@@ -1,0 +1,8 @@
+{
+  "case": "tracee",
+  "case_status": "error",
+  "error_message": "Tracee case could not run: failed to launch Tracee: /artifacts/tracee/bin/tracee --events all --output json:/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.5ab0c0b5/tracee/events.json --server healthz --server http-address=:3366 --signatures-dir /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.5ab0c0b5/tracee/signatures: command exited with code 1: Error: invalid event to trace: all",
+  "failed_at": "2026-04-23T19:33:37.508189+00:00",
+  "smoke": false,
+  "status": "error"
+}

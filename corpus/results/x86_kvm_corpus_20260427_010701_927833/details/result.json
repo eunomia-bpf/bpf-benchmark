@@ -1,0 +1,365 @@
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+  "fatal_error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+  "generated_at": "2026-04-27T01:13:35.165307+00:00",
+  "kinsn_modules": {
+    "captured_at": "2026-04-27T01:07:01.970182+00:00",
+    "daemon_binary": "daemon/target/release/bpfrejit-daemon",
+    "expected_modules": [
+      "bpf_bulk_memory",
+      "bpf_endian",
+      "bpf_extract",
+      "bpf_rotate",
+      "bpf_select"
+    ],
+    "module_load": {
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "failed_modules": [],
+      "invoked_at": "2026-04-27T01:07:01.970125+00:00",
+      "loaded_count": 5,
+      "loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loader": "runner.libs.kinsn.load_kinsn_modules",
+      "module_dir": "/artifacts/kinsn",
+      "newly_loaded_modules": [],
+      "snapshot_after": {
+        "captured_at": "2026-04-27T01:07:01.970119+00:00",
+        "expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "loaded_bpf_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "missing_expected_modules": [],
+        "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+        "resident_expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "source": "lsmod"
+      },
+      "status": "ok",
+      "total_count": 5
+    },
+    "module_snapshot_before_daemon": {
+      "captured_at": "2026-04-27T01:07:01.962364+00:00",
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loaded_bpf_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "missing_expected_modules": [],
+      "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+      "resident_expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "source": "lsmod"
+    }
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "results": [
+    {
+      "app": "bcc/capable",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "exec_storm",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "bcc/execsnoop",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "exec_storm",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "bcc/bindsnoop",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "bind_storm",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "bcc/biosnoop",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "block_io",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "bcc/vfsstat",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "vfs_create_fsync_exact",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "bcc/opensnoop",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "open_family_storm",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "bcc/syscount",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "file_open_storm",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "bcc/tcpconnect",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "network",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "bcc/tcplife",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "network",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "bcc/runqlat",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "hackbench",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "calico/felix",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "calico",
+      "selected_workload": "network",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "otelcol-ebpf-profiler",
+      "selected_workload": "exec_storm",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "cilium/agent",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "cilium",
+      "selected_workload": "network",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "tetragon",
+      "selected_workload": "tetragon_exec_connect_mix",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "katran",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "katran",
+      "selected_workload": "test_run",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "tracee",
+      "selected_workload": "tracee_system_edge_mix",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "bpftrace/capable",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bpftrace",
+      "selected_workload": "exec_storm",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "bpftrace/biosnoop",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bpftrace",
+      "selected_workload": "block_io",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "bpftrace/vfsstat",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bpftrace",
+      "selected_workload": "vfs_create_write_fsync",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "bpftrace/runqlat",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bpftrace",
+      "selected_workload": "hackbench",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "bpftrace/tcplife",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bpftrace",
+      "selected_workload": "network",
+      "status": "error",
+      "workload_miss": false
+    },
+    {
+      "app": "bpftrace/tcpretrans",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline; rediscovery returned fewer programs than expected: 16/61; missing_ids=[165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 218, 219, 223, 224, 225, 228, 231, 232, 235], tracked_ids=[140, 141, 165, 166, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 181, 182, 183, 184, 186, 188, 190, 191, 194, 195, 196, 197, 198, 199, 200, 201, 202, 204, 205, 206, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236], refreshed_ids=[140, 141, 213, 214, 215, 216, 217, 220, 221, 222, 226, 227, 229, 233, 234, 236], discover_source=runner.session._discover_programs",
+      "limitations": [],
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bpftrace",
+      "selected_workload": "tcp_retransmit",
+      "status": "error",
+      "workload_miss": false
+    }
+  ],
+  "samples": 1,
+  "status": "error",
+  "suite_name": "macro_apps",
+  "workload_seconds": 1.0
+}

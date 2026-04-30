@@ -1,0 +1,302 @@
+# Tetragon Real End-to-End Benchmark
+
+- Generated: 2026-04-23T19:39:30.882721+00:00
+- Mode: `tetragon_daemon`
+- Smoke: `False`
+- Duration per workload: `30s`
+- Tetragon binary: `/artifacts/tetragon/bin/tetragon`
+
+## Setup
+
+- Setup return code: `0`
+- Setup tetragon binary: `/artifacts/tetragon/bin/tetragon`
+
+## Baseline
+
+- Application throughput mean: `1960.8517160558838` ops/s
+- Events/s mean: `1979142.4828260622`
+- Agent CPU mean: `24.799938327513352`%
+- BPF avg ns mean: `275.2218538100012`
+
+- exec_storm: ops/s=1960.8517160558838, events/s=1979142.4828260622, agent_cpu=24.799938327513352, bpf_avg_ns=275.2218538100012
+
+## Per-Program
+
+- event_exit_acct (kprobe): sites=8, stock_avg_ns=507.2807663589465, rejit_avg_ns=470.07157233991745, speedup=1.0791564438449437
+- event_wake_up_n (kprobe): sites=28, stock_avg_ns=638.64413471655, rejit_avg_ns=344.750198994792, speedup=1.8524837304769697
+- execve_rate (tracepoint): sites=6, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- execve_send (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- event_execve (tracepoint): sites=0, stock_avg_ns=2610.9788902795162, rejit_avg_ns=2621.1384924035024, speedup=0.9961239735506421
+- tg_kp_bprm_comm (kprobe): sites=0, stock_avg_ns=217.70187734668335, rejit_avg_ns=235.33432948109757, speedup=0.9250748831532865
+- execve_map_upda (socket_filter): sites=7, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=672.0880058508045, rejit_avg_ns=753.0046070033458, speedup=0.8925416917772168
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=243.21795525328722, rejit_avg_ns=250.48366549468614, speedup=0.9709932772380598
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=236.58773270714352, rejit_avg_ns=244.65387217850295, speedup=0.967030403404062
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=250.6084464483671, rejit_avg_ns=254.0173331179602, speedup=0.9865801021223615
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=798.6666666666666, rejit_avg_ns=764.6666666666666, speedup=1.0444638186573671
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=240.65966879423917, rejit_avg_ns=238.03307442920138, speedup=1.0110345773222327
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=290.75922048852806, rejit_avg_ns=291.4877015896585, speedup=0.9975008170253579
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=560.8959099458215, rejit_avg_ns=633.4015533579392, speedup=0.8855297353981317
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=426.4941341508943, rejit_avg_ns=449.8821382274681, speedup=0.9480130414407597
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=653.4826911328823, rejit_avg_ns=689.4814877987765, speedup=0.9477885957738719
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=256.1711074856046, rejit_avg_ns=253.16085751005735, speedup=1.0118906611596843
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=271.67144111048833, rejit_avg_ns=275.37900965473244, speedup=0.9865364882062266
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=749.2638671875, rejit_avg_ns=842.3862518282143, speedup=0.8894540545520387
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=1019.5500349895032, rejit_avg_ns=1066.0550524308865, speedup=0.956376532961089
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=321.6286344871448, rejit_avg_ns=340.75753112714114, speedup=0.9438636130015301
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_filter_arg (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_actions (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_filter (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=6, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_process_event (kprobe): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_kprobe_ (kprobe): sites=3, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_filter (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=17, stock_avg_ns=969.1662703379224, rejit_avg_ns=964.575055902698, speedup=1.0047598311890076
+- generic_tracepoint_arg (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_actions (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_process_event (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_process_event (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_filter (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_arg (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=17, stock_avg_ns=777.5361449872163, rejit_avg_ns=741.7479247685975, speedup=1.0482484938933716
+- generic_tracepoint_actions (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_arg (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_process_event (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_actions (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_filter (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=17, stock_avg_ns=550.893091081873, rejit_avg_ns=563.3931227399877, speedup=0.9778129495132591
+- generic_tracepoint_arg (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=17, stock_avg_ns=290.1597428346845, rejit_avg_ns=295.4476164409644, speedup=0.9821021618993616
+- generic_tracepoint_process_event (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_actions (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_filter (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_filter (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_process_event (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_arg (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=17, stock_avg_ns=570.3025759860033, rejit_avg_ns=590.5225574175018, speedup=0.9657591718089052
+- generic_tracepoint_actions (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_actions (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_process_event (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=17, stock_avg_ns=435.54728315590603, rejit_avg_ns=442.1017261376817, speedup=0.9851743555967605
+- generic_tracepoint_filter (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_arg (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_process_event (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_actions (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=17, stock_avg_ns=517.718519938038, rejit_avg_ns=554.8950741709998, speedup=0.9330025513589164
+- generic_tracepoint_filter (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_arg (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_filter (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_actions (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_process_event (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_arg (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=17, stock_avg_ns=292.66370277933027, rejit_avg_ns=284.7900953466294, speedup=1.027647055011227
+- generic_tracepo (tracepoint): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_arg (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_filter (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_actions (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=17, stock_avg_ns=253.6182498470413, rejit_avg_ns=253.93863471779588, speedup=0.9987383374289989
+- generic_tracepoint_process_event (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_process_event (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_filter (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_arg (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_actions (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=17, stock_avg_ns=724.4452363981943, rejit_avg_ns=742.8100980810234, speedup=0.9752765050848489
+- generic_tracepo (tracepoint): sites=17, stock_avg_ns=795.9496826528188, rejit_avg_ns=827.0555906183369, speedup=0.962389580194649
+- generic_tracepoint_filter (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=39, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_process_event (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_arg (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_actions (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_filter (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_arg (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_actions (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_process_event (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=18, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=17, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_process_event (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_arg (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_actions (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepoint_filter (tracepoint): sites=0, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=18, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+- generic_tracepo (tracepoint): sites=17, stock_avg_ns=None, rejit_avg_ns=None, speedup=None
+
+## Post-ReJIT
+
+- Application throughput mean: `1951.4055254547648` ops/s
+- Events/s mean: `1950787.9343334492`
+- Agent CPU mean: `22.348154857901548`%
+- BPF avg ns mean: `274.2154031826831`
+
+- exec_storm: ops/s=1951.4055254547648, events/s=1950787.9343334492, agent_cpu=22.348154857901548, bpf_avg_ns=274.2154031826831
+
+## Comparison
+
+- exec_storm: baseline_ops/s=1960.8517160558838, post_ops/s=1951.4055254547648, app_delta=-0.48173916078261103%, baseline_cpu=24.799938327513352, post_cpu=22.348154857901548, cpu_delta=-9.886248252850557%
+
+## Limitations
+
+- events_total and events_per_sec are derived from aggregate BPF run_cnt deltas, so a single application operation can increment multiple program counters.
+

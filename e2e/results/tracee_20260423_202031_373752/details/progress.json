@@ -1,0 +1,8 @@
+{
+  "case": "tracee",
+  "case_status": "error",
+  "error_message": "Tracee case could not run: Tracee latency probe was not detected for workload tracee_default: tokens=['tracee-exec-probe-123733ca0cf14e83bd54675e726b3080'], attempts=[{'attempt': 0, 'marker': 'tracee-exec-probe-8ef77b04a9684ee3aff785c5b17768e7', 'marker_tokens': ['tracee-exec-probe-8ef77b04a9684ee3aff785c5b17768e7']}, {'attempt': 1, 'marker': 'tracee-exec-probe-9a0349e1032345c1b190f019993b24bb', 'marker_tokens': ['tracee-exec-probe-9a0349e1032345c1b190f019993b24bb']}, {'attempt': 2, 'marker': 'tracee-exec-probe-123733ca0cf14e83bd54675e726b3080', 'marker_tokens': ['tracee-exec-probe-123733ca0cf14e83bd54675e726b3080']}]",
+  "failed_at": "2026-04-23T20:22:04.049761+00:00",
+  "smoke": false,
+  "status": "error"
+}

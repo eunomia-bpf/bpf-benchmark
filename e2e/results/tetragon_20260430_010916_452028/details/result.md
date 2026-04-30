@@ -1,0 +1,42 @@
+# Tetragon Real End-to-End Benchmark
+
+```json
+{
+  "baseline": null,
+  "config": {
+    "measurement_duration_s": 8,
+    "workloads": [
+      {
+        "kind": "stress_ng_os_io_network",
+        "metric": "ops/s",
+        "name": "stress_ng_os_io_network",
+        "value": 0
+      }
+    ]
+  },
+  "duration_s": 8,
+  "error_message": "Tetragon case could not run: stress_ng_os_io_network workload stressor io timed out",
+  "generated_at": "2026-04-30T01:10:24.690597+00:00",
+  "host": {
+    "git_sha": null,
+    "git_sha_error": "[Errno 2] No such file or directory: 'git'",
+    "hostname": "virtme-ng",
+    "kernel": "7.0.0-rc2",
+    "platform": "Linux-7.0.0-rc2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "mode": "tetragon_daemon",
+  "post_rejit": null,
+  "programs": [],
+  "rejit_result": null,
+  "setup": {
+    "returncode": 0,
+    "stderr_tail": "",
+    "stdout_tail": "TETRAGON_BINARY=/artifacts/tetragon/bin/tetragon\nTETRAGON_BPF_LIB_DIR=/opt/bpf-benchmark/repo-artifacts/x86_64/tetragon\nSTRESS_NG_BINARY=/usr/bin/stress-ng",
+    "tetragon_binary": "/artifacts/tetragon/bin/tetragon",
+    "tetragon_bpf_lib_dir": "/opt/bpf-benchmark/repo-artifacts/x86_64/tetragon"
+  },
+  "status": "error",
+  "tetragon_binary": "/artifacts/tetragon/bin/tetragon"
+}
+```

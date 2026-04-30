@@ -1,0 +1,7 @@
+{
+  "case": "bpftrace",
+  "case_status": "error",
+  "error_message": "tcplife baseline failed: daemon session exited early (rc=1); biosnoop baseline failed: daemon session exited early (rc=1); runqlat baseline failed: daemon session exited early (rc=1); tcpretrans baseline failed: daemon session exited early (rc=1); capable baseline failed: daemon session exited early (rc=1); vfsstat baseline failed: daemon session exited early (rc=1)",
+  "failed_at": "2026-04-29T10:42:34.726585+00:00",
+  "status": "error"
+}

@@ -1,0 +1,8 @@
+{
+  "case": "bpftrace",
+  "case_status": "error",
+  "error_message": "runqlat baseline failed: BPF program set did not stabilize before timeout (timeout_s=20, last_program_count=3, last_program_ids=1097,1098,1099); tcpretrans baseline failed: BPF program set did not stabilize before timeout (timeout_s=20, last_program_count=1, last_program_ids=1105)",
+  "failed_at": "2026-04-24T02:16:03.837279+00:00",
+  "smoke": true,
+  "status": "error"
+}

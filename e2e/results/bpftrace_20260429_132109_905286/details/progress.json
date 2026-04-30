@@ -1,0 +1,7 @@
+{
+  "case": "bpftrace",
+  "case_status": "error",
+  "error_message": "tcplife post_rejit failed: prog 3097: bpfverify final verification failed for prog 3097: subprocess \"bpfverify\" \"--prog-type\" \"kprobe\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-603/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-603/opt.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-603/verified.bin\" failed: BPF_PROG_LOAD dry-run failed: Permission denied (os error 13)",
+  "failed_at": "2026-04-29T13:22:47.948445+00:00",
+  "status": "error"
+}

@@ -1,0 +1,8 @@
+{
+  "case": "bpftrace",
+  "case_status": "error",
+  "error_message": "capable baseline failed: BPF program set did not stabilize before timeout (timeout_s=20, last_program_count=1, last_program_ids=309)",
+  "failed_at": "2026-04-23T11:01:00.415484+00:00",
+  "smoke": true,
+  "status": "error"
+}

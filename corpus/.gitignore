@@ -1,4 +1,8 @@
 repos/
 bcf/
-results/*/details/
-results/*/details/**
+results/*/details/*
+!results/*/details/result.json
+!results/*/details/result.md
+!results/*/details/progress.json
+results/*/details/failures/
+results/*/details/workdirs/

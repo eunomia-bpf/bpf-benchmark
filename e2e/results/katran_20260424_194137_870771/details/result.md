@@ -1,0 +1,135 @@
+# Katran End-to-End Benchmark
+
+```json
+{
+  "baseline": {
+    "measurement": {
+      "bpf": {
+        "1472": {
+          "avg_ns_per_run": 220.0420878010195,
+          "bytes_jited": 176,
+          "bytes_xlated": 136,
+          "id": 1472,
+          "name": "xdp_root",
+          "run_cnt_delta": 273072,
+          "run_time_ns_delta": 60087333,
+          "type": "xdp"
+        },
+        "1478": {
+          "avg_ns_per_run": null,
+          "bytes_jited": 13629,
+          "bytes_xlated": 23840,
+          "id": 1478,
+          "name": "balancer_ingress",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "xdp"
+        },
+        "1480": {
+          "avg_ns_per_run": null,
+          "bytes_jited": 541,
+          "bytes_xlated": 1000,
+          "id": 1480,
+          "name": "healthcheck_encap",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        }
+      },
+      "duration_s": 5,
+      "metric": "ops/s",
+      "throughput": 9101.18589088081
+    },
+    "phase": "baseline",
+    "reason": "",
+    "status": "ok"
+  },
+  "duration_s": 5,
+  "generated_at": "2026-04-24T19:42:08.847277+00:00",
+  "host": {
+    "git_sha": null,
+    "git_sha_error": "[Errno 2] No such file or directory: 'git'",
+    "hostname": "virtme-ng",
+    "kernel": "7.0.0-rc2",
+    "platform": "Linux-7.0.0-rc2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "post_rejit": {
+    "measurement": {
+      "bpf": {
+        "1472": {
+          "avg_ns_per_run": 216.52368571709872,
+          "bytes_jited": 176,
+          "bytes_xlated": 136,
+          "id": 1472,
+          "name": "xdp_root",
+          "run_cnt_delta": 274237,
+          "run_time_ns_delta": 59378806,
+          "type": "xdp"
+        },
+        "1478": {
+          "avg_ns_per_run": null,
+          "bytes_jited": 13629,
+          "bytes_xlated": 23840,
+          "id": 1478,
+          "name": "balancer_ingress",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "xdp"
+        },
+        "1480": {
+          "avg_ns_per_run": 476.0,
+          "bytes_jited": 541,
+          "bytes_xlated": 1000,
+          "id": 1480,
+          "name": "healthcheck_enc",
+          "run_cnt_delta": 1,
+          "run_time_ns_delta": 476,
+          "type": "sched_cls"
+        }
+      },
+      "duration_s": 5,
+      "metric": "ops/s",
+      "throughput": 9140.052747891203
+    },
+    "phase": "post_rejit",
+    "reason": "",
+    "status": "ok"
+  },
+  "process": {
+    "returncode": 0,
+    "stderr_tail": "I20260424 19:41:38.478437 27002 KatranGrpcService.cpp:69] Starting Katran\nE20260424 19:41:38.478536 27002 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260424 19:41:38.478540 27002 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260424 19:41:38.478623 27002 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260424 19:41:38.478626 27002 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260424 19:41:38.478736 27002 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260424 19:41:38.478741 27002 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260424 19:41:38.525512 27002 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(20) .eh_frame\nE20260424 19:41:38.525529 27002 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(21) .rel.eh_frame for section(20) .eh_frame",
+    "stdout_tail": "Server listening on 0.0.0.0:50051"
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": false,
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output_chars": 89603,
+    "output_stripped": true,
+    "program_counts": {
+      "applied": 3,
+      "not_applied": 0,
+      "requested": 3
+    }
+  },
+  "status": "ok",
+  "workload_spec": {
+    "kind": "network"
+  }
+}
+```

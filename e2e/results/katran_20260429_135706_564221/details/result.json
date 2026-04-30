@@ -1,0 +1,229 @@
+{
+  "baseline": {
+    "measurement": {
+      "bpf": {
+        "3252": {
+          "avg_ns_per_run": 221.97350613116296,
+          "bytes_jited": 176,
+          "bytes_xlated": 136,
+          "id": 3252,
+          "name": "xdp_root",
+          "run_cnt_delta": 259494,
+          "run_time_ns_delta": 57600793,
+          "type": "xdp"
+        },
+        "3258": {
+          "avg_ns_per_run": null,
+          "bytes_jited": 13629,
+          "bytes_xlated": 23840,
+          "id": 3258,
+          "name": "balancer_ingress",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "xdp"
+        },
+        "3260": {
+          "avg_ns_per_run": null,
+          "bytes_jited": 541,
+          "bytes_xlated": 1000,
+          "id": 3260,
+          "name": "healthcheck_encap",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        }
+      },
+      "duration_s": 5,
+      "metric": "ops/s",
+      "throughput": 8648.363164403087
+    },
+    "phase": "baseline",
+    "reason": "",
+    "status": "ok"
+  },
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+  "duration_s": 5,
+  "error_message": "prog 3252: preserved failure workdir: /var/lib/bpfrejit-daemon/failures/3252_1777471039_186979768_1182: bpfverify --verifier-states-out failed for prog 3252: bpfverify original verifier-states failed (returncode 1, status exit status: 1): subprocess \"bpfverify\" \"--prog-type\" \"xdp\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/verified_original.bin\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/original_bpfverify_report.json\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/verifier_states.json\" \"--prog-btf-id\" \"3639\": func#0 @0\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: .1....6... (18) r2 = 0xffff898288011200\n      3: .12...6... (b7) r3 = 0\n      4: .123..6... (85) call bpf_tail_call#12\n      5: ......6... (bf) r1 = r6\n      6: .1....6... (18) r2 = 0xffff898288011200\n      8: .12...6... (b7) r3 = 1\n      9: .123..6... (85) call bpf_tail_call#12\n     10: ......6... (bf) r1 = r6\n     11: .1........ (18) r2 = 0xffff898288011200\n     13: .12....... (b7) r3 = 2\n     14: .123...... (85) call bpf_tail_call#12\n     15: .......... (b7) r0 = 2\n     16: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (bf) r6 = r1                       ; R1=ctx() R6=ctx()\n1: (18) r2 = 0xffff898288011200       ; R2=map_ptr(map=root_array,ks=4,vs=4)\n3: (b7) r3 = 0                        ; R3=0; prog 3258: preserved failure workdir: /var/lib/bpfrejit-daemon/failures/3258_1777471039_677277958_1184: bpfverify --verifier-states-out failed for prog 3258: bpfverify original verifier-states failed (returncode 1, status exit status: 1): subprocess \"bpfverify\" \"--prog-type\" \"xdp\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/verified_original.bin\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/original_bpfverify_report.json\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/verifier_states.json\" \"--prog-btf-id\" \"3650\": lar() fp-96=????mm0 fp-104=scalar(id=1591) fp-112=scalar(id=1592) fp-120=mmmmmmmm fp-128=mmmmscalar(smin=smin32=0,smax=umax=smax32=umax32=3,var_off=(0x0; 0x3)) fp-136=mmmm???? fp-144=pkt_end() fp-152=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-160=map_value(map=vip_map,ks=20,vs=8) fp-168=map_ptr(map=fallback_cache,ks=40,vs=16) fp-176=map_value(map=stats,ks=4,vs=16) fp-184=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\nmark_precise: frame0: last_idx 1041 first_idx 1032 subseq_idx 1042 \nmark_precise: frame0: regs=r7 stack=-152 before 1041: (85) call bpf_map_lookup_elem#1\nmark_precise: frame0: regs=r7 stack=-152 before 1039: (18) r1 = 0xffffccce491dd000\nmark_precise: frame0: regs=r7 stack=-152 before 1038: (07) r2 += -32\nmark_precise: frame0: regs=r7 stack=-152 before 1037: (bf) r2 = r10\nmark_precise: frame0: regs=r7 stack=-152 before 1036: (63) *(u32 *)(r10 -32) = r1\nmark_precise: frame0: regs=r7 stack=-152 before 1035: (63) *(u32 *)(r10 -48) = r1\nmark_precise: frame0: regs=r7 stack=-152 before 1034: (61) r1 = *(u32 *)(r0 +0)\nmark_precise: frame0: regs=r7 stack=-152 before 1033: (7b) *(u64 *)(r0 +8) = r1\nmark_precise: frame0: regs=r7 stack=-152 before 1032: (2d) if r3 > r2 goto pc+10\nmark_precise: frame0: parent state regs=r7 stack=-152:  R0=map_value(map=fallback_cache,ks=40,vs=16) R1=scalar() R2=0x6fc23ac00 R3=scalar() R6=ctx() R7=P0 R8=0 R9=scalar() R10=fp0 fp-32=????523 fp-48=mmmmmmmm fp-56=mmmm000 fp-64=scalar(id=1591) fp-72=scalar(id=1592) fp-80=scalar() fp-88=scalar() fp-96=????mm0 fp-104=scalar(id=1591) fp-112=scalar(id=1592) fp-120=mmmmmmmm fp-128=mmmmscalar(smin=smin32=0,smax=umax=smax32=umax32=3,var_off=(0x0; 0x3)) fp-136=mmmm???? fp-144=pkt_end() fp-152=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-160=map_value(map=vip_map,ks=20,vs=8) fp-168=map_ptr(map=fallback_cache,ks=40,vs=16) fp-176=map_value(map=stats,ks=4,vs=16) fp-184=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\nmark_precise: frame0: last_idx 1031 first_idx 1019 subseq_idx 1032 \nmark_precise: frame0: regs=r7 stack=-152 before 1031: (b7) r8 = 0\nmark_precise: frame0: regs=r7 stack=-152 before 1029: (18) r2 = 0x6fc23ac00\nmark_precise: frame0: regs=r7 stack=-152 before 1028: (1f) r3 -= r2\nmark_precise: frame0: regs=r7 stack=-152 before 1027: (bf) r3 = r1\nmark_precise: frame0: regs=r7 stack=-152 before 1026: (79) r2 = *(u64 *)(r0 +8)\nmark_precise: frame0: regs=r7 stack=-152 before 1025: (bf) r0 = r8\nmark_precise: frame0: regs=r7 stack=-152 before 1024: (bf) r1 = r0; prog 3260: preserved failure workdir: /var/lib/bpfrejit-daemon/failures/3260_1777471039_816016049_1186: bpfverify final verification failed for prog 3260: bpfverify final verification rejected bytecode (returncode 0, verifier status fail, errno 13): verifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r7 = r1\n      1: .......7.. (61) r1 = *(u32 *)(r7 +8)\n      2: .1.....7.. (63) *(u32 *)(r10 -4) = r1\n      3: .......7.. (b7) r1 = 1\n      4: .1.....7.. (63) *(u32 *)(r10 -8) = r1\n      5: .......7.. (b7) r1 = 2\n      6: .1.....7.. (63) *(u32 *)(r10 -12) = r1\n      7: .......7.. (b7) r1 = 0\n      8: .1.....7.. (63) *(u32 *)(r10 -16) = r1\n      9: .1.....7.. (7b) *(u64 *)(r10 -24) = r1\n     10: .1.....7.. (7b) *(u64 *)(r10 -32) = r1\n     11: .1.....7.. (7b) *(u64 *)(r10 -40) = r1\n     12: .1.....7.. (63) *(u32 *)(r10 -44) = r1\n     13: .......7.. (bf) r2 = r10\n     14: ..2....7.. (07) r2 += -44\n     15: ..2....7.. (18) r1 = 0xffff8983bf331200\n     17: .12....7.. (85) call bpf_map_lookup_elem#1\n     18: 0......7.. (bf) r6 = r0\n     19: ......67.. (18) r0 = 0xffffffff\n     21: 0.....67.. (15) if r6 == 0x0 goto pc+80\n     22: 0.....67.. (61) r1 = *(u32 *)(r7 +8)\n     23: 01....67.. (55) if r1 != 0x0 goto pc+4\n     24: 0.....6... (79) r1 = *(u64 *)(r6 +16)\n     25: 01....6... (07) r1 += 1\n     26: 01....6... (7b) *(u64 *)(r6 +16) = r1\n     27: 0......... (05) goto pc+74\n     28: ......67.. (bf) r2 = r10\n     29: ..2...67.. (07) r2 += -4\n     30: ..2...67.. (18) r1 = 0xffff89836ffbdc00\n     32: .12...67.. (85) call bpf_map_lookup_elem#1\n     33: 0.....67.. (55) if r0 != 0x0 goto pc+6\n     34: ......6... (79) r1 = *(u64 *)(r6 +16)\n     35: .1....6... (07) r1 += 1\n     36: .1....6... (7b) *(u64 *)(r6 +16) = r1\n     37: .......... (18) r0 = 0xffffffff\n     39: 0......... (05) goto pc+62\n     40: ......67.. (61) r1 = *(u32 *)(r7 +0)\n     41: .1....67.. (b7) r2 = 1475\n     42: .12...67.. (2d) if r2 > r1 goto pc+8\n     43: ......6... (79) r1 = *(u64 *)(r6 +8)\n     44: .1....6... (07) r1 += 1\n     45: .1....6... (7b) *(u64 *)(r6 +8) = r1\n     46: ......6... (79) r1 = *(u64 *)(r6 +24)\n     47: .1....6... (07) r1 += 1\n     48: .1....6... (7b) *(u64 *)(r6 +24) = r1\n     49: .......... (b7) r0 = 2\n     50: 0......... (05) goto pc+51\n     51: ......67.. (b7) r8 = 0\n     52: ......678. (bf) r2 = r10\n     53: ..2...678. (07) r2 += -8\n     54: ..2...678. (18) r1 = 0xffff89833216b200\n     56: .12...678. (85) call bpf_map_lookup_elem#1\n     57: 0.....678. (55) if r0 != 0x0 goto pc+5\n     58: ......6... (79) r1 = *(u64 *)(r6 +8)\n     59: .1....6... (07) r1 += 1\n     60: .1....6... (7b) *(u64 *)(r6 +8) = r1\n     61: .......... (b7) r0 = 2\n     62: 0......... (05) goto pc+39\n     63: 0.....678. (bf) r9 = r0\n     64: ......6789 (bf) r2 = r10\n     65: ..2...6789 (07) r2 += -12\n     66: ..2...6789 (18) r1 = 0xffff89833216b200\n     68: .12...6789 (85) call bpf_map_lookup_elem#1\n     69: 0.....6789 (55) if r0 != 0x0 goto pc+1\n     70: ......6... (05) goto pc-13\n     71: 0.....6789 (b7) r1 = 64\n     72: 01....6789 (73) *(u8 *)(r10 -19) = r1\n     73: 0.....6789 (b7) r4 = 0\n     74: 0...4.6789 (63) *(u32 *)(r7 +8) = r4\n     75: 0...4.6789 (71) r1 = *(u8 *)(r8 +16)\n     76: 01..4.6789 (55) if r1 != 0x1 goto pc+10\n     77: 0.....678. (61) r1 = *(u32 *)(r8 +12)\n     78: 01....678. (63) *(u32 *)(r10 -24) = r1\n     79: 0.....678. (61) r1 = *(u32 *)(r8 +8)\n     80: 01....678. (63) *(u32 *)(r10 -28) = r1\n     81: 0.....678. (61) r1 = *(u32 *)(r8 +4)\n     82: 01....678. (63) *(u32 *)(r10 -32) = r1\n     83: 0.....678. (61) r1 = *(u32 *)(r8 +0)\n     84: 01....67.. (63) *(u32 *)(r10 -36) = r1\n     85: 0.....67.. (b7) r4 = 1\n     86: 0...4.67.. (05) goto pc+3\n     87: ....4.6789 (61) r1 = *(u32 *)(r8 +0)\n     88: .1..4.67.9 (63) *(u32 *)(r10 -36) = r1\n     89: ....4.67.9 (bf) r0 = r9\n     90: 0...4.67.. (61) r8 = *(u32 *)(r0 +0)\n     91: ....4.678. (79) r1 = *(u64 *)(r6 +0)\n     92: .1..4.678. (07) r1 += 1\n     93: .1..4.678. (7b) *(u64 *)(r6 +0) = r1\n     94: ....4..78. (bf) r2 = r10\n     95: ..2.4..78. (07) r2 += -40\n     96: ..2.4..78. (bf) r1 = r7\n     97: .12.4...8. (b7) r3 = 28\n     98: .1234...8. (85) call bpf_skb_set_tunnel_key#21\n     99: ........8. (bf) r1 = r8\n    100: .1........ (b7) r2 = 0\n    101: .12....... (85) call bpf_redirect#23\n    102: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (bf) r7 =\n... verifier log truncated ...",
+  "generated_at": "2026-04-29T13:57:27.110405+00:00",
+  "host": {
+    "git_sha": null,
+    "git_sha_error": "[Errno 2] No such file or directory: 'git'",
+    "hostname": "virtme-ng",
+    "kernel": "7.0.0-rc2",
+    "platform": "Linux-7.0.0-rc2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "post_rejit": {
+    "measurement": {
+      "bpf": {
+        "3252": {
+          "avg_ns_per_run": 233.16001289367495,
+          "bytes_jited": 176,
+          "bytes_xlated": 136,
+          "id": 3252,
+          "name": "xdp_root",
+          "run_cnt_delta": 251286,
+          "run_time_ns_delta": 58589847,
+          "type": "xdp"
+        },
+        "3258": {
+          "avg_ns_per_run": null,
+          "bytes_jited": 13629,
+          "bytes_xlated": 23840,
+          "id": 3258,
+          "name": "balancer_ingress",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "xdp"
+        },
+        "3260": {
+          "avg_ns_per_run": 693.0,
+          "bytes_jited": 541,
+          "bytes_xlated": 1000,
+          "id": 3260,
+          "name": "healthcheck_encap",
+          "run_cnt_delta": 1,
+          "run_time_ns_delta": 693,
+          "type": "sched_cls"
+        }
+      },
+      "duration_s": 5,
+      "metric": "ops/s",
+      "throughput": 8375.215371155089
+    },
+    "phase": "post_rejit",
+    "reason": "prog 3252: preserved failure workdir: /var/lib/bpfrejit-daemon/failures/3252_1777471039_186979768_1182: bpfverify --verifier-states-out failed for prog 3252: bpfverify original verifier-states failed (returncode 1, status exit status: 1): subprocess \"bpfverify\" \"--prog-type\" \"xdp\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/verified_original.bin\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/original_bpfverify_report.json\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/verifier_states.json\" \"--prog-btf-id\" \"3639\": func#0 @0\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: .1....6... (18) r2 = 0xffff898288011200\n      3: .12...6... (b7) r3 = 0\n      4: .123..6... (85) call bpf_tail_call#12\n      5: ......6... (bf) r1 = r6\n      6: .1....6... (18) r2 = 0xffff898288011200\n      8: .12...6... (b7) r3 = 1\n      9: .123..6... (85) call bpf_tail_call#12\n     10: ......6... (bf) r1 = r6\n     11: .1........ (18) r2 = 0xffff898288011200\n     13: .12....... (b7) r3 = 2\n     14: .123...... (85) call bpf_tail_call#12\n     15: .......... (b7) r0 = 2\n     16: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (bf) r6 = r1                       ; R1=ctx() R6=ctx()\n1: (18) r2 = 0xffff898288011200       ; R2=map_ptr(map=root_array,ks=4,vs=4)\n3: (b7) r3 = 0                        ; R3=0; prog 3258: preserved failure workdir: /var/lib/bpfrejit-daemon/failures/3258_1777471039_677277958_1184: bpfverify --verifier-states-out failed for prog 3258: bpfverify original verifier-states failed (returncode 1, status exit status: 1): subprocess \"bpfverify\" \"--prog-type\" \"xdp\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/verified_original.bin\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/original_bpfverify_report.json\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/verifier_states.json\" \"--prog-btf-id\" \"3650\": lar() fp-96=????mm0 fp-104=scalar(id=1591) fp-112=scalar(id=1592) fp-120=mmmmmmmm fp-128=mmmmscalar(smin=smin32=0,smax=umax=smax32=umax32=3,var_off=(0x0; 0x3)) fp-136=mmmm???? fp-144=pkt_end() fp-152=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-160=map_value(map=vip_map,ks=20,vs=8) fp-168=map_ptr(map=fallback_cache,ks=40,vs=16) fp-176=map_value(map=stats,ks=4,vs=16) fp-184=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\nmark_precise: frame0: last_idx 1041 first_idx 1032 subseq_idx 1042 \nmark_precise: frame0: regs=r7 stack=-152 before 1041: (85) call bpf_map_lookup_elem#1\nmark_precise: frame0: regs=r7 stack=-152 before 1039: (18) r1 = 0xffffccce491dd000\nmark_precise: frame0: regs=r7 stack=-152 before 1038: (07) r2 += -32\nmark_precise: frame0: regs=r7 stack=-152 before 1037: (bf) r2 = r10\nmark_precise: frame0: regs=r7 stack=-152 before 1036: (63) *(u32 *)(r10 -32) = r1\nmark_precise: frame0: regs=r7 stack=-152 before 1035: (63) *(u32 *)(r10 -48) = r1\nmark_precise: frame0: regs=r7 stack=-152 before 1034: (61) r1 = *(u32 *)(r0 +0)\nmark_precise: frame0: regs=r7 stack=-152 before 1033: (7b) *(u64 *)(r0 +8) = r1\nmark_precise: frame0: regs=r7 stack=-152 before 1032: (2d) if r3 > r2 goto pc+10\nmark_precise: frame0: parent state regs=r7 stack=-152:  R0=map_value(map=fallback_cache,ks=40,vs=16) R1=scalar() R2=0x6fc23ac00 R3=scalar() R6=ctx() R7=P0 R8=0 R9=scalar() R10=fp0 fp-32=????523 fp-48=mmmmmmmm fp-56=mmmm000 fp-64=scalar(id=1591) fp-72=scalar(id=1592) fp-80=scalar() fp-88=scalar() fp-96=????mm0 fp-104=scalar(id=1591) fp-112=scalar(id=1592) fp-120=mmmmmmmm fp-128=mmmmscalar(smin=smin32=0,smax=umax=smax32=umax32=3,var_off=(0x0; 0x3)) fp-136=mmmm???? fp-144=pkt_end() fp-152=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-160=map_value(map=vip_map,ks=20,vs=8) fp-168=map_ptr(map=fallback_cache,ks=40,vs=16) fp-176=map_value(map=stats,ks=4,vs=16) fp-184=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\nmark_precise: frame0: last_idx 1031 first_idx 1019 subseq_idx 1032 \nmark_precise: frame0: regs=r7 stack=-152 before 1031: (b7) r8 = 0\nmark_precise: frame0: regs=r7 stack=-152 before 1029: (18) r2 = 0x6fc23ac00\nmark_precise: frame0: regs=r7 stack=-152 before 1028: (1f) r3 -= r2\nmark_precise: frame0: regs=r7 stack=-152 before 1027: (bf) r3 = r1\nmark_precise: frame0: regs=r7 stack=-152 before 1026: (79) r2 = *(u64 *)(r0 +8)\nmark_precise: frame0: regs=r7 stack=-152 before 1025: (bf) r0 = r8\nmark_precise: frame0: regs=r7 stack=-152 before 1024: (bf) r1 = r0; prog 3260: preserved failure workdir: /var/lib/bpfrejit-daemon/failures/3260_1777471039_816016049_1186: bpfverify final verification failed for prog 3260: bpfverify final verification rejected bytecode (returncode 0, verifier status fail, errno 13): verifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r7 = r1\n      1: .......7.. (61) r1 = *(u32 *)(r7 +8)\n      2: .1.....7.. (63) *(u32 *)(r10 -4) = r1\n      3: .......7.. (b7) r1 = 1\n      4: .1.....7.. (63) *(u32 *)(r10 -8) = r1\n      5: .......7.. (b7) r1 = 2\n      6: .1.....7.. (63) *(u32 *)(r10 -12) = r1\n      7: .......7.. (b7) r1 = 0\n      8: .1.....7.. (63) *(u32 *)(r10 -16) = r1\n      9: .1.....7.. (7b) *(u64 *)(r10 -24) = r1\n     10: .1.....7.. (7b) *(u64 *)(r10 -32) = r1\n     11: .1.....7.. (7b) *(u64 *)(r10 -40) = r1\n     12: .1.....7.. (63) *(u32 *)(r10 -44) = r1\n     13: .......7.. (bf) r2 = r10\n     14: ..2....7.. (07) r2 += -44\n     15: ..2....7.. (18) r1 = 0xffff8983bf331200\n     17: .12....7.. (85) call bpf_map_lookup_elem#1\n     18: 0......7.. (bf) r6 = r0\n     19: ......67.. (18) r0 = 0xffffffff\n     21: 0.....67.. (15) if r6 == 0x0 goto pc+80\n     22: 0.....67.. (61) r1 = *(u32 *)(r7 +8)\n     23: 01....67.. (55) if r1 != 0x0 goto pc+4\n     24: 0.....6... (79) r1 = *(u64 *)(r6 +16)\n     25: 01....6... (07) r1 += 1\n     26: 01....6... (7b) *(u64 *)(r6 +16) = r1\n     27: 0......... (05) goto pc+74\n     28: ......67.. (bf) r2 = r10\n     29: ..2...67.. (07) r2 += -4\n     30: ..2...67.. (18) r1 = 0xffff89836ffbdc00\n     32: .12...67.. (85) call bpf_map_lookup_elem#1\n     33: 0.....67.. (55) if r0 != 0x0 goto pc+6\n     34: ......6... (79) r1 = *(u64 *)(r6 +16)\n     35: .1....6... (07) r1 += 1\n     36: .1....6... (7b) *(u64 *)(r6 +16) = r1\n     37: .......... (18) r0 = 0xffffffff\n     39: 0......... (05) goto pc+62\n     40: ......67.. (61) r1 = *(u32 *)(r7 +0)\n     41: .1....67.. (b7) r2 = 1475\n     42: .12...67.. (2d) if r2 > r1 goto pc+8\n     43: ......6... (79) r1 = *(u64 *)(r6 +8)\n     44: .1....6... (07) r1 += 1\n     45: .1....6... (7b) *(u64 *)(r6 +8) = r1\n     46: ......6... (79) r1 = *(u64 *)(r6 +24)\n     47: .1....6... (07) r1 += 1\n     48: .1....6... (7b) *(u64 *)(r6 +24) = r1\n     49: .......... (b7) r0 = 2\n     50: 0......... (05) goto pc+51\n     51: ......67.. (b7) r8 = 0\n     52: ......678. (bf) r2 = r10\n     53: ..2...678. (07) r2 += -8\n     54: ..2...678. (18) r1 = 0xffff89833216b200\n     56: .12...678. (85) call bpf_map_lookup_elem#1\n     57: 0.....678. (55) if r0 != 0x0 goto pc+5\n     58: ......6... (79) r1 = *(u64 *)(r6 +8)\n     59: .1....6... (07) r1 += 1\n     60: .1....6... (7b) *(u64 *)(r6 +8) = r1\n     61: .......... (b7) r0 = 2\n     62: 0......... (05) goto pc+39\n     63: 0.....678. (bf) r9 = r0\n     64: ......6789 (bf) r2 = r10\n     65: ..2...6789 (07) r2 += -12\n     66: ..2...6789 (18) r1 = 0xffff89833216b200\n     68: .12...6789 (85) call bpf_map_lookup_elem#1\n     69: 0.....6789 (55) if r0 != 0x0 goto pc+1\n     70: ......6... (05) goto pc-13\n     71: 0.....6789 (b7) r1 = 64\n     72: 01....6789 (73) *(u8 *)(r10 -19) = r1\n     73: 0.....6789 (b7) r4 = 0\n     74: 0...4.6789 (63) *(u32 *)(r7 +8) = r4\n     75: 0...4.6789 (71) r1 = *(u8 *)(r8 +16)\n     76: 01..4.6789 (55) if r1 != 0x1 goto pc+10\n     77: 0.....678. (61) r1 = *(u32 *)(r8 +12)\n     78: 01....678. (63) *(u32 *)(r10 -24) = r1\n     79: 0.....678. (61) r1 = *(u32 *)(r8 +8)\n     80: 01....678. (63) *(u32 *)(r10 -28) = r1\n     81: 0.....678. (61) r1 = *(u32 *)(r8 +4)\n     82: 01....678. (63) *(u32 *)(r10 -32) = r1\n     83: 0.....678. (61) r1 = *(u32 *)(r8 +0)\n     84: 01....67.. (63) *(u32 *)(r10 -36) = r1\n     85: 0.....67.. (b7) r4 = 1\n     86: 0...4.67.. (05) goto pc+3\n     87: ....4.6789 (61) r1 = *(u32 *)(r8 +0)\n     88: .1..4.67.9 (63) *(u32 *)(r10 -36) = r1\n     89: ....4.67.9 (bf) r0 = r9\n     90: 0...4.67.. (61) r8 = *(u32 *)(r0 +0)\n     91: ....4.678. (79) r1 = *(u64 *)(r6 +0)\n     92: .1..4.678. (07) r1 += 1\n     93: .1..4.678. (7b) *(u64 *)(r6 +0) = r1\n     94: ....4..78. (bf) r2 = r10\n     95: ..2.4..78. (07) r2 += -40\n     96: ..2.4..78. (bf) r1 = r7\n     97: .12.4...8. (b7) r3 = 28\n     98: .1234...8. (85) call bpf_skb_set_tunnel_key#21\n     99: ........8. (bf) r1 = r8\n    100: .1........ (b7) r2 = 0\n    101: .12....... (85) call bpf_redirect#23\n    102: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (bf) r7 =\n... verifier log truncated ...",
+    "status": "error"
+  },
+  "process": {
+    "returncode": -2,
+    "stderr_tail": "I20260429 13:57:07.435544 31291 KatranGrpcService.cpp:69] Starting Katran\nE20260429 13:57:07.437040 31291 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260429 13:57:07.437048 31291 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260429 13:57:07.438766 31291 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260429 13:57:07.438771 31291 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260429 13:57:07.438920 31291 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260429 13:57:07.438925 31291 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260429 13:57:07.488225 31291 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(20) .eh_frame\nE20260429 13:57:07.488255 31291 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(21) .rel.eh_frame for section(20) .eh_frame",
+    "stdout_tail": ""
+  },
+  "programs": [
+    {
+      "btf_id": 3639,
+      "bytes_jited": 176,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 136,
+      "gpl_compatible": true,
+      "id": 3252,
+      "jited": true,
+      "loaded_at": 1777471027,
+      "map_ids": [
+        3829
+      ],
+      "name": "xdp_root",
+      "orphaned": false,
+      "run_cnt": 5,
+      "run_time_ns": 4398,
+      "tag": "379b2b6068914ad4",
+      "type": "xdp",
+      "uid": 0
+    },
+    {
+      "btf_id": 3650,
+      "bytes_jited": 13629,
+      "bytes_memlock": 24576,
+      "bytes_xlated": 23840,
+      "gpl_compatible": true,
+      "id": 3258,
+      "jited": true,
+      "loaded_at": 1777471027,
+      "map_ids": [
+        3831,
+        3833,
+        3835,
+        3834,
+        3841,
+        3846,
+        3837,
+        3848,
+        3832,
+        3838,
+        3836,
+        3840,
+        3839,
+        3844
+      ],
+      "name": "balancer_ingress",
+      "orphaned": false,
+      "tag": "90e1a12c30a4bce5",
+      "type": "xdp",
+      "uid": 0
+    },
+    {
+      "btf_id": 3651,
+      "bytes_jited": 541,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1000,
+      "gpl_compatible": true,
+      "id": 3260,
+      "jited": true,
+      "loaded_at": 1777471027,
+      "map_ids": [
+        3849,
+        3850,
+        3851
+      ],
+      "name": "healthcheck_encap",
+      "orphaned": false,
+      "run_cnt": 5,
+      "run_time_ns": 4222,
+      "tag": "3c65776e77a1eec5",
+      "type": "sched_cls",
+      "uid": 0
+    }
+  ],
+  "rejit_result": {
+    "applied": false,
+    "changed": false,
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ],
+    "error": "prog 3252: preserved failure workdir: /var/lib/bpfrejit-daemon/failures/3252_1777471039_186979768_1182: bpfverify --verifier-states-out failed for prog 3252: bpfverify original verifier-states failed (returncode 1, status exit status: 1): subprocess \"bpfverify\" \"--prog-type\" \"xdp\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/verified_original.bin\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/original_bpfverify_report.json\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/verifier_states.json\" \"--prog-btf-id\" \"3639\": func#0 @0\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: .1....6... (18) r2 = 0xffff898288011200\n      3: .12...6... (b7) r3 = 0\n      4: .123..6... (85) call bpf_tail_call#12\n      5: ......6... (bf) r1 = r6\n      6: .1....6... (18) r2 = 0xffff898288011200\n      8: .12...6... (b7) r3 = 1\n      9: .123..6... (85) call bpf_tail_call#12\n     10: ......6... (bf) r1 = r6\n     11: .1........ (18) r2 = 0xffff898288011200\n     13: .12....... (b7) r3 = 2\n     14: .123...... (85) call bpf_tail_call#12\n     15: .......... (b7) r0 = 2\n     16: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (bf) r6 = r1                       ; R1=ctx() R6=ctx()\n1: (18) r2 = 0xffff898288011200       ; R2=map_ptr(map=root_array,ks=4,vs=4)\n3: (b7) r3 = 0                        ; R3=0; prog 3258: preserved failure workdir: /var/lib/bpfrejit-daemon/failures/3258_1777471039_677277958_1184: bpfverify --verifier-states-out failed for prog 3258: bpfverify original verifier-states failed (returncode 1, status exit status: 1): subprocess \"bpfverify\" \"--prog-type\" \"xdp\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/verified_original.bin\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/original_bpfverify_report.json\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/verifier_states.json\" \"--prog-btf-id\" \"3650\": lar() fp-96=????mm0 fp-104=scalar(id=1591) fp-112=scalar(id=1592) fp-120=mmmmmmmm fp-128=mmmmscalar(smin=smin32=0,smax=umax=smax32=umax32=3,var_off=(0x0; 0x3)) fp-136=mmmm???? fp-144=pkt_end() fp-152=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-160=map_value(map=vip_map,ks=20,vs=8) fp-168=map_ptr(map=fallback_cache,ks=40,vs=16) fp-176=map_value(map=stats,ks=4,vs=16) fp-184=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\nmark_precise: frame0: last_idx 1041 first_idx 1032 subseq_idx 1042 \nmark_precise: frame0: regs=r7 stack=-152 before 1041: (85) call bpf_map_lookup_elem#1\nmark_precise: frame0: regs=r7 stack=-152 before 1039: (18) r1 = 0xffffccce491dd000\nmark_precise: frame0: regs=r7 stack=-152 before 1038: (07) r2 += -32\nmark_precise: frame0: regs=r7 stack=-152 before 1037: (bf) r2 = r10\nmark_precise: frame0: regs=r7 stack=-152 before 1036: (63) *(u32 *)(r10 -32) = r1\nmark_precise: frame0: regs=r7 stack=-152 before 1035: (63) *(u32 *)(r10 -48) = r1\nmark_precise: frame0: regs=r7 stack=-152 before 1034: (61) r1 = *(u32 *)(r0 +0)\nmark_precise: frame0: regs=r7 stack=-152 before 1033: (7b) *(u64 *)(r0 +8) = r1\nmark_precise: frame0: regs=r7 stack=-152 before 1032: (2d) if r3 > r2 goto pc+10\nmark_precise: frame0: parent state regs=r7 stack=-152:  R0=map_value(map=fallback_cache,ks=40,vs=16) R1=scalar() R2=0x6fc23ac00 R3=scalar() R6=ctx() R7=P0 R8=0 R9=scalar() R10=fp0 fp-32=????523 fp-48=mmmmmmmm fp-56=mmmm000 fp-64=scalar(id=1591) fp-72=scalar(id=1592) fp-80=scalar() fp-88=scalar() fp-96=????mm0 fp-104=scalar(id=1591) fp-112=scalar(id=1592) fp-120=mmmmmmmm fp-128=mmmmscalar(smin=smin32=0,smax=umax=smax32=umax32=3,var_off=(0x0; 0x3)) fp-136=mmmm???? fp-144=pkt_end() fp-152=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-160=map_value(map=vip_map,ks=20,vs=8) fp-168=map_ptr(map=fallback_cache,ks=40,vs=16) fp-176=map_value(map=stats,ks=4,vs=16) fp-184=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\nmark_precise: frame0: last_idx 1031 first_idx 1019 subseq_idx 1032 \nmark_precise: frame0: regs=r7 stack=-152 before 1031: (b7) r8 = 0\nmark_precise: frame0: regs=r7 stack=-152 before 1029: (18) r2 = 0x6fc23ac00\nmark_precise: frame0: regs=r7 stack=-152 before 1028: (1f) r3 -= r2\nmark_precise: frame0: regs=r7 stack=-152 before 1027: (bf) r3 = r1\nmark_precise: frame0: regs=r7 stack=-152 before 1026: (79) r2 = *(u64 *)(r0 +8)\nmark_precise: frame0: regs=r7 stack=-152 before 1025: (bf) r0 = r8\nmark_precise: frame0: regs=r7 stack=-152 before 1024: (bf) r1 = r0; prog 3260: preserved failure workdir: /var/lib/bpfrejit-daemon/failures/3260_1777471039_816016049_1186: bpfverify final verification failed for prog 3260: bpfverify final verification rejected bytecode (returncode 0, verifier status fail, errno 13): verifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r7 = r1\n      1: .......7.. (61) r1 = *(u32 *)(r7 +8)\n      2: .1.....7.. (63) *(u32 *)(r10 -4) = r1\n      3: .......7.. (b7) r1 = 1\n      4: .1.....7.. (63) *(u32 *)(r10 -8) = r1\n      5: .......7.. (b7) r1 = 2\n      6: .1.....7.. (63) *(u32 *)(r10 -12) = r1\n      7: .......7.. (b7) r1 = 0\n      8: .1.....7.. (63) *(u32 *)(r10 -16) = r1\n      9: .1.....7.. (7b) *(u64 *)(r10 -24) = r1\n     10: .1.....7.. (7b) *(u64 *)(r10 -32) = r1\n     11: .1.....7.. (7b) *(u64 *)(r10 -40) = r1\n     12: .1.....7.. (63) *(u32 *)(r10 -44) = r1\n     13: .......7.. (bf) r2 = r10\n     14: ..2....7.. (07) r2 += -44\n     15: ..2....7.. (18) r1 = 0xffff8983bf331200\n     17: .12....7.. (85) call bpf_map_lookup_elem#1\n     18: 0......7.. (bf) r6 = r0\n     19: ......67.. (18) r0 = 0xffffffff\n     21: 0.....67.. (15) if r6 == 0x0 goto pc+80\n     22: 0.....67.. (61) r1 = *(u32 *)(r7 +8)\n     23: 01....67.. (55) if r1 != 0x0 goto pc+4\n     24: 0.....6... (79) r1 = *(u64 *)(r6 +16)\n     25: 01....6... (07) r1 += 1\n     26: 01....6... (7b) *(u64 *)(r6 +16) = r1\n     27: 0......... (05) goto pc+74\n     28: ......67.. (bf) r2 = r10\n     29: ..2...67.. (07) r2 += -4\n     30: ..2...67.. (18) r1 = 0xffff89836ffbdc00\n     32: .12...67.. (85) call bpf_map_lookup_elem#1\n     33: 0.....67.. (55) if r0 != 0x0 goto pc+6\n     34: ......6... (79) r1 = *(u64 *)(r6 +16)\n     35: .1....6... (07) r1 += 1\n     36: .1....6... (7b) *(u64 *)(r6 +16) = r1\n     37: .......... (18) r0 = 0xffffffff\n     39: 0......... (05) goto pc+62\n     40: ......67.. (61) r1 = *(u32 *)(r7 +0)\n     41: .1....67.. (b7) r2 = 1475\n     42: .12...67.. (2d) if r2 > r1 goto pc+8\n     43: ......6... (79) r1 = *(u64 *)(r6 +8)\n     44: .1....6... (07) r1 += 1\n     45: .1....6... (7b) *(u64 *)(r6 +8) = r1\n     46: ......6... (79) r1 = *(u64 *)(r6 +24)\n     47: .1....6... (07) r1 += 1\n     48: .1....6... (7b) *(u64 *)(r6 +24) = r1\n     49: .......... (b7) r0 = 2\n     50: 0......... (05) goto pc+51\n     51: ......67.. (b7) r8 = 0\n     52: ......678. (bf) r2 = r10\n     53: ..2...678. (07) r2 += -8\n     54: ..2...678. (18) r1 = 0xffff89833216b200\n     56: .12...678. (85) call bpf_map_lookup_elem#1\n     57: 0.....678. (55) if r0 != 0x0 goto pc+5\n     58: ......6... (79) r1 = *(u64 *)(r6 +8)\n     59: .1....6... (07) r1 += 1\n     60: .1....6... (7b) *(u64 *)(r6 +8) = r1\n     61: .......... (b7) r0 = 2\n     62: 0......... (05) goto pc+39\n     63: 0.....678. (bf) r9 = r0\n     64: ......6789 (bf) r2 = r10\n     65: ..2...6789 (07) r2 += -12\n     66: ..2...6789 (18) r1 = 0xffff89833216b200\n     68: .12...6789 (85) call bpf_map_lookup_elem#1\n     69: 0.....6789 (55) if r0 != 0x0 goto pc+1\n     70: ......6... (05) goto pc-13\n     71: 0.....6789 (b7) r1 = 64\n     72: 01....6789 (73) *(u8 *)(r10 -19) = r1\n     73: 0.....6789 (b7) r4 = 0\n     74: 0...4.6789 (63) *(u32 *)(r7 +8) = r4\n     75: 0...4.6789 (71) r1 = *(u8 *)(r8 +16)\n     76: 01..4.6789 (55) if r1 != 0x1 goto pc+10\n     77: 0.....678. (61) r1 = *(u32 *)(r8 +12)\n     78: 01....678. (63) *(u32 *)(r10 -24) = r1\n     79: 0.....678. (61) r1 = *(u32 *)(r8 +8)\n     80: 01....678. (63) *(u32 *)(r10 -28) = r1\n     81: 0.....678. (61) r1 = *(u32 *)(r8 +4)\n     82: 01....678. (63) *(u32 *)(r10 -32) = r1\n     83: 0.....678. (61) r1 = *(u32 *)(r8 +0)\n     84: 01....67.. (63) *(u32 *)(r10 -36) = r1\n     85: 0.....67.. (b7) r4 = 1\n     86: 0...4.67.. (05) goto pc+3\n     87: ....4.6789 (61) r1 = *(u32 *)(r8 +0)\n     88: .1..4.67.9 (63) *(u32 *)(r10 -36) = r1\n     89: ....4.67.9 (bf) r0 = r9\n     90: 0...4.67.. (61) r8 = *(u32 *)(r0 +0)\n     91: ....4.678. (79) r1 = *(u64 *)(r6 +0)\n     92: .1..4.678. (07) r1 += 1\n     93: .1..4.678. (7b) *(u64 *)(r6 +0) = r1\n     94: ....4..78. (bf) r2 = r10\n     95: ..2.4..78. (07) r2 += -40\n     96: ..2.4..78. (bf) r1 = r7\n     97: .12.4...8. (b7) r3 = 28\n     98: .1234...8. (85) call bpf_skb_set_tunnel_key#21\n     99: ........8. (bf) r1 = r8\n    100: .1........ (b7) r2 = 0\n    101: .12....... (85) call bpf_redirect#23\n    102: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (bf) r7 =\n... verifier log truncated ...",
+    "error_programs": [
+      {
+        "applied": false,
+        "changed": false,
+        "error": "preserved failure workdir: /var/lib/bpfrejit-daemon/failures/3252_1777471039_186979768_1182: bpfverify --verifier-states-out failed for prog 3252: bpfverify original verifier-states failed (returncode 1, status exit status: 1): subprocess \"bpfverify\" \"--prog-type\" \"xdp\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/verified_original.bin\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/original_bpfverify_report.json\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1181/verifier_states.json\" \"--prog-btf-id\" \"3639\": func#0 @0\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: .1....6... (18) r2 = 0xffff898288011200\n      3: .12...6... (b7) r3 = 0\n      4: .123..6... (85) call bpf_tail_call#12\n      5: ......6... (bf) r1 = r6\n      6: .1....6... (18) r2 = 0xffff898288011200\n      8: .12...6... (b7) r3 = 1\n      9: .123..6... (85) call bpf_tail_call#12\n     10: ......6... (bf) r1 = r6\n     11: .1........ (18) r2 = 0xffff898288011200\n     13: .12....... (b7) r3 = 2\n     14: .123...... (85) call bpf_tail_call#12\n     15: .......... (b7) r0 = 2\n     16: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (bf) r6 = r1                       ; R1=ctx() R6=ctx()\n1: (18) r2 = 0xffff898288011200       ; R2=map_ptr(map=root_array,ks=4,vs=4)\n3: (b7) r3 = 0                        ; R3=0",
+        "exit_code": 1,
+        "prog_id": 3252
+      },
+      {
+        "applied": false,
+        "changed": false,
+        "error": "preserved failure workdir: /var/lib/bpfrejit-daemon/failures/3258_1777471039_677277958_1184: bpfverify --verifier-states-out failed for prog 3258: bpfverify original verifier-states failed (returncode 1, status exit status: 1): subprocess \"bpfverify\" \"--prog-type\" \"xdp\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/verified_original.bin\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/original_bpfverify_report.json\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.ea8850ef/bpfrejit-daemon-optimize-1797-1183/verifier_states.json\" \"--prog-btf-id\" \"3650\": lar() fp-96=????mm0 fp-104=scalar(id=1591) fp-112=scalar(id=1592) fp-120=mmmmmmmm fp-128=mmmmscalar(smin=smin32=0,smax=umax=smax32=umax32=3,var_off=(0x0; 0x3)) fp-136=mmmm???? fp-144=pkt_end() fp-152=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-160=map_value(map=vip_map,ks=20,vs=8) fp-168=map_ptr(map=fallback_cache,ks=40,vs=16) fp-176=map_value(map=stats,ks=4,vs=16) fp-184=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\nmark_precise: frame0: last_idx 1041 first_idx 1032 subseq_idx 1042 \nmark_precise: frame0: regs=r7 stack=-152 before 1041: (85) call bpf_map_lookup_elem#1\nmark_precise: frame0: regs=r7 stack=-152 before 1039: (18) r1 = 0xffffccce491dd000\nmark_precise: frame0: regs=r7 stack=-152 before 1038: (07) r2 += -32\nmark_precise: frame0: regs=r7 stack=-152 before 1037: (bf) r2 = r10\nmark_precise: frame0: regs=r7 stack=-152 before 1036: (63) *(u32 *)(r10 -32) = r1\nmark_precise: frame0: regs=r7 stack=-152 before 1035: (63) *(u32 *)(r10 -48) = r1\nmark_precise: frame0: regs=r7 stack=-152 before 1034: (61) r1 = *(u32 *)(r0 +0)\nmark_precise: frame0: regs=r7 stack=-152 before 1033: (7b) *(u64 *)(r0 +8) = r1\nmark_precise: frame0: regs=r7 stack=-152 before 1032: (2d) if r3 > r2 goto pc+10\nmark_precise: frame0: parent state regs=r7 stack=-152:  R0=map_value(map=fallback_cache,ks=40,vs=16) R1=scalar() R2=0x6fc23ac00 R3=scalar() R6=ctx() R7=P0 R8=0 R9=scalar() R10=fp0 fp-32=????523 fp-48=mmmmmmmm fp-56=mmmm000 fp-64=scalar(id=1591) fp-72=scalar(id=1592) fp-80=scalar() fp-88=scalar() fp-96=????mm0 fp-104=scalar(id=1591) fp-112=scalar(id=1592) fp-120=mmmmmmmm fp-128=mmmmscalar(smin=smin32=0,smax=umax=smax32=umax32=3,var_off=(0x0; 0x3)) fp-136=mmmm???? fp-144=pkt_end() fp-152=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-160=map_value(map=vip_map,ks=20,vs=8) fp-168=map_ptr(map=fallback_cache,ks=40,vs=16) fp-176=map_value(map=stats,ks=4,vs=16) fp-184=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\nmark_precise: frame0: last_idx 1031 first_idx 1019 subseq_idx 1032 \nmark_precise: frame0: regs=r7 stack=-152 before 1031: (b7) r8 = 0\nmark_precise: frame0: regs=r7 stack=-152 before 1029: (18) r2 = 0x6fc23ac00\nmark_precise: frame0: regs=r7 stack=-152 before 1028: (1f) r3 -= r2\nmark_precise: frame0: regs=r7 stack=-152 before 1027: (bf) r3 = r1\nmark_precise: frame0: regs=r7 stack=-152 before 1026: (79) r2 = *(u64 *)(r0 +8)\nmark_precise: frame0: regs=r7 stack=-152 before 1025: (bf) r0 = r8\nmark_precise: frame0: regs=r7 stack=-152 before 1024: (bf) r1 = r0",
+        "exit_code": 1,
+        "prog_id": 3258
+      },
+      {
+        "applied": false,
+        "changed": false,
+        "error": "preserved failure workdir: /var/lib/bpfrejit-daemon/failures/3260_1777471039_816016049_1186: bpfverify final verification failed for prog 3260: bpfverify final verification rejected bytecode (returncode 0, verifier status fail, errno 13): verifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r7 = r1\n      1: .......7.. (61) r1 = *(u32 *)(r7 +8)\n      2: .1.....7.. (63) *(u32 *)(r10 -4) = r1\n      3: .......7.. (b7) r1 = 1\n      4: .1.....7.. (63) *(u32 *)(r10 -8) = r1\n      5: .......7.. (b7) r1 = 2\n      6: .1.....7.. (63) *(u32 *)(r10 -12) = r1\n      7: .......7.. (b7) r1 = 0\n      8: .1.....7.. (63) *(u32 *)(r10 -16) = r1\n      9: .1.....7.. (7b) *(u64 *)(r10 -24) = r1\n     10: .1.....7.. (7b) *(u64 *)(r10 -32) = r1\n     11: .1.....7.. (7b) *(u64 *)(r10 -40) = r1\n     12: .1.....7.. (63) *(u32 *)(r10 -44) = r1\n     13: .......7.. (bf) r2 = r10\n     14: ..2....7.. (07) r2 += -44\n     15: ..2....7.. (18) r1 = 0xffff8983bf331200\n     17: .12....7.. (85) call bpf_map_lookup_elem#1\n     18: 0......7.. (bf) r6 = r0\n     19: ......67.. (18) r0 = 0xffffffff\n     21: 0.....67.. (15) if r6 == 0x0 goto pc+80\n     22: 0.....67.. (61) r1 = *(u32 *)(r7 +8)\n     23: 01....67.. (55) if r1 != 0x0 goto pc+4\n     24: 0.....6... (79) r1 = *(u64 *)(r6 +16)\n     25: 01....6... (07) r1 += 1\n     26: 01....6... (7b) *(u64 *)(r6 +16) = r1\n     27: 0......... (05) goto pc+74\n     28: ......67.. (bf) r2 = r10\n     29: ..2...67.. (07) r2 += -4\n     30: ..2...67.. (18) r1 = 0xffff89836ffbdc00\n     32: .12...67.. (85) call bpf_map_lookup_elem#1\n     33: 0.....67.. (55) if r0 != 0x0 goto pc+6\n     34: ......6... (79) r1 = *(u64 *)(r6 +16)\n     35: .1....6... (07) r1 += 1\n     36: .1....6... (7b) *(u64 *)(r6 +16) = r1\n     37: .......... (18) r0 = 0xffffffff\n     39: 0......... (05) goto pc+62\n     40: ......67.. (61) r1 = *(u32 *)(r7 +0)\n     41: .1....67.. (b7) r2 = 1475\n     42: .12...67.. (2d) if r2 > r1 goto pc+8\n     43: ......6... (79) r1 = *(u64 *)(r6 +8)\n     44: .1....6... (07) r1 += 1\n     45: .1....6... (7b) *(u64 *)(r6 +8) = r1\n     46: ......6... (79) r1 = *(u64 *)(r6 +24)\n     47: .1....6... (07) r1 += 1\n     48: .1....6... (7b) *(u64 *)(r6 +24) = r1\n     49: .......... (b7) r0 = 2\n     50: 0......... (05) goto pc+51\n     51: ......67.. (b7) r8 = 0\n     52: ......678. (bf) r2 = r10\n     53: ..2...678. (07) r2 += -8\n     54: ..2...678. (18) r1 = 0xffff89833216b200\n     56: .12...678. (85) call bpf_map_lookup_elem#1\n     57: 0.....678. (55) if r0 != 0x0 goto pc+5\n     58: ......6... (79) r1 = *(u64 *)(r6 +8)\n     59: .1....6... (07) r1 += 1\n     60: .1....6... (7b) *(u64 *)(r6 +8) = r1\n     61: .......... (b7) r0 = 2\n     62: 0......... (05) goto pc+39\n     63: 0.....678. (bf) r9 = r0\n     64: ......6789 (bf) r2 = r10\n     65: ..2...6789 (07) r2 += -12\n     66: ..2...6789 (18) r1 = 0xffff89833216b200\n     68: .12...6789 (85) call bpf_map_lookup_elem#1\n     69: 0.....6789 (55) if r0 != 0x0 goto pc+1\n     70: ......6... (05) goto pc-13\n     71: 0.....6789 (b7) r1 = 64\n     72: 01....6789 (73) *(u8 *)(r10 -19) = r1\n     73: 0.....6789 (b7) r4 = 0\n     74: 0...4.6789 (63) *(u32 *)(r7 +8) = r4\n     75: 0...4.6789 (71) r1 = *(u8 *)(r8 +16)\n     76: 01..4.6789 (55) if r1 != 0x1 goto pc+10\n     77: 0.....678. (61) r1 = *(u32 *)(r8 +12)\n     78: 01....678. (63) *(u32 *)(r10 -24) = r1\n     79: 0.....678. (61) r1 = *(u32 *)(r8 +8)\n     80: 01....678. (63) *(u32 *)(r10 -28) = r1\n     81: 0.....678. (61) r1 = *(u32 *)(r8 +4)\n     82: 01....678. (63) *(u32 *)(r10 -32) = r1\n     83: 0.....678. (61) r1 = *(u32 *)(r8 +0)\n     84: 01....67.. (63) *(u32 *)(r10 -36) = r1\n     85: 0.....67.. (b7) r4 = 1\n     86: 0...4.67.. (05) goto pc+3\n     87: ....4.6789 (61) r1 = *(u32 *)(r8 +0)\n     88: .1..4.67.9 (63) *(u32 *)(r10 -36) = r1\n     89: ....4.67.9 (bf) r0 = r9\n     90: 0...4.67.. (61) r8 = *(u32 *)(r0 +0)\n     91: ....4.678. (79) r1 = *(u64 *)(r6 +0)\n     92: .1..4.678. (07) r1 += 1\n     93: .1..4.678. (7b) *(u64 *)(r6 +0) = r1\n     94: ....4..78. (bf) r2 = r10\n     95: ..2.4..78. (07) r2 += -40\n     96: ..2.4..78. (bf) r1 = r7\n     97: .12.4...8. (b7) r3 = 28\n     98: .1234...8. (85) call bpf_skb_set_tunnel_key#21\n     99: ........8. (bf) r1 = r8\n    100: .1........ (b7) r2 = 0\n    101: .12....... (85) call bpf_redirect#23\n    102: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (bf) r7 =\n... verifier log truncated ...",
+        "exit_code": 1,
+        "prog_id": 3260
+      }
+    ],
+    "exit_code": 1,
+    "program_counts": {
+      "applied": 0,
+      "not_applied": 3,
+      "requested": 3
+    }
+  },
+  "status": "error",
+  "workload_spec": {
+    "kind": "network"
+  }
+}

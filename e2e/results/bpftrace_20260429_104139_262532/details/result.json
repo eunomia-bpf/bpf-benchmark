@@ -1,0 +1,324 @@
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+  "duration_s": 5,
+  "error_message": "tcplife baseline failed: daemon session exited early (rc=1); biosnoop baseline failed: daemon session exited early (rc=1); runqlat baseline failed: daemon session exited early (rc=1); tcpretrans baseline failed: daemon session exited early (rc=1); capable baseline failed: daemon session exited early (rc=1); vfsstat baseline failed: daemon session exited early (rc=1)",
+  "generated_at": "2026-04-29T10:42:34.725896+00:00",
+  "host": {
+    "git_sha": null,
+    "git_sha_error": "[Errno 2] No such file or directory: 'git'",
+    "hostname": "virtme-ng",
+    "kernel": "7.0.0-rc2",
+    "platform": "Linux-7.0.0-rc2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "programs": [
+    {
+      "btf_id": 3593,
+      "bytes_jited": 2017,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 3384,
+      "gpl_compatible": true,
+      "id": 1366,
+      "jited": true,
+      "loaded_at": 1777459300,
+      "map_ids": [
+        3775,
+        3777,
+        3776,
+        3778,
+        3779
+      ],
+      "name": "tcp_set_state",
+      "orphaned": false,
+      "tag": "65086e0a4a831b2f",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 3596,
+      "bytes_jited": 222,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 408,
+      "gpl_compatible": true,
+      "id": 1373,
+      "jited": true,
+      "loaded_at": 1777459303,
+      "map_ids": [
+        3783,
+        3782,
+        3781
+      ],
+      "name": "block_io_start",
+      "orphaned": false,
+      "tag": "dde6656d9cb8b407",
+      "type": "tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 3597,
+      "bytes_jited": 931,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1576,
+      "gpl_compatible": true,
+      "id": 1374,
+      "jited": true,
+      "loaded_at": 1777459303,
+      "map_ids": [
+        3783,
+        3784,
+        3781,
+        3782,
+        3785,
+        3786
+      ],
+      "name": "block_io_done",
+      "orphaned": false,
+      "tag": "3de1861ce6f558bf",
+      "type": "tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 3600,
+      "bytes_jited": 86,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 136,
+      "gpl_compatible": true,
+      "id": 1381,
+      "jited": true,
+      "loaded_at": 1777459315,
+      "map_ids": [
+        3788
+      ],
+      "name": "sched_wakeup",
+      "orphaned": false,
+      "run_cnt": 167,
+      "run_time_ns": 270875,
+      "tag": "c10fc60476d92e5a",
+      "type": "tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 3601,
+      "bytes_jited": 86,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 136,
+      "gpl_compatible": true,
+      "id": 1382,
+      "jited": true,
+      "loaded_at": 1777459315,
+      "map_ids": [
+        3788
+      ],
+      "name": "tracepoint_sched_sched_wakeup_new",
+      "orphaned": false,
+      "run_cnt": 11,
+      "run_time_ns": 10380,
+      "tag": "c10fc60476d92e5a",
+      "type": "tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 3602,
+      "bytes_jited": 515,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 896,
+      "gpl_compatible": true,
+      "id": 1383,
+      "jited": true,
+      "loaded_at": 1777459315,
+      "map_ids": [
+        3788,
+        3789
+      ],
+      "name": "sched_switch",
+      "orphaned": false,
+      "run_cnt": 353,
+      "run_time_ns": 367495,
+      "tag": "a804776d919d1dd2",
+      "type": "tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 3605,
+      "bytes_jited": 968,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1640,
+      "gpl_compatible": true,
+      "id": 1390,
+      "jited": true,
+      "loaded_at": 1777459328,
+      "map_ids": [
+        3793,
+        3794,
+        3795
+      ],
+      "name": "kprobe_tcp_retransmit_skb",
+      "orphaned": false,
+      "tag": "6c7dcf4992a62ddf",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 3608,
+      "bytes_jited": 769,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1360,
+      "gpl_compatible": true,
+      "id": 1397,
+      "jited": true,
+      "loaded_at": 1777459332,
+      "map_ids": [
+        3798,
+        3799,
+        3797
+      ],
+      "name": "cap_capable",
+      "orphaned": false,
+      "run_cnt": 311,
+      "run_time_ns": 1262727,
+      "tag": "f54abfb1faedf876",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 3611,
+      "bytes_jited": 362,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 680,
+      "gpl_compatible": true,
+      "id": 1404,
+      "jited": true,
+      "loaded_at": 1777459335,
+      "map_ids": [
+        3802,
+        3803
+      ],
+      "name": "1",
+      "orphaned": false,
+      "run_cnt": 2,
+      "run_time_ns": 2881,
+      "tag": "34424ab8a8d77411",
+      "type": "perf_event",
+      "uid": 0
+    },
+    {
+      "btf_id": 3612,
+      "bytes_jited": 140,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 224,
+      "gpl_compatible": true,
+      "id": 1405,
+      "jited": true,
+      "loaded_at": 1777459335,
+      "map_ids": [
+        3801
+      ],
+      "name": "vfs_create",
+      "orphaned": false,
+      "run_cnt": 8753,
+      "run_time_ns": 374610,
+      "tag": "44ac6cb7891d3e3f",
+      "type": "kprobe",
+      "uid": 0
+    }
+  ],
+  "records": [
+    {
+      "baseline": {
+        "measurement": null,
+        "phase": "baseline",
+        "reason": "daemon session exited early (rc=1)",
+        "status": "error"
+      },
+      "name": "tcplife",
+      "post_rejit": null,
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "",
+        "stdout_tail": "PID   COMM       LADDR           LPORT RADDR           RPORT TX_KB RX_KB MS\n10508 stress-ng- 127.0.0.1       55642 127.0.0.1       22087      0 408328 34\n10508 stress-ng- 127.0.0.1       22087 127.0.0.1       55642  408328     0 34"
+      },
+      "rejit_result": null
+    },
+    {
+      "baseline": {
+        "measurement": null,
+        "phase": "baseline",
+        "reason": "daemon session exited early (rc=1)",
+        "status": "error"
+      },
+      "name": "biosnoop",
+      "post_rejit": null,
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "",
+        "stdout_tail": "10393        7     0        fio              10551        2\n10393        7     0        fio              10551        2\n10394        7     0        fio              10551        2\n10394        7     0        fio              10551        2\n10394        7     0        fio              10551        2\n10394        7     0        fio              10551        3\n10394        7     0        fio              10551        3\n10395        7     0        fio              10551        3\n10395        7     0        fio              10551        3\n10395        7     0        fio              10551        3\n10395        7     0        fio              10551        3\n10395        7     0        fio              10551        4\n10395        7     0        fio              10551        1\n10410        7     0        fio              10546        0\n10411        7     0        fio              10546        0\n10413        7     0        fio              10546        1\n10415        7     0        fio              10546        2\n10416        7     0        fio              10546        0\n10416        7     0        fio              10546        0\n10416        7     0        fio              10546        0\n10417        7     0        fio              10546        1\n10417        7     0        fio              10546        0\n10417        7     0        fio              10546        0\n10417        7     0        fio              10546        0\n10418        7     0        fio              10546        0\n10421        7     0        fio              10546        2\n10421        7     0        fio              10546        0\n10422        7     0        fio              10546        0\n10422        7     0        fio              10546        0\n10423        7     0        fio              10546        0\n10425        7     0        fio              10546        2\n10426        7     0        fio              10546        0\n10427        7     0        fio              10546        0\n10429        7     0        fio              10546        2\n10429        7     0        fio              10546        0\n10429        7     0        fio              10546        0\n10430        7     0        fio              10546        0\n10430        7     0        fio              10546        0\n10430        7     0        fio              10546        0\n10430        7     0        fio              10546        0"
+      },
+      "rejit_result": null
+    },
+    {
+      "baseline": {
+        "measurement": null,
+        "phase": "baseline",
+        "reason": "daemon session exited early (rc=1)",
+        "status": "error"
+      },
+      "name": "runqlat",
+      "post_rejit": null,
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "",
+        "stdout_tail": "Tracing CPU scheduler... Hit Ctrl-C to end.\n@usecs:\n[0]                 4249 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|\n[1]                   58 |                                                    |\n[2, 4)               448 |@@@@@                                               |\n[4, 8)               118 |@                                                   |\n[8, 16)              271 |@@@                                                 |\n[16, 32)             140 |@                                                   |\n[32, 64)             116 |@                                                   |\n[64, 128)            105 |@                                                   |\n[128, 256)            26 |                                                    |\n[256, 512)             2 |                                                    |\n[512, 1K)              5 |                                                    |\n[1K, 2K)               2 |                                                    |\n[2K, 4K)               1 |                                                    |"
+      },
+      "rejit_result": null
+    },
+    {
+      "baseline": {
+        "measurement": null,
+        "phase": "baseline",
+        "reason": "daemon session exited early (rc=1)",
+        "status": "error"
+      },
+      "name": "tcpretrans",
+      "post_rejit": null,
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "",
+        "stdout_tail": "Tracing tcp retransmits. Hit Ctrl-C to end.\nTIME     PID               LADDR:LPORT           RADDR:RPORT  STATE"
+      },
+      "rejit_result": null
+    },
+    {
+      "baseline": {
+        "measurement": null,
+        "phase": "baseline",
+        "reason": "daemon session exited early (rc=1)",
+        "status": "error"
+      },
+      "name": "capable",
+      "post_rejit": null,
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "",
+        "stdout_tail": "10:42:15  0      12190  stress-ng        21   CAP_SYS_ADMIN        2\n10:42:15  0      12190  stress-ng        21   CAP_SYS_ADMIN        2\n10:42:15  0      12190  stress-ng        21   CAP_SYS_ADMIN        2\n10:42:15  0      12190  stress-ng        21   CAP_SYS_ADMIN        2\n10:42:15  0      12190  stress-ng        21   CAP_SYS_ADMIN        2\n10:42:15  0      12190  stress-ng        21   CAP_SYS_ADMIN        2\n10:42:15  0      12191  stress-ng-timer  24   CAP_SYS_RESOURCE     2\n10:42:15  0      12191  stress-ng-timer  21   CAP_SYS_ADMIN        0\n10:42:15  0      12191  stress-ng-timer  21   CAP_SYS_ADMIN        0\n10:42:15  0      12191  stress-ng-timer  21   CAP_SYS_ADMIN        0\n10:42:15  0      12191  stress-ng-timer  21   CAP_SYS_ADMIN        0\n10:42:15  0      12192  python3          21   CAP_SYS_ADMIN        2\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        2\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        2\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        2\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        2\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        2\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        2\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        2\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        2\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        2\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        2\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        2\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        2\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        2\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        2\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        2\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        0\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        0\n10:42:15  0      12192  bpftool          39   CAP_BPF              0\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        0\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        0\n10:42:15  0      12192  bpftool          39   CAP_BPF              0\n10:42:15  0      12192  bpftool          39   CAP_BPF              0\n10:42:15  0      12192  bpftool          39   CAP_BPF              0\n10:42:15  0      12192  bpftool          39   CAP_BPF              0\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        0\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        0\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        0\n10:42:15  0      12192  bpftool          21   CAP_SYS_ADMIN        0"
+      },
+      "rejit_result": null
+    },
+    {
+      "baseline": {
+        "measurement": null,
+        "phase": "baseline",
+        "reason": "daemon session exited early (rc=1)",
+        "status": "error"
+      },
+      "name": "vfsstat",
+      "post_rejit": null,
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "",
+        "stdout_tail": "@[vfs_open]: 11781\n10:42:24\n@[vfs_write]: 162\n10:42:25\n@[vfs_read]: 1\n@[vfs_write]: 1\n10:42:26\n@[vfs_read]: 1\n@[vfs_write]: 1\n10:42:27\n@[vfs_write]: 2\n@[vfs_read]: 3\n10:42:28\n@[vfs_readv]: 1\n@[vfs_writev]: 1\n@[vfs_create]: 1\n@[vfs_fsync]: 2\n@[vfs_write]: 183\n@[vfs_read]: 1518\n@[vfs_open]: 2733\n10:42:29\n@[vfs_create]: 30\n@[vfs_write]: 34\n@[vfs_read]: 39\n@[vfs_open]: 112\n10:42:30\n@[vfs_create]: 25\n@[vfs_write]: 29\n@[vfs_read]: 37\n@[vfs_open]: 98\n10:42:31\n@[vfs_create]: 21\n@[vfs_write]: 22\n@[vfs_read]: 28\n@[vfs_open]: 78\n10:42:32\n@[vfs_create]: 22\n@[vfs_write]: 23\n@[vfs_read]: 30\n@[vfs_open]: 84"
+      },
+      "rejit_result": null
+    }
+  ],
+  "status": "error"
+}

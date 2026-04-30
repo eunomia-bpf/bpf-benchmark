@@ -108,9 +108,13 @@ runner/inventory.json
 runner/corpus/results/
 docs/reference/papers/*.pdf
 
-# Keep generated per-run detail payloads ignored, but track metadata directories.
-**/results/*/details/
-**/results/*/details/**
+# Track summary files inside details/, ignore large per-program detail payloads.
+**/results/*/details/*
+!**/results/*/details/result.json
+!**/results/*/details/result.md
+!**/results/*/details/progress.json
+**/results/*/details/failures/
+**/results/*/details/workdirs/
 
 # Temporary files and scratch results
 # /tmp/ and tmp/ - the repo-root scratch directory (old layout, superseded by docs/tmp/)

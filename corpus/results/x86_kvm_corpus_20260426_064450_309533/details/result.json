@@ -1,0 +1,321 @@
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+  "fatal_error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+  "generated_at": "2026-04-26T06:53:05.797436+00:00",
+  "kinsn_modules": {
+    "captured_at": "2026-04-26T06:44:50.335526+00:00",
+    "daemon_binary": "daemon/target/release/bpfrejit-daemon",
+    "expected_modules": [
+      "bpf_bulk_memory",
+      "bpf_endian",
+      "bpf_extract",
+      "bpf_rotate",
+      "bpf_select"
+    ],
+    "module_load": {
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "failed_modules": [],
+      "invoked_at": "2026-04-26T06:44:50.335467+00:00",
+      "loaded_count": 5,
+      "loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loader": "runner.libs.kinsn.load_kinsn_modules",
+      "module_dir": "/artifacts/kinsn",
+      "newly_loaded_modules": [],
+      "snapshot_after": {
+        "captured_at": "2026-04-26T06:44:50.335460+00:00",
+        "expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "loaded_bpf_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "missing_expected_modules": [],
+        "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+        "resident_expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "source": "lsmod"
+      },
+      "status": "ok",
+      "total_count": 5
+    },
+    "module_snapshot_before_daemon": {
+      "captured_at": "2026-04-26T06:44:50.328634+00:00",
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loaded_bpf_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "missing_expected_modules": [],
+      "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+      "resident_expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "source": "lsmod"
+    }
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "results": [
+    {
+      "app": "bcc/capable",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "exec_storm",
+      "status": "error"
+    },
+    {
+      "app": "bcc/execsnoop",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "exec_storm",
+      "status": "error"
+    },
+    {
+      "app": "bcc/bindsnoop",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "bind_storm",
+      "status": "error"
+    },
+    {
+      "app": "bcc/biosnoop",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "block_io",
+      "status": "error"
+    },
+    {
+      "app": "bcc/vfsstat",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "vfs_create_fsync_exact",
+      "status": "error"
+    },
+    {
+      "app": "bcc/opensnoop",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "open_family_storm",
+      "status": "error"
+    },
+    {
+      "app": "bcc/syscount",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "file_open_storm",
+      "status": "error"
+    },
+    {
+      "app": "bcc/tcpconnect",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "network",
+      "status": "error"
+    },
+    {
+      "app": "bcc/tcplife",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "network",
+      "status": "error"
+    },
+    {
+      "app": "bcc/runqlat",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "hackbench",
+      "status": "error"
+    },
+    {
+      "app": "calico/felix",
+      "baseline": null,
+      "error": "local etcd did not become healthy within 20s: [WARNING] Deprecated '--logger=capnslog' flag is set; use '--logger=zap' flag instead\n2026-04-26 06:45:39.811033 W | embed: Running http and grpc server on single port. This is not recommended for production.\n2026-04-26 06:45:39.811072 I | etcdmain: etcd Version: 3.4.30\n2026-04-26 06:45:39.811074 I | etcdmain: Git SHA: Not provided (use ./build instead of go build)\n2026-04-26 06:45:39.811075 I | etcdmain: Go Version: go1.22.2\n2026-04-26 06:45:39.811076 I | etcdmain: Go OS/Arch: linux/amd64\n2026-04-26 06:45:39.811078 I | etcdmain: setting maximum number of CPUs to 4, total number of available CPUs is 4\n2026-04-26 06:45:39.811080 N | etcdmain: failed to detect default host (could not find default route)\n[WARNING] Deprecated '--logger=capnslog' flag is set; use '--logger=zap' flag instead\n2026-04-26 06:45:39.811111 W | embed: Running http and grpc server on single port. This is not recommended for production.\n2026-04-26 06:45:39.811226 I | embed: name = calico\n2026-04-26 06:45:39.811231 I | embed: data dir = /var/tmp/calicorunner_ncu6tybi/etcd/data\n2026-04-26 06:45:39.811233 I | embed: member dir = /var/tmp/calicorunner_ncu6tybi/etcd/data/member\n2026-04-26 06:45:39.811234 I | embed: heartbeat = 100ms\n2026-04-26 06:45:39.811235 I | embed: election = 1000ms\n2026-04-26 06:45:39.811237 I | embed: snapshot count = 100000\n2026-04-26 06:45:39.811243 I | embed: advertise client URLs = http://127.0.0.1:49177\n2026-04-26 06:45:39.811261 W | pkg/fileutil: check file permission: directory \"/var/tmp/calicorunner_ncu6tybi/etcd/data\" exist, but the permission is \"drwxr-xr-x\". The recommended permission is \"-rwx------\" to prevent possible unprivileged access to the data.\n2026-04-26 06:45:59.680178 W | wal: sync duration of 10.325369381s, expected less than 1s\n2026-04-26 06:45:59.731772 I | etcdserver: starting member 4ac19f726c865bf in cluster cefa77e4af181c7c\nraft2026/04/26 06:45:59 INFO: 4ac19f726c865bf switched to configuration voters=()\nraft2026/04/26 06:45:59 INFO: 4ac19f726c865bf became follower at term 0\nraft2026/04/26 06:45:59 INFO: newRaft 4ac19f726c865bf [peers: [], term: 0, commit: 0, applied: 0, lastindex: 0, lastterm: 0]\nraft2026/04/26 06:45:59 INFO: 4ac19f726c865bf became follower at term 1\nraft2026/04/26 06:45:59 INFO: 4ac19f726c865bf switched to configuration voters=(336672621444228543)\n2026-04-26 06:45:59.949325 W | auth: simple token is not cryptographically signed\n2026-04-26 06:46:00.095895 I | etcdserver: starting server... [version: 3.4.30, cluster version: to_be_decided]\n2026-04-26 06:46:00.095979 I | pkg/fileutil: started to purge file, dir: /var/tmp/calicorunner_ncu6tybi/etcd/data/member/snap, suffix: snap.db, max: 5, interval: 30s\n2026-04-26 06:46:00.096003 I | pkg/fileutil: started to purge file, dir: /var/tmp/calicorunner_ncu6tybi/etcd/data/member/snap, suffix: snap, max: 5, interval: 30s\n2026-04-26 06:46:00.096016 I | pkg/fileutil: started to purge file, dir: /var/tmp/calicorunner_ncu6tybi/etcd/data/member/wal, suffix: wal, max: 5, interval: 30s\n2026-04-26 06:46:00.096143 I | etcdserver: 4ac19f726c865bf as single-node; fast-forwarding 9 ticks (election ticks 10)\n2026-04-26 06:46:00.096629 I | embed: listening for peers on 127.0.0.1:43589\nraft2026/04/26 06:46:00 INFO: 4ac19f726c865bf switched to configuration voters=(336672621444228543)\n2026-04-26 06:46:00.116218 I | etcdserver/membership: added member 4ac19f726c865bf [http://127.0.0.1:43589] to cluster cefa77e4af181c7c",
+      "post_rejit": null,
+      "rejit_result": null,
+      "runner": "calico",
+      "selected_workload": "exec_storm",
+      "status": "error"
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "otelcol-ebpf-profiler",
+      "selected_workload": "exec_storm",
+      "status": "error"
+    },
+    {
+      "app": "cilium/agent",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "cilium",
+      "selected_workload": "exec_storm",
+      "status": "error"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "tetragon",
+      "selected_workload": "tetragon_exec_connect_mix",
+      "status": "error"
+    },
+    {
+      "app": "katran",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "katran",
+      "selected_workload": "test_run",
+      "status": "error"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "tracee",
+      "selected_workload": "tracee_system_edge_mix",
+      "status": "error"
+    },
+    {
+      "app": "bpftrace/capable",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bpftrace",
+      "selected_workload": "exec_storm",
+      "status": "error"
+    },
+    {
+      "app": "bpftrace/biosnoop",
+      "baseline": null,
+      "error": "BPF program set did not stabilize before timeout (timeout_s=60, last_program_count=0, last_program_ids=<none>, peak_program_count=0, peak_program_ids=<none>)",
+      "post_rejit": null,
+      "rejit_result": null,
+      "runner": "bpftrace",
+      "selected_workload": "block_io",
+      "status": "error"
+    },
+    {
+      "app": "bpftrace/vfsstat",
+      "baseline": null,
+      "error": "BPF program set did not stabilize before timeout (timeout_s=60, last_program_count=0, last_program_ids=<none>, peak_program_count=0, peak_program_ids=<none>)",
+      "post_rejit": null,
+      "rejit_result": null,
+      "runner": "bpftrace",
+      "selected_workload": "vfs_create_write_fsync",
+      "status": "error"
+    },
+    {
+      "app": "bpftrace/runqlat",
+      "baseline": null,
+      "error": "BPF program set did not stabilize before timeout (timeout_s=60, last_program_count=0, last_program_ids=<none>, peak_program_count=0, peak_program_ids=<none>)",
+      "post_rejit": null,
+      "rejit_result": null,
+      "runner": "bpftrace",
+      "selected_workload": "hackbench",
+      "status": "error"
+    },
+    {
+      "app": "bpftrace/tcplife",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bpftrace",
+      "selected_workload": "network",
+      "status": "error"
+    },
+    {
+      "app": "bpftrace/tcpretrans",
+      "baseline": null,
+      "error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bpftrace",
+      "selected_workload": "tcp_retransmit",
+      "status": "error"
+    }
+  ],
+  "samples": 30,
+  "status": "error",
+  "suite_name": "macro_apps",
+  "workload_seconds": 1.0
+}

@@ -1,0 +1,56 @@
+{
+  "baseline": null,
+  "config": {
+    "measurement_duration_s": 6,
+    "sample_count": 2,
+    "warmup_duration_s": 2,
+    "workloads": [
+      {
+        "command": "stress-ng --cap 1 --eventfd 1 --get 1 --prctl 1 --set 1 --timerfd 1 --timeout {duration}s",
+        "kind": "stress_ng_os",
+        "metric": "ops/s",
+        "name": "stress_ng_os"
+      }
+    ]
+  },
+  "duration_s": 6,
+  "error_message": "Tracee case could not run: daemon session exited early (rc=1)",
+  "generated_at": "2026-04-29T10:41:06.307770+00:00",
+  "host": {
+    "git_sha": null,
+    "git_sha_error": "[Errno 2] No such file or directory: 'git'",
+    "hostname": "virtme-ng",
+    "kernel": "7.0.0-rc2",
+    "platform": "Linux-7.0.0-rc2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "mode": "tracee_daemon_same_image_paired",
+  "post_rejit": null,
+  "programs": [],
+  "rejit_result": null,
+  "sample_count": 2,
+  "setup": {
+    "returncode": 0,
+    "stderr_tail": "",
+    "stdout_tail": "TRACEE_BINARY=/artifacts/tracee/bin/tracee\nTRACEE_EBPF_BINARY=/artifacts/tracee/bin/tracee-ebpf",
+    "tracee_binary": "/artifacts/tracee/bin/tracee"
+  },
+  "status": "error",
+  "tracee_binary": "/artifacts/tracee/bin/tracee",
+  "tracee_launch_command": [
+    [
+      "/artifacts/tracee/bin/tracee",
+      "--events",
+      "*",
+      "--output",
+      "none",
+      "--server",
+      "healthz",
+      "--server",
+      "http-address=:3366",
+      "--signatures-dir",
+      "/var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.1d12911c/tracee/signatures"
+    ]
+  ],
+  "warmup_duration_s": 2.0
+}

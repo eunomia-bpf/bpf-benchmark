@@ -1,0 +1,1700 @@
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+  "duration_s": 10,
+  "generated_at": "2026-04-25T18:42:50.758963+00:00",
+  "host": {
+    "git_sha": null,
+    "git_sha_error": "[Errno 2] No such file or directory: 'git'",
+    "hostname": "virtme-ng",
+    "kernel": "7.0.0-rc2",
+    "platform": "Linux-7.0.0-rc2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "programs": [
+    {
+      "btf_id": 3625,
+      "bytes_jited": 1067,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1672,
+      "gpl_compatible": true,
+      "id": 1413,
+      "jited": true,
+      "loaded_at": 1777142309,
+      "map_ids": [
+        3827,
+        3824,
+        3826,
+        3825
+      ],
+      "name": "tracepoint__sock__inet_sock_set_state",
+      "orphaned": false,
+      "tag": "62e4d7a55c383b2d",
+      "type": "tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 3626,
+      "bytes_jited": 267,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 448,
+      "gpl_compatible": true,
+      "id": 1416,
+      "jited": true,
+      "loaded_at": 1777142335,
+      "map_ids": [
+        3829
+      ],
+      "name": "trace_pid_start_tp",
+      "orphaned": false,
+      "tag": "1684df6111e05ef4",
+      "type": "tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 3626,
+      "bytes_jited": 335,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 616,
+      "gpl_compatible": true,
+      "id": 1417,
+      "jited": true,
+      "loaded_at": 1777142336,
+      "map_ids": [
+        3830
+      ],
+      "name": "trace_req_start",
+      "orphaned": false,
+      "tag": "a90d94622b40a4a7",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 3626,
+      "bytes_jited": 550,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 856,
+      "gpl_compatible": true,
+      "id": 1418,
+      "jited": true,
+      "loaded_at": 1777142336,
+      "map_ids": [
+        3830,
+        3829,
+        3828
+      ],
+      "name": "trace_req_completion_tp",
+      "orphaned": false,
+      "tag": "ec8af78d51153369",
+      "type": "tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 3627,
+      "bytes_jited": 662,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1168,
+      "gpl_compatible": true,
+      "id": 1423,
+      "jited": true,
+      "loaded_at": 1777142370,
+      "map_ids": [
+        3832,
+        3831
+      ],
+      "name": "sched_switch",
+      "orphaned": false,
+      "run_cnt": 401,
+      "run_time_ns": 446001,
+      "tag": "aa45fb2b35ba5ae5",
+      "type": "raw_tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 3627,
+      "bytes_jited": 149,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 248,
+      "gpl_compatible": true,
+      "id": 1424,
+      "jited": true,
+      "loaded_at": 1777142370,
+      "map_ids": [
+        3832
+      ],
+      "name": "sched_wakeup",
+      "orphaned": false,
+      "run_cnt": 192,
+      "run_time_ns": 781311,
+      "tag": "31739c4324b4ed71",
+      "type": "raw_tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 3627,
+      "bytes_jited": 149,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 248,
+      "gpl_compatible": true,
+      "id": 1425,
+      "jited": true,
+      "loaded_at": 1777142370,
+      "map_ids": [
+        3832
+      ],
+      "name": "raw_tracepoint__sched_wakeup_new",
+      "orphaned": false,
+      "run_cnt": 11,
+      "run_time_ns": 12244,
+      "tag": "31739c4324b4ed71",
+      "type": "raw_tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 3628,
+      "bytes_jited": 72,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 112,
+      "gpl_compatible": true,
+      "id": 1430,
+      "jited": true,
+      "loaded_at": 1777142394,
+      "map_ids": [
+        3834
+      ],
+      "name": "tracepoint__raw_syscalls__sys_enter",
+      "orphaned": false,
+      "run_cnt": 5066,
+      "run_time_ns": 1222284,
+      "tag": "a6928122719b4c15",
+      "type": "tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 3628,
+      "bytes_jited": 236,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 400,
+      "gpl_compatible": true,
+      "id": 1431,
+      "jited": true,
+      "loaded_at": 1777142394,
+      "map_ids": [
+        3834,
+        3833
+      ],
+      "name": "tracepoint__raw_syscalls__sys_exit",
+      "orphaned": false,
+      "run_cnt": 5077,
+      "run_time_ns": 1627727,
+      "tag": "16f0a8407a0812d5",
+      "type": "tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 3629,
+      "bytes_jited": 2677,
+      "bytes_memlock": 8192,
+      "bytes_xlated": 4144,
+      "gpl_compatible": true,
+      "id": 1434,
+      "jited": true,
+      "loaded_at": 1777142419,
+      "map_ids": [
+        3835
+      ],
+      "name": "syscall__execve",
+      "orphaned": false,
+      "run_cnt": 11,
+      "run_time_ns": 35942,
+      "tag": "e9a15c9e9095ab29",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 3629,
+      "bytes_jited": 492,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 704,
+      "gpl_compatible": true,
+      "id": 1435,
+      "jited": true,
+      "loaded_at": 1777142419,
+      "map_ids": [
+        3835
+      ],
+      "name": "do_ret_sys_execve",
+      "orphaned": false,
+      "run_cnt": 11,
+      "run_time_ns": 7903,
+      "tag": "0f3e79a1cdcb0b2d",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 3630,
+      "bytes_jited": 517,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 600,
+      "gpl_compatible": true,
+      "id": 1438,
+      "jited": true,
+      "loaded_at": 1777142444,
+      "map_ids": [
+        3836
+      ],
+      "name": "__x64_sys_open",
+      "orphaned": false,
+      "tag": "c623810c75ca3f7e",
+      "type": "tracing",
+      "uid": 0
+    },
+    {
+      "btf_id": 3630,
+      "bytes_jited": 517,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 600,
+      "gpl_compatible": true,
+      "id": 1439,
+      "jited": true,
+      "loaded_at": 1777142444,
+      "map_ids": [
+        3836
+      ],
+      "name": "kretfunc__vmlinux____x64_sys_openat",
+      "orphaned": false,
+      "run_cnt": 134,
+      "run_time_ns": 528838,
+      "tag": "977054b8f18af973",
+      "type": "tracing",
+      "uid": 0
+    },
+    {
+      "btf_id": 3630,
+      "bytes_jited": 590,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 640,
+      "gpl_compatible": true,
+      "id": 1440,
+      "jited": true,
+      "loaded_at": 1777142444,
+      "map_ids": [
+        3836
+      ],
+      "name": "kretfunc__vmlinux____x64_sys_openat2",
+      "orphaned": false,
+      "tag": "75c677093a134647",
+      "type": "tracing",
+      "uid": 0
+    },
+    {
+      "btf_id": 3631,
+      "bytes_jited": 203,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 344,
+      "gpl_compatible": true,
+      "id": 1443,
+      "jited": true,
+      "loaded_at": 1777142470,
+      "map_ids": [
+        3837
+      ],
+      "name": "cap_capable",
+      "orphaned": false,
+      "run_cnt": 300,
+      "run_time_ns": 185348,
+      "tag": "3216b96a31ea8f13",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 3632,
+      "bytes_jited": 90,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 144,
+      "gpl_compatible": true,
+      "id": 1447,
+      "jited": true,
+      "loaded_at": 1777142494,
+      "map_ids": [
+        3838
+      ],
+      "name": "vfs_create",
+      "orphaned": false,
+      "tag": "774808576942eeea",
+      "type": "tracing",
+      "uid": 0
+    },
+    {
+      "btf_id": 3632,
+      "bytes_jited": 90,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 144,
+      "gpl_compatible": true,
+      "id": 1448,
+      "jited": true,
+      "loaded_at": 1777142494,
+      "map_ids": [
+        3838
+      ],
+      "name": "kfunc__vmlinux__vfs_fsync_range",
+      "orphaned": false,
+      "tag": "76a272eb04cc2c67",
+      "type": "tracing",
+      "uid": 0
+    },
+    {
+      "btf_id": 3632,
+      "bytes_jited": 90,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 144,
+      "gpl_compatible": true,
+      "id": 1449,
+      "jited": true,
+      "loaded_at": 1777142494,
+      "map_ids": [
+        3838
+      ],
+      "name": "vfs_open",
+      "orphaned": false,
+      "run_cnt": 285,
+      "run_time_ns": 50137,
+      "tag": "5f5e43510d75075b",
+      "type": "tracing",
+      "uid": 0
+    },
+    {
+      "btf_id": 3632,
+      "bytes_jited": 87,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 136,
+      "gpl_compatible": true,
+      "id": 1450,
+      "jited": true,
+      "loaded_at": 1777142494,
+      "map_ids": [
+        3838
+      ],
+      "name": "vfs_read",
+      "orphaned": false,
+      "run_cnt": 1603,
+      "run_time_ns": 103197,
+      "tag": "f3ecd4ef200a0acc",
+      "type": "tracing",
+      "uid": 0
+    },
+    {
+      "btf_id": 3632,
+      "bytes_jited": 90,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 144,
+      "gpl_compatible": true,
+      "id": 1451,
+      "jited": true,
+      "loaded_at": 1777142494,
+      "map_ids": [
+        3838
+      ],
+      "name": "vfs_write",
+      "orphaned": false,
+      "run_cnt": 11,
+      "run_time_ns": 1627,
+      "tag": "0e2186f7ac25b302",
+      "type": "tracing",
+      "uid": 0
+    },
+    {
+      "btf_id": 3633,
+      "bytes_jited": 75,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 120,
+      "gpl_compatible": true,
+      "id": 1454,
+      "jited": true,
+      "loaded_at": 1777142520,
+      "map_ids": [
+        3843
+      ],
+      "name": "trace_connect_entry",
+      "orphaned": false,
+      "tag": "022ed07e8dc1f265",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 3633,
+      "bytes_jited": 480,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 720,
+      "gpl_compatible": true,
+      "id": 1455,
+      "jited": true,
+      "loaded_at": 1777142520,
+      "map_ids": [
+        3843,
+        3842
+      ],
+      "name": "trace_connect_v4_return",
+      "orphaned": false,
+      "tag": "e791d6f54947ca63",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 3633,
+      "bytes_jited": 477,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 712,
+      "gpl_compatible": true,
+      "id": 1456,
+      "jited": true,
+      "loaded_at": 1777142520,
+      "map_ids": [
+        3843,
+        3841
+      ],
+      "name": "trace_connect_v6_return",
+      "orphaned": false,
+      "tag": "0a4a4737ea2258ee",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 3634,
+      "bytes_jited": 75,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 120,
+      "gpl_compatible": true,
+      "id": 1459,
+      "jited": true,
+      "loaded_at": 1777142547,
+      "map_ids": [
+        3848
+      ],
+      "name": "bindsnoop_entry",
+      "orphaned": false,
+      "tag": "022ed07e8dc1f265",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 3634,
+      "bytes_jited": 721,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1160,
+      "gpl_compatible": true,
+      "id": 1460,
+      "jited": true,
+      "loaded_at": 1777142547,
+      "map_ids": [
+        3848,
+        3847
+      ],
+      "name": "bindsnoop_v4_return",
+      "orphaned": false,
+      "tag": "eaee51a7bacda567",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 3634,
+      "bytes_jited": 742,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1184,
+      "gpl_compatible": true,
+      "id": 1461,
+      "jited": true,
+      "loaded_at": 1777142547,
+      "map_ids": [
+        3848,
+        3846
+      ],
+      "name": "bindsnoop_v6_return",
+      "orphaned": false,
+      "tag": "da527dbf2259ebd4",
+      "type": "kprobe",
+      "uid": 0
+    }
+  ],
+  "records": [
+    {
+      "baseline": {
+        "measurement": {
+          "bpf": {
+            "1413": {
+              "avg_ns_per_run": 517.2557437820595,
+              "bytes_jited": 1067,
+              "bytes_xlated": 1672,
+              "id": 1413,
+              "name": "tracepoint__sock__inet_sock_set_state",
+              "run_cnt_delta": 46398,
+              "run_time_ns_delta": 23999632,
+              "type": "tracepoint"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 422.25078878182495
+        },
+        "phase": "baseline",
+        "reason": "",
+        "status": "ok"
+      },
+      "name": "tcplife",
+      "post_rejit": {
+        "measurement": {
+          "bpf": {
+            "1413": {
+              "avg_ns_per_run": 516.8884122933065,
+              "bytes_jited": 1067,
+              "bytes_xlated": 1672,
+              "id": 1413,
+              "name": "sock__inet_sock",
+              "run_cnt_delta": 46627,
+              "run_time_ns_delta": 24100956,
+              "type": "tracepoint"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 424.0914440399302
+        },
+        "phase": "post_rejit",
+        "reason": "",
+        "status": "ok"
+      },
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "In file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/bcc-python-kacbvef9/bpfrejit_bcc_compat.h:43:\nIn file included from include/linux/ns/ns_common_types.h:6:\nIn file included from include/linux/ns/nstree_types.h:6:\nIn file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/bcc-python-kacbvef9/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\nIn file included from /virtual/main.c:4:\nIn file included from include/linux/tcp.h:7:\nIn file included from include/linux/skbuff.h:11:\nIn file included from include/linux/bvec.h:6:\nIn file included from include/linux/highmem.h:5:\ninclude/linux/fs.h:1916:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 1916 |         struct __filename_head;\n      |         ^\n6 warnings generated.",
+        "stdout_tail": "4755  curl       ::1             43273 ::1             47328     0     0 0.33\n4755  curl       ::1             47328 ::1             43273     0     0 0.34\n4757  curl       127.0.0.1       43703 127.0.0.1       53924     0     0 0.19\n4757  curl       127.0.0.1       53924 127.0.0.1       43703     0     0 0.20\n4759  curl       ::1             43273 ::1             47342     0     0 0.25\n4759  curl       ::1             47342 ::1             43273     0     0 0.26\n4761  curl       127.0.0.1       43703 127.0.0.1       53940     0     0 0.28\n4761  curl       127.0.0.1       53940 127.0.0.1       43703     0     0 0.28\n4763  curl       ::1             43273 ::1             47352     0     0 0.27\n4763  curl       ::1             47352 ::1             43273     0     0 0.28\n4765  curl       127.0.0.1       43703 127.0.0.1       53946     0     0 0.25\n4765  curl       127.0.0.1       53946 127.0.0.1       43703     0     0 0.26\n4767  curl       ::1             43273 ::1             47362     0     0 0.21\n4767  curl       ::1             47362 ::1             43273     0     0 0.21\n4769  curl       127.0.0.1       43703 127.0.0.1       53958     0     0 0.21\n4769  curl       127.0.0.1       53958 127.0.0.1       43703     0     0 0.23\n4771  curl       ::1             43273 ::1             47374     0     0 0.30\n4771  curl       ::1             47374 ::1             43273     0     0 0.31\n4773  curl       127.0.0.1       43703 127.0.0.1       53972     0     0 0.30\n4773  curl       127.0.0.1       53972 127.0.0.1       43703     0     0 0.32\n4775  curl       ::1             43273 ::1             47380     0     0 0.26\n4775  curl       ::1             47380 ::1             43273     0     0 0.27\n4777  curl       127.0.0.1       43703 127.0.0.1       53986     0     0 0.23\n4777  curl       127.0.0.1       53986 127.0.0.1       43703     0     0 0.24\n4779  curl       ::1             43273 ::1             47384     0     0 0.30\n4779  curl       ::1             47384 ::1             43273     0     0 0.30\n4781  curl       127.0.0.1       43703 127.0.0.1       54000     0     0 0.23\n4781  curl       127.0.0.1       54000 127.0.0.1       43703     0     0 0.24\n4783  curl       ::1             43273 ::1             47390     0     0 0.25\n4783  curl       ::1             47390 ::1             43273     0     0 0.26\n4785  curl       127.0.0.1       43703 127.0.0.1       54014     0     0 0.32\n4785  curl       127.0.0.1       54014 127.0.0.1       43703     0     0 0.33\n4787  curl       ::1             43273 ::1             47394     0     0 0.23\n4787  curl       ::1             47394 ::1             43273     0     0 0.24\n4789  curl       127.0.0.1       43703 127.0.0.1       54020     0     0 0.24\n4789  curl       127.0.0.1       54020 127.0.0.1       43703     0     0 0.25\n4791  curl       ::1             43273 ::1             47400     0     0 0.21\n4791  curl       ::1             47400 ::1             43273     0     0 0.23\n4793  curl       127.0.0.1       43703 127.0.0.1       54032     0     0 0.24\n4793  curl       127.0.0.1       54032 127.0.0.1       43703     0     0 0.25"
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "output_chars": 4885,
+        "output_stripped": true,
+        "program_counts": {
+          "applied": 1,
+          "not_applied": 0,
+          "requested": 1
+        }
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "bpf": {
+            "1416": {
+              "avg_ns_per_run": 63.369682386053064,
+              "bytes_jited": 267,
+              "bytes_xlated": 448,
+              "id": 1416,
+              "name": "trace_pid_start_tp",
+              "run_cnt_delta": 9428994,
+              "run_time_ns_delta": 597512355,
+              "type": "tracepoint"
+            },
+            "1417": {
+              "avg_ns_per_run": 94.34725722653822,
+              "bytes_jited": 335,
+              "bytes_xlated": 616,
+              "id": 1417,
+              "name": "trace_req_start",
+              "run_cnt_delta": 9428996,
+              "run_time_ns_delta": 889599911,
+              "type": "kprobe"
+            },
+            "1418": {
+              "avg_ns_per_run": 284.0352785137168,
+              "bytes_jited": 550,
+              "bytes_xlated": 856,
+              "id": 1418,
+              "name": "trace_req_completion_tp",
+              "run_cnt_delta": 9428997,
+              "run_time_ns_delta": 2678167789,
+              "type": "tracepoint"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 942121.301746595
+        },
+        "phase": "baseline",
+        "reason": "",
+        "status": "ok"
+      },
+      "name": "biosnoop",
+      "post_rejit": {
+        "measurement": {
+          "bpf": {
+            "1416": {
+              "avg_ns_per_run": 62.6785640141441,
+              "bytes_jited": 267,
+              "bytes_xlated": 448,
+              "id": 1416,
+              "name": "trace_pid_start",
+              "run_cnt_delta": 9469954,
+              "run_time_ns_delta": 593563118,
+              "type": "tracepoint"
+            },
+            "1417": {
+              "avg_ns_per_run": 93.20803454630624,
+              "bytes_jited": 335,
+              "bytes_xlated": 616,
+              "id": 1417,
+              "name": "trace_req_start",
+              "run_cnt_delta": 9469956,
+              "run_time_ns_delta": 882675986,
+              "type": "kprobe"
+            },
+            "1418": {
+              "avg_ns_per_run": 283.60004770877,
+              "bytes_jited": 548,
+              "bytes_xlated": 848,
+              "id": 1418,
+              "name": "trace_req_compl",
+              "run_cnt_delta": 9469957,
+              "run_time_ns_delta": 2685680257,
+              "type": "tracepoint"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 946181.6101305414
+        },
+        "phase": "post_rejit",
+        "reason": "",
+        "status": "ok"
+      },
+      "process": {
+        "returncode": -15,
+        "stderr_tail": "      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/bcc-python-ftmimjgz/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\nIn file included from /virtual/main.c:4:\nIn file included from include/linux/blk-mq.h:5:\nIn file included from include/linux/blkdev.h:7:\nIn file included from include/linux/blk_types.h:7:\nIn file included from include/linux/bvec.h:6:\nIn file included from include/linux/highmem.h:5:\ninclude/linux/fs.h:1916:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 1916 |         struct __filename_head;\n      |         ^\n6 warnings generated.\nException ignored on calling ctypes callback function: <function PerfEventArray._open_perf_buffer.<locals>.raw_cb_ at 0x7f688d687880>\nTraceback (most recent call last):\n  File \"/usr/lib/python3/dist-packages/bcc/table.py\", line 991, in raw_cb_\n    callback(cpu, data, size)\n  File \"/usr/sbin/biosnoop-bpfcc\", line 408, in print_event\n    print(\"%-11.6f %-14.14s %-7s %-9s %-1s %-10s %-7s\" % (\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nKeyboardInterrupt:",
+        "stdout_tail": "20.291194                  9468    nullb0    R 31856      4096      0.00\n20.291195                  9468    nullb0    R 31864      4096      0.00\n20.291196                  9468    nullb0    R 31872      4096      0.00\n20.291197                  9468    nullb0    R 31880      4096      0.00\n20.291198                  9468    nullb0    R 31888      4096      0.00\n20.291199                  9468    nullb0    R 31896      4096      0.00\n20.291200                  9468    nullb0    R 31904      4096      0.00\n20.291201                  9468    nullb0    R 31912      4096      0.00\n20.291203                  9468    nullb0    R 31920      4096      0.00\n20.291204                  9468    nullb0    R 31928      4096      0.00\n20.291205                  9468    nullb0    R 31936      4096      0.00\n20.291206                  9468    nullb0    R 31944      4096      0.00\n20.291207                  9468    nullb0    R 31952      4096      0.00\n20.291208                  9468    nullb0    R 31960      4096      0.00\n20.291209                  9468    nullb0    R 31968      4096      0.00\n20.291211                  9468    nullb0    R 31976      4096      0.00\n20.291212                  9468    nullb0    R 31984      4096      0.00\n20.291213                  9468    nullb0    R 31992      4096      0.00\n20.291214                  9468    nullb0    R 32000      4096      0.00\n20.291215                  9468    nullb0    R 32008      4096      0.00\n20.291216                  9468    nullb0    R 32016      4096      0.00\n20.291217                  9468    nullb0    R 32024      4096      0.00\n20.291218                  9468    nullb0    R 32032      4096      0.00\n20.291220                  9468    nullb0    R 32040      4096      0.00\n20.291221                  9468    nullb0    R 32048      4096      0.00\n20.291222                  9468    nullb0    R 32056      4096      0.00\n20.291223                  9468    nullb0    R 32064      4096      0.00\n20.291224                  9468    nullb0    R 32072      4096      0.00\n20.291225                  9468    nullb0    R 32080      4096      0.00\n20.291226                  9468    nullb0    R 32088      4096      0.00\n20.291227                  9468    nullb0    R 32096      4096      0.00\n20.291229                  9468    nullb0    R 32104      4096      0.00\n20.291230                  9468    nullb0    R 32112      4096      0.00\n20.291231                  9468    nullb0    R 32120      4096      0.00\n20.291232                  9468    nullb0    R 32128      4096      0.00\n20.291233                  9468    nullb0    R 32136      4096      0.00\n20.291234                  9468    nullb0    R 32144      4096      0.00\n20.291235                  9468    nullb0    R 32152      4096      0.00\n20.291236                  9468    nullb0    R 32160      4096      0.00\n20.291238                  9468    nullb0    R 32168      4096"
+      },
+      "rejit_result": {
+        "applied": true,
+        "applied_site_totals": {
+          "bitfield_sites": 0,
+          "bounds_check_merge_sites": 0,
+          "branch_flip_sites": 0,
+          "bulk_memory_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 2,
+          "dce_sites": 1,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 0,
+          "other_sites": 0,
+          "rotate_sites": 0,
+          "skb_load_bytes_spec_sites": 0,
+          "total_sites": 3,
+          "wide_sites": 0
+        },
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "output_chars": 13075,
+        "output_stripped": true,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "bpf": {
+            "1423": {
+              "avg_ns_per_run": 169.44003135747843,
+              "bytes_jited": 662,
+              "bytes_xlated": 1168,
+              "id": 1423,
+              "name": "sched_switch",
+              "run_cnt_delta": 1577933,
+              "run_time_ns_delta": 267365017,
+              "type": "raw_tracepoint"
+            },
+            "1424": {
+              "avg_ns_per_run": 109.76972823884498,
+              "bytes_jited": 149,
+              "bytes_xlated": 248,
+              "id": 1424,
+              "name": "sched_wakeup",
+              "run_cnt_delta": 826645,
+              "run_time_ns_delta": 90740597,
+              "type": "raw_tracepoint"
+            },
+            "1425": {
+              "avg_ns_per_run": 233.8522116954858,
+              "bytes_jited": 149,
+              "bytes_xlated": 248,
+              "id": 1425,
+              "name": "raw_tracepoint__sched_wakeup_new",
+              "run_cnt_delta": 169621,
+              "run_time_ns_delta": 39666246,
+              "type": "raw_tracepoint"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 65.9076367544489
+        },
+        "phase": "baseline",
+        "reason": "",
+        "status": "ok"
+      },
+      "name": "runqlat",
+      "post_rejit": {
+        "measurement": {
+          "bpf": {
+            "1423": {
+              "avg_ns_per_run": 167.01351390165442,
+              "bytes_jited": 645,
+              "bytes_xlated": 1136,
+              "id": 1423,
+              "name": "sched_switch",
+              "run_cnt_delta": 1531904,
+              "run_time_ns_delta": 255848670,
+              "type": "raw_tracepoint"
+            },
+            "1424": {
+              "avg_ns_per_run": 113.58355276891233,
+              "bytes_jited": 149,
+              "bytes_xlated": 248,
+              "id": 1424,
+              "name": "sched_wakeup",
+              "run_cnt_delta": 795222,
+              "run_time_ns_delta": 90324140,
+              "type": "raw_tracepoint"
+            },
+            "1425": {
+              "avg_ns_per_run": 237.26570755731944,
+              "bytes_jited": 149,
+              "bytes_xlated": 248,
+              "id": 1425,
+              "name": "sched_wakeup_ne",
+              "run_cnt_delta": 167308,
+              "run_time_ns_delta": 39696451,
+              "type": "raw_tracepoint"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 65.01028022240932
+        },
+        "phase": "post_rejit",
+        "reason": "",
+        "status": "ok"
+      },
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "In file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/bcc-python-2ekb9iz5/bpfrejit_bcc_compat.h:43:\nIn file included from include/linux/ns/ns_common_types.h:6:\nIn file included from include/linux/ns/nstree_types.h:6:\nIn file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/bcc-python-2ekb9iz5/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\nIn file included from /virtual/main.c:6:\nIn file included from include/linux/pid_namespace.h:7:\nIn file included from include/linux/mm.h:1118:\nIn file included from include/linux/huge_mm.h:7:\ninclude/linux/fs.h:1916:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 1916 |         struct __filename_head;\n      |         ^\n6 warnings generated.",
+        "stdout_tail": "             8388608 -> 16777215             : 5351     |                    |\n            16777216 -> 33554431             : 0        |                    |\n            33554432 -> 67108863             : 0        |                    |\n            67108864 -> 134217727            : 0        |                    |\n           134217728 -> 268435455            : 0        |                    |\n           268435456 -> 536870911            : 4596     |                    |\n           536870912 -> 1073741823           : 4598     |                    |\n          1073741824 -> 2147483647           : 4386     |                    |\n          2147483648 -> 4294967295           : 4256     |                    |\n          4294967296 -> 8589934591           : 0        |                    |\n          8589934592 -> 17179869183          : 0        |                    |\n         17179869184 -> 34359738367          : 0        |                    |\n         34359738368 -> 68719476735          : 0        |                    |\n         68719476736 -> 137438953471         : 3670     |                    |\n        137438953472 -> 274877906943         : 3539     |                    |\n        274877906944 -> 549755813887         : 3458     |                    |\n        549755813888 -> 1099511627775        : 3328     |                    |\n       1099511627776 -> 2199023255551        : 0        |                    |\n       2199023255552 -> 4398046511103        : 0        |                    |\n       4398046511104 -> 8796093022207        : 0        |                    |\n       8796093022208 -> 17592186044415       : 0        |                    |\n      17592186044416 -> 35184372088831       : 2899     |                    |\n      35184372088832 -> 70368744177663       : 2982     |                    |\n      70368744177664 -> 140737488355327      : 2872     |                    |\n     140737488355328 -> 281474976710655      : 2853     |                    |\n     281474976710656 -> 562949953421311      : 0        |                    |\n     562949953421312 -> 1125899906842623     : 0        |                    |\n    1125899906842624 -> 2251799813685247     : 0        |                    |\n    2251799813685248 -> 4503599627370495     : 0        |                    |\n    4503599627370496 -> 9007199254740991     : 2719     |                    |\n    9007199254740992 -> 18014398509481983    : 2631     |                    |\n   18014398509481984 -> 36028797018963967    : 2591     |                    |\n   36028797018963968 -> 72057594037927935    : 2574     |                    |\n   72057594037927936 -> 144115188075855871   : 0        |                    |\n  144115188075855872 -> 288230376151711743   : 0        |                    |\n  288230376151711744 -> 576460752303423487   : 0        |                    |\n  576460752303423488 -> 1152921504606846975  : 0        |                    |\n 1152921504606846976 -> 2305843009213693951  : 2562     |                    |\n 2305843009213693952 -> 4611686018427387903  : 2585     |                    |\n 4611686018427387904 -> 9223372036854775807  : 2535     |                    |"
+      },
+      "rejit_result": {
+        "applied": true,
+        "applied_site_totals": {
+          "bitfield_sites": 0,
+          "bounds_check_merge_sites": 0,
+          "branch_flip_sites": 0,
+          "bulk_memory_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 2,
+          "dce_sites": 4,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 0,
+          "other_sites": 0,
+          "rotate_sites": 0,
+          "skb_load_bytes_spec_sites": 0,
+          "total_sites": 6,
+          "wide_sites": 0
+        },
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "output_chars": 12840,
+        "output_stripped": true,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "bpf": {
+            "1430": {
+              "avg_ns_per_run": 77.60605795197431,
+              "bytes_jited": 72,
+              "bytes_xlated": 112,
+              "id": 1430,
+              "name": "tracepoint__raw_syscalls__sys_enter",
+              "run_cnt_delta": 68505,
+              "run_time_ns_delta": 5316403,
+              "type": "tracepoint"
+            },
+            "1431": {
+              "avg_ns_per_run": 84.5409970075177,
+              "bytes_jited": 236,
+              "bytes_xlated": 400,
+              "id": 1431,
+              "name": "tracepoint__raw_syscalls__sys_exit",
+              "run_cnt_delta": 68505,
+              "run_time_ns_delta": 5791481,
+              "type": "tracepoint"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 1230.3917262308269
+        },
+        "phase": "baseline",
+        "reason": "",
+        "status": "ok"
+      },
+      "name": "syscount",
+      "post_rejit": {
+        "measurement": {
+          "bpf": {
+            "1430": {
+              "avg_ns_per_run": 80.62667795027431,
+              "bytes_jited": 72,
+              "bytes_xlated": 112,
+              "id": 1430,
+              "name": "raw_syscalls__s",
+              "run_cnt_delta": 68536,
+              "run_time_ns_delta": 5525830,
+              "type": "tracepoint"
+            },
+            "1431": {
+              "avg_ns_per_run": 84.28256682619353,
+              "bytes_jited": 236,
+              "bytes_xlated": 400,
+              "id": 1431,
+              "name": "raw_syscalls__s",
+              "run_cnt_delta": 68536,
+              "run_time_ns_delta": 5776390,
+              "type": "tracepoint"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 1220.290632194918
+        },
+        "phase": "post_rejit",
+        "reason": "",
+        "status": "ok"
+      },
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "      |                        ^\n<scratch space>:5:1: note: expanded from here\n    5 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/bcc-python-p21e3sbo/bpfrejit_bcc_compat.h:43:\nIn file included from include/linux/ns/ns_common_types.h:6:\nIn file included from include/linux/ns/nstree_types.h:6:\nIn file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/bcc-python-p21e3sbo/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\n5 warnings generated.",
+        "stdout_tail": "lseek                      1160          164.696\naccept4                      10          109.491\nwrite                        10           22.880\nclock_nanosleep              11      2001165.008\n[18:40:15]\nSYSCALL                   COUNT        TIME (us)\nread                          1      1000494.087\nopenat                     1158       749154.784\nclose                      1158       147853.907\nfstat                      1158       100613.631\nbpf                         453          197.942\nioctl                      1158          185.219\nlseek                      1158          165.115\naccept4                      10           91.374\nwrite                        10           24.644\nfutex                        26     16137982.520\n[18:40:16]\nSYSCALL                   COUNT        TIME (us)\nepoll_pwait                   7      8078839.964\nclock_nanosleep              11      2001234.110\nread                          1      1000646.770\nopenat                     1196       744676.996\nclose                      1196       151552.134\nfstat                      1196        99671.285\nnanosleep                     5        20390.128\nioctl                      1196          209.744\nbpf                         453          203.409\nclock_nanosleep               9      1610810.523\n[18:40:16]\nSYSCALL                   COUNT        TIME (us)\nread                         16      1000243.571\nopenat                      965       559025.100\nclose                       981       116435.975\nfstat                       970        72259.061\nunlinkat                    256        55429.537\npoll                          2         1303.162\ngetdents64                    2         1041.914\nbpf                         475          649.594\nnewfstatat                    7          449.164\nDetaching..."
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "output_chars": 9098,
+        "output_stripped": true,
+        "program_counts": {
+          "applied": 2,
+          "not_applied": 0,
+          "requested": 2
+        }
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "bpf": {
+            "1434": {
+              "avg_ns_per_run": 1167.7257673768077,
+              "bytes_jited": 2677,
+              "bytes_xlated": 4144,
+              "id": 1434,
+              "name": "syscall__execve",
+              "run_cnt_delta": 40039,
+              "run_time_ns_delta": 46754572,
+              "type": "kprobe"
+            },
+            "1435": {
+              "avg_ns_per_run": 805.0451309972776,
+              "bytes_jited": 492,
+              "bytes_xlated": 704,
+              "id": 1435,
+              "name": "do_ret_sys_execve",
+              "run_cnt_delta": 40039,
+              "run_time_ns_delta": 32233202,
+              "type": "kprobe"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 2001.8540864756249
+        },
+        "phase": "baseline",
+        "reason": "",
+        "status": "ok"
+      },
+      "name": "execsnoop",
+      "post_rejit": {
+        "measurement": {
+          "bpf": {
+            "1434": {
+              "avg_ns_per_run": 1192.9106307388226,
+              "bytes_jited": 2677,
+              "bytes_xlated": 4144,
+              "id": 1434,
+              "name": "syscall__execve",
+              "run_cnt_delta": 39969,
+              "run_time_ns_delta": 47679445,
+              "type": "kprobe"
+            },
+            "1435": {
+              "avg_ns_per_run": 802.9068778303185,
+              "bytes_jited": 492,
+              "bytes_xlated": 704,
+              "id": 1435,
+              "name": "do_ret_sys_exec",
+              "run_cnt_delta": 39969,
+              "run_time_ns_delta": 32091385,
+              "type": "kprobe"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 1998.38501071358
+        },
+        "phase": "post_rejit",
+        "reason": "",
+        "status": "ok"
+      },
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/bcc-python-8a7lwgk1/bpfrejit_bcc_compat.h:43:\nIn file included from include/linux/ns/ns_common_types.h:6:\nIn file included from include/linux/ns/nstree_types.h:6:\nIn file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/bcc-python-8a7lwgk1/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\nIn file included from /virtual/main.c:17:\ninclude/linux/fs.h:1916:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 1916 |         struct __filename_head;\n      |         ^\n6 warnings generated.",
+        "stdout_tail": "18:40:41 65534 true             30719   1719      0 /bin/true\n18:40:41 65534 true             30720   1719      0 /bin/true\n18:40:41 65534 true             30721   1719      0 /bin/true\n18:40:41 65534 true             30722   1719      0 /bin/true\n18:40:41 65534 true             30723   1719      0 /bin/true\n18:40:41 65534 true             30724   1719      0 /bin/true\n18:40:41 65534 true             30725   1719      0 /bin/true\n18:40:41 65534 true             30726   1719      0 /bin/true\n18:40:41 65534 true             30727   1719      0 /bin/true\n18:40:41 65534 true             30728   1719      0 /bin/true\n18:40:41 65534 true             30729   1719      0 /bin/true\n18:40:41 65534 true             30730   1719      0 /bin/true\n18:40:41 65534 true             30731   1719      0 /bin/true\n18:40:41 65534 true             30732   1719      0 /bin/true\n18:40:41 65534 true             30733   1719      0 /bin/true\n18:40:41 65534 true             30734   1719      0 /bin/true\n18:40:41 65534 true             30735   1719      0 /bin/true\n18:40:41 65534 true             30736   1719      0 /bin/true\n18:40:41 65534 true             30737   1719      0 /bin/true\n18:40:41 65534 true             30738   1719      0 /bin/true\n18:40:41 65534 true             30739   1719      0 /bin/true\n18:40:41 65534 true             30740   1719      0 /bin/true\n18:40:41 65534 true             30741   1719      0 /bin/true\n18:40:41 65534 true             30742   1719      0 /bin/true\n18:40:41 65534 true             30743   1719      0 /bin/true\n18:40:41 65534 true             30744   1719      0 /bin/true\n18:40:41 65534 true             30745   1719      0 /bin/true\n18:40:41 65534 true             30746   1719      0 /bin/true\n18:40:41 65534 true             30747   1719      0 /bin/true\n18:40:41 65534 true             30748   1719      0 /bin/true\n18:40:41 65534 true             30749   1719      0 /bin/true\n18:40:41 65534 true             30750   1719      0 /bin/true\n18:40:41 65534 true             30751   1719      0 /bin/true\n18:40:41 65534 true             30752   1719      0 /bin/true\n18:40:41 65534 true             30753   1719      0 /bin/true\n18:40:41 65534 true             30754   1719      0 /bin/true\n18:40:41 65534 true             30755   1719      0 /bin/true\n18:40:41 65534 true             30756   1719      0 /bin/true\n18:40:41 65534 true             30757   1719      0 /bin/true\n18:40:41 65534 true             30758   1719      0 /bin/true"
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "output_chars": 7428,
+        "output_stripped": true,
+        "program_counts": {
+          "applied": 2,
+          "not_applied": 0,
+          "requested": 2
+        }
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "bpf": {
+            "1438": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 517,
+              "bytes_xlated": 600,
+              "id": 1438,
+              "name": "__x64_sys_open",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "1439": {
+              "avg_ns_per_run": 2566.5709715748103,
+              "bytes_jited": 517,
+              "bytes_xlated": 600,
+              "id": 1439,
+              "name": "kretfunc__vmlinux____x64_sys_openat",
+              "run_cnt_delta": 10941,
+              "run_time_ns_delta": 28080853,
+              "type": "tracing"
+            },
+            "1440": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 590,
+              "bytes_xlated": 640,
+              "id": 1440,
+              "name": "kretfunc__vmlinux____x64_sys_openat2",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 1067.1007541876636
+        },
+        "phase": "baseline",
+        "reason": "",
+        "status": "ok"
+      },
+      "name": "opensnoop",
+      "post_rejit": {
+        "measurement": {
+          "bpf": {
+            "1438": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 517,
+              "bytes_xlated": 600,
+              "id": 1438,
+              "name": "__x64_sys_open",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "1439": {
+              "avg_ns_per_run": 1722.1287103157533,
+              "bytes_jited": 517,
+              "bytes_xlated": 600,
+              "id": 1439,
+              "name": "__x64_sys_opena",
+              "run_cnt_delta": 11623,
+              "run_time_ns_delta": 20016302,
+              "type": "tracing"
+            },
+            "1440": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 590,
+              "bytes_xlated": 640,
+              "id": 1440,
+              "name": "__x64_sys_opena",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 1135.3951844483959
+        },
+        "phase": "post_rejit",
+        "reason": "",
+        "status": "ok"
+      },
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "      |                        ^\n<scratch space>:5:1: note: expanded from here\n    5 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/bcc-python-d2l1a3y2/bpfrejit_bcc_compat.h:43:\nIn file included from include/linux/ns/ns_common_types.h:6:\nIn file included from include/linux/ns/nstree_types.h:6:\nIn file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/bcc-python-d2l1a3y2/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\n5 warnings generated.",
+        "stdout_tail": "1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-63.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-64.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-65.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-66.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-67.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-68.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-69.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-70.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-71.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-72.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-73.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-74.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-75.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-76.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-77.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-78.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-79.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-80.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-81.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-82.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-83.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-84.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-85.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-86.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-87.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-88.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp/open-89.dat\n1719   python3             3   0 /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/loopback-open-storm-o0f7t_dp\n30792  bpftool             3   0 /etc/ld.so.cache\n30792  bpftool             3   0 /lib/x86_64-linux-gnu/libelf.so.1\n30792  bpftool             3   0 /lib/x86_64-linux-gnu/libcrypto.so.3\n30792  bpftool             3   0 /lib/x86_64-linux-gnu/libz.so.1\n30792  bpftool             3   0 /lib/x86_64-linux-gnu/libcap.so.2\n30792  bpftool             3   0 /lib/x86_64-linux-gnu/libc.so.6\n30792  bpftool             3   0 /lib/x86_64-linux-gnu/libzstd.so.1\n30792  bpftool             4   0 /etc/localtime\n30792  bpftool             4   0 /proc/self/fdinfo/3\n30792  bpftool             4   0 /proc/self/fdinfo/3\n30792  bpftool             4   0 /proc/self/fdinfo/3\n30792  bpftool             4   0 /proc/self/fdinfo/3"
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "output_chars": 11107,
+        "output_stripped": true,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "bpf": {
+            "1443": {
+              "avg_ns_per_run": 40.46550476602031,
+              "bytes_jited": 203,
+              "bytes_xlated": 344,
+              "id": 1443,
+              "name": "cap_capable",
+              "run_cnt_delta": 2786182,
+              "run_time_ns_delta": 112744261,
+              "type": "kprobe"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 2442.3496461442037
+        },
+        "phase": "baseline",
+        "reason": "",
+        "status": "ok"
+      },
+      "name": "capable",
+      "post_rejit": {
+        "measurement": {
+          "bpf": {
+            "1443": {
+              "avg_ns_per_run": 40.15823063451932,
+              "bytes_jited": 206,
+              "bytes_xlated": 344,
+              "id": 1443,
+              "name": "cap_capable",
+              "run_cnt_delta": 2764313,
+              "run_time_ns_delta": 111009919,
+              "type": "kprobe"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 2414.5428610666445
+        },
+        "phase": "post_rejit",
+        "reason": "",
+        "status": "ok"
+      },
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/bcc-python-hencq1sn/bpfrejit_bcc_compat.h:43:\nIn file included from include/linux/ns/ns_common_types.h:6:\nIn file included from include/linux/ns/nstree_types.h:6:\nIn file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/bcc-python-hencq1sn/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\nIn file included from /virtual/main.c:17:\nIn file included from include/linux/security.h:9:\ninclude/linux/fs.h:1916:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 1916 |         struct __filename_head;\n      |         ^\n6 warnings generated.",
+        "stdout_tail": "18:41:32  65534  6069   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6070   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6071   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6072   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6073   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6095   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6096   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6097   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6098   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6105   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6099   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6106   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6110   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6108   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6100   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6101   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6117   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6102   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6111   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6112   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6113   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6114   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6115   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6103   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6116   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6104   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6107   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6109   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  65534  6118   stress-ng-exec   8    CAP_SETPCAP          1\n18:41:32  0      6139   bpftool          21   CAP_SYS_ADMIN        1\n18:41:32  0      6139   bpftool          21   CAP_SYS_ADMIN        1\n18:41:32  0      6139   bpftool          39   CAP_BPF              1\n18:41:32  0      6139   bpftool          21   CAP_SYS_ADMIN        1\n18:41:32  0      6139   bpftool          21   CAP_SYS_ADMIN        1\n18:41:32  0      6139   bpftool          39   CAP_BPF              1\n18:41:32  0      6139   bpftool          39   CAP_BPF              1\n18:41:32  0      6139   bpftool          39   CAP_BPF              1\n18:41:32  0      6139   bpftool          39   CAP_BPF              1\n18:41:32  0      6139   bpftool          21   CAP_SYS_ADMIN        1\n18:41:32  0      6139   bpftool          21   CAP_SYS_ADMIN        1"
+      },
+      "rejit_result": {
+        "applied": true,
+        "applied_site_totals": {
+          "bitfield_sites": 1,
+          "bounds_check_merge_sites": 0,
+          "branch_flip_sites": 0,
+          "bulk_memory_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 0,
+          "dce_sites": 0,
+          "endian_sites": 0,
+          "extract_sites": 1,
+          "lea_sites": 0,
+          "map_inline_sites": 0,
+          "other_sites": 0,
+          "rotate_sites": 0,
+          "skb_load_bytes_spec_sites": 0,
+          "total_sites": 1,
+          "wide_sites": 0
+        },
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "output_chars": 3703,
+        "output_stripped": true,
+        "program_counts": {
+          "applied": 1,
+          "not_applied": 0,
+          "requested": 1
+        }
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "bpf": {
+            "1447": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 90,
+              "bytes_xlated": 144,
+              "id": 1447,
+              "name": "vfs_create",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "1448": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 90,
+              "bytes_xlated": 144,
+              "id": 1448,
+              "name": "kfunc__vmlinux__vfs_fsync_range",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "1449": {
+              "avg_ns_per_run": 64.17002518891688,
+              "bytes_jited": 90,
+              "bytes_xlated": 144,
+              "id": 1449,
+              "name": "vfs_open",
+              "run_cnt_delta": 794,
+              "run_time_ns_delta": 50951,
+              "type": "tracing"
+            },
+            "1450": {
+              "avg_ns_per_run": 31.374035989717225,
+              "bytes_jited": 87,
+              "bytes_xlated": 136,
+              "id": 1450,
+              "name": "vfs_read",
+              "run_cnt_delta": 1556,
+              "run_time_ns_delta": 48818,
+              "type": "tracing"
+            },
+            "1451": {
+              "avg_ns_per_run": 35.34415584415584,
+              "bytes_jited": 90,
+              "bytes_xlated": 144,
+              "id": 1451,
+              "name": "vfs_write",
+              "run_cnt_delta": 770,
+              "run_time_ns_delta": 27215,
+              "type": "tracing"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 76.65979068256533
+        },
+        "phase": "baseline",
+        "reason": "",
+        "status": "ok"
+      },
+      "name": "vfsstat",
+      "post_rejit": {
+        "measurement": {
+          "bpf": {
+            "1447": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 90,
+              "bytes_xlated": 144,
+              "id": 1447,
+              "name": "vfs_create",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "1448": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 90,
+              "bytes_xlated": 144,
+              "id": 1448,
+              "name": "vfs_fsync_range",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "1449": {
+              "avg_ns_per_run": 99.9171974522293,
+              "bytes_jited": 90,
+              "bytes_xlated": 144,
+              "id": 1449,
+              "name": "vfs_open",
+              "run_cnt_delta": 785,
+              "run_time_ns_delta": 78435,
+              "type": "tracing"
+            },
+            "1450": {
+              "avg_ns_per_run": 46.66320571057755,
+              "bytes_jited": 87,
+              "bytes_xlated": 136,
+              "id": 1450,
+              "name": "vfs_read",
+              "run_cnt_delta": 1541,
+              "run_time_ns_delta": 71908,
+              "type": "tracing"
+            },
+            "1451": {
+              "avg_ns_per_run": 47.367801047120416,
+              "bytes_jited": 90,
+              "bytes_xlated": 144,
+              "id": 1451,
+              "name": "vfs_write",
+              "run_cnt_delta": 764,
+              "run_time_ns_delta": 36189,
+              "type": "tracing"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 75.74540431837019
+        },
+        "phase": "post_rejit",
+        "reason": "",
+        "status": "ok"
+      },
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "      |                        ^\n<scratch space>:5:1: note: expanded from here\n    5 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/bcc-python-5ltab7l1/bpfrejit_bcc_compat.h:43:\nIn file included from include/linux/ns/ns_common_types.h:6:\nIn file included from include/linux/ns/nstree_types.h:6:\nIn file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/bcc-python-5ltab7l1/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\n5 warnings generated.",
+        "stdout_tail": "TIME         READ/s  WRITE/s  FSYNC/s   OPEN/s CREATE/s\n18:41:35:      1487        5        0      132        0\n18:41:36:       101        6        0      130        0\n18:41:37:       157       62        0      110        0\n18:41:38:       143       71        0       71        0\n18:41:39:       148       75        0       74        0\n18:41:40:       156       78        0       78        0\n18:41:41:       154       77        0       77        0\n18:41:42:       154       77        0       77        0\n18:41:43:       152       76        0       76        0\n18:41:44:       152       76        0       76        0\n18:41:45:       160       80        0       80        0\n18:41:46:       170       85        0       85        0\n18:41:47:       151       48        0      118        0\n18:41:48:       161       82        0       79        0\n18:41:49:       164       82        0       82        0\n18:41:50:       164       81        0       82        0\n18:41:51:       170       85        0       85        0\n18:41:52:       148       75        0       74        0\n18:41:53:       142       71        0       71        0\n18:41:54:       138       69        0       69        0\n18:41:55:       142       71        0       71        0\n18:41:56:       141       71        0       70        0\n18:41:57:       110       45        0       72        0"
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "output_chars": 19744,
+        "output_stripped": true,
+        "program_counts": {
+          "applied": 5,
+          "not_applied": 0,
+          "requested": 5
+        }
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "bpf": {
+            "1454": {
+              "avg_ns_per_run": 669.5957391530268,
+              "bytes_jited": 75,
+              "bytes_xlated": 120,
+              "id": 1454,
+              "name": "trace_connect_entry",
+              "run_cnt_delta": 3849,
+              "run_time_ns_delta": 2577274,
+              "type": "kprobe"
+            },
+            "1455": {
+              "avg_ns_per_run": 4152.646753246753,
+              "bytes_jited": 480,
+              "bytes_xlated": 720,
+              "id": 1455,
+              "name": "trace_connect_v4_return",
+              "run_cnt_delta": 1925,
+              "run_time_ns_delta": 7993845,
+              "type": "kprobe"
+            },
+            "1456": {
+              "avg_ns_per_run": 3930.519230769231,
+              "bytes_jited": 477,
+              "bytes_xlated": 712,
+              "id": 1456,
+              "name": "trace_connect_v6_return",
+              "run_cnt_delta": 1924,
+              "run_time_ns_delta": 7562319,
+              "type": "kprobe"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 384.8835637013601
+        },
+        "phase": "baseline",
+        "reason": "",
+        "status": "ok"
+      },
+      "name": "tcpconnect",
+      "post_rejit": {
+        "measurement": {
+          "bpf": {
+            "1454": {
+              "avg_ns_per_run": 683.2956271275203,
+              "bytes_jited": 75,
+              "bytes_xlated": 120,
+              "id": 1454,
+              "name": "trace_connect_e",
+              "run_cnt_delta": 3819,
+              "run_time_ns_delta": 2609506,
+              "type": "kprobe"
+            },
+            "1455": {
+              "avg_ns_per_run": 4334.858115183246,
+              "bytes_jited": 480,
+              "bytes_xlated": 720,
+              "id": 1455,
+              "name": "trace_connect_v",
+              "run_cnt_delta": 1910,
+              "run_time_ns_delta": 8279579,
+              "type": "kprobe"
+            },
+            "1456": {
+              "avg_ns_per_run": 4198.881613410163,
+              "bytes_jited": 477,
+              "bytes_xlated": 712,
+              "id": 1456,
+              "name": "trace_connect_v",
+              "run_cnt_delta": 1909,
+              "run_time_ns_delta": 8015665,
+              "type": "kprobe"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 381.84991599224065
+        },
+        "phase": "post_rejit",
+        "reason": "",
+        "status": "ok"
+      },
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "In file included from include/linux/ns/nstree_types.h:6:\nIn file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/bcc-python-7aipell4/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\nIn file included from /virtual/main.c:16:\nIn file included from include/net/sock.h:14:\nIn file included from include/linux/netdevice.h:20:\nIn file included from include/net/net_namespace.h:42:\nIn file included from include/linux/skbuff.h:11:\nIn file included from include/linux/bvec.h:6:\nIn file included from include/linux/highmem.h:5:\ninclude/linux/fs.h:1916:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 1916 |         struct __filename_head;\n      |         ^\n6 warnings generated.",
+        "stdout_tail": "21463   curl         6  ::1              ::1              36897\n21465   curl         4  127.0.0.1        127.0.0.1        46101\n21467   curl         6  ::1              ::1              36897\n21469   curl         4  127.0.0.1        127.0.0.1        46101\n21471   curl         6  ::1              ::1              36897\n21473   curl         4  127.0.0.1        127.0.0.1        46101\n21475   curl         6  ::1              ::1              36897\n21477   curl         4  127.0.0.1        127.0.0.1        46101\n21479   curl         6  ::1              ::1              36897\n21481   curl         4  127.0.0.1        127.0.0.1        46101\n21483   curl         6  ::1              ::1              36897\n21485   curl         4  127.0.0.1        127.0.0.1        46101\n21487   curl         6  ::1              ::1              36897\n21489   curl         4  127.0.0.1        127.0.0.1        46101\n21491   curl         6  ::1              ::1              36897\n21493   curl         4  127.0.0.1        127.0.0.1        46101\n21495   curl         6  ::1              ::1              36897\n21497   curl         4  127.0.0.1        127.0.0.1        46101\n21499   curl         6  ::1              ::1              36897\n21501   curl         4  127.0.0.1        127.0.0.1        46101\n21503   curl         6  ::1              ::1              36897\n21505   curl         4  127.0.0.1        127.0.0.1        46101\n21507   curl         6  ::1              ::1              36897\n21509   curl         4  127.0.0.1        127.0.0.1        46101\n21511   curl         6  ::1              ::1              36897\n21513   curl         4  127.0.0.1        127.0.0.1        46101\n21515   curl         6  ::1              ::1              36897\n21517   curl         4  127.0.0.1        127.0.0.1        46101\n21519   curl         6  ::1              ::1              36897\n21521   curl         4  127.0.0.1        127.0.0.1        46101\n21523   curl         6  ::1              ::1              36897\n21525   curl         4  127.0.0.1        127.0.0.1        46101\n21527   curl         6  ::1              ::1              36897\n21529   curl         4  127.0.0.1        127.0.0.1        46101\n21531   curl         6  ::1              ::1              36897\n21533   curl         4  127.0.0.1        127.0.0.1        46101\n21535   curl         6  ::1              ::1              36897\n21537   curl         4  127.0.0.1        127.0.0.1        46101\n21539   curl         6  ::1              ::1              36897\n21541   curl         4  127.0.0.1        127.0.0.1        46101"
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "output_chars": 12348,
+        "output_stripped": true,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "bpf": {
+            "1459": {
+              "avg_ns_per_run": 63.22931180668234,
+              "bytes_jited": 75,
+              "bytes_xlated": 120,
+              "id": 1459,
+              "name": "bindsnoop_entry",
+              "run_cnt_delta": 2008549,
+              "run_time_ns_delta": 126999171,
+              "type": "kprobe"
+            },
+            "1460": {
+              "avg_ns_per_run": 834.9393801498594,
+              "bytes_jited": 721,
+              "bytes_xlated": 1160,
+              "id": 1460,
+              "name": "bindsnoop_v4_return",
+              "run_cnt_delta": 1004275,
+              "run_time_ns_delta": 838508746,
+              "type": "kprobe"
+            },
+            "1461": {
+              "avg_ns_per_run": 800.5322631074787,
+              "bytes_jited": 742,
+              "bytes_xlated": 1184,
+              "id": 1461,
+              "name": "bindsnoop_v6_return",
+              "run_cnt_delta": 1004274,
+              "run_time_ns_delta": 803953738,
+              "type": "kprobe"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 200854.8003358471
+        },
+        "phase": "baseline",
+        "reason": "",
+        "status": "ok"
+      },
+      "name": "bindsnoop",
+      "post_rejit": {
+        "measurement": {
+          "bpf": {
+            "1459": {
+              "avg_ns_per_run": 58.80138006520331,
+              "bytes_jited": 75,
+              "bytes_xlated": 120,
+              "id": 1459,
+              "name": "bindsnoop_entry",
+              "run_cnt_delta": 2002659,
+              "run_time_ns_delta": 117759113,
+              "type": "kprobe"
+            },
+            "1460": {
+              "avg_ns_per_run": 833.50763184964,
+              "bytes_jited": 719,
+              "bytes_xlated": 1160,
+              "id": 1460,
+              "name": "bindsnoop_v4_re",
+              "run_cnt_delta": 1001330,
+              "run_time_ns_delta": 834616197,
+              "type": "kprobe"
+            },
+            "1461": {
+              "avg_ns_per_run": 798.6019530044571,
+              "bytes_jited": 740,
+              "bytes_xlated": 1184,
+              "id": 1461,
+              "name": "bindsnoop_v6_re",
+              "run_cnt_delta": 1001329,
+              "run_time_ns_delta": 799663295,
+              "type": "kprobe"
+            }
+          },
+          "duration_s": 10,
+          "metric": "ops/s",
+          "throughput": 200265.73371936212
+        },
+        "phase": "post_rejit",
+        "reason": "",
+        "status": "ok"
+      },
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "In file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.x86-kvm.e2e.f39d3c82/bcc-python-4pn8884v/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\nIn file included from /virtual/main.c:18:\nIn file included from include/net/sock.h:14:\nIn file included from include/linux/netdevice.h:20:\nIn file included from include/net/net_namespace.h:42:\nIn file included from include/linux/skbuff.h:11:\nIn file included from include/linux/bvec.h:6:\nIn file included from include/linux/highmem.h:5:\ninclude/linux/fs.h:1916:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 1916 |         struct __filename_head;\n      |         ^\n6 warnings generated.\nPossibly lost 166 samples",
+        "stdout_tail": "    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0\n    1719 python3      IP   ::1             23616 ..NR.  0\n    1719 python3      IP   127.0.0.1       18240 ..NR.  0"
+      },
+      "rejit_result": {
+        "applied": true,
+        "applied_site_totals": {
+          "bitfield_sites": 2,
+          "bounds_check_merge_sites": 0,
+          "branch_flip_sites": 0,
+          "bulk_memory_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 0,
+          "dce_sites": 0,
+          "endian_sites": 2,
+          "extract_sites": 2,
+          "lea_sites": 0,
+          "map_inline_sites": 0,
+          "other_sites": 0,
+          "rotate_sites": 0,
+          "skb_load_bytes_spec_sites": 0,
+          "total_sites": 4,
+          "wide_sites": 0
+        },
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "output_chars": 12436,
+        "output_stripped": true,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      }
+    }
+  ],
+  "setup": {
+    "returncode": 0,
+    "stderr_tail": "",
+    "stdout_tail": "BCC_TOOL_bindsnoop=/usr/sbin/bindsnoop-bpfcc\nBCC_TOOL_biosnoop=/usr/sbin/biosnoop-bpfcc\nBCC_TOOL_capable=/usr/sbin/capable-bpfcc\nBCC_TOOL_execsnoop=/usr/sbin/execsnoop-bpfcc\nBCC_TOOL_opensnoop=/usr/sbin/opensnoop-bpfcc\nBCC_TOOL_runqlat=/usr/sbin/runqlat-bpfcc\nBCC_TOOL_syscount=/usr/sbin/syscount-bpfcc\nBCC_TOOL_tcpconnect=/usr/sbin/tcpconnect-bpfcc\nBCC_TOOL_tcplife=/usr/sbin/tcplife-bpfcc\nBCC_TOOL_vfsstat=/usr/sbin/vfsstat-bpfcc",
+    "tools_dir": "/usr/sbin"
+  },
+  "status": "ok",
+  "tools_dir": "/usr/sbin"
+}

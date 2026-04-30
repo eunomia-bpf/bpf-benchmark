@@ -1,0 +1,6 @@
+{
+  "error_message": "BPF stats not enabled (/proc/sys/kernel/bpf_stats_enabled != 1). Call ensure_bpf_stats_enabled() in suite setup first.",
+  "failed_at": "2026-04-30T08:35:02.511807+00:00",
+  "status": "error",
+  "suite": "corpus"
+}

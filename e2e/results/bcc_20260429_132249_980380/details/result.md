@@ -1,0 +1,2808 @@
+# BCC libbpf-tools Real End-to-End Benchmark
+
+- Generated: `2026-04-29T13:27:18.108192+00:00`
+- Duration per phase: `10s`
+- Daemon: `/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon`
+- Tools dir: `/usr/sbin`
+- Setup rc: `0`
+- Error: `opensnoop post_rejit failed: prog 3247: bpfverify --verifier-states-out failed for prog 3247: subprocess "bpfverify" "--prog-type" "tracing" "--map-fds" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-624/map_fds.json" "--input" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-624/prog.bin" "--output" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-624/verified_original.bin" "--verifier-states-out" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-624/verifier_states.json" failed: func#0 @0
+Tracing programs must provide btf_id
+processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 3248: bpfverify --verifier-states-out failed for prog 3248: subprocess "bpfverify" "--prog-type" "tracing" "--map-fds" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-625/map_fds.json" "--input" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-625/prog.bin" "--output" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-625/verified_original.bin" "--verifier-states-out" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-625/verifier_states.json" failed: func#0 @0
+Tracing programs must provide btf_id
+processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 3249: bpfverify --verifier-states-out failed for prog 3249: subprocess "bpfverify" "--prog-type" "tracing" "--map-fds" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-626/map_fds.json" "--input" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-626/prog.bin" "--output" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-626/verified_original.bin" "--verifier-states-out" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-626/verifier_states.json" failed: func#0 @0
+Tracing programs must provide btf_id
+processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; capable post_rejit failed: prog 3258: bpfverify final verification failed for prog 3258: subprocess "bpfverify" "--prog-type" "kprobe" "--map-fds" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-627/map_fds.json" "--input" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-627/opt.bin" "--output" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-627/verified.bin" "--fd-array" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-627/fd_array.json" failed: BPF_PROG_LOAD dry-run failed: Invalid argument (os error 22); vfsstat post_rejit failed: prog 3266: bpfverify --verifier-states-out failed for prog 3266: subprocess "bpfverify" "--prog-type" "tracing" "--map-fds" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-628/map_fds.json" "--input" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-628/prog.bin" "--output" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-628/verified_original.bin" "--verifier-states-out" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-628/verifier_states.json" failed: func#0 @0
+Tracing programs must provide btf_id
+processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 3267: bpfverify --verifier-states-out failed for prog 3267: subprocess "bpfverify" "--prog-type" "tracing" "--map-fds" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-629/map_fds.json" "--input" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-629/prog.bin" "--output" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-629/verified_original.bin" "--verifier-states-out" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-629/verifier_states.json" failed: func#0 @0
+Tracing programs must provide btf_id
+processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 3268: bpfverify --verifier-states-out failed for prog 3268: subprocess "bpfverify" "--prog-type" "tracing" "--map-fds" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-630/map_fds.json" "--input" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-630/prog.bin" "--output" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-630/verified_original.bin" "--verifier-states-out" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-630/verifier_states.json" failed: func#0 @0
+Tracing programs must provide btf_id
+processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 3269: bpfverify --verifier-states-out failed for prog 3269: subprocess "bpfverify" "--prog-type" "tracing" "--map-fds" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-631/map_fds.json" "--input" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-631/prog.bin" "--output" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-631/verified_original.bin" "--verifier-states-out" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-631/verifier_states.json" failed: func#0 @0
+Tracing programs must provide btf_id
+processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 3270: bpfverify --verifier-states-out failed for prog 3270: subprocess "bpfverify" "--prog-type" "tracing" "--map-fds" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-632/map_fds.json" "--input" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-632/prog.bin" "--output" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-632/verified_original.bin" "--verifier-states-out" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-632/verifier_states.json" failed: func#0 @0
+Tracing programs must provide btf_id
+processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; bindsnoop post_rejit failed: prog 3298: bpfverify final verification failed for prog 3298: subprocess "bpfverify" "--prog-type" "kprobe" "--map-fds" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-637/map_fds.json" "--input" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-637/opt.bin" "--output" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-637/verified.bin" "--fd-array" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-637/fd_array.json" failed: BPF_PROG_LOAD dry-run failed: Invalid argument (os error 22); prog 3299: bpfverify final verification failed for prog 3299: subprocess "bpfverify" "--prog-type" "kprobe" "--map-fds" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-638/map_fds.json" "--input" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-638/opt.bin" "--output" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-638/verified.bin" "--fd-array" "/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-638/fd_array.json" failed: BPF_PROG_LOAD dry-run failed: Invalid argument (os error 22)`
+
+## tcplife
+
+### Baseline
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3184": {
+        "avg_ns_per_run": 74.99104234527687,
+        "bytes_jited": 1071,
+        "bytes_xlated": 1672,
+        "id": 3184,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 1228,
+        "run_time_ns_delta": 92089,
+        "type": "tracepoint"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 5044.105799576951
+  },
+  "phase": "baseline",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### Post-ReJIT
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3184": {
+        "avg_ns_per_run": 85.8040380047506,
+        "bytes_jited": 993,
+        "bytes_xlated": 1568,
+        "id": 3184,
+        "name": "sock__inet_sock",
+        "run_cnt_delta": 842,
+        "run_time_ns_delta": 72247,
+        "type": "tracepoint"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 5150.019285708181
+  },
+  "phase": "post_rejit",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### ReJIT Result
+
+```json
+{
+  "applied": true,
+  "changed": true,
+  "enabled_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "error": "",
+  "exit_code": 0,
+  "program_counts": {
+    "applied": 1,
+    "not_applied": 0,
+    "requested": 1
+  }
+}
+```
+
+### Process Output
+
+```json
+{
+  "returncode": 0,
+  "stderr_tail": "In file included from /var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bcc-python-mzwey8i0/bpfrejit_bcc_compat.h:43:\nIn file included from include/linux/ns/ns_common_types.h:6:\nIn file included from include/linux/ns/nstree_types.h:6:\nIn file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bcc-python-mzwey8i0/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\nIn file included from /virtual/main.c:4:\nIn file included from include/linux/tcp.h:7:\nIn file included from include/linux/skbuff.h:11:\nIn file included from include/linux/bvec.h:6:\nIn file included from include/linux/highmem.h:5:\ninclude/linux/fs.h:1916:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 1916 |         struct __filename_head;\n      |         ^\n6 warnings generated.",
+  "stdout_tail": "PID   COMM       LADDR           LPORT RADDR           RPORT TX_KB RX_KB MS\n18297 stress-ng- 127.0.0.1       59254 127.0.0.1       23007     0 408736 214.54\n18297 stress-ng- 127.0.0.1       23007 127.0.0.1       59254 408736     0 214.55\n18328 stress-ng- 127.0.0.1       59268 127.0.0.1       23007     0 408800 214.53\n18328 stress-ng- 127.0.0.1       23007 127.0.0.1       59268 408800     0 214.54"
+}
+```
+
+## biosnoop
+
+### Baseline
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3193": {
+        "avg_ns_per_run": 804.1798349184342,
+        "bytes_jited": 271,
+        "bytes_xlated": 448,
+        "id": 3193,
+        "name": "trace_pid_start_tp",
+        "run_cnt_delta": 46159,
+        "run_time_ns_delta": 37120137,
+        "type": "tracepoint"
+      },
+      "3194": {
+        "avg_ns_per_run": 660.9203405619705,
+        "bytes_jited": 339,
+        "bytes_xlated": 616,
+        "id": 3194,
+        "name": "trace_req_start",
+        "run_cnt_delta": 46159,
+        "run_time_ns_delta": 30507422,
+        "type": "kprobe"
+      },
+      "3195": {
+        "avg_ns_per_run": 1260.7710271254798,
+        "bytes_jited": 554,
+        "bytes_xlated": 856,
+        "id": 3195,
+        "name": "trace_req_completion_tp",
+        "run_cnt_delta": 46119,
+        "run_time_ns_delta": 58145499,
+        "type": "tracepoint"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 4262.54856470449
+  },
+  "phase": "baseline",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### Post-ReJIT
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3193": {
+        "avg_ns_per_run": 712.1756144326303,
+        "bytes_jited": 271,
+        "bytes_xlated": 448,
+        "id": 3193,
+        "name": "trace_pid_start_tp",
+        "run_cnt_delta": 34422,
+        "run_time_ns_delta": 24514509,
+        "type": "tracepoint"
+      },
+      "3194": {
+        "avg_ns_per_run": 615.2388298181396,
+        "bytes_jited": 339,
+        "bytes_xlated": 616,
+        "id": 3194,
+        "name": "trace_req_start",
+        "run_cnt_delta": 34422,
+        "run_time_ns_delta": 21177751,
+        "type": "kprobe"
+      },
+      "3195": {
+        "avg_ns_per_run": 365.6103065200954,
+        "bytes_jited": 552,
+        "bytes_xlated": 848,
+        "id": 3195,
+        "name": "trace_req_compl",
+        "run_cnt_delta": 34386,
+        "run_time_ns_delta": 12571876,
+        "type": "tracepoint"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 5724.906828325767
+  },
+  "phase": "post_rejit",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### ReJIT Result
+
+```json
+{
+  "applied": true,
+  "changed": true,
+  "enabled_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "error": "",
+  "exit_code": 0,
+  "noop_programs": [
+    {
+      "applied": false,
+      "changed": false,
+      "exit_code": 0,
+      "passes": [
+        {
+          "pass_name": "wide_mem",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "rotate",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "cond_select",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "extract",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "endian_fusion",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "map_inline",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "const_prop",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "dce",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bounds_check_merge",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "skb_load_bytes_spec",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bulk_memory",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        }
+      ],
+      "prog_id": 3193
+    },
+    {
+      "applied": false,
+      "changed": false,
+      "exit_code": 0,
+      "passes": [
+        {
+          "pass_name": "wide_mem",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "rotate",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "cond_select",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "extract",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "endian_fusion",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "map_inline",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "const_prop",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "dce",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bounds_check_merge",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "skb_load_bytes_spec",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bulk_memory",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        }
+      ],
+      "prog_id": 3194
+    }
+  ],
+  "program_counts": {
+    "applied": 1,
+    "not_applied": 2,
+    "requested": 3
+  }
+}
+```
+
+### Process Output
+
+```json
+{
+  "returncode": 0,
+  "stderr_tail": "In file included from include/linux/ns/ns_common_types.h:6:\nIn file included from include/linux/ns/nstree_types.h:6:\nIn file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bcc-python-e22b1799/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\nIn file included from /virtual/main.c:4:\nIn file included from include/linux/blk-mq.h:5:\nIn file included from include/linux/blkdev.h:7:\nIn file included from include/linux/blk_types.h:7:\nIn file included from include/linux/bvec.h:6:\nIn file included from include/linux/highmem.h:5:\ninclude/linux/fs.h:1916:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 1916 |         struct __filename_head;\n      |         ^\n6 warnings generated.",
+  "stdout_tail": "9.935353    fio            18389   nvme0n1   R 36742768   4096      1.62\n9.936661    fio            18392   nvme0n1   R 37130184   4096      1.90\n9.937359    fio            18389   nvme0n1   R 36742792   4096      1.98\n9.938739    fio            18392   nvme0n1   R 37166960   4096      2.02\n9.940401    fio            18392   nvme0n1   R 37131712   4096      1.63\n9.942114    fio            18392   nvme0n1   R 37131728   4096      1.68\n9.943383    fio            18392   nvme0n1   R 37167248   4096      1.23\n9.945035    fio            18392   nvme0n1   R 37131744   4096      1.60\n9.946666    fio            18392   nvme0n1   R 37131752   4096      1.60\n9.948405    fio            18392   nvme0n1   R 37131824   4096      1.68\n9.950002    fio            18392   nvme0n1   R 37131856   4096      1.54\n9.951356    fio            18392   nvme0n1   R 37167256   4096      1.31\n9.953009    fio            18392   nvme0n1   R 37167264   4096      1.62\n9.954056    fio            18392   nvme0n1   R 37132040   4096      1.00\n9.955949    fio            18392   nvme0n1   R 37132048   4096      1.86\n9.957384    fio            18392   nvme0n1   R 37167304   4096      1.39\n9.959042    fio            18392   nvme0n1   R 37132064   4096      1.63\n9.960669    fio            18392   nvme0n1   R 37133272   4096      1.56\n9.962345    fio            18392   nvme0n1   R 37133296   4096      1.64\n9.964033    fio            18392   nvme0n1   R 37143024   4096      1.66\n9.965696    fio            18392   nvme0n1   R 37140144   4096      1.64\n9.967371    fio            18392   nvme0n1   R 37140176   4096      1.61\n9.969014    fio            18392   nvme0n1   R 37140184   4096      1.62\n9.970693    fio            18392   nvme0n1   R 37140200   4096      1.64\n9.972478    fio            18392   nvme0n1   R 37140216   4096      1.74\n9.973996    fio            18392   nvme0n1   R 37167328   4096      1.48\n9.975700    fio            18392   nvme0n1   R 37140288   4096      1.67\n9.977342    fio            18392   nvme0n1   R 37140296   4096      1.61\n9.978995    fio            18392   nvme0n1   R 37140304   4096      1.63\n9.980684    fio            18392   nvme0n1   R 37140384   4096      1.64\n9.982349    fio            18392   nvme0n1   R 37143072   4096      1.64\n9.984032    fio            18392   nvme0n1   R 37143216   4096      1.66\n9.985863    fio            18392   nvme0n1   R 37143232   4096      1.80\n9.987008    fio            18392   nvme0n1   R 37167384   4096      1.11\n9.989720    fio            18392   nvme0n1   R 37167392   4096      2.66\n9.991685    fio            18392   nvme0n1   R 37143320   4096      1.93\n9.993663    fio            18392   nvme0n1   R 37143344   4096      1.95\n9.995688    fio            18392   nvme0n1   R 37143488   4096      1.97\n9.997711    fio            18392   nvme0n1   R 37143496   4096      1.98\n10.000033   fio            18392   nvme0n1   R 37143512   4096      2.25"
+}
+```
+
+## runqlat
+
+### Baseline
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3210": {
+        "avg_ns_per_run": 408.78709034543846,
+        "bytes_jited": 666,
+        "bytes_xlated": 1168,
+        "id": 3210,
+        "name": "sched_switch",
+        "run_cnt_delta": 18064,
+        "run_time_ns_delta": 7384330,
+        "type": "raw_tracepoint"
+      },
+      "3211": {
+        "avg_ns_per_run": 762.8341065830721,
+        "bytes_jited": 153,
+        "bytes_xlated": 248,
+        "id": 3211,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 7975,
+        "run_time_ns_delta": 6083602,
+        "type": "raw_tracepoint"
+      },
+      "3212": {
+        "avg_ns_per_run": 545.5357710651829,
+        "bytes_jited": 153,
+        "bytes_xlated": 248,
+        "id": 3212,
+        "name": "raw_tracepoint__sched_wakeup_new",
+        "run_cnt_delta": 629,
+        "run_time_ns_delta": 343142,
+        "type": "raw_tracepoint"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 554.1152091158309
+  },
+  "phase": "baseline",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### Post-ReJIT
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3210": {
+        "avg_ns_per_run": 458.2434891188013,
+        "bytes_jited": 643,
+        "bytes_xlated": 1120,
+        "id": 3210,
+        "name": "sched_switch",
+        "run_cnt_delta": 11212,
+        "run_time_ns_delta": 5137826,
+        "type": "raw_tracepoint"
+      },
+      "3211": {
+        "avg_ns_per_run": 1013.8771064529387,
+        "bytes_jited": 153,
+        "bytes_xlated": 248,
+        "id": 3211,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 4866,
+        "run_time_ns_delta": 4933526,
+        "type": "raw_tracepoint"
+      },
+      "3212": {
+        "avg_ns_per_run": 527.3977272727273,
+        "bytes_jited": 153,
+        "bytes_xlated": 248,
+        "id": 3212,
+        "name": "raw_tracepoint__sched_wakeup_new",
+        "run_cnt_delta": 528,
+        "run_time_ns_delta": 278466,
+        "type": "raw_tracepoint"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 555.33626946052
+  },
+  "phase": "post_rejit",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### ReJIT Result
+
+```json
+{
+  "applied": true,
+  "changed": true,
+  "enabled_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "error": "",
+  "exit_code": 0,
+  "noop_programs": [
+    {
+      "applied": false,
+      "changed": false,
+      "exit_code": 0,
+      "passes": [
+        {
+          "pass_name": "wide_mem",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "rotate",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "cond_select",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "extract",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "endian_fusion",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "map_inline",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "const_prop",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "dce",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bounds_check_merge",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "skb_load_bytes_spec",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bulk_memory",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        }
+      ],
+      "prog_id": 3211
+    },
+    {
+      "applied": false,
+      "changed": false,
+      "exit_code": 0,
+      "passes": [
+        {
+          "pass_name": "wide_mem",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "rotate",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "cond_select",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "extract",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "endian_fusion",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "map_inline",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "const_prop",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "dce",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bounds_check_merge",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "skb_load_bytes_spec",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bulk_memory",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        }
+      ],
+      "prog_id": 3212
+    }
+  ],
+  "program_counts": {
+    "applied": 1,
+    "not_applied": 2,
+    "requested": 3
+  }
+}
+```
+
+### Process Output
+
+```json
+{
+  "returncode": 0,
+  "stderr_tail": "In file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bcc-python-alsrkx9f/bpfrejit_bcc_compat.h:43:\nIn file included from include/linux/ns/ns_common_types.h:6:\nIn file included from include/linux/ns/nstree_types.h:6:\nIn file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bcc-python-alsrkx9f/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\nIn file included from /virtual/main.c:6:\nIn file included from include/linux/pid_namespace.h:7:\nIn file included from include/linux/mm.h:1118:\nIn file included from include/linux/huge_mm.h:7:\ninclude/linux/fs.h:1916:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 1916 |         struct __filename_head;\n      |         ^\n6 warnings generated.",
+  "stdout_tail": "             8388608 -> 16777215             : 4        |                    |\n            16777216 -> 33554431             : 0        |                    |\n            33554432 -> 67108863             : 0        |                    |\n            67108864 -> 134217727            : 0        |                    |\n           134217728 -> 268435455            : 0        |                    |\n           268435456 -> 536870911            : 1        |                    |\n           536870912 -> 1073741823           : 2        |                    |\n          1073741824 -> 2147483647           : 5        |                    |\n          2147483648 -> 4294967295           : 2        |                    |\n          4294967296 -> 8589934591           : 0        |                    |\n          8589934592 -> 17179869183          : 0        |                    |\n         17179869184 -> 34359738367          : 0        |                    |\n         34359738368 -> 68719476735          : 0        |                    |\n         68719476736 -> 137438953471         : 2        |                    |\n        137438953472 -> 274877906943         : 4        |                    |\n        274877906944 -> 549755813887         : 1        |                    |\n        549755813888 -> 1099511627775        : 3        |                    |\n       1099511627776 -> 2199023255551        : 0        |                    |\n       2199023255552 -> 4398046511103        : 0        |                    |\n       4398046511104 -> 8796093022207        : 0        |                    |\n       8796093022208 -> 17592186044415       : 0        |                    |\n      17592186044416 -> 35184372088831       : 2        |                    |\n      35184372088832 -> 70368744177663       : 2        |                    |\n      70368744177664 -> 140737488355327      : 4        |                    |\n     140737488355328 -> 281474976710655      : 3        |                    |\n     281474976710656 -> 562949953421311      : 0        |                    |\n     562949953421312 -> 1125899906842623     : 0        |                    |\n    1125899906842624 -> 2251799813685247     : 0        |                    |\n    2251799813685248 -> 4503599627370495     : 0        |                    |\n    4503599627370496 -> 9007199254740991     : 5        |                    |\n    9007199254740992 -> 18014398509481983    : 5        |                    |\n   18014398509481984 -> 36028797018963967    : 4        |                    |\n   36028797018963968 -> 72057594037927935    : 3        |                    |\n   72057594037927936 -> 144115188075855871   : 0        |                    |\n  144115188075855872 -> 288230376151711743   : 0        |                    |\n  288230376151711744 -> 576460752303423487   : 0        |                    |\n  576460752303423488 -> 1152921504606846975  : 0        |                    |\n 1152921504606846976 -> 2305843009213693951  : 2        |                    |\n 2305843009213693952 -> 4611686018427387903  : 2        |                    |\n 4611686018427387904 -> 9223372036854775807  : 1        |                    |"
+}
+```
+
+## syscount
+
+### Baseline
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3227": {
+        "avg_ns_per_run": 114.98984113997409,
+        "bytes_jited": 76,
+        "bytes_xlated": 112,
+        "id": 3227,
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "run_cnt_delta": 557346,
+        "run_time_ns_delta": 64089128,
+        "type": "tracepoint"
+      },
+      "3228": {
+        "avg_ns_per_run": 107.93012252689977,
+        "bytes_jited": 240,
+        "bytes_xlated": 400,
+        "id": 3228,
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "run_cnt_delta": 557347,
+        "run_time_ns_delta": 60154530,
+        "type": "tracepoint"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 5002.181365781074
+  },
+  "phase": "baseline",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### Post-ReJIT
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3227": {
+        "avg_ns_per_run": 115.58373095882155,
+        "bytes_jited": 76,
+        "bytes_xlated": 112,
+        "id": 3227,
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "run_cnt_delta": 557476,
+        "run_time_ns_delta": 64435156,
+        "type": "tracepoint"
+      },
+      "3228": {
+        "avg_ns_per_run": 108.07260030458656,
+        "bytes_jited": 240,
+        "bytes_xlated": 400,
+        "id": 3228,
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "run_cnt_delta": 557477,
+        "run_time_ns_delta": 60247989,
+        "type": "tracepoint"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 5010.866773880981
+  },
+  "phase": "post_rejit",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### ReJIT Result
+
+```json
+{
+  "applied": false,
+  "changed": false,
+  "enabled_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "error": "",
+  "exit_code": 0,
+  "noop_programs": [
+    {
+      "applied": false,
+      "changed": false,
+      "exit_code": 0,
+      "passes": [
+        {
+          "pass_name": "wide_mem",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "rotate",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "cond_select",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "extract",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "endian_fusion",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "map_inline",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "const_prop",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "dce",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bounds_check_merge",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "skb_load_bytes_spec",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bulk_memory",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        }
+      ],
+      "prog_id": 3227
+    },
+    {
+      "applied": false,
+      "changed": false,
+      "exit_code": 0,
+      "passes": [
+        {
+          "pass_name": "wide_mem",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "rotate",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "cond_select",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "extract",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "endian_fusion",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "map_inline",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "const_prop",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "dce",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bounds_check_merge",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "skb_load_bytes_spec",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bulk_memory",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        }
+      ],
+      "prog_id": 3228
+    }
+  ],
+  "program_counts": {
+    "applied": 0,
+    "not_applied": 2,
+    "requested": 2
+  }
+}
+```
+
+### Process Output
+
+```json
+{
+  "returncode": 0,
+  "stderr_tail": "      |                        ^\n<scratch space>:5:1: note: expanded from here\n    5 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bcc-python-fsjcnm_m/bpfrejit_bcc_compat.h:43:\nIn file included from include/linux/ns/ns_common_types.h:6:\nIn file included from include/linux/ns/nstree_types.h:6:\nIn file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bcc-python-fsjcnm_m/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\n5 warnings generated.",
+  "stdout_tail": "openat                      140          651.219\nbpf                         495          537.195\nmmap                        150          486.836\nclock_nanosleep              20      2205510.186\n[13:24:25]\nSYSCALL                   COUNT        TIME (us)\nepoll_wait                    3      1999719.293\nfutex                        23      1903430.447\nread                       5323      1045889.374\nepoll_pwait                  34       982207.314\nwait4                       810       672571.359\npoll                        424       387472.188\nclone                       806       114711.942\nmmap                        609        72861.080\nprctl                     68838        61515.435\npselect6                      6      3595008.440\n[13:24:26]\nSYSCALL                   COUNT        TIME (us)\nclock_nanosleep              22      1907571.984\nfutex                        25      1903733.447\npoll                        457      1600986.106\nepoll_wait                 1944      1343026.177\nwait4                       257      1199628.610\nread                       6940      1057701.088\nepoll_pwait                  32       981480.910\nmmap                       1087       110513.742\nnanosleep                     6        60484.535\nepoll_wait                 1985      2565499.969\n[13:24:27]\nSYSCALL                   COUNT        TIME (us)\nclock_nanosleep              14      1750278.343\nfutex                        18      1549391.328\nwait4                       981      1327959.554\nread                       1492      1005699.363\npoll                         16       902249.775\nepoll_pwait                  26       799533.020\nclone                       972       140456.137\nnanosleep                     6        60466.483\narch_prctl               255113        53795.943\nDetaching..."
+}
+```
+
+## execsnoop
+
+### Baseline
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3237": {
+        "avg_ns_per_run": 861.3333333333334,
+        "bytes_jited": 2681,
+        "bytes_xlated": 4144,
+        "id": 3237,
+        "name": "syscall__execve",
+        "run_cnt_delta": 9,
+        "run_time_ns_delta": 7752,
+        "type": "kprobe"
+      },
+      "3238": {
+        "avg_ns_per_run": 360.1111111111111,
+        "bytes_jited": 496,
+        "bytes_xlated": 704,
+        "id": 3238,
+        "name": "do_ret_sys_execve",
+        "run_cnt_delta": 9,
+        "run_time_ns_delta": 3241,
+        "type": "kprobe"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 555.2805674045833
+  },
+  "phase": "baseline",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### Post-ReJIT
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3237": {
+        "avg_ns_per_run": 822.8888888888889,
+        "bytes_jited": 2681,
+        "bytes_xlated": 4144,
+        "id": 3237,
+        "name": "syscall__execve",
+        "run_cnt_delta": 9,
+        "run_time_ns_delta": 7406,
+        "type": "kprobe"
+      },
+      "3238": {
+        "avg_ns_per_run": 350.1111111111111,
+        "bytes_jited": 496,
+        "bytes_xlated": 704,
+        "id": 3238,
+        "name": "do_ret_sys_execve",
+        "run_cnt_delta": 9,
+        "run_time_ns_delta": 3151,
+        "type": "kprobe"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 555.0020593780648
+  },
+  "phase": "post_rejit",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### ReJIT Result
+
+```json
+{
+  "applied": false,
+  "changed": false,
+  "enabled_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "error": "",
+  "exit_code": 0,
+  "noop_programs": [
+    {
+      "applied": false,
+      "changed": false,
+      "exit_code": 0,
+      "passes": [
+        {
+          "pass_name": "wide_mem",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "rotate",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "cond_select",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "extract",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "endian_fusion",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "map_inline",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "const_prop",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "dce",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bounds_check_merge",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "skb_load_bytes_spec",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bulk_memory",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        }
+      ],
+      "prog_id": 3237
+    },
+    {
+      "applied": false,
+      "changed": false,
+      "exit_code": 0,
+      "passes": [
+        {
+          "pass_name": "wide_mem",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "rotate",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "cond_select",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "extract",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "endian_fusion",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "map_inline",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "const_prop",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "dce",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bounds_check_merge",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "skb_load_bytes_spec",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bulk_memory",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        }
+      ],
+      "prog_id": 3238
+    }
+  ],
+  "program_counts": {
+    "applied": 0,
+    "not_applied": 2,
+    "requested": 2
+  }
+}
+```
+
+### Process Output
+
+```json
+{
+  "returncode": 0,
+  "stderr_tail": "<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bcc-python-ivtep582/bpfrejit_bcc_compat.h:43:\nIn file included from include/linux/ns/ns_common_types.h:6:\nIn file included from include/linux/ns/nstree_types.h:6:\nIn file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bcc-python-ivtep582/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\nIn file included from /virtual/main.c:17:\ninclude/linux/fs.h:1916:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 1916 |         struct __filename_head;\n      |         ^\n6 warnings generated.",
+  "stdout_tail": "TIME     UID   PCOMM            PID     PPID    RET ARGS"
+}
+```
+
+## opensnoop
+
+### Baseline
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3247": {
+        "avg_ns_per_run": 1642.857142857143,
+        "bytes_jited": 521,
+        "bytes_xlated": 600,
+        "id": 3247,
+        "name": "__x64_sys_open",
+        "run_cnt_delta": 84,
+        "run_time_ns_delta": 138000,
+        "type": "tracing"
+      },
+      "3248": {
+        "avg_ns_per_run": 2185.885977914474,
+        "bytes_jited": 521,
+        "bytes_xlated": 600,
+        "id": 3248,
+        "name": "kretfunc__vmlinux____x64_sys_openat",
+        "run_cnt_delta": 26986,
+        "run_time_ns_delta": 58988319,
+        "type": "tracing"
+      },
+      "3249": {
+        "avg_ns_per_run": 1694.1,
+        "bytes_jited": 594,
+        "bytes_xlated": 640,
+        "id": 3249,
+        "name": "kretfunc__vmlinux____x64_sys_openat2",
+        "run_cnt_delta": 10,
+        "run_time_ns_delta": 16941,
+        "type": "tracing"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 386.4250238168027
+  },
+  "phase": "baseline",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### Post-ReJIT
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3247": {
+        "avg_ns_per_run": 1801.576923076923,
+        "bytes_jited": 521,
+        "bytes_xlated": 600,
+        "id": 3247,
+        "name": "__x64_sys_open",
+        "run_cnt_delta": 104,
+        "run_time_ns_delta": 187364,
+        "type": "tracing"
+      },
+      "3248": {
+        "avg_ns_per_run": 2131.724967258007,
+        "bytes_jited": 521,
+        "bytes_xlated": 600,
+        "id": 3248,
+        "name": "kretfunc__vmlinux____x64_sys_openat",
+        "run_cnt_delta": 25197,
+        "run_time_ns_delta": 53713074,
+        "type": "tracing"
+      },
+      "3249": {
+        "avg_ns_per_run": 1758.857142857143,
+        "bytes_jited": 594,
+        "bytes_xlated": 640,
+        "id": 3249,
+        "name": "kretfunc__vmlinux____x64_sys_openat2",
+        "run_cnt_delta": 14,
+        "run_time_ns_delta": 24624,
+        "type": "tracing"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 385.0866322024145
+  },
+  "phase": "post_rejit",
+  "reason": "prog 3247: bpfverify --verifier-states-out failed for prog 3247: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-624/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-624/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-624/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-624/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 3248: bpfverify --verifier-states-out failed for prog 3248: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-625/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-625/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-625/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-625/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 3249: bpfverify --verifier-states-out failed for prog 3249: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-626/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-626/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-626/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-626/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+  "status": "error"
+}
+```
+
+### ReJIT Result
+
+```json
+{
+  "applied": false,
+  "changed": false,
+  "enabled_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "error": "prog 3247: bpfverify --verifier-states-out failed for prog 3247: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-624/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-624/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-624/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-624/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 3248: bpfverify --verifier-states-out failed for prog 3248: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-625/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-625/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-625/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-625/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 3249: bpfverify --verifier-states-out failed for prog 3249: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-626/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-626/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-626/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-626/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+  "error_programs": [
+    {
+      "applied": false,
+      "changed": false,
+      "error": "bpfverify --verifier-states-out failed for prog 3247: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-624/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-624/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-624/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-624/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+      "exit_code": 1,
+      "prog_id": 3247
+    },
+    {
+      "applied": false,
+      "changed": false,
+      "error": "bpfverify --verifier-states-out failed for prog 3248: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-625/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-625/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-625/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-625/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+      "exit_code": 1,
+      "prog_id": 3248
+    },
+    {
+      "applied": false,
+      "changed": false,
+      "error": "bpfverify --verifier-states-out failed for prog 3249: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-626/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-626/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-626/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-626/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+      "exit_code": 1,
+      "prog_id": 3249
+    }
+  ],
+  "exit_code": 1,
+  "program_counts": {
+    "applied": 0,
+    "not_applied": 3,
+    "requested": 3
+  }
+}
+```
+
+### Process Output
+
+```json
+{
+  "returncode": 0,
+  "stderr_tail": "Possibly lost 3 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 3 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 3 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 10 samples",
+  "stdout_tail": "24720  stress-ng           4   0 /sys/devices/system/clocksource/clocksource0/current_clocksource\n24720  stress-ng           3   0 /proc/sys/kernel/sched_autogroup_enabled\n24720  stress-ng           3   0 /sys/devices/system/cpu\n24720  stress-ng          -1   2 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor\n24720  stress-ng          -1   2 /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor\n24721  stress-ng-utime     3   0 /proc/self/coredump_filter\n24721  stress-ng-utime     3   0 /proc/self/oom_score_adj\n24721  stress-ng-utime     3   0 /var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/tmp-stress-ng-utime-24721-0\n24721  stress-ng-utime     4   0 /var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/tmp-stress-ng-utime-24721-0/stress-ng-utime-24721-0-1275164767\n24720  stress-ng           3   0 /sys/devices/system/clocksource\n24720  stress-ng           4   0 /sys/devices/system/clocksource/clocksource0/current_clocksource\n24722  bpftool             3   0 /etc/ld.so.cache\n24722  bpftool             3   0 /lib/x86_64-linux-gnu/libelf.so.1\n24722  bpftool             3   0 /lib/x86_64-linux-gnu/libcrypto.so.3\n24722  bpftool             3   0 /lib/x86_64-linux-gnu/libz.so.1\n24722  bpftool             3   0 /lib/x86_64-linux-gnu/libcap.so.2\n24722  bpftool             3   0 /lib/x86_64-linux-gnu/libc.so.6\n24722  bpftool             3   0 /lib/x86_64-linux-gnu/libzstd.so.1\n24722  bpftool             4   0 /etc/localtime\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3\n24722  bpftool             4   0 /proc/self/fdinfo/3"
+}
+```
+
+## capable
+
+### Baseline
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3258": {
+        "avg_ns_per_run": 475.697967636707,
+        "bytes_jited": 207,
+        "bytes_xlated": 344,
+        "id": 3258,
+        "name": "cap_capable",
+        "run_cnt_delta": 93192,
+        "run_time_ns_delta": 44331245,
+        "type": "kprobe"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 4653.798020867771
+  },
+  "phase": "baseline",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### Post-ReJIT
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3258": {
+        "avg_ns_per_run": 467.69159550272497,
+        "bytes_jited": 207,
+        "bytes_xlated": 344,
+        "id": 3258,
+        "name": "cap_capable",
+        "run_cnt_delta": 93212,
+        "run_time_ns_delta": 43594469,
+        "type": "kprobe"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 4363.967352049179
+  },
+  "phase": "post_rejit",
+  "reason": "prog 3258: bpfverify final verification failed for prog 3258: subprocess \"bpfverify\" \"--prog-type\" \"kprobe\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-627/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-627/opt.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-627/verified.bin\" \"--fd-array\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-627/fd_array.json\" failed: BPF_PROG_LOAD dry-run failed: Invalid argument (os error 22)",
+  "status": "error"
+}
+```
+
+### ReJIT Result
+
+```json
+{
+  "applied": false,
+  "changed": false,
+  "enabled_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "error": "prog 3258: bpfverify final verification failed for prog 3258: subprocess \"bpfverify\" \"--prog-type\" \"kprobe\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-627/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-627/opt.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-627/verified.bin\" \"--fd-array\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-627/fd_array.json\" failed: BPF_PROG_LOAD dry-run failed: Invalid argument (os error 22)",
+  "error_programs": [
+    {
+      "applied": false,
+      "changed": false,
+      "error": "bpfverify final verification failed for prog 3258: subprocess \"bpfverify\" \"--prog-type\" \"kprobe\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-627/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-627/opt.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-627/verified.bin\" \"--fd-array\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-627/fd_array.json\" failed: BPF_PROG_LOAD dry-run failed: Invalid argument (os error 22)",
+      "exit_code": 1,
+      "prog_id": 3258
+    }
+  ],
+  "exit_code": 1,
+  "program_counts": {
+    "applied": 0,
+    "not_applied": 1,
+    "requested": 1
+  }
+}
+```
+
+### Process Output
+
+```json
+{
+  "returncode": 0,
+  "stderr_tail": "Possibly lost 3 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 29 samples\nPossibly lost 4 samples\nPossibly lost 2 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 2 samples\nPossibly lost 20 samples\nPossibly lost 3 samples\nPossibly lost 3 samples\nPossibly lost 1 samples\nPossibly lost 2 samples\nPossibly lost 19 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 3 samples\nPossibly lost 2 samples\nPossibly lost 1 samples\nPossibly lost 3 samples\nPossibly lost 1 samples\nPossibly lost 2 samples\nPossibly lost 2 samples\nPossibly lost 1 samples\nPossibly lost 2 samples\nPossibly lost 1 samples\nPossibly lost 1 samples\nPossibly lost 3 samples\nPossibly lost 1 samples\nPossibly lost 2 samples\nPossibly lost 1 samples\nPossibly lost 2 samples\nPossibly lost 1 samples\nPossibly lost 3 samples\nPossibly lost 1 samples\nPossibly lost 3 samples\nPossibly lost 1 samples",
+  "stdout_tail": "13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          39   CAP_BPF              1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          39   CAP_BPF              1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          39   CAP_BPF              1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          39   CAP_BPF              1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          39   CAP_BPF              1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          39   CAP_BPF              1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          39   CAP_BPF              1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          39   CAP_BPF              1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          39   CAP_BPF              1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          39   CAP_BPF              1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          39   CAP_BPF              1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          39   CAP_BPF              1\n13:26:11  0      26786  bpftool          39   CAP_BPF              1\n13:26:11  0      26786  bpftool          39   CAP_BPF              1\n13:26:11  0      26786  bpftool          39   CAP_BPF              1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1\n13:26:11  0      26786  bpftool          21   CAP_SYS_ADMIN        1"
+}
+```
+
+## vfsstat
+
+### Baseline
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3266": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 94,
+        "bytes_xlated": 144,
+        "id": 3266,
+        "name": "vfs_create",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "3267": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 94,
+        "bytes_xlated": 144,
+        "id": 3267,
+        "name": "kfunc__vmlinux__vfs_fsync_range",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "3268": {
+        "avg_ns_per_run": 51.45212977707006,
+        "bytes_jited": 94,
+        "bytes_xlated": 144,
+        "id": 3268,
+        "name": "vfs_open",
+        "run_cnt_delta": 30144,
+        "run_time_ns_delta": 1550973,
+        "type": "tracing"
+      },
+      "3269": {
+        "avg_ns_per_run": 52.291622481442204,
+        "bytes_jited": 91,
+        "bytes_xlated": 136,
+        "id": 3269,
+        "name": "vfs_read",
+        "run_cnt_delta": 6601,
+        "run_time_ns_delta": 345177,
+        "type": "tracing"
+      },
+      "3270": {
+        "avg_ns_per_run": 59.34724506578947,
+        "bytes_jited": 94,
+        "bytes_xlated": 144,
+        "id": 3270,
+        "name": "vfs_write",
+        "run_cnt_delta": 4864,
+        "run_time_ns_delta": 288665,
+        "type": "tracing"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 376.83804598695633
+  },
+  "phase": "baseline",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### Post-ReJIT
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3266": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 94,
+        "bytes_xlated": 144,
+        "id": 3266,
+        "name": "vfs_create",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "3267": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 94,
+        "bytes_xlated": 144,
+        "id": 3267,
+        "name": "kfunc__vmlinux__vfs_fsync_range",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "3268": {
+        "avg_ns_per_run": 53.70193786527222,
+        "bytes_jited": 94,
+        "bytes_xlated": 144,
+        "id": 3268,
+        "name": "vfs_open",
+        "run_cnt_delta": 29259,
+        "run_time_ns_delta": 1571265,
+        "type": "tracing"
+      },
+      "3269": {
+        "avg_ns_per_run": 52.419628005443826,
+        "bytes_jited": 91,
+        "bytes_xlated": 136,
+        "id": 3269,
+        "name": "vfs_read",
+        "run_cnt_delta": 6613,
+        "run_time_ns_delta": 346651,
+        "type": "tracing"
+      },
+      "3270": {
+        "avg_ns_per_run": 58.709710531718336,
+        "bytes_jited": 94,
+        "bytes_xlated": 144,
+        "id": 3270,
+        "name": "vfs_write",
+        "run_cnt_delta": 4871,
+        "run_time_ns_delta": 285975,
+        "type": "tracing"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 389.5469606952571
+  },
+  "phase": "post_rejit",
+  "reason": "prog 3266: bpfverify --verifier-states-out failed for prog 3266: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-628/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-628/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-628/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-628/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 3267: bpfverify --verifier-states-out failed for prog 3267: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-629/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-629/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-629/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-629/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 3268: bpfverify --verifier-states-out failed for prog 3268: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-630/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-630/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-630/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-630/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 3269: bpfverify --verifier-states-out failed for prog 3269: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-631/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-631/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-631/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-631/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 3270: bpfverify --verifier-states-out failed for prog 3270: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-632/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-632/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-632/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-632/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+  "status": "error"
+}
+```
+
+### ReJIT Result
+
+```json
+{
+  "applied": false,
+  "changed": false,
+  "enabled_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "error": "prog 3266: bpfverify --verifier-states-out failed for prog 3266: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-628/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-628/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-628/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-628/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 3267: bpfverify --verifier-states-out failed for prog 3267: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-629/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-629/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-629/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-629/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 3268: bpfverify --verifier-states-out failed for prog 3268: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-630/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-630/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-630/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-630/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 3269: bpfverify --verifier-states-out failed for prog 3269: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-631/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-631/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-631/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-631/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 3270: bpfverify --verifier-states-out failed for prog 3270: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-632/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-632/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-632/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-632/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+  "error_programs": [
+    {
+      "applied": false,
+      "changed": false,
+      "error": "bpfverify --verifier-states-out failed for prog 3266: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-628/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-628/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-628/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-628/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+      "exit_code": 1,
+      "prog_id": 3266
+    },
+    {
+      "applied": false,
+      "changed": false,
+      "error": "bpfverify --verifier-states-out failed for prog 3267: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-629/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-629/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-629/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-629/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+      "exit_code": 1,
+      "prog_id": 3267
+    },
+    {
+      "applied": false,
+      "changed": false,
+      "error": "bpfverify --verifier-states-out failed for prog 3268: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-630/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-630/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-630/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-630/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+      "exit_code": 1,
+      "prog_id": 3268
+    },
+    {
+      "applied": false,
+      "changed": false,
+      "error": "bpfverify --verifier-states-out failed for prog 3269: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-631/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-631/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-631/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-631/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+      "exit_code": 1,
+      "prog_id": 3269
+    },
+    {
+      "applied": false,
+      "changed": false,
+      "error": "bpfverify --verifier-states-out failed for prog 3270: subprocess \"bpfverify\" \"--prog-type\" \"tracing\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-632/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-632/prog.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-632/verified_original.bin\" \"--verifier-states-out\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-632/verifier_states.json\" failed: func#0 @0\nTracing programs must provide btf_id\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+      "exit_code": 1,
+      "prog_id": 3270
+    }
+  ],
+  "exit_code": 1,
+  "program_counts": {
+    "applied": 0,
+    "not_applied": 5,
+    "requested": 5
+  }
+}
+```
+
+### Process Output
+
+```json
+{
+  "returncode": 0,
+  "stderr_tail": "      |                        ^\n<scratch space>:5:1: note: expanded from here\n    5 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bcc-python-dafubpoo/bpfrejit_bcc_compat.h:43:\nIn file included from include/linux/ns/ns_common_types.h:6:\nIn file included from include/linux/ns/nstree_types.h:6:\nIn file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bcc-python-dafubpoo/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\n5 warnings generated.",
+  "stdout_tail": "13:26:20:         4        4        0        0        0\n13:26:21:         4        4        0        0        0\n13:26:22:         3        6        0        0        0\n13:26:23:         3        3        0        0        0\n13:26:24:         3        3        0        0        0\n13:26:25:         2        2        0        0        0\n13:26:26:         2        2        0        0        0\n13:26:27:         3        3        0        0        0\n13:26:28:        12        2        0        9        0\n13:26:29:       856      194        0     2039        0\n13:26:30:        21       16        0       26        0\n13:26:31:        21       15        0       24        0\n13:26:32:        20       18        0       26        0\n13:26:33:        22       18        0       27        0\n13:26:34:        21       16        0       25        0\n13:26:35:        19       17        0       27        0\n13:26:36:        20       15        0       24        0\n13:26:37:      1427     1089        0     1921        0\n13:26:38:       494       34        0     8780        0\n13:26:39:         5        5        0        0        0\n13:26:40:       214       16        0      259        0\n13:26:41:      1277       87        0    11209        0\n13:26:42:      2644     4175        0     5296        0\n13:26:43:         3      155        0        0        0\n13:26:44:         3        3        0        0        0\n13:26:45:         3        3        0        0        0\n13:26:46:         4        4        0        0        0\n13:26:47:         3        3        0        0        0\n13:26:48:        13        3        0        9        0\n13:26:49:         3        3        0        0        0\n13:26:50:         3        5        0        0        0\n13:26:51:         3        5        0        0        0\n13:26:52:       854      190        0     2033        0\n13:26:53:        20       18        0       27        0\n13:26:54:        22       16        0       27        0\n13:26:55:        25       26        0       32        0\n13:26:56:        21       15        0       28        0\n13:26:57:        22       21        0       29        0\n13:26:58:        38       23        0       45        0\n13:26:59:       999       69        0     1546        0"
+}
+```
+
+## tcpconnect
+
+### Baseline
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3283": {
+        "avg_ns_per_run": 1940.0,
+        "bytes_jited": 79,
+        "bytes_xlated": 120,
+        "id": 3283,
+        "name": "trace_connect_entry",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 1940,
+        "type": "kprobe"
+      },
+      "3284": {
+        "avg_ns_per_run": 11456.0,
+        "bytes_jited": 484,
+        "bytes_xlated": 720,
+        "id": 3284,
+        "name": "trace_connect_v4_return",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 11456,
+        "type": "kprobe"
+      },
+      "3285": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 481,
+        "bytes_xlated": 712,
+        "id": 3285,
+        "name": "trace_connect_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 4991.236134804426
+  },
+  "phase": "baseline",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### Post-ReJIT
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3283": {
+        "avg_ns_per_run": 1527.0,
+        "bytes_jited": 79,
+        "bytes_xlated": 120,
+        "id": 3283,
+        "name": "trace_connect_entry",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 1527,
+        "type": "kprobe"
+      },
+      "3284": {
+        "avg_ns_per_run": 11736.0,
+        "bytes_jited": 484,
+        "bytes_xlated": 720,
+        "id": 3284,
+        "name": "trace_connect_v4_return",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 11736,
+        "type": "kprobe"
+      },
+      "3285": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 481,
+        "bytes_xlated": 712,
+        "id": 3285,
+        "name": "trace_connect_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 3797.5479106109738
+  },
+  "phase": "post_rejit",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### ReJIT Result
+
+```json
+{
+  "applied": false,
+  "changed": false,
+  "enabled_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "error": "",
+  "exit_code": 0,
+  "noop_programs": [
+    {
+      "applied": false,
+      "changed": false,
+      "exit_code": 0,
+      "passes": [
+        {
+          "pass_name": "wide_mem",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "rotate",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "cond_select",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "extract",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "endian_fusion",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "map_inline",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "const_prop",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "dce",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bounds_check_merge",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "skb_load_bytes_spec",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bulk_memory",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        }
+      ],
+      "prog_id": 3283
+    },
+    {
+      "applied": false,
+      "changed": false,
+      "exit_code": 0,
+      "passes": [
+        {
+          "pass_name": "wide_mem",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "rotate",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "cond_select",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "extract",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "endian_fusion",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "map_inline",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "const_prop",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "dce",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bounds_check_merge",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "skb_load_bytes_spec",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bulk_memory",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        }
+      ],
+      "prog_id": 3284
+    },
+    {
+      "applied": false,
+      "changed": false,
+      "exit_code": 0,
+      "passes": [
+        {
+          "pass_name": "wide_mem",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "rotate",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "cond_select",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "extract",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "endian_fusion",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "map_inline",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "const_prop",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "dce",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bounds_check_merge",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "skb_load_bytes_spec",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bulk_memory",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        }
+      ],
+      "prog_id": 3285
+    }
+  ],
+  "program_counts": {
+    "applied": 0,
+    "not_applied": 3,
+    "requested": 3
+  }
+}
+```
+
+### Process Output
+
+```json
+{
+  "returncode": 0,
+  "stderr_tail": "In file included from include/linux/ns/nstree_types.h:6:\nIn file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bcc-python-mq0b1wfp/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\nIn file included from /virtual/main.c:16:\nIn file included from include/net/sock.h:14:\nIn file included from include/linux/netdevice.h:20:\nIn file included from include/net/net_namespace.h:42:\nIn file included from include/linux/skbuff.h:11:\nIn file included from include/linux/bvec.h:6:\nIn file included from include/linux/highmem.h:5:\ninclude/linux/fs.h:1916:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 1916 |         struct __filename_head;\n      |         ^\n6 warnings generated.",
+  "stdout_tail": "28683   stress-ng-so 4  127.0.0.1        127.0.0.1        23007\nTracing connect ... Hit Ctrl-C to end\nPID     COMM         IP SADDR            DADDR            DPORT\n28722   stress-ng-so 4  127.0.0.1        127.0.0.1        23007"
+}
+```
+
+## bindsnoop
+
+### Baseline
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3297": {
+        "avg_ns_per_run": 2662.0,
+        "bytes_jited": 79,
+        "bytes_xlated": 120,
+        "id": 3297,
+        "name": "bindsnoop_entry",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 5324,
+        "type": "kprobe"
+      },
+      "3298": {
+        "avg_ns_per_run": 11430.5,
+        "bytes_jited": 725,
+        "bytes_xlated": 1160,
+        "id": 3298,
+        "name": "bindsnoop_v4_return",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 22861,
+        "type": "kprobe"
+      },
+      "3299": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 746,
+        "bytes_xlated": 1184,
+        "id": 3299,
+        "name": "bindsnoop_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 5012.1796946477925
+  },
+  "phase": "baseline",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### Post-ReJIT
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3297": {
+        "avg_ns_per_run": 2381.5,
+        "bytes_jited": 79,
+        "bytes_xlated": 120,
+        "id": 3297,
+        "name": "bindsnoop_entry",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 4763,
+        "type": "kprobe"
+      },
+      "3298": {
+        "avg_ns_per_run": 12425.5,
+        "bytes_jited": 725,
+        "bytes_xlated": 1160,
+        "id": 3298,
+        "name": "bindsnoop_v4_return",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 24851,
+        "type": "kprobe"
+      },
+      "3299": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 746,
+        "bytes_xlated": 1184,
+        "id": 3299,
+        "name": "bindsnoop_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "duration_s": 10,
+    "metric": "ops/s",
+    "throughput": 3786.991181665134
+  },
+  "phase": "post_rejit",
+  "reason": "prog 3298: bpfverify final verification failed for prog 3298: subprocess \"bpfverify\" \"--prog-type\" \"kprobe\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-637/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-637/opt.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-637/verified.bin\" \"--fd-array\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-637/fd_array.json\" failed: BPF_PROG_LOAD dry-run failed: Invalid argument (os error 22); prog 3299: bpfverify final verification failed for prog 3299: subprocess \"bpfverify\" \"--prog-type\" \"kprobe\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-638/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-638/opt.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-638/verified.bin\" \"--fd-array\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-638/fd_array.json\" failed: BPF_PROG_LOAD dry-run failed: Invalid argument (os error 22)",
+  "status": "error"
+}
+```
+
+### ReJIT Result
+
+```json
+{
+  "applied": false,
+  "changed": false,
+  "enabled_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "error": "prog 3298: bpfverify final verification failed for prog 3298: subprocess \"bpfverify\" \"--prog-type\" \"kprobe\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-637/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-637/opt.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-637/verified.bin\" \"--fd-array\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-637/fd_array.json\" failed: BPF_PROG_LOAD dry-run failed: Invalid argument (os error 22); prog 3299: bpfverify final verification failed for prog 3299: subprocess \"bpfverify\" \"--prog-type\" \"kprobe\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-638/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-638/opt.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-638/verified.bin\" \"--fd-array\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-638/fd_array.json\" failed: BPF_PROG_LOAD dry-run failed: Invalid argument (os error 22)",
+  "error_programs": [
+    {
+      "applied": false,
+      "changed": false,
+      "error": "bpfverify final verification failed for prog 3298: subprocess \"bpfverify\" \"--prog-type\" \"kprobe\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-637/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-637/opt.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-637/verified.bin\" \"--fd-array\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-637/fd_array.json\" failed: BPF_PROG_LOAD dry-run failed: Invalid argument (os error 22)",
+      "exit_code": 1,
+      "prog_id": 3298
+    },
+    {
+      "applied": false,
+      "changed": false,
+      "error": "bpfverify final verification failed for prog 3299: subprocess \"bpfverify\" \"--prog-type\" \"kprobe\" \"--map-fds\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-638/map_fds.json\" \"--input\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-638/opt.bin\" \"--output\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-638/verified.bin\" \"--fd-array\" \"/var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bpfrejit-daemon-optimize-2732-638/fd_array.json\" failed: BPF_PROG_LOAD dry-run failed: Invalid argument (os error 22)",
+      "exit_code": 1,
+      "prog_id": 3299
+    }
+  ],
+  "exit_code": 1,
+  "noop_programs": [
+    {
+      "applied": false,
+      "changed": false,
+      "exit_code": 0,
+      "passes": [
+        {
+          "pass_name": "wide_mem",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "rotate",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "cond_select",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "extract",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "endian_fusion",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "map_inline",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "const_prop",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "dce",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bounds_check_merge",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "skb_load_bytes_spec",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bulk_memory",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        }
+      ],
+      "prog_id": 3297
+    }
+  ],
+  "program_counts": {
+    "applied": 0,
+    "not_applied": 3,
+    "requested": 3
+  }
+}
+```
+
+### Process Output
+
+```json
+{
+  "returncode": 0,
+  "stderr_tail": "In file included from include/linux/ns/nstree_types.h:6:\nIn file included from include/linux/rbtree.h:11:\nIn file included from include/linux/rcupdate.h:11:\nIn file included from include/linux/sched.h:10:\narch/x86/include/asm/processor.h:469:10: warning: multiple identical address spaces specified for type [-Wduplicate-decl-specifier]\narch/x86/include/asm/percpu.h:529:36: note: expanded from macro 'this_cpu_read_const'\n  529 | #define this_cpu_read_const(pcp)                        __raw_cpu_read_const(pcp)\n      |                                                         ^\narch/x86/include/asm/percpu.h:138:35: note: expanded from macro '__raw_cpu_read_const'\n  138 | #define __raw_cpu_read_const(pcp)       __raw_cpu_read(, , pcp)\n      |                                         ^\narch/x86/include/asm/percpu.h:130:9: note: expanded from macro '__raw_cpu_read'\n  130 |         *(qual __my_cpu_type(pcp) * __force)__my_cpu_ptr(&(pcp));       \\\n      |                ^\nnote: (skipping 3 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\ninclude/linux/args.h:13:24: note: expanded from macro '__CONCAT'\n   13 | #define __CONCAT(a, b) a ## b\n      |                        ^\n<scratch space>:4:1: note: expanded from here\n    4 | __seg_gs\n      | ^\n<built-in>:358:33: note: expanded from macro '__seg_gs'\n  358 | #define __seg_gs __attribute__((address_space(256)))\n      |                                 ^\nIn file included from <built-in>:5:\nIn file included from /var/tmp/bpfrejit-runtime/run.aws-x86.e2e.2cf43c71/bcc-python-tr_5_3dq/bpfrejit_bcc_compat.h:43:\ninclude/linux/ns/ns_common_types.h:52:3: warning: declaration does not declare anything [-Wmissing-declarations]\n   52 |                 struct ns_tree;\n      |                 ^\nIn file included from /virtual/main.c:18:\nIn file included from include/net/sock.h:14:\nIn file included from include/linux/netdevice.h:20:\nIn file included from include/net/net_namespace.h:42:\nIn file included from include/linux/skbuff.h:11:\nIn file included from include/linux/bvec.h:6:\nIn file included from include/linux/highmem.h:5:\ninclude/linux/fs.h:1916:2: warning: declaration does not declare anything [-Wmissing-declarations]\n 1916 |         struct __filename_head;\n      |         ^\n6 warnings generated.",
+  "stdout_tail": "   28775 stress-ng-sc IP   0.0.0.0         22907 ..NR.  0\nTracing binds ... Hit Ctrl-C to end\n     PID COMM         PROT ADDR            PORT   OPTS IF\n   28778 stress-ng-so IP   0.0.0.0         23007 ..NR.  0\n   28816 stress-ng-sc IP   0.0.0.0         22907 ..NR.  0\n   28819 stress-ng-so IP   0.0.0.0         23007 ..NR.  0"
+}
+```
+

@@ -1,0 +1,775 @@
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+  "duration_s": 5,
+  "generated_at": "2026-04-26T00:43:51.303852+00:00",
+  "host": {
+    "git_sha": null,
+    "git_sha_error": "[Errno 2] No such file or directory: 'git'",
+    "hostname": "virtme-ng",
+    "kernel": "7.0.0-rc2",
+    "platform": "Linux-7.0.0-rc2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "programs": [
+    {
+      "btf_id": 3589,
+      "bytes_jited": 2017,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 3384,
+      "gpl_compatible": true,
+      "id": 1348,
+      "jited": true,
+      "loaded_at": 1777164080,
+      "map_ids": [
+        3775,
+        3777,
+        3776,
+        3778,
+        3779
+      ],
+      "name": "tcp_set_state",
+      "orphaned": false,
+      "tag": "65086e0a4a831b2f",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 3592,
+      "bytes_jited": 222,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 408,
+      "gpl_compatible": true,
+      "id": 1355,
+      "jited": true,
+      "loaded_at": 1777164108,
+      "map_ids": [
+        3783,
+        3782,
+        3781
+      ],
+      "name": "block_io_start",
+      "orphaned": false,
+      "tag": "dde6656d9cb8b407",
+      "type": "tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 3593,
+      "bytes_jited": 931,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1576,
+      "gpl_compatible": true,
+      "id": 1356,
+      "jited": true,
+      "loaded_at": 1777164108,
+      "map_ids": [
+        3783,
+        3784,
+        3781,
+        3782,
+        3785,
+        3786
+      ],
+      "name": "block_io_done",
+      "orphaned": false,
+      "tag": "3de1861ce6f558bf",
+      "type": "tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 3598,
+      "bytes_jited": 86,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 136,
+      "gpl_compatible": true,
+      "id": 1363,
+      "jited": true,
+      "loaded_at": 1777164134,
+      "map_ids": [
+        3788
+      ],
+      "name": "sched_wakeup",
+      "orphaned": false,
+      "run_cnt": 225,
+      "run_time_ns": 476360,
+      "tag": "c10fc60476d92e5a",
+      "type": "tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 3599,
+      "bytes_jited": 86,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 136,
+      "gpl_compatible": true,
+      "id": 1364,
+      "jited": true,
+      "loaded_at": 1777164134,
+      "map_ids": [
+        3788
+      ],
+      "name": "tracepoint_sched_sched_wakeup_new",
+      "orphaned": false,
+      "run_cnt": 11,
+      "run_time_ns": 14081,
+      "tag": "c10fc60476d92e5a",
+      "type": "tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 3600,
+      "bytes_jited": 515,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 896,
+      "gpl_compatible": true,
+      "id": 1365,
+      "jited": true,
+      "loaded_at": 1777164134,
+      "map_ids": [
+        3788,
+        3789
+      ],
+      "name": "sched_switch",
+      "orphaned": false,
+      "run_cnt": 467,
+      "run_time_ns": 780386,
+      "tag": "a804776d919d1dd2",
+      "type": "tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 3603,
+      "bytes_jited": 968,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1640,
+      "gpl_compatible": true,
+      "id": 1372,
+      "jited": true,
+      "loaded_at": 1777164160,
+      "map_ids": [
+        3793,
+        3794,
+        3795
+      ],
+      "name": "kprobe_tcp_retransmit_skb",
+      "orphaned": false,
+      "tag": "6c7dcf4992a62ddf",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 3607,
+      "bytes_jited": 769,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1360,
+      "gpl_compatible": true,
+      "id": 1379,
+      "jited": true,
+      "loaded_at": 1777164191,
+      "map_ids": [
+        3798,
+        3799,
+        3797
+      ],
+      "name": "cap_capable",
+      "orphaned": false,
+      "run_cnt": 282,
+      "run_time_ns": 927441,
+      "tag": "f54abfb1faedf876",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 3610,
+      "bytes_jited": 362,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 680,
+      "gpl_compatible": true,
+      "id": 1386,
+      "jited": true,
+      "loaded_at": 1777164217,
+      "map_ids": [
+        3802,
+        3803
+      ],
+      "name": "1",
+      "orphaned": false,
+      "run_cnt": 2,
+      "run_time_ns": 6743,
+      "tag": "34424ab8a8d77411",
+      "type": "perf_event",
+      "uid": 0
+    },
+    {
+      "btf_id": 3611,
+      "bytes_jited": 140,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 224,
+      "gpl_compatible": true,
+      "id": 1387,
+      "jited": true,
+      "loaded_at": 1777164217,
+      "map_ids": [
+        3801
+      ],
+      "name": "vfs_create",
+      "orphaned": false,
+      "run_cnt": 8682,
+      "run_time_ns": 355153,
+      "tag": "44ac6cb7891d3e3f",
+      "type": "kprobe",
+      "uid": 0
+    }
+  ],
+  "records": [
+    {
+      "baseline": {
+        "measurement": {
+          "bpf": {
+            "1348": {
+              "avg_ns_per_run": 533.4184030272548,
+              "bytes_jited": 2017,
+              "bytes_xlated": 3384,
+              "id": 1348,
+              "name": "tcp_set_state",
+              "run_cnt_delta": 20877,
+              "run_time_ns_delta": 11136176,
+              "type": "kprobe"
+            }
+          },
+          "duration_s": 5,
+          "metric": "ops/s",
+          "throughput": 417.5593301388071
+        },
+        "phase": "baseline",
+        "reason": "",
+        "status": "ok"
+      },
+      "name": "tcplife",
+      "post_rejit": {
+        "measurement": {
+          "bpf": {
+            "1348": {
+              "avg_ns_per_run": 508.4060571805379,
+              "bytes_jited": 2017,
+              "bytes_xlated": 3384,
+              "id": 1348,
+              "name": "tcp_set_state",
+              "run_cnt_delta": 21231,
+              "run_time_ns_delta": 10793969,
+              "type": "kprobe"
+            }
+          },
+          "duration_s": 5,
+          "metric": "ops/s",
+          "throughput": 424.58844465563544
+        },
+        "phase": "post_rejit",
+        "reason": "",
+        "status": "ok"
+      },
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "tar: ./include/xen/interface/io/netif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/pciif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/protocols.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/pvcalls.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/ring.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/sndif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/tpmif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/usbif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/vscsiif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/xenbus.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/xs_wire.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/memory.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/nmi.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/physdev.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/platform.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/sched.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/vcpu.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/version.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xen-mca.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xenpmu.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/mem-reservation.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/page.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/pci.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/platform_pci.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/swiotlb-xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen-front-pgdir-shbuf.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen-ops.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xenbus.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xenbus_dev.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings/input/linux-event-codes.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings/input: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: .: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: Exiting with failure status due to previous errors",
+        "stdout_tail": "32484 curl       0.0.0.0         43799 0.0.0.0         59654      0     0 0\n32484 curl       0.0.0.0         59654 0.0.0.0         43799      0     0 0\n32486 curl       127.0.0.1       40829 127.0.0.1       41838      0     0 0\n32486 curl       127.0.0.1       41838 127.0.0.1       40829      0     0 0\n32488 curl       0.0.0.0         43799 0.0.0.0         59670      0     0 0\n32488 curl       0.0.0.0         59670 0.0.0.0         43799      0     0 0\n32490 curl       127.0.0.1       40829 127.0.0.1       41844      0     0 0\n32490 curl       127.0.0.1       41844 127.0.0.1       40829      0     0 0\n32492 curl       0.0.0.0         43799 0.0.0.0         59682      0     0 0\n32492 curl       0.0.0.0         59682 0.0.0.0         43799      0     0 0\n32494 curl       127.0.0.1       40829 127.0.0.1       41860      0     0 0\n32494 curl       127.0.0.1       41860 127.0.0.1       40829      0     0 0\n32496 curl       0.0.0.0         43799 0.0.0.0         59690      0     0 0\n32496 curl       0.0.0.0         59690 0.0.0.0         43799      0     0 0\n32498 curl       127.0.0.1       40829 127.0.0.1       41866      0     0 0\n32498 curl       127.0.0.1       41866 127.0.0.1       40829      0     0 0\n32500 curl       0.0.0.0         43799 0.0.0.0         59692      0     0 0\n32500 curl       0.0.0.0         59692 0.0.0.0         43799      0     0 0\n32502 curl       127.0.0.1       40829 127.0.0.1       41882      0     0 0\n32502 curl       127.0.0.1       41882 127.0.0.1       40829      0     0 0\n32504 curl       0.0.0.0         43799 0.0.0.0         59708      0     0 0\n32504 curl       0.0.0.0         59708 0.0.0.0         43799      0     0 0\n32506 curl       127.0.0.1       40829 127.0.0.1       41896      0     0 0\n32506 curl       127.0.0.1       41896 127.0.0.1       40829      0     0 0\n32508 curl       0.0.0.0         43799 0.0.0.0         59724      0     0 0\n32508 curl       0.0.0.0         59724 0.0.0.0         43799      0     0 0\n32510 curl       127.0.0.1       40829 127.0.0.1       41906      0     0 0\n32510 curl       127.0.0.1       41906 127.0.0.1       40829      0     0 0\n32512 curl       0.0.0.0         43799 0.0.0.0         59728      0     0 0\n32512 curl       0.0.0.0         59728 0.0.0.0         43799      0     0 0\n32514 curl       127.0.0.1       40829 127.0.0.1       41918      0     0 0\n32514 curl       127.0.0.1       41918 127.0.0.1       40829      0     0 0\n32516 curl       0.0.0.0         43799 0.0.0.0         59738      0     0 0\n32516 curl       0.0.0.0         59738 0.0.0.0         43799      0     0 0\n32518 curl       127.0.0.1       40829 127.0.0.1       41922      0     0 0\n32518 curl       127.0.0.1       41922 127.0.0.1       40829      0     0 0\n32520 curl       0.0.0.0         43799 0.0.0.0         59740      0     0 0\n32520 curl       0.0.0.0         59740 0.0.0.0         43799      0     0 0\n32522 curl       127.0.0.1       40829 127.0.0.1       41934      0     0 0\n32522 curl       127.0.0.1       41934 127.0.0.1       40829      0     0 0"
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "output_chars": 7027,
+        "output_stripped": true,
+        "program_counts": {
+          "applied": 1,
+          "not_applied": 0,
+          "requested": 1
+        }
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "bpf": {
+            "1355": {
+              "avg_ns_per_run": 123.9472040911276,
+              "bytes_jited": 222,
+              "bytes_xlated": 408,
+              "id": 1355,
+              "name": "block_io_start",
+              "run_cnt_delta": 4907009,
+              "run_time_ns_delta": 608210046,
+              "type": "tracepoint"
+            },
+            "1356": {
+              "avg_ns_per_run": 351.830972390717,
+              "bytes_jited": 931,
+              "bytes_xlated": 1576,
+              "id": 1356,
+              "name": "block_io_done",
+              "run_cnt_delta": 4907009,
+              "run_time_ns_delta": 1726437748,
+              "type": "tracepoint"
+            }
+          },
+          "duration_s": 5,
+          "metric": "ops/s",
+          "throughput": 980991.2468488853
+        },
+        "phase": "baseline",
+        "reason": "",
+        "status": "ok"
+      },
+      "name": "biosnoop",
+      "post_rejit": {
+        "measurement": {
+          "bpf": {
+            "1355": {
+              "avg_ns_per_run": 151.09330180398842,
+              "bytes_jited": 222,
+              "bytes_xlated": 408,
+              "id": 1355,
+              "name": "block_io_start",
+              "run_cnt_delta": 4562945,
+              "run_time_ns_delta": 689430426,
+              "type": "tracepoint"
+            },
+            "1356": {
+              "avg_ns_per_run": 403.9786541367472,
+              "bytes_jited": 931,
+              "bytes_xlated": 1576,
+              "id": 1356,
+              "name": "block_io_done",
+              "run_cnt_delta": 4562945,
+              "run_time_ns_delta": 1843332380,
+              "type": "tracepoint"
+            }
+          },
+          "duration_s": 5,
+          "metric": "ops/s",
+          "throughput": 911557.2868788897
+        },
+        "phase": "post_rejit",
+        "reason": "",
+        "status": "ok"
+      },
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "tar: ./include/xen/interface/io/netif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/pciif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/protocols.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/pvcalls.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/ring.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/sndif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/tpmif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/usbif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/vscsiif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/xenbus.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/xs_wire.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/memory.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/nmi.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/physdev.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/platform.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/sched.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/vcpu.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/version.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xen-mca.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xenpmu.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/mem-reservation.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/page.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/pci.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/platform_pci.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/swiotlb-xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen-front-pgdir-shbuf.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen-ops.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xenbus.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xenbus_dev.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings/input/linux-event-codes.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings/input: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: .: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: Exiting with failure status due to previous errors",
+        "stdout_tail": "12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0\n12263        252   0        dd               2533         0"
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "output_chars": 12598,
+        "output_stripped": true,
+        "program_counts": {
+          "applied": 2,
+          "not_applied": 0,
+          "requested": 2
+        }
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "bpf": {
+            "1363": {
+              "avg_ns_per_run": 101.26743385271293,
+              "bytes_jited": 86,
+              "bytes_xlated": 136,
+              "id": 1363,
+              "name": "sched_wakeup",
+              "run_cnt_delta": 410939,
+              "run_time_ns_delta": 41614738,
+              "type": "tracepoint"
+            },
+            "1364": {
+              "avg_ns_per_run": 177.38868113561435,
+              "bytes_jited": 86,
+              "bytes_xlated": 136,
+              "id": 1364,
+              "name": "tracepoint_sched_sched_wakeup_new",
+              "run_cnt_delta": 85839,
+              "run_time_ns_delta": 15226867,
+              "type": "tracepoint"
+            },
+            "1365": {
+              "avg_ns_per_run": 151.96060833214298,
+              "bytes_jited": 515,
+              "bytes_xlated": 896,
+              "id": 1365,
+              "name": "sched_switch",
+              "run_cnt_delta": 791081,
+              "run_time_ns_delta": 120213150,
+              "type": "tracepoint"
+            }
+          },
+          "duration_s": 5,
+          "metric": "ops/s",
+          "throughput": 66.64758564913515
+        },
+        "phase": "baseline",
+        "reason": "",
+        "status": "ok"
+      },
+      "name": "runqlat",
+      "post_rejit": {
+        "measurement": {
+          "bpf": {
+            "1363": {
+              "avg_ns_per_run": 101.32787423110061,
+              "bytes_jited": 86,
+              "bytes_xlated": 136,
+              "id": 1363,
+              "name": "sched_wakeup",
+              "run_cnt_delta": 399272,
+              "run_time_ns_delta": 40457383,
+              "type": "tracepoint"
+            },
+            "1364": {
+              "avg_ns_per_run": 178.36771783636232,
+              "bytes_jited": 86,
+              "bytes_xlated": 136,
+              "id": 1364,
+              "name": "sched_wakeup_ne",
+              "run_cnt_delta": 83526,
+              "run_time_ns_delta": 14898342,
+              "type": "tracepoint"
+            },
+            "1365": {
+              "avg_ns_per_run": 152.40908215777998,
+              "bytes_jited": 515,
+              "bytes_xlated": 896,
+              "id": 1365,
+              "name": "sched_switch",
+              "run_cnt_delta": 768716,
+              "run_time_ns_delta": 117159300,
+              "type": "tracepoint"
+            }
+          },
+          "duration_s": 5,
+          "metric": "ops/s",
+          "throughput": 64.95296689415116
+        },
+        "phase": "post_rejit",
+        "reason": "",
+        "status": "ok"
+      },
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "tar: ./include/xen/interface/io/netif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/pciif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/protocols.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/pvcalls.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/ring.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/sndif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/tpmif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/usbif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/vscsiif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/xenbus.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/xs_wire.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/memory.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/nmi.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/physdev.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/platform.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/sched.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/vcpu.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/version.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xen-mca.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xenpmu.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/mem-reservation.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/page.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/pci.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/platform_pci.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/swiotlb-xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen-front-pgdir-shbuf.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen-ops.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xenbus.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xenbus_dev.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings/input/linux-event-codes.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings/input: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: .: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: Exiting with failure status due to previous errors",
+        "stdout_tail": "Tracing CPU scheduler... Hit Ctrl-C to end.\n@usecs:\n[0]               429587 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|\n[1]               171637 |@@@@@@@@@@@@@@@@@@@@                                |\n[2, 4)            238121 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@                        |\n[4, 8)             66629 |@@@@@@@@                                            |\n[8, 16)            47666 |@@@@@                                               |\n[16, 32)           22880 |@@                                                  |\n[32, 64)           26109 |@@@                                                 |\n[64, 128)          16558 |@@                                                  |\n[128, 256)         15123 |@                                                   |\n[256, 512)         19139 |@@                                                  |\n[512, 1K)          21715 |@@                                                  |\n[1K, 2K)           27339 |@@@                                                 |\n[2K, 4K)           45707 |@@@@@                                               |\n[4K, 8K)           53112 |@@@@@@                                              |\n[8K, 16K)           7077 |                                                    |"
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "output_chars": 13109,
+        "output_stripped": true,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "bpf": {
+            "1372": {
+              "avg_ns_per_run": 11220.0,
+              "bytes_jited": 968,
+              "bytes_xlated": 1640,
+              "id": 1372,
+              "name": "kprobe_tcp_retransmit_skb",
+              "run_cnt_delta": 15,
+              "run_time_ns_delta": 168300,
+              "type": "kprobe"
+            }
+          },
+          "duration_s": 5,
+          "metric": "ops/s",
+          "throughput": 0.4881926462527705
+        },
+        "phase": "baseline",
+        "reason": "",
+        "status": "ok"
+      },
+      "name": "tcpretrans",
+      "post_rejit": {
+        "measurement": {
+          "bpf": {
+            "1372": {
+              "avg_ns_per_run": 9309.45,
+              "bytes_jited": 968,
+              "bytes_xlated": 1640,
+              "id": 1372,
+              "name": "tcp_retransmit_",
+              "run_cnt_delta": 20,
+              "run_time_ns_delta": 186189,
+              "type": "kprobe"
+            }
+          },
+          "duration_s": 5,
+          "metric": "ops/s",
+          "throughput": 0.4893428407045988
+        },
+        "phase": "post_rejit",
+        "reason": "",
+        "status": "ok"
+      },
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "tar: ./include/xen/interface/io/netif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/pciif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/protocols.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/pvcalls.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/ring.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/sndif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/tpmif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/usbif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/vscsiif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/xenbus.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/xs_wire.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/memory.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/nmi.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/physdev.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/platform.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/sched.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/vcpu.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/version.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xen-mca.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xenpmu.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/mem-reservation.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/page.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/pci.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/platform_pci.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/swiotlb-xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen-front-pgdir-shbuf.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen-ops.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xenbus.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xenbus_dev.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings/input/linux-event-codes.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings/input: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: .: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: Exiting with failure status due to previous errors",
+        "stdout_tail": "Tracing tcp retransmits. Hit Ctrl-C to end.\nTIME     PID               LADDR:LPORT           RADDR:RPORT  STATE\n00:42:42 0             127.0.0.1:39251       127.0.0.1:52768  ESTABLISHED\n00:42:43 0             127.0.0.1:39251       127.0.0.1:52768  FIN_WAIT1\n00:42:44 0             127.0.0.1:39251       127.0.0.1:52768  FIN_WAIT1\n00:42:45 0             127.0.0.1:40743       127.0.0.1:59102  ESTABLISHED\n00:42:45 0             127.0.0.1:40743       127.0.0.1:59102  FIN_WAIT1\n00:42:45 0             127.0.0.1:39251       127.0.0.1:52768  CLOSING\n00:42:46 0             127.0.0.1:40743       127.0.0.1:59102  FIN_WAIT1\n00:42:47 0             127.0.0.1:37501       127.0.0.1:53504  ESTABLISHED\n00:42:48 0             127.0.0.1:37501       127.0.0.1:53504  FIN_WAIT1\n00:42:48 0             127.0.0.1:40743       127.0.0.1:59102  CLOSING\n00:42:49 0             127.0.0.1:37501       127.0.0.1:53504  FIN_WAIT1\n00:42:49 0             127.0.0.1:39251       127.0.0.1:52768  CLOSING\n00:42:50 0             127.0.0.1:40827       127.0.0.1:58524  ESTABLISHED\n00:42:50 0             127.0.0.1:40827       127.0.0.1:58524  FIN_WAIT1\n00:42:50 14            127.0.0.1:40827       127.0.0.1:58524  FIN_WAIT1\n00:42:50 0             127.0.0.1:37501       127.0.0.1:53504  CLOSING\n00:42:50 0             127.0.0.1:34257       127.0.0.1:58770  ESTABLISHED\n00:42:51 0             127.0.0.1:34257       127.0.0.1:58770  FIN_WAIT1\n00:42:51 0             127.0.0.1:40743       127.0.0.1:59102  CLOSING\n00:42:52 0             127.0.0.1:34257       127.0.0.1:58770  FIN_WAIT1\n00:42:53 0             127.0.0.1:42597       127.0.0.1:42500  ESTABLISHED\n00:42:53 0             127.0.0.1:34257       127.0.0.1:58770  CLOSING\n00:42:53 0             127.0.0.1:42597       127.0.0.1:42500  FIN_WAIT1\n00:42:53 0             127.0.0.1:37501       127.0.0.1:53504  CLOSING\n00:42:54 0             127.0.0.1:42597       127.0.0.1:42500  FIN_WAIT1\n00:42:55 0             127.0.0.1:38621       127.0.0.1:59306  ESTABLISHED\n00:42:56 0             127.0.0.1:38621       127.0.0.1:59306  FIN_WAIT1\n00:42:56 0             127.0.0.1:39251       127.0.0.1:52768  CLOSING\n00:42:56 0             127.0.0.1:42597       127.0.0.1:42500  CLOSING\n00:42:57 0             127.0.0.1:34257       127.0.0.1:58770  CLOSING\n00:42:57 0             127.0.0.1:38621       127.0.0.1:59306  FIN_WAIT1\n00:42:58 0             127.0.0.1:34113       127.0.0.1:55506  ESTABLISHED\n00:42:58 0             127.0.0.1:34113       127.0.0.1:55506  FIN_WAIT1\n00:42:58 0             127.0.0.1:38621       127.0.0.1:59306  CLOSING\n00:42:58 0             127.0.0.1:34113       127.0.0.1:55506  FIN_WAIT1"
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "output_chars": 5744,
+        "output_stripped": true,
+        "program_counts": {
+          "applied": 1,
+          "not_applied": 0,
+          "requested": 1
+        }
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "bpf": {
+            "1379": {
+              "avg_ns_per_run": 130.23111506086377,
+              "bytes_jited": 769,
+              "bytes_xlated": 1360,
+              "id": 1379,
+              "name": "cap_capable",
+              "run_cnt_delta": 1357047,
+              "run_time_ns_delta": 176729744,
+              "type": "kprobe"
+            }
+          },
+          "duration_s": 5,
+          "metric": "ops/s",
+          "throughput": 2371.997649502309
+        },
+        "phase": "baseline",
+        "reason": "",
+        "status": "ok"
+      },
+      "name": "capable",
+      "post_rejit": {
+        "measurement": {
+          "bpf": {
+            "1379": {
+              "avg_ns_per_run": 128.83336487106934,
+              "bytes_jited": 769,
+              "bytes_xlated": 1360,
+              "id": 1379,
+              "name": "cap_capable",
+              "run_cnt_delta": 1363446,
+              "run_time_ns_delta": 175657336,
+              "type": "kprobe"
+            }
+          },
+          "duration_s": 5,
+          "metric": "ops/s",
+          "throughput": 2368.1073939046446
+        },
+        "phase": "post_rejit",
+        "reason": "",
+        "status": "ok"
+      },
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "tar: ./include/xen/interface/io/netif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/pciif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/protocols.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/pvcalls.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/ring.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/sndif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/tpmif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/usbif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/vscsiif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/xenbus.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/xs_wire.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/memory.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/nmi.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/physdev.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/platform.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/sched.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/vcpu.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/version.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xen-mca.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xenpmu.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/mem-reservation.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/page.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/pci.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/platform_pci.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/swiotlb-xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen-front-pgdir-shbuf.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen-ops.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xenbus.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xenbus_dev.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings/input/linux-event-codes.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings/input: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: .: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: Exiting with failure status due to previous errors",
+        "stdout_tail": "00:43:23  65534  13992  stress-ng        21   CAP_SYS_ADMIN        2\n00:43:23  65534  13992  stress-ng        21   CAP_SYS_ADMIN        2\n00:43:23  65534  13992  stress-ng        21   CAP_SYS_ADMIN        2\n00:43:23  65534  13992  stress-ng        21   CAP_SYS_ADMIN        2\n00:43:23  65534  13992  stress-ng        21   CAP_SYS_ADMIN        2\n00:43:23  65534  13992  stress-ng        21   CAP_SYS_ADMIN        2\n00:43:23  65534  13992  stress-ng        21   CAP_SYS_ADMIN        2\n00:43:23  65534  13992  stress-ng        21   CAP_SYS_ADMIN        2\n00:43:23  65534  13992  stress-ng        21   CAP_SYS_ADMIN        2\n00:43:23  65534  14004  stress-ng        21   CAP_SYS_ADMIN        2\nLost 48320 events\n00:43:23  0      14024  python3          21   CAP_SYS_ADMIN        2\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        2\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        2\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        2\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        2\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        2\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        2\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        2\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        2\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        2\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        2\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        2\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        2\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        2\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        2\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        2\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        0\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        0\n00:43:23  0      14024  bpftool          39   CAP_BPF              0\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        0\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        0\n00:43:23  0      14024  bpftool          39   CAP_BPF              0\n00:43:23  0      14024  bpftool          39   CAP_BPF              0\n00:43:23  0      14024  bpftool          39   CAP_BPF              0\n00:43:23  0      14024  bpftool          39   CAP_BPF              0\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        0\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        0\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        0\n00:43:23  0      14024  bpftool          21   CAP_SYS_ADMIN        0"
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "output_chars": 5259,
+        "output_stripped": true,
+        "program_counts": {
+          "applied": 1,
+          "not_applied": 0,
+          "requested": 1
+        }
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "bpf": {
+            "1386": {
+              "avg_ns_per_run": 1740.2,
+              "bytes_jited": 362,
+              "bytes_xlated": 680,
+              "id": 1386,
+              "name": "1",
+              "run_cnt_delta": 5,
+              "run_time_ns_delta": 8701,
+              "type": "perf_event"
+            },
+            "1387": {
+              "avg_ns_per_run": 68.31009296148738,
+              "bytes_jited": 140,
+              "bytes_xlated": 224,
+              "id": 1387,
+              "name": "vfs_create",
+              "run_cnt_delta": 1506,
+              "run_time_ns_delta": 102875,
+              "type": "kprobe"
+            }
+          },
+          "duration_s": 5,
+          "metric": "ops/s",
+          "throughput": 71.74890556667832
+        },
+        "phase": "baseline",
+        "reason": "",
+        "status": "ok"
+      },
+      "name": "vfsstat",
+      "post_rejit": {
+        "measurement": {
+          "bpf": {
+            "1386": {
+              "avg_ns_per_run": 1755.2,
+              "bytes_jited": 362,
+              "bytes_xlated": 680,
+              "id": 1386,
+              "name": "1",
+              "run_cnt_delta": 5,
+              "run_time_ns_delta": 8776,
+              "type": "perf_event"
+            },
+            "1387": {
+              "avg_ns_per_run": 131.09986772486772,
+              "bytes_jited": 140,
+              "bytes_xlated": 224,
+              "id": 1387,
+              "name": "vfs_create",
+              "run_cnt_delta": 1512,
+              "run_time_ns_delta": 198223,
+              "type": "kprobe"
+            }
+          },
+          "duration_s": 5,
+          "metric": "ops/s",
+          "throughput": 71.99082651134101
+        },
+        "phase": "post_rejit",
+        "reason": "",
+        "status": "ok"
+      },
+      "process": {
+        "returncode": 0,
+        "stderr_tail": "tar: ./include/xen/interface/io/netif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/pciif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/protocols.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/pvcalls.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/ring.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/sndif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/tpmif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/usbif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/vscsiif.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/xenbus.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io/xs_wire.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/io: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/memory.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/nmi.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/physdev.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/platform.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/sched.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/vcpu.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/version.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xen-mca.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface/xenpmu.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/interface: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/mem-reservation.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/page.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/pci.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/platform_pci.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/swiotlb-xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen-front-pgdir-shbuf.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen-ops.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xen.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xenbus.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen/xenbus_dev.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/xen: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings/input/linux-event-codes.h: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings/input: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include/dt-bindings: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: ./include: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: .: Cannot change ownership to uid 0, gid 0: Operation not permitted\ntar: Exiting with failure status due to previous errors",
+        "stdout_tail": "00:43:40\n@[vfs_write]: 67\n@[vfs_open]: 110\n@[vfs_read]: 163\n00:43:41\n@[vfs_open]: 73\n@[vfs_write]: 76\n@[vfs_read]: 149\n00:43:42\n@[vfs_open]: 71\n@[vfs_write]: 73\n@[vfs_read]: 144\n00:43:43\n@[vfs_open]: 73\n@[vfs_write]: 75\n@[vfs_read]: 149\n00:43:44\n@[vfs_open]: 71\n@[vfs_write]: 72\n@[vfs_read]: 143\n00:43:45\n@[vfs_write]: 65\n@[vfs_open]: 117\n@[vfs_read]: 167\n00:43:46\n@[vfs_open]: 72\n@[vfs_write]: 76\n@[vfs_read]: 148\n00:43:47\n@[vfs_open]: 73\n@[vfs_write]: 74\n@[vfs_read]: 147\n00:43:48\n@[vfs_open]: 70\n@[vfs_write]: 72\n@[vfs_read]: 142\n00:43:49\n@[vfs_open]: 73\n@[vfs_write]: 74\n@[vfs_read]: 148"
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "output_chars": 8219,
+        "output_stripped": true,
+        "program_counts": {
+          "applied": 2,
+          "not_applied": 0,
+          "requested": 2
+        }
+      }
+    }
+  ],
+  "status": "ok"
+}

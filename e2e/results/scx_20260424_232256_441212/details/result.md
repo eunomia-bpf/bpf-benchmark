@@ -1,0 +1,794 @@
+# scx_rusty End-to-End Benchmark
+
+```json
+{
+  "baseline": {
+    "phase": "baseline",
+    "records": [
+      {
+        "bpf": {
+          "10": {
+            "avg_ns_per_run": 153.14671674769016,
+            "bytes_jited": 3063,
+            "bytes_xlated": 6624,
+            "id": 10,
+            "name": "rusty_select_cpu",
+            "run_cnt_delta": 874849,
+            "run_time_ns_delta": 133980252,
+            "type": "struct_ops"
+          },
+          "12": {
+            "avg_ns_per_run": 39.84875619961477,
+            "bytes_jited": 1015,
+            "bytes_xlated": 13024,
+            "id": 12,
+            "name": "rusty_enqueue",
+            "run_cnt_delta": 876869,
+            "run_time_ns_delta": 34942139,
+            "type": "struct_ops"
+          },
+          "13": {
+            "avg_ns_per_run": 592.428201281721,
+            "bytes_jited": 712,
+            "bytes_xlated": 1304,
+            "id": 13,
+            "name": "rusty_dispatch",
+            "run_cnt_delta": 877258,
+            "run_time_ns_delta": 519712379,
+            "type": "struct_ops"
+          },
+          "14": {
+            "avg_ns_per_run": 93.78939910004561,
+            "bytes_jited": 303,
+            "bytes_xlated": 3656,
+            "id": 14,
+            "name": "rusty_runnable",
+            "run_cnt_delta": 881378,
+            "run_time_ns_delta": 82663913,
+            "type": "struct_ops"
+          },
+          "15": {
+            "avg_ns_per_run": 140.26609285974058,
+            "bytes_jited": 455,
+            "bytes_xlated": 952,
+            "id": 15,
+            "name": "rusty_running",
+            "run_cnt_delta": 882643,
+            "run_time_ns_delta": 123804885,
+            "type": "struct_ops"
+          },
+          "16": {
+            "avg_ns_per_run": 73.06766835515604,
+            "bytes_jited": 269,
+            "bytes_xlated": 1840,
+            "id": 16,
+            "name": "rusty_stopping",
+            "run_cnt_delta": 882643,
+            "run_time_ns_delta": 64492666,
+            "type": "struct_ops"
+          },
+          "17": {
+            "avg_ns_per_run": 87.2499234153791,
+            "bytes_jited": 251,
+            "bytes_xlated": 3808,
+            "id": 17,
+            "name": "rusty_quiescent",
+            "run_cnt_delta": 881378,
+            "run_time_ns_delta": 76900163,
+            "type": "struct_ops"
+          },
+          "18": {
+            "avg_ns_per_run": 23.192441117400037,
+            "bytes_jited": 115,
+            "bytes_xlated": 392,
+            "id": 18,
+            "name": "rusty_set_weight",
+            "run_cnt_delta": 5477,
+            "run_time_ns_delta": 127025,
+            "type": "struct_ops"
+          },
+          "19": {
+            "avg_ns_per_run": 1076.0,
+            "bytes_jited": 156,
+            "bytes_xlated": 10360,
+            "id": 19,
+            "name": "rusty_set_cpumask",
+            "run_cnt_delta": 1,
+            "run_time_ns_delta": 1076,
+            "type": "struct_ops"
+          },
+          "20": {
+            "avg_ns_per_run": 1412.749634769905,
+            "bytes_jited": 528,
+            "bytes_xlated": 8848,
+            "id": 20,
+            "name": "rusty_init_task",
+            "run_cnt_delta": 5476,
+            "run_time_ns_delta": 7736217,
+            "type": "struct_ops"
+          },
+          "21": {
+            "avg_ns_per_run": 968.3909074310754,
+            "bytes_jited": 157,
+            "bytes_xlated": 2792,
+            "id": 21,
+            "name": "rusty_exit_task",
+            "run_cnt_delta": 5477,
+            "run_time_ns_delta": 5303877,
+            "type": "struct_ops"
+          },
+          "22": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 591,
+            "bytes_xlated": 12816,
+            "id": 22,
+            "name": "rusty_init",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "struct_ops"
+          },
+          "23": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 155,
+            "bytes_xlated": 240,
+            "id": 23,
+            "name": "rusty_exit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "struct_ops"
+          }
+        },
+        "kind": "hackbench",
+        "metric": "runs/s",
+        "name": "hackbench",
+        "throughput": 3.3049759951486593
+      },
+      {
+        "bpf": {
+          "10": {
+            "avg_ns_per_run": 189.08354822073233,
+            "bytes_jited": 3063,
+            "bytes_xlated": 6624,
+            "id": 10,
+            "name": "rusty_select_cpu",
+            "run_cnt_delta": 1939,
+            "run_time_ns_delta": 366633,
+            "type": "struct_ops"
+          },
+          "12": {
+            "avg_ns_per_run": 119.73213918056413,
+            "bytes_jited": 1015,
+            "bytes_xlated": 13024,
+            "id": 12,
+            "name": "rusty_enqueue",
+            "run_cnt_delta": 4857,
+            "run_time_ns_delta": 581539,
+            "type": "struct_ops"
+          },
+          "13": {
+            "avg_ns_per_run": 508.74513688760806,
+            "bytes_jited": 712,
+            "bytes_xlated": 1304,
+            "id": 13,
+            "name": "rusty_dispatch",
+            "run_cnt_delta": 5552,
+            "run_time_ns_delta": 2824553,
+            "type": "struct_ops"
+          },
+          "14": {
+            "avg_ns_per_run": 143.38148873653282,
+            "bytes_jited": 303,
+            "bytes_xlated": 3656,
+            "id": 14,
+            "name": "rusty_runnable",
+            "run_cnt_delta": 2042,
+            "run_time_ns_delta": 292785,
+            "type": "struct_ops"
+          },
+          "15": {
+            "avg_ns_per_run": 126.84849106959557,
+            "bytes_jited": 455,
+            "bytes_xlated": 952,
+            "id": 15,
+            "name": "rusty_running",
+            "run_cnt_delta": 4871,
+            "run_time_ns_delta": 617879,
+            "type": "struct_ops"
+          },
+          "16": {
+            "avg_ns_per_run": 80.27468692260317,
+            "bytes_jited": 269,
+            "bytes_xlated": 1840,
+            "id": 16,
+            "name": "rusty_stopping",
+            "run_cnt_delta": 4871,
+            "run_time_ns_delta": 391018,
+            "type": "struct_ops"
+          },
+          "17": {
+            "avg_ns_per_run": 99.94028389623104,
+            "bytes_jited": 251,
+            "bytes_xlated": 3808,
+            "id": 17,
+            "name": "rusty_quiescent",
+            "run_cnt_delta": 2043,
+            "run_time_ns_delta": 204178,
+            "type": "struct_ops"
+          },
+          "18": {
+            "avg_ns_per_run": 50.166666666666664,
+            "bytes_jited": 115,
+            "bytes_xlated": 392,
+            "id": 18,
+            "name": "rusty_set_weight",
+            "run_cnt_delta": 6,
+            "run_time_ns_delta": 301,
+            "type": "struct_ops"
+          },
+          "19": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 156,
+            "bytes_xlated": 10360,
+            "id": 19,
+            "name": "rusty_set_cpumask",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "struct_ops"
+          },
+          "20": {
+            "avg_ns_per_run": 2394.1666666666665,
+            "bytes_jited": 528,
+            "bytes_xlated": 8848,
+            "id": 20,
+            "name": "rusty_init_task",
+            "run_cnt_delta": 6,
+            "run_time_ns_delta": 14365,
+            "type": "struct_ops"
+          },
+          "21": {
+            "avg_ns_per_run": 2657.1666666666665,
+            "bytes_jited": 157,
+            "bytes_xlated": 2792,
+            "id": 21,
+            "name": "rusty_exit_task",
+            "run_cnt_delta": 6,
+            "run_time_ns_delta": 15943,
+            "type": "struct_ops"
+          },
+          "22": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 591,
+            "bytes_xlated": 12816,
+            "id": 22,
+            "name": "rusty_init",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "struct_ops"
+          },
+          "23": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 155,
+            "bytes_xlated": 240,
+            "id": 23,
+            "name": "rusty_exit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "struct_ops"
+          }
+        },
+        "kind": "stress_ng_cpu",
+        "metric": "bogo-ops/s",
+        "name": "stress-ng-cpu",
+        "throughput": 11617.14
+      },
+      {
+        "bpf": {
+          "10": {
+            "avg_ns_per_run": 167.37531486146096,
+            "bytes_jited": 3063,
+            "bytes_xlated": 6624,
+            "id": 10,
+            "name": "rusty_select_cpu",
+            "run_cnt_delta": 1985,
+            "run_time_ns_delta": 332240,
+            "type": "struct_ops"
+          },
+          "12": {
+            "avg_ns_per_run": 95.53061224489795,
+            "bytes_jited": 1015,
+            "bytes_xlated": 13024,
+            "id": 12,
+            "name": "rusty_enqueue",
+            "run_cnt_delta": 4949,
+            "run_time_ns_delta": 472781,
+            "type": "struct_ops"
+          },
+          "13": {
+            "avg_ns_per_run": 498.93609825560696,
+            "bytes_jited": 712,
+            "bytes_xlated": 1304,
+            "id": 13,
+            "name": "rusty_dispatch",
+            "run_cnt_delta": 5618,
+            "run_time_ns_delta": 2803023,
+            "type": "struct_ops"
+          },
+          "14": {
+            "avg_ns_per_run": 128.92267552182165,
+            "bytes_jited": 303,
+            "bytes_xlated": 3656,
+            "id": 14,
+            "name": "rusty_runnable",
+            "run_cnt_delta": 2108,
+            "run_time_ns_delta": 271769,
+            "type": "struct_ops"
+          },
+          "15": {
+            "avg_ns_per_run": 116.40822912464704,
+            "bytes_jited": 455,
+            "bytes_xlated": 952,
+            "id": 15,
+            "name": "rusty_running",
+            "run_cnt_delta": 4958,
+            "run_time_ns_delta": 577152,
+            "type": "struct_ops"
+          },
+          "16": {
+            "avg_ns_per_run": 67.77168212989109,
+            "bytes_jited": 269,
+            "bytes_xlated": 1840,
+            "id": 16,
+            "name": "rusty_stopping",
+            "run_cnt_delta": 4958,
+            "run_time_ns_delta": 336012,
+            "type": "struct_ops"
+          },
+          "17": {
+            "avg_ns_per_run": 98.39278937381404,
+            "bytes_jited": 251,
+            "bytes_xlated": 3808,
+            "id": 17,
+            "name": "rusty_quiescent",
+            "run_cnt_delta": 2108,
+            "run_time_ns_delta": 207412,
+            "type": "struct_ops"
+          },
+          "18": {
+            "avg_ns_per_run": 73.71428571428571,
+            "bytes_jited": 115,
+            "bytes_xlated": 392,
+            "id": 18,
+            "name": "rusty_set_weight",
+            "run_cnt_delta": 7,
+            "run_time_ns_delta": 516,
+            "type": "struct_ops"
+          },
+          "19": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 156,
+            "bytes_xlated": 10360,
+            "id": 19,
+            "name": "rusty_set_cpumask",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "struct_ops"
+          },
+          "20": {
+            "avg_ns_per_run": 3940.4285714285716,
+            "bytes_jited": 528,
+            "bytes_xlated": 8848,
+            "id": 20,
+            "name": "rusty_init_task",
+            "run_cnt_delta": 7,
+            "run_time_ns_delta": 27583,
+            "type": "struct_ops"
+          },
+          "21": {
+            "avg_ns_per_run": 3183.0,
+            "bytes_jited": 157,
+            "bytes_xlated": 2792,
+            "id": 21,
+            "name": "rusty_exit_task",
+            "run_cnt_delta": 6,
+            "run_time_ns_delta": 19098,
+            "type": "struct_ops"
+          },
+          "22": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 591,
+            "bytes_xlated": 12816,
+            "id": 22,
+            "name": "rusty_init",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "struct_ops"
+          },
+          "23": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 155,
+            "bytes_xlated": 240,
+            "id": 23,
+            "name": "rusty_exit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "struct_ops"
+          }
+        },
+        "kind": "sysbench_cpu",
+        "metric": "events/s",
+        "name": "sysbench-cpu",
+        "throughput": 17658.82
+      }
+    ]
+  },
+  "duration_s": 10,
+  "generated_at": "2026-04-24T23:23:29.474023+00:00",
+  "host": {
+    "git_sha": null,
+    "git_sha_error": "[Errno 2] No such file or directory: 'git'",
+    "hostname": "virtme-ng",
+    "kernel": "7.0.0-rc2",
+    "platform": "Linux-7.0.0-rc2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "limitations": [
+    "Post-ReJIT phase is unavailable.",
+    "live ReJIT for sched_ext struct_ops callbacks is currently unsupported on the benchmark runtime; skipping post-ReJIT phase"
+  ],
+  "mode": "scx_daemon",
+  "post_rejit": null,
+  "programs": [
+    {
+      "btf_id": 18,
+      "bytes_jited": 3063,
+      "bytes_memlock": 8192,
+      "bytes_xlated": 6624,
+      "gpl_compatible": true,
+      "id": 10,
+      "jited": true,
+      "loaded_at": 1777072976,
+      "map_ids": [
+        12,
+        13,
+        3,
+        15,
+        8,
+        14,
+        7,
+        10,
+        17,
+        9,
+        5
+      ],
+      "name": "rusty_select_cpu",
+      "orphaned": false,
+      "run_cnt": 881363,
+      "run_time_ns": 135566110,
+      "tag": "6577fa6064f1e53c",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 18,
+      "bytes_jited": 1015,
+      "bytes_memlock": 20480,
+      "bytes_xlated": 13024,
+      "gpl_compatible": true,
+      "id": 12,
+      "jited": true,
+      "loaded_at": 1777072976,
+      "map_ids": [
+        8,
+        13,
+        12,
+        15,
+        14,
+        7,
+        10,
+        17,
+        9,
+        3,
+        6
+      ],
+      "name": "rusty_enqueue",
+      "orphaned": false,
+      "run_cnt": 889387,
+      "run_time_ns": 36320794,
+      "tag": "dcf256ce4745da52",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 18,
+      "bytes_jited": 712,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1304,
+      "gpl_compatible": true,
+      "id": 13,
+      "jited": true,
+      "loaded_at": 1777072976,
+      "map_ids": [
+        13,
+        12,
+        14,
+        8,
+        17
+      ],
+      "name": "rusty_dispatch",
+      "orphaned": false,
+      "run_cnt": 891447,
+      "run_time_ns": 525777306,
+      "tag": "9082eb99c31667b9",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 18,
+      "bytes_jited": 303,
+      "bytes_memlock": 8192,
+      "bytes_xlated": 3656,
+      "gpl_compatible": true,
+      "id": 14,
+      "jited": true,
+      "loaded_at": 1777072976,
+      "map_ids": [
+        14,
+        13,
+        10,
+        12,
+        17,
+        9,
+        6
+      ],
+      "name": "rusty_runnable",
+      "orphaned": false,
+      "run_cnt": 888256,
+      "run_time_ns": 83877067,
+      "tag": "0d7759ce51fa4cdc",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 18,
+      "bytes_jited": 455,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 952,
+      "gpl_compatible": true,
+      "id": 15,
+      "jited": true,
+      "loaded_at": 1777072976,
+      "map_ids": [
+        14,
+        13,
+        3,
+        10,
+        12,
+        17,
+        9
+      ],
+      "name": "rusty_running",
+      "orphaned": false,
+      "run_cnt": 895199,
+      "run_time_ns": 125665038,
+      "tag": "ecf546902c7b1fa7",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 18,
+      "bytes_jited": 269,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1840,
+      "gpl_compatible": true,
+      "id": 16,
+      "jited": true,
+      "loaded_at": 1777072976,
+      "map_ids": [
+        13,
+        14,
+        10,
+        12,
+        17,
+        9
+      ],
+      "name": "rusty_stopping",
+      "orphaned": false,
+      "run_cnt": 895199,
+      "run_time_ns": 65598956,
+      "tag": "992ee2be61dd160f",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 18,
+      "bytes_jited": 251,
+      "bytes_memlock": 8192,
+      "bytes_xlated": 3808,
+      "gpl_compatible": true,
+      "id": 17,
+      "jited": true,
+      "loaded_at": 1777072976,
+      "map_ids": [
+        14,
+        13,
+        10,
+        12,
+        17,
+        9,
+        6
+      ],
+      "name": "rusty_quiescent",
+      "orphaned": false,
+      "run_cnt": 888256,
+      "run_time_ns": 77690559,
+      "tag": "c7166411a4017547",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 18,
+      "bytes_jited": 115,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 392,
+      "gpl_compatible": true,
+      "id": 18,
+      "jited": true,
+      "loaded_at": 1777072976,
+      "map_ids": [
+        14,
+        13,
+        10,
+        12,
+        17,
+        9
+      ],
+      "name": "rusty_set_weight",
+      "orphaned": false,
+      "run_cnt": 5655,
+      "run_time_ns": 171175,
+      "tag": "d055fe7c26eaa9d5",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 18,
+      "bytes_jited": 156,
+      "bytes_memlock": 20480,
+      "bytes_xlated": 10360,
+      "gpl_compatible": true,
+      "id": 19,
+      "jited": true,
+      "loaded_at": 1777072976,
+      "map_ids": [
+        14,
+        15,
+        10,
+        12,
+        13,
+        17,
+        9,
+        7,
+        3,
+        6
+      ],
+      "name": "rusty_set_cpumask",
+      "orphaned": false,
+      "run_cnt": 134,
+      "run_time_ns": 106236,
+      "tag": "5471b5d28261daa6",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 18,
+      "bytes_jited": 528,
+      "bytes_memlock": 24576,
+      "bytes_xlated": 8848,
+      "gpl_compatible": true,
+      "id": 20,
+      "jited": true,
+      "loaded_at": 1777072976,
+      "map_ids": [
+        13,
+        7,
+        14,
+        10,
+        12,
+        18,
+        9,
+        17,
+        3,
+        6
+      ],
+      "name": "rusty_init_task",
+      "orphaned": false,
+      "run_cnt": 5661,
+      "run_time_ns": 8305849,
+      "tag": "b208e9de531daafe",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 18,
+      "bytes_jited": 157,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 2792,
+      "gpl_compatible": true,
+      "id": 21,
+      "jited": true,
+      "loaded_at": 1777072976,
+      "map_ids": [
+        7,
+        8,
+        10,
+        12,
+        13,
+        17,
+        9,
+        18,
+        14
+      ],
+      "name": "rusty_exit_task",
+      "orphaned": false,
+      "run_cnt": 5505,
+      "run_time_ns": 5376781,
+      "tag": "222181ca202cc209",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 18,
+      "bytes_jited": 591,
+      "bytes_memlock": 16384,
+      "bytes_xlated": 12816,
+      "gpl_compatible": true,
+      "id": 22,
+      "jited": true,
+      "loaded_at": 1777072976,
+      "map_ids": [
+        15,
+        14,
+        13,
+        9,
+        18,
+        12,
+        17,
+        5,
+        4,
+        3
+      ],
+      "name": "rusty_init",
+      "orphaned": false,
+      "run_cnt": 1,
+      "run_time_ns": 58788,
+      "tag": "a65fe88629107776",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 18,
+      "bytes_jited": 155,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 240,
+      "gpl_compatible": true,
+      "id": 23,
+      "jited": true,
+      "loaded_at": 1777072976,
+      "map_ids": [
+        14,
+        13,
+        16,
+        17
+      ],
+      "name": "rusty_exit",
+      "orphaned": false,
+      "tag": "11ab5b228921e73d",
+      "type": "struct_ops",
+      "uid": 0
+    }
+  ],
+  "rejit_result": null,
+  "scheduler_binary": "/artifacts/scx/bin/scx_rusty",
+  "status": "ok"
+}
+```

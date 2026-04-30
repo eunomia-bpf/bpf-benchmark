@@ -1,0 +1,1360 @@
+# bpftrace Real End-to-End Benchmark
+
+- Generated: `2026-04-29T13:53:05.349784+00:00`
+- Duration per phase: `5s`
+- Daemon: `/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon`
+- Error: `tcplife post_rejit failed: prog 3030: preserved failure workdir: /var/lib/bpfrejit-daemon/failures/3030_1777470693_606656065_1134: bpfverify final verification failed for prog 3030: bpfverify final verification rejected bytecode (returncode 0, verifier status fail, errno 13): verifier log summary:
+func#0 @0
+Live regs before insn:
+      0: .1........ (b7) r2 = 0
+      1: .12....... (63) *(u32 *)(r10 -112) = r2
+      2: .12....... (7b) *(u64 *)(r10 -120) = r2
+      3: .12....... (63) *(u32 *)(r10 -128) = r2
+      4: .12....... (7b) *(u64 *)(r10 -136) = r2
+      5: .12....... (73) *(u8 *)(r10 -138) = r2
+      6: .12....... (6b) *(u16 *)(r10 -140) = r2
+      7: .12....... (63) *(u32 *)(r10 -144) = r2
+      8: .12....... (7b) *(u64 *)(r10 -152) = r2
+      9: .1........ (79) r6 = *(u64 *)(r1 +112)
+     10: .1....6... (79) r8 = *(u64 *)(r1 +104)
+     11: ......6.8. (b7) r1 = 4
+     12: .1....6.8. (2d) if r1 > r8 goto pc+1
+     13: ......6.8. (05) goto pc+22
+     14: ......6.8. (7b) *(u64 *)(r10 -104) = r6
+     15: ......6.8. (18) r1 = 0xffff8982848b0000
+     17: .1....6.8. (bf) r2 = r10
+     18: .12...6.8. (07) r2 += -104
+     19: .12...6.8. (85) call bpf_map_lookup_elem#1
+     20: 0.....6.8. (55) if r0 != 0x0 goto pc+1
+     21: ......6.8. (05) goto pc+3
+     22: 0.....6.8. (79) r1 = *(u64 *)(r0 +0)
+     23: .1....6.8. (15) if r1 == 0x0 goto pc+1
+     24: ......6.8. (05) goto pc+11
+     25: ......6.8. (85) call bpf_ktime_get_boot_ns#125
+     26: 0.....6.8. (7b) *(u64 *)(r10 -8) = r6
+     27: 0.....6.8. (7b) *(u64 *)(r10 -104) = r0
+     28: ......6.8. (18) r1 = 0xffff8982848b0000
+     30: .1....6.8. (bf) r2 = r10
+     31: .12...6.8. (07) r2 += -8
+     32: .12...6.8. (bf) r3 = r10
+     33: .123..6.8. (07) r3 += -104
+     34: .123..6.8. (b7) r4 = 0
+     35: .1234.6.8. (85) call bpf_map_update_elem#2
+     36: ......6.8. (15) if r8 == 0x2 goto pc+3
+     37: ......6.8. (15) if r8 == 0x7 goto pc+32
+     38: ......6.8. (15) if r8 == 0x9 goto pc+1
+     39: .......... (05) goto pc+328
+     40: ......6.8. (85) call bpf_get_current_pid_tgid#14
+     41: 0.....6.8. (7b) *(u64 *)(r10 -8) = r6
+     42: 0.....6.8. (77) r0 >>= 32
+     43: 0.....6.8. (7b) *(u64 *)(r10 -104) = r0
+     44: ......6.8. (18) r1 = 0xffff898377344400
+     46: .1....6.8. (bf) r2 = r10
+     47: .12...6.8. (07) r2 += -8
+     48: .12...6.8. (bf) r3 = r10
+     49: .123..6.8. (07) r3 += -104
+     50: .123..6.8. (b7) r7 = 0
+     51: .123..678. (b7) r4 = 0
+     52: .1234.678. (85) call bpf_map_update_elem#2
+     53: ......678. (7b) *(u64 *)(r10 -96) = r7
+     54: ......678. (7b) *(u64 *)(r10 -104) = r7
+     55: ......6.8. (bf) r7 = r10
+     56: ......678. (07) r7 += -104
+     57: ......678. (bf) r1 = r7
+     58: .1....678. (b7) r2 = 16
+     59: .12...678. (85) call bpf_get_current_comm#16
+     60: ......678. (7b) *(u64 *)(r10 -8) = r6
+     61: ......678. (18) r1 = 0xffff8982848b2c00
+     63: .1....678. (bf) r2 = r10
+     64: .12...678. (07) r2 += -8
+     65: .12...678. (bf) r3 = r7
+     66: .123..6.8. (b7) r4 = 0
+     67: .1234.6.8. (85) call bpf_map_update_elem#2
+     68: ......6.8. (15) if r8 == 0x7 goto pc+1
+     69: .......... (05) goto pc+298
+     70: ......6... (7b) *(u64 *)(r10 -104) = r6
+     71: ......6... (18) r1 = 0xffff8982848b0000
+     73: .1....6... (bf) r2 = r10
+     74: .12...6... (07) r2 += -104
+     75: .12...6... (85) call bpf_map_lookup_elem#1
+     76: 0.....6... (55) if r0 != 0x0 goto pc+1
+     77: .......... (05) goto pc+290
+     78: 0.....6... (79) r1 = *(u64 *)(r0 +0)
+     79: .1....6... (15) if r1 == 0x0 goto pc+288
+     80: ......6... (85) call bpf_ktime_get_boot_ns#125
+     81: 0.....6... (7b) *(u64 *)(r10 -192) = r0
+     82: ......6... (7b) *(u64 *)(r10 -104) = r6
+     83: ......6... (18) r1 = 0xffff8982848b0000
+     85: .1....6... (bf) r2 = r10
+     86: .12...6... (07) r2 += -104
+     87: .12...6... (85) call bpf_map_lookup_elem#1
+     88: 0.....6... (b7) r9 = 0
+     89: 0.....6..9 (b7) r1 = 0
+     90: 01....6..9 (15) if r0 == 0x0 goto pc+1
+     91: 0.....6..9 (79) r1 = *(u64 *)(r0 +0)
+     92: .1....6..9 (7b) *(u64 *)(r10 -184) = r1
+     93: ......6..9 (bf) r3 = r6
+     94: ...3..6..9 (07) r3 += 14
+     95: ...3..6..9 (bf) r1 = r10
+     96: .1.3..6..9 (07) r1 += -104
+     97: .1.3..6..9 (b7) r2 = 2
+     98: .123..6..9 (85) call bpf_probe_read_kernel#113
+     99: ......6..9 (69) r1 = *(u16 *)(r10 -104)
+    100: .1....6..9 (7b) *(u64 *)(r10 -1
+... verifier log truncated ...`
+
+## tcplife
+
+### Baseline
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3030": {
+        "avg_ns_per_run": 1522.3333333333333,
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 3030,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 9,
+        "run_time_ns_delta": 13701,
+        "type": "kprobe"
+      }
+    },
+    "duration_s": 5,
+    "metric": "ops/s",
+    "throughput": 4233.473941545533
+  },
+  "phase": "baseline",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### Post-ReJIT
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3030": {
+        "avg_ns_per_run": 2426.714285714286,
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 3030,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 7,
+        "run_time_ns_delta": 16987,
+        "type": "kprobe"
+      }
+    },
+    "duration_s": 5,
+    "metric": "ops/s",
+    "throughput": 14407.942434925742
+  },
+  "phase": "post_rejit",
+  "reason": "prog 3030: preserved failure workdir: /var/lib/bpfrejit-daemon/failures/3030_1777470693_606656065_1134: bpfverify final verification failed for prog 3030: bpfverify final verification rejected bytecode (returncode 0, verifier status fail, errno 13): verifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (b7) r2 = 0\n      1: .12....... (63) *(u32 *)(r10 -112) = r2\n      2: .12....... (7b) *(u64 *)(r10 -120) = r2\n      3: .12....... (63) *(u32 *)(r10 -128) = r2\n      4: .12....... (7b) *(u64 *)(r10 -136) = r2\n      5: .12....... (73) *(u8 *)(r10 -138) = r2\n      6: .12....... (6b) *(u16 *)(r10 -140) = r2\n      7: .12....... (63) *(u32 *)(r10 -144) = r2\n      8: .12....... (7b) *(u64 *)(r10 -152) = r2\n      9: .1........ (79) r6 = *(u64 *)(r1 +112)\n     10: .1....6... (79) r8 = *(u64 *)(r1 +104)\n     11: ......6.8. (b7) r1 = 4\n     12: .1....6.8. (2d) if r1 > r8 goto pc+1\n     13: ......6.8. (05) goto pc+22\n     14: ......6.8. (7b) *(u64 *)(r10 -104) = r6\n     15: ......6.8. (18) r1 = 0xffff8982848b0000\n     17: .1....6.8. (bf) r2 = r10\n     18: .12...6.8. (07) r2 += -104\n     19: .12...6.8. (85) call bpf_map_lookup_elem#1\n     20: 0.....6.8. (55) if r0 != 0x0 goto pc+1\n     21: ......6.8. (05) goto pc+3\n     22: 0.....6.8. (79) r1 = *(u64 *)(r0 +0)\n     23: .1....6.8. (15) if r1 == 0x0 goto pc+1\n     24: ......6.8. (05) goto pc+11\n     25: ......6.8. (85) call bpf_ktime_get_boot_ns#125\n     26: 0.....6.8. (7b) *(u64 *)(r10 -8) = r6\n     27: 0.....6.8. (7b) *(u64 *)(r10 -104) = r0\n     28: ......6.8. (18) r1 = 0xffff8982848b0000\n     30: .1....6.8. (bf) r2 = r10\n     31: .12...6.8. (07) r2 += -8\n     32: .12...6.8. (bf) r3 = r10\n     33: .123..6.8. (07) r3 += -104\n     34: .123..6.8. (b7) r4 = 0\n     35: .1234.6.8. (85) call bpf_map_update_elem#2\n     36: ......6.8. (15) if r8 == 0x2 goto pc+3\n     37: ......6.8. (15) if r8 == 0x7 goto pc+32\n     38: ......6.8. (15) if r8 == 0x9 goto pc+1\n     39: .......... (05) goto pc+328\n     40: ......6.8. (85) call bpf_get_current_pid_tgid#14\n     41: 0.....6.8. (7b) *(u64 *)(r10 -8) = r6\n     42: 0.....6.8. (77) r0 >>= 32\n     43: 0.....6.8. (7b) *(u64 *)(r10 -104) = r0\n     44: ......6.8. (18) r1 = 0xffff898377344400\n     46: .1....6.8. (bf) r2 = r10\n     47: .12...6.8. (07) r2 += -8\n     48: .12...6.8. (bf) r3 = r10\n     49: .123..6.8. (07) r3 += -104\n     50: .123..6.8. (b7) r7 = 0\n     51: .123..678. (b7) r4 = 0\n     52: .1234.678. (85) call bpf_map_update_elem#2\n     53: ......678. (7b) *(u64 *)(r10 -96) = r7\n     54: ......678. (7b) *(u64 *)(r10 -104) = r7\n     55: ......6.8. (bf) r7 = r10\n     56: ......678. (07) r7 += -104\n     57: ......678. (bf) r1 = r7\n     58: .1....678. (b7) r2 = 16\n     59: .12...678. (85) call bpf_get_current_comm#16\n     60: ......678. (7b) *(u64 *)(r10 -8) = r6\n     61: ......678. (18) r1 = 0xffff8982848b2c00\n     63: .1....678. (bf) r2 = r10\n     64: .12...678. (07) r2 += -8\n     65: .12...678. (bf) r3 = r7\n     66: .123..6.8. (b7) r4 = 0\n     67: .1234.6.8. (85) call bpf_map_update_elem#2\n     68: ......6.8. (15) if r8 == 0x7 goto pc+1\n     69: .......... (05) goto pc+298\n     70: ......6... (7b) *(u64 *)(r10 -104) = r6\n     71: ......6... (18) r1 = 0xffff8982848b0000\n     73: .1....6... (bf) r2 = r10\n     74: .12...6... (07) r2 += -104\n     75: .12...6... (85) call bpf_map_lookup_elem#1\n     76: 0.....6... (55) if r0 != 0x0 goto pc+1\n     77: .......... (05) goto pc+290\n     78: 0.....6... (79) r1 = *(u64 *)(r0 +0)\n     79: .1....6... (15) if r1 == 0x0 goto pc+288\n     80: ......6... (85) call bpf_ktime_get_boot_ns#125\n     81: 0.....6... (7b) *(u64 *)(r10 -192) = r0\n     82: ......6... (7b) *(u64 *)(r10 -104) = r6\n     83: ......6... (18) r1 = 0xffff8982848b0000\n     85: .1....6... (bf) r2 = r10\n     86: .12...6... (07) r2 += -104\n     87: .12...6... (85) call bpf_map_lookup_elem#1\n     88: 0.....6... (b7) r9 = 0\n     89: 0.....6..9 (b7) r1 = 0\n     90: 01....6..9 (15) if r0 == 0x0 goto pc+1\n     91: 0.....6..9 (79) r1 = *(u64 *)(r0 +0)\n     92: .1....6..9 (7b) *(u64 *)(r10 -184) = r1\n     93: ......6..9 (bf) r3 = r6\n     94: ...3..6..9 (07) r3 += 14\n     95: ...3..6..9 (bf) r1 = r10\n     96: .1.3..6..9 (07) r1 += -104\n     97: .1.3..6..9 (b7) r2 = 2\n     98: .123..6..9 (85) call bpf_probe_read_kernel#113\n     99: ......6..9 (69) r1 = *(u16 *)(r10 -104)\n    100: .1....6..9 (7b) *(u64 *)(r10 -1\n... verifier log truncated ...",
+  "status": "error"
+}
+```
+
+### ReJIT Result
+
+```json
+{
+  "applied": false,
+  "changed": false,
+  "enabled_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "error": "prog 3030: preserved failure workdir: /var/lib/bpfrejit-daemon/failures/3030_1777470693_606656065_1134: bpfverify final verification failed for prog 3030: bpfverify final verification rejected bytecode (returncode 0, verifier status fail, errno 13): verifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (b7) r2 = 0\n      1: .12....... (63) *(u32 *)(r10 -112) = r2\n      2: .12....... (7b) *(u64 *)(r10 -120) = r2\n      3: .12....... (63) *(u32 *)(r10 -128) = r2\n      4: .12....... (7b) *(u64 *)(r10 -136) = r2\n      5: .12....... (73) *(u8 *)(r10 -138) = r2\n      6: .12....... (6b) *(u16 *)(r10 -140) = r2\n      7: .12....... (63) *(u32 *)(r10 -144) = r2\n      8: .12....... (7b) *(u64 *)(r10 -152) = r2\n      9: .1........ (79) r6 = *(u64 *)(r1 +112)\n     10: .1....6... (79) r8 = *(u64 *)(r1 +104)\n     11: ......6.8. (b7) r1 = 4\n     12: .1....6.8. (2d) if r1 > r8 goto pc+1\n     13: ......6.8. (05) goto pc+22\n     14: ......6.8. (7b) *(u64 *)(r10 -104) = r6\n     15: ......6.8. (18) r1 = 0xffff8982848b0000\n     17: .1....6.8. (bf) r2 = r10\n     18: .12...6.8. (07) r2 += -104\n     19: .12...6.8. (85) call bpf_map_lookup_elem#1\n     20: 0.....6.8. (55) if r0 != 0x0 goto pc+1\n     21: ......6.8. (05) goto pc+3\n     22: 0.....6.8. (79) r1 = *(u64 *)(r0 +0)\n     23: .1....6.8. (15) if r1 == 0x0 goto pc+1\n     24: ......6.8. (05) goto pc+11\n     25: ......6.8. (85) call bpf_ktime_get_boot_ns#125\n     26: 0.....6.8. (7b) *(u64 *)(r10 -8) = r6\n     27: 0.....6.8. (7b) *(u64 *)(r10 -104) = r0\n     28: ......6.8. (18) r1 = 0xffff8982848b0000\n     30: .1....6.8. (bf) r2 = r10\n     31: .12...6.8. (07) r2 += -8\n     32: .12...6.8. (bf) r3 = r10\n     33: .123..6.8. (07) r3 += -104\n     34: .123..6.8. (b7) r4 = 0\n     35: .1234.6.8. (85) call bpf_map_update_elem#2\n     36: ......6.8. (15) if r8 == 0x2 goto pc+3\n     37: ......6.8. (15) if r8 == 0x7 goto pc+32\n     38: ......6.8. (15) if r8 == 0x9 goto pc+1\n     39: .......... (05) goto pc+328\n     40: ......6.8. (85) call bpf_get_current_pid_tgid#14\n     41: 0.....6.8. (7b) *(u64 *)(r10 -8) = r6\n     42: 0.....6.8. (77) r0 >>= 32\n     43: 0.....6.8. (7b) *(u64 *)(r10 -104) = r0\n     44: ......6.8. (18) r1 = 0xffff898377344400\n     46: .1....6.8. (bf) r2 = r10\n     47: .12...6.8. (07) r2 += -8\n     48: .12...6.8. (bf) r3 = r10\n     49: .123..6.8. (07) r3 += -104\n     50: .123..6.8. (b7) r7 = 0\n     51: .123..678. (b7) r4 = 0\n     52: .1234.678. (85) call bpf_map_update_elem#2\n     53: ......678. (7b) *(u64 *)(r10 -96) = r7\n     54: ......678. (7b) *(u64 *)(r10 -104) = r7\n     55: ......6.8. (bf) r7 = r10\n     56: ......678. (07) r7 += -104\n     57: ......678. (bf) r1 = r7\n     58: .1....678. (b7) r2 = 16\n     59: .12...678. (85) call bpf_get_current_comm#16\n     60: ......678. (7b) *(u64 *)(r10 -8) = r6\n     61: ......678. (18) r1 = 0xffff8982848b2c00\n     63: .1....678. (bf) r2 = r10\n     64: .12...678. (07) r2 += -8\n     65: .12...678. (bf) r3 = r7\n     66: .123..6.8. (b7) r4 = 0\n     67: .1234.6.8. (85) call bpf_map_update_elem#2\n     68: ......6.8. (15) if r8 == 0x7 goto pc+1\n     69: .......... (05) goto pc+298\n     70: ......6... (7b) *(u64 *)(r10 -104) = r6\n     71: ......6... (18) r1 = 0xffff8982848b0000\n     73: .1....6... (bf) r2 = r10\n     74: .12...6... (07) r2 += -104\n     75: .12...6... (85) call bpf_map_lookup_elem#1\n     76: 0.....6... (55) if r0 != 0x0 goto pc+1\n     77: .......... (05) goto pc+290\n     78: 0.....6... (79) r1 = *(u64 *)(r0 +0)\n     79: .1....6... (15) if r1 == 0x0 goto pc+288\n     80: ......6... (85) call bpf_ktime_get_boot_ns#125\n     81: 0.....6... (7b) *(u64 *)(r10 -192) = r0\n     82: ......6... (7b) *(u64 *)(r10 -104) = r6\n     83: ......6... (18) r1 = 0xffff8982848b0000\n     85: .1....6... (bf) r2 = r10\n     86: .12...6... (07) r2 += -104\n     87: .12...6... (85) call bpf_map_lookup_elem#1\n     88: 0.....6... (b7) r9 = 0\n     89: 0.....6..9 (b7) r1 = 0\n     90: 01....6..9 (15) if r0 == 0x0 goto pc+1\n     91: 0.....6..9 (79) r1 = *(u64 *)(r0 +0)\n     92: .1....6..9 (7b) *(u64 *)(r10 -184) = r1\n     93: ......6..9 (bf) r3 = r6\n     94: ...3..6..9 (07) r3 += 14\n     95: ...3..6..9 (bf) r1 = r10\n     96: .1.3..6..9 (07) r1 += -104\n     97: .1.3..6..9 (b7) r2 = 2\n     98: .123..6..9 (85) call bpf_probe_read_kernel#113\n     99: ......6..9 (69) r1 = *(u16 *)(r10 -104)\n    100: .1....6..9 (7b) *(u64 *)(r10 -1\n... verifier log truncated ...",
+  "error_programs": [
+    {
+      "applied": false,
+      "changed": false,
+      "error": "preserved failure workdir: /var/lib/bpfrejit-daemon/failures/3030_1777470693_606656065_1134: bpfverify final verification failed for prog 3030: bpfverify final verification rejected bytecode (returncode 0, verifier status fail, errno 13): verifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (b7) r2 = 0\n      1: .12....... (63) *(u32 *)(r10 -112) = r2\n      2: .12....... (7b) *(u64 *)(r10 -120) = r2\n      3: .12....... (63) *(u32 *)(r10 -128) = r2\n      4: .12....... (7b) *(u64 *)(r10 -136) = r2\n      5: .12....... (73) *(u8 *)(r10 -138) = r2\n      6: .12....... (6b) *(u16 *)(r10 -140) = r2\n      7: .12....... (63) *(u32 *)(r10 -144) = r2\n      8: .12....... (7b) *(u64 *)(r10 -152) = r2\n      9: .1........ (79) r6 = *(u64 *)(r1 +112)\n     10: .1....6... (79) r8 = *(u64 *)(r1 +104)\n     11: ......6.8. (b7) r1 = 4\n     12: .1....6.8. (2d) if r1 > r8 goto pc+1\n     13: ......6.8. (05) goto pc+22\n     14: ......6.8. (7b) *(u64 *)(r10 -104) = r6\n     15: ......6.8. (18) r1 = 0xffff8982848b0000\n     17: .1....6.8. (bf) r2 = r10\n     18: .12...6.8. (07) r2 += -104\n     19: .12...6.8. (85) call bpf_map_lookup_elem#1\n     20: 0.....6.8. (55) if r0 != 0x0 goto pc+1\n     21: ......6.8. (05) goto pc+3\n     22: 0.....6.8. (79) r1 = *(u64 *)(r0 +0)\n     23: .1....6.8. (15) if r1 == 0x0 goto pc+1\n     24: ......6.8. (05) goto pc+11\n     25: ......6.8. (85) call bpf_ktime_get_boot_ns#125\n     26: 0.....6.8. (7b) *(u64 *)(r10 -8) = r6\n     27: 0.....6.8. (7b) *(u64 *)(r10 -104) = r0\n     28: ......6.8. (18) r1 = 0xffff8982848b0000\n     30: .1....6.8. (bf) r2 = r10\n     31: .12...6.8. (07) r2 += -8\n     32: .12...6.8. (bf) r3 = r10\n     33: .123..6.8. (07) r3 += -104\n     34: .123..6.8. (b7) r4 = 0\n     35: .1234.6.8. (85) call bpf_map_update_elem#2\n     36: ......6.8. (15) if r8 == 0x2 goto pc+3\n     37: ......6.8. (15) if r8 == 0x7 goto pc+32\n     38: ......6.8. (15) if r8 == 0x9 goto pc+1\n     39: .......... (05) goto pc+328\n     40: ......6.8. (85) call bpf_get_current_pid_tgid#14\n     41: 0.....6.8. (7b) *(u64 *)(r10 -8) = r6\n     42: 0.....6.8. (77) r0 >>= 32\n     43: 0.....6.8. (7b) *(u64 *)(r10 -104) = r0\n     44: ......6.8. (18) r1 = 0xffff898377344400\n     46: .1....6.8. (bf) r2 = r10\n     47: .12...6.8. (07) r2 += -8\n     48: .12...6.8. (bf) r3 = r10\n     49: .123..6.8. (07) r3 += -104\n     50: .123..6.8. (b7) r7 = 0\n     51: .123..678. (b7) r4 = 0\n     52: .1234.678. (85) call bpf_map_update_elem#2\n     53: ......678. (7b) *(u64 *)(r10 -96) = r7\n     54: ......678. (7b) *(u64 *)(r10 -104) = r7\n     55: ......6.8. (bf) r7 = r10\n     56: ......678. (07) r7 += -104\n     57: ......678. (bf) r1 = r7\n     58: .1....678. (b7) r2 = 16\n     59: .12...678. (85) call bpf_get_current_comm#16\n     60: ......678. (7b) *(u64 *)(r10 -8) = r6\n     61: ......678. (18) r1 = 0xffff8982848b2c00\n     63: .1....678. (bf) r2 = r10\n     64: .12...678. (07) r2 += -8\n     65: .12...678. (bf) r3 = r7\n     66: .123..6.8. (b7) r4 = 0\n     67: .1234.6.8. (85) call bpf_map_update_elem#2\n     68: ......6.8. (15) if r8 == 0x7 goto pc+1\n     69: .......... (05) goto pc+298\n     70: ......6... (7b) *(u64 *)(r10 -104) = r6\n     71: ......6... (18) r1 = 0xffff8982848b0000\n     73: .1....6... (bf) r2 = r10\n     74: .12...6... (07) r2 += -104\n     75: .12...6... (85) call bpf_map_lookup_elem#1\n     76: 0.....6... (55) if r0 != 0x0 goto pc+1\n     77: .......... (05) goto pc+290\n     78: 0.....6... (79) r1 = *(u64 *)(r0 +0)\n     79: .1....6... (15) if r1 == 0x0 goto pc+288\n     80: ......6... (85) call bpf_ktime_get_boot_ns#125\n     81: 0.....6... (7b) *(u64 *)(r10 -192) = r0\n     82: ......6... (7b) *(u64 *)(r10 -104) = r6\n     83: ......6... (18) r1 = 0xffff8982848b0000\n     85: .1....6... (bf) r2 = r10\n     86: .12...6... (07) r2 += -104\n     87: .12...6... (85) call bpf_map_lookup_elem#1\n     88: 0.....6... (b7) r9 = 0\n     89: 0.....6..9 (b7) r1 = 0\n     90: 01....6..9 (15) if r0 == 0x0 goto pc+1\n     91: 0.....6..9 (79) r1 = *(u64 *)(r0 +0)\n     92: .1....6..9 (7b) *(u64 *)(r10 -184) = r1\n     93: ......6..9 (bf) r3 = r6\n     94: ...3..6..9 (07) r3 += 14\n     95: ...3..6..9 (bf) r1 = r10\n     96: .1.3..6..9 (07) r1 += -104\n     97: .1.3..6..9 (b7) r2 = 2\n     98: .123..6..9 (85) call bpf_probe_read_kernel#113\n     99: ......6..9 (69) r1 = *(u16 *)(r10 -104)\n    100: .1....6..9 (7b) *(u64 *)(r10 -1\n... verifier log truncated ...",
+      "exit_code": 1,
+      "prog_id": 3030
+    }
+  ],
+  "exit_code": 1,
+  "program_counts": {
+    "applied": 0,
+    "not_applied": 1,
+    "requested": 1
+  }
+}
+```
+
+### Process Output
+
+```json
+{
+  "returncode": 0,
+  "stderr_tail": "",
+  "stdout_tail": "PID   COMM       LADDR           LPORT RADDR           RPORT TX_KB RX_KB MS\n15784 stress-ng- 127.0.0.1       57374 127.0.0.1       22083      0 408792 37\n15784 stress-ng- 127.0.0.1       22083 127.0.0.1       57374  408792     0 37\n15814 stress-ng- 127.0.0.1       57388 127.0.0.1       22083      0 408605 37\n15814 stress-ng- 127.0.0.1       22083 127.0.0.1       57388  408559     0 37"
+}
+```
+
+## biosnoop
+
+### Baseline
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3042": {
+        "avg_ns_per_run": 410.74304635761587,
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 3042,
+        "name": "block_io_start",
+        "run_cnt_delta": 59645,
+        "run_time_ns_delta": 24498769,
+        "type": "tracepoint"
+      },
+      "3043": {
+        "avg_ns_per_run": 1439.8329031176668,
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 3043,
+        "name": "block_io_done",
+        "run_cnt_delta": 59660,
+        "run_time_ns_delta": 85900431,
+        "type": "tracepoint"
+      }
+    },
+    "duration_s": 5,
+    "metric": "ops/s",
+    "throughput": 9925.174462952804
+  },
+  "phase": "baseline",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### Post-ReJIT
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3042": {
+        "avg_ns_per_run": 438.4907369083293,
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 3042,
+        "name": "block_io_start",
+        "run_cnt_delta": 60401,
+        "run_time_ns_delta": 26485279,
+        "type": "tracepoint"
+      },
+      "3043": {
+        "avg_ns_per_run": 1457.084701714891,
+        "bytes_jited": 889,
+        "bytes_xlated": 1488,
+        "id": 3043,
+        "name": "block_io_done",
+        "run_cnt_delta": 60412,
+        "run_time_ns_delta": 88025401,
+        "type": "tracepoint"
+      }
+    },
+    "duration_s": 5,
+    "metric": "ops/s",
+    "throughput": 10942.222245713043
+  },
+  "phase": "post_rejit",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### ReJIT Result
+
+```json
+{
+  "applied": true,
+  "changed": true,
+  "enabled_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "error": "",
+  "exit_code": 0,
+  "noop_programs": [
+    {
+      "applied": false,
+      "changed": false,
+      "exit_code": 0,
+      "passes": [
+        {
+          "pass_name": "wide_mem",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "rotate",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "cond_select",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "extract",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "endian_fusion",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "map_inline",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "const_prop",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "dce",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bounds_check_merge",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "skb_load_bytes_spec",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bulk_memory",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        }
+      ],
+      "prog_id": 3042
+    }
+  ],
+  "program_counts": {
+    "applied": 1,
+    "not_applied": 1,
+    "requested": 2
+  }
+}
+```
+
+### Process Output
+
+```json
+{
+  "returncode": 0,
+  "stderr_tail": "",
+  "stdout_tail": "18855        7     0        fio              15877        0\n18855        7     0        fio              15878        0\n18855        7     0        fio              15876        0\n18856        7     0        fio              15875        0\n18856        7     0        fio              15877        0\n18856        7     0        fio              15878        0\n18856        7     0        fio              15876        0\n18856        7     0        fio              15875        0\n18856        7     0        fio              15877        0\n18856        7     0        fio              15878        0\n18856        7     0        fio              15876        0\n18856        7     0        fio              15875        0\n18856        7     0        fio              15877        0\n18856        7     0        fio              15878        0\n18856        7     0        fio              15876        0\n18856        7     0        fio              15875        0\n18856        7     0        fio              15877        0\n18856        7     0        fio              15878        0\n18856        7     0        fio              15876        0\n18857        7     0        fio              15875        0\n18857        7     0        fio              15877        0\n18857        7     0        fio              15878        0\n18857        7     0        fio              15876        0\n18857        7     0        fio              15875        0\n18857        7     0        fio              15877        0\n18857        7     0        fio              15878        0\n18857        7     0        fio              15876        0\n18857        7     0        fio              15875        0\n18857        7     0        fio              15877        0\n18857        7     0        fio              15878        0\n18857        7     0        fio              15876        0\n18857        7     0        fio              15875        0\n18857        7     0        fio              15877        0\n18857        7     0        fio              15878        0\n18857        7     0        fio              15876        0\n18857        7     0        fio              15875        0\n18858        7     0        jbd2/loop0-8     1368         0\n18858        7     0        fio              15877        0\n18858        7     0        fio              15878        0\n18971        7     0        jbd2/loop0-8     1368       113"
+}
+```
+
+## runqlat
+
+### Baseline
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3059": {
+        "avg_ns_per_run": 227.950025335698,
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 3059,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 15788,
+        "run_time_ns_delta": 3598875,
+        "type": "tracepoint"
+      },
+      "3060": {
+        "avg_ns_per_run": 230.18450184501845,
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 3060,
+        "name": "tracepoint_sched_sched_wakeup_new",
+        "run_cnt_delta": 542,
+        "run_time_ns_delta": 124760,
+        "type": "tracepoint"
+      },
+      "3061": {
+        "avg_ns_per_run": 186.39867688022284,
+        "bytes_jited": 515,
+        "bytes_xlated": 896,
+        "id": 3061,
+        "name": "sched_switch",
+        "run_cnt_delta": 31592,
+        "run_time_ns_delta": 5888707,
+        "type": "tracepoint"
+      }
+    },
+    "duration_s": 5,
+    "metric": "ops/s",
+    "throughput": 1116.3739303928444
+  },
+  "phase": "baseline",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### Post-ReJIT
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3059": {
+        "avg_ns_per_run": 345.1068907563025,
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 3059,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 5950,
+        "run_time_ns_delta": 2053386,
+        "type": "tracepoint"
+      },
+      "3060": {
+        "avg_ns_per_run": 244.56851851851852,
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 3060,
+        "name": "tracepoint_sched_sched_wakeup_new",
+        "run_cnt_delta": 540,
+        "run_time_ns_delta": 132067,
+        "type": "tracepoint"
+      },
+      "3061": {
+        "avg_ns_per_run": 267.686679174484,
+        "bytes_jited": 506,
+        "bytes_xlated": 872,
+        "id": 3061,
+        "name": "sched_switch",
+        "run_cnt_delta": 12259,
+        "run_time_ns_delta": 3281571,
+        "type": "tracepoint"
+      }
+    },
+    "duration_s": 5,
+    "metric": "ops/s",
+    "throughput": 1121.6980029788747
+  },
+  "phase": "post_rejit",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### ReJIT Result
+
+```json
+{
+  "applied": true,
+  "changed": true,
+  "enabled_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "error": "",
+  "exit_code": 0,
+  "noop_programs": [
+    {
+      "applied": false,
+      "changed": false,
+      "exit_code": 0,
+      "passes": [
+        {
+          "pass_name": "wide_mem",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "rotate",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "cond_select",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "extract",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "endian_fusion",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "map_inline",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "const_prop",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "dce",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bounds_check_merge",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "skb_load_bytes_spec",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bulk_memory",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        }
+      ],
+      "prog_id": 3059
+    },
+    {
+      "applied": false,
+      "changed": false,
+      "exit_code": 0,
+      "passes": [
+        {
+          "pass_name": "wide_mem",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "rotate",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "cond_select",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "extract",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "endian_fusion",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "map_inline",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "const_prop",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "dce",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bounds_check_merge",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "skb_load_bytes_spec",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bulk_memory",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        }
+      ],
+      "prog_id": 3060
+    }
+  ],
+  "program_counts": {
+    "applied": 1,
+    "not_applied": 2,
+    "requested": 3
+  }
+}
+```
+
+### Process Output
+
+```json
+{
+  "returncode": 0,
+  "stderr_tail": "",
+  "stdout_tail": "Tracing CPU scheduler... Hit Ctrl-C to end.\n@usecs:\n[0]                19862 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|\n[1]                  720 |@                                                   |\n[2, 4)              1809 |@@@@                                                |\n[4, 8)               303 |                                                    |\n[8, 16)              571 |@                                                   |\n[16, 32)             220 |                                                    |\n[32, 64)             143 |                                                    |\n[64, 128)             89 |                                                    |\n[128, 256)            65 |                                                    |\n[256, 512)             7 |                                                    |\n[512, 1K)              5 |                                                    |\n[1K, 2K)               8 |                                                    |\n[2K, 4K)               3 |                                                    |"
+}
+```
+
+## tcpretrans
+
+### Baseline
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3080": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 968,
+        "bytes_xlated": 1640,
+        "id": 3080,
+        "name": "kprobe_tcp_retransmit_skb",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "duration_s": 5,
+    "metric": "ops/s",
+    "throughput": 6245.217880366343
+  },
+  "phase": "baseline",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### Post-ReJIT
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3080": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 926,
+        "bytes_xlated": 1568,
+        "id": 3080,
+        "name": "tcp_retransmit_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "duration_s": 5,
+    "metric": "ops/s",
+    "throughput": 1517.5435345197654
+  },
+  "phase": "post_rejit",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### ReJIT Result
+
+```json
+{
+  "applied": true,
+  "changed": true,
+  "enabled_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "error": "",
+  "exit_code": 0,
+  "program_counts": {
+    "applied": 1,
+    "not_applied": 0,
+    "requested": 1
+  }
+}
+```
+
+### Process Output
+
+```json
+{
+  "returncode": 0,
+  "stderr_tail": "",
+  "stdout_tail": "Tracing tcp retransmits. Hit Ctrl-C to end.\nTIME     PID               LADDR:LPORT           RADDR:RPORT  STATE"
+}
+```
+
+## capable
+
+### Baseline
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3093": {
+        "avg_ns_per_run": 174.72192570796508,
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 3093,
+        "name": "cap_capable",
+        "run_cnt_delta": 93119,
+        "run_time_ns_delta": 16269931,
+        "type": "kprobe"
+      }
+    },
+    "duration_s": 5,
+    "metric": "ops/s",
+    "throughput": 13420.758158769135
+  },
+  "phase": "baseline",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### Post-ReJIT
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3093": {
+        "avg_ns_per_run": 219.4525323252717,
+        "bytes_jited": 697,
+        "bytes_xlated": 1216,
+        "id": 3093,
+        "name": "cap_capable",
+        "run_cnt_delta": 93116,
+        "run_time_ns_delta": 20434542,
+        "type": "kprobe"
+      }
+    },
+    "duration_s": 5,
+    "metric": "ops/s",
+    "throughput": 13230.57785766918
+  },
+  "phase": "post_rejit",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### ReJIT Result
+
+```json
+{
+  "applied": true,
+  "changed": true,
+  "enabled_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "error": "",
+  "exit_code": 0,
+  "program_counts": {
+    "applied": 1,
+    "not_applied": 0,
+    "requested": 1
+  }
+}
+```
+
+### Process Output
+
+```json
+{
+  "returncode": 0,
+  "stderr_tail": "",
+  "stdout_tail": "13:52:28  0      19134  stress-ng        21   CAP_SYS_ADMIN        2\n13:52:28  0      19134  stress-ng        21   CAP_SYS_ADMIN        2\n13:52:28  0      19134  stress-ng        21   CAP_SYS_ADMIN        2\n13:52:28  0      19134  stress-ng        21   CAP_SYS_ADMIN        2\n13:52:28  0      19134  stress-ng        21   CAP_SYS_ADMIN        2\n13:52:28  0      19134  stress-ng        21   CAP_SYS_ADMIN        2\n13:52:28  0      19135  stress-ng-timer  24   CAP_SYS_RESOURCE     2\n13:52:28  0      19135  stress-ng-timer  21   CAP_SYS_ADMIN        0\n13:52:28  0      19135  stress-ng-timer  21   CAP_SYS_ADMIN        0\n13:52:28  0      19135  stress-ng-timer  21   CAP_SYS_ADMIN        0\n13:52:28  0      19135  stress-ng-timer  21   CAP_SYS_ADMIN        0\n13:52:28  0      19136  python3          21   CAP_SYS_ADMIN        2\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        2\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        2\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        2\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        2\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        2\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        2\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        2\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        2\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        2\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        2\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        2\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        2\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        2\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        2\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        2\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        0\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        0\n13:52:28  0      19136  bpftool          39   CAP_BPF              0\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        0\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        0\n13:52:28  0      19136  bpftool          39   CAP_BPF              0\n13:52:28  0      19136  bpftool          39   CAP_BPF              0\n13:52:28  0      19136  bpftool          39   CAP_BPF              0\n13:52:28  0      19136  bpftool          39   CAP_BPF              0\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        0\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        0\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        0\n13:52:28  0      19136  bpftool          21   CAP_SYS_ADMIN        0"
+}
+```
+
+## vfsstat
+
+### Baseline
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3106": {
+        "avg_ns_per_run": 3119.5625,
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 3106,
+        "name": "1",
+        "run_cnt_delta": 16,
+        "run_time_ns_delta": 49913,
+        "type": "perf_event"
+      },
+      "3107": {
+        "avg_ns_per_run": 45.88107725017718,
+        "bytes_jited": 140,
+        "bytes_xlated": 224,
+        "id": 3107,
+        "name": "vfs_create",
+        "run_cnt_delta": 84660,
+        "run_time_ns_delta": 3884292,
+        "type": "kprobe"
+      }
+    },
+    "duration_s": 5,
+    "metric": "ops/s",
+    "throughput": 503.6307049324248
+  },
+  "phase": "baseline",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### Post-ReJIT
+
+```json
+{
+  "measurement": {
+    "bpf": {
+      "3106": {
+        "avg_ns_per_run": 2676.8125,
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 3106,
+        "name": "1",
+        "run_cnt_delta": 16,
+        "run_time_ns_delta": 42829,
+        "type": "perf_event"
+      },
+      "3107": {
+        "avg_ns_per_run": 47.231288995449965,
+        "bytes_jited": 140,
+        "bytes_xlated": 224,
+        "id": 3107,
+        "name": "vfs_create",
+        "run_cnt_delta": 73406,
+        "run_time_ns_delta": 3467060,
+        "type": "kprobe"
+      }
+    },
+    "duration_s": 5,
+    "metric": "ops/s",
+    "throughput": 537.2980930705526
+  },
+  "phase": "post_rejit",
+  "reason": "",
+  "status": "ok"
+}
+```
+
+### ReJIT Result
+
+```json
+{
+  "applied": false,
+  "changed": false,
+  "enabled_passes": [
+    "wide_mem",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "map_inline",
+    "const_prop",
+    "dce",
+    "bounds_check_merge",
+    "skb_load_bytes_spec",
+    "bulk_memory"
+  ],
+  "error": "",
+  "exit_code": 0,
+  "noop_programs": [
+    {
+      "applied": false,
+      "changed": false,
+      "exit_code": 0,
+      "passes": [
+        {
+          "pass_name": "wide_mem",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "rotate",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "cond_select",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "extract",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "endian_fusion",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "map_inline",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "const_prop",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "dce",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bounds_check_merge",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "skb_load_bytes_spec",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bulk_memory",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        }
+      ],
+      "prog_id": 3106
+    },
+    {
+      "applied": false,
+      "changed": false,
+      "exit_code": 0,
+      "passes": [
+        {
+          "pass_name": "wide_mem",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "rotate",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "cond_select",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "extract",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "endian_fusion",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "map_inline",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "const_prop",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "dce",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bounds_check_merge",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "skb_load_bytes_spec",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        },
+        {
+          "pass_name": "bulk_memory",
+          "sites_applied": 0,
+          "sites_matched": 0,
+          "sites_skipped": 0,
+          "skip_reasons": {},
+          "verify": {
+            "status": "not_needed"
+          }
+        }
+      ],
+      "prog_id": 3107
+    }
+  ],
+  "program_counts": {
+    "applied": 0,
+    "not_applied": 2,
+    "requested": 2
+  }
+}
+```
+
+### Process Output
+
+```json
+{
+  "returncode": 0,
+  "stderr_tail": "",
+  "stdout_tail": "13:52:55\n@[vfs_write]: 1\n@[vfs_read]: 2\n13:52:56\n@[vfs_write]: 1\n13:52:57\n@[vfs_read]: 1\n@[vfs_write]: 1\n13:52:58\n@[vfs_write]: 1\n@[vfs_read]: 2\n13:52:59\n@[vfs_writev]: 1\n@[vfs_readv]: 1\n@[vfs_fsync]: 2\n@[vfs_create]: 8\n@[vfs_write]: 193\n@[vfs_read]: 1525\n@[vfs_open]: 2759\n13:53:00\n@[vfs_create]: 28\n@[vfs_write]: 30\n@[vfs_read]: 38\n@[vfs_open]: 108\n13:53:01\n@[vfs_create]: 21\n@[vfs_write]: 22\n@[vfs_read]: 28\n@[vfs_open]: 78\n13:53:02\n@[vfs_create]: 30\n@[vfs_write]: 32\n@[vfs_read]: 42\n@[vfs_open]: 116\n13:53:03\n@[vfs_fsync]: 22\n@[vfs_write]: 44\n@[vfs_create]: 61\n@[vfs_read]: 882\n@[vfs_open]: 1218"
+}
+```
+
