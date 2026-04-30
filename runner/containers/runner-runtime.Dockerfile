@@ -525,6 +525,8 @@ COPY --from=runner-runtime-daemon-artifact /artifacts/rust/daemon/target/ ./daem
 COPY --from=runner-runtime-bpfopt-artifacts /artifacts/rust/usr-local-bin/ /usr/local/bin/
 COPY --from=runner-runtime-kinsn-artifacts /artifacts/kinsn /artifacts/kinsn
 
+COPY --link corpus/bcf ./corpus/bcf
+COPY --link e2e/cases ./e2e/cases
 COPY runner/__init__.py runner/repos.yaml ./runner/
 COPY runner/libs ./runner/libs
 COPY runner/suites ./runner/suites
@@ -532,11 +534,9 @@ COPY runner/targets ./runner/targets
 COPY micro/*.py ./micro/
 COPY micro/config ./micro/config
 COPY corpus/*.py ./corpus/
-COPY corpus/bcf ./corpus/bcf
 COPY corpus/config ./corpus/config
 COPY corpus/inputs ./corpus/inputs
 COPY e2e/*.py ./e2e/
-COPY e2e/cases ./e2e/cases
 
 RUN set -eux; \
     find ./runner ./micro ./corpus ./e2e -type d -name __pycache__ -prune -exec rm -rf {} +; \
