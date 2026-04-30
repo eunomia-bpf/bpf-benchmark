@@ -20,6 +20,9 @@ Corpus performance is measured per-program, not per-app:
 - No thresholds, no type exclusions, no app-status filtering
 - Result payload contains `per_program` list and `summary` with `per_program_geomean`, `program_count`, `wins`, `losses`
 
+### BranchFlip Requires Real Per-Site PGO
+`branch_flip` is the Paper B profile-guided branch-layout pass. It is production code but remains outside the default 11-pass `bpfopt optimize` pipeline until Paper B benchmark results decide policy. It must consume real `bpfprof --per-site` data: every candidate site needs `branch_count`, `branch_misses`, `miss_rate`, `taken`, and `not_taken`. Placeholder PMU fields, heuristic fallback, missing-site success, and optional per-site profile fields are forbidden; missing program/site PMU data must exit 1.
+
 ### No Redundant Informational Fields
 Do not add `workload_miss`, `limitations`, or similar informational-only fields to result payloads. If something fails, it should surface as an error, not as a metadata annotation.
 
