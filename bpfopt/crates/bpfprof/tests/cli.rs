@@ -3,9 +3,11 @@ use std::process::Command;
 fn pmu_unavailable(stderr: &[u8]) -> bool {
     let stderr = String::from_utf8_lossy(stderr);
     stderr.contains("perf_event_open")
-        || stderr.contains("PMU branch counters")
-        || stderr.contains("open branch-instructions PMU counter")
-        || stderr.contains("open branch-misses PMU counter")
+        || stderr.contains("kernel LBR perf event")
+        || stderr.contains("bpf_get_branch_snapshot")
+        || stderr.contains("jited_line_info")
+        || stderr.contains("func_info")
+        || stderr.contains("sidecar")
 }
 
 fn kernel_access_unavailable(stderr: &[u8]) -> bool {
@@ -24,6 +26,7 @@ fn nonexistent_prog_id_exits_with_error() {
         .args([
             "--prog-id",
             "0",
+            "--per-site",
             "--duration",
             "100ms",
             "--output",
@@ -40,7 +43,7 @@ fn nonexistent_prog_id_exits_with_error() {
 #[test]
 fn profile_json_requires_side_output_file() {
     let output = Command::new(env!("CARGO_BIN_EXE_bpfprof"))
-        .args(["--prog-id", "0", "--duration", "100ms"])
+        .args(["--prog-id", "0", "--per-site", "--duration", "100ms"])
         .output()
         .expect("run bpfprof");
 
@@ -54,12 +57,49 @@ fn profile_json_requires_side_output_file() {
 }
 
 #[test]
+fn per_site_mode_is_required() {
+    let output_path = std::env::temp_dir().join(format!(
+        "bpfprof-cli-{}-no-per-site.json",
+        std::process::id()
+    ));
+    let output_arg = output_path.to_string_lossy().to_string();
+    let output = Command::new(env!("CARGO_BIN_EXE_bpfprof"))
+        .args([
+            "--prog-id",
+            "0",
+            "--duration",
+            "100ms",
+            "--output",
+            &output_arg,
+        ])
+        .output()
+        .expect("run bpfprof");
+    match std::fs::remove_file(&output_path) {
+        Ok(()) => {}
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {}
+        Err(err) => panic!("remove {}: {err}", output_path.display()),
+    }
+
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("requires --per-site"), "stderr={stderr}");
+    assert!(output.stdout.is_empty());
+}
+
+#[test]
 fn all_mode_pmu_unavailable_exits_with_error() {
     let output_path =
         std::env::temp_dir().join(format!("bpfprof-cli-{}-all.json", std::process::id()));
     let output_arg = output_path.to_string_lossy().to_string();
     let output = Command::new(env!("CARGO_BIN_EXE_bpfprof"))
-        .args(["--all", "--duration", "100ms", "--output", &output_arg])
+        .args([
+            "--all",
+            "--per-site",
+            "--duration",
+            "100ms",
+            "--output",
+            &output_arg,
+        ])
         .output()
         .expect("run bpfprof --all");
     match std::fs::remove_file(&output_path) {

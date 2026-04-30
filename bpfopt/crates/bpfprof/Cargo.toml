@@ -12,7 +12,7 @@ path = "src/main.rs"
 anyhow.workspace = true
 clap.workspace = true
 humantime.workspace = true
-perf-event-open-sys.workspace = true
+libc.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 kernel-sys = { path = "../kernel-sys" }
