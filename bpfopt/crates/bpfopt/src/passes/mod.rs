@@ -24,13 +24,13 @@ pub use const_prop::ConstPropPass;
 pub use dce::DcePass;
 pub use endian::EndianFusionPass;
 pub use extract::ExtractPass;
-pub use map_inline::MapInlinePass;
+pub use map_inline::{MapInfo, MapInfoAnalysis, MapInfoResult, MapInlinePass, MapReference};
 pub use rotate::RotatePass;
 pub use skb_load_bytes::SkbLoadBytesSpecPass;
 pub use wide_mem::WideMemPass;
 
 #[cfg(test)]
-use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis, MapInfoAnalysis};
+use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
 use crate::pass::BpfPass;
 #[cfg(test)]
 use crate::pass::PassManager;

@@ -42,7 +42,7 @@ impl MapProvider for MockMapProvider {
         &self,
         program: &BpfProgram,
         map_id: u32,
-    ) -> std::result::Result<Option<crate::analysis::MapInfo>, String> {
+    ) -> std::result::Result<Option<crate::passes::MapInfo>, String> {
         if let Some(metadata) = program.map_metadata.get(&map_id) {
             return Ok(Some(map_info_from_metadata(metadata)));
         }
@@ -53,7 +53,7 @@ impl MapProvider for MockMapProvider {
     fn lookup_value_size(
         &self,
         program: &BpfProgram,
-        info: &crate::analysis::MapInfo,
+        info: &crate::passes::MapInfo,
     ) -> std::result::Result<usize, String> {
         if let Some(value_size) = program
             .map_values
@@ -100,8 +100,8 @@ pub fn use_mock_maps(program: &mut BpfProgram) {
     program.set_map_provider(Arc::new(MockMapProvider));
 }
 
-fn map_info_from_metadata(metadata: &MapMetadata) -> crate::analysis::MapInfo {
-    crate::analysis::MapInfo {
+fn map_info_from_metadata(metadata: &MapMetadata) -> crate::passes::MapInfo {
+    crate::passes::MapInfo {
         map_type: metadata.map_type,
         key_size: metadata.key_size,
         value_size: metadata.value_size,

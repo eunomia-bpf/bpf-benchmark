@@ -1,13 +1,14 @@
 use super::*;
 use std::collections::HashMap;
 
-use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, MapInfoAnalysis};
+use crate::analysis::{BranchTargetAnalysis, CFGAnalysis};
 use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
 use crate::mock_maps::use_mock_maps;
 use crate::pass::{
     MapInlineRecord, PassContext, PassManager, RegState, ScalarRange, Tnum, VerifierInsn,
     VerifierInsnKind, VerifierValueWidth,
 };
+use crate::passes::MapInfoAnalysis;
 use crate::passes::{ConstPropPass, DcePass};
 
 fn ld_imm64(dst: u8, src: u8, imm: i32) -> [BpfInsn; 2] {

@@ -5,9 +5,12 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::Write as _;
 use std::sync::OnceLock;
 
-use crate::analysis::{BranchTargetAnalysis, MapInfoAnalysis};
+use crate::analysis::BranchTargetAnalysis;
 use crate::insn::*;
 use crate::pass::*;
+
+mod map_info;
+pub use map_info::{MapInfo, MapInfoAnalysis, MapInfoResult, MapReference};
 
 const BPF_MAP_TYPE_HASH: u32 = kernel_sys::BPF_MAP_TYPE_HASH;
 const BPF_MAP_TYPE_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_HASH;
@@ -206,7 +209,7 @@ fn try_extract_constant_key_sized(
 fn try_extract_constant_key_from_map_value(
     program: &BpfProgram,
     call_pc: usize,
-    info: &crate::analysis::MapInfo,
+    info: &MapInfo,
 ) -> Result<ConstantKey, String> {
     let key_width = u8::try_from(info.key_size)
         .map_err(|_| format!("map key size {} does not fit in u8", info.key_size))?;
@@ -1146,7 +1149,7 @@ fn run_map_inline_round(
 fn extract_site_constant_key(
     program: &BpfProgram,
     call_pc: usize,
-    info: &crate::analysis::MapInfo,
+    info: &MapInfo,
     use_verifier_guided_keys: bool,
 ) -> Result<ConstantKey, String> {
     if use_verifier_guided_keys {
@@ -1274,7 +1277,7 @@ fn build_site_rewrite(
     site: &MapLookupSite,
     key: &ConstantKey,
     uses: &R0UseClassification,
-    info: &crate::analysis::MapInfo,
+    info: &MapInfo,
     null_check_pc: Option<usize>,
 ) -> anyhow::Result<Option<SiteRewrite>> {
     let remove_lookup_pattern =
@@ -1410,7 +1413,7 @@ fn build_site_rewrite(
 fn site_can_attempt_lookup_pattern_removal(
     program: &BpfProgram,
     uses: &R0UseClassification,
-    info: &crate::analysis::MapInfo,
+    info: &MapInfo,
     null_check_pc: Option<usize>,
 ) -> bool {
     if info.can_remove_lookup_pattern_v1() {
@@ -1592,10 +1595,7 @@ fn encode_key_bytes(bytes: &[u8], key_size: usize) -> Vec<u8> {
     bytes[..key_size].to_vec()
 }
 
-fn prepare_inline_value(
-    info: &crate::analysis::MapInfo,
-    raw_value: &[u8],
-) -> Result<Vec<u8>, String> {
+fn prepare_inline_value(info: &MapInfo, raw_value: &[u8]) -> Result<Vec<u8>, String> {
     if info.map_type != BPF_MAP_TYPE_PERCPU_ARRAY {
         return Ok(raw_value.to_vec());
     }

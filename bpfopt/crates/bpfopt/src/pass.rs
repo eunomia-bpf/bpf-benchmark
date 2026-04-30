@@ -172,12 +172,12 @@ pub trait MapProvider: Send + Sync + std::fmt::Debug {
         &self,
         program: &BpfProgram,
         map_id: u32,
-    ) -> std::result::Result<Option<crate::analysis::MapInfo>, String>;
+    ) -> std::result::Result<Option<crate::passes::MapInfo>, String>;
 
     fn lookup_value_size(
         &self,
         program: &BpfProgram,
-        info: &crate::analysis::MapInfo,
+        info: &crate::passes::MapInfo,
     ) -> std::result::Result<usize, String>;
 
     fn lookup_elem(
@@ -198,14 +198,14 @@ impl MapProvider for SnapshotMapProvider {
         &self,
         program: &BpfProgram,
         map_id: u32,
-    ) -> std::result::Result<Option<crate::analysis::MapInfo>, String> {
+    ) -> std::result::Result<Option<crate::passes::MapInfo>, String> {
         let Some(metadata) = program.map_metadata.get(&map_id) else {
             return Err(format!(
                 "map_values snapshot has no metadata for map {}",
                 map_id
             ));
         };
-        Ok(Some(crate::analysis::MapInfo {
+        Ok(Some(crate::passes::MapInfo {
             map_type: metadata.map_type,
             key_size: metadata.key_size,
             value_size: metadata.value_size,
@@ -218,7 +218,7 @@ impl MapProvider for SnapshotMapProvider {
     fn lookup_value_size(
         &self,
         program: &BpfProgram,
-        info: &crate::analysis::MapInfo,
+        info: &crate::passes::MapInfo,
     ) -> std::result::Result<usize, String> {
         if let Some(value_size) = program
             .map_values

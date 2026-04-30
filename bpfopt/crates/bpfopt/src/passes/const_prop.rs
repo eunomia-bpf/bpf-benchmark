@@ -779,9 +779,9 @@ mod tests {
     use super::*;
     use std::collections::HashMap;
 
-    use crate::analysis::{BranchTargetAnalysis, MapInfoAnalysis};
+    use crate::analysis::BranchTargetAnalysis;
     use crate::bpf::{install_mock_map, use_mock_maps, BpfMapInfo, MockMapState};
-    use crate::passes::{DcePass, MapInlinePass};
+    use crate::passes::{DcePass, MapInfoAnalysis, MapInlinePass};
 
     const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 

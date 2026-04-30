@@ -9,14 +9,14 @@ use std::process::ExitCode;
 use std::sync::Arc;
 
 use anyhow::{anyhow, bail, Context, Result};
-use bpfopt::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis, MapInfoAnalysis};
+use bpfopt::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
 use bpfopt::insn::BpfInsn;
 use bpfopt::pass::{
     BpfProgram, BtfInfoRecords, KinsnRegistry, MapMetadata, PassContext, PassManager, PassResult,
     PlatformCapabilities, RegState, ScalarRange, StackState, StaticKinsnCallResolver, Tnum,
     VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
-use bpfopt::passes::PASS_REGISTRY;
+use bpfopt::passes::{MapInfoAnalysis, PASS_REGISTRY};
 use clap::{Args, Parser, Subcommand};
 use serde::{Deserialize, Serialize};
 
