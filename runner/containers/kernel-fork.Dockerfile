@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.6
-FROM docker.io/library/ubuntu:24.04 AS kernel-fork
+FROM docker.io/library/ubuntu:24.04 AS kernel-fork-builder
 
 ARG IMAGE_BUILD_JOBS=4
 ARG RUN_TARGET_ARCH=x86_64
@@ -153,3 +153,7 @@ printf '{\n  "kernel_release": "%s",\n  "target_arch": "%s",\n  "kernel_image": 
 
 rm -rf "${module_install_root}" "${kernel_src}"
 EOF
+
+FROM scratch AS kernel-fork
+
+COPY --link --from=kernel-fork-builder /artifacts /artifacts
