@@ -26,7 +26,6 @@ pub const BPF_DW: u8 = kernel_sys::BPF_DW as u8; // 64-bit
 // ── Mode modifiers ───────────────────────────────────────────────────
 pub const BPF_IMM: u8 = kernel_sys::BPF_IMM as u8;
 pub const BPF_MEM: u8 = kernel_sys::BPF_MEM as u8;
-pub const BPF_MEMSX: u8 = kernel_sys::BPF_MEMSX as u8;
 
 // ── ALU/JMP operations ──────────────────────────────────────────────
 pub const BPF_ADD: u8 = kernel_sys::BPF_ADD as u8;
@@ -185,23 +184,8 @@ impl BpfInsn {
     }
 
     #[inline]
-    pub fn from_kernel(insn: kernel_sys::bpf_insn) -> Self {
-        Self(insn)
-    }
-
-    #[inline]
     pub fn as_kernel(&self) -> &kernel_sys::bpf_insn {
         &self.0
-    }
-
-    #[inline]
-    pub fn as_kernel_mut(&mut self) -> &mut kernel_sys::bpf_insn {
-        &mut self.0
-    }
-
-    #[inline]
-    pub fn into_kernel(self) -> kernel_sys::bpf_insn {
-        self.0
     }
 
     #[inline]
@@ -217,12 +201,6 @@ impl BpfInsn {
     #[inline]
     pub fn regs(&self) -> u8 {
         Self::make_regs(self.dst_reg(), self.src_reg())
-    }
-
-    #[inline]
-    pub fn set_regs(&mut self, regs: u8) {
-        self.set_dst_reg(regs & 0xf);
-        self.set_src_reg((regs >> 4) & 0xf);
     }
 
     #[inline]
@@ -246,18 +224,8 @@ impl BpfInsn {
     }
 
     #[inline]
-    pub fn off(&self) -> i16 {
-        self.off
-    }
-
-    #[inline]
     pub fn set_off(&mut self, off: i16) {
         self.off = off;
-    }
-
-    #[inline]
-    pub fn imm(&self) -> i32 {
-        self.imm
     }
 
     #[inline]

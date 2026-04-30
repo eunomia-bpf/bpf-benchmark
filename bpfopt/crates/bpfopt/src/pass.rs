@@ -742,13 +742,6 @@ impl KinsnRegistry {
             .unwrap_or(0)
     }
 
-    /// Return the encoded call offset for a given pass's kinsn target.
-    pub fn call_off_for_pass(&self, pass_name: &str) -> i16 {
-        Self::target_name_for_pass(pass_name)
-            .map(|target_name| self.call_off_for_target_name(target_name))
-            .unwrap_or(0)
-    }
-
     pub fn supported_encodings_for_target_name(&self, target_name: &str) -> u32 {
         self.target_supported_encodings
             .get(target_name)
@@ -763,17 +756,17 @@ impl KinsnRegistry {
             .unwrap_or(0)
     }
 
-    pub fn supported_encodings_for_pass(&self, pass_name: &str) -> u32 {
+    pub(crate) fn supported_encodings_for_pass(&self, pass_name: &str) -> u32 {
         Self::target_name_for_pass(pass_name)
             .map(|name| self.supported_encodings_for_target_name(name))
             .unwrap_or(0)
     }
 
-    pub fn packed_supported_for_pass(&self, pass_name: &str) -> bool {
+    pub(crate) fn packed_supported_for_pass(&self, pass_name: &str) -> bool {
         (self.supported_encodings_for_pass(pass_name) & BPF_KINSN_ENC_PACKED_CALL) != 0
     }
 
-    pub fn packed_supported_for_target_name(&self, target_name: &str) -> bool {
+    pub(crate) fn packed_supported_for_target_name(&self, target_name: &str) -> bool {
         (self.supported_encodings_for_target_name(target_name) & BPF_KINSN_ENC_PACKED_CALL) != 0
     }
 }
@@ -924,8 +917,6 @@ pub struct PassManager {
     analyses: AnalysisRegistry,
 }
 
-pub const CONST_PROP_DCE_FIXED_POINT_MAX_ITERS: usize = 5;
-
 impl Default for PassManager {
     fn default() -> Self {
         Self::new()
@@ -966,13 +957,8 @@ impl PassManager {
         self.passes.iter().map(|p| p.name()).collect()
     }
 
-    /// Return a pass by pipeline index.
-    pub fn pass_at(&self, index: usize) -> Option<&dyn BpfPass> {
-        self.passes.get(index).map(|pass| pass.as_ref())
-    }
-
     /// Return whether a pass is enabled by the current policy.
-    pub fn pass_allowed(&self, pass: &dyn BpfPass, ctx: &PassContext) -> anyhow::Result<bool> {
+    fn pass_allowed(&self, pass: &dyn BpfPass, ctx: &PassContext) -> anyhow::Result<bool> {
         let available_passes = self.available_pass_names();
         validate_policy_pass_names(
             "enabled_passes",
@@ -988,7 +974,7 @@ impl PassManager {
     }
 
     /// Precompute analyses declared by a pass.
-    pub fn run_required_analyses(
+    fn run_required_analyses(
         &self,
         pass: &dyn BpfPass,
         program: &BpfProgram,
@@ -1025,51 +1011,9 @@ impl PassManager {
         let mut total_sites = 0usize;
         let mut any_changed = false;
         let mut debug_traces = Vec::new();
-        let mut pass_idx = 0usize;
-
-        while pass_idx < self.passes.len() {
-            let pass = self.passes[pass_idx].as_ref();
+        for pass in &self.passes {
+            let pass = pass.as_ref();
             if !self.pass_allowed(pass, ctx)? {
-                pass_idx += 1;
-                continue;
-            }
-
-            let has_fixed_point_pair = pass.name() == "const_prop"
-                && pass_idx + 1 < self.passes.len()
-                && self.passes[pass_idx + 1].name() == "dce"
-                && self.pass_allowed(self.passes[pass_idx + 1].as_ref(), ctx)?;
-
-            if has_fixed_point_pair {
-                for _ in 0..CONST_PROP_DCE_FIXED_POINT_MAX_ITERS {
-                    let const_result =
-                        self.run_single_pass(pass, program, &mut cache, ctx, &mut debug_traces)?;
-                    if const_result.changed {
-                        total_sites += const_result.sites_applied;
-                    }
-                    any_changed |= const_result.changed;
-
-                    let dce_result = self.run_single_pass(
-                        self.passes[pass_idx + 1].as_ref(),
-                        program,
-                        &mut cache,
-                        ctx,
-                        &mut debug_traces,
-                    )?;
-                    if dce_result.changed {
-                        total_sites += dce_result.sites_applied;
-                    }
-                    any_changed |= dce_result.changed;
-
-                    let pair_changed = const_result.changed || dce_result.changed;
-                    pass_results.push(const_result);
-                    pass_results.push(dce_result);
-
-                    if !pair_changed {
-                        break;
-                    }
-                }
-
-                pass_idx += 2;
                 continue;
             }
 
@@ -1079,7 +1023,6 @@ impl PassManager {
             }
             any_changed |= result.changed;
             pass_results.push(result);
-            pass_idx += 1;
         }
 
         Ok(PipelineResult {

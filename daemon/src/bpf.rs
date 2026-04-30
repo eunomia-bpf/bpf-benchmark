@@ -10,19 +10,19 @@ use std::sync::OnceLock;
 
 use anyhow::{bail, Context, Result};
 
-pub type BpfMapInfo = kernel_sys::bpf_map_info;
+pub(crate) type BpfMapInfo = kernel_sys::bpf_map_info;
 
-pub fn bpf_map_get_info(fd: RawFd) -> Result<BpfMapInfo> {
+pub(crate) fn bpf_map_get_info(fd: RawFd) -> Result<BpfMapInfo> {
     let borrowed = unsafe { BorrowedFd::borrow_raw(fd) };
     kernel_sys::map_obj_get_info_by_fd(borrowed)
         .with_context(|| format!("read info for BPF map fd {fd}"))
 }
 
-pub fn bpf_map_get_fd_by_id(id: u32) -> Result<OwnedFd> {
+pub(crate) fn bpf_map_get_fd_by_id(id: u32) -> Result<OwnedFd> {
     kernel_sys::map_get_fd_by_id(id).with_context(|| format!("open BPF map id {id}"))
 }
 
-pub fn bpf_map_lookup_elem_optional(
+pub(crate) fn bpf_map_lookup_elem_optional(
     fd: RawFd,
     key: &[u8],
     value_size: usize,
@@ -50,7 +50,7 @@ pub fn bpf_map_lookup_elem_optional(
     Ok(Some(value))
 }
 
-pub fn bpf_map_lookup_value_size(info: &BpfMapInfo) -> Result<usize> {
+pub(crate) fn bpf_map_lookup_value_size(info: &BpfMapInfo) -> Result<usize> {
     if is_percpu_map_type(info.type_) {
         Ok(round_up_8(info.value_size as usize).saturating_mul(possible_cpu_count()?))
     } else {
@@ -139,7 +139,7 @@ fn parse_possible_cpu_list(text: &str) -> Result<usize> {
     Ok(count)
 }
 
-pub struct ProgIdIter {
+pub(crate) struct ProgIdIter {
     next_start_id: u32,
     done: bool,
 }
@@ -171,7 +171,7 @@ impl Iterator for ProgIdIter {
     }
 }
 
-pub fn iter_prog_ids() -> ProgIdIter {
+pub(crate) fn iter_prog_ids() -> ProgIdIter {
     ProgIdIter {
         next_start_id: 0,
         done: false,

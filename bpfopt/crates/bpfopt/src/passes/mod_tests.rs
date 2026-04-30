@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use crate::bpf::{install_mock_map, use_mock_maps, BpfMapInfo, MockMapState};
 use crate::insn::*;
-use crate::pass::{BpfProgram, PassContext, PipelineResult};
+use crate::pass::{BpfProgram, PassContext, PassManager, PipelineResult};
 
 const BPF_MAP_TYPE_HASH: u32 = kernel_sys::BPF_MAP_TYPE_HASH;
 const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY;
@@ -91,6 +91,14 @@ fn run_pipeline_with_passes(program: &mut BpfProgram, pass_names: &[&str]) -> Pi
     let mut ctx = PassContext::test_default();
     ctx.policy.enabled_passes = pass_names;
     pm.run(program, &ctx).unwrap()
+}
+
+fn full_test_pipeline() -> PassManager {
+    let pass_names = PASS_REGISTRY
+        .iter()
+        .map(|entry| entry.name.to_string())
+        .collect::<Vec<_>>();
+    build_custom_pipeline(&pass_names).unwrap()
 }
 
 fn make_wide_mem_4byte_program() -> Vec<BpfInsn> {
@@ -191,7 +199,7 @@ fn test_default_pipeline_wide_mem() {
     let mut prog = make_program(make_wide_mem_4byte_program());
     let ctx = PassContext::test_default();
 
-    let pm = build_full_pipeline();
+    let pm = full_test_pipeline();
     let result = pm.run(&mut prog, &ctx).unwrap();
     assert!(result.program_changed);
     assert!(result.total_sites_applied >= 1);
@@ -228,16 +236,6 @@ fn test_build_custom_pipeline_rejects_unknown_pass_name() {
     };
 
     assert!(err.to_string().contains("unknown pass name(s): nope"));
-}
-
-#[test]
-fn test_validate_pass_names_reject_aliases() {
-    let err = validate_pass_names(&["skb_load_bytes".to_string()])
-        .expect_err("legacy alias should be rejected");
-
-    assert!(err
-        .to_string()
-        .contains("unknown pass name(s): skb_load_bytes"));
 }
 
 #[test]
@@ -360,7 +358,7 @@ fn cascade_full_pipeline_shortens_program_and_preserves_folded_semantics() {
     program.set_map_ids(vec![304]);
     let original_len = program.insns.len();
 
-    let pm = build_full_pipeline();
+    let pm = full_test_pipeline();
     use_mock_maps(&mut program);
     let result = pm.run(&mut program, &PassContext::test_default()).unwrap();
 

@@ -642,49 +642,6 @@ pub(crate) struct OptimizeSummary {
     pub total_sites_applied: usize,
     pub passes_executed: usize,
     pub passes_changed: usize,
-    pub verifier_rejections: usize,
-}
-
-#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "snake_case")]
-pub(crate) enum PassVerifyStatus {
-    NotNeeded,
-    Accepted,
-}
-
-#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
-pub(crate) struct PassVerifyResult {
-    pub status: PassVerifyStatus,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub error_message: Option<String>,
-}
-
-impl PassVerifyResult {
-    fn not_needed() -> Self {
-        Self {
-            status: PassVerifyStatus::NotNeeded,
-            error_message: None,
-        }
-    }
-
-    fn accepted() -> Self {
-        Self {
-            status: PassVerifyStatus::Accepted,
-            error_message: None,
-        }
-    }
-}
-
-#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
-pub(crate) struct PassRollbackResult {
-    pub action: String,
-    pub restored_insn_count: usize,
-}
-
-#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
-pub(crate) struct SkippedSiteDetail {
-    pub pc: usize,
-    pub reason: String,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -692,21 +649,10 @@ pub(crate) struct PassDetail {
     #[serde(rename = "pass")]
     pub pass_name: String,
     pub changed: bool,
-    pub verify_result: PassVerifyStatus,
-    pub verify_error: Option<String>,
-    pub action: String,
-    pub verify: PassVerifyResult,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub rollback: Option<PassRollbackResult>,
     pub sites_applied: usize,
-    pub sites_skipped: usize,
-    pub skip_reasons: HashMap<String, usize>,
-    #[serde(skip_serializing_if = "Vec::is_empty", default)]
-    pub skipped_sites: Vec<SkippedSiteDetail>,
     pub insns_before: usize,
     pub insns_after: usize,
     pub insn_delta: i64,
-    pub diagnostics: Vec<String>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -813,10 +759,6 @@ struct MapInfoJson {
 #[derive(Clone, Debug, Deserialize)]
 struct BpfoptPassReport {
     pass: String,
-    #[serde(default)]
-    skipped: bool,
-    #[serde(default)]
-    reason: Option<String>,
     changed: bool,
     sites_applied: usize,
     insn_count_before: usize,
@@ -1382,8 +1324,7 @@ where
         let pipeline_ns = pipeline_start.elapsed().as_nanos() as u64;
 
         let report: BpfoptOptimizeReport = read_json_file(&report_json, "bpfopt optimize report")?;
-        reject_skipped_requested_passes(&report, requested_passes)?;
-        let mut passes = report
+        let passes = report
             .passes
             .iter()
             .map(pass_detail_from_report)
@@ -1445,12 +1386,6 @@ where
             verify_result.with_context(|| {
                 format!("bpfverify final verification failed for prog {prog_id}")
             })?;
-            for pass in &mut passes {
-                if pass.changed {
-                    pass.verify = PassVerifyResult::accepted();
-                    pass.verify_result = PassVerifyStatus::Accepted;
-                }
-            }
 
             if matches!(mode, OptimizeMode::Apply) {
                 let rejit_start = Instant::now();
@@ -1520,18 +1455,11 @@ where
 
         let passes_applied = passes
             .iter()
-            .filter(|pass| pass.changed && pass.action != "rolled_back")
+            .filter(|pass| pass.changed)
             .map(|pass| pass.pass_name.clone())
             .collect::<Vec<_>>();
-        let total_sites_applied = passes
-            .iter()
-            .filter(|pass| pass.action != "rolled_back")
-            .map(|pass| pass.sites_applied)
-            .sum();
-        let passes_changed = passes
-            .iter()
-            .filter(|pass| pass.changed && pass.action != "rolled_back")
-            .count();
+        let total_sites_applied = passes.iter().map(|pass| pass.sites_applied).sum();
+        let passes_changed = passes.iter().filter(|pass| pass.changed).count();
         Ok(OptimizeOneResult {
             status,
             prog_id,
@@ -1550,7 +1478,6 @@ where
                 total_sites_applied,
                 passes_executed: passes.len(),
                 passes_changed,
-                verifier_rejections: 0,
             },
             passes,
             attempts,
@@ -1730,59 +1657,14 @@ fn capture_rejit_failure_verifier_log(
 }
 
 fn pass_detail_from_report(report: &BpfoptPassReport) -> PassDetail {
-    let verify = PassVerifyResult::not_needed();
-    let mut skip_reasons = HashMap::new();
-    let mut diagnostics = Vec::new();
-    let sites_skipped = if report.skipped {
-        if let Some(reason) = report.reason.clone() {
-            skip_reasons.insert(reason.clone(), 1);
-            diagnostics.push(reason);
-        }
-        1
-    } else {
-        0
-    };
     PassDetail {
         pass_name: report.pass.clone(),
         changed: report.changed,
-        verify_result: verify.status.clone(),
-        verify_error: None,
-        action: "kept".to_string(),
-        verify,
-        rollback: None,
         sites_applied: report.sites_applied,
-        sites_skipped,
-        skip_reasons,
-        skipped_sites: Vec::new(),
         insns_before: report.insn_count_before,
         insns_after: report.insn_count_after,
         insn_delta: report.insn_delta as i64,
-        diagnostics,
     }
-}
-
-fn reject_skipped_requested_passes(
-    report: &BpfoptOptimizeReport,
-    requested_passes: &[String],
-) -> Result<()> {
-    if requested_passes.is_empty() {
-        return Ok(());
-    }
-
-    let requested = requested_passes
-        .iter()
-        .map(|pass| canonical_pass(pass))
-        .collect::<std::collections::HashSet<_>>();
-    for pass in &report.passes {
-        if pass.skipped && requested.contains(&canonical_pass(&pass.pass)) {
-            bail!(
-                "bpfopt skipped requested pass {}: {}",
-                pass.pass,
-                pass.reason.as_deref().unwrap_or("no reason reported")
-            );
-        }
-    }
-    Ok(())
 }
 
 fn write_live_map_values<F, G>(
@@ -2485,7 +2367,7 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"p
         assert!(result.summary.applied);
         assert_eq!(result.summary.total_sites_applied, 2);
         assert_eq!(result.summary.passes_executed, 1);
-        assert_eq!(result.passes[0].verify_result, PassVerifyStatus::Accepted);
+        assert!(result.passes[0].changed);
         assert_eq!(result.attempts[0].result, "applied");
     }
 
@@ -2854,7 +2736,7 @@ grep -q '"value": "07000000"' "$map_values"
 cat >/dev/null
 printf '\xb7\x00\x00\x00\x01\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00'
 cat > "$report" <<JSON
-{"passes":[{"pass":"map_inline","skipped":false,"changed":true,"sites_applied":1,"insn_count_before":2,"insn_count_after":2,"insn_delta":0,"map_inline_records":[{"map_id":111,"key_hex":"01000000","value_hex":"07000000"}]}]}
+{"passes":[{"pass":"map_inline","changed":true,"sites_applied":1,"insn_count_before":2,"insn_count_after":2,"insn_delta":0,"map_inline_records":[{"map_id":111,"key_hex":"01000000","value_hex":"07000000"}]}]}
 JSON
 "#,
         )
@@ -2952,7 +2834,7 @@ grep -q '"value": null' "$map_values"
 cat >/dev/null
 printf '\xb7\x00\x00\x00\x00\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00'
 cat > "$report" <<JSON
-{"passes":[{"pass":"map_inline","skipped":false,"changed":false,"sites_applied":0,"insn_count_before":2,"insn_count_after":2,"insn_delta":0}]}
+{"passes":[{"pass":"map_inline","changed":false,"sites_applied":0,"insn_count_before":2,"insn_count_after":2,"insn_delta":0}]}
 JSON
 "#,
         )
@@ -3005,7 +2887,6 @@ JSON
                 total_sites_applied: 0,
                 passes_executed: 1,
                 passes_changed: 0,
-                verifier_rejections: 0,
             },
             passes: vec![],
             attempts: vec![AttemptRecord {

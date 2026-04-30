@@ -231,65 +231,6 @@ impl BpfPass for VerifierStateCountPass {
     }
 }
 
-struct TestConstPropFixedPointPass;
-
-impl BpfPass for TestConstPropFixedPointPass {
-    fn name(&self) -> &str {
-        "const_prop"
-    }
-
-    fn run(
-        &self,
-        program: &mut BpfProgram,
-        _analyses: &mut AnalysisCache,
-        _ctx: &PassContext,
-    ) -> anyhow::Result<PassResult> {
-        let changed =
-            matches!(program.insns.first(), Some(insn) if *insn == BpfInsn::mov64_reg(0, 1));
-        if changed {
-            program.insns[0] = BpfInsn::mov64_imm(0, 7);
-        }
-
-        Ok(PassResult {
-            pass_name: self.name().into(),
-            changed,
-            sites_applied: usize::from(changed),
-            sites_skipped: vec![],
-            diagnostics: vec![],
-            ..Default::default()
-        })
-    }
-}
-
-struct TestDceFixedPointPass;
-
-impl BpfPass for TestDceFixedPointPass {
-    fn name(&self) -> &str {
-        "dce"
-    }
-
-    fn run(
-        &self,
-        program: &mut BpfProgram,
-        _analyses: &mut AnalysisCache,
-        _ctx: &PassContext,
-    ) -> anyhow::Result<PassResult> {
-        let changed = matches!(program.insns.first(), Some(insn) if *insn == BpfInsn::nop());
-        if changed {
-            program.insns.remove(0);
-        }
-
-        Ok(PassResult {
-            pass_name: self.name().into(),
-            changed,
-            sites_applied: usize::from(changed),
-            sites_skipped: vec![],
-            diagnostics: vec![],
-            ..Default::default()
-        })
-    }
-}
-
 fn exit_insn() -> BpfInsn {
     BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
 }
@@ -464,39 +405,6 @@ fn test_pass_manager_invalidates_verifier_states_after_transform() {
 }
 
 #[test]
-fn test_pass_manager_retries_const_prop_and_dce_to_fixed_point() {
-    let mut pm = PassManager::new();
-    pm.add_pass(TestConstPropFixedPointPass);
-    pm.add_pass(TestDceFixedPointPass);
-
-    let mut prog = make_program(vec![BpfInsn::nop(), BpfInsn::mov64_reg(0, 1), exit_insn()]);
-    let ctx = PassContext::test_default();
-
-    let result = pm.run(&mut prog, &ctx).unwrap();
-
-    assert_eq!(
-        result
-            .pass_results
-            .iter()
-            .map(|pr| pr.pass_name.as_str())
-            .collect::<Vec<_>>(),
-        vec![
-            "const_prop",
-            "dce",
-            "const_prop",
-            "dce",
-            "const_prop",
-            "dce"
-        ]
-    );
-    assert_eq!(prog.insns, vec![BpfInsn::mov64_imm(0, 7), exit_insn()]);
-    assert!(result.pass_results[1].changed);
-    assert!(result.pass_results[2].changed);
-    assert!(!result.pass_results[4].changed);
-    assert!(!result.pass_results[5].changed);
-}
-
-#[test]
 fn test_pass_manager_enabled_pass_policy() {
     let mut pm = PassManager::new();
     pm.add_pass(NoOpPass);
@@ -570,9 +478,9 @@ fn test_kinsn_registry_per_target_call_offsets() {
         target_supported_encodings: HashMap::new(),
     };
 
-    assert_eq!(reg.call_off_for_pass("rotate"), 100);
-    assert_eq!(reg.call_off_for_pass("cond_select"), 200);
-    assert_eq!(reg.call_off_for_pass("extract"), 300);
+    assert_eq!(reg.call_off_for_target_name("bpf_rotate64"), 100);
+    assert_eq!(reg.call_off_for_target_name("bpf_select64"), 200);
+    assert_eq!(reg.call_off_for_target_name("bpf_extract64"), 300);
 }
 
 // ── Issue 5: Annotation remap tests ─────────────────────────

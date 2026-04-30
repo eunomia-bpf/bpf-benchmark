@@ -920,7 +920,6 @@ mod tests {
                 total_sites_applied: 1,
                 passes_executed: 1,
                 passes_changed: 1,
-                verifier_rejections: 0,
             },
             passes: Vec::new(),
             attempts: Vec::new(),

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 //! Concrete pass implementations and pipeline constructors.
 
+#[cfg(test)]
 use anyhow::Result;
 
 mod bounds_check_merge;
@@ -30,8 +31,11 @@ pub use rotate::RotatePass;
 pub use skb_load_bytes::SkbLoadBytesSpecPass;
 pub use wide_mem::WideMemPass;
 
+#[cfg(test)]
 use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis, MapInfoAnalysis};
-use crate::pass::{BpfPass, PassManager};
+use crate::pass::BpfPass;
+#[cfg(test)]
+use crate::pass::PassManager;
 
 // ── Pass registry ───────────────────────────────────────────────────
 
@@ -46,9 +50,8 @@ pub struct PassRegistryEntry {
     pub make: fn() -> Box<dyn BpfPass>,
 }
 
-/// Canonical pass ordering and metadata. Both `build_full_pipeline()` and
-/// `build_custom_pipeline()` iterate this array in order, guaranteeing
-/// consistent pass sequencing regardless of which passes are selected.
+/// Canonical pass ordering and metadata. Pipeline builders iterate this array in
+/// order, guaranteeing consistent pass sequencing regardless of selected names.
 pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
     PassRegistryEntry {
         name: "map_inline",
@@ -117,17 +120,9 @@ pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
     },
 ];
 
-/// Generate the pass-list help string dynamically from the registry.
-pub fn available_passes_help() -> String {
-    PASS_REGISTRY
-        .iter()
-        .map(|e| format!("  {:<24} {}", e.name, e.description))
-        .collect::<Vec<_>>()
-        .join("\n")
-}
-
 // ── Pipeline constructors ───────────────────────────────────────────
 
+#[cfg(test)]
 fn resolve_requested_passes(names: &[String]) -> Result<Vec<&'static PassRegistryEntry>> {
     let requested: std::collections::HashSet<&str> = names.iter().map(|s| s.as_str()).collect();
     let mut unknown = Vec::new();
@@ -150,28 +145,13 @@ fn resolve_requested_passes(names: &[String]) -> Result<Vec<&'static PassRegistr
         .collect())
 }
 
-pub fn validate_pass_names(names: &[String]) -> Result<()> {
-    resolve_requested_passes(names).map(|_| ())
-}
-
 /// Register standard analyses into a PassManager.
+#[cfg(test)]
 fn register_standard_analyses(pm: &mut PassManager) {
     pm.register_analysis(BranchTargetAnalysis);
     pm.register_analysis(CFGAnalysis);
     pm.register_analysis(LivenessAnalysis);
     pm.register_analysis(MapInfoAnalysis);
-}
-
-/// Build the default optimization pipeline from `PASS_REGISTRY` in canonical order.
-pub fn build_full_pipeline() -> PassManager {
-    let mut pm = PassManager::new();
-    register_standard_analyses(&mut pm);
-
-    for entry in PASS_REGISTRY {
-        pm.add_pass_boxed((entry.make)());
-    }
-
-    pm
 }
 
 /// Build a pipeline containing only the named passes, in canonical order.

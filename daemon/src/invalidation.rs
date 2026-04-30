@@ -9,7 +9,7 @@ use crate::bpf;
 
 /// A single map-inline dependency recorded for one specialized program.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct TrackedInlineSite {
+pub(crate) struct TrackedInlineSite {
     pub prog_id: u32,
     pub map_fd: u32,
     pub key: Vec<u8>,
@@ -18,7 +18,7 @@ pub struct TrackedInlineSite {
 
 /// One key/value result returned by a batched map lookup.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct BatchLookupValue {
+pub(crate) struct BatchLookupValue {
     pub key: Vec<u8>,
     pub value: Option<Vec<u8>>,
 }
@@ -27,13 +27,13 @@ pub struct BatchLookupValue {
 ///
 /// Tests inject a fake implementation; production wiring can provide a real
 /// BPF-backed adapter later.
-pub trait MapValueReader {
+pub(crate) trait MapValueReader {
     fn lookup_values_batch(&self, map_fd: u32, keys: &[Vec<u8>]) -> Result<Vec<BatchLookupValue>>;
 }
 
 /// Production map reader backed by live BPF map file descriptors.
 #[derive(Clone, Copy, Debug, Default)]
-pub struct BpfMapValueReader;
+pub(crate) struct BpfMapValueReader;
 
 impl MapValueReader for BpfMapValueReader {
     fn lookup_values_batch(&self, map_fd: u32, keys: &[Vec<u8>]) -> Result<Vec<BatchLookupValue>> {
@@ -51,14 +51,14 @@ impl MapValueReader for BpfMapValueReader {
 }
 
 /// Tracks inline dependencies and polls their backing maps for changes.
-pub struct MapInvalidationTracker<A> {
+pub(crate) struct MapInvalidationTracker<A> {
     map_reader: A,
     entries: Vec<TrackedInlineSite>,
     owned_map_fds: HashMap<u32, OwnedFd>,
 }
 
 impl<A> MapInvalidationTracker<A> {
-    pub fn new(map_reader: A) -> Self {
+    pub(crate) fn new(map_reader: A) -> Self {
         Self {
             map_reader,
             entries: Vec::new(),
@@ -76,7 +76,7 @@ impl<A> MapInvalidationTracker<A> {
         self.entries.iter().any(|entry| entry.prog_id == prog_id)
     }
 
-    pub fn remember_map_fd(&mut self, fd: OwnedFd) -> u32 {
+    pub(crate) fn remember_map_fd(&mut self, fd: OwnedFd) -> u32 {
         let raw_fd = fd.as_raw_fd() as u32;
         self.owned_map_fds.insert(raw_fd, fd);
         raw_fd
@@ -88,7 +88,7 @@ impl<A> MapInvalidationTracker<A> {
             .retain(|map_fd, _| live_fds.contains(map_fd));
     }
 
-    pub fn record_inline_site(
+    pub(crate) fn record_inline_site(
         &mut self,
         prog_id: u32,
         map_fd: u32,
@@ -112,14 +112,14 @@ impl<A> MapInvalidationTracker<A> {
         });
     }
 
-    pub fn remove_prog(&mut self, prog_id: u32) {
+    pub(crate) fn remove_prog(&mut self, prog_id: u32) {
         self.entries.retain(|entry| entry.prog_id != prog_id);
         self.prune_owned_map_fds();
     }
 }
 
 impl<A: MapValueReader> MapInvalidationTracker<A> {
-    pub fn check_all<R: MapValueReader + ?Sized>(&self, reader: &R) -> Result<Vec<u32>> {
+    pub(crate) fn check_all<R: MapValueReader + ?Sized>(&self, reader: &R) -> Result<Vec<u32>> {
         if self.entries.is_empty() {
             return Ok(Vec::new());
         }
@@ -157,7 +157,7 @@ impl<A: MapValueReader> MapInvalidationTracker<A> {
         Ok(invalidated.into_iter().collect())
     }
 
-    pub fn check_for_invalidations(&self) -> Result<Vec<u32>> {
+    pub(crate) fn check_for_invalidations(&self) -> Result<Vec<u32>> {
         self.check_all(&self.map_reader)
     }
 }

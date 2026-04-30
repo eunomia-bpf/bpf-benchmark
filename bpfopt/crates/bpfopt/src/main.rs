@@ -1592,7 +1592,6 @@ mod tests {
         assert_eq!(registry.memcpy_bulk_btf_id, 11);
         assert_eq!(registry.endian_load64_btf_id, 12);
         assert_eq!(registry.call_off_for_target_name("bpf_memcpy_bulk"), 2);
-        assert!(registry.packed_supported_for_target_name("bpf_memcpy_bulk"));
     }
 
     #[test]
