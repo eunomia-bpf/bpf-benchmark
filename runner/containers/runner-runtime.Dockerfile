@@ -544,7 +544,6 @@ RUN set -eux; \
         *) echo "unsupported RUN_TARGET_ARCH: ${RUN_TARGET_ARCH}" >&2; exit 1 ;; \
     esac
 
-COPY --link corpus/bcf ./corpus/bcf
 COPY --link e2e/cases ./e2e/cases
 COPY runner/__init__.py runner/repos.yaml ./runner/
 COPY runner/libs ./runner/libs
