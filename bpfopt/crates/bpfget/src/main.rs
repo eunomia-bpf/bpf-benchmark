@@ -43,7 +43,7 @@ struct Cli {
     /// List live BPF programs.
     #[arg(long)]
     list: bool,
-    /// Use JSON output for --list.
+    /// Required JSON output mode for --list.
     #[arg(long)]
     json: bool,
     /// Write target.json for the host platform.
@@ -171,7 +171,7 @@ fn run() -> Result<()> {
     validate_cli(&cli)?;
 
     if cli.list {
-        return list_programs(cli.json, cli.output.as_deref());
+        return list_programs(cli.output.as_deref());
     }
     if cli.target {
         return write_target_json(cli.output.as_deref(), &cli.kinsns);
@@ -214,6 +214,9 @@ fn validate_cli(cli: &Cli) -> Result<()> {
 
     if cli.json && !cli.list {
         bail!("--json is only valid with --list");
+    }
+    if cli.list && !cli.json {
+        bail!("--list requires --json");
     }
     if cli.full {
         if cli.outdir.is_none() {
@@ -410,7 +413,7 @@ fn validate_btf_record_blob(label: &str, count: u32, rec_size: u32, bytes: &[u8]
     Ok(())
 }
 
-fn list_programs(json: bool, output: Option<&Path>) -> Result<()> {
+fn list_programs(output: Option<&Path>) -> Result<()> {
     let mut start_id = 0;
     let mut rows = Vec::new();
 
@@ -436,16 +439,7 @@ fn list_programs(json: bool, output: Option<&Path>) -> Result<()> {
         }
     }
 
-    if json {
-        write_json(output, &rows)
-    } else {
-        let mut out = open_output(output)?;
-        for row in rows {
-            writeln!(out, "{} {} {}", row.id, row.name, row.prog_type.name)?;
-        }
-        out.flush()?;
-        Ok(())
-    }
+    write_json(output, &rows)
 }
 
 fn write_target_json(output: Option<&Path>, kinsn_specs: &[String]) -> Result<()> {
