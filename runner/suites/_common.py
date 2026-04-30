@@ -202,6 +202,7 @@ def base_runtime_env() -> dict[str, str]:
             "BPFREJIT_INSIDE_RUNTIME_CONTAINER",
             "BPFREJIT_IMAGE_WORKSPACE",
             "BPFREJIT_BENCH_PASSES",
+            "BPFREJIT_DAEMON_KEEP_ALL_WORKDIRS",
             "RUN_TARGET_ARCH",
         )
         if (value := os.environ.get(name, "").strip())
