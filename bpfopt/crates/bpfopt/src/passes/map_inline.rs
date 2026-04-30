@@ -238,7 +238,7 @@ fn try_extract_constant_key_from_map_value(
         .copied()
         .ok_or_else(|| format!("no map_id binding for pseudo-map-value old_fd {}", old_fd))?;
     let source_info = program
-        .map_info_provider
+        .map_provider
         .map_info(program, source_map_id)?
         .ok_or_else(|| {
             format!(
@@ -255,7 +255,7 @@ fn try_extract_constant_key_from_map_value(
 
     let source_key = vec![0u8; source_info.key_size as usize];
     let source_value_size = program
-        .map_value_provider
+        .map_provider
         .lookup_value_size(program, &source_info)
         .map_err(|err| {
             format!(
@@ -264,7 +264,7 @@ fn try_extract_constant_key_from_map_value(
             )
         })?;
     let source_value = program
-        .map_value_provider
+        .map_provider
         .lookup_elem(program, source_map_id, &source_key, source_value_size)
         .map_err(|err| {
             format!(
@@ -1281,7 +1281,7 @@ fn build_site_rewrite(
         site_can_attempt_lookup_pattern_removal(program, uses, info, null_check_pc);
     let encoded_key = encode_key_bytes(&key.bytes, info.key_size as usize);
     let lookup_value_size = program
-        .map_value_provider
+        .map_provider
         .lookup_value_size(program, info)
         .map_err(anyhow::Error::msg)?;
     log_map_inline_debug(&format!(
@@ -1301,7 +1301,7 @@ fn build_site_rewrite(
             &encoded_key
         )));
     }
-    let value = match program.map_value_provider.lookup_elem(
+    let value = match program.map_provider.lookup_elem(
         program,
         info.map_id,
         &encoded_key,
@@ -1537,7 +1537,7 @@ fn resolve_frozen_map_value(
             return Ok(None);
         };
         let Some(info) = program
-            .map_info_provider
+            .map_provider
             .map_info(program, map_id)
             .map_err(anyhow::Error::msg)?
         else {
@@ -1549,11 +1549,11 @@ fn resolve_frozen_map_value(
 
         let key = vec![0u8; info.key_size as usize];
         let value_size = program
-            .map_value_provider
+            .map_provider
             .lookup_value_size(program, &info)
             .map_err(anyhow::Error::msg)?;
         let value = match program
-            .map_value_provider
+            .map_provider
             .lookup_elem(program, map_id, &key, value_size)
         {
             Ok(value) => value,

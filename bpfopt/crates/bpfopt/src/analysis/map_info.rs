@@ -110,7 +110,7 @@ impl Analysis for MapInfoAnalysis {
     }
 
     fn run(&self, program: &BpfProgram) -> MapInfoAnalysisResult<MapInfoResult> {
-        let provider = program.map_info_provider.clone();
+        let provider = program.map_provider.clone();
         collect_map_references_with_bindings(
             &program.insns,
             &program.map_ids,
@@ -361,9 +361,9 @@ mod tests {
     #[test]
     fn map_info_analysis_propagates_live_map_lookup_errors() {
         #[derive(Debug)]
-        struct ErrorMapInfoProvider;
+        struct ErrorMapProvider;
 
-        impl crate::pass::MapInfoProvider for ErrorMapInfoProvider {
+        impl crate::pass::MapProvider for ErrorMapProvider {
             fn map_info(
                 &self,
                 _program: &BpfProgram,
@@ -373,11 +373,29 @@ mod tests {
                     "resolve live map info for map {map_id}: test error"
                 ))
             }
+
+            fn lookup_value_size(
+                &self,
+                _program: &BpfProgram,
+                _info: &MapInfo,
+            ) -> MapInfoAnalysisResult<usize> {
+                unreachable!("map_info analysis only resolves metadata")
+            }
+
+            fn lookup_elem(
+                &self,
+                _program: &BpfProgram,
+                _map_id: u32,
+                _key: &[u8],
+                _value_size: usize,
+            ) -> MapInfoAnalysisResult<Vec<u8>> {
+                unreachable!("map_info analysis only resolves metadata")
+            }
         }
 
         let ld = make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 10);
         let mut program = BpfProgram::new(vec![ld[0], ld[1]]);
-        program.map_info_provider = std::sync::Arc::new(ErrorMapInfoProvider);
+        program.map_provider = std::sync::Arc::new(ErrorMapProvider);
         program.set_map_ids(vec![999_999]);
 
         let err = MapInfoAnalysis

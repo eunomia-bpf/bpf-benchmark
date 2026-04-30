@@ -5,9 +5,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::pass::{
-    BpfProgram, MapInfoProvider, MapMetadata, MapValueProvider, SnapshotMapProvider,
-};
+use crate::pass::{BpfProgram, MapMetadata, MapProvider, SnapshotMapProvider};
 
 #[derive(Clone, Debug, Default)]
 pub struct BpfMapInfo {
@@ -39,7 +37,7 @@ pub fn install_mock_map(map_id: u32, state: MockMapState) {
 #[derive(Clone, Debug, Default)]
 pub struct MockMapProvider;
 
-impl MapInfoProvider for MockMapProvider {
+impl MapProvider for MockMapProvider {
     fn map_info(
         &self,
         program: &BpfProgram,
@@ -51,9 +49,7 @@ impl MapInfoProvider for MockMapProvider {
 
         Ok(mock_map_metadata(map_id).map(|metadata| map_info_from_metadata(&metadata)))
     }
-}
 
-impl MapValueProvider for MockMapProvider {
     fn lookup_value_size(
         &self,
         program: &BpfProgram,
@@ -101,7 +97,7 @@ impl MapValueProvider for MockMapProvider {
 }
 
 pub fn use_mock_maps(program: &mut BpfProgram) {
-    program.set_map_providers(Arc::new(MockMapProvider), Arc::new(MockMapProvider));
+    program.set_map_provider(Arc::new(MockMapProvider));
 }
 
 fn map_info_from_metadata(metadata: &MapMetadata) -> crate::analysis::MapInfo {

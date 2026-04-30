@@ -150,12 +150,9 @@ pub struct BpfProgram {
     /// Pre-loaded map metadata: map_id -> MapMetadata.
     /// Used by offline snapshot callers and unit tests.
     pub map_metadata: HashMap<u32, MapMetadata>,
-    /// Map metadata resolver. The daemon installs a live raw-syscall provider;
-    /// offline callers use the default snapshot provider.
-    pub map_info_provider: Arc<dyn MapInfoProvider>,
-    /// Map value resolver. The daemon installs a live raw-syscall provider;
-    /// offline callers use the default snapshot provider.
-    pub map_value_provider: Arc<dyn MapValueProvider>,
+    /// Map metadata/value resolver. Offline callers use the default snapshot
+    /// provider; tests can install a mock provider.
+    pub map_provider: Arc<dyn MapProvider>,
 }
 
 /// Pre-loaded map metadata used by snapshot/offline map providers.
@@ -169,17 +166,14 @@ pub struct MapMetadata {
     pub map_id: u32,
 }
 
-/// Provider for resolving map metadata from the current execution environment.
-pub trait MapInfoProvider: Send + Sync + std::fmt::Debug {
+/// Provider for resolving map metadata and values.
+pub trait MapProvider: Send + Sync + std::fmt::Debug {
     fn map_info(
         &self,
         program: &BpfProgram,
         map_id: u32,
     ) -> std::result::Result<Option<crate::analysis::MapInfo>, String>;
-}
 
-/// Provider for resolving map values from the current execution environment.
-pub trait MapValueProvider: Send + Sync + std::fmt::Debug {
     fn lookup_value_size(
         &self,
         program: &BpfProgram,
@@ -199,7 +193,7 @@ pub trait MapValueProvider: Send + Sync + std::fmt::Debug {
 #[derive(Clone, Debug, Default)]
 pub struct SnapshotMapProvider;
 
-impl MapInfoProvider for SnapshotMapProvider {
+impl MapProvider for SnapshotMapProvider {
     fn map_info(
         &self,
         program: &BpfProgram,
@@ -220,9 +214,7 @@ impl MapInfoProvider for SnapshotMapProvider {
             map_id: metadata.map_id,
         }))
     }
-}
 
-impl MapValueProvider for SnapshotMapProvider {
     fn lookup_value_size(
         &self,
         program: &BpfProgram,
@@ -325,8 +317,7 @@ impl BpfProgram {
             map_values: HashMap::new(),
             map_value_nulls: HashSet::new(),
             map_metadata: HashMap::new(),
-            map_info_provider: Arc::new(SnapshotMapProvider),
-            map_value_provider: Arc::new(SnapshotMapProvider),
+            map_provider: Arc::new(SnapshotMapProvider),
         }
     }
 
@@ -334,14 +325,9 @@ impl BpfProgram {
         self.map_value_nulls.contains(&(map_id, key.to_vec()))
     }
 
-    /// Install map providers for live runtime or specialized test execution.
-    pub fn set_map_providers(
-        &mut self,
-        map_info_provider: Arc<dyn MapInfoProvider>,
-        map_value_provider: Arc<dyn MapValueProvider>,
-    ) {
-        self.map_info_provider = map_info_provider;
-        self.map_value_provider = map_value_provider;
+    /// Install a map provider for specialized test execution.
+    pub fn set_map_provider(&mut self, map_provider: Arc<dyn MapProvider>) {
+        self.map_provider = map_provider;
     }
 
     /// Attach live-kernel map IDs to this program.
