@@ -108,7 +108,6 @@ pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
         description: "Fuse endian swap patterns into endian load kfunc (MOVBE)",
         make: || Box::new(EndianFusionPass),
     },
-    // EXPERIMENTAL: Paper B work, requires real per-site PGO.
     PassRegistryEntry {
         name: "branch_flip",
         description: "Flip branch polarity using PGO data to improve branch prediction",

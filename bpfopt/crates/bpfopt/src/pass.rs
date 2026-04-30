@@ -21,9 +21,12 @@ pub struct InsnAnnotation {
     pub branch_profile: Option<BranchProfile>,
 }
 
-/// PGO branch statistics.
+/// Real per-site PMU branch statistics.
 #[derive(Clone, Debug)]
 pub struct BranchProfile {
+    pub branch_count: u64,
+    pub branch_misses: u64,
+    pub miss_rate: f64,
     pub taken_count: u64,
     pub not_taken_count: u64,
 }

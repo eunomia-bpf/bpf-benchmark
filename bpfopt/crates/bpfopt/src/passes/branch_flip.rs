@@ -27,10 +27,9 @@ use super::utils::{fixup_all_branches as fixup_branches_inline, remap_btf_metada
 ///   pc+M+1:         JA +(N-1)       // jump over then-body (now second)
 ///   pc+M+2..pc+M+N: [then body: N-1 insns]
 ///
-/// **PGO-guided mode**: branch_flip prefers per-site `BranchProfile` data.
-/// Program-level PMU data is only a safety gate for unpredictable branches.
-/// When per-site data is absent, the pass keeps an experimental size-asymmetry
-/// heuristic as Paper B scaffolding, not as paper-ready PGO.
+/// **PGO-guided mode**: branch_flip requires real per-site `BranchProfile`
+/// data. Program-level PMU data and each candidate site's PMU miss rate are
+/// safety gates for unpredictable branches.
 ///
 /// Safety: skips sites where external branches target interior instructions,
 /// or where JSET is used (no simple inverse). Also adjusts internal branch
@@ -63,11 +62,6 @@ impl BranchFlipSite {
     }
 }
 
-// Paper B placeholder, requires real PGO before paper experiments.
-fn heuristic_should_flip(site: &BranchFlipSite) -> bool {
-    site.else_len > 0 && site.then_len > 2 * site.else_len
-}
-
 impl BpfPass for BranchFlipPass {
     fn name(&self) -> &str {
         "branch_flip"
@@ -83,34 +77,29 @@ impl BpfPass for BranchFlipPass {
         analyses: &mut AnalysisCache,
         _ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        // Phase 0: check program-level branch miss rate from PMU.
-        // If branch miss rate is above threshold, branches are unpredictable
-        // and reordering could regress performance (similar to CMOV on
-        // unpredictable branches).
-        // Paper B placeholder: real per-site PGO is required before paper
-        // experiments; missing PMU data means no potentially harmful
-        // optimization.
-        match program.branch_miss_rate {
-            None => {
-                return Ok(PassResult {
-                    diagnostics: vec!["no PMU data available, skipping branch_flip".into()],
-                    ..PassResult::unchanged(self.name())
-                });
-            }
-            Some(miss_rate) if miss_rate > self.max_branch_miss_rate => {
-                return Ok(PassResult::skipped(
-                    self.name(),
-                    SkipReason {
-                        pc: 0,
-                        reason: format!(
-                            "program branch_miss_rate {:.1}% exceeds threshold {:.1}% (unpredictable branches)",
-                            miss_rate * 100.0,
-                            self.max_branch_miss_rate * 100.0,
-                        ),
-                    },
-                ));
-            }
-            Some(_) => { /* miss rate within threshold, proceed */ }
+        // Phase 0: check real program-level PMU branch miss rate. Missing PMU
+        // data is a profile collection failure, not an optimization skip.
+        let Some(program_miss_rate) = program.branch_miss_rate else {
+            anyhow::bail!("branch_flip requires real program-level branch_miss_rate data");
+        };
+        if !program_miss_rate.is_finite() || !(0.0..=1.0).contains(&program_miss_rate) {
+            anyhow::bail!(
+                "branch_flip program branch_miss_rate must be finite and within [0, 1], got {}",
+                program_miss_rate
+            );
+        }
+        if program_miss_rate > self.max_branch_miss_rate {
+            return Ok(PassResult::skipped(
+                self.name(),
+                SkipReason {
+                    pc: 0,
+                    reason: format!(
+                        "program branch_miss_rate {:.1}% exceeds threshold {:.1}% (unpredictable branches)",
+                        program_miss_rate * 100.0,
+                        self.max_branch_miss_rate * 100.0,
+                    ),
+                },
+            ));
         }
 
         let bt_analysis = BranchTargetAnalysis;
@@ -124,12 +113,19 @@ impl BpfPass for BranchFlipPass {
         // Phase 2: filter sites and collect safe ones to apply.
         let mut safe_sites: Vec<BranchFlipSite> = Vec::new();
         let mut skipped = Vec::new();
-        let mut heuristic_applied = 0usize;
 
         for site in &sites {
             let jcc = &program.insns[site.pc];
             let own_target = (site.pc as i64 + 1 + jcc.off as i64) as usize;
             let site_end = site.pc + site.total_len();
+
+            let Some(bp) = program.annotations[site.pc].branch_profile.as_ref() else {
+                anyhow::bail!(
+                    "branch_flip candidate at pc {} has no real per-site profile data",
+                    site.pc
+                );
+            };
+            let direction_total = validate_real_branch_profile(site.pc, bp)?;
 
             let has_exterior_interior = (site.pc + 1..site_end).any(|pc_inner| {
                 pc_inner < bt.is_target.len() && bt.is_target[pc_inner] && pc_inner != own_target
@@ -152,36 +148,27 @@ impl BpfPass for BranchFlipPass {
                 continue;
             }
 
-            let (should_flip, used_heuristic, skip_reason) =
-                if let Some(bp) = program.annotations[site.pc].branch_profile.as_ref() {
-                    let total = bp.taken_count + bp.not_taken_count;
-                    (
-                        total > 0 && bp.taken_count as f64 / (total as f64) >= self.min_bias,
-                        false,
-                        "branch not biased enough".to_string(),
-                    )
-                } else if heuristic_should_flip(site) {
-                    (
-                        true,
-                        true,
-                        "no branch profile and bodies not asymmetric enough".to_string(),
-                    )
-                } else {
-                    (
-                        false,
-                        false,
-                        "no branch profile and bodies not asymmetric enough".to_string(),
-                    )
-                };
+            if bp.miss_rate > self.max_branch_miss_rate {
+                skipped.push(SkipReason {
+                    pc: site.pc,
+                    reason: format!(
+                        "site branch_miss_rate {:.1}% exceeds threshold {:.1}% (unpredictable branch)",
+                        bp.miss_rate * 100.0,
+                        self.max_branch_miss_rate * 100.0,
+                    ),
+                });
+                continue;
+            }
+
+            let should_flip = bp.taken_count as f64 / (direction_total as f64) >= self.min_bias;
 
             if !should_flip {
                 skipped.push(SkipReason {
                     pc: site.pc,
-                    reason: skip_reason,
+                    reason: "branch not biased enough".into(),
                 });
                 continue;
             }
-            heuristic_applied += usize::from(used_heuristic);
             safe_sites.push(BranchFlipSite {
                 pc: site.pc,
                 then_len: site.then_len,
@@ -190,17 +177,8 @@ impl BpfPass for BranchFlipPass {
         }
 
         if safe_sites.is_empty() {
-            let diagnostics = if heuristic_applied > 0 {
-                vec![format!(
-                    "used size-asymmetry fallback for {} branch_flip site(s) without per-site branch profiles",
-                    heuristic_applied
-                )]
-            } else {
-                vec![]
-            };
             return Ok(PassResult {
                 sites_skipped: skipped,
-                diagnostics,
                 ..PassResult::unchanged(self.name())
             });
         }
@@ -288,24 +266,49 @@ impl BpfPass for BranchFlipPass {
             sites_applied: applied,
         });
 
-        let diagnostics = if heuristic_applied > 0 {
-            vec![format!(
-                "used size-asymmetry fallback for {} branch_flip site(s) without per-site branch profiles",
-                heuristic_applied
-            )]
-        } else {
-            vec![]
-        };
-
         Ok(PassResult {
             pass_name: self.name().into(),
             changed: applied > 0,
             sites_applied: applied,
             sites_skipped: skipped,
-            diagnostics,
             ..Default::default()
         })
     }
+}
+
+fn validate_real_branch_profile(pc: usize, bp: &BranchProfile) -> anyhow::Result<u64> {
+    if bp.branch_count == 0 {
+        anyhow::bail!("branch_flip candidate at pc {pc} has zero branch_count");
+    }
+    if bp.branch_misses > bp.branch_count {
+        anyhow::bail!(
+            "branch_flip candidate at pc {pc} has branch_misses {} exceeding branch_count {}",
+            bp.branch_misses,
+            bp.branch_count
+        );
+    }
+    if !bp.miss_rate.is_finite() || !(0.0..=1.0).contains(&bp.miss_rate) {
+        anyhow::bail!(
+            "branch_flip candidate at pc {pc} has invalid miss_rate {}",
+            bp.miss_rate
+        );
+    }
+    let direction_total = bp
+        .taken_count
+        .checked_add(bp.not_taken_count)
+        .ok_or_else(|| {
+            anyhow::anyhow!("branch_flip candidate at pc {pc} direction counters overflow")
+        })?;
+    if direction_total == 0 {
+        anyhow::bail!("branch_flip candidate at pc {pc} has no real per-site direction data");
+    }
+    if direction_total > bp.branch_count {
+        anyhow::bail!(
+            "branch_flip candidate at pc {pc} direction count {direction_total} exceeds branch_count {}",
+            bp.branch_count
+        );
+    }
+    Ok(direction_total)
 }
 
 /// Scan for branch-flip candidate sites with correct if/else diamond shape.
@@ -388,6 +391,19 @@ mod tests {
         BpfProgram::new(insns)
     }
 
+    fn branch_profile(taken_count: u64, not_taken_count: u64, branch_misses: u64) -> BranchProfile {
+        let branch_count = taken_count + not_taken_count;
+        assert!(branch_count > 0);
+        assert!(branch_misses <= branch_count);
+        BranchProfile {
+            branch_count,
+            branch_misses,
+            miss_rate: branch_misses as f64 / branch_count as f64,
+            taken_count,
+            not_taken_count,
+        }
+    }
+
     fn exit_insn() -> BpfInsn {
         BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
     }
@@ -450,9 +466,7 @@ mod tests {
     }
 
     #[test]
-    fn test_branch_flip_no_pgo_skips() {
-        // Without per-PC PGO data, modestly sized bodies should still skip even
-        // when PMU data is present.
+    fn test_branch_flip_missing_per_site_profile_errors() {
         let mut prog = make_program(vec![
             jne_imm(1, 0, 2),
             BpfInsn::mov64_imm(0, 10),
@@ -469,44 +483,8 @@ mod tests {
             min_bias: 0.7,
             max_branch_miss_rate: 0.05,
         };
-        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-        assert!(!result.changed);
-        assert_eq!(result.sites_applied, 0);
-        assert!(result
-            .sites_skipped
-            .iter()
-            .any(|s| s.reason.contains("not asymmetric enough")));
-    }
-
-    #[test]
-    fn test_branch_flip_heuristic_fallback_is_experimental() {
-        let mut prog = make_program(vec![
-            jne_imm(1, 0, 6),
-            BpfInsn::mov64_imm(0, 1),
-            BpfInsn::mov64_imm(1, 2),
-            BpfInsn::mov64_imm(2, 3),
-            BpfInsn::mov64_imm(3, 4),
-            BpfInsn::mov64_imm(4, 5),
-            BpfInsn::ja(1),
-            BpfInsn::mov64_imm(0, 99),
-            exit_insn(),
-        ]);
-        prog.branch_miss_rate = Some(0.02);
-        let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
-
-        let pass = BranchFlipPass {
-            min_bias: 0.7,
-            max_branch_miss_rate: 0.05,
-        };
-        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
-        assert_eq!(result.sites_applied, 1);
-        assert!(result
-            .diagnostics
-            .iter()
-            .any(|msg| msg.contains("size-asymmetry fallback")));
+        let err = pass.run(&mut prog, &mut cache, &ctx).unwrap_err();
+        assert!(err.to_string().contains("no real per-site profile data"));
     }
 
     #[test]
@@ -518,10 +496,7 @@ mod tests {
             BpfInsn::mov64_imm(0, 20), // else
             exit_insn(),
         ]);
-        prog.annotations[0].branch_profile = Some(BranchProfile {
-            taken_count: 80,
-            not_taken_count: 20,
-        });
+        prog.annotations[0].branch_profile = Some(branch_profile(80, 20, 2));
         prog.branch_miss_rate = Some(0.02);
 
         let mut cache = AnalysisCache::new();
@@ -557,10 +532,7 @@ mod tests {
             BpfInsn::mov64_imm(2, 30), // else[2]
             exit_insn(),
         ]);
-        prog.annotations[0].branch_profile = Some(BranchProfile {
-            taken_count: 90,
-            not_taken_count: 10,
-        });
+        prog.annotations[0].branch_profile = Some(branch_profile(90, 10, 1));
         prog.branch_miss_rate = Some(0.02);
 
         let mut cache = AnalysisCache::new();
@@ -602,10 +574,7 @@ mod tests {
             BpfInsn::mov64_imm(0, 20),
             exit_insn(),
         ]);
-        prog.annotations[0].branch_profile = Some(BranchProfile {
-            taken_count: 90,
-            not_taken_count: 10,
-        });
+        prog.annotations[0].branch_profile = Some(branch_profile(90, 10, 1));
         prog.branch_miss_rate = Some(0.02);
 
         let mut cache = AnalysisCache::new();
@@ -632,10 +601,7 @@ mod tests {
             BpfInsn::mov64_imm(0, 20),
             exit_insn(),
         ]);
-        prog.annotations[0].branch_profile = Some(BranchProfile {
-            taken_count: 60,
-            not_taken_count: 40,
-        });
+        prog.annotations[0].branch_profile = Some(branch_profile(60, 40, 2));
         prog.branch_miss_rate = Some(0.02);
 
         let mut cache = AnalysisCache::new();
@@ -679,10 +645,7 @@ mod tests {
             BpfInsn::mov64_imm(0, 20),
             exit_insn(),
         ]);
-        prog.annotations[0].branch_profile = Some(BranchProfile {
-            taken_count: 80,
-            not_taken_count: 20,
-        });
+        prog.annotations[0].branch_profile = Some(branch_profile(80, 20, 2));
         prog.branch_miss_rate = Some(0.02);
         let orig_len = prog.insns.len();
 
@@ -709,10 +672,7 @@ mod tests {
             BpfInsn::mov64_imm(0, 20),
             exit_insn(),
         ]);
-        prog.annotations[0].branch_profile = Some(BranchProfile {
-            taken_count: 80,
-            not_taken_count: 20,
-        });
+        prog.annotations[0].branch_profile = Some(branch_profile(80, 20, 2));
         // Simulate high branch miss rate (10% > 5% threshold).
         prog.branch_miss_rate = Some(0.10);
 
@@ -744,10 +704,7 @@ mod tests {
             BpfInsn::mov64_imm(0, 20),
             exit_insn(),
         ]);
-        prog.annotations[0].branch_profile = Some(BranchProfile {
-            taken_count: 80,
-            not_taken_count: 20,
-        });
+        prog.annotations[0].branch_profile = Some(branch_profile(80, 20, 2));
         // Low branch miss rate (2% < 5% threshold) — should allow flip.
         prog.branch_miss_rate = Some(0.02);
 
@@ -767,9 +724,8 @@ mod tests {
     }
 
     #[test]
-    fn test_branch_flip_no_pmu_data_skips() {
-        // Without PMU data (branch_miss_rate = None), the pass should
-        // skip entirely — conservative policy: no data, no optimization.
+    fn test_branch_flip_missing_program_pmu_data_errors() {
+        // Without program-level PMU data, branch_flip fails fast.
         let mut prog = make_program(vec![
             jne_imm(1, 0, 2),
             BpfInsn::mov64_imm(0, 10),
@@ -777,10 +733,7 @@ mod tests {
             BpfInsn::mov64_imm(0, 20),
             exit_insn(),
         ]);
-        prog.annotations[0].branch_profile = Some(BranchProfile {
-            taken_count: 80,
-            not_taken_count: 20,
-        });
+        prog.annotations[0].branch_profile = Some(branch_profile(80, 20, 2));
         // No PMU data.
         assert!(prog.branch_miss_rate.is_none());
 
@@ -791,13 +744,37 @@ mod tests {
             min_bias: 0.7,
             max_branch_miss_rate: 0.05,
         };
+        let err = pass.run(&mut prog, &mut cache, &ctx).unwrap_err();
+        assert!(err
+            .to_string()
+            .contains("real program-level branch_miss_rate data"));
+    }
+
+    #[test]
+    fn test_branch_flip_skips_high_site_miss_rate() {
+        let mut prog = make_program(vec![
+            jne_imm(1, 0, 2),
+            BpfInsn::mov64_imm(0, 10),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(0, 20),
+            exit_insn(),
+        ]);
+        prog.annotations[0].branch_profile = Some(branch_profile(90, 10, 10));
+        prog.branch_miss_rate = Some(0.02);
+
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = BranchFlipPass {
+            min_bias: 0.7,
+            max_branch_miss_rate: 0.05,
+        };
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-        assert!(!result.changed, "should NOT flip when PMU data absent");
-        assert_eq!(result.sites_applied, 0);
+        assert!(!result.changed);
         assert!(result
-            .diagnostics
+            .sites_skipped
             .iter()
-            .any(|d| d.contains("no PMU data available")));
+            .any(|s| s.reason.contains("site branch_miss_rate")));
     }
 
     // ── MEDIUM #4: Profiler -> pass integration test ────────────────
@@ -820,13 +797,7 @@ mod tests {
 
         // Construct ProfilingData as the profiler module would
         let mut branch_profiles = std::collections::HashMap::new();
-        branch_profiles.insert(
-            0,
-            BranchProfile {
-                taken_count: 90,
-                not_taken_count: 10,
-            },
-        );
+        branch_profiles.insert(0, branch_profile(90, 10, 1));
         let profiling = crate::pass::ProfilingData {
             branch_profiles,
             branch_miss_rate: Some(0.10), // 10% miss rate => high, should trigger
@@ -857,13 +828,7 @@ mod tests {
         let profiling_low_miss = crate::pass::ProfilingData {
             branch_profiles: {
                 let mut m = std::collections::HashMap::new();
-                m.insert(
-                    0,
-                    BranchProfile {
-                        taken_count: 90,
-                        not_taken_count: 10,
-                    },
-                );
+                m.insert(0, branch_profile(90, 10, 1));
                 m
             },
             branch_miss_rate: Some(0.01), // 1% miss rate => low, should trigger
@@ -917,14 +882,8 @@ mod tests {
             exit_insn(),                // pc=10
         ]);
         // Inject biased PGO data for both diamonds.
-        prog.annotations[0].branch_profile = Some(BranchProfile {
-            taken_count: 80,
-            not_taken_count: 20,
-        });
-        prog.annotations[6].branch_profile = Some(BranchProfile {
-            taken_count: 85,
-            not_taken_count: 15,
-        });
+        prog.annotations[0].branch_profile = Some(branch_profile(80, 20, 2));
+        prog.annotations[6].branch_profile = Some(branch_profile(85, 15, 2));
         prog.branch_miss_rate = Some(0.02);
 
         let orig_len = prog.insns.len();
@@ -962,10 +921,7 @@ mod tests {
             BpfInsn::mov64_imm(0, 99), // pc=4: else[0]
             exit_insn(),               // pc=5
         ]);
-        prog.annotations[0].branch_profile = Some(BranchProfile {
-            taken_count: 90,
-            not_taken_count: 10,
-        });
+        prog.annotations[0].branch_profile = Some(branch_profile(90, 10, 1));
         prog.branch_miss_rate = Some(0.02);
 
         let mut cache = AnalysisCache::new();

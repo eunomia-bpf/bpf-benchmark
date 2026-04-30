@@ -138,7 +138,7 @@ fn run_bpfopt(args: &[&str], stdin_bytes: &[u8]) -> Output {
 }
 
 #[test]
-fn list_passes_outputs_12_cli_names_including_experimental_branch_flip() {
+fn list_passes_outputs_12_cli_names_including_branch_flip() {
     let output = Command::new(bpfopt_bin())
         .arg("list-passes")
         .output()

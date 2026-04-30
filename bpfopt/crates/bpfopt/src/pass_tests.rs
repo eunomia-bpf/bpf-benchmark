@@ -8,6 +8,19 @@ fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
     BpfProgram::new(insns)
 }
 
+fn branch_profile(taken_count: u64, not_taken_count: u64, branch_misses: u64) -> BranchProfile {
+    let branch_count = taken_count + not_taken_count;
+    assert!(branch_count > 0);
+    assert!(branch_misses <= branch_count);
+    BranchProfile {
+        branch_count,
+        branch_misses,
+        miss_rate: branch_misses as f64 / branch_count as f64,
+        taken_count,
+        not_taken_count,
+    }
+}
+
 fn ctx_for_pass_manager(pm: &PassManager) -> PassContext {
     let mut ctx = PassContext::test_default();
     ctx.policy.enabled_passes = pm.pass_names().into_iter().map(str::to_string).collect();
@@ -142,10 +155,7 @@ fn test_prepend_nop_pass_shifts_annotations_forward() {
     pm.add_pass(PrependNopPass);
 
     let mut program = make_program(vec![BpfInsn::mov64_imm(0, 1), exit_insn()]);
-    program.annotations[1].branch_profile = Some(BranchProfile {
-        taken_count: 7,
-        not_taken_count: 3,
-    });
+    program.annotations[1].branch_profile = Some(branch_profile(7, 3, 1));
 
     let ctx = ctx_for_pass_manager(&pm);
     let result = pm.run(&mut program, &ctx).unwrap();
@@ -455,10 +465,7 @@ fn test_kinsn_registry_per_target_call_offsets() {
 #[test]
 fn test_remap_annotations_deleted_instruction() {
     let mut prog = make_program(vec![BpfInsn::nop(), BpfInsn::nop(), exit_insn()]);
-    prog.annotations[0].branch_profile = Some(BranchProfile {
-        taken_count: 10,
-        not_taken_count: 5,
-    });
+    prog.annotations[0].branch_profile = Some(branch_profile(10, 5, 1));
 
     // Simulate a transform that removes instruction 0.
     // addr_map: old_pc 0->0 (maps to first new insn), 1->0, 2->1, sentinel 3->2
@@ -481,13 +488,7 @@ fn test_profiling_data_injection() {
     assert!(prog.annotations[1].branch_profile.is_none());
 
     let mut pdata = ProfilingData::default();
-    pdata.branch_profiles.insert(
-        1,
-        BranchProfile {
-            taken_count: 80,
-            not_taken_count: 20,
-        },
-    );
+    pdata.branch_profiles.insert(1, branch_profile(80, 20, 2));
     prog.inject_profiling(&pdata);
 
     assert!(prog.annotations[0].branch_profile.is_none());
@@ -519,9 +520,11 @@ fn test_run_with_profiling_enables_branch_flip() {
     ]);
     let ctx = PassContext::test_default();
 
-    // Without profiling: no flip.
-    let result = pm.run_with_profiling(&mut prog, &ctx, None).unwrap();
-    assert!(!result.program_changed, "should not flip without PGO data");
+    // Without profiling: branch_flip fails fast.
+    let err = pm.run_with_profiling(&mut prog, &ctx, None).unwrap_err();
+    assert!(err
+        .to_string()
+        .contains("real program-level branch_miss_rate data"));
 
     // Reset the program.
     let mut prog = make_program(vec![
@@ -534,13 +537,7 @@ fn test_run_with_profiling_enables_branch_flip() {
 
     // With profiling data showing hot branch + PMU data: should flip.
     let mut pdata = ProfilingData::default();
-    pdata.branch_profiles.insert(
-        0,
-        BranchProfile {
-            taken_count: 90,
-            not_taken_count: 10,
-        },
-    );
+    pdata.branch_profiles.insert(0, branch_profile(90, 10, 1));
     pdata.branch_miss_rate = Some(0.02);
     let result = pm
         .run_with_profiling(&mut prog, &ctx, Some(&pdata))

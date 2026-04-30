@@ -270,14 +270,15 @@ enum SupportedEncodingsJson {
 
 #[derive(Debug, Deserialize)]
 struct ProfileJson {
-    #[serde(default)]
-    branch_miss_rate: Option<f64>,
-    #[serde(default)]
-    per_insn: HashMap<String, ProfileInsnJson>,
+    branch_miss_rate: f64,
+    per_site: HashMap<String, ProfileSiteJson>,
 }
 
 #[derive(Debug, Deserialize)]
-struct ProfileInsnJson {
+struct ProfileSiteJson {
+    branch_count: u64,
+    branch_misses: u64,
+    miss_rate: f64,
     taken: u64,
     not_taken: u64,
 }
@@ -982,17 +983,52 @@ fn read_profile(path: Option<&Path>) -> Result<Option<ProfilingData>> {
         return Ok(None);
     };
     let profile: ProfileJson = read_json_file(path, "profile.json")?;
+    if !profile.branch_miss_rate.is_finite() || !(0.0..=1.0).contains(&profile.branch_miss_rate) {
+        bail!(
+            "profile branch_miss_rate must be finite and within [0, 1], got {}",
+            profile.branch_miss_rate
+        );
+    }
     let mut data = ProfilingData {
-        branch_miss_rate: profile.branch_miss_rate,
+        branch_miss_rate: Some(profile.branch_miss_rate),
         ..ProfilingData::default()
     };
-    for (pc, counts) in profile.per_insn {
+    for (pc, counts) in profile.per_site {
         let pc = pc
             .parse::<usize>()
-            .with_context(|| format!("invalid per_insn pc key: {pc}"))?;
+            .with_context(|| format!("invalid per_site pc key: {pc}"))?;
+        if counts.branch_count == 0 {
+            bail!("profile per_site[{pc}] has zero branch_count");
+        }
+        if counts.branch_misses > counts.branch_count {
+            bail!(
+                "profile per_site[{pc}] branch_misses {} exceeds branch_count {}",
+                counts.branch_misses,
+                counts.branch_count
+            );
+        }
+        if !counts.miss_rate.is_finite() || !(0.0..=1.0).contains(&counts.miss_rate) {
+            bail!(
+                "profile per_site[{pc}] miss_rate must be finite and within [0, 1], got {}",
+                counts.miss_rate
+            );
+        }
+        let direction_count = counts
+            .taken
+            .checked_add(counts.not_taken)
+            .ok_or_else(|| anyhow!("profile per_site[{pc}] direction counters overflow"))?;
+        if direction_count > counts.branch_count {
+            bail!(
+                "profile per_site[{pc}] direction count {direction_count} exceeds branch_count {}",
+                counts.branch_count
+            );
+        }
         data.branch_profiles.insert(
             pc,
             BranchProfile {
+                branch_count: counts.branch_count,
+                branch_misses: counts.branch_misses,
+                miss_rate: counts.miss_rate,
                 taken_count: counts.taken,
                 not_taken_count: counts.not_taken,
             },

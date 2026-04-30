@@ -93,9 +93,10 @@ fn run_pipeline_with_passes(program: &mut BpfProgram, pass_names: &[&str]) -> Pi
     pm.run(program, &ctx).unwrap()
 }
 
-fn full_test_pipeline() -> PassManager {
+fn default_test_pipeline() -> PassManager {
     let pass_names = PASS_REGISTRY
         .iter()
+        .filter(|entry| entry.name != "branch_flip")
         .map(|entry| entry.name.to_string())
         .collect::<Vec<_>>();
     build_custom_pipeline(&pass_names).unwrap()
@@ -199,7 +200,7 @@ fn test_default_pipeline_wide_mem() {
     let mut prog = make_program(make_wide_mem_4byte_program());
     let ctx = PassContext::test_default();
 
-    let pm = full_test_pipeline();
+    let pm = default_test_pipeline();
     let result = pm.run(&mut prog, &ctx).unwrap();
     assert!(result.program_changed);
     assert!(result.total_sites_applied >= 1);
@@ -358,7 +359,7 @@ fn cascade_full_pipeline_shortens_program_and_preserves_folded_semantics() {
     program.set_map_ids(vec![304]);
     let original_len = program.insns.len();
 
-    let pm = full_test_pipeline();
+    let pm = default_test_pipeline();
     use_mock_maps(&mut program);
     let result = pm.run(&mut program, &PassContext::test_default()).unwrap();
 
