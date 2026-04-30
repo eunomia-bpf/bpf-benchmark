@@ -238,6 +238,7 @@ The current in-tree descriptor set is:
 
 - `bpf_rotate64`
 - `bpf_select64`
+- `bpf_ccmp64` (arm64 module only)
 - `bpf_extract64`
 - `bpf_endian_load16`
 - `bpf_endian_load32`
@@ -373,7 +374,83 @@ because `JEQ cond` evaluates before any `MOV dst`, but the native emit must
 respect this ordering. The arm64 path (`TST` + `CSEL`) is inherently safe
 because `TST` always precedes the single `CSEL` instruction.
 
-### 3.3 `extract64`
+### 3.3 `ccmp64`
+
+Source files:
+
+- [`module/arm64/bpf_ccmp.c`](../module/arm64/bpf_ccmp.c)
+
+Decoded payload:
+
+```text
+dst          = bits(payload, 0..3)
+count        = bits(payload, 4..5) + 2
+mode         = bit(payload, 6)      ; 0 = original branches fail on == 0
+                                      1 = original branches fail on != 0
+width32      = bit(payload, 7)      ; 0 = BPF_JMP, 1 = BPF_JMP32
+reg[i]       = bits(payload, 8 + 4*i .. 11 + 4*i), for i in 0..count-1
+reserved     = bits(payload, 24..63)
+```
+
+Validity:
+
+```text
+2 <= count <= 4
+dst in {r0, ..., r9}
+reg[i] in {r0, ..., r10}
+forall i. reg[i] != dst
+unused reg slots are zero
+reserved = 0
+```
+
+Proof semantics:
+
+```text
+Proof_ccmp(dst, regs, mode, width)(R, M) =
+  let fail_i =
+    if mode = 0 then cmp_width(R[reg[i]]) == 0
+    else             cmp_width(R[reg[i]]) != 0
+  in
+    if exists i. fail_i then (R[dst <- 0], M)
+    else                  (R[dst <- 1], M)
+```
+
+The proof sequence is ordinary BPF:
+
+```text
+dst = 0
+if reg[0] fail_cmp 0 goto end
+...
+if reg[n-1] fail_cmp 0 goto end
+dst = 1
+end:
+```
+
+Native arm64 emit refines that proof with:
+
+```text
+cmp reg[0], #0
+ccmp reg[1], #0, poison_nzcv, continue_cond
+...
+cset dst, continue_cond
+```
+
+Admissibility required by the rewrite path:
+
+```text
+architecture = arm64
+the original site is a contiguous same-target zero-test branch chain
+all terms have the same branch width and fail polarity
+the common branch target is outside the chain
+no branch target enters the chain interior
+the replacement does not cross a subprogram boundary
+dst notin LiveOut(site) and dst notin {reg[i]}
+```
+
+The final branch to the original chain target remains ordinary BPF outside the
+kinsn. The kinsn only computes the chain predicate.
+
+### 3.4 `extract64`
 
 Source files:
 
@@ -426,7 +503,7 @@ ALU), which masks with `0xffff_ffff` and zero-extends the result to 64 bits.
 No admissibility conditions beyond `Valid` are required; the native x86 emit
 (`SHR` + `AND`) and the proof sequence agree on the full destination register.
 
-### 3.4 `endian_load16`, `endian_load32`, `endian_load64`
+### 3.5 `endian_load16`, `endian_load32`, `endian_load64`
 
 Source files:
 
