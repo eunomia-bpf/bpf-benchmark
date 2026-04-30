@@ -14,6 +14,16 @@ fn exit_insn() -> BpfInsn {
     BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
 }
 
+fn pseudo_call_to(call_pc: usize, target_pc: usize) -> BpfInsn {
+    let imm = target_pc as i64 - (call_pc as i64 + 1);
+    BpfInsn::new(
+        BPF_JMP | BPF_CALL,
+        BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
+        0,
+        imm as i32,
+    )
+}
+
 fn st_mem(size: u8, dst: u8, off: i16, imm: i32) -> BpfInsn {
     BpfInsn::new(
         BPF_ST | size | BPF_MEM,
@@ -376,6 +386,20 @@ fn test_memcpy_pattern_8_pairs() {
     assert!(result.program_changed);
     assert_eq!(result.pass_results[0].sites_applied, 1);
     assert_eq!(program.insns, expected);
+}
+
+#[test]
+fn test_memcpy_pattern_inside_multi_subprog_program() {
+    let mut insns = vec![pseudo_call_to(0, 2), exit_insn()];
+    insns.extend(make_memcpy_run(BPF_DW, 3, 6, 0, 10, -64, 8));
+    insns.push(exit_insn());
+    let mut program = make_program(insns);
+
+    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
+
+    assert!(result.program_changed);
+    assert_eq!(result.pass_results[0].sites_applied, 1);
+    assert_eq!(bulk_call_count(&program.insns, MEMCPY_BTF_ID), 1);
 }
 
 #[test]

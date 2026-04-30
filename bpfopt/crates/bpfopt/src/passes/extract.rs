@@ -266,6 +266,16 @@ mod tests {
         )
     }
 
+    fn pseudo_call_to(call_pc: usize, target_pc: usize) -> BpfInsn {
+        let imm = target_pc as i64 - (call_pc as i64 + 1);
+        BpfInsn::new(
+            BPF_JMP | BPF_CALL,
+            BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
+            0,
+            imm as i32,
+        )
+    }
+
     // ── contiguous_mask_len tests ──────────────────────────────────
 
     #[test]
@@ -442,6 +452,30 @@ mod tests {
 
         // Verify the last instruction is still EXIT.
         assert!(prog.insns.last().unwrap().is_exit());
+    }
+
+    #[test]
+    fn test_extract_pass_applies_site_inside_multi_subprog_program() {
+        let mut prog = make_program(vec![
+            BpfInsn::alu64_imm(BPF_RSH, 2, 8),
+            BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
+            pseudo_call_to(2, 4),
+            exit_insn(),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = ctx_with_extract_kfunc(7777);
+
+        let pass = ExtractPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(result.changed);
+        assert_eq!(result.sites_applied, 1);
+        assert!(prog
+            .insns
+            .iter()
+            .any(|i| i.is_call() && i.src_reg() == BPF_PSEUDO_KINSN_CALL && i.imm == 7777));
     }
 
     #[test]

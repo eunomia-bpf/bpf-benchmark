@@ -6,8 +6,8 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::utils::{
-    emit_packed_kinsn_call_with_off, fixup_all_branches, map_replacement_range,
-    remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_target,
+    emit_packed_kinsn_call_with_off, fixup_all_branches, kinsn_replacement_subprog_skip_reason,
+    map_replacement_range, remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_target,
 };
 
 /// ENDIAN_FUSION optimization pass: replaces LDX_MEM + ENDIAN_TO_BE patterns
@@ -206,6 +206,24 @@ fn emit_endian_fusion_call(
     out
 }
 
+fn endian_fusion_replacement_len(
+    dst_reg: u8,
+    src_reg: u8,
+    offset: i16,
+    arch: Arch,
+    size: u8,
+) -> usize {
+    if offset_is_directly_encodable(arch, size, offset) || offset == 0 {
+        2
+    } else if src_reg != dst_reg && src_reg != BPF_REG_10 {
+        4
+    } else if dst_reg == src_reg {
+        3
+    } else {
+        4
+    }
+}
+
 impl BpfPass for EndianFusionPass {
     fn name(&self) -> &str {
         "endian_fusion"
@@ -303,6 +321,26 @@ impl BpfPass for EndianFusionPass {
                             _ => 0,
                         }
                     ),
+                });
+                continue;
+            }
+
+            let replacement_len = endian_fusion_replacement_len(
+                site.dst_reg,
+                site.src_reg,
+                site.offset,
+                ctx.platform.arch,
+                site.size,
+            );
+            if let Some(reason) = kinsn_replacement_subprog_skip_reason(
+                &program.insns,
+                site.start_pc,
+                site.old_len,
+                replacement_len,
+            )? {
+                skipped.push(SkipReason {
+                    pc: site.start_pc,
+                    reason,
                 });
                 continue;
             }

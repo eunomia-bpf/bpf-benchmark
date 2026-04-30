@@ -6,8 +6,8 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::utils::{
-    emit_packed_kinsn_call_with_off, fixup_all_branches, map_replacement_range,
-    remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_pass,
+    emit_packed_kinsn_call_with_off, fixup_all_branches, kinsn_replacement_subprog_skip_reason,
+    map_replacement_range, remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_pass,
 };
 
 /// ROTATE optimization pass: replaces shift+OR rotate patterns with
@@ -50,23 +50,6 @@ impl BpfPass for RotatePass {
             ));
         }
 
-        // Current rotate safety checks are intraprocedural. Until the daemon
-        // models BPF-to-BPF call edges precisely, skip programs with pseudo
-        // calls instead of rewriting across subprog boundaries unsafely.
-        if program
-            .insns
-            .iter()
-            .any(|insn| insn.is_call() && insn.src_reg() == BPF_PSEUDO_CALL)
-        {
-            return Ok(PassResult::skipped(
-                self.name(),
-                SkipReason {
-                    pc: 0,
-                    reason: "subprog pseudo-calls not yet supported".into(),
-                },
-            ));
-        }
-
         let bt_analysis = BranchTargetAnalysis;
         let bt = analyses.get(&bt_analysis, program);
         let liveness_analysis = LivenessAnalysis;
@@ -85,6 +68,19 @@ impl BpfPass for RotatePass {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
                     reason: "interior branch target".into(),
+                });
+                continue;
+            }
+
+            if let Some(reason) = kinsn_replacement_subprog_skip_reason(
+                &program.insns,
+                site.start_pc,
+                site.old_len,
+                2,
+            )? {
+                skipped.push(SkipReason {
+                    pc: site.start_pc,
+                    reason,
                 });
                 continue;
             }
@@ -358,6 +354,16 @@ mod tests {
 
     fn exit_insn() -> BpfInsn {
         BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
+    }
+
+    fn pseudo_call_to(call_pc: usize, target_pc: usize) -> BpfInsn {
+        let imm = target_pc as i64 - (call_pc as i64 + 1);
+        BpfInsn::new(
+            BPF_JMP | BPF_CALL,
+            BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
+            0,
+            imm as i32,
+        )
     }
 
     fn ctx_with_rotate_kfunc(btf_id: i32) -> PassContext {
@@ -645,21 +651,14 @@ mod tests {
     }
 
     #[test]
-    fn test_rotate_pass_skips_programs_with_pseudo_calls() {
+    fn test_rotate_pass_applies_site_inside_multi_subprog_program() {
         let mut prog = make_program(vec![
+            pseudo_call_to(0, 2),
+            exit_insn(),
             BpfInsn::mov64_reg(3, 2),
             BpfInsn::alu64_imm(BPF_RSH, 2, 56),
             BpfInsn::alu64_imm(BPF_LSH, 3, 8),
             BpfInsn::alu64_reg(BPF_OR, 2, 3),
-            BpfInsn::new(
-                BPF_JMP | BPF_CALL,
-                BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
-                0,
-                1,
-            ),
-            BpfInsn::mov64_imm(0, 0),
-            exit_insn(),
-            BpfInsn::mov64_imm(0, 1),
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
@@ -668,12 +667,12 @@ mod tests {
         let pass = RotatePass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
-        assert!(!result.changed);
-        assert_eq!(result.sites_applied, 0);
-        assert!(result
-            .sites_skipped
+        assert!(result.changed);
+        assert_eq!(result.sites_applied, 1);
+        assert!(prog
+            .insns
             .iter()
-            .any(|s| s.reason.contains("subprog pseudo-calls")));
+            .any(|i| i.is_call() && i.src_reg() == BPF_PSEUDO_KINSN_CALL && i.imm == 1234));
     }
 
     // ── Issue 2: dst overwrite between MOV and shift ─────────────

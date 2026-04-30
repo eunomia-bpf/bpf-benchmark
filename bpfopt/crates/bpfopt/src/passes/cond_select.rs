@@ -6,8 +6,8 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::utils::{
-    emit_packed_kinsn_call_with_off, fixup_all_branches, map_replacement_range,
-    remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_pass,
+    emit_packed_kinsn_call_with_off, fixup_all_branches, kinsn_replacement_subprog_skip_reason,
+    map_replacement_range, remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_pass,
 };
 
 /// COND_SELECT pass: replaces branch+mov diamond patterns with
@@ -222,6 +222,19 @@ impl BpfPass for CondSelectPass {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
                     reason: "packed ABI requires register true/false operands".into(),
+                });
+                continue;
+            }
+
+            if let Some(reason) = kinsn_replacement_subprog_skip_reason(
+                &program.insns,
+                site.start_pc,
+                site.old_len,
+                2,
+            )? {
+                skipped.push(SkipReason {
+                    pc: site.start_pc,
+                    reason,
                 });
                 continue;
             }
