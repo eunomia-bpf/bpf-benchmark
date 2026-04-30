@@ -2,7 +2,7 @@
 
 `bpfrejit-daemon` keeps the benchmark runner on the socket JSON boundary while
 delegating bytecode work to the v3 CLI tools (`bpfget`, `bpfopt`, `bpfverify`,
-`bpfrejit`, and `bpfprof`).
+and `bpfrejit`).
 
 ## Build
 
@@ -26,8 +26,6 @@ requests must provide a non-empty `enabled_passes` list.
 {"cmd":"optimize","prog_id":42,"enabled_passes":["map_inline","const_prop","dce"]}
 {"cmd":"optimize","prog_id":42,"dry_run":true,"enabled_passes":["map_inline","const_prop","dce"]}
 ```
-
-`bpfprof` profile sessions collect BPF runtime stats (`run_cnt` and `run_time_ns`).
 
 ## Layout
 

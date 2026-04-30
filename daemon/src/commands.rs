@@ -528,29 +528,6 @@ fn shell_quote(value: &str) -> String {
     format!("'{}'", value.replace('\'', "'\\''"))
 }
 
-#[derive(Debug)]
-pub(crate) struct ProfileSession {
-    child: std::process::Child,
-    output_dir: WorkDir,
-    duration_ms: u64,
-}
-
-#[derive(Debug)]
-pub(crate) struct FrozenProfile {
-    duration_ms: u64,
-    programs_profiled: usize,
-}
-
-impl FrozenProfile {
-    pub(crate) fn duration_ms(&self) -> u64 {
-        self.duration_ms
-    }
-
-    pub(crate) fn programs_profiled(&self) -> usize {
-        self.programs_profiled
-    }
-}
-
 #[derive(Clone, Debug, Serialize)]
 pub(crate) struct OptimizeOneResult {
     pub status: String,
@@ -915,55 +892,6 @@ fn live_bpf_map_keys(map: &MapInfoJson, fd: i32) -> Result<Vec<Vec<u8>>> {
         }
     }
     Ok(keys)
-}
-
-pub(crate) fn start_profile(config: &CliConfig, duration_ms: u64) -> Result<ProfileSession> {
-    let output_dir = WorkDir::new("bpfrejit-daemon-profile")?;
-    let mut child = config
-        .command("bpfprof")
-        .arg("--all")
-        .arg("--duration")
-        .arg(format!("{duration_ms}ms"))
-        .arg("--output-dir")
-        .arg(output_dir.path())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .context("spawn bpfprof --all")?;
-
-    if let Some(status) = child.try_wait().context("poll bpfprof after spawn")? {
-        let output = child.wait_with_output().context("collect bpfprof output")?;
-        bail!(
-            "bpfprof exited during profile-start with status {}: {}",
-            status,
-            stderr_summary(&output)
-        );
-    }
-
-    Ok(ProfileSession {
-        child,
-        output_dir,
-        duration_ms,
-    })
-}
-
-pub(crate) fn stop_profile(session: ProfileSession) -> Result<FrozenProfile> {
-    let output = session
-        .child
-        .wait_with_output()
-        .context("wait for bpfprof profile session")?;
-    if !output.status.success() {
-        bail!(
-            "bpfprof profile session failed with status {}: {}",
-            output.status,
-            stderr_summary(&output)
-        );
-    }
-    let programs_profiled = count_json_files(session.output_dir.path())?;
-    Ok(FrozenProfile {
-        duration_ms: session.duration_ms,
-        programs_profiled,
-    })
 }
 
 pub(crate) fn try_apply_one(
@@ -1764,17 +1692,6 @@ fn bytecode_has_kinsn_call(bytes: &[u8], label: &str) -> Result<bool> {
     }))
 }
 
-fn count_json_files(path: &Path) -> Result<usize> {
-    let mut count = 0usize;
-    for entry in fs::read_dir(path).with_context(|| format!("read {}", path.display()))? {
-        let entry = entry?;
-        if entry.path().extension().and_then(|value| value.to_str()) == Some("json") {
-            count += 1;
-        }
-    }
-    Ok(count)
-}
-
 fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Result<T> {
     let data = fs::read(path).with_context(|| format!("read {}", path.display()))?;
     serde_json::from_slice(&data).with_context(|| format!("parse {label} from {}", path.display()))
@@ -2023,20 +1940,6 @@ done
 if [[ -n "$out" ]]; then
   printf '{"status":"ok","prog_id":%s,"insn_count_before":2,"insn_count_after":2}\n' "$prog_id" > "$out"
 fi
-"#,
-            )?;
-            write_executable(
-                &dir.path().join("bpfprof"),
-                r#"#!/usr/bin/env bash
-set -euo pipefail
-outdir=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --output-dir) outdir="$2"; shift 2 ;;
-    *) shift ;;
-  esac
-done
-printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1}\n' > "$outdir/42.json"
 "#,
             )?;
             Ok(Self { dir })
@@ -2526,16 +2429,6 @@ JSON
         assert!(result.summary.applied);
         assert_eq!(result.summary.total_sites_applied, 0);
         assert!(result.inlined_map_entries.is_empty());
-    }
-
-    #[test]
-    fn profile_start_stop_uses_bpfprof_output_dir() {
-        let fake = FakeCliDir::new().unwrap();
-        let session = start_profile(&fake.config(), 1).unwrap();
-        let frozen = stop_profile(session).unwrap();
-
-        assert_eq!(frozen.programs_profiled(), 1);
-        assert_eq!(frozen.duration_ms(), 1);
     }
 
     #[test]

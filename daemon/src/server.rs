@@ -63,11 +63,6 @@ where
     Ok(())
 }
 
-enum ProfilingState {
-    Active(commands::ProfileSession),
-    Frozen(commands::FrozenProfile),
-}
-
 #[derive(Default)]
 struct ReoptimizationState {
     enabled_passes_by_prog: HashMap<u32, Vec<String>>,
@@ -132,15 +127,6 @@ fn reoptimization_passes_for(
         .ok_or_else(|| anyhow::anyhow!("missing original enabled_passes for prog {prog_id}"))
 }
 
-impl ProfilingState {
-    fn label(&self) -> &'static str {
-        match self {
-            Self::Active(_) => "active",
-            Self::Frozen(_) => "loaded",
-        }
-    }
-}
-
 struct ProgramWatcher {
     seen: HashSet<u32>,
 }
@@ -184,7 +170,6 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
     let mut last_invalidation_check = Instant::now();
     let mut last_watch_check = Instant::now();
     let mut watcher = ProgramWatcher::from_live()?;
-    let mut profiling_state: Option<ProfilingState> = None;
 
     commands::validate_failure_export_root_from_env()?;
     remove_socket_file_if_present(socket_path)?;
@@ -237,13 +222,7 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
 
         match listener.accept() {
             Ok((stream, _addr)) => {
-                if let Err(err) = handle_client(
-                    stream,
-                    &config,
-                    &mut profiling_state,
-                    &tracker,
-                    &reoptimization_state,
-                ) {
+                if let Err(err) = handle_client(stream, &config, &tracker, &reoptimization_state) {
                     eprintln!("serve: client error: {err:#}");
                 }
             }
@@ -257,11 +236,6 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
     }
 
     println!("serve: shutting down");
-    if let Some(ProfilingState::Active(session)) = profiling_state.take() {
-        if let Err(err) = commands::stop_profile(session) {
-            eprintln!("serve: failed to stop profiling session during shutdown: {err:#}");
-        }
-    }
     remove_socket_file_if_present(socket_path)?;
     Ok(())
 }
@@ -288,7 +262,6 @@ fn panic_response(payload: Box<dyn std::any::Any + Send>) -> serde_json::Value {
 fn handle_client(
     stream: std::os::unix::net::UnixStream,
     config: &CliConfig,
-    profiling_state: &mut Option<ProfilingState>,
     tracker: &commands::SharedInvalidationTracker,
     reoptimization_state: &SharedReoptimizationState,
 ) -> Result<()> {
@@ -305,7 +278,7 @@ fn handle_client(
 
         let response = match serde_json::from_str::<serde_json::Value>(&line) {
             Ok(req) => match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                process_request(&req, config, profiling_state, tracker, reoptimization_state)
+                process_request(&req, config, tracker, reoptimization_state)
             })) {
                 Ok(response) => response,
                 Err(payload) => panic_response(payload),
@@ -365,19 +338,6 @@ fn required_enabled_passes<'a>(
     }
 }
 
-fn request_interval_ms(req: &serde_json::Value) -> std::result::Result<u64, String> {
-    let value = req
-        .get("interval_ms")
-        .ok_or_else(|| "missing interval_ms".to_string())?;
-    let interval_ms = value
-        .as_u64()
-        .ok_or_else(|| "interval_ms must be a JSON integer".to_string())?;
-    if interval_ms == 0 {
-        return Err("interval_ms must be greater than zero".to_string());
-    }
-    Ok(interval_ms)
-}
-
 fn error_json(message: impl Into<String>) -> serde_json::Value {
     serde_json::json!({
         "status": "error",
@@ -395,7 +355,6 @@ fn serialize_or_error<T: Serialize>(value: T) -> serde_json::Value {
 fn process_request(
     req: &serde_json::Value,
     config: &CliConfig,
-    profiling_state: &mut Option<ProfilingState>,
     tracker: &commands::SharedInvalidationTracker,
     reoptimization_state: &SharedReoptimizationState,
 ) -> serde_json::Value {
@@ -428,55 +387,10 @@ fn process_request(
                 Err(e) => error_json(format!("{e:#}")),
             }
         }
-        "profile-start" => {
-            let interval_ms = match request_interval_ms(req) {
-                Ok(interval_ms) => interval_ms,
-                Err(message) => return error_json(message),
-            };
-            if matches!(profiling_state.as_ref(), Some(ProfilingState::Active(_))) {
-                return error_json("profiling is already active");
-            }
-            match commands::start_profile(config, interval_ms) {
-                Ok(session) => {
-                    *profiling_state = Some(ProfilingState::Active(session));
-                    serde_json::json!({"status": "ok"})
-                }
-                Err(err) => error_json(format!("{err:#}")),
-            }
-        }
-        "profile-stop" => {
-            let current_state = match profiling_state.take() {
-                Some(state) => state,
-                None => return error_json("no profiling session is active"),
-            };
-            match current_state {
-                ProfilingState::Active(session) => match commands::stop_profile(session) {
-                    Ok(profile) => {
-                        let programs_profiled = profile.programs_profiled();
-                        let duration_ms = profile.duration_ms();
-                        *profiling_state = Some(ProfilingState::Frozen(profile));
-                        serde_json::json!({
-                            "status": "ok",
-                            "programs_profiled": programs_profiled,
-                            "duration_ms": duration_ms,
-                        })
-                    }
-                    Err(err) => error_json(format!("{err:#}")),
-                },
-                ProfilingState::Frozen(profile) => {
-                    *profiling_state = Some(ProfilingState::Frozen(profile));
-                    error_json("profiling is not active")
-                }
-            }
-        }
         "status" => {
-            let profiling = profiling_state
-                .as_ref()
-                .map_or("none", ProfilingState::label);
             serde_json::json!({
                 "status": "ok",
                 "version": env!("CARGO_PKG_VERSION"),
-                "profiling": profiling,
             })
         }
         _ => error_json(format!("unknown command: {cmd}")),
@@ -544,14 +458,7 @@ mod tests {
     ) -> serde_json::Value {
         let tracker = commands::new_invalidation_tracker();
         let reoptimization_state = new_reoptimization_state();
-        let mut profiling_state = None;
-        process_request(
-            req,
-            config,
-            &mut profiling_state,
-            &tracker,
-            &reoptimization_state,
-        )
+        process_request(req, config, &tracker, &reoptimization_state)
     }
 
     #[test]
@@ -692,20 +599,6 @@ mod tests {
         assert_eq!(
             response["error_message"],
             "optimize requires at least one enabled_passes entry"
-        );
-    }
-
-    #[test]
-    fn process_request_rejects_zero_profile_interval() {
-        let response = process_test_request(&serde_json::json!({
-            "cmd": "profile-start",
-            "interval_ms": 0,
-        }));
-
-        assert_eq!(response["status"], "error");
-        assert_eq!(
-            response["error_message"],
-            "interval_ms must be greater than zero"
         );
     }
 }
