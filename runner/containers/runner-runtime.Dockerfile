@@ -423,6 +423,9 @@ make -C /artifacts/headers ${make_args} M="${PWD}/module/${module_arch}" MO=/tmp
 install -m 0644 /tmp/kinsn-build/*.ko /artifacts/kinsn/
 module_count="$(find /artifacts/kinsn -maxdepth 1 -type f -name '*.ko' | wc -l)"
 test "${module_count}" -eq "${expected_modules}"
+for ko_path in /artifacts/kinsn/*.ko; do
+    readelf -S "${ko_path}" | awk '$2 == ".BTF" { found = 1 } END { exit(found ? 0 : 1) }'
+done
 EOF
 
 FROM runner-runtime-artifacts AS runner-runtime-daemon-artifact

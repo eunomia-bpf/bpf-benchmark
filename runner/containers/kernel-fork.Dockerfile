@@ -141,8 +141,10 @@ make -C "${kernel_src}" O="${build_dir}" ${make_args} INSTALL_HDR_PATH="${artifa
     srctree="${kernel_src}" SRCARCH="${srcarch}" MAKE=make CC=gcc HOSTCC=gcc \
         "${kernel_src}/scripts/package/install-extmod-build" "${artifact_root}/headers"
 )
+install -m 0644 "${build_dir}/vmlinux" "${artifact_root}/headers/vmlinux"
 test -f "${artifact_root}/headers/Makefile"
 test -f "${artifact_root}/headers/Module.symvers"
+test -s "${artifact_root}/headers/vmlinux"
 test -f "${artifact_root}/headers/include/config/kernel.release"
 test -d "${artifact_root}/headers/arch/${srcarch}/include"
 
