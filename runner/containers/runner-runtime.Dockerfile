@@ -526,6 +526,8 @@ COPY --link --from=runner-runtime-bpfopt-artifacts /artifacts/rust/usr-local-bin
 COPY --link --from=runner-runtime-kinsn-artifacts /artifacts/kinsn /artifacts/kinsn
 
 RUN set -eux; \
+    mkdir -p /opt; \
+    ln -sfn /artifacts/user /opt/bpf-benchmark; \
     ldconfig; \
     test -x /usr/local/bin/bpftool; \
     test -x /usr/local/bin/bpfrejit-daemon; \
