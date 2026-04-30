@@ -143,10 +143,7 @@ bpfverify --prog-type xdp --input prog.bin --verifier-states-out states.json
 bpfprof --prog-id 123 --duration 500ms --output profile.json
 
 # 采集所有活跃程序
-bpfprof --all --duration 1s --output profiles/
-
-# 显示程序热度排名
-bpfprof --all --duration 250ms --show
+bpfprof --all --duration 1s --output-dir profiles/
 ```
 
 #### 采集内容
