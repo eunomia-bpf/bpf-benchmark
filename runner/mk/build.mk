@@ -44,8 +44,10 @@ RUNNER_RUNTIME_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/runner-runtime.Dockerfil
 KERNEL_FORK_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/kernel-fork.Dockerfile
 KATRAN_ARTIFACTS_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/katran-artifacts.Dockerfile
 BPFREJIT_INSTALL_SCRIPT := $(RUNNER_DIR)/scripts/bpfrejit-install
-KERNEL_FORK_COMMIT_X86 := $(shell cd "$(KERNEL_DIR)" && git rev-parse --short HEAD)
-KERNEL_FORK_COMMIT_ARM64 := $(shell cd "$(KERNEL_DIR)" && git rev-parse --short HEAD)
+KERNEL_FORK_COMMIT_SHORT_LEN := 7
+KERNEL_FORK_COMMIT := $(shell cd "$(KERNEL_DIR)" && hash=$$(git rev-parse HEAD) && printf '%.$(KERNEL_FORK_COMMIT_SHORT_LEN)s\n' "$$hash")
+KERNEL_FORK_COMMIT_X86 := $(KERNEL_FORK_COMMIT)
+KERNEL_FORK_COMMIT_ARM64 := $(KERNEL_FORK_COMMIT)
 X86_RUNNER_RUNTIME_IMAGE := bpf-benchmark/runner-runtime:x86_64
 ARM64_RUNNER_RUNTIME_IMAGE := bpf-benchmark/runner-runtime:arm64
 X86_KERNEL_FORK_IMAGE := bpf-benchmark/kernel-fork:x86_64-$(KERNEL_FORK_COMMIT_X86)
