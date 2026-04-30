@@ -167,7 +167,9 @@ clean-build:
 	rm -rf "$(RUNNER_DIR)/build-arm64"
 	rm -rf "$(RUNNER_DIR)/build-llvmbpf"
 	rm -rf "$(RUNNER_DIR)/build-arm64-llvmbpf"
-	$(MAKE) -C "$(MICRO_DIR)" clean
+	$(MAKE) -C "$(MICRO_DIR)/programs" OUTPUT_DIR="$(MICRO_DIR)/programs" clean
+	rm -f "$(MICRO_DIR)"/generated-inputs/*.mem
+	rm -rf "$(MICRO_DIR)/__pycache__" "$(MICRO_DIR)/build"
 	cargo clean --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml"
 	cargo clean --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 	rm -rf "$(X86_BUILD_DIR)" "$(ARM64_BUILD_DIR)" "$(ARTIFACT_ROOT)/runtime-kernel" "$(ROOT_DIR)/.state/runner-contracts"
