@@ -159,6 +159,10 @@ const KINSN_PROBE_TARGETS: &[KinsnProbeTarget] = &[
         probe_names: &["bpf_ccmp64"],
     },
     KinsnProbeTarget {
+        json_name: "bpf_prefetch",
+        probe_names: &["bpf_prefetch"],
+    },
+    KinsnProbeTarget {
         json_name: "bpf_extract64",
         probe_names: &["bpf_extract64"],
     },

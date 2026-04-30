@@ -1138,25 +1138,35 @@ where
             );
         }
         let mut side_inputs = Vec::<(String, PathBuf)>::new();
+        let wants_const_prop = requested_passes
+            .iter()
+            .any(|pass| canonical_pass(pass) == "const_prop");
+        let wants_map_inline = requested_passes
+            .iter()
+            .any(|pass| canonical_pass(pass) == "map_inline");
 
-        write_original_verifier_states(
-            config,
-            &prog_info,
-            workdir.path(),
-            &prog_bin,
-            &map_fds_json,
-            &verifier_states_json,
-        )
-        .with_context(|| format!("capture verifier states for prog {prog_id}"))?;
+        if wants_const_prop {
+            write_original_verifier_states(
+                config,
+                &prog_info,
+                workdir.path(),
+                &prog_bin,
+                &map_fds_json,
+                &verifier_states_json,
+            )
+            .with_context(|| format!("capture verifier states for prog {prog_id}"))?;
+        }
 
-        write_live_map_values(
-            &map_fds_json,
-            &map_values_json,
-            &mut open_map_fd,
-            &mut lookup_map_value,
-            &mut scan_map_keys,
-        )
-        .with_context(|| format!("build live map value snapshot for prog {prog_id}"))?;
+        if wants_map_inline {
+            write_live_map_values(
+                &map_fds_json,
+                &map_values_json,
+                &mut open_map_fd,
+                &mut lookup_map_value,
+                &mut scan_map_keys,
+            )
+            .with_context(|| format!("build live map value snapshot for prog {prog_id}"))?;
+        }
 
         let mut has_fd_array = false;
         if needs_target(requested_passes) {
@@ -1187,20 +1197,14 @@ where
             side_inputs.push(("--target".to_string(), target_json.clone()));
         }
 
-        if requested_passes
-            .iter()
-            .any(|pass| canonical_pass(pass) == "const_prop")
-        {
+        if wants_const_prop {
             side_inputs.push((
                 "--verifier-states".to_string(),
                 verifier_states_json.clone(),
             ));
         }
 
-        if requested_passes
-            .iter()
-            .any(|pass| canonical_pass(pass) == "map_inline")
-        {
+        if wants_map_inline {
             side_inputs.push(("--map-values".to_string(), map_values_json.clone()));
             let map_ids = if prog_info.map_ids.is_empty() {
                 "0".to_string()
@@ -1210,13 +1214,20 @@ where
             side_inputs.push(("--map-ids".to_string(), PathBuf::from(map_ids)));
         }
 
-        if requested_passes
+        let wants_branch_flip = requested_passes
             .iter()
-            .any(|pass| canonical_pass(pass) == "branch_flip")
-        {
+            .any(|pass| canonical_pass(pass) == "branch_flip");
+        let wants_prefetch = requested_passes
+            .iter()
+            .any(|pass| canonical_pass(pass) == "prefetch");
+        if wants_branch_flip {
             let profile_path = profile_path
                 .ok_or_else(|| anyhow!("branch_flip requested but no profile is loaded"))?;
             side_inputs.push(("--profile".to_string(), profile_path.to_path_buf()));
+        } else if wants_prefetch {
+            if let Some(profile_path) = profile_path {
+                side_inputs.push(("--profile".to_string(), profile_path.to_path_buf()));
+            }
         }
 
         let mut bpfopt = config.command("bpfopt");
@@ -1737,7 +1748,13 @@ fn needs_target(passes: &[String]) -> bool {
     passes.iter().any(|pass| {
         matches!(
             canonical_pass(pass).as_str(),
-            "rotate" | "cond_select" | "ccmp" | "extract" | "endian_fusion" | "bulk_memory"
+            "rotate"
+                | "cond_select"
+                | "ccmp"
+                | "extract"
+                | "endian_fusion"
+                | "bulk_memory"
+                | "prefetch"
         )
     })
 }
@@ -1750,6 +1767,7 @@ fn missing_target_kinsns(path: &Path, passes: &[String]) -> Result<Vec<&'static 
             "rotate" => push_missing_target(&mut missing, &target, &["bpf_rotate64"]),
             "cond_select" => push_missing_target(&mut missing, &target, &["bpf_select64"]),
             "ccmp" => push_missing_target(&mut missing, &target, &["bpf_ccmp64"]),
+            "prefetch" => push_missing_target(&mut missing, &target, &["bpf_prefetch"]),
             "extract" => push_missing_target(&mut missing, &target, &["bpf_extract64"]),
             "endian_fusion" => push_missing_target(
                 &mut missing,
@@ -1856,6 +1874,7 @@ fn required_kinsn_names(passes: &[String]) -> Vec<&'static str> {
             "rotate" => push_unique(&mut names, "bpf_rotate64"),
             "cond_select" => push_unique(&mut names, "bpf_select64"),
             "ccmp" => push_unique(&mut names, "bpf_ccmp64"),
+            "prefetch" => push_unique(&mut names, "bpf_prefetch"),
             "extract" => push_unique(&mut names, "bpf_extract64"),
             "endian_fusion" => push_unique(&mut names, "bpf_endian_load64"),
             "bulk_memory" => {
@@ -1883,6 +1902,7 @@ fn canonical_pass(pass: &str) -> String {
         "extract" => "extract",
         "endian" | "endian-fusion" | "endian_fusion" => "endian_fusion",
         "branch-flip" | "branch_flip" => "branch_flip",
+        "prefetch" => "prefetch",
         "dce" => "dce",
         "map-inline" | "map_inline" => "map_inline",
         "bulk-memory" | "bulk_memory" => "bulk_memory",
@@ -2441,8 +2461,8 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"b
                 assert!(debug_dir.join("prog.bin").is_file());
                 assert!(debug_dir.join("prog_info.json").is_file());
                 assert!(debug_dir.join("map_fds.json").is_file());
-                assert!(debug_dir.join(MAP_VALUES_FILE).is_file());
-                assert!(debug_dir.join(VERIFIER_STATES_FILE).is_file());
+                assert!(!debug_dir.join(MAP_VALUES_FILE).exists());
+                assert!(!debug_dir.join(VERIFIER_STATES_FILE).exists());
                 assert!(debug_dir.join("bpfopt_report.json").is_file());
             },
         );
@@ -2551,6 +2571,37 @@ JSON
     }
 
     #[test]
+    fn fd_array_generation_rewrites_prefetch_call_offset() {
+        let dir = WorkDir::new("bpfrejit-daemon-prefetch-target-test").unwrap();
+        let target = dir.path().join("target.json");
+        let fd_array = dir.path().join("fd_array.json");
+        fs::write(
+            &target,
+            r#"{
+  "arch": "x86_64",
+  "features": ["cmov"],
+  "kinsns": {
+    "bpf_prefetch": {"btf_func_id": 129900, "btf_id": 51}
+  }
+}
+"#,
+        )
+        .unwrap();
+
+        write_fd_array_from_target(&target, &["prefetch".to_string()], &fd_array).unwrap();
+
+        let fd_entries: serde_json::Value =
+            serde_json::from_slice(&fs::read(&fd_array).unwrap()).unwrap();
+        assert_eq!(fd_entries[0]["slot"], 1);
+        assert_eq!(fd_entries[0]["name"], "bpf_prefetch");
+        assert_eq!(fd_entries[0]["btf_id"], 51);
+
+        let rewritten: serde_json::Value =
+            serde_json::from_slice(&fs::read(&target).unwrap()).unwrap();
+        assert_eq!(rewritten["kinsns"]["bpf_prefetch"]["call_offset"], 1);
+    }
+
+    #[test]
     fn missing_target_kinsn_is_error() {
         with_temp_failure_root(|_| {
             let fake = FakeCliDir::new().unwrap();
@@ -2599,6 +2650,93 @@ done
             let message = format!("{err:#}");
             assert!(message.contains("bpfverify --verifier-states-out failed"));
             assert!(message.contains("synthetic verifier state failure"));
+        });
+    }
+
+    #[test]
+    fn prefetch_does_not_capture_unused_verifier_states() {
+        with_clean_daemon_export_env(|| {
+            let fake = FakeCliDir::new().unwrap();
+            fake.replace_command(
+                "bpfget",
+                r#"#!/usr/bin/env bash
+set -euo pipefail
+if [[ "${1:-}" == "--target" ]]; then
+  out=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --output) out="$2"; shift 2 ;;
+      *) shift ;;
+    esac
+  done
+  cat > "$out" <<JSON
+{"arch":"x86_64","features":["cmov"],"kinsns":{"bpf_prefetch":{"btf_func_id":500,"btf_id":51}}}
+JSON
+  exit 0
+fi
+prog_id="$1"
+shift
+outdir=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --full) shift ;;
+    --outdir) outdir="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+printf '\xb7\x00\x00\x00\x00\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00' > "$outdir/prog.bin"
+cat > "$outdir/prog_info.json" <<JSON
+{"id":$prog_id,"name":"demo","type":{"name":"xdp","numeric":6},"insn_cnt":2,"map_ids":[]}
+JSON
+printf '[]\n' > "$outdir/map_fds.json"
+"#,
+            )
+            .unwrap();
+            fake.replace_command(
+                "bpfverify",
+                r#"#!/usr/bin/env bash
+set -euo pipefail
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --verifier-states-out) printf 'unexpected verifier state capture\n' >&2; exit 7 ;;
+    *) shift ;;
+  esac
+done
+"#,
+            )
+            .unwrap();
+            fake.replace_command(
+                "bpfopt",
+                r#"#!/usr/bin/env bash
+set -euo pipefail
+report=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --report) report="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+cat >/dev/null
+printf '\xb7\x00\x00\x00\x00\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00'
+cat > "$report" <<JSON
+{"passes":[{"pass":"prefetch","changed":false,"sites_applied":0,"insn_count_before":2,"insn_count_after":2,"insn_delta":0}]}
+JSON
+"#,
+            )
+            .unwrap();
+
+            let result = try_apply_one(
+                42,
+                &fake.config(),
+                Some(&["prefetch".to_string()]),
+                None,
+                None,
+            )
+            .unwrap();
+
+            assert_eq!(result.status, "ok");
+            assert!(!result.changed);
+            assert_eq!(result.summary.total_sites_applied, 0);
         });
     }
 
@@ -2720,8 +2858,6 @@ exit 11
                 "opt.bin",
                 "verified.bin",
                 "map_fds.json",
-                MAP_VALUES_FILE,
-                VERIFIER_STATES_FILE,
                 "info.json",
                 "replay.sh",
                 "bpfopt_report.json",

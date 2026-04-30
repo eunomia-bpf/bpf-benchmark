@@ -28,6 +28,7 @@ _PASS_TO_SITE_FIELD = {
     "endian_fusion": "endian_sites",
     "extract": "extract_sites",
     "rotate": "rotate_sites",
+    "prefetch": "prefetch_sites",
     "skb_load_bytes_spec": "skb_load_bytes_spec_sites",
     "wide_mem": "wide_sites",
 }
@@ -45,6 +46,7 @@ _TOTAL_SITE_FIELDS = (
     "endian_sites",
     "skb_load_bytes_spec_sites",
     "branch_flip_sites",
+    "prefetch_sites",
     "other_sites",
 )
 

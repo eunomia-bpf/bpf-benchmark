@@ -12,6 +12,7 @@ const EXPECTED_V3_KINSN_NAMES: &[&str] = &[
     "bpf_rotate64",
     "bpf_select64",
     "bpf_ccmp64",
+    "bpf_prefetch",
     "bpf_extract64",
     "bpf_endian_load64",
     "bpf_bulk_memcpy",
