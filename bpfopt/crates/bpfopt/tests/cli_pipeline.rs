@@ -198,8 +198,9 @@ fn list_passes_arch_outputs_default_optimize_order() {
     let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
     let passes = stdout.lines().collect::<Vec<_>>();
 
-    assert_eq!(passes.len(), 13);
+    assert_eq!(passes.len(), 12);
     assert!(passes.contains(&"ccmp"));
+    assert!(!passes.contains(&"const-prop"));
     assert_eq!(passes.last(), Some(&"prefetch"));
     assert!(!passes.contains(&"branch-flip"));
 }
@@ -265,7 +266,7 @@ fn optimize_without_target_fails_before_running_kinsn_passes() {
 }
 
 #[test]
-fn optimize_default_pipeline_with_all_side_inputs_reports_12_entries() {
+fn optimize_default_pipeline_with_all_side_inputs_reports_11_entries() {
     let report_path = temp_path("optimize-full-report.json");
     let target_path = write_temp_file(
         "target.json",
@@ -320,7 +321,8 @@ fn optimize_default_pipeline_with_all_side_inputs_reports_12_entries() {
     remove_file_if_exists(report_path);
 
     let passes = report["passes"].as_array().expect("passes array");
-    assert_eq!(passes.len(), 12);
+    assert_eq!(passes.len(), 11);
+    assert!(passes.iter().all(|pass| pass["pass"] != "const_prop"));
     assert!(passes.iter().all(|pass| pass["pass"] != "branch_flip"));
     assert!(passes.iter().any(|pass| pass["pass"] == "prefetch"));
     assert!(

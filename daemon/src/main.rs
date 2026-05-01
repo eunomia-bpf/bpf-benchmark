@@ -6,6 +6,7 @@
 
 mod bpf;
 mod commands;
+mod dry_run;
 mod invalidation;
 mod server;
 

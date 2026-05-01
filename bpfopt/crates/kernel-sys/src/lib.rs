@@ -4,6 +4,8 @@
 //! `libbpf-rs`/`libbpf-sys`. The only direct `bpf(2)` wrappers here are for
 //! fork-only commands that upstream libbpf does not expose.
 
+mod verifier_log;
+
 use std::collections::{BTreeMap, HashMap};
 use std::ffi::{c_char, c_void, CString};
 use std::os::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, OwnedFd};
@@ -218,124 +220,6 @@ fn is_zero_usize(value: &usize) -> bool {
     *value == 0
 }
 
-#[derive(Debug, Deserialize)]
-pub struct FdArrayEntry {
-    pub slot: Option<usize>,
-    pub name: Option<String>,
-    pub btf_fd: Option<i32>,
-    pub btf_id: Option<u32>,
-    pub btf_obj_id: Option<u32>,
-    pub btf_module: Option<String>,
-}
-
-#[derive(Debug)]
-pub struct FdArray {
-    fds: Vec<i32>,
-    _owned_fds: Vec<OwnedFd>,
-}
-
-impl FdArray {
-    pub fn empty() -> Self {
-        Self {
-            fds: Vec::new(),
-            _owned_fds: Vec::new(),
-        }
-    }
-
-    pub fn from_entries(entries: &[FdArrayEntry]) -> Result<Self> {
-        let (required, owned_fds) = required_btf_fds(entries)?;
-        Ok(Self {
-            fds: build_rejit_fd_array(&required),
-            _owned_fds: owned_fds,
-        })
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.fds.is_empty()
-    }
-
-    pub fn as_slice(&self) -> &[i32] {
-        &self.fds
-    }
-}
-
-fn required_btf_fds(entries: &[FdArrayEntry]) -> Result<(Vec<i32>, Vec<OwnedFd>)> {
-    let has_slots = entries.iter().any(|entry| entry.slot.is_some());
-    let has_missing_slots = entries.iter().any(|entry| entry.slot.is_none());
-    if has_slots && has_missing_slots {
-        bail!("fd_array entries must either all specify slot or all omit slot");
-    }
-
-    let mut rows = Vec::with_capacity(entries.len());
-    let mut owned_fds = Vec::new();
-    for (index, entry) in entries.iter().enumerate() {
-        let label = entry
-            .name
-            .as_deref()
-            .map(|name| format!(" ({name})"))
-            .unwrap_or_else(String::new);
-        let btf_fd = resolve_btf_fd(entry, index, &label, &mut owned_fds)?;
-        let slot = entry.slot.unwrap_or(index + 1);
-        if slot == 0 {
-            bail!("fd_array entry {index}{label} uses invalid slot 0");
-        }
-        rows.push((slot, btf_fd));
-    }
-
-    rows.sort_by_key(|(slot, _)| *slot);
-    let mut out = Vec::with_capacity(rows.len());
-    for (expected, (slot, btf_fd)) in (1usize..).zip(rows) {
-        if slot != expected {
-            bail!(
-                "fd_array slots must be dense starting at 1; expected slot {expected}, got {slot}"
-            );
-        }
-        out.push(btf_fd);
-    }
-    Ok((out, owned_fds))
-}
-
-fn resolve_btf_fd(
-    entry: &FdArrayEntry,
-    index: usize,
-    label: &str,
-    owned_fds: &mut Vec<OwnedFd>,
-) -> Result<i32> {
-    if entry.btf_module.is_some() {
-        bail!("fd_array entry {index}{label} uses unsupported btf_module");
-    }
-    if let Some(btf_fd) = entry.btf_fd {
-        if btf_fd < 0 {
-            bail!("fd_array entry {index}{label} has negative btf_fd {btf_fd}");
-        }
-        return Ok(btf_fd);
-    }
-    let btf_id = entry
-        .btf_id
-        .or(entry.btf_obj_id)
-        .ok_or_else(|| anyhow!("fd_array entry {index}{label} is missing btf_fd or btf_id"))?;
-    if btf_id == 0 {
-        bail!("fd_array entry {index}{label} has invalid btf_id 0");
-    }
-    let fd = btf_get_fd_by_id(btf_id).with_context(|| {
-        format!("open BTF fd for fd_array entry {index}{label} btf_id {btf_id}")
-    })?;
-    let raw_fd = fd.as_raw_fd();
-    owned_fds.push(fd);
-    Ok(raw_fd)
-}
-
-pub fn build_rejit_fd_array(required_btf_fds: &[i32]) -> Vec<i32> {
-    if required_btf_fds.is_empty() {
-        return Vec::new();
-    }
-
-    let mut fd_array = Vec::with_capacity(required_btf_fds.len() + 1);
-    fd_array.push(required_btf_fds[0]);
-    fd_array.extend_from_slice(required_btf_fds);
-    fd_array
-}
-
 pub struct BranchSnapshotSidecar {
     pub prog_fd: OwnedFd,
     pub link_fd: OwnedFd,
@@ -489,7 +373,11 @@ fn extract_log_string(buf: &[u8]) -> String {
     String::from_utf8_lossy(&buf[..end]).trim_end().to_string()
 }
 
-fn verifier_log_summary(log: &str) -> String {
+pub fn verifier_log_summary(log: &str) -> String {
+    let log = log.trim();
+    if log.is_empty() {
+        return "<empty verifier log>".to_string();
+    }
     const MAX_SUMMARY_CHARS: usize = 4096;
     let mut chars = log.chars();
     let summary: String = chars.by_ref().take(MAX_SUMMARY_CHARS).collect();
@@ -498,6 +386,70 @@ fn verifier_log_summary(log: &str) -> String {
     } else {
         summary
     }
+}
+
+pub fn verifier_states_from_log(log: &str) -> VerifierStatesJson {
+    let parsed = verifier_log::parse_verifier_log(log);
+    convert_verifier_states(&parsed)
+}
+
+fn convert_verifier_states(states: &[VerifierInsn]) -> VerifierStatesJson {
+    let has_delta = states
+        .iter()
+        .any(|state| state.kind == VerifierInsnKind::InsnDeltaState);
+    let insns = states
+        .iter()
+        .filter(|state| state.kind != VerifierInsnKind::BranchDeltaState)
+        .filter(|state| !has_delta || state.kind == VerifierInsnKind::InsnDeltaState)
+        .filter_map(convert_verifier_state)
+        .collect();
+    VerifierStatesJson { insns }
+}
+
+fn convert_verifier_state(state: &VerifierInsn) -> Option<VerifierInsnJson> {
+    let regs = state
+        .regs
+        .iter()
+        .filter_map(|(&regno, reg)| convert_reg_state(reg).map(|reg| (format!("r{regno}"), reg)))
+        .collect::<BTreeMap<_, _>>();
+    (!regs.is_empty()).then_some(VerifierInsnJson {
+        pc: state.pc,
+        frame: state.frame,
+        regs,
+    })
+}
+
+fn convert_reg_state(reg: &RegState) -> Option<VerifierRegJson> {
+    let const_val = reg
+        .exact_u64()
+        .or_else(|| reg.exact_u32().map(u64::from))
+        .map(|value| value as i64);
+    let (min, max) = if let (Some(min), Some(max)) = (reg.range.umin, reg.range.umax) {
+        if min <= i64::MAX as u64 && max <= i64::MAX as u64 {
+            (Some(min as i64), Some(max as i64))
+        } else {
+            (reg.range.smin, reg.range.smax)
+        }
+    } else {
+        (reg.range.smin, reg.range.smax)
+    };
+    let tnum = reg
+        .tnum
+        .map(|tnum| format!("0x{:x}/0x{:x}", tnum.value, tnum.mask));
+
+    (reg.offset.is_some()
+        || const_val.is_some()
+        || min.is_some()
+        || max.is_some()
+        || tnum.is_some())
+    .then_some(VerifierRegJson {
+        reg_type: reg.reg_type.clone(),
+        offset: reg.offset,
+        const_val,
+        min,
+        max,
+        tnum,
+    })
 }
 
 struct ProgRejitFailure {
@@ -2032,45 +1984,5 @@ mod tests {
         assert_eq!(decoded.insns[0].frame, 0);
         assert_eq!(decoded.insns[0].regs["r1"].reg_type, "scalar");
         assert_eq!(decoded.insns[0].regs["r1"].const_val, Some(9));
-    }
-
-    #[test]
-    fn fd_array_reserves_slot_zero_with_duplicate_valid_fd() {
-        let entries = vec![
-            FdArrayEntry {
-                slot: Some(1),
-                name: Some("bpf_rotate64".to_string()),
-                btf_fd: Some(11),
-                btf_id: None,
-                btf_obj_id: None,
-                btf_module: None,
-            },
-            FdArrayEntry {
-                slot: Some(2),
-                name: Some("bpf_select64".to_string()),
-                btf_fd: Some(22),
-                btf_id: None,
-                btf_obj_id: None,
-                btf_module: None,
-            },
-        ];
-
-        let fd_array = FdArray::from_entries(&entries).expect("fd_array");
-        assert_eq!(fd_array.as_slice(), &[11, 11, 22]);
-    }
-
-    #[test]
-    fn fd_array_rejects_holes() {
-        let entries = vec![FdArrayEntry {
-            slot: Some(2),
-            name: None,
-            btf_fd: Some(11),
-            btf_id: None,
-            btf_obj_id: None,
-            btf_module: None,
-        }];
-
-        let err = FdArray::from_entries(&entries).unwrap_err();
-        assert!(err.to_string().contains("dense"), "err={err:#}");
     }
 }

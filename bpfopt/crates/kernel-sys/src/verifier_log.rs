@@ -9,12 +9,11 @@
 //! This module extracts per-PC register state summaries that can feed later
 //! optimization analyses (constant propagation, range checks, liveness, etc.).
 //!
-//! Used by the daemon-owned verifier library to turn raw verifier logs into
-//! structured verifier-state JSON.
+//! Used to turn raw verifier logs into structured verifier-state JSON.
 
 use std::collections::HashMap;
 
-pub use kernel_sys::{
+use crate::{
     RegState, ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
 

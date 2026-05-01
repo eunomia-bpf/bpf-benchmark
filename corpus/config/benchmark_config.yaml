@@ -7,7 +7,6 @@ policy:
       - extract
       - endian_fusion
       - map_inline
-      - const_prop
       - dce
       - bounds_check_merge
       - skb_load_bytes_spec

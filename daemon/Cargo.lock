@@ -75,35 +75,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "bpfrejit"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "kernel-sys",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "bpfrejit-daemon"
 version = "0.1.0"
 dependencies = [
  "anyhow",
  "bpfget",
- "bpfrejit",
- "bpfverify",
  "clap",
- "kernel-sys",
- "libc",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "bpfverify"
-version = "0.1.0"
-dependencies = [
- "anyhow",
  "kernel-sys",
  "libc",
  "serde",

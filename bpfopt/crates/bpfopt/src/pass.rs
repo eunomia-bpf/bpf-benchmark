@@ -107,9 +107,9 @@ pub struct BpfProgram {
     pub cache_miss_rate: Option<f64>,
     /// Parsed `log_level=2` verifier state snapshots for the original program.
     pub verifier_states: Arc<[VerifierInsn]>,
-    /// Raw func_info records replayed by bpfverify after bytecode transforms.
+    /// Optional raw func_info records for offline metadata remapping.
     pub func_info: Option<BtfInfoRecords>,
-    /// Raw line_info records replayed by bpfverify after bytecode transforms.
+    /// Optional raw line_info records for offline metadata remapping.
     pub line_info: Option<BtfInfoRecords>,
     /// Pre-loaded map value snapshot: (map_id, key_bytes) -> value_bytes.
     /// Used by offline snapshot callers and unit tests.

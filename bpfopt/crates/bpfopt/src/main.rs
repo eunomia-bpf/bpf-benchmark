@@ -40,7 +40,6 @@ const ALL_PASS_ORDER: &[&str] = &[
 
 const DEFAULT_OPTIMIZE_PASS_ORDER: &[&str] = &[
     "map_inline",
-    "const_prop",
     "dce",
     "skb_load_bytes_spec",
     "bounds_check_merge",
@@ -55,7 +54,6 @@ const DEFAULT_OPTIMIZE_PASS_ORDER: &[&str] = &[
 
 const ARM64_DEFAULT_OPTIMIZE_PASS_ORDER: &[&str] = &[
     "map_inline",
-    "const_prop",
     "dce",
     "skb_load_bytes_spec",
     "bounds_check_merge",
@@ -1410,6 +1408,8 @@ mod tests {
     fn default_optimize_order_includes_ccmp_only_on_arm64() {
         assert!(default_optimize_pass_order(Arch::Aarch64).contains(&"ccmp"));
         assert!(!default_optimize_pass_order(Arch::X86_64).contains(&"ccmp"));
+        assert!(!default_optimize_pass_order(Arch::Aarch64).contains(&"const_prop"));
+        assert!(!default_optimize_pass_order(Arch::X86_64).contains(&"const_prop"));
         assert!(default_optimize_pass_order(Arch::Aarch64).contains(&"prefetch"));
         assert!(default_optimize_pass_order(Arch::X86_64).contains(&"prefetch"));
         assert_eq!(

@@ -1,575 +1,228 @@
 # bpfopt-suite 设计文档 v3
 
-> 本文档自包含，不需要参考其他文件即可开始实现。
+> 本文档自包含，是 bpfopt-suite v3 的权威设计。实现和其它文档必须与这里保持一致。
 
 ## 1. Overview
 
-bpfopt-suite v3 经过 2026-05-01 架构 pivot 后分为两类边界：`bpfopt` / `bpfprof` 仍是 Unix 风格 CLI，daemon-owned `bpfget` / `bpfverify` / `bpfrejit` 是 in-process library。核心理念保持不变：**字节码变换属于 `bpfopt`，kernel syscall 属于 daemon/kernel-sys 边界，不在 `bpfopt` 内部。**
+bpfopt-suite v3 的稳定边界是：
+
+- `bpfopt`：standalone pure bytecode CLI，只做 `struct bpf_insn[]` 变换。
+- `bpfprof`：standalone profiling CLI，负责 PMU/per-site profile。
+- `bpfrejit-daemon`：runner socket + JSON 边界，负责 live discovery、map invalidation、fd-array 构造、可选 `const_prop` verifier-state capture、最终 `BPF_PROG_REJIT`。
+- `bpfget`：daemon-owned library，只做 live program snapshot。
+- `kernel-sys`：唯一 BPF syscall 边界。
+
+`bpfverify` 和 `bpfrejit` crate 已删除。daemon 主路径不做 `BPF_PROG_LOAD` dry-run；candidate 由内核在 `BPF_PROG_REJIT` 内走标准 verifier 路径。`const_prop` 是唯一需要 verifier states 的 opt-in 路径，daemon 只在显式请求 `const_prop` 时做 thin dry-run。
 
 工具列表：
 
 | 组件 | 归属 | 职责 | 依赖内核？ |
 |------|------|------|:---:|
-| **bpfopt** | standalone CLI | BPF 字节码优化器，每个 pass 是子命令 | 否 |
-| **bpfprof** | standalone CLI | 采集 BPF 程序运行时 profile | 是 |
-| **bpfget** | daemon-owned lib | 读取内核中 BPF 程序的原始字节码、metadata、map fd、BTF records | 是 |
-| **bpfverify** | daemon-owned lib | BPF_PROG_LOAD dry-run 验证和 verifier-state 捕获 | 是 |
-| **bpfrejit** | daemon-owned lib | 提交字节码给内核 BPF_PROG_REJIT | 是 |
-| **bpfrejit-daemon** | standalone daemon | watch、map invalidation、runner socket、in-process kernel syscall orchestration | 是 |
+| `bpfopt` | standalone CLI | BPF 字节码优化器，stdin/stdout 传 raw bytecode | 否 |
+| `bpfprof` | standalone CLI | 采集 PMU/per-site profile | 是 |
+| `bpfget` | daemon-owned lib | 读取原始 bytecode、prog info、map metadata | 是 |
+| `bpfrejit-daemon` | standalone daemon | runner socket、watch、map invalidation、fd-array、ReJIT | 是 |
+| `kernel-sys` | shared lib | libbpf/libbpf-sys wrappers 和 fork syscall wrappers | 是 |
 
-典型用法：
+典型 runner path：
 
 ```bash
-# runner/daemon path: runner 发 socket JSON，daemon 进程内做 bpfget/bpfverify/bpfrejit，
-# 中间只 fork+exec bpfopt 做 pure bytecode transform
-printf '{"cmd":"optimize","prog_id":123,"enabled_passes":["wide_mem","const_prop"]}\n' | socat - /var/run/bpfrejit.sock
+printf '{"cmd":"optimize","prog_id":123,"enabled_passes":["wide_mem","map_inline","dce"]}\n' | socat - /var/run/bpfrejit.sock
+```
 
-# profile 仍是独立 CLI
-bpfprof --prog-id 123 --per-site --duration 500ms --output profile.json
+显式 `const_prop` path：
 
-# 离线优化报告
+```bash
+printf '{"cmd":"optimize","prog_id":123,"enabled_passes":["const_prop","dce"]}\n' | socat - /var/run/bpfrejit.sock
+```
+
+离线 `bpfopt` path：
+
+```bash
 bpfopt optimize --report report.json < prog.bin > opt.bin
+bpfopt const-prop --verifier-states states.json < prog.bin > opt.bin
 ```
 
-> Pivot note: 本文档中早期的 “all tools are CLI / socket-to-CLI” 描述已由 2026-05-01 pivot 覆盖。`bpfget`、`bpfverify`、`bpfrejit` 不再维护 standalone CLI 或跨进程 JSON 协议；`bpfopt` 与 `bpfprof` 保持 CLI。
+## 2. Core Principles
 
-## 2. 工具详细设计
+### 2.1 Daemon 主路径直接 ReJIT
 
-### 2.1 bpfopt
+`optimize` 请求的主路径是：
 
-纯字节码优化器。**零内核依赖**。输入字节码，输出字节码。
+1. runner 发 socket JSON。
+2. daemon 用 `bpfget` snapshot live program。
+3. daemon 写 `prog.bin`、`info.json`、可选 `map-values.json`、可选 `target.json` side files。
+4. daemon fork+exec `bpfopt optimize`，stdin/stdout 传 raw `struct bpf_insn[]`。
+5. daemon 从 snapshot 的 `used_maps` 和 target kinsn BTF 信息构造 in-memory `fd_array`。
+6. daemon 调 `kernel_sys::prog_rejit()`，内核在 `BPF_PROG_REJIT` 内 re-verify + re-JIT + image swap。
 
-#### 子命令
+主路径没有 `BPF_PROG_LOAD` dry-run、没有 final verify artifact、没有 per-pass verify loop、没有 pass rollback。ReJIT 失败时 errno/verifier log 直接作为错误和 failure artifact 暴露，不降级、不跳过、不过滤。
 
-**Per-pass 子命令**（每个 pass 都是顶层子命令）：
+### 2.2 三条 rollback 设计原则
+
+1. **零 reconstruction**：daemon 不从字节码反推 map/BTF 上下文，不重建 relocation。`prog_info` 字段和 `used_maps` 顺序直接使用。
+2. **不传 BTF func_info / line_info**：thin dry-run 使用 `func_info = None`、`line_info = None`；ProgramSnapshot 不保存这些 bytes；daemon 不做 BTF normalize/replay。
+3. **`const_prop` 默认关**：default 11-pass `bpfopt optimize` 不包含 `const_prop`。只有显式 `enabled_passes` 包含 `const_prop` 时，daemon 才做 thin dry-run 生成 `verifier-states.json` 并传给 `bpfopt`。
+
+### 2.3 Runner 边界不变
+
+`runner/libs/`、`corpus/`、`e2e/`、`micro/` 继续走 daemon socket + JSON。v3 migration 期间 runner Python 只允许 bug fix 和 stale test data 更新，不能改成直接调用 kernel-facing CLI。
+
+## 3. Components
+
+### 3.1 bpfopt
+
+`bpfopt` 是 pure bytecode CLI。它不直接调用 BPF syscall，不链接 daemon crate，也不依赖 `bpfrejit-daemon`。
+
+- stdin/stdout：raw binary `struct bpf_insn[]`，每条 8 字节。
+- side-input/output：`--target`、`--profile`、`--verifier-states`、`--map-values`、`--report` 都走文件。
+- default `optimize` pass list 是 11 pass，不含 `const_prop` 和 Paper B `branch_flip`。
+- `const_prop` 和 `branch_flip` 仍是生产 pass，但必须显式 opt-in 并提供真实 side-input。缺失 side-input 时 exit 1。
+
+常见命令：
 
 ```bash
-bpfopt wide-mem    [FLAGS] < in.bin > out.bin
-bpfopt rotate      [FLAGS] < in.bin > out.bin
-bpfopt const-prop  [FLAGS] < in.bin > out.bin
-bpfopt cond-select [FLAGS] < in.bin > out.bin
-bpfopt extract     [FLAGS] < in.bin > out.bin
-bpfopt endian      [FLAGS] < in.bin > out.bin
-bpfopt branch-flip --profile profile.json [FLAGS] < in.bin > out.bin   # Paper B PGO
-bpfopt dce         [FLAGS] < in.bin > out.bin
-bpfopt map-inline  [FLAGS] < in.bin > out.bin
-bpfopt bulk-memory [FLAGS] < in.bin > out.bin
-bpfopt bounds-check-merge [FLAGS] < in.bin > out.bin
-bpfopt skb-load-bytes     [FLAGS] < in.bin > out.bin
+bpfopt list-passes
+bpfopt optimize --passes wide_mem,map_inline,dce --report report.json < in.bin > out.bin
+bpfopt branch-flip --profile profile.json < in.bin > out.bin
+bpfopt const-prop --verifier-states verifier-states.json < in.bin > out.bin
 ```
 
-**批量子命令**（convenience，等价于串联多个 pass）：
+### 3.2 bpfprof
 
-```bash
-bpfopt optimize --passes wide-mem,rotate,const-prop < in.bin > out.bin
-```
+`bpfprof` 是 standalone CLI。daemon 只管理 `profile-start`/`profile-stop` lifecycle，不在进程内做 PMU profiling。
 
-**工具子命令**：
+`branch_flip` 需要 `bpfprof --per-site` 的真实 per-site PGO 数据。每个 candidate site 必须有 `branch_count`、`branch_misses`、`miss_rate`、`taken`、`not_taken`；缺失数据直接 exit 1。
 
-```bash
-bpfopt list-passes               # 列出所有可用 pass
-bpfopt list-passes --json        # JSON 格式
-```
+### 3.3 bpfget
 
-#### 通用 flags
+`bpfget` 是 daemon-owned library。职责限于 snapshot live BPF program：
 
-| Flag | 说明 | 默认 |
-|------|------|------|
-| `--input FILE` | 输入文件（不指定则 stdin） | stdin |
-| `--output FILE` | 输出文件（不指定则 stdout） | stdout |
-| `--report FILE` | 输出 pass 报告 JSON | 不输出 |
-| `--platform ARCH` | 目标平台：x86_64, aarch64 | 自动检测 |
-| `--kinsns LIST` | 可用 kinsn 列表（逗号分隔） | 无 |
-| `--target FILE` | 目标描述 JSON（替代 --platform + --kinsns） | 无 |
-| `--profile FILE` | PGO profile JSON 输入 | 无 |
-| `--verifier-states FILE` | Verifier states JSON 输入 | 无 |
-| `--map-values FILE` | Map values JSON 输入 | 无 |
-| `--map-ids LIST` | Map IDs（逗号分隔） | 无 |
+- `BPF_PROG_GET_ORIGINAL` 读取原始 bytecode。
+- `BPF_OBJ_GET_INFO_BY_FD` 读取 `prog_info`，包括 `map_ids`、prog type、attach fields、BTF ids 等。
+- `BPF_MAP_GET_FD_BY_ID` 打开 used maps 并读取 map metadata/value snapshot。
+- target probing 为 `bpfopt` 生成 kinsn capability JSON。
 
-#### stdin/stdout 约定
+`ProgramSnapshot` 不包含 BTF `func_info` / `line_info` bytes，不做 BTF normalize，不做 map relocation 反向解析。
 
-- **stdin/stdout 传输 raw binary 字节码**：`struct bpf_insn` 数组（每条 8 字节，little-endian）
-- 无 framing、无 header，纯二进制流
-- 管道串联时每个 pass 读 stdin、写 stdout，字节码自然流过
-- side-input/side-output 通过文件传递，不混入 stdin/stdout
+### 3.4 bpfrejit-daemon
 
-#### 错误处理
+daemon 是事件源 + runner socket boundary + kernel syscall orchestrator。
 
-- pass 无可优化 site：正常退出（exit 0），原样透传字节码，report 中 `changed=false`
-- 缺少必需 side-input（如 branch-flip 需要 --profile）：exit 1，stderr 报错
-- 字节码格式错误：exit 1，stderr 报错
-- 不得静默失败
+职责：
 
-### 2.2 bpfverify（daemon-owned lib）
+1. watch 新 BPF 程序加载。
+2. 检测 map invalidation。
+3. 维护 runner socket + JSON protocol。
+4. 管理外部 `bpfprof` lifecycle。
+5. 对 `optimize` 请求执行 snapshot -> `bpfopt` CLI -> direct `BPF_PROG_REJIT`。
+6. 对显式 `const_prop` 请求执行 thin dry-run -> verifier states side-input -> `bpfopt` CLI。
 
-daemon 进程内调用内核 BPF_PROG_LOAD dry-run 验证字节码。它不是 standalone CLI；调用方传入 candidate bytecode、prog type、attach type、BTF records、map fd 绑定和可选 kinsn fd_array。
+不做的事：
 
-#### 行为
+- 不维护 `PassManager`。
+- 不链接或调用 bpfopt library。
+- 不在进程内做 bytecode transform。
+- 不在主路径做 `BPF_PROG_LOAD` dry-run。
+- 不做 per-pass verify/rollback。
+- 不重建 BTF func_info/line_info normalize/replay。
+- 不重建 multi-map relocation 反向解析。
 
-- dry-run 返回 `VerifyReport { status, verifier_log, verifier_states, insn_count, log_level, errno, jited_size, log_true_size }`；`status` 为 `"pass"` 或 `"fail"`
-- final candidate 验证失败时，daemon 先写 `verifier.log` failure artifact，再让 socket 请求失败并在错误中包含 `prog_id` 和 verifier log 摘要
-- verifier states 在同进程由 `bpfverify` library 解析 verifier log 后传给 daemon；daemon 只在调用 `bpfopt const-prop --verifier-states FILE` 时写 `bpfopt` side-input 文件
-- map fd 和 kinsn fd_array 是 daemon 进程内 fd，不走 JSON reopen 协议
-- live verifier dry-run 在独立 watchdog thread 中执行；超时后 daemon 返回错误并让 stuck verifier thread detached，避免 socket loop 永久卡死
+### 3.5 Thin Dry-Run for const_prop
 
-#### 必需输入
+thin dry-run 是 `const_prop` 的 side-input 生成机制，不是 ReJIT 接受条件。
 
-| 字段 | 说明 |
-|------|------|
-| `insns` | candidate `struct bpf_insn[]` |
-| `prog_type` | BPF 程序类型（xdp, socket_filter, kprobe, ...） |
-| relocated `insns` | map references have been rewritten to snapshot-owned daemon map fd immediates |
+输入：
 
-#### 可选输入
+- snapshot 原始 bytecode。
+- snapshot 的 `prog_info` 基础字段。
+- daemon in-memory `fd_array`。
+- `func_info = None`。
+- `line_info = None`。
+- `log_level = 2`。
 
-| 字段 | 说明 |
-|------|------|
-| `expected_attach_type` | attach 类型 |
-| `attach_btf_id` / `attach_prog_fd` | tracing/freplace 等 attach metadata |
-| `btf_fd` / `func_info` / `line_info` | 原程序 BTF metadata，同进程复用 |
-| `fd_array` | kinsn BTF fd_array |
-| `log_level` | verifier log level（0-2），取 states 时使用 2 |
+输出：
 
-### 2.3 bpfprof
+- `verifier-states.json`，由 `kernel-sys` 的 verifier log parser 生成。
 
-采集 BPF 程序运行时 profile 数据。
+失败策略：
 
-```bash
-# 采集单个程序的 profile
-bpfprof --prog-id 123 --per-site --duration 500ms --output profile.json
+- dry-run syscall error、verifier reject、log parse failure、timeout 都直接让 request 失败。
+- 不写空 states，不继续跑 `const_prop`，不降级为无 states 的 pass。
 
-# 采集所有活跃程序
-bpfprof --all --per-site --duration 1s --output-dir profiles/
-```
+### 3.6 kernel-sys
 
-#### 采集内容
+`kernel-sys` 是唯一 BPF syscall 边界。
 
-- `bpf_enable_stats` → per-program run_cnt, run_time_ns
-- `perf_event_open` + `bpf_get_branch_snapshot()` sidecar → hardware LBR branch records
-- `BPF_OBJ_GET_INFO_BY_FD` JIT metadata + JIT image disassembly → native IP 映射到 BPF source PC
-- 计算 delta（窗口前后差值），并输出 per-site branch counters
+- 标准 BPF 命令优先使用 `libbpf-rs` / `libbpf-sys`。
+- fork-only 命令 `BPF_PROG_REJIT`、`BPF_PROG_GET_ORIGINAL` 在 `kernel-sys` 内用 `libc::syscall` 包装。
+- `bpfopt` 可以依赖 `kernel-sys` 的 pure data APIs，如 `bpf_insn` 类型、opcode 常量和 prog type enum，但不能调用 syscall。
+- `bpfprof`、`bpfrejit-daemon`、`bpfget` 只能通过 `kernel-sys` 调 BPF syscall。
 
-#### 输出
+## 4. Data and Protocol
 
-输出 `profile.json`，schema 见 §3.4。
+### 4.1 Socket JSON
 
-### 2.4 bpfget（daemon-owned lib）
-
-daemon 进程内从内核读取 BPF 程序信息，生成 `ProgramSnapshot`。它不是 standalone CLI；不再输出 program-info / map-fd JSON 协议给其它进程。
-
-#### 关键功能
-
-- `BPF_PROG_GET_ORIGINAL` → 原始字节码
-- `BPF_OBJ_GET_INFO_BY_FD` → prog_name, prog_type, map_ids 等
-- `BPF_MAP_GET_FD_BY_ID` → snapshot 时打开 daemon 进程内 map fd；`ProgramSnapshot` 持有这些 fd，后续 relocation、dry-run verify、final ReJIT 复用同一组 fd，snapshot drop 后关闭
-- `BPF_PROG_GET_NEXT_ID` → 枚举
-- BTF func_info / line_info 在同进程内保存为 bytes；调用 `bpfopt` 时仅作为 `bpfopt` side-input/output 文件存在，验证和 ReJIT 继续使用内存中的 records
-- map value snapshot 在 daemon 内读取后写给 `bpfopt map-inline --map-values FILE`
-
-### 2.5 bpfrejit（daemon-owned lib）
-
-daemon 进程内提交字节码给内核。它不是 standalone CLI；不再从文件/stdin 读取候选字节码。
-
-#### 行为
-
-- 调用 `BPF_PROG_REJIT(prog_fd, new_insns, new_insn_cnt, fd_array)`
-- `fd_array` 使用 daemon 进程内持有的 BTF fd 和 map fd，ABI 仍是 fork kernel 的 fd-array ABI
-- 成功 → 返回 summary，daemon 写 `bpfrejit_summary.json` artifact
-- 内核 verify 失败 → 返回 errno/log error，daemon socket 请求失败
-- 预验证由 in-process `bpfverify` 负责；final syscall 仍走 kernel re-verify
-
-### 2.6 bpfrejit-daemon（可选）
-
-常驻 watch 进程。**不维护 PassManager，不在进程内变换 bytecode，不做 in-process profiling。** live BPF discovery、dry-run verification、verifier-state capture、final ReJIT 归 daemon-owned libraries；bytecode transform 只通过 external `bpfopt` CLI。
-
-```bash
-bpfrejit-daemon serve --socket /var/run/bpfrejit.sock
-```
-
-#### 职责
-
-1. watch 新 BPF 程序加载（轮询 `BPF_PROG_GET_NEXT_ID`）
-2. map invalidation 检测（轮询 map values，对比之前 inline 的值）
-3. 维护 session 生命周期
-4. 作为 runner socket + JSON 协议的稳定边界
-5. 对 `optimize` 请求：进程内 snapshot → fork+exec `bpfopt` → 进程内 verify/rejit
-6. 对 `profile-start`/`profile-stop` 请求：管理外部 `bpfprof` CLI 生命周期
-
-#### 不做的事
-
-- 不在 daemon 进程内跑 pass pipeline
-- 不链接或调用 bpfopt library
-- 不在 daemon 进程内做 profiling
-- 不做字节码变换
-- 不维护 PassManager
-
-daemon 是事件源 + runner socket boundary + kernel syscall orchestrator。为了保持 runner Python 在 v3 迁移期不变，`profile-start`/`profile-stop` 只启动和停止 `bpfprof --per-site` CLI；`optimize` 在 daemon 内部持有 prog/map/BTF fd，消除 `bpfget`/`bpfverify`/`bpfrejit` 的 fork+exec 和 JSON/file 协议。禁止的是 daemon 内部 profiler、内部 PassManager 和内部 bytecode transform。
-
----
-
-## 3. 数据格式
-
-### 3.1 字节码（binary）
-
-`struct bpf_insn` 数组，每条 8 字节，little-endian：
-
-```
-offset  size  field
-0       1     opcode (u8)
-1       1     dst_reg:4 | src_reg:4 (u8, dst in low nibble)
-2       2     off (i16, little-endian)
-4       4     imm (i32, little-endian)
-```
-
-文件大小必须是 8 的倍数。LD_IMM64 占两条指令（16 字节）。
-
-这就是 stdin/stdout 管道中的格式。没有 header、没有 framing。
-
-### 3.2 target.json
-
-描述目标平台能力。bpfopt 的 `--target` 输入。
+daemon 保留 newline-delimited JSON socket。典型请求：
 
 ```json
-{
-  "arch": "x86_64",
-  "features": ["cmov", "movbe", "bmi1", "bmi2", "rorx"],
-  "kinsns": {
-    "bpf_rotate64": { "btf_func_id": 12345, "btf_id": 55 },
-    "bpf_select64": { "btf_func_id": 12346, "btf_id": 55 },
-    "bpf_extract64": { "btf_func_id": 12347, "btf_id": 55 },
-    "bpf_endian_load64": { "btf_func_id": 12348, "btf_id": 55 },
-    "bpf_bulk_memcpy": { "btf_func_id": 12349, "btf_id": 56 },
-    "bpf_bulk_memset": { "btf_func_id": 12350, "btf_id": 56 }
-  }
-}
+{"cmd":"status"}
+{"cmd":"optimize","prog_id":42,"enabled_passes":["map_inline","dce"]}
+{"cmd":"optimize","prog_id":42,"enabled_passes":["const_prop","dce"]}
 ```
 
-- `arch`：`x86_64` 或 `aarch64`
-- `features`：CPU 特性列表
-- `kinsns`：已加载的 kinsn 模块导出的函数。`btf_func_id` 是 kinsn 编码需要的函数 type id；`btf_id` 是 daemon 生成 fd_array 时必须打开的 BTF object id
-- 缺少某 pass 需要的 kinsn 或 `btf_id` 时，daemon/bpfopt 必须报错退出，不生成空 fd_array 或降级结果
+`enabled_passes` 必须非空。daemon 不过滤/跳过任何 ReJIT program；失败自然进入结果。
 
-### 3.3 map-values.json
+### 4.2 bpfopt bytecode
 
-Map 值快照。bpfopt map-inline 的输入。
+stdin/stdout 是 raw binary `struct bpf_insn[]`，无 header、无 framing。文件 side-input 只存在于 `bpfopt` / `bpfprof` CLI 边界，不用于 daemon kernel-facing state 的跨进程协议。
 
-```json
-{
-  "maps": [
-    {
-      "map_id": 123,
-      "map_type": "array",
-      "key_size": 4,
-      "value_size": 8,
-      "max_entries": 1024,
-      "entries": [
-        { "key": "01000000", "value": "2a00000000000000" },
-        { "key": "02000000", "value": "0000000000000000" }
-      ]
-    }
-  ]
-}
-```
+### 4.3 fd_array
 
-- key/value 是 hex 编码的 raw bytes
-- 只包含程序实际 lookup 的 key，不是全量 dump
-- `value` 为 null 表示 lookup miss
+daemon 构造 in-memory `fd_array`：
 
-### 3.4 profile.json
+- map fd 按 `prog_info.used_maps` / `map_ids` 顺序打开并放入数组。
+- kinsn BTF fd 按 `target.json` capability 顺序追加。
+- 若没有 map fd 但存在 kinsn BTF fd，`fd_array[0]` 复制第一个 BTF fd，占住 kinsn call offset 的 vmlinux sentinel 位置；真实 kinsn offset 从 1 开始。
 
-PGO profile 数据。bpfprof 输出，bpfopt branch-flip 等 pass 消费。
+daemon 不读写 `fd_array.json` / `map_fds.json`。
 
-```json
-{
-  "prog_id": 123,
-  "duration_ms": 500,
-  "run_cnt_delta": 15000,
-  "run_time_ns_delta": 4500000,
-  "branch_miss_rate": 0.032,
-  "branch_misses": 480,
-  "branch_instructions": 15000,
-  "per_site": {
-    "42": {
-      "branch_count": 15000,
-      "branch_misses": 480,
-      "miss_rate": 0.032,
-      "taken": 12000,
-      "not_taken": 3000
-    },
-    "67": {
-      "branch_count": 15000,
-      "branch_misses": 32,
-      "miss_rate": 0.00213,
-      "taken": 200,
-      "not_taken": 14800
-    }
-  }
-}
-```
+## 5. Failure Semantics
 
-- `per_site` 的 key 是 BPF 指令 PC（十进制字符串）
-- `per_site` 中每个字段都是必填；缺 program/site profile 数据时 `bpfprof` 或消费方必须 exit 1
-- `branch_miss_rate` 是程序级的 PMU 数据；`per_site.*.miss_rate` 是 site 级 PMU 数据
+- 所有 syscall、IO、parse、CLI 失败都 fail-fast。
+- 不允许 fallback、warning-and-continue、空结果替代、隐藏错误。
+- ReJIT errno 和 verifier log 要写入 failure artifact 并返回 socket error。
+- `const_prop` 缺 verifier states 时必须失败。
+- `branch_flip` 缺真实 per-site PGO 时必须失败。
 
-### 3.5 verifier-states.json
-
-Verifier 解析结果。bpfverify 输出，bpfopt const-prop 消费。
-
-```json
-{
-  "insns": [
-    {
-      "pc": 5,
-      "regs": {
-        "r1": { "type": "scalar", "const_val": 42 },
-        "r2": { "type": "scalar", "min": 0, "max": 255, "tnum": "0x0/0xff" }
-      }
-    },
-    {
-      "pc": 12,
-      "regs": {
-        "r0": { "type": "scalar", "const_val": 0 }
-      }
-    }
-  ]
-}
-```
-
-- 只包含有精确常量或 range 信息的 PC
-- `const_val` 存在时表示该寄存器在该 PC 是确定常量
-
-### 3.6 pass-report.json
-
-每个 pass 执行后的报告。bpfopt `--report` 输出。
-
-```json
-{
-  "pass": "wide_mem",
-  "changed": true,
-  "sites_applied": 7,
-  "insn_count_before": 150,
-  "insn_count_after": 143,
-  "insn_delta": -7
-}
-```
-
----
-
-## 4. 管道协议
-
-### 4.1 基本规则
-
-1. **`bpfopt` 字节码走 stdin/stdout**，二进制流，无 framing
-2. **`bpfopt` side-input/output 走文件**（`--profile`, `--target`, `--verifier-states`, `--map-values`, `--report` 等 flag）
-3. **daemon-owned kernel data 不走跨进程协议**：prog info、map ids、map fds、BTF records、fd_array 都在 daemon 进程内传递
-4. **`bpfprof` profile 仍走 CLI 文件输出**
-5. pass 无可优化 site → exit 0，原样透传字节码
-
-### 4.2 bpfopt 管道示例
-
-```bash
-# 三个 pass 管道
-bpfopt wide-mem < prog.bin | bpfopt rotate --target target.json | bpfopt const-prop --verifier-states states.json > opt.bin
-
-# 带 report 的管道（report 写文件，不影响 stdout 管道）
-bpfopt wide-mem --report r1.json < prog.bin | bpfopt rotate --report r2.json > opt.bin
-```
-
-### 4.3 daemon optimize flow
-
-runner 仍通过 socket 发 JSON；daemon 内部做 kernel syscall orchestration：
+## 6. Implementation Layout
 
 ```text
-runner socket JSON
-  → daemon bpfget::snapshot_program(prog_id)
-  → daemon writes bpfopt side files only when bpfopt needs them
-  → daemon fork+execs one bpfopt optimize subprocess for the full requested pass list
-  → daemon bpfverify::verify(candidate, in-memory metadata) once for the final candidate
-  → daemon bpfrejit::rejit_program(prog_id, candidate, in-memory fd_array)
+bpfopt/
+  Cargo.toml
+  crates/bpfopt/         # pure bytecode optimizer lib + bin
+  crates/bpfprof/        # profiling CLI
+  crates/kernel-sys/     # only BPF syscall boundary + shared ABI/data helpers
+
+daemon/
+  Cargo.toml
+  crates/bpfget/         # live program snapshot only
+  src/commands.rs        # socket command orchestration + direct ReJIT
+  src/dry_run.rs         # const_prop-only thin dry-run
+  src/server.rs          # socket server
+  src/invalidation.rs    # map invalidation watch
 ```
 
-`bpfopt` 是唯一保留的 bytecode transform subprocess。`bpfget`、`bpfverify`、`bpfrejit` 不再作为 subprocess 存在。当前 daemon policy 是 final-verify-only：任一后期 pass 导致最终 candidate 被 verifier 拒绝时，整段 candidate 失败并保留原程序；daemon 不在 pass 之间做 rollback。
+Standalone CLI binary crates (`bpfopt`, `bpfprof`, `bpfrejit-daemon`) must not depend on each other at compile time. Runtime composition is through stdin/stdout and side-input files only.
 
-### 4.4 verifier-in-the-loop
+## 7. Acceptance Checks
 
-`const-prop` 需要 verifier states 时，daemon 调用 in-process `bpfverify::verifier_states()`，再把结果写成 `bpfopt const-prop --verifier-states FILE` 的 side-input。缺失 verifier states、dry-run 失败或 parse 失败都直接返回 error，不允许空 states fallback。
-
----
-
-## 5. Pass 清单
-
-从当前 daemon 代码提取的全部 pass，每个对应 bpfopt 的一个子命令：
-
-| 子命令 | pass 名 | 说明 | 需要 kinsn？ | 需要 side-input？ |
-|--------|---------|------|:---:|------|
-| `wide-mem` | WideMemPass | byte load+shift+or → wide load | 否 | 无 |
-| `rotate` | RotatePass | shift+or → bpf_rotate64 kinsn | 是 | --target |
-| `cond-select` | CondSelectPass | branch+mov → bpf_select64 kinsn | 是 | --target |
-| `extract` | ExtractPass | shift+and → bpf_extract64 kinsn | 是 | --target |
-| `endian` | EndianFusionPass | load+bswap → endian kinsn (MOVBE) | 可选 | --target |
-| `branch-flip` | BranchFlipPass | if/else body 重排（Paper B / PGO-gated） | 否 | --profile |
-| `const-prop` | ConstPropPass | verifier 常量折叠 | 否 | --verifier-states |
-| `dce` | DcePass | 死代码消除 | 否 | 无 |
-| `map-inline` | MapInlinePass | map lookup → 常量内联 | 否 | --map-values, --map-ids |
-| `bulk-memory` | BulkMemoryPass | 大块 memcpy/memset → kinsn | 是 | --target |
-| `bounds-check-merge` | BoundsCheckMergePass | 合并 bounds check guard | 否 | 无 |
-| `skb-load-bytes` | SkbLoadBytesSpecPass | skb_load_bytes → direct packet access | 否 | 无 |
-
-`branch-flip` 是 Paper B 的 profile/info-guided speculative runtime optimization pass，不属于当前默认优化策略。P88 后它要求真实 `bpfprof --per-site` profile：程序级 `branch_miss_rate` 和每个候选 site 的 `branch_count`/`branch_misses`/`miss_rate`/direction 数据缺一不可；缺数据直接 exit 1，不允许 placeholder 或 heuristic fallback。
-
-**默认 pass 顺序**（`bpfopt optimize` 不指定 `--passes` 时）：
-map-inline → const-prop → dce → skb-load-bytes → bounds-check-merge → wide-mem → bulk-memory → rotate → cond-select → extract → endian
-
----
-
-## 6. 仓库结构
-
-```
-bpf-benchmark/
-├── bpfopt/
-│   ├── Cargo.toml                 # workspace: kernel-sys, bpfopt, bpfprof
-│   └── crates/
-│       ├── kernel-sys/            # 唯一 BPF syscall boundary
-│       ├── bpfopt/                # standalone pure-bytecode CLI + lib
-│       └── bpfprof/               # standalone PMU/profile CLI
-│
-└── daemon/
-    ├── Cargo.toml                 # workspace: daemon + daemon-owned kernel libs
-    ├── crates/
-    │   ├── bpfget/                # live ProgramSnapshot library
-    │   ├── bpfverify/             # dry-run verify + verifier states library
-    │   └── bpfrejit/              # BPF_PROG_REJIT library
-    └── src/
-        ├── commands.rs            # runner socket command orchestration
-        ├── server.rs              # socket server
-        ├── invalidation.rs        # map invalidation
-        └── bpf.rs                 # daemon helpers using kernel-sys/libbpf
-```
-
-### Crate 依赖关系
-
-```
-bpfopt crate（pure bytecode transform）
-  ↑
-  └── bpfopt CLI
-
-kernel-sys（唯一 BPF syscall boundary）
-  ↑
-  ├── bpfprof CLI
-  ├── bpfrejit-daemon
-  ├── daemon/crates/bpfget
-  ├── daemon/crates/bpfverify
-  └── daemon/crates/bpfrejit
-```
-
-关键：**`bpfopt` 不直接调用 BPF syscall**。它可以依赖 `kernel-sys` 的纯数据 API（`bpf_insn` 类型、opcode 常量、prog type enum），但任何 kernel-touching syscall 都只能在 `kernel-sys` 内实现并由 daemon-owned libs 或 `bpfprof` 调用。
-
----
-
-## 7. Pivot 代码映射
-
-| 原归属 | 新归属 | 改动 |
-|--------|--------|------|
-| `bpfopt/crates/bpfget` | `daemon/crates/bpfget` | CLI main 改为 `ProgramSnapshot` library；prog/map/BTF metadata 进程内返回 |
-| `bpfopt/crates/bpfverify` | `daemon/crates/bpfverify` | CLI main 改为 `VerifyRequest`/`VerifyReport` library；verifier states 进程内捕获 |
-| `bpfopt/crates/bpfrejit` | `daemon/crates/bpfrejit` | CLI main 改为 `rejit_program()` library；fd_array 由 daemon 直接传入 syscall |
-| `daemon/src/commands.rs` | 保留 | 删除三条 fork+exec 路径；只 fork+exec `bpfopt` 和 `bpfprof` |
-| `bpfopt/crates/bpfopt` | 保留 | pure bytecode transformer；仍用 stdin/stdout 和 side files |
-| `bpfopt/crates/bpfprof` | 保留 | PMU/profile CLI；daemon 只管理其 lifecycle |
-
----
-
-## 8. Daemon 集成方案
-
-### 保留的功能
-
-1. **Watch 新程序加载**：轮询 `BPF_PROG_GET_NEXT_ID`，发现新 prog_id 后可触发 optimize 请求。
-2. **Map invalidation 检测**：读取 `bpfopt map-inline --report` 产出的 invalidation hints，轮询 map values，检测变化时触发 re-optimize。
-3. **Unix socket 服务**：接受 benchmark runner 的 `optimize` / `profile-start` / `profile-stop` / `status` 请求；`discover` 不是当前实现的 socket command。
-4. **In-process kernel syscall orchestration**：snapshot、map relocation、dry-run verify、verifier-state capture、final ReJIT 都在 daemon 进程内完成。
-
-### 不保留的功能
-
-- ~~PassManager~~
-- ~~所有 pass 代码~~
-- ~~profiler 线程~~
-- ~~`bpfget`/`bpfverify`/`bpfrejit` subprocess~~
-- ~~prog/map/BTF/fd_array JSON protocol between kernel-facing tools~~
-- ~~replay report protocol for bpfverify subprocess~~
-
-### 与 benchmark runner 的集成
-
-当前 benchmark runner 通过 Unix socket 给 daemon 发 JSON 请求，并且该边界保持不变：
-
-```python
-send_json(sock, {"cmd": "optimize", "prog_id": 123, "enabled_passes": ["map_inline", "const_prop", "dce"]})
-```
-
-daemon 收到请求后：
-
-1. `bpfget::snapshot_program()` 获取 bytecode、prog info、map ids、snapshot-owned map fds、BTF records。
-2. daemon 写 `bpfopt` 需要的 `target.json`、`map-values.json`、`verifier-states.json` 等 side-input。
-3. daemon fork+exec 一次 `bpfopt optimize` 做完整 requested pass list 的 pure bytecode transform。
-4. `bpfverify::verify()` 用 in-memory metadata dry-run 最终 candidate；失败则写 verifier artifact 并返回错误，不做 per-pass rollback。
-5. `bpfrejit::rejit_program()` 用 in-memory fd_array 调 `BPF_PROG_REJIT`。
-
----
-
-## 9. 典型使用场景
-
-### 场景 1：daemon runner optimize
-
-```bash
-printf '{"cmd":"optimize","prog_id":123,"enabled_passes":["wide_mem","const_prop"]}\n' | socat - /var/run/bpfrejit.sock
-```
-
-### 场景 2：带 PGO profile
-
-```bash
-bpfprof --prog-id 123 --per-site --duration 1s --output profile.json
-printf '{"cmd":"optimize","prog_id":123,"enabled_passes":["branch_flip"]}\n' | socat - /var/run/bpfrejit.sock
-```
-
-### 场景 3：离线 corpus 优化报告（不需要内核）
-
-```bash
-for f in corpus/*.bin; do
-  bpfopt optimize --report "$f.report.json" < "$f" > "$f.opt.bin"
-done
-```
-
----
-
-## 10. 实现优先级
-
-### Phase 1：核心 bytecode CLI
-
-1. **bpfopt CLI**：实现 `optimize` 子命令、pass 子命令、stdin/stdout binary 读写。
-2. **kernel-sys**：集中 BPF syscall wrappers 和 libbpf-rs/libbpf-sys 边界。
-
-### Phase 2：daemon-owned kernel libs
-
-3. **bpfget library**：live snapshot、map fd、BTF records、target probing。
-4. **bpfverify library**：dry-run verify、verifier log parse、verifier states。
-5. **bpfrejit library**：final `BPF_PROG_REJIT` with fd_array ABI。
-
-### Phase 3：runner integration
-
-6. **daemon socket boundary**：runner Python 不改，daemon 内部链接 daemon-owned libs，只 fork+exec `bpfopt` / `bpfprof`。
-7. **Docker/build**：runtime image 只安装 `bpfopt`、`bpfprof`、`bpfrejit-daemon`。
-
-### Phase 4：增强
-
-8. invalidation-hints 完整生命周期。
-9. target probing/kInsn BTF capability 扩展。
-
----
-
-## 11. 明确排除的东西
-
-- `bpfget` / `bpfverify` / `bpfrejit` standalone production CLI
-- `bpfget` / `bpfverify` / `bpfrejit` subprocess protocols
-- 自定义 pipe framing / binary header
-- daemon 内部的 PassManager / pass pipeline
-- daemon 内部的 profiler
-- daemon 直接绕过 `kernel-sys` 调 `libc::syscall`
+- daemon kernel-facing production Rust is <= 2,400 lines after rollback.
+- daemon main optimize path does not call `BPF_PROG_LOAD`.
+- `const_prop` is absent from default optimize pass lists and benchmark config.
+- ProgramSnapshot contains no BTF func_info/line_info bytes.
+- No `map_fds.json`, `fd_array.json`, `btf-info`, or `verifier-states-out` protocol remains.
+- `cargo test --workspace --manifest-path daemon/Cargo.toml`
+- `cargo test --workspace --manifest-path bpfopt/Cargo.toml`
+- `make daemon-tests`
+- `make check`

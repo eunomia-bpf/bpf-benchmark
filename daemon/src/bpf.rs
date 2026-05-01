@@ -2,8 +2,9 @@
 //! Small BPF access adapter for daemon watch/invalidation paths.
 //!
 //! Standard BPF access is routed through `kernel-sys`/libbpf. The optimize path
-//! uses daemon-owned libraries for live program discovery, verifier dry-runs,
-//! and `BPF_PROG_REJIT`; this module only covers map watch/invalidation helpers.
+//! uses `bpfget` for live program discovery and calls `kernel-sys` directly for
+//! optional verifier-state capture and `BPF_PROG_REJIT`; this module only covers
+//! map watch/invalidation helpers.
 
 use std::os::fd::{BorrowedFd, OwnedFd, RawFd};
 use std::sync::OnceLock;

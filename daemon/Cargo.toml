@@ -8,8 +8,6 @@ description = "BpfReJIT userspace daemon — scans and optimizes live kernel BPF
 members = [
     ".",
     "crates/bpfget",
-    "crates/bpfverify",
-    "crates/bpfrejit",
 ]
 resolver = "2"
 
@@ -28,8 +26,6 @@ path = "src/main.rs"
 [dependencies]
 anyhow.workspace = true
 bpfget = { path = "crates/bpfget" }
-bpfrejit = { path = "crates/bpfrejit" }
-bpfverify = { path = "crates/bpfverify" }
 clap.workspace = true
 kernel-sys.workspace = true
 libc.workspace = true
