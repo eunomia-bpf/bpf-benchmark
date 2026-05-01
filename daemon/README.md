@@ -1,14 +1,15 @@
 # bpfrejit-daemon
 
 `bpfrejit-daemon` keeps the benchmark runner on the socket JSON boundary while
-delegating bytecode work to the v3 CLI tools (`bpfget`, `bpfopt`, `bpfverify`,
-and `bpfrejit`).
+running live BPF discovery, dry-run verification, and final ReJIT in-process.
+`bpfopt` remains an external pure bytecode CLI, and `bpfprof` remains the
+external profiling CLI.
 
 ## Build
 
 ```bash
 cargo build --release --manifest-path daemon/Cargo.toml
-cargo test --manifest-path daemon/Cargo.toml
+cargo test --workspace --manifest-path daemon/Cargo.toml
 ```
 
 ## Serve
@@ -35,9 +36,12 @@ profile data when requested; it is not part of the default optimizer pass list.
 ```text
 daemon/
   Cargo.toml
-  src/main.rs      # CLI entry point
-  src/server.rs    # socket server and request dispatch
-  src/commands.rs  # CLI subprocess orchestration
-  src/bpf.rs       # libbpf-backed BPF helpers used by the daemon
+  crates/bpfget/     # daemon-owned live program snapshot library
+  crates/bpfverify/  # daemon-owned verifier dry-run library
+  crates/bpfrejit/   # daemon-owned BPF_PROG_REJIT library
+  src/main.rs        # CLI entry point
+  src/server.rs      # socket server and request dispatch
+  src/commands.rs    # in-process BPF orchestration + bpfopt/bpfprof CLI calls
+  src/bpf.rs         # libbpf-backed map/watch helpers used by the daemon
   src/invalidation.rs
 ```

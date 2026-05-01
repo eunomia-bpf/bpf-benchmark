@@ -4,17 +4,37 @@ version = "0.1.0"
 edition = "2021"
 description = "BpfReJIT userspace daemon — scans and optimizes live kernel BPF programs"
 
-[[bin]]
-name = "bpfrejit-daemon"
-path = "src/main.rs"
+[workspace]
+members = [
+    ".",
+    "crates/bpfget",
+    "crates/bpfverify",
+    "crates/bpfrejit",
+]
+resolver = "2"
 
-[dependencies]
+[workspace.dependencies]
 anyhow = "1"
 clap = { version = "4", features = ["derive", "env"] }
 kernel-sys = { path = "../bpfopt/crates/kernel-sys" }
 libc = "0.2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+
+[[bin]]
+name = "bpfrejit-daemon"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+bpfget = { path = "crates/bpfget" }
+bpfrejit = { path = "crates/bpfrejit" }
+bpfverify = { path = "crates/bpfverify" }
+clap.workspace = true
+kernel-sys.workspace = true
+libc.workspace = true
+serde.workspace = true
+serde_json.workspace = true
 
 [profile.release]
 opt-level = 3

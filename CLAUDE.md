@@ -42,24 +42,25 @@ Before adding a test, be able to answer: what specific bug would this failure id
 ### bpfopt-suite v3 Architecture
 `docs/tmp/bpfopt_design_v3.md` is the authoritative design document for bpfopt-suite. Keep implementation and documentation aligned with that design:
 - The daemon must not run a pass pipeline, maintain `PassManager`, do profiling internally, parse `verifier_log`, or transform bytecode in-process.
-- The daemon only watches for new BPF programs, detects map invalidation, preserves the socket + JSON protocol, and triggers external scripts/commands or CLI subprocesses.
+- The daemon watches for new BPF programs, detects map invalidation, preserves the runner socket + JSON protocol, and owns in-process live discovery, dry-run verification, and final ReJIT through daemon-owned libraries.
 - `bpfopt` is a pure bytecode CLI tool with zero kernel dependency.
-- Per-pass verify loops belong in bash/scripts, not inside the daemon.
+- `bpfprof` remains a standalone CLI for PMU profiling.
+- Per-pass bytecode transforms remain `bpfopt` CLI invocations; verifier dry-runs for accepting candidates happen in-process through the daemon-owned `bpfverify` library.
 - Benchmark runner Python stays on the existing daemon socket boundary during the v3 migration.
-- stdin/stdout carry raw binary bytecode (`struct bpf_insn[]`); side-inputs and side-outputs use files.
+- stdin/stdout carry raw binary bytecode (`struct bpf_insn[]`) for `bpfopt`; side-inputs and side-outputs use files only at the `bpfopt`/`bpfprof` CLI boundary.
 
-#### Daemon Adapts Socket-to-CLI; Runner Stays Untouched
+#### Daemon Owns Kernel Calls; Runner Stays Untouched
 - v3 §8 option B: runner Python (`runner/libs/`, `corpus/`, `e2e/`, `micro/`) is the stable boundary; do not refactor it for v3 migration.
-- The daemon retains the socket + JSON protocol but delegates optimize/rejit/profile/discover to CLI subprocesses (`bpfopt`, `bpfget`, `bpfrejit`, `bpfverify`, `bpfprof`).
-- Daemon internal `PassManager`, pass code, profiler, and `verifier_log` parser are removed; the daemon body shrinks to socket server + watch + invalidation + CLI fork+exec.
+- The daemon retains the socket + JSON protocol. It invokes `bpfopt` as an external pure-bytecode CLI and `bpfprof` as an external profiling CLI, but live discovery, dry-run verification, verifier-state capture, and final ReJIT are in-process daemon-owned libraries (`bpfget`, `bpfverify`, `bpfrejit`).
+- Daemon internal `PassManager`, pass code, and profiler are removed; bytecode transformation stays out-of-process in `bpfopt`. The daemon may parse verifier logs only through the daemon-owned `bpfverify` library to feed `bpfopt const-prop`.
 - The only allowed runner Python changes during v3 migration are bug fixes (for example, micro driver baseline regression) and stale test data updates.
 
 ### No CLI Cross-Dependencies
-The 6 bpfopt-suite CLI binary crates (`bpfopt`, `bpfverify`, `bpfprof`, `bpfget`, `bpfrejit`, `bpfrejit-daemon`) must not depend on each other:
+The remaining standalone CLI binary crates (`bpfopt`, `bpfprof`, `bpfrejit-daemon`) must not depend on each other:
 - Runtime composition happens through stdin/stdout pipelines and bash orchestration.
 - Compile-time dependencies between CLI binary crates are forbidden; do not add path-dependencies from one CLI crate to another.
-- Shared code belongs in library crates, not in the lib portion of one CLI crate for other CLI crates to import.
-- `bpfrejit-daemon` must not depend on `bpfopt`'s lib portion; shared syscall/data access belongs in `kernel-sys`.
+- `bpfget`, `bpfverify`, and `bpfrejit` are daemon-owned library crates, not standalone CLI crates.
+- Shared syscall/data access belongs in `kernel-sys`; `bpfrejit-daemon` must not depend on `bpfopt`'s lib portion.
 
 ### Use libbpf-rs/libbpf-sys, Don't Re-Wrap
 Use `libbpf-rs`/`libbpf-sys` instead of custom wrappers whenever upstream libbpf exposes the needed API or type:
@@ -73,7 +74,7 @@ Use `libbpf-rs`/`libbpf-sys` instead of custom wrappers whenever upstream libbpf
 `kernel-sys` is the only bpfopt-suite crate that may directly call BPF syscalls:
 - `bpfopt` (lib and bin) may depend on `kernel-sys` for pure data APIs such as the `bpf_insn` type, opcode constants, and program type enums.
 - `bpfopt` must not call `libc::syscall(SYS_bpf, ...)` or otherwise invoke BPF syscalls directly.
-- Other CLI crates (`bpfverify`, `bpfprof`, `bpfget`, `bpfrejit`, `bpfrejit-daemon`) must also call BPF syscalls only through `kernel-sys`.
+- `bpfprof`, `bpfrejit-daemon`, and daemon-owned `bpfget`/`bpfverify`/`bpfrejit` libraries must also call BPF syscalls only through `kernel-sys`.
 - Inside `kernel-sys`, standard BPF commands should go through `libbpf-rs`/`libbpf-sys`; project-fork commands (`BPF_PROG_REJIT`, `BPF_PROG_GET_ORIGINAL`) are wrapped with `libc::syscall` because upstream libbpf does not support them.
 
 ### Default Config Must Work

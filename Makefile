@@ -92,7 +92,7 @@ lint:
 		-type f -name '*.py' -exec "$(PYTHON)" -m py_compile {} +
 
 daemon-tests:
-	cargo test --manifest-path "$(DAEMON_DIR)/Cargo.toml"
+	cargo test --workspace --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 
 vm-selftest:
 	$(RUN_TARGET_SUITE_CMD) run x86-kvm test -- --test-mode "selftest" $(VM_TEST_COMMON_SUITE_ARGS)

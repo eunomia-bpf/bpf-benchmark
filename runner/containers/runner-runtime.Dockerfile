@@ -476,11 +476,8 @@ ARG RUN_TARGET_ARCH=x86_64
 COPY Makefile ./Makefile
 COPY runner/mk ./runner/mk
 COPY bpfopt/Cargo.toml bpfopt/Cargo.lock ./bpfopt/
-COPY bpfopt/crates/bpfget ./bpfopt/crates/bpfget
 COPY bpfopt/crates/bpfopt ./bpfopt/crates/bpfopt
 COPY bpfopt/crates/bpfprof ./bpfopt/crates/bpfprof
-COPY bpfopt/crates/bpfrejit ./bpfopt/crates/bpfrejit
-COPY bpfopt/crates/bpfverify ./bpfopt/crates/bpfverify
 COPY bpfopt/crates/kernel-sys ./bpfopt/crates/kernel-sys
 
 # Build bpfopt-suite CLIs in this upper layer; kernel-sys is a library crate only.
@@ -497,9 +494,6 @@ RUN --mount=type=cache,target=/bpfopt/target,id=bpfopt-cargo-target,sharing=lock
     install -d /artifacts/rust/usr-local-bin; \
     install -m 0755 \
         "$bpfopt_bin_dir/bpfopt" \
-        "$bpfopt_bin_dir/bpfget" \
-        "$bpfopt_bin_dir/bpfrejit" \
-        "$bpfopt_bin_dir/bpfverify" \
         "$bpfopt_bin_dir/bpfprof" \
         /artifacts/rust/usr-local-bin/
 

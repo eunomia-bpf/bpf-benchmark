@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 //! Small BPF access adapter for daemon watch/invalidation paths.
 //!
-//! The daemon does not own verifier, optimization, profiling, or ReJIT logic in
-//! v3. Standard BPF access is routed through `kernel-sys`/libbpf; only the CLI
-//! tools invoke fork-specific commands such as `BPF_PROG_REJIT`.
+//! Standard BPF access is routed through `kernel-sys`/libbpf. The optimize path
+//! uses daemon-owned libraries for live program discovery, verifier dry-runs,
+//! and `BPF_PROG_REJIT`; this module only covers map watch/invalidation helpers.
 
 use std::os::fd::{BorrowedFd, OwnedFd, RawFd};
 use std::sync::OnceLock;

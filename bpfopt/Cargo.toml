@@ -2,9 +2,6 @@
 members = [
     "crates/kernel-sys",
     "crates/bpfopt",
-    "crates/bpfget",
-    "crates/bpfrejit",
-    "crates/bpfverify",
     "crates/bpfprof",
 ]
 resolver = "2"

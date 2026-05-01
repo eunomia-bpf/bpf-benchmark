@@ -4,13 +4,8 @@ version = "0.1.0"
 edition = "2021"
 description = "Submit replacement BPF bytecode through fork BPF_PROG_REJIT"
 
-[[bin]]
-name = "bpfrejit"
-path = "src/main.rs"
-
 [dependencies]
 anyhow.workspace = true
-clap.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-kernel-sys = { path = "../kernel-sys" }
+kernel-sys.workspace = true

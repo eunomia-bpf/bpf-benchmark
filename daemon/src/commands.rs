@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: MIT
-//! Socket command helpers backed by bpfopt-suite CLI subprocesses.
+//! Socket command helpers.
+//!
+//! `bpfopt` and `bpfprof` remain CLI tools. Live program discovery, dry-run
+//! verification, and final ReJIT run in this daemon process through daemon-owned
+//! libraries so map fds and BTF metadata do not round-trip through JSON files.
 
 use std::collections::{BTreeMap, HashMap};
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::os::fd::{AsRawFd, OwnedFd};
-use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -24,15 +27,13 @@ const FAILURE_ROOT_ENV: &str = "BPFREJIT_DAEMON_FAILURE_ROOT";
 const KEEP_ALL_WORKDIRS_ENV: &str = "BPFREJIT_DAEMON_KEEP_ALL_WORKDIRS";
 const DEFAULT_FAILURE_ROOT_NAME: &str = "bpfrejit-failures";
 const DEBUG_WORKDIR_ROOT_NAME: &str = "workdirs";
-const FUNC_INFO_FILE: &str = "func_info.bin";
-const LINE_INFO_FILE: &str = "line_info.bin";
+const BPFOPT_FUNC_INFO_FILE: &str = "bpfopt-func-info.bin";
+const BPFOPT_LINE_INFO_FILE: &str = "bpfopt-line-info.bin";
 const MAP_VALUES_FILE: &str = "map-values.json";
 const VERIFIER_STATES_FILE: &str = "verifier-states.json";
-const VERIFIER_STATES_STAGE: &str = "bpfverify original verifier-states";
+const VERIFIER_STATES_STAGE: &str = "in-process original verifier-states";
 const DEFAULT_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(5);
-const HEAVY_VERIFY_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(60);
 const OPTIMIZE_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(60);
-const REJIT_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(60);
 const CLI_STAGE_POLL_INTERVAL: Duration = Duration::from_millis(100);
 
 #[derive(Clone, Debug)]
@@ -44,13 +45,6 @@ impl CliConfig {
     pub(crate) fn from_env() -> Self {
         Self {
             cli_dir: std::env::var_os("BPFREJIT_CLI_DIR").map(PathBuf::from),
-        }
-    }
-
-    #[cfg(test)]
-    pub(crate) fn with_dir(path: PathBuf) -> Self {
-        Self {
-            cli_dir: Some(path),
         }
     }
 
@@ -228,24 +222,9 @@ fn copy_dir_contents(src: &Path, dst: &Path) -> Result<()> {
 
 fn normalize_failure_artifacts(failure_dir: &Path, prog_id: u32) -> Result<()> {
     copy_alias_if_present(&failure_dir.join("prog.bin"), &failure_dir.join("prog.bpf"))?;
-    copy_alias_if_present(
-        &failure_dir.join("prog_info.json"),
-        &failure_dir.join("info.json"),
-    )?;
-    let rejit_verifier_log = failure_dir.join("bpfrejit_failure_verifier.log");
-    if nonempty_regular_file(&rejit_verifier_log)? {
-        fs::copy(&rejit_verifier_log, failure_dir.join("verifier.log")).with_context(|| {
-            format!(
-                "copy {} to {}",
-                rejit_verifier_log.display(),
-                failure_dir.join("verifier.log").display()
-            )
-        })?;
-    }
-    write_replay_script(failure_dir, prog_id)?;
+    let _ = prog_id;
     require_regular_file(&failure_dir.join("prog.bpf"), "failure prog.bpf")?;
     require_regular_file(&failure_dir.join("info.json"), "failure info.json")?;
-    require_regular_file(&failure_dir.join("replay.sh"), "failure replay.sh")?;
     let verifier_log = failure_dir.join("verifier.log");
     match fs::metadata(&verifier_log) {
         Ok(_) => require_nonempty_file(&verifier_log, "failure verifier.log")?,
@@ -273,19 +252,6 @@ fn copy_alias_if_present(source: &Path, target: &Path) -> Result<()> {
     }
 }
 
-fn nonempty_regular_file(path: &Path) -> Result<bool> {
-    match fs::metadata(path) {
-        Ok(metadata) => {
-            if !metadata.is_file() {
-                bail!("failure artifact {} is not a regular file", path.display());
-            }
-            Ok(metadata.len() > 0)
-        }
-        Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(false),
-        Err(err) => Err(err).with_context(|| format!("stat {}", path.display())),
-    }
-}
-
 fn require_regular_file(path: &Path, description: &str) -> Result<()> {
     match fs::metadata(path) {
         Ok(metadata) => {
@@ -308,127 +274,6 @@ fn require_nonempty_file(path: &Path, description: &str) -> Result<()> {
         bail!("{description} {} is empty", path.display());
     }
     Ok(())
-}
-
-fn write_replay_script(failure_dir: &Path, prog_id: u32) -> Result<()> {
-    let info_json = failure_dir.join("info.json");
-    require_regular_file(&info_json, "failure info.json")?;
-    let prog_info: ProgInfoJson = read_json_file(&info_json, "failure info.json")?;
-    let load_context_args = replay_load_context_args(&prog_info);
-    let verify_args = render_shell_args(&load_context_args);
-    let btf_info_setup = replay_btf_info_setup(&prog_info);
-    let script = format!(
-        r#"#!/usr/bin/env bash
-set -euo pipefail
-cd "$(dirname "$0")"
-
-prog_id="${{1:-{prog_id}}}"
-candidate="${{BPFREJIT_REPLAY_CANDIDATE:-verified.bin}}"
-if [ ! -f "$candidate" ]; then
-    candidate=opt.bin
-fi
-if [ ! -f "$candidate" ]; then
-    candidate=prog.bpf
-fi
-
-fd_array_args=()
-if [ -s fd_array.json ]; then
-    fd_array_args=(--fd-array fd_array.json)
-fi
-
-btf_info_args=()
-{btf_info_setup}
-
-"${{BPFVERIFY:-bpfverify}}" {verify_args} "${{btf_info_args[@]}}" "${{fd_array_args[@]}}" \
-    --input "$candidate" \
-    --output replay.verified.bin \
-    --report replay_bpfverify_report.json
-"${{BPFREJIT:-bpfrejit}}" "$prog_id" replay.verified.bin \
-    --map-fds map_fds.json \
-    --output replay_bpfrejit_summary.json \
-    "${{fd_array_args[@]}}"
-"#,
-    );
-    let script_path = failure_dir.join("replay.sh");
-    fs::write(&script_path, script).with_context(|| format!("write {}", script_path.display()))?;
-    let mut permissions = fs::metadata(&script_path)?.permissions();
-    permissions.set_mode(0o755);
-    fs::set_permissions(&script_path, permissions)
-        .with_context(|| format!("chmod +x {}", script_path.display()))?;
-    Ok(())
-}
-
-fn replay_load_context_args(prog_info: &ProgInfoJson) -> Vec<String> {
-    let mut args = vec![
-        "--prog-type".to_string(),
-        prog_info.prog_type.name.clone(),
-        "--map-fds".to_string(),
-        "map_fds.json".to_string(),
-    ];
-    if let Some(attach_type) = &prog_info.expected_attach_type {
-        args.push("--expected-attach-type".to_string());
-        if attach_type.name.trim().is_empty() {
-            args.push(attach_type.numeric.to_string());
-        } else {
-            args.push(attach_type.name.clone());
-        }
-    }
-    if prog_info.btf_id != 0 {
-        args.push("--prog-btf-id".to_string());
-        args.push(prog_info.btf_id.to_string());
-    }
-    if prog_info.prog_flags != 0 {
-        args.push("--prog-flags".to_string());
-        args.push(prog_info.prog_flags.to_string());
-    }
-    if prog_info.attach_btf_id != 0 {
-        args.push("--attach-btf-id".to_string());
-        args.push(prog_info.attach_btf_id.to_string());
-    }
-    if prog_info.attach_btf_obj_id != 0 {
-        args.push("--attach-btf-obj-id".to_string());
-        args.push(prog_info.attach_btf_obj_id.to_string());
-    }
-    args
-}
-
-fn replay_btf_info_setup(prog_info: &ProgInfoJson) -> String {
-    let mut lines = Vec::new();
-    if prog_info.nr_func_info != 0 {
-        lines.push(format!(
-            "if [ -s {} ]; then\n    btf_info_args+=(--func-info {} --func-info-rec-size {})\nfi",
-            shell_quote(FUNC_INFO_FILE),
-            shell_quote(FUNC_INFO_FILE),
-            shell_quote(&prog_info.func_info_rec_size.to_string())
-        ));
-    }
-    if prog_info.nr_line_info != 0 {
-        lines.push(format!(
-            "if [ -s {} ]; then\n    btf_info_args+=(--line-info {} --line-info-rec-size {})\nfi",
-            shell_quote(LINE_INFO_FILE),
-            shell_quote(LINE_INFO_FILE),
-            shell_quote(&prog_info.line_info_rec_size.to_string())
-        ));
-    }
-    lines.join("\n")
-}
-
-fn render_shell_args(args: &[String]) -> String {
-    args.iter()
-        .map(|arg| shell_quote(arg))
-        .collect::<Vec<_>>()
-        .join(" ")
-}
-
-fn shell_quote(value: &str) -> String {
-    if !value.is_empty()
-        && value.bytes().all(|byte| {
-            byte.is_ascii_alphanumeric() || matches!(byte, b'_' | b'-' | b'.' | b'/' | b':')
-        })
-    {
-        return value.to_string();
-    }
-    format!("'{}'", value.replace('\'', "'\\''"))
 }
 
 #[derive(Debug)]
@@ -522,51 +367,108 @@ struct ApplyOneRequest<'a> {
 
 pub(crate) type SharedInvalidationTracker = Arc<Mutex<MapInvalidationTracker<BpfMapValueReader>>>;
 
-#[derive(Clone, Debug, Deserialize)]
-struct TypeJson {
-    name: String,
-    numeric: u32,
+trait KernelOps {
+    fn snapshot_program(&mut self, prog_id: u32) -> Result<bpfget::ProgramSnapshot>;
+    fn probe_target(&mut self) -> Result<bpfget::TargetJson>;
+    fn verify_pass(
+        &mut self,
+        snapshot: &bpfget::ProgramSnapshot,
+        insns: &[kernel_sys::bpf_insn],
+        fd_array: &[i32],
+    ) -> Result<bpfverify::VerifyReport>;
+    fn verifier_states(
+        &mut self,
+        snapshot: &bpfget::ProgramSnapshot,
+        insns: &[kernel_sys::bpf_insn],
+        fd_array: &[i32],
+    ) -> Result<kernel_sys::VerifierStatesJson>;
+    fn rejit(
+        &mut self,
+        prog_id: u32,
+        snapshot: &bpfget::ProgramSnapshot,
+        insns: &[kernel_sys::bpf_insn],
+        fd_array: &[i32],
+    ) -> Result<bpfrejit::RejitSummary>;
 }
 
-#[derive(Clone, Debug, Deserialize)]
-struct ProgInfoJson {
-    id: u32,
-    name: String,
-    #[serde(rename = "type")]
-    prog_type: TypeJson,
-    insn_cnt: u32,
-    #[serde(default)]
-    map_ids: Vec<u32>,
-    #[serde(default)]
-    btf_id: u32,
-    #[serde(default)]
-    prog_flags: u32,
-    #[serde(default)]
-    func_info_rec_size: u32,
-    #[serde(default)]
-    nr_func_info: u32,
-    #[serde(default)]
-    line_info_rec_size: u32,
-    #[serde(default)]
-    nr_line_info: u32,
-    #[serde(default)]
-    attach_btf_obj_id: u32,
-    #[serde(default)]
-    attach_btf_id: u32,
-    #[serde(default)]
-    expected_attach_type: Option<TypeJson>,
+struct LiveKernelOps;
+
+impl KernelOps for LiveKernelOps {
+    fn snapshot_program(&mut self, prog_id: u32) -> Result<bpfget::ProgramSnapshot> {
+        bpfget::snapshot_program(prog_id)
+    }
+
+    fn probe_target(&mut self) -> Result<bpfget::TargetJson> {
+        bpfget::probe_target_json()
+    }
+
+    fn verify_pass(
+        &mut self,
+        snapshot: &bpfget::ProgramSnapshot,
+        insns: &[kernel_sys::bpf_insn],
+        fd_array: &[i32],
+    ) -> Result<bpfverify::VerifyReport> {
+        let relocated = snapshot.relocate_for_load(insns)?;
+        bpfverify::verify_pass(bpfverify::VerifyRequest {
+            context: load_context(snapshot),
+            insns: relocated.insns(),
+            fd_array,
+            log_level: 2,
+        })
+    }
+
+    fn verifier_states(
+        &mut self,
+        snapshot: &bpfget::ProgramSnapshot,
+        insns: &[kernel_sys::bpf_insn],
+        fd_array: &[i32],
+    ) -> Result<kernel_sys::VerifierStatesJson> {
+        let relocated = snapshot.relocate_for_load(insns)?;
+        bpfverify::verifier_states(bpfverify::VerifyRequest {
+            context: load_context(snapshot),
+            insns: relocated.insns(),
+            fd_array,
+            log_level: 2,
+        })
+    }
+
+    fn rejit(
+        &mut self,
+        prog_id: u32,
+        snapshot: &bpfget::ProgramSnapshot,
+        insns: &[kernel_sys::bpf_insn],
+        fd_array: &[i32],
+    ) -> Result<bpfrejit::RejitSummary> {
+        let relocated = snapshot.relocate_for_load(insns)?;
+        bpfrejit::rejit_program(prog_id, relocated.insns(), fd_array)
+    }
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
-struct MapInfoJson {
-    map_id: u32,
-    map_type: u32,
-    key_size: u32,
-    value_size: u32,
-    max_entries: u32,
-    #[serde(default)]
-    name: String,
+fn load_context(snapshot: &bpfget::ProgramSnapshot) -> bpfverify::ProgramLoadContext<'_> {
+    bpfverify::ProgramLoadContext {
+        prog_type: snapshot.info.prog_type.numeric,
+        expected_attach_type: snapshot
+            .info
+            .expected_attach_type
+            .as_ref()
+            .map(|attach_type| attach_type.numeric),
+        prog_flags: snapshot.info.prog_flags,
+        prog_btf_id: snapshot.info.btf_id,
+        attach_btf_id: snapshot.info.attach_btf_id,
+        attach_btf_obj_id: snapshot.info.attach_btf_obj_id,
+        func_info: (!snapshot.btf.func_info.is_empty()).then_some(bpfverify::BtfRecords {
+            rec_size: snapshot.btf.func_info_rec_size,
+            bytes: &snapshot.btf.func_info,
+        }),
+        line_info: (!snapshot.btf.line_info.is_empty()).then_some(bpfverify::BtfRecords {
+            rec_size: snapshot.btf.line_info_rec_size,
+            bytes: &snapshot.btf.line_info,
+        }),
+    }
 }
+
+type ProgInfoJson = bpfget::ProgramInfo;
+type MapInfoJson = bpfget::MapInfo;
 
 #[derive(Clone, Debug, Deserialize)]
 struct BpfoptPassReport {
@@ -583,13 +485,6 @@ struct BpfoptPassReport {
 #[derive(Clone, Debug, Deserialize)]
 struct BpfoptOptimizeReport {
     passes: Vec<BpfoptPassReport>,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-struct BpfverifyReport {
-    status: String,
-    verifier_log: String,
-    errno: Option<i32>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -642,13 +537,6 @@ struct TargetKinsnJson {
     btf_id: u32,
     #[serde(default)]
     btf_obj_id: u32,
-}
-
-#[derive(Debug, Serialize)]
-struct FdArrayJsonEntry {
-    slot: usize,
-    name: String,
-    btf_id: u32,
 }
 
 pub(crate) fn new_invalidation_tracker() -> SharedInvalidationTracker {
@@ -887,6 +775,7 @@ pub(crate) fn try_apply_one(
     profile_path: Option<&Path>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
 ) -> Result<OptimizeOneResult> {
+    let mut kernel = LiveKernelOps;
     try_apply_one_with_map_access(
         ApplyOneRequest {
             prog_id,
@@ -896,6 +785,7 @@ pub(crate) fn try_apply_one(
             invalidation_tracker,
             force_rejit: false,
         },
+        &mut kernel,
         bpf::bpf_map_get_fd_by_id,
         live_bpf_map_lookup,
         live_bpf_map_keys,
@@ -909,6 +799,7 @@ pub(crate) fn try_reapply_one(
     profile_path: Option<&Path>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
 ) -> Result<OptimizeOneResult> {
+    let mut kernel = LiveKernelOps;
     try_apply_one_with_map_access(
         ApplyOneRequest {
             prog_id,
@@ -918,6 +809,7 @@ pub(crate) fn try_reapply_one(
             invalidation_tracker,
             force_rejit: true,
         },
+        &mut kernel,
         bpf::bpf_map_get_fd_by_id,
         live_bpf_map_lookup,
         live_bpf_map_keys,
@@ -926,6 +818,7 @@ pub(crate) fn try_reapply_one(
 
 fn try_apply_one_with_map_access<F, G, H>(
     request: ApplyOneRequest<'_>,
+    kernel: &mut dyn KernelOps,
     mut open_map_fd: F,
     mut lookup_map_value: G,
     mut scan_map_keys: H,
@@ -950,42 +843,33 @@ where
     }
     let workdir = WorkDir::new("bpfrejit-daemon-optimize")?;
     let prog_bin = workdir.path().join("prog.bin");
-    let prog_info_json = workdir.path().join("prog_info.json");
-    let map_fds_json = workdir.path().join("map_fds.json");
+    let info_json = workdir.path().join("info.json");
     let target_json = workdir.path().join("target.json");
-    let fd_array_json = workdir.path().join("fd_array.json");
     let verifier_states_json = workdir.path().join(VERIFIER_STATES_FILE);
     let map_values_json = workdir.path().join(MAP_VALUES_FILE);
     let opt_bin = workdir.path().join("opt.bin");
-    let verified_bin = workdir.path().join("verified.bin");
     let report_json = workdir.path().join("bpfopt_report.json");
     let rejit_summary_json = workdir.path().join("bpfrejit_summary.json");
 
     let result = (|| -> Result<OptimizeOneResult> {
-        run_stage_output(
-            "bpfget --full",
-            config
-                .command("bpfget")
-                .arg(prog_id.to_string())
-                .arg("--full")
-                .arg("--outdir")
-                .arg(workdir.path()),
-        )
-        .with_context(|| format!("bpfget --full failed for prog {prog_id}"))?;
-
-        let prog_info: ProgInfoJson = read_json_file(&prog_info_json, "prog_info.json")?;
-        let orig_bytes =
-            fs::read(&prog_bin).with_context(|| format!("read {}", prog_bin.display()))?;
+        let snapshot = kernel
+            .snapshot_program(prog_id)
+            .with_context(|| format!("snapshot live BPF program {prog_id}"))?;
+        let prog_info = snapshot.info.clone();
+        let orig_bytes = bpfget::encode_insns(&snapshot.insns);
+        fs::write(&prog_bin, &orig_bytes)
+            .with_context(|| format!("write {}", prog_bin.display()))?;
+        write_json_file(&info_json, &prog_info)?;
         let orig_insn_count = insn_count_from_bytes(&orig_bytes, "prog.bin")?;
         if prog_info.id != prog_id {
             bail!(
-                "bpfget returned prog_info id {}, expected {prog_id}",
+                "program snapshot returned id {}, expected {prog_id}",
                 prog_info.id
             );
         }
         if prog_info.insn_cnt as usize != orig_insn_count {
             bail!(
-                "bpfget returned prog_info insn_cnt {}, but prog.bin contains {} instructions",
+                "program snapshot returned insn_cnt {}, but prog.bin contains {} instructions",
                 prog_info.insn_cnt,
                 orig_insn_count
             );
@@ -999,20 +883,13 @@ where
             .any(|pass| canonical_pass(pass) == "map_inline");
 
         if wants_const_prop {
-            write_original_verifier_states(
-                config,
-                &prog_info,
-                workdir.path(),
-                &prog_bin,
-                &map_fds_json,
-                &verifier_states_json,
-            )
-            .with_context(|| format!("capture verifier states for prog {prog_id}"))?;
+            write_original_verifier_states(kernel, &snapshot, &verifier_states_json)
+                .with_context(|| format!("capture verifier states for prog {prog_id}"))?;
         }
 
         if wants_map_inline {
             write_live_map_values(
-                &map_fds_json,
+                &snapshot.maps,
                 &map_values_json,
                 &mut open_map_fd,
                 &mut lookup_map_value,
@@ -1021,32 +898,24 @@ where
             .with_context(|| format!("build live map value snapshot for prog {prog_id}"))?;
         }
 
-        let mut has_fd_array = false;
+        let mut fd_array = kernel_sys::FdArray::empty();
         if needs_target(requested_passes) {
-            run_stage_output(
-                "bpfget --target",
-                config
-                    .command("bpfget")
-                    .arg("--target")
-                    .arg("--output")
-                    .arg(&target_json),
-            )
-            .with_context(|| {
+            let target = kernel.probe_target().with_context(|| {
                 format!(
-                    "bpfget --target failed for requested passes {}",
+                    "probe target kinsns failed for requested passes {}",
                     join_pass_csv(requested_passes)
                 )
             })?;
+            write_json_file(&target_json, &target)?;
             let missing_kinsns = missing_target_kinsns(&target_json, requested_passes)?;
             if !missing_kinsns.is_empty() {
                 bail!(
-                    "bpfget --target did not expose kinsns required by requested passes {}: {}",
+                    "target probing did not expose kinsns required by requested passes {}: {}",
                     join_pass_csv(requested_passes),
                     missing_kinsns.join(", ")
                 );
             }
-            write_fd_array_from_target(&target_json, requested_passes, &fd_array_json)?;
-            has_fd_array = true;
+            fd_array = build_fd_array_from_target(&target_json, requested_passes)?;
             side_inputs.push(("--target".to_string(), target_json.clone()));
         }
 
@@ -1086,7 +955,8 @@ where
         let mut bpfopt = config.command("bpfopt");
         bpfopt.arg("optimize").arg("--report").arg(&report_json);
         append_bpfopt_context_args(&mut bpfopt, &prog_info);
-        append_btf_info_command_args(&mut bpfopt, &prog_info, workdir.path());
+        write_bpfopt_btf_inputs(&snapshot.btf, workdir.path())?;
+        append_bpfopt_btf_args(&mut bpfopt, &snapshot.btf, workdir.path())?;
         if !requested_passes.is_empty() {
             bpfopt.arg("--passes").arg(join_pass_csv(requested_passes));
         }
@@ -1114,75 +984,39 @@ where
         let final_insn_count = insn_count_from_bytes(&opt_bytes, "opt.bin")?;
         let changed = opt_bytes != orig_bytes;
         let candidate_has_kinsn_call = bytecode_has_kinsn_call(&opt_bytes, "opt.bin")?;
-        if candidate_has_kinsn_call && !has_fd_array {
-            bail!("candidate bytecode contains kinsn call but fd_array.json was not generated");
+        if candidate_has_kinsn_call && fd_array.is_empty() {
+            bail!(
+                "candidate bytecode contains kinsn call but no in-process fd_array was generated"
+            );
         }
         let use_fd_array = candidate_has_kinsn_call;
+        let fd_array_slice = if use_fd_array {
+            fd_array.as_slice()
+        } else {
+            &[]
+        };
+        let opt_insns = decode_insns(&opt_bytes, "opt.bin")?;
+        let mut candidate_snapshot = snapshot.clone();
+        candidate_snapshot.btf = read_bpfopt_btf_outputs(&snapshot.btf, workdir.path())?;
 
         let status = "ok".to_string();
         let mut applied = false;
         let error_message = None;
 
         if changed || force_rejit {
-            let final_verify_report = workdir.path().join("bpfverify_report.json");
             let final_verify_log = workdir.path().join("verifier.log");
-            let mut verify = config.command("bpfverify");
-            verify
-                .arg("--prog-type")
-                .arg(&prog_info.prog_type.name)
-                .arg("--map-fds")
-                .arg(&map_fds_json)
-                .arg("--input")
-                .arg(&opt_bin)
-                .arg("--output")
-                .arg(&verified_bin)
-                .arg("--report")
-                .arg(&final_verify_report);
-            append_candidate_load_context_args(&mut verify, &prog_info, workdir.path())?;
-            if use_fd_array {
-                verify.arg("--fd-array").arg(&fd_array_json);
-            }
-            let verify_result = run_bpfverify_reported(
-                "bpfverify final verification",
-                &mut verify,
-                &final_verify_report,
-                &final_verify_log,
-            );
-            verify_result.with_context(|| {
-                format!("bpfverify final verification failed for prog {prog_id}")
-            })?;
+            let verify_report = kernel
+                .verify_pass(&candidate_snapshot, &opt_insns, fd_array_slice)
+                .with_context(|| {
+                    format!("in-process final verification failed for prog {prog_id}")
+                })?;
+            fs::write(&final_verify_log, &verify_report.verifier_log)
+                .with_context(|| format!("write {}", final_verify_log.display()))?;
 
-            let mut rejit = config.command("bpfrejit");
-            rejit
-                .arg(prog_id.to_string())
-                .arg(&verified_bin)
-                .arg("--map-fds")
-                .arg(&map_fds_json)
-                .arg("--output")
-                .arg(&rejit_summary_json);
-            if use_fd_array {
-                rejit.arg("--fd-array").arg(&fd_array_json);
-            }
-            let rejit_result = run_stage_output("bpfrejit", &mut rejit);
-            if let Err(rejit_err) = rejit_result {
-                let verifier_context = match capture_rejit_failure_verifier_log(
-                    config,
-                    &prog_info,
-                    &map_fds_json,
-                    &fd_array_json,
-                    use_fd_array,
-                    &verified_bin,
-                    workdir.path(),
-                ) {
-                    Ok(summary) => format!("\nverifier log summary:\n{summary}"),
-                    Err(report_err) => {
-                        format!("\npost-failure bpfverify --report failed: {report_err:#}")
-                    }
-                };
-                return Err(rejit_err).with_context(|| {
-                    format!("bpfrejit failed for prog {prog_id}{verifier_context}")
-                });
-            }
+            let rejit_summary = kernel
+                .rejit(prog_id, &candidate_snapshot, &opt_insns, fd_array_slice)
+                .with_context(|| format!("in-process BPF_PROG_REJIT failed for prog {prog_id}"))?;
+            write_json_file(&rejit_summary_json, &rejit_summary)?;
             refresh_invalidation_tracking(
                 invalidation_tracker,
                 prog_id,
@@ -1252,266 +1086,81 @@ where
     }
 }
 
-fn append_candidate_load_context_args(
-    command: &mut Command,
-    prog_info: &ProgInfoJson,
-    workdir: &Path,
-) -> Result<()> {
-    append_load_context_base_args(command, prog_info);
-    append_nonempty_btf_info_command_args(command, prog_info, workdir)
-}
-
-fn append_load_context_base_args(command: &mut Command, prog_info: &ProgInfoJson) {
-    if let Some(attach_type) = &prog_info.expected_attach_type {
-        let value = if attach_type.name.trim().is_empty() {
-            attach_type.numeric.to_string()
-        } else {
-            attach_type.name.clone()
-        };
-        command.arg("--expected-attach-type").arg(value);
-    }
-    if prog_info.btf_id != 0 {
-        command
-            .arg("--prog-btf-id")
-            .arg(prog_info.btf_id.to_string());
-    }
-    if prog_info.prog_flags != 0 {
-        command
-            .arg("--prog-flags")
-            .arg(prog_info.prog_flags.to_string());
-    }
-    if prog_info.attach_btf_id != 0 {
-        command
-            .arg("--attach-btf-id")
-            .arg(prog_info.attach_btf_id.to_string());
-    }
-    if prog_info.attach_btf_obj_id != 0 {
-        command
-            .arg("--attach-btf-obj-id")
-            .arg(prog_info.attach_btf_obj_id.to_string());
-    }
-}
-
-fn append_verifier_states_load_context_args(
-    command: &mut Command,
-    prog_info: &ProgInfoJson,
-    workdir: &Path,
-) -> Result<()> {
-    append_candidate_load_context_args(command, prog_info, workdir)
-}
-
 fn append_bpfopt_context_args(command: &mut Command, prog_info: &ProgInfoJson) {
     command.arg("--prog-type").arg(&prog_info.prog_type.name);
 }
 
-fn append_btf_info_command_args(command: &mut Command, prog_info: &ProgInfoJson, workdir: &Path) {
-    if prog_info.nr_func_info != 0 {
+fn write_bpfopt_btf_inputs(btf: &bpfget::ProgramBtfInfo, workdir: &Path) -> Result<()> {
+    if !btf.func_info.is_empty() {
+        fs::write(workdir.join(BPFOPT_FUNC_INFO_FILE), &btf.func_info)
+            .with_context(|| format!("write {}", workdir.join(BPFOPT_FUNC_INFO_FILE).display()))?;
+    }
+    if !btf.line_info.is_empty() {
+        fs::write(workdir.join(BPFOPT_LINE_INFO_FILE), &btf.line_info)
+            .with_context(|| format!("write {}", workdir.join(BPFOPT_LINE_INFO_FILE).display()))?;
+    }
+    Ok(())
+}
+
+fn append_bpfopt_btf_args(
+    command: &mut Command,
+    btf: &bpfget::ProgramBtfInfo,
+    workdir: &Path,
+) -> Result<()> {
+    if !btf.func_info.is_empty() {
         command
             .arg("--func-info")
-            .arg(workdir.join(FUNC_INFO_FILE))
+            .arg(workdir.join(BPFOPT_FUNC_INFO_FILE))
             .arg("--func-info-rec-size")
-            .arg(prog_info.func_info_rec_size.to_string());
+            .arg(btf.func_info_rec_size.to_string());
     }
-    if prog_info.nr_line_info != 0 {
+    if !btf.line_info.is_empty() {
         command
             .arg("--line-info")
-            .arg(workdir.join(LINE_INFO_FILE))
+            .arg(workdir.join(BPFOPT_LINE_INFO_FILE))
             .arg("--line-info-rec-size")
-            .arg(prog_info.line_info_rec_size.to_string());
-    }
-}
-
-fn append_nonempty_btf_info_command_args(
-    command: &mut Command,
-    prog_info: &ProgInfoJson,
-    workdir: &Path,
-) -> Result<()> {
-    if prog_info.nr_func_info != 0 {
-        append_btf_info_file_if_nonempty(
-            command,
-            &workdir.join(FUNC_INFO_FILE),
-            "--func-info",
-            "--func-info-rec-size",
-            prog_info.func_info_rec_size,
-        )?;
-    }
-    if prog_info.nr_line_info != 0 {
-        append_btf_info_file_if_nonempty(
-            command,
-            &workdir.join(LINE_INFO_FILE),
-            "--line-info",
-            "--line-info-rec-size",
-            prog_info.line_info_rec_size,
-        )?;
+            .arg(btf.line_info_rec_size.to_string());
     }
     Ok(())
 }
 
-fn append_btf_info_file_if_nonempty(
-    command: &mut Command,
-    path: &Path,
-    file_flag: &str,
-    rec_size_flag: &str,
-    rec_size: u32,
-) -> Result<()> {
-    let metadata = fs::metadata(path).with_context(|| format!("stat {}", path.display()))?;
-    if metadata.len() != 0 {
-        command
-            .arg(file_flag)
-            .arg(path)
-            .arg(rec_size_flag)
-            .arg(rec_size.to_string());
-    }
-    Ok(())
-}
-
-fn run_bpfverify_reported(
-    stage: &str,
-    command: &mut Command,
-    report_json: &Path,
-    verifier_log_path: &Path,
-) -> Result<BpfverifyReport> {
-    let (output, report) =
-        run_bpfverify_report_command(stage, command, report_json, "bpfverify report")?;
-    fs::write(verifier_log_path, &report.verifier_log)
-        .with_context(|| format!("write {}", verifier_log_path.display()))?;
-    if report.status != "pass" {
-        let message = format!(
-            "{stage} rejected bytecode (returncode {}, verifier status {}, errno {}): verifier log summary:\n{}",
-            returncode_label(&output),
-            report.status,
-            report
-                .errno
-                .map(|errno| errno.to_string())
-                .unwrap_or_else(|| "unknown".to_string()),
-            verifier_log_summary(&report.verifier_log)
-        );
-        eprintln!("daemon: {message}");
-        bail!("{message}");
-    }
-    if !output.status.success() {
-        let program = format!("{command:?}");
-        let message = stage_failure_message(stage, &program, &output);
-        eprintln!("daemon: {message}");
-        bail!("{message}");
-    }
-    Ok(report)
-}
-
-fn run_bpfverify_report_command(
-    stage: &str,
-    command: &mut Command,
-    report_json: &Path,
-    report_label: &str,
-) -> Result<(std::process::Output, BpfverifyReport)> {
-    let program = format!("{command:?}");
-    command.stdout(Stdio::piped()).stderr(Stdio::piped());
-    let child = command
-        .spawn()
-        .with_context(|| format!("spawn subprocess {program}"))?;
-    let output = wait_with_timeout(stage, &program, child)?;
-    let report: BpfverifyReport = read_json_file(report_json, report_label).with_context(|| {
-        let failure = if output.status.success() {
-            format!("read {report_label}")
-        } else {
-            stage_failure_message(stage, &program, &output)
-        };
-        format!("{failure}; expected report at {}", report_json.display())
-    })?;
-    Ok((output, report))
-}
-
-fn capture_rejit_failure_verifier_log(
-    config: &CliConfig,
-    prog_info: &ProgInfoJson,
-    map_fds_json: &Path,
-    fd_array_json: &Path,
-    use_fd_array: bool,
-    verified_bin: &Path,
+fn read_bpfopt_btf_outputs(
+    original: &bpfget::ProgramBtfInfo,
     workdir: &Path,
-) -> Result<String> {
-    let report_json = workdir.join("bpfrejit_failure_bpfverify_report.json");
-    let verifier_log_path = workdir.join("bpfrejit_failure_verifier.log");
-    let mut verify = config.command("bpfverify");
-    verify
-        .arg("--prog-type")
-        .arg(&prog_info.prog_type.name)
-        .arg("--map-fds")
-        .arg(map_fds_json)
-        .arg("--input")
-        .arg(verified_bin)
-        .arg("--report")
-        .arg(&report_json);
-    append_candidate_load_context_args(&mut verify, prog_info, workdir)?;
-    if use_fd_array {
-        verify.arg("--fd-array").arg(fd_array_json);
-    }
-    let (output, report) = run_bpfverify_report_command(
-        "bpfverify --report after bpfrejit failure",
-        &mut verify,
-        &report_json,
-        "post-rejit-failure bpfverify report",
-    )?;
-    fs::write(&verifier_log_path, &report.verifier_log)
-        .with_context(|| format!("write {}", verifier_log_path.display()))?;
-    if !output.status.success() && report.status == "pass" {
-        let program = format!("{verify:?}");
-        let message = stage_failure_message(
-            "bpfverify --report after bpfrejit failure",
-            &program,
-            &output,
-        );
-        eprintln!("daemon: {message}");
-        bail!("{message}");
-    }
-    Ok(verifier_log_summary(&report.verifier_log))
+) -> Result<bpfget::ProgramBtfInfo> {
+    let func_info = if original.func_info.is_empty() {
+        Vec::new()
+    } else {
+        fs::read(workdir.join(BPFOPT_FUNC_INFO_FILE))
+            .with_context(|| format!("read {}", workdir.join(BPFOPT_FUNC_INFO_FILE).display()))?
+    };
+    let line_info = if original.line_info.is_empty() {
+        Vec::new()
+    } else {
+        fs::read(workdir.join(BPFOPT_LINE_INFO_FILE))
+            .with_context(|| format!("read {}", workdir.join(BPFOPT_LINE_INFO_FILE).display()))?
+    };
+    Ok(bpfget::ProgramBtfInfo {
+        func_info_rec_size: original.func_info_rec_size,
+        func_info,
+        line_info_rec_size: original.line_info_rec_size,
+        line_info,
+    })
 }
 
 fn write_original_verifier_states(
-    config: &CliConfig,
-    prog_info: &ProgInfoJson,
-    workdir: &Path,
-    prog_bin: &Path,
-    map_fds_json: &Path,
+    kernel: &mut dyn KernelOps,
+    snapshot: &bpfget::ProgramSnapshot,
     verifier_states_json: &Path,
-) -> Result<()> {
-    write_original_verifier_states_with_timeout(
-        config,
-        prog_info,
-        workdir,
-        prog_bin,
-        map_fds_json,
-        verifier_states_json,
-        timeout_for_stage(VERIFIER_STATES_STAGE),
-    )
-}
-
-fn write_original_verifier_states_with_timeout(
-    config: &CliConfig,
-    prog_info: &ProgInfoJson,
-    workdir: &Path,
-    prog_bin: &Path,
-    map_fds_json: &Path,
-    verifier_states_json: &Path,
-    timeout: Duration,
 ) -> Result<()> {
     if verifier_states_json.exists() {
         fs::remove_file(verifier_states_json)
             .with_context(|| format!("remove stale {}", verifier_states_json.display()))?;
     }
-    let mut verify = config.command("bpfverify");
-    verify
-        .arg("--prog-type")
-        .arg(&prog_info.prog_type.name)
-        .arg("--map-fds")
-        .arg(map_fds_json)
-        .arg("--input")
-        .arg(prog_bin)
-        .arg("--verifier-states-out")
-        .arg(verifier_states_json);
-    append_verifier_states_load_context_args(&mut verify, prog_info, workdir)?;
-    run_stage_output_with_timeout(VERIFIER_STATES_STAGE, &mut verify, timeout)
-        .context("bpfverify --verifier-states-out failed")?;
+    let states = kernel
+        .verifier_states(snapshot, &snapshot.insns, &[])
+        .with_context(|| format!("{VERIFIER_STATES_STAGE} failed"))?;
+    write_json_file(verifier_states_json, &states)?;
     require_nonempty_file(verifier_states_json, "verifier states")?;
     Ok(())
 }
@@ -1528,7 +1177,7 @@ fn pass_detail_from_report(report: &BpfoptPassReport) -> PassDetail {
 }
 
 fn write_live_map_values<F, G, H>(
-    map_fds_json: &Path,
+    maps: &[MapInfoJson],
     output: &Path,
     open_map_fd: &mut F,
     lookup_map_value: &mut G,
@@ -1539,10 +1188,9 @@ where
     G: FnMut(&MapInfoJson, i32, &[u8]) -> Result<Option<Vec<u8>>>,
     H: FnMut(&MapInfoJson, i32) -> Result<Vec<Vec<u8>>>,
 {
-    let maps: Vec<MapInfoJson> = read_json_file(map_fds_json, "map_fds.json")?;
     let mut entries_by_map = BTreeMap::<u32, BTreeMap<Vec<u8>, Option<Vec<u8>>>>::new();
 
-    for map in &maps {
+    for map in maps {
         if !is_map_inlineable_map_type(map.map_type) {
             continue;
         }
@@ -1572,7 +1220,7 @@ where
         }
     }
 
-    write_map_values_snapshot(&maps, &entries_by_map, output)
+    write_map_values_snapshot(maps, &entries_by_map, output)
 }
 
 fn write_map_values_snapshot(
@@ -1696,7 +1344,18 @@ fn push_missing_target(
     }
 }
 
-fn write_fd_array_from_target(target_path: &Path, passes: &[String], output: &Path) -> Result<()> {
+fn build_fd_array_from_target(
+    target_path: &Path,
+    passes: &[String],
+) -> Result<kernel_sys::FdArray> {
+    let entries = fd_array_entries_from_target(target_path, passes)?;
+    kernel_sys::FdArray::from_entries(&entries)
+}
+
+fn fd_array_entries_from_target(
+    target_path: &Path,
+    passes: &[String],
+) -> Result<Vec<kernel_sys::FdArrayEntry>> {
     let target: TargetJson = read_json_file(target_path, "target.json")?;
     let mut target_value: serde_json::Value = read_json_file(target_path, "target.json")?;
     let mut entries = Vec::new();
@@ -1719,14 +1378,17 @@ fn write_fd_array_from_target(target_path: &Path, passes: &[String], output: &Pa
         let call_offset = i16::try_from(slot)
             .with_context(|| format!("fd_array slot {slot} for target kinsn {name}"))?;
         write_kinsn_call_offset(&mut target_value, name, call_offset)?;
-        entries.push(FdArrayJsonEntry {
-            slot,
-            name: name.to_string(),
-            btf_id,
+        entries.push(kernel_sys::FdArrayEntry {
+            slot: Some(slot),
+            name: Some(name.to_string()),
+            btf_fd: None,
+            btf_id: Some(btf_id),
+            btf_obj_id: None,
+            btf_module: None,
         });
     }
-    write_json_file(output, &entries)?;
-    write_json_file(target_path, &target_value)
+    write_json_file(target_path, &target_value)?;
+    Ok(entries)
 }
 
 fn write_kinsn_call_offset(
@@ -1822,6 +1484,25 @@ fn insn_count_from_bytes(bytes: &[u8], label: &str) -> Result<usize> {
     Ok(bytes.len() / 8)
 }
 
+fn decode_insns(bytes: &[u8], label: &str) -> Result<Vec<kernel_sys::bpf_insn>> {
+    insn_count_from_bytes(bytes, label)?;
+    Ok(bytes
+        .chunks_exact(8)
+        .map(|chunk| {
+            let mut insn = kernel_sys::bpf_insn {
+                code: chunk[0],
+                _bitfield_align_1: [],
+                _bitfield_1: Default::default(),
+                off: i16::from_le_bytes([chunk[2], chunk[3]]),
+                imm: i32::from_le_bytes([chunk[4], chunk[5], chunk[6], chunk[7]]),
+            };
+            insn.set_dst_reg(chunk[1] & 0x0f);
+            insn.set_src_reg((chunk[1] >> 4) & 0x0f);
+            insn
+        })
+        .collect())
+}
+
 fn bytecode_has_kinsn_call(bytes: &[u8], label: &str) -> Result<bool> {
     insn_count_from_bytes(bytes, label)?;
     let call_code = (kernel_sys::BPF_JMP | kernel_sys::BPF_CALL) as u8;
@@ -1843,29 +1524,6 @@ fn write_json_file<T: Serialize>(path: &Path, value: &T) -> Result<()> {
     writeln!(file)?;
     file.flush()?;
     Ok(())
-}
-
-fn run_stage_output(stage: &str, command: &mut Command) -> Result<std::process::Output> {
-    run_stage_output_with_timeout(stage, command, timeout_for_stage(stage))
-}
-
-fn run_stage_output_with_timeout(
-    stage: &str,
-    command: &mut Command,
-    timeout: Duration,
-) -> Result<std::process::Output> {
-    let program = format!("{command:?}");
-    command.stdout(Stdio::piped()).stderr(Stdio::piped());
-    let child = command
-        .spawn()
-        .with_context(|| format!("spawn subprocess {program}"))?;
-    let output = wait_with_timeout_for(stage, &program, child, timeout, CLI_STAGE_POLL_INTERVAL)?;
-    if !output.status.success() {
-        let message = stage_failure_message(stage, &program, &output);
-        eprintln!("daemon: {message}");
-        bail!("{message}");
-    }
-    Ok(output)
 }
 
 fn run_stage_with_file_io(
@@ -1909,11 +1567,7 @@ fn wait_with_timeout(
 
 fn timeout_for_stage(stage: &str) -> Duration {
     match stage {
-        "bpfverify final verification" | "bpfverify --report after bpfrejit failure" => {
-            HEAVY_VERIFY_CLI_STAGE_TIMEOUT
-        }
         "bpfopt optimize" => OPTIMIZE_CLI_STAGE_TIMEOUT,
-        "bpfrejit" => REJIT_CLI_STAGE_TIMEOUT,
         _ => DEFAULT_CLI_STAGE_TIMEOUT,
     }
 }
@@ -2003,21 +1657,6 @@ fn stderr_summary(output: &std::process::Output) -> String {
     text.lines().take(20).collect::<Vec<_>>().join("\n")
 }
 
-fn verifier_log_summary(log: &str) -> String {
-    let trimmed = log.trim();
-    if trimmed.is_empty() {
-        return "<empty verifier log>".to_string();
-    }
-    const MAX_SUMMARY_CHARS: usize = 4096;
-    let mut chars = trimmed.chars();
-    let summary: String = chars.by_ref().take(MAX_SUMMARY_CHARS).collect();
-    if chars.next().is_some() {
-        format!("{summary}\n... verifier log truncated ...")
-    } else {
-        summary
-    }
-}
-
 fn count_json_files(path: &Path) -> Result<usize> {
     let mut count = 0usize;
     for entry in fs::read_dir(path).with_context(|| format!("read {}", path.display()))? {
@@ -2032,138 +1671,99 @@ fn count_json_files(path: &Path) -> Result<usize> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::ffi::OsString;
-    use std::os::unix::fs::PermissionsExt;
-    use std::panic::{catch_unwind, resume_unwind, AssertUnwindSafe};
-    use std::sync::Mutex as TestMutex;
-
-    static ENV_LOCK: TestMutex<()> = TestMutex::new(());
 
     #[test]
-    fn replay_btf_info_setup_uses_nonempty_metadata_files() {
-        let prog_info = ProgInfoJson {
-            id: 42,
-            name: "conntrack_clean".to_string(),
-            prog_type: TypeJson {
-                name: "sched_cls".to_string(),
-                numeric: kernel_sys::BPF_PROG_TYPE_SCHED_CLS,
-            },
-            insn_cnt: 12,
-            map_ids: Vec::new(),
-            btf_id: 108,
-            prog_flags: 0,
-            func_info_rec_size: 8,
-            nr_func_info: 2,
-            line_info_rec_size: 16,
-            nr_line_info: 3,
-            attach_btf_obj_id: 0,
-            attach_btf_id: 0,
-            expected_attach_type: None,
-        };
-
-        let setup = replay_btf_info_setup(&prog_info);
-
-        assert!(setup.contains("[ -s func_info.bin ]"));
-        assert!(setup.contains("--func-info func_info.bin --func-info-rec-size 8"));
-        assert!(setup.contains("[ -s line_info.bin ]"));
-        assert!(setup.contains("--line-info line_info.bin --line-info-rec-size 16"));
+    fn bytecode_decoder_rejects_unaligned_input() {
+        let err = decode_insns(&[0u8; 9], "bad").unwrap_err();
+        assert!(err.to_string().contains("multiple of 8"), "err={err:#}");
     }
 
     #[test]
-    fn candidate_load_context_skips_empty_btf_metadata_files() {
-        let workdir = WorkDir::new("bpfrejit-daemon-empty-btf").unwrap();
-        fs::write(workdir.path().join(FUNC_INFO_FILE), []).unwrap();
-        fs::write(workdir.path().join(LINE_INFO_FILE), []).unwrap();
-        let prog_info = ProgInfoJson {
-            id: 42,
-            name: "conntrack_clean".to_string(),
-            prog_type: TypeJson {
-                name: "sched_cls".to_string(),
-                numeric: kernel_sys::BPF_PROG_TYPE_SCHED_CLS,
-            },
-            insn_cnt: 12,
-            map_ids: Vec::new(),
-            btf_id: 108,
-            prog_flags: kernel_sys::BPF_F_TEST_RND_HI32,
-            func_info_rec_size: 8,
-            nr_func_info: 2,
-            line_info_rec_size: 16,
-            nr_line_info: 3,
-            attach_btf_obj_id: 0,
-            attach_btf_id: 0,
-            expected_attach_type: None,
-        };
-        let mut command = Command::new("bpfverify");
+    fn bytecode_has_kinsn_call_detects_project_pseudo_call() {
+        let mut normal_call = [0u8; 8];
+        normal_call[0] = (kernel_sys::BPF_JMP | kernel_sys::BPF_CALL) as u8;
+        normal_call[1] = (kernel_sys::BPF_PSEUDO_CALL as u8) << 4;
+        assert!(!bytecode_has_kinsn_call(&normal_call, "normal_call").unwrap());
 
-        append_candidate_load_context_args(&mut command, &prog_info, workdir.path()).unwrap();
-
-        let args = command
-            .get_args()
-            .map(|arg| arg.to_string_lossy().into_owned())
-            .collect::<Vec<_>>();
-        assert!(args.iter().any(|arg| arg == "--prog-btf-id"));
-        assert!(args.iter().any(|arg| arg == "--prog-flags"));
-        assert!(args
-            .iter()
-            .any(|arg| arg == &kernel_sys::BPF_F_TEST_RND_HI32.to_string()));
-        assert!(!args.iter().any(|arg| arg == "--func-info"));
-        assert!(!args.iter().any(|arg| arg == "--line-info"));
+        let mut kinsn_call = normal_call;
+        kinsn_call[1] = 4 << 4;
+        assert!(bytecode_has_kinsn_call(&kinsn_call, "kinsn_call").unwrap());
     }
 
     #[test]
-    fn verifier_states_load_context_includes_nonempty_btf_metadata() {
-        let workdir = WorkDir::new("bpfrejit-daemon-states-btf").unwrap();
-        fs::write(workdir.path().join(FUNC_INFO_FILE), [0u8; 8]).unwrap();
-        fs::write(workdir.path().join(LINE_INFO_FILE), [0u8; 16]).unwrap();
-        let prog_info = ProgInfoJson {
-            id: 42,
-            name: "conntrack_clean".to_string(),
-            prog_type: TypeJson {
-                name: "sched_cls".to_string(),
-                numeric: kernel_sys::BPF_PROG_TYPE_SCHED_CLS,
-            },
-            insn_cnt: 12,
-            map_ids: Vec::new(),
-            btf_id: 108,
-            prog_flags: 0,
-            func_info_rec_size: 8,
-            nr_func_info: 2,
-            line_info_rec_size: 16,
-            nr_line_info: 3,
-            attach_btf_obj_id: 0,
-            attach_btf_id: 0,
-            expected_attach_type: None,
-        };
-        let mut command = Command::new("bpfverify");
+    fn fd_array_generation_rewrites_target_call_offsets_in_memory() {
+        let workdir = WorkDir::new("bpfrejit-daemon-target-test").unwrap();
+        let target = workdir.path().join("target.json");
+        write_json_file(
+            &target,
+            &serde_json::json!({
+                "arch": "x86_64",
+                "features": ["bmi2", "rorx"],
+                "kinsns": {
+                    "bpf_rotate64": {"btf_func_id": 123, "btf_id": 55},
+                    "bpf_select64": {"btf_func_id": 124, "btf_id": 56}
+                }
+            }),
+        )
+        .unwrap();
 
-        append_verifier_states_load_context_args(&mut command, &prog_info, workdir.path()).unwrap();
+        let entries = fd_array_entries_from_target(
+            &target,
+            &["rotate".to_string(), "cond_select".to_string()],
+        )
+        .unwrap();
 
-        let args = command
-            .get_args()
-            .map(|arg| arg.to_string_lossy().into_owned())
-            .collect::<Vec<_>>();
-        assert!(args.iter().any(|arg| arg == "--prog-btf-id"));
-        assert!(args.iter().any(|arg| arg == "--func-info"));
-        assert!(args.iter().any(|arg| arg == "--line-info"));
+        assert_eq!(entries.len(), 2);
+        assert_eq!(entries[0].slot, Some(1));
+        assert_eq!(entries[1].slot, Some(2));
+        let rewritten: serde_json::Value = read_json_file(&target, "target.json").unwrap();
+        assert_eq!(rewritten["kinsns"]["bpf_rotate64"]["call_offset"], 1);
+        assert_eq!(rewritten["kinsns"]["bpf_select64"]["call_offset"], 2);
     }
 
     #[test]
     fn live_map_values_snapshot_writes_values_and_lookup_misses() {
         let workdir = WorkDir::new("bpfrejit-daemon-map-values").unwrap();
-        let map_fds = workdir.path().join("map_fds.json");
         let output = workdir.path().join(MAP_VALUES_FILE);
-        fs::write(
-            &map_fds,
-            r#"[
-  {"map_id":111,"map_type":2,"key_size":4,"value_size":4,"max_entries":8,"name":"array_map"},
-  {"map_id":222,"map_type":1,"key_size":4,"value_size":4,"max_entries":8,"name":"hash_map"}
-]
-"#,
-        )
-        .unwrap();
+        let maps = vec![
+            MapInfoJson {
+                old_fd: None,
+                map_id: 111,
+                map_type: kernel_sys::BPF_MAP_TYPE_ARRAY,
+                key_size: 4,
+                value_size: 4,
+                max_entries: 8,
+                name: "array_map".to_string(),
+                map_flags: 0,
+                ifindex: 0,
+                btf_id: 0,
+                btf_key_type_id: 0,
+                btf_value_type_id: 0,
+                btf_vmlinux_value_type_id: 0,
+                btf_vmlinux_id: 0,
+                map_extra: 0,
+            },
+            MapInfoJson {
+                old_fd: None,
+                map_id: 222,
+                map_type: kernel_sys::BPF_MAP_TYPE_HASH,
+                key_size: 4,
+                value_size: 4,
+                max_entries: 8,
+                name: "hash_map".to_string(),
+                map_flags: 0,
+                ifindex: 0,
+                btf_id: 0,
+                btf_key_type_id: 0,
+                btf_value_type_id: 0,
+                btf_vmlinux_value_type_id: 0,
+                btf_vmlinux_id: 0,
+                map_extra: 0,
+            },
+        ];
 
         write_live_map_values(
-            &map_fds,
+            &maps,
             &output,
             &mut |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
             &mut |map, _fd, key| {
@@ -2188,1161 +1788,5 @@ mod tests {
         assert_eq!(json["maps"][0]["entries"][0]["value"], "07000000");
         assert_eq!(json["maps"][1]["entries"][0]["key"], "02000000");
         assert!(json["maps"][1]["entries"][0]["value"].is_null());
-    }
-
-    struct FakeCliDir {
-        dir: WorkDir,
-    }
-
-    impl FakeCliDir {
-        fn new() -> Result<Self> {
-            let dir = WorkDir::new("bpfrejit-daemon-fake-cli")?;
-            write_executable(
-                &dir.path().join("bpfget"),
-                r#"#!/usr/bin/env bash
-set -euo pipefail
-if [[ "${1:-}" == "--list" ]]; then
-  printf '[{"id":42,"name":"demo","type":{"name":"xdp","numeric":6}}]\n'
-  exit 0
-fi
-if [[ "${1:-}" == "--target" ]]; then
-  out=""
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --output) out="$2"; shift 2 ;;
-      *) shift ;;
-    esac
-  done
-  printf '{"arch":"x86_64","features":["cmov"],"kinsns":{}}\n' > "$out"
-  exit 0
-fi
-prog_id="$1"
-shift
-outdir=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --full) shift ;;
-    --outdir) outdir="$2"; shift 2 ;;
-    *) shift ;;
-  esac
-done
-printf '\xb7\x00\x00\x00\x00\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00' > "$outdir/prog.bin"
-cat > "$outdir/prog_info.json" <<JSON
-{"id":$prog_id,"name":"demo","type":{"name":"xdp","numeric":6},"insn_cnt":2,"map_ids":[],"func_info_rec_size":8,"nr_func_info":1,"line_info_rec_size":16,"nr_line_info":1}
-JSON
-cat > "$outdir/map_fds.json" <<JSON
-[]
-JSON
-printf '\x00\x00\x00\x00\x01\x00\x00\x00' > "$outdir/func_info.bin"
-printf '\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00' > "$outdir/line_info.bin"
-"#,
-            )?;
-            write_executable(
-                &dir.path().join("bpfopt"),
-                r#"#!/usr/bin/env bash
-set -euo pipefail
-report=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --report) report="$2"; shift 2 ;;
-    --target) printf 'unexpected --target\n' >&2; exit 2 ;;
-    *) shift ;;
-  esac
-done
-cat >/dev/null
-printf '\xb7\x00\x00\x00\x01\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00'
-cat > "$report" <<JSON
-{"passes":[{"pass":"wide_mem","changed":true,"sites_applied":2,"insn_count_before":2,"insn_count_after":2,"insn_delta":0}]}
-JSON
-"#,
-            )?;
-            write_executable(
-                &dir.path().join("bpfverify"),
-                r#"#!/usr/bin/env bash
-set -euo pipefail
-input=""
-output=""
-states=""
-report=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --input) input="$2"; shift 2 ;;
-    --output) output="$2"; shift 2 ;;
-    --report) report="$2"; shift 2 ;;
-    --verifier-states-out) states="$2"; shift 2 ;;
-    *) shift ;;
-  esac
-done
-if [[ -n "$input" && -n "$output" ]]; then cp "$input" "$output"; fi
-if [[ -n "$report" ]]; then
-  cat > "$report" <<JSON
-{"status":"pass","verifier_log":"synthetic verifier log","verifier_states":{"insns":[]},"insn_count":2,"log_level":2,"errno":null,"jited_size":64,"log_true_size":0}
-JSON
-fi
-if [[ -n "$states" ]]; then printf '{"insns":[]}\n' > "$states"; fi
-"#,
-            )?;
-            write_executable(
-                &dir.path().join("bpfrejit"),
-                r#"#!/usr/bin/env bash
-set -euo pipefail
-prog_id="$1"
-shift
-out=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --output) out="$2"; shift 2 ;;
-    *) shift ;;
-  esac
-done
-if [[ -n "$out" ]]; then
-  printf '{"status":"ok","prog_id":%s,"insn_count_before":2,"insn_count_after":2}\n' "$prog_id" > "$out"
-fi
-"#,
-            )?;
-            write_executable(
-                &dir.path().join("bpfprof"),
-                r#"#!/usr/bin/env bash
-set -euo pipefail
-outdir=""
-per_site=0
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --per-site) per_site=1; shift ;;
-    --output-dir) outdir="$2"; shift 2 ;;
-    *) shift ;;
-  esac
-done
-if [[ "$per_site" -ne 1 ]]; then
-  echo "missing --per-site" >&2
-  exit 1
-fi
-printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"branch_miss_rate":0.01,"branch_misses":1,"branch_instructions":100,"per_site":{"0":{"branch_count":100,"branch_misses":1,"miss_rate":0.01,"taken":90,"not_taken":10}}}\n' > "$outdir/42.json"
-"#,
-            )?;
-            Ok(Self { dir })
-        }
-
-        fn config(&self) -> CliConfig {
-            CliConfig::with_dir(self.dir.path().to_path_buf())
-        }
-
-        fn replace_command(&self, name: &str, text: &str) -> Result<()> {
-            write_executable(&self.dir.path().join(name), text)
-        }
-    }
-
-    fn write_executable(path: &Path, text: &str) -> Result<()> {
-        let tmp_path = path.with_file_name(format!(
-            "{}.tmp-{}",
-            path.file_name()
-                .and_then(|name| name.to_str())
-                .unwrap_or("fake-cli"),
-            NEXT_WORKDIR_ID.fetch_add(1, Ordering::Relaxed)
-        ));
-        fs::write(&tmp_path, text)?;
-        let mut permissions = fs::metadata(&tmp_path)?.permissions();
-        permissions.set_mode(0o755);
-        fs::set_permissions(&tmp_path, permissions)?;
-        fs::rename(&tmp_path, path)?;
-        Ok(())
-    }
-
-    fn with_daemon_export_env<T>(
-        failure_root: &Path,
-        keep_all_workdirs: Option<&str>,
-        f: impl FnOnce() -> T,
-    ) -> T {
-        let _guard = ENV_LOCK
-            .lock()
-            .expect("failure export env lock should not be poisoned");
-        let old_root = std::env::var_os(FAILURE_ROOT_ENV);
-        let old_keep_all_workdirs = std::env::var_os(KEEP_ALL_WORKDIRS_ENV);
-        std::env::set_var(FAILURE_ROOT_ENV, failure_root);
-        if let Some(value) = keep_all_workdirs {
-            std::env::set_var(KEEP_ALL_WORKDIRS_ENV, value);
-        } else {
-            std::env::remove_var(KEEP_ALL_WORKDIRS_ENV);
-        }
-        let result = catch_unwind(AssertUnwindSafe(f));
-        restore_env(FAILURE_ROOT_ENV, old_root);
-        restore_env(KEEP_ALL_WORKDIRS_ENV, old_keep_all_workdirs);
-        match result {
-            Ok(value) => value,
-            Err(payload) => resume_unwind(payload),
-        }
-    }
-
-    fn with_failure_export_env<T>(failure_root: &Path, f: impl FnOnce() -> T) -> T {
-        with_daemon_export_env(failure_root, None, f)
-    }
-
-    fn with_temp_failure_root<T>(f: impl FnOnce(&Path) -> T) -> T {
-        let failure_root = WorkDir::new("bpfrejit-daemon-failure-root").unwrap();
-        with_failure_export_env(failure_root.path(), || f(failure_root.path()))
-    }
-
-    fn with_clean_daemon_export_env<T>(f: impl FnOnce() -> T) -> T {
-        let _guard = ENV_LOCK
-            .lock()
-            .expect("failure export env lock should not be poisoned");
-        let old_root = std::env::var_os(FAILURE_ROOT_ENV);
-        let old_keep_all_workdirs = std::env::var_os(KEEP_ALL_WORKDIRS_ENV);
-        std::env::remove_var(FAILURE_ROOT_ENV);
-        std::env::remove_var(KEEP_ALL_WORKDIRS_ENV);
-        let result = catch_unwind(AssertUnwindSafe(f));
-        restore_env(FAILURE_ROOT_ENV, old_root);
-        restore_env(KEEP_ALL_WORKDIRS_ENV, old_keep_all_workdirs);
-        match result {
-            Ok(value) => value,
-            Err(payload) => resume_unwind(payload),
-        }
-    }
-
-    fn restore_env(name: &str, value: Option<OsString>) {
-        if let Some(value) = value {
-            std::env::set_var(name, value);
-        } else {
-            std::env::remove_var(name);
-        }
-    }
-
-    #[test]
-    fn failure_export_root_env_defaults_to_cwd() {
-        with_clean_daemon_export_env(|| {
-            let config = FailureExportConfig::from_env().unwrap();
-            assert_eq!(
-                config.root,
-                std::env::current_dir()
-                    .unwrap()
-                    .join(DEFAULT_FAILURE_ROOT_NAME)
-            );
-        });
-    }
-
-    #[test]
-    fn optimize_uses_cli_subprocesses_and_preserves_response_shape() {
-        with_clean_daemon_export_env(|| {
-            let fake = FakeCliDir::new().unwrap();
-            let result = try_apply_one(
-                42,
-                &fake.config(),
-                Some(&["wide_mem".to_string()]),
-                None,
-                None,
-            )
-            .unwrap();
-
-            assert_eq!(result.status, "ok");
-            assert_eq!(result.prog_id, 42);
-            assert!(result.changed);
-            assert_eq!(result.passes_applied, vec!["wide_mem"]);
-            assert!(result.summary.applied);
-            assert_eq!(result.summary.total_sites_applied, 2);
-            assert_eq!(result.summary.passes_executed, 1);
-            assert!(result.passes[0].changed);
-        });
-    }
-
-    #[test]
-    fn keep_all_workdirs_env_preserves_success_workdir() {
-        let failure_root = WorkDir::new("bpfrejit-daemon-debug-failure-root").unwrap();
-        with_daemon_export_env(failure_root.path(), Some("1"), || {
-            let fake = FakeCliDir::new().unwrap();
-
-            let result = try_apply_one(
-                42,
-                &fake.config(),
-                Some(&["wide_mem".to_string()]),
-                None,
-                None,
-            )
-            .unwrap();
-
-            assert_eq!(result.status, "ok");
-            let debug_dir = failure_root.path().join("workdirs").join("42");
-            assert!(debug_dir.is_dir());
-            assert!(debug_dir.join("prog.bin").is_file());
-            assert!(debug_dir.join("prog_info.json").is_file());
-            assert!(debug_dir.join("map_fds.json").is_file());
-            assert!(!debug_dir.join(MAP_VALUES_FILE).exists());
-            assert!(!debug_dir.join(VERIFIER_STATES_FILE).exists());
-            assert!(debug_dir.join("bpfopt_report.json").is_file());
-        });
-    }
-
-    #[test]
-    fn successful_optimize_does_not_preserve_debug_workdir_by_default() {
-        with_temp_failure_root(|failure_root| {
-            let fake = FakeCliDir::new().unwrap();
-
-            let result = try_apply_one(
-                42,
-                &fake.config(),
-                Some(&["wide_mem".to_string()]),
-                None,
-                None,
-            )
-            .unwrap();
-
-            assert_eq!(result.status, "ok");
-            assert!(!failure_root.join("workdirs").exists());
-        });
-    }
-
-    #[test]
-    fn optimize_passes_btf_metadata_to_bpfopt_for_in_place_remap() {
-        with_clean_daemon_export_env(|| {
-            let fake = FakeCliDir::new().unwrap();
-            fake.replace_command(
-                "bpfopt",
-                r#"#!/usr/bin/env bash
-set -euo pipefail
-report=""
-func_info=""
-line_info=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --report) report="$2"; shift 2 ;;
-    --func-info) func_info="$2"; shift 2 ;;
-    --line-info) line_info="$2"; shift 2 ;;
-    *) shift ;;
-  esac
-done
-test -s "$func_info"
-test -s "$line_info"
-cat >/dev/null
-printf '\xb7\x00\x00\x00\x01\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00'
-cat > "$report" <<JSON
-{"passes":[{"pass":"wide_mem","changed":true,"sites_applied":1,"insn_count_before":2,"insn_count_after":2,"insn_delta":0}]}
-JSON
-"#,
-            )
-            .unwrap();
-
-            let result = try_apply_one(
-                42,
-                &fake.config(),
-                Some(&["wide_mem".to_string()]),
-                None,
-                None,
-            )
-            .unwrap();
-
-            assert_eq!(result.status, "ok");
-            assert_eq!(result.summary.total_sites_applied, 1);
-        });
-    }
-
-    #[test]
-    fn fd_array_generation_rewrites_target_call_offsets() {
-        let dir = WorkDir::new("bpfrejit-daemon-target-test").unwrap();
-        let target = dir.path().join("target.json");
-        let fd_array = dir.path().join("fd_array.json");
-        fs::write(
-            &target,
-            r#"{
-  "arch": "x86_64",
-  "features": ["cmov"],
-  "kinsns": {
-    "bpf_rotate64": {"btf_func_id": 129879, "btf_id": 42},
-    "bpf_select64": {"btf_func_id": 129880, "btf_id": 43}
-  }
-}
-"#,
-        )
-        .unwrap();
-
-        write_fd_array_from_target(
-            &target,
-            &["rotate".to_string(), "cond_select".to_string()],
-            &fd_array,
-        )
-        .unwrap();
-
-        let fd_entries: serde_json::Value =
-            serde_json::from_slice(&fs::read(&fd_array).unwrap()).unwrap();
-        assert_eq!(fd_entries[0]["slot"], 1);
-        assert_eq!(fd_entries[0]["btf_id"], 42);
-        assert_eq!(fd_entries[1]["slot"], 2);
-        assert_eq!(fd_entries[1]["btf_id"], 43);
-
-        let rewritten: serde_json::Value =
-            serde_json::from_slice(&fs::read(&target).unwrap()).unwrap();
-        assert_eq!(rewritten["kinsns"]["bpf_rotate64"]["call_offset"], 1);
-        assert_eq!(rewritten["kinsns"]["bpf_select64"]["call_offset"], 2);
-    }
-
-    #[test]
-    fn fd_array_generation_rewrites_prefetch_call_offset() {
-        let dir = WorkDir::new("bpfrejit-daemon-prefetch-target-test").unwrap();
-        let target = dir.path().join("target.json");
-        let fd_array = dir.path().join("fd_array.json");
-        fs::write(
-            &target,
-            r#"{
-  "arch": "x86_64",
-  "features": ["cmov"],
-  "kinsns": {
-    "bpf_prefetch": {"btf_func_id": 129900, "btf_id": 51}
-  }
-}
-"#,
-        )
-        .unwrap();
-
-        write_fd_array_from_target(&target, &["prefetch".to_string()], &fd_array).unwrap();
-
-        let fd_entries: serde_json::Value =
-            serde_json::from_slice(&fs::read(&fd_array).unwrap()).unwrap();
-        assert_eq!(fd_entries[0]["slot"], 1);
-        assert_eq!(fd_entries[0]["name"], "bpf_prefetch");
-        assert_eq!(fd_entries[0]["btf_id"], 51);
-
-        let rewritten: serde_json::Value =
-            serde_json::from_slice(&fs::read(&target).unwrap()).unwrap();
-        assert_eq!(rewritten["kinsns"]["bpf_prefetch"]["call_offset"], 1);
-    }
-
-    #[test]
-    fn missing_target_kinsn_is_error() {
-        with_temp_failure_root(|_| {
-            let fake = FakeCliDir::new().unwrap();
-            let err = try_apply_one(
-                42,
-                &fake.config(),
-                Some(&["rotate".to_string()]),
-                None,
-                None,
-            )
-            .unwrap_err();
-
-            let message = format!("{err:#}");
-            assert!(message.contains("bpfget --target did not expose kinsns"));
-            assert!(message.contains("bpf_rotate64"));
-        });
-    }
-
-    #[test]
-    fn verifier_states_failure_is_error() {
-        with_temp_failure_root(|_| {
-            let fake = FakeCliDir::new().unwrap();
-            fake.replace_command(
-                "bpfverify",
-                r#"#!/usr/bin/env bash
-set -euo pipefail
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --verifier-states-out) printf 'synthetic verifier state failure\n' >&2; exit 7 ;;
-    *) shift ;;
-  esac
-done
-"#,
-            )
-            .unwrap();
-
-            let err = try_apply_one(
-                42,
-                &fake.config(),
-                Some(&["const_prop".to_string()]),
-                None,
-                None,
-            )
-            .unwrap_err();
-
-            let message = format!("{err:#}");
-            assert!(message.contains("bpfverify --verifier-states-out failed"));
-            assert!(message.contains("synthetic verifier state failure"));
-        });
-    }
-
-    #[test]
-    fn verifier_and_optimizer_stages_have_heavy_timeouts() {
-        assert_eq!(
-            timeout_for_stage("bpfverify original verifier-states"),
-            Duration::from_secs(5)
-        );
-        assert_eq!(
-            timeout_for_stage("bpfverify final verification"),
-            Duration::from_secs(60)
-        );
-        assert_eq!(
-            timeout_for_stage("bpfopt optimize"),
-            Duration::from_secs(60)
-        );
-        assert_eq!(timeout_for_stage("bpfrejit"), Duration::from_secs(60));
-        assert_eq!(timeout_for_stage("bpfget --full"), Duration::from_secs(5));
-    }
-
-    #[test]
-    fn wait_with_timeout_kills_stuck_subprocess() {
-        let mut command = Command::new("sleep");
-        command.arg("5");
-        command.stdout(Stdio::piped()).stderr(Stdio::piped());
-        let child = command.spawn().expect("spawn stuck subprocess");
-        let started = Instant::now();
-
-        let err = wait_with_timeout_for(
-            "bpfverify original verifier-states",
-            "sleep 5",
-            child,
-            Duration::from_millis(50),
-            Duration::from_millis(5),
-        )
-        .unwrap_err();
-
-        let message = format!("{err:#}");
-        assert!(message.contains("bpfverify original verifier-states timed out after 50ms"));
-        assert!(started.elapsed() < Duration::from_secs(1));
-    }
-
-    #[test]
-    fn verifier_states_timeout_is_not_retried() {
-        let fake = FakeCliDir::new().unwrap();
-        fake.replace_command(
-            "bpfverify",
-            r#"#!/usr/bin/env bash
-set -euo pipefail
-printf '%s\n' "$*" >> "${BASH_SOURCE[0]}.args"
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --verifier-states-out) sleep 5; exit 0 ;;
-    *) shift ;;
-  esac
-done
-"#,
-        )
-        .unwrap();
-        let dir = WorkDir::new("bpfrejit-daemon-verifier-states-timeout").unwrap();
-        let prog_bin = dir.path().join("prog.bin");
-        let map_fds_json = dir.path().join("map_fds.json");
-        let verifier_states_json = dir.path().join("verifier-states.json");
-        fs::write(&prog_bin, b"").unwrap();
-        fs::write(&map_fds_json, b"[]\n").unwrap();
-        let prog_info = ProgInfoJson {
-            id: 42,
-            name: "demo".to_string(),
-            prog_type: TypeJson {
-                name: "xdp".to_string(),
-                numeric: 6,
-            },
-            insn_cnt: 0,
-            map_ids: Vec::new(),
-            btf_id: 0,
-            prog_flags: 0,
-            func_info_rec_size: 0,
-            nr_func_info: 0,
-            line_info_rec_size: 0,
-            nr_line_info: 0,
-            attach_btf_obj_id: 0,
-            attach_btf_id: 0,
-            expected_attach_type: None,
-        };
-        let started = Instant::now();
-
-        let err = write_original_verifier_states_with_timeout(
-            &fake.config(),
-            &prog_info,
-            dir.path(),
-            &prog_bin,
-            &map_fds_json,
-            &verifier_states_json,
-            Duration::from_millis(50),
-        )
-        .unwrap_err();
-
-        let message = format!("{err:#}");
-        assert!(message.contains("bpfverify --verifier-states-out failed"));
-        assert!(message.contains("bpfverify original verifier-states timed out after 50ms"));
-        assert!(started.elapsed() < Duration::from_secs(1));
-        let args_log = fs::read_to_string(fake.dir.path().join("bpfverify.args")).unwrap();
-        assert_eq!(
-            args_log
-                .lines()
-                .filter(|line| line.contains("--verifier-states-out"))
-                .count(),
-            1,
-            "args log:\n{args_log}"
-        );
-    }
-
-    #[test]
-    fn verifier_states_capture_does_not_request_full_report() {
-        with_clean_daemon_export_env(|| {
-            let fake = FakeCliDir::new().unwrap();
-            fake.replace_command(
-                "bpfverify",
-                r#"#!/usr/bin/env bash
-set -euo pipefail
-args_log="${BASH_SOURCE[0]}.args"
-printf '%s\n' "$*" >> "$args_log"
-input=""
-output=""
-states=""
-report=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --input) input="$2"; shift 2 ;;
-    --output) output="$2"; shift 2 ;;
-    --report) report="$2"; shift 2 ;;
-    --verifier-states-out) states="$2"; shift 2 ;;
-    *) shift ;;
-  esac
-done
-if [[ -n "$states" ]]; then
-  if [[ -n "$report" ]]; then
-    printf 'states capture must not request report\n' >&2
-    exit 13
-  fi
-  if [[ -n "$output" ]]; then
-    printf 'states capture must not request output\n' >&2
-    exit 14
-  fi
-  printf '{"insns":[]}\n' > "$states"
-  exit 0
-fi
-if [[ -n "$input" && -n "$output" ]]; then cp "$input" "$output"; fi
-if [[ -n "$report" ]]; then
-  cat > "$report" <<JSON
-{"status":"pass","verifier_log":"synthetic verifier log","verifier_states":{"insns":[]},"insn_count":2,"log_level":2,"errno":null,"jited_size":64,"log_true_size":0}
-JSON
-fi
-"#,
-            )
-            .unwrap();
-
-            let result = try_apply_one(
-                42,
-                &fake.config(),
-                Some(&["const_prop".to_string()]),
-                None,
-                None,
-            )
-            .unwrap();
-
-            assert_eq!(result.status, "ok");
-            let args_log = fs::read_to_string(fake.dir.path().join("bpfverify.args")).unwrap();
-            let states_lines = args_log
-                .lines()
-                .filter(|line| line.contains("--verifier-states-out"))
-                .collect::<Vec<_>>();
-            assert_eq!(states_lines.len(), 1, "args log:\n{args_log}");
-            assert!(!states_lines[0].contains("--report"));
-            assert!(!states_lines[0].contains("--output"));
-        });
-    }
-
-    #[test]
-    fn failure_workdir_preserves_pre_report_failures_without_verifier_log() {
-        with_temp_failure_root(|failure_root| {
-            let fake = FakeCliDir::new().unwrap();
-            fake.replace_command(
-                "bpfverify",
-                r#"#!/usr/bin/env bash
-set -euo pipefail
-printf 'synthetic verifier crash before report\n' >&2
-exit 9
-"#,
-            )
-            .unwrap();
-
-            let err = try_apply_one(
-                42,
-                &fake.config(),
-                Some(&["wide_mem".to_string()]),
-                None,
-                None,
-            )
-            .unwrap_err();
-
-            let message = format!("{err:#}");
-            assert!(message.contains("preserved failure workdir"));
-            assert!(message.contains("synthetic verifier crash before report"));
-
-            let failure_dir = failure_root.join("42");
-            assert!(failure_dir.join("prog.bpf").is_file());
-            assert!(failure_dir.join("info.json").is_file());
-            assert!(failure_dir.join("replay.sh").is_file());
-            assert!(!failure_dir.join("verifier.log").exists());
-        });
-    }
-
-    #[test]
-    fn prefetch_does_not_capture_unused_verifier_states() {
-        with_clean_daemon_export_env(|| {
-            let fake = FakeCliDir::new().unwrap();
-            fake.replace_command(
-                "bpfget",
-                r#"#!/usr/bin/env bash
-set -euo pipefail
-if [[ "${1:-}" == "--target" ]]; then
-  out=""
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --output) out="$2"; shift 2 ;;
-      *) shift ;;
-    esac
-  done
-  cat > "$out" <<JSON
-{"arch":"x86_64","features":["cmov"],"kinsns":{"bpf_prefetch":{"btf_func_id":500,"btf_id":51}}}
-JSON
-  exit 0
-fi
-prog_id="$1"
-shift
-outdir=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --full) shift ;;
-    --outdir) outdir="$2"; shift 2 ;;
-    *) shift ;;
-  esac
-done
-printf '\xb7\x00\x00\x00\x00\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00' > "$outdir/prog.bin"
-cat > "$outdir/prog_info.json" <<JSON
-{"id":$prog_id,"name":"demo","type":{"name":"xdp","numeric":6},"insn_cnt":2,"map_ids":[]}
-JSON
-printf '[]\n' > "$outdir/map_fds.json"
-"#,
-            )
-            .unwrap();
-            fake.replace_command(
-                "bpfverify",
-                r#"#!/usr/bin/env bash
-set -euo pipefail
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --verifier-states-out) printf 'unexpected verifier state capture\n' >&2; exit 7 ;;
-    *) shift ;;
-  esac
-done
-"#,
-            )
-            .unwrap();
-            fake.replace_command(
-                "bpfopt",
-                r#"#!/usr/bin/env bash
-set -euo pipefail
-report=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --report) report="$2"; shift 2 ;;
-    *) shift ;;
-  esac
-done
-cat >/dev/null
-printf '\xb7\x00\x00\x00\x00\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00'
-cat > "$report" <<JSON
-{"passes":[{"pass":"prefetch","changed":false,"sites_applied":0,"insn_count_before":2,"insn_count_after":2,"insn_delta":0}]}
-JSON
-"#,
-            )
-            .unwrap();
-
-            let result = try_apply_one(
-                42,
-                &fake.config(),
-                Some(&["prefetch".to_string()]),
-                None,
-                None,
-            )
-            .unwrap();
-
-            assert_eq!(result.status, "ok");
-            assert!(!result.changed);
-            assert_eq!(result.summary.total_sites_applied, 0);
-        });
-    }
-
-    #[test]
-    fn final_verify_failure_is_error() {
-        with_temp_failure_root(|_| {
-            let fake = FakeCliDir::new().unwrap();
-            fake.replace_command(
-                "bpfverify",
-                r#"#!/usr/bin/env bash
-set -euo pipefail
-input=""
-output=""
-states=""
-report=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --input) input="$2"; shift 2 ;;
-    --output) output="$2"; shift 2 ;;
-    --report) report="$2"; shift 2 ;;
-    --verifier-states-out) states="$2"; shift 2 ;;
-    *) shift ;;
-  esac
-done
-if [[ -n "$states" ]]; then
-  if [[ -n "$input" && -n "$output" ]]; then cp "$input" "$output"; fi
-  if [[ -n "$report" ]]; then
-    cat > "$report" <<JSON
-{"status":"pass","verifier_log":"synthetic verifier log","verifier_states":{"insns":[]},"insn_count":2,"log_level":2,"errno":null,"jited_size":64,"log_true_size":0}
-JSON
-  fi
-  printf '{"insns":[]}\n' > "$states"
-  exit 0
-fi
-printf 'synthetic final verifier failure\n' >&2
-exit 9
-"#,
-            )
-            .unwrap();
-
-            let err = try_apply_one(
-                42,
-                &fake.config(),
-                Some(&["wide_mem".to_string()]),
-                None,
-                None,
-            )
-            .unwrap_err();
-
-            let message = format!("{err:#}");
-            assert!(message.contains("bpfverify final verification failed"));
-            assert!(message.contains("synthetic final verifier failure"));
-        });
-    }
-
-    #[test]
-    fn rejit_failure_is_error() {
-        with_temp_failure_root(|_| {
-            let fake = FakeCliDir::new().unwrap();
-            fake.replace_command(
-                "bpfrejit",
-                r#"#!/usr/bin/env bash
-set -euo pipefail
-printf 'synthetic rejit failure\n' >&2
-exit 11
-"#,
-            )
-            .unwrap();
-
-            let err = try_apply_one(
-                42,
-                &fake.config(),
-                Some(&["wide_mem".to_string()]),
-                None,
-                None,
-            )
-            .unwrap_err();
-
-            let message = format!("{err:#}");
-            assert!(message.contains("bpfrejit failed for prog 42"));
-            assert!(message.contains("synthetic rejit failure"));
-        });
-    }
-
-    #[test]
-    fn rejit_failure_preserves_workdir_and_captures_verifier_log() {
-        with_temp_failure_root(|failure_root| {
-            let fake = FakeCliDir::new().unwrap();
-            fake.replace_command(
-                "bpfrejit",
-                r#"#!/usr/bin/env bash
-set -euo pipefail
-printf 'synthetic rejit failure\n' >&2
-exit 11
-"#,
-            )
-            .unwrap();
-
-            let err = try_apply_one(
-                42,
-                &fake.config(),
-                Some(&["wide_mem".to_string()]),
-                None,
-                None,
-            )
-            .unwrap_err();
-
-            let message = format!("{err:#}");
-            assert!(message.contains("preserved failure workdir"));
-            assert!(message.contains("bpfrejit failed for prog 42"));
-            assert!(message.contains("verifier log summary"));
-            assert!(message.contains("synthetic verifier log"));
-
-            let failure_dir = failure_root.join("42");
-            assert!(failure_dir.is_dir());
-            for name in [
-                "prog.bin",
-                "prog.bpf",
-                "opt.bin",
-                "verified.bin",
-                "map_fds.json",
-                "info.json",
-                "replay.sh",
-                "bpfopt_report.json",
-                "bpfverify_report.json",
-                "verifier.log",
-                "bpfrejit_failure_bpfverify_report.json",
-                "bpfrejit_failure_verifier.log",
-            ] {
-                assert!(
-                    failure_dir.join(name).exists(),
-                    "missing preserved artifact {name}"
-                );
-            }
-            assert_eq!(
-                fs::read_to_string(failure_dir.join("verifier.log")).unwrap(),
-                "synthetic verifier log"
-            );
-        });
-    }
-
-    #[test]
-    fn reapply_force_rejit_reinstalls_candidate_even_when_unchanged() {
-        with_clean_daemon_export_env(|| {
-            let fake = FakeCliDir::new().unwrap();
-            let marker = fake.dir.path().join("rejit-called");
-            let marker_arg = marker.to_string_lossy().to_string();
-            fake.replace_command(
-                "bpfopt",
-r#"#!/usr/bin/env bash
-set -euo pipefail
-report=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --report) report="$2"; shift 2 ;;
-    *) shift ;;
-  esac
-done
-cat >/dev/null
-printf '\xb7\x00\x00\x00\x00\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00'
-cat > "$report" <<JSON
-{"passes":[{"pass":"wide_mem","changed":false,"sites_applied":0,"insn_count_before":2,"insn_count_after":2,"insn_delta":0}]}
-JSON
-"#,
-            )
-            .unwrap();
-            fake.replace_command(
-                "bpfrejit",
-                &format!(
-                    r#"#!/usr/bin/env bash
-set -euo pipefail
-prog_id="$1"
-shift
-out=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --output) out="$2"; shift 2 ;;
-    *) shift ;;
-  esac
-done
-printf 'called\n' > {marker_arg:?}
-if [[ -n "$out" ]]; then
-  printf '{{"status":"ok","prog_id":%s,"insn_count_before":2,"insn_count_after":2}}\n' "$prog_id" > "$out"
-fi
-"#
-                ),
-            )
-            .unwrap();
-
-            let result = try_reapply_one(
-                42,
-                &fake.config(),
-                Some(&["wide_mem".to_string()]),
-                None,
-                None,
-            )
-            .unwrap();
-
-            assert!(!result.changed);
-            assert!(result.summary.applied);
-            assert!(marker.exists());
-        });
-    }
-
-    #[test]
-    fn map_inline_report_records_refresh_invalidation_tracker_after_rejit() {
-        with_clean_daemon_export_env(|| {
-            let fake = FakeCliDir::new().unwrap();
-            fake.replace_command(
-                "bpfget",
-                r#"#!/usr/bin/env bash
-set -euo pipefail
-prog_id="$1"
-shift
-outdir=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --full) shift ;;
-    --outdir) outdir="$2"; shift 2 ;;
-    *) shift ;;
-  esac
-done
-printf '\xb7\x00\x00\x00\x00\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00' > "$outdir/prog.bin"
-cat > "$outdir/prog_info.json" <<JSON
-{"id":$prog_id,"name":"demo","type":{"name":"xdp","numeric":6},"insn_cnt":2,"map_ids":[111]}
-JSON
-cat > "$outdir/map_fds.json" <<JSON
-[{"map_id":111,"map_type":2,"key_size":4,"value_size":4,"max_entries":8,"name":"demo_map"}]
-JSON
-"#,
-            )
-            .unwrap();
-            fake.replace_command(
-                "bpfopt",
-r#"#!/usr/bin/env bash
-set -euo pipefail
-report=""
-map_values=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --report) report="$2"; shift 2 ;;
-    --map-values) map_values="$2"; shift 2 ;;
-    *) shift ;;
-  esac
-done
-grep -q '"value": "07000000"' "$map_values"
-cat >/dev/null
-printf '\xb7\x00\x00\x00\x01\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00'
-cat > "$report" <<JSON
-{"passes":[{"pass":"map_inline","changed":true,"sites_applied":1,"insn_count_before":2,"insn_count_after":2,"insn_delta":0,"map_inline_records":[{"map_id":111,"key_hex":"01000000","value_hex":"07000000"}]}]}
-JSON
-"#,
-            )
-            .unwrap();
-            let tracker = new_invalidation_tracker();
-            let config = fake.config();
-            let enabled_passes = ["map_inline".to_string()];
-
-            let result = try_apply_one_with_map_access(
-                ApplyOneRequest {
-                    prog_id: 42,
-                    config: &config,
-                    enabled_passes: Some(&enabled_passes),
-                    profile_path: None,
-                    invalidation_tracker: Some(&tracker),
-                    force_rejit: false,
-                },
-                |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
-                |_map, _fd, key| {
-                    assert_eq!(key, 1u32.to_le_bytes().as_slice());
-                    Ok(Some(7u32.to_le_bytes().to_vec()))
-                },
-                |_map, _fd| Ok(vec![1u32.to_le_bytes().to_vec()]),
-            )
-            .unwrap();
-
-            assert_eq!(
-                result.inlined_map_entries,
-                vec![InlinedMapEntry {
-                    map_id: 111,
-                    key_hex: "01000000".to_string(),
-                    value_hex: "07000000".to_string(),
-                }]
-            );
-            let tracker = tracker.lock().expect("tracker lock should not be poisoned");
-            assert!(tracker.tracks_prog(42));
-            assert_eq!(tracker.entry_count(), 1);
-        });
-    }
-
-    #[test]
-    fn reapply_map_inline_hash_lookup_miss_completes_rejit() {
-        with_clean_daemon_export_env(|| {
-            let fake = FakeCliDir::new().unwrap();
-            fake.replace_command(
-                "bpfget",
-                r#"#!/usr/bin/env bash
-set -euo pipefail
-prog_id="$1"
-shift
-outdir=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --full) shift ;;
-    --outdir) outdir="$2"; shift 2 ;;
-    *) shift ;;
-  esac
-done
-printf '\xb7\x00\x00\x00\x00\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00' > "$outdir/prog.bin"
-cat > "$outdir/prog_info.json" <<JSON
-{"id":$prog_id,"name":"demo","type":{"name":"xdp","numeric":6},"insn_cnt":2,"map_ids":[111]}
-JSON
-cat > "$outdir/map_fds.json" <<JSON
-[{"map_id":111,"map_type":1,"key_size":4,"value_size":4,"max_entries":8,"name":"hash_map"}]
-JSON
-"#,
-            )
-            .unwrap();
-            fake.replace_command(
-                "bpfopt",
-r#"#!/usr/bin/env bash
-set -euo pipefail
-report=""
-map_values=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --report) report="$2"; shift 2 ;;
-    --map-values) map_values="$2"; shift 2 ;;
-    *) shift ;;
-  esac
-done
-grep -q '"value": null' "$map_values"
-cat >/dev/null
-printf '\xb7\x00\x00\x00\x00\x00\x00\x00\x95\x00\x00\x00\x00\x00\x00\x00'
-cat > "$report" <<JSON
-{"passes":[{"pass":"map_inline","changed":false,"sites_applied":0,"insn_count_before":2,"insn_count_after":2,"insn_delta":0}]}
-JSON
-"#,
-            )
-            .unwrap();
-            let config = fake.config();
-            let enabled_passes = ["map_inline".to_string()];
-
-            let result = try_apply_one_with_map_access(
-                ApplyOneRequest {
-                    prog_id: 42,
-                    config: &config,
-                    enabled_passes: Some(&enabled_passes),
-                    profile_path: None,
-                    invalidation_tracker: None,
-                    force_rejit: true,
-                },
-                |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
-                |_map, _fd, key| {
-                    assert_eq!(key, 1u32.to_le_bytes().as_slice());
-                    Ok(None)
-                },
-                |_map, _fd| Ok(vec![1u32.to_le_bytes().to_vec()]),
-            )
-            .unwrap();
-
-            assert!(!result.changed);
-            assert!(result.summary.applied);
-            assert_eq!(result.summary.total_sites_applied, 0);
-            assert!(result.inlined_map_entries.is_empty());
-        });
-    }
-
-    #[test]
-    fn profile_start_stop_uses_bpfprof_per_site_output_dir() {
-        let fake = FakeCliDir::new().unwrap();
-        let session = start_profile(&fake.config(), 1).unwrap();
-        let frozen = stop_profile(session).unwrap();
-
-        assert_eq!(frozen.programs_profiled(), 1);
-        let profile_path = frozen.profile_path_for(42).unwrap();
-        let profile: serde_json::Value =
-            serde_json::from_slice(&std::fs::read(profile_path).unwrap()).unwrap();
-        assert_eq!(profile["branch_miss_rate"], 0.01);
-        assert_eq!(profile["per_site"]["0"]["branch_count"], 100);
-        assert!(profile.get("per_insn").is_none());
-    }
-
-    #[test]
-    fn bytecode_has_kinsn_call_detects_project_pseudo_call() {
-        let mut normal_call = [0u8; 8];
-        normal_call[0] = (kernel_sys::BPF_JMP | kernel_sys::BPF_CALL) as u8;
-        normal_call[1] = (kernel_sys::BPF_PSEUDO_CALL as u8) << 4;
-        assert!(!bytecode_has_kinsn_call(&normal_call, "normal_call").unwrap());
-
-        let mut kinsn_call = normal_call;
-        kinsn_call[1] = 4 << 4;
-        assert!(bytecode_has_kinsn_call(&kinsn_call, "kinsn_call").unwrap());
     }
 }
