@@ -32,6 +32,9 @@ struct Cli {
     /// Expected attach type for program types that need one.
     #[arg(long, value_name = "TYPE")]
     expected_attach_type: Option<String>,
+    /// BPF_PROG_LOAD prog_flags captured from the live program.
+    #[arg(long, default_value_t = 0, value_name = "FLAGS")]
+    prog_flags: u32,
     /// BTF object ID associated with program func/line info.
     #[arg(long, value_name = "ID")]
     prog_btf_id: Option<u32>,
@@ -237,6 +240,7 @@ fn run() -> Result<ExitCode> {
         let report = kernel_sys::prog_load_dryrun_report(kernel_sys::ProgLoadDryRunOptions {
             prog_type,
             expected_attach_type,
+            prog_flags: cli.prog_flags,
             prog_btf_fd: prog_btf_fd.fd,
             attach_btf_id: cli.attach_btf_id,
             attach_btf_obj_fd: attach_btf_obj_fd.fd,
@@ -1154,6 +1158,22 @@ mod tests {
         ])
         .unwrap();
         assert_eq!(effective_log_level(&states_cli), 2);
+    }
+
+    #[test]
+    fn prog_flags_cli_defaults_to_zero_and_parses_nonzero_flags() {
+        let default_cli = Cli::try_parse_from(["bpfverify", "--prog-type", "xdp"]).unwrap();
+        assert_eq!(default_cli.prog_flags, 0);
+
+        let flags_cli = Cli::try_parse_from([
+            "bpfverify",
+            "--prog-type",
+            "xdp",
+            "--prog-flags",
+            &kernel_sys::BPF_F_XDP_HAS_FRAGS.to_string(),
+        ])
+        .unwrap();
+        assert_eq!(flags_cli.prog_flags, kernel_sys::BPF_F_XDP_HAS_FRAGS);
     }
 
     #[test]

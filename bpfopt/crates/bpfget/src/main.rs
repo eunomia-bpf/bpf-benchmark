@@ -79,6 +79,8 @@ struct ProgInfoJson {
     jited_prog_len: u32,
     btf_id: u32,
     #[serde(default, skip_serializing_if = "is_zero_u32")]
+    prog_flags: u32,
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
     func_info_rec_size: u32,
     #[serde(default, skip_serializing_if = "is_zero_u32")]
     nr_func_info: u32,
@@ -297,6 +299,7 @@ impl ProgInfoJson {
             orig_prog_len: info.orig_prog_len,
             jited_prog_len: info.jited_prog_len,
             btf_id: info.btf_id,
+            prog_flags: info.prog_flags,
             func_info_rec_size: info.func_info_rec_size,
             nr_func_info: info.nr_func_info,
             line_info_rec_size: info.line_info_rec_size,
@@ -1185,6 +1188,7 @@ mod tests {
             orig_prog_len: 96,
             jited_prog_len: 64,
             btf_id: 0,
+            prog_flags: kernel_sys::BPF_F_XDP_HAS_FRAGS,
             func_info_rec_size: 8,
             nr_func_info: 1,
             line_info_rec_size: 16,
@@ -1208,6 +1212,7 @@ mod tests {
         assert_eq!(value["type"]["numeric"], kernel_sys::BPF_PROG_TYPE_XDP);
         assert!(value.get("map_ids").is_some());
         assert!(value.get("orig_prog_len").is_some());
+        assert_eq!(value["prog_flags"], kernel_sys::BPF_F_XDP_HAS_FRAGS);
         assert_eq!(value["func_info_rec_size"], 8);
         assert_eq!(value["nr_func_info"], 1);
         assert_eq!(value["line_info_rec_size"], 16);
@@ -1394,6 +1399,7 @@ mod tests {
             orig_prog_len: 16,
             jited_prog_len: 16,
             btf_id: 0,
+            prog_flags: 0,
             func_info_rec_size: 0,
             nr_func_info: 0,
             line_info_rec_size: 0,

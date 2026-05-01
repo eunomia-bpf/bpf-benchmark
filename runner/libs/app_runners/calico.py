@@ -214,6 +214,7 @@ class CalicoRunner(NativeProcessRunner):
                 "FELIX_BPFCONNECTTIMELOADBALANCING": "Disabled",
                 "FELIX_IPTABLESBACKEND": "NFT",
                 "FELIX_NFTABLESMODE": "Enabled",
+                "FELIX_DEFAULTENDPOINTTOHOSTACTION": "ACCEPT",
                 "FELIX_BPFDATAIFACEPATTERN": iface_regex,
                 "FELIX_BPFL3IFACEPATTERN": iface_regex,
                 "FELIX_LOGFILEPATH": "none",

@@ -10,6 +10,8 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::{Duration, Instant};
 
 use anyhow::{anyhow, bail, Context, Result};
 use serde::{Deserialize, Serialize};
@@ -26,6 +28,8 @@ const FUNC_INFO_FILE: &str = "func_info.bin";
 const LINE_INFO_FILE: &str = "line_info.bin";
 const MAP_VALUES_FILE: &str = "map-values.json";
 const VERIFIER_STATES_FILE: &str = "verifier-states.json";
+const CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(5);
+const CLI_STAGE_POLL_INTERVAL: Duration = Duration::from_millis(100);
 
 #[derive(Clone, Debug)]
 pub(crate) struct CliConfig {
@@ -364,6 +368,10 @@ fn replay_load_context_args(prog_info: &ProgInfoJson) -> Vec<String> {
         args.push("--prog-btf-id".to_string());
         args.push(prog_info.btf_id.to_string());
     }
+    if prog_info.prog_flags != 0 {
+        args.push("--prog-flags".to_string());
+        args.push(prog_info.prog_flags.to_string());
+    }
     if prog_info.attach_btf_id != 0 {
         args.push("--attach-btf-id".to_string());
         args.push(prog_info.attach_btf_id.to_string());
@@ -522,6 +530,8 @@ struct ProgInfoJson {
     map_ids: Vec<u32>,
     #[serde(default)]
     btf_id: u32,
+    #[serde(default)]
+    prog_flags: u32,
     #[serde(default)]
     func_info_rec_size: u32,
     #[serde(default)]
@@ -1256,6 +1266,11 @@ fn append_load_context_base_args(command: &mut Command, prog_info: &ProgInfoJson
             .arg("--prog-btf-id")
             .arg(prog_info.btf_id.to_string());
     }
+    if prog_info.prog_flags != 0 {
+        command
+            .arg("--prog-flags")
+            .arg(prog_info.prog_flags.to_string());
+    }
     if prog_info.attach_btf_id != 0 {
         command
             .arg("--attach-btf-id")
@@ -1268,8 +1283,12 @@ fn append_load_context_base_args(command: &mut Command, prog_info: &ProgInfoJson
     }
 }
 
-fn append_verifier_states_load_context_args(command: &mut Command, prog_info: &ProgInfoJson) {
-    append_load_context_base_args(command, prog_info);
+fn append_verifier_states_load_context_args(
+    command: &mut Command,
+    prog_info: &ProgInfoJson,
+    workdir: &Path,
+) -> Result<()> {
+    append_candidate_load_context_args(command, prog_info, workdir)
 }
 
 fn append_bpfopt_context_args(command: &mut Command, prog_info: &ProgInfoJson) {
@@ -1377,9 +1396,11 @@ fn run_bpfverify_report_command(
     report_label: &str,
 ) -> Result<(std::process::Output, BpfverifyReport)> {
     let program = format!("{command:?}");
-    let output = command
-        .output()
+    command.stdout(Stdio::piped()).stderr(Stdio::piped());
+    let child = command
+        .spawn()
         .with_context(|| format!("spawn subprocess {program}"))?;
+    let output = wait_with_timeout(stage, &program, child)?;
     let report: BpfverifyReport = read_json_file(report_json, report_label).with_context(|| {
         let failure = if output.status.success() {
             format!("read {report_label}")
@@ -1460,7 +1481,7 @@ fn write_original_verifier_states(
         .arg(&original_verify_report)
         .arg("--verifier-states-out")
         .arg(verifier_states_json);
-    append_verifier_states_load_context_args(&mut verify, prog_info);
+    append_verifier_states_load_context_args(&mut verify, prog_info, workdir)?;
     run_bpfverify_reported(
         "bpfverify original verifier-states",
         &mut verify,
@@ -1802,9 +1823,11 @@ fn write_json_file<T: Serialize>(path: &Path, value: &T) -> Result<()> {
 
 fn run_stage_output(stage: &str, command: &mut Command) -> Result<std::process::Output> {
     let program = format!("{command:?}");
-    let output = command
-        .output()
+    command.stdout(Stdio::piped()).stderr(Stdio::piped());
+    let child = command
+        .spawn()
         .with_context(|| format!("spawn subprocess {program}"))?;
+    let output = wait_with_timeout(stage, &program, child)?;
     if !output.status.success() {
         let message = stage_failure_message(stage, &program, &output);
         eprintln!("daemon: {message}");
@@ -1827,14 +1850,84 @@ fn run_stage_with_file_io(
         .stdin(Stdio::from(input_file))
         .stdout(Stdio::from(output_file))
         .stderr(Stdio::piped())
-        .output()
+        .spawn()
         .with_context(|| format!("spawn subprocess {program}"))?;
+    let child_output = wait_with_timeout(stage, &program, child_output)?;
     if !child_output.status.success() {
         let message = stage_failure_message(stage, &program, &child_output);
         eprintln!("daemon: {message}");
         bail!("{message}");
     }
     Ok(())
+}
+
+fn wait_with_timeout(
+    stage: &str,
+    program: &str,
+    child: std::process::Child,
+) -> Result<std::process::Output> {
+    wait_with_timeout_for(
+        stage,
+        program,
+        child,
+        CLI_STAGE_TIMEOUT,
+        CLI_STAGE_POLL_INTERVAL,
+    )
+}
+
+fn wait_with_timeout_for(
+    stage: &str,
+    program: &str,
+    mut child: std::process::Child,
+    timeout: Duration,
+    poll_interval: Duration,
+) -> Result<std::process::Output> {
+    let start = Instant::now();
+    loop {
+        if child
+            .try_wait()
+            .with_context(|| format!("poll subprocess {program}"))?
+            .is_some()
+        {
+            return child
+                .wait_with_output()
+                .with_context(|| format!("collect subprocess {program}"));
+        }
+        if start.elapsed() >= timeout {
+            kill_and_reap_timed_out_child(program, child)?;
+            bail!(
+                "{stage} timed out after {}: killed subprocess {program}",
+                duration_label(timeout)
+            );
+        }
+        thread::sleep(poll_interval);
+    }
+}
+
+fn kill_and_reap_timed_out_child(program: &str, mut child: std::process::Child) -> Result<()> {
+    match child.kill() {
+        Ok(()) => {}
+        Err(err) if err.kind() == std::io::ErrorKind::InvalidInput => {}
+        Err(err) => {
+            return Err(err).with_context(|| format!("kill timed-out subprocess {program}"))
+        }
+    }
+    let program = program.to_string();
+    thread::spawn(move || {
+        if let Err(err) = child.wait() {
+            eprintln!("daemon: failed to reap timed-out subprocess {program}: {err}");
+        }
+    });
+    Ok(())
+}
+
+fn duration_label(duration: Duration) -> String {
+    let millis = duration.as_millis();
+    if millis < 1_000 {
+        format!("{millis}ms")
+    } else {
+        format!("{}s", duration.as_secs())
+    }
 }
 
 fn stage_failure_message(stage: &str, program: &str, output: &std::process::Output) -> String {
@@ -1915,6 +2008,7 @@ mod tests {
             insn_cnt: 12,
             map_ids: Vec::new(),
             btf_id: 108,
+            prog_flags: 0,
             func_info_rec_size: 8,
             nr_func_info: 2,
             line_info_rec_size: 16,
@@ -1947,6 +2041,7 @@ mod tests {
             insn_cnt: 12,
             map_ids: Vec::new(),
             btf_id: 108,
+            prog_flags: kernel_sys::BPF_F_TEST_RND_HI32,
             func_info_rec_size: 8,
             nr_func_info: 2,
             line_info_rec_size: 16,
@@ -1964,12 +2059,19 @@ mod tests {
             .map(|arg| arg.to_string_lossy().into_owned())
             .collect::<Vec<_>>();
         assert!(args.iter().any(|arg| arg == "--prog-btf-id"));
+        assert!(args.iter().any(|arg| arg == "--prog-flags"));
+        assert!(args
+            .iter()
+            .any(|arg| arg == &kernel_sys::BPF_F_TEST_RND_HI32.to_string()));
         assert!(!args.iter().any(|arg| arg == "--func-info"));
         assert!(!args.iter().any(|arg| arg == "--line-info"));
     }
 
     #[test]
-    fn verifier_states_load_context_omits_optional_btf_metadata() {
+    fn verifier_states_load_context_includes_nonempty_btf_metadata() {
+        let workdir = WorkDir::new("bpfrejit-daemon-states-btf").unwrap();
+        fs::write(workdir.path().join(FUNC_INFO_FILE), [0u8; 8]).unwrap();
+        fs::write(workdir.path().join(LINE_INFO_FILE), [0u8; 16]).unwrap();
         let prog_info = ProgInfoJson {
             id: 42,
             name: "conntrack_clean".to_string(),
@@ -1980,6 +2082,7 @@ mod tests {
             insn_cnt: 12,
             map_ids: Vec::new(),
             btf_id: 108,
+            prog_flags: 0,
             func_info_rec_size: 8,
             nr_func_info: 2,
             line_info_rec_size: 16,
@@ -1990,15 +2093,15 @@ mod tests {
         };
         let mut command = Command::new("bpfverify");
 
-        append_verifier_states_load_context_args(&mut command, &prog_info);
+        append_verifier_states_load_context_args(&mut command, &prog_info, workdir.path()).unwrap();
 
         let args = command
             .get_args()
             .map(|arg| arg.to_string_lossy().into_owned())
             .collect::<Vec<_>>();
         assert!(args.iter().any(|arg| arg == "--prog-btf-id"));
-        assert!(!args.iter().any(|arg| arg == "--func-info"));
-        assert!(!args.iter().any(|arg| arg == "--line-info"));
+        assert!(args.iter().any(|arg| arg == "--func-info"));
+        assert!(args.iter().any(|arg| arg == "--line-info"));
     }
 
     #[test]
@@ -2508,6 +2611,28 @@ done
             assert!(message.contains("bpfverify --verifier-states-out failed"));
             assert!(message.contains("synthetic verifier state failure"));
         });
+    }
+
+    #[test]
+    fn wait_with_timeout_kills_stuck_subprocess() {
+        let mut command = Command::new("sleep");
+        command.arg("5");
+        command.stdout(Stdio::piped()).stderr(Stdio::piped());
+        let child = command.spawn().expect("spawn stuck subprocess");
+        let started = Instant::now();
+
+        let err = wait_with_timeout_for(
+            "bpfverify original verifier-states",
+            "sleep 5",
+            child,
+            Duration::from_millis(50),
+            Duration::from_millis(5),
+        )
+        .unwrap_err();
+
+        let message = format!("{err:#}");
+        assert!(message.contains("bpfverify original verifier-states timed out after 50ms"));
+        assert!(started.elapsed() < Duration::from_secs(1));
     }
 
     #[test]

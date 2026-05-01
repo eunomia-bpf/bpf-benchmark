@@ -410,12 +410,14 @@ pub struct BpfProgInfoFork {
     pub attach_btf_id: u32,
     pub orig_prog_len: u32,
     pub orig_prog_insns: u64,
+    pub prog_flags: u32,
 }
 
 /// Options for a typed verifier dry-run load.
 pub struct ProgLoadDryRunOptions<'a> {
     pub prog_type: bpf_prog_type,
     pub expected_attach_type: Option<bpf_attach_type>,
+    pub prog_flags: u32,
     pub prog_btf_fd: Option<i32>,
     pub attach_btf_id: Option<u32>,
     pub attach_btf_obj_fd: Option<i32>,
@@ -577,6 +579,7 @@ pub fn prog_load_dryrun_report(
     if let Some(expected_attach_type) = options.expected_attach_type {
         opts.expected_attach_type = expected_attach_type;
     }
+    opts.prog_flags = options.prog_flags;
     if let Some(prog_btf_fd) = options.prog_btf_fd {
         if prog_btf_fd < 0 {
             bail!("prog_btf_fd must be non-negative");
@@ -1973,7 +1976,8 @@ mod tests {
         assert_eq!(offset_of!(BpfProgInfoFork, attach_btf_id), 224);
         assert_eq!(offset_of!(BpfProgInfoFork, orig_prog_len), 228);
         assert_eq!(offset_of!(BpfProgInfoFork, orig_prog_insns), 232);
-        assert_eq!(size_of::<BpfProgInfoFork>(), 240);
+        assert_eq!(offset_of!(BpfProgInfoFork, prog_flags), 240);
+        assert_eq!(size_of::<BpfProgInfoFork>(), 248);
     }
 
     #[test]
