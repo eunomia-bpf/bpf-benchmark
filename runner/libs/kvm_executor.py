@@ -154,6 +154,7 @@ def run_vm_suite(workspace_root: Path, config: RunConfig, suite_args: list[str] 
             rwdirs=(ROOT_DIR,),
             vm_executable=config.kvm.executable,
             machine_backend=config.kvm.backend,
+            stream_output=True,
         )
     finally:
         host_docker_disk.unlink(missing_ok=True)

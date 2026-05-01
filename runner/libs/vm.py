@@ -120,6 +120,7 @@ def run_in_vm(
     vm_executable: str | Path,
     machine_backend: str,
     networks: Sequence[str] = (),
+    stream_output: bool = False,
 ) -> subprocess.CompletedProcess[str]:
     script = Path(script_path).resolve()
     guest_path = str(script)
@@ -135,12 +136,17 @@ def run_in_vm(
         rwdirs=rwdirs,
     )
     try:
-        return _run_command_with_script_pty(command, timeout)
+        return _run_command_with_script_pty(command, timeout, stream_output=stream_output)
     finally:
         script.unlink(missing_ok=True)
 
 
-def _run_command_with_script_pty(command: list[str], timeout: int) -> subprocess.CompletedProcess[str]:
+def _run_command_with_script_pty(
+    command: list[str],
+    timeout: int,
+    *,
+    stream_output: bool = False,
+) -> subprocess.CompletedProcess[str]:
     if shutil.which("script") is None:
         return subprocess.CompletedProcess(
             command,
@@ -151,6 +157,14 @@ def _run_command_with_script_pty(command: list[str], timeout: int) -> subprocess
     with tempfile.NamedTemporaryFile(prefix="vng-pty-log.", delete=False) as handle:
         log_path = Path(handle.name)
     try:
+        if stream_output:
+            completed = subprocess.run(
+                ["script", "-qfec", shlex.join(command), str(log_path)],
+                cwd=ROOT_DIR,
+                timeout=timeout,
+                check=False,
+            )
+            return subprocess.CompletedProcess(command, completed.returncode, "", "")
         completed = subprocess.run(
             ["script", "-qfec", shlex.join(command), str(log_path)],
             cwd=ROOT_DIR,

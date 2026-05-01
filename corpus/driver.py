@@ -9,7 +9,7 @@ from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Mapping, Sequence
+from typing import Callable, Mapping, Sequence
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -450,6 +450,63 @@ def _build_app_ok_result(
     }
 
 
+def _build_app_result_from_lifecycle(
+    app: AppSpec,
+    lifecycle: LifecycleRunResult | None,
+    *,
+    fatal_error: str = "",
+) -> dict[str, object]:
+    baseline_measurement = (
+        dict(lifecycle.baseline)
+        if lifecycle is not None and isinstance(lifecycle.baseline, Mapping)
+        else None
+    )
+    apply_result = dict(lifecycle.rejit_result or {}) if lifecycle is not None else {}
+    rejit_measurement = (
+        dict(lifecycle.post_rejit)
+        if lifecycle is not None and isinstance(lifecycle.post_rejit, Mapping)
+        else None
+    )
+    error_message = str(lifecycle.error or "") if lifecycle is not None else ""
+    stop_error = str(lifecycle.stop_error or "") if lifecycle is not None else ""
+    if fatal_error:
+        error_message = fatal_error if not error_message else f"{error_message}; {fatal_error}"
+    if stop_error:
+        error_message = stop_error if not error_message else f"{error_message}; stop failed: {stop_error}"
+    if error_message:
+        return _build_app_error_result(
+            app,
+            error=error_message,
+            baseline_measurement=baseline_measurement,
+            apply_result=apply_result,
+            rejit_measurement=rejit_measurement,
+        )
+
+    apply_error = str(apply_result.get("error") or "").strip() if isinstance(apply_result, Mapping) else ""
+    if apply_error:
+        return _build_app_error_result(
+            app,
+            error=apply_error,
+            baseline_measurement=baseline_measurement,
+            apply_result=apply_result,
+            rejit_measurement=rejit_measurement,
+        )
+    if baseline_measurement is None:
+        return _build_app_error_result(
+            app,
+            error="baseline measurement is missing",
+            baseline_measurement=baseline_measurement,
+            apply_result=apply_result,
+            rejit_measurement=rejit_measurement,
+        )
+    return _build_app_ok_result(
+        app,
+        baseline_measurement=baseline_measurement,
+        apply_result=apply_result,
+        rejit_measurement=rejit_measurement,
+    )
+
+
 @dataclass
 class CorpusAppSession:
     app: AppSpec
@@ -646,122 +703,71 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
     workload_seconds = _workload_seconds()
     samples = _sample_count(args)
     results_by_name: dict[str, dict[str, object]] = {}
-    lifecycle_by_app: dict[str, Any] = {}
     completed_apps: set[str] = set()
     fatal_error = ""
 
     with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn)) as daemon_session:
         prepared_daemon_session = prepare_daemon_session(daemon_session)
-        sessions: list[CorpusAppSession] = []
 
-        try:
-            with enable_bpf_stats():
-                for app in suite.apps:
-                    _print_progress("app_start", app=app.name, runner=app.runner, workload=app.workload_for("corpus"))
-                    app_workload_seconds = _app_workload_seconds(args, app)
-                    runner: AppRunner | None = None
-                    try:
-                        runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
-                        started_prog_ids = [int(value) for value in runner.start() if int(value) > 0]
-                        state = _build_runner_state(app, runner, started_prog_ids)
-                        session = CorpusAppSession(
-                            app=app,
-                            runner=runner,
-                            state=state,
-                            workload_seconds=app_workload_seconds,
-                        )
-                        sessions.append(session)
-                    except Exception as exc:
-                        stop_error = ""
-                        quiesce_error = ""
-                        if runner is not None:
-                            try:
-                                runner.stop()
-                            except Exception as stop_exc:
-                                stop_error = str(stop_exc)
-                            try:
-                                wait_for_suite_quiescence()
-                            except Exception as quiesce_exc:
-                                quiesce_error = str(quiesce_exc)
-                        error_message = str(exc)
-                        if stop_error:
-                            error_message = f"{error_message}; stop failed: {stop_error}"
-                        if quiesce_error:
-                            error_message = f"{error_message}; quiesce failed: {quiesce_error}"
-                        result = _build_app_error_result(app, error=error_message)
-                        results_by_name[app.name] = result
-                        completed_apps.add(app.name)
-                        _print_progress("app_done", app=app.name, status=result.get("status"),
-                                        error=result.get("error"))
-                    daemon_error = _daemon_exit_error(daemon_session)
-                    if daemon_error is not None: fatal_error = daemon_error; break
-
-                if not fatal_error and sessions:
-                    lifecycle_results, fatal_error = _run_suite_lifecycle_sessions(
+        with enable_bpf_stats():
+            for app in suite.apps:
+                _print_progress("app_start", app=app.name, runner=app.runner, workload=app.workload_for("corpus"))
+                app_workload_seconds = _app_workload_seconds(args, app)
+                runner: AppRunner | None = None
+                try:
+                    runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
+                    started_prog_ids = [int(value) for value in runner.start() if int(value) > 0]
+                    state = _build_runner_state(app, runner, started_prog_ids)
+                    session = CorpusAppSession(
+                        app=app,
+                        runner=runner,
+                        state=state,
+                        workload_seconds=app_workload_seconds,
+                    )
+                    lifecycle_results, app_fatal_error = _run_suite_lifecycle_sessions(
                         prepared_daemon_session,
-                        sessions,
+                        [session],
                         samples=samples,
                     )
-                    lifecycle_by_app = {session.app.name: lifecycle for session, lifecycle in zip(sessions, lifecycle_results)}
-        finally:
-            for session in sessions:
-                lifecycle = lifecycle_by_app.get(session.app.name)
-                if lifecycle is not None and bool(lifecycle.stopped): continue
-                try:
-                    session.runner.stop()
+                    fatal_error = str(app_fatal_error or "")
+                    lifecycle = lifecycle_results[0] if lifecycle_results else None
+                    result = _build_app_result_from_lifecycle(
+                        app,
+                        lifecycle,
+                        fatal_error=fatal_error,
+                    )
+                    results_by_name[app.name] = result
+                    completed_apps.add(app.name)
+                    _print_progress("app_done", app=app.name, status=result.get("status"),
+                                    error=result.get("error"))
                 except Exception as exc:
-                    if lifecycle is not None:
-                        lifecycle.stop_error = str(exc)
-                        lifecycle.stopped = True
-                else:
-                    if lifecycle is not None:
-                        lifecycle.stopped = True
-        for session in sessions:
-            if session.app.name in completed_apps: continue
-            lifecycle = lifecycle_by_app.get(session.app.name)
-            baseline_measurement = dict(lifecycle.baseline) if lifecycle is not None and isinstance(lifecycle.baseline, Mapping) else None
-            apply_result = dict(lifecycle.rejit_result or {}) if lifecycle is not None else {}
-            rejit_measurement = dict(lifecycle.post_rejit) if lifecycle is not None and isinstance(lifecycle.post_rejit, Mapping) else None
-            error_message = str(lifecycle.error or "") if lifecycle is not None else ""
-            stop_error = str(lifecycle.stop_error or "") if lifecycle is not None else ""
-            if fatal_error: error_message = fatal_error if not error_message else f"{error_message}; {fatal_error}"
-            if stop_error: error_message = stop_error if not error_message else f"{error_message}; stop failed: {stop_error}"
-            if error_message:
-                result = _build_app_error_result(
-                    session.app,
-                    error=error_message,
-                    baseline_measurement=baseline_measurement,
-                    apply_result=apply_result,
-                    rejit_measurement=rejit_measurement,
-                )
-            else:
-                apply_error = str(apply_result.get("error") or "").strip() if isinstance(apply_result, Mapping) else ""
-                if apply_error:
-                    result = _build_app_error_result(
-                        session.app,
-                        error=apply_error,
-                        baseline_measurement=baseline_measurement,
-                        apply_result=apply_result,
-                        rejit_measurement=rejit_measurement,
-                    )
-                elif baseline_measurement is None:
-                    result = _build_app_error_result(
-                        session.app,
-                        error="baseline measurement is missing",
-                        baseline_measurement=baseline_measurement,
-                        apply_result=apply_result,
-                        rejit_measurement=rejit_measurement,
-                    )
-                else:
-                    result = _build_app_ok_result(
-                        session.app,
-                        baseline_measurement=baseline_measurement,
-                        apply_result=apply_result,
-                        rejit_measurement=rejit_measurement,
-                    )
-            results_by_name[session.app.name] = result; completed_apps.add(session.app.name)
-            _print_progress("app_done", app=session.app.name, status=result.get("status"),
-                            error=result.get("error"))
+                    stop_error = ""
+                    quiesce_error = ""
+                    if runner is not None:
+                        try:
+                            runner.stop()
+                        except Exception as stop_exc:
+                            stop_error = str(stop_exc)
+                        try:
+                            wait_for_suite_quiescence()
+                        except Exception as quiesce_exc:
+                            quiesce_error = str(quiesce_exc)
+                    error_message = str(exc)
+                    if stop_error:
+                        error_message = f"{error_message}; stop failed: {stop_error}"
+                    if quiesce_error:
+                        error_message = f"{error_message}; quiesce failed: {quiesce_error}"
+                    result = _build_app_error_result(app, error=error_message)
+                    results_by_name[app.name] = result
+                    completed_apps.add(app.name)
+                    _print_progress("app_done", app=app.name, status=result.get("status"),
+                                    error=result.get("error"))
+                daemon_error = _daemon_exit_error(daemon_session)
+                if daemon_error is not None:
+                    fatal_error = daemon_error
+                    break
+                if fatal_error:
+                    break
 
         kinsn_metadata = dict(prepared_daemon_session.metadata)
 

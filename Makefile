@@ -57,7 +57,7 @@ VM_E2E_SUITE_ARGS =
 VM_TEST_COMMON_SUITE_ARGS = --fuzz-rounds "$(FUZZ_ROUNDS)"
 VM_TEST_SUITE_ARGS = --test-mode "$(TEST_MODE)" $(VM_TEST_COMMON_SUITE_ARGS)
 
-.PHONY: check validate \
+.PHONY: check validate daemon-tests \
 	vm-selftest vm-negative-test vm-test vm-micro vm-corpus vm-e2e vm-all \
 	aws-e2e aws-corpus \
 	aws-arm64-test aws-arm64-benchmark aws-arm64-corpus aws-arm64-e2e aws-arm64-terminate \
@@ -90,6 +90,9 @@ lint:
 	find "$(ROOT_DIR)" \
 		\( -path "$(ROOT_DIR)/vendor" -o -path "$(ROOT_DIR)/docs/tmp" -o -path "$(ROOT_DIR)/runner/repos" -o -path "$(ROOT_DIR)/.cache" -o -path "$(ROOT_DIR)/tests/results" -o -path "$(ROOT_DIR)/tests/unittest/build" -o -path "$(ROOT_DIR)/tests/unittest/build-arm64" -o -path "*/__pycache__" \) -prune -o \
 		-type f -name '*.py' -exec "$(PYTHON)" -m py_compile {} +
+
+daemon-tests:
+	cargo test --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 
 vm-selftest:
 	$(RUN_TARGET_SUITE_CMD) run x86-kvm test -- --test-mode "selftest" $(VM_TEST_COMMON_SUITE_ARGS)
