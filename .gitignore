@@ -116,6 +116,15 @@ docs/reference/papers/*.pdf
 **/results/*/details/failures/
 **/results/*/details/workdirs/
 
+# Claude Code internal state (per-session lock + scheduled tasks)
+.claude/scheduled_tasks.lock
+.claude/scheduled_tasks/
+
+# docs/tmp/ binary replay artifacts (per-prog .bin / opt.bin / func_info.bin / line_info.bin)
+docs/tmp/**/*.bin
+docs/tmp/**/p89-replay-*/
+docs/tmp/**/replay/
+
 # Temporary files and scratch results
 # /tmp/ and tmp/ - the repo-root scratch directory (old layout, superseded by docs/tmp/)
 /tmp/
