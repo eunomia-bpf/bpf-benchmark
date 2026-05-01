@@ -100,7 +100,8 @@ COPY vendor/linux-framework/Makefile ./vendor/linux-framework/Makefile
 COPY vendor/linux-framework/include ./vendor/linux-framework/include
 COPY vendor/linux-framework/arch/arm64/include/uapi/asm ./vendor/linux-framework/arch/arm64/include/uapi/asm
 COPY vendor/linux-framework/scripts ./vendor/linux-framework/scripts
-COPY vendor/linux-framework/kernel/bpf ./vendor/linux-framework/kernel/bpf
+COPY vendor/linux-framework/kernel/bpf/disasm.c ./vendor/linux-framework/kernel/bpf/disasm.c
+COPY vendor/linux-framework/kernel/bpf/disasm.h ./vendor/linux-framework/kernel/bpf/disasm.h
 COPY vendor/linux-framework/tools/arch ./vendor/linux-framework/tools/arch
 COPY vendor/linux-framework/tools/bpf/bpftool ./vendor/linux-framework/tools/bpf/bpftool
 COPY vendor/linux-framework/tools/build ./vendor/linux-framework/tools/build
@@ -108,7 +109,8 @@ COPY vendor/linux-framework/tools/include ./vendor/linux-framework/tools/include
 COPY vendor/linux-framework/tools/lib ./vendor/linux-framework/tools/lib
 COPY vendor/linux-framework/tools/scripts ./vendor/linux-framework/tools/scripts
 
-RUN set -eux; \
+RUN --mount=type=cache,target=/tmp/bpf-benchmark-build,id=katran-build-${RUN_TARGET_ARCH},sharing=locked \
+    set -eux; \
     target_arch="${RUN_TARGET_ARCH}"; \
     if [ -z "${target_arch}" ] || [ "${target_arch}" = "auto" ]; then \
         case "${TARGETARCH}" in \
@@ -117,6 +119,7 @@ RUN set -eux; \
             *) echo "unsupported Katran target arch: ${TARGETARCH}" >&2; exit 1 ;; \
         esac; \
     fi; \
+    katran_cache_install="/tmp/bpf-benchmark-build/katran-install-${target_arch}"; \
     has_repo_content() { [ -n "$(find "./runner/repos/$1" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; }; \
     clone_sparse_repo() { \
         repo_name="$1"; repo_url="$2"; repo_branch="$3"; shift 3; \
@@ -139,9 +142,12 @@ RUN set -eux; \
     command -v grpc_cpp_plugin >/dev/null; \
     make image-katran-artifacts \
         RUN_TARGET_ARCH="${target_arch}" \
-        REPO_KATRAN_ROOT=/artifacts/katran \
+        REPO_KATRAN_ROOT="${katran_cache_install}" \
         BPFREJIT_IMAGE_BUILD=1 \
         JOBS="${IMAGE_BUILD_JOBS}"; \
+    rm -rf /artifacts/katran; \
+    mkdir -p /artifacts; \
+    cp -a "${katran_cache_install}" /artifacts/katran; \
     test -x /artifacts/katran/bin/katran_server_grpc; \
     test -d /artifacts/katran/lib; \
     test -f /artifacts/katran/bpf/balancer.bpf.o; \

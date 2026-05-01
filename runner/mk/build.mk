@@ -14,6 +14,7 @@ REPO_ARTIFACT_ROOT := $(ACTIVE_ARTIFACT_ROOT)/repo-artifacts/$(RUN_TARGET_ARCH)
 REPO_KATRAN_ROOT := $(REPO_ARTIFACT_ROOT)/katran
 REPO_BUILD_ROOT := $(ACTIVE_BUILD_ARTIFACT_ROOT)/repo-build/$(RUN_TARGET_ARCH)$(BUILD_ARCH_VARIANT)
 BUILD_RULE_FILES := $(ROOT_DIR)/Makefile $(RUNNER_DIR)/mk/build.mk
+KATRAN_ARTIFACTS_BUILD_RULE_FILE := $(RUNNER_DIR)/mk/katran-artifacts.mk
 MICRO_PROGRAM_SOURCE_ROOT := $(ROOT_DIR)/micro/programs
 MICRO_PROGRAM_OUTPUT_ROOT := $(ACTIVE_ARTIFACT_ROOT)/micro-programs/$(RUN_TARGET_ARCH)
 MICRO_PROGRAM_SRCS = $(shell find "$(MICRO_PROGRAM_SOURCE_ROOT)" -maxdepth 1 -type f -name '*.bpf.c' -print 2>/dev/null)
@@ -97,10 +98,46 @@ TEST_UNITTEST_SOURCE_FILES = $(shell find "$(ROOT_DIR)/tests/unittest" \( -path 
 TEST_NEGATIVE_SOURCE_FILES = $(shell find "$(ROOT_DIR)/tests/negative" \( -path '*/build' -o -path '*/build-arm64' \) -prune -o -type f -print 2>/dev/null)
 MICRO_PROGRAM_SOURCE_FILES = $(MICRO_PROGRAM_SRCS) $(shell find "$(MICRO_PROGRAM_SOURCE_ROOT)" -maxdepth 1 -type f \( -name '*.h' -o -name 'Makefile' \) -print 2>/dev/null)
 KINSN_SOURCE_FILES = $(shell find "$(ACTIVE_KINSN_SOURCE_DIR)" "$(ROOT_DIR)/module/include" -type f \( -name '*.c' -o -name '*.h' -o -name 'Makefile' \) -print 2>/dev/null)
-KATRAN_SOURCE_FILES = $(shell find "$(REPOS_DIR)/katran" \( -path '*/_build' -o -path '*/deps' -o -path '*/.git' \) -prune -o -type f -print 2>/dev/null)
+# Keep Katran artifact invalidation tied to the sparse checkout paths used by
+# katran-artifacts.Dockerfile; docs and unrelated repos must not rebuild folly.
+KATRAN_SOURCE_FILES = $(shell if [ -d "$(REPOS_DIR)/katran" ]; then \
+	for rel in CMakeLists.txt build build_bpf_modules_opensource.sh build_katran.sh cmake example_grpc katran/decap katran/lib; do \
+		path="$(REPOS_DIR)/katran/$$rel"; \
+		if [ -f "$$path" ]; then \
+			printf '%s\n' "$$path"; \
+		elif [ -d "$$path" ]; then \
+			find "$$path" \( -path '*/_build' -o -path '*/deps' -o -path '*/.git' \) -prune -o -type f -print; \
+		fi; \
+	done; \
+fi 2>/dev/null)
 LIBBPF_SOURCE_FILES = $(shell find "$(ROOT_DIR)/vendor/libbpf" \( -path '*/.git' -o -path '*/build' -o -path '*/obj' -o -path '*/prefix' \) -prune -o -type f \
 	\( -name '*.[ch]' -o -name '*.S' -o -name '*.lds' -o -name '*.map' -o -name '*.mk' -o -name '*.sh' \
 		-o -name '*.template' -o -name 'Build' -o -name 'Makefile' \) -print 2>/dev/null)
+# Katran's image builds bpftool before compiling Katran BPF objects.  Track the
+# bpftool/libbpf inputs directly instead of every kernel/bpf source file.
+BPFTOOL_SOURCE_FILES = $(ROOT_DIR)/vendor/linux-framework/Makefile \
+	$(ROOT_DIR)/vendor/linux-framework/kernel/bpf/disasm.c \
+	$(ROOT_DIR)/vendor/linux-framework/kernel/bpf/disasm.h \
+	$(shell find \
+	"$(ROOT_DIR)/vendor/linux-framework/arch/arm64/include/uapi/asm" \
+	"$(ROOT_DIR)/vendor/linux-framework/include" \
+	"$(ROOT_DIR)/vendor/linux-framework/scripts" \
+	"$(ROOT_DIR)/vendor/linux-framework/tools/arch" \
+	"$(ROOT_DIR)/vendor/linux-framework/tools/bpf/bpftool" \
+	"$(ROOT_DIR)/vendor/linux-framework/tools/build" \
+	"$(ROOT_DIR)/vendor/linux-framework/tools/include" \
+	"$(ROOT_DIR)/vendor/linux-framework/tools/lib" \
+	"$(ROOT_DIR)/vendor/linux-framework/tools/scripts" \
+		\( -path '*/.git' -o -path '*/build-*' -o -path '*/.cache' \
+			-o -path '*/tools/bpf/bpftool/bootstrap' \
+			-o -path '*/tools/bpf/bpftool/libbpf' \) -prune -o -type f \
+		\( -name '*.[ch]' -o -name '*.S' -o -name '*.lds' -o -name '*.mk' -o -name '*.sh' \
+			-o -name '*.y' -o -name '*.l' -o -name '*.pl' -o -name '*.awk' \
+			-o -name 'Build' -o -name 'Kbuild' -o -name 'Makefile' \) \
+		! -path '*/tools/bpf/bpftool/bpftool' \
+		! -path '*/tools/bpf/bpftool/FEATURE-DUMP.bpftool' \
+		! -path '*/tools/bpf/bpftool/vmlinux.h' \
+	! -name '*.d' ! -name '*.o' ! -name '*.cmd' ! -name '*.skel.h' -print 2>/dev/null)
 VENDOR_LINUX_RUNTIME_SOURCE_FILES = $(ROOT_DIR)/vendor/linux-framework/Makefile $(shell find \
 	"$(ROOT_DIR)/vendor/linux-framework/arch/arm64/include/uapi/asm" \
 	"$(ROOT_DIR)/vendor/linux-framework/include" \
@@ -131,8 +168,8 @@ KERNEL_BUILD_META_FILES = $(shell find "$(KERNEL_DIR)" \( -path '*/.git' -o -pat
 KERNEL_SOURCE_FILES = $(shell find "$(KERNEL_DIR)" \( -path '*/.git' -o -path '*/build*' -o -path '*/.cache' \) -prune -o -type f \( -name '*.c' -o -name '*.h' -o -name '*.S' -o -name '*.lds' -o -name '*.dts' -o -name '*.dtsi' -o -name '*.sh' \) -print 2>/dev/null)
 KERNEL_FORK_IMAGE_SOURCE_FILES = $(KERNEL_FORK_CONTAINERFILE) $(DOCKERIGNORE_FILE) \
 	$(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES) $(DEFCONFIG_SRC) $(ARM64_DEFCONFIG_SRC)
-KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES = $(BUILD_RULE_FILES) $(KATRAN_ARTIFACTS_CONTAINERFILE) $(DOCKERIGNORE_FILE) \
-	$(KATRAN_SOURCE_FILES) $(VENDOR_LINUX_RUNTIME_SOURCE_FILES)
+KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES = $(ROOT_DIR)/Makefile $(KATRAN_ARTIFACTS_BUILD_RULE_FILE) \
+	$(KATRAN_ARTIFACTS_CONTAINERFILE) $(DOCKERIGNORE_FILE) $(KATRAN_SOURCE_FILES) $(BPFTOOL_SOURCE_FILES)
 RUNNER_RUNTIME_IMAGE_SOURCE_FILES = $(BUILD_RULE_FILES) $(RUNNER_RUNTIME_CONTAINERFILE) $(DOCKERIGNORE_FILE) \
 	$(DAEMON_SOURCE_FILES) $(BPFOPT_SOURCE_FILES) $(RUNNER_SOURCE_FILES) $(TEST_UNITTEST_SOURCE_FILES) $(TEST_NEGATIVE_SOURCE_FILES) \
 	$(MICRO_PROGRAM_SOURCE_FILES) $(KINSN_SOURCE_FILES) \
@@ -340,60 +377,6 @@ $(MICRO_PROGRAM_OBJECTS) &: $(MICRO_PROGRAM_SOURCE_FILES) $(BUILD_RULE_FILES)
 	make -C "$(MICRO_PROGRAM_SOURCE_ROOT)" OUTPUT_DIR="$(MICRO_PROGRAM_OUTPUT_ROOT)" all
 	for path in $(MICRO_PROGRAM_OBJECTS); do test -f "$$path"; done
 
-# GCC 13 can ICE while compiling grpc's tcp_client_posix.cc on Ubuntu 24.04.
-# Build Katran's C/C++ userspace stack with clang instead.
-$(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(BUILD_RULE_FILES)
-	repo_root="$(REPOS_DIR)/katran"; \
-	build_root="$(KATRAN_BUILD_ROOT)"; \
-	install_root="$(REPO_KATRAN_ROOT)"; \
-	artifact_root="$(REPO_KATRAN_ROOT)"; \
-	override_file="$(KATRAN_BUILD_ROOT)/cxx-override.cmake"; \
-	bpf_root="$$artifact_root/bpf"; \
-	system_libdir="$$(pkg-config --variable=libdir libelf)"; \
-	mkdir -p "$$install_root/bin" "$$install_root/lib" "$$install_root/lib64" "$$bpf_root" "$$build_root/deps"; \
-	command -v grpc_cpp_plugin >/dev/null; \
-	touch "$$build_root/deps/grpc_installed"; \
-	printf '%s\n' 'set(CMAKE_CXX_COMPILE_OBJECT "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -std=gnu++20 -o <OBJECT> -c <SOURCE>")' > "$$override_file"; \
-	cd "$$repo_root" && env -u VERBOSE -u BUILD_EXAMPLE_THRIFT -u BUILD_KATRAN_TPR \
-		CC=clang CXX=clang++ AR=ar RANLIB=ranlib \
-		NCPUS="$(JOBS)" \
-		KATRAN_SKIP_SYSTEM_PACKAGES=1 BUILD_EXAMPLE_GRPC=1 BUILD_DIR="$$build_root" INSTALL_DIR="$$install_root" INSTALL_DEPS_ONLY=1 ./build_katran.sh; \
-	for cmake_file in "$$install_root"/lib/cmake/folly/folly-targets*.cmake "$$install_root"/lib64/cmake/folly/folly-targets*.cmake; do \
-		[ -f "$$cmake_file" ] || continue; \
-		sed -i \
-			-e "s#gflags_nothreads_static#$$system_libdir/libgflags.so#g" \
-			-e "s#gflags_static#$$system_libdir/libgflags.so#g" \
-			"$$cmake_file"; \
-	done; \
-	rm -rf "$$build_root/build"; \
-	env -u VERBOSE -u BUILD_EXAMPLE_THRIFT -u BUILD_KATRAN_TPR CMAKE_BUILD_EXAMPLE_GRPC=1 \
-		CC=clang CXX=clang++ AR=ar RANLIB=ranlib \
-		cmake -S "$$repo_root" -B "$$build_root/build" \
-			-DCMAKE_PREFIX_PATH="$$install_root" \
-			-DCMAKE_INSTALL_PREFIX="$$install_root" \
-			-DCMAKE_BUILD_TYPE=RelWithDebInfo \
-			-DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
-			-DLIB_BPF_PREFIX="$$install_root" \
-			-DLIBELF="$$system_libdir/libelf.so" \
-			-DGLOG_LIBRARY="$$system_libdir/libglog.so" \
-			-DGLOG_INCLUDE_DIR=/usr/include \
-			-Dgflags_DIR="$$system_libdir/cmake/gflags" \
-			-DGFLAGS_SHARED=ON \
-			-DGFLAGS_NOTHREADS=OFF \
-			-DCMAKE_CXX_STANDARD=20 \
-			-DCMAKE_CXX_FLAGS="-fpermissive" \
-			-DCMAKE_C_COMPILER=clang \
-			-DCMAKE_CXX_COMPILER=clang++ \
-			-DCMAKE_AR=/usr/bin/ar \
-			-DCMAKE_RANLIB=/usr/bin/ranlib \
-			-DCMAKE_USER_MAKE_RULES_OVERRIDE_CXX="$$override_file" \
-			-DBUILD_TESTS=OFF; \
-	cmake --build "$$build_root/build" --target install -j"$(JOBS)"; \
-	cd "$$repo_root" && ./build_bpf_modules_opensource.sh -s "$$repo_root" -b "$$build_root" -o "$$bpf_root"; \
-	test -x "$$install_root/bin/katran_server_grpc" || { echo "missing Katran install output: $$install_root/bin/katran_server_grpc" >&2; exit 1; }; \
-	[ -f "$$bpf_root/healthchecking_ipip.o" ] && mv -f "$$bpf_root/healthchecking_ipip.o" "$$bpf_root/healthchecking_ipip.bpf.o" || true; \
-	[ -f "$$bpf_root/xdp_root.o" ] && mv -f "$$bpf_root/xdp_root.o" "$$bpf_root/xdp_root.bpf.o" || true; \
-	for path in $(ACTIVE_KATRAN_REQUIRED); do test -e "$$path"; done; \
-	touch $(ACTIVE_KATRAN_REQUIRED)
+include $(KATRAN_ARTIFACTS_BUILD_RULE_FILE)
 
 endif
