@@ -3,7 +3,7 @@
 
 use std::collections::BTreeMap;
 
-use crate::analysis::CFGAnalysis;
+use crate::analysis::{BranchTargetAnalysis, BranchTargetResult, CFGAnalysis, CFGResult};
 use crate::insn::*;
 use crate::pass::*;
 
@@ -13,24 +13,48 @@ use super::utils::{
 };
 
 const HELPER_MAP_LOOKUP_ELEM: i32 = kernel_sys::BPF_FUNC_map_lookup_elem as i32;
+const HELPER_XDP_ADJUST_HEAD: i32 = kernel_sys::BPF_FUNC_xdp_adjust_head as i32;
 const PREFETCH_TARGET_NAME: &str = "bpf_prefetch";
-const PREFETCH_PTR_REG: u8 = BPF_REG_2;
-const MIN_PREFETCH_DISTANCE: usize = 20;
-const TARGET_PREFETCH_DISTANCE: usize = 32;
-const MAX_PREFETCH_DISTANCE: usize = 50;
+const TARGET_PREFETCH_DISTANCE: usize = 8;
+const MAX_PREFETCH_DISTANCE: usize = 16;
+const MAP_VALUE_LOOKAHEAD: usize = 64;
 const PREFETCH_SITE_BUDGET: usize = 8;
 
-/// Runtime-gated prefetch pass.
+const BPF_PROG_TYPE_SCHED_CLS: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_CLS;
+const BPF_PROG_TYPE_SCHED_ACT: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_ACT;
+const BPF_PROG_TYPE_XDP: u32 = kernel_sys::BPF_PROG_TYPE_XDP;
+const BPF_PROG_TYPE_SK_SKB: u32 = kernel_sys::BPF_PROG_TYPE_SK_SKB;
+const BPF_PROG_TYPE_LWT_IN: u32 = kernel_sys::BPF_PROG_TYPE_LWT_IN;
+const BPF_PROG_TYPE_LWT_OUT: u32 = kernel_sys::BPF_PROG_TYPE_LWT_OUT;
+const BPF_PROG_TYPE_LWT_XMIT: u32 = kernel_sys::BPF_PROG_TYPE_LWT_XMIT;
+
+const XDP_DATA_OFF: i16 = 0;
+const XDP_DATA_END_OFF: i16 = 4;
+const SKB_DATA_OFF: i16 = 76;
+const SKB_DATA_END_OFF: i16 = 80;
+
+/// Packet/map-value prefetch pass.
 ///
-/// Phase 1 only handles `map_lookup_elem(map, key)` helper sites and emits
-/// `bpf_prefetch(r2)` before the helper when real per-site memory PMU data says
-/// the site is hot and missy. Direct map-value load prefetching is left for the
-/// follow-up map-inline direct-load phase.
+/// The default mode is structural: emit `bpf_prefetch(ptr)` before direct packet
+/// accesses and before the first dereference of a value returned by
+/// `map_lookup_elem`. If real per-site PMU data is present for a candidate, it is
+/// used as an admission filter; missing PMU data does not block structural
+/// candidates.
 pub struct PrefetchPass;
 
-#[derive(Clone, Debug)]
-struct LookupPrefetchSite {
-    call_pc: usize,
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum PrefetchKind {
+    MapValue,
+    Packet,
+}
+
+#[derive(Clone, Copy, Debug)]
+struct PrefetchSite {
+    anchor_pc: usize,
+    target_pc: usize,
+    ptr_reg: u8,
+    ptr_def_end_pc: usize,
+    kind: PrefetchKind,
 }
 
 #[derive(Clone, Debug)]
@@ -42,16 +66,23 @@ struct PrefetchCandidate {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct PacketCtxLayout {
+    data_off: i16,
+    data_end_off: i16,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum TrackedValue {
+    Unknown,
+    Ctx,
+    PacketData { def_end_pc: usize },
+    PacketEnd,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum RegWriteKind {
     Explicit,
     CallClobber,
-}
-
-#[derive(Clone, Copy, Debug)]
-struct RegWrite {
-    pc: usize,
-    width: usize,
-    kind: RegWriteKind,
 }
 
 fn prefetch_payload(ptr_reg: u8) -> anyhow::Result<u64> {
@@ -76,28 +107,13 @@ fn decode_prefetch_payload(payload: u64) -> anyhow::Result<u8> {
     Ok(ptr_reg)
 }
 
-fn scan_lookup_prefetch_sites(insns: &[BpfInsn]) -> Vec<LookupPrefetchSite> {
-    let mut sites = Vec::new();
-    let mut pc = 0usize;
-
-    while pc < insns.len() {
-        let insn = &insns[pc];
-        if insn.is_call() && insn.src_reg() == 0 && insn.imm == HELPER_MAP_LOOKUP_ELEM {
-            sites.push(LookupPrefetchSite { call_pc: pc });
-        }
-        pc += insn_width(insn);
-    }
-
-    sites
-}
-
 impl BpfPass for PrefetchPass {
     fn name(&self) -> &str {
         "prefetch"
     }
 
     fn required_analyses(&self) -> Vec<&str> {
-        vec!["cfg"]
+        vec!["cfg", "branch_targets"]
     }
 
     fn run(
@@ -131,47 +147,42 @@ impl BpfPass for PrefetchPass {
 
         let cfg_analysis = CFGAnalysis;
         let cfg = analyses.get(&cfg_analysis, program);
+        let bt_analysis = BranchTargetAnalysis;
+        let bt = analyses.get(&bt_analysis, program);
         let mut candidates = Vec::new();
         let mut skipped = Vec::new();
 
-        for site in scan_lookup_prefetch_sites(&program.insns) {
-            let Some(profile) = program
-                .annotations
-                .get(site.call_pc)
-                .and_then(|ann| ann.prefetch_profile.as_ref())
-            else {
-                skipped.push(SkipReason {
-                    pc: site.call_pc,
-                    reason: "missing real per-site prefetch PMU profile".into(),
-                });
-                continue;
-            };
-
-            if let Some(reason) = prefetch_profile_skip_reason(site.call_pc, profile)? {
-                skipped.push(SkipReason {
-                    pc: site.call_pc,
-                    reason,
-                });
-                continue;
-            }
-
-            let insert_pc =
-                match choose_lookup_insert_pc(program, &cfg, site.call_pc, PREFETCH_PTR_REG) {
-                    Ok(insert_pc) => insert_pc,
-                    Err(reason) => {
+        for site in scan_prefetch_sites(&program.insns, &cfg, &bt, ctx.prog_type) {
+            let score = match prefetch_profile_for_site(program, site) {
+                Some(profile) => {
+                    if let Some(reason) = prefetch_profile_skip_reason(site.target_pc, profile)? {
                         skipped.push(SkipReason {
-                            pc: site.call_pc,
+                            pc: site.target_pc,
                             reason,
                         });
                         continue;
                     }
-                };
+                    profile.execution_count
+                }
+                None => default_site_score(site),
+            };
+
+            let insert_pc = match choose_prefetch_insert_pc(program, &cfg, site) {
+                Ok(insert_pc) => insert_pc,
+                Err(reason) => {
+                    skipped.push(SkipReason {
+                        pc: site.target_pc,
+                        reason,
+                    });
+                    continue;
+                }
+            };
 
             candidates.push(PrefetchCandidate {
-                target_pc: site.call_pc,
+                target_pc: site.target_pc,
                 insert_pc,
-                ptr_reg: PREFETCH_PTR_REG,
-                score: profile.execution_count,
+                ptr_reg: site.ptr_reg,
+                score,
             });
         }
 
@@ -234,6 +245,42 @@ impl BpfPass for PrefetchPass {
     }
 }
 
+fn scan_prefetch_sites(
+    insns: &[BpfInsn],
+    cfg: &CFGResult,
+    bt: &BranchTargetResult,
+    prog_type: u32,
+) -> Vec<PrefetchSite> {
+    let mut sites = scan_map_value_prefetch_sites(insns, cfg);
+    if let Some(layout) = packet_ctx_layout(prog_type) {
+        sites.extend(scan_packet_prefetch_sites(insns, bt, layout));
+    }
+    sites
+}
+
+fn prefetch_profile_for_site<'a>(
+    program: &'a BpfProgram,
+    site: PrefetchSite,
+) -> Option<&'a PrefetchProfile> {
+    program
+        .annotations
+        .get(site.target_pc)
+        .and_then(|ann| ann.prefetch_profile.as_ref())
+        .or_else(|| {
+            program
+                .annotations
+                .get(site.anchor_pc)
+                .and_then(|ann| ann.prefetch_profile.as_ref())
+        })
+}
+
+fn default_site_score(site: PrefetchSite) -> u64 {
+    match site.kind {
+        PrefetchKind::MapValue => 2,
+        PrefetchKind::Packet => 1,
+    }
+}
+
 fn prefetch_profile_skip_reason(
     pc: usize,
     profile: &PrefetchProfile,
@@ -263,43 +310,276 @@ fn prefetch_profile_skip_reason(
     Ok(None)
 }
 
-fn choose_lookup_insert_pc(
+fn scan_map_value_prefetch_sites(insns: &[BpfInsn], cfg: &CFGResult) -> Vec<PrefetchSite> {
+    let mut sites = Vec::new();
+    let mut pc = 0usize;
+
+    while pc < insns.len() {
+        let insn = &insns[pc];
+        if insn.is_call() && insn.src_reg() == 0 && insn.imm == HELPER_MAP_LOOKUP_ELEM {
+            if let Some(site) = first_map_value_deref_after_lookup(insns, cfg, pc) {
+                sites.push(site);
+            }
+        }
+        pc += insn_width(insn);
+    }
+
+    sites
+}
+
+fn first_map_value_deref_after_lookup(
+    insns: &[BpfInsn],
+    cfg: &CFGResult,
+    call_pc: usize,
+) -> Option<PrefetchSite> {
+    let (_, subprog_end) = subprog_bounds(cfg, insns.len(), call_pc)?;
+    let scan_end = subprog_end.min(call_pc.saturating_add(MAP_VALUE_LOOKAHEAD));
+    let mut aliases = [None::<usize>; 11];
+    aliases[BPF_REG_0 as usize] = Some(call_pc + 1);
+    let mut pc = call_pc + 1;
+
+    while pc < scan_end {
+        let insn = &insns[pc];
+        let width = insn_width(insn);
+
+        if let Some(base_reg) = memory_base_reg(insn) {
+            if let Some(def_end_pc) = aliases[base_reg as usize] {
+                return Some(PrefetchSite {
+                    anchor_pc: call_pc,
+                    target_pc: pc,
+                    ptr_reg: base_reg,
+                    ptr_def_end_pc: def_end_pc,
+                    kind: PrefetchKind::MapValue,
+                });
+            }
+        }
+
+        if stops_map_value_scan(insn) {
+            break;
+        }
+        apply_map_value_alias_transfer(insn, pc, width, &mut aliases);
+        pc += width;
+    }
+
+    None
+}
+
+fn stops_map_value_scan(insn: &BpfInsn) -> bool {
+    insn.is_call()
+        || insn.is_exit()
+        || insn.is_ldimm64_pseudo_func()
+        || (insn.is_ja() && insn.off != 0)
+}
+
+fn apply_map_value_alias_transfer(
+    insn: &BpfInsn,
+    pc: usize,
+    width: usize,
+    aliases: &mut [Option<usize>; 11],
+) {
+    if insn.is_ldimm64() {
+        aliases[insn.dst_reg() as usize] = None;
+        return;
+    }
+
+    match insn.class() {
+        BPF_ALU64 => apply_map_value_alu64_transfer(insn, pc, width, aliases),
+        BPF_ALU | BPF_LD | BPF_LDX => aliases[insn.dst_reg() as usize] = None,
+        _ => {}
+    }
+}
+
+fn apply_map_value_alu64_transfer(
+    insn: &BpfInsn,
+    pc: usize,
+    width: usize,
+    aliases: &mut [Option<usize>; 11],
+) {
+    let dst = insn.dst_reg() as usize;
+    match (bpf_op(insn.code), bpf_src(insn.code)) {
+        (BPF_MOV, BPF_X) => {
+            aliases[dst] = aliases[insn.src_reg() as usize].map(|_| pc + width);
+        }
+        (BPF_ADD | BPF_SUB, BPF_K) if aliases[dst].is_some() => {
+            aliases[dst] = Some(pc + width);
+        }
+        _ => aliases[dst] = None,
+    }
+}
+
+fn scan_packet_prefetch_sites(
+    insns: &[BpfInsn],
+    bt: &BranchTargetResult,
+    layout: PacketCtxLayout,
+) -> Vec<PrefetchSite> {
+    let mut sites = Vec::new();
+    let mut regs = initial_packet_regs();
+    let mut pc = 0usize;
+
+    while pc < insns.len() {
+        if pc > 0 && bt.is_target.get(pc).copied().unwrap_or(false) {
+            regs = [TrackedValue::Unknown; 11];
+        }
+
+        let insn = &insns[pc];
+        let width = insn_width(insn);
+        if let Some(base_reg) = memory_base_reg(insn) {
+            if let TrackedValue::PacketData { def_end_pc } = regs[base_reg as usize] {
+                sites.push(PrefetchSite {
+                    anchor_pc: pc,
+                    target_pc: pc,
+                    ptr_reg: base_reg,
+                    ptr_def_end_pc: def_end_pc,
+                    kind: PrefetchKind::Packet,
+                });
+            }
+        }
+
+        apply_packet_transfer(insn, pc, width, layout, &mut regs);
+        pc += width;
+    }
+
+    sites
+}
+
+fn packet_ctx_layout(prog_type: u32) -> Option<PacketCtxLayout> {
+    match prog_type {
+        BPF_PROG_TYPE_XDP => Some(PacketCtxLayout {
+            data_off: XDP_DATA_OFF,
+            data_end_off: XDP_DATA_END_OFF,
+        }),
+        BPF_PROG_TYPE_SCHED_CLS
+        | BPF_PROG_TYPE_SCHED_ACT
+        | BPF_PROG_TYPE_SK_SKB
+        | BPF_PROG_TYPE_LWT_IN
+        | BPF_PROG_TYPE_LWT_OUT
+        | BPF_PROG_TYPE_LWT_XMIT => Some(PacketCtxLayout {
+            data_off: SKB_DATA_OFF,
+            data_end_off: SKB_DATA_END_OFF,
+        }),
+        _ => None,
+    }
+}
+
+fn initial_packet_regs() -> [TrackedValue; 11] {
+    let mut regs = [TrackedValue::Unknown; 11];
+    regs[BPF_REG_1 as usize] = TrackedValue::Ctx;
+    regs
+}
+
+fn apply_packet_transfer(
+    insn: &BpfInsn,
+    pc: usize,
+    width: usize,
+    layout: PacketCtxLayout,
+    regs: &mut [TrackedValue; 11],
+) {
+    if insn.is_call() {
+        if insn.src_reg() == 0 && insn.imm == HELPER_XDP_ADJUST_HEAD {
+            for reg in regs.iter_mut() {
+                *reg = TrackedValue::Unknown;
+            }
+        } else {
+            for reg in regs.iter_mut().take(6) {
+                *reg = TrackedValue::Unknown;
+            }
+        }
+        return;
+    }
+
+    if insn.is_ldimm64() {
+        regs[insn.dst_reg() as usize] = TrackedValue::Unknown;
+        return;
+    }
+
+    match insn.class() {
+        BPF_LDX if bpf_mode(insn.code) == BPF_MEM => {
+            apply_packet_ldx_transfer(insn, pc, width, layout, regs);
+        }
+        BPF_ALU64 => apply_packet_alu64_transfer(insn, pc, width, regs),
+        BPF_ALU | BPF_LD => regs[insn.dst_reg() as usize] = TrackedValue::Unknown,
+        _ => {}
+    }
+}
+
+fn apply_packet_ldx_transfer(
+    insn: &BpfInsn,
+    pc: usize,
+    width: usize,
+    layout: PacketCtxLayout,
+    regs: &mut [TrackedValue; 11],
+) {
+    let dst = insn.dst_reg() as usize;
+    regs[dst] = match regs[insn.src_reg() as usize] {
+        TrackedValue::Ctx if bpf_size(insn.code) == BPF_W && insn.off == layout.data_off => {
+            TrackedValue::PacketData {
+                def_end_pc: pc + width,
+            }
+        }
+        TrackedValue::Ctx if bpf_size(insn.code) == BPF_W && insn.off == layout.data_end_off => {
+            TrackedValue::PacketEnd
+        }
+        _ => TrackedValue::Unknown,
+    };
+}
+
+fn apply_packet_alu64_transfer(
+    insn: &BpfInsn,
+    pc: usize,
+    width: usize,
+    regs: &mut [TrackedValue; 11],
+) {
+    let dst = insn.dst_reg() as usize;
+    match (bpf_op(insn.code), bpf_src(insn.code)) {
+        (BPF_MOV, BPF_X) => {
+            regs[dst] = match regs[insn.src_reg() as usize] {
+                TrackedValue::PacketData { .. } => TrackedValue::PacketData {
+                    def_end_pc: pc + width,
+                },
+                value => value,
+            };
+        }
+        (BPF_ADD | BPF_SUB, BPF_K) => {
+            if let TrackedValue::PacketData { .. } = regs[dst] {
+                regs[dst] = TrackedValue::PacketData {
+                    def_end_pc: pc + width,
+                };
+            } else {
+                regs[dst] = TrackedValue::Unknown;
+            }
+        }
+        _ => regs[dst] = TrackedValue::Unknown,
+    }
+}
+
+fn memory_base_reg(insn: &BpfInsn) -> Option<u8> {
+    if bpf_mode(insn.code) != BPF_MEM {
+        return None;
+    }
+    match insn.class() {
+        BPF_LDX => Some(insn.src_reg()),
+        BPF_ST | BPF_STX => Some(insn.dst_reg()),
+        _ => None,
+    }
+}
+
+fn choose_prefetch_insert_pc(
     program: &BpfProgram,
-    cfg: &crate::analysis::CFGResult,
-    target_pc: usize,
-    ptr_reg: u8,
+    cfg: &CFGResult,
+    site: PrefetchSite,
 ) -> Result<usize, String> {
+    let target_pc = site.target_pc;
     if target_pc >= program.insns.len() || target_pc >= cfg.insn_to_block.len() {
-        return Err("lookup target pc is outside the instruction stream".into());
+        return Err("prefetch target pc is outside the instruction stream".into());
     }
 
     let (subprog_start, subprog_end) = subprog_bounds(cfg, program.insns.len(), target_pc)
-        .ok_or_else(|| "lookup target pc is outside all subprograms".to_string())?;
+        .ok_or_else(|| "prefetch target pc is outside all subprograms".to_string())?;
     let block = &cfg.blocks[cfg.insn_to_block[target_pc]];
     if block.start < subprog_start || block.end > subprog_end {
         return Err(format!(
-            "lookup basic block crosses subprog boundary (block {}..{}, subprog {}..{})",
+            "prefetch basic block crosses subprog boundary (block {}..{}, subprog {}..{})",
             block.start, block.end, subprog_start, subprog_end
-        ));
-    }
-
-    let valid_end = match target_pc.checked_sub(MIN_PREFETCH_DISTANCE) {
-        Some(pc) => pc,
-        None => return Err("prefetch window is shorter than minimum distance".into()),
-    };
-    if valid_end < subprog_start {
-        return Err("prefetch window would cross subprog boundary".into());
-    }
-
-    let Some(last_write) = last_reg_write_before(&program.insns, ptr_reg, block.start, target_pc)
-    else {
-        return Err(format!(
-            "r{ptr_reg} has no definition before map_lookup_elem"
-        ));
-    };
-    if last_write.kind == RegWriteKind::CallClobber {
-        return Err(format!(
-            "r{ptr_reg} is clobbered by a helper before map_lookup_elem"
         ));
     }
 
@@ -307,21 +587,21 @@ fn choose_lookup_insert_pc(
         .start
         .max(subprog_start)
         .max(target_pc.saturating_sub(MAX_PREFETCH_DISTANCE))
-        .max(last_write.pc + last_write.width);
-    if valid_start > valid_end {
+        .max(site.ptr_def_end_pc);
+    if valid_start > target_pc {
         return Err("no valid prefetch insertion window".into());
     }
 
     reject_control_flow_between(&program.insns, valid_start, target_pc)?;
-    reject_reg_write_between(&program.insns, ptr_reg, valid_start, target_pc)?;
+    reject_reg_write_between(&program.insns, site.ptr_reg, valid_start, target_pc)?;
 
     let ideal = target_pc.saturating_sub(TARGET_PREFETCH_DISTANCE);
     let Some(insert_pc) = nearest_instruction_boundary(
         &program.insns,
         block.start,
-        target_pc,
+        target_pc + 1,
         valid_start,
-        valid_end,
+        target_pc,
         ideal,
     ) else {
         return Err("prefetch insertion window has no instruction boundary".into());
@@ -345,27 +625,6 @@ fn subprog_bounds(
         .map(|subprog| subprog.start)
         .unwrap_or(program_len);
     (pc < end).then_some((start, end))
-}
-
-fn last_reg_write_before(
-    insns: &[BpfInsn],
-    reg: u8,
-    start_pc: usize,
-    end_pc: usize,
-) -> Option<RegWrite> {
-    let mut pc = start_pc;
-    let mut last = None;
-
-    while pc < end_pc {
-        let insn = &insns[pc];
-        let width = insn_width(insn);
-        if let Some(kind) = reg_write_kind(insn, reg) {
-            last = Some(RegWrite { pc, width, kind });
-        }
-        pc += width;
-    }
-
-    last
 }
 
 fn reject_control_flow_between(
@@ -498,7 +757,7 @@ fn insn_width(insn: &BpfInsn) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::analysis::CFGAnalysis;
+    use crate::analysis::{BranchTargetAnalysis, CFGAnalysis};
     use crate::pass::{AnalysisCache, PassContext, PassManager};
 
     fn exit_insn() -> BpfInsn {
@@ -514,15 +773,6 @@ mod tests {
         )
     }
 
-    fn add64_imm(dst: u8, imm: i32) -> BpfInsn {
-        BpfInsn::new(
-            BPF_ALU64 | BPF_ADD | BPF_K,
-            BpfInsn::make_regs(dst, 0),
-            0,
-            imm,
-        )
-    }
-
     fn ld_imm64(dst: u8, src: u8, imm: i32) -> [BpfInsn; 2] {
         [
             BpfInsn::new(
@@ -535,13 +785,12 @@ mod tests {
         ]
     }
 
-    fn pseudo_call_to(call_pc: usize, target_pc: usize) -> BpfInsn {
-        let imm = target_pc as i64 - (call_pc as i64 + 1);
+    fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
         BpfInsn::new(
-            BPF_JMP | BPF_CALL,
-            BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
-            0,
-            imm as i32,
+            BPF_JMP | BPF_JEQ | BPF_K,
+            BpfInsn::make_regs(dst, 0),
+            off,
+            imm,
         )
     }
 
@@ -566,20 +815,54 @@ mod tests {
         }
     }
 
+    fn cold_prefetch_profile(execution_count: u64) -> PrefetchProfile {
+        PrefetchProfile {
+            execution_count,
+            cache_references: execution_count,
+            cache_misses: 0,
+            miss_rate: 0.0,
+        }
+    }
+
     fn sidecar_payload(insn: &BpfInsn) -> u64 {
         (u64::from(insn.dst_reg()) & 0xf)
             | (u64::from(insn.off as u16) << 4)
             | (u64::from(insn.imm as u32) << 20)
     }
 
-    fn lookup_program(filler_count: usize) -> (BpfProgram, usize) {
-        let mut insns = vec![BpfInsn::mov64_reg(BPF_REG_2, BPF_REG_10)];
-        insns.push(add64_imm(BPF_REG_2, -4));
+    fn lookup_value_program() -> (BpfProgram, usize, usize) {
+        let insns = vec![
+            map_lookup_call(),
+            jeq_imm(BPF_REG_0, 0, 1),
+            BpfInsn::ldx_mem(BPF_DW, BPF_REG_1, BPF_REG_0, 0),
+            exit_insn(),
+        ];
+        (BpfProgram::new(insns), 0, 2)
+    }
+
+    fn lookup_value_alias_program() -> (BpfProgram, usize, usize) {
+        let insns = vec![
+            map_lookup_call(),
+            BpfInsn::mov64_reg(BPF_REG_6, BPF_REG_0),
+            jeq_imm(BPF_REG_6, 0, 1),
+            BpfInsn::ldx_mem(BPF_DW, BPF_REG_1, BPF_REG_6, 8),
+            exit_insn(),
+        ];
+        (BpfProgram::new(insns), 0, 3)
+    }
+
+    fn packet_program_with_filler(filler_count: usize) -> (BpfProgram, usize) {
+        let mut insns = vec![BpfInsn::ldx_mem(BPF_W, BPF_REG_6, BPF_REG_1, XDP_DATA_OFF)];
         insns.extend(filler(BPF_REG_3, filler_count));
-        let call_pc = insns.len();
-        insns.push(map_lookup_call());
+        let load_pc = insns.len();
+        insns.push(BpfInsn::ldx_mem(BPF_B, BPF_REG_0, BPF_REG_6, 0));
         insns.push(exit_insn());
-        (BpfProgram::new(insns), call_pc)
+        (BpfProgram::new(insns), load_pc)
+    }
+
+    fn run_prefetch_pass(program: &mut BpfProgram, ctx: &PassContext) -> PassResult {
+        let mut cache = AnalysisCache::new();
+        PrefetchPass.run(program, &mut cache, ctx).unwrap()
     }
 
     #[test]
@@ -593,20 +876,18 @@ mod tests {
     }
 
     #[test]
-    fn prefetch_pass_emits_key_prefetch_for_profiled_lookup_site() {
-        let (mut program, call_pc) = lookup_program(32);
-        program.annotations[call_pc].prefetch_profile = Some(hot_prefetch_profile(100));
-        let mut cache = AnalysisCache::new();
+    fn prefetch_pass_emits_map_value_prefetch_without_profile() {
+        let (mut program, _call_pc, _load_pc) = lookup_value_program();
         let ctx = ctx_with_prefetch_kfunc(7777);
 
-        let result = PrefetchPass.run(&mut program, &mut cache, &ctx).unwrap();
+        let result = run_prefetch_pass(&mut program, &ctx);
 
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
         assert!(program.insns[2].is_kinsn_sidecar());
         assert_eq!(
             decode_prefetch_payload(sidecar_payload(&program.insns[2])).unwrap(),
-            BPF_REG_2
+            BPF_REG_0
         );
         assert!(program.insns[3].is_call());
         assert_eq!(program.insns[3].src_reg(), BPF_PSEUDO_KINSN_CALL);
@@ -615,75 +896,77 @@ mod tests {
     }
 
     #[test]
-    fn prefetch_pass_skips_lookup_site_without_profile() {
-        let (mut program, _call_pc) = lookup_program(32);
-        let mut cache = AnalysisCache::new();
+    fn prefetch_pass_uses_alias_register_for_map_value_deref() {
+        let (mut program, _call_pc, _load_pc) = lookup_value_alias_program();
         let ctx = ctx_with_prefetch_kfunc(7777);
 
-        let result = PrefetchPass.run(&mut program, &mut cache, &ctx).unwrap();
+        let result = run_prefetch_pass(&mut program, &ctx);
+
+        assert!(result.changed);
+        assert_eq!(result.sites_applied, 1);
+        assert!(program.insns[3].is_kinsn_sidecar());
+        assert_eq!(
+            decode_prefetch_payload(sidecar_payload(&program.insns[3])).unwrap(),
+            BPF_REG_6
+        );
+    }
+
+    #[test]
+    fn prefetch_pass_profile_can_filter_cold_map_value_site() {
+        let (mut program, _call_pc, load_pc) = lookup_value_program();
+        program.annotations[load_pc].prefetch_profile = Some(cold_prefetch_profile(100));
+        let ctx = ctx_with_prefetch_kfunc(7777);
+
+        let result = run_prefetch_pass(&mut program, &ctx);
 
         assert!(!result.changed);
         assert_eq!(result.sites_applied, 0);
-        assert!(result.sites_skipped.iter().any(|skip| skip
-            .reason
-            .contains("missing real per-site prefetch PMU profile")));
+        assert!(result
+            .sites_skipped
+            .iter()
+            .any(|skip| skip.reason.contains("no observed cache misses")));
+    }
+
+    #[test]
+    fn prefetch_pass_emits_packet_prefetch_without_profile() {
+        let (mut program, _load_pc) = packet_program_with_filler(8);
+        let mut ctx = ctx_with_prefetch_kfunc(7777);
+        ctx.prog_type = BPF_PROG_TYPE_XDP;
+
+        let result = run_prefetch_pass(&mut program, &ctx);
+
+        assert!(result.changed);
+        assert_eq!(result.sites_applied, 1);
+        assert!(program.insns[1].is_kinsn_sidecar());
+        assert_eq!(
+            decode_prefetch_payload(sidecar_payload(&program.insns[1])).unwrap(),
+            BPF_REG_6
+        );
     }
 
     #[test]
     fn prefetch_pass_inserts_only_at_instruction_boundaries() {
         let wide = ld_imm64(BPF_REG_3, 0, 123);
-        let mut insns = vec![BpfInsn::mov64_reg(BPF_REG_2, BPF_REG_10)];
-        insns.push(add64_imm(BPF_REG_2, -4));
+        let mut insns = vec![BpfInsn::ldx_mem(BPF_W, BPF_REG_6, BPF_REG_1, XDP_DATA_OFF)];
         insns.extend_from_slice(&wide);
-        insns.extend(filler(BPF_REG_4, 31));
-        let call_pc = insns.len();
-        insns.push(map_lookup_call());
+        insns.extend(filler(BPF_REG_4, 8));
+        insns.push(BpfInsn::ldx_mem(BPF_B, BPF_REG_0, BPF_REG_6, 0));
         insns.push(exit_insn());
         let mut program = BpfProgram::new(insns);
-        program.annotations[call_pc].prefetch_profile = Some(hot_prefetch_profile(100));
-        let mut cache = AnalysisCache::new();
-        let ctx = ctx_with_prefetch_kfunc(7777);
+        let mut ctx = ctx_with_prefetch_kfunc(7777);
+        ctx.prog_type = BPF_PROG_TYPE_XDP;
 
-        let result = PrefetchPass.run(&mut program, &mut cache, &ctx).unwrap();
+        let result = run_prefetch_pass(&mut program, &ctx);
 
         assert!(result.changed);
-        assert!(program.insns[2].is_kinsn_sidecar());
-        assert!(program.insns[4].is_ldimm64());
-        assert_eq!(program.insns[5].code, 0);
-    }
-
-    #[test]
-    fn prefetch_pass_rejects_window_that_would_cross_subprog_boundary() {
-        let mut insns = Vec::new();
-        insns.push(pseudo_call_to(0, 52));
-        insns.push(exit_insn());
-        insns.extend(filler(BPF_REG_6, 50));
-        let subprog_start = insns.len();
-        assert_eq!(subprog_start, 52);
-        insns.push(BpfInsn::mov64_reg(BPF_REG_2, BPF_REG_10));
-        insns.push(add64_imm(BPF_REG_2, -4));
-        insns.extend(filler(BPF_REG_3, 8));
-        let call_pc = insns.len();
-        insns.push(map_lookup_call());
-        insns.push(exit_insn());
-
-        let mut program = BpfProgram::new(insns);
-        program.annotations[call_pc].prefetch_profile = Some(hot_prefetch_profile(100));
-        let mut cache = AnalysisCache::new();
-        let ctx = ctx_with_prefetch_kfunc(7777);
-
-        let result = PrefetchPass.run(&mut program, &mut cache, &ctx).unwrap();
-
-        assert!(!result.changed);
-        assert!(result
-            .sites_skipped
-            .iter()
-            .any(|skip| skip.reason.contains("subprog boundary")));
+        assert!(program.insns[1].is_ldimm64());
+        assert_eq!(program.insns[2].code, 0);
+        assert!(program.insns[3].is_kinsn_sidecar());
     }
 
     #[test]
     fn prefetch_pass_integration_with_pass_manager() {
-        let (mut program, call_pc) = lookup_program(32);
+        let (mut program, call_pc, _load_pc) = lookup_value_program();
         let mut profile = ProfilingData::default();
         profile
             .prefetch_profiles
@@ -692,6 +975,7 @@ mod tests {
 
         let mut pm = PassManager::new();
         pm.register_analysis(CFGAnalysis);
+        pm.register_analysis(BranchTargetAnalysis);
         pm.add_pass(PrefetchPass);
         let ctx = ctx_with_prefetch_kfunc(1234);
 

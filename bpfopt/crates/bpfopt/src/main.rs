@@ -49,6 +49,7 @@ const DEFAULT_OPTIMIZE_PASS_ORDER: &[&str] = &[
     "cond_select",
     "extract",
     "endian_fusion",
+    "prefetch",
 ];
 
 const ARM64_DEFAULT_OPTIMIZE_PASS_ORDER: &[&str] = &[
@@ -64,6 +65,7 @@ const ARM64_DEFAULT_OPTIMIZE_PASS_ORDER: &[&str] = &[
     "ccmp",
     "extract",
     "endian_fusion",
+    "prefetch",
 ];
 
 const PASS_ALIASES: &[(&str, &str)] = &[
@@ -202,7 +204,7 @@ enum Command {
     /// Reorder if/else bodies using PGO profile data.
     #[command(name = "branch-flip")]
     BranchFlip,
-    /// Insert PGO-gated map-lookup key prefetch kinsn calls.
+    /// Insert packet and map-value prefetch kinsn calls.
     Prefetch,
     /// Remove unreachable blocks, NOPs, and dead register definitions.
     Dce,
@@ -227,7 +229,7 @@ enum Command {
 
 #[derive(Args)]
 struct OptimizeArgs {
-    /// Comma-separated pass list. Defaults to the v3 11-pass order.
+    /// Comma-separated pass list. Defaults to the target architecture optimize order.
     #[arg(long, value_name = "LIST", value_delimiter = ',')]
     passes: Vec<String>,
 }
@@ -237,6 +239,9 @@ struct ListPassesArgs {
     /// Emit machine-readable pass metadata.
     #[arg(long)]
     json: bool,
+    /// Show the default optimize order for an architecture instead of all passes.
+    #[arg(long, value_name = "ARCH")]
+    arch: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -406,7 +411,7 @@ fn run_main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Command::ListPasses(args) => list_passes(&cli.common, args.json),
+        Command::ListPasses(args) => list_passes(&cli.common, &args),
         Command::Optimize(args) => run_optimize(&cli.common, &args),
         command => run_single_pass(&cli.common, command.canonical_pass_name().unwrap()),
     }
@@ -434,9 +439,14 @@ impl Command {
     }
 }
 
-fn list_passes(common: &CommonArgs, json: bool) -> Result<()> {
-    if json {
-        let entries = ALL_PASS_ORDER
+fn list_passes(common: &CommonArgs, args: &ListPassesArgs) -> Result<()> {
+    let names = match args.arch.as_deref() {
+        Some(arch) => default_optimize_pass_order(parse_arch(arch)?).to_vec(),
+        None => ALL_PASS_ORDER.to_vec(),
+    };
+
+    if args.json {
+        let entries = names
             .iter()
             .map(|&name| {
                 let entry = registry_entry(name)?;
@@ -450,7 +460,7 @@ fn list_passes(common: &CommonArgs, json: bool) -> Result<()> {
         write_json(common.output.as_deref(), &entries)
     } else {
         let mut out = open_text_output(common.output.as_deref())?;
-        for &name in ALL_PASS_ORDER {
+        for &name in &names {
             writeln!(out, "{}", cli_name_for_pass(name))?;
         }
         Ok(())
@@ -1428,8 +1438,16 @@ mod tests {
     fn default_optimize_order_includes_ccmp_only_on_arm64() {
         assert!(default_optimize_pass_order(Arch::Aarch64).contains(&"ccmp"));
         assert!(!default_optimize_pass_order(Arch::X86_64).contains(&"ccmp"));
-        assert!(!default_optimize_pass_order(Arch::Aarch64).contains(&"prefetch"));
-        assert!(!default_optimize_pass_order(Arch::X86_64).contains(&"prefetch"));
+        assert!(default_optimize_pass_order(Arch::Aarch64).contains(&"prefetch"));
+        assert!(default_optimize_pass_order(Arch::X86_64).contains(&"prefetch"));
+        assert_eq!(
+            default_optimize_pass_order(Arch::Aarch64).last(),
+            Some(&"prefetch")
+        );
+        assert_eq!(
+            default_optimize_pass_order(Arch::X86_64).last(),
+            Some(&"prefetch")
+        );
     }
 
     #[test]

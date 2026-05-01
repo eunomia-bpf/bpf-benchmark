@@ -12,3 +12,4 @@ policy:
       - bounds_check_merge
       - skb_load_bytes_spec
       - bulk_memory
+      - prefetch

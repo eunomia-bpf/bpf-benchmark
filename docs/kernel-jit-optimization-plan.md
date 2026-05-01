@@ -223,7 +223,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 | **POPCNT/CLZ/CTZ** | 是 | ❌ 不做 | corpus 无可支撑的 pattern site。clang 已将 `__builtin_popcount` 展开为高效位操作序列，无循环可替换。调研：`bit_ops_kinsn_research_20260329.md` | 0 site |
 | **CRC32** | 是 | ⏸ 专项值得；不做默认 pass | broad corpus 覆盖低，不进默认 pipeline；若做，第一版应是 **CRC32C-only**、no-FPU scalar backend、loxilb 定向 `step8/step64` idiom pass。`bpf_csum_diff` 等 helper 更广泛但走 helper 路径。调研：`crc32_kinsn_research_20260329.md` | loxilb SCTP CRC32C：2 个 byte-update site |
 | **CCMP** | 是 | 📝 值得做 | **ARM64 独有**。conditional compare chain；restricted first wave，避免通用变长 compare-chain kinsn。调研：`arm64_kinsn_research_20260329.md` | **4957 sites，6228 saved branches** |
-| **Prefetch** | 是 | 📝 设计完成；值得做 | x86 `PREFETCHT0` + ARM64 `PRFM`。纯 hint kinsn，强 runtime-gate（无 profile 默认不插，只打开 hot+cache-miss site）。Phase 1：helper-before-lookup。Phase 2：map-inline direct-load。**完美体现 runtime-guided**（fixed JIT 不知道哪个 site 值得 prefetch）。调研：`memory_hints_kinsn_research_20260329.md`。设计：`prefetch_kinsn_design_20260329.md`（841 行）。 | 17391 `map_lookup_elem` + 21 `map_lookup_percpu_elem` 潜在 site；hot+missy site 预期 2.5-25ns/exec |
+| **Prefetch** | 是 | ✅ PrefetchV2 已实现；默认 Paper A pass | x86 `PREFETCHT0` + ARM64 `PRFM`。纯 hint kinsn。默认结构识别 packet direct access 与 `map_lookup_elem` 返回 value 的首次 deref；有 per-site PMU 数据时作为 hot/missy site filter，缺 PMU 不阻止 emit。实现报告：`docs/tmp/p89_prefetchv2_impl.md`。调研：`memory_hints_kinsn_research_20260329.md`。设计：`prefetch_kinsn_design_20260329.md`（历史 profile-gated 方案）。 | 17391 `map_lookup_elem` + 21 `map_lookup_percpu_elem` 潜在 site；hot+missy site 预期 2.5-25ns/exec |
 | **NT store** | 是 | ❌ 不做 | 当前 corpus 无明确 streaming write 场景。调研：`memory_hints_kinsn_research_20260329.md` | 不值得 |
 | **PDEP/PEXT** | 是 | ❌ 不做 | corpus 无 site。调研：`bit_ops_kinsn_research_20260329.md` | 0 site |
 | **SHRX/SHLX** | 是 | ❌ 不做 | OoO CPU 上无增量收益。调研：`bit_ops_kinsn_research_20260329.md` | 不值得 |
@@ -240,7 +240,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 | **REJIT spill-to-register** | kernel 机制 | 📝 设计完成；值得做 | REJIT 接受可选 reg_map，`bpfrejit` 提交少量热点 spill slot → native register 映射。任意 BPF→native reg_map 不现实；**x86 只剩 R12**（1 个），**ARM64 有 x23/x24**（2 个）。Verifier 不需要改。分阶段：ARM64 先做 → x86 → 受限 reg_map。调研：`rejit_register_mapping_research_20260329.md`（790 行） | 受限 spill-to-register |
 | **Region kinsn（寄存器扩展）** | 是 | 📝 待做（待调研） | 高寄存器压力的代码段包装为 region kinsn，emit callback 内部用 native 寄存器。需先定义 region ABI、verifier proof model 与现有 kinsn v2 proof-lowering 的关系 | 待调研 |
 
-`branch_flip` 属于 Paper B：基于 profile/info 的 speculative runtime optimization。P88 已将 `bpfprof --per-site` 接到真实 `bpf_get_branch_snapshot()` LBR 数据，daemon `profile-start`/`profile-stop` 调用该路径，Rust pass 删除 heuristic fallback 并要求每个候选 site 有真实 `branch_count`/`branch_misses`/`miss_rate`/direction 数据。Paper A 默认优化仍是 kinsn 主线，`bpfopt optimize` 默认 11 pass 不包含 `branch_flip`；是否进入 benchmark policy 等 Paper B profile 数据后再决定。
+`branch_flip` 属于 Paper B：基于 profile/info 的 speculative runtime optimization。P88 已将 `bpfprof --per-site` 接到真实 `bpf_get_branch_snapshot()` LBR 数据，daemon `profile-start`/`profile-stop` 调用该路径，Rust pass 删除 heuristic fallback 并要求每个候选 site 有真实 `branch_count`/`branch_misses`/`miss_rate`/direction 数据。Paper A 默认优化仍是 kinsn 主线；`bpfopt optimize` 默认包含 `prefetch`，但不包含 `branch_flip`。`branch_flip` 是否进入 benchmark policy 等 Paper B profile 数据后再决定。
 
 ### 3.2 安全加固变换（暂不在 OSDI 评估范围）
 

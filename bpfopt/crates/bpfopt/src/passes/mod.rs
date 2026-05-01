@@ -129,7 +129,7 @@ pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
     },
     PassRegistryEntry {
         name: "prefetch",
-        description: "Experimental PGO-gated map-lookup key prefetch kinsn insertion",
+        description: "Insert packet and map-value prefetch kinsn calls",
         make: || Box::new(PrefetchPass),
     },
 ];

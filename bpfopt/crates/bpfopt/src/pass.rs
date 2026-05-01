@@ -19,8 +19,8 @@ pub struct InsnAnnotation {
     /// PGO: branch taken/not-taken counts at this instruction.
     /// Used by BranchFlipPass to decide whether to flip.
     pub branch_profile: Option<BranchProfile>,
-    /// PGO: real per-site PMU data for prefetch admission.
-    /// Used by PrefetchPass to avoid static blanket insertion.
+    /// Optional PMU data for prefetch admission.
+    /// Used by PrefetchPass to suppress structurally valid but cold sites.
     pub prefetch_profile: Option<PrefetchProfile>,
 }
 
@@ -34,7 +34,7 @@ pub struct BranchProfile {
     pub not_taken_count: u64,
 }
 
-/// Real per-site PMU memory statistics for prefetch admission.
+/// Real per-site PMU memory statistics for optional prefetch admission.
 #[derive(Clone, Debug)]
 pub struct PrefetchProfile {
     pub execution_count: u64,
@@ -182,7 +182,7 @@ pub struct BpfProgram {
     pub branch_miss_rate: Option<f64>,
     /// Program-level cache miss rate from PMU hardware counters.
     /// Set by `inject_profiling` when PMU data is available.
-    /// Consumed by PrefetchPass diagnostics and admission.
+    /// Consumed by PrefetchPass diagnostics.
     pub cache_miss_rate: Option<f64>,
     /// Parsed `log_level=2` verifier state snapshots for the original program.
     pub verifier_states: Arc<[VerifierInsn]>,
