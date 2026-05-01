@@ -176,6 +176,8 @@ dependencies = [
  "libbpf-rs",
  "libbpf-sys",
  "libc",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

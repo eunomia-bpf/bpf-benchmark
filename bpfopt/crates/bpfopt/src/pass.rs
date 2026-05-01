@@ -12,6 +12,9 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 use crate::insn::{BpfInsn, BPF_KINSN_ENC_PACKED_CALL};
+pub use kernel_sys::{
+    RegState, ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
+};
 
 // ── Per-instruction annotation — populated by analysis passes, read by transform passes.
 #[derive(Clone, Debug, Default)]
@@ -49,88 +52,6 @@ pub struct ProfilingData {
     pub branch_miss_rate: Option<f64>,
     pub prefetch_profiles: HashMap<usize, PrefetchProfile>,
     pub cache_miss_rate: Option<f64>,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum VerifierInsnKind {
-    EdgeFullState,
-    PcFullState,
-    InsnDeltaState,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum VerifierValueWidth {
-    Unknown,
-    Bits32,
-    Bits64,
-}
-
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub struct Tnum {
-    pub value: u64,
-    pub mask: u64,
-}
-
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub struct ScalarRange {
-    pub smin: Option<i64>,
-    pub smax: Option<i64>,
-    pub umin: Option<u64>,
-    pub umax: Option<u64>,
-    pub smin32: Option<i32>,
-    pub smax32: Option<i32>,
-    pub umin32: Option<u32>,
-    pub umax32: Option<u32>,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct VerifierInsn {
-    pub pc: usize,
-    pub frame: usize,
-    pub from_pc: Option<usize>,
-    pub kind: VerifierInsnKind,
-    pub speculative: bool,
-    pub regs: HashMap<u8, RegState>,
-    pub stack: HashMap<i16, StackState>,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct RegState {
-    pub reg_type: String,
-    pub value_width: VerifierValueWidth,
-    pub precise: bool,
-    pub exact_value: Option<u64>,
-    pub tnum: Option<Tnum>,
-    pub range: ScalarRange,
-    pub offset: Option<i32>,
-    pub id: Option<u32>,
-}
-
-impl RegState {
-    pub fn exact_u64(&self) -> Option<u64> {
-        if self.reg_type != "scalar" {
-            return None;
-        }
-
-        match self.value_width {
-            VerifierValueWidth::Bits32 => None,
-            VerifierValueWidth::Bits64 | VerifierValueWidth::Unknown => self.exact_value,
-        }
-    }
-
-    pub fn exact_u32(&self) -> Option<u32> {
-        if self.reg_type != "scalar" {
-            return None;
-        }
-
-        self.exact_value.map(|value| value as u32)
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct StackState {
-    pub slot_types: Option<String>,
-    pub value: Option<RegState>,
 }
 
 /// Raw BTF func_info or line_info records whose first u32 is `insn_off`.
@@ -986,12 +907,18 @@ impl PassManager {
         pass: &dyn BpfPass,
         program: &BpfProgram,
         cache: &mut AnalysisCache,
-    ) {
+    ) -> anyhow::Result<()> {
         for analysis_name in pass.required_analyses() {
-            if let Some(analysis) = self.analyses.registry.get(analysis_name) {
-                analysis.run_and_cache(program, cache);
-            }
+            let analysis = self.analyses.registry.get(analysis_name).ok_or_else(|| {
+                anyhow::anyhow!(
+                    "pass '{}' requires unknown analysis '{}'",
+                    pass.name(),
+                    analysis_name
+                )
+            })?;
+            analysis.run_and_cache(program, cache);
         }
+        Ok(())
     }
 
     fn available_pass_names(&self) -> HashSet<&str> {
@@ -1062,7 +989,7 @@ impl PassManager {
         cache: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        self.run_required_analyses(pass, program, cache);
+        self.run_required_analyses(pass, program, cache)?;
         let insns_before = program.insns.len();
         let mut result = pass.run(program, cache, ctx)?;
         result.insns_before = insns_before;

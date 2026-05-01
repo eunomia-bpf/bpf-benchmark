@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import sys
 import shlex
-import shutil
 from functools import partial
 from pathlib import Path
 
@@ -107,7 +106,6 @@ def suite_command(workspace_root: Path, config: RunConfig, suite_args: list[str]
             workspace_root,
             config.identity.suite_name,
             die=_die,
-            include_runtime_tmp=False,
         )
     ]
     mkdir_cmd = shlex.join(["mkdir", "-p", *result_dirs])
@@ -117,7 +115,6 @@ def suite_command(workspace_root: Path, config: RunConfig, suite_args: list[str]
             config,
             suite_args,
             die=_die,
-            mount_runtime_tmp=False,
         )
     )
     install_cmd = _shell_join([
@@ -164,9 +161,6 @@ def run_vm_suite(workspace_root: Path, config: RunConfig, suite_args: list[str] 
         sys.stdout.write(completed.stdout)
     if completed.stderr:
         sys.stderr.write(completed.stderr)
-    if completed.returncode == 0:
-        scratch_dir = workspace_root / "docs" / "tmp" / "runtime-container-tmp" / config.identity.token
-        shutil.rmtree(scratch_dir, ignore_errors=True)
     return completed.returncode
 
 

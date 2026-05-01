@@ -18,6 +18,7 @@ use bpfopt::pass::{
 };
 use bpfopt::passes::{MapInfoAnalysis, PASS_REGISTRY};
 use clap::{Args, Parser, Subcommand};
+use kernel_sys::{VerifierRegJson, VerifierStatesJson};
 use serde::{Deserialize, Serialize};
 
 const ALL_PASS_ORDER: &[&str] = &[
@@ -327,37 +328,6 @@ struct PrefetchSiteJson {
     cache_references: u64,
     cache_misses: u64,
     miss_rate: f64,
-}
-
-#[derive(Debug, Deserialize)]
-struct VerifierStatesJson {
-    #[serde(default)]
-    insns: Vec<VerifierInsnJson>,
-}
-
-#[derive(Debug, Deserialize)]
-struct VerifierInsnJson {
-    pc: usize,
-    #[serde(default)]
-    frame: usize,
-    #[serde(default)]
-    regs: HashMap<String, VerifierRegJson>,
-}
-
-#[derive(Debug, Deserialize)]
-struct VerifierRegJson {
-    #[serde(rename = "type", default = "default_reg_type")]
-    reg_type: String,
-    #[serde(default)]
-    offset: Option<i32>,
-    #[serde(default)]
-    const_val: Option<i64>,
-    #[serde(default)]
-    min: Option<i64>,
-    #[serde(default)]
-    max: Option<i64>,
-    #[serde(default)]
-    tnum: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -846,7 +816,7 @@ fn build_pass_context(common: &CommonArgs) -> Result<PassContext> {
         if let Some(arch) = target.arch.as_deref() {
             ctx.platform.arch = parse_arch(arch)?;
         }
-        apply_features(&mut ctx.platform, &target.features);
+        apply_features(&mut ctx.platform, &target.features)?;
         ctx.kinsn_registry = kinsn_registry_from_target(&target)?;
     }
 
@@ -932,7 +902,7 @@ fn parse_prog_type(input: &str) -> Result<u32> {
     Ok(value)
 }
 
-fn apply_features(platform: &mut PlatformCapabilities, features: &[String]) {
+fn apply_features(platform: &mut PlatformCapabilities, features: &[String]) -> Result<()> {
     platform.has_bmi1 = false;
     platform.has_bmi2 = false;
     platform.has_cmov = false;
@@ -946,9 +916,10 @@ fn apply_features(platform: &mut PlatformCapabilities, features: &[String]) {
             "cmov" => platform.has_cmov = true,
             "movbe" => platform.has_movbe = true,
             "rorx" => platform.has_rorx = true,
-            _ => {}
+            _ => bail!("unknown target feature: {feature}"),
         }
     }
+    Ok(())
 }
 
 fn read_target(path: &Path) -> Result<TargetJson> {
@@ -968,7 +939,7 @@ fn kinsn_registry_from_target(target: &TargetJson) -> Result<KinsnRegistry> {
         if let Some(encodings) = &spec.supported_encodings {
             registry
                 .target_supported_encodings
-                .insert(canonical.to_string(), parse_supported_encodings(encodings));
+                .insert(canonical.to_string(), parse_supported_encodings(encodings)?);
         }
     }
     Ok(registry)
@@ -991,16 +962,21 @@ fn unavailable_kinsn_registry() -> KinsnRegistry {
     }
 }
 
-fn parse_supported_encodings(encodings: &SupportedEncodingsJson) -> u32 {
+fn parse_supported_encodings(encodings: &SupportedEncodingsJson) -> Result<u32> {
     match encodings {
-        SupportedEncodingsJson::Bits(bits) => *bits,
-        SupportedEncodingsJson::Names(names) => names.iter().fold(0u32, |bits, name| {
-            if name == "packed" || name == "packed_call" {
-                bits | bpfopt::insn::BPF_KINSN_ENC_PACKED_CALL
-            } else {
-                bits
+        SupportedEncodingsJson::Bits(bits) => Ok(*bits),
+        SupportedEncodingsJson::Names(names) => {
+            let mut bits = 0u32;
+            for name in names {
+                match name.as_str() {
+                    "packed" | "packed_call" => {
+                        bits |= bpfopt::insn::BPF_KINSN_ENC_PACKED_CALL;
+                    }
+                    _ => bail!("unknown kinsn supported encoding: {name}"),
+                }
             }
-        }),
+            Ok(bits)
+        }
     }
 }
 
@@ -1386,10 +1362,6 @@ fn optimize_reports(pass_results: &[PassResult]) -> Vec<PassReport> {
     pass_results.iter().map(pass_report).collect()
 }
 
-fn default_reg_type() -> String {
-    "scalar".to_string()
-}
-
 fn default_frozen() -> bool {
     true
 }
@@ -1501,6 +1473,33 @@ mod tests {
     }
 
     #[test]
+    fn target_json_rejects_unknown_cpu_features() {
+        let mut platform = PlatformCapabilities::test_default();
+
+        let err = apply_features(&mut platform, &["cmovv".to_string()]).unwrap_err();
+
+        assert!(
+            err.to_string().contains("unknown target feature: cmovv"),
+            "err={err:#}"
+        );
+    }
+
+    #[test]
+    fn target_json_rejects_unknown_kinsn_encoding_names() {
+        let err = parse_supported_encodings(&SupportedEncodingsJson::Names(vec![
+            "packed".to_string(),
+            "legacy".to_string(),
+        ]))
+        .unwrap_err();
+
+        assert!(
+            err.to_string()
+                .contains("unknown kinsn supported encoding: legacy"),
+            "err={err:#}"
+        );
+    }
+
+    #[test]
     fn pass_report_serializes_map_inline_records_as_hex() {
         let result = PassResult {
             pass_name: "map_inline".to_string(),
@@ -1525,10 +1524,10 @@ mod tests {
 
     #[test]
     fn verifier_states_json_builds_const_prop_delta_states() {
-        let state = VerifierInsnJson {
+        let state = kernel_sys::VerifierInsnJson {
             pc: 5,
             frame: 0,
-            regs: HashMap::from([(
+            regs: std::collections::BTreeMap::from([(
                 "r1".to_string(),
                 VerifierRegJson {
                     reg_type: "scalar".to_string(),

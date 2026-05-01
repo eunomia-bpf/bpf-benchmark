@@ -4,13 +4,17 @@
 //! `libbpf-rs`/`libbpf-sys`. The only direct `bpf(2)` wrappers here are for
 //! fork-only commands that upstream libbpf does not expose.
 
+use std::collections::{BTreeMap, HashMap};
 use std::ffi::{c_char, c_void, CString};
+use std::fs;
 use std::os::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, OwnedFd};
+use std::path::Path;
 use std::ptr::NonNull;
 use std::slice;
 use std::time::Duration;
 
 use anyhow::{anyhow, bail, Context, Result};
+use serde::{Deserialize, Serialize};
 
 pub use libbpf_rs::{
     libbpf_sys, Object, ObjectBuilder, OpenObject, Program, ProgramMut, ProgramType,
@@ -78,6 +82,268 @@ pub struct JitedFuncRange {
 pub struct JitedLineInfo {
     pub insn_off: u32,
     pub jited_addr: u64,
+}
+
+#[allow(clippy::enum_variant_names)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum VerifierInsnKind {
+    EdgeFullState,
+    PcFullState,
+    BranchDeltaState,
+    InsnDeltaState,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum VerifierValueWidth {
+    Unknown,
+    Bits32,
+    Bits64,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct Tnum {
+    pub value: u64,
+    pub mask: u64,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct ScalarRange {
+    pub smin: Option<i64>,
+    pub smax: Option<i64>,
+    pub umin: Option<u64>,
+    pub umax: Option<u64>,
+    pub smin32: Option<i32>,
+    pub smax32: Option<i32>,
+    pub umin32: Option<u32>,
+    pub umax32: Option<u32>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct VerifierInsn {
+    pub pc: usize,
+    pub frame: usize,
+    pub from_pc: Option<usize>,
+    pub kind: VerifierInsnKind,
+    pub speculative: bool,
+    pub regs: HashMap<u8, RegState>,
+    pub stack: HashMap<i16, StackState>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct RegState {
+    pub reg_type: String,
+    pub value_width: VerifierValueWidth,
+    pub precise: bool,
+    pub exact_value: Option<u64>,
+    pub tnum: Option<Tnum>,
+    pub range: ScalarRange,
+    pub offset: Option<i32>,
+    pub id: Option<u32>,
+}
+
+impl RegState {
+    pub fn new(reg_type: impl Into<String>, value_width: VerifierValueWidth) -> Self {
+        Self {
+            reg_type: reg_type.into(),
+            value_width,
+            precise: false,
+            exact_value: None,
+            tnum: None,
+            range: ScalarRange::default(),
+            offset: None,
+            id: None,
+        }
+    }
+
+    pub fn exact_u64(&self) -> Option<u64> {
+        if self.reg_type != "scalar" {
+            return None;
+        }
+
+        match self.value_width {
+            VerifierValueWidth::Bits32 => None,
+            VerifierValueWidth::Bits64 | VerifierValueWidth::Unknown => self.exact_value,
+        }
+    }
+
+    pub fn exact_u32(&self) -> Option<u32> {
+        if self.reg_type != "scalar" {
+            return None;
+        }
+
+        self.exact_value.map(|value| value as u32)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct StackState {
+    pub slot_types: Option<String>,
+    pub value: Option<RegState>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+pub struct VerifierStatesJson {
+    #[serde(default)]
+    pub insns: Vec<VerifierInsnJson>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+pub struct VerifierInsnJson {
+    pub pc: usize,
+    #[serde(default, skip_serializing_if = "is_zero_usize")]
+    pub frame: usize,
+    #[serde(default)]
+    pub regs: BTreeMap<String, VerifierRegJson>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+pub struct VerifierRegJson {
+    #[serde(rename = "type", default = "default_reg_type")]
+    pub reg_type: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offset: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub const_val: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub min: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tnum: Option<String>,
+}
+
+fn default_reg_type() -> String {
+    "scalar".to_string()
+}
+
+fn is_zero_usize(value: &usize) -> bool {
+    *value == 0
+}
+
+#[derive(Debug, Deserialize)]
+pub struct FdArrayEntry {
+    pub slot: Option<usize>,
+    pub name: Option<String>,
+    pub btf_fd: Option<i32>,
+    pub btf_id: Option<u32>,
+    pub btf_obj_id: Option<u32>,
+    pub btf_module: Option<String>,
+}
+
+#[derive(Debug)]
+pub struct FdArray {
+    fds: Vec<i32>,
+    _owned_fds: Vec<OwnedFd>,
+}
+
+impl FdArray {
+    pub fn empty() -> Self {
+        Self {
+            fds: Vec::new(),
+            _owned_fds: Vec::new(),
+        }
+    }
+
+    pub fn from_json_file(path: &Path) -> Result<Self> {
+        let text = fs::read_to_string(path)
+            .with_context(|| format!("failed to read {}", path.display()))?;
+        let entries: Vec<FdArrayEntry> = serde_json::from_str(&text)
+            .with_context(|| format!("failed to parse fd_array JSON {}", path.display()))?;
+        Self::from_entries(&entries)
+    }
+
+    pub fn from_entries(entries: &[FdArrayEntry]) -> Result<Self> {
+        let (required, owned_fds) = required_btf_fds(entries)?;
+        Ok(Self {
+            fds: build_rejit_fd_array(&required),
+            _owned_fds: owned_fds,
+        })
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.fds.is_empty()
+    }
+
+    pub fn as_slice(&self) -> &[i32] {
+        &self.fds
+    }
+}
+
+fn required_btf_fds(entries: &[FdArrayEntry]) -> Result<(Vec<i32>, Vec<OwnedFd>)> {
+    let has_slots = entries.iter().any(|entry| entry.slot.is_some());
+    let has_missing_slots = entries.iter().any(|entry| entry.slot.is_none());
+    if has_slots && has_missing_slots {
+        bail!("fd_array entries must either all specify slot or all omit slot");
+    }
+
+    let mut rows = Vec::with_capacity(entries.len());
+    let mut owned_fds = Vec::new();
+    for (index, entry) in entries.iter().enumerate() {
+        let label = entry
+            .name
+            .as_deref()
+            .map(|name| format!(" ({name})"))
+            .unwrap_or_else(String::new);
+        let btf_fd = resolve_btf_fd(entry, index, &label, &mut owned_fds)?;
+        let slot = entry.slot.unwrap_or(index + 1);
+        if slot == 0 {
+            bail!("fd_array entry {index}{label} uses invalid slot 0");
+        }
+        rows.push((slot, btf_fd));
+    }
+
+    rows.sort_by_key(|(slot, _)| *slot);
+    let mut out = Vec::with_capacity(rows.len());
+    for (expected, (slot, btf_fd)) in (1usize..).zip(rows) {
+        if slot != expected {
+            bail!(
+                "fd_array slots must be dense starting at 1; expected slot {expected}, got {slot}"
+            );
+        }
+        out.push(btf_fd);
+    }
+    Ok((out, owned_fds))
+}
+
+fn resolve_btf_fd(
+    entry: &FdArrayEntry,
+    index: usize,
+    label: &str,
+    owned_fds: &mut Vec<OwnedFd>,
+) -> Result<i32> {
+    if entry.btf_module.is_some() {
+        bail!("fd_array entry {index}{label} uses unsupported btf_module");
+    }
+    if let Some(btf_fd) = entry.btf_fd {
+        if btf_fd < 0 {
+            bail!("fd_array entry {index}{label} has negative btf_fd {btf_fd}");
+        }
+        return Ok(btf_fd);
+    }
+    let btf_id = entry
+        .btf_id
+        .or(entry.btf_obj_id)
+        .ok_or_else(|| anyhow!("fd_array entry {index}{label} is missing btf_fd or btf_id"))?;
+    if btf_id == 0 {
+        bail!("fd_array entry {index}{label} has invalid btf_id 0");
+    }
+    let fd = btf_get_fd_by_id(btf_id).with_context(|| {
+        format!("open BTF fd for fd_array entry {index}{label} btf_id {btf_id}")
+    })?;
+    let raw_fd = fd.as_raw_fd();
+    owned_fds.push(fd);
+    Ok(raw_fd)
+}
+
+pub fn build_rejit_fd_array(required_btf_fds: &[i32]) -> Vec<i32> {
+    if required_btf_fds.is_empty() {
+        return Vec::new();
+    }
+
+    let mut fd_array = Vec::with_capacity(required_btf_fds.len() + 1);
+    fd_array.push(required_btf_fds[0]);
+    fd_array.extend_from_slice(required_btf_fds);
+    fd_array
 }
 
 pub struct BranchSnapshotSidecar {
@@ -1365,7 +1631,14 @@ pub fn prog_rejit(
     if let Some(buf) = log_buf.as_deref_mut() {
         validate_rejit_log_buf(buf)?;
         let first_log_buf_size = buf.len();
-        match prog_rejit_once(prog_fd, insn_cnt, new_insns, fd_array_cnt, fd_array, Some(buf)) {
+        match prog_rejit_once(
+            prog_fd,
+            insn_cnt,
+            new_insns,
+            fd_array_cnt,
+            fd_array,
+            Some(buf),
+        ) {
             Ok(()) => return Ok(()),
             Err(failure) => {
                 if failure.error.raw_os_error() != Some(libc::ENOSPC) {
@@ -1726,5 +1999,84 @@ mod tests {
         };
 
         assert_eq!(btf_record_count("func_info", records).unwrap(), Some(2));
+    }
+
+    #[test]
+    fn verifier_states_json_round_trips_public_abi_fields() {
+        let states = VerifierStatesJson {
+            insns: vec![VerifierInsnJson {
+                pc: 7,
+                frame: 1,
+                regs: BTreeMap::from([(
+                    "r2".to_string(),
+                    VerifierRegJson {
+                        reg_type: "scalar".to_string(),
+                        offset: Some(-8),
+                        const_val: Some(42),
+                        min: Some(0),
+                        max: Some(63),
+                        tnum: Some("0x2a/0x0".to_string()),
+                    },
+                )]),
+            }],
+        };
+
+        let encoded = serde_json::to_string(&states).unwrap();
+        assert!(encoded.contains("\"pc\":7"));
+        assert!(encoded.contains("\"frame\":1"));
+        assert!(encoded.contains("\"type\":\"scalar\""));
+
+        let decoded: VerifierStatesJson = serde_json::from_str(&encoded).unwrap();
+        assert_eq!(decoded, states);
+    }
+
+    #[test]
+    fn verifier_states_json_defaults_frame_and_scalar_type() {
+        let decoded: VerifierStatesJson =
+            serde_json::from_str(r#"{"insns":[{"pc":3,"regs":{"r1":{"const_val":9}}}]}"#).unwrap();
+
+        assert_eq!(decoded.insns[0].frame, 0);
+        assert_eq!(decoded.insns[0].regs["r1"].reg_type, "scalar");
+        assert_eq!(decoded.insns[0].regs["r1"].const_val, Some(9));
+    }
+
+    #[test]
+    fn fd_array_reserves_slot_zero_with_duplicate_valid_fd() {
+        let entries = vec![
+            FdArrayEntry {
+                slot: Some(1),
+                name: Some("bpf_rotate64".to_string()),
+                btf_fd: Some(11),
+                btf_id: None,
+                btf_obj_id: None,
+                btf_module: None,
+            },
+            FdArrayEntry {
+                slot: Some(2),
+                name: Some("bpf_select64".to_string()),
+                btf_fd: Some(22),
+                btf_id: None,
+                btf_obj_id: None,
+                btf_module: None,
+            },
+        ];
+
+        let fd_array = FdArray::from_entries(&entries).expect("fd_array");
+        assert_eq!(fd_array.as_slice(), &[11, 11, 22]);
+    }
+
+    #[test]
+    fn fd_array_rejects_holes() {
+        let entries = vec![FdArrayEntry {
+            slot: Some(2),
+            name: None,
+            btf_fd: Some(11),
+            btf_id: None,
+            btf_obj_id: None,
+            btf_module: None,
+        }];
+
+        let err = FdArray::from_entries(&entries).unwrap_err();
+        assert!(err.to_string().contains("dense"), "err={err:#}");
     }
 }

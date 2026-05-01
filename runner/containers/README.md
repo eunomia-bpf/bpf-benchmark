@@ -20,10 +20,10 @@ Current policy:
    `docker build --target runner-host-artifacts --output`, not built by
    `docker run`; the exported target is a scratch stage containing only
    `/image-output` contents.
-7. AWS host kernel installation is executed through this loaded runtime image
-   as a privileged installer container. It mounts the target root at `/host`,
-   extracts the kernel image and `/lib/modules`, then chroots into `/host` to
-   run the host's `depmod`, `dracut`, and `grubby`.
+7. AWS host kernel installation streams the exported kernel image and
+   `/lib/modules` archive over SSH, extracts it on the target root, then runs
+   the host's `depmod`, `dracut`, and `grubby` directly. It must not use a
+   privileged container with the full host root bind-mounted.
 8. Runtime containers use the image workspace directly. They must not
    bind-mount the host repository over that path.
 9. Kinsn modules are inside the runner image. Runtime containers must not

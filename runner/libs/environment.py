@@ -55,7 +55,9 @@ def validate_publication_environment(
     except ValueError:
         perf_event_paranoid_value = None
     if perf_event_paranoid_value is not None and perf_event_paranoid_value > 1:
-        print(f"[WARN] perf_event_paranoid={perf_event_paranoid}. Some perf counters may not be available.")
+        report_publication_issue(
+            f"perf_event_paranoid={perf_event_paranoid}. Some perf counters may not be available."
+        )
 
     if cpu is None:
         report_publication_issue(

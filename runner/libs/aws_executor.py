@@ -401,40 +401,25 @@ def _deploy_kernel_artifacts(ctx: aws_common.AwsExecutorContext, ip: str,
         kernel_release,
     ]
     install_script = r"""
-set -eu
-release=$1
-kernel_path="/boot/vmlinuz-${release}"
-initrd_path="/boot/initramfs-${release}.img"
-kernel_title="bpf-benchmark ${release}"
-rm -rf -- "/host/lib/modules/${release}" "/host${kernel_path}"
-tar -C /host -xpf -
-chroot /host /bin/sh -c '
-set -eux
-release=$1
-kernel_path=$2
-initrd_path=$3
-kernel_title=$4
-depmod "${release}"
-dracut --force "${initrd_path}" "${release}"
-grubby --info="${kernel_path}" >/dev/null 2>&1 || grubby --add-kernel="${kernel_path}" --initrd="${initrd_path}" --title="${kernel_title}" --copy-default
-grubby --set-default="${kernel_path}" || true
-[ "$(grubby --default-kernel)" = "${kernel_path}" ]
-' sh "${release}" "${kernel_path}" "${initrd_path}" "${kernel_title}"
-""".strip()
-    install_container_cmd = [
-        "sudo", "docker", "run", "--rm", "-i",
-        "--privileged", "--pid=host",
-        "-v", "/:/host",
-        "-v", "/dev:/host/dev",
-        "-v", "/proc:/host/proc",
-        "-v", "/sys:/host/sys",
-        "-v", "/run:/host/run",
-        _runtime_container_image(ctx),
-        "/bin/sh", "-c", install_script, "kernel-install", kernel_release,
+	set -eu
+	release=$1
+	kernel_path="/boot/vmlinuz-${release}"
+	initrd_path="/boot/initramfs-${release}.img"
+	kernel_title="bpf-benchmark ${release}"
+	rm -rf -- "/lib/modules/${release}" "${kernel_path}"
+	tar -C / -xpf -
+	depmod "${release}"
+	dracut --force "${initrd_path}" "${release}"
+	grubby --info="${kernel_path}" >/dev/null 2>&1 || grubby --add-kernel="${kernel_path}" --initrd="${initrd_path}" --title="${kernel_title}" --copy-default
+	grubby --set-default="${kernel_path}" || true
+	[ "$(grubby --default-kernel)" = "${kernel_path}" ]
+	""".strip()
+    install_cmd = [
+        "sudo", "/bin/sh", "-c", install_script, "kernel-install", kernel_release,
     ]
     extract_cmd = [
         "ssh", *aws_common._ssh_base_args(ctx), f"{ctx.remote_user}@{ip}",
-        shlex.join(install_container_cmd),
+        shlex.join(install_cmd),
     ]
     with subprocess.Popen(tar_cmd, stdout=subprocess.PIPE, cwd=ROOT_DIR) as tar_proc:
         rc = subprocess.run(extract_cmd, stdin=tar_proc.stdout, cwd=ROOT_DIR, text=False, check=False).returncode
@@ -443,7 +428,7 @@ grubby --set-default="${kernel_path}" || true
         if tar_proc.returncode != 0:
             _die(f"tar failed while streaming kernel artifacts for {kernel_release}")
     if rc != 0:
-        _die(f"remote kernel installer container failed on {ip} for {kernel_release}")
+        _die(f"remote kernel installer failed on {ip} for {kernel_release}")
 
 
 def _setup_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
@@ -698,8 +683,6 @@ def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args_pa
     )
     if remote_completed.returncode != 0:
         _die(f"remote {ctx.target_name}/{ctx.suite_name} suite failed; inspect {local_log}")
-    remote_scratch = str(Path(remote_workspace) / "docs" / "tmp" / "runtime-container-tmp" / ctx.run_token)
-    aws_common._ssh_exec(ctx, ip, "sudo", "rm", "-rf", "--", remote_scratch, check=False)
     print(f"[aws-executor] Synced {ctx.target_name}/{ctx.suite_name} results to "
           + (str(local_results) if local_results is not None else "no result directory"), file=sys.stderr)
 

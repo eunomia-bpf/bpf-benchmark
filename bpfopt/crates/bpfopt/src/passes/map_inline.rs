@@ -1302,14 +1302,13 @@ fn build_direct_map_value_load_rewrites(
             continue;
         }
 
-        let map_value =
-            match resolve_frozen_map_value(program, old_fd, &mut map_cache, &mut diagnostics)? {
-                Some(map_value) => map_value,
-                None => {
-                    pc += insn_width(insn);
-                    continue;
-                }
-            };
+        let map_value = match resolve_frozen_map_value(program, old_fd, &mut map_cache)? {
+            Some(map_value) => map_value,
+            None => {
+                pc += insn_width(insn);
+                continue;
+            }
+        };
 
         let offset = total_off as usize;
         let Some(scalar) = read_scalar_from_value_at(&map_value.value, offset, bpf_size(insn.code))
@@ -1355,7 +1354,6 @@ fn resolve_frozen_map_value(
     program: &BpfProgram,
     old_fd: i32,
     cache: &mut HashMap<i32, Option<FrozenMapValue>>,
-    diagnostics: &mut Vec<String>,
 ) -> anyhow::Result<Option<FrozenMapValue>> {
     if let Some(cached) = cache.get(&old_fd) {
         return Ok(cached.clone());
@@ -1397,22 +1395,7 @@ fn resolve_frozen_map_value(
         Ok(Some(FrozenMapValue { map_id, value }))
     })();
 
-    let cached = match resolved {
-        Ok(value) => value,
-        Err(err) => {
-            if is_concrete_map_value_snapshot_error(&format!("{err:#}")) {
-                return Err(err);
-            }
-            record_diagnostic(
-                diagnostics,
-                format!(
-                    "pseudo-map-value old_fd {} could not be resolved to a frozen value: {err:#}",
-                    old_fd
-                ),
-            );
-            None
-        }
-    };
+    let cached = resolved?;
     cache.insert(old_fd, cached.clone());
     Ok(cached)
 }

@@ -219,6 +219,27 @@ impl BpfPass for CountReportingPass {
     }
 }
 
+struct MissingAnalysisPass;
+
+impl BpfPass for MissingAnalysisPass {
+    fn name(&self) -> &str {
+        "missing_analysis"
+    }
+
+    fn required_analyses(&self) -> Vec<&str> {
+        vec!["not_registered"]
+    }
+
+    fn run(
+        &self,
+        _program: &mut BpfProgram,
+        _analyses: &mut AnalysisCache,
+        _ctx: &PassContext,
+    ) -> anyhow::Result<PassResult> {
+        Ok(PassResult::unchanged(self.name()))
+    }
+}
+
 struct VerifierStateCountPass;
 
 impl BpfPass for VerifierStateCountPass {
@@ -384,6 +405,22 @@ fn test_pass_manager_analysis_cache_invalidation() {
     assert!(result.pass_results[1].changed);
     // Second count_reporter should see 3 instructions (cache was invalidated).
     assert_eq!(result.pass_results[2].diagnostics, vec!["insn_count=3"]);
+}
+
+#[test]
+fn test_pass_manager_rejects_unregistered_required_analysis() {
+    let mut pm = PassManager::new();
+    pm.add_pass(MissingAnalysisPass);
+
+    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
+    let ctx = ctx_for_pass_manager(&pm);
+
+    let err = pm.run(&mut prog, &ctx).unwrap_err();
+    assert!(
+        err.to_string()
+            .contains("requires unknown analysis 'not_registered'"),
+        "err={err:#}"
+    );
 }
 
 #[test]

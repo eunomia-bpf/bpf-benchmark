@@ -454,12 +454,16 @@ def _applied_site_totals_from_passes(raw_passes: object) -> dict[str, int]:
 def applied_site_totals_from_rejit_result(result: Mapping[str, Any] | None) -> dict[str, int]:
     counts = _zero_site_counts()
     if not isinstance(result, Mapping):
-        return counts
+        raise RuntimeError("daemon response rejit result must be an object")
 
     per_program = result.get("per_program")
-    if isinstance(per_program, Mapping):
-        for record in per_program.values():
-            pc = applied_site_totals_from_rejit_result(record if isinstance(record, Mapping) else None)
+    if per_program is not None:
+        if not isinstance(per_program, Mapping):
+            raise RuntimeError("daemon response field 'per_program' must be an object")
+        for prog_id, record in per_program.items():
+            if not isinstance(record, Mapping):
+                raise RuntimeError(f"daemon response field per_program[{prog_id!r}] must be an object")
+            pc = applied_site_totals_from_rejit_result(record)
             for f in counts:
                 counts[f] += int(pc.get(f, 0) or 0)
         return counts
@@ -524,7 +528,7 @@ def _compact_single_rejit_result_for_artifact(result: Mapping[str, Any]) -> dict
         noop_programs: list[dict[str, object]] = []
         for prog_id, record in raw_per_program.items():
             if not isinstance(record, Mapping):
-                continue
+                raise RuntimeError(f"daemon response field per_program[{prog_id!r}] must be an object")
             error = str(record.get("error") or "")
             exit_code = int(record.get("exit_code", 0) or 0)
             applied = bool(record.get("applied", False))
@@ -556,6 +560,8 @@ def _compact_single_rejit_result_for_artifact(result: Mapping[str, Any]) -> dict
             compact["error_programs"] = error_programs
         if noop_programs:
             compact["noop_programs"] = noop_programs
+    elif raw_per_program is not None:
+        raise RuntimeError("daemon response field 'per_program' must be an object")
     elif _is_successful_noop_result(result):
         compact["passes"] = _compact_pass_summaries_from_result(result)
 

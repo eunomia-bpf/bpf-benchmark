@@ -12,6 +12,7 @@ use std::process::ExitCode;
 
 use anyhow::{anyhow, bail, Context, Result};
 use clap::Parser;
+use kernel_sys::{FdArray, VerifierInsnJson, VerifierRegJson, VerifierStatesJson};
 use serde::{Deserialize, Serialize};
 
 const DEFAULT_LOG_BUF_SIZE: usize = 16 * 1024 * 1024;
@@ -102,35 +103,6 @@ struct VerifyReport {
     log_true_size: u32,
 }
 
-#[derive(Clone, Debug, Serialize)]
-struct VerifierStatesJson {
-    insns: Vec<VerifierInsnJson>,
-}
-
-#[derive(Clone, Debug, Serialize)]
-struct VerifierInsnJson {
-    pc: usize,
-    #[serde(skip_serializing_if = "is_zero_usize")]
-    frame: usize,
-    regs: BTreeMap<String, VerifierRegJson>,
-}
-
-#[derive(Clone, Debug, Serialize)]
-struct VerifierRegJson {
-    #[serde(rename = "type")]
-    reg_type: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    offset: Option<i32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    const_val: Option<i64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    min: Option<i64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    max: Option<i64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    tnum: Option<String>,
-}
-
 #[derive(Debug, Clone)]
 struct MapBinding {
     old_fd: Option<i32>,
@@ -172,38 +144,6 @@ struct MapBindingJson {
 struct ProgInfoMapIds {
     #[serde(default)]
     map_ids: Vec<u32>,
-}
-
-#[derive(Debug, Deserialize)]
-struct FdArrayEntry {
-    slot: Option<usize>,
-    name: Option<String>,
-    btf_fd: Option<i32>,
-    btf_id: Option<u32>,
-    btf_obj_id: Option<u32>,
-    btf_module: Option<String>,
-}
-
-struct FdArray {
-    fds: Vec<i32>,
-    _owned_fds: Vec<OwnedFd>,
-}
-
-impl FdArray {
-    fn empty() -> Self {
-        Self {
-            fds: Vec::new(),
-            _owned_fds: Vec::new(),
-        }
-    }
-
-    fn is_empty(&self) -> bool {
-        self.fds.is_empty()
-    }
-
-    fn as_slice(&self) -> &[i32] {
-        &self.fds
-    }
 }
 
 struct AttachBtfObjFd {
@@ -869,91 +809,7 @@ fn read_fd_array(path: Option<&Path>) -> Result<FdArray> {
     let Some(path) = path else {
         return Ok(FdArray::empty());
     };
-    let text =
-        fs::read_to_string(path).with_context(|| format!("failed to read {}", path.display()))?;
-    let entries: Vec<FdArrayEntry> = serde_json::from_str(&text)
-        .with_context(|| format!("failed to parse fd_array JSON {}", path.display()))?;
-    let (required, owned_fds) = required_btf_fds(&entries)?;
-    Ok(FdArray {
-        fds: build_rejit_fd_array(&required),
-        _owned_fds: owned_fds,
-    })
-}
-
-fn required_btf_fds(entries: &[FdArrayEntry]) -> Result<(Vec<i32>, Vec<OwnedFd>)> {
-    let has_slots = entries.iter().any(|entry| entry.slot.is_some());
-    let has_missing_slots = entries.iter().any(|entry| entry.slot.is_none());
-    if has_slots && has_missing_slots {
-        bail!("fd_array entries must either all specify slot or all omit slot");
-    }
-
-    let mut rows = Vec::with_capacity(entries.len());
-    let mut owned_fds = Vec::new();
-    for (index, entry) in entries.iter().enumerate() {
-        let label = entry
-            .name
-            .as_deref()
-            .map(|name| format!(" ({name})"))
-            .unwrap_or_else(String::new);
-        let btf_fd = resolve_btf_fd(entry, index, &label, &mut owned_fds)?;
-        let slot = entry.slot.unwrap_or(index + 1);
-        if slot == 0 {
-            bail!("fd_array entry {index}{label} uses invalid slot 0");
-        }
-        rows.push((slot, btf_fd));
-    }
-
-    rows.sort_by_key(|(slot, _)| *slot);
-    let mut out = Vec::with_capacity(rows.len());
-    for (expected, (slot, btf_fd)) in (1usize..).zip(rows) {
-        if slot != expected {
-            bail!(
-                "fd_array slots must be dense starting at 1; expected slot {expected}, got {slot}"
-            );
-        }
-        out.push(btf_fd);
-    }
-    Ok((out, owned_fds))
-}
-
-fn resolve_btf_fd(
-    entry: &FdArrayEntry,
-    index: usize,
-    label: &str,
-    owned_fds: &mut Vec<OwnedFd>,
-) -> Result<i32> {
-    if entry.btf_module.is_some() {
-        bail!("fd_array entry {index}{label} uses unsupported btf_module");
-    }
-    if let Some(btf_fd) = entry.btf_fd {
-        if btf_fd < 0 {
-            bail!("fd_array entry {index}{label} has negative btf_fd {btf_fd}");
-        }
-        return Ok(btf_fd);
-    }
-    let btf_id = entry
-        .btf_id
-        .or(entry.btf_obj_id)
-        .ok_or_else(|| anyhow!("fd_array entry {index}{label} is missing btf_fd or btf_id"))?;
-    if btf_id == 0 {
-        bail!("fd_array entry {index}{label} has invalid btf_id 0");
-    }
-    let fd = kernel_sys::btf_get_fd_by_id(btf_id).with_context(|| {
-        format!("open BTF fd for fd_array entry {index}{label} btf_id {btf_id}")
-    })?;
-    let raw_fd = fd.as_raw_fd();
-    owned_fds.push(fd);
-    Ok(raw_fd)
-}
-
-fn build_rejit_fd_array(required_btf_fds: &[i32]) -> Vec<i32> {
-    if required_btf_fds.is_empty() {
-        return Vec::new();
-    }
-    let mut fd_array = Vec::with_capacity(required_btf_fds.len() + 1);
-    fd_array.push(required_btf_fds[0]);
-    fd_array.extend_from_slice(required_btf_fds);
-    fd_array
+    FdArray::from_json_file(path)
 }
 
 fn ensure_verifier_states_parseable(
@@ -1260,10 +1116,6 @@ fn is_zero(value: &u32) -> bool {
     *value == 0
 }
 
-fn is_zero_usize(value: &usize) -> bool {
-    *value == 0
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1432,12 +1284,6 @@ from 9 to 11: R0=map_ptr(ks=4,vs=64) R10=fp0
             vec![11]
         );
         assert_eq!(converted.insns[0].regs["r3"].const_val, Some(8));
-    }
-
-    #[test]
-    fn fd_array_reserves_slot_zero() {
-        assert_eq!(build_rejit_fd_array(&[]), Vec::<i32>::new());
-        assert_eq!(build_rejit_fd_array(&[11, 22]), vec![11, 11, 22]);
     }
 
     #[test]

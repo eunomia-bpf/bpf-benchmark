@@ -379,29 +379,18 @@ def _refresh_active_session_programs(
             expected_count = len(tracked_prog_ids)
             refreshed_count = len(live_programs)
             refreshed_ids = [int(program["id"]) for program in live_programs]
-            if refreshed_count < expected_count:
-                refreshed_id_set = set(refreshed_ids)
-                still_missing_ids = sorted(tracked_prog_ids - refreshed_id_set)
+            refreshed_id_set = set(refreshed_ids)
+            if refreshed_id_set != tracked_prog_ids:
                 raise RuntimeError(
-                    f"{session.app.name}: rediscovery returned fewer BPF programs than expected "
+                    f"{session.app.name}: rediscovery changed tracked BPF program ids "
                     f"before {phase}: refreshed_count={refreshed_count}, "
                     f"expected_count={expected_count}, expected_ids={sorted(tracked_prog_ids)}, "
-                    f"missing_ids={still_missing_ids}, refreshed_ids={refreshed_ids}, "
+                    f"refreshed_ids={refreshed_ids}, "
+                    f"missing_ids={sorted(tracked_prog_ids - refreshed_id_set)}, "
+                    f"unexpected_ids={sorted(refreshed_id_set - tracked_prog_ids)}, "
+                    f"original_missing_ids={missing_ids}, "
                     f"discover_source={discover_source}"
                 )
-            _print_progress(
-                "session_warning",
-                app=session.app.name,
-                runner=session.app.runner,
-                phase=phase,
-                warning="tracked BPF program ids changed; refreshed live session programs",
-                previous_ids=sorted(tracked_prog_ids),
-                missing_ids=missing_ids,
-                refreshed_ids=refreshed_ids,
-                expected_count=expected_count,
-                refreshed_count=refreshed_count,
-                discover_source=discover_source,
-            )
         else:
             if overlapping_ids := sorted(tracked_prog_ids & claimed_ids):
                 raise RuntimeError(

@@ -118,6 +118,7 @@ dependencies = [
  "anyhow",
  "clap",
  "kernel-sys",
+ "libc",
  "serde",
  "serde_json",
 ]
@@ -237,6 +238,8 @@ dependencies = [
  "libbpf-rs",
  "libbpf-sys",
  "libc",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

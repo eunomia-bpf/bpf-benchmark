@@ -15,7 +15,6 @@ _CONTAINER_RESULT_DIR_BY_SUITE = {
     "e2e": "e2e/results",
     "test": "tests/results",
 }
-_CONTAINER_RUNTIME_TMP_DIR = "docs/tmp/runtime-container-tmp"
 _RUNTIME_CONTAINER_ENV_PASSTHROUGH = (
     "BPFREJIT_BENCH_PASSES",
     "BPFREJIT_DAEMON_KEEP_ALL_WORKDIRS",
@@ -46,12 +45,8 @@ def runtime_container_host_dirs(
     suite_name: str,
     *,
     die: Any,
-    include_runtime_tmp: bool = True,
 ) -> list[Path]:
-    dirs = runtime_container_result_dirs(host_workspace, suite_name, die=die)
-    if include_runtime_tmp:
-        dirs.append(host_workspace / _CONTAINER_RUNTIME_TMP_DIR)
-    return dirs
+    return runtime_container_result_dirs(host_workspace, suite_name, die=die)
 
 
 def _container_suite_config(config: Any, python_bin: str) -> Any:
@@ -110,7 +105,6 @@ def build_runtime_container_command(
     suite_args: list[str],
     *,
     die: Any,
-    mount_runtime_tmp: bool = True,
 ) -> list[str]:
     image = _required(config.remote.runtime_container_image, "RUN_RUNTIME_CONTAINER_IMAGE", die)
     runtime_python = config.remote.runtime_python_bin.strip() or "python3"
@@ -146,11 +140,6 @@ def build_runtime_container_command(
             command.extend(["-e", f"{name}={value}"])
     for result_dir in runtime_container_result_dirs(host_workspace, suite_name, die=die):
         command.extend(["-v", f"{result_dir}:{image_workspace / result_dir.relative_to(host_workspace)}"])
-    if mount_runtime_tmp:
-        command.extend([
-            "-v",
-            f"{host_workspace / _CONTAINER_RUNTIME_TMP_DIR}:/var/tmp/bpfrejit-runtime",
-        ])
     for source, target, readonly in (
         ("/sys", "/sys", False),
         ("/sys/fs/bpf", "/sys/fs/bpf", False),

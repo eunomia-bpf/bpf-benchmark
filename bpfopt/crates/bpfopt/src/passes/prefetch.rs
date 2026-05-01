@@ -18,7 +18,6 @@ const PREFETCH_TARGET_NAME: &str = "bpf_prefetch";
 const TARGET_PREFETCH_DISTANCE: usize = 8;
 const MAX_PREFETCH_DISTANCE: usize = 16;
 const MAP_VALUE_LOOKAHEAD: usize = 64;
-const PREFETCH_SITE_BUDGET: usize = 8;
 
 const BPF_PROG_TYPE_SCHED_CLS: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_CLS;
 const BPF_PROG_TYPE_SCHED_ACT: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_ACT;
@@ -186,7 +185,7 @@ impl BpfPass for PrefetchPass {
             });
         }
 
-        let candidates = dedup_and_budget(candidates);
+        let candidates = dedup_candidates(candidates);
         if candidates.is_empty() {
             return Ok(PassResult {
                 sites_skipped: skipped,
@@ -709,7 +708,7 @@ fn reg_write_kind(insn: &BpfInsn, reg: u8) -> Option<RegWriteKind> {
     }
 }
 
-fn dedup_and_budget(mut candidates: Vec<PrefetchCandidate>) -> Vec<PrefetchCandidate> {
+fn dedup_candidates(mut candidates: Vec<PrefetchCandidate>) -> Vec<PrefetchCandidate> {
     candidates.sort_by(|a, b| {
         b.score
             .cmp(&a.score)
@@ -725,9 +724,6 @@ fn dedup_and_budget(mut candidates: Vec<PrefetchCandidate>) -> Vec<PrefetchCandi
             continue;
         }
         kept.push(candidate);
-        if kept.len() == PREFETCH_SITE_BUDGET {
-            break;
-        }
     }
     kept.sort_by_key(|candidate| candidate.insert_pc);
     kept
