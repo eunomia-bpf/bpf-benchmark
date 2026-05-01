@@ -1,0 +1,32 @@
+{
+  "config": {
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "daemon serve exited early (rc=1): Error: BPFREJIT_DAEMON_FAILURE_ROOT is required",
+  "generated_at": "2026-05-01T00:16:56.529201+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-05-01T00:16:56.529197+00:00",
+  "launcher_boot_id": "a159108a-7180-468f-957e-6953681fa6b3",
+  "launcher_pid": 1858,
+  "launcher_start_ticks": 31219,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "run_type": "x86_kvm_corpus",
+  "samples": 1,
+  "started_at": "2026-05-01T00:16:56.447379+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_seconds": 1.0
+}
