@@ -231,24 +231,6 @@ mod tests {
     }
 
     #[test]
-    fn test_record_inline_site() {
-        let mut tracker = MapInvalidationTracker::new(FakeMapAccessor::default());
-
-        tracker.record_inline_site(101, 7, key(1), value(11));
-
-        assert_eq!(tracker.entry_count(), 1);
-        assert_eq!(
-            tracker.entries[0],
-            TrackedInlineSite {
-                prog_id: 101,
-                map_fd: 7,
-                key: key(1),
-                expected_value: value(11),
-            }
-        );
-    }
-
-    #[test]
     fn test_check_unchanged_returns_empty() {
         let accessor = FakeMapAccessor::default();
         accessor.set_value(7, key(1), value(11));

@@ -175,6 +175,7 @@ pub fn try_extract_constant_key(insns: &[BpfInsn], call_pc: usize) -> Result<Con
     })
 }
 
+#[cfg(test)]
 fn try_extract_constant_key_sized(
     insns: &[BpfInsn],
     call_pc: usize,
@@ -203,104 +204,6 @@ fn try_extract_constant_key_sized(
         materialization_pcs: stack_bytes.materialization_pcs,
         r2_mov_pc: removable_setup.map(|(mov_pc, _, _)| mov_pc),
         r2_add_pc: removable_setup.map(|(_, add_pc, _)| add_pc),
-    })
-}
-
-fn try_extract_constant_key_from_map_value(
-    program: &BpfProgram,
-    call_pc: usize,
-    info: &MapInfo,
-) -> Result<ConstantKey, String> {
-    let key_width = u8::try_from(info.key_size)
-        .map_err(|_| format!("map key size {} does not fit in u8", info.key_size))?;
-    if key_width == 0 {
-        return Err("map key size is zero".to_string());
-    }
-
-    let bounds = subprog_bounds(&program.insns, call_pc);
-    let origin = resolve_key_pointer_origin(&program.insns, call_pc, 2, bounds)?;
-    let KeyPointerOrigin::MapValue {
-        old_fd,
-        value_off,
-        ldimm_pc,
-    } = origin
-    else {
-        return Err("key pointer does not resolve to a pseudo-map-value constant".to_string());
-    };
-
-    if value_off < 0 {
-        return Err(format!(
-            "pseudo-map-value key offset {} is negative",
-            value_off
-        ));
-    }
-
-    let source_map_id = program
-        .map_fd_bindings
-        .get(&old_fd)
-        .copied()
-        .ok_or_else(|| format!("no map_id binding for pseudo-map-value old_fd {}", old_fd))?;
-    let source_info = program
-        .map_provider
-        .map_info(program, source_map_id)?
-        .ok_or_else(|| {
-            format!(
-                "failed to resolve pseudo-map-value source map {}",
-                source_map_id
-            )
-        })?;
-    if !source_info.frozen {
-        return Err(format!(
-            "pseudo-map-value source map {} is mutable",
-            source_map_id
-        ));
-    }
-
-    let source_key = vec![0u8; source_info.key_size as usize];
-    let source_value_size = program
-        .map_provider
-        .lookup_value_size(program, &source_info)
-        .map_err(|err| {
-            format!(
-                "failed to determine pseudo-map-value source map {} lookup size: {err}",
-                source_map_id
-            )
-        })?;
-    let source_value = program
-        .map_provider
-        .lookup_elem(program, source_map_id, &source_key, source_value_size)
-        .map_err(|err| {
-            format!(
-                "failed to read pseudo-map-value source map {}: {err}",
-                source_map_id
-            )
-        })?;
-    let value_off = value_off as usize;
-    let key_end = value_off
-        .checked_add(info.key_size as usize)
-        .ok_or_else(|| "pseudo-map-value key offset overflows".to_string())?;
-    if key_end > source_value.len() {
-        return Err(format!(
-            "pseudo-map-value key range [{}..{}) exceeds source map value length {}",
-            value_off,
-            key_end,
-            source_value.len()
-        ));
-    }
-
-    let bytes = source_value[value_off..key_end].to_vec();
-    Ok(ConstantKey {
-        stack_off: 0,
-        width: key_width,
-        value: constant_key_value(&bytes),
-        bytes,
-        // Reuse the removable-pc slots so a contiguous `ldimm64 r2 =
-        // pseudo_map_value` setup can be dropped alongside the lookup.
-        store_pc: ldimm_pc,
-        source_imm_pc: Some(ldimm_pc + 1),
-        materialization_pcs: vec![ldimm_pc, ldimm_pc + 1],
-        r2_mov_pc: None,
-        r2_add_pc: None,
     })
 }
 
@@ -456,6 +359,7 @@ fn format_constant_key(key: &ConstantKey) -> String {
     }
 }
 
+#[cfg(test)]
 fn find_constant_stack_bytes(
     insns: &[BpfInsn],
     before_pc: usize,
@@ -833,12 +737,12 @@ fn run_map_inline_round(
             info.max_entries,
             info.frozen
         ));
-        if !info.is_inlineable_v1() {
+        if !info.supports_direct_value_inline() {
             log_map_inline_debug(&format!(
                 "site pc={} skip: map type {} not inlineable",
                 site.call_pc, info.map_type
             ));
-            let reason = format!("map type {} not inlineable in v1", info.map_type);
+            let reason = format!("map type {} not inlineable", info.map_type);
             record_skip(
                 &mut skipped,
                 &mut diagnostics,
@@ -871,7 +775,7 @@ fn run_map_inline_round(
                     &mut skipped,
                     &mut diagnostics,
                     site.call_pc,
-                    "lookup key is not a constant stack or pseudo-map-value materialization".into(),
+                    "lookup key is not available from verifier-guided state".into(),
                     Some(format!("site at PC={}: {}", site.call_pc, detail)),
                 );
                 continue;
@@ -885,7 +789,7 @@ fn run_map_inline_round(
             record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
             continue;
         }
-        if info.can_remove_lookup_pattern_v1()
+        if info.has_removable_lookup_pattern()
             && key.bytes.len() <= 8
             && key.value >= info.max_entries as u64
         {
@@ -900,11 +804,11 @@ fn run_map_inline_round(
         let uses = classify_r0_uses_with_options(
             &program.insns,
             site.call_pc,
-            info.frozen && info.can_remove_lookup_pattern_v1(),
-            info.can_remove_lookup_pattern_v1(),
+            info.frozen && info.has_removable_lookup_pattern(),
+            info.has_removable_lookup_pattern(),
         );
         let null_check_pc = uses.null_check_pc;
-        if info.is_speculative_v1() && null_check_pc.is_none() {
+        if info.has_speculative_invalidation() && null_check_pc.is_none() {
             let reason = "speculative map inline requires an immediate null check".to_string();
             record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
             continue;
@@ -1155,7 +1059,7 @@ fn extract_site_constant_key(
     use_verifier_guided_keys: bool,
 ) -> Result<ConstantKey, String> {
     if use_verifier_guided_keys {
-        match try_extract_constant_key_verifier_guided(
+        return match try_extract_constant_key_verifier_guided(
             &program.insns,
             program.verifier_states.as_ref(),
             call_pc,
@@ -1173,105 +1077,25 @@ fn extract_site_constant_key(
                     key.r2_mov_pc,
                     key.r2_add_pc
                 ));
-                return Ok(key);
-            }
-            Err(verifier_err) => {
-                match try_extract_constant_key_sized(&program.insns, call_pc, info.key_size) {
-                    Ok(key) => {
-                        log_map_inline_debug(&format!(
-                            "site at PC={}: fallback backward-scan key after verifier-guided miss: {}",
-                            call_pc, verifier_err
-                        ));
-                        log_map_inline_debug(&format!(
-                            "site at PC={}: extracted key={} width={} stack_off={} store_pc={} source_imm_pc={:?} r2_mov_pc={:?} r2_add_pc={:?}",
-                            call_pc,
-                            format_constant_key(&key),
-                            key.width,
-                            key.stack_off,
-                            key.store_pc,
-                            key.source_imm_pc,
-                            key.r2_mov_pc,
-                            key.r2_add_pc
-                        ));
-                        return Ok(key);
-                    }
-                    Err(scan_err) => {
-                        match try_extract_constant_key_from_map_value(program, call_pc, info) {
-                            Ok(key) => {
-                                log_map_inline_debug(&format!(
-                                "site at PC={}: pseudo-map-value key after verifier-guided miss={} and backward-scan miss={}",
-                                call_pc, verifier_err, scan_err
-                            ));
-                                log_map_inline_debug(&format!(
-                                "site at PC={}: extracted pseudo-map-value key={} width={} store_pc={} source_imm_pc={:?}",
-                                call_pc,
-                                format_constant_key(&key),
-                                key.width,
-                                key.store_pc,
-                                key.source_imm_pc
-                            ));
-                                return Ok(key);
-                            }
-                            Err(map_value_err) => {
-                                log_map_inline_debug(&format!(
-                                "site pc={} skip: verifier-guided={} fallback={} pseudo-map-value={}",
-                                call_pc, verifier_err, scan_err, map_value_err
-                            ));
-                                return Err(format!(
-                                "verifier-guided key extraction failed: {}; fallback scan failed: {}; pseudo-map-value fallback failed: {}",
-                                verifier_err, scan_err, map_value_err
-                            ));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    match try_extract_constant_key_sized(&program.insns, call_pc, info.key_size) {
-        Ok(key) => {
-            log_map_inline_debug(&format!(
-                "site at PC={}: extracted key={} width={} stack_off={} store_pc={} source_imm_pc={:?} r2_mov_pc={:?} r2_add_pc={:?}",
-                call_pc,
-                format_constant_key(&key),
-                key.width,
-                key.stack_off,
-                key.store_pc,
-                key.source_imm_pc,
-                key.r2_mov_pc,
-                key.r2_add_pc
-            ));
-            Ok(key)
-        }
-        Err(scan_err) => match try_extract_constant_key_from_map_value(program, call_pc, info) {
-            Ok(key) => {
-                log_map_inline_debug(&format!(
-                    "site at PC={}: pseudo-map-value key after backward-scan miss={}",
-                    call_pc, scan_err
-                ));
-                log_map_inline_debug(&format!(
-                    "site at PC={}: extracted pseudo-map-value key={} width={} store_pc={} source_imm_pc={:?}",
-                    call_pc,
-                    format_constant_key(&key),
-                    key.width,
-                    key.store_pc,
-                    key.source_imm_pc
-                ));
                 Ok(key)
             }
-            Err(map_value_err) => {
+            Err(verifier_err) => {
                 log_map_inline_debug(&format!(
-                    "site pc={} skip: fallback={} pseudo-map-value={}",
-                    call_pc, scan_err, map_value_err
+                    "site pc={} skip: verifier-guided key extraction failed: {}",
+                    call_pc, verifier_err
                 ));
                 Err(format!(
-                    "fallback scan failed: {}; pseudo-map-value fallback failed: {}",
-                    scan_err, map_value_err
+                    "verifier-guided key extraction failed: {}",
+                    verifier_err
                 ))
             }
-        },
+        };
     }
+
+    let detail = "verifier-guided key extraction is unavailable after a prior map_inline rewrite"
+        .to_string();
+    log_map_inline_debug(&format!("site pc={} skip: {}", call_pc, detail));
+    Err(detail)
 }
 
 fn build_site_rewrite(
@@ -1401,7 +1225,7 @@ fn build_site_rewrite(
         call_pc: site.call_pc,
         diagnostic_value: format_inlined_value_diagnostic(&inline_value, &uses.fixed_loads),
         removed_null_check: can_remove_lookup_pattern && removable_null_check_pc.is_some(),
-        speculative: info.is_speculative_v1(),
+        speculative: info.has_speculative_invalidation(),
         map_inline_record: MapInlineRecord {
             map_id: info.map_id,
             key: encoded_key,
@@ -1418,11 +1242,11 @@ fn site_can_attempt_lookup_pattern_removal(
     info: &MapInfo,
     null_check_pc: Option<usize>,
 ) -> bool {
-    if info.can_remove_lookup_pattern_v1() {
+    if info.has_removable_lookup_pattern() {
         return true;
     }
 
-    info.is_speculative_v1()
+    info.has_speculative_invalidation()
         && uses.other_uses.is_empty()
         && null_check_pc.is_some_and(|pc| null_check_is_fallthrough_non_null(&program.insns[pc]))
 }
@@ -2020,6 +1844,7 @@ fn find_prev_reg_def(
     None
 }
 
+#[cfg(test)]
 fn resolve_stack_pointer_to_stack(
     insns: &[BpfInsn],
     before_pc: usize,

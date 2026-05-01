@@ -610,46 +610,40 @@ def _apply_result_from_response(
     applied = False
     changed = False
     if status == "ok":
-        try:
-            if not isinstance(summary_value, Mapping):
-                raise RuntimeError("daemon response field 'summary' must be an object")
-            summary_applied = summary.get("applied")
-            if not isinstance(summary_applied, bool):
-                raise RuntimeError("daemon response field 'summary.applied' must be a boolean")
-            changed = response.get("changed")
-            if not isinstance(changed, bool):
-                raise RuntimeError("daemon response field 'changed' must be a boolean")
-            total_sites_applied = summary.get("total_sites_applied")
-            total_sites_applied = _strict_non_negative_int(
-                total_sites_applied,
-                field_name="summary.total_sites_applied",
+        if not isinstance(summary_value, Mapping):
+            raise RuntimeError("daemon response field 'summary' must be an object")
+        summary_applied = summary.get("applied")
+        if not isinstance(summary_applied, bool):
+            raise RuntimeError("daemon response field 'summary.applied' must be a boolean")
+        changed = response.get("changed")
+        if not isinstance(changed, bool):
+            raise RuntimeError("daemon response field 'changed' must be a boolean")
+        total_sites_applied = summary.get("total_sites_applied")
+        total_sites_applied = _strict_non_negative_int(
+            total_sites_applied,
+            field_name="summary.total_sites_applied",
+        )
+        passes_executed = _strict_non_negative_int(
+            summary.get("passes_executed"),
+            field_name="summary.passes_executed",
+        )
+        passes = _normalize_apply_passes(response.get("passes"), field_name="passes")
+        if passes_executed != len(passes):
+            raise RuntimeError(
+                "daemon response fields 'summary.passes_executed' and 'passes' length disagree"
             )
-            passes_executed = _strict_non_negative_int(
-                summary.get("passes_executed"),
-                field_name="summary.passes_executed",
+        pass_sites_applied = sum(
+            int(item["sites_applied"])
+            for item in passes
+            if str(item.get("action") or "kept") != "rolled_back"
+        )
+        if total_sites_applied != pass_sites_applied:
+            raise RuntimeError(
+                "daemon response fields 'summary.total_sites_applied' and "
+                "'passes[].sites_applied' disagree"
             )
-            passes = _normalize_apply_passes(response.get("passes"), field_name="passes")
-            if passes_executed != len(passes):
-                raise RuntimeError(
-                    "daemon response fields 'summary.passes_executed' and 'passes' length disagree"
-                )
-            pass_sites_applied = sum(
-                int(item["sites_applied"])
-                for item in passes
-                if str(item.get("action") or "kept") != "rolled_back"
-            )
-            if total_sites_applied != pass_sites_applied:
-                raise RuntimeError(
-                    "daemon response fields 'summary.total_sites_applied' and "
-                    "'passes[].sites_applied' disagree"
-                )
-            applied = exit_code == 0 and summary_applied
-            changed = exit_code == 0 and changed
-        except RuntimeError as exc:
-            exit_code = 1
-            error = str(exc)
-            changed = False
-            passes = []
+        applied = exit_code == 0 and summary_applied
+        changed = exit_code == 0 and changed
 
     return {
         "applied": applied,

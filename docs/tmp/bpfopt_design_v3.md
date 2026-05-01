@@ -205,7 +205,7 @@ bpfopt wide-mem < prog.bin | bpfrejit 123
 
 ### 2.6 bpfrejit-daemon（可选）
 
-常驻 watch 进程。**不做任何优化，不跑 pass pipeline。**
+常驻 watch 进程。**不做任何 in-process 优化，不维护 PassManager，不在进程内变换 bytecode。**
 
 ```bash
 # 启动 daemon，新程序加载时触发外部脚本
@@ -223,16 +223,17 @@ bpfget $PROG_ID | bpfopt wide-mem | bpfopt rotate | bpfrejit $PROG_ID
 2. map invalidation 检测（轮询 map values，对比之前 inline 的值）
 3. 触发外部脚本/命令进行优化
 4. 维护 session 生命周期
+5. 作为 legacy runner socket + JSON 协议的适配层，按请求 fork+exec `bpfopt`、`bpfget`、`bpfverify`、`bpfrejit`、`bpfprof`
 
 #### 不做的事
 
-- 不跑 pass pipeline
-- 不调用 bpfopt
-- 不做 profiling
+- 不在 daemon 进程内跑 pass pipeline
+- 不链接或调用 bpfopt library
+- 不在 daemon 进程内做 profiling
 - 不做字节码变换
 - 不维护 PassManager
 
-daemon 只是一个事件源 + 外部命令触发器。
+daemon 只是一个事件源 + socket-to-CLI 适配器 + 外部命令触发器。为了保持 runner Python 在 v3 迁移期不变，daemon-owned external profile lifecycle（`profile-start`/`profile-stop` 只启动和停止 `bpfprof --per-site` CLI）以及 daemon-owned optimize/verify/rejit delegation（只 fork+exec CLI 子进程）是 §8 方案 B 合规行为；禁止的是 daemon 内部 profiler、内部 PassManager、内部 verifier-log parser 和内部 bytecode transform。
 
 ---
 
@@ -611,7 +612,7 @@ kernel-sys（raw BPF syscall）
 
 1. **Watch 新程序加载**：轮询 `BPF_PROG_GET_NEXT_ID`，发现新 prog_id 时触发外部 pipeline
 2. **Map invalidation 检测**：读取 `invalidation-hints.json`（由 bpfopt map-inline --report 产出），轮询 map values，检测变化时触发 re-optimize
-3. **Unix socket 服务**（可选）：接受 benchmark runner 的 `optimize` 请求，内部执行配置好的外部 pipeline 脚本
+3. **Unix socket 服务**（v3 迁移期保留）：接受 benchmark runner 的 `optimize` / `profile-start` / `profile-stop` / `discover` 请求，内部 fork+exec CLI 子进程或配置好的外部 pipeline 脚本
 
 ### 不再保留的功能
 
@@ -620,7 +621,7 @@ kernel-sys（raw BPF syscall）
 - ~~profiler 线程~~
 - ~~kfunc discovery~~（移到 bpfget）
 - ~~verifier log 解析~~（移到 bpfverify）
-- ~~commands.rs 的 optimize pipeline~~（变成 bash 脚本）
+- ~~commands.rs 的 in-process optimize pipeline~~（只能保留 socket-to-CLI delegation）
 
 ### daemon 调外部 pipeline 的方式
 
@@ -658,10 +659,10 @@ def optimize(prog_id, target_json):
 ```python
 # runner 发请求
 send_json(sock, {"cmd": "optimize", "prog_id": 123})
-# daemon 收到后执行外部脚本
+# daemon 收到后 fork+exec bpfget/bpfopt/bpfverify/bpfrejit CLI，或执行外部脚本
 ```
 
-推荐 **方案 A**（benchmark 场景），因为 benchmark 不需要 watch/invalidation。daemon 只在"持续运行自动优化"场景下才需要。
+当前 v3 迁移选择 **方案 B**：runner Python (`runner/libs/`, `corpus/`, `e2e/`, `micro/`) 保持 daemon socket + JSON 稳定边界，daemon 内部适配到 CLI 子进程。该选择允许 daemon 管理外部 `bpfprof` profile 生命周期和外部 optimize/verify/rejit 子进程顺序，但不允许把 profiler、PassManager、verifier-log parser 或 bytecode transform 重新放回 daemon 进程内。
 
 ---
 

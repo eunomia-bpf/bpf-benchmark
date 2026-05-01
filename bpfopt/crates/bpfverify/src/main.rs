@@ -119,6 +119,8 @@ struct VerifierRegJson {
     #[serde(rename = "type")]
     reg_type: String,
     #[serde(skip_serializing_if = "Option::is_none")]
+    offset: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     const_val: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     min: Option<i64>,
@@ -956,15 +958,19 @@ fn convert_reg_state(reg: &verifier_log::RegState) -> Option<VerifierRegJson> {
         .tnum
         .map(|tnum| format!("0x{:x}/0x{:x}", tnum.value, tnum.mask));
 
-    (const_val.is_some() || min.is_some() || max.is_some() || tnum.is_some()).then_some(
-        VerifierRegJson {
-            reg_type: reg.reg_type.clone(),
-            const_val,
-            min,
-            max,
-            tnum,
-        },
-    )
+    (reg.offset.is_some()
+        || const_val.is_some()
+        || min.is_some()
+        || max.is_some()
+        || tnum.is_some())
+    .then_some(VerifierRegJson {
+        reg_type: reg.reg_type.clone(),
+        offset: reg.offset,
+        const_val,
+        min,
+        max,
+        tnum,
+    })
 }
 
 fn write_json_file<T: Serialize>(path: &Path, value: &T) -> Result<()> {

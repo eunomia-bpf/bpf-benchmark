@@ -344,6 +344,8 @@ struct VerifierRegJson {
     #[serde(rename = "type", default = "default_reg_type")]
     reg_type: String,
     #[serde(default)]
+    offset: Option<i32>,
+    #[serde(default)]
     const_val: Option<i64>,
     #[serde(default)]
     min: Option<i64>,
@@ -1185,7 +1187,7 @@ fn verifier_reg_state(state: VerifierRegJson) -> Result<RegState> {
             umax: state.max.and_then(nonnegative_i64_to_u64),
             ..ScalarRange::default()
         },
-        offset: None,
+        offset: state.offset,
         id: None,
     })
 }
@@ -1512,6 +1514,7 @@ mod tests {
                 "r1".to_string(),
                 VerifierRegJson {
                     reg_type: "scalar".to_string(),
+                    offset: None,
                     const_val: Some(42),
                     min: None,
                     max: None,

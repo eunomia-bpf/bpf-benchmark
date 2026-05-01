@@ -3,7 +3,10 @@ use std::collections::HashMap;
 
 use crate::bpf::{install_mock_map, use_mock_maps, BpfMapInfo, MockMapState};
 use crate::insn::*;
-use crate::pass::{BpfProgram, PassContext, PassManager, PipelineResult};
+use crate::pass::{
+    BpfProgram, PassContext, PassManager, PipelineResult, RegState, ScalarRange, VerifierInsn,
+    VerifierInsnKind, VerifierValueWidth,
+};
 
 const BPF_MAP_TYPE_HASH: u32 = kernel_sys::BPF_MAP_TYPE_HASH;
 const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY;
@@ -79,6 +82,39 @@ fn install_array_map(map_id: u32, value: Vec<u8>) {
 
 fn install_hash_map(map_id: u32, value: Vec<u8>) {
     install_map(map_id, BPF_MAP_TYPE_HASH, value);
+}
+
+fn fp_reg(offset: i32) -> RegState {
+    RegState {
+        reg_type: "fp".to_string(),
+        value_width: VerifierValueWidth::Bits64,
+        precise: false,
+        exact_value: None,
+        tnum: None,
+        range: ScalarRange::default(),
+        offset: Some(offset),
+        id: None,
+    }
+}
+
+fn verifier_delta_state(pc: usize, regs: HashMap<u8, RegState>) -> VerifierInsn {
+    VerifierInsn {
+        pc,
+        frame: 0,
+        from_pc: None,
+        kind: VerifierInsnKind::InsnDeltaState,
+        speculative: false,
+        regs,
+        stack: HashMap::new(),
+    }
+}
+
+fn install_single_lookup_verifier_states(program: &mut BpfProgram) {
+    program.set_verifier_states(vec![
+        verifier_delta_state(2, HashMap::new()),
+        verifier_delta_state(4, HashMap::from([(2, fp_reg(-4))])),
+        verifier_delta_state(5, HashMap::new()),
+    ]);
 }
 
 fn run_pipeline_with_passes(program: &mut BpfProgram, pass_names: &[&str]) -> PipelineResult {
@@ -255,6 +291,7 @@ fn cascade_map_inline_emits_non_zero_mov_constant() {
         exit_insn(),
     ]);
     program.set_map_ids(vec![301]);
+    install_single_lookup_verifier_states(&mut program);
 
     let result = run_pipeline_with_passes(&mut program, &["map_inline"]);
 
@@ -286,6 +323,7 @@ fn cascade_const_prop_folds_non_zero_map_inline_output() {
         exit_insn(),
     ]);
     program.set_map_ids(vec![302]);
+    install_single_lookup_verifier_states(&mut program);
 
     let result = run_pipeline_with_passes(&mut program, &["map_inline", "const_prop"]);
 
@@ -324,6 +362,7 @@ fn cascade_dce_eliminates_dead_branch_after_const_prop() {
         exit_insn(),
     ]);
     program.set_map_ids(vec![303]);
+    install_single_lookup_verifier_states(&mut program);
 
     let result = run_pipeline_with_passes(&mut program, &["map_inline", "const_prop", "dce"]);
 
@@ -357,6 +396,7 @@ fn cascade_full_pipeline_shortens_program_and_preserves_folded_semantics() {
         exit_insn(),
     ]);
     program.set_map_ids(vec![304]);
+    install_single_lookup_verifier_states(&mut program);
     let original_len = program.insns.len();
 
     let pm = default_test_pipeline();
@@ -412,6 +452,7 @@ fn cascade_hash_map_removes_lookup_and_null_path_then_folds_non_null_path() {
         exit_insn(),
     ]);
     program.set_map_ids(vec![305]);
+    install_single_lookup_verifier_states(&mut program);
 
     let result = run_pipeline_with_passes(&mut program, &["map_inline", "const_prop", "dce"]);
 

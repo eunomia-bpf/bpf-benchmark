@@ -873,6 +873,19 @@ mod tests {
         }
     }
 
+    fn fp_reg(offset: i32) -> RegState {
+        RegState {
+            reg_type: "fp".to_string(),
+            value_width: VerifierValueWidth::Bits64,
+            precise: false,
+            exact_value: None,
+            tnum: None,
+            range: ScalarRange::default(),
+            offset: Some(offset),
+            id: None,
+        }
+    }
+
     fn verifier_delta_state(pc: usize, regs: HashMap<u8, RegState>) -> VerifierInsn {
         VerifierInsn {
             pc,
@@ -1076,6 +1089,11 @@ mod tests {
             exit_insn(),
         ]);
         program.set_map_ids(vec![201]);
+        program.set_verifier_states(vec![
+            verifier_delta_state(2, HashMap::new()),
+            verifier_delta_state(4, HashMap::from([(2, fp_reg(-4))])),
+            verifier_delta_state(5, HashMap::new()),
+        ]);
 
         let mut pm = PassManager::new();
         pm.register_analysis(BranchTargetAnalysis);

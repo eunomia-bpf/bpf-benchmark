@@ -49,17 +49,13 @@ impl MapInfo {
         )
     }
 
-    /// Returns whether this map is inlineable in v1.
-    ///
-    /// v1 now performs speculative inlining for mutable maps and relies on the
-    /// invalidation tracker to re-specialize when values change. The remaining
-    /// hard requirement is that userspace can read the backing value correctly.
-    pub fn is_inlineable_v1(&self) -> bool {
+    /// Returns whether userspace can read this map's backing values correctly.
+    pub fn supports_direct_value_inline(&self) -> bool {
         self.supports_direct_value_access()
     }
 
-    /// Returns whether v1 can eliminate the lookup/null-check sequence.
-    pub fn can_remove_lookup_pattern_v1(&self) -> bool {
+    /// Returns whether map_inline can eliminate the lookup/null-check sequence.
+    pub fn has_removable_lookup_pattern(&self) -> bool {
         matches!(
             self.map_type,
             BPF_MAP_TYPE_ARRAY | BPF_MAP_TYPE_PERCPU_ARRAY
@@ -67,7 +63,7 @@ impl MapInfo {
     }
 
     /// Returns whether this inline is speculative and depends on runtime stability.
-    pub fn is_speculative_v1(&self) -> bool {
+    pub fn has_speculative_invalidation(&self) -> bool {
         matches!(self.map_type, BPF_MAP_TYPE_HASH | BPF_MAP_TYPE_LRU_HASH)
     }
 }
@@ -267,9 +263,9 @@ mod tests {
             ..hash_map(202)
         };
 
-        assert!(array.is_inlineable_v1());
-        assert!(hash.is_inlineable_v1());
-        assert!(hash.is_speculative_v1());
+        assert!(array.supports_direct_value_inline());
+        assert!(hash.supports_direct_value_inline());
+        assert!(hash.has_speculative_invalidation());
     }
 
     #[test]
@@ -295,9 +291,9 @@ mod tests {
         assert_eq!(result.references[0].map_id, Some(101));
         assert_eq!(result.references[1].map_id, Some(202));
         assert_eq!(result.unique_maps.len(), 2);
-        assert!(result.unique_maps[0].is_inlineable_v1());
-        assert!(result.unique_maps[1].is_inlineable_v1());
-        assert!(result.unique_maps[1].is_speculative_v1());
+        assert!(result.unique_maps[0].supports_direct_value_inline());
+        assert!(result.unique_maps[1].supports_direct_value_inline());
+        assert!(result.unique_maps[1].has_speculative_invalidation());
     }
 
     #[test]
@@ -314,9 +310,9 @@ mod tests {
         .expect("map reference collection should succeed");
 
         assert_eq!(result.unique_maps.len(), 1);
-        assert!(result.unique_maps[0].is_inlineable_v1());
-        assert!(result.unique_maps[0].is_speculative_v1());
-        assert!(!result.unique_maps[0].can_remove_lookup_pattern_v1());
+        assert!(result.unique_maps[0].supports_direct_value_inline());
+        assert!(result.unique_maps[0].has_speculative_invalidation());
+        assert!(!result.unique_maps[0].has_removable_lookup_pattern());
     }
 
     #[test]
@@ -458,7 +454,7 @@ mod tests {
                 map_type
             );
             assert!(
-                !info.is_inlineable_v1(),
+                !info.supports_direct_value_inline(),
                 "map_type {} should NOT be inlineable",
                 map_type
             );
@@ -482,15 +478,15 @@ mod tests {
             "PERCPU_ARRAY should allow site-level direct blob access"
         );
         assert!(
-            percpu_array.is_inlineable_v1(),
+            percpu_array.supports_direct_value_inline(),
             "PERCPU_ARRAY should be conditionally inlineable"
         );
         assert!(
-            percpu_array.can_remove_lookup_pattern_v1(),
+            percpu_array.has_removable_lookup_pattern(),
             "PERCPU_ARRAY should remove the lookup pattern when the key is in range"
         );
         assert!(
-            !percpu_array.is_speculative_v1(),
+            !percpu_array.has_speculative_invalidation(),
             "PERCPU_ARRAY should not use HASH-style speculative null handling"
         );
 
@@ -507,11 +503,11 @@ mod tests {
             "PERCPU_HASH must not support direct value access"
         );
         assert!(
-            !percpu_hash.is_inlineable_v1(),
+            !percpu_hash.supports_direct_value_inline(),
             "PERCPU_HASH must not be inlineable"
         );
         assert!(
-            !percpu_hash.is_speculative_v1(),
+            !percpu_hash.has_speculative_invalidation(),
             "PERCPU_HASH must not be speculative (not inlineable at all)"
         );
 
@@ -528,11 +524,11 @@ mod tests {
             "LRU_PERCPU_HASH must not support direct value access"
         );
         assert!(
-            !lru_percpu_hash.is_inlineable_v1(),
+            !lru_percpu_hash.supports_direct_value_inline(),
             "LRU_PERCPU_HASH must not be inlineable"
         );
         assert!(
-            !lru_percpu_hash.is_speculative_v1(),
+            !lru_percpu_hash.has_speculative_invalidation(),
             "LRU_PERCPU_HASH must not be speculative (not inlineable at all)"
         );
     }

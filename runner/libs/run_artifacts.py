@@ -91,9 +91,9 @@ def artifact_timestamp(generated_at: str | None = None) -> str:
     if generated_at:
         try:
             parsed = datetime.fromisoformat(generated_at.replace("Z", "+00:00"))
-            return parsed.astimezone(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
         except ValueError:
-            pass
+            raise ValueError(f"invalid generated_at timestamp: {generated_at!r}") from None
+        return parsed.astimezone(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
     return datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
 
 

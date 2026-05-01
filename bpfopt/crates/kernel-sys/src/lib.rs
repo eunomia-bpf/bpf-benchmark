@@ -241,14 +241,6 @@ fn verifier_log_summary(log: &str) -> String {
     }
 }
 
-fn verifier_log_reaches_safe_exit(log: &str) -> bool {
-    let saw_safe_state = log.lines().any(|line| line.trim_end().ends_with(": safe"));
-    let last_line = log.lines().rev().find(|line| !line.trim().is_empty());
-    saw_safe_state
-        && last_line
-            .is_some_and(|line| line.starts_with("processed ") && !line.starts_with("processed 0 "))
-}
-
 fn btf_record_count(label: &str, records: BtfInfoRecords<'_>) -> Result<Option<u32>> {
     if records.bytes.is_empty() {
         return Ok(None);
@@ -370,47 +362,6 @@ pub fn prog_load_dryrun_report(
     if fd < 0 {
         let errno = errno_from_libbpf_ret(fd);
         let log_true_size = opts.log_true_size;
-        let log_buf_len = options.log_buf.as_deref().map_or(0, <[u8]>::len);
-        if options.log_level > 0
-            && log_buf_len > 0
-            && (errno == libc::ENOSPC || verifier_log_reaches_safe_exit(&log))
-        {
-            opts.log_level = 0;
-            opts.log_size = 0;
-            opts.log_buf = std::ptr::null_mut();
-            opts.log_true_size = 0;
-
-            let retry_fd = unsafe {
-                bpf_prog_load(
-                    options.prog_type,
-                    DEFAULT_PROG_NAME.as_ptr() as *const c_char,
-                    DEFAULT_LICENSE.as_ptr() as *const c_char,
-                    options.insns.as_ptr(),
-                    insn_cnt,
-                    &mut opts,
-                )
-            };
-            if retry_fd >= 0 {
-                let fd = unsafe { OwnedFd::from_raw_fd(retry_fd) };
-                let jited_size = Some(obj_get_info_by_fd(fd.as_fd())?.jited_prog_len);
-                drop(fd);
-                return Ok(ProgLoadDryRunReport {
-                    accepted: true,
-                    errno: None,
-                    verifier_log: log,
-                    log_true_size,
-                    jited_size,
-                });
-            }
-            return Ok(ProgLoadDryRunReport {
-                accepted: false,
-                errno: Some(errno_from_libbpf_ret(retry_fd)),
-                verifier_log: log,
-                log_true_size,
-                jited_size: None,
-            });
-        }
-
         return Ok(ProgLoadDryRunReport {
             accepted: false,
             errno: Some(errno),
@@ -1406,36 +1357,7 @@ pub fn prog_rejit(
             Some(buf) => extract_log_string(buf),
             None => String::new(),
         };
-        let mut retry_error = None;
-        if log_buf.is_some()
-            && (first_error.raw_os_error() == Some(libc::ENOSPC)
-                || verifier_log_reaches_safe_exit(&log))
-        {
-            let mut retry_attr = attr;
-            retry_attr.log_level = 0;
-            retry_attr.log_size = 0;
-            retry_attr.log_buf = 0;
-            let retry_ret = unsafe {
-                sys_bpf(
-                    BPF_PROG_REJIT,
-                    &mut retry_attr,
-                    std::mem::size_of::<AttrRejit>(),
-                )
-            };
-            if retry_ret >= 0 {
-                return Ok(());
-            }
-            retry_error = Some(std::io::Error::last_os_error());
-        }
         if !log.is_empty() {
-            if let Some(retry_error) = retry_error {
-                return Err(anyhow!(
-                    "BPF_PROG_REJIT: {}; retry without verifier log failed: {}\nverifier log summary:\n{}",
-                    first_error,
-                    retry_error,
-                    verifier_log_summary(&log)
-                ));
-            }
             return Err(anyhow!(
                 "BPF_PROG_REJIT: {}\nverifier log summary:\n{}",
                 first_error,
@@ -1692,18 +1614,5 @@ mod tests {
         };
 
         assert_eq!(btf_record_count("func_info", records).unwrap(), Some(2));
-    }
-
-    #[test]
-    fn verifier_log_reaches_safe_exit_requires_safe_processed_tail() {
-        let log = "10: safe\nprocessed 42 insns (limit 1000000) max_states_per_insn 1";
-
-        assert!(verifier_log_reaches_safe_exit(log));
-        assert!(!verifier_log_reaches_safe_exit(
-            "func_info BTF section doesn't match subprog layout\nprocessed 0 insns"
-        ));
-        assert!(!verifier_log_reaches_safe_exit(
-            "invalid mem access\nprocessed 42 insns"
-        ));
     }
 }

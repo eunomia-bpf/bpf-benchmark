@@ -5,8 +5,6 @@ use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::ops::{Deref, DerefMut};
 
-use serde::Serialize;
-
 // ── Instruction classes ──────────────────────────────────────────────
 pub const BPF_LD: u8 = kernel_sys::BPF_LD as u8;
 pub const BPF_LDX: u8 = kernel_sys::BPF_LDX as u8;
@@ -418,47 +416,6 @@ impl BpfInsn {
     #[cfg(test)]
     pub fn is_kinsn_sidecar(&self) -> bool {
         self.code == (BPF_ALU64 | BPF_MOV | BPF_K) && self.src_reg() == BPF_PSEUDO_KINSN_SIDECAR
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
-pub struct BpfInsnDump {
-    pub pc: usize,
-    pub raw_hex: String,
-    pub code: u8,
-    pub regs: u8,
-    pub dst_reg: u8,
-    pub src_reg: u8,
-    pub off: i16,
-    pub imm: i32,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
-pub struct BpfBytecodeDump {
-    pub insn_count: usize,
-    #[serde(skip_serializing_if = "Vec::is_empty", default)]
-    pub insns: Vec<BpfInsnDump>,
-    /// Compact representation: all instruction bytes as a single hex string.
-    /// Used when full per-instruction dumps are too large.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub raw_hex_blob: Option<String>,
-}
-
-/// Compact bytecode dump — only insn_count + raw hex blob.
-/// Used in socket responses to keep JSON size manageable.
-pub fn dump_bytecode_compact(insns: &[BpfInsn]) -> BpfBytecodeDump {
-    let mut blob = String::with_capacity(insns.len() * 16);
-    for insn in insns {
-        let raw = insn.raw_bytes();
-        for byte in &raw {
-            use std::fmt::Write as _;
-            write!(blob, "{:02x}", byte).expect("writing to String cannot fail");
-        }
-    }
-    BpfBytecodeDump {
-        insn_count: insns.len(),
-        insns: Vec::new(),
-        raw_hex_blob: Some(blob),
     }
 }
 

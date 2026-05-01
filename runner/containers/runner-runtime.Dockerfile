@@ -586,7 +586,6 @@ done
 if [ -z "${BPFREJIT_DAEMON_FAILURE_ROOT:-}" ] && [ -n "$suite_results" ]; then
     workspace="${BPFREJIT_IMAGE_WORKSPACE:-/workspace}"
     export BPFREJIT_DAEMON_FAILURE_ROOT="${workspace}/${suite_results}"
-    export BPFREJIT_DAEMON_FAILURE_LAYOUT="${BPFREJIT_DAEMON_FAILURE_LAYOUT:-active-run-details}"
 fi
 
 if [ -n "${BPFREJIT_DAEMON_FAILURE_ROOT:-}" ]; then

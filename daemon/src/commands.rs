@@ -20,6 +20,7 @@ use crate::invalidation::{BpfMapValueReader, MapInvalidationTracker};
 static NEXT_WORKDIR_ID: AtomicU64 = AtomicU64::new(0);
 const FAILURE_ROOT_ENV: &str = "BPFREJIT_DAEMON_FAILURE_ROOT";
 const KEEP_ALL_WORKDIRS_ENV: &str = "BPFREJIT_DAEMON_KEEP_ALL_WORKDIRS";
+const DEFAULT_FAILURE_ROOT_NAME: &str = "bpfrejit-failures";
 const DEBUG_WORKDIR_ROOT_NAME: &str = "workdirs";
 const FUNC_INFO_FILE: &str = "func_info.bin";
 const LINE_INFO_FILE: &str = "line_info.bin";
@@ -99,14 +100,18 @@ struct FailureExportConfig {
 
 impl FailureExportConfig {
     fn from_env() -> Result<Self> {
-        let raw = std::env::var_os(FAILURE_ROOT_ENV)
-            .ok_or_else(|| anyhow!("{FAILURE_ROOT_ENV} is required"))?;
-        if raw.is_empty() {
-            bail!("{FAILURE_ROOT_ENV} must not be empty");
-        }
-        Ok(Self {
-            root: PathBuf::from(raw),
-        })
+        let root = match std::env::var_os(FAILURE_ROOT_ENV) {
+            Some(raw) => {
+                if raw.is_empty() {
+                    bail!("{FAILURE_ROOT_ENV} must not be empty");
+                }
+                PathBuf::from(raw)
+            }
+            None => std::env::current_dir()
+                .context("resolve current directory for default failure export root")?
+                .join(DEFAULT_FAILURE_ROOT_NAME),
+        };
+        Ok(Self { root })
     }
 
     fn validate_configured_root(&self) -> Result<()> {
@@ -2185,10 +2190,7 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"b
         }
     }
 
-    fn with_failure_export_env<T>(
-        failure_root: &Path,
-        f: impl FnOnce() -> T,
-    ) -> T {
+    fn with_failure_export_env<T>(failure_root: &Path, f: impl FnOnce() -> T) -> T {
         with_daemon_export_env(failure_root, None, f)
     }
 
@@ -2223,10 +2225,15 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"b
     }
 
     #[test]
-    fn failure_export_root_env_is_required() {
+    fn failure_export_root_env_defaults_to_cwd() {
         with_clean_daemon_export_env(|| {
-            let err = validate_failure_export_root_from_env().unwrap_err();
-            assert!(format!("{err:#}").contains("BPFREJIT_DAEMON_FAILURE_ROOT is required"));
+            let config = FailureExportConfig::from_env().unwrap();
+            assert_eq!(
+                config.root,
+                std::env::current_dir()
+                    .unwrap()
+                    .join(DEFAULT_FAILURE_ROOT_NAME)
+            );
         });
     }
 

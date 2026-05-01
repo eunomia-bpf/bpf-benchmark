@@ -378,19 +378,16 @@ def _refresh_active_session_programs(
             discover_source = discover_source or rediscovered.source
             expected_count = len(tracked_prog_ids)
             refreshed_count = len(live_programs)
+            refreshed_ids = [int(program["id"]) for program in live_programs]
             if refreshed_count < expected_count:
-                _print_progress(
-                    "session_warning",
-                    app=session.app.name,
-                    runner=session.app.runner,
-                    phase=phase,
-                    warning=(
-                        f"rediscovery returned fewer programs than expected: "
-                        f"{refreshed_count}/{expected_count}; accepting partial set"
-                    ),
-                    missing_ids=missing_ids,
-                    refreshed_ids=[int(program["id"]) for program in live_programs],
-                    discover_source=discover_source,
+                refreshed_id_set = set(refreshed_ids)
+                still_missing_ids = sorted(tracked_prog_ids - refreshed_id_set)
+                raise RuntimeError(
+                    f"{session.app.name}: rediscovery returned fewer BPF programs than expected "
+                    f"before {phase}: refreshed_count={refreshed_count}, "
+                    f"expected_count={expected_count}, expected_ids={sorted(tracked_prog_ids)}, "
+                    f"missing_ids={still_missing_ids}, refreshed_ids={refreshed_ids}, "
+                    f"discover_source={discover_source}"
                 )
             _print_progress(
                 "session_warning",
@@ -400,7 +397,7 @@ def _refresh_active_session_programs(
                 warning="tracked BPF program ids changed; refreshed live session programs",
                 previous_ids=sorted(tracked_prog_ids),
                 missing_ids=missing_ids,
-                refreshed_ids=[int(program["id"]) for program in live_programs],
+                refreshed_ids=refreshed_ids,
                 expected_count=expected_count,
                 refreshed_count=refreshed_count,
                 discover_source=discover_source,

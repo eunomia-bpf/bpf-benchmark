@@ -965,7 +965,6 @@ void initialize_micro_exec_process()
 
 std::vector<sample_result> run_kernel(const cli_options &options)
 {
-    // TODO: moved to Python orchestrator (§5.6)
     // C++ no longer owns prepared state, daemon REJIT, attach-trigger workloads,
     // or batch orchestration. This path is a single load -> TEST_RUN -> JSON exit.
 

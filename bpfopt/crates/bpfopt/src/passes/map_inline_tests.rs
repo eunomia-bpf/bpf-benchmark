@@ -262,6 +262,7 @@ fn run_map_inline_pass(program: &mut BpfProgram) -> PipelineResult {
 
 fn try_run_map_inline_pass(program: &mut BpfProgram) -> anyhow::Result<PipelineResult> {
     use_mock_maps(program);
+    install_synthetic_verifier_states_for_map_inline_tests(program);
     let mut pm = PassManager::new();
     pm.register_analysis(BranchTargetAnalysis);
     pm.register_analysis(MapInfoAnalysis);
@@ -271,6 +272,7 @@ fn try_run_map_inline_pass(program: &mut BpfProgram) -> anyhow::Result<PipelineR
 
 fn run_map_inline_const_prop_dce(program: &mut BpfProgram) -> PipelineResult {
     use_mock_maps(program);
+    install_synthetic_verifier_states_for_map_inline_tests(program);
     let mut pm = PassManager::new();
     pm.register_analysis(BranchTargetAnalysis);
     pm.register_analysis(CFGAnalysis);
@@ -280,10 +282,70 @@ fn run_map_inline_const_prop_dce(program: &mut BpfProgram) -> PipelineResult {
     pm.add_pass(DcePass);
     pm.run(program, &PassContext::test_default()).unwrap()
 }
+
+fn install_synthetic_verifier_states_for_map_inline_tests(program: &mut BpfProgram) {
+    if !program.verifier_states.is_empty() {
+        return;
+    }
+
+    let mut states = Vec::new();
+    for site in find_map_lookup_sites(&program.insns) {
+        let Some(map_load) = program.insns.get(site.map_load_pc) else {
+            continue;
+        };
+        let Some(map_id) = program.map_fd_bindings.get(&map_load.imm).copied() else {
+            continue;
+        };
+        let Some(info) = program.map_provider.map_info(program, map_id).unwrap() else {
+            continue;
+        };
+        let bounds = subprog_bounds(&program.insns, site.call_pc);
+        let Ok(stack_off) = resolve_stack_pointer_to_stack(&program.insns, site.call_pc, 2, bounds)
+        else {
+            continue;
+        };
+        if let Some((mov_pc, add_pc, _)) =
+            find_r2_stack_pointer_setup_simple(&program.insns, site.call_pc, bounds)
+        {
+            if let Ok(key_width) = u8::try_from(info.key_size) {
+                if let Ok(stack_bytes) = find_constant_stack_bytes(
+                    &program.insns,
+                    site.call_pc,
+                    bounds,
+                    stack_off,
+                    key_width,
+                ) {
+                    let store = program.insns[stack_bytes.latest_store_pc];
+                    let mut regs = HashMap::new();
+                    if bpf_class(store.code) == BPF_STX {
+                        if let Ok(value) = resolve_constant_reg_value(
+                            &program.insns,
+                            stack_bytes.latest_store_pc,
+                            store.src_reg(),
+                            bounds,
+                        ) {
+                            regs.insert(store.src_reg(), scalar_reg(value.value));
+                        }
+                    }
+                    states.push(verifier_delta_state(stack_bytes.latest_store_pc, regs));
+                }
+            }
+            let setup_pc = add_pc.max(mov_pc);
+            states.push(verifier_delta_state(
+                setup_pc,
+                HashMap::from([(2, fp_reg(i32::from(stack_off)))]),
+            ));
+            states.push(verifier_delta_state(site.call_pc, HashMap::new()));
+        }
+    }
+
+    program.set_verifier_states(states);
+}
+
 fn has_non_constant_key_skip(result: &PipelineResult) -> bool {
     result.pass_results[0].sites_skipped.iter().any(|skip| {
         skip.reason
-            .contains("lookup key is not a constant stack or pseudo-map-value materialization")
+            .contains("lookup key is not available from verifier-guided state")
     })
 }
 
@@ -1068,7 +1130,7 @@ fn map_inline_pass_skips_non_constant_key() {
 }
 
 #[test]
-fn map_inline_pass_rewrites_hash_lookup_with_pseudo_map_value_20_byte_key() {
+fn map_inline_pass_skips_pseudo_map_value_lookup_key_without_verifier_state() {
     let key_bytes = (0u8..20).collect::<Vec<_>>();
     install_array_map_entry(9401, 1, 0, key_bytes.clone(), true);
 
@@ -1093,23 +1155,17 @@ fn map_inline_pass_rewrites_hash_lookup_with_pseudo_map_value_20_byte_key() {
 
     let result = run_map_inline_pass(&mut program);
 
-    assert!(
-        result.program_changed,
-        "skip reasons: {:?}",
-        result.pass_results[0].sites_skipped
-    );
-    assert_eq!(result.total_sites_applied, 1);
-    assert!(program.insns.contains(&BpfInsn::mov32_imm(6, 42)));
-    assert_eq!(result.pass_results[0].map_inline_records.len(), 1);
-    assert_eq!(result.pass_results[0].map_inline_records[0].key, key_bytes);
-    assert_eq!(
-        result.pass_results[0].map_inline_records[0].expected_value,
-        42u32.to_le_bytes().to_vec()
-    );
+    assert!(!result.program_changed);
+    assert_eq!(result.total_sites_applied, 0);
+    assert!(has_non_constant_key_skip(&result));
+    assert!(result.pass_results[0]
+        .diagnostics
+        .iter()
+        .any(|diag| diag.contains("no verifier states available")));
 }
 
 #[test]
-fn map_inline_pass_removes_hash_lookup_with_16_byte_split_dw_key() {
+fn map_inline_pass_skips_16_byte_key_without_verifier_support() {
     let lo = 0x0706_0504_0302_0100u64;
     let hi = 0x0f0e_0d0c_0b0a_0908u64;
     let mut key_bytes = lo.to_le_bytes().to_vec();
@@ -1145,21 +1201,13 @@ fn map_inline_pass_removes_hash_lookup_with_16_byte_split_dw_key() {
 
     let result = run_map_inline_pass(&mut program);
 
-    assert!(
-        result.program_changed,
-        "skip reasons: {:?}",
-        result.pass_results[0].sites_skipped
-    );
-    assert_eq!(result.total_sites_applied, 1);
-    assert_eq!(
-        program.insns,
-        vec![
-            BpfInsn::mov32_imm(6, 42),
-            BpfInsn::mov64_imm(0, 0),
-            exit_insn(),
-        ]
-    );
-    assert_eq!(result.pass_results[0].map_inline_records[0].key, key_bytes);
+    assert!(!result.program_changed);
+    assert_eq!(result.total_sites_applied, 0);
+    assert!(has_non_constant_key_skip(&result));
+    assert!(result.pass_results[0]
+        .diagnostics
+        .iter()
+        .any(|diag| diag.contains("supports up to 8-byte keys")));
 }
 
 #[test]
@@ -1256,7 +1304,7 @@ fn map_inline_pass_removes_hash_lookup_and_null_path_when_entry_present() {
 }
 
 #[test]
-fn map_inline_pass_rewrites_hash_lookup_with_20_byte_constant_key() {
+fn map_inline_pass_skips_20_byte_constant_key_without_verifier_support() {
     let mut values = HashMap::new();
     let mut key_bytes = vec![0u8; 20];
     key_bytes[16..20].copy_from_slice(&1u32.to_le_bytes());
@@ -1285,21 +1333,13 @@ fn map_inline_pass_rewrites_hash_lookup_with_20_byte_constant_key() {
 
     let result = run_map_inline_pass(&mut program);
 
-    assert!(
-        result.program_changed,
-        "skip reasons: {:?}",
-        result.pass_results[0].sites_skipped
-    );
-    assert_eq!(result.total_sites_applied, 1);
-    assert_eq!(
-        program.insns,
-        vec![
-            BpfInsn::mov32_imm(6, 7),
-            BpfInsn::mov64_imm(0, 0),
-            exit_insn(),
-        ]
-    );
-    assert_eq!(result.pass_results[0].map_inline_records[0].key, key_bytes);
+    assert!(!result.program_changed);
+    assert_eq!(result.total_sites_applied, 0);
+    assert!(has_non_constant_key_skip(&result));
+    assert!(result.pass_results[0]
+        .diagnostics
+        .iter()
+        .any(|diag| diag.contains("supports up to 8-byte keys")));
 }
 
 #[test]
@@ -1452,7 +1492,7 @@ fn map_inline_pass_removes_hash_lookup_before_helper_using_loaded_scalar() {
 }
 
 #[test]
-fn map_inline_pass_reaches_fixpoint_through_stack_reloaded_key() {
+fn map_inline_pass_does_not_use_non_verifier_fixpoint_fallback() {
     install_array_map(9203, 2u32.to_le_bytes().to_vec());
     install_array_map_entry(9204, 8, 2, 11u32.to_le_bytes().to_vec(), true);
 
@@ -1487,23 +1527,23 @@ fn map_inline_pass_reaches_fixpoint_through_stack_reloaded_key() {
         "skip reasons: {:?}",
         result.pass_results[0].sites_skipped
     );
-    assert_eq!(result.total_sites_applied, 2);
+    assert_eq!(result.total_sites_applied, 1);
     assert!(
-        !program
+        program
             .insns
             .iter()
             .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM),
-        "expected both lookup helpers to be eliminated, got: {:?}",
+        "expected later lookup helper to remain without refreshed verifier state, got: {:?}",
         program.insns
     );
     assert!(
-        program
+        !program
             .insns
             .iter()
             .any(|insn| insn.code == (BPF_ALU | BPF_MOV | BPF_K)
                 && insn.dst_reg() == 8
                 && insn.imm == 11),
-        "expected final lookup load to become constant, got: {:?}",
+        "did not expect non-verifier fallback to constantize final lookup, got: {:?}",
         program.insns
     );
 }

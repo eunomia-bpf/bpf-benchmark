@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 use std::fs;
-use std::io::Write;
+use std::io::{ErrorKind, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output, Stdio};
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -100,6 +100,25 @@ fn two_hash_lookup_program_bytes() -> Vec<u8> {
     .collect()
 }
 
+fn map_lookup_verifier_states_json() -> &'static str {
+    r#"{"insns":[
+        {"pc":2,"regs":{}},
+        {"pc":4,"regs":{"r2":{"type":"fp","offset":-4}}},
+        {"pc":5,"regs":{}}
+    ]}"#
+}
+
+fn two_hash_lookup_verifier_states_json() -> &'static str {
+    r#"{"insns":[
+        {"pc":2,"regs":{}},
+        {"pc":4,"regs":{"r2":{"type":"fp","offset":-4}}},
+        {"pc":5,"regs":{}},
+        {"pc":13,"regs":{}},
+        {"pc":15,"regs":{"r2":{"type":"fp","offset":-8}}},
+        {"pc":16,"regs":{}}
+    ]}"#
+}
+
 fn temp_path(name: &str) -> PathBuf {
     let id = NEXT_TEMP_ID.fetch_add(1, Ordering::Relaxed);
     std::env::temp_dir().join(format!("bpfopt-cli-{}-{id}-{name}", std::process::id()))
@@ -128,12 +147,16 @@ fn run_bpfopt(args: &[&str], stdin_bytes: &[u8]) -> Output {
         .stderr(Stdio::piped())
         .spawn()
         .expect("spawn bpfopt");
-    child
+    if let Err(err) = child
         .stdin
         .as_mut()
         .expect("stdin pipe")
         .write_all(stdin_bytes)
-        .expect("write stdin");
+    {
+        if err.kind() != ErrorKind::BrokenPipe {
+            panic!("write stdin: {err}");
+        }
+    }
     child.wait_with_output().expect("wait bpfopt")
 }
 
@@ -302,12 +325,19 @@ fn optimize_map_inline_errors_when_snapshot_key_is_absent() {
         "map-values-absent-key.json",
         r#"{"maps":[{"map_id":111,"map_type":2,"key_size":4,"value_size":4,"max_entries":8,"frozen":true,"entries":[]}]}"#,
     );
+    let verifier_path = write_temp_file(
+        "map-lookup-verifier-states.json",
+        map_lookup_verifier_states_json(),
+    );
     let map_values_arg = map_values_path.to_string_lossy().to_string();
+    let verifier_arg = verifier_path.to_string_lossy().to_string();
     let output = run_bpfopt(
         &[
             "optimize",
             "--passes",
             "map-inline",
+            "--verifier-states",
+            &verifier_arg,
             "--map-values",
             &map_values_arg,
             "--map-ids",
@@ -316,6 +346,7 @@ fn optimize_map_inline_errors_when_snapshot_key_is_absent() {
         &map_lookup_program_bytes(),
     );
     remove_file_if_exists(map_values_path);
+    remove_file_if_exists(verifier_path);
 
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -338,6 +369,11 @@ fn optimize_map_inline_skips_hash_lookup_when_snapshot_value_is_null() {
     );
     let report_arg = report_path.to_string_lossy().to_string();
     let map_values_arg = map_values_path.to_string_lossy().to_string();
+    let verifier_path = write_temp_file(
+        "two-hash-lookup-verifier-states.json",
+        two_hash_lookup_verifier_states_json(),
+    );
+    let verifier_arg = verifier_path.to_string_lossy().to_string();
     let output = run_bpfopt(
         &[
             "optimize",
@@ -345,6 +381,8 @@ fn optimize_map_inline_skips_hash_lookup_when_snapshot_value_is_null() {
             "map-inline",
             "--report",
             &report_arg,
+            "--verifier-states",
+            &verifier_arg,
             "--map-values",
             &map_values_arg,
             "--map-ids",
@@ -353,6 +391,7 @@ fn optimize_map_inline_skips_hash_lookup_when_snapshot_value_is_null() {
         &two_hash_lookup_program_bytes(),
     );
     remove_file_if_exists(map_values_path);
+    remove_file_if_exists(verifier_path);
 
     assert!(
         output.status.success(),
