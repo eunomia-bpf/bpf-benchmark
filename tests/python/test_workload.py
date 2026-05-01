@@ -2,6 +2,7 @@ import subprocess
 import sys
 import time
 import unittest
+from http.client import HTTPConnection
 from unittest import mock
 
 from runner.libs import benchmark_catalog, workload
@@ -78,6 +79,24 @@ class WorkloadContractTests(unittest.TestCase):
         command = workload._network_client_command(["wrk", "http://127.0.0.1:18080/"], None)
 
         self.assertEqual(command, ["wrk", "http://127.0.0.1:18080/"])
+
+    def test_http_workload_handlers_use_http11_keep_alive(self) -> None:
+        with workload.LocalHttpServer("127.0.0.1") as server:
+            host_port = server.url.removeprefix("http://").removesuffix("/")
+            host, port_text = host_port.rsplit(":", 1)
+            conn = HTTPConnection(host, int(port_text), timeout=2)
+            try:
+                conn.request("GET", "/")
+                first = conn.getresponse()
+                self.assertEqual(first.version, 11)
+                first.read()
+                conn.request("GET", "/")
+                second = conn.getresponse()
+                self.assertEqual(second.version, 11)
+                second.read()
+            finally:
+                conn.close()
+        self.assertIn('protocol_version = "HTTP/1.1"', workload._NAMESPACED_HTTP_SERVER_SCRIPT)
 
     def test_network_load_error_reports_actual_client_namespace_command(self) -> None:
         completed = subprocess.CompletedProcess(

@@ -28,15 +28,11 @@ const FUNC_INFO_FILE: &str = "func_info.bin";
 const LINE_INFO_FILE: &str = "line_info.bin";
 const MAP_VALUES_FILE: &str = "map-values.json";
 const VERIFIER_STATES_FILE: &str = "verifier-states.json";
+const VERIFIER_STATES_STAGE: &str = "bpfverify original verifier-states";
 const DEFAULT_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(5);
 const HEAVY_VERIFY_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(60);
 const OPTIMIZE_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(60);
 const REJIT_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(60);
-const VERIFIER_STATES_TIMEOUT_RAMP: [Duration; 3] = [
-    Duration::from_secs(5),
-    Duration::from_secs(30),
-    Duration::from_secs(60),
-];
 const CLI_STAGE_POLL_INTERVAL: Duration = Duration::from_millis(100);
 
 #[derive(Clone, Debug)]
@@ -1479,40 +1475,45 @@ fn write_original_verifier_states(
     map_fds_json: &Path,
     verifier_states_json: &Path,
 ) -> Result<()> {
-    const STAGE: &str = "bpfverify original verifier-states";
-    let timeouts = verifier_states_timeout_ramp();
-    for (index, timeout) in timeouts.iter().copied().enumerate() {
-        if verifier_states_json.exists() {
-            fs::remove_file(verifier_states_json)
-                .with_context(|| format!("remove stale {}", verifier_states_json.display()))?;
-        }
-        let mut verify = config.command("bpfverify");
-        verify
-            .arg("--prog-type")
-            .arg(&prog_info.prog_type.name)
-            .arg("--map-fds")
-            .arg(map_fds_json)
-            .arg("--input")
-            .arg(prog_bin)
-            .arg("--verifier-states-out")
-            .arg(verifier_states_json);
-        append_verifier_states_load_context_args(&mut verify, prog_info, workdir)?;
-        match run_stage_output_with_timeout(STAGE, &mut verify, timeout) {
-            Ok(_) => {
-                require_nonempty_file(verifier_states_json, "verifier states")?;
-                return Ok(());
-            }
-            Err(err) if stage_error_is_timeout(&err, STAGE) && index + 1 < timeouts.len() => {
-                eprintln!(
-                    "daemon: {STAGE} timed out after {}; retrying with {}",
-                    duration_label(timeout),
-                    duration_label(timeouts[index + 1])
-                );
-            }
-            Err(err) => return Err(err).context("bpfverify --verifier-states-out failed"),
-        }
+    write_original_verifier_states_with_timeout(
+        config,
+        prog_info,
+        workdir,
+        prog_bin,
+        map_fds_json,
+        verifier_states_json,
+        timeout_for_stage(VERIFIER_STATES_STAGE),
+    )
+}
+
+fn write_original_verifier_states_with_timeout(
+    config: &CliConfig,
+    prog_info: &ProgInfoJson,
+    workdir: &Path,
+    prog_bin: &Path,
+    map_fds_json: &Path,
+    verifier_states_json: &Path,
+    timeout: Duration,
+) -> Result<()> {
+    if verifier_states_json.exists() {
+        fs::remove_file(verifier_states_json)
+            .with_context(|| format!("remove stale {}", verifier_states_json.display()))?;
     }
-    bail!("bpfverify --verifier-states-out failed without an attempted timeout");
+    let mut verify = config.command("bpfverify");
+    verify
+        .arg("--prog-type")
+        .arg(&prog_info.prog_type.name)
+        .arg("--map-fds")
+        .arg(map_fds_json)
+        .arg("--input")
+        .arg(prog_bin)
+        .arg("--verifier-states-out")
+        .arg(verifier_states_json);
+    append_verifier_states_load_context_args(&mut verify, prog_info, workdir)?;
+    run_stage_output_with_timeout(VERIFIER_STATES_STAGE, &mut verify, timeout)
+        .context("bpfverify --verifier-states-out failed")?;
+    require_nonempty_file(verifier_states_json, "verifier states")?;
+    Ok(())
 }
 
 fn pass_detail_from_report(report: &BpfoptPassReport) -> PassDetail {
@@ -1915,15 +1916,6 @@ fn timeout_for_stage(stage: &str) -> Duration {
         "bpfrejit" => REJIT_CLI_STAGE_TIMEOUT,
         _ => DEFAULT_CLI_STAGE_TIMEOUT,
     }
-}
-
-fn verifier_states_timeout_ramp() -> &'static [Duration] {
-    &VERIFIER_STATES_TIMEOUT_RAMP
-}
-
-fn stage_error_is_timeout(err: &anyhow::Error, stage: &str) -> bool {
-    let needle = format!("{stage} timed out after");
-    err.chain().any(|cause| cause.to_string().contains(&needle))
 }
 
 fn wait_with_timeout_for(
@@ -2671,14 +2663,6 @@ done
             Duration::from_secs(5)
         );
         assert_eq!(
-            verifier_states_timeout_ramp(),
-            &[
-                Duration::from_secs(5),
-                Duration::from_secs(30),
-                Duration::from_secs(60)
-            ]
-        );
-        assert_eq!(
             timeout_for_stage("bpfverify final verification"),
             Duration::from_secs(60)
         );
@@ -2710,6 +2694,76 @@ done
         let message = format!("{err:#}");
         assert!(message.contains("bpfverify original verifier-states timed out after 50ms"));
         assert!(started.elapsed() < Duration::from_secs(1));
+    }
+
+    #[test]
+    fn verifier_states_timeout_is_not_retried() {
+        let fake = FakeCliDir::new().unwrap();
+        fake.replace_command(
+            "bpfverify",
+            r#"#!/usr/bin/env bash
+set -euo pipefail
+printf '%s\n' "$*" >> "${BASH_SOURCE[0]}.args"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --verifier-states-out) sleep 5; exit 0 ;;
+    *) shift ;;
+  esac
+done
+"#,
+        )
+        .unwrap();
+        let dir = WorkDir::new("bpfrejit-daemon-verifier-states-timeout").unwrap();
+        let prog_bin = dir.path().join("prog.bin");
+        let map_fds_json = dir.path().join("map_fds.json");
+        let verifier_states_json = dir.path().join("verifier-states.json");
+        fs::write(&prog_bin, b"").unwrap();
+        fs::write(&map_fds_json, b"[]\n").unwrap();
+        let prog_info = ProgInfoJson {
+            id: 42,
+            name: "demo".to_string(),
+            prog_type: TypeJson {
+                name: "xdp".to_string(),
+                numeric: 6,
+            },
+            insn_cnt: 0,
+            map_ids: Vec::new(),
+            btf_id: 0,
+            prog_flags: 0,
+            func_info_rec_size: 0,
+            nr_func_info: 0,
+            line_info_rec_size: 0,
+            nr_line_info: 0,
+            attach_btf_obj_id: 0,
+            attach_btf_id: 0,
+            expected_attach_type: None,
+        };
+        let started = Instant::now();
+
+        let err = write_original_verifier_states_with_timeout(
+            &fake.config(),
+            &prog_info,
+            dir.path(),
+            &prog_bin,
+            &map_fds_json,
+            &verifier_states_json,
+            Duration::from_millis(50),
+        )
+        .unwrap_err();
+
+        let message = format!("{err:#}");
+        assert!(message.contains("bpfverify --verifier-states-out failed"));
+        assert!(message.contains("bpfverify original verifier-states timed out after 50ms"));
+        assert!(started.elapsed() < Duration::from_secs(1));
+        let args_log = fs::read_to_string(fake.dir.path().join("bpfverify.args")).unwrap();
+        assert_eq!(
+            args_log
+                .lines()
+                .filter(|line| line.contains("--verifier-states-out"))
+                .count(),
+            1,
+            "args log:\n{args_log}"
+        );
     }
 
     #[test]

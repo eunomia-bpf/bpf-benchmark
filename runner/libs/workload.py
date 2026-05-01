@@ -495,6 +495,8 @@ class WorkloadResult:
 
 
 class _SilentHandler(BaseHTTPRequestHandler):
+    protocol_version = "HTTP/1.1"
+
     def do_GET(self) -> None:  # noqa: N802
         payload = b"tracee-benchmark\n"
         self.send_response(200)
@@ -547,6 +549,8 @@ import socket
 import sys
 
 class SilentHandler(BaseHTTPRequestHandler):
+    protocol_version = "HTTP/1.1"
+
     def do_GET(self):
         payload = b"tracee-benchmark\\n"
         self.send_response(200)
