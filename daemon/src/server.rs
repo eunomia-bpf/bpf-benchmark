@@ -185,6 +185,7 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
     use std::os::unix::net::UnixListener;
 
     register_signal_handlers();
+    commands::validate_failure_export_root_from_env()?;
     let config = CliConfig::from_env();
     let tracker = commands::new_invalidation_tracker();
     let reoptimization_state = new_reoptimization_state();
@@ -193,7 +194,6 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
     let mut last_watch_check = Instant::now();
     let mut watcher = ProgramWatcher::from_live()?;
 
-    commands::validate_failure_export_root_from_env()?;
     remove_socket_file_if_present(socket_path)?;
 
     let listener = UnixListener::bind(socket_path)

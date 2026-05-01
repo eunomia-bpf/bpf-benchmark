@@ -19,24 +19,12 @@ use crate::invalidation::{BpfMapValueReader, MapInvalidationTracker};
 
 static NEXT_WORKDIR_ID: AtomicU64 = AtomicU64::new(0);
 const FAILURE_ROOT_ENV: &str = "BPFREJIT_DAEMON_FAILURE_ROOT";
-const FAILURE_LAYOUT_ENV: &str = "BPFREJIT_DAEMON_FAILURE_LAYOUT";
 const KEEP_ALL_WORKDIRS_ENV: &str = "BPFREJIT_DAEMON_KEEP_ALL_WORKDIRS";
-const DEFAULT_FAILURE_ROOT: &str = "/var/lib/bpfrejit-daemon/failures";
-const FAILURE_LAYOUT_DIRECT: &str = "direct";
-const FAILURE_LAYOUT_ACTIVE_RUN_DETAILS: &str = "active-run-details";
 const DEBUG_WORKDIR_ROOT_NAME: &str = "workdirs";
-const INSIDE_RUNTIME_CONTAINER_ENV: &str = "BPFREJIT_INSIDE_RUNTIME_CONTAINER";
-const IMAGE_WORKSPACE_ENV: &str = "BPFREJIT_IMAGE_WORKSPACE";
 const FUNC_INFO_FILE: &str = "func_info.bin";
 const LINE_INFO_FILE: &str = "line_info.bin";
 const MAP_VALUES_FILE: &str = "map-values.json";
 const VERIFIER_STATES_FILE: &str = "verifier-states.json";
-const RESULT_ROOT_SUFFIXES: &[&str] = &[
-    "micro/results",
-    "corpus/results",
-    "e2e/results",
-    "tests/results",
-];
 
 #[derive(Clone, Debug)]
 pub(crate) struct CliConfig {
@@ -104,55 +92,21 @@ impl Drop for WorkDir {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum FailureExportLayout {
-    Direct,
-    ActiveRunDetails,
-}
-
-impl FailureExportLayout {
-    fn parse(value: &str) -> Result<Self> {
-        match value.trim() {
-            FAILURE_LAYOUT_DIRECT => Ok(Self::Direct),
-            FAILURE_LAYOUT_ACTIVE_RUN_DETAILS => Ok(Self::ActiveRunDetails),
-            _ => bail!(
-                "{FAILURE_LAYOUT_ENV} must be one of {FAILURE_LAYOUT_DIRECT},{FAILURE_LAYOUT_ACTIVE_RUN_DETAILS}"
-            ),
-        }
-    }
-}
-
 #[derive(Debug)]
 struct FailureExportConfig {
     root: PathBuf,
-    layout: FailureExportLayout,
 }
 
 impl FailureExportConfig {
     fn from_env() -> Result<Self> {
-        let explicit_root = std::env::var_os(FAILURE_ROOT_ENV);
-        let runtime_root = runtime_container_failure_root()?;
-        let default_layout = if explicit_root.is_none() && runtime_root.is_some() {
-            FailureExportLayout::ActiveRunDetails
-        } else {
-            FailureExportLayout::Direct
-        };
-        let layout = match std::env::var(FAILURE_LAYOUT_ENV) {
-            Ok(value) => FailureExportLayout::parse(&value)?,
-            Err(std::env::VarError::NotPresent) => default_layout,
-            Err(err) => return Err(err).with_context(|| format!("read {FAILURE_LAYOUT_ENV}")),
-        };
-        if matches!(layout, FailureExportLayout::ActiveRunDetails)
-            && explicit_root.is_none()
-            && runtime_root.is_none()
-        {
-            bail!("{FAILURE_LAYOUT_ENV}={FAILURE_LAYOUT_ACTIVE_RUN_DETAILS} requires {FAILURE_ROOT_ENV}");
+        let raw = std::env::var_os(FAILURE_ROOT_ENV)
+            .ok_or_else(|| anyhow!("{FAILURE_ROOT_ENV} is required"))?;
+        if raw.is_empty() {
+            bail!("{FAILURE_ROOT_ENV} must not be empty");
         }
-        let root = explicit_root
-            .map(PathBuf::from)
-            .or(runtime_root)
-            .unwrap_or_else(|| PathBuf::from(DEFAULT_FAILURE_ROOT));
-        Ok(Self { root, layout })
+        Ok(Self {
+            root: PathBuf::from(raw),
+        })
     }
 
     fn validate_configured_root(&self) -> Result<()> {
@@ -162,37 +116,13 @@ impl FailureExportConfig {
 
     fn resolve_failure_root(&self) -> Result<PathBuf> {
         self.validate_configured_root()?;
-        match self.layout {
-            FailureExportLayout::Direct => Ok(self.root.clone()),
-            FailureExportLayout::ActiveRunDetails => active_run_details_failure_root(&self.root),
-        }
+        Ok(self.root.clone())
     }
 
     fn resolve_debug_workdir_root(&self) -> Result<PathBuf> {
         self.validate_configured_root()?;
-        match self.layout {
-            FailureExportLayout::Direct => Ok(self.root.join(DEBUG_WORKDIR_ROOT_NAME)),
-            FailureExportLayout::ActiveRunDetails => {
-                Ok(active_run_details_root(&self.root)?.join(DEBUG_WORKDIR_ROOT_NAME))
-            }
-        }
+        Ok(self.root.join(DEBUG_WORKDIR_ROOT_NAME))
     }
-}
-
-fn runtime_container_failure_root() -> Result<Option<PathBuf>> {
-    let inside = match std::env::var(INSIDE_RUNTIME_CONTAINER_ENV) {
-        Ok(value) => value == "1",
-        Err(std::env::VarError::NotPresent) => false,
-        Err(err) => {
-            return Err(err).with_context(|| format!("read {INSIDE_RUNTIME_CONTAINER_ENV}"));
-        }
-    };
-    if !inside {
-        return Ok(None);
-    }
-    let workspace = std::env::var_os(IMAGE_WORKSPACE_ENV)
-        .ok_or_else(|| anyhow!("{IMAGE_WORKSPACE_ENV} is required inside the runtime container"))?;
-    Ok(Some(PathBuf::from(workspace)))
 }
 
 pub(crate) fn validate_failure_export_root_from_env() -> Result<()> {
@@ -222,107 +152,6 @@ fn ensure_writable_dir(path: &Path, description: &str) -> Result<()> {
     drop(file);
     fs::remove_file(&probe).with_context(|| format!("remove write probe {}", probe.display()))?;
     Ok(())
-}
-
-fn active_run_details_failure_root(results_root: &Path) -> Result<PathBuf> {
-    Ok(active_run_details_root(results_root)?.join("failures"))
-}
-
-fn active_run_details_root(results_root: &Path) -> Result<PathBuf> {
-    let parent_pid = unsafe { libc::getppid() as u64 };
-    let mut candidates = Vec::new();
-    for search_root in active_run_search_roots(results_root)? {
-        collect_active_run_candidates(&search_root, parent_pid, &mut candidates)?;
-    }
-    if candidates.len() != 1 {
-        let rendered = candidates
-            .iter()
-            .map(|path| path.display().to_string())
-            .collect::<Vec<_>>()
-            .join(", ");
-        bail!(
-            "{FAILURE_LAYOUT_ENV}={FAILURE_LAYOUT_ACTIVE_RUN_DETAILS} expected exactly one active run under {}, found {}{}",
-            results_root.display(),
-            candidates.len(),
-            if rendered.is_empty() {
-                String::new()
-            } else {
-                format!(": {rendered}")
-            }
-        );
-    }
-    Ok(candidates.remove(0).join("details"))
-}
-
-fn active_run_search_roots(root: &Path) -> Result<Vec<PathBuf>> {
-    let mut roots = Vec::new();
-    if root.is_dir() {
-        roots.push(root.to_path_buf());
-    }
-    for suffix in RESULT_ROOT_SUFFIXES {
-        let candidate = root.join(suffix);
-        match fs::metadata(&candidate) {
-            Ok(metadata) if metadata.is_dir() => roots.push(candidate),
-            Ok(_) => bail!(
-                "active-run search root {} is not a directory",
-                candidate.display()
-            ),
-            Err(err) if err.kind() == std::io::ErrorKind::NotFound => {}
-            Err(err) => return Err(err).with_context(|| format!("stat {}", candidate.display())),
-        }
-    }
-    if roots.is_empty() {
-        bail!("active-run search root {} does not exist", root.display());
-    }
-    Ok(roots)
-}
-
-fn collect_active_run_candidates(
-    results_root: &Path,
-    parent_pid: u64,
-    candidates: &mut Vec<PathBuf>,
-) -> Result<()> {
-    for entry in fs::read_dir(results_root)
-        .with_context(|| format!("read failure result root {}", results_root.display()))?
-    {
-        let entry = entry?;
-        if !entry.file_type()?.is_dir() {
-            continue;
-        }
-        let run_dir = entry.path();
-        let metadata_path = run_dir.join("metadata.json");
-        let metadata_text = match fs::read_to_string(&metadata_path) {
-            Ok(text) => text,
-            Err(err) if err.kind() == std::io::ErrorKind::NotFound => continue,
-            Err(err) => {
-                return Err(err)
-                    .with_context(|| format!("read run metadata {}", metadata_path.display()));
-            }
-        };
-        let metadata: serde_json::Value = serde_json::from_str(&metadata_text)
-            .with_context(|| format!("parse run metadata {}", metadata_path.display()))?;
-        if running_metadata_matches_parent(&metadata, parent_pid) {
-            candidates.push(run_dir);
-        }
-    }
-    Ok(())
-}
-
-fn running_metadata_matches_parent(metadata: &serde_json::Value, parent_pid: u64) -> bool {
-    let status = match metadata.get("status").and_then(serde_json::Value::as_str) {
-        Some(status) => status,
-        None => return false,
-    };
-    if status != "running" {
-        return false;
-    }
-    match metadata
-        .get("launcher_pid")
-        .and_then(serde_json::Value::as_u64)
-    {
-        Some(pid) => pid == parent_pid,
-        None => true,
-    }
 }
 
 fn preserve_failure_workdir(workdir: &WorkDir, prog_id: u32) -> Result<PathBuf> {
@@ -2333,7 +2162,6 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"b
 
     fn with_daemon_export_env<T>(
         failure_root: &Path,
-        layout: Option<&str>,
         keep_all_workdirs: Option<&str>,
         f: impl FnOnce() -> T,
     ) -> T {
@@ -2341,14 +2169,8 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"b
             .lock()
             .expect("failure export env lock should not be poisoned");
         let old_root = std::env::var_os(FAILURE_ROOT_ENV);
-        let old_layout = std::env::var_os(FAILURE_LAYOUT_ENV);
         let old_keep_all_workdirs = std::env::var_os(KEEP_ALL_WORKDIRS_ENV);
         std::env::set_var(FAILURE_ROOT_ENV, failure_root);
-        if let Some(layout) = layout {
-            std::env::set_var(FAILURE_LAYOUT_ENV, layout);
-        } else {
-            std::env::remove_var(FAILURE_LAYOUT_ENV);
-        }
         if let Some(value) = keep_all_workdirs {
             std::env::set_var(KEEP_ALL_WORKDIRS_ENV, value);
         } else {
@@ -2356,7 +2178,6 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"b
         }
         let result = catch_unwind(AssertUnwindSafe(f));
         restore_env(FAILURE_ROOT_ENV, old_root);
-        restore_env(FAILURE_LAYOUT_ENV, old_layout);
         restore_env(KEEP_ALL_WORKDIRS_ENV, old_keep_all_workdirs);
         match result {
             Ok(value) => value,
@@ -2366,15 +2187,14 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"b
 
     fn with_failure_export_env<T>(
         failure_root: &Path,
-        layout: Option<&str>,
         f: impl FnOnce() -> T,
     ) -> T {
-        with_daemon_export_env(failure_root, layout, None, f)
+        with_daemon_export_env(failure_root, None, f)
     }
 
     fn with_temp_failure_root<T>(f: impl FnOnce(&Path) -> T) -> T {
         let failure_root = WorkDir::new("bpfrejit-daemon-failure-root").unwrap();
-        with_failure_export_env(failure_root.path(), None, || f(failure_root.path()))
+        with_failure_export_env(failure_root.path(), || f(failure_root.path()))
     }
 
     fn with_clean_daemon_export_env<T>(f: impl FnOnce() -> T) -> T {
@@ -2382,14 +2202,11 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"b
             .lock()
             .expect("failure export env lock should not be poisoned");
         let old_root = std::env::var_os(FAILURE_ROOT_ENV);
-        let old_layout = std::env::var_os(FAILURE_LAYOUT_ENV);
         let old_keep_all_workdirs = std::env::var_os(KEEP_ALL_WORKDIRS_ENV);
         std::env::remove_var(FAILURE_ROOT_ENV);
-        std::env::remove_var(FAILURE_LAYOUT_ENV);
         std::env::remove_var(KEEP_ALL_WORKDIRS_ENV);
         let result = catch_unwind(AssertUnwindSafe(f));
         restore_env(FAILURE_ROOT_ENV, old_root);
-        restore_env(FAILURE_LAYOUT_ENV, old_layout);
         restore_env(KEEP_ALL_WORKDIRS_ENV, old_keep_all_workdirs);
         match result {
             Ok(value) => value,
@@ -2403,6 +2220,14 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"b
         } else {
             std::env::remove_var(name);
         }
+    }
+
+    #[test]
+    fn failure_export_root_env_is_required() {
+        with_clean_daemon_export_env(|| {
+            let err = validate_failure_export_root_from_env().unwrap_err();
+            assert!(format!("{err:#}").contains("BPFREJIT_DAEMON_FAILURE_ROOT is required"));
+        });
     }
 
     #[test]
@@ -2431,41 +2256,29 @@ printf '{"prog_id":42,"duration_ms":1,"run_cnt_delta":1,"run_time_ns_delta":1,"b
 
     #[test]
     fn keep_all_workdirs_env_preserves_success_workdir() {
-        let results_root = WorkDir::new("bpfrejit-daemon-debug-results-root").unwrap();
-        let run_dir = results_root.path().join("tracee_20260430_120000_000001");
-        fs::create_dir(&run_dir).unwrap();
-        fs::write(
-            run_dir.join("metadata.json"),
-            r#"{"status":"running","run_type":"tracee"}"#,
-        )
-        .unwrap();
-        with_daemon_export_env(
-            results_root.path(),
-            Some(FAILURE_LAYOUT_ACTIVE_RUN_DETAILS),
-            Some("1"),
-            || {
-                let fake = FakeCliDir::new().unwrap();
+        let failure_root = WorkDir::new("bpfrejit-daemon-debug-failure-root").unwrap();
+        with_daemon_export_env(failure_root.path(), Some("1"), || {
+            let fake = FakeCliDir::new().unwrap();
 
-                let result = try_apply_one(
-                    42,
-                    &fake.config(),
-                    Some(&["wide_mem".to_string()]),
-                    None,
-                    None,
-                )
-                .unwrap();
+            let result = try_apply_one(
+                42,
+                &fake.config(),
+                Some(&["wide_mem".to_string()]),
+                None,
+                None,
+            )
+            .unwrap();
 
-                assert_eq!(result.status, "ok");
-                let debug_dir = run_dir.join("details").join("workdirs").join("42");
-                assert!(debug_dir.is_dir());
-                assert!(debug_dir.join("prog.bin").is_file());
-                assert!(debug_dir.join("prog_info.json").is_file());
-                assert!(debug_dir.join("map_fds.json").is_file());
-                assert!(!debug_dir.join(MAP_VALUES_FILE).exists());
-                assert!(!debug_dir.join(VERIFIER_STATES_FILE).exists());
-                assert!(debug_dir.join("bpfopt_report.json").is_file());
-            },
-        );
+            assert_eq!(result.status, "ok");
+            let debug_dir = failure_root.path().join("workdirs").join("42");
+            assert!(debug_dir.is_dir());
+            assert!(debug_dir.join("prog.bin").is_file());
+            assert!(debug_dir.join("prog_info.json").is_file());
+            assert!(debug_dir.join("map_fds.json").is_file());
+            assert!(!debug_dir.join(MAP_VALUES_FILE).exists());
+            assert!(!debug_dir.join(VERIFIER_STATES_FILE).exists());
+            assert!(debug_dir.join("bpfopt_report.json").is_file());
+        });
     }
 
     #[test]
@@ -2876,54 +2689,6 @@ exit 11
                 "synthetic verifier log"
             );
         });
-    }
-
-    #[test]
-    fn active_run_details_layout_exports_under_running_artifact_dir() {
-        let results_root = WorkDir::new("bpfrejit-daemon-results-root").unwrap();
-        let run_dir = results_root.path().join("tracee_20260429_120000_000001");
-        fs::create_dir(&run_dir).unwrap();
-        fs::write(
-            run_dir.join("metadata.json"),
-            r#"{"status":"running","run_type":"tracee"}"#,
-        )
-        .unwrap();
-        with_failure_export_env(
-            results_root.path(),
-            Some(FAILURE_LAYOUT_ACTIVE_RUN_DETAILS),
-            || {
-                let fake = FakeCliDir::new().unwrap();
-                fake.replace_command(
-                    "bpfrejit",
-                    r#"#!/usr/bin/env bash
-set -euo pipefail
-printf 'synthetic rejit failure\n' >&2
-exit 11
-"#,
-                )
-                .unwrap();
-
-                let err = try_apply_one(
-                    42,
-                    &fake.config(),
-                    Some(&["wide_mem".to_string()]),
-                    None,
-                    None,
-                )
-                .unwrap_err();
-
-                let message = format!("{err:#}");
-                let failure_dir = run_dir.join("details").join("failures").join("42");
-                assert!(message.contains(&failure_dir.display().to_string()));
-                assert!(failure_dir.join("prog.bpf").is_file());
-                assert!(failure_dir.join("info.json").is_file());
-                assert!(failure_dir.join("replay.sh").is_file());
-                assert_eq!(
-                    fs::read_to_string(failure_dir.join("verifier.log")).unwrap(),
-                    "synthetic verifier log"
-                );
-            },
-        );
     }
 
     #[test]
