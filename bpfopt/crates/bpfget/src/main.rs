@@ -18,9 +18,11 @@ static NEXT_TMP_ID: AtomicU64 = AtomicU64::new(0);
 const BPF_LD_IMM64: u8 = (kernel_sys::BPF_LD | kernel_sys::BPF_DW | kernel_sys::BPF_IMM) as u8;
 const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
+const BPF_PSEUDO_MAP_IDX: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX as u8;
 const BPF_PSEUDO_CALL: u8 = kernel_sys::BPF_PSEUDO_CALL as u8;
 const FUNC_INFO_FILE: &str = "func_info.bin";
 const LINE_INFO_FILE: &str = "line_info.bin";
+const FULL_OPTIONAL_FILES: &[&str] = &[FUNC_INFO_FILE, LINE_INFO_FILE];
 
 #[derive(Parser, Debug)]
 #[command(
@@ -394,18 +396,25 @@ fn write_full(prog_id: u32, outdir: &Path) -> Result<()> {
     ensure_existing_dir(outdir)?;
 
     let fd = open_prog_fd(prog_id)?;
-    let insns = kernel_sys::prog_get_original(fd.as_fd())
+    let mut insns = kernel_sys::prog_get_original(fd.as_fd())
         .with_context(|| format!("read original bytecode for BPF program id {prog_id}"))?;
     ensure_original_bytecode(&insns)?;
     let (info, map_ids) = get_prog_info_with_map_ids_from_fd(fd.as_fd(), prog_id)?;
     let expected_attach_type = expected_attach_type_json(info.id, info.prog_type)?;
     let mut btf_info = kernel_sys::prog_btf_info(fd.as_fd())
         .with_context(|| format!("read BTF record metadata for BPF program id {prog_id}"))?;
+    normalize_resolved_map_pointer_immediates(&mut insns, &map_ids)?;
     let pseudo_map_old_fds = pseudo_map_old_fds(&insns);
     let map_infos = get_map_infos(&map_ids, &pseudo_map_old_fds)?;
 
     normalize_func_info_for_insns(&mut btf_info.func_info, btf_info.func_info_rec_size, &insns)?;
-    normalize_line_info_for_insns(&mut btf_info.line_info, btf_info.line_info_rec_size, &insns)?;
+    normalize_line_info_for_insns(
+        &mut btf_info.line_info,
+        btf_info.line_info_rec_size,
+        &insns,
+        &btf_info.func_info,
+        btf_info.func_info_rec_size,
+    )?;
 
     let prog_bin = encode_insns(&insns);
     let mut prog_info = ProgInfoJson::from_info(info, map_ids, expected_attach_type)?;
@@ -494,6 +503,8 @@ fn normalize_line_info_for_insns(
     line_info: &mut Vec<u8>,
     rec_size: u32,
     insns: &[kernel_sys::bpf_insn],
+    func_info: &[u8],
+    func_info_rec_size: u32,
 ) -> Result<()> {
     if line_info.is_empty() {
         return Ok(());
@@ -501,7 +512,8 @@ fn normalize_line_info_for_insns(
     validate_btf_records("line_info", line_info, rec_size)?;
 
     let rec_size = rec_size as usize;
-    let expected_func_offsets = expected_func_info_offsets(insns)?;
+    let expected_func_offsets =
+        expected_line_info_func_offsets(func_info, func_info_rec_size, insns)?;
     let mut covered_func_offsets = Vec::with_capacity(expected_func_offsets.len());
     let mut normalized = Vec::with_capacity(line_info.len());
     for record in line_info.chunks(rec_size) {
@@ -522,6 +534,22 @@ fn normalize_line_info_for_insns(
         line_info.clear();
     }
     Ok(())
+}
+
+fn expected_line_info_func_offsets(
+    func_info: &[u8],
+    func_info_rec_size: u32,
+    insns: &[kernel_sys::bpf_insn],
+) -> Result<Vec<u32>> {
+    if func_info.is_empty() {
+        return expected_func_info_offsets(insns);
+    }
+    validate_btf_records("func_info", func_info, func_info_rec_size)?;
+    let rec_size = func_info_rec_size as usize;
+    Ok(func_info
+        .chunks(rec_size)
+        .map(btf_record_insn_off)
+        .collect())
 }
 
 fn validate_btf_records(label: &str, bytes: &[u8], rec_size: u32) -> Result<()> {
@@ -564,6 +592,56 @@ fn expected_func_info_offsets(insns: &[kernel_sys::bpf_insn]) -> Result<Vec<u32>
 fn is_pseudo_call(insn: &kernel_sys::bpf_insn) -> bool {
     insn.code == (kernel_sys::BPF_JMP | kernel_sys::BPF_CALL) as u8
         && insn.src_reg() == BPF_PSEUDO_CALL
+}
+
+fn normalize_resolved_map_pointer_immediates(
+    insns: &mut [kernel_sys::bpf_insn],
+    map_ids: &[u32],
+) -> Result<()> {
+    let mut pc = 0usize;
+    while pc < insns.len() {
+        if is_resolved_kernel_map_pointer_ldimm64(insns, pc) {
+            if map_ids.len() != 1 {
+                bail!(
+                    "original bytecode contains resolved kernel map pointer at insn {pc}, but program has {} maps; cannot reconstruct a unique BPF_PSEUDO_MAP_IDX relocation",
+                    map_ids.len()
+                );
+            }
+            insns[pc].set_src_reg(BPF_PSEUDO_MAP_IDX);
+            insns[pc].imm = 0;
+            insns[pc + 1].imm = 0;
+            pc += 2;
+        } else if insns[pc].code == BPF_LD_IMM64 {
+            pc += 2;
+        } else {
+            pc += 1;
+        }
+    }
+    Ok(())
+}
+
+fn is_resolved_kernel_map_pointer_ldimm64(insns: &[kernel_sys::bpf_insn], pc: usize) -> bool {
+    if pc + 1 >= insns.len() {
+        return false;
+    }
+    let first = &insns[pc];
+    let second = &insns[pc + 1];
+    first.code == BPF_LD_IMM64
+        && first.src_reg() == 0
+        && first.off == 0
+        && second.code == 0
+        && second.dst_reg() == 0
+        && second.src_reg() == 0
+        && second.off == 0
+        && looks_like_kernel_heap_pointer(ldimm64_u64(first, second))
+}
+
+fn ldimm64_u64(first: &kernel_sys::bpf_insn, second: &kernel_sys::bpf_insn) -> u64 {
+    ((second.imm as u32 as u64) << 32) | (first.imm as u32 as u64)
+}
+
+fn looks_like_kernel_heap_pointer(value: u64) -> bool {
+    (value >> 48) == 0xffff && ((value >> 32) & 0xffff) != 0xffff && value.is_multiple_of(8)
 }
 
 fn pseudo_call_target(pc: usize, imm: i32, insn_count: usize) -> Result<u32> {
@@ -1014,6 +1092,21 @@ fn write_full_files_atomic(outdir: &Path, entries: &[(&str, &[u8])]) -> Result<(
                 )
             })?;
         }
+        for name in FULL_OPTIONAL_FILES {
+            if entries.iter().any(|(entry_name, _)| entry_name == name) {
+                continue;
+            }
+            let final_path = outdir.join(name);
+            match fs::remove_file(&final_path) {
+                Ok(()) => {}
+                Err(err) if err.kind() == io::ErrorKind::NotFound => {}
+                Err(err) => {
+                    return Err(err).with_context(|| {
+                        format!("failed to remove stale {}", final_path.display())
+                    });
+                }
+            }
+        }
         Ok(())
     })();
 
@@ -1284,7 +1377,7 @@ mod tests {
         ]
         .concat();
 
-        normalize_line_info_for_insns(&mut line_info, 16, &insns).unwrap();
+        normalize_line_info_for_insns(&mut line_info, 16, &insns, &[], 0).unwrap();
 
         assert_eq!(btf_offsets(&line_info, 16), vec![0, 2]);
         assert_eq!(btf_second_words(&line_info, 16), vec![100, 102]);
@@ -1302,10 +1395,76 @@ mod tests {
         ];
         let mut line_info = [btf_record(0, 100), btf_record(2, 101)].concat();
 
-        normalize_line_info_for_insns(&mut line_info, 16, &insns).unwrap();
+        normalize_line_info_for_insns(&mut line_info, 16, &insns, &[], 0).unwrap();
 
         assert!(line_info.is_empty());
         assert_eq!(btf_record_count(&line_info, 16).unwrap(), 0);
+    }
+
+    #[test]
+    fn normalize_line_info_uses_func_info_subprog_offsets() {
+        let insns = vec![
+            exit_insn(),
+            exit_insn(),
+            exit_insn(),
+            exit_insn(),
+            exit_insn(),
+        ];
+        let func_info = [func_btf_record(0, 10), func_btf_record(4, 11)].concat();
+        let mut line_info = [btf_record(0, 100), btf_record(2, 101)].concat();
+
+        normalize_line_info_for_insns(&mut line_info, 16, &insns, &func_info, 8).unwrap();
+
+        assert!(line_info.is_empty());
+        assert_eq!(btf_record_count(&line_info, 16).unwrap(), 0);
+    }
+
+    #[test]
+    fn resolved_kernel_map_pointer_rewrites_to_single_map_idx() {
+        let mut insns = Vec::from(ldimm64_full(0, 0xffff8dc51bd8ee00));
+
+        normalize_resolved_map_pointer_immediates(&mut insns, &[42]).unwrap();
+
+        assert_eq!(insns[0].src_reg(), BPF_PSEUDO_MAP_IDX);
+        assert_eq!(insns[0].imm, 0);
+        assert_eq!(insns[1].imm, 0);
+    }
+
+    #[test]
+    fn resolved_kernel_map_pointer_requires_unambiguous_map() {
+        let mut insns = Vec::from(ldimm64_full(0, 0xffff8dc51bd8ee00));
+
+        let err = normalize_resolved_map_pointer_immediates(&mut insns, &[42, 43]).unwrap_err();
+
+        assert!(
+            err.to_string().contains("cannot reconstruct"),
+            "err={err:#}"
+        );
+    }
+
+    #[test]
+    fn negative_ldimm64_constant_is_not_rewritten_as_map_pointer() {
+        let mut insns = Vec::from(ldimm64_full(0, u64::MAX));
+
+        normalize_resolved_map_pointer_immediates(&mut insns, &[42]).unwrap();
+
+        assert_eq!(insns[0].src_reg(), 0);
+        assert_eq!(ldimm64_u64(&insns[0], &insns[1]), u64::MAX);
+    }
+
+    #[test]
+    fn full_file_write_removes_stale_optional_btf_files() {
+        let dir = test_temp_dir("bpfget-full-files");
+        fs::create_dir_all(&dir).unwrap();
+        fs::write(dir.join(FUNC_INFO_FILE), b"stale").unwrap();
+        fs::write(dir.join(LINE_INFO_FILE), b"stale").unwrap();
+
+        write_full_files_atomic(&dir, &[("prog.bin", b"prog")]).unwrap();
+
+        assert_eq!(fs::read(dir.join("prog.bin")).unwrap(), b"prog");
+        assert!(!dir.join(FUNC_INFO_FILE).exists());
+        assert!(!dir.join(LINE_INFO_FILE).exists());
+        fs::remove_dir_all(&dir).unwrap();
     }
 
     #[test]
@@ -1429,6 +1588,12 @@ mod tests {
         [first, second]
     }
 
+    fn ldimm64_full(src_reg: u8, value: u64) -> [kernel_sys::bpf_insn; 2] {
+        let mut insns = ldimm64(src_reg, value as u32 as i32);
+        insns[1].imm = (value >> 32) as u32 as i32;
+        insns
+    }
+
     fn bpf_insn_raw(
         code: u32,
         dst_reg: u8,
@@ -1489,6 +1654,18 @@ mod tests {
             .chunks(rec_size)
             .map(|record| u32::from_le_bytes(record[4..8].try_into().unwrap()))
             .collect()
+    }
+
+    fn test_temp_dir(prefix: &str) -> PathBuf {
+        let dir = std::env::temp_dir().join(format!(
+            "{prefix}.{}.{}",
+            std::process::id(),
+            NEXT_TMP_ID.fetch_add(1, Ordering::Relaxed)
+        ));
+        if dir.exists() {
+            fs::remove_dir_all(&dir).unwrap();
+        }
+        dir
     }
 
     #[test]

@@ -220,6 +220,21 @@ fn apply_map_fds(path: Option<&Path>, insns: &mut [kernel_sys::bpf_insn]) -> Res
             insns[pc].set_src_reg(src_reg);
             insns[pc].imm = new_fd;
             pc += 2;
+        } else if is_resolved_kernel_map_pointer_ldimm64(insns, pc) {
+            if bindings.len() != 1 {
+                bail!(
+                    "{} cannot reconstruct resolved kernel map pointer at insn {} with {} map bindings",
+                    path.display(),
+                    pc,
+                    bindings.len()
+                );
+            }
+            let map_id = bindings[0].map_id;
+            let new_fd = open_map_fd(&mut opened, map_id, path)?.as_raw_fd();
+            insns[pc].set_src_reg(BPF_PSEUDO_MAP_FD);
+            insns[pc].imm = new_fd;
+            insns[pc + 1].imm = 0;
+            pc += 2;
         } else {
             pc += 1;
         }
@@ -271,6 +286,30 @@ fn is_pseudo_map_idx_ldimm64(insn: &kernel_sys::bpf_insn) -> bool {
             insn.src_reg(),
             BPF_PSEUDO_MAP_IDX | BPF_PSEUDO_MAP_IDX_VALUE
         )
+}
+
+fn is_resolved_kernel_map_pointer_ldimm64(insns: &[kernel_sys::bpf_insn], pc: usize) -> bool {
+    if pc + 1 >= insns.len() {
+        return false;
+    }
+    let first = &insns[pc];
+    let second = &insns[pc + 1];
+    first.code == BPF_LD_IMM64
+        && first.src_reg() == 0
+        && first.off == 0
+        && second.code == 0
+        && second.dst_reg() == 0
+        && second.src_reg() == 0
+        && second.off == 0
+        && looks_like_kernel_heap_pointer(ldimm64_u64(first, second))
+}
+
+fn ldimm64_u64(first: &kernel_sys::bpf_insn, second: &kernel_sys::bpf_insn) -> u64 {
+    ((second.imm as u32 as u64) << 32) | (first.imm as u32 as u64)
+}
+
+fn looks_like_kernel_heap_pointer(value: u64) -> bool {
+    (value >> 48) == 0xffff && ((value >> 32) & 0xffff) != 0xffff && value.is_multiple_of(8)
 }
 
 fn read_map_bindings(path: &Path) -> Result<Vec<MapBinding>> {
@@ -341,5 +380,32 @@ mod tests {
     fn parse_bytecode_rejects_non_instruction_multiple() {
         let err = parse_bytecode(&[0u8; 9]).unwrap_err();
         assert!(err.to_string().contains("multiple of 8"), "err={err:#}");
+    }
+
+    #[test]
+    fn resolved_kernel_map_pointer_detector_ignores_negative_constants() {
+        let pointer = Vec::from(ldimm64_full(0xffff8dc51bd8ee00));
+        let negative = Vec::from(ldimm64_full(u64::MAX));
+
+        assert!(is_resolved_kernel_map_pointer_ldimm64(&pointer, 0));
+        assert!(!is_resolved_kernel_map_pointer_ldimm64(&negative, 0));
+    }
+
+    fn ldimm64_full(value: u64) -> [kernel_sys::bpf_insn; 2] {
+        let first = kernel_sys::bpf_insn {
+            code: BPF_LD_IMM64,
+            _bitfield_align_1: [],
+            _bitfield_1: Default::default(),
+            off: 0,
+            imm: value as u32 as i32,
+        };
+        let second = kernel_sys::bpf_insn {
+            code: 0,
+            _bitfield_align_1: [],
+            _bitfield_1: Default::default(),
+            off: 0,
+            imm: (value >> 32) as u32 as i32,
+        };
+        [first, second]
     }
 }

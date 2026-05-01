@@ -7,6 +7,7 @@ import json
 import mmap
 import os
 import re
+import select
 import signal
 import socket
 import stat
@@ -15,7 +16,6 @@ import sys
 import tempfile
 import threading
 import time
-import urllib.request
 from dataclasses import asdict, dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -570,8 +570,40 @@ else:
     Server = ThreadingHTTPServer
     bind_address = (host, port)
 server = Server(bind_address, SilentHandler)
+print("READY", flush=True)
 server.serve_forever()
 """
+_NAMESPACED_HTTP_READY_MARKER = "READY"
+
+
+def _wait_for_stdout_marker(
+    process: subprocess.Popen[str],
+    *,
+    marker: str,
+    deadline: float,
+    description: str,
+) -> None:
+    stdout_lines: list[str] = []
+    while time.monotonic() < deadline:
+        if process.stdout is not None:
+            readable, _, _ = select.select([process.stdout], [], [], 0)
+            if readable:
+                line = process.stdout.readline()
+                if line:
+                    stdout_lines.append(line)
+                    if line.strip() == marker:
+                        return
+        if process.poll() is not None:
+            stdout = "".join(stdout_lines)
+            if process.stdout is not None:
+                stdout += process.stdout.read()
+            stderr = "" if process.stderr is None else process.stderr.read()
+            raise RuntimeError(
+                f"{description} exited before becoming ready: "
+                f"{tail_text(stderr or stdout, max_lines=20, max_chars=4000)}"
+            )
+        time.sleep(0.05)
+    raise TimeoutError(f"{description} did not print {marker!r}")
 
 
 class NamespacedHttpServer:
@@ -612,26 +644,23 @@ class NamespacedHttpServer:
             text=True,
             bufsize=1,
         )
-        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
         deadline = time.monotonic() + 5.0
-        while time.monotonic() < deadline:
-            if self.process.poll() is not None:
-                stdout = "" if self.process.stdout is None else self.process.stdout.read()
-                stderr = "" if self.process.stderr is None else self.process.stderr.read()
-                raise RuntimeError(
-                    "interface-bound HTTP server exited before becoming ready: "
-                    f"{tail_text(stderr or stdout, max_lines=20, max_chars=4000)}"
-                )
-            try:
-                with opener.open(self.url, timeout=0.5) as response:
-                    if int(getattr(response, "status", 0) or 0) == 200:
-                        return self
-            except Exception:
-                time.sleep(0.1)
-        self.__exit__(None, None, None)
-        raise RuntimeError(
-            f"interface-bound HTTP server in namespace {self.namespace} did not become ready at {self.url}"
-        )
+        try:
+            _wait_for_stdout_marker(
+                self.process,
+                marker=_NAMESPACED_HTTP_READY_MARKER,
+                deadline=deadline,
+                description="interface-bound HTTP server",
+            )
+        except TimeoutError as exc:
+            self.__exit__(None, None, None)
+            raise RuntimeError(
+                f"interface-bound HTTP server in namespace {self.namespace} did not report ready at {self.url}"
+            ) from exc
+        except RuntimeError:
+            self.__exit__(None, None, None)
+            raise
+        return self
 
     def __exit__(self, exc_type, exc, tb) -> None:
         del exc_type, exc, tb
@@ -722,7 +751,6 @@ _STRESS_NG_OS_STRESSORS = (
     "get",
     "prctl",
     "set",
-    "timerfd",
 )
 _STRESS_NG_SCHEDULER_STRESSORS = (
     "clone",
@@ -802,7 +830,6 @@ _STRESS_NG_STRESSOR_OPS: Mapping[str, int] = {
     "switch": 1000,
     "sync-file": 20,
     "syscall": 64,
-    "timerfd": 1000,
     "touch": 200,
     "udp-flood": 1000,
     "utime": 200,
