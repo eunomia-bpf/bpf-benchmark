@@ -514,10 +514,10 @@ COPY --link --from=runner-runtime-artifacts /usr/lib/calico /usr/lib/calico
 COPY --link --from=runner-runtime-artifacts /included-source /included-source
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/runner ${IMAGE_WORKSPACE}/runner
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/tests ${IMAGE_WORKSPACE}/tests
+COPY --link --from=runner-runtime-kinsn-artifacts /artifacts/kinsn /artifacts/kinsn
 COPY --link --from=runner-runtime-daemon-artifact /artifacts/rust/usr-local-bin/bpfrejit-daemon /usr/local/bin/bpfrejit-daemon
 COPY --link --from=runner-runtime-daemon-artifact /artifacts/rust/daemon/target/ ./daemon/target/
 COPY --link --from=runner-runtime-bpfopt-artifacts /artifacts/rust/usr-local-bin/ /usr/local/bin/
-COPY --link --from=runner-runtime-kinsn-artifacts /artifacts/kinsn /artifacts/kinsn
 
 RUN set -eux; \
     mkdir -p /opt; \
@@ -526,6 +526,7 @@ RUN set -eux; \
     test -x /usr/local/bin/bpftool; \
     test -x /usr/local/bin/bpfrejit-daemon; \
     test -x /usr/local/bin/bpfopt; \
+    test -x /usr/local/bin/bpfprof; \
     test -x /usr/local/bin/cilium-agent; \
     test -x /usr/local/bin/calico-node; \
     test -d /artifacts/kernel; \

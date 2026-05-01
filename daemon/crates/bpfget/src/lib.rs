@@ -3,6 +3,7 @@
 
 use std::collections::{BTreeMap, HashMap};
 use std::os::fd::{AsFd, AsRawFd, BorrowedFd, OwnedFd};
+use std::sync::Arc;
 
 use anyhow::{anyhow, bail, Context, Result};
 use serde::{Deserialize, Serialize};
@@ -94,14 +95,38 @@ pub struct ProgramBtfInfo {
 pub struct ProgramSnapshot {
     pub info: ProgramInfo,
     pub maps: Vec<MapInfo>,
+    pub map_fds: Vec<ProgramMapFd>,
     pub insns: Vec<kernel_sys::bpf_insn>,
     pub btf: ProgramBtfInfo,
+}
+
+#[derive(Clone, Debug)]
+pub struct ProgramMapFd {
+    pub map_id: u32,
+    fd: Arc<OwnedFd>,
+}
+
+impl ProgramMapFd {
+    pub fn new(map_id: u32, fd: OwnedFd) -> Self {
+        Self {
+            map_id,
+            fd: Arc::new(fd),
+        }
+    }
+
+    pub fn as_raw_fd(&self) -> i32 {
+        self.fd.as_raw_fd()
+    }
+
+    fn as_fd(&self) -> BorrowedFd<'_> {
+        self.fd.as_ref().as_fd()
+    }
 }
 
 #[derive(Debug)]
 pub struct RelocatedProgram {
     insns: Vec<kernel_sys::bpf_insn>,
-    _map_fds: Vec<OwnedFd>,
+    _map_fds: Vec<ProgramMapFd>,
 }
 
 impl RelocatedProgram {
@@ -112,10 +137,7 @@ impl RelocatedProgram {
 
 impl ProgramSnapshot {
     pub fn relocate_for_load(&self, source: &[kernel_sys::bpf_insn]) -> Result<RelocatedProgram> {
-        self.relocate_for_load_with(source, |map_id| {
-            kernel_sys::map_get_fd_by_id(map_id)
-                .with_context(|| format!("open BPF map id {map_id}"))
-        })
+        self.relocate_for_load_with_resolver(source, |map_id| self.snapshot_map_fd(map_id))
     }
 
     pub fn relocate_for_load_with<F>(
@@ -126,8 +148,21 @@ impl ProgramSnapshot {
     where
         F: FnMut(u32) -> Result<OwnedFd>,
     {
+        self.relocate_for_load_with_resolver(source, |map_id| {
+            open_map_fd(map_id).map(|fd| ProgramMapFd::new(map_id, fd))
+        })
+    }
+
+    fn relocate_for_load_with_resolver<F>(
+        &self,
+        source: &[kernel_sys::bpf_insn],
+        mut map_fd_for_id: F,
+    ) -> Result<RelocatedProgram>
+    where
+        F: FnMut(u32) -> Result<ProgramMapFd>,
+    {
         let mut insns = source.to_vec();
-        let mut owned = HashMap::<u32, OwnedFd>::new();
+        let mut owned = HashMap::<u32, ProgramMapFd>::new();
         let old_fd_to_map_id = build_old_fd_map(&self.maps, &pseudo_map_old_fds(&insns))?;
         let resolved_pointer_to_map_id =
             build_resolved_map_pointer_map(&self.info.map_ids, &insns)?;
@@ -139,7 +174,7 @@ impl ProgramSnapshot {
                 let map_id = *old_fd_to_map_id
                     .get(&old_fd)
                     .ok_or_else(|| anyhow!("no map binding for pseudo-map old fd {old_fd}"))?;
-                let new_fd = open_map_fd_once(&mut owned, map_id, &mut open_map_fd)?.as_raw_fd();
+                let new_fd = open_map_fd_once(&mut owned, map_id, &mut map_fd_for_id)?.as_raw_fd();
                 insns[pc].imm = new_fd;
                 pc += 2;
             } else if is_pseudo_map_idx_ldimm64(&insns[pc]) {
@@ -151,7 +186,7 @@ impl ProgramSnapshot {
                 let Some(&map_id) = self.info.map_ids.get(idx) else {
                     bail!("program metadata does not provide a map_id for pseudo-map fd_array index {idx}");
                 };
-                let new_fd = open_map_fd_once(&mut owned, map_id, &mut open_map_fd)?.as_raw_fd();
+                let new_fd = open_map_fd_once(&mut owned, map_id, &mut map_fd_for_id)?.as_raw_fd();
                 let src_reg = if insns[pc].src_reg() == BPF_PSEUDO_MAP_IDX {
                     BPF_PSEUDO_MAP_FD
                 } else {
@@ -164,7 +199,7 @@ impl ProgramSnapshot {
                 let map_id = *resolved_pointer_to_map_id.get(&value).ok_or_else(|| {
                     anyhow!("no map binding for resolved kernel map pointer at insn {pc}")
                 })?;
-                let new_fd = open_map_fd_once(&mut owned, map_id, &mut open_map_fd)?.as_raw_fd();
+                let new_fd = open_map_fd_once(&mut owned, map_id, &mut map_fd_for_id)?.as_raw_fd();
                 insns[pc].set_src_reg(BPF_PSEUDO_MAP_FD);
                 insns[pc].imm = new_fd;
                 insns[pc + 1].imm = 0;
@@ -178,6 +213,14 @@ impl ProgramSnapshot {
             insns,
             _map_fds: owned.into_values().collect(),
         })
+    }
+
+    fn snapshot_map_fd(&self, map_id: u32) -> Result<ProgramMapFd> {
+        self.map_fds
+            .iter()
+            .find(|map_fd| map_fd.map_id == map_id)
+            .cloned()
+            .ok_or_else(|| anyhow!("snapshot does not hold fd for BPF map id {map_id}"))
     }
 }
 
@@ -255,7 +298,7 @@ pub fn snapshot_program(prog_id: u32) -> Result<ProgramSnapshot> {
         btf_info.func_info_rec_size,
     )?;
     let pseudo_map_old_fds = pseudo_map_old_fds(&insns);
-    let maps = get_map_infos(&map_ids, &pseudo_map_old_fds)?;
+    let (maps, map_fds) = get_map_infos(&map_ids, &pseudo_map_old_fds)?;
 
     let mut prog_info = ProgramInfo::from_info(info, map_ids, expected_attach_type)?;
     prog_info.nr_func_info = btf_record_count(&btf_info.func_info, btf_info.func_info_rec_size)?;
@@ -276,6 +319,7 @@ pub fn snapshot_program(prog_id: u32) -> Result<ProgramSnapshot> {
     Ok(ProgramSnapshot {
         info: prog_info,
         maps,
+        map_fds,
         insns,
         btf: ProgramBtfInfo {
             func_info_rec_size: btf_info.func_info_rec_size,
@@ -435,7 +479,10 @@ fn get_prog_info_with_map_ids_from_fd(
     Ok((info, map_ids))
 }
 
-fn get_map_infos(map_ids: &[u32], pseudo_map_old_fds: &[i32]) -> Result<Vec<MapInfo>> {
+fn get_map_infos(
+    map_ids: &[u32],
+    pseudo_map_old_fds: &[i32],
+) -> Result<(Vec<MapInfo>, Vec<ProgramMapFd>)> {
     if pseudo_map_old_fds.len() > map_ids.len() {
         bail!(
             "original bytecode references {} pseudo-map fd values but prog_info exposes only {} map ids",
@@ -445,10 +492,12 @@ fn get_map_infos(map_ids: &[u32], pseudo_map_old_fds: &[i32]) -> Result<Vec<MapI
     }
 
     let mut maps = Vec::with_capacity(map_ids.len());
+    let mut map_fds = Vec::with_capacity(map_ids.len());
     for (idx, &map_id) in map_ids.iter().enumerate() {
         let fd = kernel_sys::map_get_fd_by_id(map_id)
             .with_context(|| format!("open BPF map id {map_id}"))?;
-        let info = kernel_sys::map_obj_get_info_by_fd(fd.as_fd())
+        let map_fd = ProgramMapFd::new(map_id, fd);
+        let info = kernel_sys::map_obj_get_info_by_fd(map_fd.as_fd())
             .with_context(|| format!("read info for BPF map id {map_id}"))?;
         maps.push(MapInfo {
             old_fd: pseudo_map_old_fds.get(idx).copied(),
@@ -467,8 +516,9 @@ fn get_map_infos(map_ids: &[u32], pseudo_map_old_fds: &[i32]) -> Result<Vec<MapI
             btf_vmlinux_id: info.btf_vmlinux_id,
             map_extra: info.map_extra,
         });
+        map_fds.push(map_fd);
     }
-    Ok(maps)
+    Ok((maps, map_fds))
 }
 
 fn validate_btf_record_blob(label: &str, count: u32, rec_size: u32, bytes: &[u8]) -> Result<()> {
@@ -746,15 +796,15 @@ fn build_old_fd_map(bindings: &[MapInfo], old_fds: &[i32]) -> Result<HashMap<i32
 }
 
 fn open_map_fd_once<'a, F>(
-    opened: &'a mut HashMap<u32, OwnedFd>,
+    opened: &'a mut HashMap<u32, ProgramMapFd>,
     map_id: u32,
-    open_map_fd: &mut F,
-) -> Result<&'a OwnedFd>
+    map_fd_for_id: &mut F,
+) -> Result<&'a ProgramMapFd>
 where
-    F: FnMut(u32) -> Result<OwnedFd>,
+    F: FnMut(u32) -> Result<ProgramMapFd>,
 {
     if !opened.contains_key(&map_id) {
-        opened.insert(map_id, open_map_fd(map_id)?);
+        opened.insert(map_id, map_fd_for_id(map_id)?);
     }
     opened
         .get(&map_id)
@@ -1221,6 +1271,25 @@ mod tests {
     }
 
     #[test]
+    fn snapshot_owned_map_fd_survives_relocation_and_closes_on_drop() {
+        let map_file = std::fs::File::open("/dev/null").unwrap();
+        let raw_fd = map_file.as_raw_fd();
+        let mut snapshot = test_snapshot(vec![700], vec![test_map_info(None, 700)]);
+        snapshot.map_fds = vec![ProgramMapFd::new(700, map_file.into())];
+        let mut insns = Vec::new();
+        insns.extend(ldimm64(BPF_PSEUDO_MAP_IDX, 0));
+        insns.push(exit_insn());
+
+        let relocated = snapshot.relocate_for_load(&insns).unwrap();
+
+        assert_eq!(relocated.insns()[0].imm, raw_fd);
+        drop(snapshot);
+        assert!(proc_fd_exists(raw_fd));
+        drop(relocated);
+        assert!(!proc_fd_exists(raw_fd));
+    }
+
+    #[test]
     fn btf_multi_subprog_records_are_preserved_in_memory() {
         let snapshot = ProgramSnapshot {
             info: ProgramInfo {
@@ -1248,6 +1317,7 @@ mod tests {
                 expected_attach_type: None,
             },
             maps: Vec::new(),
+            map_fds: Vec::new(),
             insns: vec![exit_insn(); 5],
             btf: ProgramBtfInfo {
                 func_info_rec_size: 8,
@@ -1266,16 +1336,22 @@ mod tests {
     fn line_info_normalization_drops_ldimm64_second_slot_targets() {
         let mut insns = Vec::from(ldimm64(BPF_PSEUDO_MAP_FD, 11));
         insns.push(exit_insn());
-        let mut line_info = [
-            record(0, 100, 16),
-            record(1, 101, 16),
-            record(2, 102, 16),
-        ]
-        .concat();
+        let mut line_info = [record(0, 100, 16), record(1, 101, 16), record(2, 102, 16)].concat();
 
         normalize_line_info_for_insns(&mut line_info, 16, &insns, &[], 0).unwrap();
 
         assert_eq!(btf_offsets(&line_info, 16), vec![0, 2]);
+        assert_line_info_replayable(&line_info, 16, &insns, &[], 0);
+    }
+
+    #[test]
+    fn line_info_normalization_drops_out_of_range_offsets() {
+        let insns = vec![exit_insn(); 2];
+        let mut line_info = [record(0, 100, 16), record(7, 107, 16)].concat();
+
+        normalize_line_info_for_insns(&mut line_info, 16, &insns, &[], 0).unwrap();
+
+        assert_eq!(btf_offsets(&line_info, 16), vec![0]);
         assert_line_info_replayable(&line_info, 16, &insns, &[], 0);
     }
 
@@ -1336,6 +1412,7 @@ mod tests {
                 expected_attach_type: None,
             },
             maps,
+            map_fds: Vec::new(),
             insns: Vec::new(),
             btf: ProgramBtfInfo::default(),
         }
@@ -1359,6 +1436,10 @@ mod tests {
             btf_vmlinux_id: 0,
             map_extra: 0,
         }
+    }
+
+    fn proc_fd_exists(raw_fd: i32) -> bool {
+        std::fs::metadata(format!("/proc/self/fd/{raw_fd}")).is_ok()
     }
 
     fn ldimm64(src_reg: u8, imm: i32) -> [kernel_sys::bpf_insn; 2] {
@@ -1456,10 +1537,7 @@ mod tests {
 
     fn decode_insns_hex(hex: &str) -> Vec<kernel_sys::bpf_insn> {
         let bytes = decode_hex_fixture(hex);
-        assert_eq!(
-            bytes.len() % std::mem::size_of::<kernel_sys::bpf_insn>(),
-            0
-        );
+        assert_eq!(bytes.len() % std::mem::size_of::<kernel_sys::bpf_insn>(), 0);
         bytes
             .chunks_exact(8)
             .map(|chunk| {

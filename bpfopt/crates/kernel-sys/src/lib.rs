@@ -6,9 +6,7 @@
 
 use std::collections::{BTreeMap, HashMap};
 use std::ffi::{c_char, c_void, CString};
-use std::fs;
 use std::os::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, OwnedFd};
-use std::path::Path;
 use std::ptr::NonNull;
 use std::slice;
 use std::time::Duration;
@@ -242,14 +240,6 @@ impl FdArray {
             fds: Vec::new(),
             _owned_fds: Vec::new(),
         }
-    }
-
-    pub fn from_json_file(path: &Path) -> Result<Self> {
-        let text = fs::read_to_string(path)
-            .with_context(|| format!("failed to read {}", path.display()))?;
-        let entries: Vec<FdArrayEntry> = serde_json::from_str(&text)
-            .with_context(|| format!("failed to parse fd_array JSON {}", path.display()))?;
-        Self::from_entries(&entries)
     }
 
     pub fn from_entries(entries: &[FdArrayEntry]) -> Result<Self> {

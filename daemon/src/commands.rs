@@ -12,6 +12,7 @@ use std::os::fd::{AsRawFd, OwnedFd};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::mpsc;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -35,6 +36,8 @@ const VERIFIER_STATES_STAGE: &str = "in-process original verifier-states";
 const DEFAULT_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(5);
 const OPTIMIZE_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(60);
 const CLI_STAGE_POLL_INTERVAL: Duration = Duration::from_millis(100);
+const FINAL_VERIFY_TIMEOUT: Duration = Duration::from_secs(60);
+const VERIFIER_STATES_TIMEOUT: Duration = Duration::from_secs(5);
 
 #[derive(Clone, Debug)]
 pub(crate) struct CliConfig {
@@ -170,7 +173,7 @@ fn preserve_failure_workdir(workdir: &WorkDir, prog_id: u32) -> Result<PathBuf> 
     fs::create_dir(&failure_dir)
         .with_context(|| format!("create failure workdir {}", failure_dir.display()))?;
     copy_dir_contents(workdir.path(), &failure_dir)?;
-    normalize_failure_artifacts(&failure_dir, prog_id)?;
+    normalize_failure_artifacts(&failure_dir)?;
     Ok(failure_dir)
 }
 
@@ -220,9 +223,8 @@ fn copy_dir_contents(src: &Path, dst: &Path) -> Result<()> {
     Ok(())
 }
 
-fn normalize_failure_artifacts(failure_dir: &Path, prog_id: u32) -> Result<()> {
+fn normalize_failure_artifacts(failure_dir: &Path) -> Result<()> {
     copy_alias_if_present(&failure_dir.join("prog.bin"), &failure_dir.join("prog.bpf"))?;
-    let _ = prog_id;
     require_regular_file(&failure_dir.join("prog.bpf"), "failure prog.bpf")?;
     require_regular_file(&failure_dir.join("info.json"), "failure info.json")?;
     let verifier_log = failure_dir.join("verifier.log");
@@ -370,7 +372,7 @@ pub(crate) type SharedInvalidationTracker = Arc<Mutex<MapInvalidationTracker<Bpf
 trait KernelOps {
     fn snapshot_program(&mut self, prog_id: u32) -> Result<bpfget::ProgramSnapshot>;
     fn probe_target(&mut self) -> Result<bpfget::TargetJson>;
-    fn verify_pass(
+    fn verify_candidate(
         &mut self,
         snapshot: &bpfget::ProgramSnapshot,
         insns: &[kernel_sys::bpf_insn],
@@ -402,19 +404,28 @@ impl KernelOps for LiveKernelOps {
         bpfget::probe_target_json()
     }
 
-    fn verify_pass(
+    fn verify_candidate(
         &mut self,
         snapshot: &bpfget::ProgramSnapshot,
         insns: &[kernel_sys::bpf_insn],
         fd_array: &[i32],
     ) -> Result<bpfverify::VerifyReport> {
-        let relocated = snapshot.relocate_for_load(insns)?;
-        bpfverify::verify_pass(bpfverify::VerifyRequest {
-            context: load_context(snapshot),
-            insns: relocated.insns(),
-            fd_array,
-            log_level: 2,
-        })
+        let snapshot = snapshot.clone();
+        let insns = insns.to_vec();
+        let fd_array = fd_array.to_vec();
+        run_in_thread_with_timeout(
+            "in-process final verification",
+            FINAL_VERIFY_TIMEOUT,
+            move || {
+                let relocated = snapshot.relocate_for_load(&insns)?;
+                bpfverify::verify(bpfverify::VerifyRequest {
+                    context: load_context(&snapshot),
+                    insns: relocated.insns(),
+                    fd_array: &fd_array,
+                    log_level: 2,
+                })
+            },
+        )
     }
 
     fn verifier_states(
@@ -423,12 +434,17 @@ impl KernelOps for LiveKernelOps {
         insns: &[kernel_sys::bpf_insn],
         fd_array: &[i32],
     ) -> Result<kernel_sys::VerifierStatesJson> {
-        let relocated = snapshot.relocate_for_load(insns)?;
-        bpfverify::verifier_states(bpfverify::VerifyRequest {
-            context: load_context(snapshot),
-            insns: relocated.insns(),
-            fd_array,
-            log_level: 2,
+        let snapshot = snapshot.clone();
+        let insns = insns.to_vec();
+        let fd_array = fd_array.to_vec();
+        run_in_thread_with_timeout(VERIFIER_STATES_STAGE, VERIFIER_STATES_TIMEOUT, move || {
+            let relocated = snapshot.relocate_for_load(&insns)?;
+            bpfverify::verifier_states(bpfverify::VerifyRequest {
+                context: load_context(&snapshot),
+                insns: relocated.insns(),
+                fd_array: &fd_array,
+                log_level: 2,
+            })
         })
     }
 
@@ -442,6 +458,48 @@ impl KernelOps for LiveKernelOps {
         let relocated = snapshot.relocate_for_load(insns)?;
         bpfrejit::rejit_program(prog_id, relocated.insns(), fd_array)
     }
+}
+
+fn run_in_thread_with_timeout<T, F>(stage: &'static str, timeout: Duration, task: F) -> Result<T>
+where
+    T: Send + 'static,
+    F: FnOnce() -> Result<T> + Send + 'static,
+{
+    let (sender, receiver) = mpsc::sync_channel(1);
+    thread::Builder::new()
+        .name(format!("bpfrejit-{stage}"))
+        .spawn(move || {
+            let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(task))
+                .map_err(|payload| anyhow!("{stage} panicked: {}", panic_payload_message(payload)))
+                .and_then(|result| result);
+            if sender.send(result).is_err() {
+                eprintln!("daemon: {stage} completed after caller timed out; dropping result");
+            }
+        })
+        .with_context(|| format!("spawn watchdog thread for {stage}"))?;
+
+    match receiver.recv_timeout(timeout) {
+        Ok(result) => result,
+        Err(mpsc::RecvTimeoutError::Timeout) => {
+            bail!(
+                "{stage} timed out after {}; verifier thread left detached",
+                duration_label(timeout)
+            )
+        }
+        Err(mpsc::RecvTimeoutError::Disconnected) => {
+            bail!("{stage} worker exited without returning a result")
+        }
+    }
+}
+
+fn panic_payload_message(payload: Box<dyn std::any::Any + Send>) -> String {
+    if let Some(message) = payload.downcast_ref::<String>() {
+        return message.clone();
+    }
+    if let Some(message) = payload.downcast_ref::<&'static str>() {
+        return (*message).to_string();
+    }
+    "non-string panic payload".to_string()
 }
 
 fn load_context(snapshot: &bpfget::ProgramSnapshot) -> bpfverify::ProgramLoadContext<'_> {
@@ -1006,12 +1064,22 @@ where
         if changed || force_rejit {
             let final_verify_log = workdir.path().join("verifier.log");
             let verify_report = kernel
-                .verify_pass(&candidate_snapshot, &opt_insns, fd_array_slice)
+                .verify_candidate(&candidate_snapshot, &opt_insns, fd_array_slice)
                 .with_context(|| {
                     format!("in-process final verification failed for prog {prog_id}")
                 })?;
             fs::write(&final_verify_log, &verify_report.verifier_log)
                 .with_context(|| format!("write {}", final_verify_log.display()))?;
+            if verify_report.status != "pass" {
+                bail!(
+                    "in-process final verification rejected prog {prog_id} (errno {}): verifier log summary:\n{}",
+                    verify_report
+                        .errno
+                        .map(|errno| errno.to_string())
+                        .unwrap_or_else(|| "unknown".to_string()),
+                    bpfverify::verifier_log_summary(&verify_report.verifier_log)
+                );
+            }
 
             let rejit_summary = kernel
                 .rejit(prog_id, &candidate_snapshot, &opt_insns, fd_array_slice)
@@ -1671,6 +1739,7 @@ fn count_json_files(path: &Path) -> Result<usize> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::os::unix::fs::PermissionsExt;
 
     #[test]
     fn bytecode_decoder_rejects_unaligned_input() {
@@ -1788,5 +1857,292 @@ mod tests {
         assert_eq!(json["maps"][0]["entries"][0]["value"], "07000000");
         assert_eq!(json["maps"][1]["entries"][0]["key"], "02000000");
         assert!(json["maps"][1]["entries"][0]["value"].is_null());
+    }
+
+    #[test]
+    fn verifier_watchdog_times_out_without_waiting_for_worker() {
+        let (release_sender, release_receiver) = mpsc::channel();
+        let started = Instant::now();
+
+        let err = run_in_thread_with_timeout(
+            "test verifier watchdog",
+            Duration::from_millis(20),
+            move || {
+                release_receiver
+                    .recv()
+                    .context("wait for test release signal")?;
+                Ok(())
+            },
+        )
+        .unwrap_err();
+
+        assert!(
+            started.elapsed() < Duration::from_secs(1),
+            "watchdog waited too long before returning timeout"
+        );
+        assert!(
+            err.to_string().contains("timed out after 20ms"),
+            "err={err:#}"
+        );
+        release_sender.send(()).unwrap();
+    }
+
+    #[test]
+    fn final_verifier_reject_preserves_log_and_prog_id_in_error() {
+        let harness = ApplyHarness::new();
+        let mut kernel = MockKernelOps {
+            verify_report: mock_verify_report(
+                "fail",
+                "mock verifier reject log",
+                Some(libc::EINVAL),
+            ),
+            rejit_calls: 0,
+        };
+
+        let err = harness.apply(&mut kernel).unwrap_err();
+
+        let message = format!("{err:#}");
+        assert!(message.contains("prog 42"), "err={message}");
+        assert!(
+            message.contains("mock verifier reject log"),
+            "err={message}"
+        );
+        assert_eq!(kernel.rejit_calls, 0);
+        let verifier_log =
+            fs::read_to_string(harness.failure_root.path().join("42/verifier.log")).unwrap();
+        assert_eq!(verifier_log, "mock verifier reject log");
+    }
+
+    #[test]
+    fn final_verifier_success_reaches_rejit_and_returns_success() {
+        let harness = ApplyHarness::new();
+        let mut kernel = MockKernelOps {
+            verify_report: mock_verify_report("pass", "mock verifier pass log", None),
+            rejit_calls: 0,
+        };
+
+        let result = harness.apply(&mut kernel).unwrap();
+
+        assert_eq!(result.status, "ok");
+        assert_eq!(result.prog_id, 42);
+        assert!(result.changed);
+        assert!(result.summary.applied);
+        assert_eq!(kernel.rejit_calls, 1);
+    }
+
+    struct ApplyHarness {
+        _env_lock: std::sync::MutexGuard<'static, ()>,
+        _cli_dir: WorkDir,
+        _failure_env: EnvGuard,
+        failure_root: WorkDir,
+        config: CliConfig,
+    }
+
+    impl ApplyHarness {
+        fn new() -> Self {
+            static TEST_ENV_LOCK: Mutex<()> = Mutex::new(());
+            let env_lock = TEST_ENV_LOCK
+                .lock()
+                .expect("test env lock should not be poisoned");
+            let cli_dir = WorkDir::new("bpfrejit-daemon-fake-cli").unwrap();
+            write_fake_bpfopt(cli_dir.path());
+            let failure_root = WorkDir::new("bpfrejit-daemon-failures").unwrap();
+            let failure_env = EnvGuard::set(FAILURE_ROOT_ENV, failure_root.path());
+            let config = CliConfig {
+                cli_dir: Some(cli_dir.path().to_path_buf()),
+            };
+            Self {
+                _env_lock: env_lock,
+                _cli_dir: cli_dir,
+                _failure_env: failure_env,
+                failure_root,
+                config,
+            }
+        }
+
+        fn apply(&self, kernel: &mut dyn KernelOps) -> Result<OptimizeOneResult> {
+            try_apply_one_with_map_access(
+                ApplyOneRequest {
+                    prog_id: 42,
+                    config: &self.config,
+                    enabled_passes: Some(&["dce".to_string()]),
+                    profile_path: None,
+                    invalidation_tracker: None,
+                    force_rejit: false,
+                },
+                kernel,
+                |_map_id| -> Result<OwnedFd> { bail!("test did not expect map fd opens") },
+                |_map, _fd, _key| -> Result<Option<Vec<u8>>> {
+                    bail!("test did not expect map value lookups")
+                },
+                |_map, _fd| -> Result<Vec<Vec<u8>>> { bail!("test did not expect map key scans") },
+            )
+        }
+    }
+
+    struct EnvGuard {
+        key: &'static str,
+        previous: Option<std::ffi::OsString>,
+    }
+
+    impl EnvGuard {
+        fn set(key: &'static str, value: &Path) -> Self {
+            let previous = std::env::var_os(key);
+            std::env::set_var(key, value.as_os_str());
+            Self { key, previous }
+        }
+    }
+
+    impl Drop for EnvGuard {
+        fn drop(&mut self) {
+            match &self.previous {
+                Some(value) => std::env::set_var(self.key, value),
+                None => std::env::remove_var(self.key),
+            }
+        }
+    }
+
+    struct MockKernelOps {
+        verify_report: bpfverify::VerifyReport,
+        rejit_calls: usize,
+    }
+
+    impl KernelOps for MockKernelOps {
+        fn snapshot_program(&mut self, prog_id: u32) -> Result<bpfget::ProgramSnapshot> {
+            Ok(test_snapshot(prog_id))
+        }
+
+        fn probe_target(&mut self) -> Result<bpfget::TargetJson> {
+            bail!("test did not expect target probing")
+        }
+
+        fn verify_candidate(
+            &mut self,
+            _snapshot: &bpfget::ProgramSnapshot,
+            _insns: &[kernel_sys::bpf_insn],
+            _fd_array: &[i32],
+        ) -> Result<bpfverify::VerifyReport> {
+            Ok(self.verify_report.clone())
+        }
+
+        fn verifier_states(
+            &mut self,
+            _snapshot: &bpfget::ProgramSnapshot,
+            _insns: &[kernel_sys::bpf_insn],
+            _fd_array: &[i32],
+        ) -> Result<kernel_sys::VerifierStatesJson> {
+            bail!("test did not expect verifier-state capture")
+        }
+
+        fn rejit(
+            &mut self,
+            prog_id: u32,
+            _snapshot: &bpfget::ProgramSnapshot,
+            insns: &[kernel_sys::bpf_insn],
+            _fd_array: &[i32],
+        ) -> Result<bpfrejit::RejitSummary> {
+            self.rejit_calls += 1;
+            Ok(bpfrejit::RejitSummary {
+                status: "ok".to_string(),
+                prog_id,
+                insn_count_before: 1,
+                insn_count_after: insns.len(),
+            })
+        }
+    }
+
+    fn write_fake_bpfopt(dir: &Path) {
+        let path = dir.join("bpfopt");
+        fs::write(
+            &path,
+            r#"#!/bin/sh
+set -eu
+if [ "$1" != "optimize" ]; then
+    echo "unexpected bpfopt subcommand: $1" >&2
+    exit 1
+fi
+report=""
+while [ "$#" -gt 0 ]; do
+    if [ "$1" = "--report" ]; then
+        shift
+        report="$1"
+    fi
+    shift || true
+done
+if [ -z "$report" ]; then
+    echo "missing --report" >&2
+    exit 1
+fi
+cat
+printf '\225\000\000\000\000\000\000\000'
+cat > "$report" <<'JSON'
+{"passes":[{"pass":"dce","changed":true,"sites_applied":1,"insn_count_before":1,"insn_count_after":2,"insn_delta":1}]}
+JSON
+"#,
+        )
+        .unwrap();
+        let mut permissions = fs::metadata(&path).unwrap().permissions();
+        permissions.set_mode(0o755);
+        fs::set_permissions(&path, permissions).unwrap();
+    }
+
+    fn test_snapshot(prog_id: u32) -> bpfget::ProgramSnapshot {
+        bpfget::ProgramSnapshot {
+            info: bpfget::ProgramInfo {
+                id: prog_id,
+                name: "mock_prog".to_string(),
+                prog_type: bpfget::TypeInfo {
+                    name: "xdp".to_string(),
+                    numeric: kernel_sys::BPF_PROG_TYPE_XDP,
+                },
+                insn_cnt: 1,
+                map_ids: Vec::new(),
+                load_time: 0,
+                created_by_uid: 0,
+                xlated_prog_len: 8,
+                orig_prog_len: 8,
+                jited_prog_len: 0,
+                btf_id: 0,
+                prog_flags: 0,
+                func_info_rec_size: 0,
+                nr_func_info: 0,
+                line_info_rec_size: 0,
+                nr_line_info: 0,
+                attach_btf_obj_id: 0,
+                attach_btf_id: 0,
+                expected_attach_type: None,
+            },
+            maps: Vec::new(),
+            map_fds: Vec::new(),
+            insns: vec![exit_insn()],
+            btf: bpfget::ProgramBtfInfo::default(),
+        }
+    }
+
+    fn exit_insn() -> kernel_sys::bpf_insn {
+        kernel_sys::bpf_insn {
+            code: (kernel_sys::BPF_JMP | kernel_sys::BPF_EXIT) as u8,
+            _bitfield_align_1: [],
+            _bitfield_1: Default::default(),
+            off: 0,
+            imm: 0,
+        }
+    }
+
+    fn mock_verify_report(
+        status: &'static str,
+        verifier_log: &str,
+        errno: Option<i32>,
+    ) -> bpfverify::VerifyReport {
+        bpfverify::VerifyReport {
+            status,
+            verifier_log: verifier_log.to_string(),
+            verifier_states: kernel_sys::VerifierStatesJson { insns: Vec::new() },
+            insn_count: 2,
+            log_level: 2,
+            errno,
+            jited_size: None,
+            log_true_size: 0,
+        }
     }
 }

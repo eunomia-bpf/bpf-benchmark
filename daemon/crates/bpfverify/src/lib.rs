@@ -327,7 +327,7 @@ fn convert_reg_state(reg: &verifier_log::RegState) -> Option<VerifierRegJson> {
     })
 }
 
-fn verifier_log_summary(log: &str) -> String {
+pub fn verifier_log_summary(log: &str) -> String {
     let trimmed = log.trim();
     if trimmed.is_empty() {
         return "<empty verifier log>".to_string();
