@@ -1462,8 +1462,13 @@ fn write_original_verifier_states(
         .arg("--verifier-states-out")
         .arg(verifier_states_json);
     append_load_context_args(&mut verify, prog_info, workdir);
-    run_stage_output("bpfverify original verifier-states", &mut verify)
-        .context("bpfverify --verifier-states-out failed")?;
+    run_bpfverify_reported(
+        "bpfverify original verifier-states",
+        &mut verify,
+        &original_verify_report,
+        &workdir.join("verifier.log"),
+    )
+    .context("bpfverify --verifier-states-out failed")?;
     Ok(())
 }
 

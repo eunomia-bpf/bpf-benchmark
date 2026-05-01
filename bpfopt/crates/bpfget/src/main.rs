@@ -395,13 +395,18 @@ fn write_full(prog_id: u32, outdir: &Path) -> Result<()> {
     ensure_original_bytecode(&insns)?;
     let (info, map_ids) = get_prog_info_with_map_ids_from_fd(fd.as_fd(), prog_id)?;
     let expected_attach_type = expected_attach_type_json(info.id, info.prog_type)?;
-    let btf_info = kernel_sys::prog_btf_info(fd.as_fd())
+    let mut btf_info = kernel_sys::prog_btf_info(fd.as_fd())
         .with_context(|| format!("read BTF record metadata for BPF program id {prog_id}"))?;
     let pseudo_map_old_fds = pseudo_map_old_fds(&insns);
     let map_infos = get_map_infos(&map_ids, &pseudo_map_old_fds)?;
 
+    normalize_func_info_for_insns(&mut btf_info.func_info, btf_info.func_info_rec_size, &insns)?;
+    normalize_line_info_for_insns(&mut btf_info.line_info, btf_info.line_info_rec_size, &insns)?;
+
     let prog_bin = encode_insns(&insns);
-    let prog_info = ProgInfoJson::from_info(info, map_ids, expected_attach_type)?;
+    let mut prog_info = ProgInfoJson::from_info(info, map_ids, expected_attach_type)?;
+    prog_info.nr_func_info = btf_record_count(&btf_info.func_info, btf_info.func_info_rec_size)?;
+    prog_info.nr_line_info = btf_record_count(&btf_info.line_info, btf_info.line_info_rec_size)?;
     let prog_info_json = json_bytes(&prog_info)?;
     let map_fds_json = json_bytes(&map_infos)?;
 
@@ -444,6 +449,99 @@ fn validate_btf_record_blob(label: &str, count: u32, rec_size: u32, bytes: &[u8]
         );
     }
     Ok(())
+}
+
+fn normalize_func_info_for_insns(
+    func_info: &mut Vec<u8>,
+    rec_size: u32,
+    insns: &[kernel_sys::bpf_insn],
+) -> Result<()> {
+    if func_info.is_empty() {
+        return Ok(());
+    }
+    validate_btf_records("func_info", func_info, rec_size)?;
+
+    let rec_size = rec_size as usize;
+    let first = btf_record_insn_off(&func_info[..rec_size]);
+    if first != 0 {
+        func_info.clear();
+        return Ok(());
+    }
+    let mut previous = None;
+    for record in func_info.chunks(rec_size) {
+        let insn_off = btf_record_insn_off(record);
+        let valid_order = previous.is_none_or(|prev| insn_off > prev);
+        if !valid_order || !valid_btf_insn_target(insns, insn_off) {
+            func_info.clear();
+            return Ok(());
+        }
+        previous = Some(insn_off);
+    }
+    Ok(())
+}
+
+fn normalize_line_info_for_insns(
+    line_info: &mut Vec<u8>,
+    rec_size: u32,
+    insns: &[kernel_sys::bpf_insn],
+) -> Result<()> {
+    if line_info.is_empty() {
+        return Ok(());
+    }
+    validate_btf_records("line_info", line_info, rec_size)?;
+
+    let rec_size = rec_size as usize;
+    let mut normalized = Vec::with_capacity(line_info.len());
+    for record in line_info.chunks(rec_size) {
+        let insn_off = btf_record_insn_off(record);
+        if valid_btf_insn_target(insns, insn_off) {
+            normalized.extend_from_slice(record);
+        }
+    }
+    *line_info = normalized;
+    Ok(())
+}
+
+fn validate_btf_records(label: &str, bytes: &[u8], rec_size: u32) -> Result<()> {
+    if rec_size < std::mem::size_of::<u32>() as u32 {
+        bail!("{label} rec_size {rec_size} is too small to hold insn_off");
+    }
+    if !bytes.len().is_multiple_of(rec_size as usize) {
+        bail!(
+            "{label} byte length {} is not a multiple of rec_size {rec_size}",
+            bytes.len()
+        );
+    }
+    Ok(())
+}
+
+fn btf_record_insn_off(record: &[u8]) -> u32 {
+    u32::from_le_bytes(record[..4].try_into().expect("record has insn_off"))
+}
+
+fn valid_btf_insn_target(insns: &[kernel_sys::bpf_insn], insn_off: u32) -> bool {
+    insns
+        .get(insn_off as usize)
+        .is_some_and(|insn| insn.code != 0)
+}
+
+fn btf_record_count(bytes: &[u8], rec_size: u32) -> Result<u32> {
+    if bytes.is_empty() {
+        return Ok(0);
+    }
+    if rec_size == 0 {
+        bail!("BTF record data is present but rec_size is zero");
+    }
+    let rec_size = rec_size as usize;
+    if !bytes.len().is_multiple_of(rec_size) {
+        bail!(
+            "BTF record byte length {} is not a multiple of rec_size {rec_size}",
+            bytes.len()
+        );
+    }
+    (bytes.len() / rec_size)
+        .try_into()
+        .map_err(|_| anyhow!("BTF record count does not fit u32"))
 }
 
 fn list_programs(output: &Path) -> Result<()> {
@@ -1110,6 +1208,49 @@ mod tests {
     }
 
     #[test]
+    fn normalize_line_info_drops_records_that_do_not_target_real_insns() {
+        let mut insns = Vec::from(ldimm64(BPF_PSEUDO_MAP_FD, 11));
+        insns.push(kernel_sys::bpf_insn {
+            code: (kernel_sys::BPF_JMP | kernel_sys::BPF_EXIT) as u8,
+            _bitfield_align_1: [],
+            _bitfield_1: Default::default(),
+            off: 0,
+            imm: 0,
+        });
+        let mut line_info = [
+            btf_record(0, 100),
+            btf_record(1, 101),
+            btf_record(2, 102),
+            btf_record(3, 103),
+        ]
+        .concat();
+
+        normalize_line_info_for_insns(&mut line_info, 16, &insns).unwrap();
+
+        assert_eq!(btf_offsets(&line_info, 16), vec![0, 2]);
+        assert_eq!(btf_second_words(&line_info, 16), vec![100, 102]);
+        assert_eq!(btf_record_count(&line_info, 16).unwrap(), 2);
+    }
+
+    #[test]
+    fn normalize_func_info_clears_inconsistent_subprog_layout() {
+        let mut insns = Vec::from(ldimm64(BPF_PSEUDO_MAP_FD, 11));
+        insns.push(kernel_sys::bpf_insn {
+            code: (kernel_sys::BPF_JMP | kernel_sys::BPF_EXIT) as u8,
+            _bitfield_align_1: [],
+            _bitfield_1: Default::default(),
+            off: 0,
+            imm: 0,
+        });
+        let mut func_info = [func_btf_record(0, 10), func_btf_record(3, 11)].concat();
+
+        normalize_func_info_for_insns(&mut func_info, 8, &insns).unwrap();
+
+        assert!(func_info.is_empty());
+        assert_eq!(btf_record_count(&func_info, 8).unwrap(), 0);
+    }
+
+    #[test]
     fn required_load_metadata_rejects_missing_tracing_attach_context() {
         let mut info = prog_info_for_type(kernel_sys::BPF_PROG_TYPE_TRACING);
         info.btf_id = 10;
@@ -1175,6 +1316,34 @@ mod tests {
             imm: 0,
         };
         [first, second]
+    }
+
+    fn func_btf_record(insn_off: u32, type_id: u32) -> Vec<u8> {
+        let mut record = vec![0; 8];
+        record[0..4].copy_from_slice(&insn_off.to_le_bytes());
+        record[4..8].copy_from_slice(&type_id.to_le_bytes());
+        record
+    }
+
+    fn btf_record(insn_off: u32, second_word: u32) -> Vec<u8> {
+        let mut record = vec![0; 16];
+        record[0..4].copy_from_slice(&insn_off.to_le_bytes());
+        record[4..8].copy_from_slice(&second_word.to_le_bytes());
+        record
+    }
+
+    fn btf_offsets(bytes: &[u8], rec_size: usize) -> Vec<u32> {
+        bytes
+            .chunks(rec_size)
+            .map(|record| u32::from_le_bytes(record[0..4].try_into().unwrap()))
+            .collect()
+    }
+
+    fn btf_second_words(bytes: &[u8], rec_size: usize) -> Vec<u32> {
+        bytes
+            .chunks(rec_size)
+            .map(|record| u32::from_le_bytes(record[4..8].try_into().unwrap()))
+            .collect()
     }
 
     #[test]
