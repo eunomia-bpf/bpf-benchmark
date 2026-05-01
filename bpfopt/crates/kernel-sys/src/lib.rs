@@ -31,6 +31,7 @@ pub const BRANCH_SNAPSHOT_EVENT_SIZE: usize =
     BRANCH_SNAPSHOT_EVENT_HEADER_SIZE + BRANCH_SNAPSHOT_MAX_ENTRIES * BRANCH_SNAPSHOT_ENTRY_SIZE;
 
 const BPFPROF_SIDECAR_NAME: &[u8] = b"bpfprof_lbr\0";
+const MAX_REJIT_LOG_BUF_SIZE: usize = 256 * 1024 * 1024;
 
 const PERF_EVENT_IOC_ENABLE: libc::c_ulong = 0x2400;
 const PERF_EVENT_IOC_DISABLE: libc::c_ulong = 0x2401;
@@ -238,6 +239,23 @@ fn verifier_log_summary(log: &str) -> String {
         format!("{summary}\n... verifier log truncated ...")
     } else {
         summary
+    }
+}
+
+struct ProgRejitFailure {
+    error: std::io::Error,
+    log: String,
+}
+
+fn format_prog_rejit_failure(failure: ProgRejitFailure) -> anyhow::Error {
+    if !failure.log.is_empty() {
+        anyhow!(
+            "BPF_PROG_REJIT: {}\nverifier log summary:\n{}",
+            failure.error,
+            verifier_log_summary(&failure.log)
+        )
+    } else {
+        anyhow!("BPF_PROG_REJIT: {}", failure.error)
     }
 }
 
@@ -1332,14 +1350,105 @@ pub fn prog_rejit(
     fd_array: &[i32],
     mut log_buf: Option<&mut [u8]>,
 ) -> Result<()> {
+    if prog_fd.as_raw_fd() < 0 {
+        bail!("BPF_PROG_REJIT prog_fd must be non-negative");
+    }
+    let insn_cnt: u32 = new_insns
+        .len()
+        .try_into()
+        .map_err(|_| anyhow!("BPF_PROG_REJIT instruction count does not fit __u32"))?;
+    let fd_array_cnt: u32 = fd_array
+        .len()
+        .try_into()
+        .map_err(|_| anyhow!("BPF_PROG_REJIT fd_array length does not fit __u32"))?;
+
+    if let Some(buf) = log_buf.as_deref_mut() {
+        validate_rejit_log_buf(buf)?;
+        let first_log_buf_size = buf.len();
+        match prog_rejit_once(prog_fd, insn_cnt, new_insns, fd_array_cnt, fd_array, Some(buf)) {
+            Ok(()) => return Ok(()),
+            Err(failure) => {
+                if failure.error.raw_os_error() != Some(libc::ENOSPC) {
+                    return Err(format_prog_rejit_failure(failure));
+                }
+                let Some(mut log_buf_size) = next_rejit_log_buf_size(first_log_buf_size) else {
+                    return Err(format_prog_rejit_failure(failure));
+                };
+                loop {
+                    let mut retry_log_buf = vec![0u8; log_buf_size];
+                    match prog_rejit_once(
+                        prog_fd,
+                        insn_cnt,
+                        new_insns,
+                        fd_array_cnt,
+                        fd_array,
+                        Some(retry_log_buf.as_mut_slice()),
+                    ) {
+                        Ok(()) => return Ok(()),
+                        Err(retry_failure) => {
+                            if retry_failure.error.raw_os_error() == Some(libc::ENOSPC) {
+                                match next_rejit_log_buf_size(log_buf_size) {
+                                    Some(next_size) => {
+                                        log_buf_size = next_size;
+                                        continue;
+                                    }
+                                    None => {}
+                                }
+                            }
+                            return Err(format_prog_rejit_failure(retry_failure));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    prog_rejit_once(prog_fd, insn_cnt, new_insns, fd_array_cnt, fd_array, None)
+        .map_err(format_prog_rejit_failure)
+}
+
+fn validate_rejit_log_buf(buf: &[u8]) -> Result<()> {
+    if buf.is_empty() {
+        bail!("BPF_PROG_REJIT log buffer must not be empty");
+    }
+    if buf.len() > u32::MAX as usize {
+        bail!(
+            "BPF_PROG_REJIT log buffer length {} does not fit __u32",
+            buf.len()
+        );
+    }
+    Ok(())
+}
+
+fn next_rejit_log_buf_size(current: usize) -> Option<usize> {
+    if current >= MAX_REJIT_LOG_BUF_SIZE {
+        return None;
+    }
+    let doubled = match current.checked_mul(2) {
+        Some(value) => value,
+        None => MAX_REJIT_LOG_BUF_SIZE,
+    };
+    let next = doubled.min(MAX_REJIT_LOG_BUF_SIZE);
+    if next > current {
+        Some(next)
+    } else {
+        None
+    }
+}
+
+fn prog_rejit_once(
+    prog_fd: BorrowedFd<'_>,
+    insn_cnt: u32,
+    new_insns: &[bpf_insn],
+    fd_array_cnt: u32,
+    fd_array: &[i32],
+    mut log_buf: Option<&mut [u8]>,
+) -> std::result::Result<(), ProgRejitFailure> {
     let mut attr: AttrRejit = zeroed();
     attr.prog_fd = prog_fd.as_raw_fd() as u32;
-    attr.insn_cnt = new_insns.len() as u32;
+    attr.insn_cnt = insn_cnt;
     attr.insns = new_insns.as_ptr() as u64;
     if let Some(buf) = log_buf.as_deref_mut() {
-        if buf.is_empty() {
-            bail!("BPF_PROG_REJIT log buffer must not be empty");
-        }
         buf.fill(0);
         attr.log_level = 2;
         attr.log_size = buf.len() as u32;
@@ -1347,24 +1456,17 @@ pub fn prog_rejit(
     }
     if !fd_array.is_empty() {
         attr.fd_array = fd_array.as_ptr() as u64;
-        attr.fd_array_cnt = fd_array.len() as u32;
+        attr.fd_array_cnt = fd_array_cnt;
     }
 
     let ret = unsafe { sys_bpf(BPF_PROG_REJIT, &mut attr, std::mem::size_of::<AttrRejit>()) };
     if ret < 0 {
-        let first_error = std::io::Error::last_os_error();
+        let error = std::io::Error::last_os_error();
         let log = match log_buf.as_deref() {
             Some(buf) => extract_log_string(buf),
             None => String::new(),
         };
-        if !log.is_empty() {
-            return Err(anyhow!(
-                "BPF_PROG_REJIT: {}\nverifier log summary:\n{}",
-                first_error,
-                verifier_log_summary(&log)
-            ));
-        }
-        return Err(anyhow!("BPF_PROG_REJIT: {first_error}"));
+        return Err(ProgRejitFailure { error, log });
     }
     Ok(())
 }
@@ -1519,6 +1621,16 @@ mod tests {
             48,
             "AttrRejit should pass the minimal zero-extended rejit prefix"
         );
+    }
+
+    #[test]
+    fn rejit_log_retry_doubles_until_limit() {
+        assert_eq!(next_rejit_log_buf_size(1024), Some(2048));
+        assert_eq!(
+            next_rejit_log_buf_size(MAX_REJIT_LOG_BUF_SIZE / 2 + 1),
+            Some(MAX_REJIT_LOG_BUF_SIZE)
+        );
+        assert_eq!(next_rejit_log_buf_size(MAX_REJIT_LOG_BUF_SIZE), None);
     }
 
     #[test]

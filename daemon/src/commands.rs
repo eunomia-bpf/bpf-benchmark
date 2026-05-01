@@ -1233,11 +1233,6 @@ where
     }
 }
 
-fn append_load_context_args(command: &mut Command, prog_info: &ProgInfoJson, workdir: &Path) {
-    append_load_context_base_args(command, prog_info);
-    append_btf_info_command_args(command, prog_info, workdir);
-}
-
 fn append_candidate_load_context_args(
     command: &mut Command,
     prog_info: &ProgInfoJson,
@@ -1271,6 +1266,10 @@ fn append_load_context_base_args(command: &mut Command, prog_info: &ProgInfoJson
             .arg("--attach-btf-obj-id")
             .arg(prog_info.attach_btf_obj_id.to_string());
     }
+}
+
+fn append_verifier_states_load_context_args(command: &mut Command, prog_info: &ProgInfoJson) {
+    append_load_context_base_args(command, prog_info);
 }
 
 fn append_bpfopt_context_args(command: &mut Command, prog_info: &ProgInfoJson) {
@@ -1461,7 +1460,7 @@ fn write_original_verifier_states(
         .arg(&original_verify_report)
         .arg("--verifier-states-out")
         .arg(verifier_states_json);
-    append_load_context_args(&mut verify, prog_info, workdir);
+    append_verifier_states_load_context_args(&mut verify, prog_info);
     run_bpfverify_reported(
         "bpfverify original verifier-states",
         &mut verify,
@@ -1959,6 +1958,39 @@ mod tests {
         let mut command = Command::new("bpfverify");
 
         append_candidate_load_context_args(&mut command, &prog_info, workdir.path()).unwrap();
+
+        let args = command
+            .get_args()
+            .map(|arg| arg.to_string_lossy().into_owned())
+            .collect::<Vec<_>>();
+        assert!(args.iter().any(|arg| arg == "--prog-btf-id"));
+        assert!(!args.iter().any(|arg| arg == "--func-info"));
+        assert!(!args.iter().any(|arg| arg == "--line-info"));
+    }
+
+    #[test]
+    fn verifier_states_load_context_omits_optional_btf_metadata() {
+        let prog_info = ProgInfoJson {
+            id: 42,
+            name: "conntrack_clean".to_string(),
+            prog_type: TypeJson {
+                name: "sched_cls".to_string(),
+                numeric: kernel_sys::BPF_PROG_TYPE_SCHED_CLS,
+            },
+            insn_cnt: 12,
+            map_ids: Vec::new(),
+            btf_id: 108,
+            func_info_rec_size: 8,
+            nr_func_info: 2,
+            line_info_rec_size: 16,
+            nr_line_info: 3,
+            attach_btf_obj_id: 0,
+            attach_btf_id: 0,
+            expected_attach_type: None,
+        };
+        let mut command = Command::new("bpfverify");
+
+        append_verifier_states_load_context_args(&mut command, &prog_info);
 
         let args = command
             .get_args()

@@ -15,6 +15,7 @@ use clap::Parser;
 use serde::{Deserialize, Serialize};
 
 const DEFAULT_LOG_BUF_SIZE: usize = 16 * 1024 * 1024;
+const MAX_LOG_BUF_SIZE: usize = 256 * 1024 * 1024;
 const BPF_LD_IMM64: u8 = (kernel_sys::BPF_LD | kernel_sys::BPF_DW | kernel_sys::BPF_IMM) as u8;
 const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
@@ -286,25 +287,47 @@ fn run() -> Result<ExitCode> {
     )?;
     let log_level = effective_log_level(&cli);
 
-    let mut log_buf = vec![0u8; DEFAULT_LOG_BUF_SIZE];
-    let dryrun = kernel_sys::prog_load_dryrun_report(kernel_sys::ProgLoadDryRunOptions {
-        prog_type,
-        expected_attach_type,
-        prog_btf_fd: prog_btf_fd.fd,
-        attach_btf_id: cli.attach_btf_id,
-        attach_btf_obj_fd: attach_btf_obj_fd.fd,
-        func_info: func_info
-            .as_ref()
-            .map(OwnedBtfInfoRecords::as_kernel_records),
-        line_info: line_info
-            .as_ref()
-            .map(OwnedBtfInfoRecords::as_kernel_records),
-        insns: &insns,
-        fd_array: (!fd_array.is_empty()).then_some(fd_array.as_slice()),
-        log_level,
-        log_buf: (log_level > 0).then_some(log_buf.as_mut_slice()),
-    })
-    .context("BPF_PROG_LOAD dry-run failed")?;
+    let mut log_buf_size = DEFAULT_LOG_BUF_SIZE;
+    let dryrun = loop {
+        let mut log_buf = if log_level > 0 {
+            vec![0u8; log_buf_size]
+        } else {
+            Vec::new()
+        };
+        let report = kernel_sys::prog_load_dryrun_report(kernel_sys::ProgLoadDryRunOptions {
+            prog_type,
+            expected_attach_type,
+            prog_btf_fd: prog_btf_fd.fd,
+            attach_btf_id: cli.attach_btf_id,
+            attach_btf_obj_fd: attach_btf_obj_fd.fd,
+            func_info: func_info
+                .as_ref()
+                .map(OwnedBtfInfoRecords::as_kernel_records),
+            line_info: line_info
+                .as_ref()
+                .map(OwnedBtfInfoRecords::as_kernel_records),
+            insns: &insns,
+            fd_array: (!fd_array.is_empty()).then_some(fd_array.as_slice()),
+            log_level,
+            log_buf: if log_level > 0 {
+                Some(log_buf.as_mut_slice())
+            } else {
+                None
+            },
+        })
+        .context("BPF_PROG_LOAD dry-run failed")?;
+
+        if log_level > 0 && report.errno == Some(libc::ENOSPC) {
+            match next_log_buf_size(log_buf_size, report.log_true_size)? {
+                Some(next_size) => {
+                    log_buf_size = next_size;
+                    continue;
+                }
+                None => {}
+            }
+        }
+        break report;
+    };
 
     let parsed_verifier_states = verifier_log::parse_verifier_log(&dryrun.verifier_log);
     let verifier_states = convert_verifier_states(&parsed_verifier_states);
@@ -348,6 +371,35 @@ fn effective_log_level(cli: &Cli) -> u32 {
         2
     } else {
         cli.log_level
+    }
+}
+
+fn next_log_buf_size(current: usize, log_true_size: u32) -> Result<Option<usize>> {
+    if current == 0 {
+        bail!("verifier log retry requires a non-zero current buffer size");
+    }
+    if current >= MAX_LOG_BUF_SIZE {
+        return Ok(None);
+    }
+
+    let doubled = match current.checked_mul(2) {
+        Some(value) => value,
+        None => MAX_LOG_BUF_SIZE,
+    };
+    let requested_by_kernel = if log_true_size == 0 {
+        current
+    } else {
+        usize::try_from(log_true_size)
+            .map_err(|_| anyhow!("kernel verifier log_true_size does not fit usize"))?
+            .checked_add(1)
+            .ok_or_else(|| anyhow!("kernel verifier log_true_size overflow"))?
+    };
+    let desired = doubled.max(requested_by_kernel);
+    let next = desired.min(MAX_LOG_BUF_SIZE);
+    if next > current {
+        Ok(Some(next))
+    } else {
+        Ok(None)
     }
 }
 
@@ -1250,6 +1302,20 @@ mod tests {
         ])
         .unwrap();
         assert_eq!(effective_log_level(&states_cli), 2);
+    }
+
+    #[test]
+    fn verifier_log_retry_uses_kernel_true_size_when_available() {
+        assert_eq!(next_log_buf_size(16, 100).unwrap(), Some(101));
+    }
+
+    #[test]
+    fn verifier_log_retry_stops_at_configured_limit() {
+        assert_eq!(next_log_buf_size(MAX_LOG_BUF_SIZE, 0).unwrap(), None);
+        assert_eq!(
+            next_log_buf_size(MAX_LOG_BUF_SIZE - 1, u32::MAX).unwrap(),
+            Some(MAX_LOG_BUF_SIZE)
+        );
     }
 
     #[test]

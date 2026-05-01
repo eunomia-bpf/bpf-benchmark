@@ -18,6 +18,7 @@ static NEXT_TMP_ID: AtomicU64 = AtomicU64::new(0);
 const BPF_LD_IMM64: u8 = (kernel_sys::BPF_LD | kernel_sys::BPF_DW | kernel_sys::BPF_IMM) as u8;
 const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
+const BPF_PSEUDO_CALL: u8 = kernel_sys::BPF_PSEUDO_CALL as u8;
 const FUNC_INFO_FILE: &str = "func_info.bin";
 const LINE_INFO_FILE: &str = "line_info.bin";
 
@@ -467,6 +468,8 @@ fn normalize_func_info_for_insns(
         func_info.clear();
         return Ok(());
     }
+    let expected_offsets = expected_func_info_offsets(insns)?;
+    let mut offsets = Vec::with_capacity(func_info.len() / rec_size);
     let mut previous = None;
     for record in func_info.chunks(rec_size) {
         let insn_off = btf_record_insn_off(record);
@@ -475,7 +478,11 @@ fn normalize_func_info_for_insns(
             func_info.clear();
             return Ok(());
         }
+        offsets.push(insn_off);
         previous = Some(insn_off);
+    }
+    if offsets != expected_offsets {
+        func_info.clear();
     }
     Ok(())
 }
@@ -491,14 +498,26 @@ fn normalize_line_info_for_insns(
     validate_btf_records("line_info", line_info, rec_size)?;
 
     let rec_size = rec_size as usize;
+    let expected_func_offsets = expected_func_info_offsets(insns)?;
+    let mut covered_func_offsets = Vec::with_capacity(expected_func_offsets.len());
     let mut normalized = Vec::with_capacity(line_info.len());
     for record in line_info.chunks(rec_size) {
         let insn_off = btf_record_insn_off(record);
         if valid_btf_insn_target(insns, insn_off) {
+            if expected_func_offsets.contains(&insn_off)
+                && !covered_func_offsets.contains(&insn_off)
+            {
+                covered_func_offsets.push(insn_off);
+            }
             normalized.extend_from_slice(record);
         }
     }
-    *line_info = normalized;
+    covered_func_offsets.sort_unstable();
+    if !normalized.is_empty() && covered_func_offsets == expected_func_offsets {
+        *line_info = normalized;
+    } else {
+        line_info.clear();
+    }
     Ok(())
 }
 
@@ -523,6 +542,41 @@ fn valid_btf_insn_target(insns: &[kernel_sys::bpf_insn], insn_off: u32) -> bool 
     insns
         .get(insn_off as usize)
         .is_some_and(|insn| insn.code != 0)
+}
+
+fn expected_func_info_offsets(insns: &[kernel_sys::bpf_insn]) -> Result<Vec<u32>> {
+    let mut offsets = vec![0u32];
+    for (pc, insn) in insns.iter().enumerate() {
+        if is_pseudo_call(insn) {
+            let target = pseudo_call_target(pc, insn.imm, insns.len())?;
+            if !offsets.contains(&target) {
+                offsets.push(target);
+            }
+        }
+    }
+    offsets.sort_unstable();
+    Ok(offsets)
+}
+
+fn is_pseudo_call(insn: &kernel_sys::bpf_insn) -> bool {
+    insn.code == (kernel_sys::BPF_JMP | kernel_sys::BPF_CALL) as u8
+        && insn.src_reg() == BPF_PSEUDO_CALL
+}
+
+fn pseudo_call_target(pc: usize, imm: i32, insn_count: usize) -> Result<u32> {
+    let next_pc = pc
+        .checked_add(1)
+        .ok_or_else(|| anyhow!("pseudo-call pc overflow"))?;
+    let next_pc = i64::try_from(next_pc).map_err(|_| anyhow!("pseudo-call pc does not fit i64"))?;
+    let insn_count =
+        i64::try_from(insn_count).map_err(|_| anyhow!("instruction count does not fit i64"))?;
+    let target = next_pc
+        .checked_add(i64::from(imm))
+        .ok_or_else(|| anyhow!("pseudo-call target overflow at insn {pc}"))?;
+    if target < 0 || target >= insn_count {
+        bail!("pseudo-call at insn {pc} targets out-of-range insn {target}");
+    }
+    u32::try_from(target).map_err(|_| anyhow!("pseudo-call target does not fit u32"))
 }
 
 fn btf_record_count(bytes: &[u8], rec_size: u32) -> Result<u32> {
@@ -1233,6 +1287,23 @@ mod tests {
     }
 
     #[test]
+    fn normalize_line_info_clears_incomplete_subprog_coverage() {
+        let insns = vec![
+            pseudo_call_to(0, 4),
+            exit_insn(),
+            exit_insn(),
+            exit_insn(),
+            exit_insn(),
+        ];
+        let mut line_info = [btf_record(0, 100), btf_record(2, 101)].concat();
+
+        normalize_line_info_for_insns(&mut line_info, 16, &insns).unwrap();
+
+        assert!(line_info.is_empty());
+        assert_eq!(btf_record_count(&line_info, 16).unwrap(), 0);
+    }
+
+    #[test]
     fn normalize_func_info_clears_inconsistent_subprog_layout() {
         let mut insns = Vec::from(ldimm64(BPF_PSEUDO_MAP_FD, 11));
         insns.push(kernel_sys::bpf_insn {
@@ -1248,6 +1319,40 @@ mod tests {
 
         assert!(func_info.is_empty());
         assert_eq!(btf_record_count(&func_info, 8).unwrap(), 0);
+    }
+
+    #[test]
+    fn normalize_func_info_requires_exact_subprog_starts() {
+        let insns = vec![
+            pseudo_call_to(0, 4),
+            exit_insn(),
+            exit_insn(),
+            exit_insn(),
+            exit_insn(),
+        ];
+        let mut func_info = [func_btf_record(0, 10), func_btf_record(3, 11)].concat();
+
+        normalize_func_info_for_insns(&mut func_info, 8, &insns).unwrap();
+
+        assert!(func_info.is_empty());
+        assert_eq!(btf_record_count(&func_info, 8).unwrap(), 0);
+    }
+
+    #[test]
+    fn normalize_func_info_preserves_exact_subprog_layout() {
+        let insns = vec![
+            pseudo_call_to(0, 4),
+            exit_insn(),
+            exit_insn(),
+            exit_insn(),
+            exit_insn(),
+        ];
+        let mut func_info = [func_btf_record(0, 10), func_btf_record(4, 11)].concat();
+
+        normalize_func_info_for_insns(&mut func_info, 8, &insns).unwrap();
+
+        assert_eq!(btf_offsets(&func_info, 8), vec![0, 4]);
+        assert_eq!(btf_record_count(&func_info, 8).unwrap(), 2);
     }
 
     #[test]
@@ -1316,6 +1421,40 @@ mod tests {
             imm: 0,
         };
         [first, second]
+    }
+
+    fn bpf_insn_raw(
+        code: u32,
+        dst_reg: u8,
+        src_reg: u8,
+        off: i16,
+        imm: i32,
+    ) -> kernel_sys::bpf_insn {
+        let mut insn = kernel_sys::bpf_insn {
+            code: code as u8,
+            _bitfield_align_1: [],
+            _bitfield_1: Default::default(),
+            off,
+            imm,
+        };
+        insn.set_dst_reg(dst_reg);
+        insn.set_src_reg(src_reg);
+        insn
+    }
+
+    fn exit_insn() -> kernel_sys::bpf_insn {
+        bpf_insn_raw(kernel_sys::BPF_JMP | kernel_sys::BPF_EXIT, 0, 0, 0, 0)
+    }
+
+    fn pseudo_call_to(call_pc: usize, target_pc: usize) -> kernel_sys::bpf_insn {
+        let imm = i64::try_from(target_pc).unwrap() - i64::try_from(call_pc).unwrap() - 1;
+        bpf_insn_raw(
+            kernel_sys::BPF_JMP | kernel_sys::BPF_CALL,
+            0,
+            BPF_PSEUDO_CALL,
+            0,
+            i32::try_from(imm).unwrap(),
+        )
     }
 
     fn func_btf_record(insn_off: u32, type_id: u32) -> Vec<u8> {
