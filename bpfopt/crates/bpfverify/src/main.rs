@@ -22,6 +22,10 @@ const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
 const BPF_PSEUDO_MAP_IDX: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX as u8;
 const BPF_PSEUDO_MAP_IDX_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX_VALUE as u8;
+const BPF_CALL_INSN: u8 = (kernel_sys::BPF_JMP | kernel_sys::BPF_CALL) as u8;
+const BPF_REG_1: u8 = 1;
+const BPF_REG_2: u8 = 2;
+const MAP_POINTER_SCAN_LIMIT: usize = 16;
 
 #[derive(Parser, Debug)]
 #[command(name = "bpfverify", version, about = "Verify raw BPF bytecode")]
@@ -472,6 +476,7 @@ fn apply_map_fds(
     let indexed_map_ids = prog_map_ids
         .map(|ids| ids.to_vec())
         .unwrap_or_else(|| bindings.iter().map(|binding| binding.map_id).collect());
+    let resolved_pointer_to_map_id = build_resolved_map_pointer_map(&indexed_map_ids, insns, path)?;
 
     let mut opened = HashMap::<u32, OwnedFd>::new();
     let mut pc = 0usize;
@@ -508,16 +513,14 @@ fn apply_map_fds(
             insns[pc].set_src_reg(src_reg);
             insns[pc].imm = new_fd;
             pc += 2;
-        } else if is_resolved_kernel_map_pointer_ldimm64(insns, pc) {
-            if bindings.len() != 1 {
-                bail!(
-                    "{} cannot reconstruct resolved kernel map pointer at insn {} with {} map bindings",
+        } else if let Some(value) = resolved_kernel_map_pointer_value(insns, pc) {
+            let map_id = *resolved_pointer_to_map_id.get(&value).ok_or_else(|| {
+                anyhow!(
+                    "{} has no map binding for resolved kernel map pointer at insn {}",
                     path.display(),
-                    pc,
-                    bindings.len()
-                );
-            }
-            let map_id = bindings[0].map_id;
+                    pc
+                )
+            })?;
             let new_fd =
                 open_map_fd(&mut opened, &bindings, map_id, dummy_map_fds, path)?.as_raw_fd();
             insns[pc].set_src_reg(BPF_PSEUDO_MAP_FD);
@@ -530,6 +533,29 @@ fn apply_map_fds(
     }
 
     Ok(opened.into_values().collect())
+}
+
+fn build_resolved_map_pointer_map(
+    map_ids: &[u32],
+    insns: &[kernel_sys::bpf_insn],
+    path: &Path,
+) -> Result<BTreeMap<u64, u32>> {
+    let values = resolved_kernel_map_pointer_values(insns);
+    if values.is_empty() {
+        return Ok(BTreeMap::new());
+    }
+    if values.len() != map_ids.len() {
+        bail!(
+            "{} cannot reconstruct {} resolved kernel map pointer values from {} map bindings",
+            path.display(),
+            values.len(),
+            map_ids.len()
+        );
+    }
+    Ok(values
+        .into_iter()
+        .zip(map_ids.iter().copied())
+        .collect::<BTreeMap<_, _>>())
 }
 
 fn build_old_fd_map(
@@ -701,20 +727,100 @@ fn is_pseudo_map_idx_ldimm64(insn: &kernel_sys::bpf_insn) -> bool {
         )
 }
 
-fn is_resolved_kernel_map_pointer_ldimm64(insns: &[kernel_sys::bpf_insn], pc: usize) -> bool {
+fn resolved_kernel_map_pointer_values(insns: &[kernel_sys::bpf_insn]) -> Vec<u64> {
+    let mut values = Vec::new();
+    let mut pc = 0usize;
+    while pc < insns.len() {
+        if let Some(value) = resolved_kernel_map_pointer_value(insns, pc) {
+            if !values.contains(&value) {
+                values.push(value);
+            }
+            pc += 2;
+        } else if insns[pc].code == BPF_LD_IMM64 {
+            pc += 2;
+        } else {
+            pc += 1;
+        }
+    }
+    values
+}
+
+fn resolved_kernel_map_pointer_value(insns: &[kernel_sys::bpf_insn], pc: usize) -> Option<u64> {
     if pc + 1 >= insns.len() {
-        return false;
+        return None;
     }
     let first = &insns[pc];
     let second = &insns[pc + 1];
-    first.code == BPF_LD_IMM64
+    if !(first.code == BPF_LD_IMM64
         && first.src_reg() == 0
         && first.off == 0
         && second.code == 0
         && second.dst_reg() == 0
         && second.src_reg() == 0
-        && second.off == 0
-        && looks_like_kernel_heap_pointer(ldimm64_u64(first, second))
+        && second.off == 0)
+    {
+        return None;
+    }
+    let value = ldimm64_u64(first, second);
+    (looks_like_kernel_heap_pointer(value)
+        && resolved_pointer_is_used_as_map_arg(insns, pc, first.dst_reg()))
+    .then_some(value)
+}
+
+fn resolved_pointer_is_used_as_map_arg(insns: &[kernel_sys::bpf_insn], pc: usize, reg: u8) -> bool {
+    let end = insns.len().min(pc + MAP_POINTER_SCAN_LIMIT);
+    let mut scan_pc = pc + 2;
+    while scan_pc < end {
+        let insn = &insns[scan_pc];
+        if is_helper_call(insn) {
+            return helper_expects_map_arg(insn.imm, reg);
+        }
+        if writes_register(insn, reg) {
+            return false;
+        }
+        scan_pc += insn_width(insn);
+    }
+    false
+}
+
+fn helper_expects_map_arg(helper: i32, reg: u8) -> bool {
+    if reg == BPF_REG_2 && helper == kernel_sys::BPF_FUNC_tail_call as i32 {
+        return true;
+    }
+    reg == BPF_REG_1
+        && matches!(
+            helper,
+            value if value == kernel_sys::BPF_FUNC_map_lookup_elem as i32
+                || value == kernel_sys::BPF_FUNC_map_update_elem as i32
+                || value == kernel_sys::BPF_FUNC_map_delete_elem as i32
+                || value == kernel_sys::BPF_FUNC_map_push_elem as i32
+                || value == kernel_sys::BPF_FUNC_map_pop_elem as i32
+                || value == kernel_sys::BPF_FUNC_map_peek_elem as i32
+                || value == kernel_sys::BPF_FUNC_redirect_map as i32
+                || value == kernel_sys::BPF_FUNC_map_lookup_percpu_elem as i32
+        )
+}
+
+fn is_helper_call(insn: &kernel_sys::bpf_insn) -> bool {
+    insn.code == BPF_CALL_INSN && insn.src_reg() == 0
+}
+
+fn writes_register(insn: &kernel_sys::bpf_insn, reg: u8) -> bool {
+    if insn.dst_reg() != reg {
+        return false;
+    }
+    matches!(
+        u32::from(insn.code) & 0x07,
+        kernel_sys::BPF_LD | kernel_sys::BPF_LDX | kernel_sys::BPF_ALU | kernel_sys::BPF_ALU64
+    )
+}
+
+fn insn_width(insn: &kernel_sys::bpf_insn) -> usize {
+    if insn.code == BPF_LD_IMM64 {
+        2
+    } else {
+        1
+    }
 }
 
 fn ldimm64_u64(first: &kernel_sys::bpf_insn, second: &kernel_sys::bpf_insn) -> u64 {
@@ -1218,11 +1324,49 @@ mod tests {
 
     #[test]
     fn resolved_kernel_map_pointer_detector_ignores_negative_constants() {
-        let pointer = Vec::from(ldimm64_full(0xffff8dc51bd8ee00));
+        let mut pointer = Vec::from(ldimm64_map_arg(BPF_REG_1, 0xffff8dc51bd8ee00));
+        pointer.push(call_helper(kernel_sys::BPF_FUNC_map_lookup_elem as i32));
         let negative = Vec::from(ldimm64_full(u64::MAX));
 
-        assert!(is_resolved_kernel_map_pointer_ldimm64(&pointer, 0));
-        assert!(!is_resolved_kernel_map_pointer_ldimm64(&negative, 0));
+        assert!(resolved_kernel_map_pointer_value(&pointer, 0).is_some());
+        assert!(resolved_kernel_map_pointer_value(&negative, 0).is_none());
+    }
+
+    #[test]
+    fn resolved_map_pointer_bindings_follow_prog_map_id_order() {
+        let mut insns = Vec::new();
+        insns.extend(ldimm64_map_arg(BPF_REG_1, 0xffff8dc51bd8ee00));
+        insns.push(call_helper(kernel_sys::BPF_FUNC_map_lookup_elem as i32));
+        insns.extend(ldimm64_map_arg(BPF_REG_2, 0xffff8dc51bd8ff00));
+        insns.push(call_helper(kernel_sys::BPF_FUNC_tail_call as i32));
+
+        let bindings =
+            build_resolved_map_pointer_map(&[700, 800], &insns, Path::new("map_fds.json")).unwrap();
+
+        assert_eq!(bindings[&0xffff8dc51bd8ee00], 700);
+        assert_eq!(bindings[&0xffff8dc51bd8ff00], 800);
+    }
+
+    #[test]
+    fn resolved_map_pointer_binding_count_mismatch_is_error() {
+        let mut insns = Vec::from(ldimm64_map_arg(BPF_REG_1, 0xffff8dc51bd8ee00));
+        insns.push(call_helper(kernel_sys::BPF_FUNC_map_lookup_elem as i32));
+
+        let err = build_resolved_map_pointer_map(&[700, 800], &insns, Path::new("map_fds.json"))
+            .unwrap_err();
+
+        assert!(
+            err.to_string().contains("cannot reconstruct"),
+            "err={err:#}"
+        );
+    }
+
+    #[test]
+    fn non_map_kernel_pointer_is_not_a_resolved_map_pointer() {
+        let mut insns = Vec::from(ldimm64_map_arg(BPF_REG_1, 0xffff8dc51bd8ee00));
+        insns.push(call_helper(kernel_sys::BPF_FUNC_ktime_get_ns as i32));
+
+        assert!(resolved_kernel_map_pointer_value(&insns, 0).is_none());
     }
 
     #[test]
@@ -1276,6 +1420,25 @@ mod tests {
             imm: (value >> 32) as u32 as i32,
         };
         [first, second]
+    }
+
+    fn ldimm64_map_arg(dst_reg: u8, value: u64) -> [kernel_sys::bpf_insn; 2] {
+        let mut insns = ldimm64_full(value);
+        insns[0].set_dst_reg(dst_reg);
+        insns
+    }
+
+    fn call_helper(helper: i32) -> kernel_sys::bpf_insn {
+        let mut insn = kernel_sys::bpf_insn {
+            code: (kernel_sys::BPF_JMP | kernel_sys::BPF_CALL) as u8,
+            _bitfield_align_1: [],
+            _bitfield_1: Default::default(),
+            off: 0,
+            imm: helper,
+        };
+        insn.set_dst_reg(0);
+        insn.set_src_reg(0);
+        insn
     }
 
     #[test]

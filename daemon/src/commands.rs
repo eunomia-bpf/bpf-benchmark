@@ -28,7 +28,10 @@ const FUNC_INFO_FILE: &str = "func_info.bin";
 const LINE_INFO_FILE: &str = "line_info.bin";
 const MAP_VALUES_FILE: &str = "map-values.json";
 const VERIFIER_STATES_FILE: &str = "verifier-states.json";
-const CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(5);
+const DEFAULT_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(5);
+const HEAVY_VERIFY_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(60);
+const OPTIMIZE_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(60);
+const REJIT_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(60);
 const CLI_STAGE_POLL_INTERVAL: Duration = Duration::from_millis(100);
 
 #[derive(Clone, Debug)]
@@ -242,7 +245,12 @@ fn normalize_failure_artifacts(failure_dir: &Path, prog_id: u32) -> Result<()> {
     require_regular_file(&failure_dir.join("prog.bpf"), "failure prog.bpf")?;
     require_regular_file(&failure_dir.join("info.json"), "failure info.json")?;
     require_regular_file(&failure_dir.join("replay.sh"), "failure replay.sh")?;
-    require_nonempty_file(&failure_dir.join("verifier.log"), "failure verifier.log")?;
+    let verifier_log = failure_dir.join("verifier.log");
+    match fs::metadata(&verifier_log) {
+        Ok(_) => require_nonempty_file(&verifier_log, "failure verifier.log")?,
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {}
+        Err(err) => return Err(err).with_context(|| format!("stat {}", verifier_log.display())),
+    }
     Ok(())
 }
 
@@ -1870,9 +1878,20 @@ fn wait_with_timeout(
         stage,
         program,
         child,
-        CLI_STAGE_TIMEOUT,
+        timeout_for_stage(stage),
         CLI_STAGE_POLL_INTERVAL,
     )
+}
+
+fn timeout_for_stage(stage: &str) -> Duration {
+    match stage {
+        "bpfverify original verifier-states"
+        | "bpfverify final verification"
+        | "bpfverify --report after bpfrejit failure" => HEAVY_VERIFY_CLI_STAGE_TIMEOUT,
+        "bpfopt optimize" => OPTIMIZE_CLI_STAGE_TIMEOUT,
+        "bpfrejit" => REJIT_CLI_STAGE_TIMEOUT,
+        _ => DEFAULT_CLI_STAGE_TIMEOUT,
+    }
 }
 
 fn wait_with_timeout_for(
@@ -2614,6 +2633,24 @@ done
     }
 
     #[test]
+    fn verifier_and_optimizer_stages_have_heavy_timeouts() {
+        assert_eq!(
+            timeout_for_stage("bpfverify original verifier-states"),
+            Duration::from_secs(60)
+        );
+        assert_eq!(
+            timeout_for_stage("bpfverify final verification"),
+            Duration::from_secs(60)
+        );
+        assert_eq!(
+            timeout_for_stage("bpfopt optimize"),
+            Duration::from_secs(60)
+        );
+        assert_eq!(timeout_for_stage("bpfrejit"), Duration::from_secs(60));
+        assert_eq!(timeout_for_stage("bpfget --full"), Duration::from_secs(5));
+    }
+
+    #[test]
     fn wait_with_timeout_kills_stuck_subprocess() {
         let mut command = Command::new("sleep");
         command.arg("5");
@@ -2633,6 +2670,41 @@ done
         let message = format!("{err:#}");
         assert!(message.contains("bpfverify original verifier-states timed out after 50ms"));
         assert!(started.elapsed() < Duration::from_secs(1));
+    }
+
+    #[test]
+    fn failure_workdir_preserves_pre_report_failures_without_verifier_log() {
+        with_temp_failure_root(|failure_root| {
+            let fake = FakeCliDir::new().unwrap();
+            fake.replace_command(
+                "bpfverify",
+                r#"#!/usr/bin/env bash
+set -euo pipefail
+printf 'synthetic verifier crash before report\n' >&2
+exit 9
+"#,
+            )
+            .unwrap();
+
+            let err = try_apply_one(
+                42,
+                &fake.config(),
+                Some(&["wide_mem".to_string()]),
+                None,
+                None,
+            )
+            .unwrap_err();
+
+            let message = format!("{err:#}");
+            assert!(message.contains("preserved failure workdir"));
+            assert!(message.contains("synthetic verifier crash before report"));
+
+            let failure_dir = failure_root.join("42");
+            assert!(failure_dir.join("prog.bpf").is_file());
+            assert!(failure_dir.join("info.json").is_file());
+            assert!(failure_dir.join("replay.sh").is_file());
+            assert!(!failure_dir.join("verifier.log").exists());
+        });
     }
 
     #[test]

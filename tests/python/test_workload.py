@@ -2,6 +2,7 @@ import subprocess
 import sys
 import time
 import unittest
+from unittest import mock
 
 from runner.libs import benchmark_catalog, workload
 
@@ -40,6 +41,20 @@ class WorkloadContractTests(unittest.TestCase):
         self.assertNotIn("timerfd", workload._STRESS_NG_WORKLOAD_STRESSORS["stress_ng_os"])
         self.assertNotIn("timerfd", workload._STRESS_NG_WORKLOAD_STRESSORS["stress_ng_os_io_network"])
         self.assertNotIn("timerfd", benchmark_catalog.TRACEE_E2E_WORKLOADS[0]["command"])
+
+    def test_interface_bound_network_client_runs_inside_benchmark_netns(self) -> None:
+        with mock.patch.object(workload, "which", return_value="/sbin/ip"):
+            command = workload._network_client_command(["wrk", "http://198.18.0.2:18080/"], workload.BENCHMARK_IFACE)
+
+        self.assertEqual(
+            command,
+            ["/sbin/ip", "netns", "exec", workload.BENCHMARK_NETNS, "wrk", "http://198.18.0.2:18080/"],
+        )
+
+    def test_loopback_network_client_stays_in_current_namespace(self) -> None:
+        command = workload._network_client_command(["wrk", "http://127.0.0.1:18080/"], None)
+
+        self.assertEqual(command, ["wrk", "http://127.0.0.1:18080/"])
 
 
 if __name__ == "__main__":

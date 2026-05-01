@@ -2404,11 +2404,30 @@ def _network_http_server(network_device: str | None = None) -> LocalHttpServer |
     return NamespacedHttpServer(BENCHMARK_NETNS, BENCHMARK_PEER_IFACE_IP)
 
 
+def _network_client_command(command: list[str], network_device: str | None = None) -> list[str]:
+    normalized_device = str(network_device or "").strip()
+    if not normalized_device:
+        return command
+    if normalized_device != BENCHMARK_IFACE:
+        raise RuntimeError(
+            f"interface-bound network workload only supports benchmark interface {BENCHMARK_IFACE}; "
+            f"got {normalized_device}"
+        )
+    ip_binary = which("ip")
+    if ip_binary is None:
+        raise RuntimeError("ip is required for interface-bound network workloads")
+    return [ip_binary, "netns", "exec", BENCHMARK_NETNS, *command]
+
+
 def run_network_load(duration_s: int | float, *, network_device: str | None = None) -> WorkloadResult:
     wrk_binary = resolve_workload_tool("wrk")
     with _network_http_server(network_device) as server:
         start = time.monotonic()
-        c = run_command([wrk_binary, "-t2", "-c10", f"-d{max(1, int(duration_s))}s", server.url], check=False, timeout=float(duration_s) + 30)
+        command = _network_client_command(
+            [wrk_binary, "-t2", "-c10", f"-d{max(1, int(duration_s))}s", server.url],
+            network_device,
+        )
+        c = run_command(command, check=False, timeout=float(duration_s) + 30)
         elapsed = time.monotonic() - start
         if c.returncode != 0:
             raise RuntimeError(f"network wrk load failed: {tail_text(c.stderr or c.stdout)}")
@@ -2428,7 +2447,11 @@ def run_tcp_connect_load(duration_s: int | float, *, network_device: str | None 
             start = time.monotonic(); deadline = start + float(duration_s)
             ops_total = 0.0; stderr_lines: list[str] = []
             while time.monotonic() < deadline:
-                c = run_command([curl_binary, "-fsS", "-g", "-o", "/dev/null", "--http1.1", "--max-time", "2", server.url], check=False, timeout=5)
+                command = _network_client_command(
+                    [curl_binary, "-fsS", "-g", "-o", "/dev/null", "--http1.1", "--max-time", "2", server.url],
+                    normalized_device,
+                )
+                c = run_command(command, check=False, timeout=5)
                 if c.returncode != 0:
                     raise RuntimeError(f"tcp connect load failed: {tail_text(c.stderr or c.stdout)}")
                 stderr_lines.append(c.stderr or ""); ops_total += 1.0
