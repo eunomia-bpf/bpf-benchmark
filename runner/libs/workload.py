@@ -9,6 +9,7 @@ import os
 import re
 import select
 import signal
+import shlex
 import socket
 import stat
 import subprocess
@@ -2419,6 +2420,10 @@ def _network_client_command(command: list[str], network_device: str | None = Non
     return [ip_binary, "netns", "exec", BENCHMARK_NETNS, *command]
 
 
+def _render_command(command: Sequence[str]) -> str:
+    return " ".join(shlex.quote(str(part)) for part in command)
+
+
 def run_network_load(duration_s: int | float, *, network_device: str | None = None) -> WorkloadResult:
     wrk_binary = resolve_workload_tool("wrk")
     with _network_http_server(network_device) as server:
@@ -2430,7 +2435,9 @@ def run_network_load(duration_s: int | float, *, network_device: str | None = No
         c = run_command(command, check=False, timeout=float(duration_s) + 30)
         elapsed = time.monotonic() - start
         if c.returncode != 0:
-            raise RuntimeError(f"network wrk load failed: {tail_text(c.stderr or c.stdout)}")
+            raise RuntimeError(
+                f"network wrk load failed via {_render_command(command)}: {tail_text(c.stderr or c.stdout)}"
+            )
         total_requests = next((float(m.group(1)) for line in c.stdout.splitlines() if (m := re.search(r"([0-9]+)\s+requests in", line.strip()))), None)
         if total_requests is None:
             raise RuntimeError(f"network wrk load did not report total request metrics: {tail_text(c.stdout or c.stderr)}")
@@ -2453,7 +2460,9 @@ def run_tcp_connect_load(duration_s: int | float, *, network_device: str | None 
                 )
                 c = run_command(command, check=False, timeout=5)
                 if c.returncode != 0:
-                    raise RuntimeError(f"tcp connect load failed: {tail_text(c.stderr or c.stdout)}")
+                    raise RuntimeError(
+                        f"tcp connect load failed via {_render_command(command)}: {tail_text(c.stderr or c.stdout)}"
+                    )
                 stderr_lines.append(c.stderr or ""); ops_total += 1.0
             elapsed = time.monotonic() - start
             return _finish_result(ops_total, elapsed, "", "\n".join(stderr_lines))

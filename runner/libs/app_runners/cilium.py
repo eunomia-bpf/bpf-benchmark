@@ -144,6 +144,8 @@ class CiliumRunner(NativeProcessRunner):
     def _run_workload(self, seconds: float) -> WorkloadResult:
         if not self.workload_kind:
             raise RuntimeError("CiliumRunner requires an explicit workload_kind")
+        if not self.device:
+            raise RuntimeError("CiliumRunner could not determine a network device for workload")
         return run_named_workload(self.workload_kind, seconds, network_device=self.device)
 
     def run_workload_spec(self, workload_spec: Mapping[str, object], seconds: float) -> WorkloadResult:
@@ -152,6 +154,8 @@ class CiliumRunner(NativeProcessRunner):
         requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or "").strip()
         if not requested_kind:
             raise RuntimeError(f"{type(self).__name__} workload spec is missing a workload kind")
+        if not self.device:
+            raise RuntimeError("CiliumRunner could not determine a network device for workload")
         return run_named_workload(requested_kind, seconds, network_device=self.device)
 
     def _command(self, binary: Path) -> list[str]:

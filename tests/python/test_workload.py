@@ -5,6 +5,29 @@ import unittest
 from unittest import mock
 
 from runner.libs import benchmark_catalog, workload
+from runner.libs.app_runners import get_app_runner
+from runner.libs.app_runners import calico as calico_runner
+from runner.libs.app_runners import cilium as cilium_runner
+
+
+class _FakeHttpServer:
+    url = f"http://{workload.BENCHMARK_PEER_IFACE_IP}:18080/"
+
+    def __enter__(self) -> "_FakeHttpServer":
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> None:
+        del exc_type, exc, tb
+
+
+def _workload_result() -> workload.WorkloadResult:
+    return workload.WorkloadResult(
+        ops_total=1.0,
+        ops_per_sec=1.0,
+        duration_s=1.0,
+        stdout="",
+        stderr="",
+    )
 
 
 class WorkloadContractTests(unittest.TestCase):
@@ -55,6 +78,80 @@ class WorkloadContractTests(unittest.TestCase):
         command = workload._network_client_command(["wrk", "http://127.0.0.1:18080/"], None)
 
         self.assertEqual(command, ["wrk", "http://127.0.0.1:18080/"])
+
+    def test_network_load_error_reports_actual_client_namespace_command(self) -> None:
+        completed = subprocess.CompletedProcess(
+            args=[],
+            returncode=1,
+            stdout="",
+            stderr="unable to connect to 198.18.0.2:18080 Cannot assign requested address",
+        )
+        with (
+            mock.patch.object(workload, "resolve_workload_tool", return_value="wrk"),
+            mock.patch.object(workload, "_network_http_server", return_value=_FakeHttpServer()),
+            mock.patch.object(workload, "which", return_value="/sbin/ip"),
+            mock.patch.object(workload, "run_command", return_value=completed),
+        ):
+            with self.assertRaisesRegex(RuntimeError, "/sbin/ip netns exec bpfbenchns wrk"):
+                workload.run_network_load(1, network_device=workload.BENCHMARK_IFACE)
+
+    def test_calico_network_workload_passes_benchmark_device(self) -> None:
+        result = _workload_result()
+        runner = calico_runner.CalicoRunner(workload_kind="network")
+        runner.device = workload.BENCHMARK_IFACE
+        with mock.patch.object(
+            calico_runner,
+            "run_named_workload",
+            return_value=result,
+        ) as run_named:
+            self.assertIs(runner._run_workload(1), result)
+
+        run_named.assert_called_once_with("network", 1, network_device=workload.BENCHMARK_IFACE)
+
+    def test_cilium_network_workload_passes_benchmark_device(self) -> None:
+        result = _workload_result()
+        runner = cilium_runner.CiliumRunner(workload_kind="network")
+        runner.device = workload.BENCHMARK_IFACE
+        with mock.patch.object(
+            cilium_runner,
+            "run_named_workload",
+            return_value=result,
+        ) as run_named:
+            self.assertIs(runner._run_workload(1), result)
+
+        run_named.assert_called_once_with("network", 1, network_device=workload.BENCHMARK_IFACE)
+
+    def test_corpus_runner_adapter_preserves_network_device_path(self) -> None:
+        for runner_name, runner_module in (
+            ("calico", calico_runner),
+            ("cilium", cilium_runner),
+        ):
+            with self.subTest(runner=runner_name):
+                result = _workload_result()
+                runner = get_app_runner(runner_name, workload="network")
+                runner.session = object()
+                runner.device = workload.BENCHMARK_IFACE
+                with mock.patch.object(
+                    runner_module,
+                    "run_named_workload",
+                    return_value=result,
+                ) as run_named:
+                    self.assertIs(runner.run_workload(1), result)
+
+                run_named.assert_called_once_with(
+                    "network",
+                    1,
+                    network_device=workload.BENCHMARK_IFACE,
+                )
+
+    def test_calico_cilium_network_workload_fail_fast_without_device(self) -> None:
+        for runner in (
+            calico_runner.CalicoRunner(workload_kind="network"),
+            cilium_runner.CiliumRunner(workload_kind="network"),
+        ):
+            with self.subTest(runner=type(runner).__name__):
+                with self.assertRaisesRegex(RuntimeError, "could not determine a network device"):
+                    runner._run_workload(1)
 
 
 if __name__ == "__main__":
