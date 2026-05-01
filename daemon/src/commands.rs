@@ -34,6 +34,11 @@ const DEFAULT_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(5);
 const OPTIMIZE_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(60);
 const CLI_STAGE_POLL_INTERVAL: Duration = Duration::from_millis(100);
 const REJIT_LOG_BUF_SIZE: usize = 16 * 1024 * 1024;
+const BPF_LD_IMM64: u8 = (kernel_sys::BPF_LD | kernel_sys::BPF_DW | kernel_sys::BPF_IMM) as u8;
+const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
+const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
+const BPF_PSEUDO_MAP_IDX: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX as u8;
+const BPF_PSEUDO_MAP_IDX_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX_VALUE as u8;
 
 #[derive(Clone, Debug)]
 pub(crate) struct CliConfig {
@@ -849,6 +854,8 @@ where
             .with_context(|| format!("write {}", prog_bin.display()))?;
         write_json_file(&info_json, &prog_info)?;
         let orig_insn_count = insn_count_from_bytes(&orig_bytes, "prog.bin")?;
+        let map_fd_indices = pseudo_map_fd_indices(&snapshot.insns, &prog_info.map_ids)
+            .with_context(|| format!("resolve pseudo-map fd bindings for prog {prog_id}"))?;
         if prog_info.id != prog_id {
             bail!(
                 "program snapshot returned id {}, expected {prog_id}",
@@ -913,6 +920,7 @@ where
             write_original_verifier_states(
                 kernel,
                 &snapshot,
+                &map_fd_indices,
                 fd_array.as_slice(),
                 &verifier_states_json,
             )
@@ -985,6 +993,9 @@ where
             );
         }
         let opt_insns = decode_insns(&opt_bytes, "opt.bin")?;
+        let mut rejit_insns = opt_insns;
+        rewrite_pseudo_map_fds_to_indices(&mut rejit_insns, &prog_info.map_ids, &map_fd_indices)
+            .with_context(|| format!("rewrite pseudo-map fd references for prog {prog_id}"))?;
 
         let status = "ok".to_string();
         let mut applied = false;
@@ -996,7 +1007,7 @@ where
                 .rejit(
                     prog_id,
                     &snapshot,
-                    &opt_insns,
+                    &rejit_insns,
                     fd_array.as_slice(),
                     &rejit_verifier_log,
                 )
@@ -1078,6 +1089,7 @@ fn append_bpfopt_context_args(command: &mut Command, prog_info: &ProgInfoJson) {
 fn write_original_verifier_states(
     kernel: &mut dyn KernelOps,
     snapshot: &bpfget::ProgramSnapshot,
+    map_fd_indices: &HashMap<i32, usize>,
     fd_array: &[i32],
     verifier_states_json: &Path,
 ) -> Result<()> {
@@ -1085,8 +1097,11 @@ fn write_original_verifier_states(
         fs::remove_file(verifier_states_json)
             .with_context(|| format!("remove stale {}", verifier_states_json.display()))?;
     }
+    let mut dry_run_insns = snapshot.insns.clone();
+    rewrite_pseudo_map_fds_to_indices(&mut dry_run_insns, &snapshot.info.map_ids, map_fd_indices)
+        .context("rewrite pseudo-map fd references for thin dry-run")?;
     let states = kernel
-        .verifier_states(snapshot, &snapshot.insns, fd_array)
+        .verifier_states(snapshot, &dry_run_insns, fd_array)
         .context("thin verifier dry-run failed")?;
     write_json_file(verifier_states_json, &states)?;
     require_nonempty_file(verifier_states_json, "verifier states")?;
@@ -1298,6 +1313,22 @@ fn build_rejit_fd_array<F>(
 where
     F: FnMut(u32) -> Result<OwnedFd>,
 {
+    build_rejit_fd_array_with_btf_open(map_ids, target_path, passes, open_map_fd, &mut |btf_id| {
+        kernel_sys::btf_get_fd_by_id(btf_id)
+    })
+}
+
+fn build_rejit_fd_array_with_btf_open<F, G>(
+    map_ids: &[u32],
+    target_path: Option<&Path>,
+    passes: &[String],
+    open_map_fd: &mut F,
+    open_btf_fd: &mut G,
+) -> Result<RejitFdArray>
+where
+    F: FnMut(u32) -> Result<OwnedFd>,
+    G: FnMut(u32) -> Result<OwnedFd>,
+{
     let mut fds = Vec::new();
     let mut owned_fds = Vec::new();
     for &map_id in map_ids {
@@ -1333,7 +1364,7 @@ where
         if btf_id == 0 {
             bail!("target kinsn {name} is missing btf_id for fd_array");
         }
-        let fd = kernel_sys::btf_get_fd_by_id(btf_id)
+        let fd = open_btf_fd(btf_id)
             .with_context(|| format!("open BTF fd for target kinsn {name} btf_id {btf_id}"))?;
         btf_raw_fds.push((name, fd.as_raw_fd()));
         btf_fds.push(fd);
@@ -1475,6 +1506,102 @@ fn decode_insns(bytes: &[u8], label: &str) -> Result<Vec<kernel_sys::bpf_insn>> 
             insn
         })
         .collect())
+}
+
+fn pseudo_map_fd_indices(
+    insns: &[kernel_sys::bpf_insn],
+    map_ids: &[u32],
+) -> Result<HashMap<i32, usize>> {
+    let mut old_fd_to_index = HashMap::new();
+    let mut next_index = 0usize;
+    let mut pc = 0usize;
+    while pc < insns.len() {
+        let insn = &insns[pc];
+        if is_ldimm64(insn) {
+            if matches!(insn.src_reg(), BPF_PSEUDO_MAP_FD | BPF_PSEUDO_MAP_VALUE) {
+                let old_fd = insn.imm;
+                if let std::collections::hash_map::Entry::Vacant(entry) =
+                    old_fd_to_index.entry(old_fd)
+                {
+                    if next_index >= map_ids.len() {
+                        bail!(
+                            "original bytecode references pseudo-map old fd {old_fd}, but prog_info exposes only {} map ids",
+                            map_ids.len()
+                        );
+                    }
+                    entry.insert(next_index);
+                    next_index += 1;
+                }
+            } else if matches!(
+                insn.src_reg(),
+                BPF_PSEUDO_MAP_IDX | BPF_PSEUDO_MAP_IDX_VALUE
+            ) {
+                validate_pseudo_map_index(insn.imm, map_ids.len())?;
+            }
+            pc += 2;
+        } else {
+            pc += 1;
+        }
+    }
+    Ok(old_fd_to_index)
+}
+
+fn rewrite_pseudo_map_fds_to_indices(
+    insns: &mut [kernel_sys::bpf_insn],
+    map_ids: &[u32],
+    old_fd_to_index: &HashMap<i32, usize>,
+) -> Result<()> {
+    let mut pc = 0usize;
+    while pc < insns.len() {
+        let insn = &mut insns[pc];
+        if is_ldimm64(insn) {
+            match insn.src_reg() {
+                BPF_PSEUDO_MAP_FD | BPF_PSEUDO_MAP_VALUE => {
+                    let old_fd = insn.imm;
+                    let Some(&index) = old_fd_to_index.get(&old_fd) else {
+                        bail!("no map binding for pseudo-map old fd {old_fd}");
+                    };
+                    if index >= map_ids.len() {
+                        bail!(
+                            "pseudo-map old fd {old_fd} resolved to map index {index}, but prog_info exposes only {} map ids",
+                            map_ids.len()
+                        );
+                    }
+                    insn.imm = i32::try_from(index)
+                        .with_context(|| format!("map index {index} does not fit i32"))?;
+                    let src_reg = if insn.src_reg() == BPF_PSEUDO_MAP_FD {
+                        BPF_PSEUDO_MAP_IDX
+                    } else {
+                        BPF_PSEUDO_MAP_IDX_VALUE
+                    };
+                    insn.set_src_reg(src_reg);
+                }
+                BPF_PSEUDO_MAP_IDX | BPF_PSEUDO_MAP_IDX_VALUE => {
+                    validate_pseudo_map_index(insn.imm, map_ids.len())?;
+                }
+                _ => {}
+            }
+            pc += 2;
+        } else {
+            pc += 1;
+        }
+    }
+    Ok(())
+}
+
+fn validate_pseudo_map_index(raw_index: i32, map_id_count: usize) -> Result<()> {
+    if raw_index < 0 {
+        bail!("pseudo-map fd_array index {raw_index} is negative");
+    }
+    let index = raw_index as usize;
+    if index >= map_id_count {
+        bail!("pseudo-map fd_array index {index} is out of range for {map_id_count} map ids");
+    }
+    Ok(())
+}
+
+fn is_ldimm64(insn: &kernel_sys::bpf_insn) -> bool {
+    insn.code == BPF_LD_IMM64
 }
 
 fn bytecode_has_kinsn_call(bytes: &[u8], label: &str) -> Result<bool> {
@@ -1666,11 +1793,155 @@ mod tests {
     }
 
     #[test]
+    fn pseudo_map_fd_rewrite_preserves_original_map_binding_after_elimination() {
+        let mut original = Vec::new();
+        original.extend(ldimm64(BPF_PSEUDO_MAP_FD, 4));
+        original.extend(ldimm64(BPF_PSEUDO_MAP_FD, 5));
+        original.push(exit_insn());
+        let map_ids = vec![101, 202];
+        let bindings = pseudo_map_fd_indices(&original, &map_ids).unwrap();
+
+        let mut candidate = Vec::new();
+        candidate.extend(ldimm64(BPF_PSEUDO_MAP_FD, 5));
+        candidate.push(exit_insn());
+        rewrite_pseudo_map_fds_to_indices(&mut candidate, &map_ids, &bindings).unwrap();
+
+        assert_eq!(candidate[0].src_reg(), BPF_PSEUDO_MAP_IDX);
+        assert_eq!(candidate[0].imm, 1);
+    }
+
+    #[test]
+    fn write_verifier_states_rewrites_stale_loader_map_fd() {
+        let workdir = WorkDir::new("bpfrejit-daemon-verifier-state-rewrite").unwrap();
+        let output = workdir.path().join(VERIFIER_STATES_FILE);
+        let mut snapshot = test_snapshot(6);
+        snapshot.info.map_ids = vec![1234];
+        snapshot.insns = {
+            let mut insns = Vec::new();
+            insns.extend(ldimm64(BPF_PSEUDO_MAP_FD, 4));
+            insns.push(exit_insn());
+            insns
+        };
+        snapshot.info.insn_cnt = snapshot.insns.len() as u32;
+        let bindings = pseudo_map_fd_indices(&snapshot.insns, &snapshot.info.map_ids).unwrap();
+        let mut kernel = MockKernelOps {
+            verifier_states: Some(kernel_sys::VerifierStatesJson { insns: Vec::new() }),
+            ..Default::default()
+        };
+
+        write_original_verifier_states(&mut kernel, &snapshot, &bindings, &[77], &output).unwrap();
+
+        assert_eq!(kernel.verifier_state_calls, 1);
+        assert_eq!(kernel.last_verifier_fd_array, vec![77]);
+        assert_eq!(kernel.last_verifier_insns[0].src_reg(), BPF_PSEUDO_MAP_IDX);
+        assert_eq!(kernel.last_verifier_insns[0].imm, 0);
+    }
+
+    #[test]
     fn fd_array_generation_rewrites_target_call_offsets_in_memory() {
         assert_eq!(kinsn_fd_array_offset(0, 0), 1);
         assert_eq!(kinsn_fd_array_offset(0, 1), 2);
         assert_eq!(kinsn_fd_array_offset(2, 0), 2);
         assert_eq!(kinsn_fd_array_offset(2, 1), 3);
+    }
+
+    #[test]
+    fn rejit_fd_array_builder_keeps_map_fds_without_target() {
+        let mut opened_maps = Vec::new();
+        let fd_array = build_rejit_fd_array_with_btf_open(
+            &[11, 22],
+            None,
+            &["dce".to_string()],
+            &mut |map_id| {
+                opened_maps.push(map_id);
+                fake_owned_fd()
+            },
+            &mut |_btf_id| bail!("test did not expect BTF fd opens"),
+        )
+        .unwrap();
+
+        assert_eq!(opened_maps, vec![11, 22]);
+        assert_eq!(fd_array.as_slice().len(), 2);
+    }
+
+    #[test]
+    fn rejit_fd_array_builder_appends_kinsn_btf_fds_after_maps() {
+        let workdir = WorkDir::new("bpfrejit-daemon-target-fd-array").unwrap();
+        let target = workdir.path().join("target.json");
+        write_json_file(
+            &target,
+            &serde_json::json!({
+                "arch": "x86_64",
+                "features": ["bmi2"],
+                "kinsns": {
+                    "bpf_rotate64": {"btf_func_id": 123, "btf_id": 55},
+                    "bpf_select64": {"btf_func_id": 124, "btf_id": 56}
+                }
+            }),
+        )
+        .unwrap();
+        let mut opened_maps = Vec::new();
+        let mut opened_btfs = Vec::new();
+
+        let fd_array = build_rejit_fd_array_with_btf_open(
+            &[11],
+            Some(&target),
+            &["rotate".to_string(), "cond_select".to_string()],
+            &mut |map_id| {
+                opened_maps.push(map_id);
+                fake_owned_fd()
+            },
+            &mut |btf_id| {
+                opened_btfs.push(btf_id);
+                fake_owned_fd()
+            },
+        )
+        .unwrap();
+
+        assert_eq!(opened_maps, vec![11]);
+        assert_eq!(opened_btfs, vec![55, 56]);
+        assert_eq!(fd_array.as_slice().len(), 3);
+        let rewritten: serde_json::Value = read_json_file(&target, "target.json").unwrap();
+        assert_eq!(rewritten["kinsns"]["bpf_rotate64"]["call_offset"], 1);
+        assert_eq!(rewritten["kinsns"]["bpf_select64"]["call_offset"], 2);
+    }
+
+    #[test]
+    fn rejit_fd_array_builder_reserves_slot_zero_when_only_btf_fds_exist() {
+        let workdir = WorkDir::new("bpfrejit-daemon-target-fd-array-no-map").unwrap();
+        let target = workdir.path().join("target.json");
+        write_json_file(
+            &target,
+            &serde_json::json!({
+                "arch": "x86_64",
+                "features": ["bmi2"],
+                "kinsns": {
+                    "bpf_rotate64": {"btf_func_id": 123, "btf_id": 55},
+                    "bpf_select64": {"btf_func_id": 124, "btf_id": 56}
+                }
+            }),
+        )
+        .unwrap();
+        let mut opened_btfs = Vec::new();
+
+        let fd_array = build_rejit_fd_array_with_btf_open(
+            &[],
+            Some(&target),
+            &["rotate".to_string(), "cond_select".to_string()],
+            &mut |_map_id| bail!("test did not expect map fd opens"),
+            &mut |btf_id| {
+                opened_btfs.push(btf_id);
+                fake_owned_fd()
+            },
+        )
+        .unwrap();
+
+        assert_eq!(opened_btfs, vec![55, 56]);
+        assert_eq!(fd_array.as_slice().len(), 3);
+        assert_eq!(fd_array.as_slice()[0], fd_array.as_slice()[1]);
+        let rewritten: serde_json::Value = read_json_file(&target, "target.json").unwrap();
+        assert_eq!(rewritten["kinsns"]["bpf_rotate64"]["call_offset"], 1);
+        assert_eq!(rewritten["kinsns"]["bpf_select64"]["call_offset"], 2);
     }
 
     #[test]
@@ -1901,6 +2172,8 @@ mod tests {
         rejit_calls: usize,
         verifier_state_calls: usize,
         verifier_states: Option<kernel_sys::VerifierStatesJson>,
+        last_verifier_insns: Vec<kernel_sys::bpf_insn>,
+        last_verifier_fd_array: Vec<i32>,
     }
 
     impl KernelOps for MockKernelOps {
@@ -1915,10 +2188,12 @@ mod tests {
         fn verifier_states(
             &mut self,
             _snapshot: &bpfget::ProgramSnapshot,
-            _insns: &[kernel_sys::bpf_insn],
-            _fd_array: &[i32],
+            insns: &[kernel_sys::bpf_insn],
+            fd_array: &[i32],
         ) -> Result<kernel_sys::VerifierStatesJson> {
             self.verifier_state_calls += 1;
+            self.last_verifier_insns = insns.to_vec();
+            self.last_verifier_fd_array = fd_array.to_vec();
             self.verifier_states
                 .clone()
                 .ok_or_else(|| anyhow!("test did not expect verifier-state capture"))
@@ -2039,5 +2314,31 @@ printf '{"passes":[{"pass":"%s","changed":true,"sites_applied":1,"insn_count_bef
             off: 0,
             imm: 0,
         }
+    }
+
+    fn ldimm64(src_reg: u8, imm: i32) -> [kernel_sys::bpf_insn; 2] {
+        let mut first = kernel_sys::bpf_insn {
+            code: BPF_LD_IMM64,
+            _bitfield_align_1: [],
+            _bitfield_1: Default::default(),
+            off: 0,
+            imm,
+        };
+        first.set_dst_reg(1);
+        first.set_src_reg(src_reg);
+        [
+            first,
+            kernel_sys::bpf_insn {
+                code: 0,
+                _bitfield_align_1: [],
+                _bitfield_1: Default::default(),
+                off: 0,
+                imm: 0,
+            },
+        ]
+    }
+
+    fn fake_owned_fd() -> Result<OwnedFd> {
+        Ok(std::fs::File::open("/dev/null")?.into())
     }
 }
