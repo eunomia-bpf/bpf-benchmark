@@ -781,10 +781,25 @@ pub struct PolicyConfig {
     pub enabled_passes: Vec<String>,
 }
 
+pub const DEFAULT_ENABLED_PASS_ORDER: &[&str] = &[
+    "map_inline",
+    "const_prop",
+    "dce",
+    "skb_load_bytes_spec",
+    "bounds_check_merge",
+    "wide_mem",
+    "bulk_memory",
+    "rotate",
+    "cond_select",
+    "extract",
+    "endian_fusion",
+    "prefetch",
+];
+
 pub fn default_enabled_passes() -> Vec<String> {
-    crate::passes::PASS_REGISTRY
+    DEFAULT_ENABLED_PASS_ORDER
         .iter()
-        .map(|entry| entry.name.to_string())
+        .map(|name| (*name).to_string())
         .collect()
 }
 

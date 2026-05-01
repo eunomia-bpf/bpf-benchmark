@@ -2,7 +2,7 @@
 //! Socket command helpers.
 //!
 //! `bpfopt` and `bpfprof` remain CLI tools. The daemon owns live discovery,
-//! short-lived fd_array construction, optional const_prop verifier-state capture,
+//! short-lived fd_array construction, automatic side-input capture,
 //! and final `BPF_PROG_REJIT`.
 
 use std::collections::{BTreeMap, HashMap};
@@ -863,9 +863,7 @@ where
             );
         }
         let mut side_inputs = Vec::<(String, PathBuf)>::new();
-        let wants_const_prop = requested_passes
-            .iter()
-            .any(|pass| canonical_pass(pass) == "const_prop");
+        let wants_verifier_states = needs_verifier_states(requested_passes);
         let wants_map_inline = requested_passes
             .iter()
             .any(|pass| canonical_pass(pass) == "map_inline");
@@ -911,7 +909,7 @@ where
             side_inputs.push(("--target".to_string(), target_json.clone()));
         }
 
-        if wants_const_prop {
+        if wants_verifier_states {
             write_original_verifier_states(
                 kernel,
                 &snapshot,
@@ -919,9 +917,6 @@ where
                 &verifier_states_json,
             )
             .with_context(|| format!("capture verifier states for prog {prog_id}"))?;
-        }
-
-        if wants_const_prop {
             side_inputs.push((
                 "--verifier-states".to_string(),
                 verifier_states_json.clone(),
@@ -1206,6 +1201,12 @@ fn is_map_inlineable_map_type(map_type: u32) -> bool {
             | kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY
             | kernel_sys::BPF_MAP_TYPE_LRU_HASH
     )
+}
+
+fn needs_verifier_states(passes: &[String]) -> bool {
+    passes
+        .iter()
+        .any(|pass| matches!(canonical_pass(pass).as_str(), "const_prop" | "map_inline"))
 }
 
 fn needs_target(passes: &[String]) -> bool {
@@ -1744,7 +1745,7 @@ mod tests {
         let harness = ApplyHarness::new();
         let mut kernel = MockKernelOps {
             rejit_error: Some("mock rejit verifier log".to_string()),
-            rejit_calls: 0,
+            ..Default::default()
         };
 
         let err = harness.apply(&mut kernel).unwrap_err();
@@ -1759,11 +1760,29 @@ mod tests {
     }
 
     #[test]
+    fn rejit_enospc_retry_log_reaches_failure_artifact() {
+        let harness = ApplyHarness::new();
+        let retry_log = "retry after ENOSPC full verifier log".to_string();
+        let mut kernel = MockKernelOps {
+            rejit_error: Some(retry_log.clone()),
+            ..Default::default()
+        };
+
+        let err = harness.apply(&mut kernel).unwrap_err();
+
+        let message = format!("{err:#}");
+        assert!(message.contains(&retry_log), "err={message}");
+        assert_eq!(kernel.rejit_calls, 1);
+        let verifier_log =
+            fs::read_to_string(harness.failure_root.path().join("42/verifier.log")).unwrap();
+        assert_eq!(verifier_log, retry_log);
+    }
+
+    #[test]
     fn bpfopt_success_reaches_rejit_and_returns_success() {
         let harness = ApplyHarness::new();
         let mut kernel = MockKernelOps {
-            rejit_error: None,
-            rejit_calls: 0,
+            ..Default::default()
         };
 
         let result = harness.apply(&mut kernel).unwrap();
@@ -1773,6 +1792,27 @@ mod tests {
         assert!(result.changed);
         assert!(result.summary.applied);
         assert_eq!(kernel.rejit_calls, 1);
+    }
+
+    #[test]
+    fn const_prop_request_captures_verifier_states_automatically() {
+        let harness = ApplyHarness::new();
+        let mut kernel = MockKernelOps {
+            verifier_states: Some(kernel_sys::VerifierStatesJson { insns: Vec::new() }),
+            ..Default::default()
+        };
+        let enabled_passes = ["const_prop".to_string(), "dce".to_string()];
+
+        let result = harness
+            .apply_with_passes(&mut kernel, &enabled_passes)
+            .unwrap();
+
+        assert_eq!(kernel.verifier_state_calls, 1);
+        assert_eq!(kernel.rejit_calls, 1);
+        assert!(result
+            .passes
+            .iter()
+            .any(|pass| pass.pass_name == "const_prop"));
     }
 
     struct ApplyHarness {
@@ -1806,11 +1846,19 @@ mod tests {
         }
 
         fn apply(&self, kernel: &mut dyn KernelOps) -> Result<OptimizeOneResult> {
+            self.apply_with_passes(kernel, &["dce".to_string()])
+        }
+
+        fn apply_with_passes(
+            &self,
+            kernel: &mut dyn KernelOps,
+            enabled_passes: &[String],
+        ) -> Result<OptimizeOneResult> {
             try_apply_one_with_map_access(
                 ApplyOneRequest {
                     prog_id: 42,
                     config: &self.config,
-                    enabled_passes: Some(&["dce".to_string()]),
+                    enabled_passes: Some(enabled_passes),
                     profile_path: None,
                     invalidation_tracker: None,
                     force_rejit: false,
@@ -1847,9 +1895,12 @@ mod tests {
         }
     }
 
+    #[derive(Default)]
     struct MockKernelOps {
         rejit_error: Option<String>,
         rejit_calls: usize,
+        verifier_state_calls: usize,
+        verifier_states: Option<kernel_sys::VerifierStatesJson>,
     }
 
     impl KernelOps for MockKernelOps {
@@ -1867,7 +1918,10 @@ mod tests {
             _insns: &[kernel_sys::bpf_insn],
             _fd_array: &[i32],
         ) -> Result<kernel_sys::VerifierStatesJson> {
-            bail!("test did not expect verifier-state capture")
+            self.verifier_state_calls += 1;
+            self.verifier_states
+                .clone()
+                .ok_or_else(|| anyhow!("test did not expect verifier-state capture"))
         }
 
         fn rejit(
@@ -1904,10 +1958,18 @@ if [ "$1" != "optimize" ]; then
     exit 1
 fi
 report=""
+passes=""
+verifier_states=""
 while [ "$#" -gt 0 ]; do
     if [ "$1" = "--report" ]; then
         shift
         report="$1"
+    elif [ "$1" = "--passes" ]; then
+        shift
+        passes="$1"
+    elif [ "$1" = "--verifier-states" ]; then
+        shift
+        verifier_states="$1"
     fi
     shift || true
 done
@@ -1915,11 +1977,25 @@ if [ -z "$report" ]; then
     echo "missing --report" >&2
     exit 1
 fi
+case ",$passes," in
+    *,const_prop,*|*,map_inline,*)
+        if [ -z "$verifier_states" ]; then
+            echo "missing --verifier-states" >&2
+            exit 2
+        fi
+        if [ ! -s "$verifier_states" ]; then
+            echo "empty --verifier-states" >&2
+            exit 3
+        fi
+        ;;
+esac
+first_pass="${passes%%,*}"
+if [ -z "$first_pass" ]; then
+    first_pass="dce"
+fi
 cat
 printf '\225\000\000\000\000\000\000\000'
-cat > "$report" <<'JSON'
-{"passes":[{"pass":"dce","changed":true,"sites_applied":1,"insn_count_before":1,"insn_count_after":2,"insn_delta":1}]}
-JSON
+printf '{"passes":[{"pass":"%s","changed":true,"sites_applied":1,"insn_count_before":1,"insn_count_after":2,"insn_delta":1}]}\n' "$first_pass" > "$report"
 "#,
         )
         .unwrap();

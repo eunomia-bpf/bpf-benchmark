@@ -11,14 +11,13 @@ The daemon main path is now:
 ```text
 runner socket optimize
   -> daemon bpfget snapshot
-  -> optional map-values / target side inputs
-  -> optional const_prop thin dry-run only when explicitly requested
+  -> automatic map-values / target / verifier-state side inputs as requested passes require
   -> bpfopt CLI
   -> daemon-built in-memory fd_array
   -> kernel_sys::prog_rejit()
 ```
 
-No main-path `BPF_PROG_LOAD` dry-run remains. `BPF_PROG_REJIT` failures surface as errors with preserved artifacts.
+No final-acceptance `BPF_PROG_LOAD` dry-run remains. The only `BPF_PROG_LOAD` dry-run on the daemon path is the thin verifier-state capture used as a side-input for `map_inline` / `const_prop`. `BPF_PROG_REJIT` failures surface as errors with preserved artifacts.
 
 ## Step Coverage
 
@@ -29,7 +28,7 @@ No main-path `BPF_PROG_LOAD` dry-run remains. `BPF_PROG_REJIT` failures surface 
 | 3. Compress `bpfget` | Done | Removed BTF func/line info snapshotting, normalization, relocation reconstruction, and replay protocol. |
 | 4. Inline `bpfrejit` | Done | Removed `daemon/crates/bpfrejit`; daemon calls `kernel_sys::prog_rejit()` directly. |
 | 5. Add thin dry-run | Done | `daemon/src/dry_run.rs`; 5s timeout; `func_info = None`, `line_info = None`. |
-| 6. Integrate `const_prop` | Done | Explicit `const_prop` triggers verifier-state capture; default pipeline skips it. |
+| 6. Integrate side-inputs | Revised | Default 12-pass policy includes `const_prop`; `map_inline` / `const_prop` automatically trigger verifier-state capture, and `map_inline` automatically gets live map values. |
 | 7. Delete residual protocol code | Done | No active daemon `map_fds.json`, `fd_array.json`, `btf-info`, or `verifier-states-out` protocol remains. |
 | 8. Update docs | Done | Updated `CLAUDE.md`, `docs/tmp/bpfopt_design_v3.md`, `docs/kernel-jit-optimization-plan.md`, plan doc, and daemon README. |
 | 9. Tests | Done | See test results below. |
@@ -39,7 +38,7 @@ No main-path `BPF_PROG_LOAD` dry-run remains. `BPF_PROG_REJIT` failures surface 
 
 Plan target: daemon kernel-facing Rust from 6,756 lines to <= 2,400 lines, net reduction >= 4,300.
 
-Actual production kernel-facing count:
+Actual production kernel-facing count. The 2,327 figure is the three-file production-before-`#[cfg(test)]` count used for the rollback acceptance metric:
 
 ```text
 daemon/src/commands.rs production before tests: 1643
@@ -49,6 +48,8 @@ total:                                          2327
 ```
 
 Result: 6,756 -> 2,327, net -4,429 lines. This meets both thresholds: <= 2,400 and >= 4,300 lines removed.
+
+Counting transparency: raw `wc -l` for the same three files is 2,682, and the broader daemon surface (`daemon/src/*.rs` plus `daemon/crates/bpfget`) is 3,995. These broader counts do not change the core conclusion; they are different scopes.
 
 Module-level comparison:
 
@@ -67,18 +68,19 @@ Module-level comparison:
 
 - Zero reconstruction: `bpfget` keeps `prog_info`/`map_ids` as kernel-provided data; daemon does not reverse-map old pseudo-map immediates.
 - No BTF func/line replay: `ProgramSnapshot` no longer stores BTF func_info/line_info bytes; thin dry-run passes `func_info = None`, `line_info = None`.
-- `const_prop` default off: removed from default `bpfopt optimize` pass lists and `corpus/config/benchmark_config.yaml`.
+- Default 12-pass policy: `const_prop` is present in default `bpfopt optimize` pass lists and `corpus/config/benchmark_config.yaml`; `branch_flip` remains non-default.
 - No ReJIT filtering added.
 - No fallback path added for failed dry-run, missing verifier states, failed `bpfopt`, or failed `BPF_PROG_REJIT`.
 - `kernel-sys` remains the only BPF syscall boundary.
+- Main `BPF_PROG_REJIT` has no daemon-side timeout; a kernel verifier hang blocks the daemon. This limitation is documented instead of hidden behind a fallback.
 
 ## Test Results
 
 All allowed tests passed:
 
-- `cargo test --workspace --manifest-path daemon/Cargo.toml`: passed, 23 daemon tests.
+- `cargo test --workspace --manifest-path daemon/Cargo.toml`: passed, 28 daemon tests.
 - `cargo test --workspace --manifest-path bpfopt/Cargo.toml`: passed, including bpfopt lib/bin/CLI, bpfprof, kernel-sys, and integration tests.
-- `make daemon-tests`: passed, 23 daemon tests.
+- `make daemon-tests`: passed, 28 daemon tests.
 - `make check`: passed. This ran `vm-test` only, with `RESULTS: 27 passed, 0 failed`, including fuzz `1000/1000` rounds.
 
 Forbidden targets were not run:

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-//! Thin verifier-state capture used only by explicit const_prop requests.
+//! Thin verifier-state capture for passes that need verifier states.
 
 use std::os::fd::{AsRawFd, OwnedFd};
 use std::sync::mpsc;
@@ -74,6 +74,12 @@ fn capture_verifier_states_inner(
     })
     .context("BPF_PROG_LOAD thin dry-run failed")?;
 
+    verifier_states_from_report(report)
+}
+
+fn verifier_states_from_report(
+    report: kernel_sys::ProgLoadDryRunReport,
+) -> Result<kernel_sys::VerifierStatesJson> {
     if !report.accepted {
         let errno = report
             .errno
@@ -165,6 +171,41 @@ mod tests {
     use std::time::Instant;
 
     #[test]
+    fn accepted_dry_run_report_yields_verifier_states() {
+        let states = verifier_states_from_report(kernel_sys::ProgLoadDryRunReport {
+            accepted: true,
+            errno: None,
+            verifier_log: "0: R1=ctx() R10=fp0\n0: (b7) r0 = 0 ; R0=0\n".to_string(),
+            log_true_size: 0,
+            jited_size: Some(8),
+        })
+        .unwrap();
+
+        assert_eq!(states.insns.len(), 1);
+        assert_eq!(states.insns[0].pc, 0);
+        assert_eq!(states.insns[0].regs["r0"].const_val, Some(0));
+    }
+
+    #[test]
+    fn rejected_dry_run_report_surfaces_errno_22() {
+        let err = verifier_states_from_report(kernel_sys::ProgLoadDryRunReport {
+            accepted: false,
+            errno: Some(22),
+            verifier_log: "0: R1=ctx() R10=fp0\ninvalid bpf_context access\n".to_string(),
+            log_true_size: 0,
+            jited_size: None,
+        })
+        .unwrap_err();
+
+        let message = err.to_string();
+        assert!(message.contains("errno 22"), "err={message}");
+        assert!(
+            message.contains("invalid bpf_context access"),
+            "err={message}"
+        );
+    }
+
+    #[test]
     fn timeout_returns_without_waiting_for_worker() {
         let (release_sender, release_receiver) = mpsc::channel();
         let started = Instant::now();
@@ -182,6 +223,12 @@ mod tests {
         );
         assert!(err.to_string().contains("timed out after 20ms"));
         release_sender.send(()).unwrap();
+    }
+
+    #[test]
+    fn production_dry_run_timeout_is_five_seconds() {
+        assert_eq!(DRY_RUN_TIMEOUT, Duration::from_secs(5));
+        assert_eq!(duration_label(DRY_RUN_TIMEOUT), "5s");
     }
 
     #[test]

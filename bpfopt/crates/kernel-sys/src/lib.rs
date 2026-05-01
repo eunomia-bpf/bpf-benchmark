@@ -1559,7 +1559,7 @@ pub fn prog_rejit(
     prog_fd: BorrowedFd<'_>,
     new_insns: &[bpf_insn],
     fd_array: &[i32],
-    mut log_buf: Option<&mut [u8]>,
+    log_buf: Option<&mut Vec<u8>>,
 ) -> Result<()> {
     if prog_fd.as_raw_fd() < 0 {
         bail!("BPF_PROG_REJIT prog_fd must be non-negative");
@@ -1573,56 +1573,44 @@ pub fn prog_rejit(
         .try_into()
         .map_err(|_| anyhow!("BPF_PROG_REJIT fd_array length does not fit __u32"))?;
 
-    if let Some(buf) = log_buf.as_deref_mut() {
-        validate_rejit_log_buf(buf)?;
-        let first_log_buf_size = buf.len();
-        match prog_rejit_once(
-            prog_fd,
-            insn_cnt,
-            new_insns,
-            fd_array_cnt,
-            fd_array,
-            Some(buf),
-        ) {
-            Ok(()) => return Ok(()),
-            Err(failure) => {
-                if failure.error.raw_os_error() != Some(libc::ENOSPC) {
-                    return Err(format_prog_rejit_failure(failure));
-                }
-                let Some(mut log_buf_size) = next_rejit_log_buf_size(first_log_buf_size) else {
-                    return Err(format_prog_rejit_failure(failure));
-                };
-                loop {
-                    let mut retry_log_buf = vec![0u8; log_buf_size];
-                    match prog_rejit_once(
-                        prog_fd,
-                        insn_cnt,
-                        new_insns,
-                        fd_array_cnt,
-                        fd_array,
-                        Some(retry_log_buf.as_mut_slice()),
-                    ) {
-                        Ok(()) => return Ok(()),
-                        Err(retry_failure) => {
-                            if retry_failure.error.raw_os_error() == Some(libc::ENOSPC) {
-                                match next_rejit_log_buf_size(log_buf_size) {
-                                    Some(next_size) => {
-                                        log_buf_size = next_size;
-                                        continue;
-                                    }
-                                    None => {}
-                                }
-                            }
-                            return Err(format_prog_rejit_failure(retry_failure));
-                        }
-                    }
-                }
-            }
-        }
+    if let Some(buf) = log_buf {
+        return prog_rejit_with_log_buf(buf, |log_buf| {
+            prog_rejit_once(
+                prog_fd,
+                insn_cnt,
+                new_insns,
+                fd_array_cnt,
+                fd_array,
+                Some(log_buf),
+            )
+        });
     }
 
     prog_rejit_once(prog_fd, insn_cnt, new_insns, fd_array_cnt, fd_array, None)
         .map_err(format_prog_rejit_failure)
+}
+
+fn prog_rejit_with_log_buf<F>(log_buf: &mut Vec<u8>, mut run_once: F) -> Result<()>
+where
+    F: FnMut(&mut [u8]) -> std::result::Result<(), ProgRejitFailure>,
+{
+    validate_rejit_log_buf(log_buf)?;
+    let mut log_buf_size = log_buf.len();
+    loop {
+        log_buf.resize(log_buf_size, 0);
+        match run_once(log_buf.as_mut_slice()) {
+            Ok(()) => return Ok(()),
+            Err(failure) => {
+                if failure.error.raw_os_error() == Some(libc::ENOSPC) {
+                    if let Some(next_size) = next_rejit_log_buf_size(log_buf_size) {
+                        log_buf_size = next_size;
+                        continue;
+                    }
+                }
+                return Err(format_prog_rejit_failure(failure));
+            }
+        }
+    }
 }
 
 fn validate_rejit_log_buf(buf: &[u8]) -> Result<()> {
@@ -1849,6 +1837,33 @@ mod tests {
             Some(MAX_REJIT_LOG_BUF_SIZE)
         );
         assert_eq!(next_rejit_log_buf_size(MAX_REJIT_LOG_BUF_SIZE), None);
+    }
+
+    #[test]
+    fn rejit_enospc_retry_exposes_final_log_to_caller() {
+        let mut log_buf = vec![0u8; 8];
+        let mut calls = 0usize;
+
+        let err = prog_rejit_with_log_buf(&mut log_buf, |buf| {
+            calls += 1;
+            buf.fill(0);
+            let (errno, message) = if calls == 1 {
+                (libc::ENOSPC, "first")
+            } else {
+                (libc::EINVAL, "retry-log")
+            };
+            buf[..message.len()].copy_from_slice(message.as_bytes());
+            Err(ProgRejitFailure {
+                error: std::io::Error::from_raw_os_error(errno),
+                log: extract_log_string(buf),
+            })
+        })
+        .unwrap_err();
+
+        assert_eq!(calls, 2);
+        assert!(log_buf.len() >= 16);
+        assert_eq!(extract_log_string(&log_buf), "retry-log");
+        assert!(err.to_string().contains("retry-log"), "err={err:#}");
     }
 
     #[test]

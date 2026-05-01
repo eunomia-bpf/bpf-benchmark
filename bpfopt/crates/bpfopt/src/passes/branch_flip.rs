@@ -812,7 +812,8 @@ mod tests {
             min_bias: 0.7,
             max_branch_miss_rate: 0.05,
         });
-        let ctx = PassContext::test_default();
+        let mut ctx = PassContext::test_default();
+        ctx.policy.enabled_passes = vec!["branch_flip".to_string()];
 
         let result = pm
             .run_with_profiling(&mut prog, &ctx, Some(&profiling))

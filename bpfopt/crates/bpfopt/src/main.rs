@@ -15,6 +15,7 @@ use bpfopt::pass::{
     Arch, BpfProgram, BranchProfile, BtfInfoRecords, KinsnRegistry, MapMetadata, PassContext,
     PassManager, PassResult, PlatformCapabilities, ProfilingData, RegState, ScalarRange,
     StackState, StaticKinsnCallResolver, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
+    DEFAULT_ENABLED_PASS_ORDER,
 };
 use bpfopt::passes::{MapInfoAnalysis, PASS_REGISTRY};
 use clap::{Args, Parser, Subcommand};
@@ -35,35 +36,6 @@ const ALL_PASS_ORDER: &[&str] = &[
     "extract",
     "endian_fusion",
     "branch_flip",
-    "prefetch",
-];
-
-const DEFAULT_OPTIMIZE_PASS_ORDER: &[&str] = &[
-    "map_inline",
-    "dce",
-    "skb_load_bytes_spec",
-    "bounds_check_merge",
-    "wide_mem",
-    "bulk_memory",
-    "rotate",
-    "cond_select",
-    "extract",
-    "endian_fusion",
-    "prefetch",
-];
-
-const ARM64_DEFAULT_OPTIMIZE_PASS_ORDER: &[&str] = &[
-    "map_inline",
-    "dce",
-    "skb_load_bytes_spec",
-    "bounds_check_merge",
-    "wide_mem",
-    "bulk_memory",
-    "rotate",
-    "cond_select",
-    "ccmp",
-    "extract",
-    "endian_fusion",
     "prefetch",
 ];
 
@@ -495,8 +467,7 @@ fn run_optimize(common: &CommonArgs, args: &OptimizeArgs) -> Result<()> {
 
 fn default_optimize_pass_order(arch: Arch) -> &'static [&'static str] {
     match arch {
-        Arch::Aarch64 => ARM64_DEFAULT_OPTIMIZE_PASS_ORDER,
-        Arch::X86_64 => DEFAULT_OPTIMIZE_PASS_ORDER,
+        Arch::Aarch64 | Arch::X86_64 => DEFAULT_ENABLED_PASS_ORDER,
     }
 }
 
@@ -592,8 +563,11 @@ fn validate_required_side_inputs(common: &CommonArgs, pass_names: &[&str]) -> Re
                 }
             }
             "map_inline" => {
-                if common.map_values.is_none() || common.map_ids.is_empty() {
-                    bail!("map-inline requires --map-values and --map-ids");
+                if common.verifier_states.is_none()
+                    || common.map_values.is_none()
+                    || common.map_ids.is_empty()
+                {
+                    bail!("map-inline requires --verifier-states, --map-values, and --map-ids");
                 }
             }
             _ => {}
@@ -1405,13 +1379,15 @@ mod tests {
     }
 
     #[test]
-    fn default_optimize_order_includes_ccmp_only_on_arm64() {
-        assert!(default_optimize_pass_order(Arch::Aarch64).contains(&"ccmp"));
+    fn default_optimize_order_is_default_12_pass_policy_on_all_arches() {
+        assert!(!default_optimize_pass_order(Arch::Aarch64).contains(&"ccmp"));
         assert!(!default_optimize_pass_order(Arch::X86_64).contains(&"ccmp"));
-        assert!(!default_optimize_pass_order(Arch::Aarch64).contains(&"const_prop"));
-        assert!(!default_optimize_pass_order(Arch::X86_64).contains(&"const_prop"));
+        assert!(default_optimize_pass_order(Arch::Aarch64).contains(&"const_prop"));
+        assert!(default_optimize_pass_order(Arch::X86_64).contains(&"const_prop"));
         assert!(default_optimize_pass_order(Arch::Aarch64).contains(&"prefetch"));
         assert!(default_optimize_pass_order(Arch::X86_64).contains(&"prefetch"));
+        assert_eq!(default_optimize_pass_order(Arch::Aarch64).len(), 12);
+        assert_eq!(default_optimize_pass_order(Arch::X86_64).len(), 12);
         assert_eq!(
             default_optimize_pass_order(Arch::Aarch64).last(),
             Some(&"prefetch")

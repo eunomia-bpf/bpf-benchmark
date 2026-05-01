@@ -17,7 +17,7 @@
 
 - daemon 主路径切成 snapshot → `bpfopt` CLI → direct `kernel_sys::prog_rejit()`，不再做 final `BPF_PROG_LOAD` dry-run。
 - `daemon/crates/bpfverify` 和 `daemon/crates/bpfrejit` 已删除；`bpfget` 压缩为 live snapshot / map metadata / target probing。
-- `const_prop` 已从默认 11-pass pipeline 和 benchmark config 移除，只有显式请求时触发 thin dry-run，且 dry-run 不传 BTF func_info/line_info。
+- 2026-05-01 revision 推翻原 plan §B.3：恢复 v2 行为，默认 12-pass pipeline 包含 `const_prop`，daemon 自动为 `map_inline` / `const_prop` 等需要 side-input 的 pass 准备数据，且 thin dry-run 不传 BTF func_info/line_info。
 - `map_fds.json` / `fd_array.json` / `btf-info` / `verifier-states-out` / replay 协议已从 daemon 主路径删除。
 - 实际测试和行数见 `docs/tmp/full-matrix-20260430/v2-style-rollback-impl.md`。
 
@@ -50,11 +50,11 @@
 
 ## B 方案三条设计原则
 
-设计 B 方案的 dry-run（仅给 const_prop 用）必须遵守：
+设计 B 方案的 dry-run（给需要 verifier states 的 pass 用）必须遵守：
 
 1. **零 reconstruction** — 所有字段直接从 `prog_info` 读，不变形不规范化。`prog_type / expected_attach_type / prog_flags / btf_id / btf_obj_id / attach_btf_id / dst_prog_fd` 全部 read-as-is 填到 `bpf_attr`。
 2. **不传 BTF func_info / line_info** — `bpf_attr.line_info_cnt = 0`、`bpf_attr.func_info_cnt = 0`。verifier 不需要 source-level metadata 来跑 verify + 输出 register state log。
-3. **const_prop 默认关** — daemon 主路径不 dry-run。const_prop 只有调用方显式启用（如 `bpfopt optimize --const-prop --verifier-states <file>`）时才触发 daemon 一次 thin dry-run；默认 11-pass pipeline 不含 const_prop。
+3. **默认 12-pass + 自动 side-input** — daemon 默认启用 v2 时代 12 个 pass：`wide_mem, rotate, cond_select, extract, endian_fusion, map_inline, const_prop, dce, bounds_check_merge, skb_load_bytes_spec, bulk_memory, prefetch`。调用方不需要 side-input opt-in；daemon 看到 `map_inline` 自动生成 live map values 和 verifier states，看到 `const_prop` 自动生成 verifier states，看到 kinsn pass 自动 probe target / 构造 fd_array。`branch_flip` 仍不在默认 12 pass 中。
 
 ## 新主路径
 
@@ -73,15 +73,16 @@ runner Python ─[socket optimize]→ daemon
 - bpfopt subprocess 失败 → daemon 报 transform error
 - REJIT syscall 失败 → daemon 解析 errno + log_buf 写 preserved workdir（含 original bytecode + optimized bytecode + verifier_log），返回 result.json
 - 单个 prog REJIT 失败**不影响其它 prog**（per-app lifecycle 已修，保留）
+- main `BPF_PROG_REJIT` 无 daemon-side timeout；如果 kernel verifier hang，daemon 会同步卡住。当前选择文档化接受该限制，不加 subprocess fallback。
 
-## const_prop 离线机制（可选启用）
+## 自动 side-input 机制
 
 ```
-显式调用：bpfopt optimize --enable-pass const_prop --verifier-states states.json
-         daemon 检测到 enabled_passes 含 const_prop → 在调 bpfopt 前先做一次 thin dry-run
+默认/显式调用：enabled_passes 含 map_inline 或 const_prop
+         daemon 检测到 verifier-state consumer → 在调 bpfopt 前先做一次 thin dry-run
          dry-run 用 BPF_PROG_LOAD 喂原 bytecode + minimal LoadAttr (no BTF info)
          → 拿 verifier_log → parse register state → 写 states.json
-         → 然后 bpfopt 用 states.json 跑 const_prop
+         → 然后 bpfopt 用 states.json 跑 map_inline / const_prop
 ```
 
 thin dry-run 函数（约 200-300 行）：
@@ -120,7 +121,7 @@ fn capture_verifier_states(prog_info: &ProgInfo, bytecode: &[Insn], fd_array: &[
 | `daemon/src/commands.rs` | 2,148 | 700-1,000 | -1,150 |
 | `daemon/crates/bpfrejit` | 77 | 0（内联到 daemon/src） | -77 |
 | 残留协议代码（map_fds 序列化等） | scattered | 0 | -200 |
-| 加：thin dry-run 模块（仅 const_prop 用） | 0 | 200-300 | +250 |
+| 加：thin dry-run 模块（verifier-state side-input 用） | 0 | 200-300 | +250 |
 | 加：minimal fd_array builder | 0 | 30-50 | +40 |
 | **净** | **6,756 daemon kernel-facing** | **~2,300** | **~-4,200 行** |
 
@@ -153,7 +154,7 @@ fn capture_verifier_states(prog_info: &ProgInfo, bytecode: &[Insn], fd_array: &[
 - daemon/src/commands.rs 直接调 `kernel_sys::prog_rejit`
 - 估计 `-77 + 30 = -47` 行
 
-### Step 5: 加 thin dry-run（const_prop opt-in）
+### Step 5: 加 thin dry-run（自动 verifier-state side-input）
 - 新文件 `daemon/src/dry_run.rs` 或加到 `commands.rs`
 - 严格按"三条原则"实现（200-300 行）
 - 加 unit test 覆盖：
@@ -162,10 +163,11 @@ fn capture_verifier_states(prog_info: &ProgInfo, bytecode: &[Insn], fd_array: &[
   - dry-run timeout 5s 兜底
   - 不传 line_info/func_info 不影响 register state 解析
 
-### Step 6: const_prop daemon 集成
-- daemon 检测 `enabled_passes` 含 const_prop → 触发 dry-run 写 states.json → 传给 bpfopt CLI
-- 不在 enabled_passes 时跳过 dry-run（默认路径）
-- 加 integration test：默认 11 pass 不触发 dry-run；显式 12 pass + const_prop 触发
+### Step 6: daemon side-input 集成
+- daemon 检测 `enabled_passes` 含 `map_inline` / `const_prop` → 触发 dry-run 写 states.json → 传给 bpfopt CLI
+- daemon 检测 `enabled_passes` 含 `map_inline` → 写 live `map-values.json` 和 `--map-ids`
+- daemon 检测 kinsn pass → probe `target.json` 并构造 fd_array call offsets
+- 加 integration test：包含 `const_prop` 的默认 12-pass 语义会触发 dry-run
 
 ### Step 7: 删除残留协议代码
 - `bpfopt/crates/kernel-sys/src/lib.rs`：删 `FdArray::from_json_file`（review P2#5 提到，dead code）
@@ -174,8 +176,8 @@ fn capture_verifier_states(prog_info: &ProgInfo, bytecode: &[Insn], fd_array: &[
 
 ### Step 8: 文档更新
 更新以下文档：
-- `CLAUDE.md` § "Daemon Owns Kernel Calls; Runner Stays Untouched"：改成「daemon 主路径直接 REJIT，不 dry-run；const_prop 是 opt-in 离线 pass」
-- `docs/tmp/bpfopt_design_v3.md`：把 v3 daemon-owned bpfverify lib 段全删；写新主路径 + const_prop 离线机制
+- `CLAUDE.md` § "Daemon Owns Kernel Calls; Runner Stays Untouched"：改成「daemon 主路径直接 ReJIT；需要 side-input 的 pass 自动准备数据」
+- `docs/tmp/bpfopt_design_v3.md`：把 v3 daemon-owned bpfverify lib 段全删；写新主路径 + 自动 side-input 机制
 - `docs/kernel-jit-optimization-plan.md` § 4 architecture：同步
 - `daemon/README.md`：更新 socket 协议描述
 
@@ -186,7 +188,7 @@ fn capture_verifier_states(prog_info: &ProgInfo, bytecode: &[Insn], fd_array: &[
 - `make check`（含 vm-test selftest + fuzz 1000 rounds）
 - 新增覆盖：
   - 主路径 ReJIT errno 报错被正确转成 result.json
-  - const_prop opt-in 路径 dry-run 触发 + states.json 生成 + bpfopt 接收
+  - const_prop 默认路径 dry-run 触发 + states.json 生成 + bpfopt 接收
   - thin dry-run 5s timeout
   - 多 map prog REJIT 主路径成功（不需要 reconstruction）
 - 报告每个 test pass/fail
@@ -210,7 +212,7 @@ fn capture_verifier_states(prog_info: &ProgInfo, bytecode: &[Insn], fd_array: &[
 - ❌ 不要改 BPF_PROG_REJIT syscall ABI（kernel 不动）
 - ❌ 不要重建 BTF func_info/line_info normalize 逻辑（即使看着像 bug 兜底也别加回去）
 - ❌ 不要重建 multi-map relocation 反向解析（fd_array 直接从 used_maps 来）
-- ❌ 不要在 daemon 主路径留任何 dry-run（const_prop opt-in 才走）
+- ❌ 不要在 final ReJIT 接受路径留任何 dry-run；thin dry-run 只允许作为需要 verifier states 的 pass 的 side-input 生成步骤
 - ❌ 不要跑 make vm-corpus / vm-e2e / vm-micro（让 Claude 跑）
 - ❌ 不要分多个 commit（一个干净的 commit 含完整 rollback；docs/report 可以是单独 commit）
 
@@ -218,7 +220,7 @@ fn capture_verifier_states(prog_info: &ProgInfo, bytecode: &[Insn], fd_array: &[
 
 - 量化：daemon kernel-facing Rust 行数从 6,756 减至 ≤ 2,400（净减 ≥ 4,300）
 - cargo test --workspace、make daemon-tests、make check 全过（vm-test selftest 仍 27 passed）
-- daemon 主路径不调用 BPF_PROG_LOAD（除非 const_prop opt-in）
+- daemon final ReJIT 接受路径不调用 BPF_PROG_LOAD；只有需要 verifier states 的 pass 才触发 side-input thin dry-run
 - daemon 不再写 / 读 map_fds.json / verifier-states-out / btf-info 任何 JSON
 - ProgramSnapshot 不含 BTF func_info/line_info bytes
 - 删完 docs 跟实现一致（CLAUDE.md/bpfopt_design_v3.md/plan doc）

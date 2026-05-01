@@ -557,7 +557,8 @@ fn test_run_with_profiling_enables_branch_flip() {
         BpfInsn::mov64_imm(0, 20), // else
         exit_insn(),
     ]);
-    let ctx = PassContext::test_default();
+    let mut ctx = PassContext::test_default();
+    ctx.policy.enabled_passes = vec!["branch_flip".to_string()];
 
     // Without profiling: branch_flip fails fast.
     let err = pm.run_with_profiling(&mut prog, &ctx, None).unwrap_err();
@@ -648,6 +649,18 @@ fn test_invalid_policy_pass_name_is_rejected() {
 
     assert!(err.to_string().contains("invalid enabled_passes"));
     assert!(err.to_string().contains("unknown pass name(s): bulk_mem"));
+}
+
+#[test]
+fn default_enabled_passes_match_default_12_pass_policy() {
+    let passes = default_enabled_passes();
+
+    assert_eq!(passes.len(), 12);
+    assert!(passes.contains(&"map_inline".to_string()));
+    assert!(passes.contains(&"const_prop".to_string()));
+    assert!(passes.contains(&"prefetch".to_string()));
+    assert!(!passes.contains(&"branch_flip".to_string()));
+    assert!(!passes.contains(&"ccmp".to_string()));
 }
 
 #[test]
