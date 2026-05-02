@@ -557,46 +557,8 @@ RUN set -eux; \
     find ./e2e/cases/tetragon/policies -type f \( -name '*.yaml' -o -name '*.yml' \) | grep -q .; \
     mkdir -p micro/results corpus/results e2e/results tests/results /var/tmp/bpfrejit-runtime
 
-RUN <<'EOF'
-set -eux
-cat > /usr/local/bin/bpfrejit-runtime-entrypoint <<'SCRIPT'
-#!/usr/bin/env bash
-set -euo pipefail
-
-suite_results=""
-previous_arg=""
-for arg in "$@"; do
-    if [ "$previous_arg" = "-m" ]; then
-        case "$arg" in
-            runner.suites.micro) suite_results="micro/results" ;;
-            runner.suites.corpus) suite_results="corpus/results" ;;
-            runner.suites.e2e) suite_results="e2e/results" ;;
-            runner.suites.test) suite_results="tests/results" ;;
-        esac
-        break
-    fi
-    previous_arg="$arg"
-done
-
-if [ -z "${BPFREJIT_DAEMON_FAILURE_ROOT:-}" ] && [ -n "$suite_results" ]; then
-    workspace="${BPFREJIT_IMAGE_WORKSPACE:-/workspace}"
-    export BPFREJIT_DAEMON_FAILURE_ROOT="${workspace}/${suite_results}"
-fi
-
-if [ -n "${BPFREJIT_DAEMON_FAILURE_ROOT:-}" ]; then
-    mkdir -p "$BPFREJIT_DAEMON_FAILURE_ROOT"
-    probe="${BPFREJIT_DAEMON_FAILURE_ROOT}/.bpfrejit-write-probe.$$"
-    if ! : > "$probe"; then
-        printf 'bpfrejit-runtime-entrypoint: failure root is not writable: %s\n' "$BPFREJIT_DAEMON_FAILURE_ROOT" >&2
-        exit 1
-    fi
-    rm "$probe"
-fi
-
-exec "$@"
-SCRIPT
-chmod +x /usr/local/bin/bpfrejit-runtime-entrypoint
-EOF
+RUN printf '#!/usr/bin/env bash\nexec "$@"\n' > /usr/local/bin/bpfrejit-runtime-entrypoint && \
+    chmod +x /usr/local/bin/bpfrejit-runtime-entrypoint
 
 ENV BPFREJIT_IMAGE_WORKSPACE=${IMAGE_WORKSPACE} \
     BPFREJIT_REPO_ARTIFACT_ROOT=/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH} \

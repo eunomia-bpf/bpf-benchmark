@@ -1079,7 +1079,7 @@ def run_file_io(duration_s: int | float) -> WorkloadResult:
 
 def _disk_backed_tmp_root() -> Path:
     seen: set[Path] = set()
-    candidates = [Path(os.environ.get(n, "").strip()) for n in ("BPFREJIT_RUNTIME_TMPDIR", "TMPDIR", "TMP", "TEMP") if os.environ.get(n, "").strip()]
+    candidates = [Path(os.environ.get(n, "").strip()) for n in ("TMPDIR", "TMP", "TEMP") if os.environ.get(n, "").strip()]
     candidates += [Path("/var/tmp"), Path("/tmp")]
     for candidate in candidates:
         resolved = candidate.expanduser()

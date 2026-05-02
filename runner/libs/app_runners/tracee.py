@@ -48,9 +48,10 @@ def _tracee_runtime_dir() -> Path:
     if explicit := os.environ.get("BPFREJIT_TRACEE_RUNTIME_DIR", "").strip():
         candidate = Path(explicit).expanduser()
     else:
-        runtime_tmpdir = os.environ.get("BPFREJIT_RUNTIME_TMPDIR", "").strip()
-        if not runtime_tmpdir: raise RuntimeError("BPFREJIT_RUNTIME_TMPDIR is required for the Tracee runner")
-        candidate = Path(runtime_tmpdir).expanduser() / "tracee"
+        tmpdir = os.environ.get("TMPDIR", "").strip()
+        if not tmpdir:
+            raise RuntimeError("TMPDIR is required for the Tracee runner")
+        candidate = Path(tmpdir).expanduser() / "tracee"
     candidate.mkdir(parents=True, exist_ok=True)
     if not os.access(candidate, os.W_OK | os.X_OK):
         raise RuntimeError(f"Tracee runtime directory is not writable/executable: {candidate}")

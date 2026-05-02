@@ -90,13 +90,6 @@ def _validate_daemon_runtime_root(candidate: Path, *, source: str) -> Path:
 
 
 def _daemon_runtime_root() -> Path:
-    explicit = os.environ.get("BPFREJIT_DAEMON_TMPDIR", "").strip()
-    if explicit:
-        return _validate_daemon_runtime_root(
-            Path(explicit).expanduser(),
-            source="BPFREJIT_DAEMON_TMPDIR",
-        )
-
     candidates: list[Path] = []
     for raw_candidate in (
         Path("/var/tmp/bpfrejit-daemon"),
@@ -727,13 +720,26 @@ def _daemon_log_tail(stdout_path: Path | None, stderr_path: Path | None) -> str:
     return tail_text(text, max_lines=80, max_chars=8000)
 
 
-def _start_daemon_server(daemon_binary: Path | str) -> tuple[subprocess.Popen[str], Path, str, Path, Path]:
+def _start_daemon_server(
+    daemon_binary: Path | str,
+    failure_root: Path | None = None,
+    keep_all_workdirs: bool = False,
+) -> tuple[subprocess.Popen[str], Path, str, Path, Path]:
     socket_dir = tempfile.mkdtemp(prefix="bd-", dir=str(_daemon_runtime_root()))
     socket_path = Path(socket_dir) / "daemon.sock"
     stdout_path = Path(socket_dir) / "daemon.stdout.log"
     stderr_path = Path(socket_dir) / "daemon.stderr.log"
+    if failure_root is None:
+        raise RuntimeError(
+            "failure_root is required when starting the daemon; "
+            "pass failure_root= to DaemonSession.start()"
+        )
+    failure_root.mkdir(parents=True, exist_ok=True)
+    cmd = [str(daemon_binary), "serve", "--socket", str(socket_path), "--failure-root", str(failure_root)]
+    if keep_all_workdirs:
+        cmd.append("--keep-all-workdirs")
     with stdout_path.open("w", encoding="utf-8") as out, stderr_path.open("w", encoding="utf-8") as err:
-        proc = subprocess.Popen([str(daemon_binary), "serve", "--socket", str(socket_path)], stdout=out, stderr=err, text=True)
+        proc = subprocess.Popen(cmd, stdout=out, stderr=err, text=True)
     deadline = time.monotonic() + 5.0
     while time.monotonic() < deadline:
         if socket_path.exists():
@@ -922,11 +928,20 @@ class DaemonSession:
     _closed: bool = False
 
     @classmethod
-    def start(cls, daemon_binary: Path | str, *, load_kinsn: bool = False) -> "DaemonSession":
+    def start(
+        cls,
+        daemon_binary: Path | str,
+        *,
+        load_kinsn: bool = False,
+        failure_root: Path | None = None,
+        keep_all_workdirs: bool = False,
+    ) -> "DaemonSession":
         from .kinsn import prepare_kinsn_modules  # noqa: PLC0415
         binary = Path(daemon_binary).resolve()
         kinsn_metadata: dict[str, object] = dict(prepare_kinsn_modules()) if load_kinsn else {}
-        proc, socket_path, socket_dir, stdout_path, stderr_path = _start_daemon_server(binary)
+        proc, socket_path, socket_dir, stdout_path, stderr_path = _start_daemon_server(
+            binary, failure_root=failure_root, keep_all_workdirs=keep_all_workdirs
+        )
         if load_kinsn:
             kinsn_metadata["daemon_binary"] = str(binary)
         return cls(daemon_binary=binary, proc=proc, socket_path=socket_path, socket_dir=socket_dir,

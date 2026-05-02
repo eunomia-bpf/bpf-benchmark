@@ -30,7 +30,7 @@ service:
 
 
 def _runtime_tmp_root() -> Path:
-    for env_name in ("BPFREJIT_RUNTIME_TMPDIR", "TMPDIR", "TMP", "TEMP"):
+    for env_name in ("TMPDIR", "TMP", "TEMP"):
         raw = os.environ.get(env_name, "").strip()
         if not raw:
             continue

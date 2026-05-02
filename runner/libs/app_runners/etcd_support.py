@@ -17,16 +17,6 @@ from .process_support import ProcessOutputCollector
 
 
 def _runtime_tmp_root() -> Path:
-    override = os.environ.get("BPFREJIT_ETCD_RUNTIME_TMPDIR", "").strip()
-    if override:
-        candidate = Path(override).expanduser()
-        try:
-            candidate.mkdir(parents=True, exist_ok=True)
-        except OSError:
-            pass
-        else:
-            if os.access(candidate, os.W_OK | os.X_OK):
-                return candidate
     for candidate in (Path("/var/tmp"), Path("/tmp")):
         try:
             candidate.mkdir(parents=True, exist_ok=True)

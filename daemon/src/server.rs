@@ -176,12 +176,24 @@ fn remove_socket_file_if_present(socket_path: &str) -> Result<()> {
     }
 }
 
-pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
+pub(crate) fn cmd_serve(
+    socket_path: &str,
+    failure_root: Option<&str>,
+    cli_dir: Option<&str>,
+    keep_all_workdirs: bool,
+) -> Result<()> {
     use std::os::unix::net::UnixListener;
+    use std::path::PathBuf;
 
     register_signal_handlers();
-    commands::validate_failure_export_root_from_env()?;
-    let config = CliConfig::from_env();
+
+    let failure_root_str = failure_root
+        .ok_or_else(|| anyhow::anyhow!("--failure-root is required"))?;
+    let failure_root_path = PathBuf::from(failure_root_str);
+    commands::init_cli_dir(cli_dir.map(PathBuf::from))?;
+    commands::init_keep_all_workdirs(keep_all_workdirs);
+    commands::validate_failure_export_root(&failure_root_path)?;
+    let config = CliConfig::from_global();
     let tracker = commands::new_invalidation_tracker();
     let reoptimization_state = new_reoptimization_state();
     let mut profiling_state: Option<ProfilingState> = None;
@@ -206,6 +218,7 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
         if last_invalidation_check.elapsed() >= Duration::from_secs(1) {
             let tracker_for_apply = tracker.clone();
             let reoptimization_state_for_apply = reoptimization_state.clone();
+            let failure_root_for_apply = failure_root_path.clone();
             run_invalidation_tick_logged("serve", &tracker, |prog_id| {
                 let profile_path = profiling_state
                     .as_ref()
@@ -218,6 +231,7 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
                     &enabled_passes,
                     profile_path.as_deref(),
                     Some(&tracker_for_apply),
+                    &failure_root_for_apply,
                 )?;
                 if result.status != "ok" {
                     anyhow::bail!(
@@ -246,6 +260,7 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
                 if let Err(err) = handle_client(
                     stream,
                     &config,
+                    &failure_root_path,
                     &mut profiling_state,
                     &tracker,
                     &reoptimization_state,
@@ -292,6 +307,7 @@ fn panic_response(payload: Box<dyn std::any::Any + Send>) -> serde_json::Value {
 fn handle_client(
     stream: std::os::unix::net::UnixStream,
     config: &CliConfig,
+    failure_root: &std::path::Path,
     profiling_state: &mut Option<ProfilingState>,
     tracker: &commands::SharedInvalidationTracker,
     reoptimization_state: &SharedReoptimizationState,
@@ -309,7 +325,7 @@ fn handle_client(
 
         let response = match serde_json::from_str::<serde_json::Value>(&line) {
             Ok(req) => match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                process_request(&req, config, profiling_state, tracker, reoptimization_state)
+                process_request(&req, config, failure_root, profiling_state, tracker, reoptimization_state)
             })) {
                 Ok(response) => response,
                 Err(payload) => panic_response(payload),
@@ -420,6 +436,7 @@ fn serialize_or_error<T: Serialize>(value: T) -> serde_json::Value {
 fn process_request(
     req: &serde_json::Value,
     config: &CliConfig,
+    failure_root: &std::path::Path,
     profiling_state: &mut Option<ProfilingState>,
     tracker: &commands::SharedInvalidationTracker,
     reoptimization_state: &SharedReoptimizationState,
@@ -449,6 +466,7 @@ fn process_request(
                 enabled_passes,
                 profile_path.as_deref(),
                 Some(tracker),
+                failure_root,
             ) {
                 Ok(result) => match remember_reoptimization_result(
                     reoptimization_state,
@@ -486,6 +504,7 @@ fn process_request(
                 enabled_passes,
                 &profile_paths,
                 Some(tracker),
+                failure_root,
             ) {
                 Ok(outcomes) => {
                     let mut per_program = BTreeMap::new();
@@ -645,12 +664,16 @@ mod tests {
     }
 
     fn process_test_request(req: &serde_json::Value) -> serde_json::Value {
-        process_test_request_with_config(req, &CliConfig::from_env())
+        // CLI_DIR global is unset in tests; from_global() returns CliConfig { cli_dir: None }.
+        // Tests that exercise process_request do not reach ReJIT, so a dummy failure_root is fine.
+        let tmp = std::env::temp_dir();
+        process_test_request_with_config(req, &CliConfig::from_global(), &tmp)
     }
 
     fn process_test_request_with_config(
         req: &serde_json::Value,
         config: &CliConfig,
+        failure_root: &std::path::Path,
     ) -> serde_json::Value {
         let tracker = commands::new_invalidation_tracker();
         let reoptimization_state = new_reoptimization_state();
@@ -658,6 +681,7 @@ mod tests {
         process_request(
             req,
             config,
+            failure_root,
             &mut profiling_state,
             &tracker,
             &reoptimization_state,

@@ -218,7 +218,6 @@ def setup_tmpdir(env: dict[str, str], scratch_token: str) -> None:
         Path(env["TMPDIR"]).chmod(0o1777)
     env.setdefault("TMP", env["TMPDIR"])
     env.setdefault("TEMP", env["TMPDIR"])
-    env["BPFREJIT_RUNTIME_TMPDIR"] = env["TMPDIR"]
 
 
 # ---------------------------------------------------------------------------

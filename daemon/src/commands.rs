@@ -24,8 +24,10 @@ use crate::bpf;
 use crate::invalidation::{BpfMapValueReader, MapInvalidationTracker};
 
 static NEXT_WORKDIR_ID: AtomicU64 = AtomicU64::new(0);
-const FAILURE_ROOT_ENV: &str = "BPFREJIT_DAEMON_FAILURE_ROOT";
-const KEEP_ALL_WORKDIRS_ENV: &str = "BPFREJIT_DAEMON_KEEP_ALL_WORKDIRS";
+/// Optional CLI binary directory set once at startup from --cli-dir CLI arg.
+static CLI_DIR: std::sync::OnceLock<Option<PathBuf>> = std::sync::OnceLock::new();
+/// Set once at startup from --keep-all-workdirs CLI flag.
+static KEEP_ALL_WORKDIRS: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 const DEBUG_WORKDIR_ROOT_NAME: &str = "workdirs";
 const MAP_VALUES_FILE: &str = "map-values.json";
 const VERIFIER_STATES_FILE: &str = "verifier-states.json";
@@ -40,10 +42,11 @@ pub(crate) struct CliConfig {
 }
 
 impl CliConfig {
-    pub(crate) fn from_env() -> Self {
-        Self {
-            cli_dir: std::env::var_os("BPFREJIT_CLI_DIR").map(PathBuf::from),
-        }
+    /// Read cli_dir from the process-global set by init_globals.
+    /// In tests where init_globals was not called, returns CliConfig { cli_dir: None }.
+    pub(crate) fn from_global() -> Self {
+        let cli_dir = CLI_DIR.get().and_then(|opt| opt.clone());
+        Self { cli_dir }
     }
 
     fn command(&self, name: &str) -> Command {
@@ -93,47 +96,23 @@ impl Drop for WorkDir {
     }
 }
 
-#[derive(Debug)]
-struct FailureExportConfig {
-    root: PathBuf,
+/// Initialise the CLI dir from parsed CLI args.
+/// Must be called exactly once before the server loop starts.
+pub(crate) fn init_cli_dir(cli_dir: Option<PathBuf>) -> Result<()> {
+    CLI_DIR
+        .set(cli_dir)
+        .map_err(|_| anyhow!("CLI dir already initialised"))
 }
 
-impl FailureExportConfig {
-    fn from_env() -> Result<Self> {
-        let root = match std::env::var_os(FAILURE_ROOT_ENV) {
-            Some(raw) => {
-                if raw.is_empty() {
-                    bail!("{FAILURE_ROOT_ENV} must not be empty");
-                }
-                PathBuf::from(raw)
-            }
-            None => bail!(
-                "{FAILURE_ROOT_ENV} must be set; \
-                 the runner-runtime entrypoint should provide it"
-            ),
-        };
-        Ok(Self { root })
-    }
-
-    fn validate_configured_root(&self) -> Result<()> {
-        ensure_writable_dir(&self.root, "failure export root")
-            .with_context(|| format!("{FAILURE_ROOT_ENV}={}", self.root.display()))
-    }
-
-    fn resolve_failure_root(&self) -> Result<PathBuf> {
-        self.validate_configured_root()?;
-        Ok(self.root.clone())
-    }
-
-    fn resolve_debug_workdir_root(&self) -> Result<PathBuf> {
-        self.validate_configured_root()?;
-        Ok(self.root.join(DEBUG_WORKDIR_ROOT_NAME))
-    }
+/// Initialise the keep-all-workdirs flag from the --keep-all-workdirs CLI arg.
+pub(crate) fn init_keep_all_workdirs(enabled: bool) {
+    KEEP_ALL_WORKDIRS.store(enabled, Ordering::Relaxed);
 }
 
-pub(crate) fn validate_failure_export_root_from_env() -> Result<()> {
-    keep_all_workdirs_enabled_from_env()?;
-    FailureExportConfig::from_env()?.validate_configured_root()
+/// Validate the failure root at startup.
+pub(crate) fn validate_failure_export_root(root: &Path) -> Result<()> {
+    ensure_writable_dir(root, "failure export root")
+        .with_context(|| format!("--failure-root={}", root.display()))
 }
 
 fn ensure_writable_dir(path: &Path, description: &str) -> Result<()> {
@@ -160,12 +139,10 @@ fn ensure_writable_dir(path: &Path, description: &str) -> Result<()> {
     Ok(())
 }
 
-fn preserve_failure_workdir(workdir: &WorkDir, prog_id: u32) -> Result<PathBuf> {
-    let config = FailureExportConfig::from_env()?;
-    let failure_root = config.resolve_failure_root()?;
-    ensure_writable_dir(&failure_root, "failure directory")
-        .with_context(|| format!("prepare failure directory {}", failure_root.display()))?;
-    let failure_dir = failure_root.join(prog_id.to_string());
+fn preserve_failure_workdir(workdir: &WorkDir, prog_id: u32, root: &Path) -> Result<PathBuf> {
+    ensure_writable_dir(root, "failure directory")
+        .with_context(|| format!("prepare failure directory {}", root.display()))?;
+    let failure_dir = root.join(prog_id.to_string());
     fs::create_dir(&failure_dir)
         .with_context(|| format!("create failure workdir {}", failure_dir.display()))?;
     copy_dir_contents(workdir.path(), &failure_dir)?;
@@ -173,12 +150,11 @@ fn preserve_failure_workdir(workdir: &WorkDir, prog_id: u32) -> Result<PathBuf> 
     Ok(failure_dir)
 }
 
-fn preserve_debug_workdir_if_requested(workdir: &WorkDir, prog_id: u32) -> Result<Option<PathBuf>> {
-    if !keep_all_workdirs_enabled_from_env()? {
+fn preserve_debug_workdir_if_requested(workdir: &WorkDir, prog_id: u32, root: &Path) -> Result<Option<PathBuf>> {
+    if !KEEP_ALL_WORKDIRS.load(Ordering::Relaxed) {
         return Ok(None);
     }
-    let config = FailureExportConfig::from_env()?;
-    let debug_root = config.resolve_debug_workdir_root()?;
+    let debug_root = root.join(DEBUG_WORKDIR_ROOT_NAME);
     ensure_writable_dir(&debug_root, "debug workdir directory")
         .with_context(|| format!("prepare debug workdir directory {}", debug_root.display()))?;
     let debug_dir = debug_root.join(prog_id.to_string());
@@ -186,15 +162,6 @@ fn preserve_debug_workdir_if_requested(workdir: &WorkDir, prog_id: u32) -> Resul
         .with_context(|| format!("create debug workdir {}", debug_dir.display()))?;
     copy_dir_contents(workdir.path(), &debug_dir)?;
     Ok(Some(debug_dir))
-}
-
-fn keep_all_workdirs_enabled_from_env() -> Result<bool> {
-    match std::env::var(KEEP_ALL_WORKDIRS_ENV) {
-        Ok(value) if value == "1" => Ok(true),
-        Ok(value) => bail!("{KEEP_ALL_WORKDIRS_ENV} must be 1 when set, got {value:?}"),
-        Err(std::env::VarError::NotPresent) => Ok(false),
-        Err(err) => Err(err).with_context(|| format!("read {KEEP_ALL_WORKDIRS_ENV}")),
-    }
 }
 
 fn copy_dir_contents(src: &Path, dst: &Path) -> Result<()> {
@@ -364,6 +331,7 @@ struct ApplyOneRequest<'a> {
     enabled_passes: &'a [String],
     profile_path: Option<&'a Path>,
     invalidation_tracker: Option<&'a SharedInvalidationTracker>,
+    failure_root: &'a Path,
 }
 
 pub(crate) type SharedInvalidationTracker = Arc<Mutex<MapInvalidationTracker<BpfMapValueReader>>>;
@@ -790,6 +758,7 @@ pub(crate) fn try_apply_one(
     enabled_passes: &[String],
     profile_path: Option<&Path>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
+    failure_root: &Path,
 ) -> Result<OptimizeOneResult> {
     let mut kernel = LiveKernelOps;
     try_apply_one_with_map_access(
@@ -799,6 +768,7 @@ pub(crate) fn try_apply_one(
             enabled_passes,
             profile_path,
             invalidation_tracker,
+            failure_root,
         },
         &mut kernel,
         bpf::bpf_map_get_fd_by_id,
@@ -813,6 +783,7 @@ pub(crate) fn try_reapply_one(
     enabled_passes: &[String],
     profile_path: Option<&Path>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
+    failure_root: &Path,
 ) -> Result<OptimizeOneResult> {
     let mut kernel = LiveKernelOps;
     try_apply_one_with_map_access(
@@ -822,6 +793,7 @@ pub(crate) fn try_reapply_one(
             enabled_passes,
             profile_path,
             invalidation_tracker,
+            failure_root,
         },
         &mut kernel,
         bpf::bpf_map_get_fd_by_id,
@@ -841,6 +813,7 @@ pub(crate) fn try_apply_many(
     enabled_passes: &[String],
     profile_paths: &HashMap<u32, PathBuf>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
+    failure_root: &Path,
 ) -> Result<Vec<ParallelApplyOutcome>> {
     if prog_ids.is_empty() {
         bail!("optimize-batch requires at least one prog_id");
@@ -855,6 +828,7 @@ pub(crate) fn try_apply_many(
     let passes = enabled_passes.to_vec();
     let tracker = invalidation_tracker.cloned();
     let profile_paths = profile_paths.clone();
+    let failure_root = failure_root.to_path_buf();
 
     Ok(pool.install(|| {
         prog_ids
@@ -862,7 +836,7 @@ pub(crate) fn try_apply_many(
             .map(|&prog_id| {
                 let profile_path = profile_paths.get(&prog_id).map(PathBuf::as_path);
                 let result =
-                    try_apply_one(prog_id, &config, &passes, profile_path, tracker.as_ref())
+                    try_apply_one(prog_id, &config, &passes, profile_path, tracker.as_ref(), &failure_root)
                         .map_err(|err| format!("{err:#}"));
                 ParallelApplyOutcome { prog_id, result }
             })
@@ -888,6 +862,7 @@ where
         enabled_passes,
         profile_path,
         invalidation_tracker,
+        failure_root,
     } = request;
     if enabled_passes.is_empty() {
         bail!("no enabled_passes provided by runner");
@@ -1032,6 +1007,7 @@ where
                     reports.len(),
                     anyhow!("pass {pass} requires verifier states from a previous per-pass ReJIT"),
                     None,
+                    failure_root,
                 )?);
                 break;
             }
@@ -1071,6 +1047,7 @@ where
                         reports.len(),
                         err,
                         None,
+                        failure_root,
                     )?);
                     break;
                 }
@@ -1104,6 +1081,7 @@ where
                         reports.len(),
                         err,
                         Some(&pass_error),
+                        failure_root,
                     )?);
                     break;
                 }
@@ -1187,7 +1165,7 @@ where
 
     match result {
         Ok(result) => {
-            if let Some(path) = preserve_debug_workdir_if_requested(&workdir, prog_id)? {
+            if let Some(path) = preserve_debug_workdir_if_requested(&workdir, prog_id, failure_root)? {
                 eprintln!(
                     "daemon: preserved debug workdir for prog {prog_id} at {}",
                     path.display()
@@ -1195,7 +1173,7 @@ where
             }
             Ok(result)
         }
-        Err(err) => match preserve_failure_workdir(&workdir, prog_id) {
+        Err(err) => match preserve_failure_workdir(&workdir, prog_id, failure_root) {
             Ok(path) => {
                 eprintln!(
                     "daemon: preserved failure workdir for prog {prog_id} at {}",
@@ -1251,6 +1229,7 @@ fn preserve_pass_failure(
     committed_passes: usize,
     err: anyhow::Error,
     rejit_error_path: Option<&Path>,
+    failure_root: &Path,
 ) -> Result<String> {
     let message = format!(
         "prog {prog_id} pass {pass} failed after {committed_passes} committed passes: {err:#}"
@@ -1267,7 +1246,7 @@ fn preserve_pass_failure(
         }))?,
     )
     .with_context(|| format!("write partial failure for pass {pass}"))?;
-    let path = preserve_failure_workdir(workdir, prog_id)?;
+    let path = preserve_failure_workdir(workdir, prog_id, failure_root)?;
     eprintln!(
         "daemon: preserved failure workdir for prog {prog_id} at {}",
         path.display()
@@ -2171,30 +2150,21 @@ mod tests {
     }
 
     struct ApplyHarness {
-        _env_lock: std::sync::MutexGuard<'static, ()>,
         _cli_dir: WorkDir,
-        _failure_env: EnvGuard,
         failure_root: WorkDir,
         config: CliConfig,
     }
 
     impl ApplyHarness {
         fn new() -> Self {
-            static TEST_ENV_LOCK: Mutex<()> = Mutex::new(());
-            let env_lock = TEST_ENV_LOCK
-                .lock()
-                .expect("test env lock should not be poisoned");
             let cli_dir = WorkDir::new("bpfrejit-daemon-fake-cli").unwrap();
             write_fake_bpfopt(cli_dir.path());
             let failure_root = WorkDir::new("bpfrejit-daemon-failures").unwrap();
-            let failure_env = EnvGuard::set(FAILURE_ROOT_ENV, failure_root.path());
             let config = CliConfig {
                 cli_dir: Some(cli_dir.path().to_path_buf()),
             };
             Self {
-                _env_lock: env_lock,
                 _cli_dir: cli_dir,
-                _failure_env: failure_env,
                 failure_root,
                 config,
             }
@@ -2216,6 +2186,7 @@ mod tests {
                     enabled_passes,
                     profile_path: None,
                     invalidation_tracker: None,
+                    failure_root: self.failure_root.path(),
                 },
                 kernel,
                 |_map_id| -> Result<OwnedFd> { bail!("test did not expect map fd opens") },
@@ -2245,28 +2216,6 @@ mod tests {
         .into_iter()
         .map(String::from)
         .collect()
-    }
-
-    struct EnvGuard {
-        key: &'static str,
-        previous: Option<std::ffi::OsString>,
-    }
-
-    impl EnvGuard {
-        fn set(key: &'static str, value: &Path) -> Self {
-            let previous = std::env::var_os(key);
-            std::env::set_var(key, value.as_os_str());
-            Self { key, previous }
-        }
-    }
-
-    impl Drop for EnvGuard {
-        fn drop(&mut self) {
-            match &self.previous {
-                Some(value) => std::env::set_var(self.key, value),
-                None => std::env::remove_var(self.key),
-            }
-        }
     }
 
     struct MockKernelOps {

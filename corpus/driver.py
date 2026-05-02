@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import sys
 from collections import Counter
 from dataclasses import dataclass
@@ -706,7 +707,11 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
     completed_apps: set[str] = set()
     fatal_error = ""
 
-    with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn)) as daemon_session:
+    output_json = Path(args.output_json).resolve()
+    failure_root = output_json.parent / "failures"
+    keep_all_workdirs = os.environ.get("BPFREJIT_DAEMON_KEEP_ALL_WORKDIRS", "").strip() == "1"
+
+    with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn), failure_root=failure_root, keep_all_workdirs=keep_all_workdirs) as daemon_session:
         prepared_daemon_session = prepare_daemon_session(daemon_session)
 
         with enable_bpf_stats():

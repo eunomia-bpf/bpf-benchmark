@@ -25,7 +25,6 @@ from runner.suites._common import (
     ensure_bpf_stats_enabled,
     env_with_suite_runtime_ld,
     positive_int,
-    resolve_daemon_binary,
     resolve_executable,
     resolve_workspace_path,
     run_checked,
@@ -131,8 +130,6 @@ def _run_unittest_suite(workspace: Path, args: argparse.Namespace, env: dict[str
         print(f"ERROR: no rejit_* test binaries found in {build_dir}", file=sys.stderr)
         return 0, 1
     runtime_env, _ = env_with_suite_runtime_ld(workspace, args.target_arch, env)
-    runtime_env["BPFREJIT_PROGS_DIR"] = str(build_dir / "progs")
-    runtime_env["BPFREJIT_DAEMON_PATH"] = str(resolve_daemon_binary(workspace, args.target_arch, args.daemon_binary, _die))
     passed = failed = 0
     for test_binary in tests:
         print(f"--- {test_binary.name} ---", file=sys.stderr)

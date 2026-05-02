@@ -270,13 +270,7 @@ def _prepare_bcc_kernel_source(env: dict[str, str]) -> str | None:
     if not kheaders_tar.exists():
         return None
 
-    runtime_tmpdir = env.get("BPFREJIT_RUNTIME_TMPDIR", "").strip()
-    if runtime_tmpdir:
-        runtime_root = Path(runtime_tmpdir).parent
-        if str(runtime_root) == ".":
-            runtime_root = Path("/var/tmp/bpfrejit-runtime")
-    else:
-        runtime_root = Path(env.get("TMPDIR") or "/tmp")
+    runtime_root = Path(env.get("TMPDIR") or "/tmp")
     target = runtime_root / "bcc-kheaders" / release
     marker = target / KHEADERS_READY_MARKER
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -316,7 +310,7 @@ def _prepare_bcc_kernel_source(env: dict[str, str]) -> str | None:
 
 
 def _prepare_bcc_python_compat(env: dict[str, str]) -> Path:
-    tmp_root = Path(env.get("BPFREJIT_RUNTIME_TMPDIR") or env.get("TMPDIR") or "/tmp")
+    tmp_root = Path(env.get("TMPDIR") or "/tmp")
     tmp_root.mkdir(parents=True, exist_ok=True)
     compat_dir = Path(tempfile.mkdtemp(prefix=BCC_PYTHON_COMPAT_DIR_PREFIX, dir=str(tmp_root)))
     header = compat_dir / "bpfrejit_bcc_compat.h"
