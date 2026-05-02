@@ -441,8 +441,13 @@ fn rejit_program(
 ) -> Result<RejitReport> {
     let prog_fd = kernel_sys::prog_get_fd_by_id(prog_id)
         .with_context(|| format!("open BPF program id {prog_id} for BPF_PROG_REJIT"))?;
+    let mut relocated: Vec<kernel_sys::bpf_insn> = insns.to_vec();
+    crate::bpf::relocate_map_fds_for_rejit(&mut relocated, &snapshot.info.map_ids, fd_array)
+        .with_context(|| format!("relocate map fds for prog {prog_id}"))?;
     let mut log_buf = vec![0u8; REJIT_LOG_BUF_SIZE];
-    if let Err(err) = kernel_sys::prog_rejit(prog_fd.as_fd(), insns, fd_array, Some(&mut log_buf)) {
+    if let Err(err) =
+        kernel_sys::prog_rejit(prog_fd.as_fd(), &relocated, fd_array, Some(&mut log_buf))
+    {
         let log = c_log_string(&log_buf);
         if !log.is_empty() {
             fs::write(verifier_log_path, log)

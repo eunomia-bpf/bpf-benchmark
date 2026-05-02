@@ -6,10 +6,94 @@
 //! optional verifier-state capture and `BPF_PROG_REJIT`; this module only covers
 //! map watch/invalidation helpers.
 
+use std::collections::HashMap;
 use std::os::fd::{BorrowedFd, OwnedFd, RawFd};
 use std::sync::OnceLock;
 
 use anyhow::{bail, Context, Result};
+
+// BPF instruction encoding for `BPF_LD | BPF_IMM | BPF_DW` wide load.
+const LD_IMM64_CODE: u8 = 0x18;
+const BPF_PSEUDO_MAP_FD: u8 = 1;
+const BPF_PSEUDO_MAP_VALUE: u8 = 2;
+
+/// Rewrite `BPF_LD_IMM64` map references so the daemon's `BPF_PROG_REJIT` call
+/// sees fds that exist in the daemon's process table.
+///
+/// The original bytecode (from `BPF_PROG_GET_ORIGINAL`) carries `imm` values
+/// that were the loader process's map fds. The daemon's process has different
+/// fds for the same maps, opened via `BPF_MAP_GET_FD_BY_ID`. This function
+/// patches each `BPF_LD_IMM64` with `src_reg = BPF_PSEUDO_MAP_FD` or
+/// `BPF_PSEUDO_MAP_VALUE` to use the daemon's fd, mapped by first-seen order
+/// against `prog_info.used_maps` / `fd_array` (the kernel records `used_maps`
+/// in the order the verifier first encountered each map).
+pub(crate) fn relocate_map_fds_for_rejit(
+    insns: &mut [kernel_sys::bpf_insn],
+    map_ids: &[u32],
+    fd_array: &[i32],
+) -> Result<()> {
+    if map_ids.len() != fd_array.len() {
+        bail!(
+            "relocate_map_fds_for_rejit: map_ids ({}) and fd_array ({}) length mismatch",
+            map_ids.len(),
+            fd_array.len()
+        );
+    }
+
+    let mut unique_old_fds: Vec<i32> = Vec::new();
+    let mut seen: HashMap<i32, ()> = HashMap::new();
+    let mut i = 0;
+    while i < insns.len() {
+        if insns[i].code == LD_IMM64_CODE {
+            let src_reg = insns[i].src_reg();
+            if src_reg == BPF_PSEUDO_MAP_FD || src_reg == BPF_PSEUDO_MAP_VALUE {
+                let old_fd = insns[i].imm;
+                if let std::collections::hash_map::Entry::Vacant(e) = seen.entry(old_fd) {
+                    unique_old_fds.push(old_fd);
+                    e.insert(());
+                }
+            }
+            i += 2;
+            continue;
+        }
+        i += 1;
+    }
+
+    if unique_old_fds.is_empty() {
+        return Ok(());
+    }
+
+    if unique_old_fds.len() > fd_array.len() {
+        bail!(
+            "relocate_map_fds_for_rejit: bytecode references {} maps but fd_array has {} entries",
+            unique_old_fds.len(),
+            fd_array.len()
+        );
+    }
+
+    let mut fd_map: HashMap<i32, i32> = HashMap::with_capacity(unique_old_fds.len());
+    for (idx, &old_fd) in unique_old_fds.iter().enumerate() {
+        fd_map.insert(old_fd, fd_array[idx]);
+    }
+
+    i = 0;
+    while i < insns.len() {
+        if insns[i].code == LD_IMM64_CODE {
+            let src_reg = insns[i].src_reg();
+            if src_reg == BPF_PSEUDO_MAP_FD || src_reg == BPF_PSEUDO_MAP_VALUE {
+                let old_fd = insns[i].imm;
+                if let Some(&new_fd) = fd_map.get(&old_fd) {
+                    insns[i].imm = new_fd;
+                }
+            }
+            i += 2;
+            continue;
+        }
+        i += 1;
+    }
+
+    Ok(())
+}
 
 pub(crate) type BpfMapInfo = kernel_sys::bpf_map_info;
 
@@ -209,5 +293,72 @@ mod tests {
     fn possible_cpu_list_rejects_empty_and_descending_ranges() {
         assert!(parse_possible_cpu_list("").is_err());
         assert!(parse_possible_cpu_list("3-1").is_err());
+    }
+
+    fn make_ld_imm64(dst: u8, src: u8, old_fd: i32) -> [kernel_sys::bpf_insn; 2] {
+        let mut hi = kernel_sys::bpf_insn {
+            code: LD_IMM64_CODE,
+            ..Default::default()
+        };
+        hi.set_dst_reg(dst);
+        hi.set_src_reg(src);
+        hi.imm = old_fd;
+        let lo = kernel_sys::bpf_insn::default();
+        [hi, lo]
+    }
+
+    #[test]
+    fn relocate_rewrites_pseudo_map_fd_imm_to_daemon_fd() {
+        let pair = make_ld_imm64(0, BPF_PSEUDO_MAP_FD, 4);
+        let mut insns = pair.to_vec();
+        relocate_map_fds_for_rejit(&mut insns, &[42], &[7]).unwrap();
+        assert_eq!(insns[0].imm, 7);
+        assert_eq!(insns[0].src_reg(), BPF_PSEUDO_MAP_FD);
+    }
+
+    #[test]
+    fn relocate_rewrites_pseudo_map_value_imm() {
+        let pair = make_ld_imm64(3, BPF_PSEUDO_MAP_VALUE, 9);
+        let mut insns = pair.to_vec();
+        relocate_map_fds_for_rejit(&mut insns, &[55], &[12]).unwrap();
+        assert_eq!(insns[0].imm, 12);
+        assert_eq!(insns[0].src_reg(), BPF_PSEUDO_MAP_VALUE);
+    }
+
+    #[test]
+    fn relocate_pairs_unique_old_fds_to_used_maps_in_first_seen_order() {
+        let mut insns: Vec<kernel_sys::bpf_insn> = Vec::new();
+        insns.extend(make_ld_imm64(0, BPF_PSEUDO_MAP_FD, 10));
+        insns.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 20));
+        insns.extend(make_ld_imm64(2, BPF_PSEUDO_MAP_FD, 10));
+        relocate_map_fds_for_rejit(&mut insns, &[111, 222], &[100, 200]).unwrap();
+        assert_eq!(insns[0].imm, 100);
+        assert_eq!(insns[2].imm, 200);
+        assert_eq!(insns[4].imm, 100);
+    }
+
+    #[test]
+    fn relocate_ignores_non_pseudo_imm() {
+        let mut insns = make_ld_imm64(0, 0, 7).to_vec();
+        relocate_map_fds_for_rejit(&mut insns, &[42], &[99]).unwrap();
+        assert_eq!(insns[0].imm, 7);
+    }
+
+    #[test]
+    fn relocate_fails_when_bytecode_uses_more_maps_than_fd_array() {
+        let mut insns: Vec<kernel_sys::bpf_insn> = Vec::new();
+        insns.extend(make_ld_imm64(0, BPF_PSEUDO_MAP_FD, 1));
+        insns.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 2));
+        let err = relocate_map_fds_for_rejit(&mut insns, &[42], &[7]).unwrap_err();
+        assert!(format!("{err:#}").contains("references 2 maps"));
+    }
+
+    #[test]
+    fn relocate_with_no_pseudo_imm_is_noop() {
+        let mut insns = vec![kernel_sys::bpf_insn {
+            code: 0x07, // BPF_ALU64 | BPF_K | BPF_ADD
+            ..Default::default()
+        }];
+        relocate_map_fds_for_rejit(&mut insns, &[], &[]).unwrap();
     }
 }
