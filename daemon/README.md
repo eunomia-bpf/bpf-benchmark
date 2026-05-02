@@ -37,7 +37,7 @@ Main `BPF_PROG_REJIT` has no daemon-side timeout. If the kernel verifier hangs,
 the daemon blocks in the syscall; this is documented behavior, not a fallback.
 
 `branch_flip` is experimental Paper B scaffolding. It is opt-in and uses loaded
-profile data when requested; it is not part of the default optimizer pass list.
+profile data when requested; benchmark defaults live in runner configuration.
 
 ## Layout
 

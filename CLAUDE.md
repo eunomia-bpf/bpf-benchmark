@@ -21,7 +21,7 @@ Corpus performance is measured per-program, not per-app:
 - Result payload contains `per_program` list and `summary` with `per_program_geomean`, `program_count`, `wins`, `losses`
 
 ### BranchFlip Requires Real Per-Site PGO
-`branch_flip` is the Paper B profile-guided branch-layout pass. It is production code but remains outside the daemon's default 12-pass policy until Paper B benchmark results decide policy. It must consume real `bpfprof --per-site` data: every candidate site needs `branch_count`, `branch_misses`, `miss_rate`, `taken`, and `not_taken`. Placeholder PMU fields, heuristic fallback, missing-site success, and optional per-site profile fields are forbidden; missing program/site PMU data must exit 1.
+`branch_flip` is the Paper B profile-guided branch-layout pass. It is production code but remains outside the runner benchmark default policy until Paper B benchmark results decide policy. It must consume real `bpfprof --per-site` data: every candidate site needs `branch_count`, `branch_misses`, `miss_rate`, `taken`, and `not_taken`. Placeholder PMU fields, heuristic fallback, missing-site success, and optional per-site profile fields are forbidden; missing program/site PMU data must exit 1.
 
 ### No Redundant Informational Fields
 Do not add `workload_miss`, `limitations`, or similar informational-only fields to result payloads. If something fails, it should surface as an error, not as a metadata annotation.
@@ -41,7 +41,7 @@ Before adding a test, be able to answer: what specific bug would this failure id
 
 ### bpfopt-suite v3 Architecture
 `docs/tmp/bpfopt_design_v3.md` is the authoritative design document for bpfopt-suite. Keep implementation and documentation aligned with that design:
-- The daemon must not maintain `PassManager`, do profiling internally, or transform bytecode in-process. It owns the fixed 12-pass orchestration loop, but every bytecode transform is a separate `bpfopt --pass <name>` CLI invocation followed immediately by `BPF_PROG_REJIT(log_level=2)`.
+- The daemon must not maintain `PassManager`, do profiling internally, transform bytecode in-process, or maintain a default pass list. It owns the runner-provided per-pass orchestration loop, but every bytecode transform is a separate `bpfopt --pass <name>` CLI invocation followed immediately by `BPF_PROG_REJIT(log_level=2)`.
 - The daemon watches for new BPF programs, detects map invalidation, preserves the runner socket + JSON protocol, and owns in-process live discovery, map-value side-input preparation, minimal fd-array construction from `prog_info.used_maps`, and per-pass `BPF_PROG_REJIT`.
 - `bpfopt` is a pure bytecode CLI tool with zero kernel dependency.
 - `bpfprof` remains a standalone CLI for PMU profiling.

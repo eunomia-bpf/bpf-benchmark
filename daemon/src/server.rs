@@ -77,7 +77,7 @@ impl ReoptimizationState {
     fn remember_result(
         &mut self,
         prog_id: u32,
-        requested_passes: Option<&[String]>,
+        requested_passes: &[String],
         result: &commands::OptimizeOneResult,
     ) {
         if result.status != "ok"
@@ -88,15 +88,7 @@ impl ReoptimizationState {
             return;
         }
 
-        let enabled_passes = requested_passes
-            .map(|passes| passes.to_vec())
-            .unwrap_or_else(|| {
-                result
-                    .passes
-                    .iter()
-                    .map(|pass| pass.pass_name.clone())
-                    .collect()
-            });
+        let enabled_passes = requested_passes.to_vec();
         self.enabled_passes_by_prog.insert(prog_id, enabled_passes);
     }
 
@@ -114,7 +106,7 @@ fn new_reoptimization_state() -> SharedReoptimizationState {
 fn remember_reoptimization_result(
     state: &SharedReoptimizationState,
     prog_id: u32,
-    enabled_passes: Option<&[String]>,
+    enabled_passes: &[String],
     result: &commands::OptimizeOneResult,
 ) -> Result<()> {
     state
@@ -223,7 +215,7 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
                 let result = commands::try_reapply_one(
                     prog_id,
                     &config,
-                    Some(&enabled_passes),
+                    &enabled_passes,
                     profile_path.as_deref(),
                     Some(&tracker_for_apply),
                 )?;
@@ -241,7 +233,7 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
                 remember_reoptimization_result(
                     &reoptimization_state_for_apply,
                     prog_id,
-                    Some(&enabled_passes),
+                    &enabled_passes,
                     &result,
                 )?;
                 Ok(())
@@ -366,6 +358,15 @@ fn request_enabled_passes(
     parse_request_pass_list(req, "enabled_passes")
 }
 
+fn require_runner_enabled_passes(
+    enabled_passes: Option<&[String]>,
+) -> std::result::Result<&[String], String> {
+    match enabled_passes {
+        Some(passes) if !passes.is_empty() => Ok(passes),
+        _ => Err("no enabled_passes provided by runner".to_string()),
+    }
+}
+
 fn request_interval_ms(req: &serde_json::Value) -> std::result::Result<u64, String> {
     let value = req
         .get("interval_ms")
@@ -431,6 +432,10 @@ fn process_request(
 
     match cmd {
         "optimize" => {
+            let enabled_passes = match require_runner_enabled_passes(enabled_passes.as_deref()) {
+                Ok(value) => value,
+                Err(message) => return error_json(message),
+            };
             let prog_id = match req.get("prog_id").and_then(|v| v.as_u64()) {
                 Some(id) => id as u32,
                 None => return error_json("missing prog_id"),
@@ -441,14 +446,14 @@ fn process_request(
             match commands::try_apply_one(
                 prog_id,
                 config,
-                enabled_passes.as_deref(),
+                enabled_passes,
                 profile_path.as_deref(),
                 Some(tracker),
             ) {
                 Ok(result) => match remember_reoptimization_result(
                     reoptimization_state,
                     prog_id,
-                    enabled_passes.as_deref(),
+                    enabled_passes,
                     &result,
                 ) {
                     Ok(()) => serialize_or_error(result),
@@ -458,6 +463,10 @@ fn process_request(
             }
         }
         "optimize-batch" => {
+            let enabled_passes = match require_runner_enabled_passes(enabled_passes.as_deref()) {
+                Ok(value) => value,
+                Err(message) => return error_json(message),
+            };
             let prog_ids = match request_prog_ids(req) {
                 Ok(value) => value,
                 Err(message) => return error_json(message),
@@ -474,7 +483,7 @@ fn process_request(
             match commands::try_apply_many(
                 &prog_ids,
                 config,
-                enabled_passes.as_deref(),
+                enabled_passes,
                 &profile_paths,
                 Some(tracker),
             ) {
@@ -494,7 +503,7 @@ fn process_request(
                                 if let Err(err) = remember_reoptimization_result(
                                     reoptimization_state,
                                     outcome.prog_id,
-                                    enabled_passes.as_deref(),
+                                    enabled_passes,
                                     &result,
                                 ) {
                                     errors.push(format!("prog {}: {err:#}", outcome.prog_id));
@@ -745,12 +754,12 @@ mod tests {
         };
         let requested = vec!["const_prop".to_string(), "map_inline".to_string()];
 
-        state.remember_result(101, Some(&requested), &result);
+        state.remember_result(101, &requested, &result);
 
         assert_eq!(state.enabled_passes_for(101), Some(requested));
 
         result.inlined_map_entries.clear();
-        state.remember_result(101, Some(&["map_inline".to_string()]), &result);
+        state.remember_result(101, &["map_inline".to_string()], &result);
 
         assert!(state.enabled_passes_for(101).is_none());
     }
@@ -766,6 +775,35 @@ mod tests {
         assert_eq!(
             response["error_message"],
             "enabled_passes entries must not be blank"
+        );
+    }
+
+    #[test]
+    fn process_request_rejects_missing_enabled_passes_for_optimize() {
+        let response = process_test_request(&serde_json::json!({
+            "cmd": "optimize",
+            "prog_id": 42,
+        }));
+
+        assert_eq!(response["status"], "error");
+        assert_eq!(
+            response["error_message"],
+            "no enabled_passes provided by runner"
+        );
+    }
+
+    #[test]
+    fn process_request_rejects_empty_enabled_passes_for_optimize_batch() {
+        let response = process_test_request(&serde_json::json!({
+            "cmd": "optimize-batch",
+            "prog_ids": [42],
+            "enabled_passes": [],
+        }));
+
+        assert_eq!(response["status"], "error");
+        assert_eq!(
+            response["error_message"],
+            "no enabled_passes provided by runner"
         );
     }
 

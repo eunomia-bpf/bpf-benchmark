@@ -378,12 +378,6 @@ impl BpfProgram {
     pub fn log_transform(&mut self, entry: TransformEntry) {
         self.transform_log.push(entry);
     }
-
-    /// Whether any transforms have been applied.
-    #[cfg(test)]
-    pub fn has_transforms(&self) -> bool {
-        self.transform_log.iter().any(|e| e.sites_applied > 0)
-    }
 }
 
 const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;

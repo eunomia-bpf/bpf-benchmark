@@ -1,15 +1,31 @@
 policy:
-  default:
-    passes:
-      - wide_mem
-      - rotate
-      - cond_select
-      - extract
-      - endian_fusion
-      - map_inline
-      - const_prop
-      - dce
-      - bounds_check_merge
-      - skb_load_bytes_spec
-      - bulk_memory
-      - prefetch
+  platforms:
+    x86_64:
+      passes:
+        - wide_mem
+        - rotate
+        - cond_select
+        - extract
+        - endian_fusion
+        - map_inline
+        - const_prop
+        - dce
+        - bounds_check_merge
+        - skb_load_bytes_spec
+        - bulk_memory
+        - prefetch
+    arm64:
+      passes:
+        - wide_mem
+        - rotate
+        - cond_select
+        - extract
+        - endian_fusion
+        - map_inline
+        - const_prop
+        - dce
+        - bounds_check_merge
+        - skb_load_bytes_spec
+        - bulk_memory
+        - prefetch
+        - ccmp

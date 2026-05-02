@@ -54,7 +54,7 @@ impl RewriteSite {
 ///
 /// **Variant B -- high-byte-first (clang reorder):**
 ///   Total: 3*W - 2 insns (for W>=2).
-pub fn scan_wide_mem(insns: &[BpfInsn]) -> Vec<RewriteSite> {
+fn scan_wide_mem(insns: &[BpfInsn]) -> Vec<RewriteSite> {
     let mut sites = Vec::new();
     let n = insns.len();
     if n < 4 {

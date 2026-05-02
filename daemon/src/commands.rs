@@ -30,20 +30,6 @@ const DEFAULT_FAILURE_ROOT_NAME: &str = "bpfrejit-failures";
 const DEBUG_WORKDIR_ROOT_NAME: &str = "workdirs";
 const MAP_VALUES_FILE: &str = "map-values.json";
 const VERIFIER_STATES_FILE: &str = "verifier-states.json";
-const DEFAULT_DAEMON_PASS_LIST: &[&str] = &[
-    "wide_mem",
-    "rotate",
-    "cond_select",
-    "extract",
-    "endian_fusion",
-    "map_inline",
-    "const_prop",
-    "dce",
-    "bounds_check_merge",
-    "skb_load_bytes_spec",
-    "bulk_memory",
-    "prefetch",
-];
 const DEFAULT_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(5);
 const OPTIMIZE_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(60);
 const CLI_STAGE_POLL_INTERVAL: Duration = Duration::from_millis(100);
@@ -375,7 +361,7 @@ pub(crate) struct PassDetail {
 struct ApplyOneRequest<'a> {
     prog_id: u32,
     config: &'a CliConfig,
-    enabled_passes: Option<&'a [String]>,
+    enabled_passes: &'a [String],
     profile_path: Option<&'a Path>,
     invalidation_tracker: Option<&'a SharedInvalidationTracker>,
 }
@@ -571,13 +557,6 @@ pub(crate) fn default_worker_count() -> usize {
     } else {
         capped
     }
-}
-
-pub(crate) fn default_pass_list() -> Vec<String> {
-    DEFAULT_DAEMON_PASS_LIST
-        .iter()
-        .map(|pass| (*pass).to_string())
-        .collect()
 }
 
 fn hex_bytes(bytes: &[u8]) -> String {
@@ -808,7 +787,7 @@ pub(crate) fn stop_profile(session: ProfileSession) -> Result<FrozenProfile> {
 pub(crate) fn try_apply_one(
     prog_id: u32,
     config: &CliConfig,
-    enabled_passes: Option<&[String]>,
+    enabled_passes: &[String],
     profile_path: Option<&Path>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
 ) -> Result<OptimizeOneResult> {
@@ -831,7 +810,7 @@ pub(crate) fn try_apply_one(
 pub(crate) fn try_reapply_one(
     prog_id: u32,
     config: &CliConfig,
-    enabled_passes: Option<&[String]>,
+    enabled_passes: &[String],
     profile_path: Option<&Path>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
 ) -> Result<OptimizeOneResult> {
@@ -859,7 +838,7 @@ pub(crate) struct ParallelApplyOutcome {
 pub(crate) fn try_apply_many(
     prog_ids: &[u32],
     config: &CliConfig,
-    enabled_passes: Option<&[String]>,
+    enabled_passes: &[String],
     profile_paths: &HashMap<u32, PathBuf>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
 ) -> Result<Vec<ParallelApplyOutcome>> {
@@ -873,7 +852,7 @@ pub(crate) fn try_apply_many(
         .build()
         .context("build daemon optimization worker pool")?;
     let config = config.clone();
-    let passes = enabled_passes.map(|passes| passes.to_vec());
+    let passes = enabled_passes.to_vec();
     let tracker = invalidation_tracker.cloned();
     let profile_paths = profile_paths.clone();
 
@@ -882,14 +861,9 @@ pub(crate) fn try_apply_many(
             .par_iter()
             .map(|&prog_id| {
                 let profile_path = profile_paths.get(&prog_id).map(PathBuf::as_path);
-                let result = try_apply_one(
-                    prog_id,
-                    &config,
-                    passes.as_deref(),
-                    profile_path,
-                    tracker.as_ref(),
-                )
-                .map_err(|err| format!("{err:#}"));
+                let result =
+                    try_apply_one(prog_id, &config, &passes, profile_path, tracker.as_ref())
+                        .map_err(|err| format!("{err:#}"));
                 ParallelApplyOutcome { prog_id, result }
             })
             .collect()
@@ -915,7 +889,16 @@ where
         profile_path,
         invalidation_tracker,
     } = request;
-    let pass_list = effective_pass_list(enabled_passes)?;
+    if enabled_passes.is_empty() {
+        bail!("no enabled_passes provided by runner");
+    }
+    let pass_list = enabled_passes
+        .iter()
+        .map(|pass| canonical_pass(pass))
+        .collect::<Vec<_>>();
+    if pass_list.iter().any(|pass| pass.is_empty()) {
+        bail!("enabled_passes entries must not be blank");
+    }
     let workdir = WorkDir::new("bpfrejit-daemon-optimize")?;
     let prog_bin = workdir.path().join("prog.bin");
     let info_json = workdir.path().join("info.json");
@@ -1229,28 +1212,6 @@ where
 
 fn append_bpfopt_context_args(command: &mut Command, prog_info: &ProgInfoJson) {
     command.arg("--prog-type").arg(&prog_info.prog_type.name);
-}
-
-fn effective_pass_list(enabled_passes: Option<&[String]>) -> Result<Vec<String>> {
-    let default = default_pass_list();
-    let Some(requested) = enabled_passes else {
-        return Ok(default);
-    };
-    if requested.is_empty() {
-        bail!("enabled_passes must be omitted or match daemon default pass list");
-    }
-    let requested = requested
-        .iter()
-        .map(|pass| canonical_pass(pass))
-        .collect::<Vec<_>>();
-    if requested != default {
-        bail!(
-            "daemon optimize pass list is fixed at [{}]; requested [{}]",
-            default.join(","),
-            requested.join(",")
-        );
-    }
-    Ok(default)
 }
 
 fn pass_needs_verifier_states(pass: &str) -> bool {
@@ -2192,7 +2153,7 @@ mod tests {
         assert!(result.changed);
         assert!(result.summary.applied);
         assert!(result.error_message.is_none());
-        assert_eq!(kernel.rejit_calls, DEFAULT_DAEMON_PASS_LIST.len());
+        assert_eq!(kernel.rejit_calls, test_runner_passes().len());
     }
 
     #[test]
@@ -2202,7 +2163,7 @@ mod tests {
 
         let result = harness.apply(&mut kernel).unwrap();
 
-        assert_eq!(kernel.rejit_calls, DEFAULT_DAEMON_PASS_LIST.len());
+        assert_eq!(kernel.rejit_calls, test_runner_passes().len());
         assert!(result
             .passes
             .iter()
@@ -2240,7 +2201,7 @@ mod tests {
         }
 
         fn apply(&self, kernel: &mut dyn KernelOps) -> Result<OptimizeOneResult> {
-            self.apply_with_passes(kernel, &default_pass_list())
+            self.apply_with_passes(kernel, &test_runner_passes())
         }
 
         fn apply_with_passes(
@@ -2252,7 +2213,7 @@ mod tests {
                 ApplyOneRequest {
                     prog_id: 42,
                     config: &self.config,
-                    enabled_passes: Some(enabled_passes),
+                    enabled_passes,
                     profile_path: None,
                     invalidation_tracker: None,
                 },
@@ -2264,6 +2225,26 @@ mod tests {
                 |_map, _fd| -> Result<Vec<Vec<u8>>> { bail!("test did not expect map key scans") },
             )
         }
+    }
+
+    fn test_runner_passes() -> Vec<String> {
+        [
+            "wide_mem",
+            "rotate",
+            "cond_select",
+            "extract",
+            "endian_fusion",
+            "map_inline",
+            "const_prop",
+            "dce",
+            "bounds_check_merge",
+            "skb_load_bytes_spec",
+            "bulk_memory",
+            "prefetch",
+        ]
+        .into_iter()
+        .map(String::from)
+        .collect()
     }
 
     struct EnvGuard {

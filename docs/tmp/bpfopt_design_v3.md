@@ -8,7 +8,7 @@ bpfopt-suite v3 的稳定边界是：
 
 - `bpfopt`：standalone pure bytecode CLI，只做 `struct bpf_insn[]` 变换；一次 invocation 只跑一个 `--pass <name>`。
 - `bpfprof`：standalone profiling CLI，负责 PMU/per-site profile。
-- `bpfrejit-daemon`：runner socket + JSON 边界，负责 live discovery、map invalidation、默认 12-pass per-pass orchestration、minimal fd-array 构造、每个 pass 后的 `BPF_PROG_REJIT(log_level=2)`。
+- `bpfrejit-daemon`：runner socket + JSON 边界，负责 live discovery、map invalidation、runner 提供 pass list 的 per-pass orchestration、minimal fd-array 构造、每个 pass 后的 `BPF_PROG_REJIT(log_level=2)`。
 - `bpfget`：daemon-owned library，只做 live program snapshot 和 target probing。
 - `kernel-sys`：唯一 BPF syscall 边界。
 
@@ -27,10 +27,10 @@ bpfopt-suite v3 的稳定边界是：
 典型 runner path：
 
 ```bash
-printf '{"cmd":"optimize","prog_id":123}\n' | socat - /var/run/bpfrejit.sock
+printf '{"cmd":"optimize","prog_id":123,"enabled_passes":["wide_mem"]}\n' | socat - /var/run/bpfrejit.sock
 ```
 
-daemon 默认 pass policy 固定为 12 个 pass：
+runner 是 benchmark pass policy 的配置中心。daemon 不维护默认 pass list；`optimize` 请求必须显式提供非空 `enabled_passes`，daemon 按 runner 提供的顺序逐个执行。当前 runner x86_64 policy 是：
 
 ```text
 wide_mem, rotate, cond_select, extract, endian_fusion, map_inline,
@@ -56,7 +56,7 @@ bpfopt list-passes
 2. daemon 用 `bpfget` snapshot live program。
 3. daemon 写 `prog.bin`、`info.json`、可选 `map-values.json`、可选 `target.json` side files。
 4. daemon 从 `target.json` 打开非 vmlinux kinsn 的 BTF module fd，从 `prog_info.map_ids` 打开 map fd，构造 in-memory `fd_array`。
-5. 对默认 pass list 逐个执行：
+5. 对 runner 请求中的 `enabled_passes` 逐个执行：
    - fork+exec `bpfopt --pass <name>`，stdin/stdout 传 raw `struct bpf_insn[]`。
    - daemon 立即调用 `kernel_sys::prog_rejit()`，传当前 pass 输出、包含所需 BTF module fd 和 map fd 的 fd_array、large verifier log buffer。
    - kernel 在 `BPF_PROG_REJIT` 内从 live `prog->aux` 复用 program metadata，re-verify + re-JIT + image swap。
@@ -164,11 +164,11 @@ daemon 保留 newline-delimited JSON socket。典型请求：
 
 ```json
 {"cmd":"status"}
-{"cmd":"optimize","prog_id":42}
-{"cmd":"optimize-batch","prog_ids":[42,43,44]}
+{"cmd":"optimize","prog_id":42,"enabled_passes":["wide_mem","rotate"]}
+{"cmd":"optimize-batch","prog_ids":[42,43,44],"enabled_passes":["wide_mem","rotate"]}
 ```
 
-`enabled_passes` 可以省略；若提供，必须精确等于 daemon 默认 12-pass list。daemon 不接受任意 pass list，避免 runner policy 和 per-pass state ordering 分叉。daemon 不过滤/跳过任何 ReJIT program；失败自然进入结果。
+`enabled_passes` 是必填非空列表。daemon 不维护默认 pass list，也不把缺失列表降级成内部默认；runner 传什么，daemon 就按该顺序执行什么。缺失或空列表必须返回错误 `no enabled_passes provided by runner`。daemon 不过滤/跳过任何 ReJIT program；失败自然进入结果。
 
 ### 4.2 bpfopt bytecode
 

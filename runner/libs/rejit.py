@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import platform
 import shutil
 import socket
 import subprocess
@@ -24,6 +25,7 @@ _PASS_TO_SITE_FIELD = {
     "branch_flip": "branch_flip_sites",
     "bounds_check_merge": "bounds_check_merge_sites",
     "bulk_memory": "bulk_memory_sites",
+    "ccmp": "ccmp_sites",
     "cond_select": "cmov_sites",
     "endian_fusion": "endian_sites",
     "extract": "extract_sites",
@@ -38,6 +40,7 @@ _TOTAL_SITE_FIELDS = (
     "dce_sites",
     "bounds_check_merge_sites",
     "bulk_memory_sites",
+    "ccmp_sites",
     "cmov_sites",
     "wide_sites",
     "rotate_sites",
@@ -351,18 +354,66 @@ def _policy_pass_list(raw: Any, *, field_name: str) -> list[str] | None:
     return [str(value).strip() for value in raw if str(value).strip()]
 
 
+def _benchmark_policy_arch_keys() -> tuple[str, ...]:
+    raw = os.environ.get("RUN_TARGET_ARCH", "").strip() or platform.machine().strip()
+    normalized = raw.lower().replace("-", "_")
+    if normalized in {"x86_64", "amd64", "x64", "x86"}:
+        return ("x86_64", "x86")
+    if normalized in {"arm64", "aarch64"}:
+        return ("arm64", "aarch64")
+    raise SystemExit(f"unsupported benchmark config architecture: {raw!r}")
+
+
+def _platform_policy_passes(policy_config: Mapping[str, Any]) -> list[str] | None:
+    platforms = _mapping_dict(policy_config.get("platforms"), field_name="policy.platforms")
+    if not platforms:
+        return None
+    for arch_key in _benchmark_policy_arch_keys():
+        if arch_key not in platforms:
+            continue
+        platform_policy = _mapping_dict(
+            platforms.get(arch_key),
+            field_name=f"policy.platforms.{arch_key}",
+        )
+        passes = _policy_pass_list(
+            platform_policy.get("passes"),
+            field_name=f"policy.platforms.{arch_key}.passes",
+        )
+        if passes is None:
+            raise SystemExit(f"benchmark config must define policy.platforms.{arch_key}.passes")
+        return passes
+    arch_keys = ", ".join(_benchmark_policy_arch_keys())
+    raise SystemExit(f"benchmark config does not define policy.platforms passes for {arch_keys}")
+
+
+def _require_non_empty_passes(raw_passes: Sequence[str], *, field_name: str) -> list[str]:
+    passes = _ordered_unique_passes(raw_passes)
+    if not passes:
+        raise SystemExit(f"benchmark config field {field_name} must not be empty")
+    return passes
+
+
 def benchmark_config_enabled_passes(benchmark_config: Mapping[str, Any] | None) -> list[str]:
     policy_config = _mapping_dict((benchmark_config or {}).get("policy"), field_name="policy")
+    platform_passes = _platform_policy_passes(policy_config)
+    if platform_passes is not None:
+        return _require_non_empty_passes(
+            platform_passes,
+            field_name="policy.platforms.<arch>.passes",
+        )
     policy_default = _mapping_dict(policy_config.get("default"), field_name="policy.default")
-    policy_default_passes = _policy_pass_list(policy_default.get("passes"), field_name="policy.default.passes")
+    policy_default_passes = _policy_pass_list(
+        policy_default.get("passes"),
+        field_name="policy.default.passes",
+    )
     if policy_default_passes is not None:
-        return _ordered_unique_passes(policy_default_passes)
+        return _require_non_empty_passes(policy_default_passes, field_name="policy.default.passes")
 
     passes_config = _mapping_dict((benchmark_config or {}).get("passes"), field_name="passes")
     if active_list := _normalize_pass_list(passes_config.get("active_list")):
         return active_list
     raise SystemExit(
-        "benchmark config must define policy.default.passes or passes.active_list "
+        "benchmark config must define policy.platforms, policy.default.passes, or passes.active_list "
         "when no explicit pass override is supplied"
     )
 
