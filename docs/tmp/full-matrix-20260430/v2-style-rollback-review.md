@@ -1,90 +1,92 @@
-# v2 Style Rollback: Necessity & Trade-off Review
+# v2-Style Rollback Implementation Audit (commit 522e810e)
 
-## 9 轮 vm-corpus bug 在 v2 风格下的归因（量化表）
+## Verdict
 
-本 review 读了 `CLAUDE.md`、memory、`docs/tmp/bpfopt_design_v3.md`、round2-6 修复报告、v3 pivot/review/fix/line_info 报告和 weekly report；`v2-vs-v3-bug-attribution.md` 当前不存在。结论是：这轮 corpus 中 8 个主要 bug 类别里，2 个是 workload/harness，v2 回归不解决；6 个是 ReJIT replay / dry-run verifier / metadata 协议复杂度，v2 回归会消失或退化成单个 REJIT syscall errno。也就是按类别看 6/8 消失；按 ReJIT 相关类别看 6/6 消失。
+**部分合格。** commit 522e810e 已把 daemon 主路径切到 `snapshot -> bpfopt CLI -> kernel_sys::prog_rejit()`，旧的 `bpfverify`/`bpfrejit` crate、`map_fds.json`/`fd_array.json`/`btf-info`/`verifier-states-out` 协议和 BTF func/line replay 基本删干净；这部分符合 rollback 目标。
 
-| Bug 类别 | 当前架构暴露 | v2 风格是否消失 | 原因 |
-| --- | --- | --- | --- |
-| HTTP/1.1 keep-alive | workload | 不消失 | round6 证明根因是 namespaced HTTP server 以 HTTP/1.0 产生大量短连接，`wrk` 触发 TIME_WAIT/本地端口压力；和 daemon 架构无关。 |
-| timerfd/open stressor timeout | workload | 不消失 | round3 定位为 `timerfd` VM-load-sensitive stressor；删除/替换 workload 才能解决。 |
-| multi-map relocation（katran/tracee） | replay protocol | 消失，带 ABI caveat | round4 的 `map_fds.json cannot reconstruct resolved kernel map pointer ... with 16 map bindings` 来自 daemon/bpfget/bpfverify 重建 map 绑定。v2 不做 BPF_PROG_LOAD replay，直接 REJIT，问题面消失。caveat：当前 kernel verifier 仍通过 `fd_array` 解析 `BPF_PSEUDO_MAP_IDX`；若要完全删 daemon map relocation，REJIT ABI 需要从 `prog->aux->used_maps` 构造/复用 map fd array，或 daemon 保留极小 map fd builder。 |
-| BTF line_info offset（multi-subprog） | replay protocol | 消失 | round3、v3 line_info fix 都在修 `GET_ORIGINAL` bytecode 与 `BPF_OBJ_GET_INFO_BY_FD` BTF records 重新喂给 BPF_PROG_LOAD 的一致性。v2 REJIT 不重新提交 func_info/line_info metadata，这类 offset normalization 不再存在。 |
-| daemon 5s/30s/60s timeout ramp | verifier-states-out | 消失 | round4-6 的 5s 太短、60s 太长、5/30/60 ramp 都是 original verifier-state dry-run 的策略债。v2 不做预 verify，最终只有 REJIT syscall 返回 errno/log。 |
-| Tetragon 287 progs vng 7200s | 串行 dry-run | 消失 | round5/6 算术很清楚：`287 * 60s = 17220s`，`287 * (5+30+60)s = 27265s`，超过 vng 7200s。v2 每个 program 只做 bpfopt transform + 一个 REJIT syscall，不再为 const_prop 串行收集 verifier states。 |
-| `line_info[35].insn_off Invalid`（post-pivot） | replay protocol | 消失 | v3 pivot 后 raw line_info 重新进入 dry-run/ReJIT replay，bcc execsnoop 251 条 line_info 中 22 条指向 replay bytecode 的非法目标。v2 不喂 line_info。 |
-| cilium prog 195 errno 13 EACCES / replay context 不全 | replay protocol | 消失 | 初始诊断把 cilium/tetragon 错误归因到 live load context replay 不完整：`prog_flags`、BTF func/line metadata、attach context 等。REJIT syscall 从原 `prog/aux` 复制这些上下文，不需要 daemon 重建。 |
+未完全达标的地方集中在四类：量化报告用了“生产行数且只数三文件”的口径，raw `wc -l` 不满足 <=2400；`PassContext::default()` 仍默认启用全量 registry（含 `const_prop`）；thin dry-run/const_prop opt-in 测试不足；REJIT verifier log 的 256MB retry 日志没有可靠落到 failure artifact。整体不是严重不合格，但 vm-corpus 前建议先补 P1 项，避免失败时缺证据或默认路径语义漂移。
 
-## 当前 daemon 代码量化（多少行 in 各模块）
+## 各 review 维度
 
-统计命令是 `rg --files ... -g '*.rs' | xargs wc -l` 和 `rg '\bfn\s+[A-Za-z0-9_]+' ... | wc -l`，没有运行 test/build。当前 `daemon/src + daemon/crates/{bpfget,bpfverify,bpfrejit}` 合计 6,756 行 Rust、337 个 `fn`。
+### 1. 三条设计原则严守度：WARN
 
-| 模块 | Rust 行数 | fn 数 | 备注 |
-| --- | ---: | ---: | --- |
-| `daemon/src` | 3,459 | 182 | daemon socket/watch/orchestration；其中 `commands.rs` 2,148 行、107 fn。 |
-| `daemon/src/bpf.rs` | 212 | 15 | BPF helper/reader。 |
-| `daemon/src/invalidation.rs` | 346 | 24 | map-inline invalidation。 |
-| `daemon/src/server.rs` | 715 | 35 | runner socket JSON。 |
-| `daemon/crates/bpfget` | 1,851 | 81 | snapshot、map fd ownership、map relocation、BTF normalization、target probing。 |
-| `daemon/crates/bpfverify` | 1,369 | 70 | `lib.rs` 425 行 dry-run；`verifier_log.rs` 944 行 verifier-state parser。 |
-| `daemon/crates/bpfrejit` | 77 | 4 | thin wrapper over `kernel_sys::prog_rejit`。 |
+- **零 reconstruction：大体 OK，但仍有 context reconstruction 残留。** daemon active code 中未发现 `normalize_func_info` / `normalize_line_info` / `relocate_for_load` / `capture_verifier_states_for_replay`，`ProgramSnapshot` 只含 `info/maps/insns`，没有 BTF func/line bytes：`daemon/crates/bpfget/src/lib.rs:64-69`。但 `expected_attach_type` 仍通过 link enumeration 反推，而不是“直接从 prog_info read-as-is”：`daemon/crates/bpfget/src/lib.rs:132-133` 调 `expected_attach_type_json()`，`bpfopt/crates/kernel-sys/src/lib.rs:692-729` 逐个 link 恢复 attach type。这不是旧 BTF/map replay，但违反 plan §B “所有字段直接从 prog_info 读”的字面原则。
+- **不传 BTF func_info/line_info：OK。** thin dry-run 明确传 `func_info: None`、`line_info: None`：`daemon/src/dry_run.rs:61-69`；`kernel-sys` 只有在 option 为 Some 时才设置 `opts.func_info_cnt` / `opts.line_info_cnt`：`bpfopt/crates/kernel-sys/src/lib.rs:540-552`。注意 dry-run 仍打开并传 `prog_btf_fd` / `attach_btf_obj_fd`：`daemon/src/dry_run.rs:58-67`，如果验收口径是“完全不传任何 BTF object metadata”，这里应算 WARN；按计划伪代码保留 BTF id/attach fields，则可接受。
+- **const_prop 默认关：WARN。** CLI 默认 optimize pass list和 corpus config 不含 `const_prop`：`bpfopt/crates/bpfopt/src/main.rs:41-68`、`corpus/config/benchmark_config.yaml:1-14`。但 library 默认仍是 `PASS_REGISTRY` 全量，且 registry 第 2 项是 `const_prop`：`bpfopt/crates/bpfopt/src/passes/mod.rs:59-69`、`bpfopt/crates/bpfopt/src/pass.rs:784-789`、`bpfopt/crates/bpfopt/src/pass.rs:1031-1039`。当前 CLI 会覆盖 `ctx.policy.enabled_passes`：`bpfopt/crates/bpfopt/src/main.rs:464-480`，所以主路径没中招；但“默认 enabled_passes list 不含 const_prop”并未全局成立。
 
-删除范围之外的体量：`bpfopt/crates/bpfopt` 25,085 行、1,175 fn（CLI main 1,553 行）；`bpfopt/crates/bpfprof` 1,412 行、56 fn（main 1,290 行）；`kernel-sys` 2,178 行、100 fn。`kernel-sys` 仍应保留，因为它是唯一 syscall boundary，且已有 `prog_rejit` log buffer retry 到 256MB、`prog_get_original`、`prog_info`、BTF/prof helpers。
+### 2. 量化目标核实：WARN
 
-ABI 证据支持大方向：`vendor/linux-framework/kernel/bpf/syscall.c:3636-3644` 在 REJIT 内部设置 `load_attr.prog_type = prog->type`、`expected_attach_type`、`log_*`、`prog_flags = prog->aux->prog_flags`、`fd_array_cnt`；`3675-3689` 复制 `attach_btf`、`attach_btf_id`、`dst_prog`；`3719-3755` 对 EXT/freplace 预填原 BTF/func_info；`3760` 调 `bpf_check(&tmp, &load_attr, ...)`，所以 kernel 会走完整 verifier path。也就是说 daemon 当前的 dry-run verifier 与 replay context 大部分是在重复 kernel 已经会做的事。
+- implementation report 声称 2,327 行的口径是：`commands.rs` 截到 `#[cfg(test)]` 前 1643 行 + `dry_run.rs` 161 行 + `bpfget` 523 行，合计 2327。该口径可复现。
+- raw `wc -l` 不是 2,327：`daemon/src/commands.rs` 1967、`daemon/src/dry_run.rs` 192、`daemon/crates/bpfget/src/lib.rs` 523，三文件合计 **2682**，超过 2400，净减也只有 6756 -> 2682 = -4074，未达到 net -4300。
+- 若沿用上轮 review 的 daemon surface 口径（`daemon/src/*.rs + daemon/crates/bpfget`），当前 raw 为 **3995** 行：`daemon/src/server.rs` 715、`daemon/src/invalidation.rs` 346、`daemon/src/bpf.rs` 213、`daemon/src/main.rs` 39 也仍在。它们不全是 rollback 目标，但报告没有把排除口径写清。
+- 模块预期未完全满足：`bpfget` 523 > plan 250-450；`commands.rs` raw/prod 1967/1643，均明显高于 plan 700-1000。
 
-## v2 风格保留的部分（bpfopt + bpfprof + kernel-sys + 简化 daemon）
+### 3. 主路径完整性：OK/WARN
 
-保留 `bpfopt` CLI 作为 pure bytecode transformer：stdin/stdout 仍是 raw `struct bpf_insn[]`，daemon 不链接 bpfopt lib、不在进程内跑 pass。保留 `bpfprof` CLI，因为 profile/PMU 是独立工具，和 REJIT replay 无关。保留 `kernel-sys`，尤其是 `BPF_PROG_REJIT`、`BPF_PROG_GET_ORIGINAL`/original bytecode 读取、`BPF_OBJ_GET_INFO_BY_FD` 和 map/profile helpers。
+- **OK：主路径确实是 snapshot -> bpfopt -> REJIT。** snapshot/write original 在 `daemon/src/commands.rs:843-850`；调用 `bpfopt optimize` 在 `daemon/src/commands.rs:957-972`；direct REJIT 在 `daemon/src/commands.rs:998-1008`，底层 `rejit_program()` 直接调 `kernel_sys::prog_rejit()`：`daemon/src/commands.rs:427-443`。
+- **OK：没有 hidden final dry-run。** active `BPF_PROG_LOAD` 只在 const_prop thin dry-run：`daemon/src/dry_run.rs:61-75`；daemon 只有 `wants_const_prop` 时才生成 verifier states：`daemon/src/commands.rs:866-927`。
+- **WARN：REJIT failure artifact 不保证含完整 verifier log。** daemon 写 `verifier.log` 时只读传入的初始 16MB buffer：`daemon/src/commands.rs:436-440`。但 `kernel_sys::prog_rejit()` 在 ENOSPC 时会内部扩容到 256MB 并用临时 `retry_log_buf`：`bpfopt/crates/kernel-sys/src/lib.rs:1576-1617`；这个 retry log 没有回填给 daemon。因此 error message 可能有 summary，但 preserved workdir 的 `verifier.log` 可能是截断首包，甚至缺失。`normalize_failure_artifacts()` 也允许没有 `verifier.log`：`daemon/src/commands.rs:226-229`，弱于 plan “含 verifier_log”的验收。
+- **OK：单 prog 主流程失败不会阻断后续 prog。** runner 逐 prog 发请求并累积 `per_program`：`runner/libs/rejit.py:837-849`。但 map invalidation reoptimization 中单 prog 失败会让 `serve()` 返回 error：`daemon/src/server.rs:214-245`，这是后台 reapply 风险，不是 corpus 主 apply 路径。
 
-简化 daemon 只需要：socket server、program watch、map invalidation、读取原 bytecode、启动 `bpfopt optimize`、把 optimized bytecode 交给 `BPF_PROG_REJIT`。`GET_ORIGINAL` 作为“拿到原 bytecode”的 API 可以保留；要删除的是 `GET_ORIGINAL -> reconstruct map/BTF/load context -> BPF_PROG_LOAD dry-run -> 再 REJIT` 的 replay protocol。
+### 4. 残留协议代码：OK/WARN
 
-## v2 风格删除的部分（bpfverify lib / verifier-states-out / BTF normalization / 等）
+- `map_fds` / `fd_array.json` / `btf-info` / `verifier-states-out` / `replay_bpfverify_report` 在 active daemon/kernel-sys/bpfopt 代码里没有旧协议残留；命中只剩 docs 说明和 `owned_map_fds` 字段名（不是 JSON 协议）。
+- `FdArray::from_json_file` 已删除；`rg from_json_file|FdArray` 只剩 in-memory fd_array 逻辑：`daemon/src/commands.rs:1280-1357`、`bpfopt/crates/kernel-sys/src/lib.rs:555-560`。
+- WARN：`kernel-sys` 仍有 stale 注释说 "`BPF_PROG_LOAD` replay needs it"：`bpfopt/crates/kernel-sys/src/lib.rs:692-696`。这会误导后续实现把 replay 需求带回来。
+- 旧 5/30/60 ramp 已删；thin dry-run 是单 5s timeout：`daemon/src/dry_run.rs:11-12`、`daemon/src/dry_run.rs:113-140`。
 
-可以删除或大幅压缩的复杂度：
+### 5. const_prop 实施：WARN
 
-- `bpfverify` library 全部 1,369 行：final dry-run、original verifier-state capture、verifier log parser、watchdog thread 都不再是 daemon 主路径。
-- `verifier-states-out` 协议：当前 `commands.rs` 仍会在 const_prop 时写 `verifier-states.json` 并调用 `kernel.verifier_states()`；v2 daemon 不应生成这个 side input。`bpfopt const-prop` 可保留为离线/显式 side-input pass，但 live daemon 默认不能依赖它，否则 dry-run 又回来了。
-- BTF func_info/line_info replay normalization：`bpfget` 里 `normalize_func_info_for_insns`、`normalize_line_info_for_insns` 以及真实 bcc fixture 测试，都是为了重新喂 BPF_PROG_LOAD；v2 REJIT 不提交这些字段。
-- map_fds / resolved pointer reconstruct：当前 `ProgramSnapshot::relocate_for_load`、snapshot-owned map fds、resolved kernel map pointer rewrite 是 dry-run/replay 需要的。目标 v2 应由 REJIT ABI 使用原 program map context；若当前 ABI未补齐，则只保留最小 map fd array 生成，不保留 JSON/reconstruct 体系。
-- `bpfrejit` crate 可内联成 daemon 调 `kernel_sys::prog_rejit` 的几十行；单独 daemon-owned crate 没有足够价值。
-- verifier watchdog/timeout 策略：`fca13a39` 加的 in-process watchdog是为 dry-run 兜底。v2 只需 bpfopt subprocess timeout；kernel REJIT 的错误通过 syscall errno/log 自然返回。
+- 显式启用路径存在：`enabled_passes` 含 `const_prop` 时 daemon 调 `write_original_verifier_states()`，再把 `--verifier-states` 传给 bpfopt：`daemon/src/commands.rs:914-927`。bpfopt 对 `const_prop` 缺 states 会 fail-fast：`bpfopt/crates/bpfopt/src/main.rs:573-593`，并读取 `VerifierStatesJson`：`bpfopt/crates/bpfopt/src/main.rs:1120-1142`。
+- 测试不足。`daemon/src/dry_run.rs` 只有 timeout 和 zero BTF id 两个 unit tests：`daemon/src/dry_run.rs:167-190`；没有 plan 要求的“合法 bytecode 接受 / 非法 bytecode 拒绝 / 5s timeout”三件套。daemon command tests 默认路径还显式 `bail!("test did not expect verifier-state capture")`：`daemon/src/commands.rs:1864-1870`，没有 const_prop opt-in 集成测试。
 
-## 量化代码净减少估计（前后行数对比）
+### 6. “不要做的事”核查：OK
 
-当前 daemon kernel-facing 面是 6,756 行。合理目标是 1,300-2,000 行 raw Rust（保守含 server、watch、invalidation 和必要测试），或 900-1,500 行生产 orchestrator。估计删除：
+- daemon 没有带回 `PassManager`；`PassManager` 只在 `bpfopt` 内：`bpfopt/crates/bpfopt/src/main.rs:512-535`。
+- bpfopt 仍是 CLI；daemon 通过 subprocess 调 `bpfopt`：`daemon/src/commands.rs:957-972`，`daemon/Cargo.toml:26-33` 也没有依赖 bpfopt lib。
+- commit 没有修改 `vendor/linux-framework/`，未动 `BPF_PROG_REJIT` kernel ABI。
+- commit 文件列表没有 corpus/e2e/micro result 文件；当前 worktree 有未提交 corpus result 脏文件，但不属于 522e810e。
 
-| 项 | 当前行数 | 回滚后 | 净减少 |
-| --- | ---: | ---: | ---: |
-| `bpfverify` | 1,369 | 0 | -1,369 |
-| `bpfget` | 1,851 | 250-450 | -1,400 左右 |
-| `commands.rs` | 2,148 | 700-1,000 | -1,100 到 -1,400 |
-| `bpfrejit` | 77 | 0-40 | -40 左右 |
-| BTF/map replay 测试与残留 | 已含在上面 | 少量保留 | -600 到 -900（重叠估算） |
+### 7. 文档一致性：OK/WARN
 
-净减少约 4,700 行，误差约 500 行；也就是 daemon 相关 Rust 体量下降 65%-75%。这还没有计算 round4-6 为 timeout/ramp/replay 增加的 churn：`441ad97f`、`7c768acd`、`e9c6bf69`、`dc92a15c` 仅 `daemon/src/commands.rs` 就累计约 +456/-99，`9bbd56f8` pivot 又新增 daemon-owned libs，`b8f4b21b` line_info 修复单文件 +569/-1。v2 回归直接砍掉这条 churn 来源。
+- `CLAUDE.md` 已同步新主路径和 const_prop-only dry-run：`CLAUDE.md:42-63`。
+- `docs/tmp/bpfopt_design_v3.md` 已反映 direct REJIT、no main-path dry-run、const_prop opt-in：`docs/tmp/bpfopt_design_v3.md:50-65`、`docs/tmp/bpfopt_design_v3.md:108-151`。
+- plan doc 已记录 Implementation Status：`docs/tmp/full-matrix-20260430/v2-style-rollback-plan.md:14-22`。
+- `daemon/README.md` 已同步 socket `enabled_passes` 和 direct REJIT：`daemon/README.md:22-33`。
+- WARN：docs 声称 default 11-pass 不含 const_prop：`docs/tmp/bpfopt_design_v3.md:79`，但 library `PassContext::default()` 仍含 const_prop，需统一口径。
 
-## 风险与代价
+### 8. 测试覆盖：WARN
 
-第一，不能提前知道 candidate 会不会被 verifier 接受；失败点后移到 `BPF_PROG_REJIT`。这符合“不过滤任何 ReJIT program”的项目规则，但 failure artifact 从“pre-verify report”变成“REJIT errno + log”。好消息是 syscall.c 已把 `attr->rejit.log_level/log_size/log_buf` 传入 `load_attr`，`kernel-sys::prog_rejit` 也已经支持 log buffer 和 ENOSPC 扩容，所以并非完全没有 verifier log。
+- 静态 `#[test]` 计数 daemon 为 23，和 implementation report “23 daemon tests”一致；本 audit 未重跑 `cargo test` / `make` / vm。
+- 有 REJIT error artifact 单测：`daemon/src/commands.rs:1742-1758`，但它只 mock 写入 verifier log，不覆盖 `kernel_sys::prog_rejit()` ENOSPC retry 后 artifact 是否保留完整 log。
+- 缺 const_prop opt-in daemon integration test；缺 thin dry-run 合法/非法真实 load case。
+- bpfopt CLI 有默认 11-pass 不含 const_prop 的测试：`bpfopt/crates/bpfopt/tests/cli_pipeline.rs:268-327`，但它仍传了无用 `--verifier-states`，不能证明默认路径不会依赖 states。
 
-第二，live `const_prop` 是主要功能代价。它需要真实 verifier states；如果 daemon 不做 dry-run，就不能在默认 live path 中启用它。推荐把 `const-prop` 保留在 `bpfopt` CLI，但从 daemon 默认 pass list 中移出，除非调用方显式提供 verifier-states side file。
+### 9. 风险项：WARN
 
-第三，map fd ABI 需要一次硬核确认。当前 `verifier.c` 对 `BPF_PSEUDO_MAP_IDX` 明确要求 `env->fd_array`，而 `syscall.c` 当前只是复制用户传入 fd_array，并未明显从 `prog->aux->used_maps` 自动构造。若用户目标是“完全不做 map relocation”，需要在 kernel REJIT 内补一个小的 used_maps -> fd_array 兼容层；否则 daemon 仍要保留极小 map fd supplier。
+- daemon hang watchdog 只有部分兜底。thin dry-run 超时后 request 会返回，但 worker thread 仍 detached：`daemon/src/dry_run.rs:131-136`；如果线程卡在 kernel verifier，会留在进程内。main `BPF_PROG_REJIT` 是同步 syscall：`daemon/src/commands.rs:437`，没有 timeout/restart 边界。
+- REJIT log buffer 初始 16MB、kernel-sys 最高 retry 256MB 仍存在：`daemon/src/commands.rs:36`、`bpfopt/crates/kernel-sys/src/lib.rs:38`、`bpfopt/crates/kernel-sys/src/lib.rs:1641-1655`。风险是 retry log 没暴露给 failure artifact，不是 retry 缺失。
+- map fd lifecycle OK：`RejitFdArray` 用 `_owned_fds` 长持 fd：`daemon/src/commands.rs:1280-1283`，dry-run 和 REJIT 都在该对象 drop 前使用：`daemon/src/commands.rs:914-1008`。
 
-## 推荐方案 + 优先级 + 步骤
+### 10. review means delete：WARN
 
-推荐做 v2-style rollback，但不是回到旧 daemon pass manager；应保留 v3 已经做对的两件事：`bpfopt`/`bpfprof` 仍是 CLI，`kernel-sys` 仍是唯一 syscall boundary。
+该删的旧协议基本删了，但还可以继续删/收紧：
 
-优先级：
+- 删除或改写 `kernel-sys` 中 stale “BPF_PROG_LOAD replay needs it” 注释：`bpfopt/crates/kernel-sys/src/lib.rs:692-696`。
+- 把 `bpfopt::pass::default_enabled_passes()` 改为默认 11-pass，或删掉这个 public 默认并强制调用方显式传 pass list：`bpfopt/crates/bpfopt/src/pass.rs:784-789`。
+- 给 `prog_rejit()` 返回结构化 `RejitError { errno, log }`，删掉 daemon 侧读初始 buffer 的脆弱路径：`daemon/src/commands.rs:436-443`。
+- 若 `expected_attach_type` 只服务 const_prop dry-run，考虑把 link enumeration 移入 dry-run-only 路径，避免 snapshot 默认做 context reconstruction：`daemon/crates/bpfget/src/lib.rs:132-133`。
+- dry-run tests 补齐后，可以删除 mock-only “不期望 verifier-state capture”的盲区测试形态，改成真实 opt-in 覆盖。
 
-1. 先定 ABI：确认或补齐 REJIT 对原 program map context 的复用。如果不能补，明确保留最小 map fd array builder，避免再次承诺“零 map replay”。
-2. 切 daemon 主路径：`snapshot bytecode -> bpfopt optimize -> BPF_PROG_REJIT`，删除 final dry-run verify 和 original verifier-state capture。
-3. 从 daemon 默认 pass 中移出 `const_prop`；`bpfopt const-prop` 作为离线/显式 side-input pass 保留。
-4. 删除 `daemon/crates/bpfverify`，压缩 `bpfget` 到 bytecode/prog-info/target probing 必需子集，内联或删除 `bpfrejit` crate。
-5. 更新 `docs/tmp/bpfopt_design_v3.md`，把设计文档从“daemon-owned bpfget/bpfverify/bpfrejit libs”改成“daemon-owned REJIT syscall, no pre-verify replay”。
-6. 最后跑最小 daemon unit + `make vm-corpus`，重点看 failure payload 是否自然记录所有 REJIT errno，而不是过滤。
+## 风险残留 + 优先级
 
-## 是否值得做（结合 9 轮调试时间成本）
+- **P0：无明确 P0。** direct REJIT 主路径和旧协议删除没有发现会立刻破坏 corpus apply 的实现错误。
+- **P1：默认 pass 语义漂移。** `PassContext::default()` 含 `const_prop`，和文档/验收标准不一致；先修，防止后续 library/test caller 重新把 const_prop 当默认。
+- **P1：REJIT failure artifact 不可靠。** 需要让 `kernel_sys::prog_rejit()` 把最终 retry log 返回给 daemon，并让 failure artifact 至少在 verifier reject 时强制包含非空 `verifier.log`。
+- **P1：watchdog 仍非强隔离。** main REJIT 无 timeout；thin dry-run timeout 不能杀 stuck kernel thread。至少文档化接受该风险，或把 const_prop dry-run 放到可杀进程边界。
+- **P2：测试缺口。** 补 const_prop opt-in integration test、dry-run legal/illegal/timeout case、ENOSPC/retry-log artifact test。
+- **P2：量化口径不透明。** implementation report 应明确“2327 是三文件 production-before-tests，不是 raw wc，也不是 full daemon surface”。
 
-值得。round2-6 加 pivot 的调试时间主要没有花在 optimizer 本身，而是花在“让 daemon 假装重新 BPF_PROG_LOAD 原 live program”上：map pointer、BTF records、prog_flags、line_info offset、verifier-state timeout、failure artifact。weekly report 的分类也把 cross-process/load-context、relocation、timeout、line_info 合计列为主要 bug 来源。v2-style rollback 把这些 bug source 从 daemon 中删除，让 kernel REJIT 的 verifier path 成为唯一验收点。代价是失去 live const_prop 和 pre-verify reject 预知，但这两个代价都比 4,700 行复杂度和 6/6 类 ReJIT bug 反复修补更可控。
+## 给 Claude 的提示
+
+vm-corpus 可以验证大方向，但建议先补 P1 小修再跑：统一 `default_enabled_passes` 口径、修 REJIT log artifact 返回、至少加 const_prop opt-in 和 dry-run legal/illegal 覆盖。否则 vm-corpus 一旦遇到 REJIT reject，failure workdir 可能缺完整 verifier log，后续归因会再次浪费时间。跑前无需回滚本 commit；主架构方向是对的，当前问题是边界收紧和证据质量。
