@@ -27,7 +27,12 @@ impl Analysis for BranchTargetAnalysis {
         let mut pc = 0;
         while pc < n {
             let insn = &program.insns[pc];
-            if insn.is_jmp_class() && !insn.is_call() && !insn.is_exit() {
+            if insn.is_ldimm64_pseudo_func() {
+                let target = (pc as i64 + 1 + insn.imm as i64) as usize;
+                if target < n {
+                    is_target[target] = true;
+                }
+            } else if insn.is_jmp_class() && !insn.is_call() && !insn.is_exit() {
                 let target = (pc as i64 + 1 + insn.off as i64) as usize;
                 if target <= n {
                     is_target[target] = true;
@@ -61,6 +66,19 @@ mod tests {
         BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
     }
 
+    fn pseudo_func_ref(dst: u8, pc: usize, target_pc: usize) -> [BpfInsn; 2] {
+        let imm = target_pc as i64 - (pc as i64 + 1);
+        [
+            BpfInsn::new(
+                BPF_LD | BPF_DW | BPF_IMM,
+                BpfInsn::make_regs(dst, BPF_PSEUDO_FUNC),
+                0,
+                imm as i32,
+            ),
+            BpfInsn::new(0, 0, 0, 0),
+        ]
+    }
+
     #[test]
     fn branch_target_simple_ja() {
         let insns = vec![
@@ -87,6 +105,22 @@ mod tests {
         let prog = make_program(insns);
         let result = BranchTargetAnalysis.run(&prog);
         assert!(result.is_target[2]);
+    }
+
+    #[test]
+    fn branch_target_pseudo_func_callback() {
+        let callback = pseudo_func_ref(2, 0, 4);
+        let prog = make_program(vec![
+            callback[0],
+            callback[1],
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+            BpfInsn::mov64_reg(0, 1),
+            exit_insn(),
+        ]);
+        let result = BranchTargetAnalysis.run(&prog);
+
+        assert!(result.is_target[4]);
     }
 
     #[test]

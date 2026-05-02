@@ -19,6 +19,23 @@ fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
     )
 }
 
+fn ld_imm64(dst: u8, src: u8, imm: i32) -> [BpfInsn; 2] {
+    [
+        BpfInsn::new(
+            BPF_LD | BPF_DW | BPF_IMM,
+            BpfInsn::make_regs(dst, src),
+            0,
+            imm,
+        ),
+        BpfInsn::new(0, 0, 0, 0),
+    ]
+}
+
+fn pseudo_func_ref(dst: u8, pc: usize, target_pc: usize) -> [BpfInsn; 2] {
+    let imm = target_pc as i64 - (pc as i64 + 1);
+    ld_imm64(dst, BPF_PSEUDO_FUNC, imm as i32)
+}
+
 /// Build a canonical 4-byte low-byte-first byte-ladder (Variant A).
 fn make_wide_mem_4byte_program() -> Vec<BpfInsn> {
     vec![
@@ -485,6 +502,39 @@ fn test_conditional_branch_fixup() {
     let jeq = &prog.insns[0];
     assert!(jeq.is_cond_jmp());
     assert_eq!(jeq.off, 1, "jeq should jump to exit at pc=2");
+}
+
+#[test]
+fn test_wide_mem_skips_byte_ladder_with_pseudo_func_boundary_inside() {
+    let map_ref = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let callback = pseudo_func_ref(2, 2, 5);
+    let mut prog = make_program(vec![
+        map_ref[0],
+        map_ref[1],
+        callback[0],
+        callback[1],
+        BpfInsn::ldx_mem(BPF_B, 6, 10, -8),
+        BpfInsn::ldx_mem(BPF_B, 8, 10, -7),
+        BpfInsn::alu64_imm(BPF_LSH, 8, 8),
+        BpfInsn::alu64_reg(BPF_OR, 6, 8),
+        exit_insn(),
+    ]);
+    let mut cache = AnalysisCache::new();
+    let ctx = PassContext::test_default();
+
+    let pass = WideMemPass;
+    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+    assert!(!result.changed);
+    assert_eq!(result.sites_applied, 0);
+    assert!(result
+        .sites_skipped
+        .iter()
+        .any(|s| s.pc == 4 && s.reason.contains("interior branch target")));
+    assert_eq!(prog.insns[0].src_reg(), BPF_PSEUDO_MAP_FD);
+    assert_eq!(prog.insns[0].imm, 42);
+    assert!(prog.insns[2].is_ldimm64_pseudo_func());
+    assert_eq!(prog.insns[2].imm, 2);
 }
 
 #[test]
