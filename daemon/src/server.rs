@@ -178,20 +178,15 @@ fn remove_socket_file_if_present(socket_path: &str) -> Result<()> {
 
 pub(crate) fn cmd_serve(
     socket_path: &str,
-    failure_root: Option<&str>,
-    cli_dir: Option<&str>,
-    keep_all_workdirs: bool,
+    failure_root: &str,
 ) -> Result<()> {
     use std::os::unix::net::UnixListener;
     use std::path::PathBuf;
 
     register_signal_handlers();
 
-    let failure_root_str = failure_root
-        .ok_or_else(|| anyhow::anyhow!("--failure-root is required"))?;
-    let failure_root_path = PathBuf::from(failure_root_str);
-    commands::init_cli_dir(cli_dir.map(PathBuf::from))?;
-    commands::init_keep_all_workdirs(keep_all_workdirs);
+    let failure_root_path = PathBuf::from(failure_root);
+    commands::init_cli_dir()?;
     commands::validate_failure_export_root(&failure_root_path)?;
     let config = CliConfig::from_global();
     let tracker = commands::new_invalidation_tracker();

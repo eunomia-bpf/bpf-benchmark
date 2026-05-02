@@ -24,11 +24,8 @@ use crate::bpf;
 use crate::invalidation::{BpfMapValueReader, MapInvalidationTracker};
 
 static NEXT_WORKDIR_ID: AtomicU64 = AtomicU64::new(0);
-/// Optional CLI binary directory set once at startup from --cli-dir CLI arg.
+/// CLI binary directory set once at startup; None means use PATH lookup.
 static CLI_DIR: std::sync::OnceLock<Option<PathBuf>> = std::sync::OnceLock::new();
-/// Set once at startup from --keep-all-workdirs CLI flag.
-static KEEP_ALL_WORKDIRS: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
-const DEBUG_WORKDIR_ROOT_NAME: &str = "workdirs";
 const MAP_VALUES_FILE: &str = "map-values.json";
 const VERIFIER_STATES_FILE: &str = "verifier-states.json";
 const DEFAULT_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(5);
@@ -42,8 +39,8 @@ pub(crate) struct CliConfig {
 }
 
 impl CliConfig {
-    /// Read cli_dir from the process-global set by init_globals.
-    /// In tests where init_globals was not called, returns CliConfig { cli_dir: None }.
+    /// Read cli_dir from the process-global set by init_cli_dir.
+    /// In tests where init_cli_dir was not called, returns CliConfig { cli_dir: None }.
     pub(crate) fn from_global() -> Self {
         let cli_dir = CLI_DIR.get().and_then(|opt| opt.clone());
         Self { cli_dir }
@@ -96,23 +93,18 @@ impl Drop for WorkDir {
     }
 }
 
-/// Initialise the CLI dir from parsed CLI args.
+/// Initialise the CLI dir (None = use PATH lookup).
 /// Must be called exactly once before the server loop starts.
-pub(crate) fn init_cli_dir(cli_dir: Option<PathBuf>) -> Result<()> {
+pub(crate) fn init_cli_dir() -> Result<()> {
     CLI_DIR
-        .set(cli_dir)
+        .set(None)
         .map_err(|_| anyhow!("CLI dir already initialised"))
-}
-
-/// Initialise the keep-all-workdirs flag from the --keep-all-workdirs CLI arg.
-pub(crate) fn init_keep_all_workdirs(enabled: bool) {
-    KEEP_ALL_WORKDIRS.store(enabled, Ordering::Relaxed);
 }
 
 /// Validate the failure root at startup.
 pub(crate) fn validate_failure_export_root(root: &Path) -> Result<()> {
     ensure_writable_dir(root, "failure export root")
-        .with_context(|| format!("--failure-root={}", root.display()))
+        .with_context(|| format!("failure-root={}", root.display()))
 }
 
 fn ensure_writable_dir(path: &Path, description: &str) -> Result<()> {
@@ -150,19 +142,6 @@ fn preserve_failure_workdir(workdir: &WorkDir, prog_id: u32, root: &Path) -> Res
     Ok(failure_dir)
 }
 
-fn preserve_debug_workdir_if_requested(workdir: &WorkDir, prog_id: u32, root: &Path) -> Result<Option<PathBuf>> {
-    if !KEEP_ALL_WORKDIRS.load(Ordering::Relaxed) {
-        return Ok(None);
-    }
-    let debug_root = root.join(DEBUG_WORKDIR_ROOT_NAME);
-    ensure_writable_dir(&debug_root, "debug workdir directory")
-        .with_context(|| format!("prepare debug workdir directory {}", debug_root.display()))?;
-    let debug_dir = debug_root.join(prog_id.to_string());
-    fs::create_dir(&debug_dir)
-        .with_context(|| format!("create debug workdir {}", debug_dir.display()))?;
-    copy_dir_contents(workdir.path(), &debug_dir)?;
-    Ok(Some(debug_dir))
-}
 
 fn copy_dir_contents(src: &Path, dst: &Path) -> Result<()> {
     for entry in fs::read_dir(src).with_context(|| format!("read {}", src.display()))? {
@@ -1165,12 +1144,6 @@ where
 
     match result {
         Ok(result) => {
-            if let Some(path) = preserve_debug_workdir_if_requested(&workdir, prog_id, failure_root)? {
-                eprintln!(
-                    "daemon: preserved debug workdir for prog {prog_id} at {}",
-                    path.display()
-                );
-            }
             Ok(result)
         }
         Err(err) => match preserve_failure_workdir(&workdir, prog_id, failure_root) {

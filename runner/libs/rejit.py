@@ -720,24 +720,17 @@ def _daemon_log_tail(stdout_path: Path | None, stderr_path: Path | None) -> str:
     return tail_text(text, max_lines=80, max_chars=8000)
 
 
+_DAEMON_SOCKET_PATH = Path("/var/tmp/bpfrejit-daemon.sock")
+
+
 def _start_daemon_server(
     daemon_binary: Path | str,
-    failure_root: Path | None = None,
-    keep_all_workdirs: bool = False,
 ) -> tuple[subprocess.Popen[str], Path, str, Path, Path]:
     socket_dir = tempfile.mkdtemp(prefix="bd-", dir=str(_daemon_runtime_root()))
-    socket_path = Path(socket_dir) / "daemon.sock"
+    socket_path = _DAEMON_SOCKET_PATH
     stdout_path = Path(socket_dir) / "daemon.stdout.log"
     stderr_path = Path(socket_dir) / "daemon.stderr.log"
-    if failure_root is None:
-        raise RuntimeError(
-            "failure_root is required when starting the daemon; "
-            "pass failure_root= to DaemonSession.start()"
-        )
-    failure_root.mkdir(parents=True, exist_ok=True)
-    cmd = [str(daemon_binary), "serve", "--socket", str(socket_path), "--failure-root", str(failure_root)]
-    if keep_all_workdirs:
-        cmd.append("--keep-all-workdirs")
+    cmd = [str(daemon_binary)]
     with stdout_path.open("w", encoding="utf-8") as out, stderr_path.open("w", encoding="utf-8") as err:
         proc = subprocess.Popen(cmd, stdout=out, stderr=err, text=True)
     deadline = time.monotonic() + 5.0
@@ -745,7 +738,7 @@ def _start_daemon_server(
         if socket_path.exists():
             return proc, socket_path, socket_dir, stdout_path, stderr_path
         if proc.poll() is not None:
-            raise RuntimeError(f"daemon serve exited early (rc={proc.returncode}): {_daemon_log_tail(stdout_path, stderr_path)}")
+            raise RuntimeError(f"daemon exited early (rc={proc.returncode}): {_daemon_log_tail(stdout_path, stderr_path)}")
         time.sleep(0.05)
     _kill_proc(proc, timeout=1)
     raise RuntimeError(f"timed out waiting for daemon socket: {_daemon_log_tail(stdout_path, stderr_path)}")
@@ -757,9 +750,9 @@ def _kill_proc(proc: subprocess.Popen[str], *, timeout: int) -> None:
     except subprocess.TimeoutExpired: proc.kill(); proc.wait(timeout=timeout)
 
 
-def _stop_daemon_server(proc: subprocess.Popen[str], socket_path: Path, socket_dir: str) -> None:
+def _stop_daemon_server(proc: subprocess.Popen[str], socket_dir: str) -> None:
     _kill_proc(proc, timeout=5)
-    socket_path.unlink(missing_ok=True)
+    _DAEMON_SOCKET_PATH.unlink(missing_ok=True)
     shutil.rmtree(socket_dir, ignore_errors=True)
 
 
@@ -933,15 +926,11 @@ class DaemonSession:
         daemon_binary: Path | str,
         *,
         load_kinsn: bool = False,
-        failure_root: Path | None = None,
-        keep_all_workdirs: bool = False,
     ) -> "DaemonSession":
         from .kinsn import prepare_kinsn_modules  # noqa: PLC0415
         binary = Path(daemon_binary).resolve()
         kinsn_metadata: dict[str, object] = dict(prepare_kinsn_modules()) if load_kinsn else {}
-        proc, socket_path, socket_dir, stdout_path, stderr_path = _start_daemon_server(
-            binary, failure_root=failure_root, keep_all_workdirs=keep_all_workdirs
-        )
+        proc, socket_path, socket_dir, stdout_path, stderr_path = _start_daemon_server(binary)
         if load_kinsn:
             kinsn_metadata["daemon_binary"] = str(binary)
         return cls(daemon_binary=binary, proc=proc, socket_path=socket_path, socket_dir=socket_dir,
@@ -959,7 +948,7 @@ class DaemonSession:
         if self._closed:
             return
         self._closed = True
-        _stop_daemon_server(self.proc, self.socket_path, self.socket_dir)
+        _stop_daemon_server(self.proc, self.socket_dir)
 
     def apply_rejit(self, prog_ids: Sequence[int], *, enabled_passes: Sequence[str] | None = None) -> dict[str, object]:
         return apply_daemon_rejit([int(p) for p in prog_ids if int(p) > 0], enabled_passes=enabled_passes,

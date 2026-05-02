@@ -260,15 +260,12 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
 
-    keep_all_workdirs = os.environ.get("BPFREJIT_DAEMON_KEEP_ALL_WORKDIRS", "").strip() == "1"
-
     if args.case == "all":
         cases_to_run = list(ALL_CASES)
         failed: list[str] = []
         daemon_binary = Path(args.daemon).resolve()
         e2e_output_json = resolve_primary_output_json(args)
-        failure_root = e2e_output_json.parent / "failures"
-        with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn), failure_root=failure_root, keep_all_workdirs=keep_all_workdirs) as daemon_session:
+        with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn)) as daemon_session:
             prepared = prepare_daemon_session(daemon_session)
             for index, case_name in enumerate(cases_to_run):
                 print(f"\n{'='*60}")
@@ -294,8 +291,7 @@ def main(argv: list[str] | None = None) -> int:
     apply_case_defaults(args)
     daemon_binary = Path(args.daemon).resolve()
     single_output_json = resolve_primary_output_json(args)
-    failure_root = single_output_json.parent / "failures"
-    with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn), failure_root=failure_root, keep_all_workdirs=keep_all_workdirs) as daemon_session:
+    with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn)) as daemon_session:
         prepared = prepare_daemon_session(daemon_session)
         _run_single_case(args, prepared_daemon_session=prepared)
     return 0
