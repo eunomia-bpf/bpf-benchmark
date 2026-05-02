@@ -26,7 +26,6 @@ use crate::invalidation::{BpfMapValueReader, MapInvalidationTracker};
 static NEXT_WORKDIR_ID: AtomicU64 = AtomicU64::new(0);
 const FAILURE_ROOT_ENV: &str = "BPFREJIT_DAEMON_FAILURE_ROOT";
 const KEEP_ALL_WORKDIRS_ENV: &str = "BPFREJIT_DAEMON_KEEP_ALL_WORKDIRS";
-const DEFAULT_FAILURE_ROOT_NAME: &str = "bpfrejit-failures";
 const DEBUG_WORKDIR_ROOT_NAME: &str = "workdirs";
 const MAP_VALUES_FILE: &str = "map-values.json";
 const VERIFIER_STATES_FILE: &str = "verifier-states.json";
@@ -108,9 +107,10 @@ impl FailureExportConfig {
                 }
                 PathBuf::from(raw)
             }
-            None => std::env::current_dir()
-                .context("resolve current directory for default failure export root")?
-                .join(DEFAULT_FAILURE_ROOT_NAME),
+            None => bail!(
+                "{FAILURE_ROOT_ENV} must be set; \
+                 the runner-runtime entrypoint should provide it"
+            ),
         };
         Ok(Self { root })
     }
