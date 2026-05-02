@@ -15,29 +15,11 @@ use bpfopt::pass::{
     Arch, BpfProgram, BranchProfile, BtfInfoRecords, KinsnRegistry, MapMetadata, PassContext,
     PassManager, PassResult, PlatformCapabilities, ProfilingData, RegState, ScalarRange,
     StackState, StaticKinsnCallResolver, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
-    DEFAULT_ENABLED_PASS_ORDER,
 };
 use bpfopt::passes::{MapInfoAnalysis, PASS_REGISTRY};
 use clap::{Args, Parser, Subcommand};
 use kernel_sys::{VerifierRegJson, VerifierStatesJson};
 use serde::{Deserialize, Serialize};
-
-const ALL_PASS_ORDER: &[&str] = &[
-    "map_inline",
-    "const_prop",
-    "dce",
-    "skb_load_bytes_spec",
-    "bounds_check_merge",
-    "wide_mem",
-    "bulk_memory",
-    "rotate",
-    "cond_select",
-    "ccmp",
-    "extract",
-    "endian_fusion",
-    "branch_flip",
-    "prefetch",
-];
 
 const PASS_ALIASES: &[(&str, &str)] = &[
     ("wide-mem", "wide_mem"),
@@ -100,8 +82,11 @@ const KINSN_ALIASES: &[(&str, &str)] = &[
 struct Cli {
     #[command(flatten)]
     common: CommonArgs,
+    /// Single pass to run. bpfopt intentionally has no built-in pass pipeline.
+    #[arg(long, value_name = "NAME")]
+    pass: Option<String>,
     #[command(subcommand)]
-    command: Command,
+    command: Option<Command>,
 }
 
 #[derive(Args, Clone, Debug, Default)]
@@ -155,54 +140,9 @@ struct CommonArgs {
 
 #[derive(Subcommand)]
 enum Command {
-    /// Fuse byte-by-byte loads into wider memory accesses.
-    #[command(name = "wide-mem")]
-    WideMem,
-    /// Replace shift+or patterns with rotate kinsn calls.
-    Rotate,
-    /// Fold register constants.
-    #[command(name = "const-prop")]
-    ConstProp,
-    /// Replace branch-over-mov with conditional select kinsn calls.
-    #[command(name = "cond-select")]
-    CondSelect,
-    /// Fold ARM64 zero-test compare chains with CCMP.
-    Ccmp,
-    /// Replace shift+mask with bit-field extract kinsn calls.
-    Extract,
-    /// Fuse endian load+swap sequences.
-    Endian,
-    /// Reorder if/else bodies using PGO profile data.
-    #[command(name = "branch-flip")]
-    BranchFlip,
-    /// Insert packet and map-value prefetch kinsn calls.
-    Prefetch,
-    /// Remove unreachable blocks, NOPs, and dead register definitions.
-    Dce,
-    /// Inline stable map lookup values.
-    #[command(name = "map-inline")]
-    MapInline,
-    /// Lower large memcpy/memset runs into bulk-memory kinsn calls.
-    #[command(name = "bulk-memory")]
-    BulkMemory,
-    /// Merge packet bounds-check ladders.
-    #[command(name = "bounds-check-merge")]
-    BoundsCheckMerge,
-    /// Specialize skb_load_bytes helper sites.
-    #[command(name = "skb-load-bytes")]
-    SkbLoadBytes,
-    /// Run a pass pipeline in-process.
-    Optimize(OptimizeArgs),
     /// List available optimization passes.
     #[command(name = "list-passes")]
     ListPasses(ListPassesArgs),
-}
-
-#[derive(Args)]
-struct OptimizeArgs {
-    /// Comma-separated pass list. Defaults to the target architecture optimize order.
-    #[arg(long, value_name = "LIST", value_delimiter = ',')]
-    passes: Vec<String>,
 }
 
 #[derive(Args)]
@@ -210,9 +150,6 @@ struct ListPassesArgs {
     /// Emit machine-readable pass metadata.
     #[arg(long)]
     json: bool,
-    /// Show the default optimize order for an architecture instead of all passes.
-    #[arg(long, value_name = "ARCH")]
-    arch: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -232,11 +169,6 @@ struct MapInlineRecordReport {
     map_id: u32,
     key_hex: String,
     value_hex: String,
-}
-
-#[derive(Clone, Debug, Serialize)]
-struct OptimizeReport {
-    passes: Vec<PassReport>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -351,57 +283,37 @@ fn run_main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Command::ListPasses(args) => list_passes(&cli.common, &args),
-        Command::Optimize(args) => run_optimize(&cli.common, &args),
-        command => run_single_pass(&cli.common, command.canonical_pass_name().unwrap()),
-    }
-}
-
-impl Command {
-    fn canonical_pass_name(&self) -> Option<&'static str> {
-        match self {
-            Command::WideMem => Some("wide_mem"),
-            Command::Rotate => Some("rotate"),
-            Command::ConstProp => Some("const_prop"),
-            Command::CondSelect => Some("cond_select"),
-            Command::Ccmp => Some("ccmp"),
-            Command::Extract => Some("extract"),
-            Command::Endian => Some("endian_fusion"),
-            Command::BranchFlip => Some("branch_flip"),
-            Command::Prefetch => Some("prefetch"),
-            Command::Dce => Some("dce"),
-            Command::MapInline => Some("map_inline"),
-            Command::BulkMemory => Some("bulk_memory"),
-            Command::BoundsCheckMerge => Some("bounds_check_merge"),
-            Command::SkbLoadBytes => Some("skb_load_bytes_spec"),
-            Command::Optimize(_) | Command::ListPasses(_) => None,
+        Some(Command::ListPasses(args)) => {
+            if cli.pass.is_some() {
+                bail!("--pass cannot be used with list-passes");
+            }
+            list_passes(&cli.common, &args)
+        }
+        None => {
+            let pass = cli
+                .pass
+                .as_deref()
+                .ok_or_else(|| anyhow!("bpfopt requires --pass <name> or list-passes"))?;
+            run_single_pass(&cli.common, canonicalize_pass_name(pass)?)
         }
     }
 }
 
 fn list_passes(common: &CommonArgs, args: &ListPassesArgs) -> Result<()> {
-    let names = match args.arch.as_deref() {
-        Some(arch) => default_optimize_pass_order(parse_arch(arch)?).to_vec(),
-        None => ALL_PASS_ORDER.to_vec(),
-    };
-
     if args.json {
-        let entries = names
+        let entries = PASS_REGISTRY
             .iter()
-            .map(|&name| {
-                let entry = registry_entry(name)?;
-                Ok(ListPassEntry {
-                    name: cli_name_for_pass(name),
-                    canonical_name: name,
-                    description: entry.description,
-                })
+            .map(|entry| ListPassEntry {
+                name: cli_name_for_pass(entry.name),
+                canonical_name: entry.name,
+                description: entry.description,
             })
-            .collect::<Result<Vec<_>>>()?;
+            .collect::<Vec<_>>();
         write_json(common.output.as_deref(), &entries)
     } else {
         let mut out = open_text_output(common.output.as_deref())?;
-        for &name in &names {
-            writeln!(out, "{}", cli_name_for_pass(name))?;
+        for entry in PASS_REGISTRY {
+            writeln!(out, "{}", cli_name_for_pass(entry.name))?;
         }
         Ok(())
     }
@@ -431,44 +343,6 @@ fn run_single_pass(common: &CommonArgs, pass_name: &'static str) -> Result<()> {
     }
 
     Ok(())
-}
-
-fn run_optimize(common: &CommonArgs, args: &OptimizeArgs) -> Result<()> {
-    let mut ctx = build_pass_context(common)?;
-    let pass_names = if args.passes.is_empty() {
-        default_optimize_pass_order(ctx.platform.arch).to_vec()
-    } else {
-        args.passes
-            .iter()
-            .map(|name| canonicalize_pass_name(name))
-            .collect::<Result<Vec<_>>>()?
-    };
-
-    validate_required_side_inputs(common, &pass_names)?;
-    let mut program = BpfProgram::new(read_bytecode(common.input.as_deref())?);
-    attach_program_inputs(&mut program, common)?;
-    validate_required_kinsns(&ctx, &pass_names)?;
-    ctx.policy.enabled_passes = pass_names.iter().map(|name| (*name).to_string()).collect();
-    let pipeline = build_pipeline(&pass_names)?;
-    let profiling = read_profile(common.profile.as_deref())?;
-    let result = run_pipeline_catching_panics(&pipeline, &mut program, &ctx, profiling.as_ref())?;
-    write_bytecode(common.output.as_deref(), &program.insns)?;
-    write_btf_info_outputs(common, &program)?;
-
-    if let Some(report_path) = common.report.as_deref() {
-        let report = OptimizeReport {
-            passes: optimize_reports(&result.pass_results),
-        };
-        write_json(Some(report_path), &report)?;
-    }
-
-    Ok(())
-}
-
-fn default_optimize_pass_order(arch: Arch) -> &'static [&'static str] {
-    match arch {
-        Arch::Aarch64 | Arch::X86_64 => DEFAULT_ENABLED_PASS_ORDER,
-    }
 }
 
 fn public_kinsn_name(target_name: &str) -> &str {
@@ -1330,10 +1204,6 @@ fn hex_bytes(bytes: &[u8]) -> String {
     out
 }
 
-fn optimize_reports(pass_results: &[PassResult]) -> Vec<PassReport> {
-    pass_results.iter().map(pass_report).collect()
-}
-
 fn default_frozen() -> bool {
     true
 }
@@ -1376,26 +1246,6 @@ mod tests {
         );
         assert_eq!(canonicalize_pass_name("prefetch").unwrap(), "prefetch");
         assert!(canonicalize_pass_name("wide_mem2").is_err());
-    }
-
-    #[test]
-    fn default_optimize_order_is_default_12_pass_policy_on_all_arches() {
-        assert!(!default_optimize_pass_order(Arch::Aarch64).contains(&"ccmp"));
-        assert!(!default_optimize_pass_order(Arch::X86_64).contains(&"ccmp"));
-        assert!(default_optimize_pass_order(Arch::Aarch64).contains(&"const_prop"));
-        assert!(default_optimize_pass_order(Arch::X86_64).contains(&"const_prop"));
-        assert!(default_optimize_pass_order(Arch::Aarch64).contains(&"prefetch"));
-        assert!(default_optimize_pass_order(Arch::X86_64).contains(&"prefetch"));
-        assert_eq!(default_optimize_pass_order(Arch::Aarch64).len(), 12);
-        assert_eq!(default_optimize_pass_order(Arch::X86_64).len(), 12);
-        assert_eq!(
-            default_optimize_pass_order(Arch::Aarch64).last(),
-            Some(&"prefetch")
-        );
-        assert_eq!(
-            default_optimize_pass_order(Arch::X86_64).last(),
-            Some(&"prefetch")
-        );
     }
 
     #[test]

@@ -41,7 +41,6 @@ const PERF_EVENT_IOC_ENABLE: libc::c_ulong = 0x2400;
 const PERF_EVENT_IOC_DISABLE: libc::c_ulong = 0x2401;
 const PERF_EVENT_IOC_RESET: libc::c_ulong = 0x2403;
 
-const DEFAULT_PROG_NAME: &[u8] = b"kernel_sys_dryrun\0";
 const DEFAULT_LICENSE: &[u8] = b"GPL\0";
 
 /// `union bpf_attr.rejit` prefix used by the fork-only `BPF_PROG_REJIT` cmd.
@@ -287,29 +286,6 @@ pub struct BpfProgInfoFork {
     pub prog_flags: u32,
 }
 
-/// Options for a typed verifier dry-run load.
-pub struct ProgLoadDryRunOptions<'a> {
-    pub prog_type: bpf_prog_type,
-    pub expected_attach_type: Option<bpf_attach_type>,
-    pub prog_flags: u32,
-    pub prog_btf_fd: Option<i32>,
-    pub attach_btf_id: Option<u32>,
-    pub attach_btf_obj_fd: Option<i32>,
-    pub func_info: Option<BtfInfoRecords<'a>>,
-    pub line_info: Option<BtfInfoRecords<'a>>,
-    pub insns: &'a [bpf_insn],
-    pub fd_array: Option<&'a [i32]>,
-    pub log_level: u32,
-    pub log_buf: Option<&'a mut [u8]>,
-}
-
-/// Raw BTF func_info or line_info records supplied to `BPF_PROG_LOAD`.
-#[derive(Clone, Copy, Debug)]
-pub struct BtfInfoRecords<'a> {
-    pub rec_size: u32,
-    pub bytes: &'a [u8],
-}
-
 /// Raw BTF metadata captured from an already-loaded program.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct ProgBtfInfo {
@@ -317,17 +293,6 @@ pub struct ProgBtfInfo {
     pub func_info: Vec<u8>,
     pub line_info_rec_size: u32,
     pub line_info: Vec<u8>,
-}
-
-/// Result of a verifier dry-run load. Kernel verifier rejection is represented
-/// as `accepted = false`, while malformed inputs still return `Err`.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct ProgLoadDryRunReport {
-    pub accepted: bool,
-    pub errno: Option<i32>,
-    pub verifier_log: String,
-    pub log_true_size: u32,
-    pub jited_size: Option<u32>,
 }
 
 impl Default for BpfProgInfoFork {
@@ -458,37 +423,16 @@ struct ProgRejitFailure {
 }
 
 fn format_prog_rejit_failure(failure: ProgRejitFailure) -> anyhow::Error {
+    let errno = failure.error.raw_os_error().unwrap_or(libc::EIO);
     if !failure.log.is_empty() {
         anyhow!(
-            "BPF_PROG_REJIT: {}\nverifier log summary:\n{}",
+            "BPF_PROG_REJIT errno {errno}: {}\nverifier log summary:\n{}",
             failure.error,
             verifier_log_summary(&failure.log)
         )
     } else {
-        anyhow!("BPF_PROG_REJIT: {}", failure.error)
+        anyhow!("BPF_PROG_REJIT errno {errno}: {}", failure.error)
     }
-}
-
-fn btf_record_count(label: &str, records: BtfInfoRecords<'_>) -> Result<Option<u32>> {
-    if records.bytes.is_empty() {
-        return Ok(None);
-    }
-    if records.rec_size == 0 {
-        bail!("{label} rec_size must be non-zero when records are present");
-    }
-    let rec_size = records.rec_size as usize;
-    if !records.bytes.len().is_multiple_of(rec_size) {
-        bail!(
-            "{label} byte length {} is not a multiple of rec_size {}",
-            records.bytes.len(),
-            records.rec_size
-        );
-    }
-    let count = records.bytes.len() / rec_size;
-    let count = count
-        .try_into()
-        .map_err(|_| anyhow!("{label} record count does not fit libbpf __u32"))?;
-    Ok(Some(count))
 }
 
 unsafe fn sys_bpf<T>(cmd: u32, attr: *mut T, size: usize) -> libc::c_long {
@@ -500,116 +444,6 @@ unsafe fn sys_bpf<T>(cmd: u32, attr: *mut T, size: usize) -> libc::c_long {
             size as libc::c_uint,
         )
     }
-}
-
-/// Load raw BPF instructions through libbpf and report verifier status without
-/// treating verifier rejection as an API error.
-pub fn prog_load_dryrun_report(
-    mut options: ProgLoadDryRunOptions<'_>,
-) -> Result<ProgLoadDryRunReport> {
-    let insn_cnt: size_t = options
-        .insns
-        .len()
-        .try_into()
-        .map_err(|_| anyhow!("instruction count does not fit libbpf size_t"))?;
-    let mut opts = bpf_prog_load_opts {
-        sz: std::mem::size_of::<bpf_prog_load_opts>() as size_t,
-        attempts: 1,
-        ..Default::default()
-    };
-
-    if let Some(expected_attach_type) = options.expected_attach_type {
-        opts.expected_attach_type = expected_attach_type;
-    }
-    opts.prog_flags = options.prog_flags;
-    if let Some(prog_btf_fd) = options.prog_btf_fd {
-        if prog_btf_fd < 0 {
-            bail!("prog_btf_fd must be non-negative");
-        }
-        opts.prog_btf_fd = prog_btf_fd as u32;
-    }
-    if let Some(attach_btf_id) = options.attach_btf_id.filter(|id| *id != 0) {
-        opts.attach_btf_id = attach_btf_id;
-    }
-    if let Some(attach_btf_obj_fd) = options.attach_btf_obj_fd {
-        if attach_btf_obj_fd < 0 {
-            bail!("attach_btf_obj_fd must be non-negative");
-        }
-        opts.attach_btf_obj_fd = attach_btf_obj_fd as u32;
-    }
-    if let Some(func_info) = options.func_info {
-        if let Some(count) = btf_record_count("func_info", func_info)? {
-            opts.func_info = func_info.bytes.as_ptr() as *const libc::c_void;
-            opts.func_info_cnt = count;
-            opts.func_info_rec_size = func_info.rec_size;
-        }
-    }
-    if let Some(line_info) = options.line_info {
-        if let Some(count) = btf_record_count("line_info", line_info)? {
-            opts.line_info = line_info.bytes.as_ptr() as *const libc::c_void;
-            opts.line_info_cnt = count;
-            opts.line_info_rec_size = line_info.rec_size;
-        }
-    }
-
-    if let Some(fd_array) = options.fd_array.filter(|fds| !fds.is_empty()) {
-        opts.fd_array_cnt = fd_array
-            .len()
-            .try_into()
-            .map_err(|_| anyhow!("fd_array length does not fit libbpf __u32"))?;
-        opts.fd_array = fd_array.as_ptr();
-    }
-
-    if options.log_level > 0 {
-        let Some(buf) = options.log_buf.as_deref_mut() else {
-            bail!("BPF_PROG_LOAD dry-run log_level requires a log buffer");
-        };
-        if buf.is_empty() {
-            bail!("BPF_PROG_LOAD dry-run log buffer must not be empty");
-        }
-        buf.fill(0);
-        opts.log_level = options.log_level;
-        opts.log_size = buf.len() as u32;
-        opts.log_buf = buf.as_mut_ptr() as *mut c_char;
-    }
-
-    let fd = unsafe {
-        bpf_prog_load(
-            options.prog_type,
-            DEFAULT_PROG_NAME.as_ptr() as *const c_char,
-            DEFAULT_LICENSE.as_ptr() as *const c_char,
-            options.insns.as_ptr(),
-            insn_cnt,
-            &mut opts,
-        )
-    };
-
-    let log = match options.log_buf.as_deref() {
-        Some(buf) => extract_log_string(buf),
-        None => String::new(),
-    };
-    if fd < 0 {
-        let errno = errno_from_libbpf_ret(fd);
-        let log_true_size = opts.log_true_size;
-        return Ok(ProgLoadDryRunReport {
-            accepted: false,
-            errno: Some(errno),
-            verifier_log: log,
-            log_true_size,
-            jited_size: None,
-        });
-    }
-
-    let fd = unsafe { OwnedFd::from_raw_fd(fd) };
-    let jited_size = Some(obj_get_info_by_fd(fd.as_fd())?.jited_prog_len);
-    drop(fd);
-    Ok(ProgLoadDryRunReport {
-        accepted: true,
-        errno: None,
-        verifier_log: log,
-        log_true_size: opts.log_true_size,
-        jited_size,
-    })
 }
 
 /// Return the next live BPF program ID after `start_id`.
@@ -691,10 +525,9 @@ fn link_obj_get_info_by_fd(fd: BorrowedFd<'_>) -> Result<bpf_link_info> {
 
 /// Recover the load-time expected attach type for a live program from its link.
 ///
-/// `struct bpf_prog_info` does not expose `prog->expected_attach_type`, while
-/// `BPF_PROG_LOAD` replay needs it for tracing, LSM, cgroup, and link-backed
-/// attach contexts. Link enumeration is the only stable userspace source for
-/// this metadata without adding another fork-only kernel ABI.
+/// `struct bpf_prog_info` does not expose `prog->expected_attach_type`. Link
+/// enumeration is the only stable userspace source for this metadata without
+/// adding another fork-only kernel ABI.
 pub fn expected_attach_type_for_prog(
     prog_id: u32,
     prog_type: bpf_prog_type,
@@ -1935,31 +1768,6 @@ mod tests {
         assert_eq!(offset_of!(BpfProgInfoFork, orig_prog_insns), 232);
         assert_eq!(offset_of!(BpfProgInfoFork, prog_flags), 240);
         assert_eq!(size_of::<BpfProgInfoFork>(), 248);
-    }
-
-    #[test]
-    fn btf_record_count_rejects_partial_record() {
-        let records = BtfInfoRecords {
-            rec_size: 8,
-            bytes: &[0; 12],
-        };
-
-        let err = btf_record_count("func_info", records).unwrap_err();
-
-        assert!(
-            err.to_string().contains("not a multiple of rec_size"),
-            "err={err:#}"
-        );
-    }
-
-    #[test]
-    fn btf_record_count_accepts_exact_records() {
-        let records = BtfInfoRecords {
-            rec_size: 8,
-            bytes: &[0; 16],
-        };
-
-        assert_eq!(btf_record_count("func_info", records).unwrap(), Some(2));
     }
 
     #[test]

@@ -21,7 +21,7 @@ Corpus performance is measured per-program, not per-app:
 - Result payload contains `per_program` list and `summary` with `per_program_geomean`, `program_count`, `wins`, `losses`
 
 ### BranchFlip Requires Real Per-Site PGO
-`branch_flip` is the Paper B profile-guided branch-layout pass. It is production code but remains outside the default 12-pass `bpfopt optimize` pipeline until Paper B benchmark results decide policy. It must consume real `bpfprof --per-site` data: every candidate site needs `branch_count`, `branch_misses`, `miss_rate`, `taken`, and `not_taken`. Placeholder PMU fields, heuristic fallback, missing-site success, and optional per-site profile fields are forbidden; missing program/site PMU data must exit 1.
+`branch_flip` is the Paper B profile-guided branch-layout pass. It is production code but remains outside the daemon's default 12-pass policy until Paper B benchmark results decide policy. It must consume real `bpfprof --per-site` data: every candidate site needs `branch_count`, `branch_misses`, `miss_rate`, `taken`, and `not_taken`. Placeholder PMU fields, heuristic fallback, missing-site success, and optional per-site profile fields are forbidden; missing program/site PMU data must exit 1.
 
 ### No Redundant Informational Fields
 Do not add `workload_miss`, `limitations`, or similar informational-only fields to result payloads. If something fails, it should surface as an error, not as a metadata annotation.
@@ -41,18 +41,18 @@ Before adding a test, be able to answer: what specific bug would this failure id
 
 ### bpfopt-suite v3 Architecture
 `docs/tmp/bpfopt_design_v3.md` is the authoritative design document for bpfopt-suite. Keep implementation and documentation aligned with that design:
-- The daemon must not run a pass pipeline, maintain `PassManager`, do profiling internally, or transform bytecode in-process. It must not run verifier dry-runs on the final ReJIT acceptance path; verifier-state capture is an automatic side-input step for passes that require it.
-- The daemon watches for new BPF programs, detects map invalidation, preserves the runner socket + JSON protocol, and owns in-process live discovery, automatic side-input preparation, fd-array construction, and final `BPF_PROG_REJIT`.
+- The daemon must not maintain `PassManager`, do profiling internally, or transform bytecode in-process. It owns the fixed 12-pass orchestration loop, but every bytecode transform is a separate `bpfopt --pass <name>` CLI invocation followed immediately by `BPF_PROG_REJIT(log_level=2)`.
+- The daemon watches for new BPF programs, detects map invalidation, preserves the runner socket + JSON protocol, and owns in-process live discovery, map-value side-input preparation, minimal fd-array construction from `prog_info.used_maps`, and per-pass `BPF_PROG_REJIT`.
 - `bpfopt` is a pure bytecode CLI tool with zero kernel dependency.
 - `bpfprof` remains a standalone CLI for PMU profiling.
-- Bytecode transforms remain `bpfopt` CLI invocations. The daemon does not accept candidates through per-pass or final `BPF_PROG_LOAD` dry-runs; the kernel re-verifies candidates during `BPF_PROG_REJIT`.
+- Bytecode transforms remain `bpfopt` CLI invocations. The daemon does not accept candidates through `BPF_PROG_LOAD` dry-runs; the kernel re-verifies each pass candidate during `BPF_PROG_REJIT`.
 - Benchmark runner Python stays on the existing daemon socket boundary during the v3 migration.
 - stdin/stdout carry raw binary bytecode (`struct bpf_insn[]`) for `bpfopt`; side-inputs and side-outputs use files only at the `bpfopt`/`bpfprof` CLI boundary.
 
 #### Daemon Owns Kernel Calls; Runner Stays Untouched
 - v3 §8 option B: runner Python (`runner/libs/`, `corpus/`, `e2e/`, `micro/`) is the stable boundary; do not refactor it for v3 migration.
-- The daemon retains the socket + JSON protocol. It invokes `bpfopt` as an external pure-bytecode CLI and `bpfprof` as an external profiling CLI, while live discovery comes from the daemon-owned `bpfget` library and final ReJIT calls `kernel-sys` directly.
-- Daemon internal `PassManager`, pass code, and profiler are removed; bytecode transformation stays out-of-process in `bpfopt`. The daemon automatically invokes the thin dry-run/verifier-state parser when requested passes need verifier states (`map_inline`, `const_prop`), and it must pass `func_info = None` and `line_info = None`.
+- The daemon retains the socket + JSON protocol. It invokes `bpfopt --pass <name>` as an external pure-bytecode CLI and `bpfprof` as an external profiling CLI, while live discovery comes from the daemon-owned `bpfget` library and every ReJIT call goes through `kernel-sys` directly.
+- Daemon internal `PassManager`, pass code, profiler, thin dry-run module, LoadAttr rebuilds, BTF metadata replay, and pseudo-map fd rewriting are removed. Verifier states for `map_inline` / `const_prop` come only from the previous successful per-pass `BPF_PROG_REJIT(log_level=2)` verifier log.
 - Main `BPF_PROG_REJIT` is a synchronous syscall with no daemon-side timeout; a kernel verifier hang can block the daemon. This limitation is accepted and documented rather than hidden behind a fallback.
 - The only allowed runner Python changes during v3 migration are bug fixes (for example, micro driver baseline regression) and stale test data updates.
 
@@ -60,7 +60,7 @@ Before adding a test, be able to answer: what specific bug would this failure id
 The remaining standalone CLI binary crates (`bpfopt`, `bpfprof`, `bpfrejit-daemon`) must not depend on each other:
 - Runtime composition happens through stdin/stdout pipelines and bash orchestration.
 - Compile-time dependencies between CLI binary crates are forbidden; do not add path-dependencies from one CLI crate to another.
-- `bpfget` is a daemon-owned library crate, not a standalone CLI crate. `bpfverify` and `bpfrejit` crates have been removed; thin dry-run and ReJIT orchestration live inside `bpfrejit-daemon` and call `kernel-sys`.
+- `bpfget` is a daemon-owned library crate, not a standalone CLI crate. `bpfverify` and `bpfrejit` crates have been removed; per-pass ReJIT orchestration lives inside `bpfrejit-daemon` and calls `kernel-sys`.
 - Shared syscall/data access belongs in `kernel-sys`; `bpfrejit-daemon` must not depend on `bpfopt`'s lib portion.
 
 ### Use libbpf-rs/libbpf-sys, Don't Re-Wrap

@@ -777,30 +777,9 @@ pub enum Arch {
 /// Optimization policy configuration.
 #[derive(Clone, Debug, Default)]
 pub struct PolicyConfig {
-    /// Enabled pass name list.
+    /// Enabled pass name list. Empty means "allow all registered passes"; the
+    /// bpfopt CLI supplies exactly one name for single-pass execution.
     pub enabled_passes: Vec<String>,
-}
-
-pub const DEFAULT_ENABLED_PASS_ORDER: &[&str] = &[
-    "map_inline",
-    "const_prop",
-    "dce",
-    "skb_load_bytes_spec",
-    "bounds_check_merge",
-    "wide_mem",
-    "bulk_memory",
-    "rotate",
-    "cond_select",
-    "extract",
-    "endian_fusion",
-    "prefetch",
-];
-
-pub fn default_enabled_passes() -> Vec<String> {
-    DEFAULT_ENABLED_PASS_ORDER
-        .iter()
-        .map(|name| (*name).to_string())
-        .collect()
 }
 
 // ── Type-erased analysis wrapper ────────────────────────────────────
@@ -908,6 +887,10 @@ impl PassManager {
             &ctx.policy.enabled_passes,
             &available_passes,
         )?;
+
+        if ctx.policy.enabled_passes.is_empty() {
+            return Ok(true);
+        }
 
         Ok(ctx
             .policy
@@ -1049,9 +1032,7 @@ impl Default for PassContext {
             kinsn_registry: KinsnRegistry::default(),
             kinsn_call_resolver: Arc::new(StaticKinsnCallResolver),
             platform: PlatformCapabilities::default(),
-            policy: PolicyConfig {
-                enabled_passes: default_enabled_passes(),
-            },
+            policy: PolicyConfig::default(),
             prog_type: 0,
         }
     }
@@ -1078,9 +1059,7 @@ impl PassContext {
             },
             kinsn_call_resolver: Arc::new(StaticKinsnCallResolver),
             platform: PlatformCapabilities::default(),
-            policy: PolicyConfig {
-                enabled_passes: default_enabled_passes(),
-            },
+            policy: PolicyConfig::default(),
             prog_type: 0,
         }
     }

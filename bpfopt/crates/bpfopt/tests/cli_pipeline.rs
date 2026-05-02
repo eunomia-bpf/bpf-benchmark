@@ -184,31 +184,9 @@ fn list_passes_outputs_cli_names_including_experimental_passes() {
 }
 
 #[test]
-fn list_passes_arch_outputs_default_optimize_order() {
-    let output = Command::new(bpfopt_bin())
-        .args(["list-passes", "--arch", "arm64"])
-        .output()
-        .expect("run list-passes --arch");
-
-    assert!(
-        output.status.success(),
-        "stderr={}",
-        String::from_utf8_lossy(&output.stderr)
-    );
-    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
-    let passes = stdout.lines().collect::<Vec<_>>();
-
-    assert_eq!(passes.len(), 12);
-    assert!(!passes.contains(&"ccmp"));
-    assert!(passes.contains(&"const-prop"));
-    assert_eq!(passes.last(), Some(&"prefetch"));
-    assert!(!passes.contains(&"branch-flip"));
-}
-
-#[test]
 fn wide_mem_accepts_stdin_and_writes_instruction_aligned_stdout() {
     let input = minimal_program_bytes();
-    let output = run_bpfopt(&["wide-mem"], &input);
+    let output = run_bpfopt(&["--pass", "wide-mem"], &input);
 
     assert!(
         output.status.success(),
@@ -220,37 +198,25 @@ fn wide_mem_accepts_stdin_and_writes_instruction_aligned_stdout() {
 }
 
 #[test]
-fn optimize_default_pipeline_fails_when_required_side_inputs_are_missing() {
+fn command_requires_single_pass_name() {
     let report_path = temp_path("optimize-report.json");
     let report_arg = report_path.to_string_lossy().to_string();
-    let output = run_bpfopt(
-        &["optimize", "--report", &report_arg],
-        &minimal_program_bytes(),
-    );
+    let output = run_bpfopt(&["--report", &report_arg], &minimal_program_bytes());
 
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(
-        stderr.contains("map-inline requires --verifier-states, --map-values, and --map-ids"),
-        "stderr={stderr}"
-    );
+    assert!(stderr.contains("requires --pass <name>"), "stderr={stderr}");
     assert!(output.stdout.is_empty());
     assert!(!report_path.exists());
     remove_file_if_exists(report_path);
 }
 
 #[test]
-fn optimize_without_target_fails_before_running_kinsn_passes() {
+fn single_kinsn_pass_without_target_fails_before_running() {
     let report_path = temp_path("optimize-kinsn-skip-report.json");
     let report_arg = report_path.to_string_lossy().to_string();
     let output = run_bpfopt(
-        &[
-            "optimize",
-            "--passes",
-            "rotate,cond-select",
-            "--report",
-            &report_arg,
-        ],
+        &["--pass", "rotate", "--report", &report_arg],
         &minimal_program_bytes(),
     );
 
@@ -266,76 +232,8 @@ fn optimize_without_target_fails_before_running_kinsn_passes() {
 }
 
 #[test]
-fn optimize_default_pipeline_with_all_side_inputs_reports_12_entries() {
-    let report_path = temp_path("optimize-full-report.json");
-    let target_path = write_temp_file(
-        "target.json",
-        r#"{
-            "arch":"x86_64",
-            "features":["cmov","movbe","bmi1","bmi2","rorx"],
-            "kinsns":{
-                "bpf_rotate64":{"btf_func_id":1001},
-                "bpf_select64":{"btf_func_id":1002},
-                "bpf_extract64":{"btf_func_id":1003},
-                "bpf_endian_load64":{"btf_func_id":1004},
-                "bpf_bulk_memcpy":{"btf_func_id":1005},
-                "bpf_bulk_memset":{"btf_func_id":1006},
-                "bpf_prefetch":{"btf_func_id":1007}
-            }
-        }"#,
-    );
-    let verifier_path = write_temp_file("verifier-states.json", r#"{"insns":[]}"#);
-    let map_values_path = write_temp_file("map-values.json", r#"{"maps":[]}"#);
-    let report_arg = report_path.to_string_lossy().to_string();
-    let target_arg = target_path.to_string_lossy().to_string();
-    let verifier_arg = verifier_path.to_string_lossy().to_string();
-    let map_values_arg = map_values_path.to_string_lossy().to_string();
-
-    let output = run_bpfopt(
-        &[
-            "optimize",
-            "--target",
-            &target_arg,
-            "--verifier-states",
-            &verifier_arg,
-            "--map-values",
-            &map_values_arg,
-            "--map-ids",
-            "1",
-            "--report",
-            &report_arg,
-        ],
-        &minimal_program_bytes(),
-    );
-    remove_file_if_exists(target_path);
-    remove_file_if_exists(verifier_path);
-    remove_file_if_exists(map_values_path);
-
-    assert!(
-        output.status.success(),
-        "stderr={}",
-        String::from_utf8_lossy(&output.stderr)
-    );
-    let report_text = fs::read_to_string(&report_path).expect("read report");
-    let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
-    remove_file_if_exists(report_path);
-
-    let passes = report["passes"].as_array().expect("passes array");
-    assert_eq!(passes.len(), 12);
-    assert!(passes.iter().any(|pass| pass["pass"] == "const_prop"));
-    assert!(passes.iter().all(|pass| pass["pass"] != "branch_flip"));
-    assert!(passes.iter().any(|pass| pass["pass"] == "prefetch"));
-    assert!(
-        passes
-            .iter()
-            .all(|pass| pass.get("skipped").is_none() && pass.get("reason").is_none()),
-        "report={report}"
-    );
-}
-
-#[test]
 fn invalid_bytecode_length_exits_with_error() {
-    let output = run_bpfopt(&["wide-mem"], &[0u8; 9]);
+    let output = run_bpfopt(&["--pass", "wide-mem"], &[0u8; 9]);
 
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -344,7 +242,7 @@ fn invalid_bytecode_length_exits_with_error() {
 }
 
 #[test]
-fn optimize_map_inline_errors_when_snapshot_key_is_absent() {
+fn map_inline_errors_when_snapshot_key_is_absent() {
     let map_values_path = write_temp_file(
         "map-values-absent-key.json",
         r#"{"maps":[{"map_id":111,"map_type":2,"key_size":4,"value_size":4,"max_entries":8,"frozen":true,"entries":[]}]}"#,
@@ -357,8 +255,7 @@ fn optimize_map_inline_errors_when_snapshot_key_is_absent() {
     let verifier_arg = verifier_path.to_string_lossy().to_string();
     let output = run_bpfopt(
         &[
-            "optimize",
-            "--passes",
+            "--pass",
             "map-inline",
             "--verifier-states",
             &verifier_arg,
@@ -385,7 +282,7 @@ fn optimize_map_inline_errors_when_snapshot_key_is_absent() {
 }
 
 #[test]
-fn optimize_map_inline_skips_hash_lookup_when_snapshot_value_is_null() {
+fn map_inline_skips_hash_lookup_when_snapshot_value_is_null() {
     let report_path = temp_path("map-inline-hash-null-report.json");
     let map_values_path = write_temp_file(
         "map-values-hash-null.json",
@@ -400,8 +297,7 @@ fn optimize_map_inline_skips_hash_lookup_when_snapshot_value_is_null() {
     let verifier_arg = verifier_path.to_string_lossy().to_string();
     let output = run_bpfopt(
         &[
-            "optimize",
-            "--passes",
+            "--pass",
             "map-inline",
             "--report",
             &report_arg,
@@ -426,16 +322,15 @@ fn optimize_map_inline_skips_hash_lookup_when_snapshot_value_is_null() {
     let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
     remove_file_if_exists(report_path);
 
-    let pass = &report["passes"][0];
-    assert_eq!(pass["pass"], "map_inline");
-    assert_eq!(pass["changed"], true);
-    assert_eq!(pass["sites_applied"], 1);
-    assert_eq!(pass["map_inline_records"].as_array().unwrap().len(), 1);
-    assert_eq!(pass["map_inline_records"][0]["key_hex"], "02000000");
+    assert_eq!(report["pass"], "map_inline");
+    assert_eq!(report["changed"], true);
+    assert_eq!(report["sites_applied"], 1);
+    assert_eq!(report["map_inline_records"].as_array().unwrap().len(), 1);
+    assert_eq!(report["map_inline_records"][0]["key_hex"], "02000000");
 }
 
 #[test]
-fn optimize_explicit_kinsn_pass_fails_when_target_lacks_kinsn() {
+fn explicit_kinsn_pass_fails_when_target_lacks_kinsn() {
     let target_path = write_temp_file(
         "empty-target.json",
         r#"{"arch":"x86_64","features":["cmov"],"kinsns":{}}"#,
@@ -445,9 +340,8 @@ fn optimize_explicit_kinsn_pass_fails_when_target_lacks_kinsn() {
     let report_arg = report_path.to_string_lossy().to_string();
     let output = run_bpfopt(
         &[
-            "optimize",
-            "--passes",
-            "wide-mem,rotate",
+            "--pass",
+            "rotate",
             "--target",
             &target_arg,
             "--report",
@@ -469,7 +363,7 @@ fn optimize_explicit_kinsn_pass_fails_when_target_lacks_kinsn() {
 }
 
 #[test]
-fn optimize_bulk_memory_missing_kinsns_fails_with_v3_names() {
+fn bulk_memory_missing_kinsns_fails_with_v3_names() {
     let target_path = write_temp_file(
         "empty-target.json",
         r#"{"arch":"x86_64","features":["cmov"],"kinsns":{}}"#,
@@ -479,8 +373,7 @@ fn optimize_bulk_memory_missing_kinsns_fails_with_v3_names() {
     let report_arg = report_path.to_string_lossy().to_string();
     let output = run_bpfopt(
         &[
-            "optimize",
-            "--passes",
+            "--pass",
             "bulk-memory",
             "--target",
             &target_arg,

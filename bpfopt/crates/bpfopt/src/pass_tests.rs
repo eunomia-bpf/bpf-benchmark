@@ -652,18 +652,6 @@ fn test_invalid_policy_pass_name_is_rejected() {
 }
 
 #[test]
-fn default_enabled_passes_match_default_12_pass_policy() {
-    let passes = default_enabled_passes();
-
-    assert_eq!(passes.len(), 12);
-    assert!(passes.contains(&"map_inline".to_string()));
-    assert!(passes.contains(&"const_prop".to_string()));
-    assert!(passes.contains(&"prefetch".to_string()));
-    assert!(!passes.contains(&"branch_flip".to_string()));
-    assert!(!passes.contains(&"ccmp".to_string()));
-}
-
-#[test]
 fn test_pass_result_skip_reason_counts() {
     let result = PassResult {
         pass_name: "test".into(),

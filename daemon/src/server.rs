@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 //! Unix socket server implementation.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
@@ -80,7 +80,10 @@ impl ReoptimizationState {
         requested_passes: Option<&[String]>,
         result: &commands::OptimizeOneResult,
     ) {
-        if result.status != "ok" || result.inlined_map_entries.is_empty() {
+        if result.status != "ok"
+            || result.error_message.is_some()
+            || result.inlined_map_entries.is_empty()
+        {
             self.enabled_passes_by_prog.remove(&prog_id);
             return;
         }
@@ -363,17 +366,6 @@ fn request_enabled_passes(
     parse_request_pass_list(req, "enabled_passes")
 }
 
-fn required_enabled_passes<'a>(
-    cmd: &str,
-    enabled_passes: &'a Option<Vec<String>>,
-) -> std::result::Result<&'a [String], String> {
-    match enabled_passes.as_deref() {
-        Some([]) => Err(format!("{cmd} requires at least one enabled_passes entry")),
-        Some(passes) => Ok(passes),
-        None => Err(format!("{cmd} requires enabled_passes")),
-    }
-}
-
 fn request_interval_ms(req: &serde_json::Value) -> std::result::Result<u64, String> {
     let value = req
         .get("interval_ms")
@@ -385,6 +377,29 @@ fn request_interval_ms(req: &serde_json::Value) -> std::result::Result<u64, Stri
         return Err("interval_ms must be greater than zero".to_string());
     }
     Ok(interval_ms)
+}
+
+fn request_prog_ids(req: &serde_json::Value) -> std::result::Result<Vec<u32>, String> {
+    let value = req
+        .get("prog_ids")
+        .ok_or_else(|| "missing prog_ids".to_string())?;
+    let array = value
+        .as_array()
+        .ok_or_else(|| "prog_ids must be a JSON integer array".to_string())?;
+    let mut prog_ids = Vec::with_capacity(array.len());
+    for entry in array {
+        let id = entry
+            .as_u64()
+            .ok_or_else(|| "prog_ids entries must be integers".to_string())?;
+        if id == 0 || id > u32::MAX as u64 {
+            return Err(format!("invalid prog_id {id}"));
+        }
+        prog_ids.push(id as u32);
+    }
+    if prog_ids.is_empty() {
+        return Err("prog_ids must not be empty".to_string());
+    }
+    Ok(prog_ids)
 }
 
 fn error_json(message: impl Into<String>) -> serde_json::Value {
@@ -416,10 +431,6 @@ fn process_request(
 
     match cmd {
         "optimize" => {
-            let requested_passes = match required_enabled_passes(cmd, &enabled_passes) {
-                Ok(passes) => passes,
-                Err(message) => return error_json(message),
-            };
             let prog_id = match req.get("prog_id").and_then(|v| v.as_u64()) {
                 Some(id) => id as u32,
                 None => return error_json("missing prog_id"),
@@ -430,20 +441,92 @@ fn process_request(
             match commands::try_apply_one(
                 prog_id,
                 config,
-                Some(requested_passes),
+                enabled_passes.as_deref(),
                 profile_path.as_deref(),
                 Some(tracker),
             ) {
                 Ok(result) => match remember_reoptimization_result(
                     reoptimization_state,
                     prog_id,
-                    Some(requested_passes),
+                    enabled_passes.as_deref(),
                     &result,
                 ) {
                     Ok(()) => serialize_or_error(result),
                     Err(err) => error_json(format!("{err:#}")),
                 },
                 Err(e) => error_json(format!("{e:#}")),
+            }
+        }
+        "optimize-batch" => {
+            let prog_ids = match request_prog_ids(req) {
+                Ok(value) => value,
+                Err(message) => return error_json(message),
+            };
+            let profile_paths = prog_ids
+                .iter()
+                .filter_map(|prog_id| {
+                    profiling_state
+                        .as_ref()
+                        .and_then(|state| state.profile_path_for(*prog_id))
+                        .map(|path| (*prog_id, path))
+                })
+                .collect::<HashMap<_, _>>();
+            match commands::try_apply_many(
+                &prog_ids,
+                config,
+                enabled_passes.as_deref(),
+                &profile_paths,
+                Some(tracker),
+            ) {
+                Ok(outcomes) => {
+                    let mut per_program = BTreeMap::new();
+                    let mut applied = 0usize;
+                    let mut errors = Vec::new();
+                    for outcome in outcomes {
+                        match outcome.result {
+                            Ok(result) => {
+                                if result.summary.applied {
+                                    applied += 1;
+                                }
+                                if let Some(message) = result.error_message.as_deref() {
+                                    errors.push(format!("prog {}: {message}", outcome.prog_id));
+                                }
+                                if let Err(err) = remember_reoptimization_result(
+                                    reoptimization_state,
+                                    outcome.prog_id,
+                                    enabled_passes.as_deref(),
+                                    &result,
+                                ) {
+                                    errors.push(format!("prog {}: {err:#}", outcome.prog_id));
+                                }
+                                per_program.insert(outcome.prog_id, serialize_or_error(result));
+                            }
+                            Err(message) => {
+                                errors.push(format!("prog {}: {message}", outcome.prog_id));
+                                per_program.insert(
+                                    outcome.prog_id,
+                                    serde_json::json!({
+                                        "status": "error",
+                                        "prog_id": outcome.prog_id,
+                                        "error_message": message,
+                                    }),
+                                );
+                            }
+                        }
+                    }
+                    serde_json::json!({
+                        "status": "ok",
+                        "worker_count": commands::default_worker_count(),
+                        "per_program": per_program,
+                        "program_counts": {
+                            "requested": prog_ids.len(),
+                            "applied": applied,
+                            "not_applied": prog_ids.len() - applied,
+                        },
+                        "error_message": errors.join("; "),
+                    })
+                }
+                Err(err) => error_json(format!("{err:#}")),
             }
         }
         "profile-start" => {
@@ -649,6 +732,8 @@ mod tests {
                 total_sites_applied: 1,
                 passes_executed: 1,
                 passes_changed: 1,
+                failed_pass: None,
+                committed_passes_before_failure: None,
             },
             passes: Vec::new(),
             inlined_map_entries: vec![InlinedMapEntry {
@@ -685,31 +770,13 @@ mod tests {
     }
 
     #[test]
-    fn process_request_rejects_optimize_without_enabled_passes() {
-        let response = process_test_request(&serde_json::json!({
-            "cmd": "optimize",
-            "prog_id": 1,
-        }));
+    fn request_prog_ids_rejects_empty_batch() {
+        let err = request_prog_ids(&serde_json::json!({
+            "cmd": "optimize-batch",
+            "prog_ids": [],
+        }))
+        .unwrap_err();
 
-        assert_eq!(response["status"], "error");
-        assert_eq!(
-            response["error_message"],
-            "optimize requires enabled_passes"
-        );
-    }
-
-    #[test]
-    fn process_request_rejects_empty_enabled_passes_for_optimize() {
-        let response = process_test_request(&serde_json::json!({
-            "cmd": "optimize",
-            "prog_id": 1,
-            "enabled_passes": [],
-        }));
-
-        assert_eq!(response["status"], "error");
-        assert_eq!(
-            response["error_message"],
-            "optimize requires at least one enabled_passes entry"
-        );
+        assert_eq!(err, "prog_ids must not be empty");
     }
 }
