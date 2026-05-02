@@ -1008,8 +1008,10 @@ fn eliminate_marked_insns(
     if insns.is_empty() || !deleted.iter().any(|&flag| flag) {
         return None;
     }
+    debug_assert_eq!(insns.len(), deleted.len());
 
     let orig_len = insns.len();
+    let deleted = normalize_ldimm64_deletions(insns, deleted);
     let mut new_insns = Vec::with_capacity(orig_len);
     let mut addr_map = vec![0usize; orig_len + 1];
     let mut pc = 0usize;
@@ -1037,8 +1039,26 @@ fn eliminate_marked_insns(
     }
     addr_map[orig_len] = new_insns.len();
 
-    fixup_surviving_branches(&mut new_insns, insns, &addr_map, deleted);
+    fixup_surviving_branches(&mut new_insns, insns, &addr_map, &deleted);
     Some((new_insns, addr_map))
+}
+
+fn normalize_ldimm64_deletions(insns: &[BpfInsn], deleted: &[bool]) -> Vec<bool> {
+    let mut normalized = deleted.to_vec();
+    let mut pc = 0usize;
+
+    while pc < insns.len() {
+        let width = insn_width(&insns[pc]);
+        let end = (pc + width).min(insns.len());
+        if width == 2 && deleted[pc..end].iter().any(|&flag| flag) {
+            for slot in &mut normalized[pc..end] {
+                *slot = true;
+            }
+        }
+        pc = end;
+    }
+
+    normalized
 }
 
 fn fixup_surviving_branches(
@@ -1156,6 +1176,18 @@ mod tests {
         ]
     }
 
+    fn pseudo_map_value(dst: u8, imm: i32) -> [BpfInsn; 2] {
+        [
+            BpfInsn::new(
+                BPF_LD | BPF_DW | BPF_IMM,
+                BpfInsn::make_regs(dst, BPF_PSEUDO_MAP_VALUE),
+                0,
+                imm,
+            ),
+            BpfInsn::new(0, 0, 0, 0x1234),
+        ]
+    }
+
     fn pseudo_call_to(call_pc: usize, target_pc: usize) -> BpfInsn {
         let imm = target_pc as i64 - (call_pc as i64 + 1);
         BpfInsn::new(
@@ -1261,6 +1293,26 @@ mod tests {
         assert_eq!(new_insns[0].dst_reg(), 0);
         assert_eq!(new_insns[0].off, 0);
         assert_eq!(new_insns[0].imm, 5);
+    }
+
+    #[test]
+    fn test_eliminate_marked_insns_deletes_ldimm64_when_second_slot_is_marked() {
+        let map_value = pseudo_map_value(1, 9);
+        let insns = vec![BpfInsn::ja(2), map_value[0], map_value[1], exit_insn()];
+        let deleted = vec![false, false, true, false];
+
+        let (new_insns, addr_map) =
+            eliminate_marked_insns(&insns, &deleted).expect("LD_IMM64 pair should be deleted");
+
+        assert_eq!(new_insns, vec![BpfInsn::ja(0), exit_insn()]);
+        assert_eq!(addr_map[1], 1);
+        assert_eq!(addr_map[2], 1);
+        assert!(
+            !new_insns
+                .iter()
+                .any(|insn| insn.is_ldimm64() || insn.src_reg() == BPF_PSEUDO_MAP_VALUE),
+            "DCE must not leave either half of a PSEUDO_MAP_VALUE LD_IMM64"
+        );
     }
 
     #[test]

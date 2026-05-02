@@ -150,6 +150,18 @@ mod tests {
         ]
     }
 
+    fn pseudo_map_value(dst: u8, imm: i32) -> [BpfInsn; 2] {
+        [
+            BpfInsn::new(
+                BPF_LD | BPF_DW | BPF_IMM,
+                BpfInsn::make_regs(dst, BPF_PSEUDO_MAP_VALUE),
+                0,
+                imm,
+            ),
+            BpfInsn::new(0, 0, 0, 0x1234),
+        ]
+    }
+
     fn run_dce_pass(program: &mut BpfProgram) -> PipelineResult {
         let mut pm = PassManager::new();
         pm.register_analysis(CFGAnalysis);
@@ -181,6 +193,27 @@ mod tests {
         assert_eq!(result.pass_results[1].pass_name, "dce");
         assert_eq!(result.pass_results[1].sites_applied, 2);
         assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]);
+    }
+
+    #[test]
+    fn dce_removes_unreachable_pseudo_map_value_ldimm64_atomically() {
+        let map_value = pseudo_map_value(1, 9);
+        let mut program = BpfProgram::new(vec![
+            BpfInsn::ja(2),
+            map_value[0],
+            map_value[1],
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ]);
+
+        let result = run_dce_pass(&mut program);
+
+        assert!(result.program_changed);
+        assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 1), exit_insn()]);
+        assert!(
+            !program.insns.iter().any(BpfInsn::is_ldimm64),
+            "unreachable PSEUDO_MAP_VALUE LD_IMM64 must not leave a dangling slot"
+        );
     }
 
     #[test]
