@@ -293,7 +293,7 @@ def _build_run_config_mapping(
     ) = ("",) * 18
     run_bpftool_bin = "bpftool"
     run_native_repos = suite.get("SUITE_DEFAULT_NATIVE_REPOS", "")
-    run_vm_timeout_seconds = suite.get("SUITE_DEFAULT_VM_TIMEOUT_SECONDS", "7200")
+    run_vm_timeout_seconds = suite.get("SUITE_DEFAULT_VM_TIMEOUT_SECONDS", "")
     run_host_python_bin = _env_or_default(values, "PYTHON", "python3")
     run_runtime_python_bin = _env_or_default(values, "RUNTIME_PYTHON", "python3")
     run_remote_python_bin = target.get("TARGET_REMOTE_PYTHON_DEFAULT", suite.get("SUITE_DEFAULT_REMOTE_PYTHON_BIN", ""))

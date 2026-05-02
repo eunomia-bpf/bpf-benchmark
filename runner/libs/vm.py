@@ -113,7 +113,7 @@ def run_in_vm(
     script_path: str | Path,
     cpus: int | None,
     mem: str | None,
-    timeout: int,
+    timeout: int | None,
     *,
     cwd: str | Path | None = None,
     rwdirs: Sequence[str | Path] = (),
@@ -143,7 +143,7 @@ def run_in_vm(
 
 def _run_command_with_script_pty(
     command: list[str],
-    timeout: int,
+    timeout: int | None,
     *,
     stream_output: bool = False,
 ) -> subprocess.CompletedProcess[str]:
@@ -156,12 +156,13 @@ def _run_command_with_script_pty(
         )
     with tempfile.NamedTemporaryFile(prefix="vng-pty-log.", delete=False) as handle:
         log_path = Path(handle.name)
+    effective_timeout = timeout if timeout else None
     try:
         if stream_output:
             completed = subprocess.run(
                 ["script", "-qfec", shlex.join(command), str(log_path)],
                 cwd=ROOT_DIR,
-                timeout=timeout,
+                timeout=effective_timeout,
                 check=False,
             )
             return subprocess.CompletedProcess(command, completed.returncode, "", "")
@@ -170,7 +171,7 @@ def _run_command_with_script_pty(
             cwd=ROOT_DIR,
             capture_output=True,
             text=True,
-            timeout=timeout,
+            timeout=effective_timeout,
             check=False,
         )
         stdout = log_path.read_text(encoding="utf-8", errors="replace") if log_path.exists() else completed.stdout

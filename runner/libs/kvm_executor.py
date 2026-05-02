@@ -149,7 +149,7 @@ def run_vm_suite(workspace_root: Path, config: RunConfig, suite_args: list[str] 
             guest_script,
             _optional_int(config.kvm.cpus),
             config.kvm.mem or None,
-            int(config.kvm.timeout_seconds),
+            _optional_int(config.kvm.timeout_seconds),
             cwd=ROOT_DIR,
             rwdirs=(ROOT_DIR,),
             vm_executable=config.kvm.executable,
