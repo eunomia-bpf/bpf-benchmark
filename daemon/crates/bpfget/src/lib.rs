@@ -79,6 +79,11 @@ pub struct TargetJson {
 pub struct TargetKinsnJson {
     pub btf_func_id: i32,
     pub btf_id: u32,
+    /// 1-based slot in the REJIT fd_array where this BTF module's fd lives.
+    /// call_offset=0 means the function lives in vmlinux BTF (no fd needed).
+    /// Assigned sequentially as new BTF module IDs are discovered during probing.
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    pub call_offset: u32,
 }
 
 struct KinsnProbeTarget {
@@ -256,6 +261,12 @@ fn probe_target_kinsns() -> Result<BTreeMap<String, TargetKinsnJson>> {
     let vmlinux_btf =
         kernel_sys::KernelBtf::load_vmlinux().context("load vmlinux BTF for split BTF probing")?;
 
+    // Maps each distinct BTF module object ID to its 1-based fd_array slot.
+    // vmlinux (btf_id=1 typically) is never a module so it gets call_offset=0.
+    // Module BTF objects are assigned sequential slots in first-seen order.
+    let mut module_slot_map: BTreeMap<u32, u32> = BTreeMap::new();
+    let mut next_slot: u32 = 1;
+
     loop {
         let Some(btf_id) = kernel_sys::btf_get_next_id(start_id)
             .with_context(|| format!("enumerate BTF objects after id {start_id}"))?
@@ -265,16 +276,30 @@ fn probe_target_kinsns() -> Result<BTreeMap<String, TargetKinsnJson>> {
         saw_btf = true;
         start_id = btf_id;
 
-        match kernel_sys::KernelBtf::load_from_kernel_by_id(btf_id) {
-            Ok(btf) => probe_kinsns_in_btf(btf_id, &btf, &mut found)?,
+        // Distinguish vmlinux (loads standalone) from module BTF (split BTF).
+        // If load_from_kernel_by_id succeeds, it is a standalone (vmlinux) BTF
+        // object, which uses call_offset=0.  If it fails and split-BTF loading
+        // succeeds, it is a kernel module BTF, which needs a fd_array slot.
+        let (btf, is_module) = match kernel_sys::KernelBtf::load_from_kernel_by_id(btf_id) {
+            Ok(btf) => (btf, false),
             Err(err) => {
                 let btf = kernel_sys::KernelBtf::load_from_kernel_by_id_split(btf_id, &vmlinux_btf)
                     .with_context(|| {
                         format!("load split BTF id {btf_id}; direct BTF load failed: {err:#}")
                     })?;
-                probe_kinsns_in_btf(btf_id, &btf, &mut found)?;
+                (btf, true)
             }
+        };
+
+        if is_module {
+            module_slot_map.entry(btf_id).or_insert_with(|| {
+                let slot = next_slot;
+                next_slot += 1;
+                slot
+            });
         }
+
+        probe_kinsns_in_btf(btf_id, is_module, &btf, &mut module_slot_map, &mut found)?;
 
         if found.len() == KINSN_PROBE_TARGETS.len() {
             break;
@@ -289,9 +314,18 @@ fn probe_target_kinsns() -> Result<BTreeMap<String, TargetKinsnJson>> {
 
 fn probe_kinsns_in_btf(
     btf_id: u32,
+    is_module: bool,
     btf: &kernel_sys::KernelBtf,
+    module_slot_map: &BTreeMap<u32, u32>,
     found: &mut BTreeMap<String, TargetKinsnJson>,
 ) -> Result<()> {
+    // call_offset=0 for vmlinux (standalone BTF), call_offset=slot for module BTF.
+    let call_offset = if is_module {
+        *module_slot_map.get(&btf_id).unwrap_or(&0)
+    } else {
+        0
+    };
+
     for target in KINSN_PROBE_TARGETS {
         if found.contains_key(target.json_name) {
             continue;
@@ -311,6 +345,7 @@ fn probe_kinsns_in_btf(
                     TargetKinsnJson {
                         btf_func_id,
                         btf_id,
+                        call_offset,
                     },
                 );
                 break;

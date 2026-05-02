@@ -390,7 +390,7 @@ trait KernelOps {
         prog_id: u32,
         snapshot: &bpfget::ProgramSnapshot,
         insns: &[kernel_sys::bpf_insn],
-        fd_array: &[i32],
+        fd_array: &RejitFdArray,
         verifier_log_path: &Path,
     ) -> Result<RejitReport>;
 }
@@ -411,7 +411,7 @@ impl KernelOps for LiveKernelOps {
         prog_id: u32,
         snapshot: &bpfget::ProgramSnapshot,
         insns: &[kernel_sys::bpf_insn],
-        fd_array: &[i32],
+        fd_array: &RejitFdArray,
         verifier_log_path: &Path,
     ) -> Result<RejitReport> {
         rejit_program(prog_id, snapshot, insns, fd_array, verifier_log_path)
@@ -436,17 +436,23 @@ fn rejit_program(
     prog_id: u32,
     snapshot: &bpfget::ProgramSnapshot,
     insns: &[kernel_sys::bpf_insn],
-    fd_array: &[i32],
+    fd_array: &RejitFdArray,
     verifier_log_path: &Path,
 ) -> Result<RejitReport> {
     let prog_fd = kernel_sys::prog_get_fd_by_id(prog_id)
         .with_context(|| format!("open BPF program id {prog_id} for BPF_PROG_REJIT"))?;
     let mut relocated: Vec<kernel_sys::bpf_insn> = insns.to_vec();
-    crate::bpf::relocate_map_fds_for_rejit(&mut relocated, &snapshot.info.map_ids, fd_array)
-        .with_context(|| format!("relocate map fds for prog {prog_id}"))?;
+    // relocate_map_fds_for_rejit expects only map fds (not the prepended BTF fds).
+    crate::bpf::relocate_map_fds_for_rejit(
+        &mut relocated,
+        &snapshot.info.map_ids,
+        fd_array.map_fds_slice(),
+    )
+    .with_context(|| format!("relocate map fds for prog {prog_id}"))?;
     let mut log_buf = vec![0u8; REJIT_LOG_BUF_SIZE];
+    // prog_rejit uses the full fd_array (BTF module fds + map fds).
     if let Err(err) =
-        kernel_sys::prog_rejit(prog_fd.as_fd(), &relocated, fd_array, Some(&mut log_buf))
+        kernel_sys::prog_rejit(prog_fd.as_fd(), &relocated, fd_array.as_slice(), Some(&mut log_buf))
     {
         let log = c_log_string(&log_buf);
         if !log.is_empty() {
@@ -542,10 +548,12 @@ struct TargetJson {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 struct TargetKinsnJson {
     btf_func_id: i32,
+    /// BTF object ID of the module containing this kinsn function.
     #[serde(default)]
     btf_id: u32,
+    /// 1-based fd_array slot for the BTF module fd (0 = vmlinux, no fd needed).
     #[serde(default)]
-    btf_obj_id: u32,
+    call_offset: u32,
 }
 
 pub(crate) fn new_invalidation_tracker() -> SharedInvalidationTracker {
@@ -954,6 +962,7 @@ where
             .with_context(|| format!("build live map value snapshot for prog {prog_id}"))?;
         }
 
+        let mut probed_kinsns: HashMap<String, TargetKinsnJson> = HashMap::new();
         if needs_target(&pass_list) {
             let probed = kernel.probe_target().with_context(|| {
                 format!(
@@ -961,6 +970,18 @@ where
                     join_pass_csv(&pass_list)
                 )
             })?;
+            // Keep kinsns in memory for fd_array construction; also write to file
+            // so bpfopt CLI can read it.
+            for (name, kinsn) in &probed.kinsns {
+                probed_kinsns.insert(
+                    name.clone(),
+                    TargetKinsnJson {
+                        btf_func_id: kinsn.btf_func_id,
+                        btf_id: kinsn.btf_id,
+                        call_offset: kinsn.call_offset,
+                    },
+                );
+            }
             write_json_file(&target_json, &probed)?;
             let missing_kinsns = missing_target_kinsns(&target_json, &pass_list)?;
             if !missing_kinsns.is_empty() {
@@ -971,7 +992,7 @@ where
                 );
             }
         }
-        let fd_array = build_rejit_fd_array(&snapshot.info.map_ids, &mut open_map_fd)
+        let fd_array = build_rejit_fd_array(&snapshot.info.map_ids, &probed_kinsns, &mut open_map_fd)
             .with_context(|| format!("build fd_array for prog {prog_id}"))?;
 
         let wants_branch_flip = pass_list
@@ -1076,7 +1097,7 @@ where
                 prog_id,
                 &snapshot,
                 &pass_insns,
-                fd_array.as_slice(),
+                &fd_array,
                 &pass_verifier_log,
             ) {
                 Ok(report) => report,
@@ -1527,22 +1548,79 @@ fn push_missing_target(
 }
 
 struct RejitFdArray {
+    /// Full fd_array: BTF module fds first (slots 0..btf_count-1),
+    /// then map fds (slots btf_count..len-1).
     fds: Vec<i32>,
+    /// Number of BTF module fds prepended before map fds.
+    btf_count: usize,
     _owned_fds: Vec<OwnedFd>,
 }
 
 impl RejitFdArray {
+    /// Slice passed to BPF_PROG_REJIT: includes both BTF and map fds.
     fn as_slice(&self) -> &[i32] {
         &self.fds
     }
+
+    /// Slice of only the map fds for `relocate_map_fds_for_rejit`.
+    fn map_fds_slice(&self) -> &[i32] {
+        &self.fds[self.btf_count..]
+    }
 }
 
-fn build_rejit_fd_array<F>(map_ids: &[u32], open_map_fd: &mut F) -> Result<RejitFdArray>
+/// Build the fd_array for BPF_PROG_REJIT.
+///
+/// Layout: BTF module fds at positions [0..btf_count-1] (call_offset N →
+/// fd_array[N-1]), followed by map fds at positions [btf_count..].
+/// BTF modules are deduped by btf_id and sorted by call_offset so that
+/// fd_array[call_offset-1] holds the correct module fd.
+fn build_rejit_fd_array<F>(
+    map_ids: &[u32],
+    kinsns: &HashMap<String, TargetKinsnJson>,
+    open_map_fd: &mut F,
+) -> Result<RejitFdArray>
 where
     F: FnMut(u32) -> Result<OwnedFd>,
 {
     let mut fds = Vec::new();
     let mut owned_fds = Vec::new();
+
+    // Collect distinct BTF module objects that have a non-zero call_offset.
+    // Deduplicate by btf_id (multiple kinsns can share a module), then sort
+    // by call_offset so fd_array[call_offset - 1] holds the right module fd.
+    let mut module_entries: Vec<(u32, u32)> = Vec::new(); // (call_offset, btf_id)
+    for kinsn in kinsns.values() {
+        if kinsn.call_offset == 0 || kinsn.btf_id == 0 {
+            continue;
+        }
+        if !module_entries.iter().any(|(_, id)| *id == kinsn.btf_id) {
+            module_entries.push((kinsn.call_offset, kinsn.btf_id));
+        }
+    }
+    module_entries.sort_by_key(|(slot, _)| *slot);
+
+    // Validate: call_offsets must be 1..=N with no gaps.
+    for (expected_slot, (actual_slot, btf_id)) in
+        module_entries.iter().enumerate().map(|(i, e)| (i as u32 + 1, e))
+    {
+        if *actual_slot != expected_slot {
+            bail!(
+                "target.json BTF module call_offsets are not contiguous: \
+                 expected slot {expected_slot} but got slot {actual_slot} for btf_id {btf_id}"
+            );
+        }
+    }
+
+    // Open BTF module fds and prepend them.
+    for (_, btf_id) in &module_entries {
+        let fd = kernel_sys::btf_get_fd_by_id(*btf_id)
+            .with_context(|| format!("open BTF module id {btf_id} for fd_array"))?;
+        fds.push(fd.as_raw_fd());
+        owned_fds.push(fd);
+    }
+    let btf_count = fds.len();
+
+    // Append map fds.
     for &map_id in map_ids {
         let fd = open_map_fd(map_id).with_context(|| format!("open BPF map id {map_id}"))?;
         fds.push(fd.as_raw_fd());
@@ -1551,6 +1629,7 @@ where
 
     Ok(RejitFdArray {
         fds,
+        btf_count,
         _owned_fds: owned_fds,
     })
 }
@@ -1817,14 +1896,17 @@ mod tests {
     #[test]
     fn rejit_fd_array_builder_keeps_map_fds_without_target() {
         let mut opened_maps = Vec::new();
-        let fd_array = build_rejit_fd_array(&[11, 22], &mut |map_id| {
+        let fd_array = build_rejit_fd_array(&[11, 22], &HashMap::new(), &mut |map_id| {
             opened_maps.push(map_id);
             fake_owned_fd()
         })
         .unwrap();
 
         assert_eq!(opened_maps, vec![11, 22]);
+        // No BTF module fds prepended (empty kinsns), 2 map fds.
+        assert_eq!(fd_array.btf_count, 0);
         assert_eq!(fd_array.as_slice().len(), 2);
+        assert_eq!(fd_array.map_fds_slice().len(), 2);
     }
 
     #[test]
@@ -2072,49 +2154,56 @@ mod tests {
                         "bpf_rotate64".to_string(),
                         bpfget::TargetKinsnJson {
                             btf_func_id: 1,
-                            btf_id: 55,
+                            btf_id: 0,
+                            call_offset: 0,
                         },
                     ),
                     (
                         "bpf_select64".to_string(),
                         bpfget::TargetKinsnJson {
                             btf_func_id: 2,
-                            btf_id: 55,
+                            btf_id: 0,
+                            call_offset: 0,
                         },
                     ),
                     (
                         "bpf_extract64".to_string(),
                         bpfget::TargetKinsnJson {
                             btf_func_id: 3,
-                            btf_id: 55,
+                            btf_id: 0,
+                            call_offset: 0,
                         },
                     ),
                     (
                         "bpf_endian_load64".to_string(),
                         bpfget::TargetKinsnJson {
                             btf_func_id: 4,
-                            btf_id: 55,
+                            btf_id: 0,
+                            call_offset: 0,
                         },
                     ),
                     (
                         "bpf_bulk_memcpy".to_string(),
                         bpfget::TargetKinsnJson {
                             btf_func_id: 5,
-                            btf_id: 55,
+                            btf_id: 0,
+                            call_offset: 0,
                         },
                     ),
                     (
                         "bpf_bulk_memset".to_string(),
                         bpfget::TargetKinsnJson {
                             btf_func_id: 6,
-                            btf_id: 55,
+                            btf_id: 0,
+                            call_offset: 0,
                         },
                     ),
                     (
                         "bpf_prefetch".to_string(),
                         bpfget::TargetKinsnJson {
                             btf_func_id: 7,
-                            btf_id: 55,
+                            btf_id: 0,
+                            call_offset: 0,
                         },
                     ),
                 ]),
@@ -2126,7 +2215,7 @@ mod tests {
             prog_id: u32,
             _snapshot: &bpfget::ProgramSnapshot,
             insns: &[kernel_sys::bpf_insn],
-            _fd_array: &[i32],
+            _fd_array: &RejitFdArray,
             verifier_log_path: &Path,
         ) -> Result<RejitReport> {
             self.rejit_calls += 1;
