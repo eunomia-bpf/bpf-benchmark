@@ -19,7 +19,7 @@ This is a fundamental requirement of cross-process ReJIT in user-space, not a v3
 | `PSEUDO_MAP_FD/MAP_VALUE` imm rewrite to daemon-process fd | ✅ **Necessary** | fds are process-local; daemon must replace loader fds with its own |
 | BTF `func_info` / `line_info` normalization | ❌ Not needed | REJIT reuses `prog->aux` BTF metadata; no need to refeed |
 | LoadAttr field reconstruction (prog_type, attach_btf_id, ...) | ❌ Not needed | REJIT inherits all of these from `prog->aux` automatically |
-| PSEUDO src_reg → fd_array index translation | ❌ Not needed here | REJIT accepts both `PSEUDO_MAP_FD imm=fd` and `PSEUDO_MAP_IDX imm=index`; we keep the simpler `PSEUDO_MAP_FD` form with rewritten imm |
+| PSEUDO map fd/index normalization | ✅ Necessary | Cross-process fd form must be rebound to daemon fds; if original bytecode uses `PSEUDO_MAP_IDX`, daemon converts it to fd form using the map-only fd slice so any BTF prefix in the full ReJIT fd_array cannot shift map indexes |
 
 ## Implementation
 
@@ -27,10 +27,11 @@ This is a fundamental requirement of cross-process ReJIT in user-space, not a v3
 
 1. Scan `LD_IMM64` (`code == 0x18`) with `src_reg ∈ {PSEUDO_MAP_FD, PSEUDO_MAP_VALUE}`.
 2. Collect unique `imm` values (stale loader fds) in first-seen order — matches the kernel's `used_maps` order.
-3. Build `old_fd → daemon_fd` map by pairing each unique old fd with `fd_array[i]` (where `fd_array` was already constructed by `build_rejit_fd_array` from `prog_info.map_ids` via `BPF_MAP_GET_FD_BY_ID`).
-4. Patch each matching instruction's `imm` to the daemon's fd. `src_reg` stays as `PSEUDO_MAP_FD/MAP_VALUE`.
+3. Build `old_fd → daemon_fd` map by pairing each unique old fd with `map_fds_slice[i]`, where `map_fds_slice` is the map-only suffix of the ReJIT fd_array. The full fd_array may have a BTF module prefix for kinsn calls; that prefix must not participate in map fd rebinding.
+4. Patch each matching fd-form instruction's `imm` to the daemon's fd. `src_reg` stays as `PSEUDO_MAP_FD/MAP_VALUE`.
+5. Convert `PSEUDO_MAP_IDX` / `PSEUDO_MAP_IDX_VALUE` to fd form using the map-only fd slice, preserving the second `LD_IMM64` word for map-value offsets.
 
-`daemon/src/commands.rs::rejit_program` calls `relocate_map_fds_for_rejit` on a mutable clone of `insns` before invoking `kernel_sys::prog_rejit`. The `RejitFdArray._owned_fds` field already keeps the daemon's `OwnedFd` handles alive across the syscall.
+`daemon/src/commands.rs::rejit_program` calls `relocate_map_fds_for_rejit` on a mutable clone of `insns` before invoking `kernel_sys::prog_rejit`. It passes only `RejitFdArray::map_fds_slice()` to relocation and passes the complete fd_array to `BPF_PROG_REJIT`. The `RejitFdArray._owned_fds` field keeps both BTF and map `OwnedFd` handles alive across the syscall.
 
 ## Code delta
 

@@ -190,8 +190,7 @@ struct TargetJson {
 #[derive(Debug, Deserialize)]
 struct KinsnJson {
     btf_func_id: i32,
-    #[serde(default, alias = "call_off")]
-    call_offset: Option<i16>,
+    call_offset: i16,
     #[serde(default)]
     supported_encodings: Option<SupportedEncodingsJson>,
 }
@@ -777,11 +776,9 @@ fn kinsn_registry_from_target(target: &TargetJson) -> Result<KinsnRegistry> {
     for (name, spec) in &target.kinsns {
         let canonical = canonicalize_kinsn_name(name)?;
         set_kinsn_btf_id(&mut registry, canonical, spec.btf_func_id);
-        if let Some(call_offset) = spec.call_offset {
-            registry
-                .target_call_offsets
-                .insert(canonical.to_string(), call_offset);
-        }
+        registry
+            .target_call_offsets
+            .insert(canonical.to_string(), spec.call_offset);
         if let Some(encodings) = &spec.supported_encodings {
             registry
                 .target_supported_encodings
@@ -1258,7 +1255,7 @@ mod tests {
                     "bpf_bulk_memcpy".to_string(),
                     KinsnJson {
                         btf_func_id: 11,
-                        call_offset: Some(2),
+                        call_offset: 2,
                         supported_encodings: None,
                     },
                 ),
@@ -1266,7 +1263,7 @@ mod tests {
                     "bpf_endian_load64".to_string(),
                     KinsnJson {
                         btf_func_id: 12,
-                        call_offset: None,
+                        call_offset: 0,
                         supported_encodings: None,
                     },
                 ),
@@ -1274,7 +1271,7 @@ mod tests {
                     "bpf_ccmp64".to_string(),
                     KinsnJson {
                         btf_func_id: 13,
-                        call_offset: None,
+                        call_offset: 0,
                         supported_encodings: None,
                     },
                 ),
@@ -1282,7 +1279,7 @@ mod tests {
                     "bpf_prefetch".to_string(),
                     KinsnJson {
                         btf_func_id: 14,
-                        call_offset: Some(7),
+                        call_offset: 7,
                         supported_encodings: None,
                     },
                 ),
@@ -1296,6 +1293,21 @@ mod tests {
         assert_eq!(registry.prefetch_btf_id, 14);
         assert_eq!(registry.call_off_for_target_name("bpf_memcpy_bulk"), 2);
         assert_eq!(registry.call_off_for_target_name("bpf_prefetch"), 7);
+    }
+
+    #[test]
+    fn target_json_requires_call_offset_for_each_kinsn() {
+        let err = serde_json::from_str::<TargetJson>(
+            r#"{
+              "arch": "x86_64",
+              "kinsns": {
+                "bpf_extract64": { "btf_func_id": 129876 }
+              }
+            }"#,
+        )
+        .unwrap_err();
+
+        assert!(err.to_string().contains("call_offset"), "err={err}");
     }
 
     #[test]
