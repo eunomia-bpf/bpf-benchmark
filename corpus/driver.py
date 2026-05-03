@@ -49,6 +49,35 @@ from runner.libs.run_artifacts import (
 DEFAULT_MACRO_APPS_YAML = ROOT_DIR / "corpus" / "config" / "macro_apps.yaml"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_OUTPUT_JSON = ROOT_DIR / "corpus" / "results" / "vm_corpus.json"
+_CORPUS_APPS_ENV = "BPFREJIT_CORPUS_APPS"
+
+
+def _filter_suite_apps(suite: AppSuite) -> AppSuite:
+    """Filter suite apps by BPFREJIT_CORPUS_APPS env var (CSV of app names).
+
+    If the env var is unset or empty, all apps are run.
+    If set, only apps whose name matches one of the CSV tokens are run.
+    Exits 1 if the filter references an app not present in the manifest.
+    """
+    raw = os.environ.get(_CORPUS_APPS_ENV, "").strip()
+    if not raw:
+        return suite
+    requested = [token.strip() for token in raw.split(",") if token.strip()]
+    if not requested:
+        return suite
+    manifest_names = {app.name for app in suite.apps}
+    unknown = [name for name in requested if name not in manifest_names]
+    if unknown:
+        raise SystemExit(
+            f"{_CORPUS_APPS_ENV} references unknown apps: {unknown!r}; "
+            f"available: {sorted(manifest_names)!r}"
+        )
+    from dataclasses import replace as _dc_replace
+    requested_set = set(requested)
+    filtered = _dc_replace(suite, apps=tuple(app for app in suite.apps if app.name in requested_set))
+    return filtered
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the app-native corpus suite driver.")
     parser.add_argument("--suite", default=str(DEFAULT_MACRO_APPS_YAML))
@@ -823,7 +852,7 @@ def build_run_metadata(
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     output_json = Path(args.output_json).resolve()
-    suite = load_app_suite_from_yaml(Path(args.suite).resolve())
+    suite = _filter_suite_apps(load_app_suite_from_yaml(Path(args.suite).resolve()))
     resolved_workload_seconds = _workload_seconds()
     resolved_samples = _sample_count(args)
     run_type = derive_run_type(output_json, "vm_corpus")
