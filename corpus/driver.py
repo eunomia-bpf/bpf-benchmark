@@ -671,7 +671,7 @@ def _run_suite_lifecycle_sessions(
             result.rejit_result = active_daemon_session.apply_rejit(
                 result.rejit_prog_ids,
                 enabled_passes=apply_enabled_passes,
-                failure_artifacts_dir=daemon_session.failure_artifacts_dir,
+                failure_artifacts_dir=prepared_daemon_session.failure_artifacts_dir,
             )
             _print_progress(
                 "rejit_done",
