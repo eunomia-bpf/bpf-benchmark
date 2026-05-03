@@ -170,7 +170,7 @@ impl BpfInsn {
     }
 
     #[inline]
-    pub fn new_raw(code: u8, regs: u8, off: i16, imm: i32) -> Self {
+    fn new_raw(code: u8, regs: u8, off: i16, imm: i32) -> Self {
         let mut inner = kernel_sys::bpf_insn {
             code,
             _bitfield_align_1: [],
