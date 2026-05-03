@@ -2416,25 +2416,6 @@ printf '{"pass":"%s","changed":true,"sites_applied":1,"insn_count_before":1,"ins
         }
     }
 
-    fn test_map(map_type: u32) -> bpfget::MapInfo {
-        bpfget::MapInfo {
-            map_id: 1,
-            map_type,
-            key_size: 4,
-            value_size: 4,
-            max_entries: 1,
-            name: "mock_map".to_string(),
-            map_flags: 0,
-            ifindex: 0,
-            btf_id: 0,
-            btf_key_type_id: 0,
-            btf_value_type_id: 0,
-            btf_vmlinux_value_type_id: 0,
-            btf_vmlinux_id: 0,
-            map_extra: 0,
-        }
-    }
-
     fn exit_insn() -> kernel_sys::bpf_insn {
         kernel_sys::bpf_insn {
             code: (kernel_sys::BPF_JMP | kernel_sys::BPF_EXIT) as u8,
