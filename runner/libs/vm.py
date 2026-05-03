@@ -80,6 +80,7 @@ def build_vng_command(
         "--cwd",
         str(resolved_cwd),
         "--disable-monitor",
+        "--verbose",
         "--cpus",
         str(resolved_cpus),
         "--mem",
