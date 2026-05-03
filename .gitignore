@@ -197,6 +197,14 @@ docs/tmp/*.sh
 corpus/results/*/guest-inputs/
 runner/corpus/results/*/guest-inputs/
 
+# Preserved failure workdirs (raw bytecode + verifier logs from REJIT failures)
+corpus/results/failures/
+e2e/results/failures/
+micro/results/failures/
+bpfrejit-failures/
+**/failures/**/*.bin
+**/failures/**/*.txt
+
 # Corpus smoke runs are scratch outputs; authoritative corpus metadata is tracked separately.
 corpus/results/vm_corpus_*_smoke_*/
 
