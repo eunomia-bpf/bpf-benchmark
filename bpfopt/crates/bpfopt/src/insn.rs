@@ -194,11 +194,6 @@ impl BpfInsn {
     }
 
     #[inline]
-    pub fn set_code(&mut self, code: u8) {
-        self.code = code;
-    }
-
-    #[inline]
     pub fn regs(&self) -> u8 {
         Self::make_regs(self.dst_reg(), self.src_reg())
     }
@@ -221,16 +216,6 @@ impl BpfInsn {
     #[inline]
     pub fn set_src_reg(&mut self, src: u8) {
         self.0.set_src_reg(src & 0xf);
-    }
-
-    #[inline]
-    pub fn set_off(&mut self, off: i16) {
-        self.off = off;
-    }
-
-    #[inline]
-    pub fn set_imm(&mut self, imm: i32) {
-        self.imm = imm;
     }
 
     #[inline]
