@@ -9,6 +9,7 @@ use crate::pass::*;
 
 use super::utils::{
     compose_addr_maps, eliminate_nops, eliminate_unreachable_blocks, fixup_all_branches,
+    insn_width,
 };
 
 /// BPF_PROG_TYPE_SCHED_CLS (TC classifier).
@@ -590,14 +591,6 @@ fn target_pc(pc: usize, off: i16) -> Option<usize> {
     let pc = pc as i64;
     let target = pc + 1 + off as i64;
     (target >= 0).then_some(target as usize)
-}
-
-fn insn_width(insn: &BpfInsn) -> usize {
-    if insn.is_ldimm64() {
-        2
-    } else {
-        1
-    }
 }
 
 #[cfg(test)]

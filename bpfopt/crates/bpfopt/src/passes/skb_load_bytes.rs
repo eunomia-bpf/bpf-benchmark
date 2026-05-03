@@ -7,7 +7,7 @@ use crate::analysis::{BranchTargetAnalysis, BranchTargetResult};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::fixup_all_branches;
+use super::utils::{fixup_all_branches, insn_width};
 
 const BPF_FUNC_SKB_LOAD_BYTES: i32 = kernel_sys::BPF_FUNC_skb_load_bytes as i32;
 
@@ -399,14 +399,6 @@ fn jgt_reg(dst: u8, src: u8, off: i16) -> BpfInsn {
         off,
         0,
     )
-}
-
-fn insn_width(insn: &BpfInsn) -> usize {
-    if insn.is_ldimm64() {
-        2
-    } else {
-        1
-    }
 }
 
 #[cfg(test)]

@@ -8,8 +8,9 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::utils::{
-    emit_packed_kinsn_call_with_off, fixup_all_branches, kinsn_replacement_subprog_skip_reason,
-    map_replacement_range, remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_target,
+    emit_packed_kinsn_call_with_off, fixup_all_branches, insn_width,
+    kinsn_replacement_subprog_skip_reason, map_replacement_range, remap_kinsn_btf_metadata,
+    resolve_kinsn_call_off_for_target,
 };
 
 const MEMCPY_TARGET: &str = "bpf_memcpy_bulk";
@@ -837,14 +838,6 @@ fn combine_ldimm64(lo: &BpfInsn, hi: &BpfInsn) -> i64 {
     let low = lo.imm as u32 as u64;
     let high = hi.imm as u32 as u64;
     i64::from_le_bytes((low | (high << 32)).to_le_bytes())
-}
-
-fn insn_width(insn: &BpfInsn) -> usize {
-    if insn.is_ldimm64() {
-        2
-    } else {
-        1
-    }
 }
 
 #[cfg(test)]
