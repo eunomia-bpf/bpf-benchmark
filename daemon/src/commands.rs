@@ -378,6 +378,7 @@ fn rejit_program(
     // relocate_map_fds_for_rejit expects only map fds (not the prepended BTF fds).
     crate::bpf::relocate_map_fds_for_rejit(
         &mut relocated,
+        &snapshot.insns,
         &snapshot.info.map_ids,
         fd_array.map_fds_slice(),
     )

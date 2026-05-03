@@ -26,13 +26,16 @@ const BPF_PSEUDO_MAP_IDX_VALUE: u8 = 6;
 /// that were the loader process's map fds. The daemon's process has different
 /// fds for the same maps, opened via `BPF_MAP_GET_FD_BY_ID`. This function
 /// patches each `BPF_LD_IMM64` map reference to use the daemon's fd. FD-form
-/// references are mapped by first-seen order against `prog_info.used_maps` /
-/// `fd_array` (the kernel records `used_maps` in the order the verifier first
-/// encountered each map). IDX-form references are converted to FD form using
-/// the map-only fd_array slice so any BTF prefix in the full ReJIT fd_array
-/// cannot shift map indexes.
+/// references are mapped using the first-seen old-fd order from the
+/// original snapshot bytecode, not from the transformed candidate. Optimization
+/// passes may delete early references to a map; recomputing first-seen order
+/// from the candidate would then bind the surviving old fd to the wrong
+/// `prog_info.used_maps` entry. IDX-form references are converted to FD form
+/// using the map-only fd_array slice so any BTF prefix in the full ReJIT
+/// fd_array cannot shift map indexes.
 pub(crate) fn relocate_map_fds_for_rejit(
     insns: &mut [kernel_sys::bpf_insn],
+    original_insns: &[kernel_sys::bpf_insn],
     map_ids: &[u32],
     fd_array: &[i32],
 ) -> Result<()> {
@@ -44,27 +47,14 @@ pub(crate) fn relocate_map_fds_for_rejit(
         );
     }
 
-    let mut unique_old_fds: Vec<i32> = Vec::new();
-    let mut seen: HashMap<i32, ()> = HashMap::new();
-    let mut saw_map_idx = false;
-    let mut i = 0;
-    while i < insns.len() {
-        if insns[i].code == LD_IMM64_CODE {
-            let src_reg = insns[i].src_reg();
-            if src_reg == BPF_PSEUDO_MAP_FD || src_reg == BPF_PSEUDO_MAP_VALUE {
-                let old_fd = insns[i].imm;
-                if let std::collections::hash_map::Entry::Vacant(e) = seen.entry(old_fd) {
-                    unique_old_fds.push(old_fd);
-                    e.insert(());
-                }
-            } else if src_reg == BPF_PSEUDO_MAP_IDX || src_reg == BPF_PSEUDO_MAP_IDX_VALUE {
-                saw_map_idx = true;
-            }
-            i += 2;
-            continue;
-        }
-        i += 1;
-    }
+    let unique_old_fds = collect_fd_form_map_refs(original_insns);
+    let saw_map_idx = insns.iter().any(|insn| {
+        insn.code == LD_IMM64_CODE
+            && matches!(
+                insn.src_reg(),
+                BPF_PSEUDO_MAP_IDX | BPF_PSEUDO_MAP_IDX_VALUE
+            )
+    });
 
     if unique_old_fds.is_empty() && !saw_map_idx {
         return Ok(());
@@ -72,7 +62,7 @@ pub(crate) fn relocate_map_fds_for_rejit(
 
     if unique_old_fds.len() > fd_array.len() {
         bail!(
-            "relocate_map_fds_for_rejit: bytecode references {} maps but fd_array has {} entries",
+            "relocate_map_fds_for_rejit: original bytecode references {} maps but fd_array has {} entries",
             unique_old_fds.len(),
             fd_array.len()
         );
@@ -83,15 +73,19 @@ pub(crate) fn relocate_map_fds_for_rejit(
         fd_map.insert(old_fd, fd_array[idx]);
     }
 
-    i = 0;
+    let mut i = 0;
     while i < insns.len() {
         if insns[i].code == LD_IMM64_CODE {
             let src_reg = insns[i].src_reg();
             if src_reg == BPF_PSEUDO_MAP_FD || src_reg == BPF_PSEUDO_MAP_VALUE {
                 let old_fd = insns[i].imm;
-                if let Some(&new_fd) = fd_map.get(&old_fd) {
-                    insns[i].imm = new_fd;
-                }
+                let Some(&new_fd) = fd_map.get(&old_fd) else {
+                    bail!(
+                        "relocate_map_fds_for_rejit: transformed bytecode references old map fd {} that was not present in original bytecode",
+                        old_fd
+                    );
+                };
+                insns[i].imm = new_fd;
             } else if src_reg == BPF_PSEUDO_MAP_IDX || src_reg == BPF_PSEUDO_MAP_IDX_VALUE {
                 let idx = usize::try_from(insns[i].imm).map_err(|_| {
                     anyhow::anyhow!(
@@ -120,6 +114,28 @@ pub(crate) fn relocate_map_fds_for_rejit(
     }
 
     Ok(())
+}
+
+fn collect_fd_form_map_refs(insns: &[kernel_sys::bpf_insn]) -> Vec<i32> {
+    let mut unique_old_fds = Vec::new();
+    let mut seen: HashMap<i32, ()> = HashMap::new();
+    let mut i = 0;
+    while i < insns.len() {
+        if insns[i].code == LD_IMM64_CODE {
+            let src_reg = insns[i].src_reg();
+            if src_reg == BPF_PSEUDO_MAP_FD || src_reg == BPF_PSEUDO_MAP_VALUE {
+                let old_fd = insns[i].imm;
+                if let std::collections::hash_map::Entry::Vacant(e) = seen.entry(old_fd) {
+                    unique_old_fds.push(old_fd);
+                    e.insert(());
+                }
+            }
+            i += 2;
+            continue;
+        }
+        i += 1;
+    }
+    unique_old_fds
 }
 
 pub(crate) type BpfMapInfo = kernel_sys::bpf_map_info;
@@ -338,7 +354,8 @@ mod tests {
     fn relocate_rewrites_pseudo_map_fd_imm_to_daemon_fd() {
         let pair = make_ld_imm64(0, BPF_PSEUDO_MAP_FD, 4);
         let mut insns = pair.to_vec();
-        relocate_map_fds_for_rejit(&mut insns, &[42], &[7]).unwrap();
+        let original = insns.clone();
+        relocate_map_fds_for_rejit(&mut insns, &original, &[42], &[7]).unwrap();
         assert_eq!(insns[0].imm, 7);
         assert_eq!(insns[0].src_reg(), BPF_PSEUDO_MAP_FD);
     }
@@ -347,7 +364,8 @@ mod tests {
     fn relocate_rewrites_pseudo_map_value_imm() {
         let pair = make_ld_imm64(3, BPF_PSEUDO_MAP_VALUE, 9);
         let mut insns = pair.to_vec();
-        relocate_map_fds_for_rejit(&mut insns, &[55], &[12]).unwrap();
+        let original = insns.clone();
+        relocate_map_fds_for_rejit(&mut insns, &original, &[55], &[12]).unwrap();
         assert_eq!(insns[0].imm, 12);
         assert_eq!(insns[0].src_reg(), BPF_PSEUDO_MAP_VALUE);
     }
@@ -358,16 +376,64 @@ mod tests {
         insns.extend(make_ld_imm64(0, BPF_PSEUDO_MAP_FD, 10));
         insns.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 20));
         insns.extend(make_ld_imm64(2, BPF_PSEUDO_MAP_FD, 10));
-        relocate_map_fds_for_rejit(&mut insns, &[111, 222], &[100, 200]).unwrap();
+        let original = insns.clone();
+        relocate_map_fds_for_rejit(&mut insns, &original, &[111, 222], &[100, 200]).unwrap();
         assert_eq!(insns[0].imm, 100);
         assert_eq!(insns[2].imm, 200);
         assert_eq!(insns[4].imm, 100);
     }
 
     #[test]
+    fn relocate_keeps_original_fd_binding_after_otelcol_dce_deletes_early_map_value_refs() {
+        let mut original: Vec<kernel_sys::bpf_insn> = Vec::new();
+        original.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 41));
+        original.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 25));
+        original.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_VALUE, 42));
+        original.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 24));
+        original.extend(make_ld_imm64(2, BPF_PSEUDO_MAP_FD, 26));
+
+        let mut dce_output: Vec<kernel_sys::bpf_insn> = Vec::new();
+        dce_output.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 41));
+        dce_output.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 25));
+        dce_output.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 24));
+        dce_output.extend(make_ld_imm64(2, BPF_PSEUDO_MAP_FD, 26));
+        dce_output.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_VALUE, 42));
+
+        relocate_map_fds_for_rejit(
+            &mut dce_output,
+            &original,
+            &[489, 466, 490, 465, 471],
+            &[100, 200, 300, 400, 500],
+        )
+        .unwrap();
+
+        assert_eq!(dce_output[0].imm, 100);
+        assert_eq!(dce_output[2].imm, 200);
+        assert_eq!(dce_output[4].imm, 400);
+        assert_eq!(dce_output[6].imm, 500);
+        assert_eq!(dce_output[8].src_reg(), BPF_PSEUDO_MAP_VALUE);
+        assert_eq!(dce_output[8].imm, 300);
+    }
+
+    #[test]
+    fn relocate_rejects_fd_form_map_ref_missing_from_original_snapshot() {
+        let original = make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 10).to_vec();
+        let mut transformed = make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 11).to_vec();
+
+        let err =
+            relocate_map_fds_for_rejit(&mut transformed, &original, &[101], &[201]).unwrap_err();
+
+        assert!(
+            format!("{err:#}").contains("was not present in original bytecode"),
+            "err={err:#}"
+        );
+    }
+
+    #[test]
     fn relocate_ignores_non_pseudo_imm() {
         let mut insns = make_ld_imm64(0, 0, 7).to_vec();
-        relocate_map_fds_for_rejit(&mut insns, &[42], &[99]).unwrap();
+        let original = insns.clone();
+        relocate_map_fds_for_rejit(&mut insns, &original, &[42], &[99]).unwrap();
         assert_eq!(insns[0].imm, 7);
     }
 
@@ -376,7 +442,8 @@ mod tests {
         let mut insns: Vec<kernel_sys::bpf_insn> = Vec::new();
         insns.extend(make_ld_imm64(0, BPF_PSEUDO_MAP_FD, 1));
         insns.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 2));
-        let err = relocate_map_fds_for_rejit(&mut insns, &[42], &[7]).unwrap_err();
+        let original = insns.clone();
+        let err = relocate_map_fds_for_rejit(&mut insns, &original, &[42], &[7]).unwrap_err();
         assert!(format!("{err:#}").contains("references 2 maps"));
     }
 
@@ -386,7 +453,8 @@ mod tests {
         insns.extend(make_ld_imm64(0, BPF_PSEUDO_MAP_IDX, 1));
         insns.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_IDX_VALUE, 0));
 
-        relocate_map_fds_for_rejit(&mut insns, &[11, 22], &[100, 200]).unwrap();
+        let original = insns.clone();
+        relocate_map_fds_for_rejit(&mut insns, &original, &[11, 22], &[100, 200]).unwrap();
 
         assert_eq!(insns[0].src_reg(), BPF_PSEUDO_MAP_FD);
         assert_eq!(insns[0].imm, 200);
@@ -397,7 +465,8 @@ mod tests {
     #[test]
     fn relocate_rejects_pseudo_map_idx_out_of_range() {
         let mut insns = make_ld_imm64(0, BPF_PSEUDO_MAP_IDX, 1).to_vec();
-        let err = relocate_map_fds_for_rejit(&mut insns, &[42], &[7]).unwrap_err();
+        let original = insns.clone();
+        let err = relocate_map_fds_for_rejit(&mut insns, &original, &[42], &[7]).unwrap_err();
         assert!(format!("{err:#}").contains("out of range"), "err={err:#}");
     }
 
@@ -407,6 +476,7 @@ mod tests {
             code: 0x07, // BPF_ALU64 | BPF_K | BPF_ADD
             ..Default::default()
         }];
-        relocate_map_fds_for_rejit(&mut insns, &[], &[]).unwrap();
+        let original = insns.clone();
+        relocate_map_fds_for_rejit(&mut insns, &original, &[], &[]).unwrap();
     }
 }
