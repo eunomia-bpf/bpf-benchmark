@@ -7,7 +7,7 @@ import tempfile
 from pathlib import Path
 from typing import Sequence
 
-from . import ROOT_DIR, docs_tmp_dir, scratch_date_stamp
+from . import ROOT_DIR
 
 
 DEFAULT_GUEST_NOFILE = 65536
@@ -19,27 +19,17 @@ def write_guest_script(
     nofile: int | None = None,
     initial_cwd: str | Path | None = None,
 ) -> Path:
-    scratch_stamp = scratch_date_stamp()
-    script_dir = docs_tmp_dir("guest-scripts", stamp=scratch_stamp)
     handle = tempfile.NamedTemporaryFile(
         mode="w",
         prefix="benchmark-guest-",
         suffix=".sh",
-        dir=script_dir,
         delete=False,
     )
-    # docs/tmp is mounted --rwdir in virtme-ng; use a dated vm-tmp subdirectory so
-    # Python's tempfile module (and any subprocesses) can create temp files even
-    # when the VM's /tmp is read-only (virtme-ng only mounts specific --rwdir paths).
-    vm_tmp_dir = docs_tmp_dir("vm-tmp", stamp=scratch_stamp)
     resolved_initial_cwd = Path(initial_cwd).resolve() if initial_cwd is not None else ROOT_DIR
     with handle:
         handle.write("#!/bin/bash\nset -eu\n")
         handle.write(f"cd {shlex.quote(str(resolved_initial_cwd))}\n")
         handle.write('export PATH="/usr/local/sbin:$PATH"\n')
-        handle.write(f"mkdir -p {shlex.quote(str(vm_tmp_dir))}\n")
-        handle.write(f"chmod 1777 {shlex.quote(str(vm_tmp_dir))}\n")
-        handle.write(f"export TMPDIR={shlex.quote(str(vm_tmp_dir))}\n")
         if nofile is not None:
             handle.write(f"ulimit -HSn {int(nofile)}\n")
         for command in commands:
@@ -94,7 +84,7 @@ def build_vng_command(
         "--mem",
         resolved_mem,
     ]
-    rwdir_values = [ROOT_DIR / "docs" / "tmp", resolved_cwd]
+    rwdir_values = [resolved_cwd]
     rwdir_values.extend(Path(value).resolve() for value in rwdirs)
     seen: set[Path] = set()
     for rwdir in rwdir_values:
@@ -102,6 +92,7 @@ def build_vng_command(
             continue
         seen.add(rwdir)
         command.extend(["--rwdir", str(rwdir)])
+    command.extend(["--overlay-rwdir", "/tmp"])
     for network in networks:
         command.extend(["--network", str(network)])
     command.extend(["--exec", exec_path])

@@ -5,6 +5,7 @@ import argparse
 import json
 import math
 import os
+import signal
 import sys
 from collections import Counter
 from dataclasses import dataclass
@@ -724,7 +725,56 @@ def _run_suite_lifecycle_sessions(
     return lifecycle_results, fatal_error
 
 
-def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
+def _sanitize_app_filename(app_name: str) -> str:
+    """Return a filesystem-safe filename stem for an app name (slashes become double underscores)."""
+    return app_name.replace("/", "__")
+
+
+def _write_incremental_app_result(
+    run_dir: Path,
+    app_name: str,
+    result: dict[str, object],
+    apps_done: int,
+    total_apps: int,
+) -> None:
+    """Write per-app JSON and update progress.json + metadata.json after each app completes."""
+    safe_name = _sanitize_app_filename(app_name)
+    apps_dir = run_dir / "details" / "apps"
+    apps_dir.mkdir(parents=True, exist_ok=True)
+    app_path = apps_dir / f"{safe_name}.json"
+    app_path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+
+    progress_path = run_dir / "details" / "progress.json"
+    progress: dict[str, object] = {}
+    if progress_path.exists():
+        try:
+            progress = json.loads(progress_path.read_text())
+        except (OSError, json.JSONDecodeError):
+            progress = {}
+    progress["apps_done"] = apps_done
+    progress["total_apps"] = total_apps
+    progress["last_app"] = app_name
+    progress["last_app_status"] = str(result.get("status") or "error")
+    progress["last_updated_at"] = datetime.now(timezone.utc).isoformat()
+    progress_path.write_text(json.dumps(progress, indent=2, sort_keys=True) + "\n")
+
+    metadata_path = run_dir / "metadata.json"
+    if metadata_path.exists():
+        try:
+            metadata: dict[str, object] = json.loads(metadata_path.read_text())
+        except (OSError, json.JSONDecodeError):
+            metadata = {}
+        metadata["last_updated_at"] = datetime.now(timezone.utc).isoformat()
+        metadata_path.write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n")
+
+
+def run_suite(
+    args: argparse.Namespace,
+    suite: AppSuite,
+    *,
+    artifact_session: "ArtifactSession | None" = None,
+    partial_results: "dict[str, dict[str, object]] | None" = None,
+) -> dict[str, object]:
     suite_path = suite.manifest_path.resolve()
     daemon_binary = Path(args.daemon).resolve()
     if not daemon_binary.exists():
@@ -735,8 +785,7 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
     results_by_name: dict[str, dict[str, object]] = {}
     completed_apps: set[str] = set()
     fatal_error = ""
-
-    output_json = Path(args.output_json).resolve()
+    total_apps = len(suite.apps)
 
     with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn)) as daemon_session:
         prepared_daemon_session = prepare_daemon_session(daemon_session)
@@ -746,6 +795,7 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
                 _print_progress("app_start", app=app.name, runner=app.runner, workload=app.workload_for("corpus"))
                 app_workload_seconds = _app_workload_seconds(args, app)
                 runner: AppRunner | None = None
+                result: dict[str, object] | None = None
                 try:
                     runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
                     started_prog_ids = [int(value) for value in runner.start() if int(value) > 0]
@@ -794,6 +844,20 @@ def run_suite(args: argparse.Namespace, suite: AppSuite) -> dict[str, object]:
                     completed_apps.add(app.name)
                     _print_progress("app_done", app=app.name, status=result.get("status"),
                                     error=result.get("error"))
+                if result is not None:
+                    if partial_results is not None:
+                        partial_results[app.name] = result
+                    if artifact_session is not None:
+                        try:
+                            _write_incremental_app_result(
+                                artifact_session.run_dir,
+                                app.name,
+                                result,
+                                apps_done=len(completed_apps),
+                                total_apps=total_apps,
+                            )
+                        except Exception as write_exc:
+                            _print_progress("incremental_write_error", app=app.name, error=str(write_exc))
                 daemon_error = _daemon_exit_error(daemon_session)
                 if daemon_error is not None:
                     fatal_error = daemon_error
@@ -849,6 +913,57 @@ def build_run_metadata(
     return metadata
 
 
+def _finalize_partial(
+    session: "ArtifactSession",
+    suite: "AppSuite",
+    partial_results: dict[str, dict[str, object]],
+    *,
+    error_message: str,
+    fatal_error: str = "",
+) -> dict[str, object]:
+    """Build and write a partial result payload from whatever per-app results were collected."""
+    results: list[dict[str, object]] = []
+    for app in suite.apps:
+        if app.name in partial_results:
+            results.append(partial_results[app.name])
+        else:
+            results.append(
+                _build_app_error_result(
+                    app,
+                    error=fatal_error or "corpus run terminated before this app was reached",
+                )
+            )
+    per_program, summary = _build_corpus_summary(results)
+    payload: dict[str, object] = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "suite_name": getattr(suite, "suite_name", ""),
+        "samples": 0,
+        "workload_seconds": 0.0,
+        "results": results,
+        "per_program": per_program,
+        "summary": summary,
+        "status": "error",
+        "partial": True,
+    }
+    if fatal_error:
+        payload["fatal_error"] = fatal_error
+    payload = compact_rejit_results_for_artifact(payload)
+    markdown = build_markdown(payload) + "\n"
+    session.write(
+        status="error",
+        progress_payload={
+            "suite": "corpus",
+            "status": "error",
+            "failed_at": datetime.now(timezone.utc).isoformat(),
+            "error_message": error_message,
+        },
+        result_payload=payload,
+        detail_texts={"result.md": markdown},
+        error_message=error_message,
+    )
+    return payload
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     output_json = Path(args.output_json).resolve()
@@ -891,8 +1006,30 @@ def main(argv: list[str] | None = None) -> int:
     )
     session.write(status="running", progress_payload=progress_payload)
 
+    # State shared between the main execution path and the SIGTERM handler.
+    _partial_results: dict[str, dict[str, object]] = {}
+    _sigterm_received: list[bool] = [False]
+
+    def _sigterm_handler(signum: int, frame: object) -> None:
+        _sigterm_received[0] = True
+        _print_progress("sigterm_received", signal=signum)
+        try:
+            _finalize_partial(
+                session,
+                suite,
+                _partial_results,
+                error_message="corpus run terminated by SIGTERM",
+                fatal_error="SIGTERM received",
+            )
+        except Exception as finalize_exc:
+            _print_progress("sigterm_finalize_error", error=str(finalize_exc))
+        raise SystemExit(130)
+
+    signal.signal(signal.SIGTERM, _sigterm_handler)
+
     try:
-        payload = run_suite(args, suite)
+        payload = run_suite(args, suite, artifact_session=session, partial_results=_partial_results)
+
         payload = compact_rejit_results_for_artifact(payload)
         markdown = build_markdown(payload) + "\n"
         payload_status = str(payload.get("status") or "error").lower()
@@ -933,15 +1070,12 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0 if payload_status == "ok" else 1
     except Exception as exc:
-        session.write(
-            status="error",
-            progress_payload={
-                "suite": "corpus",
-                "status": "error",
-                "failed_at": datetime.now(timezone.utc).isoformat(),
-                "error_message": str(exc),
-            },
-            error_message=str(exc),
+        exc_message = str(exc)
+        _finalize_partial(
+            session,
+            suite,
+            _partial_results,
+            error_message=exc_message,
         )
         raise
 
