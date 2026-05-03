@@ -788,8 +788,9 @@ def run_suite(
     fatal_error = ""
     total_apps = len(suite.apps)
 
-    with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn)) as daemon_session:
-        failure_artifacts_dir = artifact_session.run_dir / "details" if artifact_session is not None else None
+    daemon_log_dir = artifact_session.run_dir / "details" if artifact_session is not None else None
+    with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn), log_dir=daemon_log_dir) as daemon_session:
+        failure_artifacts_dir = daemon_log_dir
         prepared_daemon_session = prepare_daemon_session(
             daemon_session,
             failure_artifacts_dir=failure_artifacts_dir,

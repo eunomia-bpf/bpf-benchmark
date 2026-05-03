@@ -715,11 +715,18 @@ _DAEMON_SOCKET_PATH = Path("/var/tmp/bpfrejit-daemon.sock")
 
 def _start_daemon_server(
     daemon_binary: Path | str,
+    *,
+    log_dir: Path | None = None,
 ) -> tuple[subprocess.Popen[str], Path, str, Path, Path]:
     socket_dir = tempfile.mkdtemp(prefix="bd-", dir=str(_daemon_runtime_root()))
     socket_path = _DAEMON_SOCKET_PATH
-    stdout_path = Path(socket_dir) / "daemon.stdout.log"
-    stderr_path = Path(socket_dir) / "daemon.stderr.log"
+    if log_dir is not None:
+        log_dir.mkdir(parents=True, exist_ok=True)
+        stdout_path = log_dir / "daemon.stdout.log"
+        stderr_path = log_dir / "daemon.stderr.log"
+    else:
+        stdout_path = Path(socket_dir) / "daemon.stdout.log"
+        stderr_path = Path(socket_dir) / "daemon.stderr.log"
     cmd = [str(daemon_binary)]
     with stdout_path.open("w", encoding="utf-8") as out, stderr_path.open("w", encoding="utf-8") as err:
         proc = subprocess.Popen(cmd, stdout=out, stderr=err, text=True)
@@ -907,11 +914,12 @@ class DaemonSession:
         daemon_binary: Path | str,
         *,
         load_kinsn: bool = False,
+        log_dir: Path | None = None,
     ) -> "DaemonSession":
         from .kinsn import prepare_kinsn_modules  # noqa: PLC0415
         binary = Path(daemon_binary).resolve()
         kinsn_metadata: dict[str, object] = dict(prepare_kinsn_modules()) if load_kinsn else {}
-        proc, socket_path, socket_dir, stdout_path, stderr_path = _start_daemon_server(binary)
+        proc, socket_path, socket_dir, stdout_path, stderr_path = _start_daemon_server(binary, log_dir=log_dir)
         if load_kinsn:
             kinsn_metadata["daemon_binary"] = str(binary)
         return cls(daemon_binary=binary, proc=proc, socket_path=socket_path, socket_dir=socket_dir,

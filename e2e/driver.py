@@ -272,7 +272,7 @@ def main(argv: list[str] | None = None) -> int:
         failed: list[str] = []
         daemon_binary = Path(args.daemon).resolve()
         e2e_output_json = resolve_primary_output_json(args)
-        with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn)) as daemon_session:
+        with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn), log_dir=resolve_primary_output_json(args).parent) as daemon_session:
             prepared = prepare_daemon_session(daemon_session)
             for index, case_name in enumerate(cases_to_run):
                 print(f"\n{'='*60}")
@@ -298,7 +298,7 @@ def main(argv: list[str] | None = None) -> int:
     apply_case_defaults(args)
     daemon_binary = Path(args.daemon).resolve()
     single_output_json = resolve_primary_output_json(args)
-    with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn)) as daemon_session:
+    with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn), log_dir=resolve_primary_output_json(args).parent) as daemon_session:
         prepared = prepare_daemon_session(daemon_session)
         _run_single_case(args, prepared_daemon_session=prepared)
     return 0
