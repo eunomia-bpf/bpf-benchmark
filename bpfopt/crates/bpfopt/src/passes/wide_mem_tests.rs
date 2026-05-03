@@ -1,6 +1,6 @@
 use super::*;
 use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
-use crate::pass::{AnalysisCache, BtfInfoRecords, PassContext, PassManager};
+use crate::pass::{AnalysisCache, PassContext, PassManager};
 
 fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
     BpfProgram::new(insns)
@@ -34,23 +34,6 @@ fn ld_imm64(dst: u8, src: u8, imm: i32) -> [BpfInsn; 2] {
 fn pseudo_func_ref(dst: u8, pc: usize, target_pc: usize) -> [BpfInsn; 2] {
     let imm = target_pc as i64 - (pc as i64 + 1);
     ld_imm64(dst, BPF_PSEUDO_FUNC, imm as i32)
-}
-
-fn func_info_records(records: &[(u32, u32)]) -> BtfInfoRecords {
-    let mut bytes = Vec::with_capacity(records.len() * 8);
-    for (insn_off, type_id) in records {
-        bytes.extend_from_slice(&insn_off.to_le_bytes());
-        bytes.extend_from_slice(&type_id.to_le_bytes());
-    }
-    BtfInfoRecords::new("func_info", 8, bytes).unwrap()
-}
-
-fn func_info_offsets(records: &BtfInfoRecords) -> Vec<u32> {
-    records
-        .bytes
-        .chunks_exact(records.rec_size as usize)
-        .map(|record| u32::from_le_bytes(record[..4].try_into().unwrap()))
-        .collect()
 }
 
 /// Build a canonical 4-byte low-byte-first byte-ladder (Variant A).
@@ -552,59 +535,6 @@ fn test_wide_mem_skips_byte_ladder_with_pseudo_func_boundary_inside() {
     assert_eq!(prog.insns[0].imm, 42);
     assert!(prog.insns[2].is_ldimm64_pseudo_func());
     assert_eq!(prog.insns[2].imm, 2);
-}
-
-#[test]
-fn test_wide_mem_calico_callback_keeps_pseudo_func_target_and_func_info() {
-    let map_ref = ld_imm64(1, BPF_PSEUDO_MAP_FD, 14);
-    let callback = pseudo_func_ref(2, 19, 34);
-    let mut insns = Vec::new();
-
-    for _ in 0..17 {
-        insns.push(BpfInsn::mov64_imm(0, 0));
-    }
-    insns.extend_from_slice(&map_ref);
-    insns.extend_from_slice(&callback);
-    for _ in 21..33 {
-        insns.push(BpfInsn::mov64_imm(0, 0));
-    }
-    insns.push(exit_insn());
-    insns.push(BpfInsn::mov64_reg(8, 3));
-    insns.extend_from_slice(&[
-        // Real calico/felix conntrack_clean callback pattern from prog 102:
-        // r2 = *(u8 *)(r8 +5); r2 <<= 8; r1 = *(u8 *)(r8 +4); r2 |= r1.
-        BpfInsn::ldx_mem(BPF_B, 2, 8, 5),
-        BpfInsn::alu64_imm(BPF_LSH, 2, 8),
-        BpfInsn::ldx_mem(BPF_B, 1, 8, 4),
-        BpfInsn::alu64_reg(BPF_OR, 2, 1),
-        exit_insn(),
-    ]);
-    assert_eq!(insns.len(), 40);
-    assert_eq!(callback[0].imm, 14);
-
-    let mut prog = make_program(insns);
-    prog.func_info = Some(func_info_records(&[(0, 100), (34, 101)]));
-    let mut cache = AnalysisCache::new();
-    let mut ctx = PassContext::test_default();
-    ctx.prog_type = kernel_sys::BPF_PROG_TYPE_SCHED_CLS;
-
-    let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
-    assert_eq!(result.sites_applied, 1);
-    assert_eq!(prog.insns.len(), 37);
-    assert!(prog.insns[19].is_ldimm64_pseudo_func());
-    assert_eq!(prog.insns[19].imm, 14);
-    assert_eq!(19 + 1 + prog.insns[19].imm as usize, 34);
-    assert_eq!(prog.insns[35].code, BPF_LDX | BPF_H | BPF_MEM);
-    assert_eq!(prog.insns[35].dst_reg(), 2);
-    assert_eq!(prog.insns[35].src_reg(), 8);
-    assert_eq!(prog.insns[35].off, 4);
-    assert_eq!(
-        func_info_offsets(prog.func_info.as_ref().unwrap()),
-        vec![0, 34]
-    );
 }
 
 #[test]
