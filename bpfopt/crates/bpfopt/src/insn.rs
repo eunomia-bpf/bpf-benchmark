@@ -66,6 +66,8 @@ pub const BPF_EXIT: u8 = kernel_sys::BPF_EXIT as u8;
 // ── Pseudo source-register tags ────────────────────────────────────
 pub const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 pub const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
+pub const BPF_PSEUDO_MAP_IDX: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX as u8;
+pub const BPF_PSEUDO_MAP_IDX_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX_VALUE as u8;
 pub const BPF_PSEUDO_CALL: u8 = kernel_sys::BPF_PSEUDO_CALL as u8;
 #[cfg(test)]
 pub const BPF_PSEUDO_KFUNC_CALL: u8 = kernel_sys::BPF_PSEUDO_KFUNC_CALL as u8;

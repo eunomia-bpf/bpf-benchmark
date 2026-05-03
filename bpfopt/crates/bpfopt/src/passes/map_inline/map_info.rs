@@ -15,6 +15,7 @@ const BPF_MAP_TYPE_LRU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_HASH;
 #[cfg(test)]
 const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
 const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
+const BPF_PSEUDO_MAP_IDX: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX as u8;
 
 /// Runtime metadata for a live kernel map referenced by the program.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -73,7 +74,7 @@ impl MapInfo {
 pub struct MapReference {
     pub pc: usize,
     pub dst_reg: u8,
-    pub old_fd: i32,
+    pub imm: i32,
     pub map_index: usize,
     pub map_id: Option<u32>,
     pub info: Option<MapInfo>,
@@ -93,7 +94,7 @@ impl MapInfoResult {
     }
 }
 
-/// Analysis that resolves `BPF_PSEUDO_MAP_FD` references back to live maps.
+/// Analysis that resolves pseudo-map references back to live maps.
 pub struct MapInfoAnalysis;
 
 type MapInfoAnalysisResult<T> = std::result::Result<T, String>;
@@ -129,8 +130,9 @@ where
     collect_map_references_with_bindings(insns, map_ids, &HashMap::new(), resolver)
 }
 
-/// Scan the instruction stream and resolve each unique map reference, using a
-/// stable `old_fd -> map_id` binding table when available.
+/// Scan the instruction stream and resolve each unique map reference. FD-form
+/// references use a stable `old_fd -> map_id` binding table when available;
+/// IDX-form references already carry canonical map indexes.
 pub fn collect_map_references_with_bindings<F>(
     insns: &[BpfInsn],
     map_ids: &[u32],
@@ -148,21 +150,37 @@ where
     let mut pc = 0usize;
     while pc < insns.len() {
         let insn = &insns[pc];
-        if insn.is_ldimm64() && pc + 1 < insns.len() && insn.src_reg() == BPF_PSEUDO_MAP_FD {
-            let old_fd = insn.imm;
-            let map_index = match old_fd_to_index.get(&old_fd) {
-                Some(&index) => index,
-                None => {
-                    let index = unique_old_fds.len();
-                    unique_old_fds.push(old_fd);
-                    old_fd_to_index.insert(old_fd, index);
-                    index
+        if insn.is_ldimm64() && pc + 1 < insns.len() && is_map_reference_src(insn.src_reg()) {
+            let map_index = if insn.src_reg() == BPF_PSEUDO_MAP_IDX {
+                usize::try_from(insn.imm)
+                    .map_err(|_| format!("negative pseudo-map index {} at pc {}", insn.imm, pc))?
+            } else {
+                let old_fd = insn.imm;
+                match old_fd_to_index.get(&old_fd) {
+                    Some(&index) => index,
+                    None => {
+                        let index = unique_old_fds.len();
+                        unique_old_fds.push(old_fd);
+                        old_fd_to_index.insert(old_fd, index);
+                        index
+                    }
                 }
             };
-            let map_id = map_fd_bindings
-                .get(&old_fd)
-                .copied()
-                .or_else(|| map_ids.get(map_index).copied());
+            let map_id = if insn.src_reg() == BPF_PSEUDO_MAP_IDX {
+                Some(*map_ids.get(map_index).ok_or_else(|| {
+                    format!(
+                        "pseudo-map index {} at pc {} out of range for {} map ids",
+                        map_index,
+                        pc,
+                        map_ids.len()
+                    )
+                })?)
+            } else {
+                map_fd_bindings
+                    .get(&insn.imm)
+                    .copied()
+                    .or_else(|| map_ids.get(map_index).copied())
+            };
             let info = match resolved_by_index.get(&map_index) {
                 Some(info) => info.clone(),
                 None => {
@@ -178,7 +196,7 @@ where
             references.push(MapReference {
                 pc,
                 dst_reg: insn.dst_reg(),
-                old_fd,
+                imm: insn.imm,
                 map_index,
                 map_id,
                 info,
@@ -191,7 +209,10 @@ where
         pc += if insn.is_ldimm64() { 2 } else { 1 };
     }
 
-    let unique_maps = (0..unique_old_fds.len())
+    let mut resolved_indexes = resolved_by_index.keys().copied().collect::<Vec<_>>();
+    resolved_indexes.sort_unstable();
+    let unique_maps = resolved_indexes
+        .into_iter()
         .filter_map(|index| resolved_by_index.get(&index).cloned().flatten())
         .collect();
 
@@ -199,6 +220,10 @@ where
         references,
         unique_maps,
     })
+}
+
+fn is_map_reference_src(src_reg: u8) -> bool {
+    src_reg == BPF_PSEUDO_MAP_FD || src_reg == BPF_PSEUDO_MAP_IDX
 }
 
 #[cfg(test)]
@@ -419,8 +444,27 @@ mod tests {
         .expect("map reference collection should succeed");
 
         assert_eq!(result.references.len(), 1);
-        assert_eq!(result.references[0].old_fd, 11);
+        assert_eq!(result.references[0].imm, 11);
         assert_eq!(result.references[0].map_id, Some(202));
+    }
+
+    #[test]
+    fn map_info_analysis_resolves_canonical_idx_refs_by_map_id_order() {
+        let ld0 = make_ld_imm64(1, BPF_PSEUDO_MAP_IDX, 1);
+        let ld1 = make_ld_imm64(2, BPF_PSEUDO_MAP_IDX, 0);
+        let program = BpfProgram::new(vec![ld0[0], ld0[1], ld1[0], ld1[1]]);
+
+        let result = collect_map_references(&program.insns, &[101, 202], |map_id| {
+            Ok(Some(array_map(map_id, 4)))
+        })
+        .expect("canonical IDX references should resolve through map_ids");
+
+        assert_eq!(result.references.len(), 2);
+        assert_eq!(result.references[0].map_index, 1);
+        assert_eq!(result.references[0].map_id, Some(202));
+        assert_eq!(result.references[1].map_index, 0);
+        assert_eq!(result.references[1].map_id, Some(101));
+        assert_eq!(result.unique_maps.len(), 2);
     }
 
     #[test]

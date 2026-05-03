@@ -27,6 +27,11 @@ pub use libbpf_sys::*;
 /// `__MAX_BPF_CMD` in the forked UAPI.
 pub const BPF_PROG_REJIT: u32 = 39;
 
+/// Pseudo source-register tags that are present in the fork kernel UAPI but
+/// are not emitted by libbpf-sys bindings.
+pub const BPF_PSEUDO_MAP_IDX: u32 = 5;
+pub const BPF_PSEUDO_MAP_IDX_VALUE: u32 = 6;
+
 pub const BPF_FUNC_GET_BRANCH_SNAPSHOT: bpf_func_id = BPF_FUNC_get_branch_snapshot;
 pub const BRANCH_SNAPSHOT_MAX_ENTRIES: usize = 32;
 pub const BRANCH_SNAPSHOT_ENTRY_SIZE: usize = std::mem::size_of::<perf_branch_entry>();

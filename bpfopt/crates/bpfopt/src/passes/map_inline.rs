@@ -19,6 +19,8 @@ const BPF_MAP_TYPE_LRU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_HASH;
 const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
 const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
+const BPF_PSEUDO_MAP_IDX: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX as u8;
+const BPF_PSEUDO_MAP_IDX_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX_VALUE as u8;
 const HELPER_MAP_LOOKUP_ELEM: i32 = 1;
 const HELPER_KTIME_GET_NS: i32 = 5;
 const R2_SETUP_LOOKBACK_LIMIT: usize = 8;
@@ -104,10 +106,16 @@ type DirectMapValueLoadRewrites = (BTreeMap<usize, Vec<BpfInsn>>, usize, Vec<Str
 enum KeyPointerOrigin {
     Stack(i16),
     MapValue {
-        old_fd: i32,
+        map_ref: MapRefKey,
         value_off: i32,
         ldimm_pc: usize,
     },
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+struct MapRefKey {
+    src_reg: u8,
+    imm: i32,
 }
 
 /// Find all `bpf_map_lookup_elem()` call sites in the instruction stream.
@@ -719,8 +727,8 @@ fn run_map_inline_round(
             continue;
         };
         log_map_inline_debug(&format!(
-            "site at PC={}: map_ref old_fd={} map_index={} map_id={:?}",
-            site.call_pc, map_ref.old_fd, map_ref.map_index, map_ref.map_id
+            "site at PC={}: map_ref imm={} map_index={} map_id={:?}",
+            site.call_pc, map_ref.imm, map_ref.map_index, map_ref.map_id
         ));
         let Some(info) = map_ref.info.as_ref() else {
             let reason = "map info unavailable".to_string();
@@ -1257,7 +1265,7 @@ fn build_direct_map_value_load_rewrites(
     let mut replacements = BTreeMap::new();
     let mut sites_applied = 0usize;
     let mut diagnostics = Vec::new();
-    let mut map_cache: HashMap<i32, Option<FrozenMapValue>> = HashMap::new();
+    let mut map_cache: HashMap<MapRefKey, Option<FrozenMapValue>> = HashMap::new();
     let mut pc = 0usize;
 
     while pc < program.insns.len() {
@@ -1270,11 +1278,11 @@ fn build_direct_map_value_load_rewrites(
         let bounds = subprog_bounds(&program.insns, pc);
         let origin = match resolve_key_pointer_origin(&program.insns, pc, insn.src_reg(), bounds) {
             Ok(KeyPointerOrigin::MapValue {
-                old_fd, value_off, ..
-            }) => Some((old_fd, value_off)),
+                map_ref, value_off, ..
+            }) => Some((map_ref, value_off)),
             _ => None,
         };
-        let Some((old_fd, value_off)) = origin else {
+        let Some((map_ref, value_off)) = origin else {
             pc += insn_width(insn);
             continue;
         };
@@ -1302,7 +1310,7 @@ fn build_direct_map_value_load_rewrites(
             continue;
         }
 
-        let map_value = match resolve_frozen_map_value(program, old_fd, &mut map_cache)? {
+        let map_value = match resolve_frozen_map_value(program, map_ref, &mut map_cache)? {
             Some(map_value) => map_value,
             None => {
                 pc += insn_width(insn);
@@ -1352,15 +1360,15 @@ fn build_direct_map_value_load_rewrites(
 
 fn resolve_frozen_map_value(
     program: &BpfProgram,
-    old_fd: i32,
-    cache: &mut HashMap<i32, Option<FrozenMapValue>>,
+    map_ref: MapRefKey,
+    cache: &mut HashMap<MapRefKey, Option<FrozenMapValue>>,
 ) -> anyhow::Result<Option<FrozenMapValue>> {
-    if let Some(cached) = cache.get(&old_fd) {
+    if let Some(cached) = cache.get(&map_ref) {
         return Ok(cached.clone());
     }
 
     let resolved = (|| -> anyhow::Result<Option<FrozenMapValue>> {
-        let Some(&map_id) = program.map_fd_bindings.get(&old_fd) else {
+        let Some(map_id) = map_id_for_ref(program, map_ref)? else {
             return Ok(None);
         };
         let Some(info) = program
@@ -1396,8 +1404,27 @@ fn resolve_frozen_map_value(
     })();
 
     let cached = resolved?;
-    cache.insert(old_fd, cached.clone());
+    cache.insert(map_ref, cached.clone());
     Ok(cached)
+}
+
+fn map_id_for_ref(program: &BpfProgram, map_ref: MapRefKey) -> anyhow::Result<Option<u32>> {
+    if map_ref.src_reg == BPF_PSEUDO_MAP_VALUE || map_ref.src_reg == BPF_PSEUDO_MAP_FD {
+        return Ok(program.map_fd_bindings.get(&map_ref.imm).copied());
+    }
+    if map_ref.src_reg == BPF_PSEUDO_MAP_IDX_VALUE || map_ref.src_reg == BPF_PSEUDO_MAP_IDX {
+        let index = usize::try_from(map_ref.imm)
+            .map_err(|_| anyhow::anyhow!("negative canonical pseudo-map index {}", map_ref.imm))?;
+        let Some(&map_id) = program.map_ids.get(index) else {
+            anyhow::bail!(
+                "canonical pseudo-map index {} out of range for {} map ids",
+                index,
+                program.map_ids.len()
+            );
+        };
+        return Ok(Some(map_id));
+    }
+    Ok(None)
 }
 
 fn encode_key_bytes(bytes: &[u8], key_size: usize) -> Vec<u8> {
@@ -1500,8 +1527,8 @@ fn find_map_load_for_call(insns: &[BpfInsn], call_pc: usize) -> Option<usize> {
         if insn_defines_reg(insn, 1) {
             return (insn.is_ldimm64()
                 && insn.dst_reg() == 1
-                && insn.src_reg() == BPF_PSEUDO_MAP_FD)
-                .then_some(pc);
+                && is_pseudo_map_fd_src(insn.src_reg()))
+            .then_some(pc);
         }
         cursor = pc;
     }
@@ -1872,13 +1899,16 @@ fn resolve_key_pointer_origin_inner(
     let insn = &insns[pc];
 
     if insn.is_ldimm64() && insn.dst_reg() == reg {
-        if insn.src_reg() == BPF_PSEUDO_MAP_VALUE {
+        if is_pseudo_map_value_src(insn.src_reg()) {
             let value_off = insns
                 .get(pc + 1)
                 .ok_or_else(|| format!("pseudo-map-value load at pc {} is truncated", pc))?
                 .imm;
             return Ok(KeyPointerOrigin::MapValue {
-                old_fd: insn.imm,
+                map_ref: MapRefKey {
+                    src_reg: insn.src_reg(),
+                    imm: insn.imm,
+                },
                 value_off,
                 ldimm_pc: pc,
             });
@@ -1918,7 +1948,7 @@ fn resolve_key_pointer_origin_inner(
                     Ok(KeyPointerOrigin::Stack(stack_off))
                 }
                 KeyPointerOrigin::MapValue {
-                    old_fd,
+                    map_ref,
                     value_off,
                     ldimm_pc,
                 } => {
@@ -1930,7 +1960,7 @@ fn resolve_key_pointer_origin_inner(
                         )
                     })?;
                     Ok(KeyPointerOrigin::MapValue {
-                        old_fd,
+                        map_ref,
                         value_off,
                         ldimm_pc,
                     })
@@ -2410,7 +2440,15 @@ fn ends_current_use_region(insn: &BpfInsn, alias_regs: &HashMap<u8, i16>) -> boo
 }
 
 fn starts_next_lookup_setup(insn: &BpfInsn) -> bool {
-    insn.is_ldimm64() && insn.src_reg() == BPF_PSEUDO_MAP_FD
+    insn.is_ldimm64() && is_pseudo_map_fd_src(insn.src_reg())
+}
+
+fn is_pseudo_map_fd_src(src_reg: u8) -> bool {
+    src_reg == BPF_PSEUDO_MAP_FD || src_reg == BPF_PSEUDO_MAP_IDX
+}
+
+fn is_pseudo_map_value_src(src_reg: u8) -> bool {
+    src_reg == BPF_PSEUDO_MAP_VALUE || src_reg == BPF_PSEUDO_MAP_IDX_VALUE
 }
 
 fn alias_copy(insn: &BpfInsn, alias_regs: &HashMap<u8, i16>) -> Option<(u8, i16)> {

@@ -7,8 +7,8 @@ use std::process::{Command, Output, Stdio};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use bpfopt::insn::{
-    BpfInsn, BPF_ADD, BPF_ALU64, BPF_CALL, BPF_DW, BPF_EXIT, BPF_IMM, BPF_JMP, BPF_K, BPF_LD,
-    BPF_LDX, BPF_MEM, BPF_MOV, BPF_PSEUDO_MAP_FD, BPF_ST, BPF_W,
+    BpfInsn, BPF_ADD, BPF_ALU64, BPF_CALL, BPF_DW, BPF_EXIT, BPF_IMM, BPF_JA, BPF_JMP, BPF_K,
+    BPF_LD, BPF_LDX, BPF_MEM, BPF_MOV, BPF_PSEUDO_MAP_FD, BPF_PSEUDO_MAP_IDX, BPF_ST, BPF_W,
 };
 
 static NEXT_TEMP_ID: AtomicUsize = AtomicUsize::new(0);
@@ -22,6 +22,18 @@ fn minimal_program_bytes() -> Vec<u8> {
         0xb7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x95, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00,
     ]
+}
+
+fn decode_insns(bytes: &[u8]) -> Vec<BpfInsn> {
+    assert_eq!(bytes.len() % 8, 0);
+    bytes
+        .chunks_exact(8)
+        .map(|chunk| {
+            BpfInsn::from_raw_bytes([
+                chunk[0], chunk[1], chunk[2], chunk[3], chunk[4], chunk[5], chunk[6], chunk[7],
+            ])
+        })
+        .collect()
 }
 
 fn map_lookup_program_bytes() -> Vec<u8> {
@@ -93,6 +105,39 @@ fn two_hash_lookup_program_bytes() -> Vec<u8> {
         BpfInsn::new(BPF_ALU64 | BPF_MOV | BPF_K, BpfInsn::make_regs(0, 0), 0, 0),
         BpfInsn::new(BPF_JMP | bpfopt::insn::BPF_JA | BPF_K, 0, 1, 0),
         BpfInsn::new(BPF_ALU64 | BPF_MOV | BPF_K, BpfInsn::make_regs(0, 0), 0, 1),
+        BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0),
+    ]
+    .into_iter()
+    .flat_map(|insn| insn.raw_bytes())
+    .collect()
+}
+
+fn unreachable_idx_then_live_idx_program_bytes() -> Vec<u8> {
+    let dead_map = [
+        BpfInsn::new(
+            BPF_LD | BPF_DW | BPF_IMM,
+            BpfInsn::make_regs(1, BPF_PSEUDO_MAP_IDX),
+            0,
+            0,
+        ),
+        BpfInsn::new(0, 0, 0, 0),
+    ];
+    let live_map = [
+        BpfInsn::new(
+            BPF_LD | BPF_DW | BPF_IMM,
+            BpfInsn::make_regs(1, BPF_PSEUDO_MAP_IDX),
+            0,
+            1,
+        ),
+        BpfInsn::new(0, 0, 0, 0),
+    ];
+    [
+        BpfInsn::new(BPF_JMP | BPF_JA | BPF_K, 0, 2, 0),
+        dead_map[0],
+        dead_map[1],
+        live_map[0],
+        live_map[1],
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, 1),
         BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0),
     ]
     .into_iter()
@@ -195,6 +240,27 @@ fn wide_mem_accepts_stdin_and_writes_instruction_aligned_stdout() {
     );
     assert_eq!(output.stdout.len() % 8, 0);
     assert_eq!(output.stdout, input);
+}
+
+#[test]
+fn dce_deletes_unreachable_pseudo_map_idx_without_rebinding_live_idx() {
+    let output = run_bpfopt(
+        &["--pass", "dce"],
+        &unreachable_idx_then_live_idx_program_bytes(),
+    );
+
+    assert!(
+        output.status.success(),
+        "stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let insns = decode_insns(&output.stdout);
+    let map_loads = insns
+        .iter()
+        .filter(|insn| insn.is_ldimm64() && insn.src_reg() == BPF_PSEUDO_MAP_IDX)
+        .map(|insn| insn.imm)
+        .collect::<Vec<_>>();
+    assert_eq!(map_loads, vec![1]);
 }
 
 #[test]

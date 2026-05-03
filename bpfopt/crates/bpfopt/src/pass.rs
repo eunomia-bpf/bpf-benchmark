@@ -91,8 +91,8 @@ pub struct BpfProgram {
     /// Transform log: records what each pass did.
     pub transform_log: Vec<TransformEntry>,
     /// Map IDs referenced by this program, in the kernel's `used_maps` order.
-    /// This metadata lets analyses resolve `BPF_PSEUDO_MAP_FD` references
-    /// found in the original bytecode back to live kernel map objects.
+    /// This metadata lets analyses resolve pseudo-map references found in the
+    /// original bytecode back to live kernel map objects.
     pub map_ids: Vec<u32>,
     /// Stable `old_fd -> map_id` bindings captured from the original program
     /// before any transform removes or reorders pseudo-map loads.

@@ -406,6 +406,28 @@ fn map_inline_constantizes_frozen_pseudo_map_value_loads() {
 }
 
 #[test]
+fn map_inline_constantizes_frozen_pseudo_map_idx_value_loads() {
+    let mut values = HashMap::new();
+    values.insert(0u32.to_le_bytes().to_vec(), vec![0, 0, 0, 0, 99, 0, 0, 0]);
+    install_map(1901, 2, 1, true, values);
+
+    let map_value = ld_imm64_parts(1, BPF_PSEUDO_MAP_IDX_VALUE, 0, 4);
+    let mut program = BpfProgram::new(vec![
+        map_value[0],
+        map_value[1],
+        BpfInsn::ldx_mem(BPF_W, 2, 1, 0),
+        exit_insn(),
+    ]);
+    program.set_map_ids(vec![1901]);
+
+    let result = run_map_inline_pass(&mut program);
+
+    assert!(result.program_changed);
+    assert_eq!(result.total_sites_applied, 1);
+    assert_eq!(program.insns[2], BpfInsn::mov32_imm(2, 99));
+}
+
+#[test]
 fn map_inline_skips_mutable_pseudo_map_value_loads() {
     let mut values = HashMap::new();
     values.insert(0u32.to_le_bytes().to_vec(), vec![7, 0, 0, 0]);
