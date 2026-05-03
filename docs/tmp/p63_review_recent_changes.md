@@ -84,7 +84,7 @@ Per instruction, I did not modify source code and did not rerun `cargo build`, `
 
 ### F. P57 Failure Workdir Export
 
-- ✅ Docker entrypoint does not overwrite user-provided `BPFREJIT_DAEMON_FAILURE_ROOT`; it only sets the root when it is unset (`runner/containers/runner-runtime.Dockerfile:520`).
+- ✅ Docker entrypoint does not overwrite user-provided `legacy daemon failure-root env var`; it only sets the root when it is unset (`runner/containers/runner-runtime.Dockerfile:520`).
 - ✅ `active-run-details` scans `metadata.json` with `status == "running"` and requires exactly one active run (`daemon/src/commands.rs:212`). `launcher_pid` is optional: if present it must match parent pid, otherwise the run is accepted only if it is the sole active candidate (`daemon/src/commands.rs:292`).
 - ✅ Failure path matches the requested contract: `<run_dir>/details/failures/<prog_id>/...` (`daemon/src/commands.rs:235`, `:314`).
 - ✅ Failure root validation uses create/write/remove probes at daemon startup and export time (`daemon/src/commands.rs:184`, `:188`). Probe names include pid plus an atomic counter; no intentional residue path remains.

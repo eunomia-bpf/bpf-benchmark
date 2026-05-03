@@ -38,9 +38,9 @@ Validation performed:
 ### HIGH: stale daemon failure layout env remains
 
 - Location: `runner/containers/runner-runtime.Dockerfile:586`, `runner/containers/runner-runtime.Dockerfile:589`
-- Problem: the runtime still exports `BPFREJIT_DAEMON_FAILURE_LAYOUT=active-run-details`. Current source only reads `BPFREJIT_DAEMON_FAILURE_ROOT` at `daemon/src/commands.rs:21`; the layout env has no reader in current code.
+- Problem: the runtime still exports `BPFREJIT_DAEMON_FAILURE_LAYOUT=active-run-details`. Current source only reads `legacy daemon failure-root env var` at `daemon/src/commands.rs:21`; the layout env has no reader in current code.
 - Violation: dead env / deleted active-run-details guard residue.
-- Recommendation: DELETE the `BPFREJIT_DAEMON_FAILURE_LAYOUT` export. KEEP `BPFREJIT_DAEMON_FAILURE_ROOT`.
+- Recommendation: DELETE the `BPFREJIT_DAEMON_FAILURE_LAYOUT` export. KEEP `legacy daemon failure-root env var`.
 
 ### HIGH: corpus rediscovery accepts partial program sets
 

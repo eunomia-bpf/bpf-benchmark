@@ -1,13 +1,13 @@
-# Round 16: BPFREJIT_DAEMON_FAILURE_ROOT Silent Fallback Fix
+# Round 16: legacy daemon failure-root env var Silent Fallback Fix
 
 日期：2026-05-01
 
 ## Bug 时间线
 
 ### d065c46c — feat(daemon): export failure workdir to host result dir
-引入 `BPFREJIT_DAEMON_FAILURE_ROOT` 环境变量和 `BPFREJIT_DAEMON_FAILURE_LAYOUT=active-run-details` 机制。
+引入 `legacy daemon failure-root env var` 环境变量和 `BPFREJIT_DAEMON_FAILURE_LAYOUT=active-run-details` 机制。
 daemon 会扫描 `metadata.json status=running` 找当前 active run 的 `details/failures/` 子目录。
-runner-runtime entrypoint 设置 `BPFREJIT_DAEMON_FAILURE_ROOT=corpus/results`。
+runner-runtime entrypoint 设置 `legacy daemon failure-root env var=corpus/results`。
 
 **结果：** round at `20260430_180011` 正常，preserved failure workdir 写到
 `corpus/results/x86_kvm_corpus_20260430_180011_539406/details/failures/764`（host 可见）。
@@ -15,7 +15,7 @@ runner-runtime entrypoint 设置 `BPFREJIT_DAEMON_FAILURE_ROOT=corpus/results`�
 ### c61f0559 — refactor(daemon): delete active-run-details failure layout guard
 删除 `active-run-details` layout（理由：`metadata.json status=running` 卡死时出 bug）。
 daemon 改为直接用 `${FAILURE_ROOT}/<prog_id>/`。
-entrypoint 仍 set `BPFREJIT_DAEMON_FAILURE_ROOT=corpus/results`，
+entrypoint 仍 set `legacy daemon failure-root env var=corpus/results`，
 所以 failures 写到 `corpus/results/<prog_id>/`（flat，和 per-run 目录平级，但 host 可见）。
 
 ### f9429b0c — fix: apply p89 post-audit fail-fast fixes（引入 bug）
@@ -47,7 +47,7 @@ daemon 写到 `container:/bpfrejit-failures/` → container 退出时丢失。
 
 ### runner 端
 
-不改动。entrypoint 已经在 set `BPFREJIT_DAEMON_FAILURE_ROOT`:
+不改动。entrypoint 已经在 set `legacy daemon failure-root env var`:
 - `runner.suites.corpus` → `${workspace}/corpus/results`
 - `runner.suites.e2e`    → `${workspace}/e2e/results`
 - `runner.suites.micro`  → `${workspace}/micro/results`
@@ -60,7 +60,7 @@ daemon 写到 `container:/bpfrejit-failures/` → container 退出时丢失。
 调查结论：round 14/15/16 用的是**旧镜像**（entrypoint 设 env 的代码在 `d065c46c` 引入，
 但 f9429b0c 的 fallback 使得 daemon 在 env 有 set 的情况下也能正常用 set 的值——
 所以问题不是 env 没传到，而是 f9429b0c 把 fallback 路径写成了 `current_dir/bpfrejit-failures`，
-而此时 `BPFREJIT_DAEMON_FAILURE_ROOT` 确实被 entrypoint 设置了。
+而此时 `legacy daemon failure-root env var` 确实被 entrypoint 设置了。
 
 重新核查：round 14 证据 `preserved failure workdir: /home/yunwei37/workspace/bpf-benchmark/bpfrejit-failures/130`
 这个路径 `/home/yunwei37/workspace/bpf-benchmark/bpfrejit-failures` 就是 `cwd + "bpfrejit-failures"`，
@@ -71,7 +71,7 @@ daemon 写到 `container:/bpfrejit-failures/` → container 退出时丢失。
 
 ## 后续优化（未做）
 
-- 在 `corpus/driver.py` 启动 daemon 时，传 `BPFREJIT_DAEMON_FAILURE_ROOT` 指向
+- 在 `corpus/driver.py` 启动 daemon 时，传 `legacy daemon failure-root env var` 指向
   当前 run 的 `details/failures/` 子目录（per-run 整洁化）。
   目前 failures 写到 `corpus/results/<prog_id>/`（flat），不影响正确性，是整洁性问题。
 

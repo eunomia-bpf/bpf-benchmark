@@ -1,5 +1,5 @@
 {
-  "error_message": "daemon serve exited early (rc=1): Error: BPFREJIT_DAEMON_FAILURE_ROOT is required",
+  "error_message": "daemon serve exited early (rc=1): Error: legacy daemon failure-root env var is required",
   "failed_at": "2026-05-01T00:16:56.529186+00:00",
   "status": "error",
   "suite": "corpus"

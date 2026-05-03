@@ -15,7 +15,7 @@
     ]
   },
   "details_dir": "details",
-  "error_message": "daemon serve exited early (rc=1): Error: BPFREJIT_DAEMON_FAILURE_ROOT is required",
+  "error_message": "daemon serve exited early (rc=1): Error: legacy daemon failure-root env var is required",
   "generated_at": "2026-05-01T00:16:56.529201+00:00",
   "kinsn_enabled": true,
   "last_updated_at": "2026-05-01T00:16:56.529197+00:00",

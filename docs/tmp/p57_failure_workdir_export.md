@@ -13,7 +13,7 @@ Option A was implemented: the daemon writes failure workdirs directly into a hos
 
 The daemon accepts:
 
-- `BPFREJIT_DAEMON_FAILURE_ROOT`
+- `legacy daemon failure-root env var`
 - `BPFREJIT_DAEMON_FAILURE_LAYOUT`
 
 Supported layouts:
@@ -21,7 +21,7 @@ Supported layouts:
 - `direct`: write `<failure_root>/<prog_id>/...`. This is the default local mode and keeps `/var/lib/bpfrejit-daemon/failures` working when no runtime result mount is configured.
 - `active-run-details`: treat the root as a suite result root or workspace root, find exactly one active `metadata.json` with `status: "running"` matching the daemon parent process when `launcher_pid` is available, and write `<run_dir>/details/failures/<prog_id>/...`.
 
-Inside the runtime container, the Docker image entrypoint sets `BPFREJIT_DAEMON_FAILURE_ROOT` to the active suite result root when it can infer the suite from `python -m runner.suites.<suite>`. The daemon also has a runtime-container default: if `BPFREJIT_INSIDE_RUNTIME_CONTAINER=1` and no explicit failure root is present, it uses `BPFREJIT_IMAGE_WORKSPACE` with `active-run-details`, scanning the mounted `micro/results`, `corpus/results`, `e2e/results`, and `tests/results` roots.
+Inside the runtime container, the Docker image entrypoint sets `legacy daemon failure-root env var` to the active suite result root when it can infer the suite from `python -m runner.suites.<suite>`. The daemon also has a runtime-container default: if `BPFREJIT_INSIDE_RUNTIME_CONTAINER=1` and no explicit failure root is present, it uses `BPFREJIT_IMAGE_WORKSPACE` with `active-run-details`, scanning the mounted `micro/results`, `corpus/results`, `e2e/results`, and `tests/results` roots.
 
 ## Fail-Fast Behavior
 

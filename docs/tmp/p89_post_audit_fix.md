@@ -1,12 +1,12 @@
 # P89 Post-Audit Fix Report
 
-Scope: targeted fixes for `docs/tmp/p89_post_audit.md` plus the KVM v4 blocker where `daemon serve` exited when `BPFREJIT_DAEMON_FAILURE_ROOT` was unset. This did not touch `vendor/linux-framework/` or `module/`.
+Scope: targeted fixes for `docs/tmp/p89_post_audit.md` plus the KVM v4 blocker where `daemon serve` exited when `legacy daemon failure-root env var` was unset. This did not touch `vendor/linux-framework/` or `module/`.
 
 ## KVM v4 Blocker
 
 Status: FIXED.
 
-- `daemon/src/commands.rs`: `FailureExportConfig::from_env()` no longer requires `BPFREJIT_DAEMON_FAILURE_ROOT`.
+- `daemon/src/commands.rs`: `FailureExportConfig::from_env()` no longer requires `legacy daemon failure-root env var`.
 - If the env var is set, the daemon uses it exactly.
 - If the env var is unset, the daemon defaults to `<cwd>/bpfrejit-failures`.
 - An explicitly empty env var remains an error.
@@ -36,7 +36,7 @@ Status: FIXED.
 Status: FIXED.
 
 - Removed `BPFREJIT_DAEMON_FAILURE_LAYOUT=active-run-details` from `runner/containers/runner-runtime.Dockerfile`.
-- Kept `BPFREJIT_DAEMON_FAILURE_ROOT`; it still provides a useful explicit export root in runtime images.
+- Kept `legacy daemon failure-root env var`; it still provides a useful explicit export root in runtime images.
 
 ### corpus rediscovery accepts partial program sets
 

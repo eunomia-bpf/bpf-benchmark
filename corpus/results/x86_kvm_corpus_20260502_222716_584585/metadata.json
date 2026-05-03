@@ -16,7 +16,7 @@
     ]
   },
   "details_dir": "details",
-  "error_message": "daemon serve exited early (rc=1): Error: BPFREJIT_DAEMON_FAILURE_ROOT must be set; the runner-runtime entrypoint should provide it",
+  "error_message": "daemon serve exited early (rc=1): Error: legacy daemon failure-root env var must be set; the runner-runtime entrypoint should provide it",
   "generated_at": "2026-05-02T22:27:16.673488+00:00",
   "kinsn_enabled": true,
   "last_updated_at": "2026-05-02T22:27:16.673481+00:00",
