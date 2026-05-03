@@ -1,5 +1,6 @@
 use super::*;
 use crate::insn::*;
+use crate::passes::test_helpers::exit_insn;
 
 // ── Test helpers ────────────────────────────────────────────────
 
@@ -260,10 +261,6 @@ impl BpfPass for VerifierStateCountPass {
             ..Default::default()
         })
     }
-}
-
-fn exit_insn() -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
 }
 
 // ── BpfProgram tests ────────────────────────────────────────────
