@@ -1552,7 +1552,7 @@ fn lookup_pattern_removal_is_safe(
         return false;
     }
 
-    let min_removed_pc = skipped_pcs.iter().min().copied().unwrap_or(0);
+    let min_removed_pc = *skipped_pcs.iter().min().expect("skipped_pcs non-empty (checked above)");
     let end_pc = lookup_call_pc + insn_width(&program.insns[lookup_call_pc]);
     let mut pc = min_removed_pc;
     while pc < end_pc {
