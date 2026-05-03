@@ -13,11 +13,6 @@ use super::utils::{emit_ldimm64, insn_width};
 mod map_info;
 pub use map_info::{MapInfo, MapInfoAnalysis, MapInfoResult, MapReference};
 
-const BPF_MAP_TYPE_HASH: u32 = kernel_sys::BPF_MAP_TYPE_HASH;
-const BPF_MAP_TYPE_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_HASH;
-const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
-const BPF_MAP_TYPE_LRU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_HASH;
-const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
 const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
 const BPF_PSEUDO_MAP_IDX: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX as u8;
@@ -1433,7 +1428,7 @@ fn encode_key_bytes(bytes: &[u8], key_size: usize) -> Vec<u8> {
 }
 
 fn prepare_inline_value(info: &MapInfo, raw_value: &[u8]) -> Result<Vec<u8>, String> {
-    if info.map_type != BPF_MAP_TYPE_PERCPU_ARRAY {
+    if info.map_type != kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY {
         return Ok(raw_value.to_vec());
     }
 
@@ -1541,10 +1536,10 @@ fn is_concrete_map_value_snapshot_error(message: &str) -> bool {
 fn is_hash_like_map_type(map_type: u32) -> bool {
     matches!(
         map_type,
-        BPF_MAP_TYPE_HASH
-            | BPF_MAP_TYPE_PERCPU_HASH
-            | BPF_MAP_TYPE_LRU_HASH
-            | BPF_MAP_TYPE_LRU_PERCPU_HASH
+        kernel_sys::BPF_MAP_TYPE_HASH
+            | kernel_sys::BPF_MAP_TYPE_PERCPU_HASH
+            | kernel_sys::BPF_MAP_TYPE_LRU_HASH
+            | kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH
     )
 }
 

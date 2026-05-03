@@ -12,6 +12,10 @@ use crate::passes::test_helpers::{call_helper, exit_insn};
 use crate::passes::MapInfoAnalysis;
 use crate::passes::{ConstPropPass, DcePass};
 
+const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
+const BPF_MAP_TYPE_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_HASH;
+const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
+
 fn ld_imm64(dst: u8, src: u8, imm: i32) -> [BpfInsn; 2] {
     [
         BpfInsn::new(
