@@ -185,7 +185,14 @@ def _run_single_case(
 
     try:
         if prepared_daemon_session is not None:
-            setattr(args, "_prepared_daemon_session", prepared_daemon_session)
+            setattr(
+                args,
+                "_prepared_daemon_session",
+                prepare_daemon_session(
+                    prepared_daemon_session.session,
+                    failure_artifacts_dir=session.run_dir / "details",
+                ),
+            )
         payload = spec.run_case(args)
         payload = compact_rejit_results_for_artifact(payload)
         detail_texts = {"result.md": spec.build_markdown(payload) + "\n"}

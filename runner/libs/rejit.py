@@ -796,6 +796,7 @@ def apply_daemon_rejit(
     daemon_proc: subprocess.Popen[str] | None = None,
     daemon_stdout_path: Path | None = None,
     daemon_stderr_path: Path | None = None,
+    failure_artifacts_dir: Path | None = None,
 ) -> dict[str, object]:
     prog_ids = [int(v) for v in (prog_ids or []) if int(v) > 0]
     if not prog_ids:
@@ -859,6 +860,14 @@ def apply_daemon_rejit(
         if not isinstance(record, Mapping):
             raise RuntimeError(f"daemon response field per_program[{prog_id!r}] must be an object")
         record_dict = dict(record)
+        artifacts = record_dict.pop("failure_artifacts", None)
+        if str(record_dict.get("status") or "") == "error" and isinstance(artifacts, Mapping) and failure_artifacts_dir is not None:
+            out_dir = failure_artifacts_dir / "failures" / str(prog_id)
+            out_dir.mkdir(parents=True, exist_ok=True)
+            (out_dir / "verifier_log.txt").write_text(str(artifacts.get("verifier_log") or ""))
+            (out_dir / "pass_error.txt").write_text(str(artifacts.get("pass_error") or ""))
+            partial = artifacts.get("partial_failure_json")
+            (out_dir / "partial_failure.json").write_text(json.dumps(partial, indent=2, sort_keys=True) + "\n")
         result = _apply_result_from_response(record_dict, output=json.dumps(record_dict, sort_keys=True),
                                               exit_code=0 if str(record_dict.get("status") or "") == "ok" else 1,
                                               enabled_passes=normalized_enabled_passes)
@@ -922,7 +931,14 @@ class DaemonSession:
         self._closed = True
         _stop_daemon_server(self.proc, self.socket_dir)
 
-    def apply_rejit(self, prog_ids: Sequence[int], *, enabled_passes: Sequence[str] | None = None) -> dict[str, object]:
+    def apply_rejit(
+        self,
+        prog_ids: Sequence[int],
+        *,
+        enabled_passes: Sequence[str] | None = None,
+        failure_artifacts_dir: Path | None = None,
+    ) -> dict[str, object]:
         return apply_daemon_rejit([int(p) for p in prog_ids if int(p) > 0], enabled_passes=enabled_passes,
                                    daemon_socket_path=self.socket_path, daemon_proc=self.proc,
-                                   daemon_stdout_path=self.stdout_path, daemon_stderr_path=self.stderr_path)
+                                   daemon_stdout_path=self.stdout_path, daemon_stderr_path=self.stderr_path,
+                                   failure_artifacts_dir=failure_artifacts_dir)

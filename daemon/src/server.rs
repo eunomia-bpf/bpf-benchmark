@@ -153,15 +153,12 @@ fn remove_socket_file_if_present(socket_path: &str) -> Result<()> {
     }
 }
 
-pub(crate) fn cmd_serve(socket_path: &str, failure_root: &str) -> Result<()> {
+pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
     use std::os::unix::net::UnixListener;
-    use std::path::PathBuf;
 
     register_signal_handlers();
 
-    let failure_root_path = PathBuf::from(failure_root);
     commands::init_cli_dir()?;
-    commands::validate_failure_export_root(&failure_root_path)?;
     let config = CliConfig::from_global();
     let tracker = commands::new_invalidation_tracker();
     let reoptimization_state = new_reoptimization_state();
@@ -186,7 +183,6 @@ pub(crate) fn cmd_serve(socket_path: &str, failure_root: &str) -> Result<()> {
         if last_invalidation_check.elapsed() >= Duration::from_secs(1) {
             let tracker_for_apply = tracker.clone();
             let reoptimization_state_for_apply = reoptimization_state.clone();
-            let failure_root_for_apply = failure_root_path.clone();
             run_invalidation_tick_logged("serve", &tracker, |prog_id| {
                 let enabled_passes =
                     reoptimization_passes_for(&reoptimization_state_for_apply, prog_id)?;
@@ -195,7 +191,6 @@ pub(crate) fn cmd_serve(socket_path: &str, failure_root: &str) -> Result<()> {
                     &config,
                     &enabled_passes,
                     Some(&tracker_for_apply),
-                    &failure_root_for_apply,
                 )?;
                 if result.status != "ok" {
                     anyhow::bail!(
@@ -221,13 +216,7 @@ pub(crate) fn cmd_serve(socket_path: &str, failure_root: &str) -> Result<()> {
 
         match listener.accept() {
             Ok((stream, _addr)) => {
-                if let Err(err) = handle_client(
-                    stream,
-                    &config,
-                    &failure_root_path,
-                    &tracker,
-                    &reoptimization_state,
-                ) {
+                if let Err(err) = handle_client(stream, &config, &tracker, &reoptimization_state) {
                     eprintln!("serve: client error: {err:#}");
                 }
             }
@@ -267,7 +256,6 @@ fn panic_response(payload: Box<dyn std::any::Any + Send>) -> serde_json::Value {
 fn handle_client(
     stream: std::os::unix::net::UnixStream,
     config: &CliConfig,
-    failure_root: &std::path::Path,
     tracker: &commands::SharedInvalidationTracker,
     reoptimization_state: &SharedReoptimizationState,
 ) -> Result<()> {
@@ -284,7 +272,7 @@ fn handle_client(
 
         let response = match serde_json::from_str::<serde_json::Value>(&line) {
             Ok(req) => match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                process_request(&req, config, failure_root, tracker, reoptimization_state)
+                process_request(&req, config, tracker, reoptimization_state)
             })) {
                 Ok(response) => response,
                 Err(payload) => panic_response(payload),
@@ -386,7 +374,6 @@ fn error_json(message: impl Into<String>) -> serde_json::Value {
 fn process_request(
     req: &serde_json::Value,
     config: &CliConfig,
-    failure_root: &std::path::Path,
     tracker: &commands::SharedInvalidationTracker,
     reoptimization_state: &SharedReoptimizationState,
 ) -> serde_json::Value {
@@ -406,13 +393,7 @@ fn process_request(
                 Ok(value) => value,
                 Err(message) => return error_json(message),
             };
-            match commands::try_apply_programs(
-                &prog_ids,
-                config,
-                enabled_passes,
-                Some(tracker),
-                failure_root,
-            ) {
+            match commands::try_apply_programs(&prog_ids, config, enabled_passes, Some(tracker)) {
                 Ok(outcomes) => match optimize_response_from_outcomes(
                     &prog_ids,
                     enabled_passes,
@@ -484,7 +465,8 @@ mod tests {
     use std::sync::{Arc, Mutex};
 
     use crate::commands::{
-        ApplyProgramOutcome, InlinedMapEntry, OptimizeOneResult, OptimizeSummary, ProgramInfo,
+        ApplyProgramOutcome, FailureArtifacts, InlinedMapEntry, OptimizeOneResult, OptimizeSummary,
+        ProgramInfo,
     };
     use crate::invalidation::{BatchLookupValue, MapInvalidationTracker};
 
@@ -532,19 +514,16 @@ mod tests {
 
     fn process_test_request(req: &serde_json::Value) -> serde_json::Value {
         // CLI_DIR global is unset in tests; from_global() returns CliConfig { cli_dir: None }.
-        // Tests that exercise process_request do not reach ReJIT, so a dummy failure_root is fine.
-        let tmp = std::env::temp_dir();
-        process_test_request_with_config(req, &CliConfig::from_global(), &tmp)
+        process_test_request_with_config(req, &CliConfig::from_global())
     }
 
     fn process_test_request_with_config(
         req: &serde_json::Value,
         config: &CliConfig,
-        failure_root: &std::path::Path,
     ) -> serde_json::Value {
         let tracker = commands::new_invalidation_tracker();
         let reoptimization_state = new_reoptimization_state();
-        process_request(req, config, failure_root, &tracker, &reoptimization_state)
+        process_request(req, config, &tracker, &reoptimization_state)
     }
 
     #[test]
@@ -634,6 +613,7 @@ mod tests {
                 value_hex: "0b000000".to_string(),
             }],
             error_message: None,
+            failure_artifacts: None,
         };
         let requested = vec!["const_prop".to_string(), "map_inline".to_string()];
 
@@ -652,6 +632,15 @@ mod tests {
         let prog_ids = vec![10, 11, 12];
         let enabled_passes = vec!["rotate".to_string()];
         let reoptimization_state = new_reoptimization_state();
+        let mut artifact_error = OptimizeOneResult::error(11, "missing program 11");
+        artifact_error.failure_artifacts = Some(FailureArtifacts {
+            failed_pass_index: 2,
+            failed_pass: "rotate".to_string(),
+            committed_passes: 1,
+            verifier_log: "full verifier log".to_string(),
+            pass_error: "EINVAL".to_string(),
+            partial_failure_json: serde_json::json!({"failed_pass": "rotate"}),
+        });
         let outcomes = vec![
             ApplyProgramOutcome {
                 prog_id: 10,
@@ -659,7 +648,7 @@ mod tests {
             },
             ApplyProgramOutcome {
                 prog_id: 11,
-                result: OptimizeOneResult::error(11, "missing program 11"),
+                result: artifact_error,
             },
             ApplyProgramOutcome {
                 prog_id: 12,
@@ -695,6 +684,11 @@ mod tests {
             .as_str()
             .unwrap_or("")
             .contains("missing program 11"));
+        assert_eq!(
+            per_program["11"]["failure_artifacts"]["verifier_log"],
+            "full verifier log"
+        );
+        assert!(per_program["10"].get("failure_artifacts").is_none());
         assert_eq!(per_program["12"]["status"], "error");
         assert!(per_program["12"]["error_message"]
             .as_str()
@@ -727,6 +721,7 @@ mod tests {
             passes: Vec::new(),
             inlined_map_entries: Vec::new(),
             error_message: None,
+            failure_artifacts: None,
         }
     }
 

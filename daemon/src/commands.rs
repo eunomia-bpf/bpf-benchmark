@@ -6,7 +6,7 @@
 //! construction, and per-pass `BPF_PROG_REJIT`.
 
 use std::collections::{BTreeMap, HashMap};
-use std::fs::{self, OpenOptions};
+use std::fs;
 use std::io::Write;
 use std::os::fd::{AsFd, AsRawFd, OwnedFd};
 use std::path::{Path, PathBuf};
@@ -101,100 +101,6 @@ pub(crate) fn init_cli_dir() -> Result<()> {
         .map_err(|_| anyhow!("CLI dir already initialised"))
 }
 
-/// Validate the failure root at startup.
-pub(crate) fn validate_failure_export_root(root: &Path) -> Result<()> {
-    ensure_writable_dir(root, "failure export root")
-        .with_context(|| format!("failure-root={}", root.display()))
-}
-
-fn ensure_writable_dir(path: &Path, description: &str) -> Result<()> {
-    fs::create_dir_all(path).with_context(|| format!("create {description} {}", path.display()))?;
-    let metadata =
-        fs::metadata(path).with_context(|| format!("stat {description} {}", path.display()))?;
-    if !metadata.is_dir() {
-        bail!("{description} {} is not a directory", path.display());
-    }
-    let probe = path.join(format!(
-        ".bpfrejit-write-probe-{}-{}",
-        std::process::id(),
-        NEXT_WORKDIR_ID.fetch_add(1, Ordering::Relaxed)
-    ));
-    let mut file = OpenOptions::new()
-        .write(true)
-        .create_new(true)
-        .open(&probe)
-        .with_context(|| format!("create write probe {}", probe.display()))?;
-    file.write_all(b"probe")
-        .with_context(|| format!("write probe {}", probe.display()))?;
-    drop(file);
-    fs::remove_file(&probe).with_context(|| format!("remove write probe {}", probe.display()))?;
-    Ok(())
-}
-
-fn preserve_failure_workdir(workdir: &WorkDir, prog_id: u32, root: &Path) -> Result<PathBuf> {
-    ensure_writable_dir(root, "failure directory")
-        .with_context(|| format!("prepare failure directory {}", root.display()))?;
-    let failure_dir = root.join(prog_id.to_string());
-    fs::create_dir(&failure_dir)
-        .with_context(|| format!("create failure workdir {}", failure_dir.display()))?;
-    copy_dir_contents(workdir.path(), &failure_dir)?;
-    normalize_failure_artifacts(&failure_dir)?;
-    Ok(failure_dir)
-}
-
-fn copy_dir_contents(src: &Path, dst: &Path) -> Result<()> {
-    for entry in fs::read_dir(src).with_context(|| format!("read {}", src.display()))? {
-        let entry = entry?;
-        let source = entry.path();
-        let target = dst.join(entry.file_name());
-        let file_type = entry.file_type()?;
-        if file_type.is_dir() {
-            fs::create_dir(&target).with_context(|| format!("create {}", target.display()))?;
-            copy_dir_contents(&source, &target)?;
-        } else if file_type.is_file() {
-            fs::copy(&source, &target)
-                .with_context(|| format!("copy {} to {}", source.display(), target.display()))?;
-        } else {
-            bail!(
-                "cannot preserve non-regular workdir entry {}",
-                source.display()
-            );
-        }
-    }
-    Ok(())
-}
-
-fn normalize_failure_artifacts(failure_dir: &Path) -> Result<()> {
-    copy_alias_if_present(&failure_dir.join("prog.bin"), &failure_dir.join("prog.bpf"))?;
-    require_regular_file(&failure_dir.join("prog.bpf"), "failure prog.bpf")?;
-    require_regular_file(&failure_dir.join("info.json"), "failure info.json")?;
-    let verifier_log = failure_dir.join("verifier.log");
-    match fs::metadata(&verifier_log) {
-        Ok(_) => require_nonempty_file(&verifier_log, "failure verifier.log")?,
-        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {}
-        Err(err) => return Err(err).with_context(|| format!("stat {}", verifier_log.display())),
-    }
-    Ok(())
-}
-
-fn copy_alias_if_present(source: &Path, target: &Path) -> Result<()> {
-    match fs::metadata(source) {
-        Ok(metadata) => {
-            if !metadata.is_file() {
-                bail!(
-                    "failure artifact {} is not a regular file",
-                    source.display()
-                );
-            }
-            fs::copy(source, target)
-                .with_context(|| format!("copy {} to {}", source.display(), target.display()))?;
-            Ok(())
-        }
-        Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(()),
-        Err(err) => Err(err).with_context(|| format!("stat {}", source.display())),
-    }
-}
-
 fn require_regular_file(path: &Path, description: &str) -> Result<()> {
     match fs::metadata(path) {
         Ok(metadata) => {
@@ -232,6 +138,8 @@ pub(crate) struct OptimizeOneResult {
     pub inlined_map_entries: Vec<InlinedMapEntry>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error_message: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub failure_artifacts: Option<FailureArtifacts>,
 }
 
 impl OptimizeOneResult {
@@ -260,8 +168,19 @@ impl OptimizeOneResult {
             passes: Vec::new(),
             inlined_map_entries: Vec::new(),
             error_message: Some(message.into()),
+            failure_artifacts: None,
         }
     }
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub(crate) struct FailureArtifacts {
+    pub failed_pass_index: usize,
+    pub failed_pass: String,
+    pub committed_passes: usize,
+    pub verifier_log: String,
+    pub pass_error: String,
+    pub partial_failure_json: serde_json::Value,
 }
 
 #[derive(Clone, Debug, Serialize, PartialEq, Eq)]
@@ -309,7 +228,6 @@ struct ApplyOneRequest<'a> {
     config: &'a CliConfig,
     enabled_passes: &'a [String],
     invalidation_tracker: Option<&'a SharedInvalidationTracker>,
-    failure_root: &'a Path,
 }
 
 pub(crate) type SharedInvalidationTracker = Arc<Mutex<MapInvalidationTracker<BpfMapValueReader>>>;
@@ -675,7 +593,6 @@ pub(crate) fn try_apply_one(
     config: &CliConfig,
     enabled_passes: &[String],
     invalidation_tracker: Option<&SharedInvalidationTracker>,
-    failure_root: &Path,
 ) -> Result<OptimizeOneResult> {
     let mut kernel = LiveKernelOps;
     try_apply_one_with_map_access(
@@ -684,7 +601,6 @@ pub(crate) fn try_apply_one(
             config,
             enabled_passes,
             invalidation_tracker,
-            failure_root,
         },
         &mut kernel,
         bpf::bpf_map_get_fd_by_id,
@@ -698,7 +614,6 @@ pub(crate) fn try_reapply_one(
     config: &CliConfig,
     enabled_passes: &[String],
     invalidation_tracker: Option<&SharedInvalidationTracker>,
-    failure_root: &Path,
 ) -> Result<OptimizeOneResult> {
     let mut kernel = LiveKernelOps;
     try_apply_one_with_map_access(
@@ -707,7 +622,6 @@ pub(crate) fn try_reapply_one(
             config,
             enabled_passes,
             invalidation_tracker,
-            failure_root,
         },
         &mut kernel,
         bpf::bpf_map_get_fd_by_id,
@@ -782,15 +696,13 @@ pub(crate) fn try_apply_programs(
     config: &CliConfig,
     enabled_passes: &[String],
     invalidation_tracker: Option<&SharedInvalidationTracker>,
-    failure_root: &Path,
 ) -> Result<Vec<ApplyProgramOutcome>> {
     let config = config.clone();
     let passes = enabled_passes.to_vec();
     let tracker = invalidation_tracker.cloned();
-    let failure_root = failure_root.to_path_buf();
 
     try_apply_programs_with(prog_ids, default_worker_count(), |prog_id| {
-        try_apply_one(prog_id, &config, &passes, tracker.as_ref(), &failure_root)
+        try_apply_one(prog_id, &config, &passes, tracker.as_ref())
     })
 }
 
@@ -811,7 +723,6 @@ where
         config,
         enabled_passes,
         invalidation_tracker,
-        failure_root,
     } = request;
     if enabled_passes.is_empty() {
         bail!("no enabled_passes provided by runner");
@@ -926,29 +837,29 @@ where
         let mut verifier_states_ready = false;
         let mut last_rejit_summary = None;
         let mut partial_error = None;
+        let mut failure_artifacts = None;
         for (idx, pass) in pass_list.iter().enumerate() {
             let stem = pass_file_stem(idx, pass);
             let pass_input = workdir.path().join(format!("{stem}.in.bin"));
             let pass_output = workdir.path().join(format!("{stem}.out.bin"));
             let pass_report = workdir.path().join(format!("{stem}.report.json"));
             let pass_verifier_log = workdir.path().join(format!("{stem}.verifier.log"));
-            let pass_error = workdir.path().join(format!("{stem}.rejit.err.txt"));
             fs::write(&pass_input, &current_bytes)
                 .with_context(|| format!("write {}", pass_input.display()))?;
 
             let needs_states = pass_needs_verifier_states(pass);
             if needs_states && !verifier_states_ready {
-                write_failed_pass(&workdir, idx, pass)?;
-                partial_error = Some(preserve_pass_failure(
-                    &workdir,
+                let (message, artifacts) = pass_failure_artifacts(
                     prog_id,
                     idx,
                     pass,
                     reports.len(),
                     anyhow!("pass {pass} requires verifier states from a previous per-pass ReJIT"),
                     None,
-                    failure_root,
-                )?);
+                    None,
+                )?;
+                partial_error = Some(message);
+                failure_artifacts = Some(artifacts);
                 break;
             }
             let target_arg = pass_needs_target(pass).then_some(target_json.as_path());
@@ -977,17 +888,10 @@ where
             ) {
                 Ok(report) => report,
                 Err(err) => {
-                    write_failed_pass(&workdir, idx, pass)?;
-                    partial_error = Some(preserve_pass_failure(
-                        &workdir,
-                        prog_id,
-                        idx,
-                        pass,
-                        reports.len(),
-                        err,
-                        None,
-                        failure_root,
-                    )?);
+                    let (message, artifacts) =
+                        pass_failure_artifacts(prog_id, idx, pass, reports.len(), err, None, None)?;
+                    partial_error = Some(message);
+                    failure_artifacts = Some(artifacts);
                     break;
                 }
             };
@@ -1003,25 +907,18 @@ where
             ) {
                 Ok(report) => report,
                 Err(err) => {
-                    write_failed_pass(&workdir, idx, pass)?;
-                    fs::copy(&pass_output, workdir.path().join("failed-pass-output.bin"))
-                        .with_context(|| format!("copy failed pass output for {pass}"))?;
-                    if pass_verifier_log.exists() {
-                        fs::copy(&pass_verifier_log, workdir.path().join("verifier.log"))
-                            .with_context(|| format!("copy verifier log for failed pass {pass}"))?;
-                    }
-                    fs::write(&pass_error, format!("{err:#}\n"))
-                        .with_context(|| format!("write {}", pass_error.display()))?;
-                    partial_error = Some(preserve_pass_failure(
-                        &workdir,
+                    let pass_error = workdir.path().join(format!("{stem}.rejit.err.txt"));
+                    let (message, artifacts) = pass_failure_artifacts(
                         prog_id,
                         idx,
                         pass,
                         reports.len(),
                         err,
                         Some(&pass_error),
-                        failure_root,
-                    )?);
+                        Some(&pass_verifier_log),
+                    )?;
+                    partial_error = Some(message);
+                    failure_artifacts = Some(artifacts);
                     break;
                 }
             };
@@ -1057,8 +954,12 @@ where
         }
         .to_string();
         let applied = last_rejit_summary.is_some();
-        let failed_pass = error_message_failed_pass(error_message.as_deref());
-        let committed_passes_before_failure = error_message.as_ref().map(|_| reports.len());
+        let failed_pass = failure_artifacts
+            .as_ref()
+            .map(|artifacts| artifacts.failed_pass.clone());
+        let committed_passes_before_failure = failure_artifacts
+            .as_ref()
+            .map(|artifacts| artifacts.committed_passes);
 
         if let Some(rejit_summary) = last_rejit_summary.as_ref() {
             write_json_file(&rejit_summary_json, &rejit_summary)?;
@@ -1104,24 +1005,11 @@ where
             passes,
             inlined_map_entries,
             error_message,
+            failure_artifacts,
         })
     })();
 
-    match result {
-        Ok(result) => Ok(result),
-        Err(err) => match preserve_failure_workdir(&workdir, prog_id, failure_root) {
-            Ok(path) => {
-                eprintln!(
-                    "daemon: preserved failure workdir for prog {prog_id} at {}",
-                    path.display()
-                );
-                Err(err).with_context(|| format!("preserved failure workdir: {}", path.display()))
-            }
-            Err(preserve_err) => Err(err).with_context(|| {
-                format!("failed to preserve failure workdir for prog {prog_id}: {preserve_err:#}")
-            }),
-        },
-    }
+    result
 }
 
 fn append_bpfopt_context_args(command: &mut Command, prog_info: &ProgInfoJson) {
@@ -1149,55 +1037,47 @@ fn pass_file_stem(index: usize, pass: &str) -> String {
     format!("pass-{index:02}-{pass}")
 }
 
-fn write_failed_pass(workdir: &WorkDir, index: usize, pass: &str) -> Result<()> {
-    fs::write(
-        workdir.path().join("failed_pass.txt"),
-        format!("{index}\n{pass}\n"),
-    )
-    .with_context(|| format!("write failed_pass.txt for pass {pass}"))
-}
-
-fn preserve_pass_failure(
-    workdir: &WorkDir,
+fn pass_failure_artifacts(
     prog_id: u32,
     pass_index: usize,
     pass: &str,
     committed_passes: usize,
     err: anyhow::Error,
     rejit_error_path: Option<&Path>,
-    failure_root: &Path,
-) -> Result<String> {
+    verifier_log_path: Option<&Path>,
+) -> Result<(String, FailureArtifacts)> {
+    let pass_error = format!("{err:#}");
     let message = format!(
-        "prog {prog_id} pass {pass} failed after {committed_passes} committed passes: {err:#}"
+        "prog {prog_id} pass {pass} failed after {committed_passes} committed passes: {pass_error}"
     );
-    fs::write(
-        workdir.path().join("partial_failure.json"),
-        serde_json::to_vec_pretty(&serde_json::json!({
-            "prog_id": prog_id,
-            "failed_pass_index": pass_index,
-            "failed_pass": pass,
-            "committed_passes": committed_passes,
-            "error": message,
-            "rejit_error_path": rejit_error_path.map(|path| path.display().to_string()),
-        }))?,
-    )
-    .with_context(|| format!("write partial failure for pass {pass}"))?;
-    let path = preserve_failure_workdir(workdir, prog_id, failure_root)?;
-    eprintln!(
-        "daemon: preserved failure workdir for prog {prog_id} at {}",
-        path.display()
-    );
-    Ok(format!(
-        "{message}; preserved failure workdir: {}",
-        path.display()
+    let verifier_log = match verifier_log_path {
+        Some(path) => match fs::read_to_string(path) {
+            Ok(log) => log,
+            Err(err) if err.kind() == std::io::ErrorKind::NotFound => String::new(),
+            Err(err) => return Err(err).with_context(|| format!("read {}", path.display())),
+        },
+        None => String::new(),
+    };
+    let partial_failure_json = serde_json::json!({
+        "prog_id": prog_id,
+        "failed_pass_index": pass_index,
+        "failed_pass": pass,
+        "committed_passes": committed_passes,
+        "error": message,
+        "rejit_error_path": rejit_error_path.map(|path| path.display().to_string()),
+    });
+    eprintln!("daemon: prog {prog_id} failed; failure artifacts attached to response");
+    Ok((
+        message,
+        FailureArtifacts {
+            failed_pass_index: pass_index,
+            failed_pass: pass.to_string(),
+            committed_passes,
+            verifier_log,
+            pass_error,
+            partial_failure_json,
+        },
     ))
-}
-
-fn error_message_failed_pass(message: Option<&str>) -> Option<String> {
-    let message = message?;
-    let stripped = message.split_once(" pass ")?.1;
-    let (pass, _) = stripped.split_once(" failed after ")?;
-    Some(pass.to_string())
 }
 
 fn run_bpfopt_pass(
@@ -2113,9 +1993,11 @@ mod tests {
         assert!(message.contains("prog 42"), "err={message}");
         assert!(message.contains("mock rejit verifier log"), "err={message}");
         assert_eq!(kernel.rejit_calls, 1);
-        let verifier_log =
-            fs::read_to_string(harness.failure_root.path().join("42/verifier.log")).unwrap();
-        assert_eq!(verifier_log, "mock rejit verifier log");
+        let artifacts = result.failure_artifacts.as_ref().unwrap();
+        assert_eq!(artifacts.failed_pass_index, 0);
+        assert_eq!(artifacts.failed_pass, "wide_mem");
+        assert_eq!(artifacts.verifier_log, "mock rejit verifier log");
+        assert_eq!(artifacts.partial_failure_json["prog_id"], 42);
     }
 
     #[test]
@@ -2132,9 +2014,8 @@ mod tests {
         let message = result.error_message.as_deref().unwrap_or("");
         assert!(message.contains(&retry_log), "err={message}");
         assert_eq!(kernel.rejit_calls, 1);
-        let verifier_log =
-            fs::read_to_string(harness.failure_root.path().join("42/verifier.log")).unwrap();
-        assert_eq!(verifier_log, retry_log);
+        let artifacts = result.failure_artifacts.as_ref().unwrap();
+        assert_eq!(artifacts.verifier_log, retry_log);
     }
 
     #[test]
@@ -2151,6 +2032,7 @@ mod tests {
         assert!(result.changed);
         assert!(result.summary.applied);
         assert!(result.error_message.is_none());
+        assert!(result.failure_artifacts.is_none());
         assert_eq!(kernel.rejit_calls, test_runner_passes().len());
     }
 
@@ -2170,14 +2052,15 @@ mod tests {
 
     #[test]
     fn try_apply_programs_converts_failures_and_panics_to_program_results() {
-        let prog_ids = [7, 8, 9];
+        let prog_ids = [7, 8, 9, 10];
 
         let outcomes =
             try_apply_programs_with(&prog_ids, 2, |prog_id| -> Result<OptimizeOneResult> {
                 match prog_id {
                     7 => Ok(successful_batch_result(prog_id)),
-                    8 => bail!("missing program {prog_id}"),
-                    9 => panic!("mock worker panic"),
+                    8 => Ok(failed_batch_result(prog_id)),
+                    9 => bail!("missing program {prog_id}"),
+                    10 => panic!("mock worker panic"),
                     _ => bail!("unexpected prog_id {prog_id}"),
                 }
             })
@@ -2190,17 +2073,22 @@ mod tests {
             .collect::<BTreeMap<_, _>>();
         assert_eq!(by_id[&7].status, "ok");
         assert_eq!(by_id[&8].status, "error");
-        assert!(by_id[&8]
-            .error_message
-            .as_deref()
-            .unwrap_or("")
-            .contains("missing program 8"));
+        assert_eq!(
+            by_id[&8].failure_artifacts.as_ref().unwrap().verifier_log,
+            "batch verifier log"
+        );
         assert_eq!(by_id[&9].status, "error");
         assert!(by_id[&9]
             .error_message
             .as_deref()
             .unwrap_or("")
-            .contains("worker panicked while optimizing prog 9: mock worker panic"));
+            .contains("missing program 9"));
+        assert_eq!(by_id[&10].status, "error");
+        assert!(by_id[&10]
+            .error_message
+            .as_deref()
+            .unwrap_or("")
+            .contains("worker panicked while optimizing prog 10: mock worker panic"));
     }
 
     fn successful_batch_result(prog_id: u32) -> OptimizeOneResult {
@@ -2228,12 +2116,25 @@ mod tests {
             passes: Vec::new(),
             inlined_map_entries: Vec::new(),
             error_message: None,
+            failure_artifacts: None,
         }
+    }
+
+    fn failed_batch_result(prog_id: u32) -> OptimizeOneResult {
+        let mut result = OptimizeOneResult::error(prog_id, "batch pass failed");
+        result.failure_artifacts = Some(FailureArtifacts {
+            failed_pass_index: 1,
+            failed_pass: "rotate".to_string(),
+            committed_passes: 0,
+            verifier_log: "batch verifier log".to_string(),
+            pass_error: "EINVAL".to_string(),
+            partial_failure_json: serde_json::json!({"prog_id": prog_id}),
+        });
+        result
     }
 
     struct ApplyHarness {
         _cli_dir: WorkDir,
-        failure_root: WorkDir,
         config: CliConfig,
     }
 
@@ -2241,13 +2142,11 @@ mod tests {
         fn new() -> Self {
             let cli_dir = WorkDir::new("bpfrejit-daemon-fake-cli").unwrap();
             write_fake_bpfopt(cli_dir.path());
-            let failure_root = WorkDir::new("bpfrejit-daemon-failures").unwrap();
             let config = CliConfig {
                 cli_dir: Some(cli_dir.path().to_path_buf()),
             };
             Self {
                 _cli_dir: cli_dir,
-                failure_root,
                 config,
             }
         }
@@ -2267,7 +2166,6 @@ mod tests {
                     config: &self.config,
                     enabled_passes,
                     invalidation_tracker: None,
-                    failure_root: self.failure_root.path(),
                 },
                 kernel,
                 |_map_id| -> Result<OwnedFd> { bail!("test did not expect map fd opens") },

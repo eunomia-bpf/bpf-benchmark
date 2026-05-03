@@ -671,6 +671,7 @@ def _run_suite_lifecycle_sessions(
             result.rejit_result = active_daemon_session.apply_rejit(
                 result.rejit_prog_ids,
                 enabled_passes=apply_enabled_passes,
+                failure_artifacts_dir=daemon_session.failure_artifacts_dir,
             )
             _print_progress(
                 "rejit_done",
@@ -788,7 +789,11 @@ def run_suite(
     total_apps = len(suite.apps)
 
     with DaemonSession.start(daemon_binary, load_kinsn=not bool(args.no_kinsn)) as daemon_session:
-        prepared_daemon_session = prepare_daemon_session(daemon_session)
+        failure_artifacts_dir = artifact_session.run_dir / "details" if artifact_session is not None else None
+        prepared_daemon_session = prepare_daemon_session(
+            daemon_session,
+            failure_artifacts_dir=failure_artifacts_dir,
+        )
 
         with enable_bpf_stats():
             for app in suite.apps:

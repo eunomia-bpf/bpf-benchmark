@@ -136,6 +136,7 @@ class CaseLifecycleState:
 class PreparedDaemonSession:
     session: DaemonSession
     metadata: dict[str, object]
+    failure_artifacts_dir: Path | None = None
 
 
 @dataclass
@@ -153,14 +154,16 @@ class LifecycleRunResult:
 
 def prepare_daemon_session(
     daemon_session: DaemonSession,
+    *,
+    failure_artifacts_dir: Path | None = None,
 ) -> PreparedDaemonSession:
     metadata = copy.deepcopy(getattr(daemon_session, "kinsn_metadata", {}) or {})
     if not bool(getattr(daemon_session, "load_kinsn", False)):
-        return PreparedDaemonSession(session=daemon_session, metadata={})
+        return PreparedDaemonSession(session=daemon_session, metadata={}, failure_artifacts_dir=failure_artifacts_dir)
     if not metadata:
         raise RuntimeError("daemon session requested kinsn loading but did not capture kinsn metadata")
     metadata["daemon_binary"] = relpath(daemon_session.daemon_binary.resolve())
-    return PreparedDaemonSession(session=daemon_session, metadata=metadata)
+    return PreparedDaemonSession(session=daemon_session, metadata=metadata, failure_artifacts_dir=failure_artifacts_dir)
 
 def _daemon_exit_error(daemon_session: DaemonSession) -> str | None:
     returncode = daemon_session.proc.poll()
@@ -257,6 +260,7 @@ def run_lifecycle_sessions(
                 result.rejit_result = active_daemon_session.apply_rejit(
                     result.rejit_prog_ids,
                     enabled_passes=apply_enabled_passes,
+                    failure_artifacts_dir=daemon_session.failure_artifacts_dir,
                 )
                 _check_daemon(active_daemon_session)
         for session, result in active_pairs:
