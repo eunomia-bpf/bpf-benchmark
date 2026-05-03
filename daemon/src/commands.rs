@@ -2380,7 +2380,6 @@ printf '{"pass":"%s","changed":true,"sites_applied":1,"insn_count_before":1,"ins
                 orig_prog_len: 8,
                 jited_prog_len: 0,
                 btf_id: 0,
-                prog_flags: 0,
                 attach_btf_obj_id: 0,
                 attach_btf_id: 0,
                 expected_attach_type: None,

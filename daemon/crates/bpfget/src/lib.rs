@@ -27,8 +27,6 @@ pub struct ProgramInfo {
     pub orig_prog_len: u32,
     pub jited_prog_len: u32,
     pub btf_id: u32,
-    #[serde(default, skip_serializing_if = "is_zero_u32")]
-    pub prog_flags: u32,
     pub attach_btf_obj_id: u32,
     pub attach_btf_id: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -192,7 +190,6 @@ impl ProgramInfo {
             orig_prog_len: info.orig_prog_len,
             jited_prog_len: info.jited_prog_len,
             btf_id: info.btf_id,
-            prog_flags: info.prog_flags,
             attach_btf_obj_id: info.attach_btf_obj_id,
             attach_btf_id: info.attach_btf_id,
             expected_attach_type,
