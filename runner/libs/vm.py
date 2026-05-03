@@ -3,6 +3,7 @@ from __future__ import annotations
 import shlex
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from typing import Sequence
@@ -148,6 +149,7 @@ def _run_command_with_script_pty(
     with tempfile.NamedTemporaryFile(prefix="vng-pty-log.", delete=False) as handle:
         log_path = Path(handle.name)
     effective_timeout = timeout if timeout else None
+    succeeded = False
     try:
         if stream_output:
             completed = subprocess.run(
@@ -156,6 +158,7 @@ def _run_command_with_script_pty(
                 timeout=effective_timeout,
                 check=False,
             )
+            succeeded = completed.returncode == 0
             return subprocess.CompletedProcess(command, completed.returncode, "", "")
         completed = subprocess.run(
             ["script", "-qfec", shlex.join(command), str(log_path)],
@@ -165,7 +168,11 @@ def _run_command_with_script_pty(
             timeout=effective_timeout,
             check=False,
         )
+        succeeded = completed.returncode == 0
         stdout = log_path.read_text(encoding="utf-8", errors="replace") if log_path.exists() else completed.stdout
         return subprocess.CompletedProcess(command, completed.returncode, stdout, completed.stderr)
     finally:
-        log_path.unlink(missing_ok=True)
+        if succeeded:
+            log_path.unlink(missing_ok=True)
+        else:
+            print(f"[kvm-executor][DEBUG] preserved pty log: {log_path}", file=sys.stderr)
