@@ -262,7 +262,6 @@ $(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRA
 	docker load -i "$(X86_KERNEL_FORK_IMAGE_TAR)"
 	docker build --platform linux/amd64 \
 		--target runner-runtime \
-		--no-cache-filter=runner-runtime-daemon-artifact,runner-runtime-bpfopt-artifacts \
 		--build-context runner-runtime-katran-upstream=docker-image://$(X86_KATRAN_ARTIFACTS_IMAGE) \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
 		--build-arg IMAGE_BUILD_JOBS="$(IMAGE_BUILD_JOBS)" \
@@ -278,7 +277,6 @@ $(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_K
 	docker load -i "$(ARM64_KERNEL_FORK_IMAGE_TAR)"
 	docker build --platform linux/arm64 \
 		--target runner-runtime \
-		--no-cache-filter=runner-runtime-daemon-artifact,runner-runtime-bpfopt-artifacts \
 		--build-context runner-runtime-katran-upstream=docker-image://$(ARM64_KATRAN_ARTIFACTS_IMAGE) \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
 		--build-arg IMAGE_BUILD_JOBS="$(ARM64_IMAGE_BUILD_JOBS)" \
@@ -323,6 +321,14 @@ $(X86_RUNTIME_KERNEL_IMAGE): $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(BPFREJIT_INSTALL_
 	test -s "$@"
 	touch "$@"
 
+# Daemon binary is buildable on the host (cargo handles cross-compile to
+# aarch64 via TARGET_TRIPLE). Python's local_prep_targets requests this path
+# directly so make can detect daemon/src changes and rebuild before the
+# docker image picks it up.
+$(ACTIVE_DAEMON_BINARY): $(DAEMON_SOURCE_FILES) $(BUILD_RULE_FILES)
+	mkdir -p "$(dir $@)"
+	make -C "$(ROOT_DIR)/daemon" release TARGET_DIR="$(DAEMON_DIR)/target" $(ACTIVE_DAEMON_TARGET_ARG)
+
 .PHONY: image-katran-artifacts image-runner-artifacts image-daemon-artifact image-bpfopt-artifacts \
 	image-micro-program-artifacts image-test-artifacts
 ifneq ($(BPFREJIT_IMAGE_BUILD),1)
@@ -343,10 +349,6 @@ $(RUNNER_LIBBPF_A): $(LIBBPF_SOURCE_FILES) $(BUILD_RULE_FILES)
 	make -C "$(ROOT_DIR)/vendor/libbpf/src" -j"$(JOBS)" BUILD_STATIC_ONLY=1 \
 		OBJDIR="$(RUNNER_LIBBPF_OBJDIR)" DESTDIR= PREFIX="$(RUNNER_LIBBPF_PREFIX)" \
 		"$(RUNNER_LIBBPF_A)" install_headers
-
-$(ACTIVE_DAEMON_BINARY): $(DAEMON_SOURCE_FILES) $(BUILD_RULE_FILES)
-	mkdir -p "$(dir $@)"
-	make -C "$(ROOT_DIR)/daemon" release TARGET_DIR="$(DAEMON_DIR)/target" $(ACTIVE_DAEMON_TARGET_ARG)
 
 $(ACTIVE_BPFOPT_BINARIES) &: $(BPFOPT_SOURCE_FILES) $(BUILD_RULE_FILES)
 	cargo build --release --workspace $(ACTIVE_BPFOPT_TARGET_ARG) --target-dir "$(ROOT_DIR)/bpfopt/target" --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml" \
