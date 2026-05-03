@@ -685,10 +685,7 @@ fn as_mov64_imm(value: u64) -> Option<i32> {
 
 fn decode_ldimm64(insns: &[BpfInsn], pc: usize) -> u64 {
     let lo = insns[pc].imm as u32 as u64;
-    let hi = insns
-        .get(pc + 1)
-        .map(|insn| insn.imm as u32 as u64)
-        .unwrap_or(0);
+    let hi = insns[pc + 1].imm as u32 as u64;
     lo | (hi << 32)
 }
 
