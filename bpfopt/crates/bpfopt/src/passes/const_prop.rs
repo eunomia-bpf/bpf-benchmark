@@ -7,6 +7,8 @@ use crate::analysis::CFGAnalysis;
 use crate::insn::*;
 use crate::pass::*;
 
+use super::utils::{emit_ldimm64, fixup_all_branches, insn_width};
+
 const REG_COUNT: usize = 11;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -244,7 +246,7 @@ impl BpfPass for ConstPropPass {
         }
         addr_map[orig_len] = new_insns.len();
 
-        super::utils::fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
+        fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
         fixup_folded_jumps(&mut new_insns, &program.insns, &addr_map, &replacements);
         for old_pc in nop_pcs {
             let new_pc = addr_map[old_pc];
@@ -681,18 +683,6 @@ fn as_mov64_imm(value: u64) -> Option<i32> {
     ((imm as i64) as u64 == value).then_some(imm)
 }
 
-fn emit_ldimm64(dst_reg: u8, value: u64) -> Vec<BpfInsn> {
-    vec![
-        BpfInsn::new(
-            BPF_LD | BPF_DW | BPF_IMM,
-            BpfInsn::make_regs(dst_reg, 0),
-            0,
-            value as u32 as i32,
-        ),
-        BpfInsn::new(0, 0, 0, (value >> 32) as u32 as i32),
-    ]
-}
-
 fn decode_ldimm64(insns: &[BpfInsn], pc: usize) -> u64 {
     let lo = insns[pc].imm as u32 as u64;
     let hi = insns
@@ -764,14 +754,6 @@ fn fixup_folded_jumps(
         if let Ok(new_off) = i16::try_from(new_off) {
             new_insns[new_pc].off = new_off;
         }
-    }
-}
-
-fn insn_width(insn: &BpfInsn) -> usize {
-    if insn.is_ldimm64() {
-        2
-    } else {
-        1
     }
 }
 

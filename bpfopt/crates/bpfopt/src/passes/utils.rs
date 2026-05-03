@@ -1114,12 +1114,28 @@ fn fixup_surviving_branches(
     }
 }
 
-fn insn_width(insn: &BpfInsn) -> usize {
+/// Returns the instruction "width" (slot count): 2 for LD_IMM64, 1 for all others.
+pub fn insn_width(insn: &BpfInsn) -> usize {
     if insn.is_ldimm64() {
         2
     } else {
         1
     }
+}
+
+// ── LD_IMM64 helpers ──────────────────────────────────────────────
+
+/// Emit a two-instruction `LD_IMM64 dst, value` sequence (BPF_LD|BPF_DW|BPF_IMM).
+pub fn emit_ldimm64(dst_reg: u8, value: u64) -> Vec<BpfInsn> {
+    vec![
+        BpfInsn::new(
+            BPF_LD | BPF_DW | BPF_IMM,
+            BpfInsn::make_regs(dst_reg, 0),
+            0,
+            value as u32 as i32,
+        ),
+        BpfInsn::new(0, 0, 0, (value >> 32) as u32 as i32),
+    ]
 }
 
 // ── Kinsn call emission ────────────────────────────────────────────

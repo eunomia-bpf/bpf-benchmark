@@ -8,7 +8,7 @@ use std::sync::OnceLock;
 use crate::analysis::BranchTargetAnalysis;
 use crate::insn::*;
 use crate::pass::*;
-use super::utils::insn_width;
+use super::utils::{emit_ldimm64, insn_width};
 
 mod map_info;
 pub use map_info::{MapInfo, MapInfoAnalysis, MapInfoResult, MapReference};
@@ -1506,18 +1506,6 @@ fn emit_constant_load(dst_reg: u8, value: u64, size: u8) -> Vec<BpfInsn> {
 
     debug_assert!(value <= u32::MAX as u64);
     vec![BpfInsn::mov32_imm(dst_reg, value as u32 as i32)]
-}
-
-fn emit_ldimm64(dst_reg: u8, value: u64) -> Vec<BpfInsn> {
-    vec![
-        BpfInsn::new(
-            BPF_LD | BPF_DW | BPF_IMM,
-            BpfInsn::make_regs(dst_reg, 0),
-            0,
-            value as u32 as i32,
-        ),
-        BpfInsn::new(0, 0, 0, (value >> 32) as u32 as i32),
-    ]
 }
 
 fn find_map_load_for_call(insns: &[BpfInsn], call_pc: usize) -> Option<usize> {
