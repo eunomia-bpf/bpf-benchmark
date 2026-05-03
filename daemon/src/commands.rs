@@ -991,11 +991,15 @@ where
             let target_arg = pass_needs_target(pass).then_some(target_json.as_path());
             let verifier_states_arg = needs_states.then_some(verifier_states_json.as_path());
             let map_values_arg = (pass == "map_inline").then_some(map_values_json.as_path());
-            let map_ids_arg = (pass == "map_inline").then_some(
-                map_ids
-                    .as_deref()
-                    .ok_or_else(|| anyhow!("map_inline pass missing map ids"))?,
-            );
+            let map_ids_arg = if pass == "map_inline" {
+                Some(
+                    map_ids
+                        .as_deref()
+                        .ok_or_else(|| anyhow!("map_inline pass missing map ids"))?,
+                )
+            } else {
+                None
+            };
             let profile_for_pass = (pass == "branch_flip" || pass == "prefetch")
                 .then_some(profile_arg)
                 .flatten();
