@@ -241,7 +241,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 | **REJIT spill-to-register** | kernel 机制 | 📝 设计完成；值得做 | REJIT 接受可选 reg_map，`bpfrejit` 提交少量热点 spill slot → native register 映射。任意 BPF→native reg_map 不现实；**x86 只剩 R12**（1 个），**ARM64 有 x23/x24**（2 个）。Verifier 不需要改。分阶段：ARM64 先做 → x86 → 受限 reg_map。调研：`rejit_register_mapping_research_20260329.md`（790 行） | 受限 spill-to-register |
 | **Region kinsn（寄存器扩展）** | 是 | ⏸ 后续 phase | 高寄存器压力的代码段包装为 region kinsn，emit callback 内部用 native 寄存器。首版应限定 pure scalar N→1、无内存/stack/packet/map 写、无 helper/call，等待 kinsn v3 / region ABI 收敛后再实现 | 调研完成：`docs/tmp/region_kinsn_research_20260430.md`；结论为 Cilium/Calico 有 Jenkins/hash 信号，Tetragon 多为 byte-pack/decoder，上界 census 24/1/175 clusters，但不进当前默认 pipeline |
 
-`branch_flip` 属于 Paper B：基于 profile/info 的 speculative runtime optimization。P88 已将 `bpfprof --per-site` 接到真实 `bpf_get_branch_snapshot()` LBR 数据，daemon `profile-start`/`profile-stop` 调用该路径，Rust pass 删除 heuristic fallback 并要求每个候选 site 有真实 `branch_count`/`branch_misses`/`miss_rate`/direction 数据。Paper A 默认优化仍是 kinsn 主线；daemon 默认 12-pass policy 包含 `prefetch`，但不包含 `branch_flip`。`branch_flip` 是否进入 benchmark policy 等 Paper B profile 数据后再决定。
+`branch_flip` 属于 Paper B：基于 profile/info 的 speculative runtime optimization。P88 已将 `bpfprof --per-site` 接到真实 `bpf_get_branch_snapshot()` LBR 数据；Rust pass 删除 heuristic fallback 并要求每个候选 site 有真实 `branch_count`/`branch_misses`/`miss_rate`/direction 数据。daemon socket 不再管理 profile lifecycle 或向 `bpfopt` 注入 profile path；`branch_flip` 的 profile side-input 只存在于显式 `bpfopt` CLI 边界。Paper A 默认优化仍是 kinsn 主线；daemon 默认 12-pass policy 包含 `prefetch`，但不包含 `branch_flip`。`branch_flip` 是否进入 benchmark policy 等 Paper B profile 数据后再决定。
 
 ### 3.2 安全加固变换（暂不在 OSDI 评估范围）
 
@@ -376,7 +376,7 @@ Packed（sidecar pseudo-insn + CALL pair，零 argument setup，N→1 指令替�
 2026-05-01 per-pass ReJIT 重构后，v3 的权威边界是：`bpfopt` / `bpfprof` 保持 CLI，`bpfget` 是 daemon-owned in-process library，每个 pass 的 `BPF_PROG_REJIT(log_level=2)` 由 daemon 通过 `kernel-sys` 直接执行。`bpfverify` / `bpfrejit` crate 和 daemon thin dry-run module 已删除。
 
 - **`bpfopt` 是纯 bytecode CLI**：不直接调用 BPF syscall；stdin/stdout 传 raw `struct bpf_insn[]` binary；必须显式传 `--pass <name>`，一次只跑一个 pass；`--target`、`--profile`、`--verifier-states`、`--map-values`、`--report` 等 side-input/output 全部走文件。
-- **`bpfprof` 是独立 profile CLI**：PMU profiling 和 per-site branch profile 仍由外部 CLI 输出文件，daemon 只管理 lifecycle。
+- **`bpfprof` 是独立 profile CLI**：PMU profiling 和 per-site branch profile 仍由外部 CLI 输出文件；daemon socket 不管理 profile lifecycle，也不把 profile path 传给 `bpfopt`。
 - **kernel-facing 功能在 daemon 进程内**：`bpfget` 读取 live program bytecode/metadata/map info；daemon 只从 `prog_info.used_maps` 构造 in-memory map fd array；每个 pass 的 ReJIT 直接调用 `kernel_sys::prog_rejit()`。
 - **daemon 是 runner socket + kernel syscall orchestrator**：保留 socket + JSON 协议，watch 新程序、检测 map invalidation、维护 session 生命周期；收到 optimize 请求后只 fork+exec `bpfopt` 做 bytecode transform。
 - **主路径不 dry-run**：daemon 不调用 `BPF_PROG_LOAD` 接受 candidate。kernel 在每次 `BPF_PROG_REJIT` 内 re-verify；失败直接 surface error。
@@ -394,7 +394,7 @@ Packed（sidecar pseudo-insn + CALL pair，零 argument setup，N→1 指令替�
 
 `CLAUDE.md` 的 **No CLI Cross-Dependencies** 是实现约束。剩余 standalone CLI binary crate（`bpfopt`、`bpfprof`、`bpfrejit-daemon`）之间不能有 runtime dependency，也不能有 compile-time path-dependency。`bpfget` 是 daemon-owned library crate，不是 CLI crate；`bpfverify` / `bpfrejit` crate 已删除；共享 syscall/data access 必须通过 `kernel-sys`。
 
-当前实现状态：`bpfrejit-daemon` 不依赖 `bpfopt` 的 lib 部分；daemon 通过 `kernel-sys` 和 `bpfget` 访问 live BPF state，优化变换通过 `bpfopt` CLI 完成，profile 通过 `bpfprof` CLI 完成。
+当前实现状态：`bpfrejit-daemon` 不依赖 `bpfopt` 的 lib 部分；daemon 通过 `kernel-sys` 和 `bpfget` 访问 live BPF state，优化变换通过 `bpfopt` CLI 完成。`bpfprof` 保持 standalone CLI，不经过 daemon socket。
 
 #### 依赖 libbpf-rs，不自己 wrap
 
@@ -408,7 +408,7 @@ Packed（sidecar pseudo-insn + CALL pair，零 argument setup，N→1 指令替�
 
 1. **Phase 1：核心 bytecode CLI**。保留 `bpfopt`，实现 `bpfopt --pass <name>` 单 pass CLI 和 `list-passes`。
 2. **Phase 2：kernel syscall libs + profile CLI**。`bpfprof` 保持 CLI；`bpfget` 归 daemon-owned library；per-pass ReJIT orchestration 在 daemon 内直接调 `kernel-sys`。
-3. **Phase 3：集成**。runner Python 保持 daemon socket + JSON 边界，daemon 内部链接 kernel-facing libs，只 fork+exec `bpfopt` / `bpfprof`。
+3. **Phase 3：集成**。runner Python 保持 daemon socket + JSON 边界，daemon 内部链接 kernel-facing libs，只 fork+exec `bpfopt`；`bpfprof` 保持 daemon 外 standalone CLI。
 4. **Phase 4：增强**。完善 map invalidation lifecycle、target probing、kinsn BTF capability 扩展。
 
 ---
@@ -441,11 +441,11 @@ Packed（sidecar pseudo-insn + CALL pair，零 argument setup，N→1 指令替�
 #### Phase 3 实施方针：runner socket boundary + daemon in-process kernel libs
 
 - runner Python 不动，daemon socket + JSON 协议保持不变。
-- daemon 只 fork+exec `bpfopt` / `bpfprof`；`bpfget` 是唯一 daemon-owned kernel-facing library，per-pass ReJIT orchestration 在 daemon 内直接调 `kernel-sys`。
+- daemon 只 fork+exec `bpfopt`；`bpfprof` 保持 daemon 外 standalone CLI；`bpfget` 是唯一 daemon-owned kernel-facing library，per-pass ReJIT orchestration 在 daemon 内直接调 `kernel-sys`。
 - Task #45 daemon 瘦身仍成立：删除 `PassManager` / pass code / profiler；daemon 不做 bytecode transform。
 - 2026-05-01 pivot 的动机和验证见 `docs/tmp/full-matrix-20260430/v3-arch-pivot.md`。
 
-- **3.1 daemon socket orchestration**：`optimize` 接收 `prog_ids` 列表并使用 per-program worker pool；每个程序走 daemon snapshot → `bpfopt --pass` loop → per-pass daemon direct ReJIT；`profile-start/stop` 走 `bpfprof`；`status` 只保留 daemon 健康和 profiling 状态，旧的 all/batch 独立命令已删除。
+- **3.1 daemon socket orchestration**：`optimize` 接收 `prog_ids` 列表并使用 per-program worker pool；每个程序走 daemon snapshot → `bpfopt --pass` loop → per-pass daemon direct ReJIT；profile lifecycle、status、旧的 all/batch 独立命令已删除。
 - **3.2 daemon 瘦身**：`daemon/Cargo.toml` 依赖 daemon-owned `bpfget` 和 `kernel-sys`；删除旧 `bpfverify`/`bpfrejit` crates、`pipeline.rs`、`profiler.rs`、`kfunc_discovery.rs`、`platform_detect.rs` 及对应旧测试文件。
 - **3.3 runner 边界确认**：`runner/libs/`、`corpus/`、`e2e/`、`micro/` 在本阶段不改；Docker/build 依赖也收窄为 daemon 只跟踪 `kernel-sys` 而不是整个 `bpfopt` 源码。
 

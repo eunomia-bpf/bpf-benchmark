@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 //! Socket command helpers.
 //!
-//! `bpfopt` and `bpfprof` remain CLI tools. The daemon owns live discovery,
+//! `bpfopt` remains the external bytecode CLI. The daemon owns live discovery,
 //! pass orchestration, per-pass verifier acceptance, short-lived fd_array
 //! construction, and per-pass `BPF_PROG_REJIT`.
 
@@ -142,7 +142,6 @@ fn preserve_failure_workdir(workdir: &WorkDir, prog_id: u32, root: &Path) -> Res
     Ok(failure_dir)
 }
 
-
 fn copy_dir_contents(src: &Path, dst: &Path) -> Result<()> {
     for entry in fs::read_dir(src).with_context(|| format!("read {}", src.display()))? {
         let entry = entry?;
@@ -220,35 +219,6 @@ fn require_nonempty_file(path: &Path, description: &str) -> Result<()> {
     Ok(())
 }
 
-#[derive(Debug)]
-pub(crate) struct ProfileSession {
-    child: std::process::Child,
-    output_dir: WorkDir,
-    duration_ms: u64,
-}
-
-#[derive(Debug)]
-pub(crate) struct FrozenProfile {
-    output_dir: WorkDir,
-    duration_ms: u64,
-    programs_profiled: usize,
-}
-
-impl FrozenProfile {
-    pub(crate) fn profile_path_for(&self, prog_id: u32) -> Option<PathBuf> {
-        let path = self.output_dir.path().join(format!("{prog_id}.json"));
-        path.exists().then_some(path)
-    }
-
-    pub(crate) fn duration_ms(&self) -> u64 {
-        self.duration_ms
-    }
-
-    pub(crate) fn programs_profiled(&self) -> usize {
-        self.programs_profiled
-    }
-}
-
 #[derive(Clone, Debug, Serialize)]
 pub(crate) struct OptimizeOneResult {
     pub status: String,
@@ -308,7 +278,6 @@ struct ApplyOneRequest<'a> {
     prog_id: u32,
     config: &'a CliConfig,
     enabled_passes: &'a [String],
-    profile_path: Option<&'a Path>,
     invalidation_tracker: Option<&'a SharedInvalidationTracker>,
     failure_root: &'a Path,
 }
@@ -671,62 +640,10 @@ fn live_bpf_map_keys(map: &MapInfoJson, fd: i32) -> Result<Vec<Vec<u8>>> {
     Ok(keys)
 }
 
-pub(crate) fn start_profile(config: &CliConfig, duration_ms: u64) -> Result<ProfileSession> {
-    let output_dir = WorkDir::new("bpfrejit-daemon-profile")?;
-    let mut child = config
-        .command("bpfprof")
-        .arg("--all")
-        .arg("--per-site")
-        .arg("--duration")
-        .arg(format!("{duration_ms}ms"))
-        .arg("--output-dir")
-        .arg(output_dir.path())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .context("spawn bpfprof --all --per-site")?;
-
-    if let Some(status) = child.try_wait().context("poll bpfprof after spawn")? {
-        let output = child.wait_with_output().context("collect bpfprof output")?;
-        bail!(
-            "bpfprof exited during profile-start with status {}: {}",
-            status,
-            stderr_summary(&output)
-        );
-    }
-
-    Ok(ProfileSession {
-        child,
-        output_dir,
-        duration_ms,
-    })
-}
-
-pub(crate) fn stop_profile(session: ProfileSession) -> Result<FrozenProfile> {
-    let output = session
-        .child
-        .wait_with_output()
-        .context("wait for bpfprof profile session")?;
-    if !output.status.success() {
-        bail!(
-            "bpfprof profile session failed with status {}: {}",
-            output.status,
-            stderr_summary(&output)
-        );
-    }
-    let programs_profiled = count_json_files(session.output_dir.path())?;
-    Ok(FrozenProfile {
-        output_dir: session.output_dir,
-        duration_ms: session.duration_ms,
-        programs_profiled,
-    })
-}
-
 pub(crate) fn try_apply_one(
     prog_id: u32,
     config: &CliConfig,
     enabled_passes: &[String],
-    profile_path: Option<&Path>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
     failure_root: &Path,
 ) -> Result<OptimizeOneResult> {
@@ -736,7 +653,6 @@ pub(crate) fn try_apply_one(
             prog_id,
             config,
             enabled_passes,
-            profile_path,
             invalidation_tracker,
             failure_root,
         },
@@ -751,7 +667,6 @@ pub(crate) fn try_reapply_one(
     prog_id: u32,
     config: &CliConfig,
     enabled_passes: &[String],
-    profile_path: Option<&Path>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
     failure_root: &Path,
 ) -> Result<OptimizeOneResult> {
@@ -761,7 +676,6 @@ pub(crate) fn try_reapply_one(
             prog_id,
             config,
             enabled_passes,
-            profile_path,
             invalidation_tracker,
             failure_root,
         },
@@ -781,7 +695,6 @@ pub(crate) fn try_apply_programs(
     prog_ids: &[u32],
     config: &CliConfig,
     enabled_passes: &[String],
-    profile_paths: &HashMap<u32, PathBuf>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
     failure_root: &Path,
 ) -> Result<Vec<ApplyProgramOutcome>> {
@@ -797,23 +710,15 @@ pub(crate) fn try_apply_programs(
     let config = config.clone();
     let passes = enabled_passes.to_vec();
     let tracker = invalidation_tracker.cloned();
-    let profile_paths = profile_paths.clone();
     let failure_root = failure_root.to_path_buf();
 
     Ok(pool.install(|| {
         prog_ids
             .par_iter()
             .map(|&prog_id| {
-                let profile_path = profile_paths.get(&prog_id).map(PathBuf::as_path);
-                let result = try_apply_one(
-                    prog_id,
-                    &config,
-                    &passes,
-                    profile_path,
-                    tracker.as_ref(),
-                    &failure_root,
-                )
-                .map_err(|err| format!("{err:#}"));
+                let result =
+                    try_apply_one(prog_id, &config, &passes, tracker.as_ref(), &failure_root)
+                        .map_err(|err| format!("{err:#}"));
                 ApplyProgramOutcome { prog_id, result }
             })
             .collect()
@@ -836,7 +741,6 @@ where
         prog_id,
         config,
         enabled_passes,
-        profile_path,
         invalidation_tracker,
         failure_root,
     } = request;
@@ -938,22 +842,6 @@ where
             build_rejit_fd_array(&snapshot.info.map_ids, &probed_kinsns, &mut open_map_fd)
                 .with_context(|| format!("build fd_array for prog {prog_id}"))?;
 
-        let wants_branch_flip = pass_list
-            .iter()
-            .any(|pass| canonical_pass(pass) == "branch_flip");
-        let wants_prefetch = pass_list
-            .iter()
-            .any(|pass| canonical_pass(pass) == "prefetch");
-        let profile_arg = if wants_branch_flip {
-            let profile_path = profile_path
-                .ok_or_else(|| anyhow!("branch_flip requested but no profile is loaded"))?;
-            Some(profile_path)
-        } else if wants_prefetch {
-            profile_path
-        } else {
-            None
-        };
-
         let map_ids = if wants_map_inline {
             Some(if prog_info.map_ids.is_empty() {
                 "0".to_string()
@@ -1006,10 +894,6 @@ where
             } else {
                 None
             };
-            let profile_for_pass = (pass == "branch_flip" || pass == "prefetch")
-                .then_some(profile_arg)
-                .flatten();
-
             let report = match run_bpfopt_pass(
                 config,
                 pass,
@@ -1018,7 +902,6 @@ where
                 verifier_states_arg,
                 map_values_arg,
                 map_ids_arg,
-                profile_for_pass,
                 &pass_input,
                 &pass_output,
                 &pass_report,
@@ -1151,9 +1034,7 @@ where
     })();
 
     match result {
-        Ok(result) => {
-            Ok(result)
-        }
+        Ok(result) => Ok(result),
         Err(err) => match preserve_failure_workdir(&workdir, prog_id, failure_root) {
             Ok(path) => {
                 eprintln!(
@@ -1253,7 +1134,6 @@ fn run_bpfopt_pass(
     verifier_states: Option<&Path>,
     map_values: Option<&Path>,
     map_ids: Option<&str>,
-    profile_path: Option<&Path>,
     input: &Path,
     output: &Path,
     report: &Path,
@@ -1272,9 +1152,6 @@ fn run_bpfopt_pass(
     }
     if let Some(map_ids) = map_ids {
         bpfopt.arg("--map-ids").arg(map_ids);
-    }
-    if let Some(profile_path) = profile_path {
-        bpfopt.arg("--profile").arg(profile_path);
     }
     run_stage_with_file_io("bpfopt pass", &mut bpfopt, input, output)
         .with_context(|| format!("bpfopt pass {pass} failed"))?;
@@ -1857,17 +1734,6 @@ fn stderr_summary(output: &std::process::Output) -> String {
     text.lines().take(20).collect::<Vec<_>>().join("\n")
 }
 
-fn count_json_files(path: &Path) -> Result<usize> {
-    let mut count = 0usize;
-    for entry in fs::read_dir(path).with_context(|| format!("read {}", path.display()))? {
-        let entry = entry?;
-        if entry.path().extension().and_then(|value| value.to_str()) == Some("json") {
-            count += 1;
-        }
-    }
-    Ok(count)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2262,7 +2128,6 @@ mod tests {
                     prog_id: 42,
                     config: &self.config,
                     enabled_passes,
-                    profile_path: None,
                     invalidation_tracker: None,
                     failure_root: self.failure_root.path(),
                 },

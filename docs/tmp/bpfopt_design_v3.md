@@ -104,7 +104,7 @@ bpfopt --pass branch-flip --profile profile.json < in.bin > out.bin
 
 ### 3.2 bpfprof
 
-`bpfprof` 是 standalone CLI。daemon 只管理 `profile-start`/`profile-stop` lifecycle，不在进程内做 PMU profiling。
+`bpfprof` 是 standalone CLI。daemon 不管理 profiling lifecycle，不在进程内做 PMU profiling，也不通过 socket 向 `bpfopt` 注入 profile path。
 
 `branch_flip` 需要 `bpfprof --per-site` 的真实 per-site PGO 数据。每个 candidate site 必须有 `branch_count`、`branch_misses`、`miss_rate`、`taken`、`not_taken`；缺失数据直接 exit 1。
 
@@ -128,10 +128,9 @@ daemon 是事件源 + runner socket boundary + kernel syscall orchestrator。
 1. watch 新 BPF 程序加载。
 2. 检测 map invalidation。
 3. 维护 runner socket + JSON protocol。
-4. 管理外部 `bpfprof` lifecycle。
-5. 对 `optimize` 请求执行 snapshot -> per-pass `bpfopt` CLI -> per-pass `BPF_PROG_REJIT`。
-6. 将每次成功 ReJIT 的 verifier log 解析为 register states，作为后续 pass side-input。
-7. 对 `optimize` 的 `prog_ids` 列表使用 per-program worker pool；默认 worker 数为 `min(num_cpus, 16)`，小 VM 中减半。
+4. 对 `optimize` 请求执行 snapshot -> per-pass `bpfopt` CLI -> per-pass `BPF_PROG_REJIT`。
+5. 将每次成功 ReJIT 的 verifier log 解析为 register states，作为后续 pass side-input。
+6. 对 `optimize` 的 `prog_ids` 列表使用 per-program worker pool；默认 worker 数为 `min(num_cpus, 16)`，小 VM 中减半。
 
 不做的事：
 
@@ -163,7 +162,6 @@ daemon 是事件源 + runner socket boundary + kernel syscall orchestrator。
 daemon 保留 newline-delimited JSON socket。典型请求：
 
 ```json
-{"cmd":"status"}
 {"cmd":"optimize","prog_ids":[42,43,44],"enabled_passes":["wide_mem","rotate"]}
 ```
 

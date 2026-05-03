@@ -3,7 +3,8 @@
 `bpfrejit-daemon` keeps the benchmark runner on the socket JSON boundary while
 running live BPF discovery, automatic side-input preparation, fd-array
 construction, and final ReJIT in-process. `bpfopt` remains an
-external pure bytecode CLI, and `bpfprof` remains the external profiling CLI.
+external pure bytecode CLI. `bpfprof` remains a standalone profiling CLI outside
+the daemon socket protocol.
 
 ## Build
 
@@ -23,7 +24,6 @@ daemon/target/release/bpfrejit-daemon serve --socket /tmp/bpfrejit.sock
 requests must provide a non-empty `enabled_passes` list.
 
 ```json
-{"cmd":"status"}
 {"cmd":"optimize","prog_ids":[42],"enabled_passes":["map_inline","dce"]}
 ```
 
@@ -36,8 +36,9 @@ states, and kinsn passes get target metadata plus fd-array call offsets.
 Main `BPF_PROG_REJIT` has no daemon-side timeout. If the kernel verifier hangs,
 the daemon blocks in the syscall; this is documented behavior, not a fallback.
 
-`branch_flip` is experimental Paper B scaffolding. It is opt-in and uses loaded
-profile data when requested; benchmark defaults live in runner configuration.
+`branch_flip` is experimental Paper B scaffolding. It is opt-in, requires a real
+profile at the `bpfopt` CLI boundary, and is not wired through the daemon socket.
+Benchmark defaults live in runner configuration.
 
 ## Layout
 
@@ -47,8 +48,7 @@ daemon/
   crates/bpfget/     # daemon-owned live program snapshot library
   src/main.rs        # CLI entry point
   src/server.rs      # socket server and request dispatch
-  src/commands.rs    # in-process BPF orchestration + bpfopt/bpfprof CLI calls
-  src/dry_run.rs     # thin verifier-state capture for side-input consumers
+  src/commands.rs    # in-process BPF orchestration + bpfopt CLI calls
   src/bpf.rs         # libbpf-backed map/watch helpers used by the daemon
   src/invalidation.rs
 ```
