@@ -24,6 +24,7 @@ use crate::bpf;
 use crate::invalidation::{BpfMapValueReader, MapInvalidationTracker};
 
 static NEXT_WORKDIR_ID: AtomicU64 = AtomicU64::new(0);
+static REJIT_SYSCALL_MUTEX: Mutex<()> = Mutex::new(());
 /// CLI binary directory set once at startup; None means use PATH lookup.
 static CLI_DIR: std::sync::OnceLock<Option<PathBuf>> = std::sync::OnceLock::new();
 const MAP_VALUES_FILE: &str = "map-values.json";
@@ -406,7 +407,7 @@ pub(crate) fn default_worker_count() -> usize {
     let cpus = std::thread::available_parallelism()
         .map(|count| count.get())
         .unwrap_or(1);
-    let capped = cpus.min(16);
+    let capped = cpus.min(8);
     if cpus <= 4 {
         (capped / 2).max(1)
     } else {
@@ -691,6 +692,16 @@ where
     }))
 }
 
+fn with_serialized_rejit_syscall<T, F>(run: F) -> Result<T>
+where
+    F: FnOnce() -> Result<T>,
+{
+    let _guard = REJIT_SYSCALL_MUTEX
+        .lock()
+        .map_err(|_| anyhow!("global BPF_PROG_REJIT syscall mutex poisoned"))?;
+    run()
+}
+
 pub(crate) fn try_apply_programs(
     prog_ids: &[u32],
     config: &CliConfig,
@@ -898,13 +909,15 @@ where
             let pass_bytes = fs::read(&pass_output)
                 .with_context(|| format!("read {}", pass_output.display()))?;
             let pass_insns = decode_insns(&pass_bytes, pass_output.to_string_lossy().as_ref())?;
-            let rejit_report = match kernel.rejit(
-                prog_id,
-                &snapshot,
-                &pass_insns,
-                &fd_array,
-                &pass_verifier_log,
-            ) {
+            let rejit_report = match with_serialized_rejit_syscall(|| {
+                kernel.rejit(
+                    prog_id,
+                    &snapshot,
+                    &pass_insns,
+                    &fd_array,
+                    &pass_verifier_log,
+                )
+            }) {
                 Ok(report) => report,
                 Err(err) => {
                     let pass_error = workdir.path().join(format!("{stem}.rejit.err.txt"));
@@ -1052,7 +1065,7 @@ fn pass_failure_artifacts(
     );
     let verifier_log = match verifier_log_path {
         Some(path) => match fs::read_to_string(path) {
-            Ok(log) => log,
+            Ok(log) => kernel_sys::verifier_log_summary(&log),
             Err(err) if err.kind() == std::io::ErrorKind::NotFound => String::new(),
             Err(err) => return Err(err).with_context(|| format!("read {}", path.display())),
         },
@@ -2019,6 +2032,28 @@ mod tests {
     }
 
     #[test]
+    fn large_verifier_log_failure_artifact_is_bounded() {
+        let harness = ApplyHarness::new();
+        let large_log = format!("{}\n{}", "x".repeat(5000), "tail state");
+        let mut kernel = MockKernelOps {
+            rejit_error: Some(large_log.clone()),
+            ..Default::default()
+        };
+
+        let result = harness.apply(&mut kernel).unwrap();
+
+        let artifacts = result.failure_artifacts.as_ref().unwrap();
+        assert!(artifacts.verifier_log.len() < large_log.len());
+        assert!(
+            artifacts
+                .verifier_log
+                .contains("... verifier log truncated ..."),
+            "verifier log artifact was not summarized: {}",
+            artifacts.verifier_log
+        );
+    }
+
+    #[test]
     fn bpfopt_success_reaches_rejit_and_returns_success() {
         let harness = ApplyHarness::new();
         let mut kernel = MockKernelOps {
@@ -2089,6 +2124,34 @@ mod tests {
             .as_deref()
             .unwrap_or("")
             .contains("worker panicked while optimizing prog 10: mock worker panic"));
+    }
+
+    #[test]
+    fn rejit_syscall_guard_prevents_parallel_kernel_entries() {
+        let active = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let max_active = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let barrier = Arc::new(std::sync::Barrier::new(8));
+
+        std::thread::scope(|scope| {
+            for _ in 0..8 {
+                let active = Arc::clone(&active);
+                let max_active = Arc::clone(&max_active);
+                let barrier = Arc::clone(&barrier);
+                scope.spawn(move || {
+                    barrier.wait();
+                    with_serialized_rejit_syscall(|| {
+                        let current = active.fetch_add(1, Ordering::SeqCst) + 1;
+                        max_active.fetch_max(current, Ordering::SeqCst);
+                        std::thread::sleep(Duration::from_millis(10));
+                        active.fetch_sub(1, Ordering::SeqCst);
+                        Ok(())
+                    })
+                    .unwrap();
+                });
+            }
+        });
+
+        assert_eq!(max_active.load(Ordering::SeqCst), 1);
     }
 
     fn successful_batch_result(prog_id: u32) -> OptimizeOneResult {

@@ -1,0 +1,469 @@
+# Corpus Benchmark
+
+```json
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+  "generated_at": "2026-05-03T15:47:41.984097+00:00",
+  "kinsn_modules": {
+    "captured_at": "2026-05-03T15:47:04.775830+00:00",
+    "daemon_binary": "daemon/target/release/bpfrejit-daemon",
+    "expected_modules": [
+      "bpf_bulk_memory",
+      "bpf_endian",
+      "bpf_extract",
+      "bpf_prefetch",
+      "bpf_rotate",
+      "bpf_select"
+    ],
+    "module_load": {
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "failed_modules": [],
+      "invoked_at": "2026-05-03T15:47:04.775775+00:00",
+      "loaded_count": 6,
+      "loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loader": "runner.libs.kinsn.load_kinsn_modules",
+      "module_dir": "/artifacts/kinsn",
+      "newly_loaded_modules": [],
+      "snapshot_after": {
+        "captured_at": "2026-05-03T15:47:04.775768+00:00",
+        "expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "loaded_bpf_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "missing_expected_modules": [],
+        "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_prefetch           12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+        "resident_expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "source": "lsmod"
+      },
+      "status": "ok",
+      "total_count": 6
+    },
+    "module_snapshot_before_daemon": {
+      "captured_at": "2026-05-03T15:47:04.761525+00:00",
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loaded_bpf_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "missing_expected_modules": [],
+      "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_prefetch           12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+      "resident_expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "source": "lsmod"
+    }
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "per_program": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "baseline_avg_ns_per_run": 4798.333333333333,
+      "baseline_run_cnt_delta": 3,
+      "baseline_run_time_ns_delta": 14395,
+      "post_rejit_avg_ns_per_run": 2228.6666666666665,
+      "post_rejit_run_cnt_delta": 3,
+      "post_rejit_run_time_ns_delta": 6686,
+      "program": "tracepoint__sched_process_free",
+      "program_id": 17,
+      "ratio": 0.46446682875998613,
+      "runner": "otelcol-ebpf-profiler",
+      "type": "tracepoint",
+      "workload": "stress_ng_cpu"
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "baseline_avg_ns_per_run": 917.1711711711712,
+      "baseline_run_cnt_delta": 222,
+      "baseline_run_time_ns_delta": 203612,
+      "post_rejit_avg_ns_per_run": 927.0580357142857,
+      "post_rejit_run_cnt_delta": 224,
+      "post_rejit_run_time_ns_delta": 207661,
+      "program": "native_tracer_entry",
+      "program_id": 18,
+      "ratio": 1.010779737582124,
+      "runner": "otelcol-ebpf-profiler",
+      "type": "perf_event",
+      "workload": "stress_ng_cpu"
+    }
+  ],
+  "results": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "baseline": {
+        "bpf": {
+          "6": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3721,
+            "bytes_xlated": 6232,
+            "id": 6,
+            "name": "perf_unwind_stop",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "7": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 22575,
+            "bytes_xlated": 37232,
+            "id": 7,
+            "name": "perf_unwind_native",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "8": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18290,
+            "bytes_xlated": 28048,
+            "id": 8,
+            "name": "perf_unwind_hotspot",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "9": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17737,
+            "bytes_xlated": 29144,
+            "id": 9,
+            "name": "perf_unwind_perl",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "10": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 15178,
+            "bytes_xlated": 25032,
+            "id": 10,
+            "name": "perf_unwind_php",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "11": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 19909,
+            "bytes_xlated": 33264,
+            "id": 11,
+            "name": "perf_unwind_python",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "12": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16540,
+            "bytes_xlated": 28000,
+            "id": 12,
+            "name": "perf_unwind_ruby",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "13": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 20050,
+            "bytes_xlated": 33712,
+            "id": 13,
+            "name": "perf_unwind_v8",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "14": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 22565,
+            "bytes_xlated": 34248,
+            "id": 14,
+            "name": "perf_unwind_dotnet",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "15": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1580,
+            "bytes_xlated": 2496,
+            "id": 15,
+            "name": "perf_go_labels",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "16": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 696,
+            "bytes_xlated": 1088,
+            "id": 16,
+            "name": "perf_unwind_beam",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "17": {
+            "avg_ns_per_run": 4798.333333333333,
+            "bytes_jited": 788,
+            "bytes_xlated": 1320,
+            "id": 17,
+            "name": "tracepoint__sched_process_free",
+            "run_cnt_delta": 3,
+            "run_time_ns_delta": 14395,
+            "type": "tracepoint"
+          },
+          "18": {
+            "avg_ns_per_run": 917.1711711711712,
+            "bytes_jited": 3532,
+            "bytes_xlated": 5496,
+            "id": 18,
+            "name": "native_tracer_entry",
+            "run_cnt_delta": 222,
+            "run_time_ns_delta": 203612,
+            "type": "perf_event"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 0.6868281019999927,
+            "ops_per_sec": 2919.2166047976025,
+            "ops_total": 2005.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [1888] setting to a 5 secs run per stressor\nstress-ng: info:  [1888] dispatching hogs: 1 cpu\nstress-ng: info:  [1888] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [1888] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1888]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1888] cpu                2005      0.67      0.66      0.01      2992.76        2991.21\nstress-ng: info:  [1888] skipped: 0\nstress-ng: info:  [1888] passed: 1: cpu (1)\nstress-ng: info:  [1888] failed: 0\nstress-ng: info:  [1888] metrics untrustworthy: 0\nstress-ng: info:  [1888] successful run completed in 0.67 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "6": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3766,
+            "bytes_xlated": 6472,
+            "id": 6,
+            "name": "perf_unwind_stop",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "7": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 22819,
+            "bytes_xlated": 38720,
+            "id": 7,
+            "name": "perf_unwind_native",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "8": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18395,
+            "bytes_xlated": 28608,
+            "id": 8,
+            "name": "perf_unwind_hotspot",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "9": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17885,
+            "bytes_xlated": 29912,
+            "id": 9,
+            "name": "perf_unwind_perl",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "10": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 15261,
+            "bytes_xlated": 25464,
+            "id": 10,
+            "name": "perf_unwind_php",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "11": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18452,
+            "bytes_xlated": 30736,
+            "id": 11,
+            "name": "perf_unwind_python",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "12": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16671,
+            "bytes_xlated": 28656,
+            "id": 12,
+            "name": "perf_unwind_ruby",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "13": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 20089,
+            "bytes_xlated": 34480,
+            "id": 13,
+            "name": "perf_unwind_v8",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "14": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 22698,
+            "bytes_xlated": 34952,
+            "id": 14,
+            "name": "perf_unwind_dotnet",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "15": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1389,
+            "bytes_xlated": 2192,
+            "id": 15,
+            "name": "perf_go_labels",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "16": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 707,
+            "bytes_xlated": 1136,
+            "id": 16,
+            "name": "perf_unwind_beam",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "17": {
+            "avg_ns_per_run": 2228.6666666666665,
+            "bytes_jited": 722,
+            "bytes_xlated": 1232,
+            "id": 17,
+            "name": "tracepoint__sched_process_free",
+            "run_cnt_delta": 3,
+            "run_time_ns_delta": 6686,
+            "type": "tracepoint"
+          },
+          "18": {
+            "avg_ns_per_run": 927.0580357142857,
+            "bytes_jited": 3569,
+            "bytes_xlated": 5656,
+            "id": 18,
+            "name": "native_tracer_entry",
+            "run_cnt_delta": 224,
+            "run_time_ns_delta": 207661,
+            "type": "perf_event"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 0.6931416689999992,
+            "ops_per_sec": 2892.626557703029,
+            "ops_total": 2005.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [2075] setting to a 5 secs run per stressor\nstress-ng: info:  [2075] dispatching hogs: 1 cpu\nstress-ng: info:  [2075] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [2075] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2075]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2075] cpu                2005      0.68      0.68      0.00      2949.38        2946.87\nstress-ng: info:  [2075] skipped: 0\nstress-ng: info:  [2075] passed: 1: cpu (1)\nstress-ng: info:  [2075] failed: 0\nstress-ng: info:  [2075] metrics untrustworthy: 0\nstress-ng: info:  [2075] successful run completed in 0.68 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 13,
+          "not_applied": 0,
+          "requested": 13
+        }
+      },
+      "runner": "otelcol-ebpf-profiler",
+      "selected_workload": "stress_ng_cpu",
+      "status": "ok"
+    }
+  ],
+  "samples": 1,
+  "status": "ok",
+  "suite_name": "macro_apps",
+  "summary": {
+    "losses": 1,
+    "per_program_geomean": 0.6851814790912113,
+    "program_count": 2,
+    "wins": 1
+  },
+  "workload_seconds": 1.0
+}
+```

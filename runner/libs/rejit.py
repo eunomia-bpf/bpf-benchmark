@@ -711,6 +711,7 @@ def _daemon_log_tail(stdout_path: Path | None, stderr_path: Path | None) -> str:
 
 
 _DAEMON_SOCKET_PATH = Path("/var/tmp/bpfrejit-daemon.sock")
+_DAEMON_OPTIMIZE_CHUNK_SIZE = 64
 
 
 def _start_daemon_server(
@@ -778,7 +779,7 @@ def _daemon_request(
     line = b"".join(chunks).decode(errors="replace").strip()
     suffix = (f"\ndaemon log tail:\n{lt}" if (lt := _daemon_log_tail(stdout_path, stderr_path)) else "")
     if not line:
-        raise RuntimeError("daemon socket returned an empty response" + suffix)
+        raise RuntimeError(_daemon_error_detail("daemon socket returned an empty response", **kw))
     try:
         response = json.loads(line)
     except json.JSONDecodeError as exc:
@@ -817,67 +818,71 @@ def apply_daemon_rejit(
     changed = False
     errors: list[str] = []
 
-    payload: dict[str, object] = {"cmd": "optimize", "prog_ids": prog_ids}
-    if normalized_enabled_passes is not None:
-        payload["enabled_passes"] = [str(n).strip() for n in normalized_enabled_passes if str(n).strip()]
-    _resp = _daemon_request(daemon_socket_path, payload,
-                            daemon_proc=daemon_proc, stdout_path=daemon_stdout_path,
-                            stderr_path=daemon_stderr_path)
-    response_output = json.dumps(_resp, sort_keys=True)
-    if str(_resp.get("status") or "") != "ok":
-        msg = str(_resp.get("error_message") or "optimize failed")
-        return {
-            "applied": False,
-            "changed": False,
-            "output": response_output,
-            "exit_code": 1,
-            "error": msg,
-            "enabled_passes": normalized_enabled_passes,
-            "passes": [],
-            "per_program": {int(pid): {"prog_id": int(pid), "applied": False, "changed": False,
-                                       "output": response_output, "exit_code": 1, "error": msg,
-                                       "enabled_passes": normalized_enabled_passes, "passes": []}
-                            for pid in prog_ids},
-            "program_counts": {"requested": len(prog_ids), "applied": 0, "not_applied": len(prog_ids)},
-        }
+    for offset in range(0, len(prog_ids), _DAEMON_OPTIMIZE_CHUNK_SIZE):
+        chunk_prog_ids = prog_ids[offset:offset + _DAEMON_OPTIMIZE_CHUNK_SIZE]
+        payload: dict[str, object] = {"cmd": "optimize", "prog_ids": chunk_prog_ids}
+        if normalized_enabled_passes is not None:
+            payload["enabled_passes"] = [str(n).strip() for n in normalized_enabled_passes if str(n).strip()]
+        _resp = _daemon_request(daemon_socket_path, payload,
+                                daemon_proc=daemon_proc, stdout_path=daemon_stdout_path,
+                                stderr_path=daemon_stderr_path)
+        response_output = json.dumps(_resp, sort_keys=True)
+        if str(_resp.get("status") or "") != "ok":
+            msg = str(_resp.get("error_message") or "optimize failed")
+            for prog_id in prog_ids[offset:]:
+                result = {
+                    "prog_id": int(prog_id),
+                    "applied": False,
+                    "changed": False,
+                    "output": response_output,
+                    "exit_code": 1,
+                    "error": msg,
+                    "enabled_passes": normalized_enabled_passes,
+                    "passes": [],
+                }
+                per_program[int(prog_id)] = result
+                outputs.append(response_output)
+                errors.append(f"prog {prog_id}: {msg}")
+            exit_code = 1
+            break
 
-    raw_per_program = _resp.get("per_program")
-    if not isinstance(raw_per_program, Mapping):
-        raise RuntimeError("daemon response field 'per_program' must be an object")
-    records_by_prog_id = {str(key): value for key, value in raw_per_program.items()}
-    requested_prog_ids = {str(prog_id) for prog_id in prog_ids}
-    response_prog_ids = set(records_by_prog_id)
-    if response_prog_ids != requested_prog_ids:
-        missing = sorted(requested_prog_ids - response_prog_ids)
-        unexpected = sorted(response_prog_ids - requested_prog_ids)
-        raise RuntimeError(
-            "daemon response field 'per_program' does not match requested prog_ids: "
-            f"missing={missing}, unexpected={unexpected}"
-        )
+        raw_per_program = _resp.get("per_program")
+        if not isinstance(raw_per_program, Mapping):
+            raise RuntimeError("daemon response field 'per_program' must be an object")
+        records_by_prog_id = {str(key): value for key, value in raw_per_program.items()}
+        requested_prog_ids = {str(prog_id) for prog_id in chunk_prog_ids}
+        response_prog_ids = set(records_by_prog_id)
+        if response_prog_ids != requested_prog_ids:
+            missing = sorted(requested_prog_ids - response_prog_ids)
+            unexpected = sorted(response_prog_ids - requested_prog_ids)
+            raise RuntimeError(
+                "daemon response field 'per_program' does not match requested prog_ids: "
+                f"missing={missing}, unexpected={unexpected}"
+            )
 
-    for prog_id in prog_ids:
-        record = records_by_prog_id[str(prog_id)]
-        if not isinstance(record, Mapping):
-            raise RuntimeError(f"daemon response field per_program[{prog_id!r}] must be an object")
-        record_dict = dict(record)
-        artifacts = record_dict.pop("failure_artifacts", None)
-        if str(record_dict.get("status") or "") == "error" and isinstance(artifacts, Mapping) and failure_artifacts_dir is not None:
-            out_dir = failure_artifacts_dir / "failures" / str(prog_id)
-            out_dir.mkdir(parents=True, exist_ok=True)
-            (out_dir / "verifier_log.txt").write_text(str(artifacts.get("verifier_log") or ""))
-            (out_dir / "pass_error.txt").write_text(str(artifacts.get("pass_error") or ""))
-            partial = artifacts.get("partial_failure_json")
-            (out_dir / "partial_failure.json").write_text(json.dumps(partial, indent=2, sort_keys=True) + "\n")
-        result = _apply_result_from_response(record_dict, output=json.dumps(record_dict, sort_keys=True),
-                                              exit_code=0 if str(record_dict.get("status") or "") == "ok" else 1,
-                                              enabled_passes=normalized_enabled_passes)
-        per_program[prog_id] = result
-        outputs.append(str(result.get("output") or ""))
-        exit_code = max(exit_code, int(result.get("exit_code", 0) or 0))
-        applied = applied or bool(result.get("applied", False))
-        changed = changed or bool(result.get("changed", False))
-        if error := str(result.get("error") or "").strip():
-            errors.append(f"prog {prog_id}: {error}")
+        for prog_id in chunk_prog_ids:
+            record = records_by_prog_id[str(prog_id)]
+            if not isinstance(record, Mapping):
+                raise RuntimeError(f"daemon response field per_program[{prog_id!r}] must be an object")
+            record_dict = dict(record)
+            artifacts = record_dict.pop("failure_artifacts", None)
+            if str(record_dict.get("status") or "") == "error" and isinstance(artifacts, Mapping) and failure_artifacts_dir is not None:
+                out_dir = failure_artifacts_dir / "failures" / str(prog_id)
+                out_dir.mkdir(parents=True, exist_ok=True)
+                (out_dir / "verifier_log.txt").write_text(str(artifacts.get("verifier_log") or ""))
+                (out_dir / "pass_error.txt").write_text(str(artifacts.get("pass_error") or ""))
+                partial = artifacts.get("partial_failure_json")
+                (out_dir / "partial_failure.json").write_text(json.dumps(partial, indent=2, sort_keys=True) + "\n")
+            result = _apply_result_from_response(record_dict, output=json.dumps(record_dict, sort_keys=True),
+                                                  exit_code=0 if str(record_dict.get("status") or "") == "ok" else 1,
+                                                  enabled_passes=normalized_enabled_passes)
+            per_program[prog_id] = result
+            outputs.append(str(result.get("output") or ""))
+            exit_code = max(exit_code, int(result.get("exit_code", 0) or 0))
+            applied = applied or bool(result.get("applied", False))
+            changed = changed or bool(result.get("changed", False))
+            if error := str(result.get("error") or "").strip():
+                errors.append(f"prog {prog_id}: {error}")
     n_applied = sum(1 for r in per_program.values() if r.get("applied", False))
     return {
         "applied": applied,
