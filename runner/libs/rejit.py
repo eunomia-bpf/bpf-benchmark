@@ -716,24 +716,20 @@ _DAEMON_SOCKET_PATH = Path("/var/tmp/bpfrejit-daemon.sock")
 def _start_daemon_server(
     daemon_binary: Path | str,
     *,
-    log_dir: Path | None = None,
-) -> tuple[subprocess.Popen[str], Path, str, Path, Path]:
+    stdout_path: Path,
+    stderr_path: Path,
+) -> tuple[subprocess.Popen[str], Path, str]:
     socket_dir = tempfile.mkdtemp(prefix="bd-", dir=str(_daemon_runtime_root()))
     socket_path = _DAEMON_SOCKET_PATH
-    if log_dir is not None:
-        log_dir.mkdir(parents=True, exist_ok=True)
-        stdout_path = log_dir / "daemon.stdout.log"
-        stderr_path = log_dir / "daemon.stderr.log"
-    else:
-        stdout_path = Path(socket_dir) / "daemon.stdout.log"
-        stderr_path = Path(socket_dir) / "daemon.stderr.log"
+    stdout_path.parent.mkdir(parents=True, exist_ok=True)
+    stderr_path.parent.mkdir(parents=True, exist_ok=True)
     cmd = [str(daemon_binary)]
     with stdout_path.open("w", encoding="utf-8") as out, stderr_path.open("w", encoding="utf-8") as err:
         proc = subprocess.Popen(cmd, stdout=out, stderr=err, text=True)
     deadline = time.monotonic() + 5.0
     while time.monotonic() < deadline:
         if socket_path.exists():
-            return proc, socket_path, socket_dir, stdout_path, stderr_path
+            return proc, socket_path, socket_dir
         if proc.poll() is not None:
             raise RuntimeError(f"daemon exited early (rc={proc.returncode}): {_daemon_log_tail(stdout_path, stderr_path)}")
         time.sleep(0.05)
@@ -914,12 +910,13 @@ class DaemonSession:
         daemon_binary: Path | str,
         *,
         load_kinsn: bool = False,
-        log_dir: Path | None = None,
+        stdout_path: Path,
+        stderr_path: Path,
     ) -> "DaemonSession":
         from .kinsn import prepare_kinsn_modules  # noqa: PLC0415
         binary = Path(daemon_binary).resolve()
         kinsn_metadata: dict[str, object] = dict(prepare_kinsn_modules()) if load_kinsn else {}
-        proc, socket_path, socket_dir, stdout_path, stderr_path = _start_daemon_server(binary, log_dir=log_dir)
+        proc, socket_path, socket_dir = _start_daemon_server(binary, stdout_path=stdout_path, stderr_path=stderr_path)
         if load_kinsn:
             kinsn_metadata["daemon_binary"] = str(binary)
         return cls(daemon_binary=binary, proc=proc, socket_path=socket_path, socket_dir=socket_dir,
