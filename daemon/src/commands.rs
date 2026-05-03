@@ -234,6 +234,36 @@ pub(crate) struct OptimizeOneResult {
     pub error_message: Option<String>,
 }
 
+impl OptimizeOneResult {
+    pub(crate) fn error(prog_id: u32, message: impl Into<String>) -> Self {
+        Self {
+            status: "error".to_string(),
+            prog_id,
+            changed: false,
+            passes_applied: Vec::new(),
+            program: ProgramInfo {
+                prog_id,
+                prog_name: String::new(),
+                prog_type: 0,
+                orig_insn_count: 0,
+                final_insn_count: 0,
+                insn_delta: 0,
+            },
+            summary: OptimizeSummary {
+                applied: false,
+                total_sites_applied: 0,
+                passes_executed: 0,
+                passes_changed: 0,
+                failed_pass: None,
+                committed_passes_before_failure: None,
+            },
+            passes: Vec::new(),
+            inlined_map_entries: Vec::new(),
+            error_message: Some(message.into()),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, PartialEq, Eq)]
 pub(crate) struct InlinedMapEntry {
     pub map_id: u32,
@@ -688,7 +718,63 @@ pub(crate) fn try_reapply_one(
 
 pub(crate) struct ApplyProgramOutcome {
     pub prog_id: u32,
-    pub result: Result<OptimizeOneResult, String>,
+    pub result: OptimizeOneResult,
+}
+
+fn panic_payload_message(payload: &(dyn std::any::Any + Send)) -> String {
+    if let Some(message) = payload.downcast_ref::<String>() {
+        return message.clone();
+    }
+    if let Some(message) = payload.downcast_ref::<&'static str>() {
+        return (*message).to_string();
+    }
+    "non-string panic payload".to_string()
+}
+
+fn apply_program_catching_unwind<F>(prog_id: u32, apply: F) -> OptimizeOneResult
+where
+    F: FnOnce() -> Result<OptimizeOneResult>,
+{
+    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(apply)) {
+        Ok(Ok(result)) => result,
+        Ok(Err(err)) => OptimizeOneResult::error(prog_id, format!("{err:#}")),
+        Err(payload) => {
+            let message = panic_payload_message(payload.as_ref());
+            eprintln!("daemon: optimize worker panicked for prog {prog_id}: {message}");
+            OptimizeOneResult::error(
+                prog_id,
+                format!("worker panicked while optimizing prog {prog_id}: {message}"),
+            )
+        }
+    }
+}
+
+fn try_apply_programs_with<F>(
+    prog_ids: &[u32],
+    worker_count: usize,
+    apply_one: F,
+) -> Result<Vec<ApplyProgramOutcome>>
+where
+    F: Fn(u32) -> Result<OptimizeOneResult> + Sync,
+{
+    if prog_ids.is_empty() {
+        bail!("optimize requires at least one prog_id");
+    }
+    let pool = rayon::ThreadPoolBuilder::new()
+        .num_threads(worker_count)
+        .thread_name(|idx| format!("bpfrejit-worker-{idx}"))
+        .build()
+        .context("build daemon optimization worker pool")?;
+
+    Ok(pool.install(|| {
+        prog_ids
+            .par_iter()
+            .map(|&prog_id| {
+                let result = apply_program_catching_unwind(prog_id, || apply_one(prog_id));
+                ApplyProgramOutcome { prog_id, result }
+            })
+            .collect()
+    }))
 }
 
 pub(crate) fn try_apply_programs(
@@ -698,31 +784,14 @@ pub(crate) fn try_apply_programs(
     invalidation_tracker: Option<&SharedInvalidationTracker>,
     failure_root: &Path,
 ) -> Result<Vec<ApplyProgramOutcome>> {
-    if prog_ids.is_empty() {
-        bail!("optimize requires at least one prog_id");
-    }
-    let worker_count = default_worker_count();
-    let pool = rayon::ThreadPoolBuilder::new()
-        .num_threads(worker_count)
-        .thread_name(|idx| format!("bpfrejit-worker-{idx}"))
-        .build()
-        .context("build daemon optimization worker pool")?;
     let config = config.clone();
     let passes = enabled_passes.to_vec();
     let tracker = invalidation_tracker.cloned();
     let failure_root = failure_root.to_path_buf();
 
-    Ok(pool.install(|| {
-        prog_ids
-            .par_iter()
-            .map(|&prog_id| {
-                let result =
-                    try_apply_one(prog_id, &config, &passes, tracker.as_ref(), &failure_root)
-                        .map_err(|err| format!("{err:#}"));
-                ApplyProgramOutcome { prog_id, result }
-            })
-            .collect()
-    }))
+    try_apply_programs_with(prog_ids, default_worker_count(), |prog_id| {
+        try_apply_one(prog_id, &config, &passes, tracker.as_ref(), &failure_root)
+    })
 }
 
 fn try_apply_one_with_map_access<F, G, H>(
@@ -980,9 +1049,14 @@ where
                 "candidate bytecode contains kinsn call but requested passes did not require target probing"
             );
         }
-        let status = "ok".to_string();
-        let applied = last_rejit_summary.is_some();
         let error_message = partial_error;
+        let status = if error_message.is_some() {
+            "error"
+        } else {
+            "ok"
+        }
+        .to_string();
+        let applied = last_rejit_summary.is_some();
         let failed_pass = error_message_failed_pass(error_message.as_deref());
         let committed_passes_before_failure = error_message.as_ref().map(|_| reports.len());
 
@@ -2034,6 +2108,7 @@ mod tests {
 
         let result = harness.apply(&mut kernel).unwrap();
 
+        assert_eq!(result.status, "error");
         let message = result.error_message.as_deref().unwrap_or("");
         assert!(message.contains("prog 42"), "err={message}");
         assert!(message.contains("mock rejit verifier log"), "err={message}");
@@ -2091,6 +2166,69 @@ mod tests {
             .passes
             .iter()
             .any(|pass| pass.pass_name == "const_prop"));
+    }
+
+    #[test]
+    fn try_apply_programs_converts_failures_and_panics_to_program_results() {
+        let prog_ids = [7, 8, 9];
+
+        let outcomes =
+            try_apply_programs_with(&prog_ids, 2, |prog_id| -> Result<OptimizeOneResult> {
+                match prog_id {
+                    7 => Ok(successful_batch_result(prog_id)),
+                    8 => bail!("missing program {prog_id}"),
+                    9 => panic!("mock worker panic"),
+                    _ => bail!("unexpected prog_id {prog_id}"),
+                }
+            })
+            .unwrap();
+
+        assert_eq!(outcomes.len(), prog_ids.len());
+        let by_id = outcomes
+            .into_iter()
+            .map(|outcome| (outcome.prog_id, outcome.result))
+            .collect::<BTreeMap<_, _>>();
+        assert_eq!(by_id[&7].status, "ok");
+        assert_eq!(by_id[&8].status, "error");
+        assert!(by_id[&8]
+            .error_message
+            .as_deref()
+            .unwrap_or("")
+            .contains("missing program 8"));
+        assert_eq!(by_id[&9].status, "error");
+        assert!(by_id[&9]
+            .error_message
+            .as_deref()
+            .unwrap_or("")
+            .contains("worker panicked while optimizing prog 9: mock worker panic"));
+    }
+
+    fn successful_batch_result(prog_id: u32) -> OptimizeOneResult {
+        OptimizeOneResult {
+            status: "ok".to_string(),
+            prog_id,
+            changed: true,
+            passes_applied: vec!["rotate".to_string()],
+            program: ProgramInfo {
+                prog_id,
+                prog_name: "mock_prog".to_string(),
+                prog_type: kernel_sys::BPF_PROG_TYPE_XDP,
+                orig_insn_count: 1,
+                final_insn_count: 2,
+                insn_delta: 1,
+            },
+            summary: OptimizeSummary {
+                applied: true,
+                total_sites_applied: 1,
+                passes_executed: 1,
+                passes_changed: 1,
+                failed_pass: None,
+                committed_passes_before_failure: None,
+            },
+            passes: Vec::new(),
+            inlined_map_entries: Vec::new(),
+            error_message: None,
+        }
     }
 
     struct ApplyHarness {

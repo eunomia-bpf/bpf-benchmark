@@ -6,12 +6,10 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-use anyhow::{Context, Result};
-use serde::Serialize;
-
 use crate::bpf;
 use crate::commands::{self, CliConfig};
 use crate::invalidation::{MapInvalidationTracker, MapValueReader};
+use anyhow::{Context, Result};
 
 static SHUTDOWN_FLAG: AtomicBool = AtomicBool::new(false);
 
@@ -296,10 +294,12 @@ fn handle_client(
             }
         };
 
-        let mut resp_str = serde_json::to_string(&response)?;
+        let mut resp_str = serde_json::to_string(&response).context("serialize daemon response")?;
         resp_str.push('\n');
-        writer.write_all(resp_str.as_bytes())?;
-        writer.flush()?;
+        writer
+            .write_all(resp_str.as_bytes())
+            .context("write daemon response")?;
+        writer.flush().context("flush daemon response")?;
     }
 
     Ok(())
@@ -383,13 +383,6 @@ fn error_json(message: impl Into<String>) -> serde_json::Value {
     })
 }
 
-fn serialize_or_error<T: Serialize>(value: T) -> serde_json::Value {
-    match serde_json::to_value(value) {
-        Ok(v) => v,
-        Err(e) => error_json(format!("failed to serialize result: {e}")),
-    }
-}
-
 fn process_request(
     req: &serde_json::Value,
     config: &CliConfig,
@@ -420,58 +413,68 @@ fn process_request(
                 Some(tracker),
                 failure_root,
             ) {
-                Ok(outcomes) => {
-                    let mut per_program = BTreeMap::new();
-                    let mut applied = 0usize;
-                    let mut errors = Vec::new();
-                    for outcome in outcomes {
-                        match outcome.result {
-                            Ok(result) => {
-                                if result.summary.applied {
-                                    applied += 1;
-                                }
-                                if let Some(message) = result.error_message.as_deref() {
-                                    errors.push(format!("prog {}: {message}", outcome.prog_id));
-                                }
-                                if let Err(err) = remember_reoptimization_result(
-                                    reoptimization_state,
-                                    outcome.prog_id,
-                                    enabled_passes,
-                                    &result,
-                                ) {
-                                    errors.push(format!("prog {}: {err:#}", outcome.prog_id));
-                                }
-                                per_program.insert(outcome.prog_id, serialize_or_error(result));
-                            }
-                            Err(message) => {
-                                errors.push(format!("prog {}: {message}", outcome.prog_id));
-                                per_program.insert(
-                                    outcome.prog_id,
-                                    serde_json::json!({
-                                        "status": "error",
-                                        "prog_id": outcome.prog_id,
-                                        "error_message": message,
-                                    }),
-                                );
-                            }
-                        }
-                    }
-                    serde_json::json!({
-                        "status": "ok",
-                        "per_program": per_program,
-                        "program_counts": {
-                            "requested": prog_ids.len(),
-                            "applied": applied,
-                            "not_applied": prog_ids.len() - applied,
-                        },
-                        "error_message": errors.join("; "),
-                    })
-                }
+                Ok(outcomes) => match optimize_response_from_outcomes(
+                    &prog_ids,
+                    enabled_passes,
+                    reoptimization_state,
+                    outcomes,
+                ) {
+                    Ok(response) => response,
+                    Err(err) => error_json(format!("{err:#}")),
+                },
                 Err(err) => error_json(format!("{err:#}")),
             }
         }
         _ => error_json(format!("unknown command: {cmd}")),
     }
+}
+
+fn optimize_response_from_outcomes(
+    prog_ids: &[u32],
+    enabled_passes: &[String],
+    reoptimization_state: &SharedReoptimizationState,
+    outcomes: Vec<commands::ApplyProgramOutcome>,
+) -> Result<serde_json::Value> {
+    let mut per_program = BTreeMap::new();
+    let mut applied = 0usize;
+    let mut errors = Vec::new();
+    for outcome in outcomes {
+        let result = outcome.result;
+        if result.status == "ok" && result.summary.applied {
+            applied += 1;
+        }
+        if let Some(message) = result.error_message.as_deref() {
+            errors.push(format!("prog {}: {message}", outcome.prog_id));
+        }
+        remember_reoptimization_result(
+            reoptimization_state,
+            outcome.prog_id,
+            enabled_passes,
+            &result,
+        )
+        .with_context(|| {
+            format!(
+                "remember reoptimization result for prog {}",
+                outcome.prog_id
+            )
+        })?;
+        per_program.insert(
+            outcome.prog_id,
+            serde_json::to_value(result).with_context(|| {
+                format!("serialize optimize result for prog {}", outcome.prog_id)
+            })?,
+        );
+    }
+    Ok(serde_json::json!({
+        "status": "ok",
+        "per_program": per_program,
+        "program_counts": {
+            "requested": prog_ids.len(),
+            "applied": applied,
+            "not_applied": prog_ids.len() - applied,
+        },
+        "error_message": errors.join("; "),
+    }))
 }
 
 #[cfg(test)]
@@ -480,7 +483,9 @@ mod tests {
     use std::collections::HashMap;
     use std::sync::{Arc, Mutex};
 
-    use crate::commands::{InlinedMapEntry, OptimizeOneResult, OptimizeSummary, ProgramInfo};
+    use crate::commands::{
+        ApplyProgramOutcome, InlinedMapEntry, OptimizeOneResult, OptimizeSummary, ProgramInfo,
+    };
     use crate::invalidation::{BatchLookupValue, MapInvalidationTracker};
 
     type MockMapValues = HashMap<u32, HashMap<Vec<u8>, Vec<u8>>>;
@@ -640,6 +645,89 @@ mod tests {
         state.remember_result(101, &["map_inline".to_string()], &result);
 
         assert!(state.enabled_passes_for(101).is_none());
+    }
+
+    #[test]
+    fn optimize_response_keeps_per_program_errors_under_top_level_ok() {
+        let prog_ids = vec![10, 11, 12];
+        let enabled_passes = vec!["rotate".to_string()];
+        let reoptimization_state = new_reoptimization_state();
+        let outcomes = vec![
+            ApplyProgramOutcome {
+                prog_id: 10,
+                result: optimize_success_result(10),
+            },
+            ApplyProgramOutcome {
+                prog_id: 11,
+                result: OptimizeOneResult::error(11, "missing program 11"),
+            },
+            ApplyProgramOutcome {
+                prog_id: 12,
+                result: OptimizeOneResult::error(12, "worker panicked while optimizing prog 12"),
+            },
+        ];
+
+        let response = optimize_response_from_outcomes(
+            &prog_ids,
+            &enabled_passes,
+            &reoptimization_state,
+            outcomes,
+        )
+        .expect("optimize response should be built from per-program outcomes");
+
+        assert_eq!(response["status"], "ok");
+        assert_eq!(response["program_counts"]["requested"], 3);
+        assert_eq!(response["program_counts"]["applied"], 1);
+        assert_eq!(response["program_counts"]["not_applied"], 2);
+        let per_program = response["per_program"]
+            .as_object()
+            .expect("per_program should be an object");
+        assert_eq!(per_program.len(), prog_ids.len());
+        for prog_id in &prog_ids {
+            assert!(
+                per_program.contains_key(&prog_id.to_string()),
+                "missing prog {prog_id}"
+            );
+        }
+        assert_eq!(per_program["10"]["status"], "ok");
+        assert_eq!(per_program["11"]["status"], "error");
+        assert!(per_program["11"]["error_message"]
+            .as_str()
+            .unwrap_or("")
+            .contains("missing program 11"));
+        assert_eq!(per_program["12"]["status"], "error");
+        assert!(per_program["12"]["error_message"]
+            .as_str()
+            .unwrap_or("")
+            .contains("worker panicked"));
+    }
+
+    fn optimize_success_result(prog_id: u32) -> OptimizeOneResult {
+        OptimizeOneResult {
+            status: "ok".to_string(),
+            prog_id,
+            changed: true,
+            passes_applied: vec!["rotate".to_string()],
+            program: ProgramInfo {
+                prog_id,
+                prog_name: "demo".to_string(),
+                prog_type: 6,
+                orig_insn_count: 2,
+                final_insn_count: 2,
+                insn_delta: 0,
+            },
+            summary: OptimizeSummary {
+                applied: true,
+                total_sites_applied: 1,
+                passes_executed: 1,
+                passes_changed: 1,
+                failed_pass: None,
+                committed_passes_before_failure: None,
+            },
+            passes: Vec::new(),
+            inlined_map_entries: Vec::new(),
+            error_message: None,
+        }
     }
 
     #[test]
