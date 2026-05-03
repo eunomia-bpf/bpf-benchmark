@@ -322,9 +322,8 @@ $(X86_RUNTIME_KERNEL_IMAGE): $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(BPFREJIT_INSTALL_
 	touch "$@"
 
 # Daemon binary is buildable on the host (cargo handles cross-compile to
-# aarch64 via TARGET_TRIPLE). Python's local_prep_targets requests this path
-# directly so make can detect daemon/src changes and rebuild before the
-# docker image picks it up.
+# aarch64 via TARGET_TRIPLE). Suite targets depend on this path directly
+# so make can detect daemon/src changes and rebuild before running.
 $(ACTIVE_DAEMON_BINARY): $(DAEMON_SOURCE_FILES) $(BUILD_RULE_FILES)
 	mkdir -p "$(dir $@)"
 	make -C "$(ROOT_DIR)/daemon" release TARGET_DIR="$(DAEMON_DIR)/target" $(ACTIVE_DAEMON_TARGET_ARG)

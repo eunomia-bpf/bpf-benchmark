@@ -94,71 +94,72 @@ lint:
 daemon-tests:
 	cargo test --workspace --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 
-vm-selftest:
+_VM_COMMON_DEPS = $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(X86_RUNTIME_KERNEL_IMAGE) $(DAEMON_DIR)/target/release/bpfrejit-daemon
+
+vm-selftest: $(_VM_COMMON_DEPS)
 	$(RUN_TARGET_SUITE_CMD) run x86-kvm test -- --test-mode "selftest" $(VM_TEST_COMMON_SUITE_ARGS)
 
-vm-negative-test:
+vm-negative-test: $(_VM_COMMON_DEPS)
 	$(RUN_TARGET_SUITE_CMD) run x86-kvm test -- --test-mode "negative" $(VM_TEST_COMMON_SUITE_ARGS)
 
-vm-test:
+vm-test: $(_VM_COMMON_DEPS)
 	$(RUN_TARGET_SUITE_CMD) run x86-kvm test -- $(VM_TEST_SUITE_ARGS)
 
-vm-micro:
+vm-micro: $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(X86_RUNTIME_KERNEL_IMAGE)
 	$(RUN_TARGET_SUITE_CMD) run x86-kvm micro
 
-vm-corpus:
+vm-corpus: $(_VM_COMMON_DEPS)
 	$(RUN_TARGET_SUITE_CMD) run x86-kvm corpus -- $(VM_CORPUS_SUITE_ARGS)
 
-vm-e2e:
+vm-e2e: $(_VM_COMMON_DEPS)
 	$(RUN_TARGET_SUITE_CMD) run x86-kvm e2e -- $(VM_E2E_SUITE_ARGS)
 
-vm-all:
-	$(MAKE) vm-test
-	$(MAKE) vm-micro
-	$(MAKE) vm-corpus
-	$(MAKE) vm-e2e
+vm-all: vm-test vm-micro vm-corpus vm-e2e
 
-aws-arm64-test:
+_AWS_ARM64_SUITE_DEPS = $(ARM64_RUNNER_RUNTIME_IMAGE_TAR) $(DAEMON_DIR)/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon
+_AWS_X86_SUITE_DEPS  = $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(DAEMON_DIR)/target/release/bpfrejit-daemon
+
+aws-arm64-test: $(_AWS_ARM64_SUITE_DEPS)
 	$(RUN_TARGET_SUITE_CMD) run aws-arm64 test
 
-aws-arm64-benchmark:
+aws-arm64-benchmark: $(_AWS_ARM64_SUITE_DEPS)
 	$(RUN_TARGET_SUITE_CMD) benchmark aws-arm64 "$(AWS_ARM64_BENCH_MODE)"
 
-aws-arm64-corpus:
-	$(MAKE) aws-arm64-benchmark AWS_ARM64_BENCH_MODE=corpus
+aws-arm64-corpus: $(_AWS_ARM64_SUITE_DEPS)
+	$(RUN_TARGET_SUITE_CMD) run aws-arm64 corpus
 
-aws-arm64-e2e:
-	$(MAKE) aws-arm64-benchmark AWS_ARM64_BENCH_MODE=e2e
+aws-arm64-e2e: $(_AWS_ARM64_SUITE_DEPS)
+	$(RUN_TARGET_SUITE_CMD) run aws-arm64 e2e
 
 aws-arm64-terminate:
 	$(RUN_TARGET_SUITE_CMD) terminate aws-arm64
 
-aws-x86-test:
+aws-x86-test: $(_AWS_X86_SUITE_DEPS)
 	$(RUN_TARGET_SUITE_CMD) run aws-x86 test
 
-aws-x86-benchmark:
+aws-x86-benchmark: $(_AWS_X86_SUITE_DEPS)
 	$(RUN_TARGET_SUITE_CMD) benchmark aws-x86 "$(AWS_X86_BENCH_MODE)"
 
-aws-x86-corpus:
-	$(MAKE) aws-x86-benchmark AWS_X86_BENCH_MODE=corpus
+aws-x86-corpus: $(_AWS_X86_SUITE_DEPS)
+	$(RUN_TARGET_SUITE_CMD) run aws-x86 corpus
 
-aws-x86-e2e:
-	$(MAKE) aws-x86-benchmark AWS_X86_BENCH_MODE=e2e
+aws-x86-e2e: $(_AWS_X86_SUITE_DEPS)
+	$(RUN_TARGET_SUITE_CMD) run aws-x86 e2e
 
 aws-x86-terminate:
 	$(RUN_TARGET_SUITE_CMD) terminate aws-x86
 
 aws-e2e:
 	case "$(RUN_TARGET_ARCH)" in \
-		arm64) $(RUN_TARGET_SUITE_CMD) run aws-arm64 e2e ;; \
-		x86_64) $(RUN_TARGET_SUITE_CMD) run aws-x86 e2e ;; \
+		arm64) $(MAKE) aws-arm64-e2e ;; \
+		x86_64) $(MAKE) aws-x86-e2e ;; \
 		*) echo "unsupported RUN_TARGET_ARCH for aws-e2e: $(RUN_TARGET_ARCH)" >&2; exit 2 ;; \
 	esac
 
 aws-corpus:
 	case "$(RUN_TARGET_ARCH)" in \
-		arm64) $(RUN_TARGET_SUITE_CMD) run aws-arm64 corpus ;; \
-		x86_64) $(RUN_TARGET_SUITE_CMD) run aws-x86 corpus ;; \
+		arm64) $(MAKE) aws-arm64-corpus ;; \
+		x86_64) $(MAKE) aws-x86-corpus ;; \
 		*) echo "unsupported RUN_TARGET_ARCH for aws-corpus: $(RUN_TARGET_ARCH)" >&2; exit 2 ;; \
 	esac
 

@@ -6,8 +6,6 @@ from pathlib import Path
 from runner.libs import ROOT_DIR
 
 
-_RUNTIME_IMAGE_SUITES = {"test", "micro", "corpus", "e2e"}
-_DAEMON_BINARY_SUITES = {"test", "corpus", "e2e"}
 RUNTIME_IMAGE_WORKSPACE = ROOT_DIR
 RUNTIME_IMAGE_ARTIFACT_ROOT = Path("/opt/bpf-benchmark")
 RUNTIME_KINSN_MODULE_DIR = Path("/artifacts/kinsn")
@@ -104,17 +102,3 @@ def runtime_path_value(workspace: Path, target_arch: str) -> str:
         if standard_dir not in path_entries:
             path_entries.append(standard_dir)
     return ":".join(path_entries)
-
-
-def local_prep_targets(*, workspace, suite_name, target_arch, executor) -> list[Path]:
-    arch, suite = str(target_arch).strip(), str(suite_name).strip()
-    targets: list[Path] = []
-    if suite in _RUNTIME_IMAGE_SUITES:
-        image_tar = runtime_container_image_tar_path(workspace, arch)
-        targets.append(image_tar)
-    if suite in _DAEMON_BINARY_SUITES:
-        targets.append(daemon_binary_path(workspace, arch))
-    if str(executor).strip() == "kvm":
-        targets.append(kvm_kernel_image_path(workspace))
-    seen: set[Path] = set()
-    return [t for t in targets if not (t in seen or seen.add(t))]  # type: ignore[func-returns-value]

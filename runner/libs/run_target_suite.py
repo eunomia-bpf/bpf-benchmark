@@ -12,7 +12,6 @@ from pathlib import Path
 from runner.libs import ROOT_DIR
 from runner.libs import aws_executor
 from runner.libs.cli_support import fail
-from runner.libs.file_lock import runner_lock
 from runner.libs.run_contract import (
     RunConfig,
     build_run_config,
@@ -20,7 +19,6 @@ from runner.libs.run_contract import (
     write_run_config_file,
 )
 from runner.libs.suite_args import suite_args_from_env, write_suite_args_file
-from runner.libs.workspace_layout import local_prep_targets
 
 
 CONTROL_ROOT = ROOT_DIR / ".state" / "runner-contracts"
@@ -42,75 +40,6 @@ def _run_checked(command: list[str]) -> None:
 
 def _python_module_command(module: str, *args: str) -> list[str]:
     return [sys.executable, "-m", module, *args]
-
-
-def _run_local_prep(config: RunConfig) -> None:
-    env = _local_prep_env(config=config)
-    host_python_bin = env["HOST_PYTHON_BIN"]
-    targets = _local_prep_target_paths(config)
-    if not targets:
-        return
-    target_arch = config.identity.target_arch.strip() or config.identity.target_name.strip()
-    with runner_lock(f"artifact-build.{target_arch}"):
-        _make_real_targets(targets=targets, host_python_bin=host_python_bin, env=env)
-
-
-def _local_prep_env(*, config: RunConfig) -> dict[str, str]:
-    env = config.env()
-    host_python_bin = config.kvm.host_python_bin.strip()
-    if not host_python_bin:
-        _die("run config host python is missing")
-    env.update(
-        {
-            "ROOT_DIR": str(ROOT_DIR),
-            "PYTHONPATH": f"{ROOT_DIR}{':' + env['PYTHONPATH'] if env.get('PYTHONPATH') else ''}",
-            "HOST_PYTHON_BIN": host_python_bin,
-            "RUN_CONTRACT_PYTHON_BIN": host_python_bin,
-        }
-    )
-    return env
-
-
-def _local_prep_target_paths(config: RunConfig) -> list[str]:
-    executor = config.identity.executor.strip()
-    if executor not in {"aws-ssh", "kvm"}:
-        _die(f"unsupported executor for local prep: {executor}")
-    target_name = config.identity.target_name.strip()
-    suite_name = config.identity.suite_name.strip()
-    target_arch = config.identity.target_arch.strip()
-    if not target_name:
-        _die("run config target name is empty")
-    if not suite_name:
-        _die("run config suite name is empty")
-    if not target_arch:
-        _die("run config target arch is empty")
-    return [
-        str(path)
-        for path in local_prep_targets(
-            workspace=ROOT_DIR,
-            suite_name=suite_name,
-            target_arch=target_arch,
-            executor=executor,
-        )
-    ]
-
-
-def _make_real_targets(*, targets: list[str], host_python_bin: str, env: dict[str, str]) -> None:
-    completed = subprocess.run(
-        [
-            "make",
-            "-C",
-            str(ROOT_DIR),
-            *targets,
-            f"PYTHON={host_python_bin}",
-        ],
-        cwd=ROOT_DIR,
-        env=env,
-        text=True,
-        check=False,
-    )
-    if completed.returncode != 0:
-        raise SystemExit(completed.returncode)
 
 
 def _build_config(target_name: str, suite_name: str, run_token: str, suite_args: list[str]) -> RunConfig:
@@ -157,7 +86,6 @@ def _run_action(target_name: str, suite_name: str, suite_args: list[str] | None 
         if executor == "aws-ssh":
             write_run_config_file(config_path, config)
             write_suite_args_file(suite_args_path, effective_suite_args)
-            _run_local_prep(config)
             prep_cleanup_armed = True
             _run_checked(
                 _python_module_command(
@@ -170,7 +98,6 @@ def _run_action(target_name: str, suite_name: str, suite_args: list[str] | None 
             success = True
             return
         if executor == "kvm":
-            _run_local_prep(config)
             from runner.libs.kvm_executor import run_vm_suite
 
             return_code = run_vm_suite(ROOT_DIR, config, effective_suite_args)
