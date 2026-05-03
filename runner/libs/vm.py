@@ -94,6 +94,7 @@ def build_vng_command(
         seen.add(rwdir)
         command.extend(["--rwdir", str(rwdir)])
     command.extend(["--overlay-rwdir", "/tmp"])
+    command.extend(["--append", "loglevel=7 panic=30 oops=panic"])
     for network in networks:
         command.extend(["--network", str(network)])
     command.extend(["--exec", exec_path])
