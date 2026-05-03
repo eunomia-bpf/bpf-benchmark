@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import os
 import shlex
 import shutil
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 from typing import Sequence
 
@@ -72,6 +74,14 @@ def build_vng_command(
     kernel = Path(kernel_path).resolve()
     resolved_cwd = Path(cwd).resolve() if cwd is not None else ROOT_DIR
 
+    # DIAGNOSTIC: capture VM kernel console to a file when env var is set.
+    # Set BPFREJIT_VM_CONSOLE_LOG=1 to enable. The console log path is printed
+    # to stderr so it is findable even when the VM crashes.
+    _console_log_path: str | None = None
+    if os.environ.get("BPFREJIT_VM_CONSOLE_LOG", "").strip():
+        _ts = int(time.time())
+        _console_log_path = f"/tmp/virtme-console-{_ts}.log"
+
     command = [
         launch_executable,
         "--run",
@@ -84,6 +94,18 @@ def build_vng_command(
         "--mem",
         resolved_mem,
     ]
+    if _console_log_path is not None:
+        # --show-boot-console redirects chardev console to /proc/self/fd/2 (qemu stderr),
+        # which is captured by the script PTY wrapper and visible in the run log.
+        # Also print the expected log path so it can be found even after a crash.
+        import sys
+        print(
+            f"[kvm-executor][DIAG] VM kernel console captured via --show-boot-console"
+            f" (output mixed into run log; console path marker: {_console_log_path})",
+            file=sys.stderr,
+            flush=True,
+        )
+        command.append("--show-boot-console")
     rwdir_values = [resolved_cwd]
     rwdir_values.extend(Path(value).resolve() for value in rwdirs)
     seen: set[Path] = set()
