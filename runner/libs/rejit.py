@@ -55,25 +55,7 @@ _TOTAL_SITE_FIELDS = (
 
 _BENCH_PASSES_ENV = "BPFREJIT_BENCH_PASSES"
 _BENCHMARK_CONFIG_PATH = ROOT_DIR / "corpus" / "config" / "benchmark_config.yaml"
-_APPLY_TIMEOUT_ENV = "BPFREJIT_DAEMON_REQUEST_TIMEOUT_S"
-_FALLBACK_APPLY_TIMEOUT_SECONDS = 600.0
 _DEFAULT_BENCHMARK_REPEAT = 200
-
-
-def _default_apply_timeout_seconds() -> float:
-    raw = os.environ.get(_APPLY_TIMEOUT_ENV, "").strip()
-    if not raw:
-        return _FALLBACK_APPLY_TIMEOUT_SECONDS
-    try:
-        value = float(raw)
-    except ValueError as exc:
-        raise RuntimeError(f"{_APPLY_TIMEOUT_ENV} must be a positive number, got {raw!r}") from exc
-    if value <= 0.0:
-        raise RuntimeError(f"{_APPLY_TIMEOUT_ENV} must be positive, got {raw!r}")
-    return value
-
-
-_DEFAULT_APPLY_TIMEOUT_SECONDS = _default_apply_timeout_seconds()
 
 
 def _validate_daemon_runtime_root(candidate: Path, *, source: str) -> Path:
@@ -776,13 +758,12 @@ def _daemon_error_detail(lead: str, *, daemon_proc: subprocess.Popen[str] | None
 
 def _daemon_request(
     socket_path: Path, payload: Mapping[str, object], *,
-    timeout_seconds: float, daemon_proc: subprocess.Popen[str] | None = None,
+    daemon_proc: subprocess.Popen[str] | None = None,
     stdout_path: Path | None = None, stderr_path: Path | None = None,
 ) -> dict[str, Any]:
     request = json.dumps(dict(payload)) + "\n"
     kw = {"daemon_proc": daemon_proc, "stdout_path": stdout_path, "stderr_path": stderr_path}
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
-        client.settimeout(timeout_seconds)
         try:
             client.connect(str(socket_path))
             client.sendall(request.encode())
@@ -792,8 +773,6 @@ def _daemon_request(
                 if not chunk: break
                 chunks.append(chunk)
                 if b"\n" in chunk: break
-        except socket.timeout:
-            raise RuntimeError(_daemon_error_detail(f"daemon socket request timed out after {timeout_seconds:.0f}s", **kw))
         except OSError as exc:
             raise RuntimeError(_daemon_error_detail(f"daemon socket request failed: {exc}", **kw)) from exc
     line = b"".join(chunks).decode(errors="replace").strip()
@@ -840,7 +819,7 @@ def apply_daemon_rejit(
     payload: dict[str, object] = {"cmd": "optimize", "prog_ids": prog_ids}
     if normalized_enabled_passes is not None:
         payload["enabled_passes"] = [str(n).strip() for n in normalized_enabled_passes if str(n).strip()]
-    _resp = _daemon_request(daemon_socket_path, payload, timeout_seconds=_DEFAULT_APPLY_TIMEOUT_SECONDS,
+    _resp = _daemon_request(daemon_socket_path, payload,
                             daemon_proc=daemon_proc, stdout_path=daemon_stdout_path,
                             stderr_path=daemon_stderr_path)
     response_output = json.dumps(_resp, sort_keys=True)
