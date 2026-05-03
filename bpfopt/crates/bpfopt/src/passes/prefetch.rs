@@ -8,8 +8,8 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::utils::{
-    emit_packed_kinsn_call_with_off, fixup_all_branches, remap_kinsn_btf_metadata,
-    resolve_kinsn_call_off_for_target,
+    emit_packed_kinsn_call_with_off, fixup_all_branches, insn_width,
+    remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_target,
 };
 
 const HELPER_MAP_LOOKUP_ELEM: i32 = kernel_sys::BPF_FUNC_map_lookup_elem as i32;
@@ -740,14 +740,6 @@ fn group_candidates_by_insert_pc(
             .push(candidate.clone());
     }
     grouped
-}
-
-fn insn_width(insn: &BpfInsn) -> usize {
-    if insn.is_ldimm64() {
-        2
-    } else {
-        1
-    }
 }
 
 #[cfg(test)]

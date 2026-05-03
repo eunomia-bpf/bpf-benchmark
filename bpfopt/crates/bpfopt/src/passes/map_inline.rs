@@ -8,6 +8,7 @@ use std::sync::OnceLock;
 use crate::analysis::BranchTargetAnalysis;
 use crate::insn::*;
 use crate::pass::*;
+use super::utils::insn_width;
 
 mod map_info;
 pub use map_info::{MapInfo, MapInfoAnalysis, MapInfoResult, MapReference};
@@ -2189,14 +2190,6 @@ fn format_inlined_value_diagnostic(value: &[u8], loads: &[FixedLoadUse]) -> Stri
         }
     }
     format_bytes_preview(value)
-}
-
-fn insn_width(insn: &BpfInsn) -> usize {
-    if insn.is_ldimm64() {
-        2
-    } else {
-        1
-    }
 }
 
 fn classify_r0_uses_with_options(
