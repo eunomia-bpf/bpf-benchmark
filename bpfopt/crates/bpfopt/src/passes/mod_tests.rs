@@ -7,6 +7,7 @@ use crate::pass::{
     BpfProgram, PassContext, PassManager, PipelineResult, RegState, ScalarRange, VerifierInsn,
     VerifierInsnKind, VerifierValueWidth,
 };
+use crate::passes::test_helpers::{call_helper, exit_insn};
 
 const BPF_MAP_TYPE_HASH: u32 = kernel_sys::BPF_MAP_TYPE_HASH;
 const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY;
@@ -29,10 +30,6 @@ fn ld_imm64(dst: u8, src: u8, imm_lo: i32) -> [BpfInsn; 2] {
     ]
 }
 
-fn exit_insn() -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
-}
-
 fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
     BpfInsn::new(
         BPF_JMP | BPF_JEQ | BPF_K,
@@ -49,10 +46,6 @@ fn st_mem(size: u8, dst: u8, off: i16, imm: i32) -> BpfInsn {
         off,
         imm,
     )
-}
-
-fn call_helper(imm: i32) -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, imm)
 }
 
 fn install_map(map_id: u32, map_type: u32, value: Vec<u8>) {

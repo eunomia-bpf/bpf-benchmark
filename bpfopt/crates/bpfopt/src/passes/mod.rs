@@ -4,6 +4,9 @@
 #[cfg(test)]
 use anyhow::Result;
 
+#[cfg(test)]
+pub mod test_helpers;
+
 mod bounds_check_merge;
 mod branch_flip;
 mod bulk_memory;

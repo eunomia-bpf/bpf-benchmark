@@ -241,13 +241,10 @@ mod tests {
     use super::*;
     use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
     use crate::pass::{AnalysisCache, PassContext, PassManager};
+    use crate::passes::test_helpers::{exit_insn, pseudo_call_to};
 
     fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
         BpfProgram::new(insns)
-    }
-
-    fn exit_insn() -> BpfInsn {
-        BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
     }
 
     fn ctx_with_extract_kfunc(btf_id: i32) -> PassContext {
@@ -263,16 +260,6 @@ mod tests {
             BpfInsn::make_regs(dst, 0),
             off,
             imm,
-        )
-    }
-
-    fn pseudo_call_to(call_pc: usize, target_pc: usize) -> BpfInsn {
-        let imm = target_pc as i64 - (call_pc as i64 + 1);
-        BpfInsn::new(
-            BPF_JMP | BPF_CALL,
-            BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
-            0,
-            imm as i32,
         )
     }
 

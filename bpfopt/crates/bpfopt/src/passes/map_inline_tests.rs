@@ -8,6 +8,7 @@ use crate::pass::{
     MapInlineRecord, PassContext, PassManager, RegState, ScalarRange, Tnum, VerifierInsn,
     VerifierInsnKind, VerifierValueWidth,
 };
+use crate::passes::test_helpers::{call_helper, exit_insn};
 use crate::passes::MapInfoAnalysis;
 use crate::passes::{ConstPropPass, DcePass};
 
@@ -51,10 +52,6 @@ fn add64_imm(dst: u8, imm: i32) -> BpfInsn {
         0,
         imm,
     )
-}
-
-fn call_helper(imm: i32) -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, imm)
 }
 
 fn scalar_reg(value: u64) -> RegState {
@@ -120,10 +117,6 @@ fn jne_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
         off,
         imm,
     )
-}
-
-fn exit_insn() -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
 }
 
 fn ja(off: i16) -> BpfInsn {

@@ -1,12 +1,9 @@
 use super::*;
 use crate::pass::{AnalysisCache, PassContext};
+use crate::passes::test_helpers::exit_insn;
 
 fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
     BpfProgram::new(insns)
-}
-
-fn exit_insn() -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
 }
 
 fn jne_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {

@@ -1171,14 +1171,7 @@ pub fn resolve_kinsn_call_off_for_target(
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn exit_insn() -> BpfInsn {
-        BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
-    }
-
-    fn call_helper(imm: i32) -> BpfInsn {
-        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, imm)
-    }
+    use crate::passes::test_helpers::{call_helper, exit_insn, pseudo_call_to};
 
     fn pseudo_func_ref(dst: u8, imm: i32) -> [BpfInsn; 2] {
         [
@@ -1202,16 +1195,6 @@ mod tests {
             ),
             BpfInsn::new(0, 0, 0, 0x1234),
         ]
-    }
-
-    fn pseudo_call_to(call_pc: usize, target_pc: usize) -> BpfInsn {
-        let imm = target_pc as i64 - (call_pc as i64 + 1);
-        BpfInsn::new(
-            BPF_JMP | BPF_CALL,
-            BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
-            0,
-            imm as i32,
-        )
     }
 
     #[test]

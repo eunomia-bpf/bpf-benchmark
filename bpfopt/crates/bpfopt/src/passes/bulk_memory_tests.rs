@@ -3,25 +3,12 @@ use super::*;
 use std::collections::HashMap;
 
 use crate::pass::{BpfProgram, PassContext, PassManager, PipelineResult};
+use crate::passes::test_helpers::{exit_insn, pseudo_call_to};
 const MEMCPY_BTF_ID: i32 = 4101;
 const MEMSET_BTF_ID: i32 = 4102;
 
 fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
     BpfProgram::new(insns)
-}
-
-fn exit_insn() -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
-}
-
-fn pseudo_call_to(call_pc: usize, target_pc: usize) -> BpfInsn {
-    let imm = target_pc as i64 - (call_pc as i64 + 1);
-    BpfInsn::new(
-        BPF_JMP | BPF_CALL,
-        BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
-        0,
-        imm as i32,
-    )
 }
 
 fn st_mem(size: u8, dst: u8, off: i16, imm: i32) -> BpfInsn {

@@ -1,13 +1,10 @@
 use super::*;
 use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::pass::{AnalysisCache, PassContext, PassManager};
+use crate::passes::test_helpers::exit_insn;
 
 fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
     BpfProgram::new(insns)
-}
-
-fn exit_insn() -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
 }
 
 fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
