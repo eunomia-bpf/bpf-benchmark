@@ -262,6 +262,7 @@ $(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRA
 	docker load -i "$(X86_KERNEL_FORK_IMAGE_TAR)"
 	docker build --platform linux/amd64 \
 		--target runner-runtime \
+		--no-cache-filter=runner-runtime-daemon-artifact,runner-runtime-bpfopt-artifacts \
 		--build-context runner-runtime-katran-upstream=docker-image://$(X86_KATRAN_ARTIFACTS_IMAGE) \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
 		--build-arg IMAGE_BUILD_JOBS="$(IMAGE_BUILD_JOBS)" \
@@ -277,6 +278,7 @@ $(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_K
 	docker load -i "$(ARM64_KERNEL_FORK_IMAGE_TAR)"
 	docker build --platform linux/arm64 \
 		--target runner-runtime \
+		--no-cache-filter=runner-runtime-daemon-artifact,runner-runtime-bpfopt-artifacts \
 		--build-context runner-runtime-katran-upstream=docker-image://$(ARM64_KATRAN_ARTIFACTS_IMAGE) \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
 		--build-arg IMAGE_BUILD_JOBS="$(ARM64_IMAGE_BUILD_JOBS)" \
