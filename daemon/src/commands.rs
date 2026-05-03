@@ -24,7 +24,6 @@ use crate::bpf;
 use crate::invalidation::{BpfMapValueReader, MapInvalidationTracker};
 
 static NEXT_WORKDIR_ID: AtomicU64 = AtomicU64::new(0);
-static REJIT_SYSCALL_MUTEX: Mutex<()> = Mutex::new(());
 /// CLI binary directory set once at startup; None means use PATH lookup.
 static CLI_DIR: std::sync::OnceLock<Option<PathBuf>> = std::sync::OnceLock::new();
 const MAP_VALUES_FILE: &str = "map-values.json";
@@ -407,7 +406,7 @@ pub(crate) fn default_worker_count() -> usize {
     let cpus = std::thread::available_parallelism()
         .map(|count| count.get())
         .unwrap_or(1);
-    let capped = cpus.min(8);
+    let capped = cpus.min(16);
     if cpus <= 4 {
         (capped / 2).max(1)
     } else {
@@ -692,16 +691,6 @@ where
     }))
 }
 
-fn with_serialized_rejit_syscall<T, F>(run: F) -> Result<T>
-where
-    F: FnOnce() -> Result<T>,
-{
-    let _guard = REJIT_SYSCALL_MUTEX
-        .lock()
-        .map_err(|_| anyhow!("global BPF_PROG_REJIT syscall mutex poisoned"))?;
-    run()
-}
-
 pub(crate) fn try_apply_programs(
     prog_ids: &[u32],
     config: &CliConfig,
@@ -909,15 +898,13 @@ where
             let pass_bytes = fs::read(&pass_output)
                 .with_context(|| format!("read {}", pass_output.display()))?;
             let pass_insns = decode_insns(&pass_bytes, pass_output.to_string_lossy().as_ref())?;
-            let rejit_report = match with_serialized_rejit_syscall(|| {
-                kernel.rejit(
-                    prog_id,
-                    &snapshot,
-                    &pass_insns,
-                    &fd_array,
-                    &pass_verifier_log,
-                )
-            }) {
+            let rejit_report = match kernel.rejit(
+                prog_id,
+                &snapshot,
+                &pass_insns,
+                &fd_array,
+                &pass_verifier_log,
+            ) {
                 Ok(report) => report,
                 Err(err) => {
                     let pass_error = workdir.path().join(format!("{stem}.rejit.err.txt"));
@@ -2126,34 +2113,6 @@ mod tests {
             .contains("worker panicked while optimizing prog 10: mock worker panic"));
     }
 
-    #[test]
-    fn rejit_syscall_guard_prevents_parallel_kernel_entries() {
-        let active = Arc::new(std::sync::atomic::AtomicUsize::new(0));
-        let max_active = Arc::new(std::sync::atomic::AtomicUsize::new(0));
-        let barrier = Arc::new(std::sync::Barrier::new(8));
-
-        std::thread::scope(|scope| {
-            for _ in 0..8 {
-                let active = Arc::clone(&active);
-                let max_active = Arc::clone(&max_active);
-                let barrier = Arc::clone(&barrier);
-                scope.spawn(move || {
-                    barrier.wait();
-                    with_serialized_rejit_syscall(|| {
-                        let current = active.fetch_add(1, Ordering::SeqCst) + 1;
-                        max_active.fetch_max(current, Ordering::SeqCst);
-                        std::thread::sleep(Duration::from_millis(10));
-                        active.fetch_sub(1, Ordering::SeqCst);
-                        Ok(())
-                    })
-                    .unwrap();
-                });
-            }
-        });
-
-        assert_eq!(max_active.load(Ordering::SeqCst), 1);
-    }
-
     fn successful_batch_result(prog_id: u32) -> OptimizeOneResult {
         OptimizeOneResult {
             status: "ok".to_string(),
@@ -2454,6 +2413,25 @@ printf '{"pass":"%s","changed":true,"sites_applied":1,"insn_count_before":1,"ins
             },
             maps: Vec::new(),
             insns: vec![exit_insn()],
+        }
+    }
+
+    fn test_map(map_type: u32) -> bpfget::MapInfo {
+        bpfget::MapInfo {
+            map_id: 1,
+            map_type,
+            key_size: 4,
+            value_size: 4,
+            max_entries: 1,
+            name: "mock_map".to_string(),
+            map_flags: 0,
+            ifindex: 0,
+            btf_id: 0,
+            btf_key_type_id: 0,
+            btf_value_type_id: 0,
+            btf_vmlinux_value_type_id: 0,
+            btf_vmlinux_id: 0,
+            map_extra: 0,
         }
     }
 
