@@ -772,21 +772,21 @@ pub(crate) fn try_reapply_one(
     )
 }
 
-pub(crate) struct ParallelApplyOutcome {
+pub(crate) struct ApplyProgramOutcome {
     pub prog_id: u32,
     pub result: Result<OptimizeOneResult, String>,
 }
 
-pub(crate) fn try_apply_many(
+pub(crate) fn try_apply_programs(
     prog_ids: &[u32],
     config: &CliConfig,
     enabled_passes: &[String],
     profile_paths: &HashMap<u32, PathBuf>,
     invalidation_tracker: Option<&SharedInvalidationTracker>,
     failure_root: &Path,
-) -> Result<Vec<ParallelApplyOutcome>> {
+) -> Result<Vec<ApplyProgramOutcome>> {
     if prog_ids.is_empty() {
-        bail!("optimize-batch requires at least one prog_id");
+        bail!("optimize requires at least one prog_id");
     }
     let worker_count = default_worker_count();
     let pool = rayon::ThreadPoolBuilder::new()
@@ -805,10 +805,16 @@ pub(crate) fn try_apply_many(
             .par_iter()
             .map(|&prog_id| {
                 let profile_path = profile_paths.get(&prog_id).map(PathBuf::as_path);
-                let result =
-                    try_apply_one(prog_id, &config, &passes, profile_path, tracker.as_ref(), &failure_root)
-                        .map_err(|err| format!("{err:#}"));
-                ParallelApplyOutcome { prog_id, result }
+                let result = try_apply_one(
+                    prog_id,
+                    &config,
+                    &passes,
+                    profile_path,
+                    tracker.as_ref(),
+                    &failure_root,
+                )
+                .map_err(|err| format!("{err:#}"));
+                ApplyProgramOutcome { prog_id, result }
             })
             .collect()
     }))

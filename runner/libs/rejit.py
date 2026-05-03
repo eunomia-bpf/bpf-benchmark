@@ -656,6 +656,12 @@ def _apply_result_from_response(
         else None
     )
     passes: list[dict[str, object]] = []
+    prog_id_value = response.get("prog_id")
+    prog_id = (
+        _strict_non_negative_int(prog_id_value, field_name="prog_id")
+        if prog_id_value is not None
+        else None
+    )
 
     applied = False
     changed = False
@@ -695,7 +701,7 @@ def _apply_result_from_response(
         applied = exit_code == 0 and summary_applied
         changed = exit_code == 0 and changed
 
-    return {
+    result = {
         "applied": applied,
         "changed": changed,
         "output": output,
@@ -706,6 +712,9 @@ def _apply_result_from_response(
         "summary": dict(summary),
         "error": error,
     }
+    if prog_id is not None:
+        result["prog_id"] = prog_id
+    return result
 
 
 def _daemon_log_tail(stdout_path: Path | None, stderr_path: Path | None) -> str:
@@ -801,18 +810,6 @@ def _daemon_request(
     return dict(response)  # type: ignore[arg-type]
 
 
-def _optimize_request(
-    socket_path: Path, prog_id: int, *, enabled_passes: Sequence[str] | None,
-    daemon_proc: subprocess.Popen[str] | None = None, stdout_path: Path | None = None,
-    stderr_path: Path | None = None, timeout_seconds: float = _DEFAULT_APPLY_TIMEOUT_SECONDS,
-) -> dict[str, Any]:
-    payload: dict[str, object] = {"cmd": "optimize", "prog_id": int(prog_id)}
-    if enabled_passes is not None:
-        payload["enabled_passes"] = [str(n).strip() for n in enabled_passes if str(n).strip()]
-    return _daemon_request(socket_path, payload, timeout_seconds=timeout_seconds,
-                           daemon_proc=daemon_proc, stdout_path=stdout_path, stderr_path=stderr_path)
-
-
 def _prepare_branch_flip_profile(
     socket_path: Path,
     *,
@@ -852,6 +849,8 @@ def apply_daemon_rejit(
     prog_ids = [int(v) for v in (prog_ids or []) if int(v) > 0]
     if not prog_ids:
         raise ValueError("apply_daemon_rejit requires at least one prog_id")
+    if len(set(prog_ids)) != len(prog_ids):
+        raise ValueError("apply_daemon_rejit requires unique prog_ids")
     if daemon_socket_path is None:
         raise ValueError("apply_daemon_rejit requires daemon_socket_path")
     normalized_enabled_passes = (
@@ -884,11 +883,52 @@ def apply_daemon_rejit(
                                 for pid in prog_ids},
                 "program_counts": {"requested": len(prog_ids), "applied": 0, "not_applied": len(prog_ids)},
             }
+
+    payload: dict[str, object] = {"cmd": "optimize", "prog_ids": prog_ids}
+    if normalized_enabled_passes is not None:
+        payload["enabled_passes"] = [str(n).strip() for n in normalized_enabled_passes if str(n).strip()]
+    _resp = _daemon_request(daemon_socket_path, payload, timeout_seconds=_DEFAULT_APPLY_TIMEOUT_SECONDS,
+                            daemon_proc=daemon_proc, stdout_path=daemon_stdout_path,
+                            stderr_path=daemon_stderr_path)
+    response_output = json.dumps(_resp, sort_keys=True)
+    if str(_resp.get("status") or "") != "ok":
+        msg = str(_resp.get("error_message") or "optimize failed")
+        return {
+            "applied": False,
+            "changed": False,
+            "output": response_output,
+            "exit_code": 1,
+            "error": msg,
+            "enabled_passes": normalized_enabled_passes,
+            "passes": [],
+            "per_program": {int(pid): {"prog_id": int(pid), "applied": False, "changed": False,
+                                       "output": response_output, "exit_code": 1, "error": msg,
+                                       "enabled_passes": normalized_enabled_passes, "passes": []}
+                            for pid in prog_ids},
+            "program_counts": {"requested": len(prog_ids), "applied": 0, "not_applied": len(prog_ids)},
+        }
+
+    raw_per_program = _resp.get("per_program")
+    if not isinstance(raw_per_program, Mapping):
+        raise RuntimeError("daemon response field 'per_program' must be an object")
+    records_by_prog_id = {str(key): value for key, value in raw_per_program.items()}
+    requested_prog_ids = {str(prog_id) for prog_id in prog_ids}
+    response_prog_ids = set(records_by_prog_id)
+    if response_prog_ids != requested_prog_ids:
+        missing = sorted(requested_prog_ids - response_prog_ids)
+        unexpected = sorted(response_prog_ids - requested_prog_ids)
+        raise RuntimeError(
+            "daemon response field 'per_program' does not match requested prog_ids: "
+            f"missing={missing}, unexpected={unexpected}"
+        )
+
     for prog_id in prog_ids:
-        _resp = _optimize_request(daemon_socket_path, prog_id, enabled_passes=normalized_enabled_passes,
-                                   daemon_proc=daemon_proc, stdout_path=daemon_stdout_path, stderr_path=daemon_stderr_path)
-        result = _apply_result_from_response(_resp, output=json.dumps(_resp, sort_keys=True),
-                                              exit_code=0 if str(_resp.get("status") or "") == "ok" else 1,
+        record = records_by_prog_id[str(prog_id)]
+        if not isinstance(record, Mapping):
+            raise RuntimeError(f"daemon response field per_program[{prog_id!r}] must be an object")
+        record_dict = dict(record)
+        result = _apply_result_from_response(record_dict, output=json.dumps(record_dict, sort_keys=True),
+                                              exit_code=0 if str(record_dict.get("status") or "") == "ok" else 1,
                                               enabled_passes=normalized_enabled_passes)
         per_program[prog_id] = result
         outputs.append(str(result.get("output") or ""))

@@ -392,6 +392,9 @@ fn request_interval_ms(req: &serde_json::Value) -> std::result::Result<u64, Stri
 }
 
 fn request_prog_ids(req: &serde_json::Value) -> std::result::Result<Vec<u32>, String> {
+    if req.get("prog_id").is_some() {
+        return Err("prog_id is not supported; use prog_ids".to_string());
+    }
     let value = req
         .get("prog_ids")
         .ok_or_else(|| "missing prog_ids".to_string())?;
@@ -410,6 +413,12 @@ fn request_prog_ids(req: &serde_json::Value) -> std::result::Result<Vec<u32>, St
     }
     if prog_ids.is_empty() {
         return Err("prog_ids must not be empty".to_string());
+    }
+    let mut seen = HashSet::new();
+    for prog_id in &prog_ids {
+        if !seen.insert(*prog_id) {
+            return Err(format!("duplicate prog_id {prog_id}"));
+        }
     }
     Ok(prog_ids)
 }
@@ -448,38 +457,6 @@ fn process_request(
                 Ok(value) => value,
                 Err(message) => return error_json(message),
             };
-            let prog_id = match req.get("prog_id").and_then(|v| v.as_u64()) {
-                Some(id) => id as u32,
-                None => return error_json("missing prog_id"),
-            };
-            let profile_path = profiling_state
-                .as_ref()
-                .and_then(|state| state.profile_path_for(prog_id));
-            match commands::try_apply_one(
-                prog_id,
-                config,
-                enabled_passes,
-                profile_path.as_deref(),
-                Some(tracker),
-                failure_root,
-            ) {
-                Ok(result) => match remember_reoptimization_result(
-                    reoptimization_state,
-                    prog_id,
-                    enabled_passes,
-                    &result,
-                ) {
-                    Ok(()) => serialize_or_error(result),
-                    Err(err) => error_json(format!("{err:#}")),
-                },
-                Err(e) => error_json(format!("{e:#}")),
-            }
-        }
-        "optimize-batch" => {
-            let enabled_passes = match require_runner_enabled_passes(enabled_passes.as_deref()) {
-                Ok(value) => value,
-                Err(message) => return error_json(message),
-            };
             let prog_ids = match request_prog_ids(req) {
                 Ok(value) => value,
                 Err(message) => return error_json(message),
@@ -493,7 +470,7 @@ fn process_request(
                         .map(|path| (*prog_id, path))
                 })
                 .collect::<HashMap<_, _>>();
-            match commands::try_apply_many(
+            match commands::try_apply_programs(
                 &prog_ids,
                 config,
                 enabled_passes,
@@ -539,7 +516,6 @@ fn process_request(
                     }
                     serde_json::json!({
                         "status": "ok",
-                        "worker_count": commands::default_worker_count(),
                         "per_program": per_program,
                         "program_counts": {
                             "requested": prog_ids.len(),
@@ -801,7 +777,7 @@ mod tests {
     fn process_request_rejects_missing_enabled_passes_for_optimize() {
         let response = process_test_request(&serde_json::json!({
             "cmd": "optimize",
-            "prog_id": 42,
+            "prog_ids": [42],
         }));
 
         assert_eq!(response["status"], "error");
@@ -812,9 +788,9 @@ mod tests {
     }
 
     #[test]
-    fn process_request_rejects_empty_enabled_passes_for_optimize_batch() {
+    fn process_request_rejects_empty_enabled_passes_for_optimize() {
         let response = process_test_request(&serde_json::json!({
-            "cmd": "optimize-batch",
+            "cmd": "optimize",
             "prog_ids": [42],
             "enabled_passes": [],
         }));
@@ -827,13 +803,39 @@ mod tests {
     }
 
     #[test]
-    fn request_prog_ids_rejects_empty_batch() {
+    fn process_request_rejects_singular_prog_id_for_optimize() {
+        let response = process_test_request(&serde_json::json!({
+            "cmd": "optimize",
+            "prog_id": 42,
+            "enabled_passes": ["dce"],
+        }));
+
+        assert_eq!(response["status"], "error");
+        assert_eq!(
+            response["error_message"],
+            "prog_id is not supported; use prog_ids"
+        );
+    }
+
+    #[test]
+    fn request_prog_ids_rejects_empty_list() {
         let err = request_prog_ids(&serde_json::json!({
-            "cmd": "optimize-batch",
+            "cmd": "optimize",
             "prog_ids": [],
         }))
         .unwrap_err();
 
         assert_eq!(err, "prog_ids must not be empty");
+    }
+
+    #[test]
+    fn request_prog_ids_rejects_duplicate_ids() {
+        let err = request_prog_ids(&serde_json::json!({
+            "cmd": "optimize",
+            "prog_ids": [42, 42],
+        }))
+        .unwrap_err();
+
+        assert_eq!(err, "duplicate prog_id 42");
     }
 }

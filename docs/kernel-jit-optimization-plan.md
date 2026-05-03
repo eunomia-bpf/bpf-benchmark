@@ -320,7 +320,7 @@ v3 per-pass ReJIT 后，runner 边界仍是 daemon socket；bytecode transform �
 典型 runner path：
 
 ```bash
-printf '{"cmd":"optimize","prog_id":123}\n' | socat - /var/run/bpfrejit.sock
+printf '{"cmd":"optimize","prog_ids":[123],"enabled_passes":["map_inline","dce"]}\n' | socat - /var/run/bpfrejit.sock
 ```
 
 默认 12-pass policy 中 `map_inline` / `const_prop` 使用前一个成功 pass 的 ReJIT verifier log 生成 `verifier-states.json`。缺失或解析不到 states 是错误，不允许空 states fallback。
@@ -445,7 +445,7 @@ Packed（sidecar pseudo-insn + CALL pair，零 argument setup，N→1 指令替�
 - Task #45 daemon 瘦身仍成立：删除 `PassManager` / pass code / profiler；daemon 不做 bytecode transform。
 - 2026-05-01 pivot 的动机和验证见 `docs/tmp/full-matrix-20260430/v3-arch-pivot.md`。
 
-- **3.1 daemon socket orchestration**：`optimize` 走 daemon snapshot → `bpfopt --pass` loop → per-pass daemon direct ReJIT；`optimize-batch` 使用 per-program worker pool；`profile-start/stop` 走 `bpfprof`；`status` 只保留 daemon 健康和 profiling 状态，`optimize-all` 已删除。
+- **3.1 daemon socket orchestration**：`optimize` 接收 `prog_ids` 列表并使用 per-program worker pool；每个程序走 daemon snapshot → `bpfopt --pass` loop → per-pass daemon direct ReJIT；`profile-start/stop` 走 `bpfprof`；`status` 只保留 daemon 健康和 profiling 状态，旧的 all/batch 独立命令已删除。
 - **3.2 daemon 瘦身**：`daemon/Cargo.toml` 依赖 daemon-owned `bpfget` 和 `kernel-sys`；删除旧 `bpfverify`/`bpfrejit` crates、`pipeline.rs`、`profiler.rs`、`kfunc_discovery.rs`、`platform_detect.rs` 及对应旧测试文件。
 - **3.3 runner 边界确认**：`runner/libs/`、`corpus/`、`e2e/`、`micro/` 在本阶段不改；Docker/build 依赖也收窄为 daemon 只跟踪 `kernel-sys` 而不是整个 `bpfopt` 源码。
 

@@ -27,7 +27,7 @@ bpfopt-suite v3 的稳定边界是：
 典型 runner path：
 
 ```bash
-printf '{"cmd":"optimize","prog_id":123,"enabled_passes":["wide_mem"]}\n' | socat - /var/run/bpfrejit.sock
+printf '{"cmd":"optimize","prog_ids":[123],"enabled_passes":["wide_mem"]}\n' | socat - /var/run/bpfrejit.sock
 ```
 
 runner 是 benchmark pass policy 的配置中心。daemon 不维护默认 pass list；`optimize` 请求必须显式提供非空 `enabled_passes`，daemon 按 runner 提供的顺序逐个执行。当前 runner x86_64 policy 是：
@@ -131,7 +131,7 @@ daemon 是事件源 + runner socket boundary + kernel syscall orchestrator。
 4. 管理外部 `bpfprof` lifecycle。
 5. 对 `optimize` 请求执行 snapshot -> per-pass `bpfopt` CLI -> per-pass `BPF_PROG_REJIT`。
 6. 将每次成功 ReJIT 的 verifier log 解析为 register states，作为后续 pass side-input。
-7. 对 `optimize-batch` / invalidation reoptimize 使用 per-program worker pool；默认 worker 数为 `min(num_cpus, 16)`，小 VM 中减半。
+7. 对 `optimize` 的 `prog_ids` 列表使用 per-program worker pool；默认 worker 数为 `min(num_cpus, 16)`，小 VM 中减半。
 
 不做的事：
 
@@ -164,8 +164,7 @@ daemon 保留 newline-delimited JSON socket。典型请求：
 
 ```json
 {"cmd":"status"}
-{"cmd":"optimize","prog_id":42,"enabled_passes":["wide_mem","rotate"]}
-{"cmd":"optimize-batch","prog_ids":[42,43,44],"enabled_passes":["wide_mem","rotate"]}
+{"cmd":"optimize","prog_ids":[42,43,44],"enabled_passes":["wide_mem","rotate"]}
 ```
 
 `enabled_passes` 是必填非空列表。daemon 不维护默认 pass list，也不把缺失列表降级成内部默认；runner 传什么，daemon 就按该顺序执行什么。缺失或空列表必须返回错误 `no enabled_passes provided by runner`。daemon 不过滤/跳过任何 ReJIT program；失败自然进入结果。

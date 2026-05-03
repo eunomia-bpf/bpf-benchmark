@@ -24,7 +24,7 @@ requests must provide a non-empty `enabled_passes` list.
 
 ```json
 {"cmd":"status"}
-{"cmd":"optimize","prog_id":42,"enabled_passes":["map_inline","dce"]}
+{"cmd":"optimize","prog_ids":[42],"enabled_passes":["map_inline","dce"]}
 ```
 
 The main optimize path snapshots the live program, runs `bpfopt`, and then calls
