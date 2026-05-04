@@ -771,3 +771,130 @@ fn test_wide_mem_mixed_sites_xdp_some_skipped() {
         "one site should be skipped for likely packet pointer in XDP"
     );
 }
+
+// ── BTF struct pointer field boundary tests ─────────────────────────
+
+/// Build a minimal verifier state with the given reg_type for a register at a
+/// specific PC.  Used to simulate the verifier log output for a BTF pointer.
+fn make_verifier_state_with_reg_type(
+    pc: usize,
+    reg: u8,
+    reg_type: &str,
+) -> crate::pass::VerifierInsn {
+    let mut regs = std::collections::HashMap::new();
+    regs.insert(reg, crate::pass::RegState::new(reg_type, crate::pass::VerifierValueWidth::Unknown));
+    crate::pass::VerifierInsn {
+        pc,
+        frame: 0,
+        from_pc: None,
+        kind: crate::pass::VerifierInsnKind::PcFullState,
+        speculative: false,
+        regs,
+        stack: std::collections::HashMap::new(),
+    }
+}
+
+/// Regression test for cilium prog 141: two adjacent 4-byte byte-ladders
+/// whose base register is a BTF struct pointer must NOT be merged into a
+/// wider load because the verifier enforces field boundaries on BTF pointers.
+///
+/// Bug detected by this test: before the fix, wide_mem would merge two
+/// consecutive 4-byte byte-ladders from a `trusted_ptr_bpf_prog` register
+/// into a single 4-byte wide load.  The verifier rejected this with EACCES
+/// because the load crossed the `pages` field boundary inside `bpf_prog`.
+///
+/// With the fix, when verifier states show the base register as a BTF struct
+/// pointer, the merge is skipped and the byte-ladder is left intact.
+#[test]
+fn test_wide_mem_skips_merge_when_base_is_btf_struct_ptr() {
+    // A 2-byte byte-ladder from r6 (which verifier states show as a BTF ptr).
+    let mut prog = make_program(vec![
+        BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
+        BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
+        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
+        BpfInsn::alu64_reg(BPF_OR, 0, 1),
+        exit_insn(),
+    ]);
+
+    // Inject a verifier state that shows r6 as a trusted BTF struct pointer
+    // at PC 0 (just before the byte-ladder begins).  This simulates the
+    // verifier log from a prior BPF_PROG_REJIT(log_level=2) call.
+    let btf_state = make_verifier_state_with_reg_type(0, 6, "trusted_ptr_bpf_prog");
+    prog.set_verifier_states(vec![btf_state]);
+
+    let mut cache = AnalysisCache::new();
+    let ctx = PassContext::test_default();
+
+    let pass = WideMemPass;
+    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+    // The merge must be skipped because r6 is a BTF struct pointer.
+    assert!(
+        !result.changed,
+        "wide_mem must not merge byte-ladder from a BTF struct pointer base register"
+    );
+    assert_eq!(result.sites_applied, 0);
+    assert!(
+        result
+            .sites_skipped
+            .iter()
+            .any(|s| s.reason.contains("BTF struct pointer")),
+        "skip reason must mention BTF struct pointer; got: {:?}",
+        result.sites_skipped
+    );
+    // Original byte-ladder must be preserved.
+    assert_eq!(prog.insns.len(), 5);
+    assert_eq!(prog.insns[0].code, BPF_LDX | BPF_B | BPF_MEM);
+}
+
+/// Without verifier states, wide_mem should still apply the merge (it cannot
+/// know the pointer type).  This verifies the fix does not regress
+/// the no-states path.
+#[test]
+fn test_wide_mem_applies_without_verifier_states() {
+    let mut prog = make_program(vec![
+        BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
+        BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
+        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
+        BpfInsn::alu64_reg(BPF_OR, 0, 1),
+        exit_insn(),
+    ]);
+    // No verifier states installed — program.verifier_states is empty (default).
+    let mut cache = AnalysisCache::new();
+    let ctx = PassContext::test_default();
+
+    let pass = WideMemPass;
+    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+    assert!(
+        result.changed,
+        "wide_mem should apply when no verifier states are available"
+    );
+    assert_eq!(result.sites_applied, 1);
+}
+
+/// A scalar register (not a BTF struct pointer) must still be merged even
+/// when verifier states are present.
+#[test]
+fn test_wide_mem_applies_when_verifier_shows_scalar_base() {
+    let mut prog = make_program(vec![
+        BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
+        BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
+        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
+        BpfInsn::alu64_reg(BPF_OR, 0, 1),
+        exit_insn(),
+    ]);
+
+    // r6 is a scalar — wide loads are safe.
+    let scalar_state = make_verifier_state_with_reg_type(0, 6, "scalar");
+    prog.set_verifier_states(vec![scalar_state]);
+
+    let mut cache = AnalysisCache::new();
+    let ctx = PassContext::test_default();
+
+    let pass = WideMemPass;
+    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+    assert!(result.changed, "scalar base should still be merged");
+    assert_eq!(result.sites_applied, 1);
+}
