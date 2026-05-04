@@ -3,6 +3,7 @@ ARG TRACEE_IMAGE=docker.io/aquasec/tracee:0.24.1@sha256:cfbbfee972e64a644f6b1bac
 ARG TETRAGON_IMAGE=quay.io/cilium/tetragon:v1.6.1@sha256:ff96ace3e6a0166ba04ff3eecfaeee19b7e6deee2b7cdbe3245feda57df5015f
 ARG CILIUM_IMAGE=quay.io/cilium/cilium:v1.19.3@sha256:2e61680593cddca8b6c055f6d4c849d87a26a1c91c7e3b8b56c7fb76ab7b7b10
 ARG CALICO_NODE_IMAGE=quay.io/calico/node:v3.31.3@sha256:f2339c4ff3a57228cbc39a1f67ab81abded1997d843e0e0b1e86664c7c4eb6c0
+ARG CALICO_CTL_IMAGE=quay.io/calico/ctl:v3.31.3
 ARG RUN_TARGET_ARCH=x86_64
 ARG VENDOR_LINUX_FRAMEWORK_COMMIT
 ARG KERNEL_FORK_IMAGE_PLATFORM=linux/amd64
@@ -213,6 +214,8 @@ FROM ${CILIUM_IMAGE} AS runner-runtime-cilium-upstream
 
 FROM ${CALICO_NODE_IMAGE} AS runner-runtime-calico-upstream
 
+FROM ${CALICO_CTL_IMAGE} AS runner-runtime-calicoctl-upstream
+
 FROM runner-runtime-build-base AS runner-runtime-app-artifacts
 
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
@@ -252,6 +255,8 @@ COPY --link --from=runner-runtime-calico-upstream /usr/lib/calico/bpf/ /usr/lib/
 COPY --link --from=runner-runtime-calico-upstream /included-source/ /included-source/
 COPY --link --from=runner-runtime-calico-upstream /usr/lib64/libpcap.so.1 /usr/local/lib/libpcap.so.1
 COPY --link --from=runner-runtime-calico-upstream /usr/lib64/libpcap.so.1.9.1 /usr/local/lib/libpcap.so.1.9.1
+
+COPY --link --from=runner-runtime-calicoctl-upstream --chmod=0755 /usr/bin/calicoctl /usr/local/bin/calicoctl
 
 COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-install
 
@@ -529,6 +534,7 @@ RUN set -eux; \
     test -x /usr/local/bin/bpfprof; \
     test -x /usr/local/bin/cilium-agent; \
     test -x /usr/local/bin/calico-node; \
+    test -x /usr/local/bin/calicoctl; \
     test -d /artifacts/kernel; \
     test -d /artifacts/modules; \
     test -d /artifacts/kinsn; \
