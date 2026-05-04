@@ -17,7 +17,6 @@ from .base import AppRunner
 from .process_support import ManagedProcessSession, wait_until_program_set_stable
 from .setup_support import repo_artifact_root
 
-DEFAULT_KATRAN_TEST_PACKET = ROOT_DIR / "corpus" / "inputs" / "katran_vip_packet_64.bin"
 DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S = 30
 DEFAULT_KATRAN_STOP_TIMEOUT_S = 10.0
 DEFAULT_KATRAN_STOP_SETTLE_S = 2.0
@@ -32,8 +31,6 @@ DEFAULT_IP_CANDIDATES = (
 )
 REQUEST_FAILURE_PREVIEW_LIMIT = 5
 TCP_PROTO = socket.IPPROTO_TCP
-XDP_PASS = 2
-XDP_TX = 3
 F_LRU_BYPASS = 1 << 1
 CH_RING_SIZE = 65537
 VIP_NUM = 0
@@ -233,7 +230,6 @@ def pack_ctl_mac(mac: str) -> bytes: return bytes(int(p, 16) for p in mac.split(
 def pack_vip_definition(address: str, port: int, proto: int) -> bytes: return socket.inet_aton(address) + (b"\x00" * 12) + struct.pack("!HBB", int(port), int(proto), 0)
 def pack_vip_meta(flags: int, vip_num: int) -> bytes: return struct.pack("=II", int(flags), int(vip_num))
 def pack_real_definition(address: str, flags: int = 0) -> bytes: return socket.inet_aton(address) + (b"\x00" * 12) + bytes([int(flags) & 0xFF]) + (b"\x00" * 3)
-def xdp_action_name(retval: int) -> str: return {0: "XDP_ABORTED", 1: "XDP_DROP", XDP_PASS: "XDP_PASS", XDP_TX: "XDP_TX", 4: "XDP_REDIRECT"}.get(int(retval), f"UNKNOWN({int(retval)})")
 
 
 def _bpftool_map_update_args(map_id: int, key: bytes, value: bytes) -> list[str]:
@@ -251,25 +247,6 @@ def _bpftool_map_update_batch(updates: list[tuple[int, bytes, bytes]]) -> None:
         batch_file = Path(batch_path)
         if batch_file.exists():
             batch_file.unlink()
-
-
-def _bpftool_prog_test_run(prog_id: int, packet: bytes, *, repeat: int = 1) -> dict[str, object]:
-    with tempfile.NamedTemporaryFile(prefix="katran_in_", suffix=".bin", delete=False) as fin:
-        fin.write(packet); in_path = fin.name
-    out_path = in_path.replace("_in_", "_out_")
-    try:
-        result = run_json_command([resolve_bpftool_binary(), "-j", "prog", "run", "id", str(prog_id),
-             "data_in", in_path, "data_out", out_path, "repeat", str(max(1, int(repeat)))], timeout=max(30, repeat // 100 + 30))
-        if not isinstance(result, dict): raise RuntimeError(f"bpftool prog run returned unexpected payload: {result!r}")
-        out_data = Path(out_path).read_bytes()
-        return {"retval": int(result.get("retval", -1)), "duration_ns": int(result.get("duration", 0)),
-                "repeat": max(1, int(repeat)), "data_size_in": len(packet),
-                "data_size_out": len(out_data), "data_out_preview_hex": out_data[:32].hex()}
-    finally:
-        Path(in_path).unlink()
-        out_file = Path(out_path)
-        if out_file.exists():
-            out_file.unlink()
 
 
 class KatranDsrTopology:
@@ -647,19 +624,6 @@ def configure_katran_maps(session: KatranServerSession) -> dict[str, object]:
             "real": {"address": REAL_IP, "real_num": REAL_NUM}, "default_gateway_mac": ROUTER_LB_MAC, "ch_ring_size": CH_RING_SIZE}
 
 
-def run_katran_prog_test_run(session: KatranServerSession, *, repeat: int = 1, require_xdp_tx: bool = True) -> dict[str, object]:
-    if not DEFAULT_KATRAN_TEST_PACKET.exists():
-        raise RuntimeError(f"Katran test packet is missing: {DEFAULT_KATRAN_TEST_PACKET}")
-    packet = DEFAULT_KATRAN_TEST_PACKET.read_bytes()
-    result = _bpftool_prog_test_run(session.prog_id, packet, repeat=max(1, int(repeat)))
-    result.update({"packet_path": str(DEFAULT_KATRAN_TEST_PACKET), "expected_retval": XDP_TX,
-                   "expected_action": xdp_action_name(XDP_TX), "action": xdp_action_name(int(result["retval"])),
-                   "ok": int(result["retval"]) == XDP_TX})
-    if require_xdp_tx and not bool(result["ok"]):
-        raise RuntimeError(f"Katran BPF_PROG_TEST_RUN expected XDP_TX, got {result['action']} ({result['retval']})")
-    return result
-
-
 PARALLEL_CLIENT_REQUEST_SCRIPT = """
 import json
 import socket
@@ -772,7 +736,6 @@ def run_parallel_http_load(*, duration_s: int | float, concurrency: int) -> dict
 
 DEFAULT_INTERFACE = "katran0"
 DEFAULT_CONCURRENCY = 4
-DEFAULT_TEST_RUN_BATCH_REPEAT = 128
 DEFAULT_LOAD_TIMEOUT_S = DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S
 
 
@@ -887,7 +850,7 @@ class KatranRunner(AppRunner):
     def __init__(self, *, loader_binary: Path | str | None = None, iface: str = DEFAULT_INTERFACE,
                  router_peer_iface: str | None = None, load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
                  concurrency: int = DEFAULT_CONCURRENCY, workload_spec: Mapping[str, object],
-                 test_run_batch_repeat: int = DEFAULT_TEST_RUN_BATCH_REPEAT, default_router_mac: str = ROUTER_LB_MAC) -> None:
+                 default_router_mac: str = ROUTER_LB_MAC) -> None:
         super().__init__()
         self.loader_binary = None if loader_binary is None else Path(loader_binary).resolve()
         self.balancer_prog_path = _resolve_katran_bpf_artifact("bpf/balancer.bpf.o", "balancer.bpf.o")
@@ -902,9 +865,9 @@ class KatranRunner(AppRunner):
         self.load_timeout_s = int(load_timeout_s); self.concurrency = max(1, int(concurrency))
         self.workload_spec = dict(workload_spec)
         self.workload_kind = str(self.workload_spec.get("kind") or self.workload_spec.get("name") or "").strip().lower()
-        if not self.workload_kind:
-            raise RuntimeError("KatranRunner requires workload_spec.kind")
-        self.test_run_batch_repeat = max(1, int(test_run_batch_repeat)); self.default_router_mac = str(default_router_mac)
+        if self.workload_kind != "network":
+            raise RuntimeError(f"KatranRunner only supports workload_spec.kind='network', got {self.workload_kind!r}")
+        self.default_router_mac = str(default_router_mac)
         self.topology: Any | None = None; self.http_server: Any | None = None; self.session: KatranServerSession | None = None
         self.artifacts: dict[str, object] = {}; self.last_request_summary: dict[str, object] = {}
 
@@ -920,7 +883,7 @@ class KatranRunner(AppRunner):
     def start(self) -> list[int]:
         if self.session is not None: raise RuntimeError("KatranRunner is already running")
         topology = KatranDsrTopology(self.iface, router_peer_iface=self.router_peer_iface)
-        http_server = None if self.workload_kind == "test_run" else NamespaceHttpServer(REAL_NS, VIP_IP, VIP_PORT)
+        http_server = NamespaceHttpServer(REAL_NS, VIP_IP, VIP_PORT)
         server_binary = resolve_katran_server_binary(self.loader_binary)
         session = KatranServerSession(
             server_binary=server_binary,
@@ -933,17 +896,14 @@ class KatranRunner(AppRunner):
         )
         try:
             topology.__enter__()
-            if http_server is not None:
-                http_server.__enter__()
+            http_server.__enter__()
             session.__enter__()
-            if self.workload_kind == "network":
-                session.reattach_xdpgeneric()
+            session.reattach_xdpgeneric()
             self.artifacts = {
                 "topology": topology.metadata(),
-                "http_server": {} if http_server is None else http_server.metadata(),
+                "http_server": http_server.metadata(),
                 "live_program": session.metadata(),
                 "map_configuration": configure_katran_maps(session),
-                "test_run_validation": run_katran_prog_test_run(session, repeat=1, require_xdp_tx=False),
             }
             time.sleep(TOPOLOGY_SETTLE_S)
         except Exception:
@@ -952,11 +912,10 @@ class KatranRunner(AppRunner):
                 session.close()
             except Exception as exc:
                 cleanup_errors.append(str(exc))
-            if http_server is not None:
-                try:
-                    http_server.close()
-                except Exception as exc:
-                    cleanup_errors.append(str(exc))
+            try:
+                http_server.close()
+            except Exception as exc:
+                cleanup_errors.append(str(exc))
             try:
                 topology.close()
             except Exception as exc:
@@ -969,19 +928,6 @@ class KatranRunner(AppRunner):
         self.command_used = list(session.command_used)
         self.programs = [dict(program) for program in session.programs]
         return [int(program["id"]) for program in self.programs if int(program.get("id", 0) or 0) > 0]
-
-    def _run_test_run_workload(self, seconds: float) -> WorkloadResult:
-        if self.session is None: raise RuntimeError("KatranRunner is not running")
-        deadline = time.monotonic() + max(0.1, float(seconds))
-        batches = 0; total_packets = 0; last_summary: dict[str, object] = {}; started_at = time.monotonic()
-        while time.monotonic() < deadline or batches == 0:
-            last_summary = run_katran_prog_test_run(self.session, repeat=self.test_run_batch_repeat, require_xdp_tx=False)
-            total_packets += int(last_summary.get("repeat", 0) or 0); batches += 1
-        elapsed = max(0.000001, time.monotonic() - started_at)
-        self.last_request_summary = {"driver": "prog_test_run", "batches": batches, "packet_count": total_packets,
-                                      "duration_s": elapsed, "last_result": dict(last_summary), "namespace": CLIENT_NS}
-        return WorkloadResult(ops_total=float(total_packets), ops_per_sec=float(total_packets) / elapsed,
-                              duration_s=elapsed, stdout="", stderr=tail_text(str(last_summary)))
 
     def _run_network_workload(self, seconds: float) -> WorkloadResult:
         summary = run_parallel_http_load(duration_s=max(1.0, float(seconds)), concurrency=self.concurrency)
@@ -996,8 +942,6 @@ class KatranRunner(AppRunner):
 
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None: raise RuntimeError("KatranRunner is not running")
-        if self.workload_kind == "test_run": return self._run_test_run_workload(seconds)
-        if self.workload_kind != "network": raise RuntimeError(f"unsupported Katran workload kind: {self.workload_kind}")
         return self._run_network_workload(seconds)
 
     def run_workload_spec(self, workload_spec: Mapping[str, object], seconds: float) -> WorkloadResult:

@@ -79,7 +79,7 @@ MACRO_APP_DEFINITIONS: tuple[MacroAppDefinition, ...] = (
     MacroAppDefinition(name="otelcol-ebpf-profiler/profiling", runner="otelcol-ebpf-profiler", workload="stress_ng_cpu", duration_s=5.0),
     MacroAppDefinition(name="cilium/agent", runner="cilium", workload="network"),
     MacroAppDefinition(name="tetragon/observer", runner="tetragon", workload="stress_ng_os_io_network"),
-    MacroAppDefinition(name="katran", runner="katran", workload="test_run"),
+    MacroAppDefinition(name="katran", runner="katran", workload="network"),
     MacroAppDefinition(name="tracee/monitor", runner="tracee", workload="stress_ng_os", duration_s=5.0),
     MacroAppDefinition(name="bpftrace/capable", runner="bpftrace", workload="stress_ng_os", runner_args={"script": "capable"}),
     MacroAppDefinition(name="bpftrace/biosnoop", runner="bpftrace", workload="fio_randrw", runner_args={"script": "biosnoop"}, duration_s=5.0),
