@@ -300,6 +300,53 @@ class CalicoRunner(NativeProcessRunner):
                 continue
             run_command([binary, *command[1:]], check=False, timeout=20)
 
+    def _set_node_bgp_ipv4(self) -> None:
+        """Patch the local Calico Node resource to set spec.bgp.ipv4Address.
+
+        calico-node -startup with CALICO_NETWORKING_BACKEND=none skips writing the BGP
+        IPv4 address into the Node resource (startup.go:configureAndCheckIPAddressSubnets
+        returns early when backend=none).  Felix's felixnodeprocessor.go converts
+        node.Spec.BGP.IPv4Address into a HostIPKey update, which is the only way Felix
+        learns d.hostIP.  Without hostIP, bpf_ep_mgr.go:attachDataIfaceProgram() returns
+        "unknown host IP" and the main TC datapath programs (calico_tc_main) are never
+        attached to the interface, regardless of whether a HostEndpoint is registered.
+
+        Patching the node with the interface IP after -startup completes gives Felix the
+        host IP it needs to proceed with TC program attachment.
+        """
+        calicoctl = _resolve_calicoctl()
+        iface = self.device or BENCHMARK_IFACE
+        if is_benchmark_interface(iface):
+            ip_cidr = BENCHMARK_IFACE_CIDR
+        else:
+            # For non-benchmark interfaces derive IP from the interface itself.
+            import subprocess as _subprocess
+            result = _subprocess.run(
+                ["ip", "-4", "-o", "addr", "show", "dev", iface],
+                capture_output=True,
+                text=True,
+            )
+            match = re.search(r"inet\s+(\S+)", result.stdout)
+            if not match:
+                raise RuntimeError(
+                    f"Cannot determine IPv4 address for interface {iface}; "
+                    "set node bgp ipv4Address manually or use the benchmark interface"
+                )
+            ip_cidr = match.group(1)
+        run_command(
+            [
+                str(calicoctl),
+                "patch",
+                "--allow-version-mismatch",
+                "node",
+                self.node_name,
+                "--patch",
+                f'{{"spec":{{"bgp":{{"ipv4Address":"{ip_cidr}"}}}}}}',
+            ],
+            env=self._merged_env(self._startup_env()),
+            timeout=30,
+        )
+
     def _register_host_endpoint(self) -> None:
         """Register a HostEndpoint in etcd so Felix attaches the main TC datapath programs.
 
@@ -369,6 +416,7 @@ class CalicoRunner(NativeProcessRunner):
                 startup_timeout_s=self.etcd_startup_timeout_s,
             ).start()
             self._run_startup()
+            self._set_node_bgp_ipv4()
             self._register_host_endpoint()
             prog_ids = super().start()
         except Exception:
