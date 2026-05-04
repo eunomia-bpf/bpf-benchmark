@@ -328,6 +328,88 @@ fn wide_load_alignment_skip_reason(site: &RewriteSite) -> Option<String> {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// BTF struct pointer safety
+// ═══════════════════════════════════════════════════════════════════
+
+/// Returns `true` if a verifier `reg_type` string indicates a BTF struct
+/// pointer type whose field boundaries the verifier enforces.
+///
+/// The BPF verifier ensures that loads from BTF struct pointers are contained
+/// within a single struct member.  Byte-by-byte loads (BPF_B) each consume one
+/// byte and always fit within any member ≥ 1 byte.  A wider merged load
+/// (BPF_H/W/DW) may span multiple consecutive members, which the verifier
+/// rejects with EACCES even though every individual byte load was accepted.
+///
+/// This check identifies reg_type strings that the verifier treats as BTF struct
+/// pointers.  Safe types for wide loads (scalar, fp, map_value, pkt, ctx, mem,
+/// buf, ringbuf_mem, map_key, pkt_meta) are not matched.
+fn is_btf_struct_ptr_type(reg_type: &str) -> bool {
+    // Kernel verifier emits btf pointer registers as:
+    //   "ptr_to_btf_id"         – generic trusted BTF pointer (older kernels)
+    //   "trusted_ptr_<struct>"  – typed trusted pointer (newer kernels)
+    //   "percpu_ptr_<struct>"   – per-CPU pointer
+    //   "rdonly_untrusted_mem"  – read-only trusted pointer (sz > 0)
+    //   "untrusted_ptr_<struct>"
+    // None of these are whitelisted below, so they all fall through to `true`.
+    //
+    // Whitelisted (safe for wide loads): these types do NOT enforce field
+    // boundaries.
+    let safe = matches!(
+        reg_type,
+        "scalar" | "fp" | "map_value" | "map_key" | "pkt" | "pkt_meta"
+            | "ctx" | "mem" | "buf" | "ringbuf_mem" | "iter"
+    )
+    // Additionally handle types that start with known-safe prefixes (e.g.,
+    // "scalar" with parenthesized attributes is still a scalar).
+        || reg_type.starts_with("scalar")
+        || reg_type.starts_with("fp");
+    !safe
+}
+
+// ── Per-PC register type oracle ──────────────────────────────────────
+
+/// Returns `true` if the verifier states show that `reg` at or before `pc`
+/// holds a BTF struct pointer whose field boundaries are enforced.
+///
+/// Scans verifier state entries whose PC ≤ `pc` to find the most recent type
+/// assignment for the register.  If the verifier shows a BTF struct pointer,
+/// wide loads are unsafe.
+///
+/// Returns `false` (safe to widen) when:
+///   - No verifier states are available (offline snapshot absent).
+///   - The register is not mentioned in any state at or before `pc`.
+///   - The register has a safe type (scalar, fp, map_value, pkt, etc.).
+fn base_reg_is_btf_ptr_from_states(reg: u8, site_pc: usize, verifier_states: &[VerifierInsn]) -> bool {
+    if verifier_states.is_empty() {
+        return false;
+    }
+
+    // Walk all verifier state entries at or before site_pc and look for a
+    // mention of `reg`.  We take the one with the highest PC (closest to the
+    // site) as the definitive type; ties are broken conservatively (BTF wins).
+    let mut best_pc: Option<usize> = None;
+    let mut best_type: Option<String> = None;
+
+    for state in verifier_states {
+        if state.pc > site_pc {
+            continue;
+        }
+        if let Some(reg_state) = state.regs.get(&reg) {
+            let is_newer = best_pc.map_or(true, |bp| state.pc > bp);
+            let is_same_pc_btf = best_pc.map_or(false, |bp| {
+                state.pc == bp && is_btf_struct_ptr_type(&reg_state.reg_type)
+            });
+            if is_newer || is_same_pc_btf {
+                best_pc = Some(state.pc);
+                best_type = Some(reg_state.reg_type.clone());
+            }
+        }
+    }
+
+    best_type.as_deref().is_some_and(is_btf_struct_ptr_type)
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // BpfPass implementation
 // ═══════════════════════════════════════════════════════════════════
 
@@ -516,6 +598,43 @@ impl BpfPass for WideMemPass {
                         reason: format!(
                             "likely packet pointer r{} in XDP/TC prog (prog_type={})",
                             base_reg, ctx.prog_type
+                        ),
+                    });
+                    continue;
+                }
+            }
+
+            // Skip sites where the base register is a BTF struct pointer.
+            //
+            // The BPF verifier enforces that loads from BTF struct pointers
+            // (trusted_ptr_<struct>, ptr_to_btf_id, etc.) are contained within a
+            // single struct member.  Individual byte loads (BPF_B) always fit within
+            // any member ≥ 1 byte, but a merged wide load (BPF_H/W/DW) can span
+            // consecutive members, causing the verifier to reject the program with
+            // EACCES.  Example: cilium prog 141 loading `bpf_prog.pages` (u32 at
+            // offset 0) and the adjacent u32 cannot be merged into a u64 load
+            // because that crosses the `pages` field boundary.
+            //
+            // When verifier states are available (provided via log_level=2 output
+            // from a prior BPF_PROG_REJIT call), check the base register type at
+            // the site's start PC.  If it is a BTF struct pointer, skip the merge.
+            // When no states are available, fall through to allow the merge (the
+            // verifier itself will reject if needed).
+            {
+                let base_reg = site.get_binding("base_reg").unwrap_or(-1);
+                if base_reg >= 0
+                    && base_reg_is_btf_ptr_from_states(
+                        base_reg as u8,
+                        site.start_pc,
+                        program.verifier_states.as_ref(),
+                    )
+                {
+                    skipped.push(SkipReason {
+                        pc: site.start_pc,
+                        reason: format!(
+                            "base register r{} is a BTF struct pointer; \
+                             wide load may cross field boundary",
+                            base_reg
                         ),
                     });
                     continue;
