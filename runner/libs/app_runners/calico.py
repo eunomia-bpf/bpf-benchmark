@@ -333,15 +333,25 @@ class CalicoRunner(NativeProcessRunner):
                     "set node bgp ipv4Address manually or use the benchmark interface"
                 )
             ip_cidr = match.group(1)
+        node_yaml = (
+            "apiVersion: projectcalico.org/v3\n"
+            "kind: Node\n"
+            "metadata:\n"
+            f"  name: {self.node_name}\n"
+            "spec:\n"
+            "  bgp:\n"
+            f"    ipv4Address: {ip_cidr}\n"
+        )
+        assert self.runtime_dir is not None
+        node_path = self.runtime_dir / "node.yaml"
+        node_path.write_text(node_yaml)
         run_command(
             [
                 str(calicoctl),
-                "patch",
+                "apply",
                 "--allow-version-mismatch",
-                "node",
-                self.node_name,
-                "--patch",
-                f'{{"spec":{{"bgp":{{"ipv4Address":"{ip_cidr}"}}}}}}',
+                "-f",
+                str(node_path),
             ],
             env=self._merged_env(self._startup_env()),
             timeout=30,
