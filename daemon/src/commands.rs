@@ -898,13 +898,22 @@ where
             let pass_bytes = fs::read(&pass_output)
                 .with_context(|| format!("read {}", pass_output.display()))?;
             let pass_insns = decode_insns(&pass_bytes, pass_output.to_string_lossy().as_ref())?;
-            let rejit_report = match kernel.rejit(
+            let tid = unsafe { libc::syscall(libc::SYS_gettid) };
+            let t0 = std::time::Instant::now();
+            eprintln!("[trace] tid={tid} REJIT_ENTER prog={prog_id} pass={pass}");
+            let rejit_result = kernel.rejit(
                 prog_id,
                 &snapshot,
                 &pass_insns,
                 &fd_array,
                 &pass_verifier_log,
-            ) {
+            );
+            eprintln!(
+                "[trace] tid={tid} REJIT_EXIT prog={prog_id} pass={pass} ok={} elapsed_us={}",
+                rejit_result.is_ok(),
+                t0.elapsed().as_micros()
+            );
+            let rejit_report = match rejit_result {
                 Ok(report) => report,
                 Err(err) => {
                     let pass_error = workdir.path().join(format!("{stem}.rejit.err.txt"));
