@@ -4,7 +4,6 @@ import os
 import re
 import shutil
 import socket
-import tempfile
 from pathlib import Path
 from typing import Mapping
 
@@ -21,7 +20,6 @@ from ..workload import WorkloadResult, run_named_workload
 from .etcd_support import LocalEtcdSession
 from .process_support import NativeProcessRunner
 from .setup_support import optional_repo_artifact_path, pick_host_executable
-
 
 
 _BENCHMARK_IFACE_IP = BENCHMARK_IFACE_CIDR.split("/", 1)[0]
@@ -257,6 +255,18 @@ class CalicoRunner(NativeProcessRunner):
     def _startup_env(self) -> dict[str, str]:
         if not self.device:
             raise RuntimeError("CalicoRunner could not determine a network device")
+        # CALICO_NETWORKING_BACKEND=bird causes calico-node -startup to run
+        # configureAndCheckIPAddressSubnets() which auto-detects the interface IP and
+        # writes it to spec.bgp.ipv4Address in the Node resource.  Felix reads this field
+        # (via felixnodeprocessor.go) to learn the host IP (d.hostIP), which is required
+        # by bpf_ep_mgr.go:attachDataIfaceProgram() before it attaches the TC datapath
+        # programs (calico_tc_main, etc.) to the benchmark interface.
+        #
+        # With BACKEND=none, configureAndCheckIPAddressSubnets() returns immediately
+        # (startup.go:369) without writing spec.bgp.ipv4Address, so Felix never learns
+        # hostIP and never attaches TC programs.  BACKEND=bird is the correct choice for
+        # bare-metal when BPF dataplane is needed.  BIRD daemon itself does not need to
+        # run; Felix only requires the Node resource to have a valid bgp.ipv4Address.
         return {
             "DATASTORE_TYPE": "etcdv3",
             "ETCD_ENDPOINTS": self._etcd_client_url(),
@@ -268,7 +278,7 @@ class CalicoRunner(NativeProcessRunner):
             "IP": "autodetect",
             "IP_AUTODETECTION_METHOD": f"interface={self.device}",
             "NO_DEFAULT_POOLS": "true",
-            "CALICO_NETWORKING_BACKEND": "none",
+            "CALICO_NETWORKING_BACKEND": "bird",
         }
 
     def _etcd_client_url(self) -> str:
@@ -300,63 +310,6 @@ class CalicoRunner(NativeProcessRunner):
             if binary is None:
                 continue
             run_command([binary, *command[1:]], check=False, timeout=20)
-
-    def _set_node_bgp_ipv4(self) -> None:
-        """Patch the local Calico Node resource to set spec.bgp.ipv4Address.
-
-        calico-node -startup with CALICO_NETWORKING_BACKEND=none skips writing the BGP
-        IPv4 address into the Node resource (startup.go:configureAndCheckIPAddressSubnets
-        returns early when backend=none).  Felix's felixnodeprocessor.go converts
-        node.Spec.BGP.IPv4Address into a HostIPKey update, which is the only way Felix
-        learns d.hostIP.  Without hostIP, bpf_ep_mgr.go:attachDataIfaceProgram() returns
-        "unknown host IP" and the main TC datapath programs (calico_tc_main) are never
-        attached to the interface, regardless of whether a HostEndpoint is registered.
-
-        Patching the node with the interface IP after -startup completes gives Felix the
-        host IP it needs to proceed with TC program attachment.
-        """
-        calicoctl = _resolve_calicoctl()
-        iface = self.device or BENCHMARK_IFACE
-        if is_benchmark_interface(iface):
-            ip_cidr = BENCHMARK_IFACE_CIDR
-        else:
-            # For non-benchmark interfaces derive IP from the interface itself.
-            import subprocess as _subprocess
-            result = _subprocess.run(
-                ["ip", "-4", "-o", "addr", "show", "dev", iface],
-                capture_output=True,
-                text=True,
-            )
-            match = re.search(r"inet\s+(\S+)", result.stdout)
-            if not match:
-                raise RuntimeError(
-                    f"Cannot determine IPv4 address for interface {iface}; "
-                    "set node bgp ipv4Address manually or use the benchmark interface"
-                )
-            ip_cidr = match.group(1)
-        node_yaml = (
-            "apiVersion: projectcalico.org/v3\n"
-            "kind: Node\n"
-            "metadata:\n"
-            f"  name: {self.node_name}\n"
-            "spec:\n"
-            "  bgp:\n"
-            f"    ipv4Address: {ip_cidr}\n"
-        )
-        assert self.runtime_dir is not None
-        node_path = self.runtime_dir / "node.yaml"
-        node_path.write_text(node_yaml)
-        run_command(
-            [
-                str(calicoctl),
-                "apply",
-                "--allow-version-mismatch",
-                "-f",
-                str(node_path),
-            ],
-            env=self._merged_env(self._startup_env()),
-            timeout=30,
-        )
 
     def _apply_allow_policy(self) -> None:
         """Apply a GlobalNetworkPolicy that allows all ingress/egress for the benchmark HEP.
@@ -495,7 +448,8 @@ class CalicoRunner(NativeProcessRunner):
                 startup_timeout_s=self.etcd_startup_timeout_s,
             ).start()
             self._run_startup()
-            self._set_node_bgp_ipv4()
+            # BACKEND=bird: calico-node -startup auto-wrote spec.bgp.ipv4Address into
+            # the Node resource so Felix will learn hostIP from etcd without any patch.
             self._apply_allow_policy()
             self._register_host_endpoint()
             prog_ids = super().start()
@@ -520,3 +474,4 @@ class CalicoRunner(NativeProcessRunner):
         # _ensure_benchmark_interface() recreates it from scratch on the next start().
         if is_benchmark_interface(self.device):
             _delete_link_if_exists(BENCHMARK_IFACE)
+        run_command(["nft", "delete", "table", "ip", "calico"], check=False, timeout=10)
