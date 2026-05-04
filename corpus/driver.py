@@ -513,15 +513,6 @@ def _build_app_result_from_lifecycle(
             rejit_measurement=rejit_measurement,
         )
 
-    apply_error = str(apply_result.get("error") or "").strip() if isinstance(apply_result, Mapping) else ""
-    if apply_error:
-        return _build_app_error_result(
-            app,
-            error=apply_error,
-            baseline_measurement=baseline_measurement,
-            apply_result=apply_result,
-            rejit_measurement=rejit_measurement,
-        )
     if baseline_measurement is None:
         return _build_app_error_result(
             app,
