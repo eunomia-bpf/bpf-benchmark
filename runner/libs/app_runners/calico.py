@@ -26,6 +26,7 @@ from .setup_support import optional_repo_artifact_path, pick_host_executable
 
 _BENCHMARK_IFACE_IP = BENCHMARK_IFACE_CIDR.split("/", 1)[0]
 _BENCHMARK_HEP_NAME = "bpfbench-hep"
+_BENCHMARK_GNP_NAME = "bpfbench-allow-all"
 
 
 def _runner_hostname() -> str:
@@ -357,6 +358,50 @@ class CalicoRunner(NativeProcessRunner):
             timeout=30,
         )
 
+    def _apply_allow_policy(self) -> None:
+        """Apply a GlobalNetworkPolicy that allows all ingress/egress for the benchmark HEP.
+
+        Calico HostEndpoints enforce a default-deny policy: without an explicit allow rule,
+        all traffic through the HEP is dropped.  wrk runs in the root namespace and sends
+        packets EGRESS through bpfbench0 to the HTTP server in bpfbenchns; Felix's TC
+        datapath attached to bpfbench0 would drop every packet without this allow policy.
+
+        The policy uses a label selector matching the 'benchmark: "true"' label applied to
+        the HostEndpoint.  It must be applied BEFORE _register_host_endpoint() so that Felix
+        reads an allow policy alongside the HEP when it reconciles.
+        """
+        calicoctl = _resolve_calicoctl()
+        gnp_yaml = (
+            "apiVersion: projectcalico.org/v3\n"
+            "kind: GlobalNetworkPolicy\n"
+            "metadata:\n"
+            f"  name: {_BENCHMARK_GNP_NAME}\n"
+            "spec:\n"
+            "  selector: benchmark == \"true\"\n"
+            "  order: 0\n"
+            "  ingress:\n"
+            "    - action: Allow\n"
+            "  egress:\n"
+            "    - action: Allow\n"
+            "  types:\n"
+            "    - Ingress\n"
+            "    - Egress\n"
+        )
+        assert self.runtime_dir is not None
+        gnp_path = self.runtime_dir / "gnp.yaml"
+        gnp_path.write_text(gnp_yaml)
+        run_command(
+            [
+                str(calicoctl),
+                "apply",
+                "--allow-version-mismatch",
+                "-f",
+                str(gnp_path),
+            ],
+            env=self._merged_env(self._startup_env()),
+            timeout=30,
+        )
+
     def _register_host_endpoint(self) -> None:
         """Register a HostEndpoint in etcd so Felix attaches the main TC datapath programs.
 
@@ -364,6 +409,9 @@ class CalicoRunner(NativeProcessRunner):
         from_hep_debug.bpf.o / to_hep_debug.bpf.o when the interface has a corresponding
         HostEndpoint entry in hostIfaceToEpMap.  Without it Felix only loads 6 probe/aux
         programs and never attaches the main datapath TC programs.
+
+        The HEP carries a 'benchmark: "true"' label so that the GlobalNetworkPolicy applied
+        by _apply_allow_policy() selects it and permits all ingress/egress.
         """
         calicoctl = _resolve_calicoctl()
         iface = self.device or BENCHMARK_IFACE
@@ -373,6 +421,8 @@ class CalicoRunner(NativeProcessRunner):
             "kind: HostEndpoint\n"
             "metadata:\n"
             f"  name: {_BENCHMARK_HEP_NAME}\n"
+            "  labels:\n"
+            "    benchmark: \"true\"\n"
             "spec:\n"
             f"  interfaceName: {iface}\n"
             f"  node: {self.node_name}\n"
@@ -395,7 +445,7 @@ class CalicoRunner(NativeProcessRunner):
         )
 
     def _delete_host_endpoint(self) -> None:
-        """Delete the benchmark HostEndpoint from etcd during teardown."""
+        """Delete the benchmark HostEndpoint and allow policy from etcd during teardown."""
         try:
             calicoctl = _resolve_calicoctl()
         except RuntimeError:
@@ -407,6 +457,18 @@ class CalicoRunner(NativeProcessRunner):
                 "--allow-version-mismatch",
                 "hostendpoint",
                 _BENCHMARK_HEP_NAME,
+            ],
+            env=self._merged_env(self._startup_env()),
+            check=False,
+            timeout=15,
+        )
+        run_command(
+            [
+                str(calicoctl),
+                "delete",
+                "--allow-version-mismatch",
+                "globalnetworkpolicy",
+                _BENCHMARK_GNP_NAME,
             ],
             env=self._merged_env(self._startup_env()),
             check=False,
@@ -427,6 +489,7 @@ class CalicoRunner(NativeProcessRunner):
             ).start()
             self._run_startup()
             self._set_node_bgp_ipv4()
+            self._apply_allow_policy()
             self._register_host_endpoint()
             prog_ids = super().start()
         except Exception:
@@ -444,3 +507,9 @@ class CalicoRunner(NativeProcessRunner):
         if self.runtime_dir is not None:
             shutil.rmtree(self.runtime_dir, ignore_errors=True)
             self.runtime_dir = None
+        # Remove the benchmark veth interface so Felix's orphaned TC BPF programs
+        # (which persist after process death because TC attachment is not process-scoped)
+        # do not interfere with subsequent app runners (e.g. cilium/agent).
+        # _ensure_benchmark_interface() recreates it from scratch on the next start().
+        if is_benchmark_interface(self.device):
+            _delete_link_if_exists(BENCHMARK_IFACE)

@@ -11,6 +11,7 @@ from ..benchmark_net import (
     BENCHMARK_NETNS,
     BENCHMARK_PEER_IFACE,
     BENCHMARK_PEER_IFACE_CIDR,
+    is_benchmark_interface,
 )
 from ..workload import WorkloadResult, run_named_workload
 from .etcd_support import LocalEtcdSession
@@ -222,3 +223,9 @@ class CiliumRunner(NativeProcessRunner):
             self.runtime_dir = None
         self._bpf_root = None
         self._state_dir = None
+        # Remove the benchmark veth so Cilium's orphaned TC BPF programs do not persist
+        # into the next benchmark app's run.  TC attachments survive process death because
+        # they are scoped to the network interface, not the process.
+        # _ensure_benchmark_interface() recreates the veth from scratch on the next start().
+        if is_benchmark_interface(self.device):
+            _delete_link_if_exists(BENCHMARK_IFACE)
