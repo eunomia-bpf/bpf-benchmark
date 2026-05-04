@@ -58,7 +58,7 @@ if ! docker info >/dev/null 2>&1; then
         rm -f "$docker_disk"
         truncate -s "$docker_disk_size" "$docker_disk"
         mkfs.ext4 -F -q "$docker_disk"
-        mount -o loop "$docker_disk" "$docker_root"
+        mount -o loop,discard "$docker_disk" "$docker_root"
     fi
     mkdir -p "$docker_root/data" "$docker_root/exec"
     dockerd \\
