@@ -11,7 +11,7 @@ from typing import Any, Mapping, Sequence
 from urllib.error import URLError
 from urllib.request import urlopen
 
-from .. import ROOT_DIR, run_command, tail_text, which
+from .. import ROOT_DIR, run_command, tail_text
 from ..agent import (
     bpftool_prog_show_records,
     start_agent,
@@ -21,18 +21,9 @@ from ..agent import (
 from ..workload import (
     WorkloadResult,
     resolve_workload_tool,
-    run_block_io_load,
-    run_connect_storm,
-    run_file_open_load,
     run_named_workload,
     run_network_load,
-    run_open_storm,
     run_scheduler_load,
-    run_tracee_default_load,
-    run_tracee_io_vector_mix_workload,
-    run_tracee_module_load_loop_workload,
-    run_tracee_system_edge_mix_workload,
-    run_user_exec_loop,
 )
 from .base import AppRunner
 from .process_support import AgentSession, wait_until_program_set_stable
@@ -238,31 +229,11 @@ def _format_launch_failure(command: Sequence[str], proc: subprocess.Popen[str] |
 
 def run_tracee_workload(spec: Mapping[str, object], duration_s: int) -> WorkloadResult:
     kind = str(spec.get("kind", spec.get("name", "")))
-    if kind.startswith("stress_ng_") or kind == "fio_randrw":
+    if kind.startswith("stress_ng_") or kind in ("fio_randrw", "fio"):
         return run_named_workload(kind, duration_s)
-    if kind == "tracee_default":
-        return run_tracee_default_load(duration_s)
-    if kind == "tracee_system_edge_mix":
-        return run_tracee_system_edge_mix_workload(duration_s)
-    if kind == "tracee_module_load_loop":
-        return run_tracee_module_load_loop_workload(duration_s)
-    if kind == "tracee_io_vector_mix":
-        return run_tracee_io_vector_mix_workload(duration_s)
-    if kind == "block_io":
-        return run_block_io_load(duration_s)
-    if kind == "exec_storm":
-        return run_user_exec_loop(duration_s)
-    if kind in {"file_io", "file_open"}:
-        if which("stress-ng") is None:
-            raise RuntimeError("stress-ng is required for the Tracee file_open workload")
-        return run_file_open_load(duration_s)
-    if kind == "open_storm":
-        return run_open_storm(duration_s)
-    if kind in {"network", "connect_storm"}:
-        if kind == "network":
-            resolve_workload_tool("wrk")
-            return run_network_load(duration_s)
-        return run_connect_storm(duration_s)
+    if kind == "network":
+        resolve_workload_tool("wrk")
+        return run_network_load(duration_s)
     if kind == "scheduler":
         return run_scheduler_load(duration_s)
     raise RuntimeError(f"unsupported workload kind: {kind}")
