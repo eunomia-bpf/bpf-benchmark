@@ -219,6 +219,8 @@ class CiliumRunner(NativeProcessRunner):
             self.etcd_session.close()
             self.etcd_session = None
         if self.runtime_dir is not None:
+            if self._bpf_root is not None and self._bpf_root.is_mount():
+                run_command(["umount", str(self._bpf_root)], check=False, timeout=10)
             shutil.rmtree(self.runtime_dir, ignore_errors=True)
             self.runtime_dir = None
         self._bpf_root = None
