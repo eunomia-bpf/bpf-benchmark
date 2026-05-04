@@ -366,9 +366,16 @@ class CalicoRunner(NativeProcessRunner):
         packets EGRESS through bpfbench0 to the HTTP server in bpfbenchns; Felix's TC
         datapath attached to bpfbench0 would drop every packet without this allow policy.
 
-        The policy uses a label selector matching the 'benchmark: "true"' label applied to
-        the HostEndpoint.  It must be applied BEFORE _register_host_endpoint() so that Felix
-        reads an allow policy alongside the HEP when it reconciles.
+        The policy uses selector "all()" which unconditionally matches every endpoint
+        (including HostEndpoints) without depending on label propagation timing.  A
+        label-based selector such as 'benchmark == "true"' requires the calc graph label
+        index to process the HEP labels before Felix computes tiers, and any ordering
+        race leaves HostNormalTiers empty → pol_prog_builder writes a final deny rule →
+        packets dropped.  "all()" is exactly what Felix's own BPF FV tests (xdp_test.go
+        allowAllPolicy) use to guarantee connectivity through HEPs.
+
+        It must be applied BEFORE _register_host_endpoint() so that Felix reads the allow
+        policy alongside the HEP when it reconciles.
         """
         calicoctl = _resolve_calicoctl()
         gnp_yaml = (
@@ -377,7 +384,7 @@ class CalicoRunner(NativeProcessRunner):
             "metadata:\n"
             f"  name: {_BENCHMARK_GNP_NAME}\n"
             "spec:\n"
-            "  selector: benchmark == \"true\"\n"
+            "  selector: all()\n"
             "  order: 0\n"
             "  ingress:\n"
             "    - action: Allow\n"
