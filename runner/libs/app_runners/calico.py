@@ -4,6 +4,7 @@ import os
 import re
 import shutil
 import socket
+import tempfile
 from pathlib import Path
 from typing import Mapping
 
@@ -19,12 +20,33 @@ from ..benchmark_net import (
 from ..workload import WorkloadResult, run_named_workload
 from .etcd_support import LocalEtcdSession
 from .process_support import NativeProcessRunner
-from .setup_support import optional_repo_artifact_path
+from .setup_support import optional_repo_artifact_path, pick_host_executable
 
+
+
+_BENCHMARK_IFACE_IP = BENCHMARK_IFACE_CIDR.split("/", 1)[0]
+_BENCHMARK_HEP_NAME = "bpfbench-hep"
 
 
 def _runner_hostname() -> str:
     return socket.gethostname().strip() or "localhost"
+
+
+def _resolve_calicoctl() -> Path:
+    candidate = pick_host_executable(
+        optional_repo_artifact_path("calico", "bin", "calicoctl"),
+        ROOT_DIR / "corpus" / "build" / "calico" / "bin" / "calicoctl",
+        ROOT_DIR / "runner" / "repos" / "calico" / "bin" / "calicoctl",
+        Path("/usr/bin/calicoctl"),
+        Path("/usr/local/bin/calicoctl"),
+    )
+    if candidate is None:
+        raise RuntimeError(
+            "calicoctl binary not found; expected at corpus/build/calico/bin/calicoctl, "
+            f"{ROOT_DIR}/runner/repos/calico/bin/calicoctl, /usr/bin/calicoctl, "
+            "or BPFREJIT_REPO_ARTIFACT_ROOT/calico/bin/calicoctl"
+        )
+    return candidate
 
 
 def _anchored_iface_regex(interface: str) -> str:
@@ -278,6 +300,62 @@ class CalicoRunner(NativeProcessRunner):
                 continue
             run_command([binary, *command[1:]], check=False, timeout=20)
 
+    def _register_host_endpoint(self) -> None:
+        """Register a HostEndpoint in etcd so Felix attaches the main TC datapath programs.
+
+        Felix's bpf_ep_mgr.go:attachDataIfaceProgram() only attaches programs like
+        from_hep_debug.bpf.o / to_hep_debug.bpf.o when the interface has a corresponding
+        HostEndpoint entry in hostIfaceToEpMap.  Without it Felix only loads 6 probe/aux
+        programs and never attaches the main datapath TC programs.
+        """
+        calicoctl = _resolve_calicoctl()
+        iface = self.device or BENCHMARK_IFACE
+        ip_addr = _BENCHMARK_IFACE_IP if is_benchmark_interface(iface) else ""
+        hep_yaml = (
+            "apiVersion: projectcalico.org/v3\n"
+            "kind: HostEndpoint\n"
+            "metadata:\n"
+            f"  name: {_BENCHMARK_HEP_NAME}\n"
+            "spec:\n"
+            f"  interfaceName: {iface}\n"
+            f"  node: {self.node_name}\n"
+        )
+        if ip_addr:
+            hep_yaml += f"  expectedIPs:\n  - {ip_addr}\n"
+        assert self.runtime_dir is not None
+        hep_path = self.runtime_dir / "hep.yaml"
+        hep_path.write_text(hep_yaml)
+        run_command(
+            [
+                str(calicoctl),
+                "apply",
+                "--allow-version-mismatch",
+                "-f",
+                str(hep_path),
+            ],
+            env=self._merged_env(self._startup_env()),
+            timeout=30,
+        )
+
+    def _delete_host_endpoint(self) -> None:
+        """Delete the benchmark HostEndpoint from etcd during teardown."""
+        try:
+            calicoctl = _resolve_calicoctl()
+        except RuntimeError:
+            return
+        run_command(
+            [
+                str(calicoctl),
+                "delete",
+                "--allow-version-mismatch",
+                "hostendpoint",
+                _BENCHMARK_HEP_NAME,
+            ],
+            env=self._merged_env(self._startup_env()),
+            check=False,
+            timeout=15,
+        )
+
     def start(self) -> list[int]:
         if self.etcd_session is not None:
             raise RuntimeError(f"{type(self).__name__} is already running")
@@ -291,6 +369,7 @@ class CalicoRunner(NativeProcessRunner):
                 startup_timeout_s=self.etcd_startup_timeout_s,
             ).start()
             self._run_startup()
+            self._register_host_endpoint()
             prog_ids = super().start()
         except Exception:
             self.stop()
@@ -301,6 +380,7 @@ class CalicoRunner(NativeProcessRunner):
     def stop(self) -> None:
         super().stop()
         if self.etcd_session is not None:
+            self._delete_host_endpoint()
             self.etcd_session.close()
             self.etcd_session = None
         if self.runtime_dir is not None:

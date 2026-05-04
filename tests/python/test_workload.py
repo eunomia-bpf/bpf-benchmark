@@ -66,14 +66,14 @@ class WorkloadContractTests(unittest.TestCase):
         self.assertNotIn("timerfd", workload._STRESS_NG_WORKLOAD_STRESSORS["stress_ng_os_io_network"])
         self.assertNotIn("timerfd", benchmark_catalog.TRACEE_E2E_WORKLOADS[0]["command"])
 
-    def test_interface_bound_network_client_runs_inside_benchmark_netns(self) -> None:
-        with mock.patch.object(workload, "which", return_value="/sbin/ip"):
-            command = workload._network_client_command(["wrk", "http://198.18.0.2:18080/"], workload.BENCHMARK_IFACE)
+    def test_interface_bound_network_client_runs_in_root_namespace(self) -> None:
+        command = workload._network_client_command(["wrk", "http://198.18.0.2:18080/"], workload.BENCHMARK_IFACE)
 
-        self.assertEqual(
-            command,
-            ["/sbin/ip", "netns", "exec", workload.BENCHMARK_NETNS, "wrk", "http://198.18.0.2:18080/"],
-        )
+        # Client must NOT be wrapped in `ip netns exec bpfbenchns` so that HTTP
+        # traffic crosses bpfbench0 and hits TC BPF programs (cilium/calico datapath).
+        self.assertEqual(command, ["wrk", "http://198.18.0.2:18080/"])
+        self.assertNotIn("netns", command)
+        self.assertNotIn(workload.BENCHMARK_NETNS, command)
 
     def test_loopback_network_client_stays_in_current_namespace(self) -> None:
         command = workload._network_client_command(["wrk", "http://127.0.0.1:18080/"], None)
@@ -98,7 +98,7 @@ class WorkloadContractTests(unittest.TestCase):
                 conn.close()
         self.assertIn('protocol_version = "HTTP/1.1"', workload._NAMESPACED_HTTP_SERVER_SCRIPT)
 
-    def test_network_load_error_reports_actual_client_namespace_command(self) -> None:
+    def test_network_load_error_reports_actual_client_command(self) -> None:
         completed = subprocess.CompletedProcess(
             args=[],
             returncode=1,
@@ -108,10 +108,9 @@ class WorkloadContractTests(unittest.TestCase):
         with (
             mock.patch.object(workload, "resolve_workload_tool", return_value="wrk"),
             mock.patch.object(workload, "_network_http_server", return_value=_FakeHttpServer()),
-            mock.patch.object(workload, "which", return_value="/sbin/ip"),
             mock.patch.object(workload, "run_command", return_value=completed),
         ):
-            with self.assertRaisesRegex(RuntimeError, "/sbin/ip netns exec bpfbenchns wrk"):
+            with self.assertRaisesRegex(RuntimeError, r"wrk.*198\.18\.0\.2"):
                 workload.run_network_load(1, network_device=workload.BENCHMARK_IFACE)
 
     def test_calico_network_workload_passes_benchmark_device(self) -> None:

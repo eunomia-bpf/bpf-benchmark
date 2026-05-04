@@ -2418,10 +2418,11 @@ def _network_client_command(command: list[str], network_device: str | None = Non
             f"interface-bound network workload only supports benchmark interface {BENCHMARK_IFACE}; "
             f"got {normalized_device}"
         )
-    ip_binary = which("ip")
-    if ip_binary is None:
-        raise RuntimeError("ip is required for interface-bound network workloads")
-    return [ip_binary, "netns", "exec", BENCHMARK_NETNS, *command]
+    # Run the client in the root network namespace so traffic crosses the bpfbench0
+    # veth and hits TC BPF programs attached there (cilium/calico datapath).
+    # The HTTP server stays inside bpfbenchns (see _network_http_server), so packets
+    # travel: root-ns client → bpfbench0 → bpfbench1/bpfbenchns → server.
+    return list(command)
 
 
 def _render_command(command: Sequence[str]) -> str:
