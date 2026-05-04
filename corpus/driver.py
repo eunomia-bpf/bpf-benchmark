@@ -813,6 +813,7 @@ def run_suite(
                         [session],
                         samples=samples,
                     )
+                    wait_for_suite_quiescence()
                     fatal_error = str(app_fatal_error or "")
                     lifecycle = lifecycle_results[0] if lifecycle_results else None
                     result = _build_app_result_from_lifecycle(
