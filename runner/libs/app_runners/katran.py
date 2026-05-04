@@ -18,7 +18,7 @@ from .process_support import ManagedProcessSession, wait_until_program_set_stabl
 from .setup_support import repo_artifact_root
 
 DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S = 30
-DEFAULT_KATRAN_STOP_TIMEOUT_S = 10.0
+DEFAULT_KATRAN_STOP_TIMEOUT_S = 20.0
 DEFAULT_KATRAN_STOP_SETTLE_S = 2.0
 KATRAN_REQUIRED_MAP_NAMES = ("vip_map", "reals", "ch_rings", "ctl_array")
 DEFAULT_IP_CANDIDATES = (
