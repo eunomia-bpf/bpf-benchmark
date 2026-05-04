@@ -136,6 +136,8 @@ pub(crate) struct OptimizeOneResult {
     pub passes: Vec<PassDetail>,
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub inlined_map_entries: Vec<InlinedMapEntry>,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub skipped_maps: Vec<SkippedMapEntry>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error_message: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -167,6 +169,7 @@ impl OptimizeOneResult {
             },
             passes: Vec::new(),
             inlined_map_entries: Vec::new(),
+            skipped_maps: Vec::new(),
             error_message: Some(message.into()),
             failure_artifacts: None,
         }
@@ -188,6 +191,15 @@ pub(crate) struct InlinedMapEntry {
     pub map_id: u32,
     pub key_hex: String,
     pub value_hex: String,
+}
+
+/// A map whose keys could not be fully scanned during map_inline value preparation.
+/// The map is excluded from map-value side-input (fewer inline opportunities) but the
+/// pass and program are NOT skipped — this is a capability limitation, not an error.
+#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
+pub(crate) struct SkippedMapEntry {
+    pub map_id: u32,
+    pub reason: String,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -772,8 +784,9 @@ where
             .iter()
             .any(|pass| canonical_pass(pass) == "map_inline");
 
+        let mut skipped_maps = Vec::<SkippedMapEntry>::new();
         if wants_map_inline {
-            write_live_map_values(
+            skipped_maps = write_live_map_values(
                 &snapshot.maps,
                 &map_values_json,
                 &mut open_map_fd,
@@ -1013,6 +1026,7 @@ where
             },
             passes,
             inlined_map_entries,
+            skipped_maps,
             error_message,
             failure_artifacts,
         })
@@ -1148,13 +1162,14 @@ fn write_live_map_values<F, G, H>(
     open_map_fd: &mut F,
     lookup_map_value: &mut G,
     scan_map_keys: &mut H,
-) -> Result<()>
+) -> Result<Vec<SkippedMapEntry>>
 where
     F: FnMut(u32) -> Result<OwnedFd>,
     G: FnMut(&MapInfoJson, i32, &[u8]) -> Result<Option<Vec<u8>>>,
     H: FnMut(&MapInfoJson, i32) -> Result<Vec<Vec<u8>>>,
 {
     let mut entries_by_map = BTreeMap::<u32, BTreeMap<Vec<u8>, Option<Vec<u8>>>>::new();
+    let mut skipped = Vec::<SkippedMapEntry>::new();
 
     for map in maps {
         if !is_map_inlineable_map_type(map.map_type) {
@@ -1162,9 +1177,30 @@ where
         }
         let fd = open_map_fd(map.map_id)
             .with_context(|| format!("open BPF map id {} for map-inline values", map.map_id))?;
-        for key in scan_map_keys(map, fd.as_raw_fd())
-            .with_context(|| format!("scan live keys for map {}", map.map_id))?
-        {
+        let keys = match scan_map_keys(map, fd.as_raw_fd()) {
+            Ok(keys) => keys,
+            Err(err) => {
+                // A scan overflow is a known capability limitation: the kernel returns more
+                // keys than max_entries (e.g. LRU maps with concurrent inserts). Skip this
+                // map's entries so the pass can still run for other maps. Real IO/syscall
+                // errors propagate unchanged because they represent unexpected failures.
+                let reason = format!("{err:#}");
+                if reason.contains("more than max_entries") {
+                    eprintln!(
+                        "daemon: map_inline skipping map {} (scan overflow: {})",
+                        map.map_id, reason
+                    );
+                    skipped.push(SkippedMapEntry {
+                        map_id: map.map_id,
+                        reason,
+                    });
+                    continue;
+                }
+                return Err(err)
+                    .with_context(|| format!("scan live keys for map {}", map.map_id));
+            }
+        };
+        for key in keys {
             let value = lookup_map_value(map, fd.as_raw_fd(), &key).with_context(|| {
                 format!(
                     "lookup live value for map {} key {}",
@@ -1186,7 +1222,8 @@ where
         }
     }
 
-    write_map_values_snapshot(maps, &entries_by_map, output)
+    write_map_values_snapshot(maps, &entries_by_map, output)?;
+    Ok(skipped)
 }
 
 fn write_map_values_snapshot(
@@ -1959,7 +1996,7 @@ mod tests {
             },
         ];
 
-        write_live_map_values(
+        let skipped = write_live_map_values(
             &maps,
             &output,
             &mut |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
@@ -1980,11 +2017,106 @@ mod tests {
         )
         .unwrap();
 
+        assert!(skipped.is_empty());
         let json: serde_json::Value = serde_json::from_slice(&fs::read(output).unwrap()).unwrap();
         assert_eq!(json["maps"][0]["entries"][0]["key"], "01000000");
         assert_eq!(json["maps"][0]["entries"][0]["value"], "07000000");
         assert_eq!(json["maps"][1]["entries"][0]["key"], "02000000");
         assert!(json["maps"][1]["entries"][0]["value"].is_null());
+    }
+
+    /// Bug regression: an overflow on one map must not fail the whole map_inline pass.
+    /// The overflowing map is reported in `skipped_maps`; the normal map still produces entries.
+    #[test]
+    fn map_scan_overflow_skips_one_map_and_continues() {
+        let workdir = WorkDir::new("bpfrejit-daemon-overflow").unwrap();
+        let output = workdir.path().join(MAP_VALUES_FILE);
+        let maps = vec![
+            MapInfoJson {
+                map_id: 10,
+                map_type: kernel_sys::BPF_MAP_TYPE_ARRAY,
+                key_size: 4,
+                value_size: 4,
+                max_entries: 1,
+                name: "overflow_map".to_string(),
+                map_flags: 0,
+                ifindex: 0,
+                btf_id: 0,
+                btf_key_type_id: 0,
+                btf_value_type_id: 0,
+                btf_vmlinux_value_type_id: 0,
+                btf_vmlinux_id: 0,
+                map_extra: 0,
+            },
+            MapInfoJson {
+                map_id: 20,
+                map_type: kernel_sys::BPF_MAP_TYPE_HASH,
+                key_size: 4,
+                value_size: 4,
+                max_entries: 8,
+                name: "normal_map".to_string(),
+                map_flags: 0,
+                ifindex: 0,
+                btf_id: 0,
+                btf_key_type_id: 0,
+                btf_value_type_id: 0,
+                btf_vmlinux_value_type_id: 0,
+                btf_vmlinux_id: 0,
+                map_extra: 0,
+            },
+        ];
+
+        let skipped = write_live_map_values(
+            &maps,
+            &output,
+            &mut |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
+            &mut |_map, _fd, _key| Ok(Some(42u32.to_le_bytes().to_vec())),
+            &mut |map, _fd| {
+                if map.map_id == 10 {
+                    // Simulate a BPF_MAP_GET_NEXT_KEY overflow: more keys than max_entries.
+                    bail!(
+                        "BPF_MAP_GET_NEXT_KEY for map {} returned more than max_entries={}",
+                        map.map_id,
+                        map.max_entries
+                    )
+                } else {
+                    Ok(vec![5u32.to_le_bytes().to_vec()])
+                }
+            },
+        )
+        .unwrap();
+
+        // Overflow map must appear in skipped_maps with a meaningful reason.
+        assert_eq!(skipped.len(), 1);
+        assert_eq!(skipped[0].map_id, 10);
+        assert!(
+            skipped[0].reason.contains("more than max_entries"),
+            "unexpected reason: {}",
+            skipped[0].reason
+        );
+
+        // The normal map's entries must be present in the output file.
+        let json: serde_json::Value = serde_json::from_slice(&fs::read(&output).unwrap()).unwrap();
+        let map20_entries = &json["maps"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|m| m["map_id"] == 20)
+            .expect("map 20 not found")["entries"];
+        assert_eq!(map20_entries[0]["key"], "05000000");
+        assert_eq!(map20_entries[0]["value"], "2a000000");
+
+        // The overflowing map must have no entries (excluded from snapshot).
+        let map10_entries = &json["maps"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|m| m["map_id"] == 10)
+            .expect("map 10 not found")["entries"];
+        assert!(
+            map10_entries.as_array().unwrap().is_empty(),
+            "overflow map should have no entries in snapshot"
+        );
     }
 
     #[test]
@@ -2146,6 +2278,7 @@ mod tests {
             },
             passes: Vec::new(),
             inlined_map_entries: Vec::new(),
+            skipped_maps: Vec::new(),
             error_message: None,
             failure_artifacts: None,
         }

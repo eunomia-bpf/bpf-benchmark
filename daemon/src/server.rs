@@ -612,6 +612,7 @@ mod tests {
                 key_hex: "01000000".to_string(),
                 value_hex: "0b000000".to_string(),
             }],
+            skipped_maps: Vec::new(),
             error_message: None,
             failure_artifacts: None,
         };
@@ -720,6 +721,7 @@ mod tests {
             },
             passes: Vec::new(),
             inlined_map_entries: Vec::new(),
+            skipped_maps: Vec::new(),
             error_message: None,
             failure_artifacts: None,
         }
