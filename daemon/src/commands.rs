@@ -138,8 +138,6 @@ pub(crate) struct OptimizeOneResult {
     pub skipped_maps: Vec<SkippedMapEntry>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error_message: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub failure_artifacts: Option<FailureArtifacts>,
 }
 
 impl OptimizeOneResult {
@@ -162,26 +160,13 @@ impl OptimizeOneResult {
                 total_sites_applied: 0,
                 passes_executed: 0,
                 passes_changed: 0,
-                failed_pass: None,
-                committed_passes_before_failure: None,
             },
             passes: Vec::new(),
             inlined_map_entries: Vec::new(),
             skipped_maps: Vec::new(),
             error_message: Some(message.into()),
-            failure_artifacts: None,
         }
     }
-}
-
-#[derive(Clone, Debug, Serialize)]
-pub(crate) struct FailureArtifacts {
-    pub failed_pass_index: usize,
-    pub failed_pass: String,
-    pub committed_passes: usize,
-    pub verifier_log: String,
-    pub pass_error: String,
-    pub partial_failure_json: serde_json::Value,
 }
 
 #[derive(Clone, Debug, Serialize, PartialEq, Eq)]
@@ -216,21 +201,32 @@ pub(crate) struct OptimizeSummary {
     pub total_sites_applied: usize,
     pub passes_executed: usize,
     pub passes_changed: usize,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub failed_pass: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub committed_passes_before_failure: Option<usize>,
+}
+
+#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum PassStatus {
+    Ok,
+    Unchanged,
+    SkippedMissingStates,
+    FailedBpfopt,
+    FailedRejit,
 }
 
 #[derive(Clone, Debug, Serialize)]
 pub(crate) struct PassDetail {
     #[serde(rename = "pass")]
     pub pass_name: String,
+    pub status: PassStatus,
     pub changed: bool,
     pub sites_applied: usize,
     pub insns_before: usize,
     pub insns_after: usize,
     pub insn_delta: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub verifier_log: Option<String>,
 }
 
 #[derive(Clone, Debug)]
@@ -288,7 +284,6 @@ struct BpfoptPassReport {
     sites_applied: usize,
     insn_count_before: usize,
     insn_count_after: usize,
-    insn_delta: isize,
     #[serde(default)]
     map_inline_records: Vec<BpfoptMapInlineRecord>,
 }
@@ -667,13 +662,10 @@ pub(crate) fn try_apply_one(
         };
 
         let mut current_bytes = orig_bytes.clone();
-        let mut reports = Vec::new();
+        let mut committed_reports = Vec::new();
         let mut verifier_states_ready = false;
-        let mut last_rejit = false;
         let mut committed_passes = 0usize;
-        let mut partial_error = None;
-        let mut failure_artifacts = None;
-        for (idx, pass) in pass_list.iter().enumerate() {
+        let reports = run_pass_chain(&pass_list, |idx, pass| -> Result<PassDetail> {
             let stem = pass_file_stem(idx, pass);
             let pass_input = workdir.path().join(format!("{stem}.in.bin"));
             let pass_output = workdir.path().join(format!("{stem}.out.bin"));
@@ -684,22 +676,15 @@ pub(crate) fn try_apply_one(
 
             let needs_states = pass_needs_verifier_states(pass);
             if needs_states && !verifier_states_ready {
-                let (message, artifacts) = pass_failure_artifacts(
-                    prog_id,
-                    idx,
+                return pass_detail_without_report(
                     pass,
-                    committed_passes,
-                    anyhow!(
-                        "pass {pass} requires verifier states from a previous per-pass ReJIT — \
-                         insert a `noop` pass before {pass} in the pass chain to bootstrap them \
-                         (e.g. BPFREJIT_BENCH_PASSES=\"noop,{pass},...\")"
-                    ),
+                    PassStatus::SkippedMissingStates,
+                    &current_bytes,
+                    Some(format!(
+                        "pass {pass} requires verifier states from a previous successful per-pass ReJIT"
+                    )),
                     None,
-                    None,
-                )?;
-                partial_error = Some(message);
-                failure_artifacts = Some(artifacts);
-                break;
+                );
             }
             let target_arg = pass_needs_target(pass).then_some(target_json.as_path());
             let verifier_states_arg = needs_states.then_some(verifier_states_json.as_path());
@@ -727,61 +712,80 @@ pub(crate) fn try_apply_one(
             ) {
                 Ok(report) => report,
                 Err(err) => {
-                    let (message, artifacts) = pass_failure_artifacts(
-                        prog_id,
-                        idx,
+                    return pass_detail_without_report(
                         pass,
-                        committed_passes,
-                        err,
+                        PassStatus::FailedBpfopt,
+                        &current_bytes,
+                        Some(format!("{err:#}")),
                         None,
-                        None,
-                    )?;
-                    partial_error = Some(message);
-                    failure_artifacts = Some(artifacts);
-                    break;
+                    );
                 }
             };
-            let pass_bytes = fs::read(&pass_output)
-                .with_context(|| format!("read {}", pass_output.display()))?;
+            let pass_bytes = match fs::read(&pass_output) {
+                Ok(bytes) => bytes,
+                Err(err) => {
+                    return pass_detail_without_report(
+                        pass,
+                        PassStatus::FailedBpfopt,
+                        &current_bytes,
+                        Some(format!("read {}: {err}", pass_output.display())),
+                        None,
+                    );
+                }
+            };
             if !report.changed {
-                reports.push(report);
-                continue;
+                return Ok(pass_detail_from_report(
+                    &report,
+                    PassStatus::Unchanged,
+                    false,
+                    None,
+                    None,
+                ));
             }
-            let pass_insns = decode_insns(&pass_bytes, pass_output.to_string_lossy().as_ref())?;
+            let pass_insns = match decode_insns(&pass_bytes, pass_output.to_string_lossy().as_ref())
+            {
+                Ok(insns) => insns,
+                Err(err) => {
+                    return pass_detail_without_report(
+                        pass,
+                        PassStatus::FailedBpfopt,
+                        &current_bytes,
+                        Some(format!("{err:#}")),
+                        None,
+                    );
+                }
+            };
             let rejit_result = rejit_program(prog_id, &pass_insns, &fd_array, &pass_verifier_log);
             let rejit_report = match rejit_result {
                 Ok(report) => report,
                 Err(err) => {
-                    let pass_error = workdir.path().join(format!("{stem}.rejit.err.txt"));
-                    let (message, artifacts) = pass_failure_artifacts(
-                        prog_id,
-                        idx,
-                        pass,
-                        committed_passes,
-                        err,
-                        Some(&pass_error),
-                        Some(&pass_verifier_log),
-                    )?;
-                    partial_error = Some(message);
-                    failure_artifacts = Some(artifacts);
-                    break;
+                    return Ok(pass_detail_from_report(
+                        &report,
+                        PassStatus::FailedRejit,
+                        false,
+                        Some(format!("{err:#}")),
+                        verifier_log_summary_from_path(&pass_verifier_log)?,
+                    ));
                 }
             };
             write_verifier_states_for_next_pass(&verifier_states_json, &rejit_report)
                 .with_context(|| format!("write verifier states after pass {pass}"))?;
             verifier_states_ready = true;
             current_bytes = pass_bytes;
-            last_rejit = true;
             committed_passes += 1;
-            reports.push(report);
-        }
+            committed_reports.push(report.clone());
+            Ok(pass_detail_from_report(
+                &report,
+                PassStatus::Ok,
+                true,
+                None,
+                None,
+            ))
+        })?;
         fs::write(&opt_bin, &current_bytes)
             .with_context(|| format!("write {}", opt_bin.display()))?;
-        let passes = reports
-            .iter()
-            .map(pass_detail_from_report)
-            .collect::<Vec<_>>();
-        let map_inline_records = collect_map_inline_records(&reports)?;
+        let passes = reports;
+        let map_inline_records = collect_map_inline_records(&committed_reports)?;
         let inlined_map_entries =
             collect_inlined_map_entries(&map_inline_records, &map_value_snapshot)?;
         let opt_bytes = current_bytes;
@@ -793,21 +797,8 @@ pub(crate) fn try_apply_one(
                 "candidate bytecode contains kinsn call but requested passes did not require target probing"
             );
         }
-        let error_message = partial_error;
-        let status = if error_message.is_some() {
-            "error"
-        } else {
-            "ok"
-        }
-        .to_string();
-        let applied = last_rejit;
-        let failed_pass = failure_artifacts
-            .as_ref()
-            .map(|artifacts| artifacts.failed_pass.clone());
-        let committed_passes_before_failure = failure_artifacts
-            .as_ref()
-            .map(|artifacts| artifacts.committed_passes);
-
+        let status = "ok".to_string();
+        let applied = committed_passes > 0;
         let passes_applied = passes
             .iter()
             .filter(|pass| pass.changed)
@@ -833,14 +824,11 @@ pub(crate) fn try_apply_one(
                 total_sites_applied,
                 passes_executed: passes.len(),
                 passes_changed,
-                failed_pass,
-                committed_passes_before_failure,
             },
             passes,
             inlined_map_entries,
             skipped_maps,
-            error_message,
-            failure_artifacts,
+            error_message: None,
         })
     })();
 
@@ -872,47 +860,15 @@ fn pass_file_stem(index: usize, pass: &str) -> String {
     format!("pass-{index:02}-{pass}")
 }
 
-fn pass_failure_artifacts(
-    prog_id: u32,
-    pass_index: usize,
-    pass: &str,
-    committed_passes: usize,
-    err: anyhow::Error,
-    rejit_error_path: Option<&Path>,
-    verifier_log_path: Option<&Path>,
-) -> Result<(String, FailureArtifacts)> {
-    let pass_error = format!("{err:#}");
-    let message = format!(
-        "prog {prog_id} pass {pass} failed after {committed_passes} committed passes: {pass_error}"
-    );
-    let verifier_log = match verifier_log_path {
-        Some(path) => match fs::read_to_string(path) {
-            Ok(log) => kernel_sys::verifier_log_summary(&log),
-            Err(err) if err.kind() == std::io::ErrorKind::NotFound => String::new(),
-            Err(err) => return Err(err).with_context(|| format!("read {}", path.display())),
-        },
-        None => String::new(),
-    };
-    let partial_failure_json = serde_json::json!({
-        "prog_id": prog_id,
-        "failed_pass_index": pass_index,
-        "failed_pass": pass,
-        "committed_passes": committed_passes,
-        "error": message,
-        "rejit_error_path": rejit_error_path.map(|path| path.display().to_string()),
-    });
-    eprintln!("daemon: prog {prog_id} failed; failure artifacts attached to response");
-    Ok((
-        message,
-        FailureArtifacts {
-            failed_pass_index: pass_index,
-            failed_pass: pass.to_string(),
-            committed_passes,
-            verifier_log,
-            pass_error,
-            partial_failure_json,
-        },
-    ))
+fn run_pass_chain<F>(pass_list: &[String], mut run_pass: F) -> Result<Vec<PassDetail>>
+where
+    F: FnMut(usize, &str) -> Result<PassDetail>,
+{
+    let mut reports = Vec::with_capacity(pass_list.len());
+    for (idx, pass) in pass_list.iter().enumerate() {
+        reports.push(run_pass(idx, pass)?);
+    }
+    Ok(reports)
 }
 
 fn run_bpfopt_pass(
@@ -957,14 +913,58 @@ fn write_verifier_states_for_next_pass(path: &Path, report: &RejitReport) -> Res
     Ok(())
 }
 
-fn pass_detail_from_report(report: &BpfoptPassReport) -> PassDetail {
+fn pass_detail_from_report(
+    report: &BpfoptPassReport,
+    status: PassStatus,
+    changed: bool,
+    error: Option<String>,
+    verifier_log: Option<String>,
+) -> PassDetail {
+    let sites_applied = if changed { report.sites_applied } else { 0 };
+    let insns_after = if changed {
+        report.insn_count_after
+    } else {
+        report.insn_count_before
+    };
     PassDetail {
         pass_name: report.pass.clone(),
-        changed: report.changed,
-        sites_applied: report.sites_applied,
+        status,
+        changed,
+        sites_applied,
         insns_before: report.insn_count_before,
-        insns_after: report.insn_count_after,
-        insn_delta: report.insn_delta as i64,
+        insns_after,
+        insn_delta: insns_after as i64 - report.insn_count_before as i64,
+        error,
+        verifier_log,
+    }
+}
+
+fn pass_detail_without_report(
+    pass: &str,
+    status: PassStatus,
+    current_bytes: &[u8],
+    error: Option<String>,
+    verifier_log: Option<String>,
+) -> Result<PassDetail> {
+    let insn_count = insn_count_from_bytes(current_bytes, "current pass input")?;
+    Ok(PassDetail {
+        pass_name: pass.to_string(),
+        status,
+        changed: false,
+        sites_applied: 0,
+        insns_before: insn_count,
+        insns_after: insn_count,
+        insn_delta: 0,
+        error,
+        verifier_log,
+    })
+}
+
+fn verifier_log_summary_from_path(path: &Path) -> Result<Option<String>> {
+    match fs::read_to_string(path) {
+        Ok(log) => Ok(Some(kernel_sys::verifier_log_summary(&log))),
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(None),
+        Err(err) => Err(err).with_context(|| format!("read {}", path.display())),
     }
 }
 
@@ -1571,6 +1571,42 @@ mod tests {
     }
 
     #[test]
+    fn pass_chain_records_failed_rejit_and_still_attempts_later_passes() {
+        let pass_list = ["rotate", "cond_select", "endian_fusion"].map(str::to_string);
+        let mut attempted = Vec::new();
+        let reports = run_pass_chain(&pass_list, |idx, pass| {
+            attempted.push(pass.to_string());
+            let report = BpfoptPassReport {
+                pass: pass.to_string(),
+                changed: idx != 2,
+                sites_applied: 1,
+                insn_count_before: 1,
+                insn_count_after: 2,
+                map_inline_records: Vec::new(),
+            };
+            Ok(match idx {
+                0 => pass_detail_from_report(&report, PassStatus::Ok, true, None, None),
+                1 => pass_detail_from_report(
+                    &report,
+                    PassStatus::FailedRejit,
+                    false,
+                    Some("kernel rejected BPF_PROG_REJIT: EINVAL".to_string()),
+                    Some("verifier rejected candidate".to_string()),
+                ),
+                2 => pass_detail_from_report(&report, PassStatus::Unchanged, false, None, None),
+                _ => unreachable!(),
+            })
+        })
+        .unwrap();
+
+        assert_eq!(attempted, pass_list.to_vec());
+        assert_eq!(reports.len(), 3);
+        assert_eq!(reports[1].status, PassStatus::FailedRejit);
+        assert_eq!(reports[2].pass_name, "endian_fusion");
+        assert_eq!(reports[2].status, PassStatus::Unchanged);
+    }
+
+    #[test]
     fn rejit_fd_array_builder_keeps_map_fds_without_target() {
         let mut opened_maps = Vec::new();
         let fd_array = build_rejit_fd_array(&[11, 22], &HashMap::new(), &mut |map_id| {
@@ -1919,10 +1955,6 @@ mod tests {
             .collect::<BTreeMap<_, _>>();
         assert_eq!(by_id[&7].status, "ok");
         assert_eq!(by_id[&8].status, "error");
-        assert_eq!(
-            by_id[&8].failure_artifacts.as_ref().unwrap().verifier_log,
-            "batch verifier log"
-        );
         assert_eq!(by_id[&9].status, "error");
         assert!(by_id[&9]
             .error_message
@@ -1956,28 +1988,16 @@ mod tests {
                 total_sites_applied: 1,
                 passes_executed: 1,
                 passes_changed: 1,
-                failed_pass: None,
-                committed_passes_before_failure: None,
             },
             passes: Vec::new(),
             inlined_map_entries: Vec::new(),
             skipped_maps: Vec::new(),
             error_message: None,
-            failure_artifacts: None,
         }
     }
 
     fn failed_batch_result(prog_id: u32) -> OptimizeOneResult {
-        let mut result = OptimizeOneResult::error(prog_id, "batch pass failed");
-        result.failure_artifacts = Some(FailureArtifacts {
-            failed_pass_index: 1,
-            failed_pass: "rotate".to_string(),
-            committed_passes: 0,
-            verifier_log: "batch verifier log".to_string(),
-            pass_error: "EINVAL".to_string(),
-            partial_failure_json: serde_json::json!({"prog_id": prog_id}),
-        });
-        result
+        OptimizeOneResult::error(prog_id, "batch pass failed")
     }
 
     fn fake_owned_fd() -> Result<OwnedFd> {

@@ -323,7 +323,7 @@ v3 per-pass ReJIT 后，runner 边界仍是 daemon socket；bytecode transform �
 printf '{"cmd":"optimize","prog_ids":[123],"enabled_passes":["map_inline","dce"]}\n' | socat - /var/run/bpfrejit.sock
 ```
 
-默认 12-pass policy 中 `map_inline` / `const_prop` 使用前一个成功 pass 的 ReJIT verifier log 生成 `verifier-states.json`。缺失或解析不到 states 是错误，不允许空 states fallback。
+默认 12-pass policy 中 `map_inline` / `const_prop` 使用前一个成功 pass 的 ReJIT verifier log 生成 `verifier-states.json`。缺失 states 的 pass 记录 `skipped_missing_states` 并继续后续 pass；解析不到 states 仍是错误，不允许空 states fallback。
 
 ### 4.3 安全模型
 
@@ -334,7 +334,7 @@ Safety（kernel 保证）：
 
 Correctness（用户态工具链负责）：
   bpfopt pass 和 orchestration 脚本确保变换保持程序语义
-  手段：differential testing、kernel ReJIT verifier result、gradual rollout、failure artifact inspection
+  手段：differential testing、kernel ReJIT verifier result、gradual rollout、per-pass failure inspection
   用户态变换有 bug → 程序行为可能变 → 但内核安全不受影响（fail-safe）
 ```
 
@@ -379,11 +379,11 @@ Packed（sidecar pseudo-insn + CALL pair，零 argument setup，N→1 指令替�
 - **`bpfprof` 是独立 profile CLI**：PMU profiling 和 per-site branch profile 仍由外部 CLI 输出文件；daemon socket 不管理 profile lifecycle，也不把 profile path 传给 `bpfopt`。
 - **kernel-facing 功能在 daemon 进程内**：`bpfget` 读取 live program bytecode/metadata/map info；daemon 只从 `prog_info.used_maps` 构造 in-memory map fd array；每个 pass 的 ReJIT 直接调用 `kernel_sys::prog_rejit()`。
 - **daemon 是 runner socket + kernel syscall orchestrator**：保留 socket + JSON 协议，watch 新程序、维护 session 生命周期；收到 optimize 请求后只 fork+exec `bpfopt` 做 bytecode transform。
-- **主路径不 dry-run**：daemon 不调用 `BPF_PROG_LOAD` 接受 candidate。kernel 在每次 `BPF_PROG_REJIT` 内 re-verify；失败直接 surface error。
-- **verifier states 来自真实 ReJIT log**：默认 12-pass policy 包含 `map_inline` / `const_prop`。daemon 解析前一个成功 per-pass ReJIT 的 `log_level=2` verifier log 生成 `verifier-states.json`。缺失 states 或 parse 失败直接 error，不允许空结果 fallback。
+- **主路径不 dry-run**：daemon 不调用 `BPF_PROG_LOAD` 接受 candidate。kernel 在每次 `BPF_PROG_REJIT` 内 re-verify；失败记录到对应 pass detail。
+- **verifier states 来自真实 ReJIT log**：默认 12-pass policy 包含 `map_inline` / `const_prop`。daemon 解析前一个成功 per-pass ReJIT 的 `log_level=2` verifier log 生成 `verifier-states.json`。缺失 states 记录 per-pass skip 并继续；parse 失败直接 error，不允许空结果 fallback。
 - **main ReJIT 无 watchdog**：`BPF_PROG_REJIT` 是同步 syscall，daemon 不加 timeout；kernel verifier hang 会卡住 daemon。当前选择文档化接受该限制，不加 subprocess fallback。
 - **安全 pass 不在 OSDI 范围**：`speculation_barrier`、`dangerous_helper_firewall`、`live_patch` 不在默认 pipeline。
-- **结构化 per-pass 记录**：每个 program 的每个 pass 记录 `pass`/`changed`/`sites_applied`/`insn_delta` 等 CLI `--report` 事实字段；pass ReJIT errno 会保留失败 workdir 并返回 partial result。
+- **结构化 per-pass 记录**：每个 program 的每个 pass 记录 `pass`/`status`/`changed`/`sites_applied`/`insn_delta` 等事实字段；pass ReJIT errno 记录在该 pass detail 中，已成功 ReJIT 的 bytecode 保持提交。
 - **Benchmark runner Python 保持不动**：v3 迁移采用 §8 方案 B，`runner/libs/`、`corpus/`、`e2e/`、`micro/` 继续走 daemon socket + JSON 稳定边界；daemon 内部适配到 CLI。v3 迁移期只允许 runner bug fix 和 stale test data 更新。
 
 #### Fail-fast 原则：禁止 dead code / fallback / silence

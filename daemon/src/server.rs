@@ -265,9 +265,7 @@ fn optimize_response_from_outcomes(
 mod tests {
     use super::*;
 
-    use crate::commands::{
-        ApplyProgramOutcome, FailureArtifacts, OptimizeOneResult, OptimizeSummary, ProgramInfo,
-    };
+    use crate::commands::{ApplyProgramOutcome, OptimizeOneResult, OptimizeSummary, ProgramInfo};
 
     fn process_test_request(req: &serde_json::Value) -> serde_json::Value {
         // CLI_DIR global is unset in tests; from_global() returns CliConfig { cli_dir: None }.
@@ -284,15 +282,6 @@ mod tests {
     #[test]
     fn optimize_response_keeps_per_program_errors_under_top_level_ok() {
         let prog_ids = vec![10, 11, 12];
-        let mut artifact_error = OptimizeOneResult::error(11, "missing program 11");
-        artifact_error.failure_artifacts = Some(FailureArtifacts {
-            failed_pass_index: 2,
-            failed_pass: "rotate".to_string(),
-            committed_passes: 1,
-            verifier_log: "full verifier log".to_string(),
-            pass_error: "EINVAL".to_string(),
-            partial_failure_json: serde_json::json!({"failed_pass": "rotate"}),
-        });
         let outcomes = vec![
             ApplyProgramOutcome {
                 prog_id: 10,
@@ -300,7 +289,7 @@ mod tests {
             },
             ApplyProgramOutcome {
                 prog_id: 11,
-                result: artifact_error,
+                result: OptimizeOneResult::error(11, "missing program 11"),
             },
             ApplyProgramOutcome {
                 prog_id: 12,
@@ -331,11 +320,6 @@ mod tests {
             .as_str()
             .unwrap_or("")
             .contains("missing program 11"));
-        assert_eq!(
-            per_program["11"]["failure_artifacts"]["verifier_log"],
-            "full verifier log"
-        );
-        assert!(per_program["10"].get("failure_artifacts").is_none());
         assert_eq!(per_program["12"]["status"], "error");
         assert!(per_program["12"]["error_message"]
             .as_str()
@@ -362,14 +346,11 @@ mod tests {
                 total_sites_applied: 1,
                 passes_executed: 1,
                 passes_changed: 1,
-                failed_pass: None,
-                committed_passes_before_failure: None,
             },
             passes: Vec::new(),
             inlined_map_entries: Vec::new(),
             skipped_maps: Vec::new(),
             error_message: None,
-            failure_artifacts: None,
         }
     }
 
