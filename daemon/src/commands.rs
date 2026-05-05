@@ -132,6 +132,8 @@ pub(crate) struct OptimizeOneResult {
     pub passes: Vec<PassDetail>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error_message: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workdir_tar_b64: Option<String>,
 }
 
 impl OptimizeOneResult {
@@ -148,6 +150,7 @@ impl OptimizeOneResult {
             },
             passes: Vec::new(),
             error_message: Some(message.into()),
+            workdir_tar_b64: None,
         }
     }
 }
@@ -277,6 +280,46 @@ fn hex_bytes(bytes: &[u8]) -> String {
         out.push(HEX[(byte & 0x0f) as usize] as char);
     }
     out
+}
+
+fn base64_bytes(bytes: &[u8]) -> String {
+    const TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    let mut out = String::with_capacity(((bytes.len() + 2) / 3) * 4);
+    for chunk in bytes.chunks(3) {
+        let n = ((chunk[0] as u32) << 16)
+            | ((chunk.get(1).copied().unwrap_or(0) as u32) << 8)
+            | chunk.get(2).copied().unwrap_or(0) as u32;
+        out.push(TABLE[((n >> 18) & 0x3f) as usize] as char);
+        out.push(TABLE[((n >> 12) & 0x3f) as usize] as char);
+        out.push(if chunk.len() > 1 {
+            TABLE[((n >> 6) & 0x3f) as usize] as char
+        } else {
+            '='
+        });
+        out.push(if chunk.len() > 2 {
+            TABLE[(n & 0x3f) as usize] as char
+        } else {
+            '='
+        });
+    }
+    out
+}
+
+fn tar_workdir(workdir: &Path) -> Result<String> {
+    let output = Command::new("tar")
+        .args(["-czf", "-", "-C"])
+        .arg(workdir)
+        .arg(".")
+        .output()
+        .with_context(|| format!("tar workdir {}", workdir.display()))?;
+    if !output.status.success() {
+        bail!(
+            "tar workdir {} failed: {}",
+            workdir.display(),
+            String::from_utf8_lossy(&output.stderr).trim()
+        );
+    }
+    Ok(base64_bytes(&output.stdout))
 }
 
 fn live_bpf_map_lookup(_map: &MapInfoJson, fd: i32, key: &[u8]) -> Result<Option<Vec<u8>>> {
@@ -569,10 +612,27 @@ pub(crate) fn try_apply_one(
             },
             passes,
             error_message: None,
+            workdir_tar_b64: None,
         })
     })();
 
-    result
+    match result {
+        Ok(mut result) => {
+            let failed_pass = result
+                .passes
+                .iter()
+                .any(|pass| pass.status != PassStatus::Ok);
+            if result.status != "ok" || failed_pass {
+                result.workdir_tar_b64 = Some(tar_workdir(workdir.path())?);
+            }
+            Ok(result)
+        }
+        Err(err) => {
+            let mut result = OptimizeOneResult::error(prog_id, format!("{err:#}"));
+            result.workdir_tar_b64 = Some(tar_workdir(workdir.path())?);
+            Ok(result)
+        }
+    }
 }
 
 fn append_bpfopt_context_args(command: &mut Command, prog_info: &ProgInfoJson) {
@@ -1385,6 +1445,7 @@ mod tests {
             },
             passes: Vec::new(),
             error_message: None,
+            workdir_tar_b64: None,
         }
     }
 

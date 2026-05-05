@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import json
 import os
 import platform
@@ -230,6 +231,22 @@ def _apply_result_from_response(
     return result
 
 
+def _write_failure_workdir_tar(
+    prog_id: int,
+    workdir_tar_b64: object,
+    failure_artifacts_dir: Path | None,
+) -> None:
+    if workdir_tar_b64 is None:
+        return
+    if not isinstance(workdir_tar_b64, str):
+        raise RuntimeError(f"daemon response field workdir_tar_b64 for prog {prog_id} must be a string")
+    if failure_artifacts_dir is None:
+        raise RuntimeError(f"daemon returned workdir_tar_b64 for prog {prog_id} without failure_artifacts_dir")
+    failure_artifacts_dir.mkdir(parents=True, exist_ok=True)
+    tar_path = failure_artifacts_dir / f"{prog_id}.tar.gz"
+    tar_path.write_bytes(base64.b64decode(workdir_tar_b64, validate=True))
+
+
 def _daemon_log_tail(stdout_path: Path | None, stderr_path: Path | None) -> str:
     def _read(p: Path | None) -> str:
         if p is None:
@@ -331,6 +348,7 @@ def apply_daemon_rejit(
     daemon_proc: subprocess.Popen[str] | None = None,
     daemon_stdout_path: Path | None = None,
     daemon_stderr_path: Path | None = None,
+    failure_artifacts_dir: Path | None = None,
 ) -> dict[str, object]:
     prog_ids = [int(v) for v in (prog_ids or []) if int(v) > 0]
     if not prog_ids:
@@ -382,6 +400,11 @@ def apply_daemon_rejit(
         if not isinstance(record, Mapping):
             raise RuntimeError(f"daemon response field per_program[{prog_id!r}] must be an object")
         record_dict = dict(record)
+        _write_failure_workdir_tar(
+            prog_id,
+            record_dict.pop("workdir_tar_b64", None),
+            failure_artifacts_dir,
+        )
         result = _apply_result_from_response(record_dict)
         per_program[prog_id] = result
         if error := str(result.get("error") or "").strip():
@@ -445,7 +468,7 @@ class DaemonSession:
         enabled_passes: Sequence[str] | None = None,
         failure_artifacts_dir: Path | None = None,
     ) -> dict[str, object]:
-        del failure_artifacts_dir
         return apply_daemon_rejit([int(p) for p in prog_ids if int(p) > 0], enabled_passes=enabled_passes,
                                    daemon_socket_path=self.socket_path, daemon_proc=self.proc,
-                                   daemon_stdout_path=self.stdout_path, daemon_stderr_path=self.stderr_path)
+                                   daemon_stdout_path=self.stdout_path, daemon_stderr_path=self.stderr_path,
+                                   failure_artifacts_dir=failure_artifacts_dir)

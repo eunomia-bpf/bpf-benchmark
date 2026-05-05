@@ -1,0 +1,22 @@
+{
+  "config": {
+    "enabled_passes": [
+      "rotate"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "daemon returned workdir_tar_b64 for prog 6 without failure_artifacts_dir",
+  "generated_at": "2026-05-05T20:14:17.189281+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-05-05T20:14:17.189278+00:00",
+  "launcher_boot_id": "12cbe600-cbcd-40ad-89df-8b2eef0ac8fb",
+  "launcher_pid": 1844,
+  "launcher_start_ticks": 10606,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "run_type": "x86_kvm_corpus",
+  "samples": 1,
+  "started_at": "2026-05-05T20:14:05.146936+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_seconds": 3.0
+}

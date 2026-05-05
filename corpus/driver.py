@@ -558,6 +558,7 @@ def _run_suite_lifecycle_sessions(
             result.rejit_result = active_daemon_session.apply_rejit(
                 result.rejit_prog_ids,
                 enabled_passes=apply_enabled_passes,
+                failure_artifacts_dir=prepared_daemon_session.failure_artifacts_dir,
             )
             _print_progress(
                 "rejit_done",
@@ -681,7 +682,10 @@ def run_suite(
         stdout_path=daemon_log_dir / "daemon.stdout.log",
         stderr_path=daemon_log_dir / "daemon.stderr.log",
     ) as daemon_session:
-        prepared_daemon_session = prepare_daemon_session(daemon_session)
+        prepared_daemon_session = prepare_daemon_session(
+            daemon_session,
+            failure_artifacts_dir=artifact_session.run_dir / "details" / "failure-artifacts",
+        )
 
         with enable_bpf_stats():
             for app in suite.apps:

@@ -303,6 +303,7 @@ mod tests {
             },
             passes: Vec::new(),
             error_message: None,
+            workdir_tar_b64: None,
         }
     }
 
