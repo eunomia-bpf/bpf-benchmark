@@ -12,13 +12,54 @@ Never filter, skip, or exclude any BPF program from ReJIT. If a program fails Re
 ### App-Level Loader Only
 All benchmark apps must load their own BPF programs via real application startup. The framework must not directly load `.bpf.o` files via bpftool or libbpf. Never write custom loader binaries to replace upstream app binaries — always use the real upstream binary. If compilation is slow, use pre-built images or cached artifacts, not simplified replacements. Exception: katran's `xdp_root` bootstraps the XDP chain before the app starts.
 
-### Corpus Metrics: Per-Program avg_ns_per_run
-Corpus performance is measured per-program, not per-app:
-- `avg_ns_per_run = run_time_ns_delta / run_cnt_delta` for each BPF program
-- `ratio = post_rejit_avg / baseline_avg` (< 1.0 = faster after ReJIT)
-- Only programs with `run_cnt_delta > 0` on both baseline and post-ReJIT are included (mathematical necessity, not filtering)
-- No thresholds, no type exclusions, no app-status filtering
-- Result payload contains `per_program` list and `summary` with `per_program_geomean`, `program_count`, `wins`, `losses`
+### No In-Framework Computation or Summary
+The benchmark framework collects raw counter measurements only. **Any aggregation, ratio, average, geomean, win/loss tally, confidence interval, comparison summary, or markdown rollup is forbidden in framework code.** All performance interpretation happens in external analysis scripts or post-hoc, using the methodology below.
+
+What the framework writes to `result.json`:
+- per BPF program, per phase (baseline / post_rejit): `run_cnt_delta`, `run_time_ns_delta`, `id`, `name`, `type`, `bytes_jited`, `bytes_xlated`
+- workload `stdout`/`stderr`, lifecycle event log, app `status`, `error` string
+
+What the framework MUST NOT write or compute:
+- `avg_ns_per_run`, `ratio`, `per_program` ratio list
+- `per_program_geomean`, `program_count`, `wins`, `losses`, `summary` block
+- bootstrap CI, run-weighted aggregate, comparison_summary, markdown summary tables
+- "optimization_summary" or any fleet-level rollup in run_artifacts
+
+Forbidden code patterns (delete on sight): `geometric_mean()`, `_geometric_mean()`, `bootstrap_geometric_mean_ci()`, `win_counts()`, `comparison_summary()`, `summarize_phase_timings()`, `summarize_named_counters()`, `derive_perf_metrics()`, anything that takes a list of ratios and returns a summary scalar.
+
+### Performance Calculation Methodology (analysis-side reference)
+This section documents how analysts compute paper-grade metrics from raw `result.json` data. Framework code MUST NOT implement any of this.
+
+**Per-program ratio**:
+```
+avg_ns_per_run = run_time_ns_delta / run_cnt_delta
+ratio = post_rejit_avg_ns_per_run / baseline_avg_ns_per_run    # < 1.0 = ReJIT faster
+```
+Skip programs where either phase has `run_cnt_delta == 0`.
+
+**Threshold filter** (mandatory for paper-grade):
+- Drop programs where `min(baseline_runs, post_rejit_runs) < 100`
+- Justification: empirical noise floor on the BpfReJIT 18-app corpus drops sharply at 100 (CV 29.6% with no filter → 17.7% at ≥100). Above 100 the CV stays flat through ≥100K, so 100 captures the noise-reduction inflection point while retaining maximum program coverage (127 vs 90 progs at ≥10K). Justified by noise-floor measurement on the same dataset; do not raise without re-measuring CV on a new dataset.
+- For paper authoritative runs: SAMPLES=30 reduces noise on retained programs by ~5.5× (1/√30).
+
+**Two reporting metrics, always paired**:
+- **Method B — per-program geomean** (primary):
+  `geomean = exp(mean(log(ratio_i)))` over all retained programs (≥100 min_runs)
+  Answers: "average ReJIT speedup per BPF program"
+- **Method C — run-weighted aggregate** (secondary):
+  `aggregate_ratio = sum(post_avg × min_runs) / sum(baseline_avg × min_runs)`
+  Equivalent to `total_post_rejit_BPF_time / total_baseline_BPF_time`
+  Answers: "real CPU-time reduction in BPF execution"
+
+Both reported together; agreement (within 1%) signals high confidence. Report `wins/losses/ties` counts as supplemental.
+
+**Forbidden in metrics**:
+- log/sqrt/log² weighted geomean (no physical justification, paper-review red flag)
+- median ratio as primary (loses too much information)
+- arithmetic mean of ratios (mathematically wrong for ratio data)
+- ad-hoc thresholds other than 100 (any change must be justified by re-measuring noise-floor CV on the new dataset)
+
+**Confidence reporting**: For SAMPLES≥30, report bootstrap 95% CI on the geomean and the aggregate ratio. Below SAMPLES=30 results are smoke-only and must not be quoted as paper numbers.
 
 ### BranchFlip Requires Real Per-Site PGO
 `branch_flip` is the Paper B profile-guided branch-layout pass. It is production code but remains outside the runner benchmark default policy until Paper B benchmark results decide policy. It must consume real `bpfprof --per-site` data: every candidate site needs `branch_count`, `branch_misses`, `miss_rate`, `taken`, and `not_taken`. Placeholder PMU fields, heuristic fallback, missing-site success, and optional per-site profile fields are forbidden; missing program/site PMU data must exit 1.

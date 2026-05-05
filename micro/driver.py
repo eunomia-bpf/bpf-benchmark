@@ -32,19 +32,10 @@ from runner.libs.environment import (
     validate_publication_environment,
 )
 from runner.libs.results import parse_last_json_line
-from runner.libs.statistics import (
-    derive_perf_metrics,
-    ns_summary,
-    summarize_named_counters,
-    summarize_optional_ns,
-    summarize_perf_counter_meta,
-    summarize_phase_timings,
-)
 from runner.libs.run_artifacts import (
     ArtifactSession,
     derive_run_type,
     sanitize_artifact_token,
-    summarize_benchmark_results,
 )
 
 
@@ -242,87 +233,13 @@ def runner_help_text(runner_binary: Path) -> str:
     return "\n".join([completed.stdout, completed.stderr])
 
 
-def attach_baseline_adjustments(
-    results: dict[str, object],
-    baseline_benchmark: str | None,
-    *,
-    require_baseline: bool = True,
-) -> None:
-    if not baseline_benchmark:
-        return
-
-    benchmarks = results.get("benchmarks", [])
-    baseline_record = next((record for record in benchmarks if record.get("name") == baseline_benchmark), None)
-    if baseline_record is None:
-        if not require_baseline:
-            return
-        raise RuntimeError(f"baseline benchmark not found in results: {baseline_benchmark}")
-
-    baseline_io_mode = baseline_record.get("io_mode")
-    runtime_baselines: dict[str, float] = {}
-    for run in baseline_record.get("runs", []):
-        median = run.get("exec_ns", {}).get("median")
-        if median is not None:
-            runtime_baselines[str(run["runtime"])] = float(median)
-
-    for benchmark in benchmarks:
-        benchmark_io_mode = benchmark.get("io_mode")
-        baseline_applies = benchmark_io_mode == baseline_io_mode
-        for run in benchmark.get("runs", []):
-            baseline_exec = runtime_baselines.get(str(run["runtime"])) if baseline_applies else None
-            median_exec = run.get("exec_ns", {}).get("median")
-            adjusted = None
-            ratio = None
-            if baseline_exec is not None and median_exec is not None:
-                adjusted = max(float(median_exec) - baseline_exec, 0.0)
-                if baseline_exec != 0:
-                    ratio = float(median_exec) / baseline_exec
-            run["baseline_adjustment"] = {
-                "baseline_benchmark": baseline_benchmark,
-                "baseline_io_mode": baseline_io_mode,
-                "applied": baseline_applies,
-                "baseline_exec_ns": baseline_exec,
-                "median_minus_baseline_ns": adjusted,
-                "median_over_baseline_ratio": ratio,
-            }
-            if not baseline_applies:
-                run["baseline_adjustment"]["reason"] = (
-                    f"skipped: benchmark io_mode {benchmark_io_mode} does not match baseline io_mode {baseline_io_mode}"
-                )
-
-    for benchmark in benchmarks:
-        runtime_runs = {str(run["runtime"]): run for run in benchmark.get("runs", [])}
-        llvm = runtime_runs.get("llvmbpf")
-        kernel = runtime_runs.get("kernel")
-        if llvm is None or kernel is None:
-            continue
-
-        llvm_exec = llvm.get("exec_ns", {}).get("median")
-        kernel_exec = kernel.get("exec_ns", {}).get("median")
-        llvm_adjusted = llvm.get("baseline_adjustment", {}).get("median_minus_baseline_ns")
-        kernel_adjusted = kernel.get("baseline_adjustment", {}).get("median_minus_baseline_ns")
-
-        raw_ratio = None
-        adjusted_ratio = None
-        if llvm_exec not in (None, 0) and kernel_exec not in (None, 0):
-            raw_ratio = float(llvm_exec) / float(kernel_exec)
-        if llvm_adjusted not in (None, 0) and kernel_adjusted not in (None, 0):
-            adjusted_ratio = float(llvm_adjusted) / float(kernel_adjusted)
-
-        benchmark["runtime_comparison"] = {
-            "llvmbpf_over_kernel_exec_ratio": raw_ratio,
-            "llvmbpf_over_kernel_adjusted_exec_ratio": adjusted_ratio,
-        }
-
-
 def build_run_metadata(
     results: dict[str, Any],
     *,
     run_type: str,
 ) -> dict[str, Any]:
-    metadata = summarize_benchmark_results(results)
+    metadata = {key: value for key, value in results.items()}
     metadata["run_type"] = run_type
-    metadata["optimization_summary"]["daemon_debug_entries"] = 0
     return metadata
 
 
@@ -486,11 +403,6 @@ def main(argv: list[str] | None = None) -> int:
         updated_at: str,
         error_message: str | None,
     ) -> dict[str, Any]:
-        attach_baseline_adjustments(
-            results,
-            suite.analysis.baseline_benchmark,
-            require_baseline=str(status).startswith("completed"),
-        )
         artifact_metadata = build_run_metadata(
             results,
             run_type=run_type,
@@ -644,11 +556,7 @@ def main(argv: list[str] | None = None) -> int:
                 sample_entry = runtime_samples[runtime.name]
                 run_samples = list(sample_entry["samples"])
                 inner_repeat = int(sample_entry["inner_repeat"])
-                compile_values = [sample["compile_ns"] for sample in run_samples]
-                exec_values = [sample["exec_ns"] for sample in run_samples]
                 result_values = [sample["result"] for sample in run_samples]
-                perf_counter_summary = summarize_named_counters(run_samples, "perf_counters")
-                wall_exec_summary = summarize_optional_ns(run_samples, "wall_exec_ns")
                 timing_source = str(run_samples[0].get("timing_source", "unknown")) if run_samples else "unknown"
 
                 run_record: dict[str, Any] = {
@@ -657,24 +565,17 @@ def main(argv: list[str] | None = None) -> int:
                     "mode": runtime.mode,
                     "inner_repeat": inner_repeat,
                     "samples": run_samples,
-                    "compile_ns": ns_summary(compile_values),
-                    "exec_ns": ns_summary(exec_values),
                     "timing_source": timing_source,
-                    "phases_ns": summarize_phase_timings(run_samples),
-                    "perf_counters": perf_counter_summary,
-                    "perf_counters_meta": summarize_perf_counter_meta(run_samples),
-                    "derived_metrics": derive_perf_metrics(perf_counter_summary),
                     "result_distribution": dict(Counter(str(value) for value in result_values)),
                 }
-                if wall_exec_summary is not None:
-                    run_record["wall_exec_ns"] = wall_exec_summary
                 benchmark_record["runs"].append(run_record)
 
+                last_sample = run_samples[-1] if run_samples else {}
                 print(
                     f"  {runtime.name:10} "
-                    f"compile median {format_ns(run_record['compile_ns']['median'])} | "
-                    f"exec median {format_ns(run_record['exec_ns']['median'])} | "
-                    f"result {result_values[-1]}"
+                    f"compile last {format_ns(int(last_sample.get('compile_ns') or 0))} | "
+                    f"exec last {format_ns(int(last_sample.get('exec_ns') or 0))} | "
+                    f"result {result_values[-1] if result_values else '?'}"
                 )
                 flush_artifact("running")
 

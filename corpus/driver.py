@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import os
 import signal
 import sys
@@ -150,96 +149,6 @@ def _measure_runner_phase(
         "bpf": compute_delta(initial_stats, final_stats),
     }
 
-
-def _measurement_bpf_records(measurement: Mapping[str, object] | None) -> dict[int, Mapping[str, object]]:
-    if not isinstance(measurement, Mapping):
-        return {}
-    raw_bpf = measurement.get("bpf")
-    if not isinstance(raw_bpf, Mapping):
-        return {}
-    return {
-        int(prog_id): record
-        for prog_id, record in raw_bpf.items()
-        if isinstance(record, Mapping)
-    }
-
-
-def _build_program_ratio_entry(
-    app_result: Mapping[str, object],
-    *,
-    prog_id: int,
-    baseline_record: Mapping[str, object],
-    post_rejit_record: Mapping[str, object],
-) -> dict[str, object] | None:
-    baseline_runs = int(baseline_record.get("run_cnt_delta", 0) or 0)
-    post_rejit_runs = int(post_rejit_record.get("run_cnt_delta", 0) or 0)
-    if baseline_runs <= 0 or post_rejit_runs <= 0:
-        return None
-
-    baseline_avg = baseline_record.get("avg_ns_per_run")
-    post_rejit_avg = post_rejit_record.get("avg_ns_per_run")
-    if baseline_avg is None or post_rejit_avg is None:
-        raise RuntimeError(f"missing avg_ns_per_run for comparable program id {prog_id}")
-
-    baseline_avg_value = float(baseline_avg)
-    post_rejit_avg_value = float(post_rejit_avg)
-    if baseline_avg_value <= 0.0:
-        raise RuntimeError(f"baseline avg_ns_per_run must be > 0 for comparable program id {prog_id}")
-    if post_rejit_avg_value < 0.0:
-        raise RuntimeError(f"post_rejit avg_ns_per_run must be >= 0 for comparable program id {prog_id}")
-
-    program_name = str(post_rejit_record.get("name") or baseline_record.get("name") or f"id-{prog_id}")
-    return {
-        "app": str(app_result.get("app") or ""),
-        "runner": str(app_result.get("runner") or ""),
-        "workload": str(app_result.get("selected_workload") or ""),
-        "program_id": int(prog_id),
-        "program": program_name,
-        "type": str(post_rejit_record.get("type") or baseline_record.get("type") or ""),
-        "ratio": post_rejit_avg_value / baseline_avg_value,
-        "baseline_avg_ns_per_run": baseline_avg_value,
-        "post_rejit_avg_ns_per_run": post_rejit_avg_value,
-        "baseline_run_cnt_delta": baseline_runs,
-        "post_rejit_run_cnt_delta": post_rejit_runs,
-        "baseline_run_time_ns_delta": int(baseline_record.get("run_time_ns_delta", 0) or 0),
-        "post_rejit_run_time_ns_delta": int(post_rejit_record.get("run_time_ns_delta", 0) or 0),
-    }
-
-
-def _geometric_mean(values: Sequence[float]) -> float | None:
-    if not values:
-        return None
-    if any(value < 0.0 for value in values):
-        raise RuntimeError("geometric mean requires non-negative values")
-    if any(value == 0.0 for value in values):
-        return 0.0
-    return math.exp(sum(math.log(value) for value in values) / len(values))
-
-
-def _build_corpus_summary(
-    results: Sequence[Mapping[str, object]],
-) -> tuple[list[dict[str, object]], dict[str, object]]:
-    per_program: list[dict[str, object]] = []
-    for app_result in results:
-        baseline_records = _measurement_bpf_records(app_result.get("baseline"))
-        post_rejit_records = _measurement_bpf_records(app_result.get("post_rejit"))
-        for prog_id in sorted(set(baseline_records) & set(post_rejit_records)):
-            entry = _build_program_ratio_entry(
-                app_result,
-                prog_id=prog_id,
-                baseline_record=baseline_records[prog_id],
-                post_rejit_record=post_rejit_records[prog_id],
-            )
-            if entry is not None:
-                per_program.append(entry)
-
-    ratios = [float(entry["ratio"]) for entry in per_program]
-    return per_program, {
-        "per_program_geomean": _geometric_mean(ratios),
-        "program_count": len(per_program),
-        "wins": sum(1 for ratio in ratios if ratio < 1.0),
-        "losses": sum(1 for ratio in ratios if ratio > 1.0),
-    }
 
 def build_markdown(payload: Mapping[str, object]) -> str:
     return "\n".join(
@@ -878,7 +787,6 @@ def run_suite(
         )
         for app in suite.apps
     ]
-    per_program, summary = _build_corpus_summary(results)
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "manifest": str(suite_path),
@@ -887,8 +795,6 @@ def run_suite(
         "samples": samples,
         "workload_seconds": workload_seconds,
         "results": results,
-        "per_program": per_program,
-        "summary": summary,
         "kinsn_modules": kinsn_metadata,
         "status": "error" if any(str(result.get("status") or "error") != "ok" for result in results) else "ok",
     }
@@ -936,15 +842,12 @@ def _finalize_partial(
                     error=fatal_error or "corpus run terminated before this app was reached",
                 )
             )
-    per_program, summary = _build_corpus_summary(results)
     payload: dict[str, object] = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "suite_name": getattr(suite, "suite_name", ""),
         "samples": 0,
         "workload_seconds": 0.0,
         "results": results,
-        "per_program": per_program,
-        "summary": summary,
         "status": "error",
         "partial": True,
     }

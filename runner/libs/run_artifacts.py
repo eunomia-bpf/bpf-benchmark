@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections import Counter
 import json
 import os
 import re
@@ -121,86 +120,3 @@ def current_process_identity() -> dict[str, object]:
     return payload
 
 
-def summarize_benchmark_results(payload: Mapping[str, Any]) -> dict[str, Any]:
-    summarized: dict[str, Any] = {
-        key: value for key, value in payload.items() if key != "benchmarks"
-    }
-    runtime_names: set[str] = set()
-    correctness_mismatches: list[str] = []
-    passes_applied = Counter()
-    total_verifier_retries = 0
-    total_sites_applied = 0
-    daemon_debug_entries = 0
-    benchmark_summaries: list[dict[str, Any]] = []
-
-    for benchmark in payload.get("benchmarks", []):
-        if not isinstance(benchmark, Mapping):
-            continue
-
-        benchmark_summary = {
-            key: value for key, value in benchmark.items() if key != "runs"
-        }
-        if benchmark_summary.get("correctness_mismatch"):
-            correctness_mismatches.append(str(benchmark_summary.get("name", "unknown")))
-
-        run_summaries: list[dict[str, Any]] = []
-        for run in benchmark.get("runs", []):
-            if not isinstance(run, Mapping):
-                continue
-
-            runtime_name = str(run.get("runtime", "unknown"))
-            runtime_names.add(runtime_name)
-            samples = run.get("samples", [])
-
-            run_summary = {key: value for key, value in run.items() if key != "samples"}
-            run_summary["sample_count"] = len(samples) if isinstance(samples, list) else 0
-
-            run_passes = Counter()
-            run_verifier_retries = 0
-            run_sites_applied = 0
-            run_daemon_debug_entries = 0
-
-            if isinstance(samples, list):
-                for sample in samples:
-                    if not isinstance(sample, Mapping):
-                        continue
-                    rejit = sample.get("rejit")
-                    if not isinstance(rejit, Mapping):
-                        continue
-                    run_verifier_retries += int(rejit.get("verifier_retries", 0) or 0)
-                    run_sites_applied += int(rejit.get("total_sites_applied", 0) or 0)
-                    if isinstance(rejit.get("daemon_response"), Mapping) or isinstance(
-                        rejit.get("daemon_debug_ref"), str
-                    ) or bool(rejit.get("daemon_debug_stripped")):
-                        run_daemon_debug_entries += 1
-                    for pass_name in rejit.get("passes_applied", []):
-                        run_passes[str(pass_name)] += 1
-
-            run_summary["optimization_summary"] = {
-                "daemon_debug_entries": run_daemon_debug_entries,
-                "passes_applied": dict(sorted(run_passes.items())),
-                "total_sites_applied": run_sites_applied,
-                "verifier_retries": run_verifier_retries,
-            }
-
-            run_summaries.append(run_summary)
-            passes_applied.update(run_passes)
-            total_verifier_retries += run_verifier_retries
-            total_sites_applied += run_sites_applied
-            daemon_debug_entries += run_daemon_debug_entries
-
-        benchmark_summary["runs"] = run_summaries
-        benchmark_summaries.append(benchmark_summary)
-
-    summarized["benchmarks"] = benchmark_summaries
-    summarized["optimization_summary"] = {
-        "benchmark_count": len(benchmark_summaries),
-        "correctness_mismatch_count": len(correctness_mismatches),
-        "correctness_mismatches": correctness_mismatches,
-        "daemon_debug_entries": daemon_debug_entries,
-        "passes_applied": dict(sorted(passes_applied.items())),
-        "runtime_names": sorted(runtime_names),
-        "total_sites_applied": total_sites_applied,
-        "total_verifier_retries": total_verifier_retries,
-    }
-    return summarized

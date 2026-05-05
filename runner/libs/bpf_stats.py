@@ -96,7 +96,6 @@ def compute_delta(
             "type": str(current.get("type") or previous.get("type") or ""),
             "run_cnt_delta": run_cnt_delta,
             "run_time_ns_delta": run_time_delta,
-            "avg_ns_per_run": (run_time_delta / run_cnt_delta) if run_cnt_delta > 0 else None,
             "bytes_jited": int(current.get("bytes_jited", 0) or previous.get("bytes_jited", 0) or 0),
             "bytes_xlated": int(current.get("bytes_xlated", 0) or previous.get("bytes_xlated", 0) or 0),
         }
