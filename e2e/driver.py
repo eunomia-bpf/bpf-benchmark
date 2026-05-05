@@ -42,20 +42,10 @@ from e2e.cases.tracee.case import (  # noqa: E402
     build_markdown as build_tracee_markdown,
     run_tracee_case,
 )
-from e2e.cases.katran.case import (  # noqa: E402
-    build_markdown as build_katran_markdown,
-    run_katran_case,
-)
-from e2e.cases.cilium.case import (  # noqa: E402
-    build_markdown as build_cilium_markdown,
-    run_cilium_case,
-)
-from e2e.cases.otel.case import (  # noqa: E402
-    build_markdown as build_otel_markdown,
-    run_otel_case,
-)
 from runner.libs.case_common import (  # noqa: E402
     prepare_daemon_session,
+    run_simple_app_e2e_case,
+    simple_app_e2e_markdown,
     wait_for_suite_quiescence,
 )
 
@@ -96,18 +86,24 @@ CASE_SPECS: dict[str, CaseSpec] = {
         default_output_json=DEFAULT_BCC_OUTPUT_JSON,
     ),
     "katran": CaseSpec(
-        run_case=run_katran_case,
-        build_markdown=build_katran_markdown,
+        run_case=lambda args: run_simple_app_e2e_case(
+            args, runner_name="katran", workload_kind="network", repo_label="katran"
+        ),
+        build_markdown=simple_app_e2e_markdown("Katran"),
         default_output_json=DEFAULT_KATRAN_OUTPUT_JSON,
     ),
     "cilium": CaseSpec(
-        run_case=run_cilium_case,
-        build_markdown=build_cilium_markdown,
+        run_case=lambda args: run_simple_app_e2e_case(
+            args, runner_name="cilium", workload_kind="network", repo_label="cilium"
+        ),
+        build_markdown=simple_app_e2e_markdown("Cilium"),
         default_output_json=DEFAULT_CILIUM_OUTPUT_JSON,
     ),
     "otel": CaseSpec(
-        run_case=run_otel_case,
-        build_markdown=build_otel_markdown,
+        run_case=lambda args: run_simple_app_e2e_case(
+            args, runner_name="otelcol-ebpf-profiler", workload_kind="stress_ng_cpu", repo_label="otelcol-ebpf-profiler"
+        ),
+        build_markdown=simple_app_e2e_markdown("OpenTelemetry eBPF Profiler"),
         default_output_json=DEFAULT_OTEL_OUTPUT_JSON,
     ),
 }
