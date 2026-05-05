@@ -23,7 +23,6 @@ from ..workload import (
     resolve_workload_tool,
     run_named_workload,
     run_network_load,
-    run_scheduler_load,
 )
 from .base import AppRunner
 from .process_support import AgentSession, wait_until_program_set_stable
@@ -234,8 +233,6 @@ def run_tracee_workload(spec: Mapping[str, object], duration_s: int) -> Workload
     if kind == "network":
         resolve_workload_tool("wrk")
         return run_network_load(duration_s)
-    if kind == "scheduler":
-        return run_scheduler_load(duration_s)
     raise RuntimeError(f"unsupported workload kind: {kind}")
 
 DEFAULT_LOAD_TIMEOUT_S = 120

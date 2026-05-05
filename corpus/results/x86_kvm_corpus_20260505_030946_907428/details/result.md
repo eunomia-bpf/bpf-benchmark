@@ -1,0 +1,14132 @@
+# Corpus Benchmark
+
+```json
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+  "generated_at": "2026-05-05T03:21:13.277524+00:00",
+  "kinsn_modules": {
+    "captured_at": "2026-05-05T03:09:46.940618+00:00",
+    "daemon_binary": "daemon/target/release/bpfrejit-daemon",
+    "expected_modules": [
+      "bpf_bulk_memory",
+      "bpf_endian",
+      "bpf_extract",
+      "bpf_prefetch",
+      "bpf_rotate",
+      "bpf_select"
+    ],
+    "module_load": {
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "failed_modules": [],
+      "invoked_at": "2026-05-05T03:09:46.940557+00:00",
+      "loaded_count": 6,
+      "loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loader": "runner.libs.kinsn.load_kinsn_modules",
+      "module_dir": "/artifacts/kinsn",
+      "newly_loaded_modules": [],
+      "snapshot_after": {
+        "captured_at": "2026-05-05T03:09:46.940549+00:00",
+        "expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "loaded_bpf_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "missing_expected_modules": [],
+        "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_prefetch           12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+        "resident_expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "source": "lsmod"
+      },
+      "status": "ok",
+      "total_count": 6
+    },
+    "module_snapshot_before_daemon": {
+      "captured_at": "2026-05-05T03:09:46.920882+00:00",
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loaded_bpf_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "missing_expected_modules": [],
+      "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_prefetch           12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+      "resident_expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "source": "lsmod"
+    }
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "per_program": [
+    {
+      "app": "bcc/capable",
+      "baseline_avg_ns_per_run": 326.50397690316106,
+      "baseline_run_cnt_delta": 1103874,
+      "baseline_run_time_ns_delta": 360419251,
+      "post_rejit_avg_ns_per_run": 318.7263109499607,
+      "post_rejit_run_cnt_delta": 1150616,
+      "post_rejit_run_time_ns_delta": 366731593,
+      "program": "cap_capable",
+      "program_id": 6,
+      "ratio": 0.9761789549181903,
+      "runner": "bcc",
+      "type": "kprobe",
+      "workload": "stress_ng_os"
+    },
+    {
+      "app": "bcc/execsnoop",
+      "baseline_avg_ns_per_run": 1009.5,
+      "baseline_run_cnt_delta": 2,
+      "baseline_run_time_ns_delta": 2019,
+      "post_rejit_avg_ns_per_run": 1246.5,
+      "post_rejit_run_cnt_delta": 2,
+      "post_rejit_run_time_ns_delta": 2493,
+      "program": "syscall__execve",
+      "program_id": 9,
+      "ratio": 1.2347696879643388,
+      "runner": "bcc",
+      "type": "kprobe",
+      "workload": "stress_ng_process"
+    },
+    {
+      "app": "bcc/execsnoop",
+      "baseline_avg_ns_per_run": 173.5,
+      "baseline_run_cnt_delta": 2,
+      "baseline_run_time_ns_delta": 347,
+      "post_rejit_avg_ns_per_run": 199.5,
+      "post_rejit_run_cnt_delta": 2,
+      "post_rejit_run_time_ns_delta": 399,
+      "program": "do_ret_sys_execve",
+      "program_id": 10,
+      "ratio": 1.1498559077809798,
+      "runner": "bcc",
+      "type": "kprobe",
+      "workload": "stress_ng_process"
+    },
+    {
+      "app": "bcc/bindsnoop",
+      "baseline_avg_ns_per_run": 2059.6666666666665,
+      "baseline_run_cnt_delta": 3,
+      "baseline_run_time_ns_delta": 6179,
+      "post_rejit_avg_ns_per_run": 2527.3333333333335,
+      "post_rejit_run_cnt_delta": 3,
+      "post_rejit_run_time_ns_delta": 7582,
+      "program": "bindsnoop_entry",
+      "program_id": 13,
+      "ratio": 1.2270593947240656,
+      "runner": "bcc",
+      "type": "kprobe",
+      "workload": "stress_ng_network"
+    },
+    {
+      "app": "bcc/bindsnoop",
+      "baseline_avg_ns_per_run": 9880.666666666666,
+      "baseline_run_cnt_delta": 3,
+      "baseline_run_time_ns_delta": 29642,
+      "post_rejit_avg_ns_per_run": 13099.666666666666,
+      "post_rejit_run_cnt_delta": 3,
+      "post_rejit_run_time_ns_delta": 39299,
+      "program": "bindsnoop_v4_return",
+      "program_id": 14,
+      "ratio": 1.3257877336212132,
+      "runner": "bcc",
+      "type": "kprobe",
+      "workload": "stress_ng_network"
+    },
+    {
+      "app": "bcc/biosnoop",
+      "baseline_avg_ns_per_run": 203.20608466434643,
+      "baseline_run_cnt_delta": 1729134,
+      "baseline_run_time_ns_delta": 351370550,
+      "post_rejit_avg_ns_per_run": 203.03669260165603,
+      "post_rejit_run_cnt_delta": 1753487,
+      "post_rejit_run_time_ns_delta": 356022201,
+      "program": "trace_pid_start_tp",
+      "program_id": 18,
+      "ratio": 0.9991664026056591,
+      "runner": "bcc",
+      "type": "tracepoint",
+      "workload": "fio_randrw"
+    },
+    {
+      "app": "bcc/biosnoop",
+      "baseline_avg_ns_per_run": 211.3047056809612,
+      "baseline_run_cnt_delta": 1729144,
+      "baseline_run_time_ns_delta": 365376264,
+      "post_rejit_avg_ns_per_run": 212.00672199610264,
+      "post_rejit_run_cnt_delta": 1753497,
+      "post_rejit_run_time_ns_delta": 371753151,
+      "program": "trace_req_start",
+      "program_id": 19,
+      "ratio": 1.00332229380732,
+      "runner": "bcc",
+      "type": "kprobe",
+      "workload": "fio_randrw"
+    },
+    {
+      "app": "bcc/biosnoop",
+      "baseline_avg_ns_per_run": 94.19299320070162,
+      "baseline_run_cnt_delta": 1729149,
+      "baseline_run_time_ns_delta": 162873720,
+      "post_rejit_avg_ns_per_run": 94.22636643699295,
+      "post_rejit_run_cnt_delta": 1753502,
+      "post_rejit_run_time_ns_delta": 165226122,
+      "program": "trace_req_completion_tp",
+      "program_id": 20,
+      "ratio": 1.0003543069941543,
+      "runner": "bcc",
+      "type": "tracepoint",
+      "workload": "fio_randrw"
+    },
+    {
+      "app": "bcc/vfsstat",
+      "baseline_avg_ns_per_run": 63.57917614316495,
+      "baseline_run_cnt_delta": 133664,
+      "baseline_run_time_ns_delta": 8498247,
+      "post_rejit_avg_ns_per_run": 72.49371923520734,
+      "post_rejit_run_cnt_delta": 136926,
+      "post_rejit_run_time_ns_delta": 9926275,
+      "program": "vfs_create",
+      "program_id": 23,
+      "ratio": 1.1402116798740674,
+      "runner": "bcc",
+      "type": "tracing",
+      "workload": "stress_ng_filesystem"
+    },
+    {
+      "app": "bcc/vfsstat",
+      "baseline_avg_ns_per_run": 76.35075653370014,
+      "baseline_run_cnt_delta": 727,
+      "baseline_run_time_ns_delta": 55507,
+      "post_rejit_avg_ns_per_run": 85.00521739130434,
+      "post_rejit_run_cnt_delta": 575,
+      "post_rejit_run_time_ns_delta": 48878,
+      "program": "kfunc__vmlinux__vfs_fsync_range",
+      "program_id": 24,
+      "ratio": 1.1133513438571399,
+      "runner": "bcc",
+      "type": "tracing",
+      "workload": "stress_ng_filesystem"
+    },
+    {
+      "app": "bcc/vfsstat",
+      "baseline_avg_ns_per_run": 46.86165617956817,
+      "baseline_run_cnt_delta": 1432236,
+      "baseline_run_time_ns_delta": 67116951,
+      "post_rejit_avg_ns_per_run": 45.77515212737812,
+      "post_rejit_run_cnt_delta": 1330464,
+      "post_rejit_run_time_ns_delta": 60902192,
+      "program": "vfs_open",
+      "program_id": 25,
+      "ratio": 0.9768146467545513,
+      "runner": "bcc",
+      "type": "tracing",
+      "workload": "stress_ng_filesystem"
+    },
+    {
+      "app": "bcc/vfsstat",
+      "baseline_avg_ns_per_run": 45.472970236890056,
+      "baseline_run_cnt_delta": 59268,
+      "baseline_run_time_ns_delta": 2695092,
+      "post_rejit_avg_ns_per_run": 49.51791023419241,
+      "post_rejit_run_cnt_delta": 62897,
+      "post_rejit_run_time_ns_delta": 3114528,
+      "program": "vfs_read",
+      "program_id": 26,
+      "ratio": 1.0889526234206905,
+      "runner": "bcc",
+      "type": "tracing",
+      "workload": "stress_ng_filesystem"
+    },
+    {
+      "app": "bcc/vfsstat",
+      "baseline_avg_ns_per_run": 55.6080213770197,
+      "baseline_run_cnt_delta": 80086,
+      "baseline_run_time_ns_delta": 4453424,
+      "post_rejit_avg_ns_per_run": 54.63615582967454,
+      "post_rejit_run_cnt_delta": 71745,
+      "post_rejit_run_time_ns_delta": 3919871,
+      "program": "vfs_write",
+      "program_id": 27,
+      "ratio": 0.9825229252313087,
+      "runner": "bcc",
+      "type": "tracing",
+      "workload": "stress_ng_filesystem"
+    },
+    {
+      "app": "bcc/opensnoop",
+      "baseline_avg_ns_per_run": 391.7016674479341,
+      "baseline_run_cnt_delta": 14933,
+      "baseline_run_time_ns_delta": 5849281,
+      "post_rejit_avg_ns_per_run": 412.5510112611351,
+      "post_rejit_run_cnt_delta": 17849,
+      "post_rejit_run_time_ns_delta": 7363623,
+      "program": "__x64_sys_open",
+      "program_id": 30,
+      "ratio": 1.053227610566586,
+      "runner": "bcc",
+      "type": "tracing",
+      "workload": "stress_ng_filesystem"
+    },
+    {
+      "app": "bcc/opensnoop",
+      "baseline_avg_ns_per_run": 418.90556416598736,
+      "baseline_run_cnt_delta": 571658,
+      "baseline_run_time_ns_delta": 239470717,
+      "post_rejit_avg_ns_per_run": 426.1326829506153,
+      "post_rejit_run_cnt_delta": 574226,
+      "post_rejit_run_time_ns_delta": 244696466,
+      "program": "kretfunc__vmlinux____x64_sys_openat",
+      "program_id": 31,
+      "ratio": 1.0172523819276944,
+      "runner": "bcc",
+      "type": "tracing",
+      "workload": "stress_ng_filesystem"
+    },
+    {
+      "app": "bcc/opensnoop",
+      "baseline_avg_ns_per_run": 412.3457910014514,
+      "baseline_run_cnt_delta": 2756,
+      "baseline_run_time_ns_delta": 1136425,
+      "post_rejit_avg_ns_per_run": 435.58939038686987,
+      "post_rejit_run_cnt_delta": 3412,
+      "post_rejit_run_time_ns_delta": 1486231,
+      "program": "kretfunc__vmlinux____x64_sys_openat2",
+      "program_id": 32,
+      "ratio": 1.0563691927810575,
+      "runner": "bcc",
+      "type": "tracing",
+      "workload": "stress_ng_filesystem"
+    },
+    {
+      "app": "bcc/syscount",
+      "baseline_avg_ns_per_run": 56.57403856254885,
+      "baseline_run_cnt_delta": 9547761,
+      "baseline_run_time_ns_delta": 540155399,
+      "post_rejit_avg_ns_per_run": 61.899819623994,
+      "post_rejit_run_cnt_delta": 9394265,
+      "post_rejit_run_time_ns_delta": 581503309,
+      "program": "tracepoint__raw_syscalls__sys_enter",
+      "program_id": 35,
+      "ratio": 1.0941382513386755,
+      "runner": "bcc",
+      "type": "tracepoint",
+      "workload": "stress_ng_os"
+    },
+    {
+      "app": "bcc/syscount",
+      "baseline_avg_ns_per_run": 56.72903000724149,
+      "baseline_run_cnt_delta": 9547762,
+      "baseline_run_time_ns_delta": 541635277,
+      "post_rejit_avg_ns_per_run": 56.29107681217457,
+      "post_rejit_run_cnt_delta": 9394266,
+      "post_rejit_run_time_ns_delta": 528813349,
+      "program": "tracepoint__raw_syscalls__sys_exit",
+      "program_id": 36,
+      "ratio": 0.9922799103913638,
+      "runner": "bcc",
+      "type": "tracepoint",
+      "workload": "stress_ng_os"
+    },
+    {
+      "app": "bcc/tcpconnect",
+      "baseline_avg_ns_per_run": 245.39097401610698,
+      "baseline_run_cnt_delta": 6581,
+      "baseline_run_time_ns_delta": 1614918,
+      "post_rejit_avg_ns_per_run": 245.39383191981497,
+      "post_rejit_run_cnt_delta": 6485,
+      "post_rejit_run_time_ns_delta": 1591379,
+      "program": "trace_connect_entry",
+      "program_id": 39,
+      "ratio": 1.0000116463277406,
+      "runner": "bcc",
+      "type": "kprobe",
+      "workload": "tcp_connect"
+    },
+    {
+      "app": "bcc/tcpconnect",
+      "baseline_avg_ns_per_run": 1934.85412551284,
+      "baseline_run_cnt_delta": 6581,
+      "baseline_run_time_ns_delta": 12733275,
+      "post_rejit_avg_ns_per_run": 1811.2043176561294,
+      "post_rejit_run_cnt_delta": 6485,
+      "post_rejit_run_time_ns_delta": 11745660,
+      "program": "trace_connect_v4_return",
+      "program_id": 40,
+      "ratio": 0.9360934727707513,
+      "runner": "bcc",
+      "type": "kprobe",
+      "workload": "tcp_connect"
+    },
+    {
+      "app": "bcc/tcplife",
+      "baseline_avg_ns_per_run": 412.7407944018866,
+      "baseline_run_cnt_delta": 64879,
+      "baseline_run_time_ns_delta": 26778210,
+      "post_rejit_avg_ns_per_run": 414.83657917019474,
+      "post_rejit_run_cnt_delta": 62593,
+      "post_rejit_run_time_ns_delta": 25965866,
+      "program": "tracepoint__sock__inet_sock_set_state",
+      "program_id": 44,
+      "ratio": 1.0050777262551553,
+      "runner": "bcc",
+      "type": "tracepoint",
+      "workload": "tcp_connect"
+    },
+    {
+      "app": "bcc/runqlat",
+      "baseline_avg_ns_per_run": 194.89794140009224,
+      "baseline_run_cnt_delta": 13557564,
+      "baseline_run_time_ns_delta": 2642341314,
+      "post_rejit_avg_ns_per_run": 193.6891710102477,
+      "post_rejit_run_cnt_delta": 14098582,
+      "post_rejit_run_time_ns_delta": 2730742660,
+      "program": "sched_switch",
+      "program_id": 47,
+      "ratio": 0.9937979314652526,
+      "runner": "bcc",
+      "type": "raw_tracepoint",
+      "workload": "stress_ng_scheduler"
+    },
+    {
+      "app": "bcc/runqlat",
+      "baseline_avg_ns_per_run": 74.3767991763069,
+      "baseline_run_cnt_delta": 989689,
+      "baseline_run_time_ns_delta": 73609900,
+      "post_rejit_avg_ns_per_run": 76.18613151558097,
+      "post_rejit_run_cnt_delta": 935661,
+      "post_rejit_run_time_ns_delta": 71284392,
+      "program": "sched_wakeup",
+      "program_id": 48,
+      "ratio": 1.0243265690284025,
+      "runner": "bcc",
+      "type": "raw_tracepoint",
+      "workload": "stress_ng_scheduler"
+    },
+    {
+      "app": "bcc/runqlat",
+      "baseline_avg_ns_per_run": 291.6666666666667,
+      "baseline_run_cnt_delta": 45,
+      "baseline_run_time_ns_delta": 13125,
+      "post_rejit_avg_ns_per_run": 267.15555555555557,
+      "post_rejit_run_cnt_delta": 45,
+      "post_rejit_run_time_ns_delta": 12022,
+      "program": "raw_tracepoint__sched_wakeup_new",
+      "program_id": 49,
+      "ratio": 0.9159619047619048,
+      "runner": "bcc",
+      "type": "raw_tracepoint",
+      "workload": "stress_ng_scheduler"
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "baseline_avg_ns_per_run": 6228.666666666667,
+      "baseline_run_cnt_delta": 3,
+      "baseline_run_time_ns_delta": 18686,
+      "post_rejit_avg_ns_per_run": 3345.6666666666665,
+      "post_rejit_run_cnt_delta": 3,
+      "post_rejit_run_time_ns_delta": 10037,
+      "program": "tracepoint__sched_process_free",
+      "program_id": 63,
+      "ratio": 0.5371401048913624,
+      "runner": "otelcol-ebpf-profiler",
+      "type": "tracepoint",
+      "workload": "stress_ng_cpu"
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "baseline_avg_ns_per_run": 827.3083176985616,
+      "baseline_run_cnt_delta": 1599,
+      "baseline_run_time_ns_delta": 1322866,
+      "post_rejit_avg_ns_per_run": 848.384375,
+      "post_rejit_run_cnt_delta": 1600,
+      "post_rejit_run_time_ns_delta": 1357415,
+      "program": "native_tracer_entry",
+      "program_id": 64,
+      "ratio": 1.025475456792298,
+      "runner": "otelcol-ebpf-profiler",
+      "type": "perf_event",
+      "workload": "stress_ng_cpu"
+    },
+    {
+      "app": "cilium/agent",
+      "baseline_avg_ns_per_run": 1074.8322717622082,
+      "baseline_run_cnt_delta": 471,
+      "baseline_run_time_ns_delta": 506246,
+      "post_rejit_avg_ns_per_run": 928.4516129032259,
+      "post_rejit_run_cnt_delta": 496,
+      "post_rejit_run_time_ns_delta": 460512,
+      "program": "cil_from_netdev",
+      "program_id": 168,
+      "ratio": 0.8638106961386743,
+      "runner": "cilium",
+      "type": "sched_cls",
+      "workload": "network_lossy_multi"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 1471.183353437877,
+      "baseline_run_cnt_delta": 829,
+      "baseline_run_time_ns_delta": 1219611,
+      "post_rejit_avg_ns_per_run": 1471.1124845488257,
+      "post_rejit_run_cnt_delta": 809,
+      "post_rejit_run_time_ns_delta": 1190130,
+      "program": "event_exit_acct_process",
+      "program_id": 183,
+      "ratio": 0.9999518286494435,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 2130.218590398366,
+      "baseline_run_cnt_delta": 979,
+      "baseline_run_time_ns_delta": 2085484,
+      "post_rejit_avg_ns_per_run": 2209.823660714286,
+      "post_rejit_run_cnt_delta": 896,
+      "post_rejit_run_time_ns_delta": 1980002,
+      "program": "event_wake_up_new_task",
+      "program_id": 185,
+      "ratio": 1.0373694374252143,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 5495.5,
+      "baseline_run_cnt_delta": 2,
+      "baseline_run_time_ns_delta": 10991,
+      "post_rejit_avg_ns_per_run": 6191.5,
+      "post_rejit_run_cnt_delta": 2,
+      "post_rejit_run_time_ns_delta": 12383,
+      "program": "event_execve",
+      "program_id": 188,
+      "ratio": 1.1266490765171504,
+      "runner": "tetragon",
+      "type": "tracepoint",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 746.5,
+      "baseline_run_cnt_delta": 2,
+      "baseline_run_time_ns_delta": 1493,
+      "post_rejit_avg_ns_per_run": 750.0,
+      "post_rejit_run_cnt_delta": 2,
+      "post_rejit_run_time_ns_delta": 1500,
+      "program": "tg_kp_bprm_committing_creds",
+      "program_id": 189,
+      "ratio": 1.0046885465505693,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 540.930407810646,
+      "baseline_run_cnt_delta": 96074,
+      "baseline_run_time_ns_delta": 51969348,
+      "post_rejit_avg_ns_per_run": 453.61052908293834,
+      "post_rejit_run_cnt_delta": 129337,
+      "post_rejit_run_time_ns_delta": 58668625,
+      "program": "generic_kprobe_event",
+      "program_id": 218,
+      "ratio": 0.8385746531034836,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 230.63355330266253,
+      "baseline_run_cnt_delta": 96074,
+      "baseline_run_time_ns_delta": 22157888,
+      "post_rejit_avg_ns_per_run": 155.45736332217385,
+      "post_rejit_run_cnt_delta": 129337,
+      "post_rejit_run_time_ns_delta": 20106389,
+      "program": "generic_retkprobe_event",
+      "program_id": 222,
+      "ratio": 0.6740448694304498,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 1368.8955824859363,
+      "baseline_run_cnt_delta": 102569,
+      "baseline_run_time_ns_delta": 140406251,
+      "post_rejit_avg_ns_per_run": 1281.7230725017869,
+      "post_rejit_run_cnt_delta": 135707,
+      "post_rejit_run_time_ns_delta": 173938793,
+      "program": "generic_kprobe_event",
+      "program_id": 226,
+      "ratio": 0.9363190946778842,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 527.7782230364095,
+      "baseline_run_cnt_delta": 96074,
+      "baseline_run_time_ns_delta": 50705765,
+      "post_rejit_avg_ns_per_run": 458.39833922234163,
+      "post_rejit_run_cnt_delta": 129337,
+      "post_rejit_run_time_ns_delta": 59287866,
+      "program": "generic_kprobe_event",
+      "program_id": 241,
+      "ratio": 0.8685434889395169,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 255.44541707433854,
+      "baseline_run_cnt_delta": 96074,
+      "baseline_run_time_ns_delta": 24541663,
+      "post_rejit_avg_ns_per_run": 172.76635456211292,
+      "post_rejit_run_cnt_delta": 129337,
+      "post_rejit_run_time_ns_delta": 22345082,
+      "program": "generic_retkprobe_event",
+      "program_id": 247,
+      "ratio": 0.6763337410427499,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 1366.8942662987843,
+      "baseline_run_cnt_delta": 102569,
+      "baseline_run_time_ns_delta": 140200978,
+      "post_rejit_avg_ns_per_run": 1343.3567907329762,
+      "post_rejit_run_cnt_delta": 135707,
+      "post_rejit_run_time_ns_delta": 182302920,
+      "program": "generic_kprobe_event",
+      "program_id": 250,
+      "ratio": 0.9827803246043735,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 476.10533852026373,
+      "baseline_run_cnt_delta": 273765,
+      "baseline_run_time_ns_delta": 130340978,
+      "post_rejit_avg_ns_per_run": 508.37446487930106,
+      "post_rejit_run_cnt_delta": 280077,
+      "post_rejit_run_time_ns_delta": 142383995,
+      "program": "generic_kprobe_event",
+      "program_id": 263,
+      "ratio": 1.0677772831939458,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 741.3576409655153,
+      "baseline_run_cnt_delta": 506631,
+      "baseline_run_time_ns_delta": 375594763,
+      "post_rejit_avg_ns_per_run": 804.6377462436952,
+      "post_rejit_run_cnt_delta": 376101,
+      "post_rejit_run_time_ns_delta": 302625061,
+      "program": "generic_kprobe_event",
+      "program_id": 270,
+      "ratio": 1.085357055463496,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 200.9503608015387,
+      "baseline_run_cnt_delta": 366545,
+      "baseline_run_time_ns_delta": 73657350,
+      "post_rejit_avg_ns_per_run": 192.97500876316096,
+      "post_rejit_run_cnt_delta": 385135,
+      "post_rejit_run_time_ns_delta": 74321430,
+      "program": "generic_kprobe_event",
+      "program_id": 289,
+      "ratio": 0.9603118302123662,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 493.2234042067002,
+      "baseline_run_cnt_delta": 656429,
+      "baseline_run_time_ns_delta": 323766146,
+      "post_rejit_avg_ns_per_run": 502.43416101036917,
+      "post_rejit_run_cnt_delta": 638816,
+      "post_rejit_run_time_ns_delta": 320962981,
+      "program": "generic_kprobe_event",
+      "program_id": 296,
+      "ratio": 1.0186746142318277,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 37.01371511618164,
+      "baseline_run_cnt_delta": 656429,
+      "baseline_run_time_ns_delta": 24296876,
+      "post_rejit_avg_ns_per_run": 36.77867805440064,
+      "post_rejit_run_cnt_delta": 638816,
+      "post_rejit_run_time_ns_delta": 23494808,
+      "program": "generic_retkprobe_event",
+      "program_id": 301,
+      "ratio": 0.9936500007890792,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 5702.633142857143,
+      "baseline_run_cnt_delta": 2625,
+      "baseline_run_time_ns_delta": 14969412,
+      "post_rejit_avg_ns_per_run": 6412.922707248698,
+      "post_rejit_run_cnt_delta": 2497,
+      "post_rejit_run_time_ns_delta": 16013068,
+      "program": "generic_kprobe_event",
+      "program_id": 304,
+      "ratio": 1.1245546656427008,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 59.65548780487805,
+      "baseline_run_cnt_delta": 2624,
+      "baseline_run_time_ns_delta": 156536,
+      "post_rejit_avg_ns_per_run": 58.33960752903484,
+      "post_rejit_run_cnt_delta": 2497,
+      "post_rejit_run_time_ns_delta": 145674,
+      "program": "generic_retkprobe_event",
+      "program_id": 313,
+      "ratio": 0.977942007948251,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 6911.333333333333,
+      "baseline_run_cnt_delta": 6,
+      "baseline_run_time_ns_delta": 41468,
+      "post_rejit_avg_ns_per_run": 7897.428571428572,
+      "post_rejit_run_cnt_delta": 7,
+      "post_rejit_run_time_ns_delta": 55282,
+      "program": "generic_kprobe_event",
+      "program_id": 314,
+      "ratio": 1.1426780030040375,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 391.5,
+      "baseline_run_cnt_delta": 6,
+      "baseline_run_time_ns_delta": 2349,
+      "post_rejit_avg_ns_per_run": 589.8571428571429,
+      "post_rejit_run_cnt_delta": 7,
+      "post_rejit_run_time_ns_delta": 4129,
+      "program": "generic_retkprobe_event",
+      "program_id": 322,
+      "ratio": 1.5066593687283343,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 4840.0,
+      "baseline_run_cnt_delta": 2,
+      "baseline_run_time_ns_delta": 9680,
+      "post_rejit_avg_ns_per_run": 5260.0,
+      "post_rejit_run_cnt_delta": 2,
+      "post_rejit_run_time_ns_delta": 10520,
+      "program": "generic_kprobe_event",
+      "program_id": 365,
+      "ratio": 1.0867768595041323,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 987.9401792576265,
+      "baseline_run_cnt_delta": 6397831,
+      "baseline_run_time_ns_delta": 6320674305,
+      "post_rejit_avg_ns_per_run": 993.6979655765417,
+      "post_rejit_run_cnt_delta": 6158010,
+      "post_rejit_run_time_ns_delta": 6119202009,
+      "program": "generic_tracepoint_event",
+      "program_id": 370,
+      "ratio": 1.0058280718203423,
+      "runner": "tetragon",
+      "type": "tracepoint",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 5275.5,
+      "baseline_run_cnt_delta": 2,
+      "baseline_run_time_ns_delta": 10551,
+      "post_rejit_avg_ns_per_run": 4732.0,
+      "post_rejit_run_cnt_delta": 2,
+      "post_rejit_run_time_ns_delta": 9464,
+      "program": "generic_rawtp_event",
+      "program_id": 380,
+      "ratio": 0.8969765898966923,
+      "runner": "tetragon",
+      "type": "raw_tracepoint",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 1039.567700920391,
+      "baseline_run_cnt_delta": 21078,
+      "baseline_run_time_ns_delta": 21912008,
+      "post_rejit_avg_ns_per_run": 805.9312830531883,
+      "post_rejit_run_cnt_delta": 29687,
+      "post_rejit_run_time_ns_delta": 23925682,
+      "program": "generic_kprobe_event",
+      "program_id": 383,
+      "ratio": 0.775256178447685,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 3237.0478199718705,
+      "baseline_run_cnt_delta": 711,
+      "baseline_run_time_ns_delta": 2301541,
+      "post_rejit_avg_ns_per_run": 4143.379746835443,
+      "post_rejit_run_cnt_delta": 711,
+      "post_rejit_run_time_ns_delta": 2945943,
+      "program": "generic_kprobe_event",
+      "program_id": 391,
+      "ratio": 1.279987191190598,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 562.353227720299,
+      "baseline_run_cnt_delta": 96074,
+      "baseline_run_time_ns_delta": 54027524,
+      "post_rejit_avg_ns_per_run": 477.0954715201373,
+      "post_rejit_run_cnt_delta": 129337,
+      "post_rejit_run_time_ns_delta": 61706097,
+      "program": "generic_kprobe_event",
+      "program_id": 406,
+      "ratio": 0.8483910965608136,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 265.9974290650957,
+      "baseline_run_cnt_delta": 96074,
+      "baseline_run_time_ns_delta": 25555437,
+      "post_rejit_avg_ns_per_run": 171.22598328397908,
+      "post_rejit_run_cnt_delta": 129337,
+      "post_rejit_run_time_ns_delta": 22145855,
+      "program": "generic_retkprobe_event",
+      "program_id": 409,
+      "ratio": 0.6437129256692031,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 1363.2006649182501,
+      "baseline_run_cnt_delta": 102569,
+      "baseline_run_time_ns_delta": 139822129,
+      "post_rejit_avg_ns_per_run": 1308.2684975719749,
+      "post_rejit_run_cnt_delta": 135707,
+      "post_rejit_run_time_ns_delta": 177541193,
+      "program": "generic_kprobe_event",
+      "program_id": 414,
+      "ratio": 0.959703535392884,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 557.0263840719332,
+      "baseline_run_cnt_delta": 77850,
+      "baseline_run_time_ns_delta": 43364504,
+      "post_rejit_avg_ns_per_run": 528.7813303081518,
+      "post_rejit_run_cnt_delta": 86386,
+      "post_rejit_run_time_ns_delta": 45679304,
+      "program": "generic_kprobe_event",
+      "program_id": 420,
+      "ratio": 0.949293149173103,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 1285.855713180294,
+      "baseline_run_cnt_delta": 19385,
+      "baseline_run_time_ns_delta": 24926313,
+      "post_rejit_avg_ns_per_run": 1375.1571476206354,
+      "post_rejit_run_cnt_delta": 20993,
+      "post_rejit_run_time_ns_delta": 28868674,
+      "program": "generic_kprobe_event",
+      "program_id": 429,
+      "ratio": 1.0694490318975782,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 1273.5595459236326,
+      "baseline_run_cnt_delta": 9690,
+      "baseline_run_time_ns_delta": 12340792,
+      "post_rejit_avg_ns_per_run": 1229.252239374881,
+      "post_rejit_run_cnt_delta": 10494,
+      "post_rejit_run_time_ns_delta": 12899773,
+      "program": "generic_kprobe_event",
+      "program_id": 437,
+      "ratio": 0.9652098665582076,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 1527.8556243550051,
+      "baseline_run_cnt_delta": 9690,
+      "baseline_run_time_ns_delta": 14804921,
+      "post_rejit_avg_ns_per_run": 1686.9483514389174,
+      "post_rejit_run_cnt_delta": 10494,
+      "post_rejit_run_time_ns_delta": 17702836,
+      "program": "generic_retkprobe_event",
+      "program_id": 441,
+      "ratio": 1.104128115607176,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 1574.8338664740481,
+      "baseline_run_cnt_delta": 9691,
+      "baseline_run_time_ns_delta": 15261715,
+      "post_rejit_avg_ns_per_run": 1430.6934070121952,
+      "post_rejit_run_cnt_delta": 10496,
+      "post_rejit_run_time_ns_delta": 15016558,
+      "program": "generic_kprobe_event",
+      "program_id": 451,
+      "ratio": 0.9084725935031013,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 1365.5740521021407,
+      "baseline_run_cnt_delta": 19385,
+      "baseline_run_time_ns_delta": 26471653,
+      "post_rejit_avg_ns_per_run": 1387.7476777973611,
+      "post_rejit_run_cnt_delta": 20993,
+      "post_rejit_run_time_ns_delta": 29132987,
+      "program": "generic_kprobe_event",
+      "program_id": 457,
+      "ratio": 1.0162375856959838,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline_avg_ns_per_run": 1234.9358478712609,
+      "baseline_run_cnt_delta": 165544,
+      "baseline_run_time_ns_delta": 204436220,
+      "post_rejit_avg_ns_per_run": 1283.588848799547,
+      "post_rejit_run_cnt_delta": 157149,
+      "post_rejit_run_time_ns_delta": 201714704,
+      "program": "generic_kprobe_event",
+      "program_id": 465,
+      "ratio": 1.0393971889407474,
+      "runner": "tetragon",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "katran",
+      "baseline_avg_ns_per_run": 313.8052744039586,
+      "baseline_run_cnt_delta": 35568,
+      "baseline_run_time_ns_delta": 11161426,
+      "post_rejit_avg_ns_per_run": 330.86788779511363,
+      "post_rejit_run_cnt_delta": 36469,
+      "post_rejit_run_time_ns_delta": 12066421,
+      "program": "xdp_root",
+      "program_id": 479,
+      "ratio": 1.054373252404899,
+      "runner": "katran",
+      "type": "xdp",
+      "workload": "network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 149.25522060217298,
+      "baseline_run_cnt_delta": 29659318,
+      "baseline_run_time_ns_delta": 4426808051,
+      "post_rejit_avg_ns_per_run": 150.1063133507358,
+      "post_rejit_run_cnt_delta": 29757843,
+      "post_rejit_run_time_ns_delta": 4466840106,
+      "program": "tracepoint__raw_syscalls__sys_enter",
+      "program_id": 502,
+      "ratio": 1.0057022645179785,
+      "runner": "tracee",
+      "type": "raw_tracepoint",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 292.2462195362241,
+      "baseline_run_cnt_delta": 29659324,
+      "baseline_run_time_ns_delta": 8667825313,
+      "post_rejit_avg_ns_per_run": 292.8640634610385,
+      "post_rejit_run_cnt_delta": 29757849,
+      "post_rejit_run_time_ns_delta": 8715004578,
+      "program": "tracepoint__raw_syscalls__sys_exit",
+      "program_id": 505,
+      "ratio": 1.0021141211879314,
+      "runner": "tracee",
+      "type": "raw_tracepoint",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 262.5116147309928,
+      "baseline_run_cnt_delta": 29659318,
+      "baseline_run_time_ns_delta": 7785915460,
+      "post_rejit_avg_ns_per_run": 261.71060866205926,
+      "post_rejit_run_cnt_delta": 29757843,
+      "post_rejit_run_time_ns_delta": 7787943204,
+      "program": "trace_sys_enter",
+      "program_id": 508,
+      "ratio": 0.9969486833191957,
+      "runner": "tracee",
+      "type": "raw_tracepoint",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 268.424992963427,
+      "baseline_run_cnt_delta": 29659324,
+      "baseline_run_time_ns_delta": 7961303836,
+      "post_rejit_avg_ns_per_run": 268.3856696765952,
+      "post_rejit_run_cnt_delta": 29757849,
+      "post_rejit_run_time_ns_delta": 7986580232,
+      "program": "trace_sys_exit",
+      "program_id": 509,
+      "ratio": 0.9998535036309487,
+      "runner": "tracee",
+      "type": "raw_tracepoint",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 72.58842761147916,
+      "baseline_run_cnt_delta": 928918,
+      "baseline_run_time_ns_delta": 67428697,
+      "post_rejit_avg_ns_per_run": 69.17131435400002,
+      "post_rejit_run_cnt_delta": 957322,
+      "post_rejit_run_time_ns_delta": 66219221,
+      "program": "trace_arch_prctl",
+      "program_id": 514,
+      "ratio": 0.9529248205269188,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 272.5491055184634,
+      "baseline_run_cnt_delta": 928918,
+      "baseline_run_time_ns_delta": 253175770,
+      "post_rejit_avg_ns_per_run": 276.9282070191639,
+      "post_rejit_run_cnt_delta": 957322,
+      "post_rejit_run_time_ns_delta": 265109465,
+      "program": "trace_ret_arch_prctl",
+      "program_id": 515,
+      "ratio": 1.0160672018804473,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 222.40528169014084,
+      "baseline_run_cnt_delta": 2840,
+      "baseline_run_time_ns_delta": 631631,
+      "post_rejit_avg_ns_per_run": 242.8245814307458,
+      "post_rejit_run_cnt_delta": 2628,
+      "post_rejit_run_time_ns_delta": 638143,
+      "program": "trace_dup",
+      "program_id": 516,
+      "ratio": 1.0918112177257262,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 815.4609154929577,
+      "baseline_run_cnt_delta": 2840,
+      "baseline_run_time_ns_delta": 2315909,
+      "post_rejit_avg_ns_per_run": 985.3432267884323,
+      "post_rejit_run_cnt_delta": 2628,
+      "post_rejit_run_time_ns_delta": 2589482,
+      "program": "trace_ret_dup",
+      "program_id": 517,
+      "ratio": 1.208326736533753,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 656.0,
+      "baseline_run_cnt_delta": 4,
+      "baseline_run_time_ns_delta": 2624,
+      "post_rejit_avg_ns_per_run": 964.75,
+      "post_rejit_run_cnt_delta": 4,
+      "post_rejit_run_time_ns_delta": 3859,
+      "program": "trace_dup2",
+      "program_id": 518,
+      "ratio": 1.470655487804878,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 1885.75,
+      "baseline_run_cnt_delta": 4,
+      "baseline_run_time_ns_delta": 7543,
+      "post_rejit_avg_ns_per_run": 4233.75,
+      "post_rejit_run_cnt_delta": 4,
+      "post_rejit_run_time_ns_delta": 16935,
+      "program": "trace_ret_dup2",
+      "program_id": 519,
+      "ratio": 2.245127933183084,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 1942.2958242950108,
+      "baseline_run_cnt_delta": 3688,
+      "baseline_run_time_ns_delta": 7163187,
+      "post_rejit_avg_ns_per_run": 2076.135185185185,
+      "post_rejit_run_cnt_delta": 3780,
+      "post_rejit_run_time_ns_delta": 7847791,
+      "program": "tracepoint__sched__sched_process_fork",
+      "program_id": 527,
+      "ratio": 1.068907814770571,
+      "runner": "tracee",
+      "type": "raw_tracepoint",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 7387.0,
+      "baseline_run_cnt_delta": 2,
+      "baseline_run_time_ns_delta": 14774,
+      "post_rejit_avg_ns_per_run": 12808.5,
+      "post_rejit_run_cnt_delta": 2,
+      "post_rejit_run_time_ns_delta": 25617,
+      "program": "tracepoint__sched__sched_process_exec",
+      "program_id": 535,
+      "ratio": 1.7339244618925138,
+      "runner": "tracee",
+      "type": "raw_tracepoint",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 1447.6653707303526,
+      "baseline_run_cnt_delta": 3601,
+      "baseline_run_time_ns_delta": 5213043,
+      "post_rejit_avg_ns_per_run": 1375.2812837108954,
+      "post_rejit_run_cnt_delta": 3708,
+      "post_rejit_run_time_ns_delta": 5099543,
+      "program": "tracepoint__sched__sched_process_exit",
+      "program_id": 537,
+      "ratio": 0.9499994346186929,
+      "runner": "tracee",
+      "type": "raw_tracepoint",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 930.3835045820606,
+      "baseline_run_cnt_delta": 3601,
+      "baseline_run_time_ns_delta": 3350311,
+      "post_rejit_avg_ns_per_run": 982.5585221143474,
+      "post_rejit_run_cnt_delta": 3708,
+      "post_rejit_run_time_ns_delta": 3643327,
+      "program": "tracepoint__sched__sched_process_free",
+      "program_id": 538,
+      "ratio": 1.0560790440450945,
+      "runner": "tracee",
+      "type": "raw_tracepoint",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 355.44010650192433,
+      "baseline_run_cnt_delta": 2204655,
+      "baseline_run_time_ns_delta": 783622808,
+      "post_rejit_avg_ns_per_run": 368.8230521208636,
+      "post_rejit_run_cnt_delta": 1822418,
+      "post_rejit_run_time_ns_delta": 672149769,
+      "program": "tracepoint__sched__sched_switch",
+      "program_id": 540,
+      "ratio": 1.0376517600972157,
+      "runner": "tracee",
+      "type": "raw_tracepoint",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 16.87455132876835,
+      "baseline_run_cnt_delta": 513182,
+      "baseline_run_time_ns_delta": 8659716,
+      "post_rejit_avg_ns_per_run": 16.82093470758252,
+      "post_rejit_run_cnt_delta": 513444,
+      "post_rejit_run_time_ns_delta": 8636608,
+      "program": "trace_filldir64",
+      "program_id": 541,
+      "ratio": 0.996822634264982,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 906.4401555123577,
+      "baseline_run_cnt_delta": 3601,
+      "baseline_run_time_ns_delta": 3264091,
+      "post_rejit_avg_ns_per_run": 912.450377562028,
+      "post_rejit_run_cnt_delta": 3708,
+      "post_rejit_run_time_ns_delta": 3383366,
+      "program": "trace_do_exit",
+      "program_id": 543,
+      "ratio": 1.006630577885501,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 94.0579344247016,
+      "baseline_run_cnt_delta": 4012761,
+      "baseline_run_time_ns_delta": 377432011,
+      "post_rejit_avg_ns_per_run": 94.3321547106325,
+      "post_rejit_run_cnt_delta": 4038895,
+      "post_rejit_run_time_ns_delta": 380997668,
+      "program": "trace_security_file_ioctl",
+      "program_id": 547,
+      "ratio": 1.002915440229558,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 5864.5,
+      "baseline_run_cnt_delta": 2,
+      "baseline_run_time_ns_delta": 11729,
+      "post_rejit_avg_ns_per_run": 11919.5,
+      "post_rejit_run_cnt_delta": 2,
+      "post_rejit_run_time_ns_delta": 23839,
+      "program": "trace_security_bprm_check",
+      "program_id": 552,
+      "ratio": 2.032483587688635,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 530.6498676653234,
+      "baseline_run_cnt_delta": 737524,
+      "baseline_run_time_ns_delta": 391367013,
+      "post_rejit_avg_ns_per_run": 564.7853181523169,
+      "post_rejit_run_cnt_delta": 738027,
+      "post_rejit_run_time_ns_delta": 416826814,
+      "program": "trace_security_file_open",
+      "program_id": 553,
+      "ratio": 1.064327634033299,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 2069.089285714286,
+      "baseline_run_cnt_delta": 112,
+      "baseline_run_time_ns_delta": 231738,
+      "post_rejit_avg_ns_per_run": 2055.5593220338983,
+      "post_rejit_run_cnt_delta": 118,
+      "post_rejit_run_time_ns_delta": 242556,
+      "program": "trace_security_inode_unlink",
+      "program_id": 555,
+      "ratio": 0.9934609087322606,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 246.57243933588762,
+      "baseline_run_cnt_delta": 352350,
+      "baseline_run_time_ns_delta": 86879799,
+      "post_rejit_avg_ns_per_run": 240.1756365990505,
+      "post_rejit_run_cnt_delta": 370720,
+      "post_rejit_run_time_ns_delta": 89037912,
+      "program": "trace_commit_creds",
+      "program_id": 556,
+      "ratio": 0.9740571056762625,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 536.233823937795,
+      "baseline_run_cnt_delta": 3601,
+      "baseline_run_time_ns_delta": 1930978,
+      "post_rejit_avg_ns_per_run": 485.67340884573895,
+      "post_rejit_run_cnt_delta": 3708,
+      "post_rejit_run_time_ns_delta": 1800877,
+      "program": "trace_switch_task_namespaces",
+      "program_id": 557,
+      "ratio": 0.9057119994394064,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 137.29260959636113,
+      "baseline_run_cnt_delta": 2309292,
+      "baseline_run_time_ns_delta": 317048725,
+      "post_rejit_avg_ns_per_run": 135.13099441661555,
+      "post_rejit_run_cnt_delta": 2480037,
+      "post_rejit_run_time_ns_delta": 335129866,
+      "program": "trace_cap_capable",
+      "program_id": 558,
+      "ratio": 0.9842554148682824,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 305.24823869036726,
+      "baseline_run_cnt_delta": 846955,
+      "baseline_run_time_ns_delta": 258531522,
+      "post_rejit_avg_ns_per_run": 296.836851023481,
+      "post_rejit_run_cnt_delta": 911204,
+      "post_rejit_run_time_ns_delta": 270478926,
+      "program": "trace_security_socket_create",
+      "program_id": 559,
+      "ratio": 0.9724441074485005,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 1568.8,
+      "baseline_run_cnt_delta": 5,
+      "baseline_run_time_ns_delta": 7844,
+      "post_rejit_avg_ns_per_run": 2457.6,
+      "post_rejit_run_cnt_delta": 5,
+      "post_rejit_run_time_ns_delta": 12288,
+      "program": "trace_security_socket_listen",
+      "program_id": 564,
+      "ratio": 1.566547679755227,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 368.79023216492163,
+      "baseline_run_cnt_delta": 230655,
+      "baseline_run_time_ns_delta": 85063311,
+      "post_rejit_avg_ns_per_run": 375.0392123287671,
+      "post_rejit_run_cnt_delta": 210240,
+      "post_rejit_run_time_ns_delta": 78848244,
+      "program": "trace_security_socket_connect",
+      "program_id": 565,
+      "ratio": 1.0169445381651294,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 479.4018718360925,
+      "baseline_run_cnt_delta": 233888,
+      "baseline_run_time_ns_delta": 112126345,
+      "post_rejit_avg_ns_per_run": 487.1684124602478,
+      "post_rejit_run_cnt_delta": 211938,
+      "post_rejit_run_time_ns_delta": 103249499,
+      "program": "trace_security_socket_accept",
+      "program_id": 566,
+      "ratio": 1.0162004803911378,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 2144.8,
+      "baseline_run_cnt_delta": 5,
+      "baseline_run_time_ns_delta": 10724,
+      "post_rejit_avg_ns_per_run": 2364.6,
+      "post_rejit_run_cnt_delta": 5,
+      "post_rejit_run_time_ns_delta": 11823,
+      "program": "trace_security_socket_bind",
+      "program_id": 567,
+      "ratio": 1.102480417754569,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 363.17909178017175,
+      "baseline_run_cnt_delta": 111669,
+      "baseline_run_time_ns_delta": 40555846,
+      "post_rejit_avg_ns_per_run": 383.97916915887106,
+      "post_rejit_run_cnt_delta": 125391,
+      "post_rejit_run_time_ns_delta": 48147532,
+      "program": "trace_security_socket_setsockopt",
+      "program_id": 568,
+      "ratio": 1.0572722324865809,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 64.5737240856561,
+      "baseline_run_cnt_delta": 835107,
+      "baseline_run_time_ns_delta": 53925969,
+      "post_rejit_avg_ns_per_run": 65.74951596390815,
+      "post_rejit_run_cnt_delta": 942595,
+      "post_rejit_run_time_ns_delta": 61975165,
+      "program": "trace_vfs_write",
+      "program_id": 571,
+      "ratio": 1.018208518943284,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 72.57400189436802,
+      "baseline_run_cnt_delta": 835107,
+      "baseline_run_time_ns_delta": 60607057,
+      "post_rejit_avg_ns_per_run": 82.57865997591755,
+      "post_rejit_run_cnt_delta": 942595,
+      "post_rejit_run_time_ns_delta": 77838232,
+      "program": "vfs_write_magic_enter",
+      "program_id": 572,
+      "ratio": 1.137854573544275,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 627.5758615363061,
+      "baseline_run_cnt_delta": 835107,
+      "baseline_run_time_ns_delta": 524092995,
+      "post_rejit_avg_ns_per_run": 644.3527909653669,
+      "post_rejit_run_cnt_delta": 942595,
+      "post_rejit_run_time_ns_delta": 607363719,
+      "program": "trace_ret_vfs_write",
+      "program_id": 573,
+      "ratio": 1.0267329106444452,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 34.77421695662951,
+      "baseline_run_cnt_delta": 835107,
+      "baseline_run_time_ns_delta": 29040192,
+      "post_rejit_avg_ns_per_run": 37.19994801584986,
+      "post_rejit_run_cnt_delta": 942595,
+      "post_rejit_run_time_ns_delta": 35064485,
+      "program": "vfs_write_magic_return",
+      "program_id": 574,
+      "ratio": 1.0697565976034984,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 436.9591836734694,
+      "baseline_run_cnt_delta": 49,
+      "baseline_run_time_ns_delta": 21411,
+      "post_rejit_avg_ns_per_run": 350.46153846153845,
+      "post_rejit_run_cnt_delta": 52,
+      "post_rejit_run_time_ns_delta": 18224,
+      "program": "trace_vfs_writev",
+      "program_id": 576,
+      "ratio": 0.8020463959934325,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 660.9795918367347,
+      "baseline_run_cnt_delta": 49,
+      "baseline_run_time_ns_delta": 32388,
+      "post_rejit_avg_ns_per_run": 599.8846153846154,
+      "post_rejit_run_cnt_delta": 52,
+      "post_rejit_run_time_ns_delta": 31194,
+      "program": "vfs_writev_magic_enter",
+      "program_id": 577,
+      "ratio": 0.9075690426653746,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 2554.1632653061224,
+      "baseline_run_cnt_delta": 49,
+      "baseline_run_time_ns_delta": 125154,
+      "post_rejit_avg_ns_per_run": 2758.75,
+      "post_rejit_run_cnt_delta": 52,
+      "post_rejit_run_time_ns_delta": 143455,
+      "program": "trace_ret_vfs_writev",
+      "program_id": 578,
+      "ratio": 1.0800993176406668,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 6009.6122448979595,
+      "baseline_run_cnt_delta": 49,
+      "baseline_run_time_ns_delta": 294471,
+      "post_rejit_avg_ns_per_run": 5763.076923076923,
+      "post_rejit_run_cnt_delta": 52,
+      "post_rejit_run_time_ns_delta": 299680,
+      "program": "vfs_writev_magic_return",
+      "program_id": 579,
+      "ratio": 0.9589765010162943,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 60.16971983371996,
+      "baseline_run_cnt_delta": 1141929,
+      "baseline_run_time_ns_delta": 68709548,
+      "post_rejit_avg_ns_per_run": 58.71386313430188,
+      "post_rejit_run_cnt_delta": 1240340,
+      "post_rejit_run_time_ns_delta": 72825153,
+      "program": "trace_vfs_read",
+      "program_id": 586,
+      "ratio": 0.9758041635653055,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 573.498901420316,
+      "baseline_run_cnt_delta": 1141929,
+      "baseline_run_time_ns_delta": 654895027,
+      "post_rejit_avg_ns_per_run": 584.0076624151442,
+      "post_rejit_run_cnt_delta": 1240340,
+      "post_rejit_run_time_ns_delta": 724368064,
+      "program": "trace_ret_vfs_read",
+      "program_id": 587,
+      "ratio": 1.0183239426767905,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 470.14285714285717,
+      "baseline_run_cnt_delta": 49,
+      "baseline_run_time_ns_delta": 23037,
+      "post_rejit_avg_ns_per_run": 443.11538461538464,
+      "post_rejit_run_cnt_delta": 52,
+      "post_rejit_run_time_ns_delta": 23042,
+      "program": "trace_vfs_readv",
+      "program_id": 589,
+      "ratio": 0.9425122127948017,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 2496.7551020408164,
+      "baseline_run_cnt_delta": 49,
+      "baseline_run_time_ns_delta": 122341,
+      "post_rejit_avg_ns_per_run": 2933.7115384615386,
+      "post_rejit_run_cnt_delta": 52,
+      "post_rejit_run_time_ns_delta": 152553,
+      "program": "trace_ret_vfs_readv",
+      "program_id": 590,
+      "ratio": 1.1750097300546456,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 145.45696775912603,
+      "baseline_run_cnt_delta": 7506,
+      "baseline_run_time_ns_delta": 1091800,
+      "post_rejit_avg_ns_per_run": 144.82374100719426,
+      "post_rejit_run_cnt_delta": 7506,
+      "post_rejit_run_time_ns_delta": 1087047,
+      "program": "trace_mmap_alert",
+      "program_id": 592,
+      "ratio": 0.9956466385784943,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 69.80112119594234,
+      "baseline_run_cnt_delta": 7492,
+      "baseline_run_time_ns_delta": 522950,
+      "post_rejit_avg_ns_per_run": 73.86065136145221,
+      "post_rejit_run_cnt_delta": 7492,
+      "post_rejit_run_time_ns_delta": 553364,
+      "program": "trace_do_mmap",
+      "program_id": 593,
+      "ratio": 1.0581585237594415,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 415.826348104645,
+      "baseline_run_cnt_delta": 7492,
+      "baseline_run_time_ns_delta": 3115371,
+      "post_rejit_avg_ns_per_run": 409.3888147357181,
+      "post_rejit_run_cnt_delta": 7492,
+      "post_rejit_run_time_ns_delta": 3067141,
+      "program": "trace_ret_do_mmap",
+      "program_id": 594,
+      "ratio": 0.9845186977730741,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 143.54198371378988,
+      "baseline_run_cnt_delta": 7491,
+      "baseline_run_time_ns_delta": 1075273,
+      "post_rejit_avg_ns_per_run": 148.4391936991056,
+      "post_rejit_run_cnt_delta": 7491,
+      "post_rejit_run_time_ns_delta": 1111958,
+      "program": "trace_security_mmap_file",
+      "program_id": 595,
+      "ratio": 1.0341169172851918,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 983.3333333333334,
+      "baseline_run_cnt_delta": 39,
+      "baseline_run_time_ns_delta": 38350,
+      "post_rejit_avg_ns_per_run": 891.3333333333334,
+      "post_rejit_run_cnt_delta": 39,
+      "post_rejit_run_time_ns_delta": 34762,
+      "program": "trace_security_file_mprotect",
+      "program_id": 596,
+      "ratio": 0.9064406779661017,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 262.87847730600294,
+      "baseline_run_cnt_delta": 8196,
+      "baseline_run_time_ns_delta": 2154552,
+      "post_rejit_avg_ns_per_run": 288.85407515861397,
+      "post_rejit_run_cnt_delta": 8196,
+      "post_rejit_run_time_ns_delta": 2367448,
+      "program": "trace_security_bpf",
+      "program_id": 598,
+      "ratio": 1.0988121892625473,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 268.42638036809814,
+      "baseline_run_cnt_delta": 2608,
+      "baseline_run_time_ns_delta": 700056,
+      "post_rejit_avg_ns_per_run": 288.7430981595092,
+      "post_rejit_run_cnt_delta": 2608,
+      "post_rejit_run_time_ns_delta": 753042,
+      "program": "trace_security_bpf_map",
+      "program_id": 601,
+      "ratio": 1.0756882306558333,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 718.7639751552795,
+      "baseline_run_cnt_delta": 161,
+      "baseline_run_time_ns_delta": 115721,
+      "post_rejit_avg_ns_per_run": 941.4472049689441,
+      "post_rejit_run_cnt_delta": 161,
+      "post_rejit_run_time_ns_delta": 151573,
+      "program": "trace_security_bpf_prog",
+      "program_id": 602,
+      "ratio": 1.3098141218966308,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 1639.5,
+      "baseline_run_cnt_delta": 4,
+      "baseline_run_time_ns_delta": 6558,
+      "post_rejit_avg_ns_per_run": 2609.5,
+      "post_rejit_run_cnt_delta": 4,
+      "post_rejit_run_time_ns_delta": 10438,
+      "program": "trace_security_inode_mknod",
+      "program_id": 608,
+      "ratio": 1.5916437938395853,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 2374.75,
+      "baseline_run_cnt_delta": 4,
+      "baseline_run_time_ns_delta": 9499,
+      "post_rejit_avg_ns_per_run": 4218.0,
+      "post_rejit_run_cnt_delta": 4,
+      "post_rejit_run_time_ns_delta": 16872,
+      "program": "trace_load_elf_phdrs",
+      "program_id": 616,
+      "ratio": 1.776186967049163,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 49.270471310729555,
+      "baseline_run_cnt_delta": 2994691,
+      "baseline_run_time_ns_delta": 147549837,
+      "post_rejit_avg_ns_per_run": 51.92917639785129,
+      "post_rejit_run_cnt_delta": 3089295,
+      "post_rejit_run_time_ns_delta": 160424545,
+      "program": "trace_security_file_permission",
+      "program_id": 617,
+      "ratio": 1.0539614299679483,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 969.3370390455532,
+      "baseline_run_cnt_delta": 3688,
+      "baseline_run_time_ns_delta": 3574915,
+      "post_rejit_avg_ns_per_run": 1022.0474183350896,
+      "post_rejit_run_cnt_delta": 3796,
+      "post_rejit_run_time_ns_delta": 3879692,
+      "program": "tracepoint__task__task_rename",
+      "program_id": 618,
+      "ratio": 1.0543777624977966,
+      "runner": "tracee",
+      "type": "raw_tracepoint",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 927.1929824561404,
+      "baseline_run_cnt_delta": 7296,
+      "baseline_run_time_ns_delta": 6764800,
+      "post_rejit_avg_ns_per_run": 959.5216986155484,
+      "post_rejit_run_cnt_delta": 7512,
+      "post_rejit_run_time_ns_delta": 7207927,
+      "program": "trace_do_sigaction",
+      "program_id": 622,
+      "ratio": 1.0348673003043758,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 2812.941634241245,
+      "baseline_run_cnt_delta": 257,
+      "baseline_run_time_ns_delta": 722926,
+      "post_rejit_avg_ns_per_run": 2694.1916666666666,
+      "post_rejit_run_cnt_delta": 240,
+      "post_rejit_run_time_ns_delta": 646606,
+      "program": "trace_do_truncate",
+      "program_id": 625,
+      "ratio": 0.9577844182299894,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 146.83803664465822,
+      "baseline_run_cnt_delta": 2154475,
+      "baseline_run_time_ns_delta": 316358879,
+      "post_rejit_avg_ns_per_run": 148.0737553159208,
+      "post_rejit_run_cnt_delta": 2207990,
+      "post_rejit_run_time_ns_delta": 326945371,
+      "program": "trace_fd_install",
+      "program_id": 626,
+      "ratio": 1.0084155216148318,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 271.13380598560616,
+      "baseline_run_cnt_delta": 420041,
+      "baseline_run_time_ns_delta": 113887315,
+      "post_rejit_avg_ns_per_run": 297.407757652311,
+      "post_rejit_run_cnt_delta": 414842,
+      "post_rejit_run_time_ns_delta": 123377229,
+      "program": "trace_filp_close",
+      "program_id": 627,
+      "ratio": 1.0969040049107694,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 181.12702656088305,
+      "baseline_run_cnt_delta": 34788,
+      "baseline_run_time_ns_delta": 6301047,
+      "post_rejit_avg_ns_per_run": 192.9998154868073,
+      "post_rejit_run_cnt_delta": 32518,
+      "post_rejit_run_time_ns_delta": 6275968,
+      "program": "trace_file_update_time",
+      "program_id": 628,
+      "ratio": 1.0655495160018729,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 612.9798206278027,
+      "baseline_run_cnt_delta": 34788,
+      "baseline_run_time_ns_delta": 21324342,
+      "post_rejit_avg_ns_per_run": 642.7260594132481,
+      "post_rejit_run_cnt_delta": 32518,
+      "post_rejit_run_time_ns_delta": 20900166,
+      "program": "trace_ret_file_update_time",
+      "program_id": 629,
+      "ratio": 1.0485272724883175,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 117.48064965819744,
+      "baseline_run_cnt_delta": 342888,
+      "baseline_run_time_ns_delta": 40282705,
+      "post_rejit_avg_ns_per_run": 118.75796286565624,
+      "post_rejit_run_cnt_delta": 317819,
+      "post_rejit_run_time_ns_delta": 37743537,
+      "program": "trace_file_modified",
+      "program_id": 630,
+      "ratio": 1.0108725412327482,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 500.0191607755302,
+      "baseline_run_cnt_delta": 342888,
+      "baseline_run_time_ns_delta": 171450570,
+      "post_rejit_avg_ns_per_run": 482.44615960656853,
+      "post_rejit_run_cnt_delta": 317819,
+      "post_rejit_run_time_ns_delta": 153330556,
+      "program": "trace_ret_file_modified",
+      "program_id": 631,
+      "ratio": 0.9648553444597884,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 167.0,
+      "baseline_run_cnt_delta": 2,
+      "baseline_run_time_ns_delta": 334,
+      "post_rejit_avg_ns_per_run": 572.0,
+      "post_rejit_run_cnt_delta": 2,
+      "post_rejit_run_time_ns_delta": 1144,
+      "program": "trace_exec_binprm",
+      "program_id": 635,
+      "ratio": 3.4251497005988023,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 5524.0,
+      "baseline_run_cnt_delta": 2,
+      "baseline_run_time_ns_delta": 11048,
+      "post_rejit_avg_ns_per_run": 8883.5,
+      "post_rejit_run_cnt_delta": 2,
+      "post_rejit_run_time_ns_delta": 17767,
+      "program": "trace_security_bprm_creds_for_exec",
+      "program_id": 636,
+      "ratio": 1.6081643736422881,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 6607.5,
+      "baseline_run_cnt_delta": 2,
+      "baseline_run_time_ns_delta": 13215,
+      "post_rejit_avg_ns_per_run": 11462.0,
+      "post_rejit_run_cnt_delta": 2,
+      "post_rejit_run_time_ns_delta": 22924,
+      "program": "trace_execute_finished",
+      "program_id": 637,
+      "ratio": 1.7346954218690882,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 4416.5,
+      "baseline_run_cnt_delta": 2,
+      "baseline_run_time_ns_delta": 8833,
+      "post_rejit_avg_ns_per_run": 9071.0,
+      "post_rejit_run_cnt_delta": 2,
+      "post_rejit_run_time_ns_delta": 18142,
+      "program": "trace_set_fs_pwd",
+      "program_id": 639,
+      "ratio": 2.053888825993434,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 269.2821259936897,
+      "baseline_run_cnt_delta": 592363,
+      "baseline_run_time_ns_delta": 159512768,
+      "post_rejit_avg_ns_per_run": 268.7500898707956,
+      "post_rejit_run_cnt_delta": 620335,
+      "post_rejit_run_time_ns_delta": 166715087,
+      "program": "trace_security_task_setrlimit",
+      "program_id": 640,
+      "ratio": 0.9980242427122453,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 344.65143639271656,
+      "baseline_run_cnt_delta": 325120,
+      "baseline_run_time_ns_delta": 112053075,
+      "post_rejit_avg_ns_per_run": 346.7058611097846,
+      "post_rejit_run_cnt_delta": 335056,
+      "post_rejit_run_time_ns_delta": 116165879,
+      "program": "trace_security_task_prctl",
+      "program_id": 643,
+      "ratio": 1.0059608767007346,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 35.72164478212919,
+      "baseline_run_cnt_delta": 1080824,
+      "baseline_run_time_ns_delta": 38608811,
+      "post_rejit_avg_ns_per_run": 38.260887063026104,
+      "post_rejit_run_cnt_delta": 1123122,
+      "post_rejit_run_time_ns_delta": 42971644,
+      "program": "trace_sock_alloc_file",
+      "program_id": 646,
+      "ratio": 1.0710841367015453,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 155.88478235124313,
+      "baseline_run_cnt_delta": 1080824,
+      "baseline_run_time_ns_delta": 168484014,
+      "post_rejit_avg_ns_per_run": 154.9798748488588,
+      "post_rejit_run_cnt_delta": 1123122,
+      "post_rejit_run_time_ns_delta": 174061307,
+      "program": "trace_ret_sock_alloc_file",
+      "program_id": 647,
+      "ratio": 0.9941950234735205,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 808.2153489375472,
+      "baseline_run_cnt_delta": 74168,
+      "baseline_run_time_ns_delta": 59943716,
+      "post_rejit_avg_ns_per_run": 1085.8696139787328,
+      "post_rejit_run_cnt_delta": 72224,
+      "post_rejit_run_time_ns_delta": 78425847,
+      "program": "trace_security_sk_clone",
+      "program_id": 648,
+      "ratio": 1.3435399555405383,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 187.1322771969967,
+      "baseline_run_cnt_delta": 1727176,
+      "baseline_run_time_ns_delta": 323210378,
+      "post_rejit_avg_ns_per_run": 207.12385276299597,
+      "post_rejit_run_cnt_delta": 1791805,
+      "post_rejit_run_time_ns_delta": 371125555,
+      "program": "trace_security_socket_recvmsg",
+      "program_id": 649,
+      "ratio": 1.1068312525527269,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 187.1814028182862,
+      "baseline_run_cnt_delta": 4003284,
+      "baseline_run_time_ns_delta": 749340315,
+      "post_rejit_avg_ns_per_run": 196.55781873918983,
+      "post_rejit_run_cnt_delta": 4089323,
+      "post_rejit_run_time_ns_delta": 803788409,
+      "program": "trace_security_socket_sendmsg",
+      "program_id": 650,
+      "ratio": 1.0500926682871705,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 207.97018991098716,
+      "baseline_run_cnt_delta": 4484522,
+      "baseline_run_time_ns_delta": 932646892,
+      "post_rejit_avg_ns_per_run": 223.27893223768632,
+      "post_rejit_run_cnt_delta": 4052400,
+      "post_rejit_run_time_ns_delta": 904815545,
+      "program": "cgroup_bpf_run_filter_skb",
+      "program_id": 651,
+      "ratio": 1.0736102723820728,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 277.7204419315456,
+      "baseline_run_cnt_delta": 1154930,
+      "baseline_run_time_ns_delta": 320747670,
+      "post_rejit_avg_ns_per_run": 279.2440282709073,
+      "post_rejit_run_cnt_delta": 1079838,
+      "post_rejit_run_time_ns_delta": 301538313,
+      "program": "cgroup_skb_ingress",
+      "program_id": 653,
+      "ratio": 1.0054860431906456,
+      "runner": "tracee",
+      "type": "cgroup_skb",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 205.04242576969287,
+      "baseline_run_cnt_delta": 3059532,
+      "baseline_run_time_ns_delta": 627333863,
+      "post_rejit_avg_ns_per_run": 223.4024442404177,
+      "post_rejit_run_cnt_delta": 2695725,
+      "post_rejit_run_time_ns_delta": 602231554,
+      "program": "cgroup_skb_egress",
+      "program_id": 654,
+      "ratio": 1.0895425344379563,
+      "runner": "tracee",
+      "type": "cgroup_skb",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 251.0,
+      "baseline_run_cnt_delta": 2,
+      "baseline_run_time_ns_delta": 502,
+      "post_rejit_avg_ns_per_run": 185.5,
+      "post_rejit_run_cnt_delta": 2,
+      "post_rejit_run_time_ns_delta": 371,
+      "program": "empty_kprobe",
+      "program_id": 657,
+      "ratio": 0.7390438247011952,
+      "runner": "tracee",
+      "type": "kprobe",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 1270.5,
+      "baseline_run_cnt_delta": 2,
+      "baseline_run_time_ns_delta": 2541,
+      "post_rejit_avg_ns_per_run": 1869.5,
+      "post_rejit_run_cnt_delta": 2,
+      "post_rejit_run_time_ns_delta": 3739,
+      "program": "tracepoint__exec_test",
+      "program_id": 658,
+      "ratio": 1.4714679260133805,
+      "runner": "tracee",
+      "type": "raw_tracepoint",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline_avg_ns_per_run": 252.3699920273781,
+      "baseline_run_cnt_delta": 737524,
+      "baseline_run_time_ns_delta": 186128926,
+      "post_rejit_avg_ns_per_run": 264.92393774211513,
+      "post_rejit_run_cnt_delta": 738027,
+      "post_rejit_run_time_ns_delta": 195521019,
+      "program": "lsm_file_open_test",
+      "program_id": 659,
+      "ratio": 1.0497442093407647,
+      "runner": "tracee",
+      "type": "lsm",
+      "workload": "stress_ng_os_io_network"
+    },
+    {
+      "app": "bpftrace/capable",
+      "baseline_avg_ns_per_run": 174.44148990405645,
+      "baseline_run_cnt_delta": 1216132,
+      "baseline_run_time_ns_delta": 212143878,
+      "post_rejit_avg_ns_per_run": 158.81673628740336,
+      "post_rejit_run_cnt_delta": 1252261,
+      "post_rejit_run_time_ns_delta": 198880005,
+      "program": "cap_capable",
+      "program_id": 666,
+      "ratio": 0.9104298316573266,
+      "runner": "bpftrace",
+      "type": "kprobe",
+      "workload": "stress_ng_os"
+    },
+    {
+      "app": "bpftrace/biosnoop",
+      "baseline_avg_ns_per_run": 385.89883704771427,
+      "baseline_run_cnt_delta": 1467988,
+      "baseline_run_time_ns_delta": 566494862,
+      "post_rejit_avg_ns_per_run": 394.80541748685414,
+      "post_rejit_run_cnt_delta": 1459016,
+      "post_rejit_run_time_ns_delta": 576027421,
+      "program": "block_io_start",
+      "program_id": 673,
+      "ratio": 1.0230800914231277,
+      "runner": "bpftrace",
+      "type": "tracepoint",
+      "workload": "fio_randrw"
+    },
+    {
+      "app": "bpftrace/biosnoop",
+      "baseline_avg_ns_per_run": 759.5129567173909,
+      "baseline_run_cnt_delta": 1468003,
+      "baseline_run_time_ns_delta": 1114967299,
+      "post_rejit_avg_ns_per_run": 743.382611472957,
+      "post_rejit_run_cnt_delta": 1459031,
+      "post_rejit_run_time_ns_delta": 1084618275,
+      "program": "block_io_done",
+      "program_id": 674,
+      "ratio": 0.9787622513852178,
+      "runner": "bpftrace",
+      "type": "tracepoint",
+      "workload": "fio_randrw"
+    },
+    {
+      "app": "bpftrace/vfsstat",
+      "baseline_avg_ns_per_run": 1478.0,
+      "baseline_run_cnt_delta": 1,
+      "baseline_run_time_ns_delta": 1478,
+      "post_rejit_avg_ns_per_run": 1488.0,
+      "post_rejit_run_cnt_delta": 1,
+      "post_rejit_run_time_ns_delta": 1488,
+      "program": "1",
+      "program_id": 681,
+      "ratio": 1.006765899864682,
+      "runner": "bpftrace",
+      "type": "perf_event",
+      "workload": "stress_ng_filesystem"
+    },
+    {
+      "app": "bpftrace/vfsstat",
+      "baseline_avg_ns_per_run": 32.854222341595126,
+      "baseline_run_cnt_delta": 1556281,
+      "baseline_run_time_ns_delta": 51130402,
+      "post_rejit_avg_ns_per_run": 32.13170664586284,
+      "post_rejit_run_cnt_delta": 1584324,
+      "post_rejit_run_time_ns_delta": 50907034,
+      "program": "vfs_create",
+      "program_id": 682,
+      "ratio": 0.9780084371433275,
+      "runner": "bpftrace",
+      "type": "kprobe",
+      "workload": "stress_ng_filesystem"
+    },
+    {
+      "app": "bpftrace/runqlat",
+      "baseline_avg_ns_per_run": 62.481747049587675,
+      "baseline_run_cnt_delta": 848356,
+      "baseline_run_time_ns_delta": 53006765,
+      "post_rejit_avg_ns_per_run": 69.4761494662113,
+      "post_rejit_run_cnt_delta": 744302,
+      "post_rejit_run_time_ns_delta": 51711237,
+      "program": "sched_wakeup",
+      "program_id": 689,
+      "ratio": 1.111943131344785,
+      "runner": "bpftrace",
+      "type": "tracepoint",
+      "workload": "stress_ng_scheduler"
+    },
+    {
+      "app": "bpftrace/runqlat",
+      "baseline_avg_ns_per_run": 257.3777777777778,
+      "baseline_run_cnt_delta": 45,
+      "baseline_run_time_ns_delta": 11582,
+      "post_rejit_avg_ns_per_run": 257.77777777777777,
+      "post_rejit_run_cnt_delta": 45,
+      "post_rejit_run_time_ns_delta": 11600,
+      "program": "tracepoint_sched_sched_wakeup_new",
+      "program_id": 690,
+      "ratio": 1.0015541357278535,
+      "runner": "bpftrace",
+      "type": "tracepoint",
+      "workload": "stress_ng_scheduler"
+    },
+    {
+      "app": "bpftrace/runqlat",
+      "baseline_avg_ns_per_run": 136.2031000844938,
+      "baseline_run_cnt_delta": 17757516,
+      "baseline_run_time_ns_delta": 2418628729,
+      "post_rejit_avg_ns_per_run": 136.70329796872082,
+      "post_rejit_run_cnt_delta": 14554474,
+      "post_rejit_run_time_ns_delta": 1989644596,
+      "program": "sched_switch",
+      "program_id": 691,
+      "ratio": 1.0036724412580678,
+      "runner": "bpftrace",
+      "type": "tracepoint",
+      "workload": "stress_ng_scheduler"
+    },
+    {
+      "app": "bpftrace/tcplife",
+      "baseline_avg_ns_per_run": 464.2459472057732,
+      "baseline_run_cnt_delta": 57923,
+      "baseline_run_time_ns_delta": 26890518,
+      "post_rejit_avg_ns_per_run": 441.0649029738556,
+      "post_rejit_run_cnt_delta": 57871,
+      "post_rejit_run_time_ns_delta": 25524867,
+      "program": "tcp_set_state",
+      "program_id": 699,
+      "ratio": 0.9500673201964588,
+      "runner": "bpftrace",
+      "type": "kprobe",
+      "workload": "tcp_connect"
+    },
+    {
+      "app": "bpftrace/tcpretrans",
+      "baseline_avg_ns_per_run": 7570.214285714285,
+      "baseline_run_cnt_delta": 14,
+      "baseline_run_time_ns_delta": 105983,
+      "post_rejit_avg_ns_per_run": 6448.666666666667,
+      "post_rejit_run_cnt_delta": 12,
+      "post_rejit_run_time_ns_delta": 77384,
+      "program": "kprobe_tcp_retransmit_skb",
+      "program_id": 706,
+      "ratio": 0.8518473088451294,
+      "runner": "bpftrace",
+      "type": "kprobe",
+      "workload": "network_lossy_multi"
+    }
+  ],
+  "results": [
+    {
+      "app": "bcc/capable",
+      "baseline": {
+        "bpf": {
+          "6": {
+            "avg_ns_per_run": 326.50397690316106,
+            "bytes_jited": 203,
+            "bytes_xlated": 344,
+            "id": 6,
+            "name": "cap_capable",
+            "run_cnt_delta": 1103874,
+            "run_time_ns_delta": 360419251,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.014266366000001,
+            "ops_per_sec": 1433684.5317416338,
+            "ops_total": 1454138.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [5907] setting to a 1 secs run per stressor\nstress-ng: info:  [5907] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [5907] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [5907] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [5907]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [5907] cap             1231408      1.00      0.21      0.79   1231398.90     1232508.63\nstress-ng: metrc: [5907] eventfd          148296      1.00      0.12      0.60    148250.26      204342.15\nstress-ng: metrc: [5907] get                1028      1.00      0.01      0.11      1027.18        8444.78\nstress-ng: metrc: [5907] prctl              4124      1.00      0.63      0.37      4121.99        4128.31\nstress-ng: metrc: [5907] set               69282      1.00      0.08      0.87     69281.19       73190.13\nstress-ng: info:  [5907] skipped: 0\nstress-ng: info:  [5907] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [5907] failed: 0\nstress-ng: info:  [5907] metrics untrustworthy: 0\nstress-ng: info:  [5907] successful run completed in 1.00 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "6": {
+            "avg_ns_per_run": 318.7263109499607,
+            "bytes_jited": 203,
+            "bytes_xlated": 344,
+            "id": 6,
+            "name": "cap_capable",
+            "run_cnt_delta": 1150616,
+            "run_time_ns_delta": 366731593,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.015277655999995,
+            "ops_per_sec": 1505610.796185992,
+            "ops_total": 1528613.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [13870] setting to a 1 secs run per stressor\nstress-ng: info:  [13870] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [13870] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [13870] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [13870]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [13870] cap             1296214      1.00      0.27      0.73   1296185.57     1297231.03\nstress-ng: metrc: [13870] eventfd          152244      1.00      0.04      0.68    152189.10      212088.03\nstress-ng: metrc: [13870] get                 986      1.00      0.04      0.09       985.04        7588.12\nstress-ng: metrc: [13870] prctl              3882      1.00      0.65      0.33      3881.63        3944.63\nstress-ng: metrc: [13870] set               75287      1.00      0.12      0.86     75284.68       77314.10\nstress-ng: info:  [13870] skipped: 0\nstress-ng: info:  [13870] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [13870] failed: 0\nstress-ng: info:  [13870] metrics untrustworthy: 0\nstress-ng: info:  [13870] successful run completed in 1.00 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 1,
+          "not_applied": 0,
+          "requested": 1
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "stress_ng_os",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/execsnoop",
+      "baseline": {
+        "bpf": {
+          "9": {
+            "avg_ns_per_run": 1009.5,
+            "bytes_jited": 2677,
+            "bytes_xlated": 4144,
+            "id": 9,
+            "name": "syscall__execve",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 2019,
+            "type": "kprobe"
+          },
+          "10": {
+            "avg_ns_per_run": 173.5,
+            "bytes_jited": 492,
+            "bytes_xlated": 704,
+            "id": 10,
+            "name": "do_ret_sys_execve",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 347,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0176794009999952,
+            "ops_per_sec": 51128.08606411033,
+            "ops_total": 52032.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [7899] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [7899] setting to a 1 secs run per stressor\nstress-ng: info:  [7899] dispatching hogs: 1 clone, 1 fork, 1 vfork\nstress-ng: info:  [7899] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [7899] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [7899]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [7899] clone               949      1.01      0.24      0.90       943.19         829.49\nstress-ng: metrc: [7899] fork               4642      1.00      0.51      0.50      4641.43        4592.94\nstress-ng: metrc: [7899] vfork             46441      1.00      0.50      0.44     46434.60       49585.04\nstress-ng: info:  [7899] skipped: 1: exec (1)\nstress-ng: info:  [7899] passed: 3: clone (1) fork (1) vfork (1)\nstress-ng: info:  [7899] failed: 0\nstress-ng: info:  [7899] metrics untrustworthy: 0\nstress-ng: info:  [7899] successful run completed in 1.01 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "9": {
+            "avg_ns_per_run": 1246.5,
+            "bytes_jited": 2677,
+            "bytes_xlated": 4144,
+            "id": 9,
+            "name": "syscall__execve",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 2493,
+            "type": "kprobe"
+          },
+          "10": {
+            "avg_ns_per_run": 199.5,
+            "bytes_jited": 492,
+            "bytes_xlated": 704,
+            "id": 10,
+            "name": "do_ret_sys_execve",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 399,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0166813040000022,
+            "ops_per_sec": 52065.47990185121,
+            "ops_total": 52934.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [15080] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [15080] setting to a 1 secs run per stressor\nstress-ng: info:  [15080] dispatching hogs: 1 clone, 1 fork, 1 vfork\nstress-ng: info:  [15080] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [15080] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [15080]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [15080] clone              1029      1.01      0.25      0.93      1023.79         866.99\nstress-ng: metrc: [15080] fork               4644      1.00      0.52      0.49      4643.68        4608.69\nstress-ng: metrc: [15080] vfork             47261      1.00      0.51      0.42     47259.87       51087.67\nstress-ng: info:  [15080] skipped: 1: exec (1)\nstress-ng: info:  [15080] passed: 3: clone (1) fork (1) vfork (1)\nstress-ng: info:  [15080] failed: 0\nstress-ng: info:  [15080] metrics untrustworthy: 0\nstress-ng: info:  [15080] successful run completed in 1.01 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 2,
+          "not_applied": 0,
+          "requested": 2
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "stress_ng_process",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/bindsnoop",
+      "baseline": {
+        "bpf": {
+          "13": {
+            "avg_ns_per_run": 2059.6666666666665,
+            "bytes_jited": 75,
+            "bytes_xlated": 120,
+            "id": 13,
+            "name": "bindsnoop_entry",
+            "run_cnt_delta": 3,
+            "run_time_ns_delta": 6179,
+            "type": "kprobe"
+          },
+          "14": {
+            "avg_ns_per_run": 9880.666666666666,
+            "bytes_jited": 721,
+            "bytes_xlated": 1160,
+            "id": 14,
+            "name": "bindsnoop_v4_return",
+            "run_cnt_delta": 3,
+            "run_time_ns_delta": 29642,
+            "type": "kprobe"
+          },
+          "15": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 742,
+            "bytes_xlated": 1184,
+            "id": 15,
+            "name": "bindsnoop_v6_return",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0497630920000063,
+            "ops_per_sec": 25284140.01432605,
+            "ops_total": 26542357.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [3705] setting to a 1 secs run per stressor\nstress-ng: info:  [3705] dispatching hogs: 1 epoll, 1 netdev, 1 sctp, 1 sock, 1 sockdiag, 1 sockfd, 1 sockpair, 1 sockmany, 1 udp-flood\nstress-ng: info:  [3705] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [3705] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [3705]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [3705] epoll             57752      1.01      0.04      0.48     57382.86      112035.38\nstress-ng: metrc: [3705] netdev          2101752      1.00      0.21      0.79   2101745.99     2100804.54\nstress-ng: metrc: [3705] sctp              20088      1.00      0.05      0.81     20069.87       23414.28\nstress-ng: metrc: [3705] sock               4871      1.00      0.05      1.89      4866.71        2505.99\nstress-ng: metrc: [3705] sockdiag       22389048      1.00      0.03      0.97  22388113.90    22428252.59\nstress-ng: metrc: [3705] sockfd           618216      1.00      0.19      1.46    617910.46      374168.18\nstress-ng: metrc: [3705] sockpair         318426      1.03      0.13      1.21    307912.51      238532.78\nstress-ng: metrc: [3705] sockmany          49763      1.00      0.01      1.04     49653.66       47352.34\nstress-ng: metrc: [3705] udp-flood        982441      1.00      0.09      0.89    982412.89     1006263.28\nstress-ng: info:  [3705] skipped: 0\nstress-ng: info:  [3705] passed: 9: epoll (1) netdev (1) sctp (1) sock (1) sockdiag (1) sockfd (1) sockpair (1) sockmany (1) udp-flood (1)\nstress-ng: info:  [3705] failed: 0\nstress-ng: info:  [3705] metrics untrustworthy: 0\nstress-ng: info:  [3705] successful run completed in 1.04 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "13": {
+            "avg_ns_per_run": 2527.3333333333335,
+            "bytes_jited": 75,
+            "bytes_xlated": 120,
+            "id": 13,
+            "name": "bindsnoop_entry",
+            "run_cnt_delta": 3,
+            "run_time_ns_delta": 7582,
+            "type": "kprobe"
+          },
+          "14": {
+            "avg_ns_per_run": 13099.666666666666,
+            "bytes_jited": 721,
+            "bytes_xlated": 1160,
+            "id": 14,
+            "name": "bindsnoop_v4_return",
+            "run_cnt_delta": 3,
+            "run_time_ns_delta": 39299,
+            "type": "kprobe"
+          },
+          "15": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 742,
+            "bytes_xlated": 1184,
+            "id": 15,
+            "name": "bindsnoop_v6_return",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0626390470000047,
+            "ops_per_sec": 36175973.49591825,
+            "ops_total": 38442002.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [3761] setting to a 1 secs run per stressor\nstress-ng: info:  [3761] dispatching hogs: 1 epoll, 1 netdev, 1 sctp, 1 sock, 1 sockdiag, 1 sockfd, 1 sockpair, 1 sockmany, 1 udp-flood\nstress-ng: info:  [3761] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [3761] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [3761]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [3761] epoll            194485      1.01      0.11      1.65    192575.86      110682.26\nstress-ng: metrc: [3761] netdev          2097986      1.00      0.22      0.78   2098082.54     2096260.78\nstress-ng: metrc: [3761] sctp                 10      1.00      0.00      0.01         9.99         811.49\nstress-ng: metrc: [3761] sock               4732      1.00      0.05      1.86      4727.44        2475.91\nstress-ng: metrc: [3761] sockdiag       34145516      1.00      0.09      0.91  34139207.95    34186847.90\nstress-ng: metrc: [3761] sockfd           569535      1.00      0.11      1.52    569273.19      350026.64\nstress-ng: metrc: [3761] sockpair         332854      1.05      0.13      1.33    317225.10      227853.13\nstress-ng: metrc: [3761] sockmany          45128      1.00      0.06      0.99     45100.01       43163.66\nstress-ng: metrc: [3761] udp-flood       1051756      1.00      0.04      0.94   1051733.68     1078449.79\nstress-ng: info:  [3761] skipped: 0\nstress-ng: info:  [3761] passed: 9: epoll (1) netdev (1) sctp (1) sock (1) sockdiag (1) sockfd (1) sockpair (1) sockmany (1) udp-flood (1)\nstress-ng: info:  [3761] failed: 0\nstress-ng: info:  [3761] metrics untrustworthy: 0\nstress-ng: info:  [3761] successful run completed in 1.05 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "stress_ng_network",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/biosnoop",
+      "baseline": {
+        "bpf": {
+          "18": {
+            "avg_ns_per_run": 203.20608466434643,
+            "bytes_jited": 267,
+            "bytes_xlated": 448,
+            "id": 18,
+            "name": "trace_pid_start_tp",
+            "run_cnt_delta": 1729134,
+            "run_time_ns_delta": 351370550,
+            "type": "tracepoint"
+          },
+          "19": {
+            "avg_ns_per_run": 211.3047056809612,
+            "bytes_jited": 335,
+            "bytes_xlated": 616,
+            "id": 19,
+            "name": "trace_req_start",
+            "run_cnt_delta": 1729144,
+            "run_time_ns_delta": 365376264,
+            "type": "kprobe"
+          },
+          "20": {
+            "avg_ns_per_run": 94.19299320070162,
+            "bytes_jited": 550,
+            "bytes_xlated": 856,
+            "id": 20,
+            "name": "trace_req_completion_tp",
+            "run_cnt_delta": 1729149,
+            "run_time_ns_delta": 162873720,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.347926616999985,
+            "ops_per_sec": 432091.94244633865,
+            "ops_total": 2310796.0,
+            "stderr": "",
+            "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.371090,\n        \"1000\" : 18.162897\n      },\n      \"latency_us\" : {\n        \"2\" : 29.335090,\n        \"4\" : 1.541266,\n        \"10\" : 18.669525,\n        \"20\" : 28.054036,\n        \"50\" : 3.182374,\n        \"100\" : 0.518871,\n        \"250\" : 0.154333,\n        \"500\" : 0.010174,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "18": {
+            "avg_ns_per_run": 203.03669260165603,
+            "bytes_jited": 267,
+            "bytes_xlated": 448,
+            "id": 18,
+            "name": "trace_pid_start_tp",
+            "run_cnt_delta": 1753487,
+            "run_time_ns_delta": 356022201,
+            "type": "tracepoint"
+          },
+          "19": {
+            "avg_ns_per_run": 212.00672199610264,
+            "bytes_jited": 335,
+            "bytes_xlated": 616,
+            "id": 19,
+            "name": "trace_req_start",
+            "run_cnt_delta": 1753497,
+            "run_time_ns_delta": 371753151,
+            "type": "kprobe"
+          },
+          "20": {
+            "avg_ns_per_run": 94.22636643699295,
+            "bytes_jited": 550,
+            "bytes_xlated": 856,
+            "id": 20,
+            "name": "trace_req_completion_tp",
+            "run_cnt_delta": 1753502,
+            "run_time_ns_delta": 165226122,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.34191968799999,
+            "ops_per_sec": 440078.6865592436,
+            "ops_total": 2350865.0,
+            "stderr": "",
+            "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.117858,\n        \"1000\" : 14.948925\n      },\n      \"latency_us\" : {\n        \"2\" : 32.667340,\n        \"4\" : 1.643047,\n        \"10\" : 21.481884,\n        \"20\" : 25.896628,\n        \"50\" : 2.640593,\n        \"100\" : 0.445278,\n        \"250\" : 0.150294,\n        \"500\" : 0.010000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "fio_randrw",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/vfsstat",
+      "baseline": {
+        "bpf": {
+          "23": {
+            "avg_ns_per_run": 63.57917614316495,
+            "bytes_jited": 90,
+            "bytes_xlated": 144,
+            "id": 23,
+            "name": "vfs_create",
+            "run_cnt_delta": 133664,
+            "run_time_ns_delta": 8498247,
+            "type": "tracing"
+          },
+          "24": {
+            "avg_ns_per_run": 76.35075653370014,
+            "bytes_jited": 90,
+            "bytes_xlated": 144,
+            "id": 24,
+            "name": "kfunc__vmlinux__vfs_fsync_range",
+            "run_cnt_delta": 727,
+            "run_time_ns_delta": 55507,
+            "type": "tracing"
+          },
+          "25": {
+            "avg_ns_per_run": 46.86165617956817,
+            "bytes_jited": 90,
+            "bytes_xlated": 144,
+            "id": 25,
+            "name": "vfs_open",
+            "run_cnt_delta": 1432236,
+            "run_time_ns_delta": 67116951,
+            "type": "tracing"
+          },
+          "26": {
+            "avg_ns_per_run": 45.472970236890056,
+            "bytes_jited": 87,
+            "bytes_xlated": 136,
+            "id": 26,
+            "name": "vfs_read",
+            "run_cnt_delta": 59268,
+            "run_time_ns_delta": 2695092,
+            "type": "tracing"
+          },
+          "27": {
+            "avg_ns_per_run": 55.6080213770197,
+            "bytes_jited": 90,
+            "bytes_xlated": 144,
+            "id": 27,
+            "name": "vfs_write",
+            "run_cnt_delta": 80086,
+            "run_time_ns_delta": 4453424,
+            "type": "tracing"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.1147788639999874,
+            "ops_per_sec": 2560581.378227523,
+            "ops_total": 2854482.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [18415] setting to a 1 secs run per stressor\nstress-ng: info:  [18415] dispatching hogs: 1 access, 1 chdir, 1 chmod, 1 chown, 1 dentry, 1 dir, 1 dirmany, 1 fallocate, 1 file-ioctl, 1 filename, 1 flock, 1 fpunch, 1 fstat, 1 getdent, 1 hdd, 1 inotify, 1 open, 1 rename, 1 touch, 1 utime\nstress-ng: info:  [18415] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [18434] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [18420] dentry: 108220 dentries allocated\nstress-ng: metrc: [18415] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [18415]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [18415] access            10195      1.00      0.23      1.57     10181.59        5668.32\nstress-ng: metrc: [18415] chdir                50      1.07      0.11      0.79        46.71          55.17\nstress-ng: metrc: [18415] chmod               159      1.01      0.00      0.03       157.22        4933.60\nstress-ng: metrc: [18415] chown               174      1.00      0.01      0.00       173.82       32056.01\nstress-ng: metrc: [18415] dentry            14336      1.02      0.02      0.44     14013.33       31302.34\nstress-ng: metrc: [18415] dir                8192      1.09      0.08      0.89      7536.13        8506.70\nstress-ng: metrc: [18415] dirmany           10751      1.01      0.00      0.24     10634.95       44824.04\nstress-ng: metrc: [18415] fallocate             2      1.01      0.01      0.00         1.98         389.94\nstress-ng: metrc: [18415] file-ioctl        78126      1.00      0.06      0.74     78121.49       98270.09\nstress-ng: metrc: [18415] filename           3782      1.01      0.04      0.70      3745.51        5159.70\nstress-ng: metrc: [18415] flock           2355959      1.01      0.39      0.67   2332794.04     2238449.36\nstress-ng: metrc: [18415] fpunch             1502      1.01      0.02      0.21      1487.35        6501.04\nstress-ng: metrc: [18415] fstat              2912      1.00      0.14      0.70      2911.02        3460.50\nstress-ng: metrc: [18415] getdent          210914      1.00      0.08      0.92    210914.85      211983.88\nstress-ng: metrc: [18415] hdd               27765      1.01      0.39      0.26     27499.47       42546.44\nstress-ng: metrc: [18415] inotify               3      1.00      0.00      0.00         3.00        1014.20\nstress-ng: metrc: [18415] open              18432      1.01      0.03      0.22     18212.27       74666.10\nstress-ng: metrc: [18415] rename              516      1.01      0.00      0.02       511.38       23250.57\nstress-ng: metrc: [18415] touch             62256      1.01      0.07      1.43     61652.31       41433.87\nstress-ng: metrc: [18415] utime             48456      1.00      0.04      0.75     48454.58       61296.28\nstress-ng: info:  [18415] skipped: 0\nstress-ng: info:  [18415] passed: 20: access (1) chdir (1) chmod (1) chown (1) dentry (1) dir (1) dirmany (1) fallocate (1) file-ioctl (1) filename (1) flock (1) fpunch (1) fstat (1) getdent (1) hdd (1) inotify (1) open (1) rename (1) touch (1) utime (1)\nstress-ng: info:  [18415] failed: 0\nstress-ng: info:  [18415] metrics untrustworthy: 0\nstress-ng: info:  [18415] successful run completed in 1.10 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "23": {
+            "avg_ns_per_run": 72.49371923520734,
+            "bytes_jited": 90,
+            "bytes_xlated": 144,
+            "id": 23,
+            "name": "vfs_create",
+            "run_cnt_delta": 136926,
+            "run_time_ns_delta": 9926275,
+            "type": "tracing"
+          },
+          "24": {
+            "avg_ns_per_run": 85.00521739130434,
+            "bytes_jited": 90,
+            "bytes_xlated": 144,
+            "id": 24,
+            "name": "kfunc__vmlinux__vfs_fsync_range",
+            "run_cnt_delta": 575,
+            "run_time_ns_delta": 48878,
+            "type": "tracing"
+          },
+          "25": {
+            "avg_ns_per_run": 45.77515212737812,
+            "bytes_jited": 90,
+            "bytes_xlated": 144,
+            "id": 25,
+            "name": "vfs_open",
+            "run_cnt_delta": 1330464,
+            "run_time_ns_delta": 60902192,
+            "type": "tracing"
+          },
+          "26": {
+            "avg_ns_per_run": 49.51791023419241,
+            "bytes_jited": 87,
+            "bytes_xlated": 136,
+            "id": 26,
+            "name": "vfs_read",
+            "run_cnt_delta": 62897,
+            "run_time_ns_delta": 3114528,
+            "type": "tracing"
+          },
+          "27": {
+            "avg_ns_per_run": 54.63615582967454,
+            "bytes_jited": 90,
+            "bytes_xlated": 144,
+            "id": 27,
+            "name": "vfs_write",
+            "run_cnt_delta": 71745,
+            "run_time_ns_delta": 3919871,
+            "type": "tracing"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.1120440020000046,
+            "ops_per_sec": 2600076.970695255,
+            "ops_total": 2891400.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [8543] setting to a 1 secs run per stressor\nstress-ng: info:  [8543] dispatching hogs: 1 access, 1 chdir, 1 chmod, 1 chown, 1 dentry, 1 dir, 1 dirmany, 1 fallocate, 1 file-ioctl, 1 filename, 1 flock, 1 fpunch, 1 fstat, 1 getdent, 1 hdd, 1 inotify, 1 open, 1 rename, 1 touch, 1 utime\nstress-ng: info:  [8543] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [8560] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [8548] dentry: 74954 dentries allocated\nstress-ng: metrc: [8543] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8543]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8543] access            10632      1.00      0.25      1.68     10618.60        5518.37\nstress-ng: metrc: [8543] chdir                48      1.07      0.07      0.79        44.85          56.05\nstress-ng: metrc: [8543] chmod               117      1.00      0.00      0.02       116.90        4792.33\nstress-ng: metrc: [8543] chown               144      1.00      0.01      0.00       143.85       28213.17\nstress-ng: metrc: [8543] dentry            12288      1.03      0.04      0.37     11982.03       30071.29\nstress-ng: metrc: [8543] dir                8192      1.09      0.03      0.87      7520.96        9086.99\nstress-ng: metrc: [8543] dirmany            9923      1.01      0.01      0.21      9801.96       44594.75\nstress-ng: metrc: [8543] fallocate             1      1.01      0.00      0.00         0.99         219.68\nstress-ng: metrc: [8543] file-ioctl        78143      1.01      0.07      0.78     77277.61       92643.02\nstress-ng: metrc: [8543] filename           3938      1.01      0.01      0.76      3897.13        5115.44\nstress-ng: metrc: [8543] flock           2399209      1.01      0.51      0.54   2372728.46     2271937.34\nstress-ng: metrc: [8543] fpunch             1240      1.01      0.00      0.31      1226.49        3971.02\nstress-ng: metrc: [8543] fstat              2058      1.00      0.19      0.59      2057.53        2647.57\nstress-ng: metrc: [8543] getdent          199348      1.00      0.07      0.91    199345.39      204521.79\nstress-ng: metrc: [8543] hdd               27835      1.01      0.35      0.33     27527.79       40968.77\nstress-ng: metrc: [8543] inotify               2      1.02      0.00      0.00         1.97         740.47\nstress-ng: metrc: [8543] open              20480      1.01      0.03      0.23     20263.65       77671.96\nstress-ng: metrc: [8543] rename              413      1.00      0.00      0.01       412.95       33944.28\nstress-ng: metrc: [8543] touch             65926      1.01      0.04      1.56     65179.00       41032.06\nstress-ng: metrc: [8543] utime             51463      1.00      0.04      0.80     51460.29       61501.52\nstress-ng: info:  [8543] skipped: 0\nstress-ng: info:  [8543] passed: 20: access (1) chdir (1) chmod (1) chown (1) dentry (1) dir (1) dirmany (1) fallocate (1) file-ioctl (1) filename (1) flock (1) fpunch (1) fstat (1) getdent (1) hdd (1) inotify (1) open (1) rename (1) touch (1) utime (1)\nstress-ng: info:  [8543] failed: 0\nstress-ng: info:  [8543] metrics untrustworthy: 0\nstress-ng: info:  [8543] successful run completed in 1.10 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 5,
+          "not_applied": 0,
+          "requested": 5
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "stress_ng_filesystem",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/opensnoop",
+      "baseline": {
+        "bpf": {
+          "30": {
+            "avg_ns_per_run": 391.7016674479341,
+            "bytes_jited": 517,
+            "bytes_xlated": 600,
+            "id": 30,
+            "name": "__x64_sys_open",
+            "run_cnt_delta": 14933,
+            "run_time_ns_delta": 5849281,
+            "type": "tracing"
+          },
+          "31": {
+            "avg_ns_per_run": 418.90556416598736,
+            "bytes_jited": 517,
+            "bytes_xlated": 600,
+            "id": 31,
+            "name": "kretfunc__vmlinux____x64_sys_openat",
+            "run_cnt_delta": 571658,
+            "run_time_ns_delta": 239470717,
+            "type": "tracing"
+          },
+          "32": {
+            "avg_ns_per_run": 412.3457910014514,
+            "bytes_jited": 590,
+            "bytes_xlated": 640,
+            "id": 32,
+            "name": "kretfunc__vmlinux____x64_sys_openat2",
+            "run_cnt_delta": 2756,
+            "run_time_ns_delta": 1136425,
+            "type": "tracing"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.1186962699999867,
+            "ops_per_sec": 2576136.2375866636,
+            "ops_total": 2881914.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [23595] setting to a 1 secs run per stressor\nstress-ng: info:  [23595] dispatching hogs: 1 access, 1 chdir, 1 chmod, 1 chown, 1 dentry, 1 dir, 1 dirmany, 1 fallocate, 1 file-ioctl, 1 filename, 1 flock, 1 fpunch, 1 fstat, 1 getdent, 1 hdd, 1 inotify, 1 open, 1 rename, 1 touch, 1 utime\nstress-ng: info:  [23595] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [23613] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [23600] dentry: 103516 dentries allocated\nstress-ng: metrc: [23595] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [23595]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [23595] access            10144      1.00      0.27      1.54     10126.10        5594.97\nstress-ng: metrc: [23595] chdir                50      1.07      0.09      0.82        46.64          54.95\nstress-ng: metrc: [23595] chmod               129      1.01      0.00      0.03       127.90        5053.47\nstress-ng: metrc: [23595] chown               156      1.01      0.00      0.00       154.68       29607.14\nstress-ng: metrc: [23595] dentry            12572      1.02      0.03      0.37     12345.62       31876.83\nstress-ng: metrc: [23595] dir                8192      1.09      0.06      0.87      7481.30        8887.78\nstress-ng: metrc: [23595] dirmany           10261      1.00      0.00      0.24     10249.13       42951.56\nstress-ng: metrc: [23595] fallocate             1      1.01      0.00      0.00         0.99         246.61\nstress-ng: metrc: [23595] file-ioctl        66945      1.00      0.08      0.64     66889.85       93331.36\nstress-ng: metrc: [23595] filename           2986      1.01      0.05      0.57      2963.28        4832.80\nstress-ng: metrc: [23595] flock           2412782      1.01      0.44      0.48   2393765.67     2630681.33\nstress-ng: metrc: [23595] fpunch             1180      1.02      0.00      0.29      1159.59        4135.72\nstress-ng: metrc: [23595] fstat              1424      1.00      0.08      0.38      1421.13        3139.00\nstress-ng: metrc: [23595] getdent          199127      1.00      0.05      0.93    199121.30      202635.64\nstress-ng: metrc: [23595] hdd               28862      1.01      0.41      0.32     28653.54       39517.93\nstress-ng: metrc: [23595] inotify               2      1.04      0.00      0.00         1.93         980.87\nstress-ng: metrc: [23595] open              16250      1.01      0.03      0.22     16063.46       65546.92\nstress-ng: metrc: [23595] rename              411      1.01      0.01      0.00       408.03       29934.45\nstress-ng: metrc: [23595] touch             62332      1.01      0.03      1.37     61782.99       44547.39\nstress-ng: metrc: [23595] utime             48108      1.01      0.04      0.74     47757.19       61727.57\nstress-ng: info:  [23595] skipped: 0\nstress-ng: info:  [23595] passed: 20: access (1) chdir (1) chmod (1) chown (1) dentry (1) dir (1) dirmany (1) fallocate (1) file-ioctl (1) filename (1) flock (1) fpunch (1) fstat (1) getdent (1) hdd (1) inotify (1) open (1) rename (1) touch (1) utime (1)\nstress-ng: info:  [23595] failed: 0\nstress-ng: info:  [23595] metrics untrustworthy: 0\nstress-ng: info:  [23595] successful run completed in 1.10 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "30": {
+            "avg_ns_per_run": 412.5510112611351,
+            "bytes_jited": 517,
+            "bytes_xlated": 600,
+            "id": 30,
+            "name": "__x64_sys_open",
+            "run_cnt_delta": 17849,
+            "run_time_ns_delta": 7363623,
+            "type": "tracing"
+          },
+          "31": {
+            "avg_ns_per_run": 426.1326829506153,
+            "bytes_jited": 517,
+            "bytes_xlated": 600,
+            "id": 31,
+            "name": "kretfunc__vmlinux____x64_sys_openat",
+            "run_cnt_delta": 574226,
+            "run_time_ns_delta": 244696466,
+            "type": "tracing"
+          },
+          "32": {
+            "avg_ns_per_run": 435.58939038686987,
+            "bytes_jited": 590,
+            "bytes_xlated": 640,
+            "id": 32,
+            "name": "kretfunc__vmlinux____x64_sys_openat2",
+            "run_cnt_delta": 3412,
+            "run_time_ns_delta": 1486231,
+            "type": "tracing"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.1177979170000185,
+            "ops_per_sec": 2807045.846373632,
+            "ops_total": 3137710.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [3364] setting to a 1 secs run per stressor\nstress-ng: info:  [3364] dispatching hogs: 1 access, 1 chdir, 1 chmod, 1 chown, 1 dentry, 1 dir, 1 dirmany, 1 fallocate, 1 file-ioctl, 1 filename, 1 flock, 1 fpunch, 1 fstat, 1 getdent, 1 hdd, 1 inotify, 1 open, 1 rename, 1 touch, 1 utime\nstress-ng: info:  [3364] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [3381] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [3369] dentry: 110326 dentries allocated\nstress-ng: metrc: [3364] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [3364]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [3364] access            10963      1.02      0.17      1.55     10697.99        6380.44\nstress-ng: metrc: [3364] chdir                53      1.07      0.10      0.83        49.32          57.11\nstress-ng: metrc: [3364] chmod               155      1.02      0.00      0.04       151.30        4290.42\nstress-ng: metrc: [3364] chown               191      1.02      0.00      0.01       186.47       34651.67\nstress-ng: metrc: [3364] dentry            14295      1.03      0.02      0.45     13905.21       30780.20\nstress-ng: metrc: [3364] dir                8192      1.10      0.04      0.86      7474.34        9025.21\nstress-ng: metrc: [3364] dirmany           10589      1.00      0.00      0.25     10573.80       41658.47\nstress-ng: metrc: [3364] fallocate             2      1.02      0.00      0.01         1.95         201.27\nstress-ng: metrc: [3364] file-ioctl        66477      1.00      0.10      0.66     66465.32       88096.38\nstress-ng: metrc: [3364] filename           3518      1.02      0.03      0.63      3438.30        5327.53\nstress-ng: metrc: [3364] flock           2671774      1.01      0.45      0.53   2635928.85     2720905.39\nstress-ng: metrc: [3364] fpunch             1781      1.01      0.00      0.36      1758.00        4971.18\nstress-ng: metrc: [3364] fstat              1749      1.01      0.06      0.48      1730.04        3249.28\nstress-ng: metrc: [3364] getdent          193644      1.00      0.12      0.85    193644.83      200537.27\nstress-ng: metrc: [3364] hdd               24650      1.01      0.22      0.38     24338.36       41471.65\nstress-ng: metrc: [3364] inotify               2      1.04      0.00      0.00         1.92         757.58\nstress-ng: metrc: [3364] open              19456      1.00      0.01      0.27     19424.50       68719.01\nstress-ng: metrc: [3364] rename              579      1.01      0.02      0.00       575.40       36546.11\nstress-ng: metrc: [3364] touch             60590      1.02      0.06      1.32     59204.98       43885.48\nstress-ng: metrc: [3364] utime             49050      1.00      0.05      0.74     49019.89       62567.61\nstress-ng: info:  [3364] skipped: 0\nstress-ng: info:  [3364] passed: 20: access (1) chdir (1) chmod (1) chown (1) dentry (1) dir (1) dirmany (1) fallocate (1) file-ioctl (1) filename (1) flock (1) fpunch (1) fstat (1) getdent (1) hdd (1) inotify (1) open (1) rename (1) touch (1) utime (1)\nstress-ng: info:  [3364] failed: 0\nstress-ng: info:  [3364] metrics untrustworthy: 0\nstress-ng: info:  [3364] successful run completed in 1.11 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "stress_ng_filesystem",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/syscount",
+      "baseline": {
+        "bpf": {
+          "35": {
+            "avg_ns_per_run": 56.57403856254885,
+            "bytes_jited": 72,
+            "bytes_xlated": 112,
+            "id": 35,
+            "name": "tracepoint__raw_syscalls__sys_enter",
+            "run_cnt_delta": 9547761,
+            "run_time_ns_delta": 540155399,
+            "type": "tracepoint"
+          },
+          "36": {
+            "avg_ns_per_run": 56.72903000724149,
+            "bytes_jited": 236,
+            "bytes_xlated": 400,
+            "id": 36,
+            "name": "tracepoint__raw_syscalls__sys_exit",
+            "run_cnt_delta": 9547762,
+            "run_time_ns_delta": 541635277,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0143386759999942,
+            "ops_per_sec": 627524.1347496482,
+            "ops_total": 636522.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [13185] setting to a 1 secs run per stressor\nstress-ng: info:  [13185] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [13185] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [13185] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [13185]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [13185] cap              465172      1.00      0.08      0.92    465163.35      465303.22\nstress-ng: metrc: [13185] eventfd          128819      1.00      0.01      0.82    128778.56      154703.16\nstress-ng: metrc: [13185] get                 973      1.00      0.01      0.15       972.51        6279.20\nstress-ng: metrc: [13185] prctl              2801      1.00      0.68      0.30      2799.96        2861.18\nstress-ng: metrc: [13185] set               38757      1.00      0.07      0.91     38754.28       39408.74\nstress-ng: info:  [13185] skipped: 0\nstress-ng: info:  [13185] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [13185] failed: 0\nstress-ng: info:  [13185] metrics untrustworthy: 0\nstress-ng: info:  [13185] successful run completed in 1.00 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "35": {
+            "avg_ns_per_run": 61.899819623994,
+            "bytes_jited": 72,
+            "bytes_xlated": 112,
+            "id": 35,
+            "name": "tracepoint__raw_syscalls__sys_enter",
+            "run_cnt_delta": 9394265,
+            "run_time_ns_delta": 581503309,
+            "type": "tracepoint"
+          },
+          "36": {
+            "avg_ns_per_run": 56.29107681217457,
+            "bytes_jited": 236,
+            "bytes_xlated": 400,
+            "id": 36,
+            "name": "tracepoint__raw_syscalls__sys_exit",
+            "run_cnt_delta": 9394266,
+            "run_time_ns_delta": 528813349,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0155035149999776,
+            "ops_per_sec": 606973.7730056144,
+            "ops_total": 616384.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [18788] setting to a 1 secs run per stressor\nstress-ng: info:  [18788] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [18788] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [18788] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [18788]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [18788] cap              444968      1.00      0.12      0.88    444967.15      444895.48\nstress-ng: metrc: [18788] eventfd          128284      1.00      0.08      0.76    128212.20      153153.35\nstress-ng: metrc: [18788] get                 960      1.00      0.04      0.13       959.61        5886.28\nstress-ng: metrc: [18788] prctl              2663      1.00      0.65      0.32      2661.79        2749.22\nstress-ng: metrc: [18788] set               39509      1.00      0.09      0.89     39503.05       40263.54\nstress-ng: info:  [18788] skipped: 0\nstress-ng: info:  [18788] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [18788] failed: 0\nstress-ng: info:  [18788] metrics untrustworthy: 0\nstress-ng: info:  [18788] successful run completed in 1.00 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 2,
+          "not_applied": 0,
+          "requested": 2
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "stress_ng_os",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/tcpconnect",
+      "baseline": {
+        "bpf": {
+          "39": {
+            "avg_ns_per_run": 245.39097401610698,
+            "bytes_jited": 75,
+            "bytes_xlated": 120,
+            "id": 39,
+            "name": "trace_connect_entry",
+            "run_cnt_delta": 6581,
+            "run_time_ns_delta": 1614918,
+            "type": "kprobe"
+          },
+          "40": {
+            "avg_ns_per_run": 1934.85412551284,
+            "bytes_jited": 480,
+            "bytes_xlated": 720,
+            "id": 40,
+            "name": "trace_connect_v4_return",
+            "run_cnt_delta": 6581,
+            "run_time_ns_delta": 12733275,
+            "type": "kprobe"
+          },
+          "41": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 477,
+            "bytes_xlated": 712,
+            "id": 41,
+            "name": "trace_connect_v6_return",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.1029260459999932,
+            "ops_per_sec": 5956.881718250799,
+            "ops_total": 6570.0,
+            "stderr": "",
+            "stdout": "Running 1s test @ http://127.0.0.1:45785/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.88ms  352.80us   5.32ms   80.68%\n    Req/Sec     3.14k   671.91     6.04k    95.24%\n  6570 requests in 1.10s, 0.97MB read\n  Socket errors: connect 0, read 6570, write 0, timeout 0\nRequests/sec:   5972.79\nTransfer/sec:      0.88MB"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "39": {
+            "avg_ns_per_run": 245.39383191981497,
+            "bytes_jited": 75,
+            "bytes_xlated": 120,
+            "id": 39,
+            "name": "trace_connect_entry",
+            "run_cnt_delta": 6485,
+            "run_time_ns_delta": 1591379,
+            "type": "kprobe"
+          },
+          "40": {
+            "avg_ns_per_run": 1811.2043176561294,
+            "bytes_jited": 480,
+            "bytes_xlated": 720,
+            "id": 40,
+            "name": "trace_connect_v4_return",
+            "run_cnt_delta": 6485,
+            "run_time_ns_delta": 11745660,
+            "type": "kprobe"
+          },
+          "41": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 477,
+            "bytes_xlated": 712,
+            "id": 41,
+            "name": "trace_connect_v6_return",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.102019494000018,
+            "ops_per_sec": 5874.669218873086,
+            "ops_total": 6474.0,
+            "stderr": "",
+            "stdout": "Running 1s test @ http://127.0.0.1:41257/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.94ms  359.53us   6.38ms   84.36%\n    Req/Sec     2.96k     1.01k    4.19k    50.00%\n  6474 requests in 1.10s, 0.96MB read\n  Socket errors: connect 0, read 6474, write 0, timeout 0\nRequests/sec:   5885.04\nTransfer/sec:      0.87MB"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "tcp_connect",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/tcplife",
+      "baseline": {
+        "bpf": {
+          "44": {
+            "avg_ns_per_run": 412.7407944018866,
+            "bytes_jited": 1067,
+            "bytes_xlated": 1672,
+            "id": 44,
+            "name": "tracepoint__sock__inet_sock_set_state",
+            "run_cnt_delta": 64879,
+            "run_time_ns_delta": 26778210,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.101076226999993,
+            "ops_per_sec": 6043.178334827533,
+            "ops_total": 6654.0,
+            "stderr": "",
+            "stdout": "Running 1s test @ http://127.0.0.1:39199/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.87ms  281.79us   3.12ms   75.26%\n    Req/Sec     3.19k     2.16k    6.20k    61.90%\n  6654 requests in 1.10s, 0.98MB read\n  Socket errors: connect 0, read 6652, write 0, timeout 0\nRequests/sec:   6053.72\nTransfer/sec:      0.89MB"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "44": {
+            "avg_ns_per_run": 414.83657917019474,
+            "bytes_jited": 1067,
+            "bytes_xlated": 1672,
+            "id": 44,
+            "name": "tracepoint__sock__inet_sock_set_state",
+            "run_cnt_delta": 62593,
+            "run_time_ns_delta": 25965866,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.1034570370000267,
+            "ops_per_sec": 5824.422505359259,
+            "ops_total": 6427.0,
+            "stderr": "",
+            "stdout": "Running 1s test @ http://127.0.0.1:40609/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.90ms  323.89us   4.63ms   78.23%\n    Req/Sec     3.07k     1.20k    5.89k    76.19%\n  6427 requests in 1.10s, 0.95MB read\n  Socket errors: connect 0, read 6425, write 0, timeout 0\nRequests/sec:   5841.99\nTransfer/sec:      0.86MB"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 1,
+          "not_applied": 0,
+          "requested": 1
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "tcp_connect",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/runqlat",
+      "baseline": {
+        "bpf": {
+          "47": {
+            "avg_ns_per_run": 194.89794140009224,
+            "bytes_jited": 662,
+            "bytes_xlated": 1168,
+            "id": 47,
+            "name": "sched_switch",
+            "run_cnt_delta": 13557564,
+            "run_time_ns_delta": 2642341314,
+            "type": "raw_tracepoint"
+          },
+          "48": {
+            "avg_ns_per_run": 74.3767991763069,
+            "bytes_jited": 149,
+            "bytes_xlated": 248,
+            "id": 48,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 989689,
+            "run_time_ns_delta": 73609900,
+            "type": "raw_tracepoint"
+          },
+          "49": {
+            "avg_ns_per_run": 291.6666666666667,
+            "bytes_jited": 149,
+            "bytes_xlated": 248,
+            "id": 49,
+            "name": "raw_tracepoint__sched_wakeup_new",
+            "run_cnt_delta": 45,
+            "run_time_ns_delta": 13125,
+            "type": "raw_tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.019292796000002,
+            "ops_per_sec": 24113333.37825332,
+            "ops_total": 24578547.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [8372] setting to a 1 secs run per stressor\nstress-ng: info:  [8372] dispatching hogs: 1 futex, 1 sem, 1 sem-sysv, 1 switch, 1 yield\nstress-ng: info:  [8372] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [8372] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8372]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8372] futex           1065396      2.00      0.26      2.45    532636.28      393182.93\nstress-ng: metrc: [8372] sem             1425977      1.00      0.14      0.77   1425936.54     1576490.89\nstress-ng: metrc: [8372] sem-sysv        2758583      1.01      0.23      0.78   2738966.91     2737784.05\nstress-ng: metrc: [8372] switch           354760      1.00      0.19      0.80    354679.33      355049.37\nstress-ng: metrc: [8372] yield          18973831      1.00      3.59      7.72  18897274.20     1677742.75\nstress-ng: info:  [8372] skipped: 0\nstress-ng: info:  [8372] passed: 5: futex (1) sem (1) sem-sysv (1) switch (1) yield (1)\nstress-ng: info:  [8372] failed: 0\nstress-ng: info:  [8372] metrics untrustworthy: 0\nstress-ng: info:  [8372] successful run completed in 1.01 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "47": {
+            "avg_ns_per_run": 193.6891710102477,
+            "bytes_jited": 662,
+            "bytes_xlated": 1168,
+            "id": 47,
+            "name": "sched_switch",
+            "run_cnt_delta": 14098582,
+            "run_time_ns_delta": 2730742660,
+            "type": "raw_tracepoint"
+          },
+          "48": {
+            "avg_ns_per_run": 76.18613151558097,
+            "bytes_jited": 149,
+            "bytes_xlated": 248,
+            "id": 48,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 935661,
+            "run_time_ns_delta": 71284392,
+            "type": "raw_tracepoint"
+          },
+          "49": {
+            "avg_ns_per_run": 267.15555555555557,
+            "bytes_jited": 149,
+            "bytes_xlated": 248,
+            "id": 49,
+            "name": "raw_tracepoint__sched_wakeup_new",
+            "run_cnt_delta": 45,
+            "run_time_ns_delta": 12022,
+            "type": "raw_tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0154750849999914,
+            "ops_per_sec": 22546425.154291395,
+            "ops_total": 22895333.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [8482] setting to a 1 secs run per stressor\nstress-ng: info:  [8482] dispatching hogs: 1 futex, 1 sem, 1 sem-sysv, 1 switch, 1 yield\nstress-ng: info:  [8482] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [8482] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8482]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8482] futex           1097874      2.00      0.30      2.59    548893.88      379819.91\nstress-ng: metrc: [8482] sem             1570143      1.00      0.11      0.89   1570099.20     1565744.82\nstress-ng: metrc: [8482] sem-sysv        2711265      1.00      0.23      0.77   2710566.40     2709834.21\nstress-ng: metrc: [8482] switch           380470      1.00      0.18      0.82    380388.29      380516.42\nstress-ng: metrc: [8482] yield          17135581      1.00      2.89      8.20  17072214.06     1545479.76\nstress-ng: info:  [8482] skipped: 0\nstress-ng: info:  [8482] passed: 5: futex (1) sem (1) sem-sysv (1) switch (1) yield (1)\nstress-ng: info:  [8482] failed: 0\nstress-ng: info:  [8482] metrics untrustworthy: 0\nstress-ng: info:  [8482] successful run completed in 1.01 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "stress_ng_scheduler",
+      "status": "ok"
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "baseline": {
+        "bpf": {
+          "52": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3721,
+            "bytes_xlated": 6232,
+            "id": 52,
+            "name": "perf_unwind_stop",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "53": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 22575,
+            "bytes_xlated": 37232,
+            "id": 53,
+            "name": "perf_unwind_native",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "54": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18290,
+            "bytes_xlated": 28048,
+            "id": 54,
+            "name": "perf_unwind_hotspot",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "55": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17737,
+            "bytes_xlated": 29144,
+            "id": 55,
+            "name": "perf_unwind_perl",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "56": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 15178,
+            "bytes_xlated": 25032,
+            "id": 56,
+            "name": "perf_unwind_php",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "57": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 19909,
+            "bytes_xlated": 33264,
+            "id": 57,
+            "name": "perf_unwind_python",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "58": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16540,
+            "bytes_xlated": 28000,
+            "id": 58,
+            "name": "perf_unwind_ruby",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "59": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 20050,
+            "bytes_xlated": 33712,
+            "id": 59,
+            "name": "perf_unwind_v8",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "60": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 22565,
+            "bytes_xlated": 34248,
+            "id": 60,
+            "name": "perf_unwind_dotnet",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "61": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1580,
+            "bytes_xlated": 2496,
+            "id": 61,
+            "name": "perf_go_labels",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "62": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 696,
+            "bytes_xlated": 1088,
+            "id": 62,
+            "name": "perf_unwind_beam",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "63": {
+            "avg_ns_per_run": 6228.666666666667,
+            "bytes_jited": 788,
+            "bytes_xlated": 1320,
+            "id": 63,
+            "name": "tracepoint__sched_process_free",
+            "run_cnt_delta": 3,
+            "run_time_ns_delta": 18686,
+            "type": "tracepoint"
+          },
+          "64": {
+            "avg_ns_per_run": 827.3083176985616,
+            "bytes_jited": 3532,
+            "bytes_xlated": 5496,
+            "id": 64,
+            "name": "native_tracer_entry",
+            "run_cnt_delta": 1599,
+            "run_time_ns_delta": 1322866,
+            "type": "perf_event"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.014456052999975,
+            "ops_per_sec": 2954.0591927489118,
+            "ops_total": 14813.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [8578] setting to a 5 secs run per stressor\nstress-ng: info:  [8578] dispatching hogs: 1 cpu\nstress-ng: info:  [8578] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [8578] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8578]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8578] cpu               14813      5.00      5.00      0.00      2961.62        2961.54\nstress-ng: info:  [8578] skipped: 0\nstress-ng: info:  [8578] passed: 1: cpu (1)\nstress-ng: info:  [8578] failed: 0\nstress-ng: info:  [8578] metrics untrustworthy: 0\nstress-ng: info:  [8578] successful run completed in 5.00 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "52": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3721,
+            "bytes_xlated": 6232,
+            "id": 52,
+            "name": "perf_unwind_stop",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "53": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 22575,
+            "bytes_xlated": 37232,
+            "id": 53,
+            "name": "perf_unwind_native",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "54": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18290,
+            "bytes_xlated": 28048,
+            "id": 54,
+            "name": "perf_unwind_hotspot",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "55": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17737,
+            "bytes_xlated": 29144,
+            "id": 55,
+            "name": "perf_unwind_perl",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "56": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 15178,
+            "bytes_xlated": 25032,
+            "id": 56,
+            "name": "perf_unwind_php",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "57": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18325,
+            "bytes_xlated": 30096,
+            "id": 57,
+            "name": "perf_unwind_python",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "58": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16540,
+            "bytes_xlated": 28000,
+            "id": 58,
+            "name": "perf_unwind_ruby",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "59": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 20050,
+            "bytes_xlated": 33712,
+            "id": 59,
+            "name": "perf_unwind_v8",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "60": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 22565,
+            "bytes_xlated": 34248,
+            "id": 60,
+            "name": "perf_unwind_dotnet",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "61": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1580,
+            "bytes_xlated": 2496,
+            "id": 61,
+            "name": "perf_go_labels",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "62": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 696,
+            "bytes_xlated": 1088,
+            "id": 62,
+            "name": "perf_unwind_beam",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "63": {
+            "avg_ns_per_run": 3345.6666666666665,
+            "bytes_jited": 788,
+            "bytes_xlated": 1320,
+            "id": 63,
+            "name": "tracepoint__sched_process_free",
+            "run_cnt_delta": 3,
+            "run_time_ns_delta": 10037,
+            "type": "tracepoint"
+          },
+          "64": {
+            "avg_ns_per_run": 848.384375,
+            "bytes_jited": 3532,
+            "bytes_xlated": 5496,
+            "id": 64,
+            "name": "native_tracer_entry",
+            "run_cnt_delta": 1600,
+            "run_time_ns_delta": 1357415,
+            "type": "perf_event"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.016862850000024,
+            "ops_per_sec": 2943.4729314954125,
+            "ops_total": 14767.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [8617] setting to a 5 secs run per stressor\nstress-ng: info:  [8617] dispatching hogs: 1 cpu\nstress-ng: info:  [8617] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [8617] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8617]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8617] cpu               14767      5.00      5.00      0.00      2953.42        2953.87\nstress-ng: info:  [8617] skipped: 0\nstress-ng: info:  [8617] passed: 1: cpu (1)\nstress-ng: info:  [8617] failed: 0\nstress-ng: info:  [8617] metrics untrustworthy: 0\nstress-ng: info:  [8617] successful run completed in 5.00 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 13,
+          "not_applied": 0,
+          "requested": 13
+        }
+      },
+      "runner": "otelcol-ebpf-profiler",
+      "selected_workload": "stress_ng_cpu",
+      "status": "ok"
+    },
+    {
+      "app": "cilium/agent",
+      "baseline": {
+        "bpf": {
+          "72": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 167,
+            "bytes_xlated": 280,
+            "id": 72,
+            "name": "dump_bpf_map",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing"
+          },
+          "73": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 740,
+            "bytes_xlated": 520,
+            "id": 73,
+            "name": "dump_bpf_prog",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing"
+          },
+          "145": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3094,
+            "bytes_xlated": 5368,
+            "id": 145,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "146": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 146,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "147": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 147,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "148": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 148,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "149": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 526,
+            "bytes_xlated": 952,
+            "id": 149,
+            "name": "cil_to_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "150": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1236,
+            "bytes_xlated": 2056,
+            "id": 150,
+            "name": "cil_to_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "151": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 151,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "152": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 152,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "153": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1236,
+            "bytes_xlated": 2056,
+            "id": 153,
+            "name": "cil_to_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "154": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 154,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "155": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 526,
+            "bytes_xlated": 952,
+            "id": 155,
+            "name": "cil_to_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "156": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3094,
+            "bytes_xlated": 5368,
+            "id": 156,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "157": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 157,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "158": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 158,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "159": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 159,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "160": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 160,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "162": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 162,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "163": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 163,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "164": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 164,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "165": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 165,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "166": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 166,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "167": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 526,
+            "bytes_xlated": 952,
+            "id": 167,
+            "name": "cil_to_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "168": {
+            "avg_ns_per_run": 1074.8322717622082,
+            "bytes_jited": 3094,
+            "bytes_xlated": 5368,
+            "id": 168,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 471,
+            "run_time_ns_delta": 506246,
+            "type": "sched_cls"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0213488400000301,
+            "ops_per_sec": 176.23753310376765,
+            "ops_total": 180.0,
+            "stderr": "",
+            "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   125.95ms  160.73ms 949.95ms   91.59%\n    Req/Sec    90.20     35.07   160.00     70.00%\n  180 requests in 1.00s, 29.40KB read\nRequests/sec:    179.52\nTransfer/sec:     29.32KB"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "72": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 167,
+            "bytes_xlated": 280,
+            "id": 72,
+            "name": "dump_bpf_map",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing"
+          },
+          "73": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 740,
+            "bytes_xlated": 520,
+            "id": 73,
+            "name": "dump_bpf_prog",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing"
+          },
+          "145": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3094,
+            "bytes_xlated": 5368,
+            "id": 145,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "146": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 146,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "147": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 147,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "148": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 148,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "149": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 526,
+            "bytes_xlated": 952,
+            "id": 149,
+            "name": "cil_to_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "150": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1236,
+            "bytes_xlated": 2056,
+            "id": 150,
+            "name": "cil_to_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "151": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 151,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "152": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 152,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "153": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1236,
+            "bytes_xlated": 2056,
+            "id": 153,
+            "name": "cil_to_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "154": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 154,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "155": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 526,
+            "bytes_xlated": 952,
+            "id": 155,
+            "name": "cil_to_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "156": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3094,
+            "bytes_xlated": 5368,
+            "id": 156,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "157": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 157,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "158": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 158,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "159": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 159,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "160": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 160,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "162": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 162,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "163": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 163,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "164": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 164,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "165": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 165,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "166": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 166,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "167": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 526,
+            "bytes_xlated": 952,
+            "id": 167,
+            "name": "cil_to_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "168": {
+            "avg_ns_per_run": 928.4516129032259,
+            "bytes_jited": 3094,
+            "bytes_xlated": 5368,
+            "id": 168,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 496,
+            "run_time_ns_delta": 460512,
+            "type": "sched_cls"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0157849510000005,
+            "ops_per_sec": 186.06300458963966,
+            "ops_total": 189.0,
+            "stderr": "",
+            "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   130.13ms  148.86ms 892.84ms   87.17%\n    Req/Sec    94.65     41.58   150.00     60.00%\n  189 requests in 1.00s, 30.90KB read\nRequests/sec:    188.28\nTransfer/sec:     30.78KB"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "prog 73: prog 73 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 13: Permission denied (os error 13)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (79) r2 = *(u64 *)(r1 +0)\n      1: .12....... (79) r6 = *(u64 *)(r2 +0)\n      2: .12...6... (79) r1 = *(u64 *)(r1 +8)\n      3: .12...6... (15) if r1 == 0x0 goto pc+59\n      4: .12...6... (79) r7 = *(u64 *)(r1 +0)\n      5: ..2...67.. (79) r1 = *(u64 *)(r2 +16)\n      6: .1....67.. (55) if r1 != 0x0 goto pc+8\n      7: ......67.. (bf) r4 = r10\n      8: ....4.67.. (07) r4 += -48\n      9: ....4.67.. (bf) r1 = r6\n     10: .1..4.67.. (18) r2 = 0xffff899cbc87f77a\n     12: .12.4.67.. (b7) r3 = 32\n     13: .1234.67.. (b7) r5 = 0\n     14: .1234567.. (85) call bpf_seq_printf#126\n     15: ......67.. (7b) *(u64 *)(r10 -56) = r6\n     16: .......7.. (61) r1 = *(u32 *)(r7 +0)\n     17: .1.....7.. (7b) *(u64 *)(r10 -48) = r1\n     18: .......7.. (b7) r3 = 4\n     19: ...3...7.. (bf) r9 = r7\n     20: ...3...7.9 (0f) r9 += r3\n     21: ...3...7.9 (79) r1 = *(u64 *)(r7 +40)\n     22: .1.3...7.9 (79) r8 = *(u64 *)(r7 +48)\n     23: .1.3...789 (15) if r8 == 0x0 goto pc+24\n     24: .1.....789 (b7) r2 = 0\n     25: .12....789 (0f) r1 += r2\n     26: .1.....789 (61) r1 = *(u32 *)(r1 +4)\n     27: .1.....789 (79) r3 = *(u64 *)(r8 +8)\n     28: .1.3...789 (67) r1 <<= 3\n     29: .1.3...789 (0f) r3 += r1\n     30: ...3...789 (79) r6 = *(u64 *)(r8 +0)\n     31: ...3..6789 (bf) r1 = r10\n     32: .1.3..6789 (07) r1 += -8\n     33: .1.3..6789 (b7) r2 = 8\n     34: .123..6789 (85) call bpf_probe_read_kernel#113\n     35: ......6789 (b7) r1 = 0\n     36: .1....6789 (79) r3 = *(u64 *)(r10 -8)\n     37: .1.3..6789 (0f) r3 += r1\n     38: ...3..6789 (bf) r1 = r10\n     39: .1.3..6789 (07) r1 += -12\n     40: .1.3..6789 (b7) r2 = 4\n     41: .123..6789 (85) call bpf_probe_read_kernel#113\n     42: ......6789 (b7) r3 = 4\n     43: ...3..6789 (61) r1 = *(u32 *)(r10 -12)\n     44: .1.3..6789 (61) r2 = *(u32 *)(r8 +16)\n     45: .123..67.9 (3d) if r1 >= r2 goto pc+2\n     46: .1.3..67.. (0f) r6 += r1\n     47: ...3..67.. (bf) r9 = r6\n     48: ...3...7.9 (7b) *(u64 *)(r10 -40) = r9\n     49: ...3...7.. (79) r1 = *(u64 *)(r7 +24)\n     50: .1.3...7.. (7b) *(u64 *)(r10 -32) = r1\n     51: ...3...7.. (79) r1 = *(u64 *)(r7 +32)\n     52: .1.3...... (79) r1 = *(u64 *)(r1 +0)\n     53: .1.3...... (0f) r1 += r3\n     54: .1........ (7b) *(u64 *)(r10 -24) = r1\n     55: .......... (bf) r4 = r10\n     56: ....4..... (07) r4 += -48\n     57: ....4..... (79) r1 = *(u64 *)(r10 -56)\n     58: .1..4..... (18) r2 = 0xffff899cbc87f79a\n     60: .12.4..... (b7) r3 = 17\n     61: .1234..... (b7) r5 = 32\n     62: .12345.... (85) call bpf_seq_printf#126\n     63: .......... (b7) r0 = 0\n     64: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (79) r2 = *(u64 *)(r1 +0)\nfunc 'bpf_iter_bpf_prog' arg0 has btf_id 70962 type STRUCT 'bpf_iter_meta'\n1: R1=ctx() R2=trusted_ptr_bpf_iter_meta()\n1: (79) r6 = *(u64 *)(r2 +0)          ; R2=trusted_ptr_bpf_iter_meta() R6=trusted_ptr_seq_file()\n2: (79) r1 = *(u64 *)(r1 +8)          ; R1=ptr_or_null_bpf_prog(id=1)\n3: (15) if r1 == 0x0 goto pc+59       ; R1=ptr_bpf_prog()\n4: (79) r7 = *(u64 *)(r1 +0)\naccess beyond the end of member pages (mend:2) in struct bpf_prog with off 0 size 8\nprocessed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+        "error_programs": [
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 73 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 13: Permission denied (os error 13)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (79) r2 = *(u64 *)(r1 +0)\n      1: .12....... (79) r6 = *(u64 *)(r2 +0)\n      2: .12...6... (79) r1 = *(u64 *)(r1 +8)\n      3: .12...6... (15) if r1 == 0x0 goto pc+59\n      4: .12...6... (79) r7 = *(u64 *)(r1 +0)\n      5: ..2...67.. (79) r1 = *(u64 *)(r2 +16)\n      6: .1....67.. (55) if r1 != 0x0 goto pc+8\n      7: ......67.. (bf) r4 = r10\n      8: ....4.67.. (07) r4 += -48\n      9: ....4.67.. (bf) r1 = r6\n     10: .1..4.67.. (18) r2 = 0xffff899cbc87f77a\n     12: .12.4.67.. (b7) r3 = 32\n     13: .1234.67.. (b7) r5 = 0\n     14: .1234567.. (85) call bpf_seq_printf#126\n     15: ......67.. (7b) *(u64 *)(r10 -56) = r6\n     16: .......7.. (61) r1 = *(u32 *)(r7 +0)\n     17: .1.....7.. (7b) *(u64 *)(r10 -48) = r1\n     18: .......7.. (b7) r3 = 4\n     19: ...3...7.. (bf) r9 = r7\n     20: ...3...7.9 (0f) r9 += r3\n     21: ...3...7.9 (79) r1 = *(u64 *)(r7 +40)\n     22: .1.3...7.9 (79) r8 = *(u64 *)(r7 +48)\n     23: .1.3...789 (15) if r8 == 0x0 goto pc+24\n     24: .1.....789 (b7) r2 = 0\n     25: .12....789 (0f) r1 += r2\n     26: .1.....789 (61) r1 = *(u32 *)(r1 +4)\n     27: .1.....789 (79) r3 = *(u64 *)(r8 +8)\n     28: .1.3...789 (67) r1 <<= 3\n     29: .1.3...789 (0f) r3 += r1\n     30: ...3...789 (79) r6 = *(u64 *)(r8 +0)\n     31: ...3..6789 (bf) r1 = r10\n     32: .1.3..6789 (07) r1 += -8\n     33: .1.3..6789 (b7) r2 = 8\n     34: .123..6789 (85) call bpf_probe_read_kernel#113\n     35: ......6789 (b7) r1 = 0\n     36: .1....6789 (79) r3 = *(u64 *)(r10 -8)\n     37: .1.3..6789 (0f) r3 += r1\n     38: ...3..6789 (bf) r1 = r10\n     39: .1.3..6789 (07) r1 += -12\n     40: .1.3..6789 (b7) r2 = 4\n     41: .123..6789 (85) call bpf_probe_read_kernel#113\n     42: ......6789 (b7) r3 = 4\n     43: ...3..6789 (61) r1 = *(u32 *)(r10 -12)\n     44: .1.3..6789 (61) r2 = *(u32 *)(r8 +16)\n     45: .123..67.9 (3d) if r1 >= r2 goto pc+2\n     46: .1.3..67.. (0f) r6 += r1\n     47: ...3..67.. (bf) r9 = r6\n     48: ...3...7.9 (7b) *(u64 *)(r10 -40) = r9\n     49: ...3...7.. (79) r1 = *(u64 *)(r7 +24)\n     50: .1.3...7.. (7b) *(u64 *)(r10 -32) = r1\n     51: ...3...7.. (79) r1 = *(u64 *)(r7 +32)\n     52: .1.3...... (79) r1 = *(u64 *)(r1 +0)\n     53: .1.3...... (0f) r1 += r3\n     54: .1........ (7b) *(u64 *)(r10 -24) = r1\n     55: .......... (bf) r4 = r10\n     56: ....4..... (07) r4 += -48\n     57: ....4..... (79) r1 = *(u64 *)(r10 -56)\n     58: .1..4..... (18) r2 = 0xffff899cbc87f79a\n     60: .12.4..... (b7) r3 = 17\n     61: .1234..... (b7) r5 = 32\n     62: .12345.... (85) call bpf_seq_printf#126\n     63: .......... (b7) r0 = 0\n     64: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (79) r2 = *(u64 *)(r1 +0)\nfunc 'bpf_iter_bpf_prog' arg0 has btf_id 70962 type STRUCT 'bpf_iter_meta'\n1: R1=ctx() R2=trusted_ptr_bpf_iter_meta()\n1: (79) r6 = *(u64 *)(r2 +0)          ; R2=trusted_ptr_bpf_iter_meta() R6=trusted_ptr_seq_file()\n2: (79) r1 = *(u64 *)(r1 +8)          ; R1=ptr_or_null_bpf_prog(id=1)\n3: (15) if r1 == 0x0 goto pc+59       ; R1=ptr_bpf_prog()\n4: (79) r7 = *(u64 *)(r1 +0)\naccess beyond the end of member pages (mend:2) in struct bpf_prog with off 0 size 8\nprocessed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            "exit_code": 1,
+            "prog_id": 73
+          }
+        ],
+        "exit_code": 1,
+        "program_counts": {
+          "applied": 24,
+          "not_applied": 1,
+          "requested": 25
+        }
+      },
+      "runner": "cilium",
+      "selected_workload": "network_lossy_multi",
+      "status": "ok"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline": {
+        "bpf": {
+          "183": {
+            "avg_ns_per_run": 1471.183353437877,
+            "bytes_jited": 1012,
+            "bytes_xlated": 1792,
+            "id": 183,
+            "name": "event_exit_acct_process",
+            "run_cnt_delta": 829,
+            "run_time_ns_delta": 1219611,
+            "type": "kprobe"
+          },
+          "185": {
+            "avg_ns_per_run": 2130.218590398366,
+            "bytes_jited": 7335,
+            "bytes_xlated": 11312,
+            "id": 185,
+            "name": "event_wake_up_new_task",
+            "run_cnt_delta": 979,
+            "run_time_ns_delta": 2085484,
+            "type": "kprobe"
+          },
+          "186": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4992,
+            "bytes_xlated": 8064,
+            "id": 186,
+            "name": "execve_send",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "187": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1381,
+            "bytes_xlated": 2352,
+            "id": 187,
+            "name": "execve_rate",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "188": {
+            "avg_ns_per_run": 5495.5,
+            "bytes_jited": 11213,
+            "bytes_xlated": 20272,
+            "id": 188,
+            "name": "event_execve",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 10991,
+            "type": "tracepoint"
+          },
+          "189": {
+            "avg_ns_per_run": 746.5,
+            "bytes_jited": 1533,
+            "bytes_xlated": 2560,
+            "id": 189,
+            "name": "tg_kp_bprm_committing_creds",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 1493,
+            "type": "kprobe"
+          },
+          "190": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 303,
+            "bytes_xlated": 504,
+            "id": 190,
+            "name": "execve_map_update",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "socket_filter"
+          },
+          "193": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 193,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "194": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 194,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "195": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 195,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "196": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 196,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "197": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 197,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "198": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 198,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "199": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 199,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "200": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 200,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "201": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 201,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "202": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 202,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "203": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 203,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "204": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 204,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "205": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 205,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "206": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 206,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "207": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 207,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "208": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 208,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "209": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 209,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "210": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 210,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "211": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 211,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "212": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 212,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "213": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 213,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "214": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 214,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "215": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 215,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "216": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 216,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "217": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 217,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "218": {
+            "avg_ns_per_run": 540.930407810646,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 218,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 96074,
+            "run_time_ns_delta": 51969348,
+            "type": "kprobe"
+          },
+          "219": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 219,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "220": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 220,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "221": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 221,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "222": {
+            "avg_ns_per_run": 230.63355330266253,
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 222,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 96074,
+            "run_time_ns_delta": 22157888,
+            "type": "kprobe"
+          },
+          "223": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 223,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "224": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 224,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "225": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 225,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "226": {
+            "avg_ns_per_run": 1368.8955824859363,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 226,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 102569,
+            "run_time_ns_delta": 140406251,
+            "type": "kprobe"
+          },
+          "227": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 227,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "228": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 228,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "229": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 229,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "230": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 230,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "231": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 231,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "232": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 232,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "233": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 233,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "234": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 234,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "235": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 235,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "236": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 236,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "237": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 237,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "238": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 238,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "239": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 239,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "240": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 240,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "241": {
+            "avg_ns_per_run": 527.7782230364095,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 241,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 96074,
+            "run_time_ns_delta": 50705765,
+            "type": "kprobe"
+          },
+          "242": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 242,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "243": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 243,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "244": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 244,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "245": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 245,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "246": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 246,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "247": {
+            "avg_ns_per_run": 255.44541707433854,
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 247,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 96074,
+            "run_time_ns_delta": 24541663,
+            "type": "kprobe"
+          },
+          "248": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 248,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "249": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 249,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "250": {
+            "avg_ns_per_run": 1366.8942662987843,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 250,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 102569,
+            "run_time_ns_delta": 140200978,
+            "type": "kprobe"
+          },
+          "251": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 251,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "252": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 252,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "253": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 253,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "254": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 254,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "255": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 255,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "256": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 256,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "257": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 257,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "258": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 258,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "259": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 259,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "260": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 260,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "261": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 261,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "262": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 262,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "263": {
+            "avg_ns_per_run": 476.10533852026373,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 263,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 273765,
+            "run_time_ns_delta": 130340978,
+            "type": "kprobe"
+          },
+          "264": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 264,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "265": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 265,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "266": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 266,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "267": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 267,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "268": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 268,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "269": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 269,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "270": {
+            "avg_ns_per_run": 741.3576409655153,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 270,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 506631,
+            "run_time_ns_delta": 375594763,
+            "type": "kprobe"
+          },
+          "271": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 271,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "272": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 272,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "273": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 273,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "274": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 274,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "275": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 275,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "276": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 276,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "277": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 277,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "278": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 278,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "279": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 279,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "280": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 280,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "281": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 281,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "282": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 282,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "283": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 283,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "284": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 284,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "285": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 285,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "286": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 286,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "287": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 287,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "288": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 288,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "289": {
+            "avg_ns_per_run": 200.9503608015387,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 289,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 366545,
+            "run_time_ns_delta": 73657350,
+            "type": "kprobe"
+          },
+          "290": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 290,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "291": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 291,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "292": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 292,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "293": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 293,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "294": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 294,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "295": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 295,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "296": {
+            "avg_ns_per_run": 493.2234042067002,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 296,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 656429,
+            "run_time_ns_delta": 323766146,
+            "type": "kprobe"
+          },
+          "297": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 297,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "298": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 298,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "299": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 299,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "300": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 300,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "301": {
+            "avg_ns_per_run": 37.01371511618164,
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 301,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 656429,
+            "run_time_ns_delta": 24296876,
+            "type": "kprobe"
+          },
+          "302": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 302,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "303": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 303,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "304": {
+            "avg_ns_per_run": 5702.633142857143,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 304,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 2625,
+            "run_time_ns_delta": 14969412,
+            "type": "kprobe"
+          },
+          "305": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 305,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "306": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 306,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "307": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 307,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "308": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 308,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "309": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 309,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "310": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 310,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "311": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 311,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "312": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 312,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "313": {
+            "avg_ns_per_run": 59.65548780487805,
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 313,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 2624,
+            "run_time_ns_delta": 156536,
+            "type": "kprobe"
+          },
+          "314": {
+            "avg_ns_per_run": 6911.333333333333,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 314,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 6,
+            "run_time_ns_delta": 41468,
+            "type": "kprobe"
+          },
+          "315": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 315,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "316": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 316,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "317": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 317,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "318": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 318,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "319": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 319,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "320": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 320,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "321": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 321,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "322": {
+            "avg_ns_per_run": 391.5,
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 322,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 6,
+            "run_time_ns_delta": 2349,
+            "type": "kprobe"
+          },
+          "323": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 323,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "324": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 324,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "325": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 325,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "326": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 326,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "327": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 327,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "328": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 328,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "329": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 329,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "330": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 330,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "331": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 331,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "332": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 332,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "333": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 333,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "334": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 334,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "335": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 335,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "336": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 336,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "337": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 337,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "338": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 338,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "339": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 339,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "340": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 340,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "341": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 341,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "342": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 342,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "343": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 343,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "344": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 344,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "345": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 345,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "346": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 346,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "347": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 347,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "348": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 348,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "349": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 349,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "350": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 350,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "351": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 351,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "352": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 352,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "353": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 353,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "354": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 354,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "355": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 355,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "356": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 356,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "357": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 357,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "358": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 358,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "359": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 359,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "360": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 360,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "361": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 361,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "362": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 362,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "363": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 363,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "364": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 364,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "365": {
+            "avg_ns_per_run": 4840.0,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 365,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 9680,
+            "type": "kprobe"
+          },
+          "366": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 366,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "367": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 367,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "368": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11087,
+            "bytes_xlated": 17992,
+            "id": 368,
+            "name": "generic_tracepoint_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "369": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4754,
+            "bytes_xlated": 8504,
+            "id": 369,
+            "name": "generic_tracepoint_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "370": {
+            "avg_ns_per_run": 987.9401792576265,
+            "bytes_jited": 10899,
+            "bytes_xlated": 19392,
+            "id": 370,
+            "name": "generic_tracepoint_event",
+            "run_cnt_delta": 6397831,
+            "run_time_ns_delta": 6320674305,
+            "type": "tracepoint"
+          },
+          "371": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 14876,
+            "bytes_xlated": 25720,
+            "id": 371,
+            "name": "generic_tracepoint_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "372": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 372,
+            "name": "generic_tracepoint_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "373": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 373,
+            "name": "generic_tracepoint_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "374": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17059,
+            "bytes_xlated": 29456,
+            "id": 374,
+            "name": "generic_rawtp_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "375": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 375,
+            "name": "generic_rawtp_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "376": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 376,
+            "name": "generic_rawtp_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "377": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 377,
+            "name": "generic_rawtp_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "378": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 741,
+            "bytes_xlated": 1176,
+            "id": 378,
+            "name": "generic_rawtp_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "379": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 379,
+            "name": "generic_rawtp_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "380": {
+            "avg_ns_per_run": 5275.5,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 380,
+            "name": "generic_rawtp_event",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 10551,
+            "type": "raw_tracepoint"
+          },
+          "381": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 381,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "382": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 382,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "383": {
+            "avg_ns_per_run": 1039.567700920391,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 383,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 21078,
+            "run_time_ns_delta": 21912008,
+            "type": "kprobe"
+          },
+          "384": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 384,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "385": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 385,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "386": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 386,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "387": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 387,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "388": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 388,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "389": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 389,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "390": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 390,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "391": {
+            "avg_ns_per_run": 3237.0478199718705,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 391,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 711,
+            "run_time_ns_delta": 2301541,
+            "type": "kprobe"
+          },
+          "392": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 392,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "393": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 393,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "394": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 394,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "395": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 395,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "396": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 396,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "397": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 397,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "398": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 398,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "399": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 399,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "400": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 400,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "401": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 401,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "402": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 402,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "403": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 403,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "404": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 404,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "405": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 405,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "406": {
+            "avg_ns_per_run": 562.353227720299,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 406,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 96074,
+            "run_time_ns_delta": 54027524,
+            "type": "kprobe"
+          },
+          "407": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 407,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "408": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 408,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "409": {
+            "avg_ns_per_run": 265.9974290650957,
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 409,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 96074,
+            "run_time_ns_delta": 25555437,
+            "type": "kprobe"
+          },
+          "410": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 410,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "411": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 411,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "412": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 412,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "413": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 413,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "414": {
+            "avg_ns_per_run": 1363.2006649182501,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 414,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 102569,
+            "run_time_ns_delta": 139822129,
+            "type": "kprobe"
+          },
+          "415": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 415,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "416": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 416,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "417": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 417,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "418": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 418,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "419": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 419,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "420": {
+            "avg_ns_per_run": 557.0263840719332,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 420,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 77850,
+            "run_time_ns_delta": 43364504,
+            "type": "kprobe"
+          },
+          "421": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 421,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "422": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 422,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "423": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 423,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "424": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 424,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "425": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 425,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "426": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 426,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "427": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 427,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "428": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 428,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "429": {
+            "avg_ns_per_run": 1285.855713180294,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 429,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 19385,
+            "run_time_ns_delta": 24926313,
+            "type": "kprobe"
+          },
+          "430": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 430,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "431": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 431,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "432": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 432,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "433": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 433,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "434": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 434,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "435": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 435,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "436": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 436,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "437": {
+            "avg_ns_per_run": 1273.5595459236326,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 437,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 9690,
+            "run_time_ns_delta": 12340792,
+            "type": "kprobe"
+          },
+          "438": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 438,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "439": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 439,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "440": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 440,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "441": {
+            "avg_ns_per_run": 1527.8556243550051,
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 441,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 9690,
+            "run_time_ns_delta": 14804921,
+            "type": "kprobe"
+          },
+          "442": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 442,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "443": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 443,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "444": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 444,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "445": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 445,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "446": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 446,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "447": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 447,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "448": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 448,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "449": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 449,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "450": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 450,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "451": {
+            "avg_ns_per_run": 1574.8338664740481,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 451,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 9691,
+            "run_time_ns_delta": 15261715,
+            "type": "kprobe"
+          },
+          "452": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 452,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "453": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 453,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "454": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 454,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "455": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 455,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "456": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 456,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "457": {
+            "avg_ns_per_run": 1365.5740521021407,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 457,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 19385,
+            "run_time_ns_delta": 26471653,
+            "type": "kprobe"
+          },
+          "458": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 458,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "459": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 459,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "460": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 460,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "461": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 461,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "462": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 462,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "463": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 463,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "464": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 464,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "465": {
+            "avg_ns_per_run": 1234.9358478712609,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 465,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 165544,
+            "run_time_ns_delta": 204436220,
+            "type": "kprobe"
+          },
+          "466": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 466,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "467": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 467,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "468": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 468,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "469": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 469,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "470": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 470,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "471": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 471,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "472": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 472,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.2833427969999889,
+            "ops_per_sec": 13146569.287208261,
+            "ops_total": 16871555.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [11066] setting to a 1 secs run per stressor\nstress-ng: info:  [11066] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set, 1 aio, 1 aiol, 1 hdd, 1 io, 1 iomix, 1 io-uring, 1 sync-file, 1 epoll, 1 netdev, 1 sctp, 1 sock, 1 sockdiag, 1 sockfd, 1 sockpair, 1 sockmany, 1 udp-flood\nstress-ng: info:  [11066] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [11075] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: metrc: [11066] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [11066]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [11066] cap              106138      1.00      0.03      0.90    106140.25      113943.47\nstress-ng: metrc: [11066] eventfd           58364      1.00      0.04      0.82     58354.76       68321.44\nstress-ng: metrc: [11066] get                 491      1.00      0.05      0.17       490.64        2274.65\nstress-ng: metrc: [11066] prctl               778      1.00      0.47      0.12       777.82        1326.71\nstress-ng: metrc: [11066] set                7950      1.00      0.02      0.80      7949.71        9719.34\nstress-ng: metrc: [11066] aio                7188      1.00      0.00      0.10      7183.50       73945.29\nstress-ng: metrc: [11066] aiol               1213      1.26      0.00      0.17       960.98        7152.33\nstress-ng: metrc: [11066] hdd               18822      1.00      0.27      0.32     18768.40       32151.11\nstress-ng: metrc: [11066] io                  151      1.00      0.00      0.03       150.91        4773.50\nstress-ng: metrc: [11066] iomix              1233      1.00      0.02      0.29      1227.23        4065.50\nstress-ng: metrc: [11066] io-uring           7582      1.03      0.00      0.38      7327.85       20032.13\nstress-ng: metrc: [11066] sync-file            12      1.00      0.00      0.57        11.99          20.89\nstress-ng: metrc: [11066] epoll              9149      1.00      0.01      0.68      9145.13       13195.51\nstress-ng: metrc: [11066] netdev            37135      1.00      0.03      0.88     37095.48       40670.71\nstress-ng: metrc: [11066] sctp              24130      1.00      0.01      0.39     24085.66       59779.07\nstress-ng: metrc: [11066] sock                305      1.00      0.01      0.89       304.48         339.49\nstress-ng: metrc: [11066] sockdiag       16239546      1.00      0.03      0.46  16217174.57    33297750.49\nstress-ng: metrc: [11066] sockfd            90200      1.00      0.04      0.97     89944.92       89598.88\nstress-ng: metrc: [11066] sockpair         113690      1.06      0.02      1.40    107671.27       79924.19\nstress-ng: metrc: [11066] sockmany           9689      1.02      0.00      0.87      9485.69       11164.87\nstress-ng: metrc: [11066] udp-flood        137789      1.00      0.01      0.91    137788.93      150477.57\nstress-ng: info:  [11066] skipped: 0\nstress-ng: info:  [11066] passed: 21: cap (1) eventfd (1) get (1) prctl (1) set (1) aio (1) aiol (1) hdd (1) io (1) iomix (1) io-uring (1) sync-file (1) epoll (1) netdev (1) sctp (1) sock (1) sockdiag (1) sockfd (1) sockpair (1) sockmany (1) udp-flood (1)\nstress-ng: info:  [11066] failed: 0\nstress-ng: info:  [11066] metrics untrustworthy: 0\nstress-ng: info:  [11066] successful run completed in 1.27 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "183": {
+            "avg_ns_per_run": 1471.1124845488257,
+            "bytes_jited": 1012,
+            "bytes_xlated": 1792,
+            "id": 183,
+            "name": "event_exit_acct_process",
+            "run_cnt_delta": 809,
+            "run_time_ns_delta": 1190130,
+            "type": "kprobe"
+          },
+          "185": {
+            "avg_ns_per_run": 2209.823660714286,
+            "bytes_jited": 7335,
+            "bytes_xlated": 11312,
+            "id": 185,
+            "name": "event_wake_up_new_task",
+            "run_cnt_delta": 896,
+            "run_time_ns_delta": 1980002,
+            "type": "kprobe"
+          },
+          "186": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4992,
+            "bytes_xlated": 8064,
+            "id": 186,
+            "name": "execve_send",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "187": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1381,
+            "bytes_xlated": 2352,
+            "id": 187,
+            "name": "execve_rate",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "188": {
+            "avg_ns_per_run": 6191.5,
+            "bytes_jited": 11213,
+            "bytes_xlated": 20272,
+            "id": 188,
+            "name": "event_execve",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 12383,
+            "type": "tracepoint"
+          },
+          "189": {
+            "avg_ns_per_run": 750.0,
+            "bytes_jited": 1533,
+            "bytes_xlated": 2560,
+            "id": 189,
+            "name": "tg_kp_bprm_committing_creds",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 1500,
+            "type": "kprobe"
+          },
+          "190": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 303,
+            "bytes_xlated": 504,
+            "id": 190,
+            "name": "execve_map_update",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "socket_filter"
+          },
+          "193": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 193,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "194": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 194,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "195": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 195,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "196": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 196,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "197": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 197,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "198": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 198,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "199": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 199,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "200": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 200,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "201": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 201,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "202": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 202,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "203": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 203,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "204": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 204,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "205": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 205,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "206": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 206,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "207": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 207,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "208": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 208,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "209": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 209,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "210": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 210,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "211": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 211,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "212": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 212,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "213": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 213,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "214": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 214,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "215": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 215,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "216": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 216,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "217": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 217,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "218": {
+            "avg_ns_per_run": 453.61052908293834,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 218,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 129337,
+            "run_time_ns_delta": 58668625,
+            "type": "kprobe"
+          },
+          "219": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 219,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "220": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 220,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "221": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 221,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "222": {
+            "avg_ns_per_run": 155.45736332217385,
+            "bytes_jited": 13995,
+            "bytes_xlated": 24648,
+            "id": 222,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 129337,
+            "run_time_ns_delta": 20106389,
+            "type": "kprobe"
+          },
+          "223": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3701,
+            "bytes_xlated": 6568,
+            "id": 223,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "224": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 224,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "225": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 225,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "226": {
+            "avg_ns_per_run": 1281.7230725017869,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 226,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 135707,
+            "run_time_ns_delta": 173938793,
+            "type": "kprobe"
+          },
+          "227": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 227,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "228": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 228,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "229": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 229,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "230": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 230,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "231": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 231,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "232": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 232,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "233": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 233,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "234": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 234,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "235": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 235,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "236": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 236,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "237": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 237,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "238": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 238,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "239": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 239,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "240": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 240,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "241": {
+            "avg_ns_per_run": 458.39833922234163,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 241,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 129337,
+            "run_time_ns_delta": 59287866,
+            "type": "kprobe"
+          },
+          "242": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 242,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "243": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 243,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "244": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 244,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "245": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 245,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "246": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3701,
+            "bytes_xlated": 6568,
+            "id": 246,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "247": {
+            "avg_ns_per_run": 172.76635456211292,
+            "bytes_jited": 13995,
+            "bytes_xlated": 24648,
+            "id": 247,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 129337,
+            "run_time_ns_delta": 22345082,
+            "type": "kprobe"
+          },
+          "248": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 248,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "249": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 249,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "250": {
+            "avg_ns_per_run": 1343.3567907329762,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 250,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 135707,
+            "run_time_ns_delta": 182302920,
+            "type": "kprobe"
+          },
+          "251": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 251,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "252": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 252,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "253": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 253,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "254": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 254,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "255": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 255,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "256": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 256,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "257": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 257,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "258": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 258,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "259": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 259,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "260": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 260,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "261": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 261,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "262": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 262,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "263": {
+            "avg_ns_per_run": 508.37446487930106,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 263,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 280077,
+            "run_time_ns_delta": 142383995,
+            "type": "kprobe"
+          },
+          "264": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 264,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "265": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 265,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "266": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 266,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "267": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 267,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "268": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 268,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "269": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 269,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "270": {
+            "avg_ns_per_run": 804.6377462436952,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 270,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 376101,
+            "run_time_ns_delta": 302625061,
+            "type": "kprobe"
+          },
+          "271": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 271,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "272": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 272,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "273": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 273,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "274": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 274,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "275": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 275,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "276": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 276,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "277": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 277,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "278": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 278,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "279": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 279,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "280": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 280,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "281": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 281,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "282": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 282,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "283": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 283,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "284": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 284,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "285": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 285,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "286": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 286,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "287": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 287,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "288": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 288,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "289": {
+            "avg_ns_per_run": 192.97500876316096,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 289,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 385135,
+            "run_time_ns_delta": 74321430,
+            "type": "kprobe"
+          },
+          "290": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 290,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "291": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 291,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "292": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 292,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "293": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 293,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "294": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 294,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "295": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 295,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "296": {
+            "avg_ns_per_run": 502.43416101036917,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 296,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 638816,
+            "run_time_ns_delta": 320962981,
+            "type": "kprobe"
+          },
+          "297": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 297,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "298": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 298,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "299": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 299,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "300": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 300,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "301": {
+            "avg_ns_per_run": 36.77867805440064,
+            "bytes_jited": 13995,
+            "bytes_xlated": 24648,
+            "id": 301,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 638816,
+            "run_time_ns_delta": 23494808,
+            "type": "kprobe"
+          },
+          "302": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3701,
+            "bytes_xlated": 6568,
+            "id": 302,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "303": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 303,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "304": {
+            "avg_ns_per_run": 6412.922707248698,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 304,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 2497,
+            "run_time_ns_delta": 16013068,
+            "type": "kprobe"
+          },
+          "305": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 305,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "306": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 306,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "307": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 307,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "308": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 308,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "309": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 309,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "310": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 310,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "311": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 311,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "312": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3701,
+            "bytes_xlated": 6568,
+            "id": 312,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "313": {
+            "avg_ns_per_run": 58.33960752903484,
+            "bytes_jited": 13995,
+            "bytes_xlated": 24648,
+            "id": 313,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 2497,
+            "run_time_ns_delta": 145674,
+            "type": "kprobe"
+          },
+          "314": {
+            "avg_ns_per_run": 7897.428571428572,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 314,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 7,
+            "run_time_ns_delta": 55282,
+            "type": "kprobe"
+          },
+          "315": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 315,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "316": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 316,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "317": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 317,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "318": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 318,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "319": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 319,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "320": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 320,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "321": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 321,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "322": {
+            "avg_ns_per_run": 589.8571428571429,
+            "bytes_jited": 13995,
+            "bytes_xlated": 24648,
+            "id": 322,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 7,
+            "run_time_ns_delta": 4129,
+            "type": "kprobe"
+          },
+          "323": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 323,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "324": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3701,
+            "bytes_xlated": 6568,
+            "id": 324,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "325": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 325,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "326": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 326,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "327": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 327,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "328": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 328,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "329": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 329,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "330": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 330,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "331": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 331,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "332": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 332,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "333": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 333,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "334": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3701,
+            "bytes_xlated": 6568,
+            "id": 334,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "335": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 13995,
+            "bytes_xlated": 24648,
+            "id": 335,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "336": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 336,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "337": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 337,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "338": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 338,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "339": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 339,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "340": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 340,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "341": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 341,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "342": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 342,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "343": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3701,
+            "bytes_xlated": 6568,
+            "id": 343,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "344": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 344,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "345": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 345,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "346": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 13995,
+            "bytes_xlated": 24648,
+            "id": 346,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "347": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 347,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "348": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 348,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "349": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 349,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "350": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 350,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "351": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 351,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "352": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 352,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "353": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 353,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "354": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 354,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "355": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 355,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "356": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 356,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "357": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 357,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "358": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 358,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "359": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 359,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "360": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 360,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "361": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 361,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "362": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 362,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "363": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 363,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "364": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 364,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "365": {
+            "avg_ns_per_run": 5260.0,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 365,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 10520,
+            "type": "kprobe"
+          },
+          "366": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 366,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "367": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 367,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "368": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11015,
+            "bytes_xlated": 17848,
+            "id": 368,
+            "name": "generic_tracepoint_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "369": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4646,
+            "bytes_xlated": 8312,
+            "id": 369,
+            "name": "generic_tracepoint_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "370": {
+            "avg_ns_per_run": 993.6979655765417,
+            "bytes_jited": 10815,
+            "bytes_xlated": 19224,
+            "id": 370,
+            "name": "generic_tracepoint_event",
+            "run_cnt_delta": 6158010,
+            "run_time_ns_delta": 6119202009,
+            "type": "tracepoint"
+          },
+          "371": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 14824,
+            "bytes_xlated": 25624,
+            "id": 371,
+            "name": "generic_tracepoint_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "372": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 372,
+            "name": "generic_tracepoint_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "373": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 373,
+            "name": "generic_tracepoint_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "374": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16995,
+            "bytes_xlated": 29336,
+            "id": 374,
+            "name": "generic_rawtp_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "375": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 375,
+            "name": "generic_rawtp_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "376": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3701,
+            "bytes_xlated": 6568,
+            "id": 376,
+            "name": "generic_rawtp_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "377": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 377,
+            "name": "generic_rawtp_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "378": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 729,
+            "bytes_xlated": 1152,
+            "id": 378,
+            "name": "generic_rawtp_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "379": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 379,
+            "name": "generic_rawtp_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "380": {
+            "avg_ns_per_run": 4732.0,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 380,
+            "name": "generic_rawtp_event",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 9464,
+            "type": "raw_tracepoint"
+          },
+          "381": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 381,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "382": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 382,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "383": {
+            "avg_ns_per_run": 805.9312830531883,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 383,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 29687,
+            "run_time_ns_delta": 23925682,
+            "type": "kprobe"
+          },
+          "384": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 384,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "385": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 385,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "386": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 386,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "387": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 387,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "388": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 388,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "389": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 389,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "390": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 390,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "391": {
+            "avg_ns_per_run": 4143.379746835443,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 391,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 711,
+            "run_time_ns_delta": 2945943,
+            "type": "kprobe"
+          },
+          "392": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 392,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "393": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 393,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "394": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 394,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "395": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 395,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "396": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 396,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "397": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 397,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "398": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 398,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "399": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 399,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "400": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 400,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "401": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 401,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "402": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 402,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "403": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 403,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "404": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 404,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "405": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 405,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "406": {
+            "avg_ns_per_run": 477.0954715201373,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 406,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 129337,
+            "run_time_ns_delta": 61706097,
+            "type": "kprobe"
+          },
+          "407": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 407,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "408": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 408,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "409": {
+            "avg_ns_per_run": 171.22598328397908,
+            "bytes_jited": 13995,
+            "bytes_xlated": 24648,
+            "id": 409,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 129337,
+            "run_time_ns_delta": 22145855,
+            "type": "kprobe"
+          },
+          "410": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 410,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "411": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3701,
+            "bytes_xlated": 6568,
+            "id": 411,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "412": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 412,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "413": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 413,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "414": {
+            "avg_ns_per_run": 1308.2684975719749,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 414,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 135707,
+            "run_time_ns_delta": 177541193,
+            "type": "kprobe"
+          },
+          "415": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 415,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "416": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 416,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "417": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 417,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "418": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 418,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "419": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 419,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "420": {
+            "avg_ns_per_run": 528.7813303081518,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 420,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 86386,
+            "run_time_ns_delta": 45679304,
+            "type": "kprobe"
+          },
+          "421": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 421,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "422": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 422,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "423": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 423,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "424": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 424,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "425": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 425,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "426": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 426,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "427": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 427,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "428": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 428,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "429": {
+            "avg_ns_per_run": 1375.1571476206354,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 429,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 20993,
+            "run_time_ns_delta": 28868674,
+            "type": "kprobe"
+          },
+          "430": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 430,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "431": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 431,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "432": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 432,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "433": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 433,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "434": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 434,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "435": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 435,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "436": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 436,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "437": {
+            "avg_ns_per_run": 1229.252239374881,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 437,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 10494,
+            "run_time_ns_delta": 12899773,
+            "type": "kprobe"
+          },
+          "438": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 438,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "439": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 439,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "440": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 440,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "441": {
+            "avg_ns_per_run": 1686.9483514389174,
+            "bytes_jited": 13995,
+            "bytes_xlated": 24648,
+            "id": 441,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 10494,
+            "run_time_ns_delta": 17702836,
+            "type": "kprobe"
+          },
+          "442": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3701,
+            "bytes_xlated": 6568,
+            "id": 442,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "443": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 443,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "444": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 444,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "445": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 445,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "446": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 446,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "447": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 447,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "448": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 448,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "449": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 449,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "450": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 450,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "451": {
+            "avg_ns_per_run": 1430.6934070121952,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 451,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 10496,
+            "run_time_ns_delta": 15016558,
+            "type": "kprobe"
+          },
+          "452": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 452,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "453": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 453,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "454": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 454,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "455": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 455,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "456": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 456,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "457": {
+            "avg_ns_per_run": 1387.7476777973611,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 457,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 20993,
+            "run_time_ns_delta": 29132987,
+            "type": "kprobe"
+          },
+          "458": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 458,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "459": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 459,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "460": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 460,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "461": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 461,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "462": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 462,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "463": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 463,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "464": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 464,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "465": {
+            "avg_ns_per_run": 1283.588848799547,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 465,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 157149,
+            "run_time_ns_delta": 201714704,
+            "type": "kprobe"
+          },
+          "466": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 466,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "467": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4785,
+            "bytes_xlated": 8560,
+            "id": 467,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "468": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1277,
+            "bytes_xlated": 2168,
+            "id": 468,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "469": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 469,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "470": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1710,
+            "bytes_xlated": 3032,
+            "id": 470,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "471": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17085,
+            "bytes_xlated": 29336,
+            "id": 471,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "472": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11008,
+            "bytes_xlated": 17848,
+            "id": 472,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.1520965450000062,
+            "ops_per_sec": 24761284.220325343,
+            "ops_total": 28527390.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [13224] setting to a 1 secs run per stressor\nstress-ng: info:  [13224] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set, 1 aio, 1 aiol, 1 hdd, 1 io, 1 iomix, 1 io-uring, 1 sync-file, 1 epoll, 1 netdev, 1 sctp, 1 sock, 1 sockdiag, 1 sockfd, 1 sockpair, 1 sockmany, 1 udp-flood\nstress-ng: info:  [13224] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [13233] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: metrc: [13224] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [13224]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [13224] cap              101156      1.00      0.02      0.90    101154.00      109739.02\nstress-ng: metrc: [13224] eventfd           56735      1.00      0.01      0.91     56726.66       61532.30\nstress-ng: metrc: [13224] get                 491      1.00      0.01      0.23       490.74        1987.91\nstress-ng: metrc: [13224] prctl               758      1.00      0.44      0.13       757.55        1342.38\nstress-ng: metrc: [13224] set                8954      1.00      0.03      0.85      8952.25       10129.60\nstress-ng: metrc: [13224] aio                6965      1.02      0.01      0.09      6845.16       72518.85\nstress-ng: metrc: [13224] aiol               1002      1.13      0.01      0.13       889.59        6945.07\nstress-ng: metrc: [13224] hdd               22094      1.02      0.45      0.34     21656.09       27997.78\nstress-ng: metrc: [13224] io                   93      1.02      0.02      0.00        91.31        3837.74\nstress-ng: metrc: [13224] iomix              1026      1.02      0.02      0.33      1005.62        2919.70\nstress-ng: metrc: [13224] io-uring           7222      1.02      0.00      0.31      7079.52       23135.65\nstress-ng: metrc: [13224] sync-file            11      1.02      0.03      0.50        10.83          20.77\nstress-ng: metrc: [13224] epoll             19154      1.04      0.00      1.10     18470.57       17350.72\nstress-ng: metrc: [13224] netdev            32955      1.00      0.02      0.77     32954.24       41906.58\nstress-ng: metrc: [13224] sctp                438      1.00      0.01      0.00       436.40       65716.43\nstress-ng: metrc: [13224] sock                287      1.00      0.02      0.98       286.32         286.75\nstress-ng: metrc: [13224] sockdiag       27975190      1.00      0.03      0.84  27971021.99    32133599.05\nstress-ng: metrc: [13224] sockfd            84609      1.02      0.01      0.91     83277.14       92166.87\nstress-ng: metrc: [13224] sockpair         112293      1.05      0.05      1.35    106490.38       80021.58\nstress-ng: metrc: [13224] sockmany          10492      1.03      0.02      0.87     10196.29       11792.05\nstress-ng: metrc: [13224] udp-flood         85465      1.00      0.01      0.62     85464.10      135570.93\nstress-ng: info:  [13224] skipped: 0\nstress-ng: info:  [13224] passed: 21: cap (1) eventfd (1) get (1) prctl (1) set (1) aio (1) aiol (1) hdd (1) io (1) iomix (1) io-uring (1) sync-file (1) epoll (1) netdev (1) sctp (1) sock (1) sockdiag (1) sockfd (1) sockpair (1) sockmany (1) udp-flood (1)\nstress-ng: info:  [13224] failed: 0\nstress-ng: info:  [13224] metrics untrustworthy: 0\nstress-ng: info:  [13224] successful run completed in 1.13 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "prog 198: prog 198 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 204: prog 204 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 213: prog 213 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 215: prog 215 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 221: prog 221 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P31 R2=map_value(map=string_postfix_,ks=4,vs=132,off=30) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-27,smax=smax32=99,umax=0xffffffffffffffe5) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n1879: frame2: R1=38 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38)\n1879: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1880: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1881: (07) r1 += 1                    ; frame2: R1=39\n1882: (55) if r6 != 0x0 goto pc-12    ; frame2: R6=0\nframe 0: propagating r6,fp-32,fp-56\nmark_precise: frame2: last_idx 1883 first_idx 1882 subseq_idx -1 \nmark_precise: frame2: regs= stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=39 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(smin=smin32=-35,smax=smax32=91,umax=0xffffffffffffffdd) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off\n... verifier log truncated ...; prog 225: prog 225 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 236: prog 236 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 240: prog 240 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 248: prog 248 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P31 R2=map_value(map=string_postfix_,ks=4,vs=132,off=30) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-27,smax=smax32=99,umax=0xffffffffffffffe5) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n1879: frame2: R1=38 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38)\n1879: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1880: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1881: (07) r1 += 1                    ; frame2: R1=39\n1882: (55) if r6 != 0x0 goto pc-12    ; frame2: R6=0\nframe 0: propagating r6,fp-32,fp-56\nmark_precise: frame2: last_idx 1883 first_idx 1882 subseq_idx -1 \nmark_precise: frame2: regs= stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=39 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(smin=smin32=-35,smax=smax32=91,umax=0xffffffffffffffdd) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off\n... verifier log truncated ...; prog 256: prog 256 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 258: prog 258 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 269: prog 269 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 272: prog 272 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 279: prog 279 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 287: prog 287 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 292: prog 292 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 300: prog 300 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P31 R2=map_value(map=string_postfix_,ks=4,vs=132,off=30) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-27,smax=smax32=99,umax=0xffffffffffffffe5) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n1879: frame2: R1=38 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38)\n1879: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1880: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1881: (07) r1 += 1                    ; frame2: R1=39\n1882: (55) if r6 != 0x0 goto pc-12    ; frame2: R6=0\nframe 0: propagating r6,fp-32,fp-56\nmark_precise: frame2: last_idx 1883 first_idx 1882 subseq_idx -1 \nmark_precise: frame2: regs= stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=39 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(smin=smin32=-35,smax=smax32=91,umax=0xffffffffffffffdd) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off\n... verifier log truncated ...; prog 309: prog 309 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 310: prog 310 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P31 R2=map_value(map=string_postfix_,ks=4,vs=132,off=30) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-27,smax=smax32=99,umax=0xffffffffffffffe5) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n1879: frame2: R1=38 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38)\n1879: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1880: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1881: (07) r1 += 1                    ; frame2: R1=39\n1882: (55) if r6 != 0x0 goto pc-12    ; frame2: R6=0\nframe 0: propagating r6,fp-32,fp-56\nmark_precise: frame2: last_idx 1883 first_idx 1882 subseq_idx -1 \nmark_precise: frame2: regs= stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=39 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(smin=smin32=-35,smax=smax32=91,umax=0xffffffffffffffdd) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off\n... verifier log truncated ...; prog 320: prog 320 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 323: prog 323 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P31 R2=map_value(map=string_postfix_,ks=4,vs=132,off=30) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-27,smax=smax32=99,umax=0xffffffffffffffe5) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n1879: frame2: R1=38 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38)\n1879: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1880: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1881: (07) r1 += 1                    ; frame2: R1=39\n1882: (55) if r6 != 0x0 goto pc-12    ; frame2: R6=0\nframe 0: propagating r6,fp-32,fp-56\nmark_precise: frame2: last_idx 1883 first_idx 1882 subseq_idx -1 \nmark_precise: frame2: regs= stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=39 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(smin=smin32=-35,smax=smax32=91,umax=0xffffffffffffffdd) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off\n... verifier log truncated ...; prog 328: prog 328 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 332: prog 332 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P31 R2=map_value(map=string_postfix_,ks=4,vs=132,off=30) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-27,smax=smax32=99,umax=0xffffffffffffffe5) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n1879: frame2: R1=38 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38)\n1879: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1880: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1881: (07) r1 += 1                    ; frame2: R1=39\n1882: (55) if r6 != 0x0 goto pc-12    ; frame2: R6=0\nframe 0: propagating r6,fp-32,fp-56\nmark_precise: frame2: last_idx 1883 first_idx 1882 subseq_idx -1 \nmark_precise: frame2: regs= stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=39 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(smin=smin32=-35,smax=smax32=91,umax=0xffffffffffffffdd) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off\n... verifier log truncated ...; prog 336: prog 336 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 344: prog 344 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P31 R2=map_value(map=string_postfix_,ks=4,vs=132,off=30) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-27,smax=smax32=99,umax=0xffffffffffffffe5) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n1879: frame2: R1=38 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38)\n1879: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1880: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1881: (07) r1 += 1                    ; frame2: R1=39\n1882: (55) if r6 != 0x0 goto pc-12    ; frame2: R6=0\nframe 0: propagating r6,fp-32,fp-56\nmark_precise: frame2: last_idx 1883 first_idx 1882 subseq_idx -1 \nmark_precise: frame2: regs= stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=39 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(smin=smin32=-35,smax=smax32=91,umax=0xffffffffffffffdd) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off\n... verifier log truncated ...; prog 350: prog 350 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 358: prog 358 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 364: prog 364 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 373: prog 373 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 375: prog 375 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 382: prog 382 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 390: prog 390 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 395: prog 395 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 405: prog 405 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 412: prog 412 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P31 R2=map_value(map=string_postfix_,ks=4,vs=132,off=30) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-27,smax=smax32=99,umax=0xffffffffffffffe5) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n1879: frame2: R1=38 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38)\n1879: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1880: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1881: (07) r1 += 1                    ; frame2: R1=39\n1882: (55) if r6 != 0x0 goto pc-12    ; frame2: R6=0\nframe 0: propagating r6,fp-32,fp-56\nmark_precise: frame2: last_idx 1883 first_idx 1882 subseq_idx -1 \nmark_precise: frame2: regs= stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=39 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(smin=smin32=-35,smax=smax32=91,umax=0xffffffffffffffdd) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off\n... verifier log truncated ...; prog 417: prog 417 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 424: prog 424 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 428: prog 428 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 438: prog 438 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 443: prog 443 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P31 R2=map_value(map=string_postfix_,ks=4,vs=132,off=30) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-27,smax=smax32=99,umax=0xffffffffffffffe5) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n1879: frame2: R1=38 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38)\n1879: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1880: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1881: (07) r1 += 1                    ; frame2: R1=39\n1882: (55) if r6 != 0x0 goto pc-12    ; frame2: R6=0\nframe 0: propagating r6,fp-32,fp-56\nmark_precise: frame2: last_idx 1883 first_idx 1882 subseq_idx -1 \nmark_precise: frame2: regs= stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=39 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(smin=smin32=-35,smax=smax32=91,umax=0xffffffffffffffdd) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off\n... verifier log truncated ...; prog 449: prog 449 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 454: prog 454 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 459: prog 459 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...; prog 466: prog 466 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+        "error_programs": [
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 198 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 198
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 204 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 204
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 213 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 213
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 215 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 215
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 221 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P31 R2=map_value(map=string_postfix_,ks=4,vs=132,off=30) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-27,smax=smax32=99,umax=0xffffffffffffffe5) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n1879: frame2: R1=38 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38)\n1879: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1880: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1881: (07) r1 += 1                    ; frame2: R1=39\n1882: (55) if r6 != 0x0 goto pc-12    ; frame2: R6=0\nframe 0: propagating r6,fp-32,fp-56\nmark_precise: frame2: last_idx 1883 first_idx 1882 subseq_idx -1 \nmark_precise: frame2: regs= stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=39 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(smin=smin32=-35,smax=smax32=91,umax=0xffffffffffffffdd) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 221
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 225 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 225
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 236 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 236
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 240 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 240
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 248 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P31 R2=map_value(map=string_postfix_,ks=4,vs=132,off=30) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-27,smax=smax32=99,umax=0xffffffffffffffe5) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n1879: frame2: R1=38 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38)\n1879: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1880: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1881: (07) r1 += 1                    ; frame2: R1=39\n1882: (55) if r6 != 0x0 goto pc-12    ; frame2: R6=0\nframe 0: propagating r6,fp-32,fp-56\nmark_precise: frame2: last_idx 1883 first_idx 1882 subseq_idx -1 \nmark_precise: frame2: regs= stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=39 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(smin=smin32=-35,smax=smax32=91,umax=0xffffffffffffffdd) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 248
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 256 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 256
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 258 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 258
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 269 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 269
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 272 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 272
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 279 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 279
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 287 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 287
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 292 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 292
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 300 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P31 R2=map_value(map=string_postfix_,ks=4,vs=132,off=30) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-27,smax=smax32=99,umax=0xffffffffffffffe5) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n1879: frame2: R1=38 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38)\n1879: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1880: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1881: (07) r1 += 1                    ; frame2: R1=39\n1882: (55) if r6 != 0x0 goto pc-12    ; frame2: R6=0\nframe 0: propagating r6,fp-32,fp-56\nmark_precise: frame2: last_idx 1883 first_idx 1882 subseq_idx -1 \nmark_precise: frame2: regs= stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=39 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(smin=smin32=-35,smax=smax32=91,umax=0xffffffffffffffdd) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 300
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 309 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 309
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 310 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P31 R2=map_value(map=string_postfix_,ks=4,vs=132,off=30) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-27,smax=smax32=99,umax=0xffffffffffffffe5) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n1879: frame2: R1=38 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38)\n1879: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1880: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1881: (07) r1 += 1                    ; frame2: R1=39\n1882: (55) if r6 != 0x0 goto pc-12    ; frame2: R6=0\nframe 0: propagating r6,fp-32,fp-56\nmark_precise: frame2: last_idx 1883 first_idx 1882 subseq_idx -1 \nmark_precise: frame2: regs= stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=39 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(smin=smin32=-35,smax=smax32=91,umax=0xffffffffffffffdd) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 310
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 320 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 320
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 323 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P31 R2=map_value(map=string_postfix_,ks=4,vs=132,off=30) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-27,smax=smax32=99,umax=0xffffffffffffffe5) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n1879: frame2: R1=38 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38)\n1879: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1880: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1881: (07) r1 += 1                    ; frame2: R1=39\n1882: (55) if r6 != 0x0 goto pc-12    ; frame2: R6=0\nframe 0: propagating r6,fp-32,fp-56\nmark_precise: frame2: last_idx 1883 first_idx 1882 subseq_idx -1 \nmark_precise: frame2: regs= stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=39 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(smin=smin32=-35,smax=smax32=91,umax=0xffffffffffffffdd) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 323
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 328 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 328
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 332 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P31 R2=map_value(map=string_postfix_,ks=4,vs=132,off=30) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-27,smax=smax32=99,umax=0xffffffffffffffe5) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n1879: frame2: R1=38 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38)\n1879: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1880: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1881: (07) r1 += 1                    ; frame2: R1=39\n1882: (55) if r6 != 0x0 goto pc-12    ; frame2: R6=0\nframe 0: propagating r6,fp-32,fp-56\nmark_precise: frame2: last_idx 1883 first_idx 1882 subseq_idx -1 \nmark_precise: frame2: regs= stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=39 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(smin=smin32=-35,smax=smax32=91,umax=0xffffffffffffffdd) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 332
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 336 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 336
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 344 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P31 R2=map_value(map=string_postfix_,ks=4,vs=132,off=30) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-27,smax=smax32=99,umax=0xffffffffffffffe5) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n1879: frame2: R1=38 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38)\n1879: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1880: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1881: (07) r1 += 1                    ; frame2: R1=39\n1882: (55) if r6 != 0x0 goto pc-12    ; frame2: R6=0\nframe 0: propagating r6,fp-32,fp-56\nmark_precise: frame2: last_idx 1883 first_idx 1882 subseq_idx -1 \nmark_precise: frame2: regs= stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=39 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(smin=smin32=-35,smax=smax32=91,umax=0xffffffffffffffdd) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 344
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 350 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 350
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 358 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 358
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 364 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 364
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 373 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 373
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 375 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 375
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 382 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 382
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 390 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 390
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 395 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 395
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 405 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 405
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 412 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P31 R2=map_value(map=string_postfix_,ks=4,vs=132,off=30) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-27,smax=smax32=99,umax=0xffffffffffffffe5) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n1879: frame2: R1=38 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38)\n1879: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1880: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1881: (07) r1 += 1                    ; frame2: R1=39\n1882: (55) if r6 != 0x0 goto pc-12    ; frame2: R6=0\nframe 0: propagating r6,fp-32,fp-56\nmark_precise: frame2: last_idx 1883 first_idx 1882 subseq_idx -1 \nmark_precise: frame2: regs= stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=39 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(smin=smin32=-35,smax=smax32=91,umax=0xffffffffffffffdd) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 412
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 417 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 417
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 424 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 424
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 428 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 428
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 438 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 438
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 443 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 1881: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 1880: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 1879: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 1878: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 1877: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 1876: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 1875: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 1874: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 1873: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 1872: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 1871: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P31 R2=map_value(map=string_postfix_,ks=4,vs=132,off=30) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-27,smax=smax32=99,umax=0xffffffffffffffe5) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n1879: frame2: R1=38 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38)\n1879: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1880: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n1881: (07) r1 += 1                    ; frame2: R1=39\n1882: (55) if r6 != 0x0 goto pc-12    ; frame2: R6=0\nframe 0: propagating r6,fp-32,fp-56\nmark_precise: frame2: last_idx 1883 first_idx 1882 subseq_idx -1 \nmark_precise: frame2: regs= stack= before 1882: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=39 R2=map_value(map=string_postfix_,ks=4,vs=132,off=38) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(smin=smin32=-35,smax=smax32=91,umax=0xffffffffffffffdd) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 443
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 449 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 449
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 454 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 454
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 459 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 459
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 466 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 1907: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 1906: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 1905: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 1904: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 1903: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 1902: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 1901: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 1900: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 1899: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 1898: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 1897: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 1896: (15) if r1 \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 466
+          }
+        ],
+        "exit_code": 1,
+        "program_counts": {
+          "applied": 243,
+          "not_applied": 44,
+          "requested": 287
+        }
+      },
+      "runner": "tetragon",
+      "selected_workload": "stress_ng_os_io_network",
+      "status": "ok"
+    },
+    {
+      "app": "katran",
+      "baseline": {
+        "bpf": {
+          "479": {
+            "avg_ns_per_run": 313.8052744039586,
+            "bytes_jited": 176,
+            "bytes_xlated": 136,
+            "id": 479,
+            "name": "xdp_root",
+            "run_cnt_delta": 35568,
+            "run_time_ns_delta": 11161426,
+            "type": "xdp"
+          },
+          "485": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 13629,
+            "bytes_xlated": 23840,
+            "id": 485,
+            "name": "balancer_ingress",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "xdp"
+          },
+          "487": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 541,
+            "bytes_xlated": 1000,
+            "id": 487,
+            "name": "healthcheck_encap",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0006881809999868,
+            "ops_per_sec": 5923.923268561197,
+            "ops_total": 5928.0,
+            "stderr": "",
+            "stdout": ""
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "479": {
+            "avg_ns_per_run": 330.86788779511363,
+            "bytes_jited": 176,
+            "bytes_xlated": 136,
+            "id": 479,
+            "name": "xdp_root",
+            "run_cnt_delta": 36469,
+            "run_time_ns_delta": 12066421,
+            "type": "xdp"
+          },
+          "485": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 13581,
+            "bytes_xlated": 23744,
+            "id": 485,
+            "name": "balancer_ingress",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "xdp"
+          },
+          "487": {
+            "avg_ns_per_run": 508.0,
+            "bytes_jited": 541,
+            "bytes_xlated": 1000,
+            "id": 487,
+            "name": "healthcheck_encap",
+            "run_cnt_delta": 1,
+            "run_time_ns_delta": 508,
+            "type": "sched_cls"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0003220720000172,
+            "ops_per_sec": 6076.043076654111,
+            "ops_total": 6078.0,
+            "stderr": "",
+            "stdout": ""
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      },
+      "runner": "katran",
+      "selected_workload": "network",
+      "status": "ok"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline": {
+        "bpf": {
+          "502": {
+            "avg_ns_per_run": 149.25522060217298,
+            "bytes_jited": 234,
+            "bytes_xlated": 264,
+            "id": 502,
+            "name": "tracepoint__raw_syscalls__sys_enter",
+            "run_cnt_delta": 29659318,
+            "run_time_ns_delta": 4426808051,
+            "type": "raw_tracepoint"
+          },
+          "503": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 2513,
+            "bytes_xlated": 4552,
+            "id": 503,
+            "name": "sys_enter_init",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "504": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17446,
+            "bytes_xlated": 30376,
+            "id": 504,
+            "name": "sys_enter_submit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "505": {
+            "avg_ns_per_run": 292.2462195362241,
+            "bytes_jited": 263,
+            "bytes_xlated": 320,
+            "id": 505,
+            "name": "tracepoint__raw_syscalls__sys_exit",
+            "run_cnt_delta": 29659324,
+            "run_time_ns_delta": 8667825313,
+            "type": "raw_tracepoint"
+          },
+          "506": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 2093,
+            "bytes_xlated": 3800,
+            "id": 506,
+            "name": "sys_exit_init",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "507": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11583,
+            "bytes_xlated": 19880,
+            "id": 507,
+            "name": "sys_exit_submit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "508": {
+            "avg_ns_per_run": 262.5116147309928,
+            "bytes_jited": 8156,
+            "bytes_xlated": 13688,
+            "id": 508,
+            "name": "trace_sys_enter",
+            "run_cnt_delta": 29659318,
+            "run_time_ns_delta": 7785915460,
+            "type": "raw_tracepoint"
+          },
+          "509": {
+            "avg_ns_per_run": 268.424992963427,
+            "bytes_jited": 8189,
+            "bytes_xlated": 13744,
+            "id": 509,
+            "name": "trace_sys_exit",
+            "run_cnt_delta": 29659324,
+            "run_time_ns_delta": 7961303836,
+            "type": "raw_tracepoint"
+          },
+          "510": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 510,
+            "name": "trace_ptrace",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "511": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11319,
+            "bytes_xlated": 19504,
+            "id": 511,
+            "name": "trace_ret_ptrace",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "512": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 512,
+            "name": "trace_process_vm_writev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "513": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11319,
+            "bytes_xlated": 19504,
+            "id": 513,
+            "name": "trace_ret_process_vm_writev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "514": {
+            "avg_ns_per_run": 72.58842761147916,
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 514,
+            "name": "trace_arch_prctl",
+            "run_cnt_delta": 928918,
+            "run_time_ns_delta": 67428697,
+            "type": "kprobe"
+          },
+          "515": {
+            "avg_ns_per_run": 272.5491055184634,
+            "bytes_jited": 11319,
+            "bytes_xlated": 19504,
+            "id": 515,
+            "name": "trace_ret_arch_prctl",
+            "run_cnt_delta": 928918,
+            "run_time_ns_delta": 253175770,
+            "type": "kprobe"
+          },
+          "516": {
+            "avg_ns_per_run": 222.40528169014084,
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 516,
+            "name": "trace_dup",
+            "run_cnt_delta": 2840,
+            "run_time_ns_delta": 631631,
+            "type": "kprobe"
+          },
+          "517": {
+            "avg_ns_per_run": 815.4609154929577,
+            "bytes_jited": 11319,
+            "bytes_xlated": 19504,
+            "id": 517,
+            "name": "trace_ret_dup",
+            "run_cnt_delta": 2840,
+            "run_time_ns_delta": 2315909,
+            "type": "kprobe"
+          },
+          "518": {
+            "avg_ns_per_run": 656.0,
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 518,
+            "name": "trace_dup2",
+            "run_cnt_delta": 4,
+            "run_time_ns_delta": 2624,
+            "type": "kprobe"
+          },
+          "519": {
+            "avg_ns_per_run": 1885.75,
+            "bytes_jited": 11319,
+            "bytes_xlated": 19504,
+            "id": 519,
+            "name": "trace_ret_dup2",
+            "run_cnt_delta": 4,
+            "run_time_ns_delta": 7543,
+            "type": "kprobe"
+          },
+          "520": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 520,
+            "name": "trace_dup3",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "521": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11319,
+            "bytes_xlated": 19504,
+            "id": 521,
+            "name": "trace_ret_dup3",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "522": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 20734,
+            "bytes_xlated": 31992,
+            "id": 522,
+            "name": "syscall__execve_enter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "523": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 20705,
+            "bytes_xlated": 32008,
+            "id": 523,
+            "name": "syscall__execve_exit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "524": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 20997,
+            "bytes_xlated": 32400,
+            "id": 524,
+            "name": "syscall__execveat_enter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "525": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 20965,
+            "bytes_xlated": 32408,
+            "id": 525,
+            "name": "syscall__execveat_exit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "526": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 12292,
+            "bytes_xlated": 18744,
+            "id": 526,
+            "name": "sys_dup_exit_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "527": {
+            "avg_ns_per_run": 1942.2958242950108,
+            "bytes_jited": 19722,
+            "bytes_xlated": 32248,
+            "id": 527,
+            "name": "tracepoint__sched__sched_process_fork",
+            "run_cnt_delta": 3688,
+            "run_time_ns_delta": 7163187,
+            "type": "raw_tracepoint"
+          },
+          "528": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 59266,
+            "bytes_xlated": 108072,
+            "id": 528,
+            "name": "lkm_seeker_modtree_loop",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "529": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 6232,
+            "bytes_xlated": 10320,
+            "id": 529,
+            "name": "uprobe_lkm_seeker_submitter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "530": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4339,
+            "bytes_xlated": 7784,
+            "id": 530,
+            "name": "uprobe_lkm_seeker",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "531": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 62309,
+            "bytes_xlated": 111768,
+            "id": 531,
+            "name": "lkm_seeker_kset_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "532": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 652,
+            "bytes_xlated": 1048,
+            "id": 532,
+            "name": "lkm_seeker_mod_tree_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "533": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 57791,
+            "bytes_xlated": 102120,
+            "id": 533,
+            "name": "lkm_seeker_proc_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "534": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3889,
+            "bytes_xlated": 6456,
+            "id": 534,
+            "name": "lkm_seeker_new_mod_only_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "535": {
+            "avg_ns_per_run": 7387.0,
+            "bytes_jited": 20556,
+            "bytes_xlated": 35424,
+            "id": 535,
+            "name": "tracepoint__sched__sched_process_exec",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 14774,
+            "type": "raw_tracepoint"
+          },
+          "536": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 24434,
+            "bytes_xlated": 38432,
+            "id": 536,
+            "name": "sched_process_exec_event_submit_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "537": {
+            "avg_ns_per_run": 1447.6653707303526,
+            "bytes_jited": 8700,
+            "bytes_xlated": 14536,
+            "id": 537,
+            "name": "tracepoint__sched__sched_process_exit",
+            "run_cnt_delta": 3601,
+            "run_time_ns_delta": 5213043,
+            "type": "raw_tracepoint"
+          },
+          "538": {
+            "avg_ns_per_run": 930.3835045820606,
+            "bytes_jited": 248,
+            "bytes_xlated": 440,
+            "id": 538,
+            "name": "tracepoint__sched__sched_process_free",
+            "run_cnt_delta": 3601,
+            "run_time_ns_delta": 3350311,
+            "type": "raw_tracepoint"
+          },
+          "539": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 9155,
+            "bytes_xlated": 13888,
+            "id": 539,
+            "name": "syscall__accept4",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "540": {
+            "avg_ns_per_run": 355.44010650192433,
+            "bytes_jited": 8945,
+            "bytes_xlated": 14912,
+            "id": 540,
+            "name": "tracepoint__sched__sched_switch",
+            "run_cnt_delta": 2204655,
+            "run_time_ns_delta": 783622808,
+            "type": "raw_tracepoint"
+          },
+          "541": {
+            "avg_ns_per_run": 16.87455132876835,
+            "bytes_jited": 8201,
+            "bytes_xlated": 13776,
+            "id": 541,
+            "name": "trace_filldir64",
+            "run_cnt_delta": 513182,
+            "run_time_ns_delta": 8659716,
+            "type": "kprobe"
+          },
+          "542": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 23523,
+            "bytes_xlated": 36784,
+            "id": 542,
+            "name": "trace_call_usermodehelper",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "543": {
+            "avg_ns_per_run": 906.4401555123577,
+            "bytes_jited": 7959,
+            "bytes_xlated": 13408,
+            "id": 543,
+            "name": "trace_do_exit",
+            "run_cnt_delta": 3601,
+            "run_time_ns_delta": 3264091,
+            "type": "kprobe"
+          },
+          "544": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 56303,
+            "bytes_xlated": 97056,
+            "id": 544,
+            "name": "uprobe_syscall_table_check",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "545": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 6788,
+            "bytes_xlated": 11256,
+            "id": 545,
+            "name": "uprobe_seq_ops_trigger",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "546": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 6553,
+            "bytes_xlated": 10976,
+            "id": 546,
+            "name": "uprobe_mem_dump_trigger",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "547": {
+            "avg_ns_per_run": 94.0579344247016,
+            "bytes_jited": 11476,
+            "bytes_xlated": 18328,
+            "id": 547,
+            "name": "trace_security_file_ioctl",
+            "run_cnt_delta": 4012761,
+            "run_time_ns_delta": 377432011,
+            "type": "kprobe"
+          },
+          "548": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 9747,
+            "bytes_xlated": 15688,
+            "id": 548,
+            "name": "trace_tracepoint_probe_register_prio_may_exist",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "549": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 8649,
+            "bytes_xlated": 14440,
+            "id": 549,
+            "name": "tracepoint__cgroup__cgroup_attach_task",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "550": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 8624,
+            "bytes_xlated": 14416,
+            "id": 550,
+            "name": "tracepoint__cgroup__cgroup_mkdir",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "551": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 8624,
+            "bytes_xlated": 14416,
+            "id": 551,
+            "name": "tracepoint__cgroup__cgroup_rmdir",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "552": {
+            "avg_ns_per_run": 5864.5,
+            "bytes_jited": 33399,
+            "bytes_xlated": 52904,
+            "id": 552,
+            "name": "trace_security_bprm_check",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 11729,
+            "type": "kprobe"
+          },
+          "553": {
+            "avg_ns_per_run": 530.6498676653234,
+            "bytes_jited": 22985,
+            "bytes_xlated": 37160,
+            "id": 553,
+            "name": "trace_security_file_open",
+            "run_cnt_delta": 737524,
+            "run_time_ns_delta": 391367013,
+            "type": "kprobe"
+          },
+          "554": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18653,
+            "bytes_xlated": 30680,
+            "id": 554,
+            "name": "trace_security_sb_mount",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "555": {
+            "avg_ns_per_run": 2069.089285714286,
+            "bytes_jited": 9997,
+            "bytes_xlated": 16416,
+            "id": 555,
+            "name": "trace_security_inode_unlink",
+            "run_cnt_delta": 112,
+            "run_time_ns_delta": 231738,
+            "type": "kprobe"
+          },
+          "556": {
+            "avg_ns_per_run": 246.57243933588762,
+            "bytes_jited": 10745,
+            "bytes_xlated": 16960,
+            "id": 556,
+            "name": "trace_commit_creds",
+            "run_cnt_delta": 352350,
+            "run_time_ns_delta": 86879799,
+            "type": "kprobe"
+          },
+          "557": {
+            "avg_ns_per_run": 536.233823937795,
+            "bytes_jited": 10034,
+            "bytes_xlated": 16552,
+            "id": 557,
+            "name": "trace_switch_task_namespaces",
+            "run_cnt_delta": 3601,
+            "run_time_ns_delta": 1930978,
+            "type": "kprobe"
+          },
+          "558": {
+            "avg_ns_per_run": 137.29260959636113,
+            "bytes_jited": 8199,
+            "bytes_xlated": 13760,
+            "id": 558,
+            "name": "trace_cap_capable",
+            "run_cnt_delta": 2309292,
+            "run_time_ns_delta": 317048725,
+            "type": "kprobe"
+          },
+          "559": {
+            "avg_ns_per_run": 305.24823869036726,
+            "bytes_jited": 8478,
+            "bytes_xlated": 14176,
+            "id": 559,
+            "name": "trace_security_socket_create",
+            "run_cnt_delta": 846955,
+            "run_time_ns_delta": 258531522,
+            "type": "kprobe"
+          },
+          "560": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 9217,
+            "bytes_xlated": 15344,
+            "id": 560,
+            "name": "trace_security_inode_symlink",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "561": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 8301,
+            "bytes_xlated": 13904,
+            "id": 561,
+            "name": "trace_proc_create",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "562": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 9523,
+            "bytes_xlated": 15840,
+            "id": 562,
+            "name": "trace_debugfs_create_file",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "563": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 9235,
+            "bytes_xlated": 15424,
+            "id": 563,
+            "name": "trace_debugfs_create_dir",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "564": {
+            "avg_ns_per_run": 1568.8,
+            "bytes_jited": 10837,
+            "bytes_xlated": 16632,
+            "id": 564,
+            "name": "trace_security_socket_listen",
+            "run_cnt_delta": 5,
+            "run_time_ns_delta": 7844,
+            "type": "kprobe"
+          },
+          "565": {
+            "avg_ns_per_run": 368.79023216492163,
+            "bytes_jited": 10093,
+            "bytes_xlated": 15472,
+            "id": 565,
+            "name": "trace_security_socket_connect",
+            "run_cnt_delta": 230655,
+            "run_time_ns_delta": 85063311,
+            "type": "kprobe"
+          },
+          "566": {
+            "avg_ns_per_run": 479.4018718360925,
+            "bytes_jited": 11320,
+            "bytes_xlated": 17368,
+            "id": 566,
+            "name": "trace_security_socket_accept",
+            "run_cnt_delta": 233888,
+            "run_time_ns_delta": 112126345,
+            "type": "kprobe"
+          },
+          "567": {
+            "avg_ns_per_run": 2144.8,
+            "bytes_jited": 10606,
+            "bytes_xlated": 16152,
+            "id": 567,
+            "name": "trace_security_socket_bind",
+            "run_cnt_delta": 5,
+            "run_time_ns_delta": 10724,
+            "type": "kprobe"
+          },
+          "568": {
+            "avg_ns_per_run": 363.17909178017175,
+            "bytes_jited": 11072,
+            "bytes_xlated": 17024,
+            "id": 568,
+            "name": "trace_security_socket_setsockopt",
+            "run_cnt_delta": 111669,
+            "run_time_ns_delta": 40555846,
+            "type": "kprobe"
+          },
+          "569": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 949,
+            "bytes_xlated": 1568,
+            "id": 569,
+            "name": "send_bin",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "570": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 949,
+            "bytes_xlated": 1568,
+            "id": 570,
+            "name": "send_bin_tp",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "571": {
+            "avg_ns_per_run": 64.5737240856561,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 571,
+            "name": "trace_vfs_write",
+            "run_cnt_delta": 835107,
+            "run_time_ns_delta": 53925969,
+            "type": "kprobe"
+          },
+          "572": {
+            "avg_ns_per_run": 72.57400189436802,
+            "bytes_jited": 279,
+            "bytes_xlated": 432,
+            "id": 572,
+            "name": "vfs_write_magic_enter",
+            "run_cnt_delta": 835107,
+            "run_time_ns_delta": 60607057,
+            "type": "kprobe"
+          },
+          "573": {
+            "avg_ns_per_run": 627.5758615363061,
+            "bytes_jited": 19139,
+            "bytes_xlated": 31808,
+            "id": 573,
+            "name": "trace_ret_vfs_write",
+            "run_cnt_delta": 835107,
+            "run_time_ns_delta": 524092995,
+            "type": "kprobe"
+          },
+          "574": {
+            "avg_ns_per_run": 34.77421695662951,
+            "bytes_jited": 23804,
+            "bytes_xlated": 36792,
+            "id": 574,
+            "name": "vfs_write_magic_return",
+            "run_cnt_delta": 835107,
+            "run_time_ns_delta": 29040192,
+            "type": "kprobe"
+          },
+          "575": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 29921,
+            "bytes_xlated": 51704,
+            "id": 575,
+            "name": "trace_ret_vfs_write_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "576": {
+            "avg_ns_per_run": 436.9591836734694,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 576,
+            "name": "trace_vfs_writev",
+            "run_cnt_delta": 49,
+            "run_time_ns_delta": 21411,
+            "type": "kprobe"
+          },
+          "577": {
+            "avg_ns_per_run": 660.9795918367347,
+            "bytes_jited": 279,
+            "bytes_xlated": 432,
+            "id": 577,
+            "name": "vfs_writev_magic_enter",
+            "run_cnt_delta": 49,
+            "run_time_ns_delta": 32388,
+            "type": "kprobe"
+          },
+          "578": {
+            "avg_ns_per_run": 2554.1632653061224,
+            "bytes_jited": 19138,
+            "bytes_xlated": 31800,
+            "id": 578,
+            "name": "trace_ret_vfs_writev",
+            "run_cnt_delta": 49,
+            "run_time_ns_delta": 125154,
+            "type": "kprobe"
+          },
+          "579": {
+            "avg_ns_per_run": 6009.6122448979595,
+            "bytes_jited": 24540,
+            "bytes_xlated": 37648,
+            "id": 579,
+            "name": "vfs_writev_magic_return",
+            "run_cnt_delta": 49,
+            "run_time_ns_delta": 294471,
+            "type": "kprobe"
+          },
+          "580": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 29845,
+            "bytes_xlated": 51680,
+            "id": 580,
+            "name": "trace_ret_vfs_writev_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "581": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 581,
+            "name": "trace_kernel_write",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "582": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 279,
+            "bytes_xlated": 432,
+            "id": 582,
+            "name": "kernel_write_magic_enter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "583": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 19142,
+            "bytes_xlated": 31808,
+            "id": 583,
+            "name": "trace_ret_kernel_write",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "584": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 23804,
+            "bytes_xlated": 36792,
+            "id": 584,
+            "name": "kernel_write_magic_return",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "585": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 29921,
+            "bytes_xlated": 51704,
+            "id": 585,
+            "name": "trace_ret_kernel_write_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "586": {
+            "avg_ns_per_run": 60.16971983371996,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 586,
+            "name": "trace_vfs_read",
+            "run_cnt_delta": 1141929,
+            "run_time_ns_delta": 68709548,
+            "type": "kprobe"
+          },
+          "587": {
+            "avg_ns_per_run": 573.498901420316,
+            "bytes_jited": 19142,
+            "bytes_xlated": 31808,
+            "id": 587,
+            "name": "trace_ret_vfs_read",
+            "run_cnt_delta": 1141929,
+            "run_time_ns_delta": 654895027,
+            "type": "kprobe"
+          },
+          "588": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17164,
+            "bytes_xlated": 29848,
+            "id": 588,
+            "name": "trace_ret_vfs_read_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "589": {
+            "avg_ns_per_run": 470.14285714285717,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 589,
+            "name": "trace_vfs_readv",
+            "run_cnt_delta": 49,
+            "run_time_ns_delta": 23037,
+            "type": "kprobe"
+          },
+          "590": {
+            "avg_ns_per_run": 2496.7551020408164,
+            "bytes_jited": 19138,
+            "bytes_xlated": 31800,
+            "id": 590,
+            "name": "trace_ret_vfs_readv",
+            "run_cnt_delta": 49,
+            "run_time_ns_delta": 122341,
+            "type": "kprobe"
+          },
+          "591": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17892,
+            "bytes_xlated": 30816,
+            "id": 591,
+            "name": "trace_ret_vfs_readv_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "592": {
+            "avg_ns_per_run": 145.45696775912603,
+            "bytes_jited": 20742,
+            "bytes_xlated": 32864,
+            "id": 592,
+            "name": "trace_mmap_alert",
+            "run_cnt_delta": 7506,
+            "run_time_ns_delta": 1091800,
+            "type": "kprobe"
+          },
+          "593": {
+            "avg_ns_per_run": 69.80112119594234,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 593,
+            "name": "trace_do_mmap",
+            "run_cnt_delta": 7492,
+            "run_time_ns_delta": 522950,
+            "type": "kprobe"
+          },
+          "594": {
+            "avg_ns_per_run": 415.826348104645,
+            "bytes_jited": 19582,
+            "bytes_xlated": 31944,
+            "id": 594,
+            "name": "trace_ret_do_mmap",
+            "run_cnt_delta": 7492,
+            "run_time_ns_delta": 3115371,
+            "type": "kprobe"
+          },
+          "595": {
+            "avg_ns_per_run": 143.54198371378988,
+            "bytes_jited": 36984,
+            "bytes_xlated": 60888,
+            "id": 595,
+            "name": "trace_security_mmap_file",
+            "run_cnt_delta": 7491,
+            "run_time_ns_delta": 1075273,
+            "type": "kprobe"
+          },
+          "596": {
+            "avg_ns_per_run": 983.3333333333334,
+            "bytes_jited": 34612,
+            "bytes_xlated": 59616,
+            "id": 596,
+            "name": "trace_security_file_mprotect",
+            "run_cnt_delta": 39,
+            "run_time_ns_delta": 38350,
+            "type": "kprobe"
+          },
+          "597": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 622,
+            "bytes_xlated": 1000,
+            "id": 597,
+            "name": "syscall__init_module",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "598": {
+            "avg_ns_per_run": 262.87847730600294,
+            "bytes_jited": 15620,
+            "bytes_xlated": 26984,
+            "id": 598,
+            "name": "trace_security_bpf",
+            "run_cnt_delta": 8196,
+            "run_time_ns_delta": 2154552,
+            "type": "kprobe"
+          },
+          "599": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 599,
+            "name": "trace_register_kprobe",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "600": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 8826,
+            "bytes_xlated": 14712,
+            "id": 600,
+            "name": "trace_ret_register_kprobe",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "601": {
+            "avg_ns_per_run": 268.42638036809814,
+            "bytes_jited": 8362,
+            "bytes_xlated": 13992,
+            "id": 601,
+            "name": "trace_security_bpf_map",
+            "run_cnt_delta": 2608,
+            "run_time_ns_delta": 700056,
+            "type": "kprobe"
+          },
+          "602": {
+            "avg_ns_per_run": 718.7639751552795,
+            "bytes_jited": 9601,
+            "bytes_xlated": 15520,
+            "id": 602,
+            "name": "trace_security_bpf_prog",
+            "run_cnt_delta": 161,
+            "run_time_ns_delta": 115721,
+            "type": "kprobe"
+          },
+          "603": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 6376,
+            "bytes_xlated": 10616,
+            "id": 603,
+            "name": "trace_bpf_check",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "604": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 6612,
+            "bytes_xlated": 11096,
+            "id": 604,
+            "name": "trace_check_map_func_compatibility",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "605": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 6618,
+            "bytes_xlated": 11104,
+            "id": 605,
+            "name": "trace_check_helper_call",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "606": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18650,
+            "bytes_xlated": 30720,
+            "id": 606,
+            "name": "trace_security_kernel_read_file",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "607": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17285,
+            "bytes_xlated": 30536,
+            "id": 607,
+            "name": "trace_security_kernel_post_read_file",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "608": {
+            "avg_ns_per_run": 1639.5,
+            "bytes_jited": 9251,
+            "bytes_xlated": 15432,
+            "id": 608,
+            "name": "trace_security_inode_mknod",
+            "run_cnt_delta": 4,
+            "run_time_ns_delta": 6558,
+            "type": "kprobe"
+          },
+          "609": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 8685,
+            "bytes_xlated": 14440,
+            "id": 609,
+            "name": "trace_device_add",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "610": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 610,
+            "name": "trace___register_chrdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "611": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 8828,
+            "bytes_xlated": 14704,
+            "id": 611,
+            "name": "trace_ret__register_chrdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "612": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 19884,
+            "bytes_xlated": 32720,
+            "id": 612,
+            "name": "tracepoint__module__module_load",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "613": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 9004,
+            "bytes_xlated": 15024,
+            "id": 613,
+            "name": "tracepoint__module__module_free",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "614": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 614,
+            "name": "trace_do_init_module",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "615": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 14587,
+            "bytes_xlated": 24016,
+            "id": 615,
+            "name": "trace_ret_do_init_module",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "616": {
+            "avg_ns_per_run": 2374.75,
+            "bytes_jited": 18493,
+            "bytes_xlated": 30424,
+            "id": 616,
+            "name": "trace_load_elf_phdrs",
+            "run_cnt_delta": 4,
+            "run_time_ns_delta": 9499,
+            "type": "kprobe"
+          },
+          "617": {
+            "avg_ns_per_run": 49.270471310729555,
+            "bytes_jited": 8719,
+            "bytes_xlated": 14592,
+            "id": 617,
+            "name": "trace_security_file_permission",
+            "run_cnt_delta": 2994691,
+            "run_time_ns_delta": 147549837,
+            "type": "kprobe"
+          },
+          "618": {
+            "avg_ns_per_run": 969.3370390455532,
+            "bytes_jited": 8512,
+            "bytes_xlated": 14208,
+            "id": 618,
+            "name": "tracepoint__task__task_rename",
+            "run_cnt_delta": 3688,
+            "run_time_ns_delta": 3574915,
+            "type": "raw_tracepoint"
+          },
+          "619": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 9837,
+            "bytes_xlated": 16448,
+            "id": 619,
+            "name": "trace_security_inode_rename",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "620": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 620,
+            "name": "trace_kallsyms_lookup_name",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "621": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 8431,
+            "bytes_xlated": 14104,
+            "id": 621,
+            "name": "trace_ret_kallsyms_lookup_name",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "622": {
+            "avg_ns_per_run": 927.1929824561404,
+            "bytes_jited": 10070,
+            "bytes_xlated": 16296,
+            "id": 622,
+            "name": "trace_do_sigaction",
+            "run_cnt_delta": 7296,
+            "run_time_ns_delta": 6764800,
+            "type": "kprobe"
+          },
+          "623": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18577,
+            "bytes_xlated": 30600,
+            "id": 623,
+            "name": "trace_vfs_utimes",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "624": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18577,
+            "bytes_xlated": 30600,
+            "id": 624,
+            "name": "trace_utimes_common",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "625": {
+            "avg_ns_per_run": 2812.941634241245,
+            "bytes_jited": 9550,
+            "bytes_xlated": 15896,
+            "id": 625,
+            "name": "trace_do_truncate",
+            "run_cnt_delta": 257,
+            "run_time_ns_delta": 722926,
+            "type": "kprobe"
+          },
+          "626": {
+            "avg_ns_per_run": 146.83803664465822,
+            "bytes_jited": 17005,
+            "bytes_xlated": 27568,
+            "id": 626,
+            "name": "trace_fd_install",
+            "run_cnt_delta": 2154475,
+            "run_time_ns_delta": 316358879,
+            "type": "kprobe"
+          },
+          "627": {
+            "avg_ns_per_run": 271.13380598560616,
+            "bytes_jited": 16933,
+            "bytes_xlated": 27416,
+            "id": 627,
+            "name": "trace_filp_close",
+            "run_cnt_delta": 420041,
+            "run_time_ns_delta": 113887315,
+            "type": "kprobe"
+          },
+          "628": {
+            "avg_ns_per_run": 181.12702656088305,
+            "bytes_jited": 469,
+            "bytes_xlated": 784,
+            "id": 628,
+            "name": "trace_file_update_time",
+            "run_cnt_delta": 34788,
+            "run_time_ns_delta": 6301047,
+            "type": "kprobe"
+          },
+          "629": {
+            "avg_ns_per_run": 612.9798206278027,
+            "bytes_jited": 20045,
+            "bytes_xlated": 31224,
+            "id": 629,
+            "name": "trace_ret_file_update_time",
+            "run_cnt_delta": 34788,
+            "run_time_ns_delta": 21324342,
+            "type": "kprobe"
+          },
+          "630": {
+            "avg_ns_per_run": 117.48064965819744,
+            "bytes_jited": 483,
+            "bytes_xlated": 800,
+            "id": 630,
+            "name": "trace_file_modified",
+            "run_cnt_delta": 342888,
+            "run_time_ns_delta": 40282705,
+            "type": "kprobe"
+          },
+          "631": {
+            "avg_ns_per_run": 500.0191607755302,
+            "bytes_jited": 20180,
+            "bytes_xlated": 31400,
+            "id": 631,
+            "name": "trace_ret_file_modified",
+            "run_cnt_delta": 342888,
+            "run_time_ns_delta": 171450570,
+            "type": "kprobe"
+          },
+          "632": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 632,
+            "name": "trace_inotify_find_inode",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "633": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18061,
+            "bytes_xlated": 30032,
+            "id": 633,
+            "name": "trace_ret_inotify_find_inode",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "634": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 12887,
+            "bytes_xlated": 20216,
+            "id": 634,
+            "name": "process_execute_failed_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "635": {
+            "avg_ns_per_run": 167.0,
+            "bytes_jited": 16503,
+            "bytes_xlated": 28960,
+            "id": 635,
+            "name": "trace_exec_binprm",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 334,
+            "type": "kprobe"
+          },
+          "636": {
+            "avg_ns_per_run": 5524.0,
+            "bytes_jited": 16714,
+            "bytes_xlated": 29144,
+            "id": 636,
+            "name": "trace_security_bprm_creds_for_exec",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 11048,
+            "type": "kprobe"
+          },
+          "637": {
+            "avg_ns_per_run": 6607.5,
+            "bytes_jited": 24495,
+            "bytes_xlated": 38400,
+            "id": 637,
+            "name": "trace_execute_finished",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 13215,
+            "type": "kprobe"
+          },
+          "638": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18408,
+            "bytes_xlated": 30272,
+            "id": 638,
+            "name": "trace_security_path_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "639": {
+            "avg_ns_per_run": 4416.5,
+            "bytes_jited": 18267,
+            "bytes_xlated": 30048,
+            "id": 639,
+            "name": "trace_set_fs_pwd",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 8833,
+            "type": "kprobe"
+          },
+          "640": {
+            "avg_ns_per_run": 269.2821259936897,
+            "bytes_jited": 8645,
+            "bytes_xlated": 14424,
+            "id": 640,
+            "name": "trace_security_task_setrlimit",
+            "run_cnt_delta": 592363,
+            "run_time_ns_delta": 159512768,
+            "type": "kprobe"
+          },
+          "641": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 8670,
+            "bytes_xlated": 14480,
+            "id": 641,
+            "name": "trace_security_settime64",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "642": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17596,
+            "bytes_xlated": 29272,
+            "id": 642,
+            "name": "trace_chmod_common",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "643": {
+            "avg_ns_per_run": 344.65143639271656,
+            "bytes_jited": 47182,
+            "bytes_xlated": 76688,
+            "id": 643,
+            "name": "trace_security_task_prctl",
+            "run_cnt_delta": 325120,
+            "run_time_ns_delta": 112053075,
+            "type": "kprobe"
+          },
+          "644": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 14930,
+            "bytes_xlated": 24112,
+            "id": 644,
+            "name": "syscall_checker",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "645": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 9521,
+            "bytes_xlated": 15856,
+            "id": 645,
+            "name": "trace_security_sb_umount",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "646": {
+            "avg_ns_per_run": 35.72164478212919,
+            "bytes_jited": 331,
+            "bytes_xlated": 528,
+            "id": 646,
+            "name": "trace_sock_alloc_file",
+            "run_cnt_delta": 1080824,
+            "run_time_ns_delta": 38608811,
+            "type": "kprobe"
+          },
+          "647": {
+            "avg_ns_per_run": 155.88478235124313,
+            "bytes_jited": 8648,
+            "bytes_xlated": 13456,
+            "id": 647,
+            "name": "trace_ret_sock_alloc_file",
+            "run_cnt_delta": 1080824,
+            "run_time_ns_delta": 168484014,
+            "type": "kprobe"
+          },
+          "648": {
+            "avg_ns_per_run": 808.2153489375472,
+            "bytes_jited": 344,
+            "bytes_xlated": 592,
+            "id": 648,
+            "name": "trace_security_sk_clone",
+            "run_cnt_delta": 74168,
+            "run_time_ns_delta": 59943716,
+            "type": "kprobe"
+          },
+          "649": {
+            "avg_ns_per_run": 187.1322771969967,
+            "bytes_jited": 8895,
+            "bytes_xlated": 13696,
+            "id": 649,
+            "name": "trace_security_socket_recvmsg",
+            "run_cnt_delta": 1727176,
+            "run_time_ns_delta": 323210378,
+            "type": "kprobe"
+          },
+          "650": {
+            "avg_ns_per_run": 187.1814028182862,
+            "bytes_jited": 8895,
+            "bytes_xlated": 13696,
+            "id": 650,
+            "name": "trace_security_socket_sendmsg",
+            "run_cnt_delta": 4003284,
+            "run_time_ns_delta": 749340315,
+            "type": "kprobe"
+          },
+          "651": {
+            "avg_ns_per_run": 207.97018991098716,
+            "bytes_jited": 5668,
+            "bytes_xlated": 8808,
+            "id": 651,
+            "name": "cgroup_bpf_run_filter_skb",
+            "run_cnt_delta": 4484522,
+            "run_time_ns_delta": 932646892,
+            "type": "kprobe"
+          },
+          "653": {
+            "avg_ns_per_run": 277.7204419315456,
+            "bytes_jited": 19660,
+            "bytes_xlated": 31088,
+            "id": 653,
+            "name": "cgroup_skb_ingress",
+            "run_cnt_delta": 1154930,
+            "run_time_ns_delta": 320747670,
+            "type": "cgroup_skb"
+          },
+          "654": {
+            "avg_ns_per_run": 205.04242576969287,
+            "bytes_jited": 19660,
+            "bytes_xlated": 31088,
+            "id": 654,
+            "name": "cgroup_skb_egress",
+            "run_cnt_delta": 3059532,
+            "run_time_ns_delta": 627333863,
+            "type": "cgroup_skb"
+          },
+          "655": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 928,
+            "bytes_xlated": 1584,
+            "id": 655,
+            "name": "cgroup_mkdir_signal",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "656": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 910,
+            "bytes_xlated": 1544,
+            "id": 656,
+            "name": "cgroup_rmdir_signal",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "657": {
+            "avg_ns_per_run": 251.0,
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 657,
+            "name": "empty_kprobe",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 502,
+            "type": "kprobe"
+          },
+          "658": {
+            "avg_ns_per_run": 1270.5,
+            "bytes_jited": 58693,
+            "bytes_xlated": 96032,
+            "id": 658,
+            "name": "tracepoint__exec_test",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 2541,
+            "type": "raw_tracepoint"
+          },
+          "659": {
+            "avg_ns_per_run": 252.3699920273781,
+            "bytes_jited": 7328,
+            "bytes_xlated": 13360,
+            "id": 659,
+            "name": "lsm_file_open_test",
+            "run_cnt_delta": 737524,
+            "run_time_ns_delta": 186128926,
+            "type": "lsm"
+          },
+          "660": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 5384,
+            "bytes_xlated": 9160,
+            "id": 660,
+            "name": "uprobe__features_fallback_arena",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.238092330999962,
+            "ops_per_sec": 20564674.158661902,
+            "ops_total": 107719662.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [10136] setting to a 5 secs run per stressor\nstress-ng: info:  [10136] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set, 1 aio, 1 aiol, 1 hdd, 1 io, 1 iomix, 1 io-uring, 1 sync-file, 1 epoll, 1 netdev, 1 sctp, 1 sock, 1 sockdiag, 1 sockfd, 1 sockpair, 1 sockmany, 1 udp-flood\nstress-ng: info:  [10136] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [10145] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: metrc: [10136] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [10136]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [10136] cap              482409      5.00      0.17      4.46     96482.03      104362.84\nstress-ng: metrc: [10136] eventfd          202926      5.00      0.16      3.96     40582.91       49254.11\nstress-ng: metrc: [10136] get                2382      5.00      0.04      1.22       476.27        1890.56\nstress-ng: metrc: [10136] prctl              3532      5.00      2.57      0.64       706.34        1100.00\nstress-ng: metrc: [10136] set               37522      5.00      0.06      4.30      7504.67        8602.55\nstress-ng: metrc: [10136] aio               51129      5.00      0.02      0.91     10222.29       55272.56\nstress-ng: metrc: [10136] aiol               9950      5.10      0.16      0.74      1950.74       11001.04\nstress-ng: metrc: [10136] hdd               98653      5.00      2.06      1.73     19725.64       26048.06\nstress-ng: metrc: [10136] io                  750      5.00      0.02      0.11       149.93        5566.44\nstress-ng: metrc: [10136] iomix              6195      5.01      0.05      0.90      1237.49        6528.06\nstress-ng: metrc: [10136] io-uring          56802      5.02      0.00      2.47     11314.28       23013.69\nstress-ng: metrc: [10136] sync-file            69      5.00      0.14      3.43        13.79          19.34\nstress-ng: metrc: [10136] epoll            156239      5.21      0.17      5.95     29999.24       25511.48\nstress-ng: metrc: [10136] netdev           166818      5.00      0.16      4.53     33364.60       35576.80\nstress-ng: metrc: [10136] sctp              26871      5.00      0.01      0.32      5373.75       80546.15\nstress-ng: metrc: [10136] sock               2103      5.00      0.11      4.93       420.37         416.73\nstress-ng: metrc: [10136] sockdiag      104685426      5.00      0.26      4.38  20935750.48    22576841.17\nstress-ng: metrc: [10136] sockfd           401616      5.00      0.16      4.69     80249.46       82749.09\nstress-ng: metrc: [10136] sockpair         297669      5.02      0.13      5.79     59289.61       50280.18\nstress-ng: metrc: [10136] sockmany          72310      5.02      0.04      4.42     14402.77       16206.97\nstress-ng: metrc: [10136] udp-flood        958291      5.00      0.10      4.52    191658.28      207808.13\nstress-ng: info:  [10136] skipped: 0\nstress-ng: info:  [10136] passed: 21: cap (1) eventfd (1) get (1) prctl (1) set (1) aio (1) aiol (1) hdd (1) io (1) iomix (1) io-uring (1) sync-file (1) epoll (1) netdev (1) sctp (1) sock (1) sockdiag (1) sockfd (1) sockpair (1) sockmany (1) udp-flood (1)\nstress-ng: info:  [10136] failed: 0\nstress-ng: info:  [10136] metrics untrustworthy: 0\nstress-ng: info:  [10136] successful run completed in 5.21 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "502": {
+            "avg_ns_per_run": 150.1063133507358,
+            "bytes_jited": 234,
+            "bytes_xlated": 264,
+            "id": 502,
+            "name": "tracepoint__raw_syscalls__sys_enter",
+            "run_cnt_delta": 29757843,
+            "run_time_ns_delta": 4466840106,
+            "type": "raw_tracepoint"
+          },
+          "503": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 2513,
+            "bytes_xlated": 4552,
+            "id": 503,
+            "name": "sys_enter_init",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "504": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17446,
+            "bytes_xlated": 30376,
+            "id": 504,
+            "name": "sys_enter_submit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "505": {
+            "avg_ns_per_run": 292.8640634610385,
+            "bytes_jited": 263,
+            "bytes_xlated": 320,
+            "id": 505,
+            "name": "tracepoint__raw_syscalls__sys_exit",
+            "run_cnt_delta": 29757849,
+            "run_time_ns_delta": 8715004578,
+            "type": "raw_tracepoint"
+          },
+          "506": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 2093,
+            "bytes_xlated": 3800,
+            "id": 506,
+            "name": "sys_exit_init",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "507": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11583,
+            "bytes_xlated": 19880,
+            "id": 507,
+            "name": "sys_exit_submit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "508": {
+            "avg_ns_per_run": 261.71060866205926,
+            "bytes_jited": 8156,
+            "bytes_xlated": 13688,
+            "id": 508,
+            "name": "trace_sys_enter",
+            "run_cnt_delta": 29757843,
+            "run_time_ns_delta": 7787943204,
+            "type": "raw_tracepoint"
+          },
+          "509": {
+            "avg_ns_per_run": 268.3856696765952,
+            "bytes_jited": 8189,
+            "bytes_xlated": 13744,
+            "id": 509,
+            "name": "trace_sys_exit",
+            "run_cnt_delta": 29757849,
+            "run_time_ns_delta": 7986580232,
+            "type": "raw_tracepoint"
+          },
+          "510": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 510,
+            "name": "trace_ptrace",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "511": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11319,
+            "bytes_xlated": 19504,
+            "id": 511,
+            "name": "trace_ret_ptrace",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "512": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 512,
+            "name": "trace_process_vm_writev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "513": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11319,
+            "bytes_xlated": 19504,
+            "id": 513,
+            "name": "trace_ret_process_vm_writev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "514": {
+            "avg_ns_per_run": 69.17131435400002,
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 514,
+            "name": "trace_arch_prctl",
+            "run_cnt_delta": 957322,
+            "run_time_ns_delta": 66219221,
+            "type": "kprobe"
+          },
+          "515": {
+            "avg_ns_per_run": 276.9282070191639,
+            "bytes_jited": 11319,
+            "bytes_xlated": 19504,
+            "id": 515,
+            "name": "trace_ret_arch_prctl",
+            "run_cnt_delta": 957322,
+            "run_time_ns_delta": 265109465,
+            "type": "kprobe"
+          },
+          "516": {
+            "avg_ns_per_run": 242.8245814307458,
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 516,
+            "name": "trace_dup",
+            "run_cnt_delta": 2628,
+            "run_time_ns_delta": 638143,
+            "type": "kprobe"
+          },
+          "517": {
+            "avg_ns_per_run": 985.3432267884323,
+            "bytes_jited": 11319,
+            "bytes_xlated": 19504,
+            "id": 517,
+            "name": "trace_ret_dup",
+            "run_cnt_delta": 2628,
+            "run_time_ns_delta": 2589482,
+            "type": "kprobe"
+          },
+          "518": {
+            "avg_ns_per_run": 964.75,
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 518,
+            "name": "trace_dup2",
+            "run_cnt_delta": 4,
+            "run_time_ns_delta": 3859,
+            "type": "kprobe"
+          },
+          "519": {
+            "avg_ns_per_run": 4233.75,
+            "bytes_jited": 11319,
+            "bytes_xlated": 19504,
+            "id": 519,
+            "name": "trace_ret_dup2",
+            "run_cnt_delta": 4,
+            "run_time_ns_delta": 16935,
+            "type": "kprobe"
+          },
+          "520": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 520,
+            "name": "trace_dup3",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "521": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 11319,
+            "bytes_xlated": 19504,
+            "id": 521,
+            "name": "trace_ret_dup3",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "522": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 20734,
+            "bytes_xlated": 31992,
+            "id": 522,
+            "name": "syscall__execve_enter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "523": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 20705,
+            "bytes_xlated": 32008,
+            "id": 523,
+            "name": "syscall__execve_exit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "524": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 20997,
+            "bytes_xlated": 32400,
+            "id": 524,
+            "name": "syscall__execveat_enter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "525": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 20965,
+            "bytes_xlated": 32408,
+            "id": 525,
+            "name": "syscall__execveat_exit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "526": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 12292,
+            "bytes_xlated": 18744,
+            "id": 526,
+            "name": "sys_dup_exit_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "527": {
+            "avg_ns_per_run": 2076.135185185185,
+            "bytes_jited": 19722,
+            "bytes_xlated": 32248,
+            "id": 527,
+            "name": "tracepoint__sched__sched_process_fork",
+            "run_cnt_delta": 3780,
+            "run_time_ns_delta": 7847791,
+            "type": "raw_tracepoint"
+          },
+          "528": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 59266,
+            "bytes_xlated": 108072,
+            "id": 528,
+            "name": "lkm_seeker_modtree_loop",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "529": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 6232,
+            "bytes_xlated": 10320,
+            "id": 529,
+            "name": "uprobe_lkm_seeker_submitter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "530": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 4339,
+            "bytes_xlated": 7784,
+            "id": 530,
+            "name": "uprobe_lkm_seeker",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "531": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 62309,
+            "bytes_xlated": 111768,
+            "id": 531,
+            "name": "lkm_seeker_kset_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "532": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 652,
+            "bytes_xlated": 1048,
+            "id": 532,
+            "name": "lkm_seeker_mod_tree_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "533": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 57791,
+            "bytes_xlated": 102120,
+            "id": 533,
+            "name": "lkm_seeker_proc_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "534": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3889,
+            "bytes_xlated": 6456,
+            "id": 534,
+            "name": "lkm_seeker_new_mod_only_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "535": {
+            "avg_ns_per_run": 12808.5,
+            "bytes_jited": 20556,
+            "bytes_xlated": 35424,
+            "id": 535,
+            "name": "tracepoint__sched__sched_process_exec",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 25617,
+            "type": "raw_tracepoint"
+          },
+          "536": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 24434,
+            "bytes_xlated": 38432,
+            "id": 536,
+            "name": "sched_process_exec_event_submit_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "537": {
+            "avg_ns_per_run": 1375.2812837108954,
+            "bytes_jited": 8700,
+            "bytes_xlated": 14536,
+            "id": 537,
+            "name": "tracepoint__sched__sched_process_exit",
+            "run_cnt_delta": 3708,
+            "run_time_ns_delta": 5099543,
+            "type": "raw_tracepoint"
+          },
+          "538": {
+            "avg_ns_per_run": 982.5585221143474,
+            "bytes_jited": 248,
+            "bytes_xlated": 440,
+            "id": 538,
+            "name": "tracepoint__sched__sched_process_free",
+            "run_cnt_delta": 3708,
+            "run_time_ns_delta": 3643327,
+            "type": "raw_tracepoint"
+          },
+          "539": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 9155,
+            "bytes_xlated": 13888,
+            "id": 539,
+            "name": "syscall__accept4",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "540": {
+            "avg_ns_per_run": 368.8230521208636,
+            "bytes_jited": 8945,
+            "bytes_xlated": 14912,
+            "id": 540,
+            "name": "tracepoint__sched__sched_switch",
+            "run_cnt_delta": 1822418,
+            "run_time_ns_delta": 672149769,
+            "type": "raw_tracepoint"
+          },
+          "541": {
+            "avg_ns_per_run": 16.82093470758252,
+            "bytes_jited": 8201,
+            "bytes_xlated": 13776,
+            "id": 541,
+            "name": "trace_filldir64",
+            "run_cnt_delta": 513444,
+            "run_time_ns_delta": 8636608,
+            "type": "kprobe"
+          },
+          "542": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 23523,
+            "bytes_xlated": 36784,
+            "id": 542,
+            "name": "trace_call_usermodehelper",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "543": {
+            "avg_ns_per_run": 912.450377562028,
+            "bytes_jited": 7959,
+            "bytes_xlated": 13408,
+            "id": 543,
+            "name": "trace_do_exit",
+            "run_cnt_delta": 3708,
+            "run_time_ns_delta": 3383366,
+            "type": "kprobe"
+          },
+          "544": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 56303,
+            "bytes_xlated": 97056,
+            "id": 544,
+            "name": "uprobe_syscall_table_check",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "545": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 6788,
+            "bytes_xlated": 11256,
+            "id": 545,
+            "name": "uprobe_seq_ops_trigger",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "546": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 6553,
+            "bytes_xlated": 10976,
+            "id": 546,
+            "name": "uprobe_mem_dump_trigger",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "547": {
+            "avg_ns_per_run": 94.3321547106325,
+            "bytes_jited": 11476,
+            "bytes_xlated": 18328,
+            "id": 547,
+            "name": "trace_security_file_ioctl",
+            "run_cnt_delta": 4038895,
+            "run_time_ns_delta": 380997668,
+            "type": "kprobe"
+          },
+          "548": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 9747,
+            "bytes_xlated": 15688,
+            "id": 548,
+            "name": "trace_tracepoint_probe_register_prio_may_exist",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "549": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 8649,
+            "bytes_xlated": 14440,
+            "id": 549,
+            "name": "tracepoint__cgroup__cgroup_attach_task",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "550": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 8624,
+            "bytes_xlated": 14416,
+            "id": 550,
+            "name": "tracepoint__cgroup__cgroup_mkdir",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "551": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 8624,
+            "bytes_xlated": 14416,
+            "id": 551,
+            "name": "tracepoint__cgroup__cgroup_rmdir",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "552": {
+            "avg_ns_per_run": 11919.5,
+            "bytes_jited": 33399,
+            "bytes_xlated": 52904,
+            "id": 552,
+            "name": "trace_security_bprm_check",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 23839,
+            "type": "kprobe"
+          },
+          "553": {
+            "avg_ns_per_run": 564.7853181523169,
+            "bytes_jited": 22949,
+            "bytes_xlated": 37088,
+            "id": 553,
+            "name": "trace_security_file_open",
+            "run_cnt_delta": 738027,
+            "run_time_ns_delta": 416826814,
+            "type": "kprobe"
+          },
+          "554": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18653,
+            "bytes_xlated": 30680,
+            "id": 554,
+            "name": "trace_security_sb_mount",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "555": {
+            "avg_ns_per_run": 2055.5593220338983,
+            "bytes_jited": 9997,
+            "bytes_xlated": 16416,
+            "id": 555,
+            "name": "trace_security_inode_unlink",
+            "run_cnt_delta": 118,
+            "run_time_ns_delta": 242556,
+            "type": "kprobe"
+          },
+          "556": {
+            "avg_ns_per_run": 240.1756365990505,
+            "bytes_jited": 10745,
+            "bytes_xlated": 16960,
+            "id": 556,
+            "name": "trace_commit_creds",
+            "run_cnt_delta": 370720,
+            "run_time_ns_delta": 89037912,
+            "type": "kprobe"
+          },
+          "557": {
+            "avg_ns_per_run": 485.67340884573895,
+            "bytes_jited": 10034,
+            "bytes_xlated": 16552,
+            "id": 557,
+            "name": "trace_switch_task_namespaces",
+            "run_cnt_delta": 3708,
+            "run_time_ns_delta": 1800877,
+            "type": "kprobe"
+          },
+          "558": {
+            "avg_ns_per_run": 135.13099441661555,
+            "bytes_jited": 8199,
+            "bytes_xlated": 13760,
+            "id": 558,
+            "name": "trace_cap_capable",
+            "run_cnt_delta": 2480037,
+            "run_time_ns_delta": 335129866,
+            "type": "kprobe"
+          },
+          "559": {
+            "avg_ns_per_run": 296.836851023481,
+            "bytes_jited": 8478,
+            "bytes_xlated": 14176,
+            "id": 559,
+            "name": "trace_security_socket_create",
+            "run_cnt_delta": 911204,
+            "run_time_ns_delta": 270478926,
+            "type": "kprobe"
+          },
+          "560": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 9217,
+            "bytes_xlated": 15344,
+            "id": 560,
+            "name": "trace_security_inode_symlink",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "561": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 8301,
+            "bytes_xlated": 13904,
+            "id": 561,
+            "name": "trace_proc_create",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "562": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 9523,
+            "bytes_xlated": 15840,
+            "id": 562,
+            "name": "trace_debugfs_create_file",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "563": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 9235,
+            "bytes_xlated": 15424,
+            "id": 563,
+            "name": "trace_debugfs_create_dir",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "564": {
+            "avg_ns_per_run": 2457.6,
+            "bytes_jited": 10837,
+            "bytes_xlated": 16632,
+            "id": 564,
+            "name": "trace_security_socket_listen",
+            "run_cnt_delta": 5,
+            "run_time_ns_delta": 12288,
+            "type": "kprobe"
+          },
+          "565": {
+            "avg_ns_per_run": 375.0392123287671,
+            "bytes_jited": 10093,
+            "bytes_xlated": 15472,
+            "id": 565,
+            "name": "trace_security_socket_connect",
+            "run_cnt_delta": 210240,
+            "run_time_ns_delta": 78848244,
+            "type": "kprobe"
+          },
+          "566": {
+            "avg_ns_per_run": 487.1684124602478,
+            "bytes_jited": 11320,
+            "bytes_xlated": 17368,
+            "id": 566,
+            "name": "trace_security_socket_accept",
+            "run_cnt_delta": 211938,
+            "run_time_ns_delta": 103249499,
+            "type": "kprobe"
+          },
+          "567": {
+            "avg_ns_per_run": 2364.6,
+            "bytes_jited": 10606,
+            "bytes_xlated": 16152,
+            "id": 567,
+            "name": "trace_security_socket_bind",
+            "run_cnt_delta": 5,
+            "run_time_ns_delta": 11823,
+            "type": "kprobe"
+          },
+          "568": {
+            "avg_ns_per_run": 383.97916915887106,
+            "bytes_jited": 11072,
+            "bytes_xlated": 17024,
+            "id": 568,
+            "name": "trace_security_socket_setsockopt",
+            "run_cnt_delta": 125391,
+            "run_time_ns_delta": 48147532,
+            "type": "kprobe"
+          },
+          "569": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 949,
+            "bytes_xlated": 1568,
+            "id": 569,
+            "name": "send_bin",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "570": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 949,
+            "bytes_xlated": 1568,
+            "id": 570,
+            "name": "send_bin_tp",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "571": {
+            "avg_ns_per_run": 65.74951596390815,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 571,
+            "name": "trace_vfs_write",
+            "run_cnt_delta": 942595,
+            "run_time_ns_delta": 61975165,
+            "type": "kprobe"
+          },
+          "572": {
+            "avg_ns_per_run": 82.57865997591755,
+            "bytes_jited": 279,
+            "bytes_xlated": 432,
+            "id": 572,
+            "name": "vfs_write_magic_enter",
+            "run_cnt_delta": 942595,
+            "run_time_ns_delta": 77838232,
+            "type": "kprobe"
+          },
+          "573": {
+            "avg_ns_per_run": 644.3527909653669,
+            "bytes_jited": 19139,
+            "bytes_xlated": 31808,
+            "id": 573,
+            "name": "trace_ret_vfs_write",
+            "run_cnt_delta": 942595,
+            "run_time_ns_delta": 607363719,
+            "type": "kprobe"
+          },
+          "574": {
+            "avg_ns_per_run": 37.19994801584986,
+            "bytes_jited": 23768,
+            "bytes_xlated": 36720,
+            "id": 574,
+            "name": "vfs_write_magic_return",
+            "run_cnt_delta": 942595,
+            "run_time_ns_delta": 35064485,
+            "type": "kprobe"
+          },
+          "575": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 29921,
+            "bytes_xlated": 51704,
+            "id": 575,
+            "name": "trace_ret_vfs_write_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "576": {
+            "avg_ns_per_run": 350.46153846153845,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 576,
+            "name": "trace_vfs_writev",
+            "run_cnt_delta": 52,
+            "run_time_ns_delta": 18224,
+            "type": "kprobe"
+          },
+          "577": {
+            "avg_ns_per_run": 599.8846153846154,
+            "bytes_jited": 279,
+            "bytes_xlated": 432,
+            "id": 577,
+            "name": "vfs_writev_magic_enter",
+            "run_cnt_delta": 52,
+            "run_time_ns_delta": 31194,
+            "type": "kprobe"
+          },
+          "578": {
+            "avg_ns_per_run": 2758.75,
+            "bytes_jited": 19138,
+            "bytes_xlated": 31800,
+            "id": 578,
+            "name": "trace_ret_vfs_writev",
+            "run_cnt_delta": 52,
+            "run_time_ns_delta": 143455,
+            "type": "kprobe"
+          },
+          "579": {
+            "avg_ns_per_run": 5763.076923076923,
+            "bytes_jited": 24504,
+            "bytes_xlated": 37576,
+            "id": 579,
+            "name": "vfs_writev_magic_return",
+            "run_cnt_delta": 52,
+            "run_time_ns_delta": 299680,
+            "type": "kprobe"
+          },
+          "580": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 29845,
+            "bytes_xlated": 51680,
+            "id": 580,
+            "name": "trace_ret_vfs_writev_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "581": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 581,
+            "name": "trace_kernel_write",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "582": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 279,
+            "bytes_xlated": 432,
+            "id": 582,
+            "name": "kernel_write_magic_enter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "583": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 19142,
+            "bytes_xlated": 31808,
+            "id": 583,
+            "name": "trace_ret_kernel_write",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "584": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 23768,
+            "bytes_xlated": 36720,
+            "id": 584,
+            "name": "kernel_write_magic_return",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "585": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 29921,
+            "bytes_xlated": 51704,
+            "id": 585,
+            "name": "trace_ret_kernel_write_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "586": {
+            "avg_ns_per_run": 58.71386313430188,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 586,
+            "name": "trace_vfs_read",
+            "run_cnt_delta": 1240340,
+            "run_time_ns_delta": 72825153,
+            "type": "kprobe"
+          },
+          "587": {
+            "avg_ns_per_run": 584.0076624151442,
+            "bytes_jited": 19142,
+            "bytes_xlated": 31808,
+            "id": 587,
+            "name": "trace_ret_vfs_read",
+            "run_cnt_delta": 1240340,
+            "run_time_ns_delta": 724368064,
+            "type": "kprobe"
+          },
+          "588": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17164,
+            "bytes_xlated": 29848,
+            "id": 588,
+            "name": "trace_ret_vfs_read_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "589": {
+            "avg_ns_per_run": 443.11538461538464,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 589,
+            "name": "trace_vfs_readv",
+            "run_cnt_delta": 52,
+            "run_time_ns_delta": 23042,
+            "type": "kprobe"
+          },
+          "590": {
+            "avg_ns_per_run": 2933.7115384615386,
+            "bytes_jited": 19138,
+            "bytes_xlated": 31800,
+            "id": 590,
+            "name": "trace_ret_vfs_readv",
+            "run_cnt_delta": 52,
+            "run_time_ns_delta": 152553,
+            "type": "kprobe"
+          },
+          "591": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17892,
+            "bytes_xlated": 30816,
+            "id": 591,
+            "name": "trace_ret_vfs_readv_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "592": {
+            "avg_ns_per_run": 144.82374100719426,
+            "bytes_jited": 20742,
+            "bytes_xlated": 32864,
+            "id": 592,
+            "name": "trace_mmap_alert",
+            "run_cnt_delta": 7506,
+            "run_time_ns_delta": 1087047,
+            "type": "kprobe"
+          },
+          "593": {
+            "avg_ns_per_run": 73.86065136145221,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 593,
+            "name": "trace_do_mmap",
+            "run_cnt_delta": 7492,
+            "run_time_ns_delta": 553364,
+            "type": "kprobe"
+          },
+          "594": {
+            "avg_ns_per_run": 409.3888147357181,
+            "bytes_jited": 19582,
+            "bytes_xlated": 31944,
+            "id": 594,
+            "name": "trace_ret_do_mmap",
+            "run_cnt_delta": 7492,
+            "run_time_ns_delta": 3067141,
+            "type": "kprobe"
+          },
+          "595": {
+            "avg_ns_per_run": 148.4391936991056,
+            "bytes_jited": 36948,
+            "bytes_xlated": 60816,
+            "id": 595,
+            "name": "trace_security_mmap_file",
+            "run_cnt_delta": 7491,
+            "run_time_ns_delta": 1111958,
+            "type": "kprobe"
+          },
+          "596": {
+            "avg_ns_per_run": 891.3333333333334,
+            "bytes_jited": 34612,
+            "bytes_xlated": 59616,
+            "id": 596,
+            "name": "trace_security_file_mprotect",
+            "run_cnt_delta": 39,
+            "run_time_ns_delta": 34762,
+            "type": "kprobe"
+          },
+          "597": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 622,
+            "bytes_xlated": 1000,
+            "id": 597,
+            "name": "syscall__init_module",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "598": {
+            "avg_ns_per_run": 288.85407515861397,
+            "bytes_jited": 15620,
+            "bytes_xlated": 26984,
+            "id": 598,
+            "name": "trace_security_bpf",
+            "run_cnt_delta": 8196,
+            "run_time_ns_delta": 2367448,
+            "type": "kprobe"
+          },
+          "599": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 599,
+            "name": "trace_register_kprobe",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "600": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 8826,
+            "bytes_xlated": 14712,
+            "id": 600,
+            "name": "trace_ret_register_kprobe",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "601": {
+            "avg_ns_per_run": 288.7430981595092,
+            "bytes_jited": 8362,
+            "bytes_xlated": 13992,
+            "id": 601,
+            "name": "trace_security_bpf_map",
+            "run_cnt_delta": 2608,
+            "run_time_ns_delta": 753042,
+            "type": "kprobe"
+          },
+          "602": {
+            "avg_ns_per_run": 941.4472049689441,
+            "bytes_jited": 9601,
+            "bytes_xlated": 15520,
+            "id": 602,
+            "name": "trace_security_bpf_prog",
+            "run_cnt_delta": 161,
+            "run_time_ns_delta": 151573,
+            "type": "kprobe"
+          },
+          "603": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 6376,
+            "bytes_xlated": 10616,
+            "id": 603,
+            "name": "trace_bpf_check",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "604": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 6612,
+            "bytes_xlated": 11096,
+            "id": 604,
+            "name": "trace_check_map_func_compatibility",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "605": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 6618,
+            "bytes_xlated": 11104,
+            "id": 605,
+            "name": "trace_check_helper_call",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "606": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18650,
+            "bytes_xlated": 30720,
+            "id": 606,
+            "name": "trace_security_kernel_read_file",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "607": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17285,
+            "bytes_xlated": 30536,
+            "id": 607,
+            "name": "trace_security_kernel_post_read_file",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "608": {
+            "avg_ns_per_run": 2609.5,
+            "bytes_jited": 9251,
+            "bytes_xlated": 15432,
+            "id": 608,
+            "name": "trace_security_inode_mknod",
+            "run_cnt_delta": 4,
+            "run_time_ns_delta": 10438,
+            "type": "kprobe"
+          },
+          "609": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 8685,
+            "bytes_xlated": 14440,
+            "id": 609,
+            "name": "trace_device_add",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "610": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 610,
+            "name": "trace___register_chrdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "611": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 8828,
+            "bytes_xlated": 14704,
+            "id": 611,
+            "name": "trace_ret__register_chrdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "612": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 19884,
+            "bytes_xlated": 32720,
+            "id": 612,
+            "name": "tracepoint__module__module_load",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "613": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 9004,
+            "bytes_xlated": 15024,
+            "id": 613,
+            "name": "tracepoint__module__module_free",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "614": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 614,
+            "name": "trace_do_init_module",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "615": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 14587,
+            "bytes_xlated": 24016,
+            "id": 615,
+            "name": "trace_ret_do_init_module",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "616": {
+            "avg_ns_per_run": 4218.0,
+            "bytes_jited": 18493,
+            "bytes_xlated": 30424,
+            "id": 616,
+            "name": "trace_load_elf_phdrs",
+            "run_cnt_delta": 4,
+            "run_time_ns_delta": 16872,
+            "type": "kprobe"
+          },
+          "617": {
+            "avg_ns_per_run": 51.92917639785129,
+            "bytes_jited": 8719,
+            "bytes_xlated": 14592,
+            "id": 617,
+            "name": "trace_security_file_permission",
+            "run_cnt_delta": 3089295,
+            "run_time_ns_delta": 160424545,
+            "type": "kprobe"
+          },
+          "618": {
+            "avg_ns_per_run": 1022.0474183350896,
+            "bytes_jited": 8512,
+            "bytes_xlated": 14208,
+            "id": 618,
+            "name": "tracepoint__task__task_rename",
+            "run_cnt_delta": 3796,
+            "run_time_ns_delta": 3879692,
+            "type": "raw_tracepoint"
+          },
+          "619": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 9837,
+            "bytes_xlated": 16448,
+            "id": 619,
+            "name": "trace_security_inode_rename",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "620": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 620,
+            "name": "trace_kallsyms_lookup_name",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "621": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 8431,
+            "bytes_xlated": 14104,
+            "id": 621,
+            "name": "trace_ret_kallsyms_lookup_name",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "622": {
+            "avg_ns_per_run": 959.5216986155484,
+            "bytes_jited": 10070,
+            "bytes_xlated": 16296,
+            "id": 622,
+            "name": "trace_do_sigaction",
+            "run_cnt_delta": 7512,
+            "run_time_ns_delta": 7207927,
+            "type": "kprobe"
+          },
+          "623": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18577,
+            "bytes_xlated": 30600,
+            "id": 623,
+            "name": "trace_vfs_utimes",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "624": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18577,
+            "bytes_xlated": 30600,
+            "id": 624,
+            "name": "trace_utimes_common",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "625": {
+            "avg_ns_per_run": 2694.1916666666666,
+            "bytes_jited": 9550,
+            "bytes_xlated": 15896,
+            "id": 625,
+            "name": "trace_do_truncate",
+            "run_cnt_delta": 240,
+            "run_time_ns_delta": 646606,
+            "type": "kprobe"
+          },
+          "626": {
+            "avg_ns_per_run": 148.0737553159208,
+            "bytes_jited": 17005,
+            "bytes_xlated": 27568,
+            "id": 626,
+            "name": "trace_fd_install",
+            "run_cnt_delta": 2207990,
+            "run_time_ns_delta": 326945371,
+            "type": "kprobe"
+          },
+          "627": {
+            "avg_ns_per_run": 297.407757652311,
+            "bytes_jited": 16933,
+            "bytes_xlated": 27416,
+            "id": 627,
+            "name": "trace_filp_close",
+            "run_cnt_delta": 414842,
+            "run_time_ns_delta": 123377229,
+            "type": "kprobe"
+          },
+          "628": {
+            "avg_ns_per_run": 192.9998154868073,
+            "bytes_jited": 469,
+            "bytes_xlated": 784,
+            "id": 628,
+            "name": "trace_file_update_time",
+            "run_cnt_delta": 32518,
+            "run_time_ns_delta": 6275968,
+            "type": "kprobe"
+          },
+          "629": {
+            "avg_ns_per_run": 642.7260594132481,
+            "bytes_jited": 20045,
+            "bytes_xlated": 31224,
+            "id": 629,
+            "name": "trace_ret_file_update_time",
+            "run_cnt_delta": 32518,
+            "run_time_ns_delta": 20900166,
+            "type": "kprobe"
+          },
+          "630": {
+            "avg_ns_per_run": 118.75796286565624,
+            "bytes_jited": 483,
+            "bytes_xlated": 800,
+            "id": 630,
+            "name": "trace_file_modified",
+            "run_cnt_delta": 317819,
+            "run_time_ns_delta": 37743537,
+            "type": "kprobe"
+          },
+          "631": {
+            "avg_ns_per_run": 482.44615960656853,
+            "bytes_jited": 20180,
+            "bytes_xlated": 31400,
+            "id": 631,
+            "name": "trace_ret_file_modified",
+            "run_cnt_delta": 317819,
+            "run_time_ns_delta": 153330556,
+            "type": "kprobe"
+          },
+          "632": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 632,
+            "name": "trace_inotify_find_inode",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "633": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18061,
+            "bytes_xlated": 30032,
+            "id": 633,
+            "name": "trace_ret_inotify_find_inode",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "634": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 12887,
+            "bytes_xlated": 20216,
+            "id": 634,
+            "name": "process_execute_failed_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "635": {
+            "avg_ns_per_run": 572.0,
+            "bytes_jited": 16503,
+            "bytes_xlated": 28960,
+            "id": 635,
+            "name": "trace_exec_binprm",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 1144,
+            "type": "kprobe"
+          },
+          "636": {
+            "avg_ns_per_run": 8883.5,
+            "bytes_jited": 16714,
+            "bytes_xlated": 29144,
+            "id": 636,
+            "name": "trace_security_bprm_creds_for_exec",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 17767,
+            "type": "kprobe"
+          },
+          "637": {
+            "avg_ns_per_run": 11462.0,
+            "bytes_jited": 24495,
+            "bytes_xlated": 38400,
+            "id": 637,
+            "name": "trace_execute_finished",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 22924,
+            "type": "kprobe"
+          },
+          "638": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18408,
+            "bytes_xlated": 30272,
+            "id": 638,
+            "name": "trace_security_path_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "639": {
+            "avg_ns_per_run": 9071.0,
+            "bytes_jited": 18267,
+            "bytes_xlated": 30048,
+            "id": 639,
+            "name": "trace_set_fs_pwd",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 18142,
+            "type": "kprobe"
+          },
+          "640": {
+            "avg_ns_per_run": 268.7500898707956,
+            "bytes_jited": 8645,
+            "bytes_xlated": 14424,
+            "id": 640,
+            "name": "trace_security_task_setrlimit",
+            "run_cnt_delta": 620335,
+            "run_time_ns_delta": 166715087,
+            "type": "kprobe"
+          },
+          "641": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 8670,
+            "bytes_xlated": 14480,
+            "id": 641,
+            "name": "trace_security_settime64",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "642": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17596,
+            "bytes_xlated": 29272,
+            "id": 642,
+            "name": "trace_chmod_common",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "643": {
+            "avg_ns_per_run": 346.7058611097846,
+            "bytes_jited": 47182,
+            "bytes_xlated": 76688,
+            "id": 643,
+            "name": "trace_security_task_prctl",
+            "run_cnt_delta": 335056,
+            "run_time_ns_delta": 116165879,
+            "type": "kprobe"
+          },
+          "644": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 14930,
+            "bytes_xlated": 24112,
+            "id": 644,
+            "name": "syscall_checker",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "645": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 9521,
+            "bytes_xlated": 15856,
+            "id": 645,
+            "name": "trace_security_sb_umount",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "646": {
+            "avg_ns_per_run": 38.260887063026104,
+            "bytes_jited": 331,
+            "bytes_xlated": 528,
+            "id": 646,
+            "name": "trace_sock_alloc_file",
+            "run_cnt_delta": 1123122,
+            "run_time_ns_delta": 42971644,
+            "type": "kprobe"
+          },
+          "647": {
+            "avg_ns_per_run": 154.9798748488588,
+            "bytes_jited": 8648,
+            "bytes_xlated": 13456,
+            "id": 647,
+            "name": "trace_ret_sock_alloc_file",
+            "run_cnt_delta": 1123122,
+            "run_time_ns_delta": 174061307,
+            "type": "kprobe"
+          },
+          "648": {
+            "avg_ns_per_run": 1085.8696139787328,
+            "bytes_jited": 344,
+            "bytes_xlated": 592,
+            "id": 648,
+            "name": "trace_security_sk_clone",
+            "run_cnt_delta": 72224,
+            "run_time_ns_delta": 78425847,
+            "type": "kprobe"
+          },
+          "649": {
+            "avg_ns_per_run": 207.12385276299597,
+            "bytes_jited": 8895,
+            "bytes_xlated": 13696,
+            "id": 649,
+            "name": "trace_security_socket_recvmsg",
+            "run_cnt_delta": 1791805,
+            "run_time_ns_delta": 371125555,
+            "type": "kprobe"
+          },
+          "650": {
+            "avg_ns_per_run": 196.55781873918983,
+            "bytes_jited": 8895,
+            "bytes_xlated": 13696,
+            "id": 650,
+            "name": "trace_security_socket_sendmsg",
+            "run_cnt_delta": 4089323,
+            "run_time_ns_delta": 803788409,
+            "type": "kprobe"
+          },
+          "651": {
+            "avg_ns_per_run": 223.27893223768632,
+            "bytes_jited": 5668,
+            "bytes_xlated": 8808,
+            "id": 651,
+            "name": "cgroup_bpf_run_filter_skb",
+            "run_cnt_delta": 4052400,
+            "run_time_ns_delta": 904815545,
+            "type": "kprobe"
+          },
+          "653": {
+            "avg_ns_per_run": 279.2440282709073,
+            "bytes_jited": 18427,
+            "bytes_xlated": 29120,
+            "id": 653,
+            "name": "cgroup_skb_ingress",
+            "run_cnt_delta": 1079838,
+            "run_time_ns_delta": 301538313,
+            "type": "cgroup_skb"
+          },
+          "654": {
+            "avg_ns_per_run": 223.4024442404177,
+            "bytes_jited": 18427,
+            "bytes_xlated": 29120,
+            "id": 654,
+            "name": "cgroup_skb_egress",
+            "run_cnt_delta": 2695725,
+            "run_time_ns_delta": 602231554,
+            "type": "cgroup_skb"
+          },
+          "655": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 928,
+            "bytes_xlated": 1584,
+            "id": 655,
+            "name": "cgroup_mkdir_signal",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "656": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 910,
+            "bytes_xlated": 1544,
+            "id": 656,
+            "name": "cgroup_rmdir_signal",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "657": {
+            "avg_ns_per_run": 185.5,
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 657,
+            "name": "empty_kprobe",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 371,
+            "type": "kprobe"
+          },
+          "658": {
+            "avg_ns_per_run": 1869.5,
+            "bytes_jited": 58693,
+            "bytes_xlated": 96032,
+            "id": 658,
+            "name": "tracepoint__exec_test",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 3739,
+            "type": "raw_tracepoint"
+          },
+          "659": {
+            "avg_ns_per_run": 264.92393774211513,
+            "bytes_jited": 7328,
+            "bytes_xlated": 13360,
+            "id": 659,
+            "name": "lsm_file_open_test",
+            "run_cnt_delta": 738027,
+            "run_time_ns_delta": 195521019,
+            "type": "lsm"
+          },
+          "660": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 5384,
+            "bytes_xlated": 9160,
+            "id": 660,
+            "name": "uprobe__features_fallback_arena",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.1766229750001,
+            "ops_per_sec": 21106257.984723695,
+            "ops_total": 109259140.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [18439] setting to a 5 secs run per stressor\nstress-ng: info:  [18439] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set, 1 aio, 1 aiol, 1 hdd, 1 io, 1 iomix, 1 io-uring, 1 sync-file, 1 epoll, 1 netdev, 1 sctp, 1 sock, 1 sockdiag, 1 sockfd, 1 sockpair, 1 sockmany, 1 udp-flood\nstress-ng: info:  [18439] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [18448] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: metrc: [18439] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [18439]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [18439] cap              486301      5.00      0.14      4.66     97260.24      101373.45\nstress-ng: metrc: [18439] eventfd          218416      5.00      0.12      4.30     43680.88       49431.33\nstress-ng: metrc: [18439] get                2381      5.00      0.05      1.34       476.16        1712.89\nstress-ng: metrc: [18439] prctl              3640      5.00      2.60      0.66       727.91        1116.45\nstress-ng: metrc: [18439] set               39522      5.00      0.05      4.48      7904.34        8728.28\nstress-ng: metrc: [18439] aio               43107      5.00      0.02      0.75      8613.62       55857.91\nstress-ng: metrc: [18439] aiol               8713      5.15      0.14      0.65      1692.84       11086.69\nstress-ng: metrc: [18439] hdd              104693      5.01      2.03      1.88     20917.61       26768.09\nstress-ng: metrc: [18439] io                  464      5.01      0.00      0.13        92.67        3561.04\nstress-ng: metrc: [18439] iomix              4330      5.01      0.03      0.79       864.55        5235.42\nstress-ng: metrc: [18439] io-uring          52562      5.02      0.00      2.00     10461.48       26248.69\nstress-ng: metrc: [18439] sync-file            62      5.00      0.13      3.12        12.39          19.04\nstress-ng: metrc: [18439] epoll            137745      5.11      0.19      4.99     26951.28       26604.00\nstress-ng: metrc: [18439] netdev           169228      5.00      0.08      4.66     33843.98       35721.03\nstress-ng: metrc: [18439] sctp              45562      5.00      0.01      0.51      9110.86       86429.66\nstress-ng: metrc: [18439] sock               2257      5.00      0.11      5.43       451.03         407.40\nstress-ng: metrc: [18439] sockdiag      106285828      5.00      0.13      4.49  21255920.95    22999173.61\nstress-ng: metrc: [18439] sockfd           398877      5.00      0.19      4.90     79715.23       78383.74\nstress-ng: metrc: [18439] sockpair         372007      5.03      0.21      6.63     73969.19       54431.41\nstress-ng: metrc: [18439] sockmany          69582      5.00      0.08      4.35     13911.65       15722.56\nstress-ng: metrc: [18439] udp-flood        813863      5.00      0.07      4.45    162772.09      179965.50\nstress-ng: info:  [18439] skipped: 0\nstress-ng: info:  [18439] passed: 21: cap (1) eventfd (1) get (1) prctl (1) set (1) aio (1) aiol (1) hdd (1) io (1) iomix (1) io-uring (1) sync-file (1) epoll (1) netdev (1) sctp (1) sock (1) sockdiag (1) sockfd (1) sockpair (1) sockmany (1) udp-flood (1)\nstress-ng: info:  [18439] failed: 0\nstress-ng: info:  [18439] metrics untrustworthy: 0\nstress-ng: info:  [18439] successful run completed in 5.15 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 158,
+          "not_applied": 0,
+          "requested": 158
+        }
+      },
+      "runner": "tracee",
+      "selected_workload": "stress_ng_os_io_network",
+      "status": "ok"
+    },
+    {
+      "app": "bpftrace/capable",
+      "baseline": {
+        "bpf": {
+          "666": {
+            "avg_ns_per_run": 174.44148990405645,
+            "bytes_jited": 769,
+            "bytes_xlated": 1360,
+            "id": 666,
+            "name": "cap_capable",
+            "run_cnt_delta": 1216132,
+            "run_time_ns_delta": 212143878,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0132022839999308,
+            "ops_per_sec": 1435499.1327675483,
+            "ops_total": 1454451.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [25495] setting to a 1 secs run per stressor\nstress-ng: info:  [25495] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [25495] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [25495] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [25495]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [25495] cap             1225866      1.00      0.16      0.84   1225871.26     1226059.72\nstress-ng: metrc: [25495] eventfd          136620      1.00      0.13      0.59    136551.86      188935.22\nstress-ng: metrc: [25495] get                 922      1.00      0.02      0.16       922.01        5219.15\nstress-ng: metrc: [25495] prctl              3029      1.00      0.57      0.41      3028.32        3076.36\nstress-ng: metrc: [25495] set               88014      1.00      0.21      0.78     88012.32       89663.81\nstress-ng: info:  [25495] skipped: 0\nstress-ng: info:  [25495] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [25495] failed: 0\nstress-ng: info:  [25495] metrics untrustworthy: 0\nstress-ng: info:  [25495] successful run completed in 1.00 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "666": {
+            "avg_ns_per_run": 158.81673628740336,
+            "bytes_jited": 697,
+            "bytes_xlated": 1216,
+            "id": 666,
+            "name": "cap_capable",
+            "run_cnt_delta": 1252261,
+            "run_time_ns_delta": 198880005,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0135410870000214,
+            "ops_per_sec": 1436232.8460789565,
+            "ops_total": 1455681.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [31768] setting to a 1 secs run per stressor\nstress-ng: info:  [31768] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [31768] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [31768] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [31768]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [31768] cap             1218325      1.00      0.20      0.80   1218336.04     1219890.12\nstress-ng: metrc: [31768] eventfd          143107      1.00      0.06      0.65    143041.21      200801.20\nstress-ng: metrc: [31768] get                 968      1.00      0.03      0.15       967.16        5458.07\nstress-ng: metrc: [31768] prctl              3193      1.00      0.57      0.40      3192.93        3267.80\nstress-ng: metrc: [31768] set               90088      1.00      0.12      0.87     90075.42       91491.76\nstress-ng: info:  [31768] skipped: 0\nstress-ng: info:  [31768] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [31768] failed: 0\nstress-ng: info:  [31768] metrics untrustworthy: 0\nstress-ng: info:  [31768] successful run completed in 1.00 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 1,
+          "not_applied": 0,
+          "requested": 1
+        }
+      },
+      "runner": "bpftrace",
+      "selected_workload": "stress_ng_os",
+      "status": "ok"
+    },
+    {
+      "app": "bpftrace/biosnoop",
+      "baseline": {
+        "bpf": {
+          "673": {
+            "avg_ns_per_run": 385.89883704771427,
+            "bytes_jited": 222,
+            "bytes_xlated": 408,
+            "id": 673,
+            "name": "block_io_start",
+            "run_cnt_delta": 1467988,
+            "run_time_ns_delta": 566494862,
+            "type": "tracepoint"
+          },
+          "674": {
+            "avg_ns_per_run": 759.5129567173909,
+            "bytes_jited": 931,
+            "bytes_xlated": 1576,
+            "id": 674,
+            "name": "block_io_done",
+            "run_cnt_delta": 1468003,
+            "run_time_ns_delta": 1114967299,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.355000422999979,
+            "ops_per_sec": 367613.2295984336,
+            "ops_total": 1968569.0,
+            "stderr": "",
+            "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.088664,\n        \"1000\" : 13.714445\n      },\n      \"latency_us\" : {\n        \"2\" : 33.914461,\n        \"4\" : 1.666185,\n        \"10\" : 10.275186,\n        \"20\" : 36.002670,\n        \"50\" : 2.417679,\n        \"100\" : 1.604141,\n        \"250\" : 0.303669,\n        \"500\" : 0.012900,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "673": {
+            "avg_ns_per_run": 394.80541748685414,
+            "bytes_jited": 222,
+            "bytes_xlated": 408,
+            "id": 673,
+            "name": "block_io_start",
+            "run_cnt_delta": 1459016,
+            "run_time_ns_delta": 576027421,
+            "type": "tracepoint"
+          },
+          "674": {
+            "avg_ns_per_run": 743.382611472957,
+            "bytes_jited": 883,
+            "bytes_xlated": 1480,
+            "id": 674,
+            "name": "block_io_done",
+            "run_cnt_delta": 1459031,
+            "run_time_ns_delta": 1084618275,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.384734650999917,
+            "ops_per_sec": 363755.9001419456,
+            "ops_total": 1958729.0,
+            "stderr": "",
+            "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.119456,\n        \"1000\" : 12.899227\n      },\n      \"latency_us\" : {\n        \"2\" : 34.660511,\n        \"4\" : 1.662569,\n        \"10\" : 11.310705,\n        \"20\" : 34.891855,\n        \"50\" : 2.565445,\n        \"100\" : 1.541272,\n        \"250\" : 0.322777,\n        \"500\" : 0.024546,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 2,
+          "not_applied": 0,
+          "requested": 2
+        }
+      },
+      "runner": "bpftrace",
+      "selected_workload": "fio_randrw",
+      "status": "ok"
+    },
+    {
+      "app": "bpftrace/vfsstat",
+      "baseline": {
+        "bpf": {
+          "681": {
+            "avg_ns_per_run": 1478.0,
+            "bytes_jited": 362,
+            "bytes_xlated": 680,
+            "id": 681,
+            "name": "1",
+            "run_cnt_delta": 1,
+            "run_time_ns_delta": 1478,
+            "type": "perf_event"
+          },
+          "682": {
+            "avg_ns_per_run": 32.854222341595126,
+            "bytes_jited": 140,
+            "bytes_xlated": 224,
+            "id": 682,
+            "name": "vfs_create",
+            "run_cnt_delta": 1556281,
+            "run_time_ns_delta": 51130402,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.1300688159999481,
+            "ops_per_sec": 2652584.4776519677,
+            "ops_total": 2997603.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [16146] setting to a 1 secs run per stressor\nstress-ng: info:  [16146] dispatching hogs: 1 access, 1 chdir, 1 chmod, 1 chown, 1 dentry, 1 dir, 1 dirmany, 1 fallocate, 1 file-ioctl, 1 filename, 1 flock, 1 fpunch, 1 fstat, 1 getdent, 1 hdd, 1 inotify, 1 open, 1 rename, 1 touch, 1 utime\nstress-ng: info:  [16146] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [16165] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [16151] dentry: 109640 dentries allocated\nstress-ng: metrc: [16146] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [16146]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [16146] access             9329      1.02      0.25      1.60      9187.36        5035.80\nstress-ng: metrc: [16146] chdir                45      1.08      0.13      0.84        41.78          46.34\nstress-ng: metrc: [16146] chmod               121      1.02      0.00      0.02       119.16        5071.89\nstress-ng: metrc: [16146] chown               135      1.00      0.00      0.00       134.75       28559.34\nstress-ng: metrc: [16146] dentry            14336      1.03      0.04      0.38     13967.98       34089.83\nstress-ng: metrc: [16146] dir                8193      1.11      0.10      0.87      7390.32        8458.81\nstress-ng: metrc: [16146] dirmany           10195      1.01      0.01      0.23     10049.09       42194.35\nstress-ng: metrc: [16146] fallocate             1      1.02      0.00      0.00         0.98         254.58\nstress-ng: metrc: [16146] file-ioctl        79822      1.00      0.06      0.78     79739.07       95106.58\nstress-ng: metrc: [16146] filename           3666      1.01      0.04      0.71      3619.21        4914.75\nstress-ng: metrc: [16146] flock           2511027      1.01      0.27      0.77   2475561.86     2409810.15\nstress-ng: metrc: [16146] fpunch             1377      1.01      0.00      0.24      1357.47        5739.10\nstress-ng: metrc: [16146] fstat              2335      1.00      0.11      0.54      2333.87        3599.90\nstress-ng: metrc: [16146] getdent          190470      1.00      0.12      0.87    190468.68      192773.65\nstress-ng: metrc: [16146] hdd               26437      1.01      0.25      0.36     26048.85       43745.32\nstress-ng: metrc: [16146] inotify               3      1.06      0.00      0.00         2.83         858.61\nstress-ng: metrc: [16146] open              18330      1.02      0.01      0.25     18012.77       70557.26\nstress-ng: metrc: [16146] rename              387      1.01      0.00      0.01       382.38       33431.24\nstress-ng: metrc: [16146] touch             68720      1.01      0.06      1.78     67704.95       37375.90\nstress-ng: metrc: [16146] utime             52674      1.00      0.03      0.80     52662.76       63483.07\nstress-ng: info:  [16146] skipped: 0\nstress-ng: info:  [16146] passed: 20: access (1) chdir (1) chmod (1) chown (1) dentry (1) dir (1) dirmany (1) fallocate (1) file-ioctl (1) filename (1) flock (1) fpunch (1) fstat (1) getdent (1) hdd (1) inotify (1) open (1) rename (1) touch (1) utime (1)\nstress-ng: info:  [16146] failed: 0\nstress-ng: info:  [16146] metrics untrustworthy: 0\nstress-ng: info:  [16146] successful run completed in 1.12 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "681": {
+            "avg_ns_per_run": 1488.0,
+            "bytes_jited": 362,
+            "bytes_xlated": 680,
+            "id": 681,
+            "name": "1",
+            "run_cnt_delta": 1,
+            "run_time_ns_delta": 1488,
+            "type": "perf_event"
+          },
+          "682": {
+            "avg_ns_per_run": 32.13170664586284,
+            "bytes_jited": 140,
+            "bytes_xlated": 224,
+            "id": 682,
+            "name": "vfs_create",
+            "run_cnt_delta": 1584324,
+            "run_time_ns_delta": 50907034,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.119524618000014,
+            "ops_per_sec": 2577701.243546896,
+            "ops_total": 2885800.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [2087] setting to a 1 secs run per stressor\nstress-ng: info:  [2087] dispatching hogs: 1 access, 1 chdir, 1 chmod, 1 chown, 1 dentry, 1 dir, 1 dirmany, 1 fallocate, 1 file-ioctl, 1 filename, 1 flock, 1 fpunch, 1 fstat, 1 getdent, 1 hdd, 1 inotify, 1 open, 1 rename, 1 touch, 1 utime\nstress-ng: info:  [2087] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [2106] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [2092] dentry: 110502 dentries allocated\nstress-ng: metrc: [2087] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2087]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2087] access            11056      1.00      0.24      1.63     11042.33        5910.45\nstress-ng: metrc: [2087] chdir                45      1.08      0.15      0.72        41.81          51.65\nstress-ng: metrc: [2087] chmod                99      1.01      0.00      0.03        97.80        3445.28\nstress-ng: metrc: [2087] chown               109      1.00      0.00      0.00       108.94       28385.42\nstress-ng: metrc: [2087] dentry            14336      1.03      0.03      0.40     13937.45       33552.16\nstress-ng: metrc: [2087] dir                8192      1.09      0.08      0.88      7511.22        8521.19\nstress-ng: metrc: [2087] dirmany            9219      1.01      0.00      0.22      9097.96       41534.51\nstress-ng: metrc: [2087] fallocate             1      1.02      0.00      0.00         0.98         296.91\nstress-ng: metrc: [2087] file-ioctl        77910      1.00      0.05      0.72     77887.42      101849.79\nstress-ng: metrc: [2087] filename           3763      1.01      0.05      0.69      3719.74        5065.09\nstress-ng: metrc: [2087] flock           2401342      1.01      0.39      0.70   2373609.45     2209075.14\nstress-ng: metrc: [2087] fpunch             1375      1.01      0.01      0.27      1355.46        4946.15\nstress-ng: metrc: [2087] fstat              1795      1.00      0.12      0.41      1794.82        3374.76\nstress-ng: metrc: [2087] getdent          196598      1.00      0.03      0.97    196549.92      196993.76\nstress-ng: metrc: [2087] hdd               26938      1.01      0.36      0.34     26580.71       38619.35\nstress-ng: metrc: [2087] inotify               2      1.04      0.00      0.00         1.93         527.15\nstress-ng: metrc: [2087] open              15360      1.01      0.00      0.24     15148.98       63737.08\nstress-ng: metrc: [2087] rename              324      1.01      0.01      0.00       319.54       25322.39\nstress-ng: metrc: [2087] touch             68631      1.02      0.07      1.55     67235.62       42346.39\nstress-ng: metrc: [2087] utime             48705      1.01      0.11      0.71     48192.63       59927.65\nstress-ng: info:  [2087] skipped: 0\nstress-ng: info:  [2087] passed: 20: access (1) chdir (1) chmod (1) chown (1) dentry (1) dir (1) dirmany (1) fallocate (1) file-ioctl (1) filename (1) flock (1) fpunch (1) fstat (1) getdent (1) hdd (1) inotify (1) open (1) rename (1) touch (1) utime (1)\nstress-ng: info:  [2087] failed: 0\nstress-ng: info:  [2087] metrics untrustworthy: 0\nstress-ng: info:  [2087] successful run completed in 1.10 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 2,
+          "not_applied": 0,
+          "requested": 2
+        }
+      },
+      "runner": "bpftrace",
+      "selected_workload": "stress_ng_filesystem",
+      "status": "ok"
+    },
+    {
+      "app": "bpftrace/runqlat",
+      "baseline": {
+        "bpf": {
+          "689": {
+            "avg_ns_per_run": 62.481747049587675,
+            "bytes_jited": 86,
+            "bytes_xlated": 136,
+            "id": 689,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 848356,
+            "run_time_ns_delta": 53006765,
+            "type": "tracepoint"
+          },
+          "690": {
+            "avg_ns_per_run": 257.3777777777778,
+            "bytes_jited": 86,
+            "bytes_xlated": 136,
+            "id": 690,
+            "name": "tracepoint_sched_sched_wakeup_new",
+            "run_cnt_delta": 45,
+            "run_time_ns_delta": 11582,
+            "type": "tracepoint"
+          },
+          "691": {
+            "avg_ns_per_run": 136.2031000844938,
+            "bytes_jited": 515,
+            "bytes_xlated": 896,
+            "id": 691,
+            "name": "sched_switch",
+            "run_cnt_delta": 17757516,
+            "run_time_ns_delta": 2418628729,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0162069420000535,
+            "ops_per_sec": 19616077.371767208,
+            "ops_total": 19933994.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [9508] setting to a 1 secs run per stressor\nstress-ng: info:  [9508] dispatching hogs: 1 futex, 1 sem, 1 sem-sysv, 1 switch, 1 yield\nstress-ng: info:  [9508] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [9508] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [9508]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [9508] futex            320584      2.00      0.17      1.14    160271.25      244820.97\nstress-ng: metrc: [9508] sem             1710867      1.00      0.23      0.80   1710838.86     1667622.22\nstress-ng: metrc: [9508] sem-sysv        2721640      1.00      0.24      0.76   2720743.53     2721716.21\nstress-ng: metrc: [9508] switch           684636      1.00      0.10      0.89    684514.09      687784.68\nstress-ng: metrc: [9508] yield          14496267      1.00      3.17      8.83  14447691.28     1207716.09\nstress-ng: info:  [9508] skipped: 0\nstress-ng: info:  [9508] passed: 5: futex (1) sem (1) sem-sysv (1) switch (1) yield (1)\nstress-ng: info:  [9508] failed: 0\nstress-ng: info:  [9508] metrics untrustworthy: 0\nstress-ng: info:  [9508] successful run completed in 1.01 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "689": {
+            "avg_ns_per_run": 69.4761494662113,
+            "bytes_jited": 86,
+            "bytes_xlated": 136,
+            "id": 689,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 744302,
+            "run_time_ns_delta": 51711237,
+            "type": "tracepoint"
+          },
+          "690": {
+            "avg_ns_per_run": 257.77777777777777,
+            "bytes_jited": 86,
+            "bytes_xlated": 136,
+            "id": 690,
+            "name": "tracepoint_sched_sched_wakeup_new",
+            "run_cnt_delta": 45,
+            "run_time_ns_delta": 11600,
+            "type": "tracepoint"
+          },
+          "691": {
+            "avg_ns_per_run": 136.70329796872082,
+            "bytes_jited": 515,
+            "bytes_xlated": 896,
+            "id": 691,
+            "name": "sched_switch",
+            "run_cnt_delta": 14554474,
+            "run_time_ns_delta": 1989644596,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0159907280000198,
+            "ops_per_sec": 24011613.81464844,
+            "ops_total": 24395577.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [9629] setting to a 1 secs run per stressor\nstress-ng: info:  [9629] dispatching hogs: 1 futex, 1 sem, 1 sem-sysv, 1 switch, 1 yield\nstress-ng: info:  [9629] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [9629] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [9629]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [9629] futex            558194      2.00      0.17      1.74    278908.48      292207.47\nstress-ng: metrc: [9629] sem             1716487      1.00      0.14      0.89   1716430.12     1661009.29\nstress-ng: metrc: [9629] sem-sysv        2621644      1.00      0.29      0.70   2620814.82     2626629.34\nstress-ng: metrc: [9629] switch           296463      1.00      0.04      0.51    296413.74      542979.49\nstress-ng: metrc: [9629] yield          19202789      1.00      3.57      8.41  19136736.91     1602553.18\nstress-ng: info:  [9629] skipped: 0\nstress-ng: info:  [9629] passed: 5: futex (1) sem (1) sem-sysv (1) switch (1) yield (1)\nstress-ng: info:  [9629] failed: 0\nstress-ng: info:  [9629] metrics untrustworthy: 0\nstress-ng: info:  [9629] successful run completed in 1.01 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      },
+      "runner": "bpftrace",
+      "selected_workload": "stress_ng_scheduler",
+      "status": "ok"
+    },
+    {
+      "app": "bpftrace/tcplife",
+      "baseline": {
+        "bpf": {
+          "699": {
+            "avg_ns_per_run": 464.2459472057732,
+            "bytes_jited": 2017,
+            "bytes_xlated": 3384,
+            "id": 699,
+            "name": "tcp_set_state",
+            "run_cnt_delta": 57923,
+            "run_time_ns_delta": 26890518,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.104024355999968,
+            "ops_per_sec": 5983.563645221058,
+            "ops_total": 6606.0,
+            "stderr": "",
+            "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.89ms  306.59us   4.65ms   79.49%\n    Req/Sec     3.02k   213.64     3.65k    90.91%\n  6606 requests in 1.10s, 0.98MB read\n  Socket errors: connect 0, read 6603, write 0, timeout 0\nRequests/sec:   6001.98\nTransfer/sec:      0.89MB"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "699": {
+            "avg_ns_per_run": 441.0649029738556,
+            "bytes_jited": 2017,
+            "bytes_xlated": 3384,
+            "id": 699,
+            "name": "tcp_set_state",
+            "run_cnt_delta": 57871,
+            "run_time_ns_delta": 25524867,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.102455657000064,
+            "ops_per_sec": 5998.427200233066,
+            "ops_total": 6613.0,
+            "stderr": "",
+            "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.89ms  302.70us   4.48ms   80.15%\n    Req/Sec     3.03k     2.00k    5.35k    40.91%\n  6613 requests in 1.10s, 0.98MB read\n  Socket errors: connect 0, read 6612, write 0, timeout 0\nRequests/sec:   6013.81\nTransfer/sec:      0.89MB"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 1,
+          "not_applied": 0,
+          "requested": 1
+        }
+      },
+      "runner": "bpftrace",
+      "selected_workload": "tcp_connect",
+      "status": "ok"
+    },
+    {
+      "app": "bpftrace/tcpretrans",
+      "baseline": {
+        "bpf": {
+          "706": {
+            "avg_ns_per_run": 7570.214285714285,
+            "bytes_jited": 968,
+            "bytes_xlated": 1640,
+            "id": 706,
+            "name": "kprobe_tcp_retransmit_skb",
+            "run_cnt_delta": 14,
+            "run_time_ns_delta": 105983,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 6.065637174000017,
+            "ops_per_sec": 187.4493919408304,
+            "ops_total": 1137.0,
+            "stderr": "",
+            "stdout": "Running 5s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   103.04ms   91.90ms 890.55ms   86.68%\n    Req/Sec   114.54     30.89   202.00     67.68%\n  1137 requests in 5.01s, 174.40KB read\nRequests/sec:    227.01\nTransfer/sec:     34.82KB"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "706": {
+            "avg_ns_per_run": 6448.666666666667,
+            "bytes_jited": 928,
+            "bytes_xlated": 1568,
+            "id": 706,
+            "name": "kprobe_tcp_retransmit_skb",
+            "run_cnt_delta": 12,
+            "run_time_ns_delta": 77384,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.019184648999953,
+            "ops_per_sec": 225.93311051545865,
+            "ops_total": 1134.0,
+            "stderr": "",
+            "stdout": "Running 5s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   103.61ms   94.91ms 906.12ms   86.69%\n    Req/Sec   113.65     30.67   171.00     67.00%\n  1134 requests in 5.01s, 173.81KB read\nRequests/sec:    226.49\nTransfer/sec:     34.71KB"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 1,
+          "not_applied": 0,
+          "requested": 1
+        }
+      },
+      "runner": "bpftrace",
+      "selected_workload": "network_lossy_multi",
+      "status": "ok"
+    }
+  ],
+  "samples": 1,
+  "status": "ok",
+  "suite_name": "macro_apps",
+  "summary": {
+    "losses": 95,
+    "per_program_geomean": 1.0563682384220172,
+    "program_count": 151,
+    "wins": 56
+  },
+  "workload_seconds": 1.0
+}
+```

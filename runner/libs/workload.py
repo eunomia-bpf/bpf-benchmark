@@ -495,6 +495,11 @@ def _network_http_server(network_device: str | None = None) -> LocalHttpServer |
             f"interface-bound network workload only supports benchmark interface {BENCHMARK_IFACE}; "
             f"got {normalized_device}"
         )
+    # Re-create the bpfbench veth/netns if a previous app teardown left them
+    # missing or partially configured (e.g. cilium teardown deletes the veth).
+    # Lazy import to avoid runner→workload cycle at import time.
+    from .app_runners.cilium import _ensure_benchmark_interface
+    _ensure_benchmark_interface()
     return NamespacedHttpServer(BENCHMARK_NETNS, BENCHMARK_PEER_IFACE_IP)
 
 
@@ -619,38 +624,56 @@ def run_network_load(duration_s: int | float, *, network_device: str | None = No
 
 
 def run_tcp_connect_load(duration_s: int | float, *, network_device: str | None = None) -> WorkloadResult:
-    curl_binary = which("curl")
-    if curl_binary is None:
-        raise RuntimeError("curl is required for TCP connect load")
+    """TCP connect-rate workload using wrk with Connection: close.
+
+    Each HTTP request forces a fresh TCP handshake (no keep-alive), which is
+    the standard way SIGCOMM/USENIX papers measure TCP connect throughput.
+    """
+    wrk_binary = resolve_workload_tool("wrk")
+    seconds = max(1, int(round(float(duration_s))))
+    wrk_args = [wrk_binary, "-t2", "-c10", f"-d{seconds}s",
+                "-H", "Connection: close"]
     normalized_device = str(network_device or "").strip()
     if normalized_device:
         with _network_http_server(normalized_device) as server:
-            start = time.monotonic(); deadline = start + float(duration_s)
-            ops_total = 0.0; stderr_lines: list[str] = []
-            while time.monotonic() < deadline:
-                command = _network_client_command(
-                    [curl_binary, "-fsS", "-g", "-o", "/dev/null", "--http1.1", "--max-time", "2", server.url],
-                    normalized_device,
-                )
-                c = run_command(command, check=False, timeout=5)
-                if c.returncode != 0:
-                    raise RuntimeError(
-                        f"tcp connect load failed via {_render_command(command)}: {tail_text(c.stderr or c.stdout)}"
-                    )
-                stderr_lines.append(c.stderr or ""); ops_total += 1.0
+            command = _network_client_command([*wrk_args, server.url], normalized_device)
+            start = time.monotonic()
+            c = run_command(command, check=False, timeout=float(duration_s) + 30)
             elapsed = time.monotonic() - start
-            return _finish_result(ops_total, elapsed, "", "\n".join(stderr_lines))
-    with LocalHttpServer("127.0.0.1") as server_v4, LocalHttpServer("::1") as server_v6:
-        urls = (server_v4.url, server_v6.url)
-        start = time.monotonic(); deadline = start + float(duration_s)
-        ops_total = 0.0; stderr_lines: list[str] = []
-        while time.monotonic() < deadline:
-            c = run_command([curl_binary, "-fsS", "-g", "-o", "/dev/null", "--http1.1", "--max-time", "2", urls[int(ops_total) % len(urls)]], check=False, timeout=5)
             if c.returncode != 0:
-                raise RuntimeError(f"tcp connect load failed: {tail_text(c.stderr or c.stdout)}")
-            stderr_lines.append(c.stderr or ""); ops_total += 1.0
+                raise RuntimeError(
+                    f"tcp connect load failed via {_render_command(command)}: "
+                    f"{tail_text(c.stderr or c.stdout)}"
+                )
+            total = next(
+                (float(m.group(1)) for line in c.stdout.splitlines()
+                 if (m := re.search(r"([0-9]+)\s+requests in", line.strip()))),
+                None,
+            )
+            if total is None:
+                raise RuntimeError(
+                    f"tcp connect load did not report requests metric: "
+                    f"{tail_text(c.stdout or c.stderr)}"
+                )
+            return _finish_result(total, elapsed, c.stdout or "", c.stderr or "")
+    with LocalHttpServer("127.0.0.1") as server:
+        command = [*wrk_args, server.url]
+        start = time.monotonic()
+        c = run_command(command, check=False, timeout=float(duration_s) + 30)
         elapsed = time.monotonic() - start
-        return _finish_result(ops_total, elapsed, "", "\n".join(stderr_lines))
+        if c.returncode != 0:
+            raise RuntimeError(f"tcp connect load failed: {tail_text(c.stderr or c.stdout)}")
+        total = next(
+            (float(m.group(1)) for line in c.stdout.splitlines()
+             if (m := re.search(r"([0-9]+)\s+requests in", line.strip()))),
+            None,
+        )
+        if total is None:
+            raise RuntimeError(
+                f"tcp connect load did not report requests metric: "
+                f"{tail_text(c.stdout or c.stderr)}"
+            )
+        return _finish_result(total, elapsed, c.stdout or "", c.stderr or "")
 
 
 def run_named_workload(

@@ -9,7 +9,6 @@ from .. import ROOT_DIR, run_command, tail_text, which
 from ..agent import bpftool_prog_show_records, start_agent, stop_agent, wait_healthy
 from ..workload import (
     WorkloadResult,
-    run_exec_storm,
     run_file_io,
     run_named_workload,
 )
@@ -112,11 +111,9 @@ def resolve_tetragon_binary(explicit: str | None, setup_result: Mapping[str, obj
     return None
 
 def run_tetragon_workload(spec: Mapping[str, object], duration_s: int) -> WorkloadResult:
-    kind = str(spec.get("kind", "")); value = int(spec.get("value", 0) or 0)
+    kind = str(spec.get("kind", ""))
     if kind.startswith("stress_ng_") or kind in ("fio_randrw", "fio"):
         return run_named_workload(kind, duration_s)
-    if kind == "exec_storm":
-        return run_exec_storm(duration_s, value or 2)
     if kind == "file_io":
         return run_file_io(duration_s)
     raise RuntimeError(f"unsupported workload kind: {kind}")
