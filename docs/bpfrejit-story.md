@@ -179,7 +179,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 | **BITFIELD_EXTRACT** | 是 | ✅ | shift+and → `bpf_extract64()` kinsn → JIT emit BEXTR |
 | **BRANCH_FLIP** | 否 | ✅ | if/else body 重排。policy-sensitive：依赖 PGO |
 | **ENDIAN_FUSION** | 可选 | ✅ | load+bswap → combined kinsn → JIT emit MOVBE |
-| **Dynamic map inlining** | 否 | 🔄 | JVM deopt 模型：map 稳定 → inline → invalidation → re-REJIT。**论文核心 story** |
+| **Dynamic map inlining** | 否 | 🔄 | Paper benchmark 模型：snapshot once → inline → ReJIT → measure；不做 production invalidation polling |
 | **Verifier const prop** | 否 | 🔄 设计完成 | `log_level=2` → tnum/range 常量 → `MOV imm` → branch folding |
 | **DCE** | 否 | 🔄 设计完成 | const prop / map inline 后的 unreachable block / dead store 消除 |
 | **Bounds check merge** | 否 | ✅ | guard window merge / hoisting |

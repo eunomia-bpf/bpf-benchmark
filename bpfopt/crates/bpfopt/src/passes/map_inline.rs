@@ -91,7 +91,7 @@ struct ConstantStackBytes {
 }
 
 #[derive(Clone, Debug)]
-struct FrozenMapValue {
+struct SnapshotMapValue {
     map_id: u32,
     key: Vec<u8>,
     value: Vec<u8>,
@@ -1240,7 +1240,7 @@ fn build_direct_map_value_load_rewrites(
     let mut sites_applied = 0usize;
     let mut diagnostics = Vec::new();
     let mut map_inline_records = Vec::new();
-    let mut map_cache: HashMap<MapRefKey, Option<FrozenMapValue>> = HashMap::new();
+    let mut map_cache: HashMap<MapRefKey, Option<SnapshotMapValue>> = HashMap::new();
     let mut pc = 0usize;
 
     while pc < program.insns.len() {
@@ -1285,7 +1285,7 @@ fn build_direct_map_value_load_rewrites(
             continue;
         }
 
-        let map_value = match resolve_frozen_map_value(program, map_ref, &mut map_cache)? {
+        let map_value = match resolve_snapshot_map_value(program, map_ref, &mut map_cache)? {
             Some(map_value) => map_value,
             None => {
                 pc += insn_width(insn);
@@ -1337,16 +1337,16 @@ fn build_direct_map_value_load_rewrites(
     Ok((replacements, sites_applied, diagnostics, map_inline_records))
 }
 
-fn resolve_frozen_map_value(
+fn resolve_snapshot_map_value(
     program: &BpfProgram,
     map_ref: MapRefKey,
-    cache: &mut HashMap<MapRefKey, Option<FrozenMapValue>>,
-) -> anyhow::Result<Option<FrozenMapValue>> {
+    cache: &mut HashMap<MapRefKey, Option<SnapshotMapValue>>,
+) -> anyhow::Result<Option<SnapshotMapValue>> {
     if let Some(cached) = cache.get(&map_ref) {
         return Ok(cached.clone());
     }
 
-    let resolved = (|| -> anyhow::Result<Option<FrozenMapValue>> {
+    let resolved = (|| -> anyhow::Result<Option<SnapshotMapValue>> {
         let Some(map_id) = map_id_for_ref(program, map_ref)? else {
             return Ok(None);
         };
@@ -1376,7 +1376,7 @@ fn resolve_frozen_map_value(
             }
             Err(err) => return Err(anyhow::Error::msg(err)),
         };
-        Ok(Some(FrozenMapValue { map_id, key, value }))
+        Ok(Some(SnapshotMapValue { map_id, key, value }))
     })();
 
     let cached = resolved?;

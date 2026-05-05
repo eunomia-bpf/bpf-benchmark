@@ -57,11 +57,6 @@ void validate_cli_options(const cli_options &options)
 
 void print_sample_json(std::ostream &out, const sample_result &sample)
 {
-    const double inflation_ratio = sample.code_size.bpf_bytecode_bytes == 0
-        ? 0.0
-        : static_cast<double>(sample.code_size.native_code_bytes) /
-              static_cast<double>(sample.code_size.bpf_bytecode_bytes);
-
     out
         << "{"
         << "\"compile_ns\":" << sample.compile_ns << ","
@@ -97,8 +92,7 @@ void print_sample_json(std::ostream &out, const sample_result &sample)
     out
         << ",\"code_size\":{"
         << "\"bpf_bytecode_bytes\":" << sample.code_size.bpf_bytecode_bytes << ","
-        << "\"native_code_bytes\":" << sample.code_size.native_code_bytes << ","
-        << "\"inflation_ratio\":" << inflation_ratio
+        << "\"native_code_bytes\":" << sample.code_size.native_code_bytes
         << "},"
         << "\"phases_ns\":{";
 

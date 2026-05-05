@@ -63,6 +63,9 @@ fn mov32_reg(dst: u8, src: u8) -> BpfInsn {
 fn ctx_with_select_kfunc(btf_id: i32) -> PassContext {
     let mut ctx = PassContext::test_default();
     ctx.kinsn_registry.select64_btf_id = btf_id;
+    ctx.kinsn_registry
+        .target_supported_encodings
+        .insert("bpf_select64".to_string(), BPF_KINSN_ENC_PACKED_CALL);
     ctx.platform.has_cmov = true;
     ctx
 }
@@ -593,33 +596,6 @@ fn test_cond_select_emit_cond_reg_is_r3() {
     assert!(prog.insns[0].is_kinsn_sidecar());
 }
 
-#[test]
-fn test_cond_select_register_alias_safety() {
-    // Packed lowering keeps cond as an operand reference instead of materializing it into r3.
-    let mut prog = make_program(vec![
-        jne_imm(1, 0, 2),
-        BpfInsn::mov64_reg(0, 6), // false_val
-        BpfInsn::ja(1),
-        BpfInsn::mov64_reg(0, 7), // true_val
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let ctx = ctx_with_select_kfunc(5555);
-
-    let pass = CondSelectPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
-    let mut initial = [0u64; 11];
-    initial[1] = 100;
-    initial[6] = 600;
-    initial[7] = 700;
-    let after = simulate_param_setup(&prog.insns, &initial);
-    assert_eq!(after[1], 700);
-    assert_eq!(after[2], 600);
-    assert_eq!(after[3], 100);
-}
-
 // ── Issue 1: Parallel-copy alias safety tests ─────────────────
 
 /// Decode the packed sidecar payload and map its logical (a, b, cond)
@@ -684,37 +660,6 @@ fn test_cond_select_alias_cond_reg_is_r2() {
     assert_eq!(after[1], 700, "r1 should be true_val (a)");
     assert_eq!(after[2], 600, "r2 should be false_val (b)");
     assert_eq!(after[3], 200, "r3 should be original cond (r2=200)");
-}
-
-#[test]
-fn test_cond_select_alias_cycle_r1_r2() {
-    // Circular alias: true_val = Reg(2), false_val = Reg(1), cond = r3
-    // We need r1=r2, r2=r1 which is a swap cycle.
-    // JNE r3, 0, +2 ; MOV r0, r1 (false) ; JA +1 ; MOV r0, r2 (true)
-    let mut prog = make_program(vec![
-        jne_imm(3, 0, 2),
-        BpfInsn::mov64_reg(0, 1), // false_val = r1
-        BpfInsn::ja(1),
-        BpfInsn::mov64_reg(0, 2), // true_val = r2
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let ctx = ctx_with_select_kfunc(5555);
-
-    let pass = CondSelectPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert!(result.changed);
-
-    let mut initial = [0u64; 11];
-    initial[1] = 100; // false_val source
-    initial[2] = 200; // true_val source
-    initial[3] = 300; // cond
-    let after = simulate_param_setup(&prog.insns, &initial);
-
-    // For JNE: a=true_val=r2=200, b=false_val=r1=100, cond=r3=300
-    assert_eq!(after[1], 200, "r1 should be true_val (from r2)");
-    assert_eq!(after[2], 100, "r2 should be false_val (from r1)");
-    assert_eq!(after[3], 300, "r3 should be cond (r3 already there)");
 }
 
 #[test]

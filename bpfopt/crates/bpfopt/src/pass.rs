@@ -534,15 +534,6 @@ impl PassResult {
             ..Self::skipped(pass_name, reason)
         }
     }
-
-    /// Aggregate skip reasons into a reason -> count map.
-    pub fn skip_reason_counts(&self) -> HashMap<String, usize> {
-        let mut counts: HashMap<String, usize> = HashMap::new();
-        for skip in &self.sites_skipped {
-            *counts.entry(skip.reason.clone()).or_insert(0) += 1;
-        }
-        counts
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -634,7 +625,6 @@ pub struct KinsnRegistry {
     /// Per-target static call offsets used by offline callers.
     pub target_call_offsets: HashMap<String, i16>,
     /// Per-target supported kinsn encodings.
-    /// Tests that only seed BTF IDs rely on the packed-only fallback below.
     pub target_supported_encodings: HashMap<String, u32>,
 }
 
@@ -678,13 +668,6 @@ impl KinsnRegistry {
         self.target_supported_encodings
             .get(target_name)
             .copied()
-            .or_else(|| {
-                if self.btf_id_for_target_name(target_name) >= 0 {
-                    Some(BPF_KINSN_ENC_PACKED_CALL)
-                } else {
-                    None
-                }
-            })
             .unwrap_or(0)
     }
 
@@ -787,7 +770,6 @@ impl AnalysisRegistry {
 #[derive(Clone, Debug)]
 pub struct PipelineResult {
     pub pass_results: Vec<PassResult>,
-    pub total_sites_applied: usize,
     pub program_changed: bool,
 }
 
@@ -901,7 +883,6 @@ impl PassManager {
     ) -> anyhow::Result<PipelineResult> {
         let mut cache = AnalysisCache::new();
         let mut pass_results = Vec::new();
-        let mut total_sites = 0usize;
         let mut any_changed = false;
         for pass in &self.passes {
             let pass = pass.as_ref();
@@ -910,16 +891,12 @@ impl PassManager {
             }
 
             let result = self.run_single_pass(pass, program, &mut cache, ctx)?;
-            if result.changed {
-                total_sites += result.sites_applied;
-            }
             any_changed |= result.changed;
             pass_results.push(result);
         }
 
         Ok(PipelineResult {
             pass_results,
-            total_sites_applied: total_sites,
             program_changed: any_changed,
         })
     }

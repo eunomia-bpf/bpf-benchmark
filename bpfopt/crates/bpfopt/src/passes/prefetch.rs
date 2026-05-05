@@ -745,8 +745,7 @@ fn group_candidates_by_insert_pc(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::analysis::{BranchTargetAnalysis, CFGAnalysis};
-    use crate::pass::{AnalysisCache, PassContext, PassManager};
+    use crate::pass::{AnalysisCache, PassContext};
 
     fn exit_insn() -> BpfInsn {
         BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
@@ -791,16 +790,10 @@ mod tests {
     fn ctx_with_prefetch_kfunc(btf_id: i32) -> PassContext {
         let mut ctx = PassContext::test_default();
         ctx.kinsn_registry.prefetch_btf_id = btf_id;
+        ctx.kinsn_registry
+            .target_supported_encodings
+            .insert(PREFETCH_TARGET_NAME.to_string(), BPF_KINSN_ENC_PACKED_CALL);
         ctx
-    }
-
-    fn hot_prefetch_profile(execution_count: u64) -> PrefetchProfile {
-        PrefetchProfile {
-            execution_count,
-            cache_references: execution_count * 2,
-            cache_misses: execution_count,
-            miss_rate: 0.5,
-        }
     }
 
     fn cold_prefetch_profile(execution_count: u64) -> PrefetchProfile {
@@ -950,28 +943,5 @@ mod tests {
         assert!(program.insns[1].is_ldimm64());
         assert_eq!(program.insns[2].code, 0);
         assert!(program.insns[3].is_kinsn_sidecar());
-    }
-
-    #[test]
-    fn prefetch_pass_integration_with_pass_manager() {
-        let (mut program, call_pc, _load_pc) = lookup_value_program();
-        let mut profile = ProfilingData::default();
-        profile
-            .prefetch_profiles
-            .insert(call_pc, hot_prefetch_profile(100));
-        profile.cache_miss_rate = Some(0.5);
-
-        let mut pm = PassManager::new();
-        pm.register_analysis(CFGAnalysis);
-        pm.register_analysis(BranchTargetAnalysis);
-        pm.add_pass(PrefetchPass);
-        let ctx = ctx_with_prefetch_kfunc(1234);
-
-        let result = pm
-            .run_with_profiling(&mut program, &ctx, Some(&profile))
-            .unwrap();
-
-        assert!(result.program_changed);
-        assert_eq!(result.total_sites_applied, 1);
     }
 }

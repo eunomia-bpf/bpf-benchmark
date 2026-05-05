@@ -507,6 +507,9 @@ mod tests {
         let mut ctx = PassContext::test_default();
         ctx.platform.arch = arch;
         ctx.kinsn_registry.ccmp64_btf_id = 77;
+        ctx.kinsn_registry
+            .target_supported_encodings
+            .insert("bpf_ccmp64".to_string(), BPF_KINSN_ENC_PACKED_CALL);
         ctx
     }
 

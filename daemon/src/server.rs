@@ -66,25 +66,6 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
     Ok(())
 }
 
-fn panic_payload_message(payload: &(dyn std::any::Any + Send)) -> String {
-    if let Some(message) = payload.downcast_ref::<String>() {
-        return message.clone();
-    }
-    if let Some(message) = payload.downcast_ref::<&'static str>() {
-        return (*message).to_string();
-    }
-    "non-string panic payload".to_string()
-}
-
-fn panic_response(payload: Box<dyn std::any::Any + Send>) -> serde_json::Value {
-    let message = panic_payload_message(payload.as_ref());
-    eprintln!("serve: request panicked: {message}");
-    serde_json::json!({
-        "status": "error",
-        "error_message": format!("request handler panicked: {message}"),
-    })
-}
-
 fn handle_client(stream: std::os::unix::net::UnixStream, config: &CliConfig) -> Result<()> {
     use std::io::{BufRead, BufReader, Write};
 
@@ -98,12 +79,7 @@ fn handle_client(stream: std::os::unix::net::UnixStream, config: &CliConfig) -> 
         }
 
         let response = match serde_json::from_str::<serde_json::Value>(&line) {
-            Ok(req) => match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                process_request(&req, config)
-            })) {
-                Ok(response) => response,
-                Err(payload) => panic_response(payload),
-            },
+            Ok(req) => process_request(&req, config),
             Err(e) => {
                 serde_json::json!({"status": "error", "error_message": format!("invalid JSON: {e}")})
             }
@@ -216,7 +192,7 @@ fn process_request(req: &serde_json::Value, config: &CliConfig) -> serde_json::V
                 Err(message) => return error_json(message),
             };
             match commands::try_apply_programs(&prog_ids, config, enabled_passes) {
-                Ok(outcomes) => match optimize_response_from_outcomes(&prog_ids, outcomes) {
+                Ok(outcomes) => match optimize_response_from_outcomes(outcomes) {
                     Ok(response) => response,
                     Err(err) => error_json(format!("{err:#}")),
                 },
@@ -228,17 +204,12 @@ fn process_request(req: &serde_json::Value, config: &CliConfig) -> serde_json::V
 }
 
 fn optimize_response_from_outcomes(
-    prog_ids: &[u32],
     outcomes: Vec<commands::ApplyProgramOutcome>,
 ) -> Result<serde_json::Value> {
     let mut per_program = BTreeMap::new();
-    let mut applied = 0usize;
     let mut errors = Vec::new();
     for outcome in outcomes {
         let result = outcome.result;
-        if result.status == "ok" && result.summary.applied {
-            applied += 1;
-        }
         if let Some(message) = result.error_message.as_deref() {
             errors.push(format!("prog {}: {message}", outcome.prog_id));
         }
@@ -252,11 +223,6 @@ fn optimize_response_from_outcomes(
     Ok(serde_json::json!({
         "status": "ok",
         "per_program": per_program,
-        "program_counts": {
-            "requested": prog_ids.len(),
-            "applied": applied,
-            "not_applied": prog_ids.len() - applied,
-        },
         "error_message": errors.join("; "),
     }))
 }
@@ -265,7 +231,7 @@ fn optimize_response_from_outcomes(
 mod tests {
     use super::*;
 
-    use crate::commands::{ApplyProgramOutcome, OptimizeOneResult, OptimizeSummary, ProgramInfo};
+    use crate::commands::{ApplyProgramOutcome, OptimizeOneResult, ProgramInfo};
 
     fn process_test_request(req: &serde_json::Value) -> serde_json::Value {
         // CLI_DIR global is unset in tests; from_global() returns CliConfig { cli_dir: None }.
@@ -293,17 +259,14 @@ mod tests {
             },
             ApplyProgramOutcome {
                 prog_id: 12,
-                result: OptimizeOneResult::error(12, "worker panicked while optimizing prog 12"),
+                result: OptimizeOneResult::error(12, "pass failed while optimizing prog 12"),
             },
         ];
 
-        let response = optimize_response_from_outcomes(&prog_ids, outcomes)
+        let response = optimize_response_from_outcomes(outcomes)
             .expect("optimize response should be built from per-program outcomes");
 
         assert_eq!(response["status"], "ok");
-        assert_eq!(response["program_counts"]["requested"], 3);
-        assert_eq!(response["program_counts"]["applied"], 1);
-        assert_eq!(response["program_counts"]["not_applied"], 2);
         let per_program = response["per_program"]
             .as_object()
             .expect("per_program should be an object");
@@ -324,7 +287,7 @@ mod tests {
         assert!(per_program["12"]["error_message"]
             .as_str()
             .unwrap_or("")
-            .contains("worker panicked"));
+            .contains("pass failed"));
     }
 
     fn optimize_success_result(prog_id: u32) -> OptimizeOneResult {
@@ -332,7 +295,6 @@ mod tests {
             status: "ok".to_string(),
             prog_id,
             changed: true,
-            passes_applied: vec!["rotate".to_string()],
             program: ProgramInfo {
                 prog_id,
                 prog_name: "demo".to_string(),
@@ -341,15 +303,8 @@ mod tests {
                 final_insn_count: 2,
                 insn_delta: 0,
             },
-            summary: OptimizeSummary {
-                applied: true,
-                total_sites_applied: 1,
-                passes_executed: 1,
-                passes_changed: 1,
-            },
             passes: Vec::new(),
             inlined_map_entries: Vec::new(),
-            skipped_maps: Vec::new(),
             error_message: None,
         }
     }

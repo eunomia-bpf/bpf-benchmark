@@ -466,9 +466,12 @@ fn build_line_spans(
                 end
             );
         }
-        let mut branches = (start..end)
-            .filter_map(|pc| bpf_branch_site(pc, &insns[pc]))
-            .collect::<Vec<_>>();
+        let mut branches = Vec::new();
+        for pc in start..end {
+            if let Some(branch) = bpf_branch_site(pc, &insns[pc])? {
+                branches.push(branch);
+            }
+        }
         let native_branch_ips =
             native_branch_ips_for_span(line.jited_addr, lines.get(idx + 1), ranges, jited_image)?;
         if branches.len() == native_branch_ips.len() {
@@ -542,43 +545,46 @@ fn is_native_branch_flow(flow: FlowControl) -> bool {
     )
 }
 
-fn bpf_branch_site(pc: usize, insn: &kernel_sys::bpf_insn) -> Option<BpfBranchSite> {
+fn bpf_branch_site(pc: usize, insn: &kernel_sys::bpf_insn) -> Result<Option<BpfBranchSite>> {
     let class = insn.code & 0x07;
     if class != kernel_sys::BPF_JMP as u8 && class != kernel_sys::BPF_JMP32 as u8 {
-        return None;
+        return Ok(None);
     }
     let op = insn.code & 0xf0;
     if op == kernel_sys::BPF_JA as u8 {
-        return Some(BpfBranchSite {
+        return Ok(Some(BpfBranchSite {
             pc,
             native_ip: None,
             fallthrough_pc: None,
-            taken_target_pc: relative_branch_target(pc, insn.off),
-        });
+            taken_target_pc: Some(relative_branch_target(pc, insn.off)?),
+        }));
     }
     if op == kernel_sys::BPF_CALL as u8 || op == kernel_sys::BPF_EXIT as u8 {
-        return Some(BpfBranchSite {
+        return Ok(Some(BpfBranchSite {
             pc,
             native_ip: None,
             fallthrough_pc: None,
             taken_target_pc: None,
-        });
+        }));
     }
     if is_conditional_bpf_branch_op(op) {
-        return Some(BpfBranchSite {
+        return Ok(Some(BpfBranchSite {
             pc,
             native_ip: None,
             fallthrough_pc: pc.checked_add(1),
-            taken_target_pc: relative_branch_target(pc, insn.off),
-        });
+            taken_target_pc: Some(relative_branch_target(pc, insn.off)?),
+        }));
     }
-    None
+    Ok(None)
 }
 
-fn relative_branch_target(pc: usize, off: i16) -> Option<usize> {
-    let pc = i64::try_from(pc).ok()?;
-    let target = pc.checked_add(1)?.checked_add(i64::from(off))?;
-    usize::try_from(target).ok()
+fn relative_branch_target(pc: usize, off: i16) -> Result<usize> {
+    let pc = i64::try_from(pc).context("BPF branch pc does not fit i64")?;
+    let target = pc
+        .checked_add(1)
+        .and_then(|pc| pc.checked_add(i64::from(off)))
+        .ok_or_else(|| anyhow!("BPF branch target pc overflow"))?;
+    usize::try_from(target).context("BPF branch target pc is negative or too large")
 }
 
 fn is_conditional_bpf_branch_op(op: u8) -> bool {
@@ -986,10 +992,9 @@ fn read_u32(bytes: &[u8], offset: usize, label: &str) -> Result<u32> {
     let raw = bytes
         .get(offset..end)
         .ok_or_else(|| anyhow!("{label} is truncated at offset {offset}"))?;
-    let raw: [u8; 4] = raw
-        .try_into()
-        .map_err(|_| anyhow!("{label} slice length changed after bounds check"))?;
-    Ok(u32::from_ne_bytes(raw))
+    let mut value = [0u8; 4];
+    value.copy_from_slice(raw);
+    Ok(u32::from_ne_bytes(value))
 }
 
 fn read_i64(bytes: &[u8], offset: usize, label: &str) -> Result<i64> {
@@ -999,10 +1004,9 @@ fn read_i64(bytes: &[u8], offset: usize, label: &str) -> Result<i64> {
     let raw = bytes
         .get(offset..end)
         .ok_or_else(|| anyhow!("{label} is truncated at offset {offset}"))?;
-    let raw: [u8; 8] = raw
-        .try_into()
-        .map_err(|_| anyhow!("{label} slice length changed after bounds check"))?;
-    Ok(i64::from_ne_bytes(raw))
+    let mut value = [0u8; 8];
+    value.copy_from_slice(raw);
+    Ok(i64::from_ne_bytes(value))
 }
 
 fn read_u64(bytes: &[u8], offset: usize, label: &str) -> Result<u64> {
@@ -1012,10 +1016,9 @@ fn read_u64(bytes: &[u8], offset: usize, label: &str) -> Result<u64> {
     let raw = bytes
         .get(offset..end)
         .ok_or_else(|| anyhow!("{label} is truncated at offset {offset}"))?;
-    let raw: [u8; 8] = raw
-        .try_into()
-        .map_err(|_| anyhow!("{label} slice length changed after bounds check"))?;
-    Ok(u64::from_ne_bytes(raw))
+    let mut value = [0u8; 8];
+    value.copy_from_slice(raw);
+    Ok(u64::from_ne_bytes(value))
 }
 
 fn parse_duration(input: &str) -> Result<Duration, String> {

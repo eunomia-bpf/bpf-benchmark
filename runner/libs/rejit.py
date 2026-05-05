@@ -18,43 +18,6 @@ import yaml
 from . import ROOT_DIR, tail_text
 
 
-_PASS_TO_SITE_FIELD = {
-    "noop": "noop_sites",
-    "map_inline": "map_inline_sites",
-    "const_prop": "const_prop_sites",
-    "dce": "dce_sites",
-    "branch_flip": "branch_flip_sites",
-    "bounds_check_merge": "bounds_check_merge_sites",
-    "bulk_memory": "bulk_memory_sites",
-    "ccmp": "ccmp_sites",
-    "cond_select": "cmov_sites",
-    "endian_fusion": "endian_sites",
-    "extract": "extract_sites",
-    "rotate": "rotate_sites",
-    "prefetch": "prefetch_sites",
-    "skb_load_bytes_spec": "skb_load_bytes_spec_sites",
-    "wide_mem": "wide_sites",
-}
-_TOTAL_SITE_FIELDS = (
-    "noop_sites",
-    "map_inline_sites",
-    "const_prop_sites",
-    "dce_sites",
-    "bounds_check_merge_sites",
-    "bulk_memory_sites",
-    "ccmp_sites",
-    "cmov_sites",
-    "wide_sites",
-    "rotate_sites",
-    "lea_sites",
-    "extract_sites",
-    "endian_sites",
-    "skb_load_bytes_spec_sites",
-    "branch_flip_sites",
-    "prefetch_sites",
-    "other_sites",
-)
-
 _BENCH_PASSES_ENV = "BPFREJIT_BENCH_PASSES"
 _BENCHMARK_CONFIG_PATH = ROOT_DIR / "corpus" / "config" / "benchmark_config.yaml"
 _DEFAULT_BENCHMARK_REPEAT = 200
@@ -192,19 +155,40 @@ def _normalize_apply_passes(
             raise RuntimeError(
                 f"daemon response field {field_name}[{index}].pass must be a non-empty string"
             )
-        if pass_name not in _PASS_TO_SITE_FIELD:
+        changed = item.get("changed")
+        if not isinstance(changed, bool):
             raise RuntimeError(
-                f"daemon response field {field_name}[{index}].pass contains unknown pass "
-                f"{pass_name!r}"
+                f"daemon response field {field_name}[{index}].changed must be a boolean"
             )
-        action = str(item.get("action") or "kept").strip()
-        if action not in {"kept", "rolled_back"}:
-            raise RuntimeError(
-                f"daemon response field {field_name}[{index}].action must be 'kept' or 'rolled_back'"
-            )
-        summary = _compact_pass_summary(item, field_name=f"{field_name}[{index}]")
-        summary["action"] = action
-        normalized.append(summary)
+        compact: dict[str, object] = {
+            "pass_name": pass_name,
+            "changed": changed,
+            "sites_applied": _strict_non_negative_int(
+                item.get("sites_applied"),
+                field_name=f"{field_name}[{index}].sites_applied",
+            ),
+        }
+        status = str(item.get("status") or "").strip()
+        if status:
+            compact["status"] = status
+        for int_field in ("insns_before", "insns_after"):
+            if int_field in item:
+                compact[int_field] = _strict_non_negative_int(
+                    item.get(int_field),
+                    field_name=f"{field_name}[{index}].{int_field}",
+                )
+        if "insn_delta" in item:
+            insn_delta = item.get("insn_delta")
+            if isinstance(insn_delta, bool) or not isinstance(insn_delta, int):
+                raise RuntimeError(
+                    f"daemon response field {field_name}[{index}].insn_delta must be an integer"
+                )
+            compact["insn_delta"] = insn_delta
+        for text_field in ("error", "verifier_log"):
+            text = str(item.get(text_field) or "").strip()
+            if text:
+                compact[text_field] = text
+        normalized.append(compact)
     return normalized
 
 
@@ -212,105 +196,11 @@ def _pass_name_from_item(item: Mapping[str, Any]) -> str:
     return str(item.get("pass_name") or item.get("pass") or "").strip()
 
 
-def _optional_non_negative_int(value: object, *, field_name: str, default: int = 0) -> int:
-    if value is None:
-        return default
-    return _strict_non_negative_int(value, field_name=field_name)
-
-
-def _compact_skip_reasons(raw: object, *, field_name: str) -> dict[str, int]:
-    if raw is None:
-        return {}
-    if not isinstance(raw, Mapping):
-        raise RuntimeError(f"daemon response field {field_name!r} must be an object")
-    compact: dict[str, int] = {}
-    for reason, count in raw.items():
-        reason_text = str(reason).strip()
-        if not reason_text:
-            continue
-        compact[reason_text] = _strict_non_negative_int(
-            count,
-            field_name=f"{field_name}.{reason_text}",
-        )
-    return dict(sorted(compact.items()))
-
-
-def _compact_verify_summary(item: Mapping[str, Any]) -> dict[str, object]:
-    verify = item.get("verify")
-    status = None
-    error = None
-    if isinstance(verify, Mapping):
-        status = verify.get("status")
-        error = verify.get("error_message")
-    if status is None:
-        status = item.get("verify_result")
-    if error is None:
-        error = item.get("verify_error")
-    compact: dict[str, object] = {}
-    status_text = str(status or "").strip()
-    if status_text:
-        compact["status"] = status_text
-    error_text = str(error or "").strip()
-    if error_text:
-        compact["error"] = error_text
-    return compact
-
-
-def _compact_pass_summary(item: Mapping[str, Any], *, field_name: str) -> dict[str, object]:
-    pass_name = _pass_name_from_item(item)
-    if not pass_name:
-        raise RuntimeError(f"daemon response field {field_name}.pass must be a non-empty string")
-    if pass_name not in _PASS_TO_SITE_FIELD:
-        raise RuntimeError(
-            f"daemon response field {field_name}.pass contains unknown pass {pass_name!r}"
-        )
-
-    sites_applied = _optional_non_negative_int(
-        item.get("sites_applied"),
-        field_name=f"{field_name}.sites_applied",
-    )
-    sites_skipped = _optional_non_negative_int(
-        item.get("sites_skipped"),
-        field_name=f"{field_name}.sites_skipped",
-    )
-    sites_matched_value = item.get("sites_matched")
-    if sites_matched_value is None:
-        sites_matched_value = item.get("sites_found")
-    sites_matched = (
-        _strict_non_negative_int(sites_matched_value, field_name=f"{field_name}.sites_matched")
-        if sites_matched_value is not None
-        else sites_applied + sites_skipped
-    )
-    skip_reasons = _compact_skip_reasons(
-        item.get("skip_reasons"),
-        field_name=f"{field_name}.skip_reasons",
-    )
-
-    compact: dict[str, object] = {
-        "pass_name": pass_name,
-        "sites_matched": sites_matched,
-        "sites_applied": sites_applied,
-        "sites_skipped": sites_skipped,
-        "skip_reasons": skip_reasons,
-    }
-    verify_summary = _compact_verify_summary(item)
-    if verify_summary:
-        compact["verify"] = verify_summary
-    return compact
-
-
 def _compact_pass_summaries_from_result(result: Mapping[str, Any]) -> list[dict[str, object]]:
     raw_passes = result.get("passes")
     if raw_passes is None:
         return []
-    if not isinstance(raw_passes, list):
-        raise RuntimeError("daemon response field 'passes' must be a list")
-    summaries: list[dict[str, object]] = []
-    for index, item in enumerate(raw_passes):
-        if not isinstance(item, Mapping):
-            raise RuntimeError(f"daemon response field passes[{index}] must be an object")
-        summaries.append(_compact_pass_summary(item, field_name=f"passes[{index}]"))
-    return summaries
+    return _normalize_apply_passes(raw_passes, field_name="passes")
 
 
 def _is_successful_noop_result(result: Mapping[str, Any]) -> bool:
@@ -399,9 +289,6 @@ def _cached_benchmark_config_enabled_passes() -> tuple[str, ...]:
     return tuple(benchmark_config_enabled_passes(load_benchmark_config()))
 
 
-def _zero_site_counts() -> dict[str, int]:
-    return dict.fromkeys(("total_sites", *_TOTAL_SITE_FIELDS, "bitfield_sites"), 0)
-
 def benchmark_rejit_enabled_passes() -> list[str]:
     raw = os.environ.get(_BENCH_PASSES_ENV)
     if raw is not None:
@@ -417,101 +304,6 @@ def benchmark_run_provenance() -> dict[str, object]:
         "config": {"enabled_passes": benchmark_rejit_enabled_passes()},
     }
 
-
-_SKIP_IN_PASS_TOTAL = frozenset(("lea_sites", "other_sites"))
-
-
-def _accumulate_pass_site_counts(
-    raw_passes: object,
-    counts: dict[str, int],
-    *,
-    also_found: bool = False,
-    include_rolled_back: bool = True,
-    field_name: str = "passes",
-) -> None:
-    if not isinstance(raw_passes, list):
-        raise RuntimeError(f"daemon response field {field_name!r} must be a list")
-    for index, item in enumerate(raw_passes):
-        if not isinstance(item, Mapping):
-            raise RuntimeError(f"daemon response field {field_name}[{index}] must be an object")
-        pass_name = _pass_name_from_item(item)
-        if not pass_name:
-            raise RuntimeError(
-                f"daemon response field {field_name}[{index}].pass must be a non-empty string"
-            )
-        count_field = _PASS_TO_SITE_FIELD.get(pass_name)
-        if count_field is None:
-            raise RuntimeError(
-                f"daemon response field {field_name}[{index}].pass contains unknown pass "
-                f"{pass_name!r}"
-            )
-        action = str(item.get("action") or "kept").strip()
-        if action not in {"kept", "rolled_back"}:
-            raise RuntimeError(
-                f"daemon response field {field_name}[{index}].action must be 'kept' or 'rolled_back'"
-            )
-        if not include_rolled_back and action == "rolled_back":
-            continue
-        count_key = "sites_applied"
-        if also_found and "sites_found" in item:
-            count_key = "sites_found"
-        value = item.get(count_key)
-        if value is None and also_found and count_key == "sites_found":
-            count_key = "sites_applied"
-            value = item.get(count_key)
-        if isinstance(value, bool) or not isinstance(value, int):
-            raise RuntimeError(
-                f"daemon response field {field_name}[{index}].{count_key} must be a non-negative integer"
-            )
-        if value < 0:
-            raise RuntimeError(
-                f"daemon response field {field_name}[{index}].{count_key} must be a non-negative integer"
-            )
-        counts[count_field] += value
-
-
-def _applied_site_totals_from_passes(raw_passes: object) -> dict[str, int]:
-    counts = _zero_site_counts()
-    _accumulate_pass_site_counts(raw_passes, counts, include_rolled_back=False, field_name="passes")
-    counts["bitfield_sites"] = counts["extract_sites"]
-    counts["total_sites"] = sum(counts[f] for f in _TOTAL_SITE_FIELDS if f not in _SKIP_IN_PASS_TOTAL)
-    return counts
-
-
-def applied_site_totals_from_rejit_result(result: Mapping[str, Any] | None) -> dict[str, int]:
-    counts = _zero_site_counts()
-    if not isinstance(result, Mapping):
-        raise RuntimeError("daemon response rejit result must be an object")
-
-    per_program = result.get("per_program")
-    if per_program is not None:
-        if not isinstance(per_program, Mapping):
-            raise RuntimeError("daemon response field 'per_program' must be an object")
-        for prog_id, record in per_program.items():
-            if not isinstance(record, Mapping):
-                raise RuntimeError(f"daemon response field per_program[{prog_id!r}] must be an object")
-            pc = applied_site_totals_from_rejit_result(record)
-            for f in counts:
-                counts[f] += int(pc.get(f, 0) or 0)
-        return counts
-
-    raw_passes = result.get("passes")
-    if raw_passes is not None:
-        counts = _applied_site_totals_from_passes(raw_passes)
-    elif isinstance(summary := result.get("summary"), Mapping):
-        total_sites_applied = summary.get("total_sites_applied")
-        if isinstance(total_sites_applied, bool) or not isinstance(total_sites_applied, int):
-            raise RuntimeError(
-                "daemon response field 'summary.total_sites_applied' must be a non-negative integer"
-            )
-        if total_sites_applied < 0:
-            raise RuntimeError(
-                "daemon response field 'summary.total_sites_applied' must be a non-negative integer"
-            )
-        counts["total_sites"] = total_sites_applied
-    return counts
-
-
 _ARTIFACT_REJIT_RESULT_KEYS = frozenset(
     {
         "applied",
@@ -524,8 +316,6 @@ _ARTIFACT_REJIT_RESULT_KEYS = frozenset(
         "passes",
         "per_program",
         "prog_id",
-        "program_counts",
-        "summary",
     }
 )
 
@@ -543,11 +333,6 @@ def _compact_single_rejit_result_for_artifact(result: Mapping[str, Any]) -> dict
     enabled_passes = result.get("enabled_passes")
     if isinstance(enabled_passes, Sequence) and not isinstance(enabled_passes, (str, bytes, bytearray)):
         compact["enabled_passes"] = [str(name).strip() for name in enabled_passes if str(name).strip()]
-
-    for key in ("summary", "program_counts"):
-        value = result.get(key)
-        if isinstance(value, Mapping):
-            compact[key] = dict(value)
 
     raw_per_program = result.get("per_program")
     if isinstance(raw_per_program, Mapping):
@@ -630,8 +415,6 @@ def _apply_result_from_response(
     enabled_passes: Sequence[str] | None,
 ) -> dict[str, object]:
     status = str(response.get("status") or "").strip()
-    summary_value = response.get("summary")
-    summary: dict[str, Any] = dict(summary_value) if isinstance(summary_value, Mapping) else {}
     error = str(response.get("error_message") or "").strip()
     normalized_enabled_passes = (
         _normalize_pass_list(list(enabled_passes))
@@ -649,39 +432,11 @@ def _apply_result_from_response(
     applied = False
     changed = False
     if status == "ok":
-        if not isinstance(summary_value, Mapping):
-            raise RuntimeError("daemon response field 'summary' must be an object")
-        summary_applied = summary.get("applied")
-        if not isinstance(summary_applied, bool):
-            raise RuntimeError("daemon response field 'summary.applied' must be a boolean")
         changed = response.get("changed")
         if not isinstance(changed, bool):
             raise RuntimeError("daemon response field 'changed' must be a boolean")
-        total_sites_applied = summary.get("total_sites_applied")
-        total_sites_applied = _strict_non_negative_int(
-            total_sites_applied,
-            field_name="summary.total_sites_applied",
-        )
-        passes_executed = _strict_non_negative_int(
-            summary.get("passes_executed"),
-            field_name="summary.passes_executed",
-        )
         passes = _normalize_apply_passes(response.get("passes"), field_name="passes")
-        if passes_executed != len(passes):
-            raise RuntimeError(
-                "daemon response fields 'summary.passes_executed' and 'passes' length disagree"
-            )
-        pass_sites_applied = sum(
-            int(item["sites_applied"])
-            for item in passes
-            if str(item.get("action") or "kept") != "rolled_back"
-        )
-        if total_sites_applied != pass_sites_applied:
-            raise RuntimeError(
-                "daemon response fields 'summary.total_sites_applied' and "
-                "'passes[].sites_applied' disagree"
-            )
-        applied = exit_code == 0 and summary_applied
+        applied = exit_code == 0 and changed
         changed = exit_code == 0 and changed
 
     result = {
@@ -692,7 +447,6 @@ def _apply_result_from_response(
         "enabled_passes": normalized_enabled_passes,
         "passes": passes,
         "inlined_map_entries": [dict(e) for e in (response.get("inlined_map_entries") or []) if isinstance(e, Mapping)],
-        "summary": dict(summary),
         "error": error,
     }
     if prog_id is not None:
@@ -843,7 +597,6 @@ def apply_daemon_rejit(
                                        "output": response_output, "exit_code": 1, "error": msg,
                                        "enabled_passes": normalized_enabled_passes, "passes": []}
                             for pid in prog_ids},
-            "program_counts": {"requested": len(prog_ids), "applied": 0, "not_applied": len(prog_ids)},
         }
 
     raw_per_program = _resp.get("per_program")
@@ -883,13 +636,11 @@ def apply_daemon_rejit(
         changed = changed or bool(result.get("changed", False))
         if error := str(result.get("error") or "").strip():
             errors.append(f"prog {prog_id}: {error}")
-    n_applied = sum(1 for r in per_program.values() if r.get("applied", False))
     return {
         "applied": applied,
         "changed": changed,
         "output": "\n".join(o for o in outputs if o), "exit_code": exit_code, "per_program": per_program,
         "enabled_passes": normalized_enabled_passes,
-        "program_counts": {"requested": len(prog_ids), "applied": n_applied, "not_applied": len(prog_ids) - n_applied},
         "error": "; ".join(errors),
     }
 

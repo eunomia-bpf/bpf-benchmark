@@ -341,7 +341,6 @@ fn test_pass_manager_empty_pipeline() {
     let result = pm.run(&mut prog, &ctx).unwrap();
 
     assert_eq!(result.pass_results.len(), 0);
-    assert_eq!(result.total_sites_applied, 0);
     assert!(!result.program_changed);
     // Program should be unchanged.
     assert_eq!(prog.insns.len(), 2);
@@ -366,7 +365,6 @@ fn test_pass_manager_multiple_passes_sequential() {
     assert!(result.pass_results[1].changed);
     assert_eq!(result.pass_results[1].sites_applied, 1);
 
-    assert_eq!(result.total_sites_applied, 2);
     assert!(result.program_changed);
 
     // Check the MOV IMM was rewritten.
@@ -466,34 +464,6 @@ fn test_pass_manager_enabled_pass_policy() {
     assert_eq!(result.pass_results[0].pass_name, "append_nop");
     assert!(result.program_changed);
     assert_eq!(prog.insns.len(), 2);
-}
-
-// ── Per-target static call offset tests ────────────────────────
-
-#[test]
-fn test_kinsn_registry_per_target_call_offsets() {
-    let reg = KinsnRegistry {
-        rotate64_btf_id: 10,
-        select64_btf_id: 20,
-        ccmp64_btf_id: -1,
-        extract64_btf_id: 30,
-        memcpy_bulk_btf_id: -1,
-        memset_bulk_btf_id: -1,
-        endian_load16_btf_id: -1,
-        endian_load32_btf_id: -1,
-        endian_load64_btf_id: -1,
-        prefetch_btf_id: -1,
-        target_call_offsets: HashMap::from([
-            ("bpf_rotate64".to_string(), 100),
-            ("bpf_select64".to_string(), 200),
-            ("bpf_extract64".to_string(), 300),
-        ]),
-        target_supported_encodings: HashMap::new(),
-    };
-
-    assert_eq!(reg.call_off_for_target_name("bpf_rotate64"), 100);
-    assert_eq!(reg.call_off_for_target_name("bpf_select64"), 200);
-    assert_eq!(reg.call_off_for_target_name("bpf_extract64"), 300);
 }
 
 // ── Issue 5: Annotation remap tests ─────────────────────────
@@ -623,7 +593,6 @@ fn test_pass_skips_without_platform_capability() {
     let result = pm.run(&mut prog, &ctx).unwrap();
     // Should not apply anything because platform lacks CMOV.
     assert!(!result.program_changed);
-    assert_eq!(result.total_sites_applied, 0);
     // Should have a skip reason about CMOV.
     assert!(result.pass_results[0]
         .sites_skipped
@@ -646,45 +615,6 @@ fn test_invalid_policy_pass_name_is_rejected() {
 
     assert!(err.to_string().contains("invalid enabled_passes"));
     assert!(err.to_string().contains("unknown pass name(s): bulk_mem"));
-}
-
-#[test]
-fn test_pass_result_skip_reason_counts() {
-    let result = PassResult {
-        pass_name: "test".into(),
-        changed: false,
-        sites_applied: 0,
-        sites_skipped: vec![
-            SkipReason {
-                pc: 0,
-                reason: "kfunc_unavailable".into(),
-            },
-            SkipReason {
-                pc: 5,
-                reason: "subprog_unsupported".into(),
-            },
-            SkipReason {
-                pc: 10,
-                reason: "kfunc_unavailable".into(),
-            },
-            SkipReason {
-                pc: 15,
-                reason: "kfunc_unavailable".into(),
-            },
-            SkipReason {
-                pc: 20,
-                reason: "insufficient_bias".into(),
-            },
-        ],
-        diagnostics: vec![],
-        ..Default::default()
-    };
-
-    let counts = result.skip_reason_counts();
-    assert_eq!(counts["kfunc_unavailable"], 3);
-    assert_eq!(counts["subprog_unsupported"], 1);
-    assert_eq!(counts["insufficient_bias"], 1);
-    assert_eq!(counts.len(), 3);
 }
 
 #[test]

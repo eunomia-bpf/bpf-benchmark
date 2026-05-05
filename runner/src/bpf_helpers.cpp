@@ -3,14 +3,11 @@
 #include "micro_exec.hpp"
 
 #include <algorithm>
+#include <bpf/bpf.h>
 #include <bpf/libbpf.h>
-#include <cerrno>
-#include <cstring>
 #include <iomanip>
 #include <sstream>
 #include <string>
-#include <sys/syscall.h>
-#include <unistd.h>
 #include <utility>
 
 std::string libbpf_error_string(int error_code)
@@ -23,12 +20,10 @@ std::string libbpf_error_string(int error_code)
 bpf_prog_info load_prog_info(int program_fd)
 {
     bpf_prog_info info = {};
-    union bpf_attr attr = {};
-    attr.info.bpf_fd = program_fd;
-    attr.info.info_len = sizeof(info);
-    attr.info.info = ptr_to_u64(&info);
-    if (syscall(__NR_bpf, BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) != 0) {
-        fail("BPF_OBJ_GET_INFO_BY_FD failed: " + std::string(strerror(errno)));
+    __u32 info_len = sizeof(info);
+    const int err = bpf_obj_get_info_by_fd(program_fd, &info, &info_len);
+    if (err != 0) {
+        fail("bpf_obj_get_info_by_fd failed: " + libbpf_error_string(err));
     }
     return info;
 }
@@ -50,12 +45,10 @@ std::vector<uint8_t> load_jited_program(
     info.jited_prog_len = jited_prog_len;
     info.jited_prog_insns = ptr_to_u64(jited_program.data());
 
-    union bpf_attr attr = {};
-    attr.info.bpf_fd = program_fd;
-    attr.info.info_len = sizeof(info);
-    attr.info.info = ptr_to_u64(&info);
-    if (syscall(__NR_bpf, BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) != 0) {
-        fail("BPF_OBJ_GET_INFO_BY_FD (JIT dump) failed: " + std::string(strerror(errno)));
+    __u32 info_len = sizeof(info);
+    const int err = bpf_obj_get_info_by_fd(program_fd, &info, &info_len);
+    if (err != 0) {
+        fail("bpf_obj_get_info_by_fd (JIT dump) failed: " + libbpf_error_string(err));
     }
 
     jited_program.resize(info.jited_prog_len);
@@ -79,12 +72,10 @@ std::vector<uint8_t> load_xlated_program(
     info.xlated_prog_len = xlated_prog_len;
     info.xlated_prog_insns = ptr_to_u64(xlated.data());
 
-    union bpf_attr attr = {};
-    attr.info.bpf_fd = program_fd;
-    attr.info.info_len = sizeof(info);
-    attr.info.info = ptr_to_u64(&info);
-    if (syscall(__NR_bpf, BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) != 0) {
-        fail("BPF_OBJ_GET_INFO_BY_FD (xlated dump) failed: " + std::string(strerror(errno)));
+    __u32 info_len = sizeof(info);
+    const int err = bpf_obj_get_info_by_fd(program_fd, &info, &info_len);
+    if (err != 0) {
+        fail("bpf_obj_get_info_by_fd (xlated dump) failed: " + libbpf_error_string(err));
     }
 
     xlated.resize(info.xlated_prog_len);

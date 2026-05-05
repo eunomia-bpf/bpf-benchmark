@@ -918,7 +918,6 @@ mod tests {
         let result = run_const_prop_pass(&mut program);
 
         assert!(result.program_changed);
-        assert_eq!(result.total_sites_applied, 1);
         assert_eq!(
             program.insns,
             vec![
@@ -941,7 +940,6 @@ mod tests {
         let result = run_const_prop_pass(&mut program);
 
         assert!(result.program_changed);
-        assert_eq!(result.total_sites_applied, 1);
         assert_eq!(
             program.insns,
             vec![
@@ -960,7 +958,6 @@ mod tests {
         let result = run_const_prop_pass(&mut program);
 
         assert!(result.program_changed);
-        assert_eq!(result.total_sites_applied, 1);
         assert_eq!(program.insns.len(), 5);
         assert!(program.insns[2].is_ldimm64());
         assert_eq!(program.insns[2].dst_reg(), 1);
@@ -978,7 +975,6 @@ mod tests {
         let result = run_const_prop_pass(&mut program);
 
         assert!(!result.program_changed);
-        assert_eq!(result.total_sites_applied, 0);
         assert_eq!(program.insns, original);
     }
 
@@ -997,7 +993,6 @@ mod tests {
         let result = run_const_prop_pass(&mut program);
 
         assert!(result.program_changed);
-        assert_eq!(result.total_sites_applied, 2);
         assert_eq!(
             program.insns,
             vec![
@@ -1030,7 +1025,6 @@ mod tests {
         let result = run_const_prop_pass(&mut program);
 
         assert!(result.program_changed);
-        assert_eq!(result.total_sites_applied, 1);
         assert_eq!(
             program.insns,
             vec![
@@ -1106,7 +1100,6 @@ mod tests {
         let result = run_const_prop_pass(&mut program);
 
         assert!(result.program_changed);
-        assert_eq!(result.total_sites_applied, 1);
         assert_eq!(
             program.insns,
             vec![
@@ -1133,7 +1126,6 @@ mod tests {
         let result = run_const_prop_pass(&mut program);
 
         assert!(result.program_changed);
-        assert_eq!(result.total_sites_applied, 1);
         assert_eq!(
             program.insns,
             vec![
@@ -1161,7 +1153,6 @@ mod tests {
         let result = run_const_prop_pass(&mut program);
 
         assert!(result.program_changed);
-        assert_eq!(result.total_sites_applied, 2);
         assert_eq!(
             program.insns,
             vec![BpfInsn::mov64_imm(2, 7), BpfInsn::ja(0), exit_insn(),]
@@ -1195,7 +1186,6 @@ mod tests {
         let result = run_const_prop_pass(&mut program);
 
         assert!(result.program_changed);
-        assert_eq!(result.total_sites_applied, 2);
         assert_eq!(
             program.insns,
             vec![BpfInsn::mov64_imm(1, -1), BpfInsn::ja(0), exit_insn(),]

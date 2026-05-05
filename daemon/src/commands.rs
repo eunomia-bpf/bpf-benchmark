@@ -128,14 +128,10 @@ pub(crate) struct OptimizeOneResult {
     pub status: String,
     pub prog_id: u32,
     pub changed: bool,
-    pub passes_applied: Vec<String>,
     pub program: ProgramInfo,
-    pub summary: OptimizeSummary,
     pub passes: Vec<PassDetail>,
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub inlined_map_entries: Vec<InlinedMapEntry>,
-    #[serde(skip_serializing_if = "Vec::is_empty", default)]
-    pub skipped_maps: Vec<SkippedMapEntry>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error_message: Option<String>,
 }
@@ -146,7 +142,6 @@ impl OptimizeOneResult {
             status: "error".to_string(),
             prog_id,
             changed: false,
-            passes_applied: Vec::new(),
             program: ProgramInfo {
                 prog_id,
                 prog_name: String::new(),
@@ -155,15 +150,8 @@ impl OptimizeOneResult {
                 final_insn_count: 0,
                 insn_delta: 0,
             },
-            summary: OptimizeSummary {
-                applied: false,
-                total_sites_applied: 0,
-                passes_executed: 0,
-                passes_changed: 0,
-            },
             passes: Vec::new(),
             inlined_map_entries: Vec::new(),
-            skipped_maps: Vec::new(),
             error_message: Some(message.into()),
         }
     }
@@ -176,15 +164,6 @@ pub(crate) struct InlinedMapEntry {
     pub value_hex: String,
 }
 
-/// A map whose keys could not be fully scanned during map_inline value preparation.
-/// The map is excluded from map-value side-input (fewer inline opportunities) but the
-/// pass and program are NOT skipped — this is a capability limitation, not an error.
-#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
-pub(crate) struct SkippedMapEntry {
-    pub map_id: u32,
-    pub reason: String,
-}
-
 #[derive(Clone, Debug, Serialize)]
 pub(crate) struct ProgramInfo {
     pub prog_id: u32,
@@ -193,14 +172,6 @@ pub(crate) struct ProgramInfo {
     pub orig_insn_count: usize,
     pub final_insn_count: usize,
     pub insn_delta: i64,
-}
-
-#[derive(Clone, Debug, Serialize)]
-pub(crate) struct OptimizeSummary {
-    pub applied: bool,
-    pub total_sites_applied: usize,
-    pub passes_executed: usize,
-    pub passes_changed: usize,
 }
 
 #[derive(Clone, Debug, Serialize, PartialEq, Eq)]
@@ -476,32 +447,11 @@ pub(crate) struct ApplyProgramOutcome {
     pub result: OptimizeOneResult,
 }
 
-fn panic_payload_message(payload: &(dyn std::any::Any + Send)) -> String {
-    if let Some(message) = payload.downcast_ref::<String>() {
-        return message.clone();
-    }
-    if let Some(message) = payload.downcast_ref::<&'static str>() {
-        return (*message).to_string();
-    }
-    "non-string panic payload".to_string()
-}
-
-fn apply_program_catching_unwind<F>(prog_id: u32, apply: F) -> OptimizeOneResult
+fn apply_program_result<F>(prog_id: u32, apply: F) -> OptimizeOneResult
 where
     F: FnOnce() -> Result<OptimizeOneResult>,
 {
-    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(apply)) {
-        Ok(Ok(result)) => result,
-        Ok(Err(err)) => OptimizeOneResult::error(prog_id, format!("{err:#}")),
-        Err(payload) => {
-            let message = panic_payload_message(payload.as_ref());
-            eprintln!("daemon: optimize worker panicked for prog {prog_id}: {message}");
-            OptimizeOneResult::error(
-                prog_id,
-                format!("worker panicked while optimizing prog {prog_id}: {message}"),
-            )
-        }
-    }
+    apply().unwrap_or_else(|err| OptimizeOneResult::error(prog_id, format!("{err:#}")))
 }
 
 fn try_apply_programs_with<F>(
@@ -525,7 +475,7 @@ where
         prog_ids
             .par_iter()
             .map(|&prog_id| {
-                let result = apply_program_catching_unwind(prog_id, || apply_one(prog_id));
+                let result = apply_program_result(prog_id, || apply_one(prog_id));
                 ApplyProgramOutcome { prog_id, result }
             })
             .collect()
@@ -580,27 +530,13 @@ pub(crate) fn try_apply_one(
         fs::write(&prog_bin, &orig_bytes)
             .with_context(|| format!("write {}", prog_bin.display()))?;
         let orig_insn_count = insn_count_from_bytes(&orig_bytes, "prog.bin")?;
-        if prog_info.id != prog_id {
-            bail!(
-                "program snapshot returned id {}, expected {prog_id}",
-                prog_info.id
-            );
-        }
-        if prog_info.insn_cnt as usize != orig_insn_count {
-            bail!(
-                "program snapshot returned insn_cnt {}, but prog.bin contains {} instructions",
-                prog_info.insn_cnt,
-                orig_insn_count
-            );
-        }
         let wants_map_inline = pass_list
             .iter()
             .any(|pass| canonical_pass(pass) == "map_inline");
 
-        let mut skipped_maps = Vec::<SkippedMapEntry>::new();
         let mut map_value_snapshot = MapValueSnapshot::new();
         if wants_map_inline {
-            (skipped_maps, map_value_snapshot) = write_live_map_values(
+            map_value_snapshot = write_live_map_values(
                 &snapshot.maps,
                 &map_values_json,
                 &mut open_map_fd,
@@ -777,26 +713,11 @@ pub(crate) fn try_apply_one(
         let opt_bytes = current_bytes;
         let final_insn_count = insn_count_from_bytes(&opt_bytes, "opt.bin")?;
         let changed = opt_bytes != orig_bytes;
-        let candidate_has_kinsn_call = bytecode_has_kinsn_call(&opt_bytes, "opt.bin")?;
-        if candidate_has_kinsn_call && !needs_target(&pass_list) {
-            bail!(
-                "candidate bytecode contains kinsn call but requested passes did not require target probing"
-            );
-        }
         let status = "ok".to_string();
-        let applied = committed_passes > 0;
-        let passes_applied = passes
-            .iter()
-            .filter(|pass| pass.changed)
-            .map(|pass| pass.pass_name.clone())
-            .collect::<Vec<_>>();
-        let total_sites_applied = passes.iter().map(|pass| pass.sites_applied).sum();
-        let passes_changed = passes.iter().filter(|pass| pass.changed).count();
         Ok(OptimizeOneResult {
             status,
             prog_id,
             changed,
-            passes_applied,
             program: ProgramInfo {
                 prog_id,
                 prog_name: prog_info.name,
@@ -805,15 +726,8 @@ pub(crate) fn try_apply_one(
                 final_insn_count,
                 insn_delta: final_insn_count as i64 - orig_insn_count as i64,
             },
-            summary: OptimizeSummary {
-                applied,
-                total_sites_applied,
-                passes_executed: passes.len(),
-                passes_changed,
-            },
             passes,
             inlined_map_entries,
-            skipped_maps,
             error_message: None,
         })
     })();
@@ -948,7 +862,7 @@ fn write_live_map_values<F, G, H>(
     open_map_fd: &mut F,
     lookup_map_value: &mut G,
     scan_map_keys: &mut H,
-) -> Result<(Vec<SkippedMapEntry>, MapValueSnapshot)>
+) -> Result<MapValueSnapshot>
 where
     F: FnMut(u32) -> Result<OwnedFd>,
     G: FnMut(&MapInfoJson, i32, &[u8]) -> Result<Option<Vec<u8>>>,
@@ -956,7 +870,6 @@ where
 {
     let mut entries_by_map = BTreeMap::<u32, BTreeMap<Vec<u8>, Option<Vec<u8>>>>::new();
     let mut value_snapshot = MapValueSnapshot::new();
-    let mut skipped = Vec::<SkippedMapEntry>::new();
 
     for map in maps {
         if !is_map_inlineable_map_type(map.map_type) {
@@ -964,28 +877,8 @@ where
         }
         let fd = open_map_fd(map.map_id)
             .with_context(|| format!("open BPF map id {} for map-inline values", map.map_id))?;
-        let keys = match scan_map_keys(map, fd.as_raw_fd()) {
-            Ok(keys) => keys,
-            Err(err) => {
-                // A scan overflow is a known capability limitation: the kernel returns more
-                // keys than max_entries (e.g. LRU maps with concurrent inserts). Skip this
-                // map's entries so the pass can still run for other maps. Real IO/syscall
-                // errors propagate unchanged because they represent unexpected failures.
-                let reason = format!("{err:#}");
-                if reason.contains("more than max_entries") {
-                    eprintln!(
-                        "daemon: map_inline skipping map {} (scan overflow: {})",
-                        map.map_id, reason
-                    );
-                    skipped.push(SkippedMapEntry {
-                        map_id: map.map_id,
-                        reason,
-                    });
-                    continue;
-                }
-                return Err(err).with_context(|| format!("scan live keys for map {}", map.map_id));
-            }
-        };
+        let keys = scan_map_keys(map, fd.as_raw_fd())
+            .with_context(|| format!("scan live keys for map {}", map.map_id))?;
         for key in keys {
             let value = lookup_map_value(map, fd.as_raw_fd(), &key).with_context(|| {
                 format!(
@@ -1012,7 +905,7 @@ where
     }
 
     write_map_values_snapshot(maps, &entries_by_map, output)?;
-    Ok((skipped, value_snapshot))
+    Ok(value_snapshot)
 }
 
 fn write_map_values_snapshot(
@@ -1368,16 +1261,6 @@ fn decode_insns(bytes: &[u8], label: &str) -> Result<Vec<kernel_sys::bpf_insn>> 
         .collect())
 }
 
-fn bytecode_has_kinsn_call(bytes: &[u8], label: &str) -> Result<bool> {
-    insn_count_from_bytes(bytes, label)?;
-    let call_code = (kernel_sys::BPF_JMP | kernel_sys::BPF_CALL) as u8;
-    const BPF_PSEUDO_KINSN_CALL: u8 = 4;
-    Ok(bytes.chunks_exact(8).any(|insn| {
-        let src_reg = insn[1] >> 4;
-        insn[0] == call_code && src_reg == BPF_PSEUDO_KINSN_CALL
-    }))
-}
-
 fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Result<T> {
     let data = fs::read(path).with_context(|| format!("read {}", path.display()))?;
     serde_json::from_slice(&data).with_context(|| format!("parse {label} from {}", path.display()))
@@ -1530,18 +1413,6 @@ mod tests {
     fn bytecode_decoder_rejects_unaligned_input() {
         let err = decode_insns(&[0u8; 9], "bad").unwrap_err();
         assert!(err.to_string().contains("multiple of 8"), "err={err:#}");
-    }
-
-    #[test]
-    fn bytecode_has_kinsn_call_detects_project_pseudo_call() {
-        let mut normal_call = [0u8; 8];
-        normal_call[0] = (kernel_sys::BPF_JMP | kernel_sys::BPF_CALL) as u8;
-        normal_call[1] = (kernel_sys::BPF_PSEUDO_CALL as u8) << 4;
-        assert!(!bytecode_has_kinsn_call(&normal_call, "normal_call").unwrap());
-
-        let mut kinsn_call = normal_call;
-        kinsn_call[1] = 4 << 4;
-        assert!(bytecode_has_kinsn_call(&kinsn_call, "kinsn_call").unwrap());
     }
 
     #[test]
@@ -1800,7 +1671,7 @@ mod tests {
             },
         ];
 
-        let (skipped, _) = write_live_map_values(
+        let _snapshot = write_live_map_values(
             &maps,
             &output,
             &mut |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
@@ -1821,7 +1692,6 @@ mod tests {
         )
         .unwrap();
 
-        assert!(skipped.is_empty());
         let json: serde_json::Value = serde_json::from_slice(&fs::read(output).unwrap()).unwrap();
         assert_eq!(json["maps"][0]["entries"][0]["key"], "01000000");
         assert_eq!(json["maps"][0]["entries"][0]["value"], "07000000");
@@ -1829,85 +1699,9 @@ mod tests {
         assert!(json["maps"][1]["entries"][0]["value"].is_null());
     }
 
-    /// Bug regression: an overflow on one map must not fail the whole map_inline pass.
-    /// The overflowing map is reported in `skipped_maps`; the normal map still produces entries.
     #[test]
-    fn map_scan_overflow_skips_one_map_and_continues() {
-        let workdir = WorkDir::new("bpfrejit-daemon-overflow").unwrap();
-        let output = workdir.path().join(MAP_VALUES_FILE);
-        let maps = vec![
-            MapInfoJson {
-                map_id: 10,
-                map_type: kernel_sys::BPF_MAP_TYPE_ARRAY,
-                key_size: 4,
-                value_size: 4,
-                max_entries: 1,
-            },
-            MapInfoJson {
-                map_id: 20,
-                map_type: kernel_sys::BPF_MAP_TYPE_HASH,
-                key_size: 4,
-                value_size: 4,
-                max_entries: 8,
-            },
-        ];
-
-        let (skipped, _) = write_live_map_values(
-            &maps,
-            &output,
-            &mut |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
-            &mut |_map, _fd, _key| Ok(Some(42u32.to_le_bytes().to_vec())),
-            &mut |map, _fd| {
-                if map.map_id == 10 {
-                    // Simulate a BPF_MAP_GET_NEXT_KEY overflow: more keys than max_entries.
-                    bail!(
-                        "BPF_MAP_GET_NEXT_KEY for map {} returned more than max_entries={}",
-                        map.map_id,
-                        map.max_entries
-                    )
-                } else {
-                    Ok(vec![5u32.to_le_bytes().to_vec()])
-                }
-            },
-        )
-        .unwrap();
-
-        // Overflow map must appear in skipped_maps with a meaningful reason.
-        assert_eq!(skipped.len(), 1);
-        assert_eq!(skipped[0].map_id, 10);
-        assert!(
-            skipped[0].reason.contains("more than max_entries"),
-            "unexpected reason: {}",
-            skipped[0].reason
-        );
-
-        // The normal map's entries must be present in the output file.
-        let json: serde_json::Value = serde_json::from_slice(&fs::read(&output).unwrap()).unwrap();
-        let map20_entries = &json["maps"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .find(|m| m["map_id"] == 20)
-            .expect("map 20 not found")["entries"];
-        assert_eq!(map20_entries[0]["key"], "05000000");
-        assert_eq!(map20_entries[0]["value"], "2a000000");
-
-        // The overflowing map must have no entries (excluded from snapshot).
-        let map10_entries = &json["maps"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .find(|m| m["map_id"] == 10)
-            .expect("map 10 not found")["entries"];
-        assert!(
-            map10_entries.as_array().unwrap().is_empty(),
-            "overflow map should have no entries in snapshot"
-        );
-    }
-
-    #[test]
-    fn try_apply_programs_converts_failures_and_panics_to_program_results() {
-        let prog_ids = [7, 8, 9, 10];
+    fn try_apply_programs_converts_failures_to_program_results() {
+        let prog_ids = [7, 8, 9];
 
         let outcomes =
             try_apply_programs_with(&prog_ids, 2, |prog_id| -> Result<OptimizeOneResult> {
@@ -1915,7 +1709,6 @@ mod tests {
                     7 => Ok(successful_batch_result(prog_id)),
                     8 => Ok(failed_batch_result(prog_id)),
                     9 => bail!("missing program {prog_id}"),
-                    10 => panic!("mock worker panic"),
                     _ => bail!("unexpected prog_id {prog_id}"),
                 }
             })
@@ -1934,12 +1727,6 @@ mod tests {
             .as_deref()
             .unwrap_or("")
             .contains("missing program 9"));
-        assert_eq!(by_id[&10].status, "error");
-        assert!(by_id[&10]
-            .error_message
-            .as_deref()
-            .unwrap_or("")
-            .contains("worker panicked while optimizing prog 10: mock worker panic"));
     }
 
     fn successful_batch_result(prog_id: u32) -> OptimizeOneResult {
@@ -1947,7 +1734,6 @@ mod tests {
             status: "ok".to_string(),
             prog_id,
             changed: true,
-            passes_applied: vec!["rotate".to_string()],
             program: ProgramInfo {
                 prog_id,
                 prog_name: "mock_prog".to_string(),
@@ -1956,15 +1742,8 @@ mod tests {
                 final_insn_count: 2,
                 insn_delta: 1,
             },
-            summary: OptimizeSummary {
-                applied: true,
-                total_sites_applied: 1,
-                passes_executed: 1,
-                passes_changed: 1,
-            },
             passes: Vec::new(),
             inlined_map_entries: Vec::new(),
-            skipped_maps: Vec::new(),
             error_message: None,
         }
     }

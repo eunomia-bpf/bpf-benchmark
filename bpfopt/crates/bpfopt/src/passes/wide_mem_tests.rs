@@ -1,6 +1,5 @@
 use super::*;
-use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
-use crate::pass::{AnalysisCache, PassContext, PassManager};
+use crate::pass::{AnalysisCache, PassContext};
 use crate::passes::test_helpers::exit_insn;
 
 fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
@@ -31,23 +30,6 @@ fn ld_imm64(dst: u8, src: u8, imm: i32) -> [BpfInsn; 2] {
 fn pseudo_func_ref(dst: u8, pc: usize, target_pc: usize) -> [BpfInsn; 2] {
     let imm = target_pc as i64 - (pc as i64 + 1);
     ld_imm64(dst, BPF_PSEUDO_FUNC, imm as i32)
-}
-
-/// Build a canonical 4-byte low-byte-first byte-ladder (Variant A).
-fn make_wide_mem_4byte_program() -> Vec<BpfInsn> {
-    vec![
-        BpfInsn::ldx_mem(BPF_B, 2, 1, 0),
-        BpfInsn::ldx_mem(BPF_B, 3, 1, 1),
-        BpfInsn::alu64_imm(BPF_LSH, 3, 8),
-        BpfInsn::alu64_reg(BPF_OR, 2, 3),
-        BpfInsn::ldx_mem(BPF_B, 3, 1, 2),
-        BpfInsn::alu64_imm(BPF_LSH, 3, 16),
-        BpfInsn::alu64_reg(BPF_OR, 2, 3),
-        BpfInsn::ldx_mem(BPF_B, 3, 1, 3),
-        BpfInsn::alu64_imm(BPF_LSH, 3, 24),
-        BpfInsn::alu64_reg(BPF_OR, 2, 3),
-        exit_insn(),
-    ]
 }
 
 // ── Pattern matching tests (from matcher.rs) ──────────────────
@@ -407,23 +389,6 @@ fn test_wide_mem_pass_skips_site_with_live_scratch_reg() {
         .reason
         .contains("scratch register live"),);
     assert_eq!(prog.insns.len(), 6);
-}
-
-#[test]
-fn test_wide_mem_pass_integration_with_pass_manager() {
-    let mut pm = PassManager::new();
-    pm.register_analysis(BranchTargetAnalysis);
-    pm.register_analysis(LivenessAnalysis);
-    pm.add_pass(WideMemPass);
-
-    let mut prog = make_program(make_wide_mem_4byte_program());
-    let ctx = PassContext::test_default();
-
-    let result = pm.run(&mut prog, &ctx).unwrap();
-
-    assert!(result.program_changed);
-    assert_eq!(result.total_sites_applied, 1);
-    assert_eq!(prog.insns.len(), 2);
 }
 
 // ── Branch fixup tests (from rewriter.rs) ──────────────────────

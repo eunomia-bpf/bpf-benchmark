@@ -150,18 +150,6 @@ def _measure_runner_phase(
     }
 
 
-def build_markdown(payload: Mapping[str, object]) -> str:
-    return "\n".join(
-        [
-            "# Corpus Benchmark",
-            "",
-            "```json",
-            json.dumps(payload, indent=2, sort_keys=True, default=str),
-            "```",
-        ]
-    )
-
-
 def _build_runner_state(
     app: AppSpec,
     runner: AppRunner,
@@ -854,7 +842,6 @@ def _finalize_partial(
     if fatal_error:
         payload["fatal_error"] = fatal_error
     payload = compact_rejit_results_for_artifact(payload)
-    markdown = build_markdown(payload) + "\n"
     session.write(
         status="error",
         progress_payload={
@@ -864,7 +851,6 @@ def _finalize_partial(
             "error_message": error_message,
         },
         result_payload=payload,
-        detail_texts={"result.md": markdown},
         error_message=error_message,
     )
     return payload
@@ -937,7 +923,6 @@ def main(argv: list[str] | None = None) -> int:
         payload = run_suite(args, suite, artifact_session=session, partial_results=_partial_results)
 
         payload = compact_rejit_results_for_artifact(payload)
-        markdown = build_markdown(payload) + "\n"
         payload_status = str(payload.get("status") or "error").lower()
         error_message = str(payload.get("fatal_error") or "").strip()
         if payload_status == "ok":
@@ -949,7 +934,6 @@ def main(argv: list[str] | None = None) -> int:
                     "completed_at": datetime.now(timezone.utc).isoformat(),
                 },
                 result_payload=payload,
-                detail_texts={"result.md": markdown},
             )
         else:
             session.write(
@@ -961,7 +945,6 @@ def main(argv: list[str] | None = None) -> int:
                     "error_message": error_message or "corpus suite reported errors",
                 },
                 result_payload=payload,
-                detail_texts={"result.md": markdown},
                 error_message=error_message or "corpus suite reported errors",
             )
         print(

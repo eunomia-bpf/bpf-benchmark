@@ -225,7 +225,6 @@ fn test_default_pipeline_wide_mem() {
     let pm = default_test_pipeline();
     let result = pm.run(&mut prog, &ctx).unwrap();
     assert!(result.program_changed);
-    assert!(result.total_sites_applied >= 1);
 }
 
 #[test]

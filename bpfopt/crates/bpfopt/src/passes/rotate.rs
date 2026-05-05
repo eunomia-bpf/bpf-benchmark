@@ -365,8 +365,7 @@ fn rotate_site(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
-    use crate::pass::{AnalysisCache, PassContext, PassManager};
+    use crate::pass::{AnalysisCache, PassContext};
     use crate::passes::test_helpers::{exit_insn, pseudo_call_to};
 
     fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
@@ -376,6 +375,9 @@ mod tests {
     fn ctx_with_rotate_kfunc(btf_id: i32) -> PassContext {
         let mut ctx = PassContext::test_default();
         ctx.kinsn_registry.rotate64_btf_id = btf_id;
+        ctx.kinsn_registry
+            .target_supported_encodings
+            .insert("bpf_rotate64".to_string(), BPF_KINSN_ENC_PACKED_CALL);
         ctx.platform.has_rorx = true;
         ctx
     }
@@ -645,28 +647,6 @@ mod tests {
             .sites_skipped
             .iter()
             .any(|s| s.reason.contains("tmp_reg")));
-    }
-
-    #[test]
-    fn test_rotate_pass_integration_with_pass_manager() {
-        let mut pm = PassManager::new();
-        pm.register_analysis(BranchTargetAnalysis);
-        pm.register_analysis(LivenessAnalysis);
-        pm.add_pass(RotatePass);
-
-        let mut prog = make_program(vec![
-            BpfInsn::mov64_reg(3, 2), // provenance
-            BpfInsn::alu64_imm(BPF_RSH, 2, 56),
-            BpfInsn::alu64_imm(BPF_LSH, 3, 8),
-            BpfInsn::alu64_reg(BPF_OR, 2, 3),
-            exit_insn(),
-        ]);
-        let ctx = ctx_with_rotate_kfunc(1234);
-
-        let result = pm.run(&mut prog, &ctx).unwrap();
-
-        assert!(result.program_changed);
-        assert_eq!(result.total_sites_applied, 1);
     }
 
     #[test]

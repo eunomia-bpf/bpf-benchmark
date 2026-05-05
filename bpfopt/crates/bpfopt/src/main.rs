@@ -261,15 +261,10 @@ enum MapTypeJson {
 }
 
 fn main() -> ExitCode {
-    let result = std::panic::catch_unwind(run_main);
-    match result {
-        Ok(Ok(())) => ExitCode::SUCCESS,
-        Ok(Err(err)) => {
+    match run_main() {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(err) => {
             eprintln!("error: {err:#}");
-            ExitCode::from(1)
-        }
-        Err(_) => {
-            eprintln!("error: internal bpfopt panic");
             ExitCode::from(1)
         }
     }
@@ -325,16 +320,18 @@ fn run_single_pass(common: &CommonArgs, pass_name: &'static str) -> Result<()> {
     ctx.policy.enabled_passes = vec![pass_name.to_string()];
     let pipeline = build_pipeline(&[pass_name])?;
     let profiling = read_profile(common.profile.as_deref())?;
-    let result = run_pipeline_catching_panics(&pipeline, &mut program, &ctx, profiling.as_ref())?;
+    let result = pipeline.run_with_profiling(&mut program, &ctx, profiling.as_ref())?;
     write_bytecode(common.output.as_deref(), &program.insns)?;
     write_btf_info_outputs(common, &program)?;
 
     if let Some(report_path) = common.report.as_deref() {
-        let report = result
-            .pass_results
-            .first()
-            .map(pass_report)
-            .unwrap_or_else(|| unchanged_report(pass_name, program.insns.len()));
+        if result.pass_results.len() != 1 {
+            bail!(
+                "requested pass {pass_name} returned {} pass reports",
+                result.pass_results.len()
+            );
+        }
+        let report = pass_report(&result.pass_results[0]);
         write_json(Some(report_path), &report)?;
     }
 
@@ -348,18 +345,6 @@ fn public_kinsn_name(target_name: &str) -> &str {
         "bpf_endian_load16" | "bpf_endian_load32" | "bpf_endian_load64" => "bpf_endian_load64",
         _ => target_name,
     }
-}
-
-fn run_pipeline_catching_panics(
-    pipeline: &PassManager,
-    program: &mut BpfProgram,
-    ctx: &PassContext,
-    profiling: Option<&ProfilingData>,
-) -> Result<bpfopt::pass::PipelineResult> {
-    std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-        pipeline.run_with_profiling(program, ctx, profiling)
-    }))
-    .map_err(|_| anyhow!("internal pass panic"))?
 }
 
 fn build_pipeline(pass_names: &[&str]) -> Result<PassManager> {
@@ -476,6 +461,16 @@ fn validate_required_kinsns(ctx: &PassContext, pass_names: &[&str]) -> Result<()
 fn require_kinsn(ctx: &PassContext, target_name: &str) -> Result<()> {
     if ctx.kinsn_registry.btf_id_for_target_name(target_name) < 0 {
         bail!("kinsn '{}' not in target", public_kinsn_name(target_name));
+    }
+    if !ctx
+        .kinsn_registry
+        .target_supported_encodings
+        .contains_key(target_name)
+    {
+        bail!(
+            "target kinsn '{}' missing supported_encodings",
+            public_kinsn_name(target_name)
+        );
     }
     Ok(())
 }
@@ -776,11 +771,13 @@ fn kinsn_registry_from_target(target: &TargetJson) -> Result<KinsnRegistry> {
         registry
             .target_call_offsets
             .insert(canonical.to_string(), spec.call_offset);
-        if let Some(encodings) = &spec.supported_encodings {
-            registry
-                .target_supported_encodings
-                .insert(canonical.to_string(), parse_supported_encodings(encodings)?);
-        }
+        let encodings = spec
+            .supported_encodings
+            .as_ref()
+            .ok_or_else(|| anyhow!("target kinsn {canonical} missing supported_encodings"))?;
+        registry
+            .target_supported_encodings
+            .insert(canonical.to_string(), parse_supported_encodings(encodings)?);
     }
     Ok(registry)
 }
@@ -1167,18 +1164,6 @@ fn pass_report(result: &PassResult) -> PassReport {
     }
 }
 
-fn unchanged_report(pass_name: &str, insn_count: usize) -> PassReport {
-    PassReport {
-        pass: pass_name.to_string(),
-        changed: false,
-        sites_applied: 0,
-        insn_count_before: insn_count,
-        insn_count_after: insn_count,
-        insn_delta: 0,
-        map_inline_records: Vec::new(),
-    }
-}
-
 fn map_inline_record_report(record: &bpfopt::pass::MapInlineRecord) -> MapInlineRecordReport {
     MapInlineRecordReport {
         map_id: record.map_id,
@@ -1247,7 +1232,9 @@ mod tests {
                     KinsnJson {
                         btf_func_id: 11,
                         call_offset: 2,
-                        supported_encodings: None,
+                        supported_encodings: Some(SupportedEncodingsJson::Names(vec![
+                            "packed".to_string()
+                        ])),
                     },
                 ),
                 (
@@ -1255,7 +1242,9 @@ mod tests {
                     KinsnJson {
                         btf_func_id: 12,
                         call_offset: 0,
-                        supported_encodings: None,
+                        supported_encodings: Some(SupportedEncodingsJson::Names(vec![
+                            "packed".to_string()
+                        ])),
                     },
                 ),
                 (
@@ -1263,7 +1252,9 @@ mod tests {
                     KinsnJson {
                         btf_func_id: 13,
                         call_offset: 0,
-                        supported_encodings: None,
+                        supported_encodings: Some(SupportedEncodingsJson::Names(vec![
+                            "packed".to_string()
+                        ])),
                     },
                 ),
                 (
@@ -1271,7 +1262,9 @@ mod tests {
                     KinsnJson {
                         btf_func_id: 14,
                         call_offset: 7,
-                        supported_encodings: None,
+                        supported_encodings: Some(SupportedEncodingsJson::Names(vec![
+                            "packed".to_string()
+                        ])),
                     },
                 ),
             ]),

@@ -860,7 +860,6 @@ mod tests {
         // With low miss rate and high bias, the branch should be flipped
         assert!(result2.program_changed,
             "should flip when branch_miss_rate (0.01) is below max (0.05) and bias (0.9) >= min (0.7)");
-        assert_eq!(result2.total_sites_applied, 1);
     }
 
     /// Test that branch_flip correctly handles multiple sequential diamonds

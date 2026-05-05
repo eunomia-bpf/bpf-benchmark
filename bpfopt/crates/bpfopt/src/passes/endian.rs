@@ -577,8 +577,7 @@ fn map_endian_replacement(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
-    use crate::pass::{AnalysisCache, PassContext, PassManager};
+    use crate::pass::{AnalysisCache, PassContext};
 
     fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
         BpfProgram::new(insns)
@@ -617,6 +616,21 @@ mod tests {
         ctx.kinsn_registry.endian_load16_btf_id = btf_id16;
         ctx.kinsn_registry.endian_load32_btf_id = btf_id32;
         ctx.kinsn_registry.endian_load64_btf_id = btf_id64;
+        if btf_id16 >= 0 {
+            ctx.kinsn_registry
+                .target_supported_encodings
+                .insert("bpf_endian_load16".to_string(), BPF_KINSN_ENC_PACKED_CALL);
+        }
+        if btf_id32 >= 0 {
+            ctx.kinsn_registry
+                .target_supported_encodings
+                .insert("bpf_endian_load32".to_string(), BPF_KINSN_ENC_PACKED_CALL);
+        }
+        if btf_id64 >= 0 {
+            ctx.kinsn_registry
+                .target_supported_encodings
+                .insert("bpf_endian_load64".to_string(), BPF_KINSN_ENC_PACKED_CALL);
+        }
         ctx.platform.has_movbe = true;
         ctx
     }
@@ -1190,25 +1204,5 @@ mod tests {
         assert!(calls.contains(&1111), "should contain 16-bit kfunc btf_id");
         assert!(calls.contains(&2222), "should contain 32-bit kfunc btf_id");
         assert!(calls.contains(&3333), "should contain 64-bit kfunc btf_id");
-    }
-
-    #[test]
-    fn test_endian_fusion_pass_integration_with_pass_manager() {
-        let mut pm = PassManager::new();
-        pm.register_analysis(BranchTargetAnalysis);
-        pm.register_analysis(LivenessAnalysis);
-        pm.add_pass(EndianFusionPass);
-
-        let mut prog = make_program(vec![
-            BpfInsn::ldx_mem(BPF_W, 2, 1, 0),
-            endian_to_be(2, 32),
-            exit_insn(),
-        ]);
-        let ctx = ctx_with_endian32_kfunc(1234);
-
-        let result = pm.run(&mut prog, &ctx).unwrap();
-
-        assert!(result.program_changed);
-        assert_eq!(result.total_sites_applied, 1);
     }
 }

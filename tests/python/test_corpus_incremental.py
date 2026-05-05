@@ -4,7 +4,7 @@ Tests for corpus/driver.py incremental per-app write and SIGTERM finalize.
 Bug-detection purpose:
   - _write_incremental_app_result: verify that per-app JSON, progress.json, and
     metadata.json are correctly written/updated after each app completes.
-  - SIGTERM handler: verify that _finalize_partial writes result.json + result.md
+  - SIGTERM handler: verify that _finalize_partial writes result.json
     with partial results and calls SystemExit(130).
   - _finalize_partial: verify that apps not yet reached get an error entry and
     partial=True is set in the payload.
@@ -151,7 +151,7 @@ class TestFinalizePartial(unittest.TestCase):
     def _session(self) -> ArtifactSession:
         return _make_artifact_session(self.tmp)
 
-    def test_writes_result_json_and_result_md(self) -> None:
+    def test_writes_result_json(self) -> None:
         session = self._session()
         suite = self._suite(["tracee", "tetragon", "cilium"])
         partial = {
@@ -159,9 +159,7 @@ class TestFinalizePartial(unittest.TestCase):
         }
         driver._finalize_partial(session, suite, partial, error_message="test error")
         result_json = session.run_dir / "details" / "result.json"
-        result_md = session.run_dir / "details" / "result.md"
         self.assertTrue(result_json.exists(), "result.json must exist after _finalize_partial")
-        self.assertTrue(result_md.exists(), "result.md must exist after _finalize_partial")
 
     def test_partial_flag_set(self) -> None:
         session = self._session()
@@ -205,81 +203,7 @@ class TestSigtermHandler(unittest.TestCase):
 
     def test_sigterm_causes_partial_finalize_and_exit_130(self) -> None:
         """Sending SIGTERM to the process during run_suite causes SystemExit(130)
-        and writes partial result.json + result.md with the apps completed so far."""
-        import subprocess, textwrap, sys
-
-        # Write a minimal suite YAML with two fake apps.
-        suite_yaml = self.tmp / "suite.yaml"
-        suite_yaml.write_text(textwrap.dedent("""\
-            suite_name: test_sigterm
-            apps: []
-        """))
-
-        output_json = self.tmp / "vm_corpus.json"
-
-        # Run driver.main() in a subprocess and send SIGTERM after it starts.
-        script = textwrap.dedent(f"""\
-            import sys, os, signal, time, threading
-            sys.path.insert(0, {str(REPO_ROOT)!r})
-            import corpus.driver as driver
-            from runner.libs.run_artifacts import ArtifactSession
-            from datetime import datetime, timezone
-            from pathlib import Path
-
-            # Monkeypatch run_suite to sleep long enough to receive SIGTERM
-            original_run_suite = driver.run_suite
-            def _slow_run_suite(args, suite, *, artifact_session=None, partial_results=None):
-                # Add a completed app to partial_results before sleeping
-                if partial_results is not None:
-                    partial_results['tracee'] = {{'app': 'tracee', 'status': 'ok', 'error': '',
-                                                   'baseline': None, 'post_rejit': None, 'rejit_result': None}}
-                # Signal the parent that we're ready
-                print('READY', flush=True)
-                time.sleep(30)
-                return {{'status': 'ok', 'results': [], 'per_program': [], 'summary': {{}}}}
-
-            driver.run_suite = _slow_run_suite
-
-            # Minimal args
-            import argparse
-            args = argparse.Namespace(
-                suite={str(suite_yaml)!r},
-                daemon='/nonexistent',
-                samples=1,
-                output_json={str(output_json)!r},
-                no_kinsn=True,
-            )
-
-            # Patch daemon binary check
-            import runner.libs.app_suite_schema as schema
-            from dataclasses import dataclass, field
-
-            suite = driver._filter_suite_apps(
-                driver.load_app_suite_from_yaml(Path({str(suite_yaml)!r}))
-            )
-
-            try:
-                rc = driver.main([
-                    '--suite', {str(suite_yaml)!r},
-                    '--daemon', '/nonexistent',
-                    '--samples', '1',
-                    '--output-json', {str(output_json)!r},
-                    '--no-kinsn',
-                ])
-                sys.exit(rc)
-            except SystemExit as e:
-                sys.exit(e.code)
-        """)
-
-        # We use a simpler approach: just invoke the SIGTERM handler directly via the
-        # signal module after monkeypatching run_suite.
-        # The subprocess approach is fragile; instead test the handler logic directly.
-        del script  # not used
-
-        # Directly test: set up a minimal main() environment and fire SIGTERM handler.
-        output_json = self.tmp / "out" / "vm_corpus.json"
-        output_json.parent.mkdir(parents=True, exist_ok=True)
-
+        and writes partial result.json with the apps completed so far."""
         session = _make_artifact_session(self.tmp)
         suite = _FakeSuite(
             apps=[
@@ -320,9 +244,7 @@ class TestSigtermHandler(unittest.TestCase):
         self.assertTrue(sigterm_received[0])
 
         result_json = session.run_dir / "details" / "result.json"
-        result_md = session.run_dir / "details" / "result.md"
         self.assertTrue(result_json.exists(), "result.json must be written on SIGTERM")
-        self.assertTrue(result_md.exists(), "result.md must be written on SIGTERM")
 
         payload = json.loads(result_json.read_text())
         results_by_app = {r["app"]: r for r in payload.get("results", [])}
