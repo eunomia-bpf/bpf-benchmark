@@ -268,26 +268,26 @@ fn try_match_rotate(
                     // Case 1: rsh_reg is the copy (tmp), lsh_reg is the original (dst)
                     //   => MOV rsh_reg, lsh_reg
                     if let Some(mov_pc) = find_provenance_mov(insns, pc, rsh_reg, lsh_reg) {
-                        return Some(RotateSite {
-                            start_pc: mov_pc,
-                            old_len: (pc + 3) - mov_pc,
-                            dst_reg: result_reg,
-                            val_reg: lsh_reg,
-                            tmp_reg: rsh_reg,
-                            shift_amount: lsh_amount,
-                        });
+                        return rotate_site(
+                            mov_pc,
+                            (pc + 3) - mov_pc,
+                            result_reg,
+                            lsh_reg,
+                            rsh_reg,
+                            lsh_amount,
+                        );
                     }
                     // Case 2: lsh_reg is the copy (tmp), rsh_reg is the original (dst)
                     //   => MOV lsh_reg, rsh_reg
                     if let Some(mov_pc) = find_provenance_mov(insns, pc, lsh_reg, rsh_reg) {
-                        return Some(RotateSite {
-                            start_pc: mov_pc,
-                            old_len: (pc + 3) - mov_pc,
-                            dst_reg: result_reg,
-                            val_reg: rsh_reg,
-                            tmp_reg: lsh_reg,
-                            shift_amount: lsh_amount,
-                        });
+                        return rotate_site(
+                            mov_pc,
+                            (pc + 3) - mov_pc,
+                            result_reg,
+                            rsh_reg,
+                            lsh_reg,
+                            lsh_amount,
+                        );
                     }
                 }
             }
@@ -315,24 +315,24 @@ fn try_match_rotate(
                     let result_reg = or_dst;
                     // Try both provenance directions:
                     if let Some(mov_pc) = find_provenance_mov(insns, pc, rsh_reg, lsh_reg) {
-                        return Some(RotateSite {
-                            start_pc: mov_pc,
-                            old_len: (pc + 3) - mov_pc,
-                            dst_reg: result_reg,
-                            val_reg: lsh_reg,
-                            tmp_reg: rsh_reg,
-                            shift_amount: lsh_amount,
-                        });
+                        return rotate_site(
+                            mov_pc,
+                            (pc + 3) - mov_pc,
+                            result_reg,
+                            lsh_reg,
+                            rsh_reg,
+                            lsh_amount,
+                        );
                     }
                     if let Some(mov_pc) = find_provenance_mov(insns, pc, lsh_reg, rsh_reg) {
-                        return Some(RotateSite {
-                            start_pc: mov_pc,
-                            old_len: (pc + 3) - mov_pc,
-                            dst_reg: result_reg,
-                            val_reg: rsh_reg,
-                            tmp_reg: lsh_reg,
-                            shift_amount: lsh_amount,
-                        });
+                        return rotate_site(
+                            mov_pc,
+                            (pc + 3) - mov_pc,
+                            result_reg,
+                            rsh_reg,
+                            lsh_reg,
+                            lsh_amount,
+                        );
                     }
                 }
             }
@@ -340,6 +340,26 @@ fn try_match_rotate(
     }
 
     None
+}
+
+fn rotate_site(
+    start_pc: usize,
+    old_len: usize,
+    dst_reg: u8,
+    val_reg: u8,
+    tmp_reg: u8,
+    shift_amount: u32,
+) -> Option<RotateSite> {
+    // The packed rotate kinsn uses tmp_reg as verifier proof scratch. It cannot
+    // encode sites where the original OR writes the result into that same temp.
+    (dst_reg != tmp_reg).then_some(RotateSite {
+        start_pc,
+        old_len,
+        dst_reg,
+        val_reg,
+        tmp_reg,
+        shift_amount,
+    })
 }
 
 #[cfg(test)]
@@ -406,8 +426,8 @@ mod tests {
 
     #[test]
     fn test_rotate_pass_pattern_or_reversed() {
-        // clang emits OR tmp, dst instead of OR dst, tmp.
-        // Result lands in tmp register (r3) instead of dst (r2).
+        // OR source/destination order may differ, but the result must not land
+        // in the scratch copy register.
         let insns = vec![
             BpfInsn::mov64_reg(3, 2),           // MOV r3, r2 (provenance: r3 is copy)
             BpfInsn::alu64_imm(BPF_RSH, 3, 56), // RSH r3 (copy), 56
@@ -420,6 +440,18 @@ mod tests {
         assert_eq!(sites[0].dst_reg, 2); // result register
         assert_eq!(sites[0].val_reg, 2); // original value register
         assert_eq!(sites[0].tmp_reg, 3); // copy register
+    }
+
+    #[test]
+    fn test_rotate_pass_no_match_when_or_writes_tmp_reg() {
+        let insns = vec![
+            BpfInsn::mov64_reg(3, 2),
+            BpfInsn::alu64_imm(BPF_RSH, 3, 56),
+            BpfInsn::alu64_imm(BPF_LSH, 2, 8),
+            BpfInsn::alu64_reg(BPF_OR, 3, 2),
+        ];
+
+        assert!(scan_rotate_sites(&insns).is_empty());
     }
 
     #[test]

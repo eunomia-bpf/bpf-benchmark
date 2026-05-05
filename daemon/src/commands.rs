@@ -670,6 +670,7 @@ pub(crate) fn try_apply_one(
         let mut reports = Vec::new();
         let mut verifier_states_ready = false;
         let mut last_rejit = false;
+        let mut committed_passes = 0usize;
         let mut partial_error = None;
         let mut failure_artifacts = None;
         for (idx, pass) in pass_list.iter().enumerate() {
@@ -687,8 +688,12 @@ pub(crate) fn try_apply_one(
                     prog_id,
                     idx,
                     pass,
-                    reports.len(),
-                    anyhow!("pass {pass} requires verifier states from a previous per-pass ReJIT"),
+                    committed_passes,
+                    anyhow!(
+                        "pass {pass} requires verifier states from a previous per-pass ReJIT — \
+                         insert a `noop` pass before {pass} in the pass chain to bootstrap them \
+                         (e.g. BPFREJIT_BENCH_PASSES=\"noop,{pass},...\")"
+                    ),
                     None,
                     None,
                 )?;
@@ -722,8 +727,15 @@ pub(crate) fn try_apply_one(
             ) {
                 Ok(report) => report,
                 Err(err) => {
-                    let (message, artifacts) =
-                        pass_failure_artifacts(prog_id, idx, pass, reports.len(), err, None, None)?;
+                    let (message, artifacts) = pass_failure_artifacts(
+                        prog_id,
+                        idx,
+                        pass,
+                        committed_passes,
+                        err,
+                        None,
+                        None,
+                    )?;
                     partial_error = Some(message);
                     failure_artifacts = Some(artifacts);
                     break;
@@ -731,6 +743,13 @@ pub(crate) fn try_apply_one(
             };
             let pass_bytes = fs::read(&pass_output)
                 .with_context(|| format!("read {}", pass_output.display()))?;
+            if !report.changed {
+                if pass_bytes != current_bytes {
+                    bail!("bpfopt pass {pass} reported unchanged but modified bytecode");
+                }
+                reports.push(report);
+                continue;
+            }
             let pass_insns = decode_insns(&pass_bytes, pass_output.to_string_lossy().as_ref())?;
             let rejit_result = rejit_program(prog_id, &pass_insns, &fd_array, &pass_verifier_log);
             let rejit_report = match rejit_result {
@@ -741,7 +760,7 @@ pub(crate) fn try_apply_one(
                         prog_id,
                         idx,
                         pass,
-                        reports.len(),
+                        committed_passes,
                         err,
                         Some(&pass_error),
                         Some(&pass_verifier_log),
@@ -756,6 +775,7 @@ pub(crate) fn try_apply_one(
             verifier_states_ready = true;
             current_bytes = pass_bytes;
             last_rejit = true;
+            committed_passes += 1;
             reports.push(report);
         }
         fs::write(&opt_bin, &current_bytes)
