@@ -683,36 +683,18 @@ pub(crate) fn try_apply_one(
 
             let needs_states = pass_needs_verifier_states(pass);
             if needs_states && !verifier_states_ready {
-                let bootstrap_verifier_log = workdir
-                    .path()
-                    .join(format!("{stem}.bootstrap.verifier.log"));
-                let bootstrap_insns =
-                    decode_insns(&current_bytes, "verifier-state bootstrap input")?;
-                let bootstrap_report = rejit_program(
+                let (message, artifacts) = pass_failure_artifacts(
                     prog_id,
-                    &bootstrap_insns,
-                    &fd_array,
-                    &bootstrap_verifier_log,
-                );
-                let rejit_report = match bootstrap_report {
-                    Ok(report) => report,
-                    Err(err) => {
-                        let (message, artifacts) = pass_failure_artifacts(
-                            prog_id,
-                            idx,
-                            pass,
-                            reports.len(),
-                            err.context("bootstrap verifier states"),
-                            None,
-                            Some(&bootstrap_verifier_log),
-                        )?;
-                        partial_error = Some(message);
-                        failure_artifacts = Some(artifacts);
-                        break;
-                    }
-                };
-                write_verifier_states_for_next_pass(&verifier_states_json, &rejit_report)
-                    .with_context(|| format!("write verifier states before pass {pass}"))?;
+                    idx,
+                    pass,
+                    reports.len(),
+                    anyhow!("pass {pass} requires verifier states from a previous per-pass ReJIT"),
+                    None,
+                    None,
+                )?;
+                partial_error = Some(message);
+                failure_artifacts = Some(artifacts);
+                break;
             }
             let target_arg = pass_needs_target(pass).then_some(target_json.as_path());
             let verifier_states_arg = needs_states.then_some(verifier_states_json.as_path());
