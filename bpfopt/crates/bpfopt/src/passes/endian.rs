@@ -379,13 +379,13 @@ impl BpfPass for EndianFusionPass {
 
         if !ctx
             .kinsn_registry
-            .packed_supported_for_target_name("bpf_endian_load16")
+            .kinsn_registered_for_target_name("bpf_endian_load16")
             && !ctx
                 .kinsn_registry
-                .packed_supported_for_target_name("bpf_endian_load32")
+                .kinsn_registered_for_target_name("bpf_endian_load32")
             && !ctx
                 .kinsn_registry
-                .packed_supported_for_target_name("bpf_endian_load64")
+                .kinsn_registered_for_target_name("bpf_endian_load64")
         {
             return Ok(PassResult::skipped(
                 self.name(),
@@ -431,7 +431,7 @@ impl BpfPass for EndianFusionPass {
             }
 
             if !kfunc_name_for_size(site.size)
-                .map(|name| ctx.kinsn_registry.packed_supported_for_target_name(name))
+                .map(|name| ctx.kinsn_registry.kinsn_registered_for_target_name(name))
                 .unwrap_or(false)
             {
                 skipped.push(SkipReason {
@@ -615,21 +615,6 @@ mod tests {
         ctx.kinsn_registry.endian_load16_btf_id = btf_id16;
         ctx.kinsn_registry.endian_load32_btf_id = btf_id32;
         ctx.kinsn_registry.endian_load64_btf_id = btf_id64;
-        if btf_id16 >= 0 {
-            ctx.kinsn_registry
-                .target_supported_encodings
-                .insert("bpf_endian_load16".to_string(), BPF_KINSN_ENC_PACKED_CALL);
-        }
-        if btf_id32 >= 0 {
-            ctx.kinsn_registry
-                .target_supported_encodings
-                .insert("bpf_endian_load32".to_string(), BPF_KINSN_ENC_PACKED_CALL);
-        }
-        if btf_id64 >= 0 {
-            ctx.kinsn_registry
-                .target_supported_encodings
-                .insert("bpf_endian_load64".to_string(), BPF_KINSN_ENC_PACKED_CALL);
-        }
         ctx.platform.has_movbe = true;
         ctx
     }

@@ -63,9 +63,6 @@ fn mov32_reg(dst: u8, src: u8) -> BpfInsn {
 fn ctx_with_select_kfunc(btf_id: i32) -> PassContext {
     let mut ctx = PassContext::test_default();
     ctx.kinsn_registry.select64_btf_id = btf_id;
-    ctx.kinsn_registry
-        .target_supported_encodings
-        .insert("bpf_select64".to_string(), BPF_KINSN_ENC_PACKED_CALL);
     ctx.platform.has_cmov = true;
     ctx
 }

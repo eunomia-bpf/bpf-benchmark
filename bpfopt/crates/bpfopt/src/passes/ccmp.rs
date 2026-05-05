@@ -154,16 +154,6 @@ impl BpfPass for CcmpPass {
             ));
         }
 
-        if !ctx.kinsn_registry.packed_supported_for_pass(self.name()) {
-            return Ok(PassResult::skipped(
-                self.name(),
-                SkipReason {
-                    pc: 0,
-                    reason: "bpf_ccmp64 packed ABI not available".into(),
-                },
-            ));
-        }
-
         let bt_analysis = BranchTargetAnalysis;
         let bt = analyses.get(&bt_analysis, program);
         let liveness_analysis = LivenessAnalysis;
@@ -506,9 +496,6 @@ mod tests {
         let mut ctx = PassContext::test_default();
         ctx.platform.arch = arch;
         ctx.kinsn_registry.ccmp64_btf_id = 77;
-        ctx.kinsn_registry
-            .target_supported_encodings
-            .insert("bpf_ccmp64".to_string(), BPF_KINSN_ENC_PACKED_CALL);
         ctx
     }
 

@@ -158,10 +158,8 @@ def prepare_daemon_session(
     failure_artifacts_dir: Path | None = None,
 ) -> PreparedDaemonSession:
     metadata = copy.deepcopy(getattr(daemon_session, "kinsn_metadata", {}) or {})
-    if not bool(getattr(daemon_session, "load_kinsn", False)):
-        return PreparedDaemonSession(session=daemon_session, metadata={}, failure_artifacts_dir=failure_artifacts_dir)
     if not metadata:
-        raise RuntimeError("daemon session requested kinsn loading but did not capture kinsn metadata")
+        raise RuntimeError("daemon session did not capture kinsn metadata")
     metadata["daemon_binary"] = relpath(daemon_session.daemon_binary.resolve())
     return PreparedDaemonSession(session=daemon_session, metadata=metadata, failure_artifacts_dir=failure_artifacts_dir)
 

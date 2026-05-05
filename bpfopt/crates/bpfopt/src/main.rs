@@ -194,15 +194,6 @@ struct TargetJson {
 struct KinsnJson {
     btf_func_id: i32,
     call_offset: i16,
-    #[serde(default)]
-    supported_encodings: Option<SupportedEncodingsJson>,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(untagged)]
-enum SupportedEncodingsJson {
-    Bits(u32),
-    Names(Vec<String>),
 }
 
 #[derive(Debug, Deserialize)]
@@ -465,16 +456,6 @@ fn validate_required_kinsns(ctx: &PassContext, pass_names: &[&str]) -> Result<()
 fn require_kinsn(ctx: &PassContext, target_name: &str) -> Result<()> {
     if ctx.kinsn_registry.btf_id_for_target_name(target_name) < 0 {
         bail!("kinsn '{}' not in target", public_kinsn_name(target_name));
-    }
-    if !ctx
-        .kinsn_registry
-        .target_supported_encodings
-        .contains_key(target_name)
-    {
-        bail!(
-            "target kinsn '{}' missing supported_encodings",
-            public_kinsn_name(target_name)
-        );
     }
     Ok(())
 }
@@ -775,13 +756,6 @@ fn kinsn_registry_from_target(target: &TargetJson) -> Result<KinsnRegistry> {
         registry
             .target_call_offsets
             .insert(canonical.to_string(), spec.call_offset);
-        let encodings = spec
-            .supported_encodings
-            .as_ref()
-            .ok_or_else(|| anyhow!("target kinsn {canonical} missing supported_encodings"))?;
-        registry
-            .target_supported_encodings
-            .insert(canonical.to_string(), parse_supported_encodings(encodings)?);
     }
     Ok(registry)
 }
@@ -799,25 +773,6 @@ fn unavailable_kinsn_registry() -> KinsnRegistry {
         endian_load64_btf_id: -1,
         prefetch_btf_id: -1,
         target_call_offsets: HashMap::new(),
-        target_supported_encodings: HashMap::new(),
-    }
-}
-
-fn parse_supported_encodings(encodings: &SupportedEncodingsJson) -> Result<u32> {
-    match encodings {
-        SupportedEncodingsJson::Bits(bits) => Ok(*bits),
-        SupportedEncodingsJson::Names(names) => {
-            let mut bits = 0u32;
-            for name in names {
-                match name.as_str() {
-                    "packed" | "packed_call" => {
-                        bits |= bpfopt::insn::BPF_KINSN_ENC_PACKED_CALL;
-                    }
-                    _ => bail!("unknown kinsn supported encoding: {name}"),
-                }
-            }
-            Ok(bits)
-        }
     }
 }
 
@@ -1244,9 +1199,6 @@ mod tests {
                     KinsnJson {
                         btf_func_id: 11,
                         call_offset: 2,
-                        supported_encodings: Some(SupportedEncodingsJson::Names(vec![
-                            "packed".to_string()
-                        ])),
                     },
                 ),
                 (
@@ -1254,9 +1206,6 @@ mod tests {
                     KinsnJson {
                         btf_func_id: 12,
                         call_offset: 0,
-                        supported_encodings: Some(SupportedEncodingsJson::Names(vec![
-                            "packed".to_string()
-                        ])),
                     },
                 ),
                 (
@@ -1264,9 +1213,6 @@ mod tests {
                     KinsnJson {
                         btf_func_id: 13,
                         call_offset: 0,
-                        supported_encodings: Some(SupportedEncodingsJson::Names(vec![
-                            "packed".to_string()
-                        ])),
                     },
                 ),
                 (
@@ -1274,9 +1220,6 @@ mod tests {
                     KinsnJson {
                         btf_func_id: 14,
                         call_offset: 7,
-                        supported_encodings: Some(SupportedEncodingsJson::Names(vec![
-                            "packed".to_string()
-                        ])),
                     },
                 ),
             ]),
@@ -1318,20 +1261,6 @@ mod tests {
         );
     }
 
-    #[test]
-    fn target_json_rejects_unknown_kinsn_encoding_names() {
-        let err = parse_supported_encodings(&SupportedEncodingsJson::Names(vec![
-            "packed".to_string(),
-            "legacy".to_string(),
-        ]))
-        .unwrap_err();
-
-        assert!(
-            err.to_string()
-                .contains("unknown kinsn supported encoding: legacy"),
-            "err={err:#}"
-        );
-    }
 
     #[test]
     fn pass_report_serializes_inlined_map_entries_as_hex() {

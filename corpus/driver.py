@@ -84,11 +84,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--samples", type=int, default=0)
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
     parser.add_argument(
-        "--no-kinsn",
-        action="store_true",
-        help="Disable loading kinsn modules for this corpus run.",
-    )
-    parser.add_argument(
         "--keep-failure-artifacts",
         action="store_true",
         help="Persist daemon failure-artifact tarballs under details/failure-artifacts/ for debug; default discards them.",
@@ -683,7 +678,6 @@ def run_suite(
     daemon_log_dir = artifact_session.run_dir / "details"
     with DaemonSession.start(
         daemon_binary,
-        load_kinsn=not bool(args.no_kinsn),
         stdout_path=daemon_log_dir / "daemon.stdout.log",
         stderr_path=daemon_log_dir / "daemon.stderr.log",
     ) as daemon_session:
@@ -809,7 +803,6 @@ def build_run_metadata(
         "manifest": str(Path(args.suite).resolve()),
         "samples": int(resolved_samples),
         "workload_seconds": float(resolved_workload_seconds),
-        "kinsn_enabled": not bool(args.no_kinsn),
     }
     metadata.update(benchmark_run_provenance())
     metadata.update(current_process_identity())
@@ -874,7 +867,6 @@ def main(argv: list[str] | None = None) -> int:
         "status": "running",
         "samples": int(resolved_samples),
         "workload_seconds": float(resolved_workload_seconds),
-        "kinsn_enabled": not bool(args.no_kinsn),
     }
 
     def build_artifact_metadata(

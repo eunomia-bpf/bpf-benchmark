@@ -89,9 +89,6 @@ pub const BPF_REG_8: u8 = kernel_sys::BPF_REG_8 as u8;
 pub const BPF_REG_9: u8 = kernel_sys::BPF_REG_9 as u8;
 pub const BPF_REG_10: u8 = kernel_sys::BPF_REG_10 as u8;
 
-// ── kinsn encoding constants (synced with include/linux/bpf.h) ────
-pub const BPF_KINSN_ENC_PACKED_CALL: u32 = 1 << 1;
-
 // ── Helper macros (as functions) ────────────────────────────────────
 #[inline]
 pub const fn bpf_class(code: u8) -> u8 {

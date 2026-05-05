@@ -40,16 +40,6 @@ impl BpfPass for RotatePass {
             ));
         }
 
-        if !ctx.kinsn_registry.packed_supported_for_pass(self.name()) {
-            return Ok(PassResult::skipped(
-                self.name(),
-                SkipReason {
-                    pc: 0,
-                    reason: "bpf_rotate64 packed ABI not available".into(),
-                },
-            ));
-        }
-
         let bt_analysis = BranchTargetAnalysis;
         let bt = analyses.get(&bt_analysis, program);
         let liveness_analysis = LivenessAnalysis;
@@ -374,9 +364,6 @@ mod tests {
     fn ctx_with_rotate_kfunc(btf_id: i32) -> PassContext {
         let mut ctx = PassContext::test_default();
         ctx.kinsn_registry.rotate64_btf_id = btf_id;
-        ctx.kinsn_registry
-            .target_supported_encodings
-            .insert("bpf_rotate64".to_string(), BPF_KINSN_ENC_PACKED_CALL);
         ctx.platform.has_rorx = true;
         ctx
     }

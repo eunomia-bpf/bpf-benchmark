@@ -11,7 +11,7 @@ use std::any::{Any, TypeId};
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
-use crate::insn::{BpfInsn, BPF_KINSN_ENC_PACKED_CALL};
+use crate::insn::BpfInsn;
 pub use kernel_sys::{
     RegState, ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
@@ -622,8 +622,6 @@ pub struct KinsnRegistry {
     pub prefetch_btf_id: i32,
     /// Per-target static call offsets used by offline callers.
     pub target_call_offsets: HashMap<String, i16>,
-    /// Per-target supported kinsn encodings.
-    pub target_supported_encodings: HashMap<String, u32>,
 }
 
 impl KinsnRegistry {
@@ -662,25 +660,15 @@ impl KinsnRegistry {
             .unwrap_or(0)
     }
 
-    pub fn supported_encodings_for_target_name(&self, target_name: &str) -> u32 {
-        self.target_supported_encodings
-            .get(target_name)
-            .copied()
-            .unwrap_or(0)
+    /// Whether the kinsn for the named target is registered (btf_id ≥ 0).
+    pub fn kinsn_registered_for_target_name(&self, target_name: &str) -> bool {
+        self.btf_id_for_target_name(target_name) >= 0
     }
 
-    pub(crate) fn supported_encodings_for_pass(&self, pass_name: &str) -> u32 {
+    /// Whether the kinsn used by the named pass is registered.
+    pub(crate) fn kinsn_registered_for_pass(&self, pass_name: &str) -> bool {
         Self::target_name_for_pass(pass_name)
-            .map(|name| self.supported_encodings_for_target_name(name))
-            .unwrap_or(0)
-    }
-
-    pub(crate) fn packed_supported_for_pass(&self, pass_name: &str) -> bool {
-        (self.supported_encodings_for_pass(pass_name) & BPF_KINSN_ENC_PACKED_CALL) != 0
-    }
-
-    pub(crate) fn packed_supported_for_target_name(&self, target_name: &str) -> bool {
-        (self.supported_encodings_for_target_name(target_name) & BPF_KINSN_ENC_PACKED_CALL) != 0
+            .is_some_and(|name| self.kinsn_registered_for_target_name(name))
     }
 }
 
@@ -985,7 +973,6 @@ impl PassContext {
                 endian_load64_btf_id: -1,
                 prefetch_btf_id: -1,
                 target_call_offsets: HashMap::new(),
-                target_supported_encodings: HashMap::new(),
             },
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig::default(),

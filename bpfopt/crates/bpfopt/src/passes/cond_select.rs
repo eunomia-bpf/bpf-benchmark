@@ -136,16 +136,6 @@ impl BpfPass for CondSelectPass {
             ));
         }
 
-        if !ctx.kinsn_registry.packed_supported_for_pass(self.name()) {
-            return Ok(PassResult::skipped(
-                self.name(),
-                SkipReason {
-                    pc: 0,
-                    reason: "bpf_select64 packed ABI not available".into(),
-                },
-            ));
-        }
-
         let bt_analysis = BranchTargetAnalysis;
         let bt = analyses.get(&bt_analysis, program);
         let liveness_analysis = LivenessAnalysis;

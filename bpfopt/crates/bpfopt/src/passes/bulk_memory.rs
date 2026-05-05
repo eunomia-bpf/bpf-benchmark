@@ -165,7 +165,7 @@ impl BpfPass for BulkMemoryPass {
                 continue;
             }
 
-            if !ctx.kinsn_registry.packed_supported_for_target_name(target) {
+            if !ctx.kinsn_registry.kinsn_registered_for_target_name(target) {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
                     reason: format!("{target} packed ABI not available"),

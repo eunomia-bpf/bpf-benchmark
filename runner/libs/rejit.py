@@ -427,7 +427,6 @@ class DaemonSession:
     stdout_path: Path
     stderr_path: Path
     kinsn_metadata: dict[str, object] = field(default_factory=dict)
-    load_kinsn: bool = False
     _closed: bool = False
 
     @classmethod
@@ -435,19 +434,17 @@ class DaemonSession:
         cls,
         daemon_binary: Path | str,
         *,
-        load_kinsn: bool = False,
         stdout_path: Path,
         stderr_path: Path,
     ) -> "DaemonSession":
         from .kinsn import prepare_kinsn_modules  # noqa: PLC0415
         binary = Path(daemon_binary).resolve()
-        kinsn_metadata: dict[str, object] = dict(prepare_kinsn_modules()) if load_kinsn else {}
+        kinsn_metadata: dict[str, object] = dict(prepare_kinsn_modules())
         proc, socket_path, socket_dir = _start_daemon_server(binary, stdout_path=stdout_path, stderr_path=stderr_path)
-        if load_kinsn:
-            kinsn_metadata["daemon_binary"] = str(binary)
+        kinsn_metadata["daemon_binary"] = str(binary)
         return cls(daemon_binary=binary, proc=proc, socket_path=socket_path, socket_dir=socket_dir,
                    stdout_path=stdout_path, stderr_path=stderr_path,
-                   kinsn_metadata=kinsn_metadata, load_kinsn=bool(load_kinsn))
+                   kinsn_metadata=kinsn_metadata)
 
     def __enter__(self) -> "DaemonSession":
         return self

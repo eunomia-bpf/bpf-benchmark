@@ -133,7 +133,7 @@ impl BpfPass for PrefetchPass {
 
         if !ctx
             .kinsn_registry
-            .packed_supported_for_target_name(PREFETCH_TARGET_NAME)
+            .kinsn_registered_for_target_name(PREFETCH_TARGET_NAME)
         {
             return Ok(PassResult::skipped(
                 self.name(),
@@ -789,9 +789,6 @@ mod tests {
     fn ctx_with_prefetch_kfunc(btf_id: i32) -> PassContext {
         let mut ctx = PassContext::test_default();
         ctx.kinsn_registry.prefetch_btf_id = btf_id;
-        ctx.kinsn_registry
-            .target_supported_encodings
-            .insert(PREFETCH_TARGET_NAME.to_string(), BPF_KINSN_ENC_PACKED_CALL);
         ctx
     }
 

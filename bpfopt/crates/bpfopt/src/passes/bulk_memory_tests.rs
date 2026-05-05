@@ -315,10 +315,6 @@ fn ctx_with_bulk_kfuncs() -> PassContext {
     let mut ctx = PassContext::test_default();
     ctx.kinsn_registry.memcpy_bulk_btf_id = MEMCPY_BTF_ID;
     ctx.kinsn_registry.memset_bulk_btf_id = MEMSET_BTF_ID;
-    ctx.kinsn_registry.target_supported_encodings = HashMap::from([
-        (MEMCPY_TARGET.to_string(), BPF_KINSN_ENC_PACKED_CALL),
-        (MEMSET_TARGET.to_string(), BPF_KINSN_ENC_PACKED_CALL),
-    ]);
     ctx
 }
 
