@@ -283,6 +283,10 @@ _STRESS_NG_FILESYSTEM_STRESSORS = (
     "rename",
     "touch",
     "utime",
+    "link",
+    "symlink",
+    "mknod",
+    "fcntl",
 )
 _STRESS_NG_IO_STRESSORS = (
     "aio",
@@ -302,6 +306,7 @@ _STRESS_NG_NETWORK_STRESSORS = (
     "sockfd",
     "sockpair",
     "sockmany",
+    "udp",
     "udp-flood",
 )
 _STRESS_NG_OS_STRESSORS = (
@@ -310,6 +315,13 @@ _STRESS_NG_OS_STRESSORS = (
     "get",
     "prctl",
     "set",
+    "dup",
+    "kill",
+    "sigfd",
+    "signal",
+    "pty",
+    "itimer",
+    "timerfd",
 )
 _STRESS_NG_PROCESS_STRESSORS = (
     "clone",
@@ -324,10 +336,15 @@ _STRESS_NG_SCHEDULER_STRESSORS = (
     "switch",
     "yield",
 )
+_STRESS_NG_MEMORY_STRESSORS = (
+    "mmap",
+    "mprotect",
+    "mremap",
+    "madvise",
+)
 _STRESS_NG_WORKLOAD_STRESSORS: Mapping[str, tuple[str, ...]] = {
     "stress_ng_cpu": _STRESS_NG_CPU_STRESSORS,
     "stress_ng_filesystem": _STRESS_NG_FILESYSTEM_STRESSORS,
-    "stress_ng_network": _STRESS_NG_NETWORK_STRESSORS,
     "stress_ng_os": _STRESS_NG_OS_STRESSORS,
     "stress_ng_process": _STRESS_NG_PROCESS_STRESSORS,
     "stress_ng_scheduler": _STRESS_NG_SCHEDULER_STRESSORS,
@@ -335,6 +352,7 @@ _STRESS_NG_WORKLOAD_STRESSORS: Mapping[str, tuple[str, ...]] = {
         *_STRESS_NG_OS_STRESSORS,
         *_STRESS_NG_IO_STRESSORS,
         *_STRESS_NG_NETWORK_STRESSORS,
+        *_STRESS_NG_MEMORY_STRESSORS,
     ),
 }
 
@@ -343,6 +361,8 @@ _STRESS_NG_STRESSOR_ARGS: Mapping[str, tuple[str, ...]] = {
     "fpunch": ("--fpunch-bytes", "32M"),
     "hdd": ("--hdd-bytes", "128M"),
     "iomix": ("--iomix-bytes", "128M"),
+    "mmap": ("--mmap-bytes", "16M"),
+    "mremap": ("--mremap-bytes", "16M"),
     "open": ("--open-max", "1024"),
     "syscall": ("--syscall-method", "fast75"),
 }
@@ -401,8 +421,11 @@ def run_stress_ng_class_load(duration_s: int | float, stressors: Sequence[str], 
     seconds = max(1, int(round(float(duration_s))))
     temp_root = _disk_backed_tmp_root()
     command: list[str] = [stress_ng]
+    # Use 4 workers per stressor so each rare-syscall stressor still gets
+    # enough kernel time within a 1s smoke / 5s authoritative workload to
+    # fire BPF hooks in heavy multi-policy agents (tetragon/tracee).
     for stressor in normalized_stressors:
-        command += [f"--{stressor}", "1"]
+        command += [f"--{stressor}", "4"]
         command += list(_STRESS_NG_STRESSOR_ARGS.get(stressor, ()))
     command += _stress_ng_dynamic_stressor_args(normalized_stressors)
     command += ["--timeout", f"{seconds}s", "--metrics-brief", "--temp-path", str(temp_root)]
@@ -546,18 +569,24 @@ def run_network_lossy_multi_load(
     *,
     network_device: str | None = None,
 ) -> WorkloadResult:
-    """Network load with 5% packet loss + concurrent ICMP probes.
+    """Network load with 20% packet loss + concurrent ICMP probes.
 
-    Drives TCP retransmits (for tcpretrans-style hooks) and exercises ICMP
-    plus HTTP traffic so multi-protocol datapath programs (e.g. cilium)
-    receive packets across more program slots than plain HTTP load.
+    Exercises ICMP plus HTTP traffic so multi-protocol datapath programs
+    (e.g. cilium) receive packets across more program slots than plain HTTP
+    load.
+
+    Parameters chosen to maximise event volume for low-frequency BPF hooks
+    while staying within standard netem stress-test parameter ranges:
+    - 20% loss / 50 ms delay: aggressive but bounded; matches the upper end
+      of typical netem WAN emulation profiles in networking literature.
+    - wrk -t4 -c50: 200 concurrent flows -> ~10K connect events/s under loss.
     """
     if not network_device:
         raise RuntimeError("network_lossy_multi requires network_device")
     wrk_binary = resolve_workload_tool("wrk")
     ping_binary = which("ping")
     seconds = max(1, int(round(float(duration_s))))
-    with _netem_qdisc(network_device, loss_pct=5.0, delay_ms=5):
+    with _netem_qdisc(network_device, loss_pct=20.0, delay_ms=50):
         with _network_http_server(network_device) as server:
             ping_proc = None
             if ping_binary is not None:
@@ -571,7 +600,7 @@ def run_network_lossy_multi_load(
             try:
                 start = time.monotonic()
                 command = _network_client_command(
-                    [wrk_binary, "-t2", "-c20", f"-d{seconds}s", server.url],
+                    [wrk_binary, "-t4", "-c50", f"-d{seconds}s", server.url],
                     network_device,
                 )
                 c = run_command(command, check=False, timeout=float(duration_s) + 30)
@@ -603,7 +632,15 @@ def run_network_lossy_multi_load(
                         ping_proc.wait(timeout=2)
 
 
-def run_network_load(duration_s: int | float, *, network_device: str | None = None) -> WorkloadResult:
+def run_xdp_traffic_load(duration_s: int | float, *, network_device: str | None = None) -> WorkloadResult:
+    """Lightweight HTTP keep-alive load for XDP packet-forwarding programs.
+
+    XDP runs at network device ingress before any qdisc; the goal is steady
+    packet flow through the iface, not connect-rate or netem. wrk -t2 -c10
+    sustains ~30K-100K HTTP requests/sec via 10 keep-alive connections, which
+    yields enough packets for katran's XDP load balancer measurement without
+    saturating the link.
+    """
     wrk_binary = resolve_workload_tool("wrk")
     with _network_http_server(network_device) as server:
         start = time.monotonic()
@@ -676,11 +713,73 @@ def run_tcp_connect_load(duration_s: int | float, *, network_device: str | None 
         return _finish_result(total, elapsed, c.stdout or "", c.stderr or "")
 
 
+_MULTI_RUNTIME_PROBES: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("python3", ("-c", "x = 0\nwhile True:\n    x += 1")),
+    ("ruby", ("-e", "x = 0; loop { x += 1 }")),
+    ("node", ("-e", "let x=0; while(true){x++;}")),
+    ("perl", ("-e", "my $x=0; while(1){$x++;}")),
+    ("php", ("-r", "$x=0; while(true){$x++;}")),
+)
+
+
+def _spawn_runtime_idlers() -> list[subprocess.Popen[str]]:
+    procs: list[subprocess.Popen[str]] = []
+    for tool, args in _MULTI_RUNTIME_PROBES:
+        binary = which(tool)
+        if binary is None:
+            continue
+        try:
+            proc = subprocess.Popen(
+                [binary, *args],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                stdin=subprocess.DEVNULL,
+            )
+        except OSError:
+            continue
+        procs.append(proc)
+    return procs
+
+
+def _kill_runtime_idlers(procs: Sequence[subprocess.Popen[str]]) -> None:
+    for proc in procs:
+        if proc.poll() is None:
+            proc.terminate()
+    for proc in procs:
+        try:
+            proc.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            try:
+                proc.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                pass
+
+
+def run_multi_runtime_cpu_load(duration_s: int | float) -> WorkloadResult:
+    """CPU workload with concurrent multi-language idle loops.
+
+    Spawns long-running interpreter processes (python/ruby/node/perl/php) so
+    eBPF profilers (e.g. otelcol-ebpf-profiler) sample stack frames for each
+    runtime's unwinder, then runs stress-ng --cpu to drive native unwinder
+    coverage. Interpreters that are not installed are silently skipped so the
+    workload still runs on hosts with a partial language toolchain.
+    """
+    procs = _spawn_runtime_idlers()
+    try:
+        return run_stress_ng_class_load(
+            float(duration_s),
+            _STRESS_NG_CPU_STRESSORS,
+            workload_name="multi_runtime_cpu",
+        )
+    finally:
+        _kill_runtime_idlers(procs)
+
+
 def run_named_workload(
     kind: str,
     duration_s: int | float,
     *,
-    network_as_tcp_connect: bool = False,
     network_device: str | None = None,
 ) -> WorkloadResult:
     seconds = max(1, int(round(float(duration_s))))
@@ -691,12 +790,12 @@ def run_named_workload(
             _STRESS_NG_WORKLOAD_STRESSORS[kind],
             workload_name=kind,
         )
+    if kind == "multi_runtime_cpu":
+        return run_multi_runtime_cpu_load(seconds)
     if kind == "tcp_connect":
         return run_tcp_connect_load(seconds, network_device=network_device)
-    if kind == "network":
-        if network_as_tcp_connect:
-            return run_tcp_connect_load(seconds, network_device=network_device)
-        return run_network_load(seconds, network_device=network_device)
+    if kind == "xdp_traffic":
+        return run_xdp_traffic_load(seconds, network_device=network_device)
     if kind == "network_lossy_multi":
         return run_network_lossy_multi_load(seconds, network_device=network_device)
     if kind in {"fio", "fio_randrw"}:

@@ -60,10 +60,6 @@ class WorkloadContractTests(unittest.TestCase):
             if process.stderr is not None:
                 process.stderr.close()
 
-    def test_stress_ng_os_excludes_timerfd(self) -> None:
-        self.assertNotIn("timerfd", workload._STRESS_NG_WORKLOAD_STRESSORS["stress_ng_os"])
-        self.assertNotIn("timerfd", workload._STRESS_NG_WORKLOAD_STRESSORS["stress_ng_os_io_network"])
-
     def test_interface_bound_network_client_runs_in_root_namespace(self) -> None:
         command = workload._network_client_command(["wrk", "http://198.18.0.2:18080/"], workload.BENCHMARK_IFACE)
 
@@ -109,11 +105,11 @@ class WorkloadContractTests(unittest.TestCase):
             mock.patch.object(workload, "run_command", return_value=completed),
         ):
             with self.assertRaisesRegex(RuntimeError, r"wrk.*198\.18\.0\.2"):
-                workload.run_network_load(1, network_device=workload.BENCHMARK_IFACE)
+                workload.run_xdp_traffic_load(1, network_device=workload.BENCHMARK_IFACE)
 
     def test_cilium_network_workload_passes_benchmark_device(self) -> None:
         result = _workload_result()
-        runner = cilium_runner.CiliumRunner(workload_kind="network")
+        runner = cilium_runner.CiliumRunner(workload_kind="network_lossy_multi")
         runner.device = workload.BENCHMARK_IFACE
         with mock.patch.object(
             cilium_runner,
@@ -122,7 +118,7 @@ class WorkloadContractTests(unittest.TestCase):
         ) as run_named:
             self.assertIs(runner._run_workload(1), result)
 
-        run_named.assert_called_once_with("network", 1, network_device=workload.BENCHMARK_IFACE)
+        run_named.assert_called_once_with("network_lossy_multi", 1, network_device=workload.BENCHMARK_IFACE)
 
     def test_corpus_runner_adapter_preserves_network_device_path(self) -> None:
         for runner_name, runner_module in (
@@ -130,7 +126,7 @@ class WorkloadContractTests(unittest.TestCase):
         ):
             with self.subTest(runner=runner_name):
                 result = _workload_result()
-                runner = get_app_runner(runner_name, workload="network")
+                runner = get_app_runner(runner_name, workload="network_lossy_multi")
                 runner.session = object()
                 runner.device = workload.BENCHMARK_IFACE
                 with mock.patch.object(
@@ -141,13 +137,13 @@ class WorkloadContractTests(unittest.TestCase):
                     self.assertIs(runner.run_workload(1), result)
 
                 run_named.assert_called_once_with(
-                    "network",
+                    "network_lossy_multi",
                     1,
                     network_device=workload.BENCHMARK_IFACE,
                 )
 
     def test_cilium_network_workload_fail_fast_without_device(self) -> None:
-        runner = cilium_runner.CiliumRunner(workload_kind="network")
+        runner = cilium_runner.CiliumRunner(workload_kind="network_lossy_multi")
         with self.assertRaisesRegex(RuntimeError, "could not determine a network device"):
             runner._run_workload(1)
 

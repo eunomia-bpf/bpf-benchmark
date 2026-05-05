@@ -103,7 +103,6 @@ class BpftraceRunner(AppRunner):
         return run_named_workload(
             kind,
             max(1, int(round(seconds))),
-            network_as_tcp_connect=True,
             network_device=BENCHMARK_IFACE,
         )
 
@@ -120,7 +119,6 @@ class BpftraceRunner(AppRunner):
         return run_named_workload(
             requested_kind,
             max(1, int(round(seconds))),
-            network_as_tcp_connect=True,
             network_device=BENCHMARK_IFACE,
         )
 

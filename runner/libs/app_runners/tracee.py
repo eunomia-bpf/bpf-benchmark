@@ -20,9 +20,7 @@ from ..agent import (
 )
 from ..workload import (
     WorkloadResult,
-    resolve_workload_tool,
     run_named_workload,
-    run_network_load,
 )
 from .base import AppRunner
 from .process_support import AgentSession, wait_until_program_set_stable
@@ -230,9 +228,6 @@ def run_tracee_workload(spec: Mapping[str, object], duration_s: int) -> Workload
     kind = str(spec.get("kind", spec.get("name", "")))
     if kind.startswith("stress_ng_") or kind in ("fio_randrw", "fio"):
         return run_named_workload(kind, duration_s)
-    if kind == "network":
-        resolve_workload_tool("wrk")
-        return run_network_load(duration_s)
     raise RuntimeError(f"unsupported workload kind: {kind}")
 
 DEFAULT_LOAD_TIMEOUT_S = 120

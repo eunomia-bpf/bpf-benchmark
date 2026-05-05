@@ -1,0 +1,22 @@
+{
+  "config": {
+    "enabled_passes": [
+      "wide_mem"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "corpus suite reported errors",
+  "generated_at": "2026-05-05T04:49:33.923089+00:00",
+  "kinsn_enabled": true,
+  "last_updated_at": "2026-05-05T04:49:33.923085+00:00",
+  "launcher_boot_id": "d7304e93-4631-4236-a3fd-f23a45bec95a",
+  "launcher_pid": 1834,
+  "launcher_start_ticks": 10784,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "run_type": "x86_kvm_corpus",
+  "samples": 1,
+  "started_at": "2026-05-05T04:44:37.943491+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_seconds": 1.0
+}

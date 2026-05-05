@@ -3,8 +3,6 @@ suite_name: macro_apps
 
 apps:
   - bcc/capable
-  - bcc/execsnoop
-  - bcc/bindsnoop
   - bcc/biosnoop
   - bcc/vfsstat
   - bcc/opensnoop
@@ -22,4 +20,3 @@ apps:
   - bpftrace/vfsstat
   - bpftrace/runqlat
   - bpftrace/tcplife
-  - bpftrace/tcpretrans

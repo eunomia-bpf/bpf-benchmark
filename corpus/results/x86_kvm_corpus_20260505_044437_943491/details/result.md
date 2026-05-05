@@ -1,0 +1,2431 @@
+# Corpus Benchmark
+
+```json
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+  "generated_at": "2026-05-05T04:49:33.920972+00:00",
+  "kinsn_modules": {
+    "captured_at": "2026-05-05T04:44:37.972924+00:00",
+    "daemon_binary": "daemon/target/release/bpfrejit-daemon",
+    "expected_modules": [
+      "bpf_bulk_memory",
+      "bpf_endian",
+      "bpf_extract",
+      "bpf_prefetch",
+      "bpf_rotate",
+      "bpf_select"
+    ],
+    "module_load": {
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "failed_modules": [],
+      "invoked_at": "2026-05-05T04:44:37.972860+00:00",
+      "loaded_count": 6,
+      "loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loader": "runner.libs.kinsn.load_kinsn_modules",
+      "module_dir": "/artifacts/kinsn",
+      "newly_loaded_modules": [],
+      "snapshot_after": {
+        "captured_at": "2026-05-05T04:44:37.972851+00:00",
+        "expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "loaded_bpf_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "missing_expected_modules": [],
+        "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_prefetch           12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+        "resident_expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "source": "lsmod"
+      },
+      "status": "ok",
+      "total_count": 6
+    },
+    "module_snapshot_before_daemon": {
+      "captured_at": "2026-05-05T04:44:37.957133+00:00",
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loaded_bpf_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "missing_expected_modules": [],
+      "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_prefetch           12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+      "resident_expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "source": "lsmod"
+    }
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "per_program": [
+    {
+      "app": "bcc/biosnoop",
+      "baseline_avg_ns_per_run": 214.0956648865943,
+      "baseline_run_cnt_delta": 1707983,
+      "baseline_run_time_ns_delta": 365671756,
+      "post_rejit_avg_ns_per_run": 212.83811600194178,
+      "post_rejit_run_cnt_delta": 1748919,
+      "post_rejit_run_time_ns_delta": 372236625,
+      "program": "trace_pid_start_tp",
+      "program_id": 9,
+      "ratio": 0.9941262291073543,
+      "runner": "bcc",
+      "type": "tracepoint",
+      "workload": "fio_randrw"
+    },
+    {
+      "app": "bcc/biosnoop",
+      "baseline_avg_ns_per_run": 195.33374609849105,
+      "baseline_run_cnt_delta": 1707993,
+      "baseline_run_time_ns_delta": 333628671,
+      "post_rejit_avg_ns_per_run": 192.93956358434218,
+      "post_rejit_run_cnt_delta": 1748929,
+      "post_rejit_run_time_ns_delta": 337437598,
+      "program": "trace_req_start",
+      "program_id": 10,
+      "ratio": 0.9877431188313889,
+      "runner": "bcc",
+      "type": "kprobe",
+      "workload": "fio_randrw"
+    },
+    {
+      "app": "bcc/biosnoop",
+      "baseline_avg_ns_per_run": 95.40891207132562,
+      "baseline_run_cnt_delta": 1707998,
+      "baseline_run_time_ns_delta": 162958231,
+      "post_rejit_avg_ns_per_run": 92.75681529434502,
+      "post_rejit_run_cnt_delta": 1748934,
+      "post_rejit_run_time_ns_delta": 162225548,
+      "program": "trace_req_completion_tp",
+      "program_id": 11,
+      "ratio": 0.9722028401812406,
+      "runner": "bcc",
+      "type": "tracepoint",
+      "workload": "fio_randrw"
+    },
+    {
+      "app": "bcc/tcpconnect",
+      "baseline_avg_ns_per_run": 212.16487718782173,
+      "baseline_run_cnt_delta": 6799,
+      "baseline_run_time_ns_delta": 1442509,
+      "post_rejit_avg_ns_per_run": 219.78711566617864,
+      "post_rejit_run_cnt_delta": 6830,
+      "post_rejit_run_time_ns_delta": 1501146,
+      "program": "trace_connect_entry",
+      "program_id": 30,
+      "ratio": 1.0359260146136686,
+      "runner": "bcc",
+      "type": "kprobe",
+      "workload": "tcp_connect"
+    },
+    {
+      "app": "bcc/tcpconnect",
+      "baseline_avg_ns_per_run": 1671.5030151492867,
+      "baseline_run_cnt_delta": 6799,
+      "baseline_run_time_ns_delta": 11364549,
+      "post_rejit_avg_ns_per_run": 1675.2385065885799,
+      "post_rejit_run_cnt_delta": 6830,
+      "post_rejit_run_time_ns_delta": 11441879,
+      "program": "trace_connect_v4_return",
+      "program_id": 31,
+      "ratio": 1.002234809871976,
+      "runner": "bcc",
+      "type": "kprobe",
+      "workload": "tcp_connect"
+    },
+    {
+      "app": "bcc/tcplife",
+      "baseline_avg_ns_per_run": 397.1355798319328,
+      "baseline_run_cnt_delta": 59500,
+      "baseline_run_time_ns_delta": 23629567,
+      "post_rejit_avg_ns_per_run": 422.2789895451892,
+      "post_rejit_run_cnt_delta": 56529,
+      "post_rejit_run_time_ns_delta": 23871009,
+      "program": "tracepoint__sock__inet_sock_set_state",
+      "program_id": 35,
+      "ratio": 1.0633119040200252,
+      "runner": "bcc",
+      "type": "tracepoint",
+      "workload": "tcp_connect"
+    },
+    {
+      "app": "bcc/runqlat",
+      "baseline_avg_ns_per_run": 188.44961539118827,
+      "baseline_run_cnt_delta": 11586058,
+      "baseline_run_time_ns_delta": 2183388174,
+      "post_rejit_avg_ns_per_run": 180.55381219412547,
+      "post_rejit_run_cnt_delta": 12566018,
+      "post_rejit_run_time_ns_delta": 2268842454,
+      "program": "sched_switch",
+      "program_id": 38,
+      "ratio": 0.9581012506675989,
+      "runner": "bcc",
+      "type": "raw_tracepoint",
+      "workload": "stress_ng_scheduler"
+    },
+    {
+      "app": "bcc/runqlat",
+      "baseline_avg_ns_per_run": 81.4425099206518,
+      "baseline_run_cnt_delta": 2937559,
+      "baseline_run_time_ns_delta": 239242178,
+      "post_rejit_avg_ns_per_run": 74.29398829947395,
+      "post_rejit_run_cnt_delta": 3655904,
+      "post_rejit_run_time_ns_delta": 271611689,
+      "program": "sched_wakeup",
+      "program_id": 39,
+      "ratio": 0.9122261626251138,
+      "runner": "bcc",
+      "type": "raw_tracepoint",
+      "workload": "stress_ng_scheduler"
+    },
+    {
+      "app": "bcc/runqlat",
+      "baseline_avg_ns_per_run": 354.78205128205127,
+      "baseline_run_cnt_delta": 78,
+      "baseline_run_time_ns_delta": 27673,
+      "post_rejit_avg_ns_per_run": 311.85897435897436,
+      "post_rejit_run_cnt_delta": 78,
+      "post_rejit_run_time_ns_delta": 24325,
+      "program": "raw_tracepoint__sched_wakeup_new",
+      "program_id": 40,
+      "ratio": 0.8790156470205616,
+      "runner": "bcc",
+      "type": "raw_tracepoint",
+      "workload": "stress_ng_scheduler"
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "baseline_avg_ns_per_run": 1550.75,
+      "baseline_run_cnt_delta": 8,
+      "baseline_run_time_ns_delta": 12406,
+      "post_rejit_avg_ns_per_run": 2839.375,
+      "post_rejit_run_cnt_delta": 8,
+      "post_rejit_run_time_ns_delta": 22715,
+      "program": "tracepoint__sched_process_free",
+      "program_id": 54,
+      "ratio": 1.830968886022892,
+      "runner": "otelcol-ebpf-profiler",
+      "type": "tracepoint",
+      "workload": "multi_runtime_cpu"
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "baseline_avg_ns_per_run": 1639.7255266418836,
+      "baseline_run_cnt_delta": 1614,
+      "baseline_run_time_ns_delta": 2646517,
+      "post_rejit_avg_ns_per_run": 1901.4644194756554,
+      "post_rejit_run_cnt_delta": 1602,
+      "post_rejit_run_time_ns_delta": 3046146,
+      "program": "native_tracer_entry",
+      "program_id": 55,
+      "ratio": 1.1596236007679934,
+      "runner": "otelcol-ebpf-profiler",
+      "type": "perf_event",
+      "workload": "multi_runtime_cpu"
+    },
+    {
+      "app": "cilium/agent",
+      "baseline_avg_ns_per_run": 1579.0,
+      "baseline_run_cnt_delta": 1,
+      "baseline_run_time_ns_delta": 1579,
+      "post_rejit_avg_ns_per_run": 1877.0,
+      "post_rejit_run_cnt_delta": 1,
+      "post_rejit_run_time_ns_delta": 1877,
+      "program": "cil_from_host",
+      "program_id": 140,
+      "ratio": 1.188727042431919,
+      "runner": "cilium",
+      "type": "sched_cls",
+      "workload": "network_lossy_multi"
+    },
+    {
+      "app": "cilium/agent",
+      "baseline_avg_ns_per_run": 1025.0,
+      "baseline_run_cnt_delta": 1,
+      "baseline_run_time_ns_delta": 1025,
+      "post_rejit_avg_ns_per_run": 1521.0,
+      "post_rejit_run_cnt_delta": 1,
+      "post_rejit_run_time_ns_delta": 1521,
+      "program": "cil_to_host",
+      "program_id": 143,
+      "ratio": 1.4839024390243902,
+      "runner": "cilium",
+      "type": "sched_cls",
+      "workload": "network_lossy_multi"
+    },
+    {
+      "app": "cilium/agent",
+      "baseline_avg_ns_per_run": 1251.0,
+      "baseline_run_cnt_delta": 1,
+      "baseline_run_time_ns_delta": 1251,
+      "post_rejit_avg_ns_per_run": 1023.0,
+      "post_rejit_run_cnt_delta": 1,
+      "post_rejit_run_time_ns_delta": 1023,
+      "program": "cil_to_host",
+      "program_id": 145,
+      "ratio": 0.8177458033573142,
+      "runner": "cilium",
+      "type": "sched_cls",
+      "workload": "network_lossy_multi"
+    },
+    {
+      "app": "cilium/agent",
+      "baseline_avg_ns_per_run": 1015.1519575315195,
+      "baseline_run_cnt_delta": 1507,
+      "baseline_run_time_ns_delta": 1529834,
+      "post_rejit_avg_ns_per_run": 1048.6125654450261,
+      "post_rejit_run_cnt_delta": 1337,
+      "post_rejit_run_time_ns_delta": 1401995,
+      "program": "cil_from_netdev",
+      "program_id": 155,
+      "ratio": 1.0329611814913608,
+      "runner": "cilium",
+      "type": "sched_cls",
+      "workload": "network_lossy_multi"
+    },
+    {
+      "app": "katran",
+      "baseline_avg_ns_per_run": 316.9367648645732,
+      "baseline_run_cnt_delta": 37068,
+      "baseline_run_time_ns_delta": 11748212,
+      "post_rejit_avg_ns_per_run": 305.93738578953025,
+      "post_rejit_run_cnt_delta": 37212,
+      "post_rejit_run_time_ns_delta": 11384542,
+      "program": "xdp_root",
+      "program_id": 470,
+      "ratio": 0.9652947202898882,
+      "runner": "katran",
+      "type": "xdp",
+      "workload": "network"
+    },
+    {
+      "app": "bpftrace/biosnoop",
+      "baseline_avg_ns_per_run": 410.65136599564636,
+      "baseline_run_cnt_delta": 1438804,
+      "baseline_run_time_ns_delta": 590846828,
+      "post_rejit_avg_ns_per_run": 409.10374611619716,
+      "post_rejit_run_cnt_delta": 1443495,
+      "post_rejit_run_time_ns_delta": 590539212,
+      "program": "block_io_start",
+      "program_id": 664,
+      "ratio": 0.9962313046842133,
+      "runner": "bpftrace",
+      "type": "tracepoint",
+      "workload": "fio_randrw"
+    },
+    {
+      "app": "bpftrace/biosnoop",
+      "baseline_avg_ns_per_run": 761.5516559066846,
+      "baseline_run_cnt_delta": 1438819,
+      "baseline_run_time_ns_delta": 1095734992,
+      "post_rejit_avg_ns_per_run": 758.6952310687144,
+      "post_rejit_run_cnt_delta": 1443510,
+      "post_rejit_run_time_ns_delta": 1095184153,
+      "program": "block_io_done",
+      "program_id": 665,
+      "ratio": 0.996249204087713,
+      "runner": "bpftrace",
+      "type": "tracepoint",
+      "workload": "fio_randrw"
+    },
+    {
+      "app": "bpftrace/runqlat",
+      "baseline_avg_ns_per_run": 65.13828295238336,
+      "baseline_run_cnt_delta": 2887037,
+      "baseline_run_time_ns_delta": 188056633,
+      "post_rejit_avg_ns_per_run": 58.27561766605349,
+      "post_rejit_run_cnt_delta": 2573478,
+      "post_rejit_run_time_ns_delta": 149971020,
+      "program": "sched_wakeup",
+      "program_id": 680,
+      "ratio": 0.8946446701497099,
+      "runner": "bpftrace",
+      "type": "tracepoint",
+      "workload": "stress_ng_scheduler"
+    },
+    {
+      "app": "bpftrace/runqlat",
+      "baseline_avg_ns_per_run": 297.6025641025641,
+      "baseline_run_cnt_delta": 78,
+      "baseline_run_time_ns_delta": 23213,
+      "post_rejit_avg_ns_per_run": 280.1923076923077,
+      "post_rejit_run_cnt_delta": 78,
+      "post_rejit_run_time_ns_delta": 21855,
+      "program": "tracepoint_sched_sched_wakeup_new",
+      "program_id": 681,
+      "ratio": 0.9414982983672942,
+      "runner": "bpftrace",
+      "type": "tracepoint",
+      "workload": "stress_ng_scheduler"
+    },
+    {
+      "app": "bpftrace/runqlat",
+      "baseline_avg_ns_per_run": 137.9863113409948,
+      "baseline_run_cnt_delta": 10332568,
+      "baseline_run_time_ns_delta": 1425752945,
+      "post_rejit_avg_ns_per_run": 125.012225359901,
+      "post_rejit_run_cnt_delta": 13664383,
+      "post_rejit_run_time_ns_delta": 1708214927,
+      "program": "sched_switch",
+      "program_id": 682,
+      "ratio": 0.9059755576114216,
+      "runner": "bpftrace",
+      "type": "tracepoint",
+      "workload": "stress_ng_scheduler"
+    },
+    {
+      "app": "bpftrace/tcplife",
+      "baseline_avg_ns_per_run": 428.85989671873494,
+      "baseline_run_cnt_delta": 62354,
+      "baseline_run_time_ns_delta": 26741130,
+      "post_rejit_avg_ns_per_run": 401.3120863586712,
+      "post_rejit_run_cnt_delta": 62252,
+      "post_rejit_run_time_ns_delta": 24982480,
+      "program": "tcp_set_state",
+      "program_id": 690,
+      "ratio": 0.9357650119052031,
+      "runner": "bpftrace",
+      "type": "kprobe",
+      "workload": "tcp_connect"
+    }
+  ],
+  "results": [
+    {
+      "app": "bcc/capable",
+      "baseline": null,
+      "error": "stress_ng_os workload failed: /usr/bin/stress-ng: unrecognized option '--ioctl'",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "stress_ng_os",
+      "status": "error"
+    },
+    {
+      "app": "bcc/biosnoop",
+      "baseline": {
+        "bpf": {
+          "9": {
+            "avg_ns_per_run": 214.0956648865943,
+            "bytes_jited": 267,
+            "bytes_xlated": 448,
+            "id": 9,
+            "name": "trace_pid_start_tp",
+            "run_cnt_delta": 1707983,
+            "run_time_ns_delta": 365671756,
+            "type": "tracepoint"
+          },
+          "10": {
+            "avg_ns_per_run": 195.33374609849105,
+            "bytes_jited": 335,
+            "bytes_xlated": 616,
+            "id": 10,
+            "name": "trace_req_start",
+            "run_cnt_delta": 1707993,
+            "run_time_ns_delta": 333628671,
+            "type": "kprobe"
+          },
+          "11": {
+            "avg_ns_per_run": 95.40891207132562,
+            "bytes_jited": 550,
+            "bytes_xlated": 856,
+            "id": 11,
+            "name": "trace_req_completion_tp",
+            "run_cnt_delta": 1707998,
+            "run_time_ns_delta": 162958231,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.353252336000011,
+            "ops_per_sec": 426804.46513515426,
+            "ops_total": 2284792.0,
+            "stderr": "",
+            "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.090506,\n        \"1000\" : 14.165363\n      },\n      \"latency_us\" : {\n        \"2\" : 33.557419,\n        \"4\" : 1.599816,\n        \"10\" : 18.270057,\n        \"20\" : 28.783083,\n        \"50\" : 2.915208,\n        \"100\" : 0.390276,\n        \"250\" : 0.217634,\n        \"500\" : 0.010463,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "9": {
+            "avg_ns_per_run": 212.83811600194178,
+            "bytes_jited": 267,
+            "bytes_xlated": 448,
+            "id": 9,
+            "name": "trace_pid_start_tp",
+            "run_cnt_delta": 1748919,
+            "run_time_ns_delta": 372236625,
+            "type": "tracepoint"
+          },
+          "10": {
+            "avg_ns_per_run": 192.93956358434218,
+            "bytes_jited": 335,
+            "bytes_xlated": 616,
+            "id": 10,
+            "name": "trace_req_start",
+            "run_cnt_delta": 1748929,
+            "run_time_ns_delta": 337437598,
+            "type": "kprobe"
+          },
+          "11": {
+            "avg_ns_per_run": 92.75681529434502,
+            "bytes_jited": 550,
+            "bytes_xlated": 856,
+            "id": 11,
+            "name": "trace_req_completion_tp",
+            "run_cnt_delta": 1748934,
+            "run_time_ns_delta": 162225548,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.337601414999995,
+            "ops_per_sec": 440269.4801069185,
+            "ops_total": 2349983.0,
+            "stderr": "",
+            "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.126556,\n        \"1000\" : 15.349331\n      },\n      \"latency_us\" : {\n        \"2\" : 32.282905,\n        \"4\" : 1.578793,\n        \"10\" : 20.434036,\n        \"20\" : 27.209271,\n        \"50\" : 2.442539,\n        \"100\" : 0.408112,\n        \"250\" : 0.160451,\n        \"500\" : 0.010000,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "fio_randrw",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/vfsstat",
+      "baseline": null,
+      "error": "stress_ng_filesystem workload failed: /usr/bin/stress-ng: unrecognized option '--hardlink'",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "stress_ng_filesystem",
+      "status": "error"
+    },
+    {
+      "app": "bcc/opensnoop",
+      "baseline": null,
+      "error": "stress_ng_filesystem workload failed: /usr/bin/stress-ng: unrecognized option '--hardlink'",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "stress_ng_filesystem",
+      "status": "error"
+    },
+    {
+      "app": "bcc/syscount",
+      "baseline": null,
+      "error": "stress_ng_os workload failed: /usr/bin/stress-ng: unrecognized option '--ioctl'",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "stress_ng_os",
+      "status": "error"
+    },
+    {
+      "app": "bcc/tcpconnect",
+      "baseline": {
+        "bpf": {
+          "30": {
+            "avg_ns_per_run": 212.16487718782173,
+            "bytes_jited": 75,
+            "bytes_xlated": 120,
+            "id": 30,
+            "name": "trace_connect_entry",
+            "run_cnt_delta": 6799,
+            "run_time_ns_delta": 1442509,
+            "type": "kprobe"
+          },
+          "31": {
+            "avg_ns_per_run": 1671.5030151492867,
+            "bytes_jited": 480,
+            "bytes_xlated": 720,
+            "id": 31,
+            "name": "trace_connect_v4_return",
+            "run_cnt_delta": 6799,
+            "run_time_ns_delta": 11364549,
+            "type": "kprobe"
+          },
+          "32": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 477,
+            "bytes_xlated": 712,
+            "id": 32,
+            "name": "trace_connect_v6_return",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.1022969509999996,
+            "ops_per_sec": 6158.050236682549,
+            "ops_total": 6788.0,
+            "stderr": "",
+            "stdout": "Running 1s test @ http://127.0.0.1:32797/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.86ms  314.46us   5.11ms   80.01%\n    Req/Sec     3.25k     2.21k    6.39k    52.38%\n  6788 requests in 1.10s, 1.00MB read\n  Socket errors: connect 0, read 6788, write 0, timeout 0\nRequests/sec:   6172.29\nTransfer/sec:      0.91MB"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "30": {
+            "avg_ns_per_run": 219.78711566617864,
+            "bytes_jited": 75,
+            "bytes_xlated": 120,
+            "id": 30,
+            "name": "trace_connect_entry",
+            "run_cnt_delta": 6830,
+            "run_time_ns_delta": 1501146,
+            "type": "kprobe"
+          },
+          "31": {
+            "avg_ns_per_run": 1675.2385065885799,
+            "bytes_jited": 480,
+            "bytes_xlated": 720,
+            "id": 31,
+            "name": "trace_connect_v4_return",
+            "run_cnt_delta": 6830,
+            "run_time_ns_delta": 11441879,
+            "type": "kprobe"
+          },
+          "32": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 477,
+            "bytes_xlated": 712,
+            "id": 32,
+            "name": "trace_connect_v6_return",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.1036226740000075,
+            "ops_per_sec": 6178.74221022026,
+            "ops_total": 6819.0,
+            "stderr": "",
+            "stdout": "Running 1s test @ http://127.0.0.1:36851/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     2.82ms   16.33ms 208.76ms   98.30%\n    Req/Sec     3.12k   476.20     4.27k    81.82%\n  6819 requests in 1.10s, 1.01MB read\n  Socket errors: connect 0, read 6819, write 0, timeout 0\nRequests/sec:   6202.45\nTransfer/sec:      0.92MB"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "tcp_connect",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/tcplife",
+      "baseline": {
+        "bpf": {
+          "35": {
+            "avg_ns_per_run": 397.1355798319328,
+            "bytes_jited": 1067,
+            "bytes_xlated": 1672,
+            "id": 35,
+            "name": "tracepoint__sock__inet_sock_set_state",
+            "run_cnt_delta": 59500,
+            "run_time_ns_delta": 23629567,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0018516270000077,
+            "ops_per_sec": 6106.692682947505,
+            "ops_total": 6118.0,
+            "stderr": "",
+            "stdout": "Running 1s test @ http://127.0.0.1:36207/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.89ms  297.86us   3.19ms   77.71%\n    Req/Sec     3.07k     2.13k    5.42k    65.00%\n  6118 requests in 1.00s, 0.90MB read\n  Socket errors: connect 0, read 6117, write 0, timeout 0\nRequests/sec:   6116.45\nTransfer/sec:      0.90MB"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "35": {
+            "avg_ns_per_run": 422.2789895451892,
+            "bytes_jited": 1067,
+            "bytes_xlated": 1672,
+            "id": 35,
+            "name": "tracepoint__sock__inet_sock_set_state",
+            "run_cnt_delta": 56529,
+            "run_time_ns_delta": 23871009,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0025612809999984,
+            "ops_per_sec": 5783.187631400268,
+            "ops_total": 5798.0,
+            "stderr": "",
+            "stdout": "Running 1s test @ http://127.0.0.1:37635/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.93ms  296.93us   3.44ms   74.20%\n    Req/Sec     2.91k   106.24     3.18k    70.00%\n  5798 requests in 1.00s, 0.86MB read\n  Socket errors: connect 0, read 5796, write 0, timeout 0\nRequests/sec:   5796.82\nTransfer/sec:      0.86MB"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 1,
+          "not_applied": 0,
+          "requested": 1
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "tcp_connect",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/runqlat",
+      "baseline": {
+        "bpf": {
+          "38": {
+            "avg_ns_per_run": 188.44961539118827,
+            "bytes_jited": 662,
+            "bytes_xlated": 1168,
+            "id": 38,
+            "name": "sched_switch",
+            "run_cnt_delta": 11586058,
+            "run_time_ns_delta": 2183388174,
+            "type": "raw_tracepoint"
+          },
+          "39": {
+            "avg_ns_per_run": 81.4425099206518,
+            "bytes_jited": 149,
+            "bytes_xlated": 248,
+            "id": 39,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 2937559,
+            "run_time_ns_delta": 239242178,
+            "type": "raw_tracepoint"
+          },
+          "40": {
+            "avg_ns_per_run": 354.78205128205127,
+            "bytes_jited": 149,
+            "bytes_xlated": 248,
+            "id": 40,
+            "name": "raw_tracepoint__sched_wakeup_new",
+            "run_cnt_delta": 78,
+            "run_time_ns_delta": 27673,
+            "type": "raw_tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0153184640000177,
+            "ops_per_sec": 10199755.41388344,
+            "ops_total": 10356000.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [22303] setting to a 1 secs run per stressor\nstress-ng: info:  [22303] dispatching hogs: 4 futex, 4 sem, 4 sem-sysv, 4 switch, 4 yield\nstress-ng: info:  [22303] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [22303] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [22303]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [22303] futex            942696      2.00      0.07      4.96    471290.50      187297.53\nstress-ng: metrc: [22303] sem             1878860      1.00      0.45      1.35   1877705.10     1044098.82\nstress-ng: metrc: [22303] sem-sysv         682016      1.00      0.06      0.91    681582.73      703951.12\nstress-ng: metrc: [22303] switch          1319888      1.00      0.41      3.59   1319435.09      330301.89\nstress-ng: metrc: [22303] yield           5532540      1.00      1.67      3.59   5528214.23     1051027.42\nstress-ng: info:  [22303] skipped: 0\nstress-ng: info:  [22303] passed: 20: futex (4) sem (4) sem-sysv (4) switch (4) yield (4)\nstress-ng: info:  [22303] failed: 0\nstress-ng: info:  [22303] metrics untrustworthy: 0\nstress-ng: info:  [22303] successful run completed in 1.00 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "38": {
+            "avg_ns_per_run": 180.55381219412547,
+            "bytes_jited": 662,
+            "bytes_xlated": 1168,
+            "id": 38,
+            "name": "sched_switch",
+            "run_cnt_delta": 12566018,
+            "run_time_ns_delta": 2268842454,
+            "type": "raw_tracepoint"
+          },
+          "39": {
+            "avg_ns_per_run": 74.29398829947395,
+            "bytes_jited": 149,
+            "bytes_xlated": 248,
+            "id": 39,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 3655904,
+            "run_time_ns_delta": 271611689,
+            "type": "raw_tracepoint"
+          },
+          "40": {
+            "avg_ns_per_run": 311.85897435897436,
+            "bytes_jited": 149,
+            "bytes_xlated": 248,
+            "id": 40,
+            "name": "raw_tracepoint__sched_wakeup_new",
+            "run_cnt_delta": 78,
+            "run_time_ns_delta": 24325,
+            "type": "raw_tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0254553149999879,
+            "ops_per_sec": 11169873.355232583,
+            "ops_total": 11454206.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [22479] setting to a 1 secs run per stressor\nstress-ng: info:  [22479] dispatching hogs: 4 futex, 4 sem, 4 sem-sysv, 4 switch, 4 yield\nstress-ng: info:  [22479] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [22479] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [22479]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [22479] futex            855424      2.00      0.39      4.59    427662.00      171790.03\nstress-ng: metrc: [22479] sem             1876306      1.00      0.42      1.07   1875056.50     1256073.32\nstress-ng: metrc: [22479] sem-sysv         421567      1.00      0.16      0.81    421265.99      434986.33\nstress-ng: metrc: [22479] switch          1628591      1.00      0.33      3.66   1628406.49      407729.99\nstress-ng: metrc: [22479] yield           6672318      1.00      1.69      3.97   6672593.62     1178133.11\nstress-ng: info:  [22479] skipped: 0\nstress-ng: info:  [22479] passed: 20: futex (4) sem (4) sem-sysv (4) switch (4) yield (4)\nstress-ng: info:  [22479] failed: 0\nstress-ng: info:  [22479] metrics untrustworthy: 0\nstress-ng: info:  [22479] successful run completed in 1.02 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "stress_ng_scheduler",
+      "status": "ok"
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "baseline": {
+        "bpf": {
+          "43": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3721,
+            "bytes_xlated": 6232,
+            "id": 43,
+            "name": "perf_unwind_stop",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "44": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 22575,
+            "bytes_xlated": 37232,
+            "id": 44,
+            "name": "perf_unwind_native",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "45": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18290,
+            "bytes_xlated": 28048,
+            "id": 45,
+            "name": "perf_unwind_hotspot",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "46": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17737,
+            "bytes_xlated": 29144,
+            "id": 46,
+            "name": "perf_unwind_perl",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "47": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 15178,
+            "bytes_xlated": 25032,
+            "id": 47,
+            "name": "perf_unwind_php",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "48": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 19909,
+            "bytes_xlated": 33264,
+            "id": 48,
+            "name": "perf_unwind_python",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "49": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16540,
+            "bytes_xlated": 28000,
+            "id": 49,
+            "name": "perf_unwind_ruby",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "50": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 20050,
+            "bytes_xlated": 33712,
+            "id": 50,
+            "name": "perf_unwind_v8",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "51": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 22565,
+            "bytes_xlated": 34248,
+            "id": 51,
+            "name": "perf_unwind_dotnet",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "52": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1580,
+            "bytes_xlated": 2496,
+            "id": 52,
+            "name": "perf_go_labels",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "53": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 696,
+            "bytes_xlated": 1088,
+            "id": 53,
+            "name": "perf_unwind_beam",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "54": {
+            "avg_ns_per_run": 1550.75,
+            "bytes_jited": 788,
+            "bytes_xlated": 1320,
+            "id": 54,
+            "name": "tracepoint__sched_process_free",
+            "run_cnt_delta": 8,
+            "run_time_ns_delta": 12406,
+            "type": "tracepoint"
+          },
+          "55": {
+            "avg_ns_per_run": 1639.7255266418836,
+            "bytes_jited": 3532,
+            "bytes_xlated": 5496,
+            "id": 55,
+            "name": "native_tracer_entry",
+            "run_cnt_delta": 1614,
+            "run_time_ns_delta": 2646517,
+            "type": "perf_event"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.019012358999987,
+            "ops_per_sec": 11544.90084012167,
+            "ops_total": 57944.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [22616] setting to a 5 secs run per stressor\nstress-ng: info:  [22616] dispatching hogs: 4 cpu\nstress-ng: info:  [22616] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [22616] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [22616]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [22616] cpu               57944      5.00     20.01      0.00     11585.45        2896.38\nstress-ng: info:  [22616] skipped: 0\nstress-ng: info:  [22616] passed: 4: cpu (4)\nstress-ng: info:  [22616] failed: 0\nstress-ng: info:  [22616] metrics untrustworthy: 0\nstress-ng: info:  [22616] successful run completed in 5.01 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "43": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3721,
+            "bytes_xlated": 6232,
+            "id": 43,
+            "name": "perf_unwind_stop",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "44": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 22575,
+            "bytes_xlated": 37232,
+            "id": 44,
+            "name": "perf_unwind_native",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "45": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18290,
+            "bytes_xlated": 28048,
+            "id": 45,
+            "name": "perf_unwind_hotspot",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "46": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 17737,
+            "bytes_xlated": 29144,
+            "id": 46,
+            "name": "perf_unwind_perl",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "47": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 15178,
+            "bytes_xlated": 25032,
+            "id": 47,
+            "name": "perf_unwind_php",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "48": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 18325,
+            "bytes_xlated": 30096,
+            "id": 48,
+            "name": "perf_unwind_python",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "49": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16540,
+            "bytes_xlated": 28000,
+            "id": 49,
+            "name": "perf_unwind_ruby",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "50": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 20050,
+            "bytes_xlated": 33712,
+            "id": 50,
+            "name": "perf_unwind_v8",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "51": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 22565,
+            "bytes_xlated": 34248,
+            "id": 51,
+            "name": "perf_unwind_dotnet",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "52": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1580,
+            "bytes_xlated": 2496,
+            "id": 52,
+            "name": "perf_go_labels",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "53": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 696,
+            "bytes_xlated": 1088,
+            "id": 53,
+            "name": "perf_unwind_beam",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "54": {
+            "avg_ns_per_run": 2839.375,
+            "bytes_jited": 788,
+            "bytes_xlated": 1320,
+            "id": 54,
+            "name": "tracepoint__sched_process_free",
+            "run_cnt_delta": 8,
+            "run_time_ns_delta": 22715,
+            "type": "tracepoint"
+          },
+          "55": {
+            "avg_ns_per_run": 1901.4644194756554,
+            "bytes_jited": 3532,
+            "bytes_xlated": 5496,
+            "id": 55,
+            "name": "native_tracer_entry",
+            "run_cnt_delta": 1602,
+            "run_time_ns_delta": 3046146,
+            "type": "perf_event"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.015827225999999,
+            "ops_per_sec": 11586.52349481864,
+            "ops_total": 58116.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [22666] setting to a 5 secs run per stressor\nstress-ng: info:  [22666] dispatching hogs: 4 cpu\nstress-ng: info:  [22666] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [22666] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [22666]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [22666] cpu               58116      5.00     20.00      0.00     11622.31        2905.56\nstress-ng: info:  [22666] skipped: 0\nstress-ng: info:  [22666] passed: 4: cpu (4)\nstress-ng: info:  [22666] failed: 0\nstress-ng: info:  [22666] metrics untrustworthy: 0\nstress-ng: info:  [22666] successful run completed in 5.00 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 13,
+          "not_applied": 0,
+          "requested": 13
+        }
+      },
+      "runner": "otelcol-ebpf-profiler",
+      "selected_workload": "multi_runtime_cpu",
+      "status": "ok"
+    },
+    {
+      "app": "cilium/agent",
+      "baseline": {
+        "bpf": {
+          "63": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 167,
+            "bytes_xlated": 280,
+            "id": 63,
+            "name": "dump_bpf_map",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing"
+          },
+          "64": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 740,
+            "bytes_xlated": 520,
+            "id": 64,
+            "name": "dump_bpf_prog",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing"
+          },
+          "120": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 120,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "121": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3094,
+            "bytes_xlated": 5368,
+            "id": 121,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "122": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1236,
+            "bytes_xlated": 2056,
+            "id": 122,
+            "name": "cil_to_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "123": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 123,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "124": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 124,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "125": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 125,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "127": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 127,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "129": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 129,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "131": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 526,
+            "bytes_xlated": 952,
+            "id": 131,
+            "name": "cil_to_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "132": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 132,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "133": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 133,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "134": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 134,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "135": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 135,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "136": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 136,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "137": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 137,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "138": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 138,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "139": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1236,
+            "bytes_xlated": 2056,
+            "id": 139,
+            "name": "cil_to_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "140": {
+            "avg_ns_per_run": 1579.0,
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 140,
+            "name": "cil_from_host",
+            "run_cnt_delta": 1,
+            "run_time_ns_delta": 1579,
+            "type": "sched_cls"
+          },
+          "141": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 141,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "142": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3094,
+            "bytes_xlated": 5368,
+            "id": 142,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "143": {
+            "avg_ns_per_run": 1025.0,
+            "bytes_jited": 526,
+            "bytes_xlated": 952,
+            "id": 143,
+            "name": "cil_to_host",
+            "run_cnt_delta": 1,
+            "run_time_ns_delta": 1025,
+            "type": "sched_cls"
+          },
+          "144": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 144,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "145": {
+            "avg_ns_per_run": 1251.0,
+            "bytes_jited": 526,
+            "bytes_xlated": 952,
+            "id": 145,
+            "name": "cil_to_host",
+            "run_cnt_delta": 1,
+            "run_time_ns_delta": 1251,
+            "type": "sched_cls"
+          },
+          "146": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 146,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "147": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 147,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "148": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3094,
+            "bytes_xlated": 5368,
+            "id": 148,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "149": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 149,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "150": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1236,
+            "bytes_xlated": 2056,
+            "id": 150,
+            "name": "cil_to_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "151": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 151,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "152": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 526,
+            "bytes_xlated": 952,
+            "id": 152,
+            "name": "cil_to_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "153": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 153,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "154": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 154,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "155": {
+            "avg_ns_per_run": 1015.1519575315195,
+            "bytes_jited": 3094,
+            "bytes_xlated": 5368,
+            "id": 155,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 1507,
+            "run_time_ns_delta": 1529834,
+            "type": "sched_cls"
+          },
+          "156": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 156,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "157": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 157,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "159": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 159,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 6.145272728999998,
+            "ops_per_sec": 103.49418618943774,
+            "ops_total": 636.0,
+            "stderr": "",
+            "stdout": "Running 5s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   334.36ms  279.07ms   1.98s    84.78%\n    Req/Sec    34.19     15.75    70.00     66.30%\n  636 requests in 5.01s, 99.64KB read\n  Socket errors: connect 0, read 0, write 0, timeout 5\nRequests/sec:    126.83\nTransfer/sec:     19.87KB"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "63": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 167,
+            "bytes_xlated": 280,
+            "id": 63,
+            "name": "dump_bpf_map",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing"
+          },
+          "64": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 740,
+            "bytes_xlated": 520,
+            "id": 64,
+            "name": "dump_bpf_prog",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing"
+          },
+          "120": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 120,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "121": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3094,
+            "bytes_xlated": 5368,
+            "id": 121,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "122": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1236,
+            "bytes_xlated": 2056,
+            "id": 122,
+            "name": "cil_to_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "123": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 123,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "124": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 124,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "125": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 125,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "127": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 127,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "129": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 129,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "131": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 526,
+            "bytes_xlated": 952,
+            "id": 131,
+            "name": "cil_to_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "132": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 132,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "133": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 133,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "134": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 134,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "135": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 135,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "136": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 136,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "137": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 137,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "138": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 138,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "139": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1236,
+            "bytes_xlated": 2056,
+            "id": 139,
+            "name": "cil_to_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "140": {
+            "avg_ns_per_run": 1877.0,
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 140,
+            "name": "cil_from_host",
+            "run_cnt_delta": 1,
+            "run_time_ns_delta": 1877,
+            "type": "sched_cls"
+          },
+          "141": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 141,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "142": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3094,
+            "bytes_xlated": 5368,
+            "id": 142,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "143": {
+            "avg_ns_per_run": 1521.0,
+            "bytes_jited": 526,
+            "bytes_xlated": 952,
+            "id": 143,
+            "name": "cil_to_host",
+            "run_cnt_delta": 1,
+            "run_time_ns_delta": 1521,
+            "type": "sched_cls"
+          },
+          "144": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 144,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "145": {
+            "avg_ns_per_run": 1023.0,
+            "bytes_jited": 526,
+            "bytes_xlated": 952,
+            "id": 145,
+            "name": "cil_to_host",
+            "run_cnt_delta": 1,
+            "run_time_ns_delta": 1023,
+            "type": "sched_cls"
+          },
+          "146": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 146,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "147": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 147,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "148": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3094,
+            "bytes_xlated": 5368,
+            "id": 148,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "149": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 149,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "150": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1236,
+            "bytes_xlated": 2056,
+            "id": 150,
+            "name": "cil_to_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "151": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 151,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "152": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 526,
+            "bytes_xlated": 952,
+            "id": 152,
+            "name": "cil_to_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "153": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 153,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "154": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 154,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "155": {
+            "avg_ns_per_run": 1048.6125654450261,
+            "bytes_jited": 3094,
+            "bytes_xlated": 5368,
+            "id": 155,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 1337,
+            "run_time_ns_delta": 1401995,
+            "type": "sched_cls"
+          },
+          "156": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 156,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "157": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 157,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "159": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 159,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.074002358000001,
+            "ops_per_sec": 108.0015264746552,
+            "ops_total": 548.0,
+            "stderr": "",
+            "stdout": "Running 5s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   341.36ms  298.35ms   1.93s    84.63%\n    Req/Sec    29.52     15.97    80.00     63.89%\n  548 requests in 5.02s, 86.86KB read\n  Socket errors: connect 0, read 0, write 0, timeout 9\nRequests/sec:    109.27\nTransfer/sec:     17.32KB"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "prog 64: prog 64 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 13: Permission denied (os error 13)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (79) r2 = *(u64 *)(r1 +0)\n      1: .12....... (79) r6 = *(u64 *)(r2 +0)\n      2: .12...6... (79) r1 = *(u64 *)(r1 +8)\n      3: .12...6... (15) if r1 == 0x0 goto pc+59\n      4: .12...6... (79) r7 = *(u64 *)(r1 +0)\n      5: ..2...67.. (79) r1 = *(u64 *)(r2 +16)\n      6: .1....67.. (55) if r1 != 0x0 goto pc+8\n      7: ......67.. (bf) r4 = r10\n      8: ....4.67.. (07) r4 += -48\n      9: ....4.67.. (bf) r1 = r6\n     10: .1..4.67.. (18) r2 = 0xffff8a708c807b7a\n     12: .12.4.67.. (b7) r3 = 32\n     13: .1234.67.. (b7) r5 = 0\n     14: .1234567.. (85) call bpf_seq_printf#126\n     15: ......67.. (7b) *(u64 *)(r10 -56) = r6\n     16: .......7.. (61) r1 = *(u32 *)(r7 +0)\n     17: .1.....7.. (7b) *(u64 *)(r10 -48) = r1\n     18: .......7.. (b7) r3 = 4\n     19: ...3...7.. (bf) r9 = r7\n     20: ...3...7.9 (0f) r9 += r3\n     21: ...3...7.9 (79) r1 = *(u64 *)(r7 +40)\n     22: .1.3...7.9 (79) r8 = *(u64 *)(r7 +48)\n     23: .1.3...789 (15) if r8 == 0x0 goto pc+24\n     24: .1.....789 (b7) r2 = 0\n     25: .12....789 (0f) r1 += r2\n     26: .1.....789 (61) r1 = *(u32 *)(r1 +4)\n     27: .1.....789 (79) r3 = *(u64 *)(r8 +8)\n     28: .1.3...789 (67) r1 <<= 3\n     29: .1.3...789 (0f) r3 += r1\n     30: ...3...789 (79) r6 = *(u64 *)(r8 +0)\n     31: ...3..6789 (bf) r1 = r10\n     32: .1.3..6789 (07) r1 += -8\n     33: .1.3..6789 (b7) r2 = 8\n     34: .123..6789 (85) call bpf_probe_read_kernel#113\n     35: ......6789 (b7) r1 = 0\n     36: .1....6789 (79) r3 = *(u64 *)(r10 -8)\n     37: .1.3..6789 (0f) r3 += r1\n     38: ...3..6789 (bf) r1 = r10\n     39: .1.3..6789 (07) r1 += -12\n     40: .1.3..6789 (b7) r2 = 4\n     41: .123..6789 (85) call bpf_probe_read_kernel#113\n     42: ......6789 (b7) r3 = 4\n     43: ...3..6789 (61) r1 = *(u32 *)(r10 -12)\n     44: .1.3..6789 (61) r2 = *(u32 *)(r8 +16)\n     45: .123..67.9 (3d) if r1 >= r2 goto pc+2\n     46: .1.3..67.. (0f) r6 += r1\n     47: ...3..67.. (bf) r9 = r6\n     48: ...3...7.9 (7b) *(u64 *)(r10 -40) = r9\n     49: ...3...7.. (79) r1 = *(u64 *)(r7 +24)\n     50: .1.3...7.. (7b) *(u64 *)(r10 -32) = r1\n     51: ...3...7.. (79) r1 = *(u64 *)(r7 +32)\n     52: .1.3...... (79) r1 = *(u64 *)(r1 +0)\n     53: .1.3...... (0f) r1 += r3\n     54: .1........ (7b) *(u64 *)(r10 -24) = r1\n     55: .......... (bf) r4 = r10\n     56: ....4..... (07) r4 += -48\n     57: ....4..... (79) r1 = *(u64 *)(r10 -56)\n     58: .1..4..... (18) r2 = 0xffff8a708c807b9a\n     60: .12.4..... (b7) r3 = 17\n     61: .1234..... (b7) r5 = 32\n     62: .12345.... (85) call bpf_seq_printf#126\n     63: .......... (b7) r0 = 0\n     64: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (79) r2 = *(u64 *)(r1 +0)\nfunc 'bpf_iter_bpf_prog' arg0 has btf_id 70962 type STRUCT 'bpf_iter_meta'\n1: R1=ctx() R2=trusted_ptr_bpf_iter_meta()\n1: (79) r6 = *(u64 *)(r2 +0)          ; R2=trusted_ptr_bpf_iter_meta() R6=trusted_ptr_seq_file()\n2: (79) r1 = *(u64 *)(r1 +8)          ; R1=ptr_or_null_bpf_prog(id=1)\n3: (15) if r1 == 0x0 goto pc+59       ; R1=ptr_bpf_prog()\n4: (79) r7 = *(u64 *)(r1 +0)\naccess beyond the end of member pages (mend:2) in struct bpf_prog with off 0 size 8\nprocessed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 147: prog 147 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (61) r2 = *(u32 *)(r1 +48)\n      1: .12....... (b4) w3 = 0\n      2: .123...... (63) *(u32 *)(r1 +48) = r3\n      3: .12....... (18) r3 = 0xffffcae3c07ae004\n      5: .123...... (71) r3 = *(u8 *)(r3 +0)\n      6: .123...... (61) r4 = *(u32 *)(r1 +80)\n      7: .1234..... (61) r5 = *(u32 *)(r1 +76)\n      8: .12345.... (0f) r5 += r3\n      9: .12.45.... (b4) w0 = -134\n     10: 012.45.... (07) r5 += 20\n     11: 012.45.... (2d) if r5 > r4 goto pc+12\n     12: 012....... (18) r3 = 0xffffcae3c07ae03c\n     14: 0123...... (61) r3 = *(u32 *)(r3 +0)\n     15: 012....... (18) r3 = 0xffffcae3c07ae004\n     17: 0123...... (71) r3 = *(u8 *)(r3 +0)\n     18: 0123...... (61) r4 = *(u32 *)(r1 +80)\n     19: 01234..... (61) r5 = *(u32 *)(r1 +76)\n     20: 012345.... (0f) r5 += r3\n     21: 012.45.... (07) r5 += 20\n     22: 012.45.... (2d) if r5 > r4 goto pc+1\n     23: .12....... (b4) w0 = 0\n     24: 012....... (66) if w0 s> 0xffffffff goto pc+44\n     25: 012....... (b4) w3 = 62980354\n     26: 0123...... (63) *(u32 *)(r1 +64) = r3\n     27: 012....... (b4) w3 = 0\n     28: 0123...... (63) *(u32 *)(r1 +60) = r3\n     29: 0123...... (63) *(u32 *)(r1 +52) = r3\n     30: 012....... (63) *(u32 *)(r1 +48) = r2\n     31: 01........ (84) w0 = -w0\n     32: 01........ (63) *(u32 *)(r1 +56) = r0\n     33: 01........ (bf) r6 = r1\n     34: 01....6... (61) r7 = *(u32 *)(r1 +0)\n     35: 0.....67.. (18) r1 = 0x103c10100\n     37: 01....67.. (7b) *(u64 *)(r10 -24) = r1\n     38: 0.....67.. (73) *(u8 *)(r10 -24) = r0\n     39: ......67.. (bf) r2 = r10\n     40: ..2...67.. (07) r2 += -24\n     41: ..2...67.. (18) r1 = 0xffff8a708608a400\n     43: .12...67.. (85) call bpf_map_lookup_elem#1\n     44: 0.....67.. (15) if r0 == 0x0 goto pc+7\n     45: 0.....67.. (79) r1 = *(u64 *)(r0 +0)\n     46: 01....67.. (07) r1 += 1\n     47: 01....67.. (7b) *(u64 *)(r0 +0) = r1\n     48: 0.....67.. (79) r1 = *(u64 *)(r0 +8)\n     49: 01....67.. (0f) r1 += r7\n     50: 01....6... (7b) *(u64 *)(r0 +8) = r1\n     51: ......6... (05) goto pc+11\n     52: ......67.. (7b) *(u64 *)(r10 -8) = r7\n     53: ......6... (b7) r1 = 1\n     54: .1....6... (7b) *(u64 *)(r10 -16) = r1\n     55: ......6... (bf) r2 = r10\n     56: ..2...6... (07) r2 += -24\n     57: ..2...6... (bf) r3 = r10\n     58: ..23..6... (07) r3 += -16\n     59: ..23..6... (18) r1 = 0xffff8a708608a400\n     61: .123..6... (b4) w4 = 0\n     62: .1234.6... (85) call bpf_map_update_elem#2\n     63: ......6... (bf) r1 = r6\n     64: .1........ (18) r2 = 0xffff8a725c9cb400\n     66: .12....... (b7) r3 = 1\n     67: .123...... (85) call bpf_tail_call#12\n     68: .......... (b4) w0 = 2\n     69: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +48)         ; R1=ctx() R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n1: (b4) w3 = 0                        ; R3=0\n2: (63) *(u32 *)(r1 +48) = r3         ; R1=ctx() R3=0\n3: (18) r3 = 0xffffcae3c07ae004       ; R3=map_value(map=.rodata.config,ks=4,vs=156,off=4)\n5: (71) r3 = *(u8 *)(r3 +0)           ; R3=14\n6: (61) r4 = *(u32 *)(r1 +80)         ; R1=ctx() R4=pkt_end()\n7: (61) r5 = *(u32 *)(r1 +76)         ; R1=ctx() R5=pkt(r=0)\n8: (0f) r5 += r3\nmark_precise: frame0: last_idx 8 first_idx 0 subseq_idx -1 \nmark_precise: frame0: regs=r3 stack= before 7: (61) r5 = *(u32 *)(r1 +76)\nmark_precise: frame0: regs=r3 stack= before 6: (61) r4 = *(u32 *)(r1 +80)\nmark_precise: frame0: regs=r3 stack= before 5: (71) r3 = *(u8 *)(r3 +0)\n9: R3=14 R5=pkt(off=14,r=0)\n9: (b4) w0 = -134                     ; R0=0xffffff7a\n10: (07) r5 += 20                     ; R5=pkt(off=34,r=0)\n11: (2d) if r5 > r4 goto pc+12        ; R4=pkt_end() R5=pkt(off=34,r=34)\n12: (18) r3 = 0xffffcae3c07ae03c      ; R3=map_value(map=.rodata.config,ks=4,vs=156,off=60)\n14: (61) r3 = *(u32 *)(r3 +0)         ; R3=128\n15: (18) r3 = 0xffffcae3c07ae004      ; R3=map_value(map=.rodata.config,ks=4,vs=156,off=4)\n17: (71) r3 = *(u8 *)(r3 +0)          ; R3=14\n18: (61) r4 = *(u32 *)(r1 +80)        ; R1=ctx() R4=pkt_end()\n19: (61) r5 = *(u32 *)(r1 +76)        ; R1=ctx() R5=pkt(r=0)\n20: (0f) r5 += r3\nmark_precis\n... verifier log truncated ...; prog 156: prog 156 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (b7) r4 = 0\n      1: .1..4..... (61) r2 = *(u32 *)(r1 +56)\n      2: .12.4..... (63) *(u32 *)(r10 -56) = r2\n      3: .1..4..... (18) r3 = 0xffffcae3c09fe049\n      5: .1.34..... (71) r3 = *(u8 *)(r3 +0)\n      6: .1.34..... (16) if w3 == 0x0 goto pc+12\n      7: .1........ (bf) r6 = r1\n      8: ......6... (b4) w1 = 0\n      9: .1....6... (63) *(u32 *)(r10 -48) = r1\n     10: ......6... (bf) r2 = r10\n     11: ..2...6... (07) r2 += -48\n     12: ..2...6... (18) r1 = 0xdeadc0de\n     14: .12...6... (85) call bpf_map_lookup_elem#1\n     15: 0.....6... (b7) r4 = 0\n     16: 0...4.6... (15) if r0 == 0x0 goto pc+1\n     17: 0.....6... (79) r4 = *(u64 *)(r0 +0)\n     18: ....4.6... (bf) r1 = r6\n     19: .1..4..... (61) r0 = *(u32 *)(r1 +16)\n     20: 01..4..... (54) w0 &= 65535\n     21: 01..4..... (b4) w3 = 1\n     22: 01.34..... (16) if w0 == 0xdd86 goto pc+1\n     23: .1..4..... (b4) w3 = 0\n     24: .1.34..... (7b) *(u64 *)(r10 -64) = r4\n     25: .1.3...... (61) r6 = *(u32 *)(r1 +64)\n     26: .1.3..6... (61) r2 = *(u32 *)(r1 +0)\n     27: .123..6... (63) *(u32 *)(r10 -80) = r2\n     28: .1.3..6... (18) r0 = 0xffffcae3c09fe004\n     30: 01.3..6... (71) r0 = *(u8 *)(r0 +0)\n     31: 01.3..6... (b4) w8 = 1\n     32: 01.3..6.8. (16) if w0 == 0x0 goto pc+1\n     33: .1.3..6... (b4) w8 = 0\n     34: .1.3..6.8. (64) w8 <<= 1\n     35: .1.3..6.8. (4c) w8 |= w3\n     36: .1....6.8. (18) r3 = 0xffffcae3c09fe03c\n     38: .1.3..6.8. (61) r3 = *(u32 *)(r3 +0)\n     39: .1.3..6.8. (61) r2 = *(u32 *)(r1 +0)\n     40: .123..6.8. (63) *(u32 *)(r10 -72) = r2\n     41: .1.3..6.8. (18) r5 = 0xffffcae3c09fe05c\n     43: .1.3.56.8. (69) r5 = *(u16 *)(r5 +0)\n     44: .1.3.56.8. (61) r7 = *(u32 *)(r1 +40)\n     45: .1.3.5678. (61) r4 = *(u32 *)(r1 +60)\n     46: .1.345678. (61) r2 = *(u32 *)(r1 +52)\n     47: .12345678. (61) r9 = *(u32 *)(r1 +48)\n     48: .123456789 (61) r0 = *(u32 *)(r1 +68)\n     49: 0123456789 (6b) *(u16 *)(r10 -46) = r5\n     50: 01234.6789 (63) *(u32 *)(r10 -44) = r0\n     51: .1234.6789 (b4) w5 = 0\n     52: .123456789 (73) *(u8 *)(r10 -10) = r5\n     53: .123456789 (73) *(u8 *)(r10 -11) = r5\n     54: .123456789 (73) *(u8 *)(r10 -9) = r5\n     55: .1234.6789 (b4) w5 = 1\n     56: .123456789 (73) *(u8 *)(r10 -48) = r5\n     57: .1234.6789 (61) r5 = *(u32 *)(r10 -80)\n     58: .123456789 (63) *(u32 *)(r10 -40) = r5\n     59: .1234.6789 (63) *(u32 *)(r10 -32) = r9\n     60: .1234.678. (63) *(u32 *)(r10 -28) = r2\n     61: .1.34.678. (63) *(u32 *)(r10 -24) = r4\n     62: .1.3..678. (63) *(u32 *)(r10 -16) = r7\n     63: .1.3..6.8. (73) *(u8 *)(r10 -12) = r8\n     64: .1.3..6... (79) r2 = *(u64 *)(r10 -64)\n     65: .123..6... (7b) *(u64 *)(r10 -8) = r2\n     66: .1.3..6... (61) r4 = *(u32 *)(r10 -56)\n     67: .1.34.6... (bc) w2 = w4\n     68: .1234.6... (74) w2 >>= 8\n     69: .1234.6... (73) *(u8 *)(r10 -17) = r2\n     70: .1.34.6... (bc) w2 = w6\n     71: .1234.6... (74) w2 >>= 8\n     72: .1234.6... (73) *(u8 *)(r10 -18) = r2\n     73: .1.34.6... (bc) w2 = w6\n     74: .1234.6... (74) w2 >>= 16\n     75: .1234.6... (6b) *(u16 *)(r10 -20) = r2\n     76: .1.34.6... (73) *(u8 *)(r10 -47) = r4\n     77: .1.3..6... (b4) w2 = 3\n     78: .123..6... (6b) *(u16 *)(r10 -34) = r2\n     79: .1.3..6... (61) r2 = *(u32 *)(r10 -72)\n     80: .123..6... (ae) if w3 < w2 goto pc+1\n     81: .12...6... (bc) w3 = w2\n     82: .1.3..6... (6b) *(u16 *)(r10 -36) = r3\n     83: .1.3..6... (67) r3 <<= 32\n     84: .1.3..6... (18) r2 = 0xffffffff\n     86: .123..6... (4f) r3 |= r2\n     87: .1.3..6... (bf) r4 = r10\n     88: .1.34.6... (07) r4 += -48\n     89: .1.34.6... (18) r2 = 0xffff8a7087a88e00\n     91: .1234.6... (b4) w5 = 48\n     92: .123456... (85) call bpf_perf_event_output#25\n     93: ......6... (54) w6 &= 255\n     94: ......6... (bc) w0 = w6\n     95: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (b7) r4 = 0                        ; R4=0\n1: (61) r2 = *(u32 *)(r1 +56)         ; R1=ctx() R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2: (63) *(u32 *)(r10 -56) = r2        ; R2=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=\n... verifier log truncated ...; prog 159: prog 159 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (61) r7 = *(u32 *)(r6 +48)\n      2: ......67.. (b4) w1 = 0\n      3: .1....67.. (63) *(u32 *)(r6 +48) = r1\n      4: ......67.. (18) r1 = 0xffffcae3c09fe004\n      6: .1....67.. (71) r1 = *(u8 *)(r1 +0)\n      7: .1....67.. (61) r2 = *(u32 *)(r6 +80)\n      8: .12...67.. (61) r3 = *(u32 *)(r6 +76)\n      9: .123..67.. (0f) r3 += r1\n     10: ..23..67.. (b4) w0 = -134\n     11: 0.23..67.. (07) r3 += 20\n     12: 0.23..67.. (2d) if r3 > r2 goto pc+118\n     13: 0.....67.. (18) r1 = 0xffffcae3c09fe03c\n     15: 01....67.. (61) r1 = *(u32 *)(r1 +0)\n     16: 0.....67.. (61) r1 = *(u32 *)(r6 +44)\n     17: 01....67.. (63) *(u32 *)(r10 -32) = r1\n     18: 01....67.. (61) r2 = *(u32 *)(r10 -32)\n     19: 012...67.. (63) *(u32 *)(r10 -32) = r1\n     20: 0.2...67.. (54) w2 &= 1\n     21: 0.2...67.. (61) r1 = *(u32 *)(r10 -32)\n     22: 012...67.. (54) w1 &= 2\n     23: 012...67.. (4c) w1 |= w2\n     24: 01....67.. (b4) w8 = 1\n     25: 01....678. (56) if w1 != 0x0 goto pc+1\n     26: 0.....67.. (b4) w8 = 0\n     27: 0.....678. (18) r1 = 0xffffcae3c09fe004\n     29: 01....678. (71) r1 = *(u8 *)(r1 +0)\n     30: 01....678. (61) r2 = *(u32 *)(r6 +80)\n     31: 012...678. (61) r9 = *(u32 *)(r6 +76)\n     32: 012...6789 (0f) r9 += r1\n     33: 0.2...6789 (bf) r1 = r9\n     34: 012...6789 (07) r1 += 20\n     35: 012...6789 (2d) if r1 > r2 goto pc+95\n     36: ......6789 (61) r1 = *(u32 *)(r9 +16)\n     37: .1....6789 (b7) r2 = 0\n     38: .12...6789 (63) *(u32 *)(r10 -16) = r2\n     39: .12...6789 (63) *(u32 *)(r10 -20) = r2\n     40: .12...6789 (63) *(u32 *)(r10 -24) = r2\n     41: .12...6789 (63) *(u32 *)(r10 -28) = r2\n     42: .1....6789 (63) *(u32 *)(r10 -32) = r1\n     43: ......6789 (b4) w1 = 1\n     44: .1....6789 (73) *(u8 *)(r10 -16) = r1\n     45: ......6789 (bf) r2 = r10\n     46: ..2...6789 (07) r2 += -32\n     47: ..2...6789 (18) r1 = 0xffff8a7084f60800\n     49: .12...6789 (85) call bpf_map_lookup_elem#1\n     50: 0.....6789 (15) if r0 == 0x0 goto pc+43\n     51: 0.....67.9 (18) r1 = 0xffffcae3c09fe004\n     53: 01....67.9 (71) r2 = *(u8 *)(r1 +0)\n     54: 0.2...67.9 (61) r1 = *(u32 *)(r0 +8)\n     55: 012...67.9 (54) w1 &= 3\n     56: 012...67.9 (56) if w1 != 0x0 goto pc+62\n     57: 0.2...67.9 (79) r1 = *(u64 *)(r0 +24)\n     58: 012...67.9 (7b) *(u64 *)(r10 -40) = r1\n     59: 0.2...67.9 (79) r1 = *(u64 *)(r0 +16)\n     60: 012...67.9 (7b) *(u64 *)(r10 -48) = r1\n     61: 0.2...67.9 (71) r3 = *(u8 *)(r9 +8)\n     62: 0.23..67.9 (a6) if w3 < 0x2 goto pc+95\n     63: 0.23..67.9 (bf) r8 = r0\n     64: ..23..6789 (bc) w4 = w3\n     65: ..234.6789 (04) w4 += -1\n     66: ..234.6789 (73) *(u8 *)(r9 +8) = r4\n     67: ..234.678. (04) w2 += 10\n     68: ..234.678. (54) w4 &= 255\n     69: ..234.678. (bf) r1 = r6\n     70: .1234.678. (b4) w5 = 2\n     71: .12345678. (85) call bpf_l3_csum_replace#10\n     72: 0.....678. (c6) if w0 s< 0x0 goto pc+105\n     73: ......678. (bf) r3 = r10\n     74: ...3..678. (07) r3 += -40\n     75: ...3..678. (bf) r1 = r6\n     76: .1.3..678. (b4) w2 = 6\n     77: .123..678. (b4) w4 = 6\n     78: .1234.678. (b4) w5 = 0\n     79: .12345678. (85) call bpf_skb_store_bytes#9\n     80: 0.....678. (bc) w1 = w0\n     81: .1....678. (b4) w0 = -141\n     82: 01....678. (c6) if w1 s< 0x0 goto pc+48\n     83: ......678. (bf) r3 = r10\n     84: ...3..678. (07) r3 += -48\n     85: ...3..678. (bf) r1 = r6\n     86: .1.3..678. (b4) w2 = 0\n     87: .123..678. (b4) w4 = 6\n     88: .1234.678. (b4) w5 = 0\n     89: .12345678. (85) call bpf_skb_store_bytes#9\n     90: 0.....678. (bc) w1 = w0\n     91: .1....678. (b4) w0 = -141\n     92: 01....678. (c6) if w1 s< 0x0 goto pc+38\n     93: ......678. (05) goto pc+88\n     94: ......6789 (61) r1 = *(u32 *)(r9 +16)\n     95: .1....678. (b4) w2 = 0\n     96: .12...678. (63) *(u32 *)(r10 -12) = r2\n     97: .12...678. (63) *(u32 *)(r10 -16) = r2\n     98: .12...678. (63) *(u32 *)(r10 -20) = r2\n     99: .1....678. (63) *(u32 *)(r10 -24) = r1\n    100: ......678. (b4) w1 = 64\n    101: .1....678. (63) *(u32 *)(r10 -32) = r1\n    102: ......678. (b4) w1 = 16777216\n    103: .1....678\n... verifier log truncated ...",
+        "error_programs": [
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 64 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 13: Permission denied (os error 13)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (79) r2 = *(u64 *)(r1 +0)\n      1: .12....... (79) r6 = *(u64 *)(r2 +0)\n      2: .12...6... (79) r1 = *(u64 *)(r1 +8)\n      3: .12...6... (15) if r1 == 0x0 goto pc+59\n      4: .12...6... (79) r7 = *(u64 *)(r1 +0)\n      5: ..2...67.. (79) r1 = *(u64 *)(r2 +16)\n      6: .1....67.. (55) if r1 != 0x0 goto pc+8\n      7: ......67.. (bf) r4 = r10\n      8: ....4.67.. (07) r4 += -48\n      9: ....4.67.. (bf) r1 = r6\n     10: .1..4.67.. (18) r2 = 0xffff8a708c807b7a\n     12: .12.4.67.. (b7) r3 = 32\n     13: .1234.67.. (b7) r5 = 0\n     14: .1234567.. (85) call bpf_seq_printf#126\n     15: ......67.. (7b) *(u64 *)(r10 -56) = r6\n     16: .......7.. (61) r1 = *(u32 *)(r7 +0)\n     17: .1.....7.. (7b) *(u64 *)(r10 -48) = r1\n     18: .......7.. (b7) r3 = 4\n     19: ...3...7.. (bf) r9 = r7\n     20: ...3...7.9 (0f) r9 += r3\n     21: ...3...7.9 (79) r1 = *(u64 *)(r7 +40)\n     22: .1.3...7.9 (79) r8 = *(u64 *)(r7 +48)\n     23: .1.3...789 (15) if r8 == 0x0 goto pc+24\n     24: .1.....789 (b7) r2 = 0\n     25: .12....789 (0f) r1 += r2\n     26: .1.....789 (61) r1 = *(u32 *)(r1 +4)\n     27: .1.....789 (79) r3 = *(u64 *)(r8 +8)\n     28: .1.3...789 (67) r1 <<= 3\n     29: .1.3...789 (0f) r3 += r1\n     30: ...3...789 (79) r6 = *(u64 *)(r8 +0)\n     31: ...3..6789 (bf) r1 = r10\n     32: .1.3..6789 (07) r1 += -8\n     33: .1.3..6789 (b7) r2 = 8\n     34: .123..6789 (85) call bpf_probe_read_kernel#113\n     35: ......6789 (b7) r1 = 0\n     36: .1....6789 (79) r3 = *(u64 *)(r10 -8)\n     37: .1.3..6789 (0f) r3 += r1\n     38: ...3..6789 (bf) r1 = r10\n     39: .1.3..6789 (07) r1 += -12\n     40: .1.3..6789 (b7) r2 = 4\n     41: .123..6789 (85) call bpf_probe_read_kernel#113\n     42: ......6789 (b7) r3 = 4\n     43: ...3..6789 (61) r1 = *(u32 *)(r10 -12)\n     44: .1.3..6789 (61) r2 = *(u32 *)(r8 +16)\n     45: .123..67.9 (3d) if r1 >= r2 goto pc+2\n     46: .1.3..67.. (0f) r6 += r1\n     47: ...3..67.. (bf) r9 = r6\n     48: ...3...7.9 (7b) *(u64 *)(r10 -40) = r9\n     49: ...3...7.. (79) r1 = *(u64 *)(r7 +24)\n     50: .1.3...7.. (7b) *(u64 *)(r10 -32) = r1\n     51: ...3...7.. (79) r1 = *(u64 *)(r7 +32)\n     52: .1.3...... (79) r1 = *(u64 *)(r1 +0)\n     53: .1.3...... (0f) r1 += r3\n     54: .1........ (7b) *(u64 *)(r10 -24) = r1\n     55: .......... (bf) r4 = r10\n     56: ....4..... (07) r4 += -48\n     57: ....4..... (79) r1 = *(u64 *)(r10 -56)\n     58: .1..4..... (18) r2 = 0xffff8a708c807b9a\n     60: .12.4..... (b7) r3 = 17\n     61: .1234..... (b7) r5 = 32\n     62: .12345.... (85) call bpf_seq_printf#126\n     63: .......... (b7) r0 = 0\n     64: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (79) r2 = *(u64 *)(r1 +0)\nfunc 'bpf_iter_bpf_prog' arg0 has btf_id 70962 type STRUCT 'bpf_iter_meta'\n1: R1=ctx() R2=trusted_ptr_bpf_iter_meta()\n1: (79) r6 = *(u64 *)(r2 +0)          ; R2=trusted_ptr_bpf_iter_meta() R6=trusted_ptr_seq_file()\n2: (79) r1 = *(u64 *)(r1 +8)          ; R1=ptr_or_null_bpf_prog(id=1)\n3: (15) if r1 == 0x0 goto pc+59       ; R1=ptr_bpf_prog()\n4: (79) r7 = *(u64 *)(r1 +0)\naccess beyond the end of member pages (mend:2) in struct bpf_prog with off 0 size 8\nprocessed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            "exit_code": 1,
+            "prog_id": 64
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 147 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (61) r2 = *(u32 *)(r1 +48)\n      1: .12....... (b4) w3 = 0\n      2: .123...... (63) *(u32 *)(r1 +48) = r3\n      3: .12....... (18) r3 = 0xffffcae3c07ae004\n      5: .123...... (71) r3 = *(u8 *)(r3 +0)\n      6: .123...... (61) r4 = *(u32 *)(r1 +80)\n      7: .1234..... (61) r5 = *(u32 *)(r1 +76)\n      8: .12345.... (0f) r5 += r3\n      9: .12.45.... (b4) w0 = -134\n     10: 012.45.... (07) r5 += 20\n     11: 012.45.... (2d) if r5 > r4 goto pc+12\n     12: 012....... (18) r3 = 0xffffcae3c07ae03c\n     14: 0123...... (61) r3 = *(u32 *)(r3 +0)\n     15: 012....... (18) r3 = 0xffffcae3c07ae004\n     17: 0123...... (71) r3 = *(u8 *)(r3 +0)\n     18: 0123...... (61) r4 = *(u32 *)(r1 +80)\n     19: 01234..... (61) r5 = *(u32 *)(r1 +76)\n     20: 012345.... (0f) r5 += r3\n     21: 012.45.... (07) r5 += 20\n     22: 012.45.... (2d) if r5 > r4 goto pc+1\n     23: .12....... (b4) w0 = 0\n     24: 012....... (66) if w0 s> 0xffffffff goto pc+44\n     25: 012....... (b4) w3 = 62980354\n     26: 0123...... (63) *(u32 *)(r1 +64) = r3\n     27: 012....... (b4) w3 = 0\n     28: 0123...... (63) *(u32 *)(r1 +60) = r3\n     29: 0123...... (63) *(u32 *)(r1 +52) = r3\n     30: 012....... (63) *(u32 *)(r1 +48) = r2\n     31: 01........ (84) w0 = -w0\n     32: 01........ (63) *(u32 *)(r1 +56) = r0\n     33: 01........ (bf) r6 = r1\n     34: 01....6... (61) r7 = *(u32 *)(r1 +0)\n     35: 0.....67.. (18) r1 = 0x103c10100\n     37: 01....67.. (7b) *(u64 *)(r10 -24) = r1\n     38: 0.....67.. (73) *(u8 *)(r10 -24) = r0\n     39: ......67.. (bf) r2 = r10\n     40: ..2...67.. (07) r2 += -24\n     41: ..2...67.. (18) r1 = 0xffff8a708608a400\n     43: .12...67.. (85) call bpf_map_lookup_elem#1\n     44: 0.....67.. (15) if r0 == 0x0 goto pc+7\n     45: 0.....67.. (79) r1 = *(u64 *)(r0 +0)\n     46: 01....67.. (07) r1 += 1\n     47: 01....67.. (7b) *(u64 *)(r0 +0) = r1\n     48: 0.....67.. (79) r1 = *(u64 *)(r0 +8)\n     49: 01....67.. (0f) r1 += r7\n     50: 01....6... (7b) *(u64 *)(r0 +8) = r1\n     51: ......6... (05) goto pc+11\n     52: ......67.. (7b) *(u64 *)(r10 -8) = r7\n     53: ......6... (b7) r1 = 1\n     54: .1....6... (7b) *(u64 *)(r10 -16) = r1\n     55: ......6... (bf) r2 = r10\n     56: ..2...6... (07) r2 += -24\n     57: ..2...6... (bf) r3 = r10\n     58: ..23..6... (07) r3 += -16\n     59: ..23..6... (18) r1 = 0xffff8a708608a400\n     61: .123..6... (b4) w4 = 0\n     62: .1234.6... (85) call bpf_map_update_elem#2\n     63: ......6... (bf) r1 = r6\n     64: .1........ (18) r2 = 0xffff8a725c9cb400\n     66: .12....... (b7) r3 = 1\n     67: .123...... (85) call bpf_tail_call#12\n     68: .......... (b4) w0 = 2\n     69: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +48)         ; R1=ctx() R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n1: (b4) w3 = 0                        ; R3=0\n2: (63) *(u32 *)(r1 +48) = r3         ; R1=ctx() R3=0\n3: (18) r3 = 0xffffcae3c07ae004       ; R3=map_value(map=.rodata.config,ks=4,vs=156,off=4)\n5: (71) r3 = *(u8 *)(r3 +0)           ; R3=14\n6: (61) r4 = *(u32 *)(r1 +80)         ; R1=ctx() R4=pkt_end()\n7: (61) r5 = *(u32 *)(r1 +76)         ; R1=ctx() R5=pkt(r=0)\n8: (0f) r5 += r3\nmark_precise: frame0: last_idx 8 first_idx 0 subseq_idx -1 \nmark_precise: frame0: regs=r3 stack= before 7: (61) r5 = *(u32 *)(r1 +76)\nmark_precise: frame0: regs=r3 stack= before 6: (61) r4 = *(u32 *)(r1 +80)\nmark_precise: frame0: regs=r3 stack= before 5: (71) r3 = *(u8 *)(r3 +0)\n9: R3=14 R5=pkt(off=14,r=0)\n9: (b4) w0 = -134                     ; R0=0xffffff7a\n10: (07) r5 += 20                     ; R5=pkt(off=34,r=0)\n11: (2d) if r5 > r4 goto pc+12        ; R4=pkt_end() R5=pkt(off=34,r=34)\n12: (18) r3 = 0xffffcae3c07ae03c      ; R3=map_value(map=.rodata.config,ks=4,vs=156,off=60)\n14: (61) r3 = *(u32 *)(r3 +0)         ; R3=128\n15: (18) r3 = 0xffffcae3c07ae004      ; R3=map_value(map=.rodata.config,ks=4,vs=156,off=4)\n17: (71) r3 = *(u8 *)(r3 +0)          ; R3=14\n18: (61) r4 = *(u32 *)(r1 +80)        ; R1=ctx() R4=pkt_end()\n19: (61) r5 = *(u32 *)(r1 +76)        ; R1=ctx() R5=pkt(r=0)\n20: (0f) r5 += r3\nmark_precis\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 147
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 156 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (b7) r4 = 0\n      1: .1..4..... (61) r2 = *(u32 *)(r1 +56)\n      2: .12.4..... (63) *(u32 *)(r10 -56) = r2\n      3: .1..4..... (18) r3 = 0xffffcae3c09fe049\n      5: .1.34..... (71) r3 = *(u8 *)(r3 +0)\n      6: .1.34..... (16) if w3 == 0x0 goto pc+12\n      7: .1........ (bf) r6 = r1\n      8: ......6... (b4) w1 = 0\n      9: .1....6... (63) *(u32 *)(r10 -48) = r1\n     10: ......6... (bf) r2 = r10\n     11: ..2...6... (07) r2 += -48\n     12: ..2...6... (18) r1 = 0xdeadc0de\n     14: .12...6... (85) call bpf_map_lookup_elem#1\n     15: 0.....6... (b7) r4 = 0\n     16: 0...4.6... (15) if r0 == 0x0 goto pc+1\n     17: 0.....6... (79) r4 = *(u64 *)(r0 +0)\n     18: ....4.6... (bf) r1 = r6\n     19: .1..4..... (61) r0 = *(u32 *)(r1 +16)\n     20: 01..4..... (54) w0 &= 65535\n     21: 01..4..... (b4) w3 = 1\n     22: 01.34..... (16) if w0 == 0xdd86 goto pc+1\n     23: .1..4..... (b4) w3 = 0\n     24: .1.34..... (7b) *(u64 *)(r10 -64) = r4\n     25: .1.3...... (61) r6 = *(u32 *)(r1 +64)\n     26: .1.3..6... (61) r2 = *(u32 *)(r1 +0)\n     27: .123..6... (63) *(u32 *)(r10 -80) = r2\n     28: .1.3..6... (18) r0 = 0xffffcae3c09fe004\n     30: 01.3..6... (71) r0 = *(u8 *)(r0 +0)\n     31: 01.3..6... (b4) w8 = 1\n     32: 01.3..6.8. (16) if w0 == 0x0 goto pc+1\n     33: .1.3..6... (b4) w8 = 0\n     34: .1.3..6.8. (64) w8 <<= 1\n     35: .1.3..6.8. (4c) w8 |= w3\n     36: .1....6.8. (18) r3 = 0xffffcae3c09fe03c\n     38: .1.3..6.8. (61) r3 = *(u32 *)(r3 +0)\n     39: .1.3..6.8. (61) r2 = *(u32 *)(r1 +0)\n     40: .123..6.8. (63) *(u32 *)(r10 -72) = r2\n     41: .1.3..6.8. (18) r5 = 0xffffcae3c09fe05c\n     43: .1.3.56.8. (69) r5 = *(u16 *)(r5 +0)\n     44: .1.3.56.8. (61) r7 = *(u32 *)(r1 +40)\n     45: .1.3.5678. (61) r4 = *(u32 *)(r1 +60)\n     46: .1.345678. (61) r2 = *(u32 *)(r1 +52)\n     47: .12345678. (61) r9 = *(u32 *)(r1 +48)\n     48: .123456789 (61) r0 = *(u32 *)(r1 +68)\n     49: 0123456789 (6b) *(u16 *)(r10 -46) = r5\n     50: 01234.6789 (63) *(u32 *)(r10 -44) = r0\n     51: .1234.6789 (b4) w5 = 0\n     52: .123456789 (73) *(u8 *)(r10 -10) = r5\n     53: .123456789 (73) *(u8 *)(r10 -11) = r5\n     54: .123456789 (73) *(u8 *)(r10 -9) = r5\n     55: .1234.6789 (b4) w5 = 1\n     56: .123456789 (73) *(u8 *)(r10 -48) = r5\n     57: .1234.6789 (61) r5 = *(u32 *)(r10 -80)\n     58: .123456789 (63) *(u32 *)(r10 -40) = r5\n     59: .1234.6789 (63) *(u32 *)(r10 -32) = r9\n     60: .1234.678. (63) *(u32 *)(r10 -28) = r2\n     61: .1.34.678. (63) *(u32 *)(r10 -24) = r4\n     62: .1.3..678. (63) *(u32 *)(r10 -16) = r7\n     63: .1.3..6.8. (73) *(u8 *)(r10 -12) = r8\n     64: .1.3..6... (79) r2 = *(u64 *)(r10 -64)\n     65: .123..6... (7b) *(u64 *)(r10 -8) = r2\n     66: .1.3..6... (61) r4 = *(u32 *)(r10 -56)\n     67: .1.34.6... (bc) w2 = w4\n     68: .1234.6... (74) w2 >>= 8\n     69: .1234.6... (73) *(u8 *)(r10 -17) = r2\n     70: .1.34.6... (bc) w2 = w6\n     71: .1234.6... (74) w2 >>= 8\n     72: .1234.6... (73) *(u8 *)(r10 -18) = r2\n     73: .1.34.6... (bc) w2 = w6\n     74: .1234.6... (74) w2 >>= 16\n     75: .1234.6... (6b) *(u16 *)(r10 -20) = r2\n     76: .1.34.6... (73) *(u8 *)(r10 -47) = r4\n     77: .1.3..6... (b4) w2 = 3\n     78: .123..6... (6b) *(u16 *)(r10 -34) = r2\n     79: .1.3..6... (61) r2 = *(u32 *)(r10 -72)\n     80: .123..6... (ae) if w3 < w2 goto pc+1\n     81: .12...6... (bc) w3 = w2\n     82: .1.3..6... (6b) *(u16 *)(r10 -36) = r3\n     83: .1.3..6... (67) r3 <<= 32\n     84: .1.3..6... (18) r2 = 0xffffffff\n     86: .123..6... (4f) r3 |= r2\n     87: .1.3..6... (bf) r4 = r10\n     88: .1.34.6... (07) r4 += -48\n     89: .1.34.6... (18) r2 = 0xffff8a7087a88e00\n     91: .1234.6... (b4) w5 = 48\n     92: .123456... (85) call bpf_perf_event_output#25\n     93: ......6... (54) w6 &= 255\n     94: ......6... (bc) w0 = w6\n     95: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (b7) r4 = 0                        ; R4=0\n1: (61) r2 = *(u32 *)(r1 +56)         ; R1=ctx() R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2: (63) *(u32 *)(r10 -56) = r2        ; R2=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 156
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 159 pass wide_mem failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (61) r7 = *(u32 *)(r6 +48)\n      2: ......67.. (b4) w1 = 0\n      3: .1....67.. (63) *(u32 *)(r6 +48) = r1\n      4: ......67.. (18) r1 = 0xffffcae3c09fe004\n      6: .1....67.. (71) r1 = *(u8 *)(r1 +0)\n      7: .1....67.. (61) r2 = *(u32 *)(r6 +80)\n      8: .12...67.. (61) r3 = *(u32 *)(r6 +76)\n      9: .123..67.. (0f) r3 += r1\n     10: ..23..67.. (b4) w0 = -134\n     11: 0.23..67.. (07) r3 += 20\n     12: 0.23..67.. (2d) if r3 > r2 goto pc+118\n     13: 0.....67.. (18) r1 = 0xffffcae3c09fe03c\n     15: 01....67.. (61) r1 = *(u32 *)(r1 +0)\n     16: 0.....67.. (61) r1 = *(u32 *)(r6 +44)\n     17: 01....67.. (63) *(u32 *)(r10 -32) = r1\n     18: 01....67.. (61) r2 = *(u32 *)(r10 -32)\n     19: 012...67.. (63) *(u32 *)(r10 -32) = r1\n     20: 0.2...67.. (54) w2 &= 1\n     21: 0.2...67.. (61) r1 = *(u32 *)(r10 -32)\n     22: 012...67.. (54) w1 &= 2\n     23: 012...67.. (4c) w1 |= w2\n     24: 01....67.. (b4) w8 = 1\n     25: 01....678. (56) if w1 != 0x0 goto pc+1\n     26: 0.....67.. (b4) w8 = 0\n     27: 0.....678. (18) r1 = 0xffffcae3c09fe004\n     29: 01....678. (71) r1 = *(u8 *)(r1 +0)\n     30: 01....678. (61) r2 = *(u32 *)(r6 +80)\n     31: 012...678. (61) r9 = *(u32 *)(r6 +76)\n     32: 012...6789 (0f) r9 += r1\n     33: 0.2...6789 (bf) r1 = r9\n     34: 012...6789 (07) r1 += 20\n     35: 012...6789 (2d) if r1 > r2 goto pc+95\n     36: ......6789 (61) r1 = *(u32 *)(r9 +16)\n     37: .1....6789 (b7) r2 = 0\n     38: .12...6789 (63) *(u32 *)(r10 -16) = r2\n     39: .12...6789 (63) *(u32 *)(r10 -20) = r2\n     40: .12...6789 (63) *(u32 *)(r10 -24) = r2\n     41: .12...6789 (63) *(u32 *)(r10 -28) = r2\n     42: .1....6789 (63) *(u32 *)(r10 -32) = r1\n     43: ......6789 (b4) w1 = 1\n     44: .1....6789 (73) *(u8 *)(r10 -16) = r1\n     45: ......6789 (bf) r2 = r10\n     46: ..2...6789 (07) r2 += -32\n     47: ..2...6789 (18) r1 = 0xffff8a7084f60800\n     49: .12...6789 (85) call bpf_map_lookup_elem#1\n     50: 0.....6789 (15) if r0 == 0x0 goto pc+43\n     51: 0.....67.9 (18) r1 = 0xffffcae3c09fe004\n     53: 01....67.9 (71) r2 = *(u8 *)(r1 +0)\n     54: 0.2...67.9 (61) r1 = *(u32 *)(r0 +8)\n     55: 012...67.9 (54) w1 &= 3\n     56: 012...67.9 (56) if w1 != 0x0 goto pc+62\n     57: 0.2...67.9 (79) r1 = *(u64 *)(r0 +24)\n     58: 012...67.9 (7b) *(u64 *)(r10 -40) = r1\n     59: 0.2...67.9 (79) r1 = *(u64 *)(r0 +16)\n     60: 012...67.9 (7b) *(u64 *)(r10 -48) = r1\n     61: 0.2...67.9 (71) r3 = *(u8 *)(r9 +8)\n     62: 0.23..67.9 (a6) if w3 < 0x2 goto pc+95\n     63: 0.23..67.9 (bf) r8 = r0\n     64: ..23..6789 (bc) w4 = w3\n     65: ..234.6789 (04) w4 += -1\n     66: ..234.6789 (73) *(u8 *)(r9 +8) = r4\n     67: ..234.678. (04) w2 += 10\n     68: ..234.678. (54) w4 &= 255\n     69: ..234.678. (bf) r1 = r6\n     70: .1234.678. (b4) w5 = 2\n     71: .12345678. (85) call bpf_l3_csum_replace#10\n     72: 0.....678. (c6) if w0 s< 0x0 goto pc+105\n     73: ......678. (bf) r3 = r10\n     74: ...3..678. (07) r3 += -40\n     75: ...3..678. (bf) r1 = r6\n     76: .1.3..678. (b4) w2 = 6\n     77: .123..678. (b4) w4 = 6\n     78: .1234.678. (b4) w5 = 0\n     79: .12345678. (85) call bpf_skb_store_bytes#9\n     80: 0.....678. (bc) w1 = w0\n     81: .1....678. (b4) w0 = -141\n     82: 01....678. (c6) if w1 s< 0x0 goto pc+48\n     83: ......678. (bf) r3 = r10\n     84: ...3..678. (07) r3 += -48\n     85: ...3..678. (bf) r1 = r6\n     86: .1.3..678. (b4) w2 = 0\n     87: .123..678. (b4) w4 = 6\n     88: .1234.678. (b4) w5 = 0\n     89: .12345678. (85) call bpf_skb_store_bytes#9\n     90: 0.....678. (bc) w1 = w0\n     91: .1....678. (b4) w0 = -141\n     92: 01....678. (c6) if w1 s< 0x0 goto pc+38\n     93: ......678. (05) goto pc+88\n     94: ......6789 (61) r1 = *(u32 *)(r9 +16)\n     95: .1....678. (b4) w2 = 0\n     96: .12...678. (63) *(u32 *)(r10 -12) = r2\n     97: .12...678. (63) *(u32 *)(r10 -16) = r2\n     98: .12...678. (63) *(u32 *)(r10 -20) = r2\n     99: .1....678. (63) *(u32 *)(r10 -24) = r1\n    100: ......678. (b4) w1 = 64\n    101: .1....678. (63) *(u32 *)(r10 -32) = r1\n    102: ......678. (b4) w1 = 16777216\n    103: .1....678\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 159
+          }
+        ],
+        "exit_code": 1,
+        "program_counts": {
+          "applied": 34,
+          "not_applied": 4,
+          "requested": 38
+        }
+      },
+      "runner": "cilium",
+      "selected_workload": "network_lossy_multi",
+      "status": "ok"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline": null,
+      "error": "stress_ng_os_io_network workload failed: /usr/bin/stress-ng: unrecognized option '--ioctl'",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "tetragon",
+      "selected_workload": "stress_ng_os_io_network",
+      "status": "error"
+    },
+    {
+      "app": "katran",
+      "baseline": {
+        "bpf": {
+          "470": {
+            "avg_ns_per_run": 316.9367648645732,
+            "bytes_jited": 176,
+            "bytes_xlated": 136,
+            "id": 470,
+            "name": "xdp_root",
+            "run_cnt_delta": 37068,
+            "run_time_ns_delta": 11748212,
+            "type": "xdp"
+          },
+          "476": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 13629,
+            "bytes_xlated": 23840,
+            "id": 476,
+            "name": "balancer_ingress",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "xdp"
+          },
+          "478": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 541,
+            "bytes_xlated": 1000,
+            "id": 478,
+            "name": "healthcheck_encap",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.000882780999973,
+            "ops_per_sec": 6172.550989265313,
+            "ops_total": 6178.0,
+            "stderr": "",
+            "stdout": ""
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "470": {
+            "avg_ns_per_run": 305.93738578953025,
+            "bytes_jited": 176,
+            "bytes_xlated": 136,
+            "id": 470,
+            "name": "xdp_root",
+            "run_cnt_delta": 37212,
+            "run_time_ns_delta": 11384542,
+            "type": "xdp"
+          },
+          "476": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 13581,
+            "bytes_xlated": 23744,
+            "id": 476,
+            "name": "balancer_ingress",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "xdp"
+          },
+          "478": {
+            "avg_ns_per_run": null,
+            "bytes_jited": 541,
+            "bytes_xlated": 1000,
+            "id": 478,
+            "name": "healthcheck_encap",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0007611899999915,
+            "ops_per_sec": 6197.282690388955,
+            "ops_total": 6202.0,
+            "stderr": "",
+            "stdout": ""
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      },
+      "runner": "katran",
+      "selected_workload": "network",
+      "status": "ok"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline": null,
+      "error": "stress_ng_os_io_network workload failed: /usr/bin/stress-ng: unrecognized option '--ioctl'",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "tracee",
+      "selected_workload": "stress_ng_os_io_network",
+      "status": "error"
+    },
+    {
+      "app": "bpftrace/capable",
+      "baseline": null,
+      "error": "stress_ng_os workload failed: /usr/bin/stress-ng: unrecognized option '--ioctl'",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bpftrace",
+      "selected_workload": "stress_ng_os",
+      "status": "error"
+    },
+    {
+      "app": "bpftrace/biosnoop",
+      "baseline": {
+        "bpf": {
+          "664": {
+            "avg_ns_per_run": 410.65136599564636,
+            "bytes_jited": 222,
+            "bytes_xlated": 408,
+            "id": 664,
+            "name": "block_io_start",
+            "run_cnt_delta": 1438804,
+            "run_time_ns_delta": 590846828,
+            "type": "tracepoint"
+          },
+          "665": {
+            "avg_ns_per_run": 761.5516559066846,
+            "bytes_jited": 931,
+            "bytes_xlated": 1576,
+            "id": 665,
+            "name": "block_io_done",
+            "run_cnt_delta": 1438819,
+            "run_time_ns_delta": 1095734992,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.33762821900001,
+            "ops_per_sec": 360976.43390400335,
+            "ops_total": 1926758.0,
+            "stderr": "",
+            "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.254484,\n        \"1000\" : 15.485277\n      },\n      \"latency_us\" : {\n        \"2\" : 30.704764,\n        \"4\" : 2.908063,\n        \"10\" : 10.452952,\n        \"20\" : 35.047844,\n        \"50\" : 3.118146,\n        \"100\" : 1.732669,\n        \"250\" : 0.279768,\n        \"500\" : 0.015623,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "664": {
+            "avg_ns_per_run": 409.10374611619716,
+            "bytes_jited": 222,
+            "bytes_xlated": 408,
+            "id": 664,
+            "name": "block_io_start",
+            "run_cnt_delta": 1443495,
+            "run_time_ns_delta": 590539212,
+            "type": "tracepoint"
+          },
+          "665": {
+            "avg_ns_per_run": 758.6952310687144,
+            "bytes_jited": 883,
+            "bytes_xlated": 1480,
+            "id": 665,
+            "name": "block_io_done",
+            "run_cnt_delta": 1443510,
+            "run_time_ns_delta": 1095184153,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.341959992,
+            "ops_per_sec": 362393.95332408923,
+            "ops_total": 1935894.0,
+            "stderr": "",
+            "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.153842,\n        \"1000\" : 16.420320\n      },\n      \"latency_us\" : {\n        \"2\" : 31.235700,\n        \"4\" : 1.624712,\n        \"10\" : 11.452479,\n        \"20\" : 34.847383,\n        \"50\" : 2.366943,\n        \"100\" : 1.536567,\n        \"250\" : 0.341871,\n        \"500\" : 0.019565,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 2,
+          "not_applied": 0,
+          "requested": 2
+        }
+      },
+      "runner": "bpftrace",
+      "selected_workload": "fio_randrw",
+      "status": "ok"
+    },
+    {
+      "app": "bpftrace/vfsstat",
+      "baseline": null,
+      "error": "stress_ng_filesystem workload failed: /usr/bin/stress-ng: unrecognized option '--hardlink'",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bpftrace",
+      "selected_workload": "stress_ng_filesystem",
+      "status": "error"
+    },
+    {
+      "app": "bpftrace/runqlat",
+      "baseline": {
+        "bpf": {
+          "680": {
+            "avg_ns_per_run": 65.13828295238336,
+            "bytes_jited": 86,
+            "bytes_xlated": 136,
+            "id": 680,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 2887037,
+            "run_time_ns_delta": 188056633,
+            "type": "tracepoint"
+          },
+          "681": {
+            "avg_ns_per_run": 297.6025641025641,
+            "bytes_jited": 86,
+            "bytes_xlated": 136,
+            "id": 681,
+            "name": "tracepoint_sched_sched_wakeup_new",
+            "run_cnt_delta": 78,
+            "run_time_ns_delta": 23213,
+            "type": "tracepoint"
+          },
+          "682": {
+            "avg_ns_per_run": 137.9863113409948,
+            "bytes_jited": 515,
+            "bytes_xlated": 896,
+            "id": 682,
+            "name": "sched_switch",
+            "run_cnt_delta": 10332568,
+            "run_time_ns_delta": 1425752945,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0181966480000142,
+            "ops_per_sec": 15988239.631289547,
+            "ops_total": 16279172.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [17268] setting to a 1 secs run per stressor\nstress-ng: info:  [17268] dispatching hogs: 4 futex, 4 sem, 4 sem-sysv, 4 switch, 4 yield\nstress-ng: info:  [17268] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [17268] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [17268]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [17268] futex           1479158      2.00      0.31      6.33    739480.11      222662.31\nstress-ng: metrc: [17268] sem             1994012      1.00      0.49      1.49   1991514.72     1005081.33\nstress-ng: metrc: [17268] sem-sysv         296060      1.00      0.04      0.42    295920.16      646705.85\nstress-ng: metrc: [17268] switch          1352243      1.00      0.39      2.79   1352029.12      424461.08\nstress-ng: metrc: [17268] yield          11157699      1.00      1.84      3.65  11133448.21     2031457.12\nstress-ng: info:  [17268] skipped: 0\nstress-ng: info:  [17268] passed: 20: futex (4) sem (4) sem-sysv (4) switch (4) yield (4)\nstress-ng: info:  [17268] failed: 0\nstress-ng: info:  [17268] metrics untrustworthy: 0\nstress-ng: info:  [17268] successful run completed in 1.01 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "680": {
+            "avg_ns_per_run": 58.27561766605349,
+            "bytes_jited": 86,
+            "bytes_xlated": 136,
+            "id": 680,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 2573478,
+            "run_time_ns_delta": 149971020,
+            "type": "tracepoint"
+          },
+          "681": {
+            "avg_ns_per_run": 280.1923076923077,
+            "bytes_jited": 86,
+            "bytes_xlated": 136,
+            "id": 681,
+            "name": "tracepoint_sched_sched_wakeup_new",
+            "run_cnt_delta": 78,
+            "run_time_ns_delta": 21855,
+            "type": "tracepoint"
+          },
+          "682": {
+            "avg_ns_per_run": 125.012225359901,
+            "bytes_jited": 515,
+            "bytes_xlated": 896,
+            "id": 682,
+            "name": "sched_switch",
+            "run_cnt_delta": 13664383,
+            "run_time_ns_delta": 1708214927,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.0141976029999569,
+            "ops_per_sec": 16716872.481112264,
+            "ops_total": 16954212.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [17444] setting to a 1 secs run per stressor\nstress-ng: info:  [17444] dispatching hogs: 4 futex, 4 sem, 4 sem-sysv, 4 switch, 4 yield\nstress-ng: info:  [17444] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [17444] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [17444]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [17444] futex            826382      2.00      0.29      3.98    412986.52      193717.64\nstress-ng: metrc: [17444] sem             6449431      1.00      0.65      2.16   6446468.51     2297969.63\nstress-ng: metrc: [17444] sem-sysv         692809      1.00      0.09      0.84    692572.01      742078.56\nstress-ng: metrc: [17444] switch          1019683      1.00      0.14      1.68   1019518.32      559050.52\nstress-ng: metrc: [17444] yield           7965907      1.00      2.09      5.06   7955904.51     1114363.48\nstress-ng: info:  [17444] skipped: 0\nstress-ng: info:  [17444] passed: 20: futex (4) sem (4) sem-sysv (4) switch (4) yield (4)\nstress-ng: info:  [17444] failed: 0\nstress-ng: info:  [17444] metrics untrustworthy: 0\nstress-ng: info:  [17444] successful run completed in 1.00 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      },
+      "runner": "bpftrace",
+      "selected_workload": "stress_ng_scheduler",
+      "status": "ok"
+    },
+    {
+      "app": "bpftrace/tcplife",
+      "baseline": {
+        "bpf": {
+          "690": {
+            "avg_ns_per_run": 428.85989671873494,
+            "bytes_jited": 2017,
+            "bytes_xlated": 3384,
+            "id": 690,
+            "name": "tcp_set_state",
+            "run_cnt_delta": 62354,
+            "run_time_ns_delta": 26741130,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.104306089999966,
+            "ops_per_sec": 6435.715662855956,
+            "ops_total": 7107.0,
+            "stderr": "",
+            "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   808.92us  275.79us   4.80ms   79.33%\n    Req/Sec     3.25k   244.75     3.73k    68.18%\n  7107 requests in 1.10s, 1.05MB read\n  Socket errors: connect 0, read 7107, write 0, timeout 0\nRequests/sec:   6462.17\nTransfer/sec:      0.96MB"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "690": {
+            "avg_ns_per_run": 401.3120863586712,
+            "bytes_jited": 2017,
+            "bytes_xlated": 3384,
+            "id": 690,
+            "name": "tcp_set_state",
+            "run_cnt_delta": 62252,
+            "run_time_ns_delta": 24982480,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 1.102166230000023,
+            "ops_per_sec": 6456.376367111023,
+            "ops_total": 7116.0,
+            "stderr": "",
+            "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   794.66us  259.86us   2.94ms   75.37%\n    Req/Sec     3.41k     2.28k    6.17k    57.14%\n  7116 requests in 1.10s, 1.05MB read\n  Socket errors: connect 0, read 7115, write 0, timeout 0\nRequests/sec:   6468.50\nTransfer/sec:      0.96MB"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 1,
+          "not_applied": 0,
+          "requested": 1
+        }
+      },
+      "runner": "bpftrace",
+      "selected_workload": "tcp_connect",
+      "status": "ok"
+    }
+  ],
+  "samples": 1,
+  "status": "error",
+  "suite_name": "macro_apps",
+  "summary": {
+    "losses": 8,
+    "per_program_geomean": 1.025828120178698,
+    "program_count": 22,
+    "wins": 14
+  },
+  "workload_seconds": 1.0
+}
+```

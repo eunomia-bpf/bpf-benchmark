@@ -434,7 +434,6 @@ class BCCRunner(AppRunner):
         return run_named_workload(
             str(self.workload_spec.get("kind") or self.workload_spec.get("name") or ""),
             seconds,
-            network_as_tcp_connect=True,
         )
 
     def run_workload_spec(
@@ -447,7 +446,7 @@ class BCCRunner(AppRunner):
         requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or "").strip()
         if not requested_kind:
             raise RuntimeError(f"BCC tool {self.tool_name} workload spec is missing a workload kind")
-        return run_named_workload(requested_kind, seconds, network_as_tcp_connect=True)
+        return run_named_workload(requested_kind, seconds)
 
     def stop(self) -> None:
         if self.session is None:

@@ -865,8 +865,8 @@ class KatranRunner(AppRunner):
         self.load_timeout_s = int(load_timeout_s); self.concurrency = max(1, int(concurrency))
         self.workload_spec = dict(workload_spec)
         self.workload_kind = str(self.workload_spec.get("kind") or self.workload_spec.get("name") or "").strip().lower()
-        if self.workload_kind != "network":
-            raise RuntimeError(f"KatranRunner only supports workload_spec.kind='network', got {self.workload_kind!r}")
+        if self.workload_kind != "xdp_traffic":
+            raise RuntimeError(f"KatranRunner only supports workload_spec.kind='xdp_traffic', got {self.workload_kind!r}")
         self.default_router_mac = str(default_router_mac)
         self.topology: Any | None = None; self.http_server: Any | None = None; self.session: KatranServerSession | None = None
         self.artifacts: dict[str, object] = {}; self.last_request_summary: dict[str, object] = {}
