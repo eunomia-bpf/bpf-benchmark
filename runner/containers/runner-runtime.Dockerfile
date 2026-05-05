@@ -7,6 +7,8 @@ ARG CALICO_CTL_IMAGE=quay.io/calico/ctl:v3.31.3
 ARG RUN_TARGET_ARCH=x86_64
 ARG VENDOR_LINUX_FRAMEWORK_COMMIT
 ARG KERNEL_FORK_IMAGE_PLATFORM=linux/amd64
+ARG KERNEL_ARTIFACTS_STAGE=runner-runtime-kernel-artifacts-host
+ARG KINSN_ARTIFACTS_STAGE=runner-runtime-kinsn-artifacts-host
 
 FROM docker.io/library/ubuntu:24.04 AS runner-runtime-runtime-base
 
@@ -317,7 +319,13 @@ RUN set -eux; \
     ln -sfn /usr/local/bin/cilium-dbg "${repo_artifact_root}/cilium/bin/cilium-dbg"; \
     ln -sfn /usr/local/bin/otelcol-ebpf-profiler "${repo_artifact_root}/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
 
-FROM --platform=${KERNEL_FORK_IMAGE_PLATFORM} bpf-benchmark/kernel-fork:${RUN_TARGET_ARCH}-${VENDOR_LINUX_FRAMEWORK_COMMIT} AS runner-runtime-kernel-base
+FROM scratch AS runner-runtime-kernel-artifacts-host
+
+COPY --link --from=runner-runtime-host-kernel-artifacts / /artifacts
+
+FROM --platform=${KERNEL_FORK_IMAGE_PLATFORM} bpf-benchmark/kernel-fork:${RUN_TARGET_ARCH}-${VENDOR_LINUX_FRAMEWORK_COMMIT} AS runner-runtime-kernel-artifacts-docker
+
+FROM ${KERNEL_ARTIFACTS_STAGE} AS runner-runtime-kernel-base
 
 FROM runner-runtime-app-artifacts AS runner-runtime-artifacts
 
@@ -384,7 +392,11 @@ RUN set -eux; \
     find ./runner -maxdepth 3 -type f \( -name CMakeCache.txt -o -name cmake_install.cmake -o -name Makefile \) -delete; \
     find ./tests -type f \( \( -name '*.o' ! -name '*.bpf.o' \) -o -name '*.d' -o -name '*.cmd' \) -delete
 
-FROM --platform=${KERNEL_FORK_IMAGE_PLATFORM} runner-runtime-build-base AS runner-runtime-kinsn-artifacts
+FROM scratch AS runner-runtime-kinsn-artifacts-host
+
+COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn
+
+FROM --platform=${KERNEL_FORK_IMAGE_PLATFORM} runner-runtime-build-base AS runner-runtime-kinsn-artifacts-docker
 
 ARG IMAGE_BUILD_JOBS=4
 ARG KERNEL_FORK_IMAGE_PLATFORM=linux/amd64
@@ -445,6 +457,8 @@ for ko_path in /artifacts/kinsn/*.ko; do
     readelf -S "${ko_path}" | awk '$2 == ".BTF" { found = 1 } END { exit(found ? 0 : 1) }'
 done
 EOF
+
+FROM ${KINSN_ARTIFACTS_STAGE} AS runner-runtime-kinsn-artifacts
 
 FROM runner-runtime-runtime-base AS runner-runtime-daemon-artifact-x86_64
 
