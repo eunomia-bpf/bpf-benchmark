@@ -193,20 +193,6 @@ RUN set -eux; \
 ENV PATH="/usr/local/go/bin:${PATH}" \
     GOTOOLCHAIN=local
 
-ARG RUST_VERSION=1.90.0
-
-ENV RUSTUP_HOME=/opt/rustup \
-    CARGO_HOME=/opt/cargo \
-    PATH="/opt/cargo/bin:${PATH}"
-
-RUN set -eux; \
-    curl --proto '=https' --tlsv1.2 -fsSL https://sh.rustup.rs -o /tmp/rustup-init.sh; \
-    sh /tmp/rustup-init.sh -y --no-modify-path --profile minimal --default-toolchain "${RUST_VERSION}"; \
-    rm -f /tmp/rustup-init.sh; \
-    chmod -R a+rX /opt/rustup /opt/cargo; \
-    rustc --version; \
-    cargo --version
-
 FROM ${TRACEE_IMAGE} AS runner-runtime-tracee-upstream
 
 FROM ${TETRAGON_IMAGE} AS runner-runtime-tetragon-upstream
@@ -390,51 +376,28 @@ FROM scratch AS runner-runtime-kinsn-artifacts
 
 COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn
 
-FROM runner-runtime-runtime-base AS runner-runtime-daemon-artifact-x86_64
+FROM runner-runtime-runtime-base AS runner-runtime-daemon-artifact
 
 # DAEMON_HOST_BIN_DIR is the host-relative directory containing the pre-built
-# x86_64 bpfrejit-daemon binary. ARM64 builds this artifact inside Docker.
+# bpfrejit-daemon binary (x86_64 from daemon/target/release/, arm64 from
+# daemon/target/aarch64-unknown-linux-gnu/release/). Both arches build on host.
+# The runner Python (workspace_layout.py) reads the daemon from this same path
+# inside the image workspace, so the binary is staged at both /usr/local/bin and
+# /artifacts/rust/${DAEMON_HOST_BIN_DIR}.
 ARG DAEMON_HOST_BIN_DIR=daemon/target/release
 
 COPY ${DAEMON_HOST_BIN_DIR}/bpfrejit-daemon /tmp/bpfrejit-daemon
 RUN set -eux; \
-    image_dir=/artifacts/rust/daemon/target/release; \
-    install -d /artifacts/rust/usr-local-bin "${image_dir}"; \
+    install -d /artifacts/rust/usr-local-bin "/artifacts/rust/${DAEMON_HOST_BIN_DIR}"; \
     install -m 0755 /tmp/bpfrejit-daemon /artifacts/rust/usr-local-bin/bpfrejit-daemon; \
-    install -m 0755 /tmp/bpfrejit-daemon "${image_dir}/bpfrejit-daemon"; \
+    install -m 0755 /tmp/bpfrejit-daemon "/artifacts/rust/${DAEMON_HOST_BIN_DIR}/bpfrejit-daemon"; \
     rm /tmp/bpfrejit-daemon
 
-FROM runner-runtime-build-base AS runner-runtime-daemon-artifact-arm64
+FROM runner-runtime-runtime-base AS runner-runtime-bpfopt-artifacts
 
-ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
-ARG RUN_TARGET_ARCH=x86_64
-
-WORKDIR ${IMAGE_WORKSPACE}
-
-COPY bpfopt/Cargo.toml bpfopt/Cargo.lock ./bpfopt/
-COPY bpfopt/crates/kernel-sys ./bpfopt/crates/kernel-sys
-COPY daemon/Cargo.toml daemon/Cargo.lock daemon/Makefile ./daemon/
-COPY daemon/crates ./daemon/crates
-COPY daemon/src ./daemon/src
-
-RUN --mount=type=cache,target=/opt/cargo/registry,id=cargo-registry-${RUN_TARGET_ARCH},sharing=locked \
-    --mount=type=cache,target=/opt/cargo/git,id=cargo-git-${RUN_TARGET_ARCH},sharing=locked \
-    --mount=type=cache,target=/tmp/cargo-daemon-target,id=cargo-daemon-target-${RUN_TARGET_ARCH},sharing=locked <<'EOF'
-set -eux
-test "${RUN_TARGET_ARCH}" = arm64
-make -C daemon release TARGET_DIR=/tmp/cargo-daemon-target TARGET_TRIPLE=aarch64-unknown-linux-gnu
-image_dir=/artifacts/rust/daemon/target/aarch64-unknown-linux-gnu/release
-install -d /artifacts/rust/usr-local-bin "${image_dir}"
-install -m 0755 /tmp/cargo-daemon-target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon /artifacts/rust/usr-local-bin/bpfrejit-daemon
-install -m 0755 /tmp/cargo-daemon-target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon "${image_dir}/bpfrejit-daemon"
-EOF
-
-FROM runner-runtime-daemon-artifact-${RUN_TARGET_ARCH} AS runner-runtime-daemon-artifact
-
-FROM runner-runtime-runtime-base AS runner-runtime-bpfopt-artifacts-x86_64
-
-# BPFOPT_HOST_BIN_DIR is the host-relative directory containing pre-built x86_64
-# bpfopt + bpfprof CLIs. ARM64 builds these artifacts inside Docker.
+# BPFOPT_HOST_BIN_DIR is the host-relative directory containing pre-built bpfopt
+# + bpfprof CLIs (x86_64 from bpfopt/target/release/, arm64 from
+# bpfopt/target/aarch64-unknown-linux-gnu/release/).
 ARG BPFOPT_HOST_BIN_DIR=bpfopt/target/release
 
 COPY ${BPFOPT_HOST_BIN_DIR}/bpfopt /tmp/bpfopt
@@ -443,32 +406,6 @@ RUN set -eux; \
     install -d /artifacts/rust/usr-local-bin; \
     install -m 0755 /tmp/bpfopt /tmp/bpfprof /artifacts/rust/usr-local-bin/; \
     rm /tmp/bpfopt /tmp/bpfprof
-
-FROM runner-runtime-build-base AS runner-runtime-bpfopt-artifacts-arm64
-
-ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
-ARG RUN_TARGET_ARCH=x86_64
-
-WORKDIR ${IMAGE_WORKSPACE}
-
-COPY bpfopt/Cargo.toml bpfopt/Cargo.lock ./bpfopt/
-COPY bpfopt/crates ./bpfopt/crates
-
-RUN --mount=type=cache,target=/opt/cargo/registry,id=cargo-registry-${RUN_TARGET_ARCH},sharing=locked \
-    --mount=type=cache,target=/opt/cargo/git,id=cargo-git-${RUN_TARGET_ARCH},sharing=locked \
-    --mount=type=cache,target=/tmp/cargo-bpfopt-target,id=cargo-bpfopt-target-${RUN_TARGET_ARCH},sharing=locked <<'EOF'
-set -eux
-test "${RUN_TARGET_ARCH}" = arm64
-cargo build --release --workspace --target aarch64-unknown-linux-gnu --target-dir /tmp/cargo-bpfopt-target --manifest-path bpfopt/Cargo.toml \
-    -p bpfopt -p bpfprof
-install -d /artifacts/rust/usr-local-bin
-install -m 0755 \
-    /tmp/cargo-bpfopt-target/aarch64-unknown-linux-gnu/release/bpfopt \
-    /tmp/cargo-bpfopt-target/aarch64-unknown-linux-gnu/release/bpfprof \
-    /artifacts/rust/usr-local-bin/
-EOF
-
-FROM runner-runtime-bpfopt-artifacts-${RUN_TARGET_ARCH} AS runner-runtime-bpfopt-artifacts
 
 FROM runner-runtime-runtime-base AS runner-runtime
 
@@ -489,7 +426,7 @@ COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/runner ${IMAGE_WO
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/tests ${IMAGE_WORKSPACE}/tests
 COPY --link --from=runner-runtime-kinsn-artifacts /artifacts/kinsn /artifacts/kinsn
 COPY --link --from=runner-runtime-daemon-artifact /artifacts/rust/usr-local-bin/bpfrejit-daemon /usr/local/bin/bpfrejit-daemon
-COPY --link --from=runner-runtime-daemon-artifact /artifacts/rust/daemon/target/ ./daemon/target/
+COPY --link --from=runner-runtime-daemon-artifact /artifacts/rust/daemon/ ${IMAGE_WORKSPACE}/daemon/
 COPY --link --from=runner-runtime-bpfopt-artifacts /artifacts/rust/usr-local-bin/ /usr/local/bin/
 
 RUN set -eux; \

@@ -293,7 +293,7 @@ $(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRA
 		-t "$(X86_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"; mv -f "$$tmp" "$@"
 
-$(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR) $(HOST_KERNEL_MANIFEST_ARM64) $(HOST_KINSN_KO_FILES_ARM64)
+$(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR) $(HOST_KERNEL_MANIFEST_ARM64) $(HOST_KINSN_KO_FILES_ARM64) $(ARM64_DAEMON_BINARY) $(ARM64_BPFOPT_BINARIES)
 	@mkdir -p "$(dir $@)"
 	docker load -i "$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR)"
 	docker build --platform linux/arm64 \
@@ -307,6 +307,8 @@ $(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_K
 		--build-arg RUN_TARGET_ARCH=arm64 \
 		--build-arg KERNEL_IMAGE_NAME=vmlinuz.efi \
 		--build-arg KERNEL_MANIFEST_JSON="$$(cat $(HOST_KERNEL_MANIFEST_ARM64))" \
+		--build-arg DAEMON_HOST_BIN_DIR="$(patsubst $(ROOT_DIR)/%,%,$(ARM64_DAEMON_BIN_DIR))" \
+		--build-arg BPFOPT_HOST_BIN_DIR="$(patsubst $(ROOT_DIR)/%,%,$(ARM64_BPFOPT_BIN_DIR))" \
 		-t "$(ARM64_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(ARM64_RUNNER_RUNTIME_IMAGE)"; mv -f "$$tmp" "$@"
 
@@ -332,9 +334,9 @@ $(X86_RUNTIME_KERNEL_IMAGE): $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(BPFREJIT_INSTALL_
 	test -s "$@"
 	touch "$@"
 
-# x86 Rust runtime binaries are host-built before the image stage. ARM64
-# builds happen inside the arm64 Docker stage because the host lacks a complete
-# aarch64 userspace sysroot for libbpf's dynamic libraries.
+# Rust runtime binaries are host-built before the image stage for both arches.
+# ARM64 cross-link uses an extracted aarch64 sysroot at $(AARCH64_SYSROOT_DIR)
+# (libelf, libz, libzstd) bootstrapped from Ubuntu ports .deb archives.
 $(X86_DAEMON_BINARY): $(DAEMON_SOURCE_FILES) $(BUILD_RULE_FILES)
 	mkdir -p "$(dir $@)"
 	make -C "$(ROOT_DIR)/daemon" release TARGET_DIR="$(DAEMON_DIR)/target"
@@ -342,6 +344,41 @@ $(X86_DAEMON_BINARY): $(DAEMON_SOURCE_FILES) $(BUILD_RULE_FILES)
 $(X86_BPFOPT_BINARIES) &: $(BPFOPT_SOURCE_FILES) $(BUILD_RULE_FILES)
 	cargo build --release --workspace --target-dir "$(ROOT_DIR)/bpfopt/target" --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml" \
 		-p bpfopt -p bpfprof
+
+AARCH64_SYSROOT_DIR := $(ROOT_DIR)/.cache/aarch64-sysroot
+AARCH64_SYSROOT_MARKER := $(AARCH64_SYSROOT_DIR)/usr/include/libelf.h
+AARCH64_SYSROOT_DEB_PACKAGES := \
+	libzstd1:arm64 libelf1t64:arm64 libelf-dev:arm64 \
+	zlib1g:arm64 zlib1g-dev:arm64 libzstd-dev:arm64
+ARM64_CARGO_RUSTFLAGS := -C link-arg=--sysroot=$(AARCH64_SYSROOT_DIR) \
+	-C link-arg=-L$(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu \
+	-C link-arg=-Wl,-rpath-link=$(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu
+ARM64_CARGO_ENV := \
+	CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
+	CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS="$(ARM64_CARGO_RUSTFLAGS)"
+
+$(AARCH64_SYSROOT_MARKER):
+	@command -v aarch64-linux-gnu-gcc >/dev/null || { echo "aarch64-linux-gnu-gcc missing; install gcc-aarch64-linux-gnu" >&2; exit 1; }
+	@command -v dpkg-deb >/dev/null
+	@command -v apt-get >/dev/null
+	@if ! dpkg --print-foreign-architectures | grep -q arm64; then \
+		echo "dpkg foreign architecture arm64 not configured; run: sudo dpkg --add-architecture arm64 && sudo apt-get update" >&2; exit 1; \
+	fi
+	mkdir -p "$(AARCH64_SYSROOT_DIR)/.debs"
+	cd "$(AARCH64_SYSROOT_DIR)/.debs" && apt-get download $(AARCH64_SYSROOT_DEB_PACKAGES)
+	for d in "$(AARCH64_SYSROOT_DIR)"/.debs/*.deb; do dpkg-deb -x "$$d" "$(AARCH64_SYSROOT_DIR)"; done
+	test -f "$@"
+
+$(ARM64_DAEMON_BINARY): $(DAEMON_SOURCE_FILES) $(BUILD_RULE_FILES) $(AARCH64_SYSROOT_MARKER)
+	mkdir -p "$(dir $@)"
+	$(ARM64_CARGO_ENV) \
+		make -C "$(ROOT_DIR)/daemon" release TARGET_DIR="$(DAEMON_DIR)/target" TARGET_TRIPLE="$(ARM64_RUST_TARGET)"
+
+$(ARM64_BPFOPT_BINARIES) &: $(BPFOPT_SOURCE_FILES) $(BUILD_RULE_FILES) $(AARCH64_SYSROOT_MARKER)
+	$(ARM64_CARGO_ENV) \
+		cargo build --release --workspace --target "$(ARM64_RUST_TARGET)" \
+			--target-dir "$(ROOT_DIR)/bpfopt/target" --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml" \
+			-p bpfopt -p bpfprof
 
 .PHONY: image-katran-artifacts image-runner-artifacts \
 	image-micro-program-artifacts image-test-artifacts

@@ -665,11 +665,6 @@ impl KinsnRegistry {
         self.btf_id_for_target_name(target_name) >= 0
     }
 
-    /// Whether the kinsn used by the named pass is registered.
-    pub(crate) fn kinsn_registered_for_pass(&self, pass_name: &str) -> bool {
-        Self::target_name_for_pass(pass_name)
-            .is_some_and(|name| self.kinsn_registered_for_target_name(name))
-    }
 }
 
 /// CPU platform capabilities.
