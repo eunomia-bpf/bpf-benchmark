@@ -46,6 +46,14 @@ from e2e.cases.katran.case import (  # noqa: E402
     build_markdown as build_katran_markdown,
     run_katran_case,
 )
+from e2e.cases.cilium.case import (  # noqa: E402
+    build_markdown as build_cilium_markdown,
+    run_cilium_case,
+)
+from e2e.cases.otel.case import (  # noqa: E402
+    build_markdown as build_otel_markdown,
+    run_otel_case,
+)
 from runner.libs.case_common import (  # noqa: E402
     prepare_daemon_session,
     wait_for_suite_quiescence,
@@ -56,6 +64,8 @@ DEFAULT_TETRAGON_OUTPUT_JSON = RESULTS_DIR / "tetragon.json"
 DEFAULT_BPFTRACE_OUTPUT_JSON = RESULTS_DIR / "bpftrace.json"
 DEFAULT_BCC_OUTPUT_JSON = RESULTS_DIR / "bcc.json"
 DEFAULT_KATRAN_OUTPUT_JSON = RESULTS_DIR / "katran.json"
+DEFAULT_CILIUM_OUTPUT_JSON = RESULTS_DIR / "cilium.json"
+DEFAULT_OTEL_OUTPUT_JSON = RESULTS_DIR / "otel.json"
 
 @dataclass(frozen=True)
 class CaseSpec:
@@ -90,6 +100,16 @@ CASE_SPECS: dict[str, CaseSpec] = {
         build_markdown=build_katran_markdown,
         default_output_json=DEFAULT_KATRAN_OUTPUT_JSON,
     ),
+    "cilium": CaseSpec(
+        run_case=run_cilium_case,
+        build_markdown=build_cilium_markdown,
+        default_output_json=DEFAULT_CILIUM_OUTPUT_JSON,
+    ),
+    "otel": CaseSpec(
+        run_case=run_otel_case,
+        build_markdown=build_otel_markdown,
+        default_output_json=DEFAULT_OTEL_OUTPUT_JSON,
+    ),
 }
 
 def _args_no_kinsn(args: argparse.Namespace) -> bool:
@@ -98,7 +118,7 @@ def _args_no_kinsn(args: argparse.Namespace) -> bool:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the repository end-to-end benchmark suite driver.")
-    parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "bcc", "katran", "all"))
+    parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "bcc", "katran", "cilium", "otel", "all"))
     parser.add_argument("--duration", type=int, help="Override the per-workload duration in seconds.")
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
     parser.add_argument("--daemon", default=str(ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"))
@@ -122,7 +142,7 @@ def resolve_primary_output_json(args: argparse.Namespace) -> Path:
     return Path(args.output_json).resolve()
 
 
-ALL_CASES = ("tracee", "tetragon", "bpftrace", "bcc", "katran")
+ALL_CASES = ("tracee", "tetragon", "bpftrace", "bcc", "katran", "cilium", "otel")
 def _payload_status(payload: object) -> str:
     if not isinstance(payload, dict):
         return ""
