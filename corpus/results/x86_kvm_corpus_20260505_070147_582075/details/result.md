@@ -1,0 +1,174 @@
+# Corpus Benchmark
+
+```json
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+  "fatal_error": "daemon response field passes[0].pass contains unknown pass 'noop'",
+  "generated_at": "2026-05-05T07:01:59.621995+00:00",
+  "kinsn_modules": {
+    "captured_at": "2026-05-05T07:01:47.612207+00:00",
+    "daemon_binary": "daemon/target/release/bpfrejit-daemon",
+    "expected_modules": [
+      "bpf_bulk_memory",
+      "bpf_endian",
+      "bpf_extract",
+      "bpf_prefetch",
+      "bpf_rotate",
+      "bpf_select"
+    ],
+    "module_load": {
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "failed_modules": [],
+      "invoked_at": "2026-05-05T07:01:47.612114+00:00",
+      "loaded_count": 6,
+      "loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loader": "runner.libs.kinsn.load_kinsn_modules",
+      "module_dir": "/artifacts/kinsn",
+      "newly_loaded_modules": [],
+      "snapshot_after": {
+        "captured_at": "2026-05-05T07:01:47.612101+00:00",
+        "expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "loaded_bpf_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "missing_expected_modules": [],
+        "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_prefetch           12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+        "resident_expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "source": "lsmod"
+      },
+      "status": "ok",
+      "total_count": 6
+    },
+    "module_snapshot_before_daemon": {
+      "captured_at": "2026-05-05T07:01:47.596711+00:00",
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loaded_bpf_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "missing_expected_modules": [],
+      "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_prefetch           12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+      "resident_expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "source": "lsmod"
+    }
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "results": [
+    {
+      "app": "bcc/syscount",
+      "baseline": {
+        "bpf": {
+          "6": {
+            "bytes_jited": 72,
+            "bytes_xlated": 112,
+            "id": 6,
+            "name": "tracepoint__raw_syscalls__sys_enter",
+            "run_cnt_delta": 87397564,
+            "run_time_ns_delta": 9499939556,
+            "type": "tracepoint"
+          },
+          "7": {
+            "bytes_jited": 236,
+            "bytes_xlated": 400,
+            "id": 7,
+            "name": "tracepoint__raw_syscalls__sys_exit",
+            "run_cnt_delta": 87397996,
+            "run_time_ns_delta": 2434828493,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.0765493480000004,
+            "ops_per_sec": 2874358.250014327,
+            "ops_total": 8843105.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [21835] setting to a 3 secs run per stressor\nstress-ng: info:  [21835] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [21835] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [21835] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [21835]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [21835] cap             2971322      3.00      0.85      6.97    990440.63      380265.16\nstress-ng: metrc: [21835] eventfd          806695      3.00      0.50      3.84    268861.11      185733.28\nstress-ng: metrc: [21835] get                8540      3.00      0.16      1.30      2845.56        5830.71\nstress-ng: metrc: [21835] prctl              8485      3.01      2.00      0.91      2820.04        2913.29\nstress-ng: metrc: [21835] set              117224      3.00      0.29      4.07     39073.85       26840.91\nstress-ng: metrc: [21835] dup                3946      3.00      0.65      0.52      1313.77        3367.15\nstress-ng: metrc: [21835] kill             357569      3.00      0.39      4.73    119119.65       69815.55\nstress-ng: metrc: [21835] sigfd           3908202      3.00      0.97      6.34   1301140.19      534186.66\nstress-ng: metrc: [21835] signal                0      3.00      0.07      0.40         0.00           0.00\nstress-ng: metrc: [21835] pty                 207      3.01      0.20      4.72        68.81          42.06\nstress-ng: metrc: [21835] itimer              435      3.00      0.33      3.48       145.00         114.05\nstress-ng: metrc: [21835] timerfd          660480      3.00      0.61      3.13    219891.81      176832.45\nstress-ng: info:  [21835] skipped: 0\nstress-ng: info:  [21835] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [21835] failed: 0\nstress-ng: info:  [21835] metrics untrustworthy: 0\nstress-ng: info:  [21835] successful run completed in 3.07 secs"
+          }
+        ]
+      },
+      "error": "daemon response field passes[0].pass contains unknown pass 'noop'",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "bcc",
+      "selected_workload": "stress_ng_os",
+      "status": "error"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline": null,
+      "error": "daemon response field passes[0].pass contains unknown pass 'noop'",
+      "post_rejit": null,
+      "rejit_result": null,
+      "runner": "tracee",
+      "selected_workload": "stress_ng_os_io_network",
+      "status": "error"
+    },
+    {
+      "app": "bpftrace/biosnoop",
+      "baseline": null,
+      "error": "daemon response field passes[0].pass contains unknown pass 'noop'",
+      "post_rejit": null,
+      "rejit_result": null,
+      "runner": "bpftrace",
+      "selected_workload": "fio_randrw",
+      "status": "error"
+    }
+  ],
+  "samples": 1,
+  "status": "error",
+  "suite_name": "macro_apps",
+  "workload_seconds": 3.0
+}
+```

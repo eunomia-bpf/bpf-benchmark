@@ -13,6 +13,8 @@ docs/tmp/runtime-container-tmp/**
 **/runtime-container-tmp/**
 **/__pycache__
 **/*.pyc
+**/.pytest_cache
+**/.pytest_cache/**
 
 corpus/results
 corpus/results/**

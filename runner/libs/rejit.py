@@ -19,6 +19,7 @@ from . import ROOT_DIR, tail_text
 
 
 _PASS_TO_SITE_FIELD = {
+    "noop": "noop_sites",
     "map_inline": "map_inline_sites",
     "const_prop": "const_prop_sites",
     "dce": "dce_sites",
@@ -35,6 +36,7 @@ _PASS_TO_SITE_FIELD = {
     "wide_mem": "wide_sites",
 }
 _TOTAL_SITE_FIELDS = (
+    "noop_sites",
     "map_inline_sites",
     "const_prop_sites",
     "dce_sites",
