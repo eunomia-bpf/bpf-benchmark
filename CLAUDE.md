@@ -73,6 +73,9 @@ Keep the codebase fail-fast so missing v3 capabilities become visible defects in
 - No fallback: unsupported capability or command failure must exit 1 with friendly stderr, never downgrade to other logic, return partial results, or exit 0.
 - No silenced errors: propagate BPF syscall, IO, and parse errors; do not use `.ok()`, `let _ = result`, `unwrap_or_default`, or warning-and-continue for fallible work.
 
+### No Revert / Restore Commits
+Do not produce `git revert` commits or "Restore X" commits to undo previous changes. If a change is wrong, fix it forward in a new commit that does the right thing — do not bounce the tree between two states. Repeated revert/restore pairs (e.g. `Revert "X"` followed by `Restore X`) are forbidden; they pollute history and obscure intent. Decide what the code should be, write that, commit once.
+
 ### Unit Test Quality
 Do not add unit tests unless they have a clear bug-detection purpose.
 Good unit tests cover logic branches, state changes, calculations, conversions, boundaries, error paths, external ABI/layout/serialization contracts, or bug regressions.
