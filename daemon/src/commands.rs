@@ -474,7 +474,7 @@ pub(crate) fn try_apply_one(
                     pass,
                     PassStatus::SkippedMissingStates,
                     Some(format!(
-                        "pass {pass} requires verifier states from a previous successful per-pass ReJIT — insert a `noop` pass before {pass} in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,{pass},...\")"
+                        "pass {pass} requires verifier states from a previous per-pass ReJIT — insert a `noop` pass before {pass} in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,{pass},...\")"
                     )),
                     None,
                 ));

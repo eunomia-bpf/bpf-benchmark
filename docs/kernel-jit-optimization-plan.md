@@ -800,4 +800,5 @@ make clean
 - **v1 历史记录（#1 - #303）**：`docs/kernel-jit-optimization-plan-record-old.md`
 - **v2 任务记录（#304 - #673）**：`docs/kernel-jit-optimization-plan-task-archive.md`
 - **当前任务**：用 `git log --oneline` 查看
+- **2026-05-05 changed flag deletion follow-up**：`docs/tmp/changed-flag-deletion-20260505.md`
 - **调研报告**：`docs/tmp/` 按日期组织
