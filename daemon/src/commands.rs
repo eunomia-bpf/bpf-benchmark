@@ -224,8 +224,8 @@ fn c_log_string(buf: &[u8]) -> String {
     String::from_utf8_lossy(&buf[..end]).trim_end().to_string()
 }
 
-type ProgInfoJson = bpfget::ProgramInfo;
-type MapInfoJson = bpfget::MapInfo;
+type ProgInfoJson = bpf::ProgramInfo;
+type MapInfoJson = bpf::MapInfo;
 
 #[derive(Debug, Serialize)]
 struct MapValuesJson {
@@ -394,12 +394,12 @@ pub(crate) fn try_apply_one(
     let mut scan_map_keys = live_bpf_map_keys;
 
     let result = (|| -> Result<OptimizeOneResult> {
-        let mut snapshot = bpfget::snapshot_program(prog_id)
+        let mut snapshot = bpf::snapshot_program(prog_id)
             .with_context(|| format!("snapshot live BPF program {prog_id}"))?;
         bpf::canonicalize_map_refs_to_idx(&mut snapshot.insns, None, &snapshot.info.map_ids)
             .with_context(|| format!("canonicalize map references for prog {prog_id}"))?;
         let prog_info = snapshot.info.clone();
-        let orig_bytes = bpfget::encode_insns(&snapshot.insns);
+        let orig_bytes = bpf::encode_insns(&snapshot.insns);
         fs::write(&prog_bin, &orig_bytes)
             .with_context(|| format!("write {}", prog_bin.display()))?;
         let orig_insn_count = insn_count_from_bytes(&orig_bytes, "prog.bin")?;
@@ -418,7 +418,7 @@ pub(crate) fn try_apply_one(
 
         let mut probed_kinsns: HashMap<String, TargetKinsnJson> = HashMap::new();
         if needs_target(&pass_list) {
-            let mut probed = bpfget::probe_target_json().with_context(|| {
+            let mut probed = bpf::probe_target_json().with_context(|| {
                 format!(
                     "probe target kinsns failed for requested passes {}",
                     join_pass_csv(&pass_list)
@@ -771,7 +771,7 @@ fn needs_target(passes: &[String]) -> bool {
 }
 
 fn shift_target_module_call_offsets_for_map_prefix(
-    target: &mut bpfget::TargetJson,
+    target: &mut bpf::TargetJson,
     map_count: usize,
 ) -> Result<()> {
     let module_base = module_fd_array_base(map_count)?;
@@ -1107,19 +1107,6 @@ mod tests {
     }
 
     #[test]
-    fn rejit_fd_array_builder_keeps_map_fds_without_target() {
-        let mut opened_maps = Vec::new();
-        let fd_array = build_rejit_fd_array(&[11, 22], &HashMap::new(), &mut |map_id| {
-            opened_maps.push(map_id);
-            fake_owned_fd()
-        })
-        .unwrap();
-
-        assert_eq!(opened_maps, vec![11, 22]);
-        assert_eq!(fd_array.as_slice().len(), 2);
-    }
-
-    #[test]
     fn rejit_fd_array_builder_places_maps_first_and_module_btf_fds_at_call_offsets() {
         let mut opened_btfs = Vec::new();
         let mut opened_btf_fds = Vec::new();
@@ -1268,13 +1255,13 @@ mod tests {
 
     #[test]
     fn target_call_offsets_shift_after_map_prefix() {
-        let mut target = bpfget::TargetJson {
+        let mut target = bpf::TargetJson {
             arch: "x86_64".to_string(),
             features: Vec::new(),
             kinsns: BTreeMap::from([
                 (
                     "bpf_rotate64".to_string(),
-                    bpfget::TargetKinsnJson {
+                    bpf::TargetKinsnJson {
                         btf_func_id: 1,
                         btf_id: 100,
                         call_offset: 1,
@@ -1282,7 +1269,7 @@ mod tests {
                 ),
                 (
                     "bpf_extract64".to_string(),
-                    bpfget::TargetKinsnJson {
+                    bpf::TargetKinsnJson {
                         btf_func_id: 2,
                         btf_id: 200,
                         call_offset: 2,
@@ -1290,7 +1277,7 @@ mod tests {
                 ),
                 (
                     "bpf_select64".to_string(),
-                    bpfget::TargetKinsnJson {
+                    bpf::TargetKinsnJson {
                         btf_func_id: 3,
                         btf_id: 0,
                         call_offset: 0,

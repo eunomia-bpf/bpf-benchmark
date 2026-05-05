@@ -45,9 +45,8 @@ Benchmark defaults live in runner configuration.
 ```text
 daemon/
   Cargo.toml
-  crates/bpfget/     # daemon-owned live program snapshot library
   src/main.rs        # CLI entry point
   src/server.rs      # socket server and request dispatch
   src/commands.rs    # in-process BPF orchestration + bpfopt CLI calls
-  src/bpf.rs         # libbpf-backed map helpers used by the daemon
+  src/bpf.rs         # live BPF discovery, target probing, and map helpers
 ```

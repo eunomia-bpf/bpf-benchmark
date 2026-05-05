@@ -5,10 +5,7 @@ edition = "2021"
 description = "BpfReJIT userspace daemon — scans and optimizes live kernel BPF programs"
 
 [workspace]
-members = [
-    ".",
-    "crates/bpfget",
-]
+members = ["."]
 resolver = "2"
 
 [workspace.dependencies]
@@ -26,7 +23,6 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow.workspace = true
-bpfget = { path = "crates/bpfget" }
 clap.workspace = true
 kernel-sys.workspace = true
 libc.workspace = true
