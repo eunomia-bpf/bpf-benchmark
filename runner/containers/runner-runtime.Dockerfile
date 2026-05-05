@@ -315,20 +315,20 @@ RUN set -eux; \
     ln -sfn /usr/local/bin/cilium-dbg "${repo_artifact_root}/cilium/bin/cilium-dbg"; \
     ln -sfn /usr/local/bin/otelcol-ebpf-profiler "${repo_artifact_root}/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
 
-FROM scratch AS runner-runtime-kernel-base
-
-COPY --link --from=runner-runtime-host-kernel-artifacts / /artifacts
-
 FROM runner-runtime-app-artifacts AS runner-runtime-artifacts
 
 ARG IMAGE_BUILD_JOBS=4
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
+# arch-specific paths inside the host kernel build dir, set by the runner-runtime image build:
+#   x86_64 → KERNEL_BOOT_SUBDIR=arch/x86/boot   KERNEL_IMAGE_NAME=bzImage
+#   arm64  → KERNEL_BOOT_SUBDIR=arch/arm64/boot KERNEL_IMAGE_NAME=vmlinuz.efi
+ARG KERNEL_BOOT_SUBDIR
+ARG KERNEL_IMAGE_NAME
 
-COPY --link --from=runner-runtime-kernel-base /artifacts/kernel /artifacts/kernel
-COPY --link --from=runner-runtime-kernel-base /artifacts/modules /artifacts/modules
-COPY --link --from=runner-runtime-kernel-base /artifacts/headers /usr/src/linux-headers-fork
-COPY --link --from=runner-runtime-kernel-base /artifacts/manifest.json /artifacts/manifest.json
+COPY --link --from=runner-runtime-host-kernel-build /${KERNEL_BOOT_SUBDIR}/${KERNEL_IMAGE_NAME} /artifacts/kernel/${KERNEL_IMAGE_NAME}
+COPY --link --from=runner-runtime-host-kernel-build /modules-install/lib/modules /artifacts/modules
+COPY --link --from=runner-runtime-host-kernel-build /manifest.json /artifacts/manifest.json
 
 COPY Makefile ./Makefile
 COPY runner/mk ./runner/mk

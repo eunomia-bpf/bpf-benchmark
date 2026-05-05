@@ -78,14 +78,12 @@ ACTIVE_KINSN_SOURCE_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/m
 HOST_BUILD_ROOT := $(ACTIVE_BUILD_ARTIFACT_ROOT)/repo-build/host
 HOST_KERNEL_BUILD_DIR_X86 := $(HOST_BUILD_ROOT)/kernel/x86_64
 HOST_KERNEL_BUILD_DIR_ARM64 := $(HOST_BUILD_ROOT)/kernel/arm64
-HOST_KERNEL_ARTIFACT_DIR_X86 := $(HOST_BUILD_ROOT)/kernel-artifacts/x86_64
-HOST_KERNEL_ARTIFACT_DIR_ARM64 := $(HOST_BUILD_ROOT)/kernel-artifacts/arm64
 HOST_KINSN_DIR_X86 := $(HOST_BUILD_ROOT)/kinsn/x86_64
 HOST_KINSN_DIR_ARM64 := $(HOST_BUILD_ROOT)/kinsn/arm64
-HOST_KERNEL_IMAGE_X86 := $(HOST_KERNEL_ARTIFACT_DIR_X86)/kernel/bzImage
-HOST_KERNEL_IMAGE_ARM64 := $(HOST_KERNEL_ARTIFACT_DIR_ARM64)/kernel/Image
-HOST_KERNEL_MANIFEST_X86 := $(HOST_KERNEL_ARTIFACT_DIR_X86)/manifest.json
-HOST_KERNEL_MANIFEST_ARM64 := $(HOST_KERNEL_ARTIFACT_DIR_ARM64)/manifest.json
+HOST_KERNEL_IMAGE_X86 := $(HOST_KERNEL_BUILD_DIR_X86)/arch/x86/boot/bzImage
+HOST_KERNEL_IMAGE_ARM64 := $(HOST_KERNEL_BUILD_DIR_ARM64)/arch/arm64/boot/vmlinuz.efi
+HOST_KERNEL_MANIFEST_X86 := $(HOST_KERNEL_BUILD_DIR_X86)/manifest.json
+HOST_KERNEL_MANIFEST_ARM64 := $(HOST_KERNEL_BUILD_DIR_ARM64)/manifest.json
 HOST_KINSN_MODULES_X86 := $(patsubst %.o,%,$(shell awk '/^obj-m[[:space:]]*\+=/ { print $$3 }' "$(ROOT_DIR)/module/x86/Makefile" 2>/dev/null))
 HOST_KINSN_MODULES_ARM64 := $(patsubst %.o,%,$(shell awk '/^obj-m[[:space:]]*\+=/ { print $$3 }' "$(ROOT_DIR)/module/arm64/Makefile" 2>/dev/null))
 HOST_KINSN_KO_FILES_X86 := $(addprefix $(HOST_KINSN_DIR_X86)/,$(addsuffix .ko,$(HOST_KINSN_MODULES_X86)))
@@ -202,59 +200,42 @@ host-kernel-arm64: $(HOST_KERNEL_MANIFEST_ARM64)
 host-kinsn-x86: $(HOST_KINSN_KO_FILES_X86)
 host-kinsn-arm64: $(HOST_KINSN_KO_FILES_ARM64)
 
-# Build the fork kernel + modules + extmod-build headers natively on the host.
-# Group target (&:) declares the rule produces all named outputs in one invocation.
-$(HOST_KERNEL_IMAGE_X86) $(HOST_KERNEL_ARTIFACT_DIR_X86)/kernel/Module.symvers $(HOST_KERNEL_MANIFEST_X86) &: $(HOST_KERNEL_SOURCE_FILES)
-	rm -rf "$(HOST_KERNEL_ARTIFACT_DIR_X86)" "$(HOST_KERNEL_BUILD_DIR_X86)/.modinst"
-	mkdir -p "$(HOST_KERNEL_BUILD_DIR_X86)" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/kernel" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/modules"
+# Build the fork kernel + modules natively on the host. All artifacts stay inside
+# kbuild's O= dir; Dockerfile COPY's directly from there using a build-context.
+# Outputs the runner-runtime image consumes:
+#   $(O)/arch/{x86,arm64}/boot/<image>     bzImage / Image (VM boot)
+#   $(O)/modules-install/lib/modules/<rel>  modprobe tree (sch_netem, null_blk, ...)
+#   $(O)/manifest.json                     kernel_release + image-name (aws_executor)
+$(HOST_KERNEL_IMAGE_X86) $(HOST_KERNEL_MANIFEST_X86) &: $(HOST_KERNEL_SOURCE_FILES)
+	mkdir -p "$(HOST_KERNEL_BUILD_DIR_X86)"
 	cp "$(DEFCONFIG_SRC)" "$(HOST_KERNEL_BUILD_DIR_X86)/.config"
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 olddefconfig
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
-	install -m 0644 "$(HOST_KERNEL_BUILD_DIR_X86)/arch/x86/boot/bzImage" "$(HOST_KERNEL_IMAGE_X86)"
-	install -m 0644 "$(HOST_KERNEL_BUILD_DIR_X86)/System.map" "$(HOST_KERNEL_BUILD_DIR_X86)/.config" "$(HOST_KERNEL_BUILD_DIR_X86)/Module.symvers" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/kernel/"
-	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_X86)/.modinst" DEPMOD=true modules_install >/dev/null
+	rm -rf "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install"
+	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_X86)/modules-install" DEPMOD=true modules_install >/dev/null
 	rel=$$(cat "$(HOST_KERNEL_BUILD_DIR_X86)/include/config/kernel.release"); \
-		depmod -b "$(HOST_KERNEL_BUILD_DIR_X86)/.modinst" "$$rel" >/dev/null; \
-		cp -a "$(HOST_KERNEL_BUILD_DIR_X86)/.modinst/lib/modules/$$rel" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/modules/$$rel"; \
-		rm -f "$(HOST_KERNEL_ARTIFACT_DIR_X86)/modules/$$rel/build" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/modules/$$rel/source"; \
-		$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_HDR_PATH="$(HOST_KERNEL_ARTIFACT_DIR_X86)/headers/usr" headers_install; \
-		cd "$(HOST_KERNEL_BUILD_DIR_X86)" && srctree="$(KERNEL_DIR)" SRCARCH=x86 MAKE="$(MAKE)" CC=gcc HOSTCC=gcc "$(KERNEL_DIR)/scripts/package/install-extmod-build" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/headers"; \
-		install -m 0644 "$(HOST_KERNEL_BUILD_DIR_X86)/vmlinux" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/headers/vmlinux"; \
 		printf '{"kernel_release":"%s","target_arch":"x86_64","kernel_image":"bzImage"}\n' "$$rel" >"$(HOST_KERNEL_MANIFEST_X86)"
-	rm -rf "$(HOST_KERNEL_BUILD_DIR_X86)/.modinst"
 
-$(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_ARTIFACT_DIR_ARM64)/kernel/Module.symvers $(HOST_KERNEL_MANIFEST_ARM64) &: $(HOST_KERNEL_SOURCE_FILES)
+$(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_MANIFEST_ARM64) &: $(HOST_KERNEL_SOURCE_FILES)
 	@command -v aarch64-linux-gnu-gcc >/dev/null
-	rm -rf "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)" "$(HOST_KERNEL_BUILD_DIR_ARM64)/.modinst"
-	mkdir -p "$(HOST_KERNEL_BUILD_DIR_ARM64)" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/kernel" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/modules"
+	mkdir -p "$(HOST_KERNEL_BUILD_DIR_ARM64)"
 	cp "$(ARM64_DEFCONFIG_SRC)" "$(HOST_KERNEL_BUILD_DIR_ARM64)/.config"
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image vmlinuz.efi modules -j"$(IMAGE_BUILD_JOBS)"
-	install -m 0644 "$(HOST_KERNEL_BUILD_DIR_ARM64)/arch/arm64/boot/Image" "$(HOST_KERNEL_IMAGE_ARM64)"
-	install -m 0644 "$(HOST_KERNEL_BUILD_DIR_ARM64)/arch/arm64/boot/vmlinuz.efi" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/kernel/vmlinuz.efi"
-	install -m 0644 "$(HOST_KERNEL_BUILD_DIR_ARM64)/System.map" "$(HOST_KERNEL_BUILD_DIR_ARM64)/.config" "$(HOST_KERNEL_BUILD_DIR_ARM64)/Module.symvers" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/kernel/"
-	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_ARM64)/.modinst" DEPMOD=true modules_install >/dev/null
+	rm -rf "$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install"
+	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install" DEPMOD=true modules_install >/dev/null
 	rel=$$(cat "$(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/kernel.release"); \
-		depmod -b "$(HOST_KERNEL_BUILD_DIR_ARM64)/.modinst" "$$rel" >/dev/null; \
-		cp -a "$(HOST_KERNEL_BUILD_DIR_ARM64)/.modinst/lib/modules/$$rel" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/modules/$$rel"; \
-		rm -f "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/modules/$$rel/build" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/modules/$$rel/source"; \
-		$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_HDR_PATH="$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/headers/usr" headers_install; \
-		cd "$(HOST_KERNEL_BUILD_DIR_ARM64)" && srctree="$(KERNEL_DIR)" SRCARCH=arm64 MAKE="$(MAKE)" CC=gcc HOSTCC=gcc "$(KERNEL_DIR)/scripts/package/install-extmod-build" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/headers"; \
-		install -m 0644 "$(HOST_KERNEL_BUILD_DIR_ARM64)/vmlinux" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/headers/vmlinux"; \
-		printf '{"kernel_release":"%s","target_arch":"arm64","kernel_image":"Image"}\n' "$$rel" >"$(HOST_KERNEL_MANIFEST_ARM64)"
-	rm -rf "$(HOST_KERNEL_BUILD_DIR_ARM64)/.modinst"
+		printf '{"kernel_release":"%s","target_arch":"arm64","kernel_image":"vmlinuz.efi"}\n' "$$rel" >"$(HOST_KERNEL_MANIFEST_ARM64)"
 
-# kinsn .ko build against the fork kernel; depends on Module.symvers from the kernel rule.
-# kbuild MO= drops .ko/.o/.mod.c/.cmd into one tree; install only .ko to the publish dir.
-$(HOST_KINSN_KO_FILES_X86) &: $(HOST_KERNEL_ARTIFACT_DIR_X86)/kernel/Module.symvers $(KINSN_SOURCE_FILES_X86) $(BUILD_RULE_FILES)
-	rm -rf "$(HOST_KINSN_DIR_X86)" "$(HOST_BUILD_ROOT)/kinsn-build/x86_64"
+# kinsn .ko build against the fork kernel; kbuild MO= dir is reused across runs for
+# incremental builds. Only the publish dir (HOST_KINSN_DIR_*) is wiped each run.
+$(HOST_KINSN_KO_FILES_X86) &: $(HOST_KERNEL_MANIFEST_X86) $(KINSN_SOURCE_FILES_X86) $(BUILD_RULE_FILES)
 	mkdir -p "$(HOST_KINSN_DIR_X86)" "$(HOST_BUILD_ROOT)/kinsn-build/x86_64"
 	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 M="$(ROOT_DIR)/module/x86" MO="$(HOST_BUILD_ROOT)/kinsn-build/x86_64" modules -j"$(IMAGE_BUILD_JOBS)"
 	install -m 0644 "$(HOST_BUILD_ROOT)/kinsn-build/x86_64"/*.ko "$(HOST_KINSN_DIR_X86)/"
 
-$(HOST_KINSN_KO_FILES_ARM64) &: $(HOST_KERNEL_ARTIFACT_DIR_ARM64)/kernel/Module.symvers $(KINSN_SOURCE_FILES_ARM64) $(BUILD_RULE_FILES)
+$(HOST_KINSN_KO_FILES_ARM64) &: $(HOST_KERNEL_MANIFEST_ARM64) $(KINSN_SOURCE_FILES_ARM64) $(BUILD_RULE_FILES)
 	@command -v aarch64-linux-gnu-gcc >/dev/null
-	rm -rf "$(HOST_KINSN_DIR_ARM64)" "$(HOST_BUILD_ROOT)/kinsn-build/arm64"
 	mkdir -p "$(HOST_KINSN_DIR_ARM64)" "$(HOST_BUILD_ROOT)/kinsn-build/arm64"
 	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- M="$(ROOT_DIR)/module/arm64" MO="$(HOST_BUILD_ROOT)/kinsn-build/arm64" modules -j"$(IMAGE_BUILD_JOBS)"
 	install -m 0644 "$(HOST_BUILD_ROOT)/kinsn-build/arm64"/*.ko "$(HOST_KINSN_DIR_ARM64)/"
@@ -299,11 +280,13 @@ $(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRA
 	docker build --platform linux/amd64 \
 		--target runner-runtime \
 		--build-context runner-runtime-katran-upstream=docker-image://$(X86_KATRAN_ARTIFACTS_IMAGE) \
-		--build-context runner-runtime-host-kernel-artifacts="$(HOST_KERNEL_ARTIFACT_DIR_X86)" \
+		--build-context runner-runtime-host-kernel-build="$(HOST_KERNEL_BUILD_DIR_X86)" \
 		--build-context runner-runtime-host-kinsn-artifacts="$(HOST_KINSN_DIR_X86)" \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
 		--build-arg IMAGE_BUILD_JOBS="$(IMAGE_BUILD_JOBS)" \
 		--build-arg RUN_TARGET_ARCH=x86_64 \
+		--build-arg KERNEL_BOOT_SUBDIR=arch/x86/boot \
+		--build-arg KERNEL_IMAGE_NAME=bzImage \
 		--build-arg DAEMON_HOST_BIN_DIR="$(patsubst $(ROOT_DIR)/%,%,$(X86_DAEMON_BIN_DIR))" \
 		--build-arg BPFOPT_HOST_BIN_DIR="$(patsubst $(ROOT_DIR)/%,%,$(X86_BPFOPT_BIN_DIR))" \
 		-t "$(X86_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
@@ -315,11 +298,13 @@ $(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_K
 	docker build --platform linux/arm64 \
 		--target runner-runtime \
 		--build-context runner-runtime-katran-upstream=docker-image://$(ARM64_KATRAN_ARTIFACTS_IMAGE) \
-		--build-context runner-runtime-host-kernel-artifacts="$(HOST_KERNEL_ARTIFACT_DIR_ARM64)" \
+		--build-context runner-runtime-host-kernel-build="$(HOST_KERNEL_BUILD_DIR_ARM64)" \
 		--build-context runner-runtime-host-kinsn-artifacts="$(HOST_KINSN_DIR_ARM64)" \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
 		--build-arg IMAGE_BUILD_JOBS="$(ARM64_IMAGE_BUILD_JOBS)" \
 		--build-arg RUN_TARGET_ARCH=arm64 \
+		--build-arg KERNEL_BOOT_SUBDIR=arch/arm64/boot \
+		--build-arg KERNEL_IMAGE_NAME=vmlinuz.efi \
 		-t "$(ARM64_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(ARM64_RUNNER_RUNTIME_IMAGE)"; mv -f "$$tmp" "$@"
 
