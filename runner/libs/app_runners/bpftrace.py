@@ -6,6 +6,7 @@ from typing import Any, Mapping, Sequence
 
 from .. import ROOT_DIR, tail_text, which
 from ..agent import bpftool_prog_show_records, start_agent, stop_agent
+from ..benchmark_net import BENCHMARK_IFACE
 from ..workload import WorkloadResult, run_named_workload
 from .base import AppRunner
 from .process_support import ProcessOutputCollector, programs_after, wait_until_program_set_stable
@@ -86,7 +87,7 @@ class BpftraceRunner(AppRunner):
             discover_programs=lambda: self._discover_script_programs(before_ids),
             process=self.process,
             collector_snapshot=self.collector.snapshot,
-            process_name=f"bpftrace ({script_spec.name})",
+            process_name=f"bpftrace ({self.script_name})",
         )
         if not programs:
             self._fail_start(f"bpftrace did not attach any BPF programs for {script_path.name}")
@@ -103,6 +104,7 @@ class BpftraceRunner(AppRunner):
             kind,
             max(1, int(round(seconds))),
             network_as_tcp_connect=True,
+            network_device=BENCHMARK_IFACE,
         )
 
     def run_workload_spec(
@@ -119,6 +121,7 @@ class BpftraceRunner(AppRunner):
             requested_kind,
             max(1, int(round(seconds))),
             network_as_tcp_connect=True,
+            network_device=BENCHMARK_IFACE,
         )
 
     def stop(self) -> None:

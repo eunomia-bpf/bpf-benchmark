@@ -28,7 +28,7 @@ MACRO_APP_DEFINITIONS: tuple[MacroAppDefinition, ...] = (
     MacroAppDefinition(name="bcc/tcplife", runner="bcc", workload="tcp_connect", runner_args={"tool": "tcplife"}),
     MacroAppDefinition(name="bcc/runqlat", runner="bcc", workload="stress_ng_scheduler", runner_args={"tool": "runqlat"}),
     MacroAppDefinition(name="otelcol-ebpf-profiler/profiling", runner="otelcol-ebpf-profiler", workload="stress_ng_cpu", duration_s=5.0),
-    MacroAppDefinition(name="cilium/agent", runner="cilium", workload="network"),
+    MacroAppDefinition(name="cilium/agent", runner="cilium", workload="network_lossy_multi"),
     MacroAppDefinition(name="tetragon/observer", runner="tetragon", workload="stress_ng_os_io_network"),
     MacroAppDefinition(name="katran", runner="katran", workload="network"),
     MacroAppDefinition(name="tracee/monitor", runner="tracee", workload="stress_ng_os_io_network", duration_s=5.0),
@@ -37,7 +37,7 @@ MACRO_APP_DEFINITIONS: tuple[MacroAppDefinition, ...] = (
     MacroAppDefinition(name="bpftrace/vfsstat", runner="bpftrace", workload="stress_ng_filesystem", runner_args={"script": "vfsstat"}),
     MacroAppDefinition(name="bpftrace/runqlat", runner="bpftrace", workload="stress_ng_scheduler", runner_args={"script": "runqlat"}),
     MacroAppDefinition(name="bpftrace/tcplife", runner="bpftrace", workload="tcp_connect", runner_args={"script": "tcplife"}),
-    MacroAppDefinition(name="bpftrace/tcpretrans", runner="bpftrace", workload="stress_ng_network", runner_args={"script": "tcpretrans"}, duration_s=5.0),
+    MacroAppDefinition(name="bpftrace/tcpretrans", runner="bpftrace", workload="network_lossy_multi", runner_args={"script": "tcpretrans"}, duration_s=5.0),
 )
 
 MACRO_APP_DEFINITION_BY_NAME = {spec.name: spec for spec in MACRO_APP_DEFINITIONS}

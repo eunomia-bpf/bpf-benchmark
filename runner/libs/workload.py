@@ -14,8 +14,9 @@ import threading
 import time
 from dataclasses import asdict, dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Mapping, Sequence
+from typing import Iterator, Mapping, Sequence
 
 from . import run_command, tail_text, which
 from .benchmark_net import BENCHMARK_IFACE, BENCHMARK_NETNS, BENCHMARK_PEER_IFACE_IP
@@ -300,6 +301,7 @@ _STRESS_NG_NETWORK_STRESSORS = (
     "sockdiag",
     "sockfd",
     "sockpair",
+    "sockmany",
     "udp-flood",
 )
 _STRESS_NG_OS_STRESSORS = (
@@ -309,23 +311,25 @@ _STRESS_NG_OS_STRESSORS = (
     "prctl",
     "set",
 )
-_STRESS_NG_SCHEDULER_STRESSORS = (
+_STRESS_NG_PROCESS_STRESSORS = (
     "clone",
+    "exec",
     "fork",
+    "vfork",
+)
+_STRESS_NG_SCHEDULER_STRESSORS = (
     "futex",
     "sem",
     "sem-sysv",
     "switch",
-    "vfork",
     "yield",
 )
 _STRESS_NG_WORKLOAD_STRESSORS: Mapping[str, tuple[str, ...]] = {
     "stress_ng_cpu": _STRESS_NG_CPU_STRESSORS,
     "stress_ng_filesystem": _STRESS_NG_FILESYSTEM_STRESSORS,
-    "stress_ng_io": _STRESS_NG_IO_STRESSORS,
     "stress_ng_network": _STRESS_NG_NETWORK_STRESSORS,
     "stress_ng_os": _STRESS_NG_OS_STRESSORS,
-    "stress_ng_process": _STRESS_NG_SCHEDULER_STRESSORS,
+    "stress_ng_process": _STRESS_NG_PROCESS_STRESSORS,
     "stress_ng_scheduler": _STRESS_NG_SCHEDULER_STRESSORS,
     "stress_ng_os_io_network": (
         *_STRESS_NG_OS_STRESSORS,
@@ -428,45 +432,6 @@ def run_stress_ng_class_load(duration_s: int | float, stressors: Sequence[str], 
     return _finish_result(ops_total, elapsed, completed.stdout or "", completed.stderr or "")
 
 
-def run_exec_storm(duration_s: int | float, rate: int) -> WorkloadResult:
-    stress_ng = which("stress-ng")
-    if stress_ng is None:
-        raise RuntimeError("stress-ng is required for the exec_storm workload")
-    temp_root = _disk_backed_tmp_root()
-    run_cwd: Path | None = None
-    stress_ng_args = ["--exec", str(max(1, int(rate))), "--exec-method", "execve",
-                      "--temp-path", str(temp_root), "--timeout", f"{max(1, int(duration_s))}s", "--metrics-brief"]
-    command: list[str] = [stress_ng, *stress_ng_args]
-    if os.geteuid() == 0:
-        setpriv = which("setpriv")
-        if setpriv is None:
-            raise RuntimeError("setpriv is required for the exec_storm workload when running as root")
-        temp_root = _shared_unprivileged_tmp_root()
-        stress_ng_args[5] = str(temp_root)
-        command = [setpriv, "--reuid", "65534", "--regid", "65534", "--clear-groups", stress_ng, *stress_ng_args]
-        run_cwd = temp_root
-    start = time.monotonic()
-    try:
-        completed = run_command(
-            command,
-            check=False,
-            cwd=run_cwd,
-            timeout=max(float(duration_s) + 30, float(duration_s) * 12),
-        )
-    except subprocess.TimeoutExpired:
-        raise RuntimeError("stress-ng exec workload timed out")
-    elapsed = time.monotonic() - start
-    if completed.returncode != 0:
-        details = tail_text(completed.stderr or completed.stdout)
-        raise RuntimeError(f"stress-ng exec workload failed: {details}")
-    combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
-    ops_total = parse_stress_ng_bogo_ops(combined, stressor="exec")
-    if ops_total is None:
-        details = tail_text(combined)
-        raise RuntimeError(f"stress-ng exec workload did not report bogo-ops metrics: {details}")
-    return _finish_result(ops_total, elapsed, completed.stdout or "", completed.stderr or "")
-
-
 def run_file_io(duration_s: int | float) -> WorkloadResult:
     fio_binary = which("fio")
     if fio_binary is None:
@@ -521,353 +486,6 @@ def _disk_backed_tmp_root() -> Path:
     raise RuntimeError("no writable disk-backed temporary directory is available")
 
 
-def _shared_unprivileged_tmp_root() -> Path:
-    for candidate in (Path("/dev/shm"), Path("/tmp"), Path("/var/tmp")):
-        try: candidate.mkdir(parents=True, exist_ok=True)
-        except OSError: continue
-        if not os.access(candidate, os.W_OK | os.X_OK): continue
-        runtime_root = candidate / "bpf-benchmark"
-        try: runtime_root.mkdir(parents=True, exist_ok=True); runtime_root.chmod(0o1777)
-        except OSError: continue
-        if os.access(runtime_root, os.W_OK | os.X_OK): return runtime_root
-    raise RuntimeError("no writable shared temporary directory is available for exec_storm")
-
-
-def _build_shell_cpu_burn_command(duration_s: float) -> tuple[list[str] | None, list[str]]:
-    bash_binary = which("bash")
-    if bash_binary is None:
-        return None, ["shell_burner_unavailable"]
-    duration_us = max(1, int(round(duration_s * 1_000_000.0)))
-    return (
-        [
-            bash_binary,
-            "-lc",
-            (
-                "if [ -n \"${EPOCHREALTIME:-}\" ]; then "
-                f"end_us=$((10#${{EPOCHREALTIME/./}} + {duration_us})); "
-                "while (( 10#${EPOCHREALTIME/./} < end_us )); do :; done; "
-                "else "
-                f"end_ns=$(( $(date +%s%N) + {duration_us * 1000} )); "
-                "while [ \"$(date +%s%N)\" -lt \"$end_ns\" ]; do :; done; "
-                "fi"
-            ),
-        ],
-        ["shell_burner=bash"],
-    )
-
-
-def _build_native_cpu_burn_command(root: Path, duration_s: float) -> tuple[list[str] | None, str | None]:
-    cc_binary = which("cc") or which("gcc") or which("clang")
-    if cc_binary is None:
-        return None, "native_burner_unavailable"
-    source = root / "cpu_burn.c"
-    binary = root / "cpu-burn-native"
-    source.write_text(
-        """
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-
-int main(int argc, char **argv) {
-    const double duration_s = (argc > 1) ? atof(argv[1]) : 1.0;
-    struct timespec start;
-    if (clock_gettime(CLOCK_MONOTONIC, &start) != 0) {
-        return 2;
-    }
-    const unsigned long long start_ns =
-        ((unsigned long long)start.tv_sec * 1000000000ULL) + (unsigned long long)start.tv_nsec;
-    const unsigned long long duration_ns =
-        (unsigned long long)(duration_s * 1000000000.0);
-    unsigned long long value = 1;
-    for (;;) {
-        struct timespec now;
-        if (clock_gettime(CLOCK_MONOTONIC, &now) != 0) {
-            return 3;
-        }
-        const unsigned long long now_ns =
-            ((unsigned long long)now.tv_sec * 1000000000ULL) + (unsigned long long)now.tv_nsec;
-        if ((now_ns - start_ns) >= duration_ns) {
-            break;
-        }
-        value = value * 1664525ULL + 1013904223ULL;
-    }
-    if (value == 0) {
-        fprintf(stderr, "%llu\\n", value);
-    }
-    return 0;
-}
-        """.strip()
-        + "\n",
-        encoding="utf-8",
-    )
-    build = run_command(
-        [
-            cc_binary,
-            "-O2",
-            "-fno-omit-frame-pointer",
-            "-std=c11",
-            "-D_POSIX_C_SOURCE=200809L",
-            "-o",
-            str(binary),
-            str(source),
-        ],
-        check=False,
-        timeout=30,
-    )
-    if build.returncode != 0:
-        return None, f"native_burner_build_failed={tail_text(build.stderr or build.stdout)}"
-    return [str(binary), f"{duration_s:.3f}"], None
-
-
-def _build_go_cpu_burn_command(root: Path, duration_s: float) -> tuple[list[str] | None, str | None]:
-    go_binary = which("go")
-    if go_binary is None:
-        return None, "go_burner_unavailable"
-    source = root / "cpu_burn.go"
-    binary = root / "cpu-burn-go"
-    source.write_text(
-        """
-package main
-
-import (
-    "context"
-    "os"
-    "runtime/pprof"
-    "strconv"
-    "time"
-)
-
-func main() {
-    durationS, err := strconv.ParseFloat(os.Args[1], 64)
-    if err != nil {
-        panic(err)
-    }
-    labels := pprof.Labels("workload", "otel-profiler", "language", "go")
-    pprof.Do(context.Background(), labels, func(context.Context) {
-        deadline := time.Now().Add(time.Duration(durationS * float64(time.Second)))
-        value := uint64(1)
-        for time.Now().Before(deadline) {
-            value = value*1664525 + 1013904223
-        }
-        if value == 0 {
-            os.Stderr.WriteString("0")
-        }
-    })
-}
-        """.strip()
-        + "\n",
-        encoding="utf-8",
-    )
-    build = run_command(
-        [go_binary, "build", "-o", str(binary), str(source)],
-        check=False,
-        timeout=60,
-    )
-    if build.returncode != 0:
-        return None, f"go_burner_build_failed={tail_text(build.stderr or build.stdout)}"
-    return [str(binary), f"{duration_s:.3f}"], None
-
-
-def run_otel_profiler_cpu_mix_workload(duration_s: int | float) -> WorkloadResult:
-    effective_duration = max(1.0, float(duration_s))
-    python_binary = sys.executable or which("python3")
-    if not python_binary:
-        raise RuntimeError("python3 is required for the otel profiler CPU mix workload")
-    with tempfile.TemporaryDirectory(prefix="otel-profiler-workload-", dir=str(_disk_backed_tmp_root())) as tempdir:
-        root = Path(tempdir)
-        commands: list[tuple[str, list[str]]] = []
-        notes: list[str] = []
-        shell_command, shell_notes = _build_shell_cpu_burn_command(effective_duration)
-        notes.extend(shell_notes)
-        if shell_command is not None:
-            commands.append(("shell", shell_command))
-        native_command, native_note = _build_native_cpu_burn_command(root, effective_duration)
-        if native_note:
-            notes.append(native_note)
-        if native_command is not None:
-            commands.append(("native", native_command))
-        go_command, go_note = _build_go_cpu_burn_command(root, effective_duration)
-        if go_note:
-            notes.append(go_note)
-        if go_command is not None:
-            commands.append(("go", go_command))
-        commands.append(
-            (
-                "python",
-                [
-                    python_binary,
-                    "-c",
-                    (
-                        "import time\n"
-                        "deadline = time.monotonic() + float(__import__('sys').argv[1])\n"
-                        "value = 1\n"
-                        "while time.monotonic() < deadline:\n"
-                        "    value = (value * 1664525 + 1013904223) & 0xFFFFFFFF\n"
-                        "print(value if value == -1 else '', end='')\n"
-                    ),
-                    f"{effective_duration:.3f}",
-                ],
-            )
-        )
-        if node_binary := (which("node") or which("nodejs")):
-            commands.append(
-                (
-                    "node",
-                    [
-                        node_binary,
-                        "-e",
-                        (
-                            "const deadline = Date.now() + Math.ceil(Number(process.argv[1]) * 1000);"
-                            " let value = 1;"
-                            " while (Date.now() < deadline) { value = (value * 1664525 + 1013904223) >>> 0; }"
-                            " if (value === 0xffffffff) console.error(value);"
-                        ),
-                        f"{effective_duration:.3f}",
-                    ],
-                )
-            )
-        else:
-            notes.append("node_burner_unavailable")
-        if java_binary := which("java"):
-            java_source = root / "CpuBurn.java"
-            java_source.write_text(
-                """
-public final class CpuBurn {
-    public static void main(String[] args) {
-        final long durationNs = (long) (Double.parseDouble(args[0]) * 1_000_000_000L);
-        final long start = System.nanoTime();
-        long value = 1L;
-        while ((System.nanoTime() - start) < durationNs) {
-            value = value * 1664525L + 1013904223L;
-        }
-        if (value == Long.MIN_VALUE) {
-            System.err.println(value);
-        }
-    }
-}
-                """.strip()
-                + "\n",
-                encoding="utf-8",
-            )
-            commands.append(("java", [java_binary, str(java_source), f"{effective_duration:.3f}"]))
-        else:
-            notes.append("java_burner_unavailable")
-        if ruby_binary := which("ruby"):
-            commands.append(
-                (
-                    "ruby",
-                    [
-                        ruby_binary,
-                        "-e",
-                        (
-                            "deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + ARGV[0].to_f;"
-                            " value = 1;"
-                            " while Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline do"
-                            " value = (value * 1664525 + 1013904223) & 0xffffffff;"
-                            " end;"
-                            " warn(value) if value == -1"
-                        ),
-                        f"{effective_duration:.3f}",
-                    ],
-                )
-            )
-        else:
-            notes.append("ruby_burner_unavailable")
-        if perl_binary := which("perl"):
-            commands.append(
-                (
-                    "perl",
-                    [
-                        perl_binary,
-                        "-e",
-                        (
-                            "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);"
-                            " my $deadline = clock_gettime(CLOCK_MONOTONIC) + $ARGV[0];"
-                            " my $value = 1;"
-                            " while (clock_gettime(CLOCK_MONOTONIC) < $deadline) {"
-                            "   $value = ($value * 1664525 + 1013904223) & 0xffffffff;"
-                            " }"
-                            " print q{} if $value == -1;"
-                        ),
-                        f"{effective_duration:.3f}",
-                    ],
-                )
-            )
-        else:
-            notes.append("perl_burner_unavailable")
-
-        processes: list[tuple[str, subprocess.Popen[str]]] = []
-        started_burners: list[str] = []
-        start = time.monotonic()
-        deadline = start + effective_duration
-        try:
-            for name, command in commands:
-                try:
-                    processes.append(
-                        (
-                            name,
-                            subprocess.Popen(
-                                command,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                text=True,
-                            ),
-                        )
-                    )
-                    started_burners.append(name)
-                except OSError as exc:
-                    notes.append(f"{name}_burner_start_failed={exc}")
-            if not processes:
-                raise RuntimeError("no otel profiler CPU burners could be started")
-            while time.monotonic() < deadline and processes:
-                now = time.monotonic()
-                still_running: list[tuple[str, subprocess.Popen[str]]] = []
-                for name, process in processes:
-                    if process.poll() is None or (now + 0.1) >= deadline:
-                        still_running.append((name, process))
-                        continue
-                    stdout_text, stderr_text = process.communicate()
-                    notes.append(
-                        f"{name}_burner_exited_early={process.returncode}:{tail_text(stderr_text or stdout_text)}",
-                    )
-                processes = still_running
-                if not processes:
-                    raise RuntimeError("all otel profiler CPU burners exited before the sampling window ended")
-                time.sleep(0.05)
-            stdout_parts: list[str] = []
-            stderr_parts: list[str] = []
-            successful_burners: list[str] = []
-            for name, process in processes:
-                remaining_timeout = max(5.0, effective_duration)
-                stdout_text, stderr_text = process.communicate(timeout=remaining_timeout)
-                if process.returncode != 0:
-                    notes.append(
-                        f"{name}_burner_failed={process.returncode}:{tail_text(stderr_text or stdout_text)}",
-                    )
-                    continue
-                successful_burners.append(name)
-                if stdout_text.strip():
-                    stdout_parts.append(stdout_text)
-                if stderr_text.strip():
-                    stderr_parts.append(f"{name}: {stderr_text}")
-            if not successful_burners:
-                raise RuntimeError("all otel profiler CPU burners failed before completing")
-        finally:
-            for _name, process in processes:
-                if process.poll() is None:
-                    process.terminate()
-                    try:
-                        process.wait(timeout=5)
-                    except subprocess.TimeoutExpired:
-                        process.kill()
-                        process.wait(timeout=5)
-        started = " ".join(started_burners)
-        stdout = "\n".join(part for part in [f"started_burners={started}", *stdout_parts] if part)
-        stderr = "\n".join(part for part in [*notes, *stderr_parts] if part)
-        return _finish_result(float(len(successful_burners)), time.monotonic() - start, stdout, stderr)
-
-
 def _network_http_server(network_device: str | None = None) -> LocalHttpServer | NamespacedHttpServer:
     normalized_device = str(network_device or "").strip()
     if not normalized_device:
@@ -898,6 +516,86 @@ def _network_client_command(command: list[str], network_device: str | None = Non
 
 def _render_command(command: Sequence[str]) -> str:
     return " ".join(shlex.quote(str(part)) for part in command)
+
+
+@contextmanager
+def _netem_qdisc(device: str, *, loss_pct: float, delay_ms: int) -> Iterator[None]:
+    tc = which("tc")
+    if tc is None:
+        raise RuntimeError("tc binary required for netem-based workloads (install iproute2)")
+    add = [tc, "qdisc", "add", "dev", device, "root", "netem",
+           "loss", f"{loss_pct}%", "delay", f"{delay_ms}ms"]
+    delete = [tc, "qdisc", "del", "dev", device, "root"]
+    if run_command(add, check=False, timeout=10).returncode != 0:
+        run_command(delete, check=False, timeout=10)
+        if run_command(add, check=False, timeout=10).returncode != 0:
+            raise RuntimeError(f"failed to install netem qdisc on {device}")
+    try:
+        yield
+    finally:
+        run_command(delete, check=False, timeout=10)
+
+
+def run_network_lossy_multi_load(
+    duration_s: int | float,
+    *,
+    network_device: str | None = None,
+) -> WorkloadResult:
+    """Network load with 5% packet loss + concurrent ICMP probes.
+
+    Drives TCP retransmits (for tcpretrans-style hooks) and exercises ICMP
+    plus HTTP traffic so multi-protocol datapath programs (e.g. cilium)
+    receive packets across more program slots than plain HTTP load.
+    """
+    if not network_device:
+        raise RuntimeError("network_lossy_multi requires network_device")
+    wrk_binary = resolve_workload_tool("wrk")
+    ping_binary = which("ping")
+    seconds = max(1, int(round(float(duration_s))))
+    with _netem_qdisc(network_device, loss_pct=5.0, delay_ms=5):
+        with _network_http_server(network_device) as server:
+            ping_proc = None
+            if ping_binary is not None:
+                ping_cmd = _network_client_command(
+                    [ping_binary, "-i", "0.01", "-q", "-w", str(seconds), BENCHMARK_PEER_IFACE_IP],
+                    network_device,
+                )
+                ping_proc = subprocess.Popen(
+                    ping_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                )
+            try:
+                start = time.monotonic()
+                command = _network_client_command(
+                    [wrk_binary, "-t2", "-c20", f"-d{seconds}s", server.url],
+                    network_device,
+                )
+                c = run_command(command, check=False, timeout=float(duration_s) + 30)
+                elapsed = time.monotonic() - start
+                if c.returncode != 0:
+                    raise RuntimeError(
+                        f"network_lossy_multi wrk load failed via {_render_command(command)}: "
+                        f"{tail_text(c.stderr or c.stdout)}"
+                    )
+                total_requests = next(
+                    (float(m.group(1))
+                     for line in c.stdout.splitlines()
+                     if (m := re.search(r"([0-9]+)\s+requests in", line.strip()))),
+                    None,
+                )
+                if total_requests is None:
+                    raise RuntimeError(
+                        f"network_lossy_multi wrk did not report requests metric: "
+                        f"{tail_text(c.stdout or c.stderr)}"
+                    )
+                return _finish_result(total_requests, elapsed, c.stdout or "", c.stderr or "")
+            finally:
+                if ping_proc is not None:
+                    ping_proc.terminate()
+                    try:
+                        ping_proc.wait(timeout=2)
+                    except subprocess.TimeoutExpired:
+                        ping_proc.kill()
+                        ping_proc.wait(timeout=2)
 
 
 def run_network_load(duration_s: int | float, *, network_device: str | None = None) -> WorkloadResult:
@@ -955,23 +653,6 @@ def run_tcp_connect_load(duration_s: int | float, *, network_device: str | None 
         return _finish_result(ops_total, elapsed, "", "\n".join(stderr_lines))
 
 
-def run_scheduler_load(duration_s: int | float) -> WorkloadResult:
-    hackbench = resolve_workload_tool("hackbench")
-    start = time.monotonic()
-    deadline = start + float(duration_s)
-    completed_runs = 0.0
-    stdout_lines: list[str] = []
-    stderr_lines: list[str] = []
-    while time.monotonic() < deadline:
-        c = run_command([hackbench, "--pipe", "--groups", "8", "--fds", "16", "--loops", "10"], check=False, timeout=max(30, int(duration_s) + 10))
-        if c.returncode != 0:
-            raise RuntimeError(f"scheduler hackbench failed: {tail_text(c.stderr or c.stdout)}")
-        stdout_lines.append(c.stdout or ""); stderr_lines.append(c.stderr or "")
-        completed_runs += 1.0
-    elapsed = time.monotonic() - start
-    return _finish_result(completed_runs, elapsed, "\n".join(stdout_lines), "\n".join(stderr_lines))
-
-
 def run_named_workload(
     kind: str,
     duration_s: int | float,
@@ -989,30 +670,12 @@ def run_named_workload(
         )
     if kind == "tcp_connect":
         return run_tcp_connect_load(seconds, network_device=network_device)
-    if kind == "scheduler":
-        return run_scheduler_load(seconds)
-    if kind == "exec_storm":
-        return run_exec_storm(seconds, rate=2)
     if kind == "network":
         if network_as_tcp_connect:
             return run_tcp_connect_load(seconds, network_device=network_device)
         return run_network_load(seconds, network_device=network_device)
+    if kind == "network_lossy_multi":
+        return run_network_lossy_multi_load(seconds, network_device=network_device)
     if kind in {"fio", "fio_randrw"}:
         return run_file_io(seconds)
-    if kind == "hackbench":
-        return run_scheduler_load(seconds)
-    if kind == "oom_stress":
-        stress_ng = which("stress-ng")
-        if stress_ng is None:
-            raise RuntimeError("stress-ng is required for the oom_stress workload")
-        command = [stress_ng, "--vm", "1", "--vm-bytes", "75%", "--oomable", "--timeout", f"{seconds}s", "--metrics-brief"]
-        start = time.monotonic()
-        completed = run_command(command, check=False, timeout=float(seconds) + 30)
-        elapsed = time.monotonic() - start
-        if completed.returncode != 0:
-            raise RuntimeError(f"oom_stress workload failed: {tail_text(completed.stderr or completed.stdout)}")
-        combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
-        if (ops_total := parse_stress_ng_bogo_ops(combined, stressor="vm")) is None:
-            raise RuntimeError(f"oom_stress workload did not report bogo-ops metrics: {tail_text(combined)}")
-        return _finish_result(ops_total, elapsed, completed.stdout or "", completed.stderr or "")
     raise RuntimeError(f"unsupported workload kind: {kind}")
