@@ -225,8 +225,6 @@ pub(crate) struct PassDetail {
     pub insn_delta: i64,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub verifier_log: Option<String>,
 }
 
 #[derive(Clone, Debug)]
@@ -683,7 +681,6 @@ pub(crate) fn try_apply_one(
                     Some(format!(
                         "pass {pass} requires verifier states from a previous successful per-pass ReJIT"
                     )),
-                    None,
                 );
             }
             let target_arg = pass_needs_target(pass).then_some(target_json.as_path());
@@ -717,7 +714,6 @@ pub(crate) fn try_apply_one(
                         PassStatus::FailedBpfopt,
                         &current_bytes,
                         Some(format!("{err:#}")),
-                        None,
                     );
                 }
             };
@@ -729,7 +725,6 @@ pub(crate) fn try_apply_one(
                         PassStatus::FailedBpfopt,
                         &current_bytes,
                         Some(format!("read {}: {err}", pass_output.display())),
-                        None,
                     );
                 }
             };
@@ -738,7 +733,6 @@ pub(crate) fn try_apply_one(
                     &report,
                     PassStatus::Unchanged,
                     false,
-                    None,
                     None,
                 ));
             }
@@ -751,7 +745,6 @@ pub(crate) fn try_apply_one(
                         PassStatus::FailedBpfopt,
                         &current_bytes,
                         Some(format!("{err:#}")),
-                        None,
                     );
                 }
             };
@@ -764,7 +757,6 @@ pub(crate) fn try_apply_one(
                         PassStatus::FailedRejit,
                         false,
                         Some(format!("{err:#}")),
-                        verifier_log_summary_from_path(&pass_verifier_log)?,
                     ));
                 }
             };
@@ -774,13 +766,7 @@ pub(crate) fn try_apply_one(
             current_bytes = pass_bytes;
             committed_passes += 1;
             committed_reports.push(report.clone());
-            Ok(pass_detail_from_report(
-                &report,
-                PassStatus::Ok,
-                true,
-                None,
-                None,
-            ))
+            Ok(pass_detail_from_report(&report, PassStatus::Ok, true, None))
         })?;
         fs::write(&opt_bin, &current_bytes)
             .with_context(|| format!("write {}", opt_bin.display()))?;
@@ -918,7 +904,6 @@ fn pass_detail_from_report(
     status: PassStatus,
     changed: bool,
     error: Option<String>,
-    verifier_log: Option<String>,
 ) -> PassDetail {
     let sites_applied = if changed { report.sites_applied } else { 0 };
     let insns_after = if changed {
@@ -935,7 +920,6 @@ fn pass_detail_from_report(
         insns_after,
         insn_delta: insns_after as i64 - report.insn_count_before as i64,
         error,
-        verifier_log,
     }
 }
 
@@ -944,7 +928,6 @@ fn pass_detail_without_report(
     status: PassStatus,
     current_bytes: &[u8],
     error: Option<String>,
-    verifier_log: Option<String>,
 ) -> Result<PassDetail> {
     let insn_count = insn_count_from_bytes(current_bytes, "current pass input")?;
     Ok(PassDetail {
@@ -956,16 +939,7 @@ fn pass_detail_without_report(
         insns_after: insn_count,
         insn_delta: 0,
         error,
-        verifier_log,
     })
-}
-
-fn verifier_log_summary_from_path(path: &Path) -> Result<Option<String>> {
-    match fs::read_to_string(path) {
-        Ok(log) => Ok(Some(kernel_sys::verifier_log_summary(&log))),
-        Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(None),
-        Err(err) => Err(err).with_context(|| format!("read {}", path.display())),
-    }
 }
 
 fn write_live_map_values<F, G, H>(
@@ -1585,15 +1559,14 @@ mod tests {
                 map_inline_records: Vec::new(),
             };
             Ok(match idx {
-                0 => pass_detail_from_report(&report, PassStatus::Ok, true, None, None),
+                0 => pass_detail_from_report(&report, PassStatus::Ok, true, None),
                 1 => pass_detail_from_report(
                     &report,
                     PassStatus::FailedRejit,
                     false,
                     Some("kernel rejected BPF_PROG_REJIT: EINVAL".to_string()),
-                    Some("verifier rejected candidate".to_string()),
                 ),
-                2 => pass_detail_from_report(&report, PassStatus::Unchanged, false, None, None),
+                2 => pass_detail_from_report(&report, PassStatus::Unchanged, false, None),
                 _ => unreachable!(),
             })
         })
