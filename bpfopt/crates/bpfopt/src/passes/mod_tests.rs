@@ -59,13 +59,7 @@ fn install_map(map_id: u32, map_type: u32, value: Vec<u8>) {
         max_entries: 8,
     };
 
-    install_mock_map(
-        map_id,
-        MockMapState {
-            info,
-            values,
-        },
-    );
+    install_mock_map(map_id, MockMapState { info, values });
 }
 
 fn install_array_map(map_id: u32, value: Vec<u8>) {

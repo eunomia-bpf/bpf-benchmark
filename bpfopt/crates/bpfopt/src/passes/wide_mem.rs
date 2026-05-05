@@ -379,7 +379,11 @@ fn is_btf_struct_ptr_type(reg_type: &str) -> bool {
 ///   - No verifier states are available (offline snapshot absent).
 ///   - The register is not mentioned in any state at or before `pc`.
 ///   - The register has a safe type (scalar, fp, map_value, pkt, etc.).
-fn base_reg_is_btf_ptr_from_states(reg: u8, site_pc: usize, verifier_states: &[VerifierInsn]) -> bool {
+fn base_reg_is_btf_ptr_from_states(
+    reg: u8,
+    site_pc: usize,
+    verifier_states: &[VerifierInsn],
+) -> bool {
     if verifier_states.is_empty() {
         return false;
     }

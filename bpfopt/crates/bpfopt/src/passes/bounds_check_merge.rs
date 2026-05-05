@@ -8,8 +8,7 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::utils::{
-    compose_addr_maps, eliminate_nops, eliminate_unreachable_blocks, fixup_all_branches,
-    insn_width,
+    compose_addr_maps, eliminate_nops, eliminate_unreachable_blocks, fixup_all_branches, insn_width,
 };
 
 /// BPF_PROG_TYPE_SCHED_CLS (TC classifier).

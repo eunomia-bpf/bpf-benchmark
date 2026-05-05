@@ -782,7 +782,10 @@ fn make_verifier_state_with_reg_type(
     reg_type: &str,
 ) -> crate::pass::VerifierInsn {
     let mut regs = std::collections::HashMap::new();
-    regs.insert(reg, crate::pass::RegState::new(reg_type, crate::pass::VerifierValueWidth::Unknown));
+    regs.insert(
+        reg,
+        crate::pass::RegState::new(reg_type, crate::pass::VerifierValueWidth::Unknown),
+    );
     crate::pass::VerifierInsn {
         pc,
         frame: 0,

@@ -888,13 +888,7 @@ mod tests {
             max_entries: 8,
         };
 
-        install_mock_map(
-            map_id,
-            MockMapState {
-                info,
-                values,
-            },
-        );
+        install_mock_map(map_id, MockMapState { info, values });
     }
 
     fn run_const_prop_pass(program: &mut BpfProgram) -> PipelineResult {

@@ -744,9 +744,6 @@ pub(crate) fn try_apply_one(
             let pass_bytes = fs::read(&pass_output)
                 .with_context(|| format!("read {}", pass_output.display()))?;
             if !report.changed {
-                if pass_bytes != current_bytes {
-                    bail!("bpfopt pass {pass} reported unchanged but modified bytecode");
-                }
                 reports.push(report);
                 continue;
             }

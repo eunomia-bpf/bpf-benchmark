@@ -1,0 +1,11041 @@
+# Corpus Benchmark
+
+```json
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+  "generated_at": "2026-05-05T08:47:50.093155+00:00",
+  "kinsn_modules": {
+    "captured_at": "2026-05-05T08:08:08.548065+00:00",
+    "daemon_binary": "daemon/target/release/bpfrejit-daemon",
+    "expected_modules": [
+      "bpf_bulk_memory",
+      "bpf_endian",
+      "bpf_extract",
+      "bpf_prefetch",
+      "bpf_rotate",
+      "bpf_select"
+    ],
+    "module_load": {
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "failed_modules": [],
+      "invoked_at": "2026-05-05T08:08:08.548002+00:00",
+      "loaded_count": 6,
+      "loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loader": "runner.libs.kinsn.load_kinsn_modules",
+      "module_dir": "/artifacts/kinsn",
+      "newly_loaded_modules": [],
+      "snapshot_after": {
+        "captured_at": "2026-05-05T08:08:08.547995+00:00",
+        "expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "loaded_bpf_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "missing_expected_modules": [],
+        "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_prefetch           12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+        "resident_expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "source": "lsmod"
+      },
+      "status": "ok",
+      "total_count": 6
+    },
+    "module_snapshot_before_daemon": {
+      "captured_at": "2026-05-05T08:08:08.531752+00:00",
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loaded_bpf_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "missing_expected_modules": [],
+      "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_prefetch           12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+      "resident_expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "source": "lsmod"
+    }
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "results": [
+    {
+      "app": "bcc/capable",
+      "baseline": {
+        "bpf": {
+          "6": {
+            "bytes_jited": 203,
+            "bytes_xlated": 344,
+            "id": 6,
+            "name": "cap_capable",
+            "run_cnt_delta": 3216316,
+            "run_time_ns_delta": 329147873,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.0615211060000007,
+            "ops_per_sec": 5736478.172755735,
+            "ops_total": 17562349.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [19293] setting to a 3 secs run per stressor\nstress-ng: info:  [19293] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [19293] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [19293] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [19293]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [19293] cap             3922582      3.00      1.04      2.70   1307178.23     1050452.25\nstress-ng: metrc: [19293] eventfd         1197462      3.00      0.73      3.72    398875.17      268911.66\nstress-ng: metrc: [19293] get                6126      3.00      0.11      0.73      2041.20        7309.42\nstress-ng: metrc: [19293] prctl             15491      3.00      2.47      1.88      5161.94        3557.21\nstress-ng: metrc: [19293] set              141346      3.00      0.40      2.57     47112.02       47666.60\nstress-ng: metrc: [19293] dup                5223      3.00      0.85      0.77      1740.87        3225.74\nstress-ng: metrc: [19293] kill             380084      3.00      0.28      4.16    126624.06       85756.08\nstress-ng: metrc: [19293] sigfd          10359288      3.00      1.12      5.17   3451049.71     1646432.59\nstress-ng: metrc: [19293] signal                0      3.00      0.64      3.06         0.00           0.00\nstress-ng: metrc: [19293] pty                 252      3.01      0.21      3.75        83.75          63.56\nstress-ng: metrc: [19293] itimer              543      3.00      1.25      3.47       180.95         115.00\nstress-ng: metrc: [19293] timerfd         1533952      3.00      0.76      4.47    510914.77      293657.84\nstress-ng: info:  [19293] skipped: 0\nstress-ng: info:  [19293] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [19293] failed: 0\nstress-ng: info:  [19293] metrics untrustworthy: 0\nstress-ng: info:  [19293] successful run completed in 3.05 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "6": {
+            "bytes_jited": 206,
+            "bytes_xlated": 344,
+            "id": 6,
+            "name": "cap_capable",
+            "run_cnt_delta": 2353664,
+            "run_time_ns_delta": 395456906,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.0481467750000064,
+            "ops_per_sec": 6969895.995247786,
+            "ops_total": 21245266.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [592] setting to a 3 secs run per stressor\nstress-ng: info:  [592] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [592] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [592] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [592]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [592] cap             6761879      3.00      1.67      4.95   2253810.15     1021345.63\nstress-ng: metrc: [592] eventfd         1351263      3.00      0.95      4.08    450095.83      268720.41\nstress-ng: metrc: [592] get                7955      3.00      0.14      0.72      2648.14        9263.45\nstress-ng: metrc: [592] prctl              9986      3.00      1.68      1.13      3325.60        3549.77\nstress-ng: metrc: [592] set              113607      3.00      0.27      2.45     37813.44       41701.42\nstress-ng: metrc: [592] dup                3522      3.00      0.60      0.51      1173.94        3174.80\nstress-ng: metrc: [592] kill             484047      3.00      0.29      4.99    161304.41       91626.27\nstress-ng: metrc: [592] sigfd          10993634      3.01      1.23      6.21   3654418.20     1478372.40\nstress-ng: metrc: [592] signal                0      3.00      0.01      0.06         0.00           0.00\nstress-ng: metrc: [592] pty                 281      3.01      0.21      4.47        93.38          60.05\nstress-ng: metrc: [592] itimer              500      3.00      0.73      3.41       166.49         120.77\nstress-ng: metrc: [592] timerfd         1518592      3.00      0.63      4.62    505698.66      288908.05\nstress-ng: info:  [592] skipped: 0\nstress-ng: info:  [592] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [592] failed: 0\nstress-ng: info:  [592] metrics untrustworthy: 0\nstress-ng: info:  [592] successful run completed in 3.04 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 1,
+          "not_applied": 0,
+          "requested": 1
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "stress_ng_os",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/biosnoop",
+      "baseline": {
+        "bpf": {
+          "9": {
+            "bytes_jited": 267,
+            "bytes_xlated": 448,
+            "id": 9,
+            "name": "trace_pid_start_tp",
+            "run_cnt_delta": 1684955,
+            "run_time_ns_delta": 374280085,
+            "type": "tracepoint"
+          },
+          "10": {
+            "bytes_jited": 335,
+            "bytes_xlated": 616,
+            "id": 10,
+            "name": "trace_req_start",
+            "run_cnt_delta": 1684965,
+            "run_time_ns_delta": 338421890,
+            "type": "kprobe"
+          },
+          "11": {
+            "bytes_jited": 550,
+            "bytes_xlated": 856,
+            "id": 11,
+            "name": "trace_req_completion_tp",
+            "run_cnt_delta": 1684970,
+            "run_time_ns_delta": 162937413,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.341681004999998,
+            "ops_per_sec": 422163.35979051987,
+            "ops_total": 2255062.0,
+            "stderr": "",
+            "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.240389,\n        \"1000\" : 17.647799\n      },\n      \"latency_us\" : {\n        \"2\" : 29.938122,\n        \"4\" : 1.547561,\n        \"10\" : 19.740620,\n        \"20\" : 28.255752,\n        \"50\" : 2.071033,\n        \"100\" : 0.359432,\n        \"250\" : 0.188485,\n        \"500\" : 0.010275,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "9": {
+            "bytes_jited": 267,
+            "bytes_xlated": 448,
+            "id": 9,
+            "name": "trace_pid_start_tp",
+            "run_cnt_delta": 1729136,
+            "run_time_ns_delta": 384533002,
+            "type": "tracepoint"
+          },
+          "10": {
+            "bytes_jited": 335,
+            "bytes_xlated": 616,
+            "id": 10,
+            "name": "trace_req_start",
+            "run_cnt_delta": 1729146,
+            "run_time_ns_delta": 350707301,
+            "type": "kprobe"
+          },
+          "11": {
+            "bytes_jited": 550,
+            "bytes_xlated": 856,
+            "id": 11,
+            "name": "trace_req_completion_tp",
+            "run_cnt_delta": 1729151,
+            "run_time_ns_delta": 167021919,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.355959490000004,
+            "ops_per_sec": 431371.2611743444,
+            "ops_total": 2310407.0,
+            "stderr": "",
+            "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.079261,\n        \"1000\" : 12.517886\n      },\n      \"latency_us\" : {\n        \"2\" : 35.102458,\n        \"4\" : 1.646620,\n        \"10\" : 19.297403,\n        \"20\" : 27.750076,\n        \"50\" : 2.884274,\n        \"100\" : 0.590903,\n        \"250\" : 0.121927,\n        \"500\" : 0.010000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "fio_randrw",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/vfsstat",
+      "baseline": {
+        "bpf": {
+          "14": {
+            "bytes_jited": 90,
+            "bytes_xlated": 144,
+            "id": 14,
+            "name": "vfs_create",
+            "run_cnt_delta": 234022,
+            "run_time_ns_delta": 14255191,
+            "type": "tracing"
+          },
+          "15": {
+            "bytes_jited": 90,
+            "bytes_xlated": 144,
+            "id": 15,
+            "name": "kfunc__vmlinux__vfs_fsync_range",
+            "run_cnt_delta": 1041,
+            "run_time_ns_delta": 74126,
+            "type": "tracing"
+          },
+          "16": {
+            "bytes_jited": 90,
+            "bytes_xlated": 144,
+            "id": 16,
+            "name": "vfs_open",
+            "run_cnt_delta": 3756577,
+            "run_time_ns_delta": 179416177,
+            "type": "tracing"
+          },
+          "17": {
+            "bytes_jited": 87,
+            "bytes_xlated": 136,
+            "id": 17,
+            "name": "vfs_read",
+            "run_cnt_delta": 103677,
+            "run_time_ns_delta": 4481496,
+            "type": "tracing"
+          },
+          "18": {
+            "bytes_jited": 90,
+            "bytes_xlated": 144,
+            "id": 18,
+            "name": "vfs_write",
+            "run_cnt_delta": 113102,
+            "run_time_ns_delta": 5944394,
+            "type": "tracing"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.2832759669999803,
+            "ops_per_sec": 1684143.5369968195,
+            "ops_total": 5529508.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [10975] setting to a 3 secs run per stressor\nstress-ng: info:  [10975] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [10975] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [11048] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [10992] dentry: 462618 dentries allocated\nstress-ng: metrc: [10975] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [10975]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [10975] access            29849      3.04      0.50      3.25      9830.61        7962.53\nstress-ng: metrc: [10975] chdir               279      3.18      0.73      5.37        87.72          45.69\nstress-ng: metrc: [10975] chmod               219      3.02      0.00      0.27        72.44         803.32\nstress-ng: metrc: [10975] chown               341      3.01      0.01      0.01       113.34       14669.19\nstress-ng: metrc: [10975] dentry            29916      3.06      0.10      0.92      9763.59       29329.44\nstress-ng: metrc: [10975] dir               32768      3.23      0.09      3.26     10149.57        9800.58\nstress-ng: metrc: [10975] dirmany           26509      3.05      0.00      0.62      8698.17       42432.46\nstress-ng: metrc: [10975] fallocate             3      3.05      0.02      0.00         0.98         154.52\nstress-ng: metrc: [10975] file-ioctl       178326      3.03      0.31      1.86     58891.86       82117.82\nstress-ng: metrc: [10975] filename           7395      3.06      0.07      1.51      2419.51        4672.75\nstress-ng: metrc: [10975] flock           3867449      3.04      0.62      0.98   1271740.93     2418850.33\nstress-ng: metrc: [10975] fpunch             1264      3.05      0.00      2.30       413.92         549.71\nstress-ng: metrc: [10975] fstat             10312      3.01      0.60      2.31      3431.56        3540.68\nstress-ng: metrc: [10975] getdent          943852      3.00      0.55      6.97    314203.06      125504.81\nstress-ng: metrc: [10975] hdd               55588      3.03      1.11      0.59     18328.85       32611.10\nstress-ng: metrc: [10975] inotify               8      3.07      0.01      0.00         2.60         569.68\nstress-ng: metrc: [10975] open              25600      3.05      0.05      0.34      8391.90       64979.73\nstress-ng: metrc: [10975] rename           107108      3.00      0.07      0.67     35697.85      146022.58\nstress-ng: metrc: [10975] touch             90088      3.05      0.04      3.23     29576.84       27586.42\nstress-ng: metrc: [10975] utime            101474      3.01      0.14      1.65     33680.61       56789.07\nstress-ng: metrc: [10975] link                  9      3.05      0.07      1.09         2.95           7.78\nstress-ng: metrc: [10975] symlink               4      3.16      0.03      1.18         1.27           3.29\nstress-ng: metrc: [10975] mknod               118      3.04      0.02      0.02        38.77        3508.15\nstress-ng: metrc: [10975] fcntl             21029      3.06      0.10      0.30      6871.19       53811.10\nstress-ng: info:  [10975] skipped: 0\nstress-ng: info:  [10975] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [10975] failed: 0\nstress-ng: info:  [10975] metrics untrustworthy: 0\nstress-ng: info:  [10975] successful run completed in 3.27 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "14": {
+            "bytes_jited": 90,
+            "bytes_xlated": 144,
+            "id": 14,
+            "name": "vfs_create",
+            "run_cnt_delta": 269419,
+            "run_time_ns_delta": 16566833,
+            "type": "tracing"
+          },
+          "15": {
+            "bytes_jited": 90,
+            "bytes_xlated": 144,
+            "id": 15,
+            "name": "kfunc__vmlinux__vfs_fsync_range",
+            "run_cnt_delta": 1072,
+            "run_time_ns_delta": 89641,
+            "type": "tracing"
+          },
+          "16": {
+            "bytes_jited": 90,
+            "bytes_xlated": 144,
+            "id": 16,
+            "name": "vfs_open",
+            "run_cnt_delta": 4100381,
+            "run_time_ns_delta": 223016308,
+            "type": "tracing"
+          },
+          "17": {
+            "bytes_jited": 87,
+            "bytes_xlated": 136,
+            "id": 17,
+            "name": "vfs_read",
+            "run_cnt_delta": 105515,
+            "run_time_ns_delta": 4702537,
+            "type": "tracing"
+          },
+          "18": {
+            "bytes_jited": 90,
+            "bytes_xlated": 144,
+            "id": 18,
+            "name": "vfs_write",
+            "run_cnt_delta": 106782,
+            "run_time_ns_delta": 5771858,
+            "type": "tracing"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.2708360549999895,
+            "ops_per_sec": 1699397.6177751343,
+            "ops_total": 5558451.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [19284] setting to a 3 secs run per stressor\nstress-ng: info:  [19284] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [19284] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [19357] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [19301] dentry: 291023 dentries allocated\nstress-ng: metrc: [19284] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [19284]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [19284] access            29908      3.03      0.49      2.93      9886.43        8744.65\nstress-ng: metrc: [19284] chdir               329      3.18      0.68      6.02       103.49          49.06\nstress-ng: metrc: [19284] chmod               319      3.10      0.04      0.06       102.97        3296.20\nstress-ng: metrc: [19284] chown               280      3.08      0.00      0.09        91.01        2915.42\nstress-ng: metrc: [19284] dentry            22528      3.09      0.06      0.73      7290.59       28382.38\nstress-ng: metrc: [19284] dir               32769      3.20      0.17      3.46     10235.99        9026.71\nstress-ng: metrc: [19284] dirmany           25852      3.08      0.02      0.61      8405.68       41276.29\nstress-ng: metrc: [19284] fallocate             4      3.10      0.01      0.00         1.29         264.62\nstress-ng: metrc: [19284] file-ioctl       213563      3.01      0.44      2.21     71016.25       80850.18\nstress-ng: metrc: [19284] filename           8498      3.03      0.08      1.75      2806.88        4630.52\nstress-ng: metrc: [19284] flock           3895056      3.01      0.78      0.92   1292207.35     2284747.61\nstress-ng: metrc: [19284] fpunch             1275      3.08      0.01      1.85       414.18         685.61\nstress-ng: metrc: [19284] fstat              8670      3.01      0.43      1.94      2877.56        3661.32\nstress-ng: metrc: [19284] getdent          876418      3.01      0.46      6.34    291397.02      128938.22\nstress-ng: metrc: [19284] hdd               48953      3.07      0.85      0.65     15967.61       32565.58\nstress-ng: metrc: [19284] inotify               8      3.08      0.01      0.01         2.60         523.80\nstress-ng: metrc: [19284] open              16384      3.09      0.03      0.20      5298.35       71762.71\nstress-ng: metrc: [19284] rename           126052      3.02      0.06      0.78     41736.09      150262.97\nstress-ng: metrc: [19284] touch            126505      3.11      0.13      3.88     40712.81       31568.28\nstress-ng: metrc: [19284] utime            105796      3.02      0.11      1.79     35008.24       55802.43\nstress-ng: metrc: [19284] link                 12      3.10      0.06      1.35         3.87           8.49\nstress-ng: metrc: [19284] symlink               4      3.12      0.00      1.13         1.28           3.54\nstress-ng: metrc: [19284] mknod                52      3.08      0.02      0.01        16.88        1995.70\nstress-ng: metrc: [19284] fcntl             19216      3.01      0.04      0.24      6386.10       70564.04\nstress-ng: info:  [19284] skipped: 0\nstress-ng: info:  [19284] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [19284] failed: 0\nstress-ng: info:  [19284] metrics untrustworthy: 0\nstress-ng: info:  [19284] successful run completed in 3.26 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 5,
+          "not_applied": 0,
+          "requested": 5
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "stress_ng_filesystem",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/opensnoop",
+      "baseline": {
+        "bpf": {
+          "21": {
+            "bytes_jited": 517,
+            "bytes_xlated": 600,
+            "id": 21,
+            "name": "__x64_sys_open",
+            "run_cnt_delta": 15141,
+            "run_time_ns_delta": 3423845,
+            "type": "tracing"
+          },
+          "22": {
+            "bytes_jited": 517,
+            "bytes_xlated": 600,
+            "id": 22,
+            "name": "kretfunc__vmlinux____x64_sys_openat",
+            "run_cnt_delta": 2122221,
+            "run_time_ns_delta": 499662984,
+            "type": "tracing"
+          },
+          "23": {
+            "bytes_jited": 590,
+            "bytes_xlated": 640,
+            "id": 23,
+            "name": "kretfunc__vmlinux____x64_sys_openat2",
+            "run_cnt_delta": 2554,
+            "run_time_ns_delta": 660602,
+            "type": "tracing"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.3142556820000095,
+            "ops_per_sec": 1645299.7364130293,
+            "ops_total": 5452944.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [26694] setting to a 3 secs run per stressor\nstress-ng: info:  [26694] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [26694] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [26768] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [26714] dentry: 309186 dentries allocated\nstress-ng: metrc: [26694] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [26694]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [26694] access            32825      3.03      0.44      2.82     10821.19       10070.03\nstress-ng: metrc: [26694] chdir               313      3.18      0.71      5.72        98.48          48.64\nstress-ng: metrc: [26694] chmod               231      3.02      0.02      0.05        76.48        3499.73\nstress-ng: metrc: [26694] chown               172      3.06      0.00      0.06        56.20        2835.15\nstress-ng: metrc: [26694] dentry            21709      3.10      0.06      0.77      6998.59       26171.09\nstress-ng: metrc: [26694] dir               32770      3.27      0.17      3.72     10031.95        8426.82\nstress-ng: metrc: [26694] dirmany           27644      3.05      0.01      0.64      9052.38       42154.00\nstress-ng: metrc: [26694] fallocate             0      3.06      0.01      0.01         0.00           0.00\nstress-ng: metrc: [26694] file-ioctl       168921      3.02      0.23      1.75     56014.34       85100.37\nstress-ng: metrc: [26694] filename           9255      3.04      0.19      1.84      3045.57        4555.50\nstress-ng: metrc: [26694] flock           3855127      3.02      0.71      0.77   1275093.18     2602503.18\nstress-ng: metrc: [26694] fpunch             1074      3.05      0.01      2.48       352.12         432.24\nstress-ng: metrc: [26694] fstat              7650      3.00      0.38      1.58      2547.70        3896.09\nstress-ng: metrc: [26694] getdent          834056      3.00      0.39      6.37    277712.13      123522.93\nstress-ng: metrc: [26694] hdd               43838      3.04      0.77      0.64     14434.18       30990.05\nstress-ng: metrc: [26694] inotify               8      3.12      0.02      0.00         2.57         407.10\nstress-ng: metrc: [26694] open              16654      3.07      0.01      0.26      5418.63       61559.50\nstress-ng: metrc: [26694] rename           117883      3.00      0.06      0.76     39282.70      143107.22\nstress-ng: metrc: [26694] touch            157885      3.07      0.20      3.73     51352.50       40192.78\nstress-ng: metrc: [26694] utime             99317      3.02      0.06      1.81     32866.91       53352.78\nstress-ng: metrc: [26694] link                 11      3.09      0.09      1.28         3.56           8.02\nstress-ng: metrc: [26694] symlink               6      3.14      0.09      1.29         1.91           4.34\nstress-ng: metrc: [26694] mknod               116      3.07      0.03      0.00        37.74        4316.28\nstress-ng: metrc: [26694] fcntl             25479      3.04      0.02      0.29      8374.11       80294.59\nstress-ng: info:  [26694] skipped: 0\nstress-ng: info:  [26694] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [26694] failed: 0\nstress-ng: info:  [26694] metrics untrustworthy: 0\nstress-ng: info:  [26694] successful run completed in 3.30 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "21": {
+            "bytes_jited": 517,
+            "bytes_xlated": 600,
+            "id": 21,
+            "name": "__x64_sys_open",
+            "run_cnt_delta": 15199,
+            "run_time_ns_delta": 3922513,
+            "type": "tracing"
+          },
+          "22": {
+            "bytes_jited": 517,
+            "bytes_xlated": 600,
+            "id": 22,
+            "name": "kretfunc__vmlinux____x64_sys_openat",
+            "run_cnt_delta": 2153276,
+            "run_time_ns_delta": 617630595,
+            "type": "tracing"
+          },
+          "23": {
+            "bytes_jited": 590,
+            "bytes_xlated": 640,
+            "id": 23,
+            "name": "kretfunc__vmlinux____x64_sys_openat2",
+            "run_cnt_delta": 2784,
+            "run_time_ns_delta": 799049,
+            "type": "tracing"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 4.055660074000002,
+            "ops_per_sec": 1348852.443297741,
+            "ops_total": 5470487.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [19304] setting to a 3 secs run per stressor\nstress-ng: info:  [19304] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [19304] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [19377] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [19321] dentry: 424954 dentries allocated\nstress-ng: metrc: [19304] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [19304]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [19304] access            27120      3.03      0.49      2.61      8945.30        8747.54\nstress-ng: metrc: [19304] chdir               338      3.18      0.67      6.01       106.28          50.59\nstress-ng: metrc: [19304] chmod               268      3.05      0.00      0.09        87.97        2983.91\nstress-ng: metrc: [19304] chown               342      3.04      0.01      0.07       112.40        4240.60\nstress-ng: metrc: [19304] dentry            19625      3.07      0.03      0.65      6391.88       28998.38\nstress-ng: metrc: [19304] dir               30721      3.23      0.18      3.06      9501.85        9480.01\nstress-ng: metrc: [19304] dirmany           23570      3.04      0.01      0.57      7759.21       40589.50\nstress-ng: metrc: [19304] fallocate             3      3.05      0.01      0.01         0.99         141.10\nstress-ng: metrc: [19304] file-ioctl       173361      3.01      0.24      1.76     57566.07       87071.84\nstress-ng: metrc: [19304] filename           6144      3.03      0.09      1.23      2028.85        4657.60\nstress-ng: metrc: [19304] flock           3724041      3.03      0.72      1.00   1230525.21     2163142.98\nstress-ng: metrc: [19304] fpunch             1099      3.04      0.00      1.57       361.55         701.64\nstress-ng: metrc: [19304] fstat              9773      3.00      0.59      2.30      3252.52        3379.82\nstress-ng: metrc: [19304] getdent         1014104      3.00      0.44      7.45    337804.89      128406.80\nstress-ng: metrc: [19304] hdd               45060      3.02      0.91      0.59     14904.57       30178.52\nstress-ng: metrc: [19304] inotify               8      3.33      0.01      0.01         2.40         334.67\nstress-ng: metrc: [19304] open              16684      3.07      0.04      0.21      5431.00       66714.65\nstress-ng: metrc: [19304] rename           157302      3.01      0.05      0.97     52275.92      153549.41\nstress-ng: metrc: [19304] touch             99629      3.08      0.06      2.95     32385.51       33102.05\nstress-ng: metrc: [19304] utime            103663      3.01      0.13      1.70     34431.79       56806.19\nstress-ng: metrc: [19304] link                  8      3.07      0.07      0.82         2.61           9.03\nstress-ng: metrc: [19304] symlink               4      3.16      0.04      1.25         1.27           3.12\nstress-ng: metrc: [19304] mknod               112      3.07      0.01      0.02        36.44        3698.93\nstress-ng: metrc: [19304] fcntl             17508      3.05      0.07      0.24      5739.67       55366.34\nstress-ng: info:  [19304] skipped: 0\nstress-ng: info:  [19304] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [19304] failed: 0\nstress-ng: info:  [19304] metrics untrustworthy: 0\nstress-ng: info:  [19304] successful run completed in 4.04 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "stress_ng_filesystem",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/syscount",
+      "baseline": {
+        "bpf": {
+          "26": {
+            "bytes_jited": 72,
+            "bytes_xlated": 112,
+            "id": 26,
+            "name": "tracepoint__raw_syscalls__sys_enter",
+            "run_cnt_delta": 67650640,
+            "run_time_ns_delta": 12353912679,
+            "type": "tracepoint"
+          },
+          "27": {
+            "bytes_jited": 236,
+            "bytes_xlated": 400,
+            "id": 27,
+            "name": "tracepoint__raw_syscalls__sys_exit",
+            "run_cnt_delta": 67651132,
+            "run_time_ns_delta": 1770494000,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.084948529000002,
+            "ops_per_sec": 2194415.8667031024,
+            "ops_total": 6769660.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [10083] setting to a 3 secs run per stressor\nstress-ng: info:  [10083] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [10083] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [10083] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [10083]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [10083] cap             1826635      3.00      0.41      6.34    608785.77      270331.77\nstress-ng: metrc: [10083] eventfd          900419      3.00      0.52      5.48    300118.60      150200.93\nstress-ng: metrc: [10083] get                6111      3.00      0.14      1.37      2036.17        4040.74\nstress-ng: metrc: [10083] prctl              6967      3.00      1.90      0.75      2320.94        2623.49\nstress-ng: metrc: [10083] set               57672      3.00      0.23      2.66     19200.40       19931.80\nstress-ng: metrc: [10083] dup                3584      3.00      0.55      0.48      1194.44        3491.82\nstress-ng: metrc: [10083] kill             247610      3.00      0.36      4.03     82478.35       56423.26\nstress-ng: metrc: [10083] sigfd           3054201      3.00      0.92      5.88   1017459.07      449098.00\nstress-ng: metrc: [10083] signal                0      3.00      0.02      0.30         0.00           0.00\nstress-ng: metrc: [10083] pty                 160      3.01      0.25      4.95        53.22          30.73\nstress-ng: metrc: [10083] itimer              701      3.00      0.33      5.76       233.67         115.19\nstress-ng: metrc: [10083] timerfd          665600      3.00      0.18      3.97    221712.09      160191.50\nstress-ng: info:  [10083] skipped: 0\nstress-ng: info:  [10083] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [10083] failed: 0\nstress-ng: info:  [10083] metrics untrustworthy: 0\nstress-ng: info:  [10083] successful run completed in 3.07 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "26": {
+            "bytes_jited": 72,
+            "bytes_xlated": 112,
+            "id": 26,
+            "name": "tracepoint__raw_syscalls__sys_enter",
+            "run_cnt_delta": 64989793,
+            "run_time_ns_delta": 11920223635,
+            "type": "tracepoint"
+          },
+          "27": {
+            "bytes_jited": 236,
+            "bytes_xlated": 400,
+            "id": 27,
+            "name": "tracepoint__raw_syscalls__sys_exit",
+            "run_cnt_delta": 64990255,
+            "run_time_ns_delta": 1807767785,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.040856916999985,
+            "ops_per_sec": 2239664.076900739,
+            "ops_total": 6810498.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [8288] setting to a 3 secs run per stressor\nstress-ng: info:  [8288] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [8288] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [8288] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8288]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8288] cap             1471817      3.00      0.37      5.05    490472.82      271326.93\nstress-ng: metrc: [8288] eventfd          707188      3.00      0.29      4.45    235615.86      148967.68\nstress-ng: metrc: [8288] get                6439      3.01      0.15      1.26      2141.39        4591.09\nstress-ng: metrc: [8288] prctl              7712      3.00      2.20      0.90      2567.17        2485.17\nstress-ng: metrc: [8288] set               60058      3.00      0.30      2.91     20005.45       18707.65\nstress-ng: metrc: [8288] dup                3644      3.00      0.60      0.54      1214.63        3189.95\nstress-ng: metrc: [8288] kill             351366      3.00      0.33      6.06    117045.27       55049.42\nstress-ng: metrc: [8288] sigfd           3493872      3.00      0.52      6.63   1163644.86      489047.33\nstress-ng: metrc: [8288] signal                0      3.00      0.02      0.59         0.00           0.00\nstress-ng: metrc: [8288] pty                 182      3.01      0.22      4.38        60.53          39.57\nstress-ng: metrc: [8288] itimer              636      3.00      0.44      5.11       211.99         114.69\nstress-ng: metrc: [8288] timerfd          707584      3.00      0.21      3.98    235720.75      169090.33\nstress-ng: info:  [8288] skipped: 0\nstress-ng: info:  [8288] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [8288] failed: 0\nstress-ng: info:  [8288] metrics untrustworthy: 0\nstress-ng: info:  [8288] successful run completed in 3.03 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 2,
+          "not_applied": 0,
+          "requested": 2
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "stress_ng_os",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/tcpconnect",
+      "baseline": {
+        "bpf": {
+          "30": {
+            "bytes_jited": 75,
+            "bytes_xlated": 120,
+            "id": 30,
+            "name": "trace_connect_entry",
+            "run_cnt_delta": 19184,
+            "run_time_ns_delta": 4572160,
+            "type": "kprobe"
+          },
+          "31": {
+            "bytes_jited": 480,
+            "bytes_xlated": 720,
+            "id": 31,
+            "name": "trace_connect_v4_return",
+            "run_cnt_delta": 19184,
+            "run_time_ns_delta": 33791691,
+            "type": "kprobe"
+          },
+          "32": {
+            "bytes_jited": 477,
+            "bytes_xlated": 712,
+            "id": 32,
+            "name": "trace_connect_v6_return",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.1061794439999915,
+            "ops_per_sec": 6172.856509316353,
+            "ops_total": 19174.0,
+            "stderr": "",
+            "stdout": "Running 3s test @ http://127.0.0.1:39867/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     2.58ms   16.14ms 231.78ms   98.64%\n    Req/Sec     3.16k     1.43k    6.08k    72.13%\n  19174 requests in 3.10s, 2.83MB read\n  Socket errors: connect 0, read 19173, write 0, timeout 0\nRequests/sec:   6185.32\nTransfer/sec:      0.91MB"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "30": {
+            "bytes_jited": 75,
+            "bytes_xlated": 120,
+            "id": 30,
+            "name": "trace_connect_entry",
+            "run_cnt_delta": 18763,
+            "run_time_ns_delta": 4703623,
+            "type": "kprobe"
+          },
+          "31": {
+            "bytes_jited": 483,
+            "bytes_xlated": 736,
+            "id": 31,
+            "name": "trace_connect_v4_return",
+            "run_cnt_delta": 18763,
+            "run_time_ns_delta": 33444153,
+            "type": "kprobe"
+          },
+          "32": {
+            "bytes_jited": 480,
+            "bytes_xlated": 728,
+            "id": 32,
+            "name": "trace_connect_v6_return",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.1027667970000152,
+            "ops_per_sec": 6043.638219324386,
+            "ops_total": 18752.0,
+            "stderr": "",
+            "stdout": "Running 3s test @ http://127.0.0.1:37673/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.68ms   10.68ms 220.71ms   99.33%\n    Req/Sec     3.04k   643.89     4.73k    66.13%\n  18752 requests in 3.10s, 2.77MB read\n  Socket errors: connect 0, read 18752, write 0, timeout 0\nRequests/sec:   6049.69\nTransfer/sec:      0.89MB"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "tcp_connect",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/tcplife",
+      "baseline": {
+        "bpf": {
+          "35": {
+            "bytes_jited": 1067,
+            "bytes_xlated": 1672,
+            "id": 35,
+            "name": "tracepoint__sock__inet_sock_set_state",
+            "run_cnt_delta": 180396,
+            "run_time_ns_delta": 76932301,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.1046004190000076,
+            "ops_per_sec": 5974.037717219014,
+            "ops_total": 18547.0,
+            "stderr": "",
+            "stdout": "Running 3s test @ http://127.0.0.1:35555/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.91ms  299.91us   4.10ms   77.29%\n    Req/Sec     3.01k   578.31     4.22k    69.35%\n  18547 requests in 3.10s, 2.74MB read\n  Socket errors: connect 0, read 18546, write 0, timeout 0\nRequests/sec:   5983.01\nTransfer/sec:      0.88MB"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "35": {
+            "bytes_jited": 1070,
+            "bytes_xlated": 1688,
+            "id": 35,
+            "name": "tracepoint__sock__inet_sock_set_state",
+            "run_cnt_delta": 179285,
+            "run_time_ns_delta": 76659349,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.104206956999974,
+            "ops_per_sec": 5936.4598608494625,
+            "ops_total": 18428.0,
+            "stderr": "",
+            "stdout": "Running 3s test @ http://127.0.0.1:39325/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.76ms   11.40ms 230.52ms   99.30%\n    Req/Sec     2.99k   608.83     4.31k    67.74%\n  18428 requests in 3.10s, 2.72MB read\n  Socket errors: connect 0, read 18425, write 0, timeout 0\nRequests/sec:   5945.22\nTransfer/sec:      0.88MB"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 1,
+          "not_applied": 0,
+          "requested": 1
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "tcp_connect",
+      "status": "ok"
+    },
+    {
+      "app": "bcc/runqlat",
+      "baseline": {
+        "bpf": {
+          "38": {
+            "bytes_jited": 662,
+            "bytes_xlated": 1168,
+            "id": 38,
+            "name": "sched_switch",
+            "run_cnt_delta": 36976824,
+            "run_time_ns_delta": 6736211512,
+            "type": "raw_tracepoint"
+          },
+          "39": {
+            "bytes_jited": 149,
+            "bytes_xlated": 248,
+            "id": 39,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 10634963,
+            "run_time_ns_delta": 832097734,
+            "type": "raw_tracepoint"
+          },
+          "40": {
+            "bytes_jited": 149,
+            "bytes_xlated": 248,
+            "id": 40,
+            "name": "raw_tracepoint__sched_wakeup_new",
+            "run_cnt_delta": 78,
+            "run_time_ns_delta": 27626,
+            "type": "raw_tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.022498826000003,
+            "ops_per_sec": 12822238.231036441,
+            "ops_total": 38755200.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [12716] setting to a 3 secs run per stressor\nstress-ng: info:  [12716] dispatching hogs: 4 futex, 4 sem, 4 sem-sysv, 4 switch, 4 yield\nstress-ng: info:  [12716] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [12716] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [12716]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [12716] futex           4211918      6.00      1.37     16.01    701945.79      242330.72\nstress-ng: metrc: [12716] sem             6490875      3.00      1.26      3.76   2163590.48     1292565.27\nstress-ng: metrc: [12716] sem-sysv        1675552      3.00      0.42      2.32    558427.16      612774.65\nstress-ng: metrc: [12716] switch          4030406      3.00      1.12      8.98   1343383.23      399002.61\nstress-ng: metrc: [12716] yield          22346449      3.00      4.98     12.56   7445800.98     1273923.07\nstress-ng: info:  [12716] skipped: 0\nstress-ng: info:  [12716] passed: 20: futex (4) sem (4) sem-sysv (4) switch (4) yield (4)\nstress-ng: info:  [12716] failed: 0\nstress-ng: info:  [12716] metrics untrustworthy: 0\nstress-ng: info:  [12716] successful run completed in 3.01 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "38": {
+            "bytes_jited": 662,
+            "bytes_xlated": 1168,
+            "id": 38,
+            "name": "sched_switch",
+            "run_cnt_delta": 36328753,
+            "run_time_ns_delta": 6608247807,
+            "type": "raw_tracepoint"
+          },
+          "39": {
+            "bytes_jited": 149,
+            "bytes_xlated": 248,
+            "id": 39,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 10167666,
+            "run_time_ns_delta": 806874233,
+            "type": "raw_tracepoint"
+          },
+          "40": {
+            "bytes_jited": 149,
+            "bytes_xlated": 248,
+            "id": 40,
+            "name": "raw_tracepoint__sched_wakeup_new",
+            "run_cnt_delta": 78,
+            "run_time_ns_delta": 27854,
+            "type": "raw_tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.0139522419999594,
+            "ops_per_sec": 11961489.468087094,
+            "ops_total": 36051358.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [12907] setting to a 3 secs run per stressor\nstress-ng: info:  [12907] dispatching hogs: 4 futex, 4 sem, 4 sem-sysv, 4 switch, 4 yield\nstress-ng: info:  [12907] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [12907] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [12907]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [12907] futex           2684280      6.00      0.50     14.48    447331.53      179196.38\nstress-ng: metrc: [12907] sem            11423255      3.00      1.30      4.48   3807227.24     1976303.06\nstress-ng: metrc: [12907] sem-sysv        1316702      3.00      0.45      2.41    438805.84      459794.98\nstress-ng: metrc: [12907] switch          4556383      3.00      1.45     10.53   1518696.75      380226.05\nstress-ng: metrc: [12907] yield          16070738      3.00      4.45     10.86   5355041.71     1049841.40\nstress-ng: info:  [12907] skipped: 0\nstress-ng: info:  [12907] passed: 20: futex (4) sem (4) sem-sysv (4) switch (4) yield (4)\nstress-ng: info:  [12907] failed: 0\nstress-ng: info:  [12907] metrics untrustworthy: 0\nstress-ng: info:  [12907] successful run completed in 3.00 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "stress_ng_scheduler",
+      "status": "ok"
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "baseline": {
+        "bpf": {
+          "43": {
+            "bytes_jited": 3721,
+            "bytes_xlated": 6232,
+            "id": 43,
+            "name": "perf_unwind_stop",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "44": {
+            "bytes_jited": 22575,
+            "bytes_xlated": 37232,
+            "id": 44,
+            "name": "perf_unwind_native",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "45": {
+            "bytes_jited": 18290,
+            "bytes_xlated": 28048,
+            "id": 45,
+            "name": "perf_unwind_hotspot",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "46": {
+            "bytes_jited": 17737,
+            "bytes_xlated": 29144,
+            "id": 46,
+            "name": "perf_unwind_perl",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "47": {
+            "bytes_jited": 15178,
+            "bytes_xlated": 25032,
+            "id": 47,
+            "name": "perf_unwind_php",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "48": {
+            "bytes_jited": 19909,
+            "bytes_xlated": 33264,
+            "id": 48,
+            "name": "perf_unwind_python",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "49": {
+            "bytes_jited": 16540,
+            "bytes_xlated": 28000,
+            "id": 49,
+            "name": "perf_unwind_ruby",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "50": {
+            "bytes_jited": 20050,
+            "bytes_xlated": 33712,
+            "id": 50,
+            "name": "perf_unwind_v8",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "51": {
+            "bytes_jited": 22565,
+            "bytes_xlated": 34248,
+            "id": 51,
+            "name": "perf_unwind_dotnet",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "52": {
+            "bytes_jited": 1580,
+            "bytes_xlated": 2496,
+            "id": 52,
+            "name": "perf_go_labels",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "53": {
+            "bytes_jited": 696,
+            "bytes_xlated": 1088,
+            "id": 53,
+            "name": "perf_unwind_beam",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "54": {
+            "bytes_jited": 788,
+            "bytes_xlated": 1320,
+            "id": 54,
+            "name": "tracepoint__sched_process_free",
+            "run_cnt_delta": 6,
+            "run_time_ns_delta": 20945,
+            "type": "tracepoint"
+          },
+          "55": {
+            "bytes_jited": 3532,
+            "bytes_xlated": 5496,
+            "id": 55,
+            "name": "native_tracer_entry",
+            "run_cnt_delta": 7952,
+            "run_time_ns_delta": 14520896,
+            "type": "perf_event"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.017554865000022,
+            "ops_per_sec": 10894.549530750324,
+            "ops_total": 54664.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [13052] setting to a 5 secs run per stressor\nstress-ng: info:  [13052] dispatching hogs: 4 cpu\nstress-ng: info:  [13052] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [13052] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [13052]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [13052] cpu               54664      5.00     20.00      0.00     10932.15        2733.01\nstress-ng: info:  [13052] skipped: 0\nstress-ng: info:  [13052] passed: 4: cpu (4)\nstress-ng: info:  [13052] failed: 0\nstress-ng: info:  [13052] metrics untrustworthy: 0\nstress-ng: info:  [13052] successful run completed in 5.00 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "43": {
+            "bytes_jited": 3768,
+            "bytes_xlated": 6472,
+            "id": 43,
+            "name": "perf_unwind_stop",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "44": {
+            "bytes_jited": 22854,
+            "bytes_xlated": 38720,
+            "id": 44,
+            "name": "perf_unwind_native",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "45": {
+            "bytes_jited": 18402,
+            "bytes_xlated": 28608,
+            "id": 45,
+            "name": "perf_unwind_hotspot",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "46": {
+            "bytes_jited": 17885,
+            "bytes_xlated": 29912,
+            "id": 46,
+            "name": "perf_unwind_perl",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "47": {
+            "bytes_jited": 15261,
+            "bytes_xlated": 25464,
+            "id": 47,
+            "name": "perf_unwind_php",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "48": {
+            "bytes_jited": 20037,
+            "bytes_xlated": 33904,
+            "id": 48,
+            "name": "perf_unwind_python",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "49": {
+            "bytes_jited": 16671,
+            "bytes_xlated": 28656,
+            "id": 49,
+            "name": "perf_unwind_ruby",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "50": {
+            "bytes_jited": 20198,
+            "bytes_xlated": 34480,
+            "id": 50,
+            "name": "perf_unwind_v8",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "51": {
+            "bytes_jited": 22697,
+            "bytes_xlated": 34952,
+            "id": 51,
+            "name": "perf_unwind_dotnet",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "52": {
+            "bytes_jited": 1588,
+            "bytes_xlated": 2528,
+            "id": 52,
+            "name": "perf_go_labels",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "53": {
+            "bytes_jited": 707,
+            "bytes_xlated": 1136,
+            "id": 53,
+            "name": "perf_unwind_beam",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "54": {
+            "bytes_jited": 794,
+            "bytes_xlated": 1352,
+            "id": 54,
+            "name": "tracepoint__sched_process_free",
+            "run_cnt_delta": 6,
+            "run_time_ns_delta": 16940,
+            "type": "tracepoint"
+          },
+          "55": {
+            "bytes_jited": 3569,
+            "bytes_xlated": 5656,
+            "id": 55,
+            "name": "native_tracer_entry",
+            "run_cnt_delta": 7952,
+            "run_time_ns_delta": 14975065,
+            "type": "perf_event"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.01742944800003,
+            "ops_per_sec": 10899.206569172205,
+            "ops_total": 54686.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [13167] setting to a 5 secs run per stressor\nstress-ng: info:  [13167] dispatching hogs: 4 cpu\nstress-ng: info:  [13167] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [13167] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [13167]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [13167] cpu               54686      5.00     20.01      0.00     10933.92        2733.54\nstress-ng: info:  [13167] skipped: 0\nstress-ng: info:  [13167] passed: 4: cpu (4)\nstress-ng: info:  [13167] failed: 0\nstress-ng: info:  [13167] metrics untrustworthy: 0\nstress-ng: info:  [13167] successful run completed in 5.01 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 13,
+          "not_applied": 0,
+          "requested": 13
+        }
+      },
+      "runner": "otelcol-ebpf-profiler",
+      "selected_workload": "stress_ng_cpu",
+      "status": "ok"
+    },
+    {
+      "app": "cilium/agent",
+      "baseline": {
+        "bpf": {
+          "63": {
+            "bytes_jited": 167,
+            "bytes_xlated": 280,
+            "id": 63,
+            "name": "dump_bpf_map",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing"
+          },
+          "64": {
+            "bytes_jited": 740,
+            "bytes_xlated": 520,
+            "id": 64,
+            "name": "dump_bpf_prog",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing"
+          },
+          "120": {
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 120,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "121": {
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 121,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "122": {
+            "bytes_jited": 3094,
+            "bytes_xlated": 5368,
+            "id": 122,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "123": {
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 123,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "124": {
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 124,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "126": {
+            "bytes_jited": 1236,
+            "bytes_xlated": 2056,
+            "id": 126,
+            "name": "cil_to_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "127": {
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 127,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "128": {
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 128,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "129": {
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 129,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "132": {
+            "bytes_jited": 526,
+            "bytes_xlated": 952,
+            "id": 132,
+            "name": "cil_to_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "133": {
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 133,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "134": {
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 134,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "135": {
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 135,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "136": {
+            "bytes_jited": 1236,
+            "bytes_xlated": 2056,
+            "id": 136,
+            "name": "cil_to_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "137": {
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 137,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "138": {
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 138,
+            "name": "cil_from_host",
+            "run_cnt_delta": 1,
+            "run_time_ns_delta": 2149,
+            "type": "sched_cls"
+          },
+          "139": {
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 139,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "140": {
+            "bytes_jited": 3094,
+            "bytes_xlated": 5368,
+            "id": 140,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "141": {
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 141,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "142": {
+            "bytes_jited": 526,
+            "bytes_xlated": 952,
+            "id": 142,
+            "name": "cil_to_host",
+            "run_cnt_delta": 1,
+            "run_time_ns_delta": 1175,
+            "type": "sched_cls"
+          },
+          "143": {
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 143,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "144": {
+            "bytes_jited": 1236,
+            "bytes_xlated": 2056,
+            "id": 144,
+            "name": "cil_to_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "145": {
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 145,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "146": {
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 146,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "147": {
+            "bytes_jited": 3094,
+            "bytes_xlated": 5368,
+            "id": 147,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "148": {
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 148,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "149": {
+            "bytes_jited": 526,
+            "bytes_xlated": 952,
+            "id": 149,
+            "name": "cil_to_host",
+            "run_cnt_delta": 1,
+            "run_time_ns_delta": 647,
+            "type": "sched_cls"
+          },
+          "150": {
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 150,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "151": {
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 151,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "152": {
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 152,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "153": {
+            "bytes_jited": 382,
+            "bytes_xlated": 592,
+            "id": 153,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "154": {
+            "bytes_jited": 3340,
+            "bytes_xlated": 5952,
+            "id": 154,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "156": {
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 156,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "157": {
+            "bytes_jited": 3094,
+            "bytes_xlated": 5368,
+            "id": 157,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 1134,
+            "run_time_ns_delta": 1255825,
+            "type": "sched_cls"
+          },
+          "158": {
+            "bytes_jited": 526,
+            "bytes_xlated": 952,
+            "id": 158,
+            "name": "cil_to_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "159": {
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 159,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.077008267999986,
+            "ops_per_sec": 87.4530779865969,
+            "ops_total": 444.0,
+            "stderr": "",
+            "stdout": "Running 5s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   317.42ms  285.87ms   1.88s    87.64%\n    Req/Sec    25.26     14.74    70.00     64.42%\n  444 requests in 5.00s, 70.98KB read\n  Socket errors: connect 0, read 0, write 0, timeout 19\nRequests/sec:     88.71\nTransfer/sec:     14.18KB"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "63": {
+            "bytes_jited": 167,
+            "bytes_xlated": 280,
+            "id": 63,
+            "name": "dump_bpf_map",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing"
+          },
+          "64": {
+            "bytes_jited": 740,
+            "bytes_xlated": 520,
+            "id": 64,
+            "name": "dump_bpf_prog",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing"
+          },
+          "120": {
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 120,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "121": {
+            "bytes_jited": 3361,
+            "bytes_xlated": 6064,
+            "id": 121,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "122": {
+            "bytes_jited": 3118,
+            "bytes_xlated": 5496,
+            "id": 122,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "123": {
+            "bytes_jited": 385,
+            "bytes_xlated": 608,
+            "id": 123,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "124": {
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 124,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "126": {
+            "bytes_jited": 1242,
+            "bytes_xlated": 2088,
+            "id": 126,
+            "name": "cil_to_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "127": {
+            "bytes_jited": 1192,
+            "bytes_xlated": 2024,
+            "id": 127,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "128": {
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 128,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "129": {
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 129,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "132": {
+            "bytes_jited": 529,
+            "bytes_xlated": 968,
+            "id": 132,
+            "name": "cil_to_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "133": {
+            "bytes_jited": 1192,
+            "bytes_xlated": 2024,
+            "id": 133,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "134": {
+            "bytes_jited": 3361,
+            "bytes_xlated": 6064,
+            "id": 134,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "135": {
+            "bytes_jited": 385,
+            "bytes_xlated": 608,
+            "id": 135,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "136": {
+            "bytes_jited": 1242,
+            "bytes_xlated": 2088,
+            "id": 136,
+            "name": "cil_to_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "137": {
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 137,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "138": {
+            "bytes_jited": 3361,
+            "bytes_xlated": 6064,
+            "id": 138,
+            "name": "cil_from_host",
+            "run_cnt_delta": 1,
+            "run_time_ns_delta": 1366,
+            "type": "sched_cls"
+          },
+          "139": {
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 139,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "140": {
+            "bytes_jited": 3118,
+            "bytes_xlated": 5496,
+            "id": 140,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "141": {
+            "bytes_jited": 385,
+            "bytes_xlated": 608,
+            "id": 141,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "142": {
+            "bytes_jited": 529,
+            "bytes_xlated": 968,
+            "id": 142,
+            "name": "cil_to_host",
+            "run_cnt_delta": 1,
+            "run_time_ns_delta": 1140,
+            "type": "sched_cls"
+          },
+          "143": {
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 143,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "144": {
+            "bytes_jited": 1242,
+            "bytes_xlated": 2088,
+            "id": 144,
+            "name": "cil_to_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "145": {
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 145,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "146": {
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 146,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "147": {
+            "bytes_jited": 3118,
+            "bytes_xlated": 5496,
+            "id": 147,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "148": {
+            "bytes_jited": 385,
+            "bytes_xlated": 608,
+            "id": 148,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "149": {
+            "bytes_jited": 529,
+            "bytes_xlated": 968,
+            "id": 149,
+            "name": "cil_to_host",
+            "run_cnt_delta": 1,
+            "run_time_ns_delta": 554,
+            "type": "sched_cls"
+          },
+          "150": {
+            "bytes_jited": 1183,
+            "bytes_xlated": 1976,
+            "id": 150,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "151": {
+            "bytes_jited": 3361,
+            "bytes_xlated": 6064,
+            "id": 151,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "152": {
+            "bytes_jited": 364,
+            "bytes_xlated": 672,
+            "id": 152,
+            "name": "tail_drop_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "153": {
+            "bytes_jited": 385,
+            "bytes_xlated": 608,
+            "id": 153,
+            "name": "tail_handle_ipv4_from_netdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "154": {
+            "bytes_jited": 3361,
+            "bytes_xlated": 6064,
+            "id": 154,
+            "name": "cil_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "156": {
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 156,
+            "name": "cil_host_policy",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "157": {
+            "bytes_jited": 3118,
+            "bytes_xlated": 5496,
+            "id": 157,
+            "name": "cil_from_netdev",
+            "run_cnt_delta": 946,
+            "run_time_ns_delta": 1074916,
+            "type": "sched_cls"
+          },
+          "158": {
+            "bytes_jited": 529,
+            "bytes_xlated": 968,
+            "id": 158,
+            "name": "cil_to_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          },
+          "159": {
+            "bytes_jited": 1192,
+            "bytes_xlated": 2024,
+            "id": 159,
+            "name": "tail_handle_ipv4_from_host",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 6.136117683000009,
+            "ops_per_sec": 57.528231731601146,
+            "ops_total": 353.0,
+            "stderr": "",
+            "stdout": "Running 5s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   356.61ms  353.18ms   1.92s    87.13%\n    Req/Sec    22.34     14.48    70.00     73.61%\n  353 requests in 5.01s, 58.28KB read\n  Socket errors: connect 0, read 0, write 0, timeout 17\nRequests/sec:     70.51\nTransfer/sec:     11.64KB"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "prog 64: prog 64 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 13: Permission denied (os error 13)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (79) r2 = *(u64 *)(r1 +0)\n      1: .12....... (79) r6 = *(u64 *)(r2 +0)\n      2: .12...6... (79) r1 = *(u64 *)(r1 +8)\n      3: .12...6... (15) if r1 == 0x0 goto pc+59\n      4: .12...6... (79) r7 = *(u64 *)(r1 +0)\n      5: ..2...67.. (79) r1 = *(u64 *)(r2 +16)\n      6: .1....67.. (55) if r1 != 0x0 goto pc+8\n      7: ......67.. (bf) r4 = r10\n      8: ....4.67.. (07) r4 += -48\n      9: ....4.67.. (bf) r1 = r6\n     10: .1..4.67.. (18) r2 = 0xffff8bba78bd217a\n     12: .12.4.67.. (b7) r3 = 32\n     13: .1234.67.. (b7) r5 = 0\n     14: .1234567.. (85) call bpf_seq_printf#126\n     15: ......67.. (7b) *(u64 *)(r10 -56) = r6\n     16: .......7.. (61) r1 = *(u32 *)(r7 +0)\n     17: .1.....7.. (7b) *(u64 *)(r10 -48) = r1\n     18: .......7.. (b7) r3 = 4\n     19: ...3...7.. (bf) r9 = r7\n     20: ...3...7.9 (0f) r9 += r3\n     21: ...3...7.9 (79) r1 = *(u64 *)(r7 +40)\n     22: .1.3...7.9 (79) r8 = *(u64 *)(r7 +48)\n     23: .1.3...789 (15) if r8 == 0x0 goto pc+24\n     24: .1.....789 (b7) r2 = 0\n     25: .12....789 (0f) r1 += r2\n     26: .1.....789 (61) r1 = *(u32 *)(r1 +4)\n     27: .1.....789 (79) r3 = *(u64 *)(r8 +8)\n     28: .1.3...789 (67) r1 <<= 3\n     29: .1.3...789 (0f) r3 += r1\n     30: ...3...789 (79) r6 = *(u64 *)(r8 +0)\n     31: ...3..6789 (bf) r1 = r10\n     32: .1.3..6789 (07) r1 += -8\n     33: .1.3..6789 (b7) r2 = 8\n     34: .123..6789 (85) call bpf_probe_read_kernel#113\n     35: ......6789 (b7) r1 = 0\n     36: .1....6789 (79) r3 = *(u64 *)(r10 -8)\n     37: .1.3..6789 (0f) r3 += r1\n     38: ...3..6789 (bf) r1 = r10\n     39: .1.3..6789 (07) r1 += -12\n     40: .1.3..6789 (b7) r2 = 4\n     41: .123..6789 (85) call bpf_probe_read_kernel#113\n     42: ......6789 (b7) r3 = 4\n     43: ...3..6789 (61) r1 = *(u32 *)(r10 -12)\n     44: .1.3..6789 (61) r2 = *(u32 *)(r8 +16)\n     45: .123..67.9 (3d) if r1 >= r2 goto pc+2\n     46: .1.3..67.. (0f) r6 += r1\n     47: ...3..67.. (bf) r9 = r6\n     48: ...3...7.9 (7b) *(u64 *)(r10 -40) = r9\n     49: ...3...7.. (79) r1 = *(u64 *)(r7 +24)\n     50: .1.3...7.. (7b) *(u64 *)(r10 -32) = r1\n     51: ...3...7.. (79) r1 = *(u64 *)(r7 +32)\n     52: .1.3...... (79) r1 = *(u64 *)(r1 +0)\n     53: .1.3...... (0f) r1 += r3\n     54: .1........ (7b) *(u64 *)(r10 -24) = r1\n     55: .......... (bf) r4 = r10\n     56: ....4..... (07) r4 += -48\n     57: ....4..... (79) r1 = *(u64 *)(r10 -56)\n     58: .1..4..... (18) r2 = 0xffff8bba78bd219a\n     60: .12.4..... (b7) r3 = 17\n     61: .1234..... (b7) r5 = 32\n     62: .12345.... (85) call bpf_seq_printf#126\n     63: .......... (b7) r0 = 0\n     64: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (79) r2 = *(u64 *)(r1 +0)\nfunc 'bpf_iter_bpf_prog' arg0 has btf_id 70962 type STRUCT 'bpf_iter_meta'\n1: R1=ctx() R2=trusted_ptr_bpf_iter_meta()\n1: (79) r6 = *(u64 *)(r2 +0)          ; R2=trusted_ptr_bpf_iter_meta() R6=trusted_ptr_seq_file()\n2: (79) r1 = *(u64 *)(r1 +8)          ; R1=ptr_or_null_bpf_prog(id=1)\n3: (15) if r1 == 0x0 goto pc+59       ; R1=ptr_bpf_prog()\n4: (79) r7 = *(u64 *)(r1 +0)\naccess beyond the end of member pages (mend:2) in struct bpf_prog with off 0 size 8\nprocessed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0; prog 120: prog 120 pass cond_select failed after 1 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (b7) r4 = 0\n      1: .1..4..... (61) r2 = *(u32 *)(r1 +56)\n      2: .12.4..... (63) *(u32 *)(r10 -56) = r2\n      3: .1..4..... (18) r3 = 0xffffcd1a0033e049\n      5: .1.34..... (71) r3 = *(u8 *)(r3 +0)\n      6: .1.34..... (16) if w3 == 0x0 goto pc+12\n      7: .1........ (bf) r6 = r1\n      8: ......6... (b4) w1 = 0\n      9: .1....6... (63) *(u32 *)(r10 -48) = r1\n     10: ......6... (bf) r2 = r10\n     11: ..2...6... (07) r2 += -48\n     12: ..2...6... (18) r1 = 0xdeadc0de\n     14: .12...6... (85) call bpf_map_lookup_elem#1\n     15: 0.....6... (b7) r4 = 0\n     16: 0...4.6... (15) if r0 == 0x0 goto pc+1\n     17: 0.....6... (79) r4 = *(u64 *)(r0 +0)\n     18: ....4.6... (bf) r1 = r6\n     19: .1..4..... (61) r0 = *(u32 *)(r1 +16)\n     20: 01..4..... (54) w0 &= 65535\n     21: 01..4..... (b4) w3 = 1\n     22: 01.34..... (16) if w0 == 0xdd86 goto pc+1\n     23: .1..4..... (b4) w3 = 0\n     24: .1.34..... (7b) *(u64 *)(r10 -64) = r4\n     25: .1.3...... (61) r6 = *(u32 *)(r1 +64)\n     26: .1.3..6... (61) r2 = *(u32 *)(r1 +0)\n     27: .123..6... (63) *(u32 *)(r10 -80) = r2\n     28: .1.3..6... (18) r0 = 0xffffcd1a0033e004\n     30: 01.3..6... (71) r0 = *(u8 *)(r0 +0)\n     31: 01.3..6... (b4) w8 = 1\n     32: 01.3..6.8. (16) if w0 == 0x0 goto pc+1\n     33: .1.3..6... (b4) w8 = 0\n     34: .1.3..6.8. (64) w8 <<= 1\n     35: .1.3..6.8. (4c) w8 |= w3\n     36: .1....6.8. (18) r3 = 0xffffcd1a0033e03c\n     38: .1.3..6.8. (61) r3 = *(u32 *)(r3 +0)\n     39: .1.3..6.8. (61) r2 = *(u32 *)(r1 +0)\n     40: .123..6.8. (63) *(u32 *)(r10 -72) = r2\n     41: .1.3..6.8. (18) r5 = 0xffffcd1a0033e05c\n     43: .1.3.56.8. (69) r5 = *(u16 *)(r5 +0)\n     44: .1.3.56.8. (61) r7 = *(u32 *)(r1 +40)\n     45: .1.3.5678. (61) r4 = *(u32 *)(r1 +60)\n     46: .1.345678. (61) r2 = *(u32 *)(r1 +52)\n     47: .12345678. (61) r9 = *(u32 *)(r1 +48)\n     48: .123456789 (61) r0 = *(u32 *)(r1 +68)\n     49: 0123456789 (6b) *(u16 *)(r10 -46) = r5\n     50: 01234.6789 (63) *(u32 *)(r10 -44) = r0\n     51: .1234.6789 (b4) w5 = 0\n     52: .123456789 (73) *(u8 *)(r10 -10) = r5\n     53: .123456789 (73) *(u8 *)(r10 -11) = r5\n     54: .123456789 (73) *(u8 *)(r10 -9) = r5\n     55: .1234.6789 (b4) w5 = 1\n     56: .123456789 (73) *(u8 *)(r10 -48) = r5\n     57: .1234.6789 (61) r5 = *(u32 *)(r10 -80)\n     58: .123456789 (63) *(u32 *)(r10 -40) = r5\n     59: .1234.6789 (63) *(u32 *)(r10 -32) = r9\n     60: .1234.678. (63) *(u32 *)(r10 -28) = r2\n     61: .1.34.678. (63) *(u32 *)(r10 -24) = r4\n     62: .1.3..678. (63) *(u32 *)(r10 -16) = r7\n     63: .1.3..6.8. (73) *(u8 *)(r10 -12) = r8\n     64: .1.3..6... (79) r2 = *(u64 *)(r10 -64)\n     65: .123..6... (7b) *(u64 *)(r10 -8) = r2\n     66: .1.3..6... (61) r4 = *(u32 *)(r10 -56)\n     67: .1.34.6... (bc) w2 = w4\n     68: .1234.6... (74) w2 >>= 8\n     69: .1234.6... (73) *(u8 *)(r10 -17) = r2\n     70: .1.34.6... (bc) w2 = w6\n     71: .1234.6... (74) w2 >>= 8\n     72: .1234.6... (73) *(u8 *)(r10 -18) = r2\n     73: .1.34.6... (bc) w2 = w6\n     74: .1234.6... (74) w2 >>= 16\n     75: .1234.6... (6b) *(u16 *)(r10 -20) = r2\n     76: .1.34.6... (73) *(u8 *)(r10 -47) = r4\n     77: .1.3..6... (b4) w2 = 3\n     78: .123..6... (6b) *(u16 *)(r10 -34) = r2\n     79: .1.3..6... (61) r2 = *(u32 *)(r10 -72)\n     80: .123..6... (ae) if w3 < w2 goto pc+1\n     81: .12...6... (bc) w3 = w2\n     82: .1.3..6... (6b) *(u16 *)(r10 -36) = r3\n     83: .1.3..6... (67) r3 <<= 32\n     84: .1.3..6... (18) r2 = 0xffffffff\n     86: .123..6... (4f) r3 |= r2\n     87: .1.3..6... (bf) r4 = r10\n     88: .1.34.6... (07) r4 += -48\n     89: .1.34.6... (18) r2 = 0xffff8bba05f2ba00\n     91: .1234.6... (b4) w5 = 48\n     92: .123456... (85) call bpf_perf_event_output#25\n     93: ......6... (54) w6 &= 255\n     94: ......6... (bc) w0 = w6\n     95: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (b7) r4 = 0                        ; R4=0\n1: (61) r2 = *(u32 *)(r1 +56)         ; R1=ctx() R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2: (63) *(u32 *)(r10 -56) = r2        ; R2=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=\n... verifier log truncated ...; prog 129: prog 129 pass bulk_memory failed after 4 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (b7) r4 = 0\n      1: .1..4..... (61) r2 = *(u32 *)(r1 +56)\n      2: .12.4..... (63) *(u32 *)(r10 -56) = r2\n      3: .1..4..... (18) r3 = 0xffffcd1a00816049\n      5: .1.34..... (71) r3 = *(u8 *)(r3 +0)\n      6: .1.34..... (16) if w3 == 0x0 goto pc+12\n      7: .1........ (bf) r6 = r1\n      8: ......6... (b4) w1 = 0\n      9: .1....6... (63) *(u32 *)(r10 -48) = r1\n     10: ......6... (bf) r2 = r10\n     11: ..2...6... (07) r2 += -48\n     12: ..2...6... (18) r1 = 0xdeadc0de\n     14: .12...6... (85) call bpf_map_lookup_elem#1\n     15: 0.....6... (b7) r4 = 0\n     16: 0...4.6... (15) if r0 == 0x0 goto pc+1\n     17: 0.....6... (79) r4 = *(u64 *)(r0 +0)\n     18: ....4.6... (bf) r1 = r6\n     19: .1..4..... (61) r0 = *(u32 *)(r1 +16)\n     20: 01..4..... (54) w0 &= 65535\n     21: 01..4..... (b4) w3 = 1\n     22: 01.34..... (16) if w0 == 0xdd86 goto pc+1\n     23: .1..4..... (b4) w3 = 0\n     24: .1.34..... (7b) *(u64 *)(r10 -64) = r4\n     25: .1.3...... (61) r6 = *(u32 *)(r1 +64)\n     26: .1.3..6... (61) r2 = *(u32 *)(r1 +0)\n     27: .123..6... (63) *(u32 *)(r10 -80) = r2\n     28: .1.3..6... (18) r0 = 0xffffcd1a00816004\n     30: 01.3..6... (71) r0 = *(u8 *)(r0 +0)\n     31: 01.3..6... (b4) w8 = 1\n     32: 01.3..6.8. (16) if w0 == 0x0 goto pc+1\n     33: .1.3..6... (b4) w8 = 0\n     34: .1.3..6.8. (64) w8 <<= 1\n     35: .1.3..6.8. (4c) w8 |= w3\n     36: .1....6.8. (18) r3 = 0xffffcd1a0081603c\n     38: .1.3..6.8. (61) r3 = *(u32 *)(r3 +0)\n     39: .1.3..6.8. (61) r2 = *(u32 *)(r1 +0)\n     40: .123..6.8. (63) *(u32 *)(r10 -72) = r2\n     41: .1.3..6.8. (18) r5 = 0xffffcd1a0081605c\n     43: .1.3.56.8. (69) r5 = *(u16 *)(r5 +0)\n     44: .1.3.56.8. (61) r7 = *(u32 *)(r1 +40)\n     45: .1.3.5678. (61) r4 = *(u32 *)(r1 +60)\n     46: .1.345678. (61) r2 = *(u32 *)(r1 +52)\n     47: .12345678. (61) r9 = *(u32 *)(r1 +48)\n     48: .123456789 (61) r0 = *(u32 *)(r1 +68)\n     49: 0123456789 (6b) *(u16 *)(r10 -46) = r5\n     50: 01234.6789 (63) *(u32 *)(r10 -44) = r0\n     51: .1234.6789 (b4) w5 = 0\n     52: .123456789 (73) *(u8 *)(r10 -10) = r5\n     53: .123456789 (73) *(u8 *)(r10 -11) = r5\n     54: .123456789 (73) *(u8 *)(r10 -9) = r5\n     55: .1234.6789 (b4) w5 = 1\n     56: .123456789 (73) *(u8 *)(r10 -48) = r5\n     57: .1234.6789 (61) r5 = *(u32 *)(r10 -80)\n     58: .123456789 (63) *(u32 *)(r10 -40) = r5\n     59: .1234.6789 (63) *(u32 *)(r10 -32) = r9\n     60: .1234.678. (63) *(u32 *)(r10 -28) = r2\n     61: .1.34.678. (63) *(u32 *)(r10 -24) = r4\n     62: .1.3..678. (63) *(u32 *)(r10 -16) = r7\n     63: .1.3..6.8. (73) *(u8 *)(r10 -12) = r8\n     64: .1.3..6... (79) r2 = *(u64 *)(r10 -64)\n     65: .123..6... (7b) *(u64 *)(r10 -8) = r2\n     66: .1.3..6... (61) r4 = *(u32 *)(r10 -56)\n     67: .1.34.6... (bc) w2 = w4\n     68: .1234.6... (74) w2 >>= 8\n     69: .1234.6... (73) *(u8 *)(r10 -17) = r2\n     70: .1.34.6... (bc) w2 = w6\n     71: .1234.6... (74) w2 >>= 8\n     72: .1234.6... (73) *(u8 *)(r10 -18) = r2\n     73: .1.34.6... (bc) w2 = w6\n     74: .1234.6... (74) w2 >>= 16\n     75: .1234.6... (6b) *(u16 *)(r10 -20) = r2\n     76: .1.34.6... (73) *(u8 *)(r10 -47) = r4\n     77: .1.3..6... (b4) w2 = 3\n     78: .123..6... (6b) *(u16 *)(r10 -34) = r2\n     79: .1.3..6... (61) r2 = *(u32 *)(r10 -72)\n     80: .123..6... (ae) if w3 < w2 goto pc+1\n     81: .12...6... (bc) w3 = w2\n     82: .1.3..6... (6b) *(u16 *)(r10 -36) = r3\n     83: .1.3..6... (67) r3 <<= 32\n     84: .1.3..6... (18) r2 = 0xffffffff\n     86: .123..6... (4f) r3 |= r2\n     87: .1.3..6... (bf) r4 = r10\n     88: .1.34.6... (07) r4 += -48\n     89: .1.34.6... (18) r2 = 0xffff8bba05f2ba00\n     91: .1234.6... (b4) w5 = 48\n     92: .123456... (85) call bpf_perf_event_output#25\n     93: ......6... (54) w6 &= 255\n     94: ......6... (bc) w0 = w6\n     95: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (b7) r4 = 0                        ; R4=0\n1: (61) r2 = *(u32 *)(r1 +56)         ; R1=ctx() R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2: (63) *(u32 *)(r10 -56) = r2        ; R2=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=\n... verifier log truncated ...; prog 137: prog 137 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (b7) r4 = 0\n      1: .1..4..... (61) r2 = *(u32 *)(r1 +56)\n      2: .12.4..... (63) *(u32 *)(r10 -56) = r2\n      3: .1..4..... (18) r3 = 0xffffcd1a00946049\n      5: .1.34..... (71) r3 = *(u8 *)(r3 +0)\n      6: .1.34..... (16) if w3 == 0x0 goto pc+13\n      7: .1........ (bf) r6 = r1\n      8: ......6... (b4) w1 = 0\n      9: .1....6... (63) *(u32 *)(r10 -48) = r1\n     10: ......6... (bf) r2 = r10\n     11: ..2...6... (07) r2 += -48\n     12: ..2...6... (18) r1 = 0xdeadc0de\n     14: .12...6... (85) call bpf_map_lookup_elem#1\n     15: 0.....6... (b7) r4 = 0\n     16: 0...4.6... (15) if r0 == 0x0 goto pc+2\n     17: 0.....6... (05) goto pc+0\n     18: 0.....6... (79) r4 = *(u64 *)(r0 +0)\n     19: ....4.6... (bf) r1 = r6\n     20: .1..4..... (61) r0 = *(u32 *)(r1 +16)\n     21: 01..4..... (54) w0 &= 65535\n     22: 01..4..... (b4) w3 = 1\n     23: 01.34..... (16) if w0 == 0xdd86 goto pc+1\n     24: .1..4..... (b4) w3 = 0\n     25: .1.34..... (7b) *(u64 *)(r10 -64) = r4\n     26: .1.3...... (61) r6 = *(u32 *)(r1 +64)\n     27: .1.3..6... (61) r2 = *(u32 *)(r1 +0)\n     28: .123..6... (63) *(u32 *)(r10 -80) = r2\n     29: .1.3..6... (18) r0 = 0xffffcd1a00946004\n     31: 01.3..6... (71) r0 = *(u8 *)(r0 +0)\n     32: 01.3..6... (b4) w8 = 1\n     33: 01.3..6.8. (16) if w0 == 0x0 goto pc+1\n     34: .1.3..6... (b4) w8 = 0\n     35: .1.3..6.8. (64) w8 <<= 1\n     36: .1.3..6.8. (4c) w8 |= w3\n     37: .1....6.8. (18) r3 = 0xffffcd1a0094603c\n     39: .1.3..6.8. (61) r3 = *(u32 *)(r3 +0)\n     40: .1.3..6.8. (61) r2 = *(u32 *)(r1 +0)\n     41: .123..6.8. (63) *(u32 *)(r10 -72) = r2\n     42: .1.3..6.8. (18) r5 = 0xffffcd1a0094605c\n     44: .1.3.56.8. (69) r5 = *(u16 *)(r5 +0)\n     45: .1.3.56.8. (61) r7 = *(u32 *)(r1 +40)\n     46: .1.3.5678. (61) r4 = *(u32 *)(r1 +60)\n     47: .1.345678. (61) r2 = *(u32 *)(r1 +52)\n     48: .12345678. (61) r9 = *(u32 *)(r1 +48)\n     49: .123456789 (61) r0 = *(u32 *)(r1 +68)\n     50: 0123456789 (6b) *(u16 *)(r10 -46) = r5\n     51: 01234.6789 (63) *(u32 *)(r10 -44) = r0\n     52: .1234.6789 (b4) w5 = 0\n     53: .123456789 (73) *(u8 *)(r10 -10) = r5\n     54: .123456789 (73) *(u8 *)(r10 -11) = r5\n     55: .123456789 (73) *(u8 *)(r10 -9) = r5\n     56: .1234.6789 (b4) w5 = 1\n     57: .123456789 (73) *(u8 *)(r10 -48) = r5\n     58: .1234.6789 (61) r5 = *(u32 *)(r10 -80)\n     59: .123456789 (63) *(u32 *)(r10 -40) = r5\n     60: .1234.6789 (63) *(u32 *)(r10 -32) = r9\n     61: .1234.678. (63) *(u32 *)(r10 -28) = r2\n     62: .1.34.678. (63) *(u32 *)(r10 -24) = r4\n     63: .1.3..678. (63) *(u32 *)(r10 -16) = r7\n     64: .1.3..6.8. (73) *(u8 *)(r10 -12) = r8\n     65: .1.3..6... (79) r2 = *(u64 *)(r10 -64)\n     66: .123..6... (7b) *(u64 *)(r10 -8) = r2\n     67: .1.3..6... (61) r4 = *(u32 *)(r10 -56)\n     68: .1.34.6... (bc) w2 = w4\n     69: .1234.6... (74) w2 >>= 8\n     70: .1234.6... (73) *(u8 *)(r10 -17) = r2\n     71: .1.34.6... (bc) w2 = w6\n     72: .1234.6... (74) w2 >>= 8\n     73: .1234.6... (73) *(u8 *)(r10 -18) = r2\n     74: .1.34.6... (bc) w2 = w6\n     75: .1234.6... (74) w2 >>= 16\n     76: .1234.6... (6b) *(u16 *)(r10 -20) = r2\n     77: .1.34.6... (73) *(u8 *)(r10 -47) = r4\n     78: .1.3..6... (b4) w2 = 3\n     79: .123..6... (6b) *(u16 *)(r10 -34) = r2\n     80: .1.3..6... (61) r2 = *(u32 *)(r10 -72)\n     81: .123..6... (ae) if w3 < w2 goto pc+1\n     82: .12...6... (bc) w3 = w2\n     83: .1.3..6... (6b) *(u16 *)(r10 -36) = r3\n     84: .1.3..6... (67) r3 <<= 32\n     85: .1.3..6... (18) r2 = 0xffffffff\n     87: .123..6... (4f) r3 |= r2\n     88: .1.3..6... (bf) r4 = r10\n     89: .1.34.6... (07) r4 += -48\n     90: .1.34.6... (18) r2 = 0xffff8bba05f2ba00\n     92: .1234.6... (b4) w5 = 48\n     93: .123456... (85) call bpf_perf_event_output#25\n     94: ......6... (54) w6 &= 255\n     95: ......6... (bc) w0 = w6\n     96: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (b7) r4 = 0                        ; R4=0\n1: (61) r2 = *(u32 *)(r1 +56)         ; R1=ctx() R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2: (63) *(u32 *)(r10 -56) = r2        ; R2=scalar(id=1,smin=0,smax=umax=0xfffff\n... verifier log truncated ...; prog 141: prog 141 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (61) r2 = *(u32 *)(r1 +48)\n      1: .12....... (b4) w3 = 0\n      2: .123...... (63) *(u32 *)(r1 +48) = r3\n      3: .12....... (18) r3 = 0xffffcd1a00946004\n      5: .123...... (71) r3 = *(u8 *)(r3 +0)\n      6: .123...... (61) r4 = *(u32 *)(r1 +80)\n      7: .1234..... (61) r5 = *(u32 *)(r1 +76)\n      8: .12345.... (0f) r5 += r3\n      9: .12.45.... (b4) w0 = -134\n     10: 012.45.... (07) r5 += 20\n     11: 012.45.... (2d) if r5 > r4 goto pc+12\n     12: 012....... (18) r3 = 0xffffcd1a0094603c\n     14: 0123...... (61) r3 = *(u32 *)(r3 +0)\n     15: 012....... (18) r3 = 0xffffcd1a00946004\n     17: 0123...... (71) r3 = *(u8 *)(r3 +0)\n     18: 0123...... (61) r4 = *(u32 *)(r1 +80)\n     19: 01234..... (61) r5 = *(u32 *)(r1 +76)\n     20: 012345.... (0f) r5 += r3\n     21: 012.45.... (07) r5 += 20\n     22: 012.45.... (2d) if r5 > r4 goto pc+1\n     23: .12....... (b4) w0 = 0\n     24: 012....... (66) if w0 s> 0xffffffff goto pc+45\n     25: 012....... (b4) w3 = 62980354\n     26: 0123...... (63) *(u32 *)(r1 +64) = r3\n     27: 012....... (b4) w3 = 0\n     28: 0123...... (63) *(u32 *)(r1 +60) = r3\n     29: 0123...... (63) *(u32 *)(r1 +52) = r3\n     30: 012....... (63) *(u32 *)(r1 +48) = r2\n     31: 01........ (84) w0 = -w0\n     32: 01........ (63) *(u32 *)(r1 +56) = r0\n     33: 01........ (bf) r6 = r1\n     34: 01....6... (61) r7 = *(u32 *)(r1 +0)\n     35: 0.....67.. (18) r1 = 0x103c10100\n     37: 01....67.. (7b) *(u64 *)(r10 -24) = r1\n     38: 0.....67.. (73) *(u8 *)(r10 -24) = r0\n     39: ......67.. (bf) r2 = r10\n     40: ..2...67.. (07) r2 += -24\n     41: ..2...67.. (18) r1 = 0xffff8bbe1467d000\n     43: .12...67.. (85) call bpf_map_lookup_elem#1\n     44: 0.....67.. (15) if r0 == 0x0 goto pc+8\n     45: 0.....67.. (05) goto pc+0\n     46: 0.....67.. (79) r1 = *(u64 *)(r0 +0)\n     47: 01....67.. (07) r1 += 1\n     48: 01....67.. (7b) *(u64 *)(r0 +0) = r1\n     49: 0.....67.. (79) r1 = *(u64 *)(r0 +8)\n     50: 01....67.. (0f) r1 += r7\n     51: 01....6... (7b) *(u64 *)(r0 +8) = r1\n     52: ......6... (05) goto pc+11\n     53: ......67.. (7b) *(u64 *)(r10 -8) = r7\n     54: ......6... (b7) r1 = 1\n     55: .1....6... (7b) *(u64 *)(r10 -16) = r1\n     56: ......6... (bf) r2 = r10\n     57: ..2...6... (07) r2 += -24\n     58: ..2...6... (bf) r3 = r10\n     59: ..23..6... (07) r3 += -16\n     60: ..23..6... (18) r1 = 0xffff8bbe1467d000\n     62: .123..6... (b4) w4 = 0\n     63: .1234.6... (85) call bpf_map_update_elem#2\n     64: ......6... (bf) r1 = r6\n     65: .1........ (18) r2 = 0xffff8bc0c2396400\n     67: .12....... (b7) r3 = 1\n     68: .123...... (85) call bpf_tail_call#12\n     69: .......... (b4) w0 = 2\n     70: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +48)         ; R1=ctx() R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n1: (b4) w3 = 0                        ; R3=0\n2: (63) *(u32 *)(r1 +48) = r3         ; R1=ctx() R3=0\n3: (18) r3 = 0xffffcd1a00946004       ; R3=map_value(map=.rodata.config,ks=4,vs=156,off=4)\n5: (71) r3 = *(u8 *)(r3 +0)           ; R3=14\n6: (61) r4 = *(u32 *)(r1 +80)         ; R1=ctx() R4=pkt_end()\n7: (61) r5 = *(u32 *)(r1 +76)         ; R1=ctx() R5=pkt(r=0)\n8: (0f) r5 += r3\nmark_precise: frame0: last_idx 8 first_idx 0 subseq_idx -1 \nmark_precise: frame0: regs=r3 stack= before 7: (61) r5 = *(u32 *)(r1 +76)\nmark_precise: frame0: regs=r3 stack= before 6: (61) r4 = *(u32 *)(r1 +80)\nmark_precise: frame0: regs=r3 stack= before 5: (71) r3 = *(u8 *)(r3 +0)\n9: R3=14 R5=pkt(off=14,r=0)\n9: (b4) w0 = -134                     ; R0=0xffffff7a\n10: (07) r5 += 20                     ; R5=pkt(off=34,r=0)\n11: (2d) if r5 > r4 goto pc+12        ; R4=pkt_end() R5=pkt(off=34,r=34)\n12: (18) r3 = 0xffffcd1a0094603c      ; R3=map_value(map=.rodata.config,ks=4,vs=156,off=60)\n14: (61) r3 = *(u32 *)(r3 +0)         ; R3=128\n15: (18) r3 = 0xffffcd1a00946004      ; R3=map_value(map=.rodata.config,ks=4,vs=156,off=4)\n17: (71) r3 = *(u8 *)(r3 +0)          ; R3=14\n18: (61) r4 = *(u32 *)(r1 +80)        ; R1=ctx() R4=pkt_end()\n19: (61) r5 = *(u32 *)(r1 +76)        ; R1=ctx() R5=pkt\n... verifier log truncated ...; prog 143: prog 143 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (61) r7 = *(u32 *)(r6 +48)\n      2: ......67.. (b4) w1 = 0\n      3: .1....67.. (63) *(u32 *)(r6 +48) = r1\n      4: ......67.. (18) r1 = 0xffffcd1a00946004\n      6: .1....67.. (71) r1 = *(u8 *)(r1 +0)\n      7: .1....67.. (61) r2 = *(u32 *)(r6 +80)\n      8: .12...67.. (61) r3 = *(u32 *)(r6 +76)\n      9: .123..67.. (0f) r3 += r1\n     10: ..23..67.. (b4) w0 = -134\n     11: 0.23..67.. (07) r3 += 20\n     12: 0.23..67.. (2d) if r3 > r2 goto pc+119\n     13: 0.....67.. (18) r1 = 0xffffcd1a0094603c\n     15: 01....67.. (61) r1 = *(u32 *)(r1 +0)\n     16: 0.....67.. (61) r1 = *(u32 *)(r6 +44)\n     17: 01....67.. (63) *(u32 *)(r10 -32) = r1\n     18: 01....67.. (61) r2 = *(u32 *)(r10 -32)\n     19: 012...67.. (63) *(u32 *)(r10 -32) = r1\n     20: 0.2...67.. (54) w2 &= 1\n     21: 0.2...67.. (61) r1 = *(u32 *)(r10 -32)\n     22: 012...67.. (54) w1 &= 2\n     23: 012...67.. (4c) w1 |= w2\n     24: 01....67.. (b4) w8 = 1\n     25: 01....678. (56) if w1 != 0x0 goto pc+1\n     26: 0.....67.. (b4) w8 = 0\n     27: 0.....678. (18) r1 = 0xffffcd1a00946004\n     29: 01....678. (71) r1 = *(u8 *)(r1 +0)\n     30: 01....678. (61) r2 = *(u32 *)(r6 +80)\n     31: 012...678. (61) r9 = *(u32 *)(r6 +76)\n     32: 012...6789 (0f) r9 += r1\n     33: 0.2...6789 (bf) r1 = r9\n     34: 012...6789 (07) r1 += 20\n     35: 012...6789 (2d) if r1 > r2 goto pc+96\n     36: ......6789 (61) r1 = *(u32 *)(r9 +16)\n     37: .1....6789 (b7) r2 = 0\n     38: .12...6789 (63) *(u32 *)(r10 -16) = r2\n     39: .12...6789 (63) *(u32 *)(r10 -20) = r2\n     40: .12...6789 (63) *(u32 *)(r10 -24) = r2\n     41: .12...6789 (63) *(u32 *)(r10 -28) = r2\n     42: .1....6789 (63) *(u32 *)(r10 -32) = r1\n     43: ......6789 (b4) w1 = 1\n     44: .1....6789 (73) *(u8 *)(r10 -16) = r1\n     45: ......6789 (bf) r2 = r10\n     46: ..2...6789 (07) r2 += -32\n     47: ..2...6789 (18) r1 = 0xffff8bbac1600c00\n     49: .12...6789 (85) call bpf_map_lookup_elem#1\n     50: 0.....6789 (15) if r0 == 0x0 goto pc+44\n     51: 0.....67.9 (05) goto pc+0\n     52: 0.....67.9 (18) r1 = 0xffffcd1a00946004\n     54: 01....67.9 (71) r2 = *(u8 *)(r1 +0)\n     55: 0.2...67.9 (61) r1 = *(u32 *)(r0 +8)\n     56: 012...67.9 (54) w1 &= 3\n     57: 012...67.9 (56) if w1 != 0x0 goto pc+62\n     58: 0.2...67.9 (79) r1 = *(u64 *)(r0 +24)\n     59: 012...67.9 (7b) *(u64 *)(r10 -40) = r1\n     60: 0.2...67.9 (79) r1 = *(u64 *)(r0 +16)\n     61: 012...67.9 (7b) *(u64 *)(r10 -48) = r1\n     62: 0.2...67.9 (71) r3 = *(u8 *)(r9 +8)\n     63: 0.23..67.9 (a6) if w3 < 0x2 goto pc+96\n     64: 0.23..67.9 (bf) r8 = r0\n     65: ..23..6789 (bc) w4 = w3\n     66: ..234.6789 (04) w4 += -1\n     67: ..234.6789 (73) *(u8 *)(r9 +8) = r4\n     68: ..234.678. (04) w2 += 10\n     69: ..234.678. (54) w4 &= 255\n     70: ..234.678. (bf) r1 = r6\n     71: .1234.678. (b4) w5 = 2\n     72: .12345678. (85) call bpf_l3_csum_replace#10\n     73: 0.....678. (c6) if w0 s< 0x0 goto pc+106\n     74: ......678. (bf) r3 = r10\n     75: ...3..678. (07) r3 += -40\n     76: ...3..678. (bf) r1 = r6\n     77: .1.3..678. (b4) w2 = 6\n     78: .123..678. (b4) w4 = 6\n     79: .1234.678. (b4) w5 = 0\n     80: .12345678. (85) call bpf_skb_store_bytes#9\n     81: 0.....678. (bc) w1 = w0\n     82: .1....678. (b4) w0 = -141\n     83: 01....678. (c6) if w1 s< 0x0 goto pc+48\n     84: ......678. (bf) r3 = r10\n     85: ...3..678. (07) r3 += -48\n     86: ...3..678. (bf) r1 = r6\n     87: .1.3..678. (b4) w2 = 0\n     88: .123..678. (b4) w4 = 6\n     89: .1234.678. (b4) w5 = 0\n     90: .12345678. (85) call bpf_skb_store_bytes#9\n     91: 0.....678. (bc) w1 = w0\n     92: .1....678. (b4) w0 = -141\n     93: 01....678. (c6) if w1 s< 0x0 goto pc+38\n     94: ......678. (05) goto pc+89\n     95: ......6789 (61) r1 = *(u32 *)(r9 +16)\n     96: .1....678. (b4) w2 = 0\n     97: .12...678. (63) *(u32 *)(r10 -12) = r2\n     98: .12...678. (63) *(u32 *)(r10 -16) = r2\n     99: .12...678. (63) *(u32 *)(r10 -20) = r2\n    100: .1....678. (63) *(u32 *)(r10 -24) = r1\n    101: ......678. (b4) w1 = 64\n    102: .1....678. (63) *(u32 *)(r10 -32) = r1\n    103: ......678. (b\n... verifier log truncated ...; prog 150: prog 150 pass cond_select failed after 1 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (61) r7 = *(u32 *)(r6 +48)\n      2: ......67.. (b4) w1 = 0\n      3: .1....67.. (63) *(u32 *)(r6 +48) = r1\n      4: ......67.. (18) r1 = 0xffffcd1a009b6004\n      6: .1....67.. (71) r1 = *(u8 *)(r1 +0)\n      7: .1....67.. (61) r2 = *(u32 *)(r6 +80)\n      8: .12...67.. (61) r3 = *(u32 *)(r6 +76)\n      9: .123..67.. (0f) r3 += r1\n     10: ..23..67.. (b4) w0 = -134\n     11: 0.23..67.. (07) r3 += 20\n     12: 0.23..67.. (2d) if r3 > r2 goto pc+118\n     13: 0.....67.. (18) r1 = 0xffffcd1a009b603c\n     15: 01....67.. (61) r1 = *(u32 *)(r1 +0)\n     16: 0.....67.. (61) r1 = *(u32 *)(r6 +44)\n     17: 01....67.. (63) *(u32 *)(r10 -32) = r1\n     18: 01....67.. (61) r2 = *(u32 *)(r10 -32)\n     19: 012...67.. (63) *(u32 *)(r10 -32) = r1\n     20: 0.2...67.. (54) w2 &= 1\n     21: 0.2...67.. (61) r1 = *(u32 *)(r10 -32)\n     22: 012...67.. (54) w1 &= 2\n     23: 012...67.. (4c) w1 |= w2\n     24: 01....67.. (b4) w8 = 1\n     25: 01....678. (56) if w1 != 0x0 goto pc+1\n     26: 0.....67.. (b4) w8 = 0\n     27: 0.....678. (18) r1 = 0xffffcd1a009b6004\n     29: 01....678. (71) r1 = *(u8 *)(r1 +0)\n     30: 01....678. (61) r2 = *(u32 *)(r6 +80)\n     31: 012...678. (61) r9 = *(u32 *)(r6 +76)\n     32: 012...6789 (0f) r9 += r1\n     33: 0.2...6789 (bf) r1 = r9\n     34: 012...6789 (07) r1 += 20\n     35: 012...6789 (2d) if r1 > r2 goto pc+95\n     36: ......6789 (61) r1 = *(u32 *)(r9 +16)\n     37: .1....6789 (b7) r2 = 0\n     38: .12...6789 (63) *(u32 *)(r10 -16) = r2\n     39: .12...6789 (63) *(u32 *)(r10 -20) = r2\n     40: .12...6789 (63) *(u32 *)(r10 -24) = r2\n     41: .12...6789 (63) *(u32 *)(r10 -28) = r2\n     42: .1....6789 (63) *(u32 *)(r10 -32) = r1\n     43: ......6789 (b4) w1 = 1\n     44: .1....6789 (73) *(u8 *)(r10 -16) = r1\n     45: ......6789 (bf) r2 = r10\n     46: ..2...6789 (07) r2 += -32\n     47: ..2...6789 (18) r1 = 0xffff8bbac1600c00\n     49: .12...6789 (85) call bpf_map_lookup_elem#1\n     50: 0.....6789 (15) if r0 == 0x0 goto pc+43\n     51: 0.....67.9 (18) r1 = 0xffffcd1a009b6004\n     53: 01....67.9 (71) r2 = *(u8 *)(r1 +0)\n     54: 0.2...67.9 (61) r1 = *(u32 *)(r0 +8)\n     55: 012...67.9 (54) w1 &= 3\n     56: 012...67.9 (56) if w1 != 0x0 goto pc+62\n     57: 0.2...67.9 (79) r1 = *(u64 *)(r0 +24)\n     58: 012...67.9 (7b) *(u64 *)(r10 -40) = r1\n     59: 0.2...67.9 (79) r1 = *(u64 *)(r0 +16)\n     60: 012...67.9 (7b) *(u64 *)(r10 -48) = r1\n     61: 0.2...67.9 (71) r3 = *(u8 *)(r9 +8)\n     62: 0.23..67.9 (a6) if w3 < 0x2 goto pc+95\n     63: 0.23..67.9 (bf) r8 = r0\n     64: ..23..6789 (bc) w4 = w3\n     65: ..234.6789 (04) w4 += -1\n     66: ..234.6789 (73) *(u8 *)(r9 +8) = r4\n     67: ..234.678. (04) w2 += 10\n     68: ..234.678. (54) w4 &= 255\n     69: ..234.678. (bf) r1 = r6\n     70: .1234.678. (b4) w5 = 2\n     71: .12345678. (85) call bpf_l3_csum_replace#10\n     72: 0.....678. (c6) if w0 s< 0x0 goto pc+105\n     73: ......678. (bf) r3 = r10\n     74: ...3..678. (07) r3 += -40\n     75: ...3..678. (bf) r1 = r6\n     76: .1.3..678. (b4) w2 = 6\n     77: .123..678. (b4) w4 = 6\n     78: .1234.678. (b4) w5 = 0\n     79: .12345678. (85) call bpf_skb_store_bytes#9\n     80: 0.....678. (bc) w1 = w0\n     81: .1....678. (b4) w0 = -141\n     82: 01....678. (c6) if w1 s< 0x0 goto pc+48\n     83: ......678. (bf) r3 = r10\n     84: ...3..678. (07) r3 += -48\n     85: ...3..678. (bf) r1 = r6\n     86: .1.3..678. (b4) w2 = 0\n     87: .123..678. (b4) w4 = 6\n     88: .1234.678. (b4) w5 = 0\n     89: .12345678. (85) call bpf_skb_store_bytes#9\n     90: 0.....678. (bc) w1 = w0\n     91: .1....678. (b4) w0 = -141\n     92: 01....678. (c6) if w1 s< 0x0 goto pc+38\n     93: ......678. (05) goto pc+88\n     94: ......6789 (61) r1 = *(u32 *)(r9 +16)\n     95: .1....678. (b4) w2 = 0\n     96: .12...678. (63) *(u32 *)(r10 -12) = r2\n     97: .12...678. (63) *(u32 *)(r10 -16) = r2\n     98: .12...678. (63) *(u32 *)(r10 -20) = r2\n     99: .1....678. (63) *(u32 *)(r10 -24) = r1\n    100: ......678. (b4) w1 = 64\n    101: .1....678. (63) *(u32 *)(r10 -32) = r1\n    102: ......678. (b4) w1 = 16777216\n    103: .1....678\n... verifier log truncated ...",
+        "error_programs": [
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 64 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 13: Permission denied (os error 13)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (79) r2 = *(u64 *)(r1 +0)\n      1: .12....... (79) r6 = *(u64 *)(r2 +0)\n      2: .12...6... (79) r1 = *(u64 *)(r1 +8)\n      3: .12...6... (15) if r1 == 0x0 goto pc+59\n      4: .12...6... (79) r7 = *(u64 *)(r1 +0)\n      5: ..2...67.. (79) r1 = *(u64 *)(r2 +16)\n      6: .1....67.. (55) if r1 != 0x0 goto pc+8\n      7: ......67.. (bf) r4 = r10\n      8: ....4.67.. (07) r4 += -48\n      9: ....4.67.. (bf) r1 = r6\n     10: .1..4.67.. (18) r2 = 0xffff8bba78bd217a\n     12: .12.4.67.. (b7) r3 = 32\n     13: .1234.67.. (b7) r5 = 0\n     14: .1234567.. (85) call bpf_seq_printf#126\n     15: ......67.. (7b) *(u64 *)(r10 -56) = r6\n     16: .......7.. (61) r1 = *(u32 *)(r7 +0)\n     17: .1.....7.. (7b) *(u64 *)(r10 -48) = r1\n     18: .......7.. (b7) r3 = 4\n     19: ...3...7.. (bf) r9 = r7\n     20: ...3...7.9 (0f) r9 += r3\n     21: ...3...7.9 (79) r1 = *(u64 *)(r7 +40)\n     22: .1.3...7.9 (79) r8 = *(u64 *)(r7 +48)\n     23: .1.3...789 (15) if r8 == 0x0 goto pc+24\n     24: .1.....789 (b7) r2 = 0\n     25: .12....789 (0f) r1 += r2\n     26: .1.....789 (61) r1 = *(u32 *)(r1 +4)\n     27: .1.....789 (79) r3 = *(u64 *)(r8 +8)\n     28: .1.3...789 (67) r1 <<= 3\n     29: .1.3...789 (0f) r3 += r1\n     30: ...3...789 (79) r6 = *(u64 *)(r8 +0)\n     31: ...3..6789 (bf) r1 = r10\n     32: .1.3..6789 (07) r1 += -8\n     33: .1.3..6789 (b7) r2 = 8\n     34: .123..6789 (85) call bpf_probe_read_kernel#113\n     35: ......6789 (b7) r1 = 0\n     36: .1....6789 (79) r3 = *(u64 *)(r10 -8)\n     37: .1.3..6789 (0f) r3 += r1\n     38: ...3..6789 (bf) r1 = r10\n     39: .1.3..6789 (07) r1 += -12\n     40: .1.3..6789 (b7) r2 = 4\n     41: .123..6789 (85) call bpf_probe_read_kernel#113\n     42: ......6789 (b7) r3 = 4\n     43: ...3..6789 (61) r1 = *(u32 *)(r10 -12)\n     44: .1.3..6789 (61) r2 = *(u32 *)(r8 +16)\n     45: .123..67.9 (3d) if r1 >= r2 goto pc+2\n     46: .1.3..67.. (0f) r6 += r1\n     47: ...3..67.. (bf) r9 = r6\n     48: ...3...7.9 (7b) *(u64 *)(r10 -40) = r9\n     49: ...3...7.. (79) r1 = *(u64 *)(r7 +24)\n     50: .1.3...7.. (7b) *(u64 *)(r10 -32) = r1\n     51: ...3...7.. (79) r1 = *(u64 *)(r7 +32)\n     52: .1.3...... (79) r1 = *(u64 *)(r1 +0)\n     53: .1.3...... (0f) r1 += r3\n     54: .1........ (7b) *(u64 *)(r10 -24) = r1\n     55: .......... (bf) r4 = r10\n     56: ....4..... (07) r4 += -48\n     57: ....4..... (79) r1 = *(u64 *)(r10 -56)\n     58: .1..4..... (18) r2 = 0xffff8bba78bd219a\n     60: .12.4..... (b7) r3 = 17\n     61: .1234..... (b7) r5 = 32\n     62: .12345.... (85) call bpf_seq_printf#126\n     63: .......... (b7) r0 = 0\n     64: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (79) r2 = *(u64 *)(r1 +0)\nfunc 'bpf_iter_bpf_prog' arg0 has btf_id 70962 type STRUCT 'bpf_iter_meta'\n1: R1=ctx() R2=trusted_ptr_bpf_iter_meta()\n1: (79) r6 = *(u64 *)(r2 +0)          ; R2=trusted_ptr_bpf_iter_meta() R6=trusted_ptr_seq_file()\n2: (79) r1 = *(u64 *)(r1 +8)          ; R1=ptr_or_null_bpf_prog(id=1)\n3: (15) if r1 == 0x0 goto pc+59       ; R1=ptr_bpf_prog()\n4: (79) r7 = *(u64 *)(r1 +0)\naccess beyond the end of member pages (mend:2) in struct bpf_prog with off 0 size 8\nprocessed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            "exit_code": 1,
+            "prog_id": 64
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 120 pass cond_select failed after 1 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (b7) r4 = 0\n      1: .1..4..... (61) r2 = *(u32 *)(r1 +56)\n      2: .12.4..... (63) *(u32 *)(r10 -56) = r2\n      3: .1..4..... (18) r3 = 0xffffcd1a0033e049\n      5: .1.34..... (71) r3 = *(u8 *)(r3 +0)\n      6: .1.34..... (16) if w3 == 0x0 goto pc+12\n      7: .1........ (bf) r6 = r1\n      8: ......6... (b4) w1 = 0\n      9: .1....6... (63) *(u32 *)(r10 -48) = r1\n     10: ......6... (bf) r2 = r10\n     11: ..2...6... (07) r2 += -48\n     12: ..2...6... (18) r1 = 0xdeadc0de\n     14: .12...6... (85) call bpf_map_lookup_elem#1\n     15: 0.....6... (b7) r4 = 0\n     16: 0...4.6... (15) if r0 == 0x0 goto pc+1\n     17: 0.....6... (79) r4 = *(u64 *)(r0 +0)\n     18: ....4.6... (bf) r1 = r6\n     19: .1..4..... (61) r0 = *(u32 *)(r1 +16)\n     20: 01..4..... (54) w0 &= 65535\n     21: 01..4..... (b4) w3 = 1\n     22: 01.34..... (16) if w0 == 0xdd86 goto pc+1\n     23: .1..4..... (b4) w3 = 0\n     24: .1.34..... (7b) *(u64 *)(r10 -64) = r4\n     25: .1.3...... (61) r6 = *(u32 *)(r1 +64)\n     26: .1.3..6... (61) r2 = *(u32 *)(r1 +0)\n     27: .123..6... (63) *(u32 *)(r10 -80) = r2\n     28: .1.3..6... (18) r0 = 0xffffcd1a0033e004\n     30: 01.3..6... (71) r0 = *(u8 *)(r0 +0)\n     31: 01.3..6... (b4) w8 = 1\n     32: 01.3..6.8. (16) if w0 == 0x0 goto pc+1\n     33: .1.3..6... (b4) w8 = 0\n     34: .1.3..6.8. (64) w8 <<= 1\n     35: .1.3..6.8. (4c) w8 |= w3\n     36: .1....6.8. (18) r3 = 0xffffcd1a0033e03c\n     38: .1.3..6.8. (61) r3 = *(u32 *)(r3 +0)\n     39: .1.3..6.8. (61) r2 = *(u32 *)(r1 +0)\n     40: .123..6.8. (63) *(u32 *)(r10 -72) = r2\n     41: .1.3..6.8. (18) r5 = 0xffffcd1a0033e05c\n     43: .1.3.56.8. (69) r5 = *(u16 *)(r5 +0)\n     44: .1.3.56.8. (61) r7 = *(u32 *)(r1 +40)\n     45: .1.3.5678. (61) r4 = *(u32 *)(r1 +60)\n     46: .1.345678. (61) r2 = *(u32 *)(r1 +52)\n     47: .12345678. (61) r9 = *(u32 *)(r1 +48)\n     48: .123456789 (61) r0 = *(u32 *)(r1 +68)\n     49: 0123456789 (6b) *(u16 *)(r10 -46) = r5\n     50: 01234.6789 (63) *(u32 *)(r10 -44) = r0\n     51: .1234.6789 (b4) w5 = 0\n     52: .123456789 (73) *(u8 *)(r10 -10) = r5\n     53: .123456789 (73) *(u8 *)(r10 -11) = r5\n     54: .123456789 (73) *(u8 *)(r10 -9) = r5\n     55: .1234.6789 (b4) w5 = 1\n     56: .123456789 (73) *(u8 *)(r10 -48) = r5\n     57: .1234.6789 (61) r5 = *(u32 *)(r10 -80)\n     58: .123456789 (63) *(u32 *)(r10 -40) = r5\n     59: .1234.6789 (63) *(u32 *)(r10 -32) = r9\n     60: .1234.678. (63) *(u32 *)(r10 -28) = r2\n     61: .1.34.678. (63) *(u32 *)(r10 -24) = r4\n     62: .1.3..678. (63) *(u32 *)(r10 -16) = r7\n     63: .1.3..6.8. (73) *(u8 *)(r10 -12) = r8\n     64: .1.3..6... (79) r2 = *(u64 *)(r10 -64)\n     65: .123..6... (7b) *(u64 *)(r10 -8) = r2\n     66: .1.3..6... (61) r4 = *(u32 *)(r10 -56)\n     67: .1.34.6... (bc) w2 = w4\n     68: .1234.6... (74) w2 >>= 8\n     69: .1234.6... (73) *(u8 *)(r10 -17) = r2\n     70: .1.34.6... (bc) w2 = w6\n     71: .1234.6... (74) w2 >>= 8\n     72: .1234.6... (73) *(u8 *)(r10 -18) = r2\n     73: .1.34.6... (bc) w2 = w6\n     74: .1234.6... (74) w2 >>= 16\n     75: .1234.6... (6b) *(u16 *)(r10 -20) = r2\n     76: .1.34.6... (73) *(u8 *)(r10 -47) = r4\n     77: .1.3..6... (b4) w2 = 3\n     78: .123..6... (6b) *(u16 *)(r10 -34) = r2\n     79: .1.3..6... (61) r2 = *(u32 *)(r10 -72)\n     80: .123..6... (ae) if w3 < w2 goto pc+1\n     81: .12...6... (bc) w3 = w2\n     82: .1.3..6... (6b) *(u16 *)(r10 -36) = r3\n     83: .1.3..6... (67) r3 <<= 32\n     84: .1.3..6... (18) r2 = 0xffffffff\n     86: .123..6... (4f) r3 |= r2\n     87: .1.3..6... (bf) r4 = r10\n     88: .1.34.6... (07) r4 += -48\n     89: .1.34.6... (18) r2 = 0xffff8bba05f2ba00\n     91: .1234.6... (b4) w5 = 48\n     92: .123456... (85) call bpf_perf_event_output#25\n     93: ......6... (54) w6 &= 255\n     94: ......6... (bc) w0 = w6\n     95: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (b7) r4 = 0                        ; R4=0\n1: (61) r2 = *(u32 *)(r1 +56)         ; R1=ctx() R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2: (63) *(u32 *)(r10 -56) = r2        ; R2=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 120
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 129 pass bulk_memory failed after 4 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (b7) r4 = 0\n      1: .1..4..... (61) r2 = *(u32 *)(r1 +56)\n      2: .12.4..... (63) *(u32 *)(r10 -56) = r2\n      3: .1..4..... (18) r3 = 0xffffcd1a00816049\n      5: .1.34..... (71) r3 = *(u8 *)(r3 +0)\n      6: .1.34..... (16) if w3 == 0x0 goto pc+12\n      7: .1........ (bf) r6 = r1\n      8: ......6... (b4) w1 = 0\n      9: .1....6... (63) *(u32 *)(r10 -48) = r1\n     10: ......6... (bf) r2 = r10\n     11: ..2...6... (07) r2 += -48\n     12: ..2...6... (18) r1 = 0xdeadc0de\n     14: .12...6... (85) call bpf_map_lookup_elem#1\n     15: 0.....6... (b7) r4 = 0\n     16: 0...4.6... (15) if r0 == 0x0 goto pc+1\n     17: 0.....6... (79) r4 = *(u64 *)(r0 +0)\n     18: ....4.6... (bf) r1 = r6\n     19: .1..4..... (61) r0 = *(u32 *)(r1 +16)\n     20: 01..4..... (54) w0 &= 65535\n     21: 01..4..... (b4) w3 = 1\n     22: 01.34..... (16) if w0 == 0xdd86 goto pc+1\n     23: .1..4..... (b4) w3 = 0\n     24: .1.34..... (7b) *(u64 *)(r10 -64) = r4\n     25: .1.3...... (61) r6 = *(u32 *)(r1 +64)\n     26: .1.3..6... (61) r2 = *(u32 *)(r1 +0)\n     27: .123..6... (63) *(u32 *)(r10 -80) = r2\n     28: .1.3..6... (18) r0 = 0xffffcd1a00816004\n     30: 01.3..6... (71) r0 = *(u8 *)(r0 +0)\n     31: 01.3..6... (b4) w8 = 1\n     32: 01.3..6.8. (16) if w0 == 0x0 goto pc+1\n     33: .1.3..6... (b4) w8 = 0\n     34: .1.3..6.8. (64) w8 <<= 1\n     35: .1.3..6.8. (4c) w8 |= w3\n     36: .1....6.8. (18) r3 = 0xffffcd1a0081603c\n     38: .1.3..6.8. (61) r3 = *(u32 *)(r3 +0)\n     39: .1.3..6.8. (61) r2 = *(u32 *)(r1 +0)\n     40: .123..6.8. (63) *(u32 *)(r10 -72) = r2\n     41: .1.3..6.8. (18) r5 = 0xffffcd1a0081605c\n     43: .1.3.56.8. (69) r5 = *(u16 *)(r5 +0)\n     44: .1.3.56.8. (61) r7 = *(u32 *)(r1 +40)\n     45: .1.3.5678. (61) r4 = *(u32 *)(r1 +60)\n     46: .1.345678. (61) r2 = *(u32 *)(r1 +52)\n     47: .12345678. (61) r9 = *(u32 *)(r1 +48)\n     48: .123456789 (61) r0 = *(u32 *)(r1 +68)\n     49: 0123456789 (6b) *(u16 *)(r10 -46) = r5\n     50: 01234.6789 (63) *(u32 *)(r10 -44) = r0\n     51: .1234.6789 (b4) w5 = 0\n     52: .123456789 (73) *(u8 *)(r10 -10) = r5\n     53: .123456789 (73) *(u8 *)(r10 -11) = r5\n     54: .123456789 (73) *(u8 *)(r10 -9) = r5\n     55: .1234.6789 (b4) w5 = 1\n     56: .123456789 (73) *(u8 *)(r10 -48) = r5\n     57: .1234.6789 (61) r5 = *(u32 *)(r10 -80)\n     58: .123456789 (63) *(u32 *)(r10 -40) = r5\n     59: .1234.6789 (63) *(u32 *)(r10 -32) = r9\n     60: .1234.678. (63) *(u32 *)(r10 -28) = r2\n     61: .1.34.678. (63) *(u32 *)(r10 -24) = r4\n     62: .1.3..678. (63) *(u32 *)(r10 -16) = r7\n     63: .1.3..6.8. (73) *(u8 *)(r10 -12) = r8\n     64: .1.3..6... (79) r2 = *(u64 *)(r10 -64)\n     65: .123..6... (7b) *(u64 *)(r10 -8) = r2\n     66: .1.3..6... (61) r4 = *(u32 *)(r10 -56)\n     67: .1.34.6... (bc) w2 = w4\n     68: .1234.6... (74) w2 >>= 8\n     69: .1234.6... (73) *(u8 *)(r10 -17) = r2\n     70: .1.34.6... (bc) w2 = w6\n     71: .1234.6... (74) w2 >>= 8\n     72: .1234.6... (73) *(u8 *)(r10 -18) = r2\n     73: .1.34.6... (bc) w2 = w6\n     74: .1234.6... (74) w2 >>= 16\n     75: .1234.6... (6b) *(u16 *)(r10 -20) = r2\n     76: .1.34.6... (73) *(u8 *)(r10 -47) = r4\n     77: .1.3..6... (b4) w2 = 3\n     78: .123..6... (6b) *(u16 *)(r10 -34) = r2\n     79: .1.3..6... (61) r2 = *(u32 *)(r10 -72)\n     80: .123..6... (ae) if w3 < w2 goto pc+1\n     81: .12...6... (bc) w3 = w2\n     82: .1.3..6... (6b) *(u16 *)(r10 -36) = r3\n     83: .1.3..6... (67) r3 <<= 32\n     84: .1.3..6... (18) r2 = 0xffffffff\n     86: .123..6... (4f) r3 |= r2\n     87: .1.3..6... (bf) r4 = r10\n     88: .1.34.6... (07) r4 += -48\n     89: .1.34.6... (18) r2 = 0xffff8bba05f2ba00\n     91: .1234.6... (b4) w5 = 48\n     92: .123456... (85) call bpf_perf_event_output#25\n     93: ......6... (54) w6 &= 255\n     94: ......6... (bc) w0 = w6\n     95: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (b7) r4 = 0                        ; R4=0\n1: (61) r2 = *(u32 *)(r1 +56)         ; R1=ctx() R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2: (63) *(u32 *)(r10 -56) = r2        ; R2=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 129
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 137 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (b7) r4 = 0\n      1: .1..4..... (61) r2 = *(u32 *)(r1 +56)\n      2: .12.4..... (63) *(u32 *)(r10 -56) = r2\n      3: .1..4..... (18) r3 = 0xffffcd1a00946049\n      5: .1.34..... (71) r3 = *(u8 *)(r3 +0)\n      6: .1.34..... (16) if w3 == 0x0 goto pc+13\n      7: .1........ (bf) r6 = r1\n      8: ......6... (b4) w1 = 0\n      9: .1....6... (63) *(u32 *)(r10 -48) = r1\n     10: ......6... (bf) r2 = r10\n     11: ..2...6... (07) r2 += -48\n     12: ..2...6... (18) r1 = 0xdeadc0de\n     14: .12...6... (85) call bpf_map_lookup_elem#1\n     15: 0.....6... (b7) r4 = 0\n     16: 0...4.6... (15) if r0 == 0x0 goto pc+2\n     17: 0.....6... (05) goto pc+0\n     18: 0.....6... (79) r4 = *(u64 *)(r0 +0)\n     19: ....4.6... (bf) r1 = r6\n     20: .1..4..... (61) r0 = *(u32 *)(r1 +16)\n     21: 01..4..... (54) w0 &= 65535\n     22: 01..4..... (b4) w3 = 1\n     23: 01.34..... (16) if w0 == 0xdd86 goto pc+1\n     24: .1..4..... (b4) w3 = 0\n     25: .1.34..... (7b) *(u64 *)(r10 -64) = r4\n     26: .1.3...... (61) r6 = *(u32 *)(r1 +64)\n     27: .1.3..6... (61) r2 = *(u32 *)(r1 +0)\n     28: .123..6... (63) *(u32 *)(r10 -80) = r2\n     29: .1.3..6... (18) r0 = 0xffffcd1a00946004\n     31: 01.3..6... (71) r0 = *(u8 *)(r0 +0)\n     32: 01.3..6... (b4) w8 = 1\n     33: 01.3..6.8. (16) if w0 == 0x0 goto pc+1\n     34: .1.3..6... (b4) w8 = 0\n     35: .1.3..6.8. (64) w8 <<= 1\n     36: .1.3..6.8. (4c) w8 |= w3\n     37: .1....6.8. (18) r3 = 0xffffcd1a0094603c\n     39: .1.3..6.8. (61) r3 = *(u32 *)(r3 +0)\n     40: .1.3..6.8. (61) r2 = *(u32 *)(r1 +0)\n     41: .123..6.8. (63) *(u32 *)(r10 -72) = r2\n     42: .1.3..6.8. (18) r5 = 0xffffcd1a0094605c\n     44: .1.3.56.8. (69) r5 = *(u16 *)(r5 +0)\n     45: .1.3.56.8. (61) r7 = *(u32 *)(r1 +40)\n     46: .1.3.5678. (61) r4 = *(u32 *)(r1 +60)\n     47: .1.345678. (61) r2 = *(u32 *)(r1 +52)\n     48: .12345678. (61) r9 = *(u32 *)(r1 +48)\n     49: .123456789 (61) r0 = *(u32 *)(r1 +68)\n     50: 0123456789 (6b) *(u16 *)(r10 -46) = r5\n     51: 01234.6789 (63) *(u32 *)(r10 -44) = r0\n     52: .1234.6789 (b4) w5 = 0\n     53: .123456789 (73) *(u8 *)(r10 -10) = r5\n     54: .123456789 (73) *(u8 *)(r10 -11) = r5\n     55: .123456789 (73) *(u8 *)(r10 -9) = r5\n     56: .1234.6789 (b4) w5 = 1\n     57: .123456789 (73) *(u8 *)(r10 -48) = r5\n     58: .1234.6789 (61) r5 = *(u32 *)(r10 -80)\n     59: .123456789 (63) *(u32 *)(r10 -40) = r5\n     60: .1234.6789 (63) *(u32 *)(r10 -32) = r9\n     61: .1234.678. (63) *(u32 *)(r10 -28) = r2\n     62: .1.34.678. (63) *(u32 *)(r10 -24) = r4\n     63: .1.3..678. (63) *(u32 *)(r10 -16) = r7\n     64: .1.3..6.8. (73) *(u8 *)(r10 -12) = r8\n     65: .1.3..6... (79) r2 = *(u64 *)(r10 -64)\n     66: .123..6... (7b) *(u64 *)(r10 -8) = r2\n     67: .1.3..6... (61) r4 = *(u32 *)(r10 -56)\n     68: .1.34.6... (bc) w2 = w4\n     69: .1234.6... (74) w2 >>= 8\n     70: .1234.6... (73) *(u8 *)(r10 -17) = r2\n     71: .1.34.6... (bc) w2 = w6\n     72: .1234.6... (74) w2 >>= 8\n     73: .1234.6... (73) *(u8 *)(r10 -18) = r2\n     74: .1.34.6... (bc) w2 = w6\n     75: .1234.6... (74) w2 >>= 16\n     76: .1234.6... (6b) *(u16 *)(r10 -20) = r2\n     77: .1.34.6... (73) *(u8 *)(r10 -47) = r4\n     78: .1.3..6... (b4) w2 = 3\n     79: .123..6... (6b) *(u16 *)(r10 -34) = r2\n     80: .1.3..6... (61) r2 = *(u32 *)(r10 -72)\n     81: .123..6... (ae) if w3 < w2 goto pc+1\n     82: .12...6... (bc) w3 = w2\n     83: .1.3..6... (6b) *(u16 *)(r10 -36) = r3\n     84: .1.3..6... (67) r3 <<= 32\n     85: .1.3..6... (18) r2 = 0xffffffff\n     87: .123..6... (4f) r3 |= r2\n     88: .1.3..6... (bf) r4 = r10\n     89: .1.34.6... (07) r4 += -48\n     90: .1.34.6... (18) r2 = 0xffff8bba05f2ba00\n     92: .1234.6... (b4) w5 = 48\n     93: .123456... (85) call bpf_perf_event_output#25\n     94: ......6... (54) w6 &= 255\n     95: ......6... (bc) w0 = w6\n     96: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (b7) r4 = 0                        ; R4=0\n1: (61) r2 = *(u32 *)(r1 +56)         ; R1=ctx() R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2: (63) *(u32 *)(r10 -56) = r2        ; R2=scalar(id=1,smin=0,smax=umax=0xfffff\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 137
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 141 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (61) r2 = *(u32 *)(r1 +48)\n      1: .12....... (b4) w3 = 0\n      2: .123...... (63) *(u32 *)(r1 +48) = r3\n      3: .12....... (18) r3 = 0xffffcd1a00946004\n      5: .123...... (71) r3 = *(u8 *)(r3 +0)\n      6: .123...... (61) r4 = *(u32 *)(r1 +80)\n      7: .1234..... (61) r5 = *(u32 *)(r1 +76)\n      8: .12345.... (0f) r5 += r3\n      9: .12.45.... (b4) w0 = -134\n     10: 012.45.... (07) r5 += 20\n     11: 012.45.... (2d) if r5 > r4 goto pc+12\n     12: 012....... (18) r3 = 0xffffcd1a0094603c\n     14: 0123...... (61) r3 = *(u32 *)(r3 +0)\n     15: 012....... (18) r3 = 0xffffcd1a00946004\n     17: 0123...... (71) r3 = *(u8 *)(r3 +0)\n     18: 0123...... (61) r4 = *(u32 *)(r1 +80)\n     19: 01234..... (61) r5 = *(u32 *)(r1 +76)\n     20: 012345.... (0f) r5 += r3\n     21: 012.45.... (07) r5 += 20\n     22: 012.45.... (2d) if r5 > r4 goto pc+1\n     23: .12....... (b4) w0 = 0\n     24: 012....... (66) if w0 s> 0xffffffff goto pc+45\n     25: 012....... (b4) w3 = 62980354\n     26: 0123...... (63) *(u32 *)(r1 +64) = r3\n     27: 012....... (b4) w3 = 0\n     28: 0123...... (63) *(u32 *)(r1 +60) = r3\n     29: 0123...... (63) *(u32 *)(r1 +52) = r3\n     30: 012....... (63) *(u32 *)(r1 +48) = r2\n     31: 01........ (84) w0 = -w0\n     32: 01........ (63) *(u32 *)(r1 +56) = r0\n     33: 01........ (bf) r6 = r1\n     34: 01....6... (61) r7 = *(u32 *)(r1 +0)\n     35: 0.....67.. (18) r1 = 0x103c10100\n     37: 01....67.. (7b) *(u64 *)(r10 -24) = r1\n     38: 0.....67.. (73) *(u8 *)(r10 -24) = r0\n     39: ......67.. (bf) r2 = r10\n     40: ..2...67.. (07) r2 += -24\n     41: ..2...67.. (18) r1 = 0xffff8bbe1467d000\n     43: .12...67.. (85) call bpf_map_lookup_elem#1\n     44: 0.....67.. (15) if r0 == 0x0 goto pc+8\n     45: 0.....67.. (05) goto pc+0\n     46: 0.....67.. (79) r1 = *(u64 *)(r0 +0)\n     47: 01....67.. (07) r1 += 1\n     48: 01....67.. (7b) *(u64 *)(r0 +0) = r1\n     49: 0.....67.. (79) r1 = *(u64 *)(r0 +8)\n     50: 01....67.. (0f) r1 += r7\n     51: 01....6... (7b) *(u64 *)(r0 +8) = r1\n     52: ......6... (05) goto pc+11\n     53: ......67.. (7b) *(u64 *)(r10 -8) = r7\n     54: ......6... (b7) r1 = 1\n     55: .1....6... (7b) *(u64 *)(r10 -16) = r1\n     56: ......6... (bf) r2 = r10\n     57: ..2...6... (07) r2 += -24\n     58: ..2...6... (bf) r3 = r10\n     59: ..23..6... (07) r3 += -16\n     60: ..23..6... (18) r1 = 0xffff8bbe1467d000\n     62: .123..6... (b4) w4 = 0\n     63: .1234.6... (85) call bpf_map_update_elem#2\n     64: ......6... (bf) r1 = r6\n     65: .1........ (18) r2 = 0xffff8bc0c2396400\n     67: .12....... (b7) r3 = 1\n     68: .123...... (85) call bpf_tail_call#12\n     69: .......... (b4) w0 = 2\n     70: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +48)         ; R1=ctx() R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n1: (b4) w3 = 0                        ; R3=0\n2: (63) *(u32 *)(r1 +48) = r3         ; R1=ctx() R3=0\n3: (18) r3 = 0xffffcd1a00946004       ; R3=map_value(map=.rodata.config,ks=4,vs=156,off=4)\n5: (71) r3 = *(u8 *)(r3 +0)           ; R3=14\n6: (61) r4 = *(u32 *)(r1 +80)         ; R1=ctx() R4=pkt_end()\n7: (61) r5 = *(u32 *)(r1 +76)         ; R1=ctx() R5=pkt(r=0)\n8: (0f) r5 += r3\nmark_precise: frame0: last_idx 8 first_idx 0 subseq_idx -1 \nmark_precise: frame0: regs=r3 stack= before 7: (61) r5 = *(u32 *)(r1 +76)\nmark_precise: frame0: regs=r3 stack= before 6: (61) r4 = *(u32 *)(r1 +80)\nmark_precise: frame0: regs=r3 stack= before 5: (71) r3 = *(u8 *)(r3 +0)\n9: R3=14 R5=pkt(off=14,r=0)\n9: (b4) w0 = -134                     ; R0=0xffffff7a\n10: (07) r5 += 20                     ; R5=pkt(off=34,r=0)\n11: (2d) if r5 > r4 goto pc+12        ; R4=pkt_end() R5=pkt(off=34,r=34)\n12: (18) r3 = 0xffffcd1a0094603c      ; R3=map_value(map=.rodata.config,ks=4,vs=156,off=60)\n14: (61) r3 = *(u32 *)(r3 +0)         ; R3=128\n15: (18) r3 = 0xffffcd1a00946004      ; R3=map_value(map=.rodata.config,ks=4,vs=156,off=4)\n17: (71) r3 = *(u8 *)(r3 +0)          ; R3=14\n18: (61) r4 = *(u32 *)(r1 +80)        ; R1=ctx() R4=pkt_end()\n19: (61) r5 = *(u32 *)(r1 +76)        ; R1=ctx() R5=pkt\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 141
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 143 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (61) r7 = *(u32 *)(r6 +48)\n      2: ......67.. (b4) w1 = 0\n      3: .1....67.. (63) *(u32 *)(r6 +48) = r1\n      4: ......67.. (18) r1 = 0xffffcd1a00946004\n      6: .1....67.. (71) r1 = *(u8 *)(r1 +0)\n      7: .1....67.. (61) r2 = *(u32 *)(r6 +80)\n      8: .12...67.. (61) r3 = *(u32 *)(r6 +76)\n      9: .123..67.. (0f) r3 += r1\n     10: ..23..67.. (b4) w0 = -134\n     11: 0.23..67.. (07) r3 += 20\n     12: 0.23..67.. (2d) if r3 > r2 goto pc+119\n     13: 0.....67.. (18) r1 = 0xffffcd1a0094603c\n     15: 01....67.. (61) r1 = *(u32 *)(r1 +0)\n     16: 0.....67.. (61) r1 = *(u32 *)(r6 +44)\n     17: 01....67.. (63) *(u32 *)(r10 -32) = r1\n     18: 01....67.. (61) r2 = *(u32 *)(r10 -32)\n     19: 012...67.. (63) *(u32 *)(r10 -32) = r1\n     20: 0.2...67.. (54) w2 &= 1\n     21: 0.2...67.. (61) r1 = *(u32 *)(r10 -32)\n     22: 012...67.. (54) w1 &= 2\n     23: 012...67.. (4c) w1 |= w2\n     24: 01....67.. (b4) w8 = 1\n     25: 01....678. (56) if w1 != 0x0 goto pc+1\n     26: 0.....67.. (b4) w8 = 0\n     27: 0.....678. (18) r1 = 0xffffcd1a00946004\n     29: 01....678. (71) r1 = *(u8 *)(r1 +0)\n     30: 01....678. (61) r2 = *(u32 *)(r6 +80)\n     31: 012...678. (61) r9 = *(u32 *)(r6 +76)\n     32: 012...6789 (0f) r9 += r1\n     33: 0.2...6789 (bf) r1 = r9\n     34: 012...6789 (07) r1 += 20\n     35: 012...6789 (2d) if r1 > r2 goto pc+96\n     36: ......6789 (61) r1 = *(u32 *)(r9 +16)\n     37: .1....6789 (b7) r2 = 0\n     38: .12...6789 (63) *(u32 *)(r10 -16) = r2\n     39: .12...6789 (63) *(u32 *)(r10 -20) = r2\n     40: .12...6789 (63) *(u32 *)(r10 -24) = r2\n     41: .12...6789 (63) *(u32 *)(r10 -28) = r2\n     42: .1....6789 (63) *(u32 *)(r10 -32) = r1\n     43: ......6789 (b4) w1 = 1\n     44: .1....6789 (73) *(u8 *)(r10 -16) = r1\n     45: ......6789 (bf) r2 = r10\n     46: ..2...6789 (07) r2 += -32\n     47: ..2...6789 (18) r1 = 0xffff8bbac1600c00\n     49: .12...6789 (85) call bpf_map_lookup_elem#1\n     50: 0.....6789 (15) if r0 == 0x0 goto pc+44\n     51: 0.....67.9 (05) goto pc+0\n     52: 0.....67.9 (18) r1 = 0xffffcd1a00946004\n     54: 01....67.9 (71) r2 = *(u8 *)(r1 +0)\n     55: 0.2...67.9 (61) r1 = *(u32 *)(r0 +8)\n     56: 012...67.9 (54) w1 &= 3\n     57: 012...67.9 (56) if w1 != 0x0 goto pc+62\n     58: 0.2...67.9 (79) r1 = *(u64 *)(r0 +24)\n     59: 012...67.9 (7b) *(u64 *)(r10 -40) = r1\n     60: 0.2...67.9 (79) r1 = *(u64 *)(r0 +16)\n     61: 012...67.9 (7b) *(u64 *)(r10 -48) = r1\n     62: 0.2...67.9 (71) r3 = *(u8 *)(r9 +8)\n     63: 0.23..67.9 (a6) if w3 < 0x2 goto pc+96\n     64: 0.23..67.9 (bf) r8 = r0\n     65: ..23..6789 (bc) w4 = w3\n     66: ..234.6789 (04) w4 += -1\n     67: ..234.6789 (73) *(u8 *)(r9 +8) = r4\n     68: ..234.678. (04) w2 += 10\n     69: ..234.678. (54) w4 &= 255\n     70: ..234.678. (bf) r1 = r6\n     71: .1234.678. (b4) w5 = 2\n     72: .12345678. (85) call bpf_l3_csum_replace#10\n     73: 0.....678. (c6) if w0 s< 0x0 goto pc+106\n     74: ......678. (bf) r3 = r10\n     75: ...3..678. (07) r3 += -40\n     76: ...3..678. (bf) r1 = r6\n     77: .1.3..678. (b4) w2 = 6\n     78: .123..678. (b4) w4 = 6\n     79: .1234.678. (b4) w5 = 0\n     80: .12345678. (85) call bpf_skb_store_bytes#9\n     81: 0.....678. (bc) w1 = w0\n     82: .1....678. (b4) w0 = -141\n     83: 01....678. (c6) if w1 s< 0x0 goto pc+48\n     84: ......678. (bf) r3 = r10\n     85: ...3..678. (07) r3 += -48\n     86: ...3..678. (bf) r1 = r6\n     87: .1.3..678. (b4) w2 = 0\n     88: .123..678. (b4) w4 = 6\n     89: .1234.678. (b4) w5 = 0\n     90: .12345678. (85) call bpf_skb_store_bytes#9\n     91: 0.....678. (bc) w1 = w0\n     92: .1....678. (b4) w0 = -141\n     93: 01....678. (c6) if w1 s< 0x0 goto pc+38\n     94: ......678. (05) goto pc+89\n     95: ......6789 (61) r1 = *(u32 *)(r9 +16)\n     96: .1....678. (b4) w2 = 0\n     97: .12...678. (63) *(u32 *)(r10 -12) = r2\n     98: .12...678. (63) *(u32 *)(r10 -16) = r2\n     99: .12...678. (63) *(u32 *)(r10 -20) = r2\n    100: .1....678. (63) *(u32 *)(r10 -24) = r1\n    101: ......678. (b4) w1 = 64\n    102: .1....678. (63) *(u32 *)(r10 -32) = r1\n    103: ......678. (b\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 143
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 150 pass cond_select failed after 1 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (61) r7 = *(u32 *)(r6 +48)\n      2: ......67.. (b4) w1 = 0\n      3: .1....67.. (63) *(u32 *)(r6 +48) = r1\n      4: ......67.. (18) r1 = 0xffffcd1a009b6004\n      6: .1....67.. (71) r1 = *(u8 *)(r1 +0)\n      7: .1....67.. (61) r2 = *(u32 *)(r6 +80)\n      8: .12...67.. (61) r3 = *(u32 *)(r6 +76)\n      9: .123..67.. (0f) r3 += r1\n     10: ..23..67.. (b4) w0 = -134\n     11: 0.23..67.. (07) r3 += 20\n     12: 0.23..67.. (2d) if r3 > r2 goto pc+118\n     13: 0.....67.. (18) r1 = 0xffffcd1a009b603c\n     15: 01....67.. (61) r1 = *(u32 *)(r1 +0)\n     16: 0.....67.. (61) r1 = *(u32 *)(r6 +44)\n     17: 01....67.. (63) *(u32 *)(r10 -32) = r1\n     18: 01....67.. (61) r2 = *(u32 *)(r10 -32)\n     19: 012...67.. (63) *(u32 *)(r10 -32) = r1\n     20: 0.2...67.. (54) w2 &= 1\n     21: 0.2...67.. (61) r1 = *(u32 *)(r10 -32)\n     22: 012...67.. (54) w1 &= 2\n     23: 012...67.. (4c) w1 |= w2\n     24: 01....67.. (b4) w8 = 1\n     25: 01....678. (56) if w1 != 0x0 goto pc+1\n     26: 0.....67.. (b4) w8 = 0\n     27: 0.....678. (18) r1 = 0xffffcd1a009b6004\n     29: 01....678. (71) r1 = *(u8 *)(r1 +0)\n     30: 01....678. (61) r2 = *(u32 *)(r6 +80)\n     31: 012...678. (61) r9 = *(u32 *)(r6 +76)\n     32: 012...6789 (0f) r9 += r1\n     33: 0.2...6789 (bf) r1 = r9\n     34: 012...6789 (07) r1 += 20\n     35: 012...6789 (2d) if r1 > r2 goto pc+95\n     36: ......6789 (61) r1 = *(u32 *)(r9 +16)\n     37: .1....6789 (b7) r2 = 0\n     38: .12...6789 (63) *(u32 *)(r10 -16) = r2\n     39: .12...6789 (63) *(u32 *)(r10 -20) = r2\n     40: .12...6789 (63) *(u32 *)(r10 -24) = r2\n     41: .12...6789 (63) *(u32 *)(r10 -28) = r2\n     42: .1....6789 (63) *(u32 *)(r10 -32) = r1\n     43: ......6789 (b4) w1 = 1\n     44: .1....6789 (73) *(u8 *)(r10 -16) = r1\n     45: ......6789 (bf) r2 = r10\n     46: ..2...6789 (07) r2 += -32\n     47: ..2...6789 (18) r1 = 0xffff8bbac1600c00\n     49: .12...6789 (85) call bpf_map_lookup_elem#1\n     50: 0.....6789 (15) if r0 == 0x0 goto pc+43\n     51: 0.....67.9 (18) r1 = 0xffffcd1a009b6004\n     53: 01....67.9 (71) r2 = *(u8 *)(r1 +0)\n     54: 0.2...67.9 (61) r1 = *(u32 *)(r0 +8)\n     55: 012...67.9 (54) w1 &= 3\n     56: 012...67.9 (56) if w1 != 0x0 goto pc+62\n     57: 0.2...67.9 (79) r1 = *(u64 *)(r0 +24)\n     58: 012...67.9 (7b) *(u64 *)(r10 -40) = r1\n     59: 0.2...67.9 (79) r1 = *(u64 *)(r0 +16)\n     60: 012...67.9 (7b) *(u64 *)(r10 -48) = r1\n     61: 0.2...67.9 (71) r3 = *(u8 *)(r9 +8)\n     62: 0.23..67.9 (a6) if w3 < 0x2 goto pc+95\n     63: 0.23..67.9 (bf) r8 = r0\n     64: ..23..6789 (bc) w4 = w3\n     65: ..234.6789 (04) w4 += -1\n     66: ..234.6789 (73) *(u8 *)(r9 +8) = r4\n     67: ..234.678. (04) w2 += 10\n     68: ..234.678. (54) w4 &= 255\n     69: ..234.678. (bf) r1 = r6\n     70: .1234.678. (b4) w5 = 2\n     71: .12345678. (85) call bpf_l3_csum_replace#10\n     72: 0.....678. (c6) if w0 s< 0x0 goto pc+105\n     73: ......678. (bf) r3 = r10\n     74: ...3..678. (07) r3 += -40\n     75: ...3..678. (bf) r1 = r6\n     76: .1.3..678. (b4) w2 = 6\n     77: .123..678. (b4) w4 = 6\n     78: .1234.678. (b4) w5 = 0\n     79: .12345678. (85) call bpf_skb_store_bytes#9\n     80: 0.....678. (bc) w1 = w0\n     81: .1....678. (b4) w0 = -141\n     82: 01....678. (c6) if w1 s< 0x0 goto pc+48\n     83: ......678. (bf) r3 = r10\n     84: ...3..678. (07) r3 += -48\n     85: ...3..678. (bf) r1 = r6\n     86: .1.3..678. (b4) w2 = 0\n     87: .123..678. (b4) w4 = 6\n     88: .1234.678. (b4) w5 = 0\n     89: .12345678. (85) call bpf_skb_store_bytes#9\n     90: 0.....678. (bc) w1 = w0\n     91: .1....678. (b4) w0 = -141\n     92: 01....678. (c6) if w1 s< 0x0 goto pc+38\n     93: ......678. (05) goto pc+88\n     94: ......6789 (61) r1 = *(u32 *)(r9 +16)\n     95: .1....678. (b4) w2 = 0\n     96: .12...678. (63) *(u32 *)(r10 -12) = r2\n     97: .12...678. (63) *(u32 *)(r10 -16) = r2\n     98: .12...678. (63) *(u32 *)(r10 -20) = r2\n     99: .1....678. (63) *(u32 *)(r10 -24) = r1\n    100: ......678. (b4) w1 = 64\n    101: .1....678. (63) *(u32 *)(r10 -32) = r1\n    102: ......678. (b4) w1 = 16777216\n    103: .1....678\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 150
+          }
+        ],
+        "exit_code": 1,
+        "program_counts": {
+          "applied": 31,
+          "not_applied": 7,
+          "requested": 38
+        }
+      },
+      "runner": "cilium",
+      "selected_workload": "network_lossy_multi",
+      "status": "ok"
+    },
+    {
+      "app": "tetragon/observer",
+      "baseline": {
+        "bpf": {
+          "174": {
+            "bytes_jited": 1012,
+            "bytes_xlated": 1792,
+            "id": 174,
+            "name": "event_exit_acct_process",
+            "run_cnt_delta": 7748,
+            "run_time_ns_delta": 10780241,
+            "type": "kprobe"
+          },
+          "176": {
+            "bytes_jited": 7335,
+            "bytes_xlated": 11312,
+            "id": 176,
+            "name": "event_wake_up_new_task",
+            "run_cnt_delta": 8803,
+            "run_time_ns_delta": 17755311,
+            "type": "kprobe"
+          },
+          "177": {
+            "bytes_jited": 4992,
+            "bytes_xlated": 8064,
+            "id": 177,
+            "name": "execve_send",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "178": {
+            "bytes_jited": 11213,
+            "bytes_xlated": 20272,
+            "id": 178,
+            "name": "event_execve",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 11233,
+            "type": "tracepoint"
+          },
+          "179": {
+            "bytes_jited": 1381,
+            "bytes_xlated": 2352,
+            "id": 179,
+            "name": "execve_rate",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "180": {
+            "bytes_jited": 1533,
+            "bytes_xlated": 2560,
+            "id": 180,
+            "name": "tg_kp_bprm_committing_creds",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 1365,
+            "type": "kprobe"
+          },
+          "181": {
+            "bytes_jited": 303,
+            "bytes_xlated": 504,
+            "id": 181,
+            "name": "execve_map_update",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "socket_filter"
+          },
+          "184": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 184,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "185": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 185,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "186": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 186,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "187": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 187,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "188": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 188,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "189": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 189,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "190": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 190,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "191": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 191,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "192": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 192,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "193": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 193,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "194": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 194,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "195": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 195,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "196": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 196,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "197": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 197,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "198": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 198,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "199": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 199,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "200": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 200,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "201": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 201,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "202": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 202,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "203": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 203,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "204": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 204,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "205": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 205,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "206": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 206,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 40904,
+            "run_time_ns_delta": 35068190,
+            "type": "kprobe"
+          },
+          "207": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 207,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "208": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 208,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "209": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 209,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "210": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 210,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "211": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 211,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "212": {
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 212,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "213": {
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 213,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "214": {
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 214,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "215": {
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 215,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 40904,
+            "run_time_ns_delta": 22707735,
+            "type": "kprobe"
+          },
+          "216": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 216,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "217": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 217,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "218": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 218,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "219": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 219,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "220": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 220,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 46011,
+            "run_time_ns_delta": 48253453,
+            "type": "kprobe"
+          },
+          "221": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 221,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "222": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 222,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "223": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 223,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "224": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 224,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "225": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 225,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "226": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 226,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "227": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 227,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "228": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 228,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "229": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 229,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "230": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 230,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "231": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 231,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "232": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 232,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "233": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 233,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "234": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 234,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "235": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 235,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "236": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 236,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 40904,
+            "run_time_ns_delta": 33541288,
+            "type": "kprobe"
+          },
+          "237": {
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 237,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "238": {
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 238,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "239": {
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 239,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "240": {
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 240,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 40904,
+            "run_time_ns_delta": 25163513,
+            "type": "kprobe"
+          },
+          "241": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 241,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "242": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 242,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "243": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 243,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "244": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 244,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 46011,
+            "run_time_ns_delta": 47553819,
+            "type": "kprobe"
+          },
+          "245": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 245,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "246": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 246,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "247": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 247,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "248": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 248,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "249": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 249,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "250": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 250,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "251": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 251,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "252": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 252,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 699122,
+            "run_time_ns_delta": 638892900,
+            "type": "kprobe"
+          },
+          "253": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 253,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "254": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 254,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "255": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 255,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "256": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 256,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 926230,
+            "run_time_ns_delta": 961116365,
+            "type": "kprobe"
+          },
+          "257": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 257,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "258": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 258,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "259": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 259,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "260": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 260,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "261": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 261,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "262": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 262,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "263": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 263,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "264": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 264,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "265": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 265,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "266": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 266,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "267": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 267,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "268": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 268,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "269": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 269,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "270": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 270,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "271": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 271,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "272": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 272,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "273": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 273,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "274": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 274,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "275": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 275,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "276": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 276,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "277": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 277,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "278": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 278,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "279": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 279,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "280": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 280,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 756290,
+            "run_time_ns_delta": 153406855,
+            "type": "kprobe"
+          },
+          "281": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 281,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "282": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 282,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "283": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 283,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "284": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 284,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "285": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 285,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "286": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 286,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 1892436,
+            "run_time_ns_delta": 995474717,
+            "type": "kprobe"
+          },
+          "287": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 287,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "288": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 288,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "289": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 289,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "290": {
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 290,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "291": {
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 291,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "292": {
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 292,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "293": {
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 293,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 1892435,
+            "run_time_ns_delta": 74907880,
+            "type": "kprobe"
+          },
+          "294": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 294,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "295": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 295,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 236155,
+            "run_time_ns_delta": 1343455809,
+            "type": "kprobe"
+          },
+          "296": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 296,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "297": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 297,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "298": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 298,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "299": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 299,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "300": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 300,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "301": {
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 301,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 236155,
+            "run_time_ns_delta": 12897450,
+            "type": "kprobe"
+          },
+          "302": {
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 302,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "303": {
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 303,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "304": {
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 304,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "305": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 305,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "306": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 306,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "307": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 307,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "308": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 308,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "309": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 309,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "310": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 310,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "311": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 311,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 53,
+            "run_time_ns_delta": 374551,
+            "type": "kprobe"
+          },
+          "312": {
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 312,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "313": {
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 313,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 53,
+            "run_time_ns_delta": 24294,
+            "type": "kprobe"
+          },
+          "314": {
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 314,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "315": {
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 315,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "316": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 316,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "317": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 317,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "318": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 318,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "319": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 319,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "320": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 320,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "321": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 321,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "322": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 322,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "323": {
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 323,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "324": {
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 324,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "325": {
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 325,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "326": {
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 326,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "327": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 327,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "328": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 328,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "329": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 329,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "330": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 330,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "331": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 331,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "332": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 332,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "333": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 333,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "334": {
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 334,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "335": {
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 335,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "336": {
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 336,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "337": {
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 337,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "338": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 338,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "339": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 339,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "340": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 340,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "341": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 341,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "342": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 342,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "343": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 343,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "344": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 344,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "345": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 345,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "346": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 346,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "347": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 347,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "348": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 348,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "349": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 349,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "350": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 350,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "351": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 351,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "352": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 352,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "353": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 353,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "354": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 354,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "355": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 355,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "356": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 356,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "357": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 357,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "358": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 358,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 8278,
+            "type": "kprobe"
+          },
+          "359": {
+            "bytes_jited": 11087,
+            "bytes_xlated": 17992,
+            "id": 359,
+            "name": "generic_tracepoint_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "360": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 360,
+            "name": "generic_tracepoint_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "361": {
+            "bytes_jited": 14876,
+            "bytes_xlated": 25720,
+            "id": 361,
+            "name": "generic_tracepoint_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "362": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 362,
+            "name": "generic_tracepoint_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "363": {
+            "bytes_jited": 4754,
+            "bytes_xlated": 8504,
+            "id": 363,
+            "name": "generic_tracepoint_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "364": {
+            "bytes_jited": 10899,
+            "bytes_xlated": 19392,
+            "id": 364,
+            "name": "generic_tracepoint_event",
+            "run_cnt_delta": 37464159,
+            "run_time_ns_delta": 35892379568,
+            "type": "tracepoint"
+          },
+          "365": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 365,
+            "name": "generic_rawtp_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "366": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 366,
+            "name": "generic_rawtp_event",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 9368,
+            "type": "raw_tracepoint"
+          },
+          "367": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 367,
+            "name": "generic_rawtp_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "368": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 368,
+            "name": "generic_rawtp_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "369": {
+            "bytes_jited": 741,
+            "bytes_xlated": 1176,
+            "id": 369,
+            "name": "generic_rawtp_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "370": {
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 370,
+            "name": "generic_rawtp_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "371": {
+            "bytes_jited": 17059,
+            "bytes_xlated": 29456,
+            "id": 371,
+            "name": "generic_rawtp_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "372": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 372,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "373": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 373,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 15923,
+            "run_time_ns_delta": 24535241,
+            "type": "kprobe"
+          },
+          "374": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 374,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "375": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 375,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "376": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 376,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "377": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 377,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "378": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 378,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "379": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 379,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "380": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 380,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "381": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 381,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "382": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 382,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 58773,
+            "run_time_ns_delta": 189561850,
+            "type": "kprobe"
+          },
+          "383": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 383,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "384": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 384,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "385": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 385,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "386": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 386,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "387": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 387,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "388": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 388,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "389": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 389,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "390": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 390,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "391": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 391,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "392": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 392,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "393": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 393,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "394": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 394,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "395": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 395,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "396": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 396,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "397": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 397,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "398": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 398,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 40904,
+            "run_time_ns_delta": 35996483,
+            "type": "kprobe"
+          },
+          "399": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 399,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "400": {
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 400,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "401": {
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 401,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 40904,
+            "run_time_ns_delta": 27116953,
+            "type": "kprobe"
+          },
+          "402": {
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 402,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "403": {
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 403,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "404": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 404,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "405": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 405,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "406": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 406,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 46011,
+            "run_time_ns_delta": 48008451,
+            "type": "kprobe"
+          },
+          "407": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 407,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "408": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 408,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "409": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 409,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "410": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 410,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "411": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 411,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "412": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 412,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "413": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 413,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 108388,
+            "run_time_ns_delta": 62034170,
+            "type": "kprobe"
+          },
+          "414": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 414,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "415": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 415,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "416": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 416,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "417": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 417,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "418": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 418,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "419": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 419,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "420": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 420,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "421": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 421,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "422": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 422,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "423": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 423,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "424": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 424,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 27826,
+            "run_time_ns_delta": 35187651,
+            "type": "kprobe"
+          },
+          "425": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 425,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "426": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 426,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "427": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 427,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "428": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 428,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "429": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 429,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "430": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 430,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "431": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 431,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 13909,
+            "run_time_ns_delta": 19445375,
+            "type": "kprobe"
+          },
+          "432": {
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 432,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "433": {
+            "bytes_jited": 799,
+            "bytes_xlated": 1360,
+            "id": 433,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "434": {
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 434,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 13909,
+            "run_time_ns_delta": 24021022,
+            "type": "kprobe"
+          },
+          "435": {
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 435,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "436": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 436,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "437": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 437,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "438": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 438,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "439": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 439,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "440": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 440,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 13910,
+            "run_time_ns_delta": 22760447,
+            "type": "kprobe"
+          },
+          "441": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 441,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "442": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 442,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "443": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 443,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "444": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 444,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "445": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 445,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 27826,
+            "run_time_ns_delta": 33636375,
+            "type": "kprobe"
+          },
+          "446": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 446,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "447": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 447,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "448": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 448,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "449": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 449,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "450": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 450,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "451": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 451,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "452": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 452,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "453": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 453,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "454": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 454,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 524392,
+            "run_time_ns_delta": 594949769,
+            "type": "kprobe"
+          },
+          "455": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 455,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "456": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 456,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "457": {
+            "bytes_jited": 1722,
+            "bytes_xlated": 3056,
+            "id": 457,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "458": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 458,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "459": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 459,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "460": {
+            "bytes_jited": 1877,
+            "bytes_xlated": 3160,
+            "id": 460,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "461": {
+            "bytes_jited": 17149,
+            "bytes_xlated": 29456,
+            "id": 461,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "462": {
+            "bytes_jited": 1313,
+            "bytes_xlated": 2240,
+            "id": 462,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "463": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 463,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.240788097999996,
+            "ops_per_sec": 13853983.531161664,
+            "ops_total": 72605792.0,
+            "stderr": "",
+            "stdout": "stress-ng: metrc: [23165] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [23165]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [23165] cap              436348      5.02      0.11      4.19     86972.15      101585.12\nstress-ng: metrc: [23165] eventfd           58802      5.01      0.05      1.06     11741.10       53235.82\nstress-ng: metrc: [23165] get                1797      5.01      0.12      0.92       358.74        1721.28\nstress-ng: metrc: [23165] prctl              4342      5.00      2.43      0.81       867.79        1340.07\nstress-ng: metrc: [23165] set               32100      5.04      0.10      3.79      6372.23        8246.01\nstress-ng: metrc: [23165] dup                1556      5.02      0.38      0.39       310.22        2013.89\nstress-ng: metrc: [23165] kill              36105      5.05      0.08      3.12      7149.63       11277.05\nstress-ng: metrc: [23165] sigfd            325972      5.10      0.04      1.73     63923.54      183660.99\nstress-ng: metrc: [23165] signal                0      5.02      0.01      0.00         0.00           0.00\nstress-ng: metrc: [23165] pty                  72      5.06      0.06      4.68        14.23          15.18\nstress-ng: metrc: [23165] itimer              228      5.05      0.10      2.00        45.17         108.77\nstress-ng: metrc: [23165] timerfd          376832      5.10      0.05      3.14     73829.72      117874.41\nstress-ng: metrc: [23165] aio               30625      5.08      0.02      0.27      6033.20      103220.48\nstress-ng: metrc: [23165] aiol               6111      5.17      0.07      0.76      1182.22        7307.10\nstress-ng: metrc: [23165] hdd               50010      5.08      0.80      0.78      9845.74       31722.09\nstress-ng: metrc: [23165] io                  157      5.06      0.03      0.01        31.04        3536.27\nstress-ng: metrc: [23165] iomix              5403      5.11      0.12      2.77      1058.34        1871.04\nstress-ng: metrc: [23165] io-uring          29828      5.11      0.02      1.58      5838.71       18670.89\nstress-ng: metrc: [23165] sync-file           122      5.10      0.02      1.33        23.92          90.57\nstress-ng: metrc: [23165] epoll              1785      5.10      0.02      0.17       350.21        9404.24\nstress-ng: metrc: [23165] netdev            77838      5.00      0.03      1.75     15559.27       43842.86\nstress-ng: metrc: [23165] sctp               5486      5.00      0.04      0.01      1097.08      123464.01\nstress-ng: metrc: [23165] sock                999      5.06      0.10      2.00       197.43         475.52\nstress-ng: metrc: [23165] sockdiag       67998160      5.06      0.16      4.33  13433440.77    15134655.34\nstress-ng: metrc: [23165] sockfd           168564      5.03      0.01      1.59     33487.10      104936.36\nstress-ng: metrc: [23165] sockpair            363      5.07      0.04      0.15        71.55        1948.74\nstress-ng: metrc: [23165] sockmany          13905      5.07      0.02      1.20      2739.99       11457.12\nstress-ng: metrc: [23165] udp              112791      5.07      0.06      2.52     22264.30       43620.24\nstress-ng: metrc: [23165] udp-flood        202950      5.02      0.06      1.71     40415.14      114917.15\nstress-ng: metrc: [23165] mmap                154      5.05      0.02      1.31        30.50         116.28\nstress-ng: metrc: [23165] mprotect        2623613      5.07      0.71     15.42    517472.57      162583.22\nstress-ng: metrc: [23165] mremap             2695      5.02      0.05      2.57       536.35        1028.49\nstress-ng: metrc: [23165] madvise              79      5.05      0.13      4.24        15.64          18.05\nstress-ng: info:  [23165] skipped: 0\nstress-ng: info:  [23165] passed: 132: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4)\nstress-ng: info:  [23165] failed: 0\nstress-ng: info:  [23165] metrics untrustworthy: 0\nstress-ng: info:  [23165] successful run completed in 5.22 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "174": {
+            "bytes_jited": 1029,
+            "bytes_xlated": 1872,
+            "id": 174,
+            "name": "event_exit_acct_process",
+            "run_cnt_delta": 7660,
+            "run_time_ns_delta": 9906295,
+            "type": "kprobe"
+          },
+          "176": {
+            "bytes_jited": 7128,
+            "bytes_xlated": 11152,
+            "id": 176,
+            "name": "event_wake_up_new_task",
+            "run_cnt_delta": 8737,
+            "run_time_ns_delta": 18822775,
+            "type": "kprobe"
+          },
+          "177": {
+            "bytes_jited": 4992,
+            "bytes_xlated": 8064,
+            "id": 177,
+            "name": "execve_send",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "178": {
+            "bytes_jited": 11213,
+            "bytes_xlated": 20272,
+            "id": 178,
+            "name": "event_execve",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 16181,
+            "type": "tracepoint"
+          },
+          "179": {
+            "bytes_jited": 1395,
+            "bytes_xlated": 2416,
+            "id": 179,
+            "name": "execve_rate",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "180": {
+            "bytes_jited": 1541,
+            "bytes_xlated": 2592,
+            "id": 180,
+            "name": "tg_kp_bprm_committing_creds",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 1909,
+            "type": "kprobe"
+          },
+          "181": {
+            "bytes_jited": 303,
+            "bytes_xlated": 504,
+            "id": 181,
+            "name": "execve_map_update",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "socket_filter"
+          },
+          "184": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 184,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "185": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 185,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "186": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 186,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "187": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 187,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "188": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 188,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "189": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 189,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "190": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 190,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "191": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 191,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "192": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 192,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "193": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 193,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "194": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 194,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "195": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 195,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "196": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 196,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "197": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 197,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "198": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 198,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "199": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 199,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "200": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 200,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "201": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 201,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "202": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 202,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "203": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 203,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "204": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 204,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "205": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 205,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "206": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 206,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 47395,
+            "run_time_ns_delta": 51462791,
+            "type": "kprobe"
+          },
+          "207": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 207,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "208": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 208,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "209": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 209,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "210": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 210,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "211": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 211,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "212": {
+            "bytes_jited": 807,
+            "bytes_xlated": 1392,
+            "id": 212,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "213": {
+            "bytes_jited": 3770,
+            "bytes_xlated": 6688,
+            "id": 213,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "214": {
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 214,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "215": {
+            "bytes_jited": 14043,
+            "bytes_xlated": 24744,
+            "id": 215,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 47395,
+            "run_time_ns_delta": 49881660,
+            "type": "kprobe"
+          },
+          "216": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 216,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "217": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 217,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "218": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 218,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "219": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 219,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "220": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 220,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 60600,
+            "run_time_ns_delta": 77920479,
+            "type": "kprobe"
+          },
+          "221": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 221,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "222": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 222,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "223": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 223,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "224": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 224,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "225": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 225,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "226": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 226,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "227": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 227,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "228": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 228,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "229": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 229,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "230": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 230,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "231": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 231,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "232": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 232,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "233": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 233,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "234": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 234,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "235": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 235,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "236": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 236,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 47395,
+            "run_time_ns_delta": 49622618,
+            "type": "kprobe"
+          },
+          "237": {
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 237,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "238": {
+            "bytes_jited": 807,
+            "bytes_xlated": 1392,
+            "id": 238,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "239": {
+            "bytes_jited": 3788,
+            "bytes_xlated": 6784,
+            "id": 239,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "240": {
+            "bytes_jited": 14078,
+            "bytes_xlated": 24872,
+            "id": 240,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 47395,
+            "run_time_ns_delta": 56227476,
+            "type": "kprobe"
+          },
+          "241": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 241,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "242": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 242,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "243": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 243,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "244": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 244,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 60600,
+            "run_time_ns_delta": 73579347,
+            "type": "kprobe"
+          },
+          "245": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 245,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "246": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 246,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "247": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 247,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "248": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 248,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "249": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 249,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "250": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 250,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "251": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 251,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "252": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 252,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 724980,
+            "run_time_ns_delta": 831726889,
+            "type": "kprobe"
+          },
+          "253": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 253,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "254": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 254,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "255": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 255,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "256": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 256,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 1419372,
+            "run_time_ns_delta": 1480715723,
+            "type": "kprobe"
+          },
+          "257": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 257,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "258": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 258,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "259": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 259,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "260": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 260,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "261": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 261,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "262": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 262,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "263": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 263,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "264": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 264,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "265": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 265,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "266": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 266,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "267": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 267,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "268": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 268,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "269": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 269,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "270": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 270,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "271": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 271,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "272": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 272,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "273": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 273,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "274": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 274,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "275": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 275,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "276": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 276,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "277": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 277,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "278": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 278,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "279": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 279,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "280": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 280,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 860094,
+            "run_time_ns_delta": 183466910,
+            "type": "kprobe"
+          },
+          "281": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 281,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "282": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 282,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "283": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 283,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "284": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 284,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "285": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 285,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "286": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 286,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 1971859,
+            "run_time_ns_delta": 1082488634,
+            "type": "kprobe"
+          },
+          "287": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 287,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "288": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 288,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "289": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 289,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "290": {
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 290,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "291": {
+            "bytes_jited": 807,
+            "bytes_xlated": 1392,
+            "id": 291,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "292": {
+            "bytes_jited": 3788,
+            "bytes_xlated": 6784,
+            "id": 292,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "293": {
+            "bytes_jited": 14078,
+            "bytes_xlated": 24872,
+            "id": 293,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 1971860,
+            "run_time_ns_delta": 83767967,
+            "type": "kprobe"
+          },
+          "294": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 294,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "295": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 295,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 253943,
+            "run_time_ns_delta": 1528026879,
+            "type": "kprobe"
+          },
+          "296": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 296,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "297": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 297,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "298": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 298,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "299": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 299,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "300": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 300,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "301": {
+            "bytes_jited": 14078,
+            "bytes_xlated": 24872,
+            "id": 301,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 253943,
+            "run_time_ns_delta": 15653517,
+            "type": "kprobe"
+          },
+          "302": {
+            "bytes_jited": 807,
+            "bytes_xlated": 1392,
+            "id": 302,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "303": {
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 303,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "304": {
+            "bytes_jited": 3788,
+            "bytes_xlated": 6784,
+            "id": 304,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "305": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 305,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "306": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 306,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "307": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 307,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "308": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 308,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "309": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 309,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "310": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 310,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "311": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 311,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 36,
+            "run_time_ns_delta": 255937,
+            "type": "kprobe"
+          },
+          "312": {
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 312,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "313": {
+            "bytes_jited": 14078,
+            "bytes_xlated": 24872,
+            "id": 313,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 36,
+            "run_time_ns_delta": 16935,
+            "type": "kprobe"
+          },
+          "314": {
+            "bytes_jited": 3788,
+            "bytes_xlated": 6784,
+            "id": 314,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "315": {
+            "bytes_jited": 807,
+            "bytes_xlated": 1392,
+            "id": 315,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "316": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 316,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "317": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 317,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "318": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 318,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "319": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 319,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "320": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 320,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "321": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 321,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "322": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 322,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "323": {
+            "bytes_jited": 807,
+            "bytes_xlated": 1392,
+            "id": 323,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "324": {
+            "bytes_jited": 14078,
+            "bytes_xlated": 24872,
+            "id": 324,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "325": {
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 325,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "326": {
+            "bytes_jited": 3788,
+            "bytes_xlated": 6784,
+            "id": 326,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "327": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 327,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "328": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 328,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "329": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 329,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "330": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 330,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "331": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 331,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "332": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 332,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "333": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 333,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "334": {
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 334,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "335": {
+            "bytes_jited": 3788,
+            "bytes_xlated": 6784,
+            "id": 335,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "336": {
+            "bytes_jited": 807,
+            "bytes_xlated": 1392,
+            "id": 336,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "337": {
+            "bytes_jited": 14078,
+            "bytes_xlated": 24872,
+            "id": 337,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "338": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 338,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "339": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 339,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "340": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 340,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "341": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 341,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "342": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 342,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "343": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 343,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "344": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 344,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "345": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 345,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "346": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 346,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "347": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 347,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "348": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 348,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "349": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 349,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "350": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 350,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "351": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 351,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "352": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 352,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "353": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 353,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "354": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 354,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "355": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 355,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "356": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 356,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "357": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 357,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "358": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 358,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 12163,
+            "type": "kprobe"
+          },
+          "359": {
+            "bytes_jited": 11118,
+            "bytes_xlated": 18152,
+            "id": 359,
+            "name": "generic_tracepoint_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "360": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 360,
+            "name": "generic_tracepoint_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "361": {
+            "bytes_jited": 14893,
+            "bytes_xlated": 25800,
+            "id": 361,
+            "name": "generic_tracepoint_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "362": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 362,
+            "name": "generic_tracepoint_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "363": {
+            "bytes_jited": 4781,
+            "bytes_xlated": 8648,
+            "id": 363,
+            "name": "generic_tracepoint_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          "364": {
+            "bytes_jited": 10963,
+            "bytes_xlated": 19728,
+            "id": 364,
+            "name": "generic_tracepoint_event",
+            "run_cnt_delta": 37870494,
+            "run_time_ns_delta": 35537552898,
+            "type": "tracepoint"
+          },
+          "365": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 365,
+            "name": "generic_rawtp_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "366": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 366,
+            "name": "generic_rawtp_event",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 10486,
+            "type": "raw_tracepoint"
+          },
+          "367": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 367,
+            "name": "generic_rawtp_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "368": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 368,
+            "name": "generic_rawtp_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "369": {
+            "bytes_jited": 741,
+            "bytes_xlated": 1176,
+            "id": 369,
+            "name": "generic_rawtp_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "370": {
+            "bytes_jited": 3788,
+            "bytes_xlated": 6784,
+            "id": 370,
+            "name": "generic_rawtp_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "371": {
+            "bytes_jited": 17087,
+            "bytes_xlated": 29584,
+            "id": 371,
+            "name": "generic_rawtp_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "372": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 372,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "373": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 373,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 27975,
+            "run_time_ns_delta": 43393300,
+            "type": "kprobe"
+          },
+          "374": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 374,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "375": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 375,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "376": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 376,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "377": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 377,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "378": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 378,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "379": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 379,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "380": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 380,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "381": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 381,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "382": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 382,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 35314,
+            "run_time_ns_delta": 153007404,
+            "type": "kprobe"
+          },
+          "383": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 383,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "384": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 384,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "385": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 385,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "386": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 386,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "387": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 387,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "388": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 388,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "389": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 389,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "390": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 390,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "391": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 391,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "392": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 392,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "393": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 393,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "394": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 394,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "395": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 395,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "396": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 396,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "397": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 397,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "398": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 398,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 47395,
+            "run_time_ns_delta": 53329961,
+            "type": "kprobe"
+          },
+          "399": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 399,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "400": {
+            "bytes_jited": 3788,
+            "bytes_xlated": 6784,
+            "id": 400,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "401": {
+            "bytes_jited": 14078,
+            "bytes_xlated": 24872,
+            "id": 401,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 47395,
+            "run_time_ns_delta": 58394760,
+            "type": "kprobe"
+          },
+          "402": {
+            "bytes_jited": 807,
+            "bytes_xlated": 1392,
+            "id": 402,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "403": {
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 403,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "404": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 404,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "405": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 405,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "406": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 406,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 60600,
+            "run_time_ns_delta": 73933716,
+            "type": "kprobe"
+          },
+          "407": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 407,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "408": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 408,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "409": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 409,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "410": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 410,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "411": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 411,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "412": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 412,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "413": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 413,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 167974,
+            "run_time_ns_delta": 105534555,
+            "type": "kprobe"
+          },
+          "414": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 414,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "415": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 415,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "416": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 416,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "417": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 417,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "418": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 418,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "419": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 419,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "420": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 420,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "421": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 421,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "422": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 422,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "423": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 423,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "424": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 424,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 42220,
+            "run_time_ns_delta": 59026510,
+            "type": "kprobe"
+          },
+          "425": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 425,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "426": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 426,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "427": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 427,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "428": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 428,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "429": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 429,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "430": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 430,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "431": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 431,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 21104,
+            "run_time_ns_delta": 30913935,
+            "type": "kprobe"
+          },
+          "432": {
+            "bytes_jited": 3788,
+            "bytes_xlated": 6784,
+            "id": 432,
+            "name": "generic_retkprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "433": {
+            "bytes_jited": 807,
+            "bytes_xlated": 1392,
+            "id": 433,
+            "name": "generic_retkprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "434": {
+            "bytes_jited": 14078,
+            "bytes_xlated": 24872,
+            "id": 434,
+            "name": "generic_retkprobe_event",
+            "run_cnt_delta": 21104,
+            "run_time_ns_delta": 41492430,
+            "type": "kprobe"
+          },
+          "435": {
+            "bytes_jited": 10581,
+            "bytes_xlated": 17344,
+            "id": 435,
+            "name": "generic_retkprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "436": {
+            "bytes_jited": 11080,
+            "bytes_xlated": 17992,
+            "id": 436,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "437": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 437,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "438": {
+            "bytes_jited": 4893,
+            "bytes_xlated": 8752,
+            "id": 438,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "439": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 439,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "440": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 440,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 21105,
+            "run_time_ns_delta": 35806601,
+            "type": "kprobe"
+          },
+          "441": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 441,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "442": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 442,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "443": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 443,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "444": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 444,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "445": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 445,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 42220,
+            "run_time_ns_delta": 58184751,
+            "type": "kprobe"
+          },
+          "446": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 446,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "447": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 447,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "448": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 448,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "449": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 449,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "450": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 450,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "451": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 451,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "452": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 452,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "453": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 453,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "454": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 454,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 332810,
+            "run_time_ns_delta": 380285160,
+            "type": "kprobe"
+          },
+          "455": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 455,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "456": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 456,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "457": {
+            "bytes_jited": 1730,
+            "bytes_xlated": 3088,
+            "id": 457,
+            "name": "generic_kprobe_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "458": {
+            "bytes_jited": 11111,
+            "bytes_xlated": 18152,
+            "id": 458,
+            "name": "generic_kprobe_process_filter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "459": {
+            "bytes_jited": 4923,
+            "bytes_xlated": 8912,
+            "id": 459,
+            "name": "generic_kprobe_actions",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "460": {
+            "bytes_jited": 1885,
+            "bytes_xlated": 3192,
+            "id": 460,
+            "name": "generic_kprobe_output",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "461": {
+            "bytes_jited": 17177,
+            "bytes_xlated": 29584,
+            "id": 461,
+            "name": "generic_kprobe_process_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "462": {
+            "bytes_jited": 1324,
+            "bytes_xlated": 2272,
+            "id": 462,
+            "name": "generic_kprobe_setup_event",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "463": {
+            "bytes_jited": 10676,
+            "bytes_xlated": 17544,
+            "id": 463,
+            "name": "generic_kprobe_filter_arg",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.2673737049999545,
+            "ops_per_sec": 3072794.3196124793,
+            "ops_total": 16185556.0,
+            "stderr": "",
+            "stdout": "stress-ng: metrc: [10935] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [10935]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [10935] cap              240330      5.06      0.13      2.32     47492.65       98115.98\nstress-ng: metrc: [10935] eventfd           89930      5.00      0.12      1.52     17982.25       54551.27\nstress-ng: metrc: [10935] get                2908      5.02      0.10      1.46       578.83        1871.32\nstress-ng: metrc: [10935] prctl              4406      5.01      2.43      0.81       879.74        1356.41\nstress-ng: metrc: [10935] set               16437      5.11      0.09      1.84      3214.73        8512.32\nstress-ng: metrc: [10935] dup                1480      5.03      0.39      0.36       294.26        1963.35\nstress-ng: metrc: [10935] kill              24509      5.06      0.09      1.64      4845.73       14230.65\nstress-ng: metrc: [10935] sigfd            561284      5.09      0.10      3.10    110311.90      175536.14\nstress-ng: metrc: [10935] signal                0      5.09      0.00      0.00         0.00           0.00\nstress-ng: metrc: [10935] pty                  65      5.04      0.07      3.01        12.89          21.12\nstress-ng: metrc: [10935] itimer              283      5.07      0.04      2.29        55.81         121.72\nstress-ng: metrc: [10935] timerfd          201728      5.10      0.12      1.65     39557.22      114254.00\nstress-ng: metrc: [10935] aio               20383      5.04      0.03      0.17      4046.55      101949.15\nstress-ng: metrc: [10935] aiol               4886      5.21      0.10      0.63       937.36        6715.17\nstress-ng: metrc: [10935] hdd               45886      5.01      0.60      0.90      9150.94       30533.91\nstress-ng: metrc: [10935] io                  107      5.02      0.02      0.02        21.33        2660.57\nstress-ng: metrc: [10935] iomix              3950      5.13      0.13      2.61       770.21        1444.81\nstress-ng: metrc: [10935] io-uring          23868      5.12      0.00      1.46      4657.93       16300.03\nstress-ng: metrc: [10935] sync-file           101      5.02      0.07      1.01        20.13          93.24\nstress-ng: metrc: [10935] epoll               519      5.13      0.06      0.02       101.09        6737.81\nstress-ng: metrc: [10935] netdev           120154      5.04      0.11      2.76     23843.98       41942.49\nstress-ng: metrc: [10935] sctp              18122      5.04      0.00      0.85      3595.67       21184.72\nstress-ng: metrc: [10935] sock                610      5.06      0.04      1.27       120.55         463.08\nstress-ng: metrc: [10935] sockdiag       10984903      5.03      0.02      2.26   2183337.03     4823607.65\nstress-ng: metrc: [10935] sockfd           223211      5.08      0.11      1.96     43973.48      108217.85\nstress-ng: metrc: [10935] sockpair            701      5.12      0.01      0.21       136.97        3102.03\nstress-ng: metrc: [10935] sockmany          21103      5.14      0.02      2.10      4108.71        9959.30\nstress-ng: metrc: [10935] udp              163204      5.01      0.05      3.62     32583.15       44450.58\nstress-ng: metrc: [10935] udp-flood        355794      5.01      0.04      2.45     71057.48      142697.29\nstress-ng: metrc: [10935] mmap                162      5.02      0.00      1.78        32.30          90.91\nstress-ng: metrc: [10935] mprotect        3051230      5.05      0.85     18.98    604741.09      153893.80\nstress-ng: metrc: [10935] mremap             3227      5.01      0.05      2.80       644.27        1129.84\nstress-ng: metrc: [10935] madvise              75      5.01      0.21      4.13        14.96          17.29\nstress-ng: info:  [10935] skipped: 0\nstress-ng: info:  [10935] passed: 132: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4)\nstress-ng: info:  [10935] failed: 0\nstress-ng: info:  [10935] metrics untrustworthy: 0\nstress-ng: info:  [10935] successful run completed in 5.24 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "prog 177: prog 177 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 7: Argument list too long (os error 7)\nverifier log summary:\nfunc#0 @0\nfunc#1 @844\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r7 = 0\n      2: ......67.. (63) *(u32 *)(r10 -88) = r7\n      3: ......67.. (bf) r2 = r10\n      4: ..2...67.. (07) r2 += -88\n      5: ..2...67.. (18) r1 = 0xffff8bc003cb5800\n      7: .12...67.. (85) call bpf_map_lookup_elem#1\n      8: 0.....67.. (15) if r0 == 0x0 goto pc+821\n      9: 0.....67.. (7b) *(u64 *)(r10 -120) = r6\n     10: 0......7.. (bf) r8 = r0\n     11: 0......78. (bf) r6 = r0\n     12: ......678. (85) call bpf_get_current_task#35\n     13: 0.....678. (b7) r1 = 2680\n     14: 01....678. (0f) r0 += r1\n     15: 0.....678. (bf) r1 = r10\n     16: 01....678. (07) r1 += -72\n     17: 01....678. (b7) r2 = 8\n     18: 012...678. (bf) r3 = r0\n     19: .123..678. (85) call bpf_probe_read#4\n     20: ......678. (b7) r1 = 1448\n     21: .1....678. (79) r3 = *(u64 *)(r10 -72)\n     22: .1.3..678. (0f) r3 += r1\n     23: ...3..678. (bf) r1 = r10\n     24: .1.3..678. (07) r1 += -64\n     25: .1.3..678. (b7) r2 = 8\n     26: .123..678. (85) call bpf_probe_read#4\n     27: ......678. (79) r9 = *(u64 *)(r10 -64)\n     28: ......6789 (63) *(u32 *)(r10 -84) = r7\n     29: ......6.89 (bf) r2 = r10\n     30: ..2...6.89 (07) r2 += -84\n     31: ..2...6.89 (18) r1 = 0xffff8bba06350800\n     33: .12...6.89 (85) call bpf_map_lookup_elem#1\n     34: 0.....6.89 (7b) *(u64 *)(r10 -104) = r6\n     35: 0.....6.89 (07) r6 += 5808\n     36: 0.....6.89 (7b) *(u64 *)(r10 -112) = r6\n     37: 0.......89 (bf) r2 = r8\n     38: 0.2.....89 (7b) *(u64 *)(r10 -96) = r8\n     39: 0.2......9 (bf) r8 = r0\n     40: ..2.....89 (55) if r8 != 0x0 goto pc+1\n     41: .......... (05) goto pc+254\n     42: ..2.....89 (b7) r1 = 64\n     43: .12.....89 (0f) r9 += r1\n     44: ..2.....89 (b7) r1 = 4096\n     45: .12.....89 (63) *(u32 *)(r2 +6192) = r1\n     46: ........89 (85) call bpf_get_current_task#35\n     47: 0.......89 (b7) r1 = 3408\n     48: 01......89 (0f) r0 += r1\n     49: 0.......89 (bf) r1 = r10\n     50: 01......89 (07) r1 += -80\n     51: 01......89 (b7) r2 = 8\n     52: 012.....89 (bf) r3 = r0\n     53: .123....89 (85) call bpf_probe_read#4\n     54: ........89 (b7) r1 = 8\n     55: .1......89 (7b) *(u64 *)(r10 -128) = r9\n     56: .1......89 (0f) r9 += r1\n     57: ........89 (79) r7 = *(u64 *)(r10 -80)\n     58: .......789 (bf) r1 = r10\n     59: .1.....789 (07) r1 += -72\n     60: .1.....789 (b7) r2 = 8\n     61: .12....789 (7b) *(u64 *)(r10 -136) = r9\n     62: .12....789 (bf) r3 = r9\n     63: .123...78. (85) call bpf_probe_read#4\n     64: .......78. (b7) r1 = 8\n     65: .1.....78. (79) r6 = *(u64 *)(r10 -72)\n     66: .1....678. (bf) r3 = r6\n     67: .1.3..678. (0f) r3 += r1\n     68: ...3..678. (b7) r1 = 8\n     69: .1.3..678. (0f) r3 += r1\n     70: ...3..678. (bf) r1 = r10\n     71: .1.3..678. (07) r1 += -64\n     72: .1.3..678. (b7) r2 = 8\n     73: .123..678. (85) call bpf_probe_read#4\n     74: ......678. (79) r3 = *(u64 *)(r10 -96)\n     75: ...3..678. (bf) r9 = r8\n     76: ...3..6789 (07) r9 += 4096\n     77: ...3..6789 (79) r1 = *(u64 *)(r10 -64)\n     78: .1.3..6789 (55) if r1 != 0x0 goto pc+41\n     79: ......6789 (b7) r1 = 24\n     80: .1....6789 (bf) r3 = r6\n     81: .1.3..6789 (0f) r3 += r1\n     82: ...3..6789 (bf) r1 = r10\n     83: .1.3..6789 (07) r1 += -64\n     84: .1.3..6789 (b7) r2 = 8\n     85: .123..6789 (85) call bpf_probe_read#4\n     86: ......6789 (79) r3 = *(u64 *)(r10 -96)\n     87: ...3..6789 (79) r1 = *(u64 *)(r10 -64)\n     88: .1.3..6789 (1d) if r1 == r6 goto pc+31\n     89: ...3...789 (61) r1 = *(u32 *)(r3 +6192)\n     90: .1.3...789 (bf) r2 = r1\n     91: .123...789 (07) r2 += -10\n     92: .123...789 (63) *(u32 *)(r3 +6192) = r2\n     93: .123...789 (67) r1 <<= 32\n     94: .123...789 (c7) r1 s>>= 32\n     95: .123...789 (65) if r1 s> 0x9 goto pc+5\n     96: ..23.....9 (18) r1 = 0xffffffdc\n     98: .123.....9 (63) *(u32 *)(r3 +6196) = r1\n     99: ..2......9 (bf) r7 = r9\n    100: ..2....7.. (05) goto pc+93\n    101: ...3...78. (b7) r1 = 41\n    102: .1.3...78. (73) *(u8 *)(r8 +4095) = r1\n    103: ...3...78. (b7) r1 = 116\n    104: .1.3...78. (73) *(u8 *)(r8 +4092) = r1\n    105: ...3\n... verifier log truncated ...; prog 178: prog 178 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 7: Argument list too long (os error 7)\nverifier log summary:\nfunc#0 @0\nfunc#1 @1724\nfunc#2 @1840\nfunc#3 @2033\nfunc#4 @2208\nfunc#5 @2277\nfunc#6 @2300\nfunc#7 @2370\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (85) call bpf_get_current_task#35\n      2: 0.....6... (bf) r9 = r0\n      3: ......6..9 (7b) *(u64 *)(r10 -128) = r6\n      4: ......6..9 (61) r6 = *(u32 *)(r6 +8)\n      5: ......6..9 (b7) r1 = 0\n      6: .1....6..9 (63) *(u32 *)(r10 -120) = r1\n      7: ......6..9 (bf) r2 = r10\n      8: ..2...6..9 (07) r2 += -120\n      9: ..2...6..9 (18) r1 = 0xffff8bc003cb5800\n     11: .12...6..9 (85) call bpf_map_lookup_elem#1\n     12: 0.....6..9 (bf) r7 = r0\n     13: ......67.9 (15) if r7 == 0x0 goto pc+1689\n     14: ......67.9 (7b) *(u64 *)(r10 -144) = r6\n     15: .......7.9 (85) call bpf_get_current_pid_tgid#14\n     16: 0......7.9 (bf) r6 = r0\n     17: ......67.9 (85) call bpf_get_current_task#35\n     18: 0.....67.9 (7b) *(u64 *)(r10 -96) = r0\n     19: 0.....67.9 (b7) r8 = 2816\n     20: 0.....6789 (0f) r0 += r8\n     21: 0.....6789 (bf) r1 = r10\n     22: 01....6789 (07) r1 += -96\n     23: 01....6789 (b7) r2 = 8\n     24: 012...6789 (bf) r3 = r0\n     25: .123..6789 (85) call bpf_probe_read_kernel#113\n     26: ......6789 (7b) *(u64 *)(r10 -160) = r6\n     27: ......6789 (7b) *(u64 *)(r10 -152) = r6\n     28: .......789 (79) r3 = *(u64 *)(r10 -96)\n     29: ...3...789 (7b) *(u64 *)(r10 -136) = r9\n     30: ...3...789 (15) if r3 == 0x0 goto pc+162\n     31: ...3...789 (b7) r1 = 2804\n     32: .1.3...789 (0f) r3 += r1\n     33: ...3...789 (bf) r1 = r10\n     34: .1.3...789 (07) r1 += -8\n     35: .1.3...789 (b7) r2 = 4\n     36: .123...789 (85) call bpf_probe_read_kernel#113\n     37: .......789 (61) r1 = *(u32 *)(r10 -8)\n     38: .1.....789 (63) *(u32 *)(r10 -112) = r1\n     39: .......789 (bf) r2 = r10\n     40: ..2....789 (07) r2 += -112\n     41: ..2....789 (18) r1 = 0xffff8bbe5325ec00\n     43: .12....789 (85) call bpf_map_lookup_elem#1\n     44: 0......789 (bf) r6 = r0\n     45: ......6789 (15) if r6 == 0x0 goto pc+3\n     46: ......6789 (05) goto pc+0\n     47: ......6789 (79) r1 = *(u64 *)(r6 +8)\n     48: .1....6789 (55) if r1 != 0x0 goto pc+81\n     49: .......789 (b7) r1 = 2816\n     50: .1.....789 (79) r3 = *(u64 *)(r10 -96)\n     51: .1.3...789 (0f) r3 += r1\n     52: ...3...789 (bf) r1 = r10\n     53: .1.3...789 (07) r1 += -96\n     54: .1.3...789 (b7) r2 = 8\n     55: .123...789 (85) call bpf_probe_read_kernel#113\n     56: .......789 (79) r3 = *(u64 *)(r10 -96)\n     57: ...3...789 (15) if r3 == 0x0 goto pc+135\n     58: ...3...789 (b7) r1 = 2804\n     59: .1.3...789 (0f) r3 += r1\n     60: ...3...789 (bf) r1 = r10\n     61: .1.3...789 (07) r1 += -8\n     62: .1.3...789 (b7) r2 = 4\n     63: .123...789 (85) call bpf_probe_read_kernel#113\n     64: .......789 (61) r1 = *(u32 *)(r10 -8)\n     65: .1.....789 (63) *(u32 *)(r10 -112) = r1\n     66: .......789 (bf) r2 = r10\n     67: ..2....789 (07) r2 += -112\n     68: ..2....789 (18) r1 = 0xffff8bbe5325ec00\n     70: .12....789 (85) call bpf_map_lookup_elem#1\n     71: 0......789 (bf) r6 = r0\n     72: ......6789 (15) if r6 == 0x0 goto pc+3\n     73: ......6789 (05) goto pc+0\n     74: ......6789 (79) r1 = *(u64 *)(r6 +8)\n     75: .1....6789 (55) if r1 != 0x0 goto pc+54\n     76: .......789 (b7) r1 = 2816\n     77: .1.....789 (79) r3 = *(u64 *)(r10 -96)\n     78: .1.3...789 (0f) r3 += r1\n     79: ...3...789 (bf) r1 = r10\n     80: .1.3...789 (07) r1 += -96\n     81: .1.3...789 (b7) r2 = 8\n     82: .123...789 (85) call bpf_probe_read_kernel#113\n     83: .......789 (79) r3 = *(u64 *)(r10 -96)\n     84: ...3...789 (15) if r3 == 0x0 goto pc+108\n     85: ...3...789 (b7) r1 = 2804\n     86: .1.3...789 (0f) r3 += r1\n     87: ...3...789 (bf) r1 = r10\n     88: .1.3...789 (07) r1 += -8\n     89: .1.3...789 (b7) r2 = 4\n     90: .123...789 (85) call bpf_probe_read_kernel#113\n     91: .......789 (61) r1 = *(u32 *)(r10 -8)\n     92: .1.....789 (63) *(u32 *)(r10 -112) = r1\n     93: .......789 (bf) r2 = r10\n     94: ..2....789 (07) r2 += -112\n     95: ..2....789 (18) r1 = 0xffff8bbe5325ec00\n     97: .12....789 (85) call bpf_map_lookup_elem#1\n     98: 0......789 (bf) r6 = r0\n\n... verifier log truncated ...; prog 185: prog 185 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 195: prog 195 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @316\nfunc#2 @348\nfunc#3 @380\nfunc#4 @447\nfunc#5 @510\nfunc#6 @758\nfunc#7 @806\nfunc#8 @997\nfunc#9 @1307\nfunc#10 @1346\nfunc#11 @1510\nfunc#12 @1788\nfunc#13 @1994\nfunc#14 @2054\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r1 = 0\n      2: .1....6... (63) *(u32 *)(r10 -20) = r1\n      3: ......6... (bf) r2 = r10\n      4: ..2...6... (07) r2 += -20\n      5: ..2...6... (18) r1 = 0xffff8bba06e56000\n      7: .12...6... (85) call bpf_map_lookup_elem#1\n      8: 0.....6... (bf) r7 = r0\n      9: ......67.. (15) if r7 == 0x0 goto pc+304\n     10: ......67.. (61) r9 = *(u32 *)(r7 +24296)\n     11: ......67.9 (bf) r2 = r7\n     12: ..2...67.9 (07) r2 += 24288\n     13: ..2...67.9 (18) r1 = 0xffff8bbf43fca000\n     15: .12...67.9 (85) call bpf_map_lookup_elem#1\n     16: 0.....67.9 (bf) r8 = r0\n     17: ......6789 (15) if r8 == 0x0 goto pc+291\n     18: ......6789 (71) r1 = *(u8 *)(r7 +24264)\n     19: .1....6789 (15) if r1 == 0x0 goto pc+289\n     20: ......6789 (7b) *(u64 *)(r10 -48) = r6\n     21: .......789 (7b) *(u64 *)(r10 -56) = r9\n     22: .......789 (57) r9 &= 7\n     23: .......789 (bf) r1 = r7\n     24: .1.....789 (0f) r1 += r9\n     25: .1.....789 (71) r1 = *(u8 *)(r1 +24233)\n     26: .1.....789 (15) if r1 == 0x0 goto pc+217\n     27: .......789 (67) r9 <<= 2\n     28: .......789 (07) r9 += 4\n     29: .......789 (bf) r1 = r9\n     30: .1.....789 (0f) r1 += r8\n     31: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     32: .1.....789 (0f) r9 += r1\n     33: .......789 (07) r9 += 4\n     34: .......789 (bf) r1 = r9\n     35: .1.....789 (57) r1 &= 1023\n     36: .1.....789 (0f) r1 += r8\n     37: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     38: .1.....789 (0f) r9 += r1\n     39: .......789 (bf) r1 = r9\n     40: .1.....789 (57) r1 &= 1023\n     41: .1.....789 (0f) r1 += r8\n     42: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     43: .1.....789 (0f) r9 += r1\n     44: .......789 (bf) r1 = r9\n     45: .1.....789 (57) r1 &= 1023\n     46: .1.....789 (0f) r1 += r8\n     47: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     48: .1.....789 (0f) r9 += r1\n     49: .......789 (bf) r1 = r9\n     50: .1.....789 (57) r1 &= 1023\n     51: .1.....789 (0f) r1 += r8\n     52: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     53: .1.....789 (0f) r9 += r1\n     54: .......789 (bf) r1 = r9\n     55: .1.....789 (57) r1 &= 1023\n     56: .1.....789 (0f) r1 += r8\n     57: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     58: .1.....789 (0f) r9 += r1\n     59: .......789 (bf) r1 = r9\n     60: .1.....789 (57) r1 &= 1023\n     61: .1.....789 (bf) r3 = r8\n     62: .1.3...789 (7b) *(u64 *)(r10 -64) = r1\n     63: .1.3...789 (0f) r3 += r1\n     64: ...3...789 (71) r1 = *(u8 *)(r3 +1)\n     65: .1.3...789 (67) r1 <<= 8\n     66: .1.3...789 (71) r2 = *(u8 *)(r3 +0)\n     67: .123...789 (4f) r1 |= r2\n     68: .1.3...789 (71) r2 = *(u8 *)(r3 +2)\n     69: .123...789 (67) r2 <<= 16\n     70: .123...789 (7b) *(u64 *)(r10 -40) = r3\n     71: .123...789 (71) r3 = *(u8 *)(r3 +3)\n     72: .123...789 (67) r3 <<= 24\n     73: .123...789 (4f) r3 |= r2\n     74: .1.3...789 (4f) r3 |= r1\n     75: ...3...789 (a5) if r3 < 0x19 goto pc+164\n     76: .......789 (b7) r1 = 1\n     77: .1.....789 (7b) *(u64 *)(r10 -32) = r1\n     78: .......789 (b7) r6 = 4\n  1  79: ......6789 (79) r1 = *(u64 *)(r10 -40)\n  1  80: .1....6789 (0f) r1 += r6\n  1  81: .1....6789 (71) r3 = *(u8 *)(r1 +1)\n  1  82: .1.3..6789 (67) r3 <<= 8\n  1  83: .1.3..6789 (71) r2 = *(u8 *)(r1 +0)\n  1  84: .123..6789 (4f) r3 |= r2\n  1  85: .1.3..6789 (71) r4 = *(u8 *)(r1 +2)\n  1  86: .1.34.6789 (67) r4 <<= 16\n  1  87: .1.34.6789 (71) r2 = *(u8 *)(r1 +3)\n  1  88: ..234.6789 (67) r2 <<= 24\n  1  89: ..234.6789 (4f) r2 |= r4\n  1  90: ..23..6789 (4f) r2 |= r3\n  1  91: ..2...6789 (57) r2 &= 1023\n  1  92: ..2...6789 (65) if r2 s> 0x0 goto pc+3\n     93: .......7.. (79) r1 = *(u64 *)(r10 -32)\n     94: .1.....7.. (15) if r1 == 0x0 goto pc+149\n     95: .......7.. (05) goto pc+144\n  1  96: ..2...6789 (0f) r2 += r9\n  1  97: ..2...6789 (57) r2 &= 1023\n  1  98: ..2...6789 (bf) r1 = r8\n  1  99: .12...6789 (0f) r1 += r2\n  1 100: .1....6789 (71) r3 = *(u8 *)(r1 +1)\n  1 101: \n... verifier log truncated ...; prog 196: prog 196 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @100\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r1 = 0\n      2: .1....6... (63) *(u32 *)(r10 -12) = r1\n      3: ......6... (bf) r2 = r10\n      4: ..2...6... (07) r2 += -12\n      5: ..2...6... (18) r1 = 0xffff8bba06e56000\n      7: .12...6... (85) call bpf_map_lookup_elem#1\n      8: 0.....6... (15) if r0 == 0x0 goto pc+89\n      9: 0.....6... (61) r8 = *(u32 *)(r0 +24300)\n     10: 0.....6.8. (67) r8 <<= 32\n     11: 0.....6.8. (c7) r8 s>>= 32\n     12: 0.....6.8. (c5) if r8 s< 0x2 goto pc+85\n     13: 0.....6.8. (07) r0 += 24288\n     14: 0.....6.8. (18) r1 = 0xffff8bbf43fca000\n     16: 01....6.8. (bf) r2 = r0\n     17: .12...6.8. (85) call bpf_map_lookup_elem#1\n     18: 0.....6.8. (bf) r7 = r0\n     19: ......678. (15) if r7 == 0x0 goto pc+78\n     20: ......678. (57) r8 &= 2047\n     21: ......678. (bf) r1 = r8\n     22: .1....678. (67) r1 <<= 32\n     23: .1....678. (c7) r1 s>>= 32\n     24: .1....678. (bf) r2 = r7\n     25: .12...678. (0f) r2 += r1\n     26: ..2...678. (71) r1 = *(u8 *)(r2 +1)\n     27: .12...678. (67) r1 <<= 8\n     28: .12...678. (71) r3 = *(u8 *)(r2 +0)\n     29: .123..678. (4f) r1 |= r3\n     30: .12...678. (71) r3 = *(u8 *)(r2 +2)\n     31: .123..678. (67) r3 <<= 16\n     32: .123..678. (71) r2 = *(u8 *)(r2 +3)\n     33: .123..678. (67) r2 <<= 24\n     34: .123..678. (4f) r2 |= r3\n     35: .12...678. (4f) r2 |= r1\n     36: ..2...678. (0f) r2 += r8\n     37: ..2...67.. (57) r2 &= 2047\n     38: ..2...67.. (b7) r8 = 1\n     39: ..2...678. (73) *(u8 *)(r10 -1) = r8\n     40: ..2...678. (b7) r1 = 0\n     41: .12...678. (63) *(u32 *)(r10 -8) = r1\n     42: ..2...678. (67) r2 <<= 32\n     43: ..2...678. (c7) r2 s>>= 32\n     44: ..2...678. (0f) r7 += r2\n     45: ......678. (bf) r2 = r10\n     46: ..2...678. (07) r2 += -8\n     47: ..2...678. (18) r1 = 0xffff8bba78bd2e00\n     49: .12...678. (85) call bpf_map_lookup_elem#1\n     50: 0.....678. (15) if r0 == 0x0 goto pc+3\n     51: 0.....678. (71) r1 = *(u8 *)(r0 +0)\n     52: .1....678. (55) if r1 != 0x1 goto pc+1\n     53: ......67.. (b7) r8 = 0\n     54: ......678. (61) r1 = *(u32 *)(r7 +0)\n     55: .1....678. (a5) if r1 < 0x5 goto pc+35\n     56: ......678. (bf) r4 = r10\n     57: ....4.678. (07) r4 += -1\n     58: ....4.678. (bf) r1 = r6\n     59: .1..4.678. (b7) r2 = 0\n     60: .12.4.678. (bf) r3 = r7\n     61: .1234.678. (bf) r5 = r8\n     62: .12345678. (85) call pc+37\n     63: 0.....678. (bf) r1 = r0\n     64: 01....678. (67) r1 <<= 2\n     65: 01....678. (07) r1 += 4\n     66: 01....678. (67) r1 <<= 32\n     67: 01....678. (77) r1 >>= 32\n     68: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     69: 012...678. (3d) if r1 >= r2 goto pc+21\n     70: 0.....678. (bf) r4 = r10\n     71: 0...4.678. (07) r4 += -1\n     72: 0...4.678. (bf) r1 = r6\n     73: 01..4.678. (bf) r2 = r0\n     74: .12.4.678. (bf) r3 = r7\n     75: .1234.678. (bf) r5 = r8\n     76: .12345678. (85) call pc+23\n     77: 0.....678. (bf) r1 = r0\n     78: 01....678. (67) r1 <<= 2\n     79: 01....678. (07) r1 += 4\n     80: 01....678. (67) r1 <<= 32\n     81: 01....678. (77) r1 >>= 32\n     82: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     83: 012...678. (3d) if r1 >= r2 goto pc+7\n     84: 0.....678. (bf) r4 = r10\n     85: 0...4.678. (07) r4 += -1\n     86: 0...4.678. (bf) r1 = r6\n     87: 01..4.678. (bf) r2 = r0\n     88: .12.4.678. (bf) r3 = r7\n     89: .1234.6.8. (bf) r5 = r8\n     90: .123456... (85) call pc+9\n     91: ......6... (71) r1 = *(u8 *)(r10 -1)\n     92: .1....6... (15) if r1 == 0x0 goto pc+5\n     93: ......6... (bf) r1 = r6\n     94: .1........ (18) r2 = 0xffff8bba06e56c00\n     96: .12....... (b7) r3 = 5\n     97: .123...... (85) call bpf_tail_call#12\n     98: .......... (b7) r0 = 0\n     99: 0......... (95) exit\n    100: .12345.... (bf) r6 = r5\n    101: .1234.6... (7b) *(u64 *)(r10 -88) = r4\n    102: .123..6... (bf) r8 = r2\n    103: .1.3..6.8. (7b) *(u64 *)(r10 -96) = r1\n    104: ...3..6.8. (bf) r1 = r8\n    105: .1.3..6.8. (67) r1 <<= 32\n    106: .1.3..6.8. (77) r1 >>= 32\n    107: .1.3..6.8. (67) r1 <<= 2\n    108: .1.3..6.8. (7b) *(u64 *)(r10 -80) = r3\n    109: .1.3..6.8. (bf) r2 = r3\n    1\n... verifier log truncated ...; prog 197: prog 197 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @2058\nLive regs before insn:\n      0: .1........ (bf) r9 = r1\n      1: .........9 (b7) r1 = 0\n      2: .1.......9 (63) *(u32 *)(r10 -308) = r1\n      3: .........9 (bf) r2 = r10\n      4: ..2......9 (07) r2 += -308\n      5: ..2......9 (18) r1 = 0xffff8bba06e56000\n      7: .12......9 (85) call bpf_map_lookup_elem#1\n      8: 0........9 (bf) r7 = r0\n      9: .......7.9 (15) if r7 == 0x0 goto pc+2038\n     10: .......7.9 (85) call bpf_get_current_task#35\n     11: 0......7.9 (7b) *(u64 *)(r10 -264) = r0\n     12: 0......7.9 (b7) r1 = 2804\n     13: 01.....7.9 (0f) r0 += r1\n     14: 0......7.9 (bf) r1 = r10\n     15: 01.....7.9 (07) r1 += -280\n     16: 01.....7.9 (b7) r2 = 4\n     17: 012....7.9 (bf) r3 = r0\n     18: .123...7.9 (85) call bpf_probe_read_kernel#113\n     19: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     20: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     21: .......7.9 (bf) r2 = r10\n     22: ..2....7.9 (07) r2 += -304\n     23: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     25: .12....7.9 (85) call bpf_map_lookup_elem#1\n     26: 0......7.9 (bf) r6 = r0\n     27: ......67.9 (15) if r6 == 0x0 goto pc+2\n     28: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     29: .1....67.9 (55) if r1 != 0x0 goto pc+661\n     30: .......7.9 (b7) r1 = 2816\n     31: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     32: .1.3...7.9 (0f) r3 += r1\n     33: ...3...7.9 (bf) r1 = r10\n     34: .1.3...7.9 (07) r1 += -264\n     35: .1.3...7.9 (b7) r2 = 8\n     36: .123...7.9 (85) call bpf_probe_read_kernel#113\n     37: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     38: ...3...7.9 (15) if r3 == 0x0 goto pc+76\n     39: ...3...7.9 (b7) r1 = 2804\n     40: .1.3...7.9 (0f) r3 += r1\n     41: ...3...7.9 (bf) r1 = r10\n     42: .1.3...7.9 (07) r1 += -280\n     43: .1.3...7.9 (b7) r2 = 4\n     44: .123...7.9 (85) call bpf_probe_read_kernel#113\n     45: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     46: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     47: .......7.9 (bf) r2 = r10\n     48: ..2....7.9 (07) r2 += -304\n     49: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     51: .12....7.9 (85) call bpf_map_lookup_elem#1\n     52: 0......7.9 (bf) r6 = r0\n     53: ......67.9 (15) if r6 == 0x0 goto pc+2\n     54: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     55: .1....67.9 (55) if r1 != 0x0 goto pc+635\n     56: .......7.9 (b7) r1 = 2816\n     57: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     58: .1.3...7.9 (0f) r3 += r1\n     59: ...3...7.9 (bf) r1 = r10\n     60: .1.3...7.9 (07) r1 += -264\n     61: .1.3...7.9 (b7) r2 = 8\n     62: .123...7.9 (85) call bpf_probe_read_kernel#113\n     63: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     64: ...3...7.9 (15) if r3 == 0x0 goto pc+50\n     65: ...3...7.9 (b7) r1 = 2804\n     66: .1.3...7.9 (0f) r3 += r1\n     67: ...3...7.9 (bf) r1 = r10\n     68: .1.3...7.9 (07) r1 += -280\n     69: .1.3...7.9 (b7) r2 = 4\n     70: .123...7.9 (85) call bpf_probe_read_kernel#113\n     71: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     72: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     73: .......7.9 (bf) r2 = r10\n     74: ..2....7.9 (07) r2 += -304\n     75: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     77: .12....7.9 (85) call bpf_map_lookup_elem#1\n     78: 0......7.9 (bf) r6 = r0\n     79: ......67.9 (15) if r6 == 0x0 goto pc+2\n     80: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     81: .1....67.9 (55) if r1 != 0x0 goto pc+609\n     82: .......7.9 (b7) r1 = 2816\n     83: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     84: .1.3...7.9 (0f) r3 += r1\n     85: ...3...7.9 (bf) r1 = r10\n     86: .1.3...7.9 (07) r1 += -264\n     87: .1.3...7.9 (b7) r2 = 8\n     88: .123...7.9 (85) call bpf_probe_read_kernel#113\n     89: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     90: ...3...7.9 (15) if r3 == 0x0 goto pc+24\n     91: ...3...7.9 (b7) r1 = 2804\n     92: .1.3...7.9 (0f) r3 += r1\n     93: ...3...7.9 (bf) r1 = r10\n     94: .1.3...7.9 (07) r1 += -280\n     95: .1.3...7.9 (b7) r2 = 4\n     96: .123...7.9 (85) call bpf_probe_read_kernel#113\n     97: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     98: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     99: .......7.9 (bf) r2 = r10\n    100: ..2....7.9 (07) r2 += -304\n    101: \n... verifier log truncated ...; prog 198: prog 198 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @316\nfunc#2 @348\nfunc#3 @380\nfunc#4 @447\nfunc#5 @510\nfunc#6 @758\nfunc#7 @806\nfunc#8 @997\nfunc#9 @1307\nfunc#10 @1346\nfunc#11 @1510\nfunc#12 @1788\nfunc#13 @1994\nfunc#14 @2054\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r1 = 0\n      2: .1....6... (63) *(u32 *)(r10 -20) = r1\n      3: ......6... (bf) r2 = r10\n      4: ..2...6... (07) r2 += -20\n      5: ..2...6... (18) r1 = 0xffff8bba06e56000\n      7: .12...6... (85) call bpf_map_lookup_elem#1\n      8: 0.....6... (bf) r7 = r0\n      9: ......67.. (15) if r7 == 0x0 goto pc+304\n     10: ......67.. (61) r9 = *(u32 *)(r7 +24296)\n     11: ......67.9 (bf) r2 = r7\n     12: ..2...67.9 (07) r2 += 24288\n     13: ..2...67.9 (18) r1 = 0xffff8bbd65ee0000\n     15: .12...67.9 (85) call bpf_map_lookup_elem#1\n     16: 0.....67.9 (bf) r8 = r0\n     17: ......6789 (15) if r8 == 0x0 goto pc+291\n     18: ......6789 (71) r1 = *(u8 *)(r7 +24264)\n     19: .1....6789 (15) if r1 == 0x0 goto pc+289\n     20: ......6789 (7b) *(u64 *)(r10 -48) = r6\n     21: .......789 (7b) *(u64 *)(r10 -56) = r9\n     22: .......789 (57) r9 &= 7\n     23: .......789 (bf) r1 = r7\n     24: .1.....789 (0f) r1 += r9\n     25: .1.....789 (71) r1 = *(u8 *)(r1 +24233)\n     26: .1.....789 (15) if r1 == 0x0 goto pc+217\n     27: .......789 (67) r9 <<= 2\n     28: .......789 (07) r9 += 4\n     29: .......789 (bf) r1 = r9\n     30: .1.....789 (0f) r1 += r8\n     31: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     32: .1.....789 (0f) r9 += r1\n     33: .......789 (07) r9 += 4\n     34: .......789 (bf) r1 = r9\n     35: .1.....789 (57) r1 &= 1023\n     36: .1.....789 (0f) r1 += r8\n     37: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     38: .1.....789 (0f) r9 += r1\n     39: .......789 (bf) r1 = r9\n     40: .1.....789 (57) r1 &= 1023\n     41: .1.....789 (0f) r1 += r8\n     42: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     43: .1.....789 (0f) r9 += r1\n     44: .......789 (bf) r1 = r9\n     45: .1.....789 (57) r1 &= 1023\n     46: .1.....789 (0f) r1 += r8\n     47: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     48: .1.....789 (0f) r9 += r1\n     49: .......789 (bf) r1 = r9\n     50: .1.....789 (57) r1 &= 1023\n     51: .1.....789 (0f) r1 += r8\n     52: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     53: .1.....789 (0f) r9 += r1\n     54: .......789 (bf) r1 = r9\n     55: .1.....789 (57) r1 &= 1023\n     56: .1.....789 (0f) r1 += r8\n     57: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     58: .1.....789 (0f) r9 += r1\n     59: .......789 (bf) r1 = r9\n     60: .1.....789 (57) r1 &= 1023\n     61: .1.....789 (bf) r3 = r8\n     62: .1.3...789 (7b) *(u64 *)(r10 -64) = r1\n     63: .1.3...789 (0f) r3 += r1\n     64: ...3...789 (71) r1 = *(u8 *)(r3 +1)\n     65: .1.3...789 (67) r1 <<= 8\n     66: .1.3...789 (71) r2 = *(u8 *)(r3 +0)\n     67: .123...789 (4f) r1 |= r2\n     68: .1.3...789 (71) r2 = *(u8 *)(r3 +2)\n     69: .123...789 (67) r2 <<= 16\n     70: .123...789 (7b) *(u64 *)(r10 -40) = r3\n     71: .123...789 (71) r3 = *(u8 *)(r3 +3)\n     72: .123...789 (67) r3 <<= 24\n     73: .123...789 (4f) r3 |= r2\n     74: .1.3...789 (4f) r3 |= r1\n     75: ...3...789 (a5) if r3 < 0x19 goto pc+164\n     76: .......789 (b7) r1 = 1\n     77: .1.....789 (7b) *(u64 *)(r10 -32) = r1\n     78: .......789 (b7) r6 = 4\n  1  79: ......6789 (79) r1 = *(u64 *)(r10 -40)\n  1  80: .1....6789 (0f) r1 += r6\n  1  81: .1....6789 (71) r3 = *(u8 *)(r1 +1)\n  1  82: .1.3..6789 (67) r3 <<= 8\n  1  83: .1.3..6789 (71) r2 = *(u8 *)(r1 +0)\n  1  84: .123..6789 (4f) r3 |= r2\n  1  85: .1.3..6789 (71) r4 = *(u8 *)(r1 +2)\n  1  86: .1.34.6789 (67) r4 <<= 16\n  1  87: .1.34.6789 (71) r2 = *(u8 *)(r1 +3)\n  1  88: ..234.6789 (67) r2 <<= 24\n  1  89: ..234.6789 (4f) r2 |= r4\n  1  90: ..23..6789 (4f) r2 |= r3\n  1  91: ..2...6789 (57) r2 &= 1023\n  1  92: ..2...6789 (65) if r2 s> 0x0 goto pc+3\n     93: .......7.. (79) r1 = *(u64 *)(r10 -32)\n     94: .1.....7.. (15) if r1 == 0x0 goto pc+149\n     95: .......7.. (05) goto pc+144\n  1  96: ..2...6789 (0f) r2 += r9\n  1  97: ..2...6789 (57) r2 &= 1023\n  1  98: ..2...6789 (bf) r1 = r8\n  1  99: .12...6789 (0f) r1 += r2\n  1 100: .1....6789 (71) r3 = *(u8 *)(r1 +1)\n  1 101: \n... verifier log truncated ...; prog 208: prog 208 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @104\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r1 = 0\n      2: .1....6... (63) *(u32 *)(r10 -12) = r1\n      3: ......6... (bf) r2 = r10\n      4: ..2...6... (07) r2 += -12\n      5: ..2...6... (18) r1 = 0xffff8bba05f9c400\n      7: .12...6... (85) call bpf_map_lookup_elem#1\n      8: 0.....6... (15) if r0 == 0x0 goto pc+91\n      9: 0.....6... (05) goto pc+0\n     10: 0.....6... (61) r8 = *(u32 *)(r0 +24300)\n     11: 0.....6.8. (67) r8 <<= 32\n     12: 0.....6.8. (c7) r8 s>>= 32\n     13: 0.....6.8. (c5) if r8 s< 0x2 goto pc+86\n     14: 0.....6.8. (07) r0 += 24288\n     15: 0.....6.8. (18) r1 = 0xffff8bc0802ba000\n     17: 01....6.8. (bf) r2 = r0\n     18: .12...6.8. (85) call bpf_map_lookup_elem#1\n     19: 0.....6.8. (bf) r7 = r0\n     20: ......678. (15) if r7 == 0x0 goto pc+79\n     21: ......678. (57) r8 &= 2047\n     22: ......678. (bf) r1 = r8\n     23: .1....678. (67) r1 <<= 32\n     24: .1....678. (c7) r1 s>>= 32\n     25: .1....678. (bf) r2 = r7\n     26: .12...678. (0f) r2 += r1\n     27: ..2...678. (71) r1 = *(u8 *)(r2 +1)\n     28: .12...678. (67) r1 <<= 8\n     29: .12...678. (71) r3 = *(u8 *)(r2 +0)\n     30: .123..678. (4f) r1 |= r3\n     31: .12...678. (71) r3 = *(u8 *)(r2 +2)\n     32: .123..678. (67) r3 <<= 16\n     33: .123..678. (71) r2 = *(u8 *)(r2 +3)\n     34: .123..678. (67) r2 <<= 24\n     35: .123..678. (4f) r2 |= r3\n     36: .12...678. (4f) r2 |= r1\n     37: ..2...678. (0f) r2 += r8\n     38: ..2...67.. (57) r2 &= 2047\n     39: ..2...67.. (b7) r8 = 1\n     40: ..2...678. (73) *(u8 *)(r10 -1) = r8\n     41: ..2...678. (b7) r1 = 0\n     42: .12...678. (63) *(u32 *)(r10 -8) = r1\n     43: ..2...678. (67) r2 <<= 32\n     44: ..2...678. (c7) r2 s>>= 32\n     45: ..2...678. (0f) r7 += r2\n     46: ......678. (bf) r2 = r10\n     47: ..2...678. (07) r2 += -8\n     48: ..2...678. (18) r1 = 0xffff8bba06c60a00\n     50: .12...678. (85) call bpf_map_lookup_elem#1\n     51: 0.....678. (15) if r0 == 0x0 goto pc+4\n     52: 0.....678. (05) goto pc+0\n     53: 0.....678. (71) r1 = *(u8 *)(r0 +0)\n     54: .1....678. (55) if r1 != 0x1 goto pc+1\n     55: ......67.. (b7) r8 = 0\n     56: ......678. (61) r1 = *(u32 *)(r7 +0)\n     57: .1....678. (a5) if r1 < 0x5 goto pc+35\n     58: ......678. (bf) r4 = r10\n     59: ....4.678. (07) r4 += -1\n     60: ....4.678. (bf) r1 = r6\n     61: .1..4.678. (b7) r2 = 0\n     62: .12.4.678. (bf) r3 = r7\n     63: .1234.678. (bf) r5 = r8\n     64: .12345678. (85) call pc+37\n     65: 0.....678. (bf) r1 = r0\n     66: 01....678. (67) r1 <<= 2\n     67: 01....678. (07) r1 += 4\n     68: 01....678. (67) r1 <<= 32\n     69: 01....678. (77) r1 >>= 32\n     70: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     71: 012...678. (3d) if r1 >= r2 goto pc+21\n     72: 0.....678. (bf) r4 = r10\n     73: 0...4.678. (07) r4 += -1\n     74: 0...4.678. (bf) r1 = r6\n     75: 01..4.678. (bf) r2 = r0\n     76: .12.4.678. (bf) r3 = r7\n     77: .1234.678. (bf) r5 = r8\n     78: .12345678. (85) call pc+23\n     79: 0.....678. (bf) r1 = r0\n     80: 01....678. (67) r1 <<= 2\n     81: 01....678. (07) r1 += 4\n     82: 01....678. (67) r1 <<= 32\n     83: 01....678. (77) r1 >>= 32\n     84: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     85: 012...678. (3d) if r1 >= r2 goto pc+7\n     86: 0.....678. (bf) r4 = r10\n     87: 0...4.678. (07) r4 += -1\n     88: 0...4.678. (bf) r1 = r6\n     89: 01..4.678. (bf) r2 = r0\n     90: .12.4.678. (bf) r3 = r7\n     91: .1234.6.8. (bf) r5 = r8\n     92: .123456... (85) call pc+9\n     93: ......6... (71) r1 = *(u8 *)(r10 -1)\n     94: .1....6... (15) if r1 == 0x0 goto pc+5\n     95: ......6... (bf) r1 = r6\n     96: .1........ (18) r2 = 0xffff8bba05ee6400\n     98: .12....... (b7) r3 = 5\n     99: .123...... (85) call bpf_tail_call#12\n    100: .......... (b7) r0 = 0\n    101: 0......... (95) exit\n    102: .12345.... (bf) r6 = r5\n    103: .1234.6... (7b) *(u64 *)(r10 -88) = r4\n    104: .123..6... (bf) r8 = r2\n    105: .1.3..6.8. (7b) *(u64 *)(r10 -96) = r1\n    106: ...3..6.8. (bf) r1 = r8\n    107: .1.3..6.8. (67) r1 <<= 32\n    108: .1.3..6.8. (77) r1 >>= 32\n    109: .1.3..6.8. (67) r1 <<= 2\n    110: .1.3..6\n... verifier log truncated ...; prog 210: prog 210 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 213: prog 213 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @100\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r1 = 0\n      2: .1....6... (63) *(u32 *)(r10 -12) = r1\n      3: ......6... (bf) r2 = r10\n      4: ..2...6... (07) r2 += -12\n      5: ..2...6... (18) r1 = 0xffff8bba05f9c400\n      7: .12...6... (85) call bpf_map_lookup_elem#1\n      8: 0.....6... (15) if r0 == 0x0 goto pc+89\n      9: 0.....6... (61) r8 = *(u32 *)(r0 +24300)\n     10: 0.....6.8. (67) r8 <<= 32\n     11: 0.....6.8. (c7) r8 s>>= 32\n     12: 0.....6.8. (c5) if r8 s< 0x2 goto pc+85\n     13: 0.....6.8. (07) r0 += 24288\n     14: 0.....6.8. (18) r1 = 0xffff8bbc5911c000\n     16: 01....6.8. (bf) r2 = r0\n     17: .12...6.8. (85) call bpf_map_lookup_elem#1\n     18: 0.....6.8. (bf) r7 = r0\n     19: ......678. (15) if r7 == 0x0 goto pc+78\n     20: ......678. (57) r8 &= 2047\n     21: ......678. (bf) r1 = r8\n     22: .1....678. (67) r1 <<= 32\n     23: .1....678. (c7) r1 s>>= 32\n     24: .1....678. (bf) r2 = r7\n     25: .12...678. (0f) r2 += r1\n     26: ..2...678. (71) r1 = *(u8 *)(r2 +1)\n     27: .12...678. (67) r1 <<= 8\n     28: .12...678. (71) r3 = *(u8 *)(r2 +0)\n     29: .123..678. (4f) r1 |= r3\n     30: .12...678. (71) r3 = *(u8 *)(r2 +2)\n     31: .123..678. (67) r3 <<= 16\n     32: .123..678. (71) r2 = *(u8 *)(r2 +3)\n     33: .123..678. (67) r2 <<= 24\n     34: .123..678. (4f) r2 |= r3\n     35: .12...678. (4f) r2 |= r1\n     36: ..2...678. (0f) r2 += r8\n     37: ..2...67.. (57) r2 &= 2047\n     38: ..2...67.. (b7) r8 = 1\n     39: ..2...678. (73) *(u8 *)(r10 -1) = r8\n     40: ..2...678. (b7) r1 = 0\n     41: .12...678. (63) *(u32 *)(r10 -8) = r1\n     42: ..2...678. (67) r2 <<= 32\n     43: ..2...678. (c7) r2 s>>= 32\n     44: ..2...678. (0f) r7 += r2\n     45: ......678. (bf) r2 = r10\n     46: ..2...678. (07) r2 += -8\n     47: ..2...678. (18) r1 = 0xffff8bba06c60a00\n     49: .12...678. (85) call bpf_map_lookup_elem#1\n     50: 0.....678. (15) if r0 == 0x0 goto pc+3\n     51: 0.....678. (71) r1 = *(u8 *)(r0 +0)\n     52: .1....678. (55) if r1 != 0x1 goto pc+1\n     53: ......67.. (b7) r8 = 0\n     54: ......678. (61) r1 = *(u32 *)(r7 +0)\n     55: .1....678. (a5) if r1 < 0x5 goto pc+35\n     56: ......678. (bf) r4 = r10\n     57: ....4.678. (07) r4 += -1\n     58: ....4.678. (bf) r1 = r6\n     59: .1..4.678. (b7) r2 = 0\n     60: .12.4.678. (bf) r3 = r7\n     61: .1234.678. (bf) r5 = r8\n     62: .12345678. (85) call pc+37\n     63: 0.....678. (bf) r1 = r0\n     64: 01....678. (67) r1 <<= 2\n     65: 01....678. (07) r1 += 4\n     66: 01....678. (67) r1 <<= 32\n     67: 01....678. (77) r1 >>= 32\n     68: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     69: 012...678. (3d) if r1 >= r2 goto pc+21\n     70: 0.....678. (bf) r4 = r10\n     71: 0...4.678. (07) r4 += -1\n     72: 0...4.678. (bf) r1 = r6\n     73: 01..4.678. (bf) r2 = r0\n     74: .12.4.678. (bf) r3 = r7\n     75: .1234.678. (bf) r5 = r8\n     76: .12345678. (85) call pc+23\n     77: 0.....678. (bf) r1 = r0\n     78: 01....678. (67) r1 <<= 2\n     79: 01....678. (07) r1 += 4\n     80: 01....678. (67) r1 <<= 32\n     81: 01....678. (77) r1 >>= 32\n     82: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     83: 012...678. (3d) if r1 >= r2 goto pc+7\n     84: 0.....678. (bf) r4 = r10\n     85: 0...4.678. (07) r4 += -1\n     86: 0...4.678. (bf) r1 = r6\n     87: 01..4.678. (bf) r2 = r0\n     88: .12.4.678. (bf) r3 = r7\n     89: .1234.6.8. (bf) r5 = r8\n     90: .123456... (85) call pc+9\n     91: ......6... (71) r1 = *(u8 *)(r10 -1)\n     92: .1....6... (15) if r1 == 0x0 goto pc+5\n     93: ......6... (bf) r1 = r6\n     94: .1........ (18) r2 = 0xffff8bbe8d876600\n     96: .12....... (b7) r3 = 5\n     97: .123...... (85) call bpf_tail_call#12\n     98: .......... (b7) r0 = 0\n     99: 0......... (95) exit\n    100: .12345.... (bf) r7 = r5\n    101: .1234..7.. (7b) *(u64 *)(r10 -72) = r4\n    102: .123...7.. (bf) r6 = r2\n    103: .1.3..67.. (7b) *(u64 *)(r10 -80) = r1\n    104: ...3..67.. (bf) r1 = r6\n    105: .1.3..67.. (67) r1 <<= 32\n    106: .1.3..67.. (77) r1 >>= 32\n    107: .1.3..67.. (67) r1 <<= 2\n    108: .1.3..67.. (7b) *(u64 *)(r10 -64) = r3\n    109: .1.3..67.. (bf) r2 = r3\n    1\n... verifier log truncated ...; prog 214: prog 214 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @291\nfunc#2 @323\nfunc#3 @355\nfunc#4 @422\nfunc#5 @485\nfunc#6 @733\nfunc#7 @781\nfunc#8 @972\nfunc#9 @1282\nfunc#10 @1321\nfunc#11 @1485\nfunc#12 @1763\nfunc#13 @1969\nfunc#14 @2029\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r1 = 0\n      2: .1....6... (63) *(u32 *)(r10 -20) = r1\n      3: ......6... (bf) r2 = r10\n      4: ..2...6... (07) r2 += -20\n      5: ..2...6... (18) r1 = 0xffff8bba05f9c400\n      7: .12...6... (85) call bpf_map_lookup_elem#1\n      8: 0.....6... (bf) r7 = r0\n      9: ......67.. (15) if r7 == 0x0 goto pc+279\n     10: ......67.. (61) r9 = *(u32 *)(r7 +24296)\n     11: ......67.9 (bf) r2 = r7\n     12: ..2...67.9 (07) r2 += 24288\n     13: ..2...67.9 (18) r1 = 0xffff8bbc5911c000\n     15: .12...67.9 (85) call bpf_map_lookup_elem#1\n     16: 0.....67.9 (bf) r8 = r0\n     17: ......6789 (15) if r8 == 0x0 goto pc+266\n     18: ......6789 (71) r1 = *(u8 *)(r7 +24264)\n     19: .1....6789 (15) if r1 == 0x0 goto pc+264\n     20: ......6789 (7b) *(u64 *)(r10 -48) = r6\n     21: .......789 (7b) *(u64 *)(r10 -56) = r9\n     22: .......789 (57) r9 &= 7\n     23: .......789 (bf) r1 = r7\n     24: .1.....789 (0f) r1 += r9\n     25: .1.....789 (71) r1 = *(u8 *)(r1 +24233)\n     26: .1.....789 (15) if r1 == 0x0 goto pc+192\n     27: .......789 (67) r9 <<= 2\n     28: .......789 (07) r9 += 4\n     29: .......789 (bf) r1 = r9\n     30: .1.....789 (0f) r1 += r8\n     31: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     32: .1.....789 (0f) r9 += r1\n     33: .......789 (07) r9 += 4\n     34: .......789 (bf) r1 = r9\n     35: .1.....789 (57) r1 &= 1023\n     36: .1.....789 (bf) r3 = r8\n     37: .1.3...789 (7b) *(u64 *)(r10 -64) = r1\n     38: .1.3...789 (0f) r3 += r1\n     39: ...3...789 (71) r1 = *(u8 *)(r3 +1)\n     40: .1.3...789 (67) r1 <<= 8\n     41: .1.3...789 (71) r2 = *(u8 *)(r3 +0)\n     42: .123...789 (4f) r1 |= r2\n     43: .1.3...789 (71) r2 = *(u8 *)(r3 +2)\n     44: .123...789 (67) r2 <<= 16\n     45: .123...789 (7b) *(u64 *)(r10 -40) = r3\n     46: .123...789 (71) r3 = *(u8 *)(r3 +3)\n     47: .123...789 (67) r3 <<= 24\n     48: .123...789 (4f) r3 |= r2\n     49: .1.3...789 (4f) r3 |= r1\n     50: ...3...789 (a5) if r3 < 0x19 goto pc+164\n     51: .......789 (b7) r1 = 1\n     52: .1.....789 (7b) *(u64 *)(r10 -32) = r1\n     53: .......789 (b7) r6 = 4\n  1  54: ......6789 (79) r1 = *(u64 *)(r10 -40)\n  1  55: .1....6789 (0f) r1 += r6\n  1  56: .1....6789 (71) r3 = *(u8 *)(r1 +1)\n  1  57: .1.3..6789 (67) r3 <<= 8\n  1  58: .1.3..6789 (71) r2 = *(u8 *)(r1 +0)\n  1  59: .123..6789 (4f) r3 |= r2\n  1  60: .1.3..6789 (71) r4 = *(u8 *)(r1 +2)\n  1  61: .1.34.6789 (67) r4 <<= 16\n  1  62: .1.34.6789 (71) r2 = *(u8 *)(r1 +3)\n  1  63: ..234.6789 (67) r2 <<= 24\n  1  64: ..234.6789 (4f) r2 |= r4\n  1  65: ..23..6789 (4f) r2 |= r3\n  1  66: ..2...6789 (57) r2 &= 1023\n  1  67: ..2...6789 (65) if r2 s> 0x0 goto pc+3\n     68: .......7.. (79) r1 = *(u64 *)(r10 -32)\n     69: .1.....7.. (15) if r1 == 0x0 goto pc+149\n     70: .......7.. (05) goto pc+144\n  1  71: ..2...6789 (0f) r2 += r9\n  1  72: ..2...6789 (57) r2 &= 1023\n  1  73: ..2...6789 (bf) r1 = r8\n  1  74: .12...6789 (0f) r1 += r2\n  1  75: .1....6789 (71) r3 = *(u8 *)(r1 +1)\n  1  76: .1.3..6789 (67) r3 <<= 8\n  1  77: .1.3..6789 (71) r2 = *(u8 *)(r1 +0)\n  1  78: .123..6789 (4f) r3 |= r2\n  1  79: .1.3..6789 (71) r4 = *(u8 *)(r1 +2)\n  1  80: .1.34.6789 (67) r4 <<= 16\n  1  81: .1.34.6789 (71) r2 = *(u8 *)(r1 +3)\n  1  82: .1234.6789 (67) r2 <<= 24\n  1  83: .1234.6789 (4f) r2 |= r4\n  1  84: .123..6789 (4f) r2 |= r3\n  1  85: .12...6789 (25) if r2 > 0x5 goto pc+133\n  1  86: .12...6789 (57) r2 &= 7\n  1  87: .12...6789 (67) r2 <<= 32\n  1  88: .12...6789 (77) r2 >>= 32\n  1  89: .12...6789 (67) r2 <<= 3\n  1  90: .12...6789 (bf) r3 = r7\n  1  91: .123..6789 (0f) r3 += r2\n  1  92: .1.3..6789 (79) r4 = *(u64 *)(r3 +24184)\n  1  93: .1..4.6789 (57) r4 &= 2047\n  1  94: .1..4.6789 (71) r2 = *(u8 *)(r1 +13)\n  1  95: .12.4.6789 (67) r2 <<= 8\n  1  96: .12.4.6789 (71) r3 = *(u8 *)(r1 +12)\n  1  97: .1234.6789 (4f) r2 |= r3\n  1  98: .12.4.6789 (71) r5 = *(u8 *)(r1 +14)\n  1  99: .12.456789 (67) r5 <<= 16\n  1\n... verifier log truncated ...; prog 215: prog 215 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @2925\nLive regs before insn:\n      0: .1........ (bf) r9 = r1\n      1: .........9 (79) r1 = *(u64 *)(r9 +80)\n      2: .1.......9 (7b) *(u64 *)(r10 -128) = r1\n      3: .........9 (b7) r6 = 0\n      4: ......6..9 (63) *(u32 *)(r10 -132) = r6\n      5: ......6..9 (bf) r2 = r10\n      6: ..2...6..9 (07) r2 += -132\n      7: ..2...6..9 (18) r1 = 0xffff8bba05f9c400\n      9: .12...6..9 (85) call bpf_map_lookup_elem#1\n     10: 0.....6..9 (bf) r8 = r0\n     11: ......6.89 (15) if r8 == 0x0 goto pc+2490\n     12: ......6.89 (63) *(u32 *)(r8 +24288) = r6\n     13: ......6.89 (bf) r2 = r8\n     14: ..2...6.89 (07) r2 += 24288\n     15: ..2...6.89 (18) r1 = 0xffff8bc046df3c00\n     17: .12...6.89 (85) call bpf_map_lookup_elem#1\n     18: 0.....6.89 (bf) r7 = r0\n     19: ......6789 (15) if r7 == 0x0 goto pc+2482\n     20: ......6789 (71) r1 = *(u8 *)(r7 +1)\n     21: .1....6789 (67) r1 <<= 8\n     22: .1....6789 (71) r2 = *(u8 *)(r7 +0)\n     23: .12...6789 (4f) r1 |= r2\n     24: .1....6789 (71) r2 = *(u8 *)(r7 +2)\n     25: .12...6789 (67) r2 <<= 16\n     26: .12...6789 (71) r3 = *(u8 *)(r7 +3)\n     27: .123..6789 (67) r3 <<= 24\n     28: .123..6789 (4f) r3 |= r2\n     29: .1.3..6789 (4f) r3 |= r1\n     30: ...3..6789 (7b) *(u64 *)(r8 +96) = r3\n     31: ......6789 (85) call bpf_get_current_pid_tgid#14\n     32: 0.....6789 (55) if r0 != 0xffffffea goto pc+8\n     33: ......6789 (b7) r1 = 32\n     34: .1....6789 (bf) r3 = r9\n     35: .1.3..6789 (0f) r3 += r1\n     36: ...3..6789 (bf) r1 = r10\n     37: .1.3..6789 (07) r1 += -80\n     38: .1.3..6789 (b7) r2 = 8\n     39: .123..6789 (85) call bpf_probe_read#4\n     40: ......6789 (79) r0 = *(u64 *)(r10 -80)\n     41: 0.....6789 (7b) *(u64 *)(r8 +104) = r0\n     42: ......6789 (85) call bpf_get_current_pid_tgid#14\n     43: 0.....6789 (63) *(u32 *)(r8 +124) = r0\n     44: ......6789 (79) r1 = *(u64 *)(r8 +96)\n     45: .1....6789 (79) r2 = *(u64 *)(r8 +104)\n     46: .12...6789 (7b) *(u64 *)(r10 -72) = r2\n     47: .1....6789 (7b) *(u64 *)(r10 -80) = r1\n     48: ......6789 (bf) r2 = r10\n     49: ..2...6789 (07) r2 += -80\n     50: ..2...6789 (18) r1 = 0xffff8bc04576ec00\n     52: .12...6789 (85) call bpf_map_lookup_elem#1\n     53: 0.....6789 (55) if r0 != 0x0 goto pc+1\n     54: ......6... (05) goto pc+2447\n     55: 0......789 (79) r1 = *(u64 *)(r0 +16)\n     56: 01.....789 (7b) *(u64 *)(r10 -184) = r1\n     57: 0......789 (79) r1 = *(u64 *)(r0 +8)\n     58: 01.....789 (7b) *(u64 *)(r10 -176) = r1\n     59: 0......789 (79) r6 = *(u64 *)(r0 +0)\n     60: ......6789 (bf) r2 = r10\n     61: ..2...6789 (07) r2 += -80\n     62: ..2...6789 (18) r1 = 0xffff8bc04576ec00\n     64: .12...6789 (85) call bpf_map_delete_elem#3\n     65: ......6789 (7b) *(u64 *)(r8 +144) = r6\n     66: .......789 (71) r1 = *(u8 *)(r7 +93)\n     67: .1.....789 (67) r1 <<= 8\n     68: .1.....789 (71) r2 = *(u8 *)(r7 +92)\n     69: .12....789 (4f) r1 |= r2\n     70: .1.....789 (71) r2 = *(u8 *)(r7 +94)\n     71: .12....789 (67) r2 <<= 16\n     72: .12....789 (bf) r4 = r7\n     73: .12.4...89 (71) r7 = *(u8 *)(r4 +95)\n     74: .12.4..789 (67) r7 <<= 24\n     75: .12.4..789 (4f) r7 |= r2\n     76: .1..4..789 (71) r2 = *(u8 *)(r4 +89)\n     77: .12.4..789 (67) r2 <<= 8\n     78: .12.4..789 (71) r3 = *(u8 *)(r4 +88)\n     79: .1234..789 (4f) r2 |= r3\n     80: .12.4..789 (71) r3 = *(u8 *)(r4 +90)\n     81: .1234..789 (67) r3 <<= 16\n     82: .1234..789 (7b) *(u64 *)(r10 -144) = r4\n     83: .1234..789 (71) r5 = *(u8 *)(r4 +91)\n     84: .123.5.789 (67) r5 <<= 24\n     85: .123.5.789 (4f) r5 |= r3\n     86: .12..5.789 (4f) r5 |= r2\n     87: .1...5.789 (4f) r7 |= r1\n     88: .....5.789 (b7) r0 = 8\n     89: 0....5.789 (bf) r4 = r8\n     90: 0...45.789 (07) r4 += 144\n     91: 0...45.789 (7b) *(u64 *)(r10 -152) = r8\n     92: 0...45.789 (7b) *(u64 *)(r10 -168) = r9\n     93: 0...45.789 (15) if r7 == 0x0 goto pc+1621\n     94: ....45.78. (79) r1 = *(u64 *)(r10 -128)\n     95: .1..45.78. (7b) *(u64 *)(r10 -104) = r1\n     96: ....45.78. (b7) r1 = 8\n     97: .1..45.78. (b7) r2 = 8\n     98: .12.45.78. (57) r2 &= 16383\n     99: .12.45.78. (7b) *(u64 *)(r8 +24184) = r1\n    100: ..2.45.78. (7\n... verifier log truncated ...; prog 219: prog 219 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 223: prog 223 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 230: prog 230 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 237: prog 237 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\n+= -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2017: frame2: R1=90 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90)\n2017: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n2018: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=s\n... verifier log truncated ...; prog 245: prog 245 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 249: prog 249 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 257: prog 257 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @2058\nLive regs before insn:\n      0: .1........ (bf) r9 = r1\n      1: .........9 (b7) r1 = 0\n      2: .1.......9 (63) *(u32 *)(r10 -308) = r1\n      3: .........9 (bf) r2 = r10\n      4: ..2......9 (07) r2 += -308\n      5: ..2......9 (18) r1 = 0xffff8bc0021f4400\n      7: .12......9 (85) call bpf_map_lookup_elem#1\n      8: 0........9 (bf) r7 = r0\n      9: .......7.9 (15) if r7 == 0x0 goto pc+2038\n     10: .......7.9 (85) call bpf_get_current_task#35\n     11: 0......7.9 (7b) *(u64 *)(r10 -264) = r0\n     12: 0......7.9 (b7) r1 = 2804\n     13: 01.....7.9 (0f) r0 += r1\n     14: 0......7.9 (bf) r1 = r10\n     15: 01.....7.9 (07) r1 += -280\n     16: 01.....7.9 (b7) r2 = 4\n     17: 012....7.9 (bf) r3 = r0\n     18: .123...7.9 (85) call bpf_probe_read_kernel#113\n     19: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     20: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     21: .......7.9 (bf) r2 = r10\n     22: ..2....7.9 (07) r2 += -304\n     23: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     25: .12....7.9 (85) call bpf_map_lookup_elem#1\n     26: 0......7.9 (bf) r6 = r0\n     27: ......67.9 (15) if r6 == 0x0 goto pc+2\n     28: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     29: .1....67.9 (55) if r1 != 0x0 goto pc+661\n     30: .......7.9 (b7) r1 = 2816\n     31: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     32: .1.3...7.9 (0f) r3 += r1\n     33: ...3...7.9 (bf) r1 = r10\n     34: .1.3...7.9 (07) r1 += -264\n     35: .1.3...7.9 (b7) r2 = 8\n     36: .123...7.9 (85) call bpf_probe_read_kernel#113\n     37: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     38: ...3...7.9 (15) if r3 == 0x0 goto pc+76\n     39: ...3...7.9 (b7) r1 = 2804\n     40: .1.3...7.9 (0f) r3 += r1\n     41: ...3...7.9 (bf) r1 = r10\n     42: .1.3...7.9 (07) r1 += -280\n     43: .1.3...7.9 (b7) r2 = 4\n     44: .123...7.9 (85) call bpf_probe_read_kernel#113\n     45: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     46: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     47: .......7.9 (bf) r2 = r10\n     48: ..2....7.9 (07) r2 += -304\n     49: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     51: .12....7.9 (85) call bpf_map_lookup_elem#1\n     52: 0......7.9 (bf) r6 = r0\n     53: ......67.9 (15) if r6 == 0x0 goto pc+2\n     54: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     55: .1....67.9 (55) if r1 != 0x0 goto pc+635\n     56: .......7.9 (b7) r1 = 2816\n     57: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     58: .1.3...7.9 (0f) r3 += r1\n     59: ...3...7.9 (bf) r1 = r10\n     60: .1.3...7.9 (07) r1 += -264\n     61: .1.3...7.9 (b7) r2 = 8\n     62: .123...7.9 (85) call bpf_probe_read_kernel#113\n     63: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     64: ...3...7.9 (15) if r3 == 0x0 goto pc+50\n     65: ...3...7.9 (b7) r1 = 2804\n     66: .1.3...7.9 (0f) r3 += r1\n     67: ...3...7.9 (bf) r1 = r10\n     68: .1.3...7.9 (07) r1 += -280\n     69: .1.3...7.9 (b7) r2 = 4\n     70: .123...7.9 (85) call bpf_probe_read_kernel#113\n     71: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     72: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     73: .......7.9 (bf) r2 = r10\n     74: ..2....7.9 (07) r2 += -304\n     75: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     77: .12....7.9 (85) call bpf_map_lookup_elem#1\n     78: 0......7.9 (bf) r6 = r0\n     79: ......67.9 (15) if r6 == 0x0 goto pc+2\n     80: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     81: .1....67.9 (55) if r1 != 0x0 goto pc+609\n     82: .......7.9 (b7) r1 = 2816\n     83: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     84: .1.3...7.9 (0f) r3 += r1\n     85: ...3...7.9 (bf) r1 = r10\n     86: .1.3...7.9 (07) r1 += -264\n     87: .1.3...7.9 (b7) r2 = 8\n     88: .123...7.9 (85) call bpf_probe_read_kernel#113\n     89: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     90: ...3...7.9 (15) if r3 == 0x0 goto pc+24\n     91: ...3...7.9 (b7) r1 = 2804\n     92: .1.3...7.9 (0f) r3 += r1\n     93: ...3...7.9 (bf) r1 = r10\n     94: .1.3...7.9 (07) r1 += -280\n     95: .1.3...7.9 (b7) r2 = 4\n     96: .123...7.9 (85) call bpf_probe_read_kernel#113\n     97: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     98: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     99: .......7.9 (bf) r2 = r10\n    100: ..2....7.9 (07) r2 += -304\n    101: \n... verifier log truncated ...; prog 260: prog 260 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 264: prog 264 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 273: prog 273 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 282: prog 282 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 283: prog 283 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 290: prog 290 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\n+= -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2017: frame2: R1=90 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90)\n2017: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n2018: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=s\n... verifier log truncated ...; prog 294: prog 294 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 303: prog 303 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\n+= -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2017: frame2: R1=90 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90)\n2017: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n2018: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=s\n... verifier log truncated ...; prog 310: prog 310 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 312: prog 312 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\n+= -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2017: frame2: R1=90 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90)\n2017: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n2018: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=s\n... verifier log truncated ...; prog 317: prog 317 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 325: prog 325 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\n+= -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2017: frame2: R1=90 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90)\n2017: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n2018: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=s\n... verifier log truncated ...; prog 329: prog 329 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 333: prog 333 pass extract failed after 2 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @2058\nLive regs before insn:\n      0: .1........ (bf) r9 = r1\n      1: .........9 (b7) r1 = 0\n      2: .1.......9 (63) *(u32 *)(r10 -308) = r1\n      3: .........9 (bf) r2 = r10\n      4: ..2......9 (07) r2 += -308\n      5: ..2......9 (18) r1 = 0xffff8bc0c0c63600\n      7: .12......9 (85) call bpf_map_lookup_elem#1\n      8: 0........9 (bf) r7 = r0\n      9: .......7.9 (15) if r7 == 0x0 goto pc+2038\n     10: .......7.9 (85) call bpf_get_current_task#35\n     11: 0......7.9 (7b) *(u64 *)(r10 -264) = r0\n     12: 0......7.9 (b7) r1 = 2804\n     13: 01.....7.9 (0f) r0 += r1\n     14: 0......7.9 (bf) r1 = r10\n     15: 01.....7.9 (07) r1 += -280\n     16: 01.....7.9 (b7) r2 = 4\n     17: 012....7.9 (bf) r3 = r0\n     18: .123...7.9 (85) call bpf_probe_read_kernel#113\n     19: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     20: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     21: .......7.9 (bf) r2 = r10\n     22: ..2....7.9 (07) r2 += -304\n     23: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     25: .12....7.9 (85) call bpf_map_lookup_elem#1\n     26: 0......7.9 (bf) r6 = r0\n     27: ......67.9 (15) if r6 == 0x0 goto pc+2\n     28: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     29: .1....67.9 (55) if r1 != 0x0 goto pc+661\n     30: .......7.9 (b7) r1 = 2816\n     31: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     32: .1.3...7.9 (0f) r3 += r1\n     33: ...3...7.9 (bf) r1 = r10\n     34: .1.3...7.9 (07) r1 += -264\n     35: .1.3...7.9 (b7) r2 = 8\n     36: .123...7.9 (85) call bpf_probe_read_kernel#113\n     37: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     38: ...3...7.9 (15) if r3 == 0x0 goto pc+76\n     39: ...3...7.9 (b7) r1 = 2804\n     40: .1.3...7.9 (0f) r3 += r1\n     41: ...3...7.9 (bf) r1 = r10\n     42: .1.3...7.9 (07) r1 += -280\n     43: .1.3...7.9 (b7) r2 = 4\n     44: .123...7.9 (85) call bpf_probe_read_kernel#113\n     45: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     46: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     47: .......7.9 (bf) r2 = r10\n     48: ..2....7.9 (07) r2 += -304\n     49: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     51: .12....7.9 (85) call bpf_map_lookup_elem#1\n     52: 0......7.9 (bf) r6 = r0\n     53: ......67.9 (15) if r6 == 0x0 goto pc+2\n     54: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     55: .1....67.9 (55) if r1 != 0x0 goto pc+635\n     56: .......7.9 (b7) r1 = 2816\n     57: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     58: .1.3...7.9 (0f) r3 += r1\n     59: ...3...7.9 (bf) r1 = r10\n     60: .1.3...7.9 (07) r1 += -264\n     61: .1.3...7.9 (b7) r2 = 8\n     62: .123...7.9 (85) call bpf_probe_read_kernel#113\n     63: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     64: ...3...7.9 (15) if r3 == 0x0 goto pc+50\n     65: ...3...7.9 (b7) r1 = 2804\n     66: .1.3...7.9 (0f) r3 += r1\n     67: ...3...7.9 (bf) r1 = r10\n     68: .1.3...7.9 (07) r1 += -280\n     69: .1.3...7.9 (b7) r2 = 4\n     70: .123...7.9 (85) call bpf_probe_read_kernel#113\n     71: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     72: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     73: .......7.9 (bf) r2 = r10\n     74: ..2....7.9 (07) r2 += -304\n     75: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     77: .12....7.9 (85) call bpf_map_lookup_elem#1\n     78: 0......7.9 (bf) r6 = r0\n     79: ......67.9 (15) if r6 == 0x0 goto pc+2\n     80: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     81: .1....67.9 (55) if r1 != 0x0 goto pc+609\n     82: .......7.9 (b7) r1 = 2816\n     83: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     84: .1.3...7.9 (0f) r3 += r1\n     85: ...3...7.9 (bf) r1 = r10\n     86: .1.3...7.9 (07) r1 += -264\n     87: .1.3...7.9 (b7) r2 = 8\n     88: .123...7.9 (85) call bpf_probe_read_kernel#113\n     89: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     90: ...3...7.9 (15) if r3 == 0x0 goto pc+24\n     91: ...3...7.9 (b7) r1 = 2804\n     92: .1.3...7.9 (0f) r3 += r1\n     93: ...3...7.9 (bf) r1 = r10\n     94: .1.3...7.9 (07) r1 += -280\n     95: .1.3...7.9 (b7) r2 = 4\n     96: .123...7.9 (85) call bpf_probe_read_kernel#113\n     97: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     98: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     99: .......7.9 (bf) r2 = r10\n    100: ..2....7.9 (07) r2 += -304\n    101: \n... verifier log truncated ...; prog 334: prog 334 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @291\nfunc#2 @323\nfunc#3 @355\nfunc#4 @422\nfunc#5 @485\nfunc#6 @733\nfunc#7 @781\nfunc#8 @972\nfunc#9 @1282\nfunc#10 @1321\nfunc#11 @1485\nfunc#12 @1763\nfunc#13 @1969\nfunc#14 @2029\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r1 = 0\n      2: .1....6... (63) *(u32 *)(r10 -20) = r1\n      3: ......6... (bf) r2 = r10\n      4: ..2...6... (07) r2 += -20\n      5: ..2...6... (18) r1 = 0xffff8bc0c0c63600\n      7: .12...6... (85) call bpf_map_lookup_elem#1\n      8: 0.....6... (bf) r7 = r0\n      9: ......67.. (15) if r7 == 0x0 goto pc+279\n     10: ......67.. (61) r9 = *(u32 *)(r7 +24296)\n     11: ......67.9 (bf) r2 = r7\n     12: ..2...67.9 (07) r2 += 24288\n     13: ..2...67.9 (18) r1 = 0xffff8bbd9f988000\n     15: .12...67.9 (85) call bpf_map_lookup_elem#1\n     16: 0.....67.9 (bf) r8 = r0\n     17: ......6789 (15) if r8 == 0x0 goto pc+266\n     18: ......6789 (71) r1 = *(u8 *)(r7 +24264)\n     19: .1....6789 (15) if r1 == 0x0 goto pc+264\n     20: ......6789 (7b) *(u64 *)(r10 -48) = r6\n     21: .......789 (7b) *(u64 *)(r10 -56) = r9\n     22: .......789 (57) r9 &= 7\n     23: .......789 (bf) r1 = r7\n     24: .1.....789 (0f) r1 += r9\n     25: .1.....789 (71) r1 = *(u8 *)(r1 +24233)\n     26: .1.....789 (15) if r1 == 0x0 goto pc+192\n     27: .......789 (67) r9 <<= 2\n     28: .......789 (07) r9 += 4\n     29: .......789 (bf) r1 = r9\n     30: .1.....789 (0f) r1 += r8\n     31: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     32: .1.....789 (0f) r9 += r1\n     33: .......789 (07) r9 += 4\n     34: .......789 (bf) r1 = r9\n     35: .1.....789 (57) r1 &= 1023\n     36: .1.....789 (bf) r3 = r8\n     37: .1.3...789 (7b) *(u64 *)(r10 -64) = r1\n     38: .1.3...789 (0f) r3 += r1\n     39: ...3...789 (71) r1 = *(u8 *)(r3 +1)\n     40: .1.3...789 (67) r1 <<= 8\n     41: .1.3...789 (71) r2 = *(u8 *)(r3 +0)\n     42: .123...789 (4f) r1 |= r2\n     43: .1.3...789 (71) r2 = *(u8 *)(r3 +2)\n     44: .123...789 (67) r2 <<= 16\n     45: .123...789 (7b) *(u64 *)(r10 -40) = r3\n     46: .123...789 (71) r3 = *(u8 *)(r3 +3)\n     47: .123...789 (67) r3 <<= 24\n     48: .123...789 (4f) r3 |= r2\n     49: .1.3...789 (4f) r3 |= r1\n     50: ...3...789 (a5) if r3 < 0x19 goto pc+164\n     51: .......789 (b7) r1 = 1\n     52: .1.....789 (7b) *(u64 *)(r10 -32) = r1\n     53: .......789 (b7) r6 = 4\n  1  54: ......6789 (79) r1 = *(u64 *)(r10 -40)\n  1  55: .1....6789 (0f) r1 += r6\n  1  56: .1....6789 (71) r3 = *(u8 *)(r1 +1)\n  1  57: .1.3..6789 (67) r3 <<= 8\n  1  58: .1.3..6789 (71) r2 = *(u8 *)(r1 +0)\n  1  59: .123..6789 (4f) r3 |= r2\n  1  60: .1.3..6789 (71) r4 = *(u8 *)(r1 +2)\n  1  61: .1.34.6789 (67) r4 <<= 16\n  1  62: .1.34.6789 (71) r2 = *(u8 *)(r1 +3)\n  1  63: ..234.6789 (67) r2 <<= 24\n  1  64: ..234.6789 (4f) r2 |= r4\n  1  65: ..23..6789 (4f) r2 |= r3\n  1  66: ..2...6789 (57) r2 &= 1023\n  1  67: ..2...6789 (65) if r2 s> 0x0 goto pc+3\n     68: .......7.. (79) r1 = *(u64 *)(r10 -32)\n     69: .1.....7.. (15) if r1 == 0x0 goto pc+149\n     70: .......7.. (05) goto pc+144\n  1  71: ..2...6789 (0f) r2 += r9\n  1  72: ..2...6789 (57) r2 &= 1023\n  1  73: ..2...6789 (bf) r1 = r8\n  1  74: .12...6789 (0f) r1 += r2\n  1  75: .1....6789 (71) r3 = *(u8 *)(r1 +1)\n  1  76: .1.3..6789 (67) r3 <<= 8\n  1  77: .1.3..6789 (71) r2 = *(u8 *)(r1 +0)\n  1  78: .123..6789 (4f) r3 |= r2\n  1  79: .1.3..6789 (71) r4 = *(u8 *)(r1 +2)\n  1  80: .1.34.6789 (67) r4 <<= 16\n  1  81: .1.34.6789 (71) r2 = *(u8 *)(r1 +3)\n  1  82: .1234.6789 (67) r2 <<= 24\n  1  83: .1234.6789 (4f) r2 |= r4\n  1  84: .123..6789 (4f) r2 |= r3\n  1  85: .12...6789 (25) if r2 > 0x5 goto pc+133\n  1  86: .12...6789 (57) r2 &= 7\n  1  87: .12...6789 (67) r2 <<= 32\n  1  88: .12...6789 (77) r2 >>= 32\n  1  89: .12...6789 (67) r2 <<= 3\n  1  90: .12...6789 (bf) r3 = r7\n  1  91: .123..6789 (0f) r3 += r2\n  1  92: .1.3..6789 (79) r4 = *(u64 *)(r3 +24184)\n  1  93: .1..4.6789 (57) r4 &= 2047\n  1  94: .1..4.6789 (71) r2 = *(u8 *)(r1 +13)\n  1  95: .12.4.6789 (67) r2 <<= 8\n  1  96: .12.4.6789 (71) r3 = *(u8 *)(r1 +12)\n  1  97: .1234.6789 (4f) r2 |= r3\n  1  98: .12.4.6789 (71) r5 = *(u8 *)(r1 +14)\n  1  99: .12.456789 (67) r5 <<= 16\n  1\n... verifier log truncated ...; prog 343: prog 343 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 345: prog 345 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 353: prog 353 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 362: prog 362 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 365: prog 365 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 374: prog 374 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 377: prog 377 pass bulk_memory failed after 4 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @100\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r1 = 0\n      2: .1....6... (63) *(u32 *)(r10 -12) = r1\n      3: ......6... (bf) r2 = r10\n      4: ..2...6... (07) r2 += -12\n      5: ..2...6... (18) r1 = 0xffff8bbd634bec00\n      7: .12...6... (85) call bpf_map_lookup_elem#1\n      8: 0.....6... (15) if r0 == 0x0 goto pc+89\n      9: 0.....6... (61) r8 = *(u32 *)(r0 +24300)\n     10: 0.....6.8. (67) r8 <<= 32\n     11: 0.....6.8. (c7) r8 s>>= 32\n     12: 0.....6.8. (c5) if r8 s< 0x2 goto pc+85\n     13: 0.....6.8. (07) r0 += 24288\n     14: 0.....6.8. (18) r1 = 0xffff8bc045a38000\n     16: 01....6.8. (bf) r2 = r0\n     17: .12...6.8. (85) call bpf_map_lookup_elem#1\n     18: 0.....6.8. (bf) r7 = r0\n     19: ......678. (15) if r7 == 0x0 goto pc+78\n     20: ......678. (57) r8 &= 2047\n     21: ......678. (bf) r1 = r8\n     22: .1....678. (67) r1 <<= 32\n     23: .1....678. (c7) r1 s>>= 32\n     24: .1....678. (bf) r2 = r7\n     25: .12...678. (0f) r2 += r1\n     26: ..2...678. (71) r1 = *(u8 *)(r2 +1)\n     27: .12...678. (67) r1 <<= 8\n     28: .12...678. (71) r3 = *(u8 *)(r2 +0)\n     29: .123..678. (4f) r1 |= r3\n     30: .12...678. (71) r3 = *(u8 *)(r2 +2)\n     31: .123..678. (67) r3 <<= 16\n     32: .123..678. (71) r2 = *(u8 *)(r2 +3)\n     33: .123..678. (67) r2 <<= 24\n     34: .123..678. (4f) r2 |= r3\n     35: .12...678. (4f) r2 |= r1\n     36: ..2...678. (0f) r2 += r8\n     37: ..2...67.. (57) r2 &= 2047\n     38: ..2...67.. (b7) r8 = 1\n     39: ..2...678. (73) *(u8 *)(r10 -1) = r8\n     40: ..2...678. (b7) r1 = 0\n     41: .12...678. (63) *(u32 *)(r10 -8) = r1\n     42: ..2...678. (67) r2 <<= 32\n     43: ..2...678. (c7) r2 s>>= 32\n     44: ..2...678. (0f) r7 += r2\n     45: ......678. (bf) r2 = r10\n     46: ..2...678. (07) r2 += -8\n     47: ..2...678. (18) r1 = 0xffff8bbf8c0c3a00\n     49: .12...678. (85) call bpf_map_lookup_elem#1\n     50: 0.....678. (15) if r0 == 0x0 goto pc+3\n     51: 0.....678. (71) r1 = *(u8 *)(r0 +0)\n     52: .1....678. (55) if r1 != 0x1 goto pc+1\n     53: ......67.. (b7) r8 = 0\n     54: ......678. (61) r1 = *(u32 *)(r7 +0)\n     55: .1....678. (a5) if r1 < 0x5 goto pc+35\n     56: ......678. (bf) r4 = r10\n     57: ....4.678. (07) r4 += -1\n     58: ....4.678. (bf) r1 = r6\n     59: .1..4.678. (b7) r2 = 0\n     60: .12.4.678. (bf) r3 = r7\n     61: .1234.678. (bf) r5 = r8\n     62: .12345678. (85) call pc+37\n     63: 0.....678. (bf) r1 = r0\n     64: 01....678. (67) r1 <<= 2\n     65: 01....678. (07) r1 += 4\n     66: 01....678. (67) r1 <<= 32\n     67: 01....678. (77) r1 >>= 32\n     68: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     69: 012...678. (3d) if r1 >= r2 goto pc+21\n     70: 0.....678. (bf) r4 = r10\n     71: 0...4.678. (07) r4 += -1\n     72: 0...4.678. (bf) r1 = r6\n     73: 01..4.678. (bf) r2 = r0\n     74: .12.4.678. (bf) r3 = r7\n     75: .1234.678. (bf) r5 = r8\n     76: .12345678. (85) call pc+23\n     77: 0.....678. (bf) r1 = r0\n     78: 01....678. (67) r1 <<= 2\n     79: 01....678. (07) r1 += 4\n     80: 01....678. (67) r1 <<= 32\n     81: 01....678. (77) r1 >>= 32\n     82: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     83: 012...678. (3d) if r1 >= r2 goto pc+7\n     84: 0.....678. (bf) r4 = r10\n     85: 0...4.678. (07) r4 += -1\n     86: 0...4.678. (bf) r1 = r6\n     87: 01..4.678. (bf) r2 = r0\n     88: .12.4.678. (bf) r3 = r7\n     89: .1234.6.8. (bf) r5 = r8\n     90: .123456... (85) call pc+9\n     91: ......6... (71) r1 = *(u8 *)(r10 -1)\n     92: .1....6... (15) if r1 == 0x0 goto pc+5\n     93: ......6... (bf) r1 = r6\n     94: .1........ (18) r2 = 0xffff8bbf09d98800\n     96: .12....... (b7) r3 = 5\n     97: .123...... (85) call bpf_tail_call#12\n     98: .......... (b7) r0 = 0\n     99: 0......... (95) exit\n    100: .12345.... (bf) r6 = r5\n    101: .1234.6... (7b) *(u64 *)(r10 -88) = r4\n    102: .123..6... (bf) r8 = r2\n    103: .1.3..6.8. (7b) *(u64 *)(r10 -96) = r1\n    104: ...3..6.8. (bf) r1 = r8\n    105: .1.3..6.8. (67) r1 <<= 32\n    106: .1.3..6.8. (77) r1 >>= 32\n    107: .1.3..6.8. (67) r1 <<= 2\n    108: .1.3..6.8. (7b) *(u64 *)(r10 -80) = r3\n    109: .1.3..6.8. (bf) r2 = r3\n    1\n... verifier log truncated ...; prog 379: prog 379 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 391: prog 391 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 393: prog 393 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 403: prog 403 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\n+= -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2017: frame2: R1=90 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90)\n2017: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n2018: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=s\n... verifier log truncated ...; prog 404: prog 404 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 415: prog 415 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 422: prog 422 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 427: prog 427 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 435: prog 435 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\n+= -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2017: frame2: R1=90 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90)\n2017: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n2018: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=s\n... verifier log truncated ...; prog 436: prog 436 pass extract failed after 2 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @2058\nLive regs before insn:\n      0: .1........ (bf) r9 = r1\n      1: .........9 (b7) r1 = 0\n      2: .1.......9 (63) *(u32 *)(r10 -308) = r1\n      3: .........9 (bf) r2 = r10\n      4: ..2......9 (07) r2 += -308\n      5: ..2......9 (18) r1 = 0xffff8bbddabcca00\n      7: .12......9 (85) call bpf_map_lookup_elem#1\n      8: 0........9 (bf) r7 = r0\n      9: .......7.9 (15) if r7 == 0x0 goto pc+2038\n     10: .......7.9 (85) call bpf_get_current_task#35\n     11: 0......7.9 (7b) *(u64 *)(r10 -264) = r0\n     12: 0......7.9 (b7) r1 = 2804\n     13: 01.....7.9 (0f) r0 += r1\n     14: 0......7.9 (bf) r1 = r10\n     15: 01.....7.9 (07) r1 += -280\n     16: 01.....7.9 (b7) r2 = 4\n     17: 012....7.9 (bf) r3 = r0\n     18: .123...7.9 (85) call bpf_probe_read_kernel#113\n     19: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     20: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     21: .......7.9 (bf) r2 = r10\n     22: ..2....7.9 (07) r2 += -304\n     23: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     25: .12....7.9 (85) call bpf_map_lookup_elem#1\n     26: 0......7.9 (bf) r6 = r0\n     27: ......67.9 (15) if r6 == 0x0 goto pc+2\n     28: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     29: .1....67.9 (55) if r1 != 0x0 goto pc+661\n     30: .......7.9 (b7) r1 = 2816\n     31: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     32: .1.3...7.9 (0f) r3 += r1\n     33: ...3...7.9 (bf) r1 = r10\n     34: .1.3...7.9 (07) r1 += -264\n     35: .1.3...7.9 (b7) r2 = 8\n     36: .123...7.9 (85) call bpf_probe_read_kernel#113\n     37: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     38: ...3...7.9 (15) if r3 == 0x0 goto pc+76\n     39: ...3...7.9 (b7) r1 = 2804\n     40: .1.3...7.9 (0f) r3 += r1\n     41: ...3...7.9 (bf) r1 = r10\n     42: .1.3...7.9 (07) r1 += -280\n     43: .1.3...7.9 (b7) r2 = 4\n     44: .123...7.9 (85) call bpf_probe_read_kernel#113\n     45: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     46: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     47: .......7.9 (bf) r2 = r10\n     48: ..2....7.9 (07) r2 += -304\n     49: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     51: .12....7.9 (85) call bpf_map_lookup_elem#1\n     52: 0......7.9 (bf) r6 = r0\n     53: ......67.9 (15) if r6 == 0x0 goto pc+2\n     54: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     55: .1....67.9 (55) if r1 != 0x0 goto pc+635\n     56: .......7.9 (b7) r1 = 2816\n     57: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     58: .1.3...7.9 (0f) r3 += r1\n     59: ...3...7.9 (bf) r1 = r10\n     60: .1.3...7.9 (07) r1 += -264\n     61: .1.3...7.9 (b7) r2 = 8\n     62: .123...7.9 (85) call bpf_probe_read_kernel#113\n     63: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     64: ...3...7.9 (15) if r3 == 0x0 goto pc+50\n     65: ...3...7.9 (b7) r1 = 2804\n     66: .1.3...7.9 (0f) r3 += r1\n     67: ...3...7.9 (bf) r1 = r10\n     68: .1.3...7.9 (07) r1 += -280\n     69: .1.3...7.9 (b7) r2 = 4\n     70: .123...7.9 (85) call bpf_probe_read_kernel#113\n     71: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     72: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     73: .......7.9 (bf) r2 = r10\n     74: ..2....7.9 (07) r2 += -304\n     75: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     77: .12....7.9 (85) call bpf_map_lookup_elem#1\n     78: 0......7.9 (bf) r6 = r0\n     79: ......67.9 (15) if r6 == 0x0 goto pc+2\n     80: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     81: .1....67.9 (55) if r1 != 0x0 goto pc+609\n     82: .......7.9 (b7) r1 = 2816\n     83: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     84: .1.3...7.9 (0f) r3 += r1\n     85: ...3...7.9 (bf) r1 = r10\n     86: .1.3...7.9 (07) r1 += -264\n     87: .1.3...7.9 (b7) r2 = 8\n     88: .123...7.9 (85) call bpf_probe_read_kernel#113\n     89: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     90: ...3...7.9 (15) if r3 == 0x0 goto pc+24\n     91: ...3...7.9 (b7) r1 = 2804\n     92: .1.3...7.9 (0f) r3 += r1\n     93: ...3...7.9 (bf) r1 = r10\n     94: .1.3...7.9 (07) r1 += -280\n     95: .1.3...7.9 (b7) r2 = 4\n     96: .123...7.9 (85) call bpf_probe_read_kernel#113\n     97: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     98: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     99: .......7.9 (bf) r2 = r10\n    100: ..2....7.9 (07) r2 += -304\n    101: \n... verifier log truncated ...; prog 438: prog 438 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @100\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r1 = 0\n      2: .1....6... (63) *(u32 *)(r10 -12) = r1\n      3: ......6... (bf) r2 = r10\n      4: ..2...6... (07) r2 += -12\n      5: ..2...6... (18) r1 = 0xffff8bbddabcca00\n      7: .12...6... (85) call bpf_map_lookup_elem#1\n      8: 0.....6... (15) if r0 == 0x0 goto pc+89\n      9: 0.....6... (61) r8 = *(u32 *)(r0 +24300)\n     10: 0.....6.8. (67) r8 <<= 32\n     11: 0.....6.8. (c7) r8 s>>= 32\n     12: 0.....6.8. (c5) if r8 s< 0x2 goto pc+85\n     13: 0.....6.8. (07) r0 += 24288\n     14: 0.....6.8. (18) r1 = 0xffff8bbf4649c000\n     16: 01....6.8. (bf) r2 = r0\n     17: .12...6.8. (85) call bpf_map_lookup_elem#1\n     18: 0.....6.8. (bf) r7 = r0\n     19: ......678. (15) if r7 == 0x0 goto pc+78\n     20: ......678. (57) r8 &= 2047\n     21: ......678. (bf) r1 = r8\n     22: .1....678. (67) r1 <<= 32\n     23: .1....678. (c7) r1 s>>= 32\n     24: .1....678. (bf) r2 = r7\n     25: .12...678. (0f) r2 += r1\n     26: ..2...678. (71) r1 = *(u8 *)(r2 +1)\n     27: .12...678. (67) r1 <<= 8\n     28: .12...678. (71) r3 = *(u8 *)(r2 +0)\n     29: .123..678. (4f) r1 |= r3\n     30: .12...678. (71) r3 = *(u8 *)(r2 +2)\n     31: .123..678. (67) r3 <<= 16\n     32: .123..678. (71) r2 = *(u8 *)(r2 +3)\n     33: .123..678. (67) r2 <<= 24\n     34: .123..678. (4f) r2 |= r3\n     35: .12...678. (4f) r2 |= r1\n     36: ..2...678. (0f) r2 += r8\n     37: ..2...67.. (57) r2 &= 2047\n     38: ..2...67.. (b7) r8 = 1\n     39: ..2...678. (73) *(u8 *)(r10 -1) = r8\n     40: ..2...678. (b7) r1 = 0\n     41: .12...678. (63) *(u32 *)(r10 -8) = r1\n     42: ..2...678. (67) r2 <<= 32\n     43: ..2...678. (c7) r2 s>>= 32\n     44: ..2...678. (0f) r7 += r2\n     45: ......678. (bf) r2 = r10\n     46: ..2...678. (07) r2 += -8\n     47: ..2...678. (18) r1 = 0xffff8bbd634bf000\n     49: .12...678. (85) call bpf_map_lookup_elem#1\n     50: 0.....678. (15) if r0 == 0x0 goto pc+3\n     51: 0.....678. (71) r1 = *(u8 *)(r0 +0)\n     52: .1....678. (55) if r1 != 0x1 goto pc+1\n     53: ......67.. (b7) r8 = 0\n     54: ......678. (61) r1 = *(u32 *)(r7 +0)\n     55: .1....678. (a5) if r1 < 0x5 goto pc+35\n     56: ......678. (bf) r4 = r10\n     57: ....4.678. (07) r4 += -1\n     58: ....4.678. (bf) r1 = r6\n     59: .1..4.678. (b7) r2 = 0\n     60: .12.4.678. (bf) r3 = r7\n     61: .1234.678. (bf) r5 = r8\n     62: .12345678. (85) call pc+37\n     63: 0.....678. (bf) r1 = r0\n     64: 01....678. (67) r1 <<= 2\n     65: 01....678. (07) r1 += 4\n     66: 01....678. (67) r1 <<= 32\n     67: 01....678. (77) r1 >>= 32\n     68: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     69: 012...678. (3d) if r1 >= r2 goto pc+21\n     70: 0.....678. (bf) r4 = r10\n     71: 0...4.678. (07) r4 += -1\n     72: 0...4.678. (bf) r1 = r6\n     73: 01..4.678. (bf) r2 = r0\n     74: .12.4.678. (bf) r3 = r7\n     75: .1234.678. (bf) r5 = r8\n     76: .12345678. (85) call pc+23\n     77: 0.....678. (bf) r1 = r0\n     78: 01....678. (67) r1 <<= 2\n     79: 01....678. (07) r1 += 4\n     80: 01....678. (67) r1 <<= 32\n     81: 01....678. (77) r1 >>= 32\n     82: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     83: 012...678. (3d) if r1 >= r2 goto pc+7\n     84: 0.....678. (bf) r4 = r10\n     85: 0...4.678. (07) r4 += -1\n     86: 0...4.678. (bf) r1 = r6\n     87: 01..4.678. (bf) r2 = r0\n     88: .12.4.678. (bf) r3 = r7\n     89: .1234.6.8. (bf) r5 = r8\n     90: .123456... (85) call pc+9\n     91: ......6... (71) r1 = *(u8 *)(r10 -1)\n     92: .1....6... (15) if r1 == 0x0 goto pc+5\n     93: ......6... (bf) r1 = r6\n     94: .1........ (18) r2 = 0xffff8bba80313600\n     96: .12....... (b7) r3 = 5\n     97: .123...... (85) call bpf_tail_call#12\n     98: .......... (b7) r0 = 0\n     99: 0......... (95) exit\n    100: .12345.... (bf) r6 = r5\n    101: .1234.6... (7b) *(u64 *)(r10 -88) = r4\n    102: .123..6... (bf) r8 = r2\n    103: .1.3..6.8. (7b) *(u64 *)(r10 -96) = r1\n    104: ...3..6.8. (bf) r1 = r8\n    105: .1.3..6.8. (67) r1 <<= 32\n    106: .1.3..6.8. (77) r1 >>= 32\n    107: .1.3..6.8. (67) r1 <<= 2\n    108: .1.3..6.8. (7b) *(u64 *)(r10 -80) = r3\n    109: .1.3..6.8. (bf) r2 = r3\n    1\n... verifier log truncated ...; prog 441: prog 441 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 446: prog 446 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 456: prog 456 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...; prog 463: prog 463 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+        "error_programs": [
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 177 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 7: Argument list too long (os error 7)\nverifier log summary:\nfunc#0 @0\nfunc#1 @844\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r7 = 0\n      2: ......67.. (63) *(u32 *)(r10 -88) = r7\n      3: ......67.. (bf) r2 = r10\n      4: ..2...67.. (07) r2 += -88\n      5: ..2...67.. (18) r1 = 0xffff8bc003cb5800\n      7: .12...67.. (85) call bpf_map_lookup_elem#1\n      8: 0.....67.. (15) if r0 == 0x0 goto pc+821\n      9: 0.....67.. (7b) *(u64 *)(r10 -120) = r6\n     10: 0......7.. (bf) r8 = r0\n     11: 0......78. (bf) r6 = r0\n     12: ......678. (85) call bpf_get_current_task#35\n     13: 0.....678. (b7) r1 = 2680\n     14: 01....678. (0f) r0 += r1\n     15: 0.....678. (bf) r1 = r10\n     16: 01....678. (07) r1 += -72\n     17: 01....678. (b7) r2 = 8\n     18: 012...678. (bf) r3 = r0\n     19: .123..678. (85) call bpf_probe_read#4\n     20: ......678. (b7) r1 = 1448\n     21: .1....678. (79) r3 = *(u64 *)(r10 -72)\n     22: .1.3..678. (0f) r3 += r1\n     23: ...3..678. (bf) r1 = r10\n     24: .1.3..678. (07) r1 += -64\n     25: .1.3..678. (b7) r2 = 8\n     26: .123..678. (85) call bpf_probe_read#4\n     27: ......678. (79) r9 = *(u64 *)(r10 -64)\n     28: ......6789 (63) *(u32 *)(r10 -84) = r7\n     29: ......6.89 (bf) r2 = r10\n     30: ..2...6.89 (07) r2 += -84\n     31: ..2...6.89 (18) r1 = 0xffff8bba06350800\n     33: .12...6.89 (85) call bpf_map_lookup_elem#1\n     34: 0.....6.89 (7b) *(u64 *)(r10 -104) = r6\n     35: 0.....6.89 (07) r6 += 5808\n     36: 0.....6.89 (7b) *(u64 *)(r10 -112) = r6\n     37: 0.......89 (bf) r2 = r8\n     38: 0.2.....89 (7b) *(u64 *)(r10 -96) = r8\n     39: 0.2......9 (bf) r8 = r0\n     40: ..2.....89 (55) if r8 != 0x0 goto pc+1\n     41: .......... (05) goto pc+254\n     42: ..2.....89 (b7) r1 = 64\n     43: .12.....89 (0f) r9 += r1\n     44: ..2.....89 (b7) r1 = 4096\n     45: .12.....89 (63) *(u32 *)(r2 +6192) = r1\n     46: ........89 (85) call bpf_get_current_task#35\n     47: 0.......89 (b7) r1 = 3408\n     48: 01......89 (0f) r0 += r1\n     49: 0.......89 (bf) r1 = r10\n     50: 01......89 (07) r1 += -80\n     51: 01......89 (b7) r2 = 8\n     52: 012.....89 (bf) r3 = r0\n     53: .123....89 (85) call bpf_probe_read#4\n     54: ........89 (b7) r1 = 8\n     55: .1......89 (7b) *(u64 *)(r10 -128) = r9\n     56: .1......89 (0f) r9 += r1\n     57: ........89 (79) r7 = *(u64 *)(r10 -80)\n     58: .......789 (bf) r1 = r10\n     59: .1.....789 (07) r1 += -72\n     60: .1.....789 (b7) r2 = 8\n     61: .12....789 (7b) *(u64 *)(r10 -136) = r9\n     62: .12....789 (bf) r3 = r9\n     63: .123...78. (85) call bpf_probe_read#4\n     64: .......78. (b7) r1 = 8\n     65: .1.....78. (79) r6 = *(u64 *)(r10 -72)\n     66: .1....678. (bf) r3 = r6\n     67: .1.3..678. (0f) r3 += r1\n     68: ...3..678. (b7) r1 = 8\n     69: .1.3..678. (0f) r3 += r1\n     70: ...3..678. (bf) r1 = r10\n     71: .1.3..678. (07) r1 += -64\n     72: .1.3..678. (b7) r2 = 8\n     73: .123..678. (85) call bpf_probe_read#4\n     74: ......678. (79) r3 = *(u64 *)(r10 -96)\n     75: ...3..678. (bf) r9 = r8\n     76: ...3..6789 (07) r9 += 4096\n     77: ...3..6789 (79) r1 = *(u64 *)(r10 -64)\n     78: .1.3..6789 (55) if r1 != 0x0 goto pc+41\n     79: ......6789 (b7) r1 = 24\n     80: .1....6789 (bf) r3 = r6\n     81: .1.3..6789 (0f) r3 += r1\n     82: ...3..6789 (bf) r1 = r10\n     83: .1.3..6789 (07) r1 += -64\n     84: .1.3..6789 (b7) r2 = 8\n     85: .123..6789 (85) call bpf_probe_read#4\n     86: ......6789 (79) r3 = *(u64 *)(r10 -96)\n     87: ...3..6789 (79) r1 = *(u64 *)(r10 -64)\n     88: .1.3..6789 (1d) if r1 == r6 goto pc+31\n     89: ...3...789 (61) r1 = *(u32 *)(r3 +6192)\n     90: .1.3...789 (bf) r2 = r1\n     91: .123...789 (07) r2 += -10\n     92: .123...789 (63) *(u32 *)(r3 +6192) = r2\n     93: .123...789 (67) r1 <<= 32\n     94: .123...789 (c7) r1 s>>= 32\n     95: .123...789 (65) if r1 s> 0x9 goto pc+5\n     96: ..23.....9 (18) r1 = 0xffffffdc\n     98: .123.....9 (63) *(u32 *)(r3 +6196) = r1\n     99: ..2......9 (bf) r7 = r9\n    100: ..2....7.. (05) goto pc+93\n    101: ...3...78. (b7) r1 = 41\n    102: .1.3...78. (73) *(u8 *)(r8 +4095) = r1\n    103: ...3...78. (b7) r1 = 116\n    104: .1.3...78. (73) *(u8 *)(r8 +4092) = r1\n    105: ...3\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 177
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 178 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 7: Argument list too long (os error 7)\nverifier log summary:\nfunc#0 @0\nfunc#1 @1724\nfunc#2 @1840\nfunc#3 @2033\nfunc#4 @2208\nfunc#5 @2277\nfunc#6 @2300\nfunc#7 @2370\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (85) call bpf_get_current_task#35\n      2: 0.....6... (bf) r9 = r0\n      3: ......6..9 (7b) *(u64 *)(r10 -128) = r6\n      4: ......6..9 (61) r6 = *(u32 *)(r6 +8)\n      5: ......6..9 (b7) r1 = 0\n      6: .1....6..9 (63) *(u32 *)(r10 -120) = r1\n      7: ......6..9 (bf) r2 = r10\n      8: ..2...6..9 (07) r2 += -120\n      9: ..2...6..9 (18) r1 = 0xffff8bc003cb5800\n     11: .12...6..9 (85) call bpf_map_lookup_elem#1\n     12: 0.....6..9 (bf) r7 = r0\n     13: ......67.9 (15) if r7 == 0x0 goto pc+1689\n     14: ......67.9 (7b) *(u64 *)(r10 -144) = r6\n     15: .......7.9 (85) call bpf_get_current_pid_tgid#14\n     16: 0......7.9 (bf) r6 = r0\n     17: ......67.9 (85) call bpf_get_current_task#35\n     18: 0.....67.9 (7b) *(u64 *)(r10 -96) = r0\n     19: 0.....67.9 (b7) r8 = 2816\n     20: 0.....6789 (0f) r0 += r8\n     21: 0.....6789 (bf) r1 = r10\n     22: 01....6789 (07) r1 += -96\n     23: 01....6789 (b7) r2 = 8\n     24: 012...6789 (bf) r3 = r0\n     25: .123..6789 (85) call bpf_probe_read_kernel#113\n     26: ......6789 (7b) *(u64 *)(r10 -160) = r6\n     27: ......6789 (7b) *(u64 *)(r10 -152) = r6\n     28: .......789 (79) r3 = *(u64 *)(r10 -96)\n     29: ...3...789 (7b) *(u64 *)(r10 -136) = r9\n     30: ...3...789 (15) if r3 == 0x0 goto pc+162\n     31: ...3...789 (b7) r1 = 2804\n     32: .1.3...789 (0f) r3 += r1\n     33: ...3...789 (bf) r1 = r10\n     34: .1.3...789 (07) r1 += -8\n     35: .1.3...789 (b7) r2 = 4\n     36: .123...789 (85) call bpf_probe_read_kernel#113\n     37: .......789 (61) r1 = *(u32 *)(r10 -8)\n     38: .1.....789 (63) *(u32 *)(r10 -112) = r1\n     39: .......789 (bf) r2 = r10\n     40: ..2....789 (07) r2 += -112\n     41: ..2....789 (18) r1 = 0xffff8bbe5325ec00\n     43: .12....789 (85) call bpf_map_lookup_elem#1\n     44: 0......789 (bf) r6 = r0\n     45: ......6789 (15) if r6 == 0x0 goto pc+3\n     46: ......6789 (05) goto pc+0\n     47: ......6789 (79) r1 = *(u64 *)(r6 +8)\n     48: .1....6789 (55) if r1 != 0x0 goto pc+81\n     49: .......789 (b7) r1 = 2816\n     50: .1.....789 (79) r3 = *(u64 *)(r10 -96)\n     51: .1.3...789 (0f) r3 += r1\n     52: ...3...789 (bf) r1 = r10\n     53: .1.3...789 (07) r1 += -96\n     54: .1.3...789 (b7) r2 = 8\n     55: .123...789 (85) call bpf_probe_read_kernel#113\n     56: .......789 (79) r3 = *(u64 *)(r10 -96)\n     57: ...3...789 (15) if r3 == 0x0 goto pc+135\n     58: ...3...789 (b7) r1 = 2804\n     59: .1.3...789 (0f) r3 += r1\n     60: ...3...789 (bf) r1 = r10\n     61: .1.3...789 (07) r1 += -8\n     62: .1.3...789 (b7) r2 = 4\n     63: .123...789 (85) call bpf_probe_read_kernel#113\n     64: .......789 (61) r1 = *(u32 *)(r10 -8)\n     65: .1.....789 (63) *(u32 *)(r10 -112) = r1\n     66: .......789 (bf) r2 = r10\n     67: ..2....789 (07) r2 += -112\n     68: ..2....789 (18) r1 = 0xffff8bbe5325ec00\n     70: .12....789 (85) call bpf_map_lookup_elem#1\n     71: 0......789 (bf) r6 = r0\n     72: ......6789 (15) if r6 == 0x0 goto pc+3\n     73: ......6789 (05) goto pc+0\n     74: ......6789 (79) r1 = *(u64 *)(r6 +8)\n     75: .1....6789 (55) if r1 != 0x0 goto pc+54\n     76: .......789 (b7) r1 = 2816\n     77: .1.....789 (79) r3 = *(u64 *)(r10 -96)\n     78: .1.3...789 (0f) r3 += r1\n     79: ...3...789 (bf) r1 = r10\n     80: .1.3...789 (07) r1 += -96\n     81: .1.3...789 (b7) r2 = 8\n     82: .123...789 (85) call bpf_probe_read_kernel#113\n     83: .......789 (79) r3 = *(u64 *)(r10 -96)\n     84: ...3...789 (15) if r3 == 0x0 goto pc+108\n     85: ...3...789 (b7) r1 = 2804\n     86: .1.3...789 (0f) r3 += r1\n     87: ...3...789 (bf) r1 = r10\n     88: .1.3...789 (07) r1 += -8\n     89: .1.3...789 (b7) r2 = 4\n     90: .123...789 (85) call bpf_probe_read_kernel#113\n     91: .......789 (61) r1 = *(u32 *)(r10 -8)\n     92: .1.....789 (63) *(u32 *)(r10 -112) = r1\n     93: .......789 (bf) r2 = r10\n     94: ..2....789 (07) r2 += -112\n     95: ..2....789 (18) r1 = 0xffff8bbe5325ec00\n     97: .12....789 (85) call bpf_map_lookup_elem#1\n     98: 0......789 (bf) r6 = r0\n\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 178
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 185 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 185
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 195 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @316\nfunc#2 @348\nfunc#3 @380\nfunc#4 @447\nfunc#5 @510\nfunc#6 @758\nfunc#7 @806\nfunc#8 @997\nfunc#9 @1307\nfunc#10 @1346\nfunc#11 @1510\nfunc#12 @1788\nfunc#13 @1994\nfunc#14 @2054\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r1 = 0\n      2: .1....6... (63) *(u32 *)(r10 -20) = r1\n      3: ......6... (bf) r2 = r10\n      4: ..2...6... (07) r2 += -20\n      5: ..2...6... (18) r1 = 0xffff8bba06e56000\n      7: .12...6... (85) call bpf_map_lookup_elem#1\n      8: 0.....6... (bf) r7 = r0\n      9: ......67.. (15) if r7 == 0x0 goto pc+304\n     10: ......67.. (61) r9 = *(u32 *)(r7 +24296)\n     11: ......67.9 (bf) r2 = r7\n     12: ..2...67.9 (07) r2 += 24288\n     13: ..2...67.9 (18) r1 = 0xffff8bbf43fca000\n     15: .12...67.9 (85) call bpf_map_lookup_elem#1\n     16: 0.....67.9 (bf) r8 = r0\n     17: ......6789 (15) if r8 == 0x0 goto pc+291\n     18: ......6789 (71) r1 = *(u8 *)(r7 +24264)\n     19: .1....6789 (15) if r1 == 0x0 goto pc+289\n     20: ......6789 (7b) *(u64 *)(r10 -48) = r6\n     21: .......789 (7b) *(u64 *)(r10 -56) = r9\n     22: .......789 (57) r9 &= 7\n     23: .......789 (bf) r1 = r7\n     24: .1.....789 (0f) r1 += r9\n     25: .1.....789 (71) r1 = *(u8 *)(r1 +24233)\n     26: .1.....789 (15) if r1 == 0x0 goto pc+217\n     27: .......789 (67) r9 <<= 2\n     28: .......789 (07) r9 += 4\n     29: .......789 (bf) r1 = r9\n     30: .1.....789 (0f) r1 += r8\n     31: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     32: .1.....789 (0f) r9 += r1\n     33: .......789 (07) r9 += 4\n     34: .......789 (bf) r1 = r9\n     35: .1.....789 (57) r1 &= 1023\n     36: .1.....789 (0f) r1 += r8\n     37: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     38: .1.....789 (0f) r9 += r1\n     39: .......789 (bf) r1 = r9\n     40: .1.....789 (57) r1 &= 1023\n     41: .1.....789 (0f) r1 += r8\n     42: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     43: .1.....789 (0f) r9 += r1\n     44: .......789 (bf) r1 = r9\n     45: .1.....789 (57) r1 &= 1023\n     46: .1.....789 (0f) r1 += r8\n     47: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     48: .1.....789 (0f) r9 += r1\n     49: .......789 (bf) r1 = r9\n     50: .1.....789 (57) r1 &= 1023\n     51: .1.....789 (0f) r1 += r8\n     52: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     53: .1.....789 (0f) r9 += r1\n     54: .......789 (bf) r1 = r9\n     55: .1.....789 (57) r1 &= 1023\n     56: .1.....789 (0f) r1 += r8\n     57: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     58: .1.....789 (0f) r9 += r1\n     59: .......789 (bf) r1 = r9\n     60: .1.....789 (57) r1 &= 1023\n     61: .1.....789 (bf) r3 = r8\n     62: .1.3...789 (7b) *(u64 *)(r10 -64) = r1\n     63: .1.3...789 (0f) r3 += r1\n     64: ...3...789 (71) r1 = *(u8 *)(r3 +1)\n     65: .1.3...789 (67) r1 <<= 8\n     66: .1.3...789 (71) r2 = *(u8 *)(r3 +0)\n     67: .123...789 (4f) r1 |= r2\n     68: .1.3...789 (71) r2 = *(u8 *)(r3 +2)\n     69: .123...789 (67) r2 <<= 16\n     70: .123...789 (7b) *(u64 *)(r10 -40) = r3\n     71: .123...789 (71) r3 = *(u8 *)(r3 +3)\n     72: .123...789 (67) r3 <<= 24\n     73: .123...789 (4f) r3 |= r2\n     74: .1.3...789 (4f) r3 |= r1\n     75: ...3...789 (a5) if r3 < 0x19 goto pc+164\n     76: .......789 (b7) r1 = 1\n     77: .1.....789 (7b) *(u64 *)(r10 -32) = r1\n     78: .......789 (b7) r6 = 4\n  1  79: ......6789 (79) r1 = *(u64 *)(r10 -40)\n  1  80: .1....6789 (0f) r1 += r6\n  1  81: .1....6789 (71) r3 = *(u8 *)(r1 +1)\n  1  82: .1.3..6789 (67) r3 <<= 8\n  1  83: .1.3..6789 (71) r2 = *(u8 *)(r1 +0)\n  1  84: .123..6789 (4f) r3 |= r2\n  1  85: .1.3..6789 (71) r4 = *(u8 *)(r1 +2)\n  1  86: .1.34.6789 (67) r4 <<= 16\n  1  87: .1.34.6789 (71) r2 = *(u8 *)(r1 +3)\n  1  88: ..234.6789 (67) r2 <<= 24\n  1  89: ..234.6789 (4f) r2 |= r4\n  1  90: ..23..6789 (4f) r2 |= r3\n  1  91: ..2...6789 (57) r2 &= 1023\n  1  92: ..2...6789 (65) if r2 s> 0x0 goto pc+3\n     93: .......7.. (79) r1 = *(u64 *)(r10 -32)\n     94: .1.....7.. (15) if r1 == 0x0 goto pc+149\n     95: .......7.. (05) goto pc+144\n  1  96: ..2...6789 (0f) r2 += r9\n  1  97: ..2...6789 (57) r2 &= 1023\n  1  98: ..2...6789 (bf) r1 = r8\n  1  99: .12...6789 (0f) r1 += r2\n  1 100: .1....6789 (71) r3 = *(u8 *)(r1 +1)\n  1 101: \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 195
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 196 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @100\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r1 = 0\n      2: .1....6... (63) *(u32 *)(r10 -12) = r1\n      3: ......6... (bf) r2 = r10\n      4: ..2...6... (07) r2 += -12\n      5: ..2...6... (18) r1 = 0xffff8bba06e56000\n      7: .12...6... (85) call bpf_map_lookup_elem#1\n      8: 0.....6... (15) if r0 == 0x0 goto pc+89\n      9: 0.....6... (61) r8 = *(u32 *)(r0 +24300)\n     10: 0.....6.8. (67) r8 <<= 32\n     11: 0.....6.8. (c7) r8 s>>= 32\n     12: 0.....6.8. (c5) if r8 s< 0x2 goto pc+85\n     13: 0.....6.8. (07) r0 += 24288\n     14: 0.....6.8. (18) r1 = 0xffff8bbf43fca000\n     16: 01....6.8. (bf) r2 = r0\n     17: .12...6.8. (85) call bpf_map_lookup_elem#1\n     18: 0.....6.8. (bf) r7 = r0\n     19: ......678. (15) if r7 == 0x0 goto pc+78\n     20: ......678. (57) r8 &= 2047\n     21: ......678. (bf) r1 = r8\n     22: .1....678. (67) r1 <<= 32\n     23: .1....678. (c7) r1 s>>= 32\n     24: .1....678. (bf) r2 = r7\n     25: .12...678. (0f) r2 += r1\n     26: ..2...678. (71) r1 = *(u8 *)(r2 +1)\n     27: .12...678. (67) r1 <<= 8\n     28: .12...678. (71) r3 = *(u8 *)(r2 +0)\n     29: .123..678. (4f) r1 |= r3\n     30: .12...678. (71) r3 = *(u8 *)(r2 +2)\n     31: .123..678. (67) r3 <<= 16\n     32: .123..678. (71) r2 = *(u8 *)(r2 +3)\n     33: .123..678. (67) r2 <<= 24\n     34: .123..678. (4f) r2 |= r3\n     35: .12...678. (4f) r2 |= r1\n     36: ..2...678. (0f) r2 += r8\n     37: ..2...67.. (57) r2 &= 2047\n     38: ..2...67.. (b7) r8 = 1\n     39: ..2...678. (73) *(u8 *)(r10 -1) = r8\n     40: ..2...678. (b7) r1 = 0\n     41: .12...678. (63) *(u32 *)(r10 -8) = r1\n     42: ..2...678. (67) r2 <<= 32\n     43: ..2...678. (c7) r2 s>>= 32\n     44: ..2...678. (0f) r7 += r2\n     45: ......678. (bf) r2 = r10\n     46: ..2...678. (07) r2 += -8\n     47: ..2...678. (18) r1 = 0xffff8bba78bd2e00\n     49: .12...678. (85) call bpf_map_lookup_elem#1\n     50: 0.....678. (15) if r0 == 0x0 goto pc+3\n     51: 0.....678. (71) r1 = *(u8 *)(r0 +0)\n     52: .1....678. (55) if r1 != 0x1 goto pc+1\n     53: ......67.. (b7) r8 = 0\n     54: ......678. (61) r1 = *(u32 *)(r7 +0)\n     55: .1....678. (a5) if r1 < 0x5 goto pc+35\n     56: ......678. (bf) r4 = r10\n     57: ....4.678. (07) r4 += -1\n     58: ....4.678. (bf) r1 = r6\n     59: .1..4.678. (b7) r2 = 0\n     60: .12.4.678. (bf) r3 = r7\n     61: .1234.678. (bf) r5 = r8\n     62: .12345678. (85) call pc+37\n     63: 0.....678. (bf) r1 = r0\n     64: 01....678. (67) r1 <<= 2\n     65: 01....678. (07) r1 += 4\n     66: 01....678. (67) r1 <<= 32\n     67: 01....678. (77) r1 >>= 32\n     68: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     69: 012...678. (3d) if r1 >= r2 goto pc+21\n     70: 0.....678. (bf) r4 = r10\n     71: 0...4.678. (07) r4 += -1\n     72: 0...4.678. (bf) r1 = r6\n     73: 01..4.678. (bf) r2 = r0\n     74: .12.4.678. (bf) r3 = r7\n     75: .1234.678. (bf) r5 = r8\n     76: .12345678. (85) call pc+23\n     77: 0.....678. (bf) r1 = r0\n     78: 01....678. (67) r1 <<= 2\n     79: 01....678. (07) r1 += 4\n     80: 01....678. (67) r1 <<= 32\n     81: 01....678. (77) r1 >>= 32\n     82: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     83: 012...678. (3d) if r1 >= r2 goto pc+7\n     84: 0.....678. (bf) r4 = r10\n     85: 0...4.678. (07) r4 += -1\n     86: 0...4.678. (bf) r1 = r6\n     87: 01..4.678. (bf) r2 = r0\n     88: .12.4.678. (bf) r3 = r7\n     89: .1234.6.8. (bf) r5 = r8\n     90: .123456... (85) call pc+9\n     91: ......6... (71) r1 = *(u8 *)(r10 -1)\n     92: .1....6... (15) if r1 == 0x0 goto pc+5\n     93: ......6... (bf) r1 = r6\n     94: .1........ (18) r2 = 0xffff8bba06e56c00\n     96: .12....... (b7) r3 = 5\n     97: .123...... (85) call bpf_tail_call#12\n     98: .......... (b7) r0 = 0\n     99: 0......... (95) exit\n    100: .12345.... (bf) r6 = r5\n    101: .1234.6... (7b) *(u64 *)(r10 -88) = r4\n    102: .123..6... (bf) r8 = r2\n    103: .1.3..6.8. (7b) *(u64 *)(r10 -96) = r1\n    104: ...3..6.8. (bf) r1 = r8\n    105: .1.3..6.8. (67) r1 <<= 32\n    106: .1.3..6.8. (77) r1 >>= 32\n    107: .1.3..6.8. (67) r1 <<= 2\n    108: .1.3..6.8. (7b) *(u64 *)(r10 -80) = r3\n    109: .1.3..6.8. (bf) r2 = r3\n    1\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 196
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 197 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @2058\nLive regs before insn:\n      0: .1........ (bf) r9 = r1\n      1: .........9 (b7) r1 = 0\n      2: .1.......9 (63) *(u32 *)(r10 -308) = r1\n      3: .........9 (bf) r2 = r10\n      4: ..2......9 (07) r2 += -308\n      5: ..2......9 (18) r1 = 0xffff8bba06e56000\n      7: .12......9 (85) call bpf_map_lookup_elem#1\n      8: 0........9 (bf) r7 = r0\n      9: .......7.9 (15) if r7 == 0x0 goto pc+2038\n     10: .......7.9 (85) call bpf_get_current_task#35\n     11: 0......7.9 (7b) *(u64 *)(r10 -264) = r0\n     12: 0......7.9 (b7) r1 = 2804\n     13: 01.....7.9 (0f) r0 += r1\n     14: 0......7.9 (bf) r1 = r10\n     15: 01.....7.9 (07) r1 += -280\n     16: 01.....7.9 (b7) r2 = 4\n     17: 012....7.9 (bf) r3 = r0\n     18: .123...7.9 (85) call bpf_probe_read_kernel#113\n     19: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     20: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     21: .......7.9 (bf) r2 = r10\n     22: ..2....7.9 (07) r2 += -304\n     23: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     25: .12....7.9 (85) call bpf_map_lookup_elem#1\n     26: 0......7.9 (bf) r6 = r0\n     27: ......67.9 (15) if r6 == 0x0 goto pc+2\n     28: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     29: .1....67.9 (55) if r1 != 0x0 goto pc+661\n     30: .......7.9 (b7) r1 = 2816\n     31: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     32: .1.3...7.9 (0f) r3 += r1\n     33: ...3...7.9 (bf) r1 = r10\n     34: .1.3...7.9 (07) r1 += -264\n     35: .1.3...7.9 (b7) r2 = 8\n     36: .123...7.9 (85) call bpf_probe_read_kernel#113\n     37: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     38: ...3...7.9 (15) if r3 == 0x0 goto pc+76\n     39: ...3...7.9 (b7) r1 = 2804\n     40: .1.3...7.9 (0f) r3 += r1\n     41: ...3...7.9 (bf) r1 = r10\n     42: .1.3...7.9 (07) r1 += -280\n     43: .1.3...7.9 (b7) r2 = 4\n     44: .123...7.9 (85) call bpf_probe_read_kernel#113\n     45: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     46: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     47: .......7.9 (bf) r2 = r10\n     48: ..2....7.9 (07) r2 += -304\n     49: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     51: .12....7.9 (85) call bpf_map_lookup_elem#1\n     52: 0......7.9 (bf) r6 = r0\n     53: ......67.9 (15) if r6 == 0x0 goto pc+2\n     54: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     55: .1....67.9 (55) if r1 != 0x0 goto pc+635\n     56: .......7.9 (b7) r1 = 2816\n     57: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     58: .1.3...7.9 (0f) r3 += r1\n     59: ...3...7.9 (bf) r1 = r10\n     60: .1.3...7.9 (07) r1 += -264\n     61: .1.3...7.9 (b7) r2 = 8\n     62: .123...7.9 (85) call bpf_probe_read_kernel#113\n     63: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     64: ...3...7.9 (15) if r3 == 0x0 goto pc+50\n     65: ...3...7.9 (b7) r1 = 2804\n     66: .1.3...7.9 (0f) r3 += r1\n     67: ...3...7.9 (bf) r1 = r10\n     68: .1.3...7.9 (07) r1 += -280\n     69: .1.3...7.9 (b7) r2 = 4\n     70: .123...7.9 (85) call bpf_probe_read_kernel#113\n     71: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     72: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     73: .......7.9 (bf) r2 = r10\n     74: ..2....7.9 (07) r2 += -304\n     75: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     77: .12....7.9 (85) call bpf_map_lookup_elem#1\n     78: 0......7.9 (bf) r6 = r0\n     79: ......67.9 (15) if r6 == 0x0 goto pc+2\n     80: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     81: .1....67.9 (55) if r1 != 0x0 goto pc+609\n     82: .......7.9 (b7) r1 = 2816\n     83: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     84: .1.3...7.9 (0f) r3 += r1\n     85: ...3...7.9 (bf) r1 = r10\n     86: .1.3...7.9 (07) r1 += -264\n     87: .1.3...7.9 (b7) r2 = 8\n     88: .123...7.9 (85) call bpf_probe_read_kernel#113\n     89: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     90: ...3...7.9 (15) if r3 == 0x0 goto pc+24\n     91: ...3...7.9 (b7) r1 = 2804\n     92: .1.3...7.9 (0f) r3 += r1\n     93: ...3...7.9 (bf) r1 = r10\n     94: .1.3...7.9 (07) r1 += -280\n     95: .1.3...7.9 (b7) r2 = 4\n     96: .123...7.9 (85) call bpf_probe_read_kernel#113\n     97: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     98: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     99: .......7.9 (bf) r2 = r10\n    100: ..2....7.9 (07) r2 += -304\n    101: \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 197
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 198 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @316\nfunc#2 @348\nfunc#3 @380\nfunc#4 @447\nfunc#5 @510\nfunc#6 @758\nfunc#7 @806\nfunc#8 @997\nfunc#9 @1307\nfunc#10 @1346\nfunc#11 @1510\nfunc#12 @1788\nfunc#13 @1994\nfunc#14 @2054\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r1 = 0\n      2: .1....6... (63) *(u32 *)(r10 -20) = r1\n      3: ......6... (bf) r2 = r10\n      4: ..2...6... (07) r2 += -20\n      5: ..2...6... (18) r1 = 0xffff8bba06e56000\n      7: .12...6... (85) call bpf_map_lookup_elem#1\n      8: 0.....6... (bf) r7 = r0\n      9: ......67.. (15) if r7 == 0x0 goto pc+304\n     10: ......67.. (61) r9 = *(u32 *)(r7 +24296)\n     11: ......67.9 (bf) r2 = r7\n     12: ..2...67.9 (07) r2 += 24288\n     13: ..2...67.9 (18) r1 = 0xffff8bbd65ee0000\n     15: .12...67.9 (85) call bpf_map_lookup_elem#1\n     16: 0.....67.9 (bf) r8 = r0\n     17: ......6789 (15) if r8 == 0x0 goto pc+291\n     18: ......6789 (71) r1 = *(u8 *)(r7 +24264)\n     19: .1....6789 (15) if r1 == 0x0 goto pc+289\n     20: ......6789 (7b) *(u64 *)(r10 -48) = r6\n     21: .......789 (7b) *(u64 *)(r10 -56) = r9\n     22: .......789 (57) r9 &= 7\n     23: .......789 (bf) r1 = r7\n     24: .1.....789 (0f) r1 += r9\n     25: .1.....789 (71) r1 = *(u8 *)(r1 +24233)\n     26: .1.....789 (15) if r1 == 0x0 goto pc+217\n     27: .......789 (67) r9 <<= 2\n     28: .......789 (07) r9 += 4\n     29: .......789 (bf) r1 = r9\n     30: .1.....789 (0f) r1 += r8\n     31: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     32: .1.....789 (0f) r9 += r1\n     33: .......789 (07) r9 += 4\n     34: .......789 (bf) r1 = r9\n     35: .1.....789 (57) r1 &= 1023\n     36: .1.....789 (0f) r1 += r8\n     37: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     38: .1.....789 (0f) r9 += r1\n     39: .......789 (bf) r1 = r9\n     40: .1.....789 (57) r1 &= 1023\n     41: .1.....789 (0f) r1 += r8\n     42: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     43: .1.....789 (0f) r9 += r1\n     44: .......789 (bf) r1 = r9\n     45: .1.....789 (57) r1 &= 1023\n     46: .1.....789 (0f) r1 += r8\n     47: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     48: .1.....789 (0f) r9 += r1\n     49: .......789 (bf) r1 = r9\n     50: .1.....789 (57) r1 &= 1023\n     51: .1.....789 (0f) r1 += r8\n     52: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     53: .1.....789 (0f) r9 += r1\n     54: .......789 (bf) r1 = r9\n     55: .1.....789 (57) r1 &= 1023\n     56: .1.....789 (0f) r1 += r8\n     57: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     58: .1.....789 (0f) r9 += r1\n     59: .......789 (bf) r1 = r9\n     60: .1.....789 (57) r1 &= 1023\n     61: .1.....789 (bf) r3 = r8\n     62: .1.3...789 (7b) *(u64 *)(r10 -64) = r1\n     63: .1.3...789 (0f) r3 += r1\n     64: ...3...789 (71) r1 = *(u8 *)(r3 +1)\n     65: .1.3...789 (67) r1 <<= 8\n     66: .1.3...789 (71) r2 = *(u8 *)(r3 +0)\n     67: .123...789 (4f) r1 |= r2\n     68: .1.3...789 (71) r2 = *(u8 *)(r3 +2)\n     69: .123...789 (67) r2 <<= 16\n     70: .123...789 (7b) *(u64 *)(r10 -40) = r3\n     71: .123...789 (71) r3 = *(u8 *)(r3 +3)\n     72: .123...789 (67) r3 <<= 24\n     73: .123...789 (4f) r3 |= r2\n     74: .1.3...789 (4f) r3 |= r1\n     75: ...3...789 (a5) if r3 < 0x19 goto pc+164\n     76: .......789 (b7) r1 = 1\n     77: .1.....789 (7b) *(u64 *)(r10 -32) = r1\n     78: .......789 (b7) r6 = 4\n  1  79: ......6789 (79) r1 = *(u64 *)(r10 -40)\n  1  80: .1....6789 (0f) r1 += r6\n  1  81: .1....6789 (71) r3 = *(u8 *)(r1 +1)\n  1  82: .1.3..6789 (67) r3 <<= 8\n  1  83: .1.3..6789 (71) r2 = *(u8 *)(r1 +0)\n  1  84: .123..6789 (4f) r3 |= r2\n  1  85: .1.3..6789 (71) r4 = *(u8 *)(r1 +2)\n  1  86: .1.34.6789 (67) r4 <<= 16\n  1  87: .1.34.6789 (71) r2 = *(u8 *)(r1 +3)\n  1  88: ..234.6789 (67) r2 <<= 24\n  1  89: ..234.6789 (4f) r2 |= r4\n  1  90: ..23..6789 (4f) r2 |= r3\n  1  91: ..2...6789 (57) r2 &= 1023\n  1  92: ..2...6789 (65) if r2 s> 0x0 goto pc+3\n     93: .......7.. (79) r1 = *(u64 *)(r10 -32)\n     94: .1.....7.. (15) if r1 == 0x0 goto pc+149\n     95: .......7.. (05) goto pc+144\n  1  96: ..2...6789 (0f) r2 += r9\n  1  97: ..2...6789 (57) r2 &= 1023\n  1  98: ..2...6789 (bf) r1 = r8\n  1  99: .12...6789 (0f) r1 += r2\n  1 100: .1....6789 (71) r3 = *(u8 *)(r1 +1)\n  1 101: \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 198
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 208 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @104\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r1 = 0\n      2: .1....6... (63) *(u32 *)(r10 -12) = r1\n      3: ......6... (bf) r2 = r10\n      4: ..2...6... (07) r2 += -12\n      5: ..2...6... (18) r1 = 0xffff8bba05f9c400\n      7: .12...6... (85) call bpf_map_lookup_elem#1\n      8: 0.....6... (15) if r0 == 0x0 goto pc+91\n      9: 0.....6... (05) goto pc+0\n     10: 0.....6... (61) r8 = *(u32 *)(r0 +24300)\n     11: 0.....6.8. (67) r8 <<= 32\n     12: 0.....6.8. (c7) r8 s>>= 32\n     13: 0.....6.8. (c5) if r8 s< 0x2 goto pc+86\n     14: 0.....6.8. (07) r0 += 24288\n     15: 0.....6.8. (18) r1 = 0xffff8bc0802ba000\n     17: 01....6.8. (bf) r2 = r0\n     18: .12...6.8. (85) call bpf_map_lookup_elem#1\n     19: 0.....6.8. (bf) r7 = r0\n     20: ......678. (15) if r7 == 0x0 goto pc+79\n     21: ......678. (57) r8 &= 2047\n     22: ......678. (bf) r1 = r8\n     23: .1....678. (67) r1 <<= 32\n     24: .1....678. (c7) r1 s>>= 32\n     25: .1....678. (bf) r2 = r7\n     26: .12...678. (0f) r2 += r1\n     27: ..2...678. (71) r1 = *(u8 *)(r2 +1)\n     28: .12...678. (67) r1 <<= 8\n     29: .12...678. (71) r3 = *(u8 *)(r2 +0)\n     30: .123..678. (4f) r1 |= r3\n     31: .12...678. (71) r3 = *(u8 *)(r2 +2)\n     32: .123..678. (67) r3 <<= 16\n     33: .123..678. (71) r2 = *(u8 *)(r2 +3)\n     34: .123..678. (67) r2 <<= 24\n     35: .123..678. (4f) r2 |= r3\n     36: .12...678. (4f) r2 |= r1\n     37: ..2...678. (0f) r2 += r8\n     38: ..2...67.. (57) r2 &= 2047\n     39: ..2...67.. (b7) r8 = 1\n     40: ..2...678. (73) *(u8 *)(r10 -1) = r8\n     41: ..2...678. (b7) r1 = 0\n     42: .12...678. (63) *(u32 *)(r10 -8) = r1\n     43: ..2...678. (67) r2 <<= 32\n     44: ..2...678. (c7) r2 s>>= 32\n     45: ..2...678. (0f) r7 += r2\n     46: ......678. (bf) r2 = r10\n     47: ..2...678. (07) r2 += -8\n     48: ..2...678. (18) r1 = 0xffff8bba06c60a00\n     50: .12...678. (85) call bpf_map_lookup_elem#1\n     51: 0.....678. (15) if r0 == 0x0 goto pc+4\n     52: 0.....678. (05) goto pc+0\n     53: 0.....678. (71) r1 = *(u8 *)(r0 +0)\n     54: .1....678. (55) if r1 != 0x1 goto pc+1\n     55: ......67.. (b7) r8 = 0\n     56: ......678. (61) r1 = *(u32 *)(r7 +0)\n     57: .1....678. (a5) if r1 < 0x5 goto pc+35\n     58: ......678. (bf) r4 = r10\n     59: ....4.678. (07) r4 += -1\n     60: ....4.678. (bf) r1 = r6\n     61: .1..4.678. (b7) r2 = 0\n     62: .12.4.678. (bf) r3 = r7\n     63: .1234.678. (bf) r5 = r8\n     64: .12345678. (85) call pc+37\n     65: 0.....678. (bf) r1 = r0\n     66: 01....678. (67) r1 <<= 2\n     67: 01....678. (07) r1 += 4\n     68: 01....678. (67) r1 <<= 32\n     69: 01....678. (77) r1 >>= 32\n     70: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     71: 012...678. (3d) if r1 >= r2 goto pc+21\n     72: 0.....678. (bf) r4 = r10\n     73: 0...4.678. (07) r4 += -1\n     74: 0...4.678. (bf) r1 = r6\n     75: 01..4.678. (bf) r2 = r0\n     76: .12.4.678. (bf) r3 = r7\n     77: .1234.678. (bf) r5 = r8\n     78: .12345678. (85) call pc+23\n     79: 0.....678. (bf) r1 = r0\n     80: 01....678. (67) r1 <<= 2\n     81: 01....678. (07) r1 += 4\n     82: 01....678. (67) r1 <<= 32\n     83: 01....678. (77) r1 >>= 32\n     84: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     85: 012...678. (3d) if r1 >= r2 goto pc+7\n     86: 0.....678. (bf) r4 = r10\n     87: 0...4.678. (07) r4 += -1\n     88: 0...4.678. (bf) r1 = r6\n     89: 01..4.678. (bf) r2 = r0\n     90: .12.4.678. (bf) r3 = r7\n     91: .1234.6.8. (bf) r5 = r8\n     92: .123456... (85) call pc+9\n     93: ......6... (71) r1 = *(u8 *)(r10 -1)\n     94: .1....6... (15) if r1 == 0x0 goto pc+5\n     95: ......6... (bf) r1 = r6\n     96: .1........ (18) r2 = 0xffff8bba05ee6400\n     98: .12....... (b7) r3 = 5\n     99: .123...... (85) call bpf_tail_call#12\n    100: .......... (b7) r0 = 0\n    101: 0......... (95) exit\n    102: .12345.... (bf) r6 = r5\n    103: .1234.6... (7b) *(u64 *)(r10 -88) = r4\n    104: .123..6... (bf) r8 = r2\n    105: .1.3..6.8. (7b) *(u64 *)(r10 -96) = r1\n    106: ...3..6.8. (bf) r1 = r8\n    107: .1.3..6.8. (67) r1 <<= 32\n    108: .1.3..6.8. (77) r1 >>= 32\n    109: .1.3..6.8. (67) r1 <<= 2\n    110: .1.3..6\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 208
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 210 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 210
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 213 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @100\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r1 = 0\n      2: .1....6... (63) *(u32 *)(r10 -12) = r1\n      3: ......6... (bf) r2 = r10\n      4: ..2...6... (07) r2 += -12\n      5: ..2...6... (18) r1 = 0xffff8bba05f9c400\n      7: .12...6... (85) call bpf_map_lookup_elem#1\n      8: 0.....6... (15) if r0 == 0x0 goto pc+89\n      9: 0.....6... (61) r8 = *(u32 *)(r0 +24300)\n     10: 0.....6.8. (67) r8 <<= 32\n     11: 0.....6.8. (c7) r8 s>>= 32\n     12: 0.....6.8. (c5) if r8 s< 0x2 goto pc+85\n     13: 0.....6.8. (07) r0 += 24288\n     14: 0.....6.8. (18) r1 = 0xffff8bbc5911c000\n     16: 01....6.8. (bf) r2 = r0\n     17: .12...6.8. (85) call bpf_map_lookup_elem#1\n     18: 0.....6.8. (bf) r7 = r0\n     19: ......678. (15) if r7 == 0x0 goto pc+78\n     20: ......678. (57) r8 &= 2047\n     21: ......678. (bf) r1 = r8\n     22: .1....678. (67) r1 <<= 32\n     23: .1....678. (c7) r1 s>>= 32\n     24: .1....678. (bf) r2 = r7\n     25: .12...678. (0f) r2 += r1\n     26: ..2...678. (71) r1 = *(u8 *)(r2 +1)\n     27: .12...678. (67) r1 <<= 8\n     28: .12...678. (71) r3 = *(u8 *)(r2 +0)\n     29: .123..678. (4f) r1 |= r3\n     30: .12...678. (71) r3 = *(u8 *)(r2 +2)\n     31: .123..678. (67) r3 <<= 16\n     32: .123..678. (71) r2 = *(u8 *)(r2 +3)\n     33: .123..678. (67) r2 <<= 24\n     34: .123..678. (4f) r2 |= r3\n     35: .12...678. (4f) r2 |= r1\n     36: ..2...678. (0f) r2 += r8\n     37: ..2...67.. (57) r2 &= 2047\n     38: ..2...67.. (b7) r8 = 1\n     39: ..2...678. (73) *(u8 *)(r10 -1) = r8\n     40: ..2...678. (b7) r1 = 0\n     41: .12...678. (63) *(u32 *)(r10 -8) = r1\n     42: ..2...678. (67) r2 <<= 32\n     43: ..2...678. (c7) r2 s>>= 32\n     44: ..2...678. (0f) r7 += r2\n     45: ......678. (bf) r2 = r10\n     46: ..2...678. (07) r2 += -8\n     47: ..2...678. (18) r1 = 0xffff8bba06c60a00\n     49: .12...678. (85) call bpf_map_lookup_elem#1\n     50: 0.....678. (15) if r0 == 0x0 goto pc+3\n     51: 0.....678. (71) r1 = *(u8 *)(r0 +0)\n     52: .1....678. (55) if r1 != 0x1 goto pc+1\n     53: ......67.. (b7) r8 = 0\n     54: ......678. (61) r1 = *(u32 *)(r7 +0)\n     55: .1....678. (a5) if r1 < 0x5 goto pc+35\n     56: ......678. (bf) r4 = r10\n     57: ....4.678. (07) r4 += -1\n     58: ....4.678. (bf) r1 = r6\n     59: .1..4.678. (b7) r2 = 0\n     60: .12.4.678. (bf) r3 = r7\n     61: .1234.678. (bf) r5 = r8\n     62: .12345678. (85) call pc+37\n     63: 0.....678. (bf) r1 = r0\n     64: 01....678. (67) r1 <<= 2\n     65: 01....678. (07) r1 += 4\n     66: 01....678. (67) r1 <<= 32\n     67: 01....678. (77) r1 >>= 32\n     68: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     69: 012...678. (3d) if r1 >= r2 goto pc+21\n     70: 0.....678. (bf) r4 = r10\n     71: 0...4.678. (07) r4 += -1\n     72: 0...4.678. (bf) r1 = r6\n     73: 01..4.678. (bf) r2 = r0\n     74: .12.4.678. (bf) r3 = r7\n     75: .1234.678. (bf) r5 = r8\n     76: .12345678. (85) call pc+23\n     77: 0.....678. (bf) r1 = r0\n     78: 01....678. (67) r1 <<= 2\n     79: 01....678. (07) r1 += 4\n     80: 01....678. (67) r1 <<= 32\n     81: 01....678. (77) r1 >>= 32\n     82: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     83: 012...678. (3d) if r1 >= r2 goto pc+7\n     84: 0.....678. (bf) r4 = r10\n     85: 0...4.678. (07) r4 += -1\n     86: 0...4.678. (bf) r1 = r6\n     87: 01..4.678. (bf) r2 = r0\n     88: .12.4.678. (bf) r3 = r7\n     89: .1234.6.8. (bf) r5 = r8\n     90: .123456... (85) call pc+9\n     91: ......6... (71) r1 = *(u8 *)(r10 -1)\n     92: .1....6... (15) if r1 == 0x0 goto pc+5\n     93: ......6... (bf) r1 = r6\n     94: .1........ (18) r2 = 0xffff8bbe8d876600\n     96: .12....... (b7) r3 = 5\n     97: .123...... (85) call bpf_tail_call#12\n     98: .......... (b7) r0 = 0\n     99: 0......... (95) exit\n    100: .12345.... (bf) r7 = r5\n    101: .1234..7.. (7b) *(u64 *)(r10 -72) = r4\n    102: .123...7.. (bf) r6 = r2\n    103: .1.3..67.. (7b) *(u64 *)(r10 -80) = r1\n    104: ...3..67.. (bf) r1 = r6\n    105: .1.3..67.. (67) r1 <<= 32\n    106: .1.3..67.. (77) r1 >>= 32\n    107: .1.3..67.. (67) r1 <<= 2\n    108: .1.3..67.. (7b) *(u64 *)(r10 -64) = r3\n    109: .1.3..67.. (bf) r2 = r3\n    1\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 213
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 214 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @291\nfunc#2 @323\nfunc#3 @355\nfunc#4 @422\nfunc#5 @485\nfunc#6 @733\nfunc#7 @781\nfunc#8 @972\nfunc#9 @1282\nfunc#10 @1321\nfunc#11 @1485\nfunc#12 @1763\nfunc#13 @1969\nfunc#14 @2029\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r1 = 0\n      2: .1....6... (63) *(u32 *)(r10 -20) = r1\n      3: ......6... (bf) r2 = r10\n      4: ..2...6... (07) r2 += -20\n      5: ..2...6... (18) r1 = 0xffff8bba05f9c400\n      7: .12...6... (85) call bpf_map_lookup_elem#1\n      8: 0.....6... (bf) r7 = r0\n      9: ......67.. (15) if r7 == 0x0 goto pc+279\n     10: ......67.. (61) r9 = *(u32 *)(r7 +24296)\n     11: ......67.9 (bf) r2 = r7\n     12: ..2...67.9 (07) r2 += 24288\n     13: ..2...67.9 (18) r1 = 0xffff8bbc5911c000\n     15: .12...67.9 (85) call bpf_map_lookup_elem#1\n     16: 0.....67.9 (bf) r8 = r0\n     17: ......6789 (15) if r8 == 0x0 goto pc+266\n     18: ......6789 (71) r1 = *(u8 *)(r7 +24264)\n     19: .1....6789 (15) if r1 == 0x0 goto pc+264\n     20: ......6789 (7b) *(u64 *)(r10 -48) = r6\n     21: .......789 (7b) *(u64 *)(r10 -56) = r9\n     22: .......789 (57) r9 &= 7\n     23: .......789 (bf) r1 = r7\n     24: .1.....789 (0f) r1 += r9\n     25: .1.....789 (71) r1 = *(u8 *)(r1 +24233)\n     26: .1.....789 (15) if r1 == 0x0 goto pc+192\n     27: .......789 (67) r9 <<= 2\n     28: .......789 (07) r9 += 4\n     29: .......789 (bf) r1 = r9\n     30: .1.....789 (0f) r1 += r8\n     31: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     32: .1.....789 (0f) r9 += r1\n     33: .......789 (07) r9 += 4\n     34: .......789 (bf) r1 = r9\n     35: .1.....789 (57) r1 &= 1023\n     36: .1.....789 (bf) r3 = r8\n     37: .1.3...789 (7b) *(u64 *)(r10 -64) = r1\n     38: .1.3...789 (0f) r3 += r1\n     39: ...3...789 (71) r1 = *(u8 *)(r3 +1)\n     40: .1.3...789 (67) r1 <<= 8\n     41: .1.3...789 (71) r2 = *(u8 *)(r3 +0)\n     42: .123...789 (4f) r1 |= r2\n     43: .1.3...789 (71) r2 = *(u8 *)(r3 +2)\n     44: .123...789 (67) r2 <<= 16\n     45: .123...789 (7b) *(u64 *)(r10 -40) = r3\n     46: .123...789 (71) r3 = *(u8 *)(r3 +3)\n     47: .123...789 (67) r3 <<= 24\n     48: .123...789 (4f) r3 |= r2\n     49: .1.3...789 (4f) r3 |= r1\n     50: ...3...789 (a5) if r3 < 0x19 goto pc+164\n     51: .......789 (b7) r1 = 1\n     52: .1.....789 (7b) *(u64 *)(r10 -32) = r1\n     53: .......789 (b7) r6 = 4\n  1  54: ......6789 (79) r1 = *(u64 *)(r10 -40)\n  1  55: .1....6789 (0f) r1 += r6\n  1  56: .1....6789 (71) r3 = *(u8 *)(r1 +1)\n  1  57: .1.3..6789 (67) r3 <<= 8\n  1  58: .1.3..6789 (71) r2 = *(u8 *)(r1 +0)\n  1  59: .123..6789 (4f) r3 |= r2\n  1  60: .1.3..6789 (71) r4 = *(u8 *)(r1 +2)\n  1  61: .1.34.6789 (67) r4 <<= 16\n  1  62: .1.34.6789 (71) r2 = *(u8 *)(r1 +3)\n  1  63: ..234.6789 (67) r2 <<= 24\n  1  64: ..234.6789 (4f) r2 |= r4\n  1  65: ..23..6789 (4f) r2 |= r3\n  1  66: ..2...6789 (57) r2 &= 1023\n  1  67: ..2...6789 (65) if r2 s> 0x0 goto pc+3\n     68: .......7.. (79) r1 = *(u64 *)(r10 -32)\n     69: .1.....7.. (15) if r1 == 0x0 goto pc+149\n     70: .......7.. (05) goto pc+144\n  1  71: ..2...6789 (0f) r2 += r9\n  1  72: ..2...6789 (57) r2 &= 1023\n  1  73: ..2...6789 (bf) r1 = r8\n  1  74: .12...6789 (0f) r1 += r2\n  1  75: .1....6789 (71) r3 = *(u8 *)(r1 +1)\n  1  76: .1.3..6789 (67) r3 <<= 8\n  1  77: .1.3..6789 (71) r2 = *(u8 *)(r1 +0)\n  1  78: .123..6789 (4f) r3 |= r2\n  1  79: .1.3..6789 (71) r4 = *(u8 *)(r1 +2)\n  1  80: .1.34.6789 (67) r4 <<= 16\n  1  81: .1.34.6789 (71) r2 = *(u8 *)(r1 +3)\n  1  82: .1234.6789 (67) r2 <<= 24\n  1  83: .1234.6789 (4f) r2 |= r4\n  1  84: .123..6789 (4f) r2 |= r3\n  1  85: .12...6789 (25) if r2 > 0x5 goto pc+133\n  1  86: .12...6789 (57) r2 &= 7\n  1  87: .12...6789 (67) r2 <<= 32\n  1  88: .12...6789 (77) r2 >>= 32\n  1  89: .12...6789 (67) r2 <<= 3\n  1  90: .12...6789 (bf) r3 = r7\n  1  91: .123..6789 (0f) r3 += r2\n  1  92: .1.3..6789 (79) r4 = *(u64 *)(r3 +24184)\n  1  93: .1..4.6789 (57) r4 &= 2047\n  1  94: .1..4.6789 (71) r2 = *(u8 *)(r1 +13)\n  1  95: .12.4.6789 (67) r2 <<= 8\n  1  96: .12.4.6789 (71) r3 = *(u8 *)(r1 +12)\n  1  97: .1234.6789 (4f) r2 |= r3\n  1  98: .12.4.6789 (71) r5 = *(u8 *)(r1 +14)\n  1  99: .12.456789 (67) r5 <<= 16\n  1\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 214
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 215 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @2925\nLive regs before insn:\n      0: .1........ (bf) r9 = r1\n      1: .........9 (79) r1 = *(u64 *)(r9 +80)\n      2: .1.......9 (7b) *(u64 *)(r10 -128) = r1\n      3: .........9 (b7) r6 = 0\n      4: ......6..9 (63) *(u32 *)(r10 -132) = r6\n      5: ......6..9 (bf) r2 = r10\n      6: ..2...6..9 (07) r2 += -132\n      7: ..2...6..9 (18) r1 = 0xffff8bba05f9c400\n      9: .12...6..9 (85) call bpf_map_lookup_elem#1\n     10: 0.....6..9 (bf) r8 = r0\n     11: ......6.89 (15) if r8 == 0x0 goto pc+2490\n     12: ......6.89 (63) *(u32 *)(r8 +24288) = r6\n     13: ......6.89 (bf) r2 = r8\n     14: ..2...6.89 (07) r2 += 24288\n     15: ..2...6.89 (18) r1 = 0xffff8bc046df3c00\n     17: .12...6.89 (85) call bpf_map_lookup_elem#1\n     18: 0.....6.89 (bf) r7 = r0\n     19: ......6789 (15) if r7 == 0x0 goto pc+2482\n     20: ......6789 (71) r1 = *(u8 *)(r7 +1)\n     21: .1....6789 (67) r1 <<= 8\n     22: .1....6789 (71) r2 = *(u8 *)(r7 +0)\n     23: .12...6789 (4f) r1 |= r2\n     24: .1....6789 (71) r2 = *(u8 *)(r7 +2)\n     25: .12...6789 (67) r2 <<= 16\n     26: .12...6789 (71) r3 = *(u8 *)(r7 +3)\n     27: .123..6789 (67) r3 <<= 24\n     28: .123..6789 (4f) r3 |= r2\n     29: .1.3..6789 (4f) r3 |= r1\n     30: ...3..6789 (7b) *(u64 *)(r8 +96) = r3\n     31: ......6789 (85) call bpf_get_current_pid_tgid#14\n     32: 0.....6789 (55) if r0 != 0xffffffea goto pc+8\n     33: ......6789 (b7) r1 = 32\n     34: .1....6789 (bf) r3 = r9\n     35: .1.3..6789 (0f) r3 += r1\n     36: ...3..6789 (bf) r1 = r10\n     37: .1.3..6789 (07) r1 += -80\n     38: .1.3..6789 (b7) r2 = 8\n     39: .123..6789 (85) call bpf_probe_read#4\n     40: ......6789 (79) r0 = *(u64 *)(r10 -80)\n     41: 0.....6789 (7b) *(u64 *)(r8 +104) = r0\n     42: ......6789 (85) call bpf_get_current_pid_tgid#14\n     43: 0.....6789 (63) *(u32 *)(r8 +124) = r0\n     44: ......6789 (79) r1 = *(u64 *)(r8 +96)\n     45: .1....6789 (79) r2 = *(u64 *)(r8 +104)\n     46: .12...6789 (7b) *(u64 *)(r10 -72) = r2\n     47: .1....6789 (7b) *(u64 *)(r10 -80) = r1\n     48: ......6789 (bf) r2 = r10\n     49: ..2...6789 (07) r2 += -80\n     50: ..2...6789 (18) r1 = 0xffff8bc04576ec00\n     52: .12...6789 (85) call bpf_map_lookup_elem#1\n     53: 0.....6789 (55) if r0 != 0x0 goto pc+1\n     54: ......6... (05) goto pc+2447\n     55: 0......789 (79) r1 = *(u64 *)(r0 +16)\n     56: 01.....789 (7b) *(u64 *)(r10 -184) = r1\n     57: 0......789 (79) r1 = *(u64 *)(r0 +8)\n     58: 01.....789 (7b) *(u64 *)(r10 -176) = r1\n     59: 0......789 (79) r6 = *(u64 *)(r0 +0)\n     60: ......6789 (bf) r2 = r10\n     61: ..2...6789 (07) r2 += -80\n     62: ..2...6789 (18) r1 = 0xffff8bc04576ec00\n     64: .12...6789 (85) call bpf_map_delete_elem#3\n     65: ......6789 (7b) *(u64 *)(r8 +144) = r6\n     66: .......789 (71) r1 = *(u8 *)(r7 +93)\n     67: .1.....789 (67) r1 <<= 8\n     68: .1.....789 (71) r2 = *(u8 *)(r7 +92)\n     69: .12....789 (4f) r1 |= r2\n     70: .1.....789 (71) r2 = *(u8 *)(r7 +94)\n     71: .12....789 (67) r2 <<= 16\n     72: .12....789 (bf) r4 = r7\n     73: .12.4...89 (71) r7 = *(u8 *)(r4 +95)\n     74: .12.4..789 (67) r7 <<= 24\n     75: .12.4..789 (4f) r7 |= r2\n     76: .1..4..789 (71) r2 = *(u8 *)(r4 +89)\n     77: .12.4..789 (67) r2 <<= 8\n     78: .12.4..789 (71) r3 = *(u8 *)(r4 +88)\n     79: .1234..789 (4f) r2 |= r3\n     80: .12.4..789 (71) r3 = *(u8 *)(r4 +90)\n     81: .1234..789 (67) r3 <<= 16\n     82: .1234..789 (7b) *(u64 *)(r10 -144) = r4\n     83: .1234..789 (71) r5 = *(u8 *)(r4 +91)\n     84: .123.5.789 (67) r5 <<= 24\n     85: .123.5.789 (4f) r5 |= r3\n     86: .12..5.789 (4f) r5 |= r2\n     87: .1...5.789 (4f) r7 |= r1\n     88: .....5.789 (b7) r0 = 8\n     89: 0....5.789 (bf) r4 = r8\n     90: 0...45.789 (07) r4 += 144\n     91: 0...45.789 (7b) *(u64 *)(r10 -152) = r8\n     92: 0...45.789 (7b) *(u64 *)(r10 -168) = r9\n     93: 0...45.789 (15) if r7 == 0x0 goto pc+1621\n     94: ....45.78. (79) r1 = *(u64 *)(r10 -128)\n     95: .1..45.78. (7b) *(u64 *)(r10 -104) = r1\n     96: ....45.78. (b7) r1 = 8\n     97: .1..45.78. (b7) r2 = 8\n     98: .12.45.78. (57) r2 &= 16383\n     99: .12.45.78. (7b) *(u64 *)(r8 +24184) = r1\n    100: ..2.45.78. (7\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 215
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 219 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 219
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 223 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 223
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 230 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 230
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 237 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\n+= -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2017: frame2: R1=90 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90)\n2017: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n2018: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=s\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 237
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 245 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 245
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 249 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 249
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 257 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @2058\nLive regs before insn:\n      0: .1........ (bf) r9 = r1\n      1: .........9 (b7) r1 = 0\n      2: .1.......9 (63) *(u32 *)(r10 -308) = r1\n      3: .........9 (bf) r2 = r10\n      4: ..2......9 (07) r2 += -308\n      5: ..2......9 (18) r1 = 0xffff8bc0021f4400\n      7: .12......9 (85) call bpf_map_lookup_elem#1\n      8: 0........9 (bf) r7 = r0\n      9: .......7.9 (15) if r7 == 0x0 goto pc+2038\n     10: .......7.9 (85) call bpf_get_current_task#35\n     11: 0......7.9 (7b) *(u64 *)(r10 -264) = r0\n     12: 0......7.9 (b7) r1 = 2804\n     13: 01.....7.9 (0f) r0 += r1\n     14: 0......7.9 (bf) r1 = r10\n     15: 01.....7.9 (07) r1 += -280\n     16: 01.....7.9 (b7) r2 = 4\n     17: 012....7.9 (bf) r3 = r0\n     18: .123...7.9 (85) call bpf_probe_read_kernel#113\n     19: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     20: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     21: .......7.9 (bf) r2 = r10\n     22: ..2....7.9 (07) r2 += -304\n     23: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     25: .12....7.9 (85) call bpf_map_lookup_elem#1\n     26: 0......7.9 (bf) r6 = r0\n     27: ......67.9 (15) if r6 == 0x0 goto pc+2\n     28: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     29: .1....67.9 (55) if r1 != 0x0 goto pc+661\n     30: .......7.9 (b7) r1 = 2816\n     31: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     32: .1.3...7.9 (0f) r3 += r1\n     33: ...3...7.9 (bf) r1 = r10\n     34: .1.3...7.9 (07) r1 += -264\n     35: .1.3...7.9 (b7) r2 = 8\n     36: .123...7.9 (85) call bpf_probe_read_kernel#113\n     37: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     38: ...3...7.9 (15) if r3 == 0x0 goto pc+76\n     39: ...3...7.9 (b7) r1 = 2804\n     40: .1.3...7.9 (0f) r3 += r1\n     41: ...3...7.9 (bf) r1 = r10\n     42: .1.3...7.9 (07) r1 += -280\n     43: .1.3...7.9 (b7) r2 = 4\n     44: .123...7.9 (85) call bpf_probe_read_kernel#113\n     45: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     46: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     47: .......7.9 (bf) r2 = r10\n     48: ..2....7.9 (07) r2 += -304\n     49: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     51: .12....7.9 (85) call bpf_map_lookup_elem#1\n     52: 0......7.9 (bf) r6 = r0\n     53: ......67.9 (15) if r6 == 0x0 goto pc+2\n     54: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     55: .1....67.9 (55) if r1 != 0x0 goto pc+635\n     56: .......7.9 (b7) r1 = 2816\n     57: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     58: .1.3...7.9 (0f) r3 += r1\n     59: ...3...7.9 (bf) r1 = r10\n     60: .1.3...7.9 (07) r1 += -264\n     61: .1.3...7.9 (b7) r2 = 8\n     62: .123...7.9 (85) call bpf_probe_read_kernel#113\n     63: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     64: ...3...7.9 (15) if r3 == 0x0 goto pc+50\n     65: ...3...7.9 (b7) r1 = 2804\n     66: .1.3...7.9 (0f) r3 += r1\n     67: ...3...7.9 (bf) r1 = r10\n     68: .1.3...7.9 (07) r1 += -280\n     69: .1.3...7.9 (b7) r2 = 4\n     70: .123...7.9 (85) call bpf_probe_read_kernel#113\n     71: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     72: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     73: .......7.9 (bf) r2 = r10\n     74: ..2....7.9 (07) r2 += -304\n     75: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     77: .12....7.9 (85) call bpf_map_lookup_elem#1\n     78: 0......7.9 (bf) r6 = r0\n     79: ......67.9 (15) if r6 == 0x0 goto pc+2\n     80: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     81: .1....67.9 (55) if r1 != 0x0 goto pc+609\n     82: .......7.9 (b7) r1 = 2816\n     83: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     84: .1.3...7.9 (0f) r3 += r1\n     85: ...3...7.9 (bf) r1 = r10\n     86: .1.3...7.9 (07) r1 += -264\n     87: .1.3...7.9 (b7) r2 = 8\n     88: .123...7.9 (85) call bpf_probe_read_kernel#113\n     89: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     90: ...3...7.9 (15) if r3 == 0x0 goto pc+24\n     91: ...3...7.9 (b7) r1 = 2804\n     92: .1.3...7.9 (0f) r3 += r1\n     93: ...3...7.9 (bf) r1 = r10\n     94: .1.3...7.9 (07) r1 += -280\n     95: .1.3...7.9 (b7) r2 = 4\n     96: .123...7.9 (85) call bpf_probe_read_kernel#113\n     97: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     98: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     99: .......7.9 (bf) r2 = r10\n    100: ..2....7.9 (07) r2 += -304\n    101: \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 257
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 260 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 260
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 264 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 264
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 273 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 273
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 282 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 282
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 283 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 283
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 290 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\n+= -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2017: frame2: R1=90 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90)\n2017: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n2018: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=s\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 290
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 294 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 294
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 303 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\n+= -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2017: frame2: R1=90 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90)\n2017: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n2018: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=s\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 303
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 310 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 310
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 312 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\n+= -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2017: frame2: R1=90 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90)\n2017: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n2018: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=s\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 312
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 317 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 317
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 325 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\n+= -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2017: frame2: R1=90 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90)\n2017: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n2018: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=s\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 325
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 329 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 329
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 333 pass extract failed after 2 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @2058\nLive regs before insn:\n      0: .1........ (bf) r9 = r1\n      1: .........9 (b7) r1 = 0\n      2: .1.......9 (63) *(u32 *)(r10 -308) = r1\n      3: .........9 (bf) r2 = r10\n      4: ..2......9 (07) r2 += -308\n      5: ..2......9 (18) r1 = 0xffff8bc0c0c63600\n      7: .12......9 (85) call bpf_map_lookup_elem#1\n      8: 0........9 (bf) r7 = r0\n      9: .......7.9 (15) if r7 == 0x0 goto pc+2038\n     10: .......7.9 (85) call bpf_get_current_task#35\n     11: 0......7.9 (7b) *(u64 *)(r10 -264) = r0\n     12: 0......7.9 (b7) r1 = 2804\n     13: 01.....7.9 (0f) r0 += r1\n     14: 0......7.9 (bf) r1 = r10\n     15: 01.....7.9 (07) r1 += -280\n     16: 01.....7.9 (b7) r2 = 4\n     17: 012....7.9 (bf) r3 = r0\n     18: .123...7.9 (85) call bpf_probe_read_kernel#113\n     19: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     20: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     21: .......7.9 (bf) r2 = r10\n     22: ..2....7.9 (07) r2 += -304\n     23: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     25: .12....7.9 (85) call bpf_map_lookup_elem#1\n     26: 0......7.9 (bf) r6 = r0\n     27: ......67.9 (15) if r6 == 0x0 goto pc+2\n     28: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     29: .1....67.9 (55) if r1 != 0x0 goto pc+661\n     30: .......7.9 (b7) r1 = 2816\n     31: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     32: .1.3...7.9 (0f) r3 += r1\n     33: ...3...7.9 (bf) r1 = r10\n     34: .1.3...7.9 (07) r1 += -264\n     35: .1.3...7.9 (b7) r2 = 8\n     36: .123...7.9 (85) call bpf_probe_read_kernel#113\n     37: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     38: ...3...7.9 (15) if r3 == 0x0 goto pc+76\n     39: ...3...7.9 (b7) r1 = 2804\n     40: .1.3...7.9 (0f) r3 += r1\n     41: ...3...7.9 (bf) r1 = r10\n     42: .1.3...7.9 (07) r1 += -280\n     43: .1.3...7.9 (b7) r2 = 4\n     44: .123...7.9 (85) call bpf_probe_read_kernel#113\n     45: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     46: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     47: .......7.9 (bf) r2 = r10\n     48: ..2....7.9 (07) r2 += -304\n     49: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     51: .12....7.9 (85) call bpf_map_lookup_elem#1\n     52: 0......7.9 (bf) r6 = r0\n     53: ......67.9 (15) if r6 == 0x0 goto pc+2\n     54: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     55: .1....67.9 (55) if r1 != 0x0 goto pc+635\n     56: .......7.9 (b7) r1 = 2816\n     57: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     58: .1.3...7.9 (0f) r3 += r1\n     59: ...3...7.9 (bf) r1 = r10\n     60: .1.3...7.9 (07) r1 += -264\n     61: .1.3...7.9 (b7) r2 = 8\n     62: .123...7.9 (85) call bpf_probe_read_kernel#113\n     63: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     64: ...3...7.9 (15) if r3 == 0x0 goto pc+50\n     65: ...3...7.9 (b7) r1 = 2804\n     66: .1.3...7.9 (0f) r3 += r1\n     67: ...3...7.9 (bf) r1 = r10\n     68: .1.3...7.9 (07) r1 += -280\n     69: .1.3...7.9 (b7) r2 = 4\n     70: .123...7.9 (85) call bpf_probe_read_kernel#113\n     71: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     72: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     73: .......7.9 (bf) r2 = r10\n     74: ..2....7.9 (07) r2 += -304\n     75: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     77: .12....7.9 (85) call bpf_map_lookup_elem#1\n     78: 0......7.9 (bf) r6 = r0\n     79: ......67.9 (15) if r6 == 0x0 goto pc+2\n     80: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     81: .1....67.9 (55) if r1 != 0x0 goto pc+609\n     82: .......7.9 (b7) r1 = 2816\n     83: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     84: .1.3...7.9 (0f) r3 += r1\n     85: ...3...7.9 (bf) r1 = r10\n     86: .1.3...7.9 (07) r1 += -264\n     87: .1.3...7.9 (b7) r2 = 8\n     88: .123...7.9 (85) call bpf_probe_read_kernel#113\n     89: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     90: ...3...7.9 (15) if r3 == 0x0 goto pc+24\n     91: ...3...7.9 (b7) r1 = 2804\n     92: .1.3...7.9 (0f) r3 += r1\n     93: ...3...7.9 (bf) r1 = r10\n     94: .1.3...7.9 (07) r1 += -280\n     95: .1.3...7.9 (b7) r2 = 4\n     96: .123...7.9 (85) call bpf_probe_read_kernel#113\n     97: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     98: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     99: .......7.9 (bf) r2 = r10\n    100: ..2....7.9 (07) r2 += -304\n    101: \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 333
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 334 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @291\nfunc#2 @323\nfunc#3 @355\nfunc#4 @422\nfunc#5 @485\nfunc#6 @733\nfunc#7 @781\nfunc#8 @972\nfunc#9 @1282\nfunc#10 @1321\nfunc#11 @1485\nfunc#12 @1763\nfunc#13 @1969\nfunc#14 @2029\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r1 = 0\n      2: .1....6... (63) *(u32 *)(r10 -20) = r1\n      3: ......6... (bf) r2 = r10\n      4: ..2...6... (07) r2 += -20\n      5: ..2...6... (18) r1 = 0xffff8bc0c0c63600\n      7: .12...6... (85) call bpf_map_lookup_elem#1\n      8: 0.....6... (bf) r7 = r0\n      9: ......67.. (15) if r7 == 0x0 goto pc+279\n     10: ......67.. (61) r9 = *(u32 *)(r7 +24296)\n     11: ......67.9 (bf) r2 = r7\n     12: ..2...67.9 (07) r2 += 24288\n     13: ..2...67.9 (18) r1 = 0xffff8bbd9f988000\n     15: .12...67.9 (85) call bpf_map_lookup_elem#1\n     16: 0.....67.9 (bf) r8 = r0\n     17: ......6789 (15) if r8 == 0x0 goto pc+266\n     18: ......6789 (71) r1 = *(u8 *)(r7 +24264)\n     19: .1....6789 (15) if r1 == 0x0 goto pc+264\n     20: ......6789 (7b) *(u64 *)(r10 -48) = r6\n     21: .......789 (7b) *(u64 *)(r10 -56) = r9\n     22: .......789 (57) r9 &= 7\n     23: .......789 (bf) r1 = r7\n     24: .1.....789 (0f) r1 += r9\n     25: .1.....789 (71) r1 = *(u8 *)(r1 +24233)\n     26: .1.....789 (15) if r1 == 0x0 goto pc+192\n     27: .......789 (67) r9 <<= 2\n     28: .......789 (07) r9 += 4\n     29: .......789 (bf) r1 = r9\n     30: .1.....789 (0f) r1 += r8\n     31: .1.....789 (61) r1 = *(u32 *)(r1 +0)\n     32: .1.....789 (0f) r9 += r1\n     33: .......789 (07) r9 += 4\n     34: .......789 (bf) r1 = r9\n     35: .1.....789 (57) r1 &= 1023\n     36: .1.....789 (bf) r3 = r8\n     37: .1.3...789 (7b) *(u64 *)(r10 -64) = r1\n     38: .1.3...789 (0f) r3 += r1\n     39: ...3...789 (71) r1 = *(u8 *)(r3 +1)\n     40: .1.3...789 (67) r1 <<= 8\n     41: .1.3...789 (71) r2 = *(u8 *)(r3 +0)\n     42: .123...789 (4f) r1 |= r2\n     43: .1.3...789 (71) r2 = *(u8 *)(r3 +2)\n     44: .123...789 (67) r2 <<= 16\n     45: .123...789 (7b) *(u64 *)(r10 -40) = r3\n     46: .123...789 (71) r3 = *(u8 *)(r3 +3)\n     47: .123...789 (67) r3 <<= 24\n     48: .123...789 (4f) r3 |= r2\n     49: .1.3...789 (4f) r3 |= r1\n     50: ...3...789 (a5) if r3 < 0x19 goto pc+164\n     51: .......789 (b7) r1 = 1\n     52: .1.....789 (7b) *(u64 *)(r10 -32) = r1\n     53: .......789 (b7) r6 = 4\n  1  54: ......6789 (79) r1 = *(u64 *)(r10 -40)\n  1  55: .1....6789 (0f) r1 += r6\n  1  56: .1....6789 (71) r3 = *(u8 *)(r1 +1)\n  1  57: .1.3..6789 (67) r3 <<= 8\n  1  58: .1.3..6789 (71) r2 = *(u8 *)(r1 +0)\n  1  59: .123..6789 (4f) r3 |= r2\n  1  60: .1.3..6789 (71) r4 = *(u8 *)(r1 +2)\n  1  61: .1.34.6789 (67) r4 <<= 16\n  1  62: .1.34.6789 (71) r2 = *(u8 *)(r1 +3)\n  1  63: ..234.6789 (67) r2 <<= 24\n  1  64: ..234.6789 (4f) r2 |= r4\n  1  65: ..23..6789 (4f) r2 |= r3\n  1  66: ..2...6789 (57) r2 &= 1023\n  1  67: ..2...6789 (65) if r2 s> 0x0 goto pc+3\n     68: .......7.. (79) r1 = *(u64 *)(r10 -32)\n     69: .1.....7.. (15) if r1 == 0x0 goto pc+149\n     70: .......7.. (05) goto pc+144\n  1  71: ..2...6789 (0f) r2 += r9\n  1  72: ..2...6789 (57) r2 &= 1023\n  1  73: ..2...6789 (bf) r1 = r8\n  1  74: .12...6789 (0f) r1 += r2\n  1  75: .1....6789 (71) r3 = *(u8 *)(r1 +1)\n  1  76: .1.3..6789 (67) r3 <<= 8\n  1  77: .1.3..6789 (71) r2 = *(u8 *)(r1 +0)\n  1  78: .123..6789 (4f) r3 |= r2\n  1  79: .1.3..6789 (71) r4 = *(u8 *)(r1 +2)\n  1  80: .1.34.6789 (67) r4 <<= 16\n  1  81: .1.34.6789 (71) r2 = *(u8 *)(r1 +3)\n  1  82: .1234.6789 (67) r2 <<= 24\n  1  83: .1234.6789 (4f) r2 |= r4\n  1  84: .123..6789 (4f) r2 |= r3\n  1  85: .12...6789 (25) if r2 > 0x5 goto pc+133\n  1  86: .12...6789 (57) r2 &= 7\n  1  87: .12...6789 (67) r2 <<= 32\n  1  88: .12...6789 (77) r2 >>= 32\n  1  89: .12...6789 (67) r2 <<= 3\n  1  90: .12...6789 (bf) r3 = r7\n  1  91: .123..6789 (0f) r3 += r2\n  1  92: .1.3..6789 (79) r4 = *(u64 *)(r3 +24184)\n  1  93: .1..4.6789 (57) r4 &= 2047\n  1  94: .1..4.6789 (71) r2 = *(u8 *)(r1 +13)\n  1  95: .12.4.6789 (67) r2 <<= 8\n  1  96: .12.4.6789 (71) r3 = *(u8 *)(r1 +12)\n  1  97: .1234.6789 (4f) r2 |= r3\n  1  98: .12.4.6789 (71) r5 = *(u8 *)(r1 +14)\n  1  99: .12.456789 (67) r5 <<= 16\n  1\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 334
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 343 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 343
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 345 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 345
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 353 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 353
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 362 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 362
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 365 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 365
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 374 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 374
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 377 pass bulk_memory failed after 4 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @100\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r1 = 0\n      2: .1....6... (63) *(u32 *)(r10 -12) = r1\n      3: ......6... (bf) r2 = r10\n      4: ..2...6... (07) r2 += -12\n      5: ..2...6... (18) r1 = 0xffff8bbd634bec00\n      7: .12...6... (85) call bpf_map_lookup_elem#1\n      8: 0.....6... (15) if r0 == 0x0 goto pc+89\n      9: 0.....6... (61) r8 = *(u32 *)(r0 +24300)\n     10: 0.....6.8. (67) r8 <<= 32\n     11: 0.....6.8. (c7) r8 s>>= 32\n     12: 0.....6.8. (c5) if r8 s< 0x2 goto pc+85\n     13: 0.....6.8. (07) r0 += 24288\n     14: 0.....6.8. (18) r1 = 0xffff8bc045a38000\n     16: 01....6.8. (bf) r2 = r0\n     17: .12...6.8. (85) call bpf_map_lookup_elem#1\n     18: 0.....6.8. (bf) r7 = r0\n     19: ......678. (15) if r7 == 0x0 goto pc+78\n     20: ......678. (57) r8 &= 2047\n     21: ......678. (bf) r1 = r8\n     22: .1....678. (67) r1 <<= 32\n     23: .1....678. (c7) r1 s>>= 32\n     24: .1....678. (bf) r2 = r7\n     25: .12...678. (0f) r2 += r1\n     26: ..2...678. (71) r1 = *(u8 *)(r2 +1)\n     27: .12...678. (67) r1 <<= 8\n     28: .12...678. (71) r3 = *(u8 *)(r2 +0)\n     29: .123..678. (4f) r1 |= r3\n     30: .12...678. (71) r3 = *(u8 *)(r2 +2)\n     31: .123..678. (67) r3 <<= 16\n     32: .123..678. (71) r2 = *(u8 *)(r2 +3)\n     33: .123..678. (67) r2 <<= 24\n     34: .123..678. (4f) r2 |= r3\n     35: .12...678. (4f) r2 |= r1\n     36: ..2...678. (0f) r2 += r8\n     37: ..2...67.. (57) r2 &= 2047\n     38: ..2...67.. (b7) r8 = 1\n     39: ..2...678. (73) *(u8 *)(r10 -1) = r8\n     40: ..2...678. (b7) r1 = 0\n     41: .12...678. (63) *(u32 *)(r10 -8) = r1\n     42: ..2...678. (67) r2 <<= 32\n     43: ..2...678. (c7) r2 s>>= 32\n     44: ..2...678. (0f) r7 += r2\n     45: ......678. (bf) r2 = r10\n     46: ..2...678. (07) r2 += -8\n     47: ..2...678. (18) r1 = 0xffff8bbf8c0c3a00\n     49: .12...678. (85) call bpf_map_lookup_elem#1\n     50: 0.....678. (15) if r0 == 0x0 goto pc+3\n     51: 0.....678. (71) r1 = *(u8 *)(r0 +0)\n     52: .1....678. (55) if r1 != 0x1 goto pc+1\n     53: ......67.. (b7) r8 = 0\n     54: ......678. (61) r1 = *(u32 *)(r7 +0)\n     55: .1....678. (a5) if r1 < 0x5 goto pc+35\n     56: ......678. (bf) r4 = r10\n     57: ....4.678. (07) r4 += -1\n     58: ....4.678. (bf) r1 = r6\n     59: .1..4.678. (b7) r2 = 0\n     60: .12.4.678. (bf) r3 = r7\n     61: .1234.678. (bf) r5 = r8\n     62: .12345678. (85) call pc+37\n     63: 0.....678. (bf) r1 = r0\n     64: 01....678. (67) r1 <<= 2\n     65: 01....678. (07) r1 += 4\n     66: 01....678. (67) r1 <<= 32\n     67: 01....678. (77) r1 >>= 32\n     68: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     69: 012...678. (3d) if r1 >= r2 goto pc+21\n     70: 0.....678. (bf) r4 = r10\n     71: 0...4.678. (07) r4 += -1\n     72: 0...4.678. (bf) r1 = r6\n     73: 01..4.678. (bf) r2 = r0\n     74: .12.4.678. (bf) r3 = r7\n     75: .1234.678. (bf) r5 = r8\n     76: .12345678. (85) call pc+23\n     77: 0.....678. (bf) r1 = r0\n     78: 01....678. (67) r1 <<= 2\n     79: 01....678. (07) r1 += 4\n     80: 01....678. (67) r1 <<= 32\n     81: 01....678. (77) r1 >>= 32\n     82: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     83: 012...678. (3d) if r1 >= r2 goto pc+7\n     84: 0.....678. (bf) r4 = r10\n     85: 0...4.678. (07) r4 += -1\n     86: 0...4.678. (bf) r1 = r6\n     87: 01..4.678. (bf) r2 = r0\n     88: .12.4.678. (bf) r3 = r7\n     89: .1234.6.8. (bf) r5 = r8\n     90: .123456... (85) call pc+9\n     91: ......6... (71) r1 = *(u8 *)(r10 -1)\n     92: .1....6... (15) if r1 == 0x0 goto pc+5\n     93: ......6... (bf) r1 = r6\n     94: .1........ (18) r2 = 0xffff8bbf09d98800\n     96: .12....... (b7) r3 = 5\n     97: .123...... (85) call bpf_tail_call#12\n     98: .......... (b7) r0 = 0\n     99: 0......... (95) exit\n    100: .12345.... (bf) r6 = r5\n    101: .1234.6... (7b) *(u64 *)(r10 -88) = r4\n    102: .123..6... (bf) r8 = r2\n    103: .1.3..6.8. (7b) *(u64 *)(r10 -96) = r1\n    104: ...3..6.8. (bf) r1 = r8\n    105: .1.3..6.8. (67) r1 <<= 32\n    106: .1.3..6.8. (77) r1 >>= 32\n    107: .1.3..6.8. (67) r1 <<= 2\n    108: .1.3..6.8. (7b) *(u64 *)(r10 -80) = r3\n    109: .1.3..6.8. (bf) r2 = r3\n    1\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 377
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 379 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 379
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 391 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 391
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 393 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 393
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 403 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\n+= -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2017: frame2: R1=90 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90)\n2017: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n2018: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=s\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 403
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 404 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 404
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 415 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 415
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 422 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 422
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 427 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 427
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 435 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\n+= -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2019: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2018: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2017: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2016: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2015: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2014: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2013: (bf) r3 = r7\nmark_precise: frame2: regs=r1 stack= before 2012: (57) r2 &= 4095\nmark_precise: frame2: regs=r1 stack= before 2011: (bf) r2 = r6\nmark_precise: frame2: regs=r1 stack= before 2010: (07) r6 += -1\nmark_precise: frame2: regs=r1 stack= before 2009: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs=r1 stack= before 2020: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x100000023,var_off=(0x0; 0x1ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2017: frame2: R1=90 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90)\n2017: (71) r3 = *(u8 *)(r3 +0)        ; frame2: R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n2018: (73) *(u8 *)(r2 +0) = r3        ; frame2: R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=s\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 435
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 436 pass extract failed after 2 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @2058\nLive regs before insn:\n      0: .1........ (bf) r9 = r1\n      1: .........9 (b7) r1 = 0\n      2: .1.......9 (63) *(u32 *)(r10 -308) = r1\n      3: .........9 (bf) r2 = r10\n      4: ..2......9 (07) r2 += -308\n      5: ..2......9 (18) r1 = 0xffff8bbddabcca00\n      7: .12......9 (85) call bpf_map_lookup_elem#1\n      8: 0........9 (bf) r7 = r0\n      9: .......7.9 (15) if r7 == 0x0 goto pc+2038\n     10: .......7.9 (85) call bpf_get_current_task#35\n     11: 0......7.9 (7b) *(u64 *)(r10 -264) = r0\n     12: 0......7.9 (b7) r1 = 2804\n     13: 01.....7.9 (0f) r0 += r1\n     14: 0......7.9 (bf) r1 = r10\n     15: 01.....7.9 (07) r1 += -280\n     16: 01.....7.9 (b7) r2 = 4\n     17: 012....7.9 (bf) r3 = r0\n     18: .123...7.9 (85) call bpf_probe_read_kernel#113\n     19: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     20: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     21: .......7.9 (bf) r2 = r10\n     22: ..2....7.9 (07) r2 += -304\n     23: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     25: .12....7.9 (85) call bpf_map_lookup_elem#1\n     26: 0......7.9 (bf) r6 = r0\n     27: ......67.9 (15) if r6 == 0x0 goto pc+2\n     28: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     29: .1....67.9 (55) if r1 != 0x0 goto pc+661\n     30: .......7.9 (b7) r1 = 2816\n     31: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     32: .1.3...7.9 (0f) r3 += r1\n     33: ...3...7.9 (bf) r1 = r10\n     34: .1.3...7.9 (07) r1 += -264\n     35: .1.3...7.9 (b7) r2 = 8\n     36: .123...7.9 (85) call bpf_probe_read_kernel#113\n     37: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     38: ...3...7.9 (15) if r3 == 0x0 goto pc+76\n     39: ...3...7.9 (b7) r1 = 2804\n     40: .1.3...7.9 (0f) r3 += r1\n     41: ...3...7.9 (bf) r1 = r10\n     42: .1.3...7.9 (07) r1 += -280\n     43: .1.3...7.9 (b7) r2 = 4\n     44: .123...7.9 (85) call bpf_probe_read_kernel#113\n     45: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     46: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     47: .......7.9 (bf) r2 = r10\n     48: ..2....7.9 (07) r2 += -304\n     49: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     51: .12....7.9 (85) call bpf_map_lookup_elem#1\n     52: 0......7.9 (bf) r6 = r0\n     53: ......67.9 (15) if r6 == 0x0 goto pc+2\n     54: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     55: .1....67.9 (55) if r1 != 0x0 goto pc+635\n     56: .......7.9 (b7) r1 = 2816\n     57: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     58: .1.3...7.9 (0f) r3 += r1\n     59: ...3...7.9 (bf) r1 = r10\n     60: .1.3...7.9 (07) r1 += -264\n     61: .1.3...7.9 (b7) r2 = 8\n     62: .123...7.9 (85) call bpf_probe_read_kernel#113\n     63: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     64: ...3...7.9 (15) if r3 == 0x0 goto pc+50\n     65: ...3...7.9 (b7) r1 = 2804\n     66: .1.3...7.9 (0f) r3 += r1\n     67: ...3...7.9 (bf) r1 = r10\n     68: .1.3...7.9 (07) r1 += -280\n     69: .1.3...7.9 (b7) r2 = 4\n     70: .123...7.9 (85) call bpf_probe_read_kernel#113\n     71: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     72: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     73: .......7.9 (bf) r2 = r10\n     74: ..2....7.9 (07) r2 += -304\n     75: ..2....7.9 (18) r1 = 0xffff8bbe5325ec00\n     77: .12....7.9 (85) call bpf_map_lookup_elem#1\n     78: 0......7.9 (bf) r6 = r0\n     79: ......67.9 (15) if r6 == 0x0 goto pc+2\n     80: ......67.9 (79) r1 = *(u64 *)(r6 +8)\n     81: .1....67.9 (55) if r1 != 0x0 goto pc+609\n     82: .......7.9 (b7) r1 = 2816\n     83: .1.....7.9 (79) r3 = *(u64 *)(r10 -264)\n     84: .1.3...7.9 (0f) r3 += r1\n     85: ...3...7.9 (bf) r1 = r10\n     86: .1.3...7.9 (07) r1 += -264\n     87: .1.3...7.9 (b7) r2 = 8\n     88: .123...7.9 (85) call bpf_probe_read_kernel#113\n     89: .......7.9 (79) r3 = *(u64 *)(r10 -264)\n     90: ...3...7.9 (15) if r3 == 0x0 goto pc+24\n     91: ...3...7.9 (b7) r1 = 2804\n     92: .1.3...7.9 (0f) r3 += r1\n     93: ...3...7.9 (bf) r1 = r10\n     94: .1.3...7.9 (07) r1 += -280\n     95: .1.3...7.9 (b7) r2 = 4\n     96: .123...7.9 (85) call bpf_probe_read_kernel#113\n     97: .......7.9 (61) r1 = *(u32 *)(r10 -280)\n     98: .1.....7.9 (63) *(u32 *)(r10 -304) = r1\n     99: .......7.9 (bf) r2 = r10\n    100: ..2....7.9 (07) r2 += -304\n    101: \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 436
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 438 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nfunc#1 @100\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r1 = 0\n      2: .1....6... (63) *(u32 *)(r10 -12) = r1\n      3: ......6... (bf) r2 = r10\n      4: ..2...6... (07) r2 += -12\n      5: ..2...6... (18) r1 = 0xffff8bbddabcca00\n      7: .12...6... (85) call bpf_map_lookup_elem#1\n      8: 0.....6... (15) if r0 == 0x0 goto pc+89\n      9: 0.....6... (61) r8 = *(u32 *)(r0 +24300)\n     10: 0.....6.8. (67) r8 <<= 32\n     11: 0.....6.8. (c7) r8 s>>= 32\n     12: 0.....6.8. (c5) if r8 s< 0x2 goto pc+85\n     13: 0.....6.8. (07) r0 += 24288\n     14: 0.....6.8. (18) r1 = 0xffff8bbf4649c000\n     16: 01....6.8. (bf) r2 = r0\n     17: .12...6.8. (85) call bpf_map_lookup_elem#1\n     18: 0.....6.8. (bf) r7 = r0\n     19: ......678. (15) if r7 == 0x0 goto pc+78\n     20: ......678. (57) r8 &= 2047\n     21: ......678. (bf) r1 = r8\n     22: .1....678. (67) r1 <<= 32\n     23: .1....678. (c7) r1 s>>= 32\n     24: .1....678. (bf) r2 = r7\n     25: .12...678. (0f) r2 += r1\n     26: ..2...678. (71) r1 = *(u8 *)(r2 +1)\n     27: .12...678. (67) r1 <<= 8\n     28: .12...678. (71) r3 = *(u8 *)(r2 +0)\n     29: .123..678. (4f) r1 |= r3\n     30: .12...678. (71) r3 = *(u8 *)(r2 +2)\n     31: .123..678. (67) r3 <<= 16\n     32: .123..678. (71) r2 = *(u8 *)(r2 +3)\n     33: .123..678. (67) r2 <<= 24\n     34: .123..678. (4f) r2 |= r3\n     35: .12...678. (4f) r2 |= r1\n     36: ..2...678. (0f) r2 += r8\n     37: ..2...67.. (57) r2 &= 2047\n     38: ..2...67.. (b7) r8 = 1\n     39: ..2...678. (73) *(u8 *)(r10 -1) = r8\n     40: ..2...678. (b7) r1 = 0\n     41: .12...678. (63) *(u32 *)(r10 -8) = r1\n     42: ..2...678. (67) r2 <<= 32\n     43: ..2...678. (c7) r2 s>>= 32\n     44: ..2...678. (0f) r7 += r2\n     45: ......678. (bf) r2 = r10\n     46: ..2...678. (07) r2 += -8\n     47: ..2...678. (18) r1 = 0xffff8bbd634bf000\n     49: .12...678. (85) call bpf_map_lookup_elem#1\n     50: 0.....678. (15) if r0 == 0x0 goto pc+3\n     51: 0.....678. (71) r1 = *(u8 *)(r0 +0)\n     52: .1....678. (55) if r1 != 0x1 goto pc+1\n     53: ......67.. (b7) r8 = 0\n     54: ......678. (61) r1 = *(u32 *)(r7 +0)\n     55: .1....678. (a5) if r1 < 0x5 goto pc+35\n     56: ......678. (bf) r4 = r10\n     57: ....4.678. (07) r4 += -1\n     58: ....4.678. (bf) r1 = r6\n     59: .1..4.678. (b7) r2 = 0\n     60: .12.4.678. (bf) r3 = r7\n     61: .1234.678. (bf) r5 = r8\n     62: .12345678. (85) call pc+37\n     63: 0.....678. (bf) r1 = r0\n     64: 01....678. (67) r1 <<= 2\n     65: 01....678. (07) r1 += 4\n     66: 01....678. (67) r1 <<= 32\n     67: 01....678. (77) r1 >>= 32\n     68: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     69: 012...678. (3d) if r1 >= r2 goto pc+21\n     70: 0.....678. (bf) r4 = r10\n     71: 0...4.678. (07) r4 += -1\n     72: 0...4.678. (bf) r1 = r6\n     73: 01..4.678. (bf) r2 = r0\n     74: .12.4.678. (bf) r3 = r7\n     75: .1234.678. (bf) r5 = r8\n     76: .12345678. (85) call pc+23\n     77: 0.....678. (bf) r1 = r0\n     78: 01....678. (67) r1 <<= 2\n     79: 01....678. (07) r1 += 4\n     80: 01....678. (67) r1 <<= 32\n     81: 01....678. (77) r1 >>= 32\n     82: 01....678. (61) r2 = *(u32 *)(r7 +0)\n     83: 012...678. (3d) if r1 >= r2 goto pc+7\n     84: 0.....678. (bf) r4 = r10\n     85: 0...4.678. (07) r4 += -1\n     86: 0...4.678. (bf) r1 = r6\n     87: 01..4.678. (bf) r2 = r0\n     88: .12.4.678. (bf) r3 = r7\n     89: .1234.6.8. (bf) r5 = r8\n     90: .123456... (85) call pc+9\n     91: ......6... (71) r1 = *(u8 *)(r10 -1)\n     92: .1....6... (15) if r1 == 0x0 goto pc+5\n     93: ......6... (bf) r1 = r6\n     94: .1........ (18) r2 = 0xffff8bba80313600\n     96: .12....... (b7) r3 = 5\n     97: .123...... (85) call bpf_tail_call#12\n     98: .......... (b7) r0 = 0\n     99: 0......... (95) exit\n    100: .12345.... (bf) r6 = r5\n    101: .1234.6... (7b) *(u64 *)(r10 -88) = r4\n    102: .123..6... (bf) r8 = r2\n    103: .1.3..6.8. (7b) *(u64 *)(r10 -96) = r1\n    104: ...3..6.8. (bf) r1 = r8\n    105: .1.3..6.8. (67) r1 <<= 32\n    106: .1.3..6.8. (77) r1 >>= 32\n    107: .1.3..6.8. (67) r1 <<= 2\n    108: .1.3..6.8. (7b) *(u64 *)(r10 -80) = r3\n    109: .1.3..6.8. (bf) r2 = r3\n    1\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 438
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 441 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 441
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 446 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 446
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 456 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 456
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 463 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 28: No space left on device (os error 28)\nverifier log summary:\nprecise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs= stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs= stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs= stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs= stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs= stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs= stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs= stack= before 2038: (bf) r3 = r7\nmark_precise: frame2: regs= stack= before 2037: (57) r2 &= 4095\nmark_precise: frame2: regs= stack= before 2036: (bf) r2 = r6\nmark_precise: frame2: regs= stack= before 2035: (07) r6 += -1\nmark_precise: frame2: regs= stack= before 2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: regs= stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: parent state regs= stack=:  frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=P87 R2=map_value(map=string_postfix_,ks=4,vs=132,off=86) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=Pscalar(smin=smin32=-83,smax=smax32=43,umax=0xffffffffffffffad) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\nmark_precise: frame1: parent state regs= stack=:  frame1: R6=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) R10=fp0\nmark_precise: frame0: parent state regs= stack=:  R6=P20 R7=map_value(map=process_call_he,ks=4,vs=25608) R8=map_value(map=filter_map,ks=4,vs=4096) R9=scalar(smin=umin=8,smax=umax=0x60000001e,var_off=(0x0; 0x7ffffffff)) R10=fp0 fp-24=0000???? fp-32=P1 fp-40=map_value(map=filter_map,ks=4,vs=4096,smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff)) fp-48=ctx() fp-56=Pscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=scalar(smin=smin32=0,smax=umax=smax32=umax32=1023,var_off=(0x0; 0x3ff))\n2046: safe\n\nfrom 2045 to 2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: frame2: R0=map_value(map=string_postfix_,ks=4,vs=132) R1=91 R2=map_value(map=string_postfix_,ks=4,vs=132,off=90) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=scalar(id=697,smin=smin32=-87,smax=smax32=39,umin=1,umax=0xffffffffffffffa9) R7=map_value(map=process_call_he,ks=4,vs=25608,off=148,smin=smin32=0,smax=umax=smax32=umax32=2047,var_off=(0x0; 0x7ff)) R8=map_ptr(ks=132,vs=1) R9=0 R10=fp0 fp-8=mmmm0\n2034: (15) if r1 == 0x83 goto pc+11\nmark_precise: frame2: last_idx 2034 first_idx 2045 subseq_idx -1 \nmark_precise: frame2: regs=r1 stack= before 2045: (55) if r6 != 0x0 goto pc-12\nmark_precise: frame2: regs=r1 stack= before 2044: (07) r1 += 1\nmark_precise: frame2: regs=r1 stack= before 2043: (73) *(u8 *)(r2 +0) = r3\nmark_precise: frame2: regs=r1 stack= before 2042: (71) r3 = *(u8 *)(r3 +0)\nmark_precise: frame2: regs=r1 stack= before 2041: (0f) r2 += r1\nmark_precise: frame2: regs=r1 stack= before 2040: (bf) r2 = r0\nmark_precise: frame2: regs=r1 stack= before 2039: (0f) r3 += r2\nmark_precise: frame2: regs=r1 stack= before 2038: (bf) r3 = r7\nma\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 463
+          }
+        ],
+        "exit_code": 1,
+        "program_counts": {
+          "applied": 231,
+          "not_applied": 56,
+          "requested": 287
+        }
+      },
+      "runner": "tetragon",
+      "selected_workload": "stress_ng_os_io_network",
+      "status": "ok"
+    },
+    {
+      "app": "katran",
+      "baseline": {
+        "bpf": {
+          "470": {
+            "bytes_jited": 176,
+            "bytes_xlated": 136,
+            "id": 470,
+            "name": "xdp_root",
+            "run_cnt_delta": 96060,
+            "run_time_ns_delta": 35420264,
+            "type": "xdp"
+          },
+          "476": {
+            "bytes_jited": 13629,
+            "bytes_xlated": 23840,
+            "id": 476,
+            "name": "balancer_ingress",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "xdp"
+          },
+          "478": {
+            "bytes_jited": 541,
+            "bytes_xlated": 1000,
+            "id": 478,
+            "name": "healthcheck_encap",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.0012084879999747,
+            "ops_per_sec": 5334.517766431205,
+            "ops_total": 16010.0,
+            "stderr": "",
+            "stdout": ""
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "470": {
+            "bytes_jited": 176,
+            "bytes_xlated": 136,
+            "id": 470,
+            "name": "xdp_root",
+            "run_cnt_delta": 97068,
+            "run_time_ns_delta": 35829348,
+            "type": "xdp"
+          },
+          "476": {
+            "bytes_jited": 13629,
+            "bytes_xlated": 23840,
+            "id": 476,
+            "name": "balancer_ingress",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "xdp"
+          },
+          "478": {
+            "bytes_jited": 544,
+            "bytes_xlated": 1016,
+            "id": 478,
+            "name": "healthcheck_encap",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "sched_cls"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.0007752609999443,
+            "ops_per_sec": 5391.273451984214,
+            "ops_total": 16178.0,
+            "stderr": "",
+            "stdout": ""
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "prog 476: prog 476 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 7: Argument list too long (os error 7)\nverifier log summary:\nfunc#0 @0\nfunc#1 @2406\nfunc#2 @2554\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r7 = 1\n      2: ......67.. (61) r8 = *(u32 *)(r6 +0)\n      3: ......678. (61) r9 = *(u32 *)(r6 +4)\n      4: ......6789 (bf) r1 = r8\n      5: .1....6789 (07) r1 += 14\n      6: .1....6789 (2d) if r1 > r9 goto pc+1581\n      7: ......6789 (b7) r1 = 528\n      8: .1....6789 (63) *(u32 *)(r10 -132) = r1\n      9: ......6789 (bf) r2 = r10\n     10: ..2...6789 (07) r2 += -132\n     11: ..2...6789 (18) r1 = 0xffff8bba26210000\n     13: .12...6789 (85) call bpf_map_lookup_elem#1\n     14: 0.....6789 (15) if r0 == 0x0 goto pc+1573\n     15: 0.....6.89 (05) goto pc+0\n     16: 0.....6.89 (05) goto pc+0\n     17: 0.....6.89 (1f) r9 -= r8\n     18: 0.....6.89 (79) r1 = *(u64 *)(r0 +8)\n     19: 01....6.89 (0f) r1 += r9\n     20: 01....6.89 (7b) *(u64 *)(r0 +8) = r1\n     21: 0.....6.89 (79) r1 = *(u64 *)(r0 +0)\n     22: 01....6.89 (07) r1 += 1\n     23: 01....6.89 (7b) *(u64 *)(r0 +0) = r1\n     24: ......6.89 (71) r2 = *(u8 *)(r8 +12)\n     25: ..2...6.89 (71) r1 = *(u8 *)(r8 +13)\n     26: .12...6..9 (67) r1 <<= 8\n     27: .12...6..9 (4f) r1 |= r2\n     28: .1....6..9 (b7) r8 = 1\n     29: .1....6.89 (15) if r1 == 0xdd86 goto pc+129\n     30: .1....6.89 (55) if r1 != 0x8 goto pc+1530\n     31: ......6.89 (61) r2 = *(u32 *)(r6 +4)\n     32: ..2...6.89 (61) r7 = *(u32 *)(r6 +0)\n     33: ..2...6789 (b7) r1 = 0\n     34: .12...6789 (7b) *(u64 *)(r10 -48) = r1\n     35: .12...6789 (7b) *(u64 *)(r10 -56) = r1\n     36: .12...6789 (7b) *(u64 *)(r10 -64) = r1\n     37: .12...6789 (7b) *(u64 *)(r10 -72) = r1\n     38: .12...6789 (7b) *(u64 *)(r10 -80) = r1\n     39: .12...6789 (7b) *(u64 *)(r10 -88) = r1\n     40: .12...6789 (63) *(u32 *)(r10 -96) = r1\n     41: .12...6789 (7b) *(u64 *)(r10 -104) = r1\n     42: .12...6789 (7b) *(u64 *)(r10 -112) = r1\n     43: .12...6789 (63) *(u32 *)(r10 -120) = r1\n     44: ..2...6789 (bf) r3 = r7\n     45: ..23..6789 (07) r3 += 34\n     46: ..23..6789 (7b) *(u64 *)(r10 -144) = r2\n     47: ..23..6789 (2d) if r3 > r2 goto pc+1510\n     48: ...3..6789 (05) goto pc+0\n     49: ...3..6789 (71) r1 = *(u8 *)(r7 +14)\n     50: .1.3..6789 (57) r1 &= 15\n     51: .1.3..6789 (55) if r1 != 0x5 goto pc+1506\n     52: ...3..6789 (05) goto pc+0\n     53: ...3..6789 (71) r1 = *(u8 *)(r7 +15)\n     54: .1.3..6789 (73) *(u8 *)(r10 -43) = r1\n     55: ...3..6789 (71) r1 = *(u8 *)(r7 +23)\n     56: .1.3..6789 (73) *(u8 *)(r10 -52) = r1\n     57: .1.3..6789 (69) r2 = *(u16 *)(r7 +20)\n     58: .123..6789 (bf) r4 = r2\n     59: .1234.6789 (57) r4 &= 65343\n     60: .1234.6789 (55) if r4 != 0x0 goto pc+1497\n     61: .123..6789 (05) goto pc+0\n     62: .123..6789 (69) r0 = *(u16 *)(r7 +16)\n     63: 0123..6789 (15) if r1 == 0x1 goto pc+259\n     64: 01.3..6789 (05) goto pc+0\n     65: 01.3..6789 (61) r2 = *(u32 *)(r7 +26)\n     66: 0123..6789 (63) *(u32 *)(r10 -88) = r2\n     67: 01.3..6789 (61) r2 = *(u32 *)(r7 +30)\n     68: 0123..6789 (63) *(u32 *)(r10 -72) = r2\n     69: 01.3..6789 (b7) r2 = 0\n     70: 0123..6789 (55) if r1 != 0x3a goto pc+640\n     71: 0..3..6789 (bf) r1 = r7\n     72: 01.3..6789 (07) r1 += 42\n     73: 01.3..6789 (79) r2 = *(u64 *)(r10 -144)\n     74: 0123..6789 (2d) if r1 > r2 goto pc+1483\n     75: 0..3..67.9 (05) goto pc+0\n     76: 0..3..67.9 (71) r1 = *(u8 *)(r3 +0)\n     77: 01....67.9 (15) if r1 == 0x1 goto pc+603\n     78: 01....67.9 (15) if r1 == 0x2 goto pc+582\n     79: .1.....7.9 (b7) r8 = 2\n     80: .1.....789 (55) if r1 != 0x80 goto pc+1477\n     81: .......7.9 (b7) r8 = 1\n     82: .......789 (bf) r1 = r7\n     83: .1.....789 (07) r1 += 62\n     84: .1.....789 (79) r2 = *(u64 *)(r10 -144)\n     85: .12....789 (2d) if r1 > r2 goto pc+1472\n     86: .......7.9 (b7) r1 = 129\n     87: .1.....7.9 (73) *(u8 *)(r7 +54) = r1\n     88: .......7.9 (b7) r1 = 64\n     89: .1.....7.9 (73) *(u8 *)(r7 +21) = r1\n     90: .......7.9 (69) r1 = *(u16 *)(r7 +56)\n     91: .1.....7.9 (07) r1 += -1\n     92: .1.....7.9 (6b) *(u16 *)(r7 +56) = r1\n     93: .......7.9 (61) r1 = *(u32 *)(r7 +34)\n     94: .1.....7.9 (67) r1 <<= 32\n     95: .1.....7.9 (61) r2 = *(u32 *)(r7 +30)\n... verifier log truncated ...",
+        "error_programs": [
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 476 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 7: Argument list too long (os error 7)\nverifier log summary:\nfunc#0 @0\nfunc#1 @2406\nfunc#2 @2554\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r7 = 1\n      2: ......67.. (61) r8 = *(u32 *)(r6 +0)\n      3: ......678. (61) r9 = *(u32 *)(r6 +4)\n      4: ......6789 (bf) r1 = r8\n      5: .1....6789 (07) r1 += 14\n      6: .1....6789 (2d) if r1 > r9 goto pc+1581\n      7: ......6789 (b7) r1 = 528\n      8: .1....6789 (63) *(u32 *)(r10 -132) = r1\n      9: ......6789 (bf) r2 = r10\n     10: ..2...6789 (07) r2 += -132\n     11: ..2...6789 (18) r1 = 0xffff8bba26210000\n     13: .12...6789 (85) call bpf_map_lookup_elem#1\n     14: 0.....6789 (15) if r0 == 0x0 goto pc+1573\n     15: 0.....6.89 (05) goto pc+0\n     16: 0.....6.89 (05) goto pc+0\n     17: 0.....6.89 (1f) r9 -= r8\n     18: 0.....6.89 (79) r1 = *(u64 *)(r0 +8)\n     19: 01....6.89 (0f) r1 += r9\n     20: 01....6.89 (7b) *(u64 *)(r0 +8) = r1\n     21: 0.....6.89 (79) r1 = *(u64 *)(r0 +0)\n     22: 01....6.89 (07) r1 += 1\n     23: 01....6.89 (7b) *(u64 *)(r0 +0) = r1\n     24: ......6.89 (71) r2 = *(u8 *)(r8 +12)\n     25: ..2...6.89 (71) r1 = *(u8 *)(r8 +13)\n     26: .12...6..9 (67) r1 <<= 8\n     27: .12...6..9 (4f) r1 |= r2\n     28: .1....6..9 (b7) r8 = 1\n     29: .1....6.89 (15) if r1 == 0xdd86 goto pc+129\n     30: .1....6.89 (55) if r1 != 0x8 goto pc+1530\n     31: ......6.89 (61) r2 = *(u32 *)(r6 +4)\n     32: ..2...6.89 (61) r7 = *(u32 *)(r6 +0)\n     33: ..2...6789 (b7) r1 = 0\n     34: .12...6789 (7b) *(u64 *)(r10 -48) = r1\n     35: .12...6789 (7b) *(u64 *)(r10 -56) = r1\n     36: .12...6789 (7b) *(u64 *)(r10 -64) = r1\n     37: .12...6789 (7b) *(u64 *)(r10 -72) = r1\n     38: .12...6789 (7b) *(u64 *)(r10 -80) = r1\n     39: .12...6789 (7b) *(u64 *)(r10 -88) = r1\n     40: .12...6789 (63) *(u32 *)(r10 -96) = r1\n     41: .12...6789 (7b) *(u64 *)(r10 -104) = r1\n     42: .12...6789 (7b) *(u64 *)(r10 -112) = r1\n     43: .12...6789 (63) *(u32 *)(r10 -120) = r1\n     44: ..2...6789 (bf) r3 = r7\n     45: ..23..6789 (07) r3 += 34\n     46: ..23..6789 (7b) *(u64 *)(r10 -144) = r2\n     47: ..23..6789 (2d) if r3 > r2 goto pc+1510\n     48: ...3..6789 (05) goto pc+0\n     49: ...3..6789 (71) r1 = *(u8 *)(r7 +14)\n     50: .1.3..6789 (57) r1 &= 15\n     51: .1.3..6789 (55) if r1 != 0x5 goto pc+1506\n     52: ...3..6789 (05) goto pc+0\n     53: ...3..6789 (71) r1 = *(u8 *)(r7 +15)\n     54: .1.3..6789 (73) *(u8 *)(r10 -43) = r1\n     55: ...3..6789 (71) r1 = *(u8 *)(r7 +23)\n     56: .1.3..6789 (73) *(u8 *)(r10 -52) = r1\n     57: .1.3..6789 (69) r2 = *(u16 *)(r7 +20)\n     58: .123..6789 (bf) r4 = r2\n     59: .1234.6789 (57) r4 &= 65343\n     60: .1234.6789 (55) if r4 != 0x0 goto pc+1497\n     61: .123..6789 (05) goto pc+0\n     62: .123..6789 (69) r0 = *(u16 *)(r7 +16)\n     63: 0123..6789 (15) if r1 == 0x1 goto pc+259\n     64: 01.3..6789 (05) goto pc+0\n     65: 01.3..6789 (61) r2 = *(u32 *)(r7 +26)\n     66: 0123..6789 (63) *(u32 *)(r10 -88) = r2\n     67: 01.3..6789 (61) r2 = *(u32 *)(r7 +30)\n     68: 0123..6789 (63) *(u32 *)(r10 -72) = r2\n     69: 01.3..6789 (b7) r2 = 0\n     70: 0123..6789 (55) if r1 != 0x3a goto pc+640\n     71: 0..3..6789 (bf) r1 = r7\n     72: 01.3..6789 (07) r1 += 42\n     73: 01.3..6789 (79) r2 = *(u64 *)(r10 -144)\n     74: 0123..6789 (2d) if r1 > r2 goto pc+1483\n     75: 0..3..67.9 (05) goto pc+0\n     76: 0..3..67.9 (71) r1 = *(u8 *)(r3 +0)\n     77: 01....67.9 (15) if r1 == 0x1 goto pc+603\n     78: 01....67.9 (15) if r1 == 0x2 goto pc+582\n     79: .1.....7.9 (b7) r8 = 2\n     80: .1.....789 (55) if r1 != 0x80 goto pc+1477\n     81: .......7.9 (b7) r8 = 1\n     82: .......789 (bf) r1 = r7\n     83: .1.....789 (07) r1 += 62\n     84: .1.....789 (79) r2 = *(u64 *)(r10 -144)\n     85: .12....789 (2d) if r1 > r2 goto pc+1472\n     86: .......7.9 (b7) r1 = 129\n     87: .1.....7.9 (73) *(u8 *)(r7 +54) = r1\n     88: .......7.9 (b7) r1 = 64\n     89: .1.....7.9 (73) *(u8 *)(r7 +21) = r1\n     90: .......7.9 (69) r1 = *(u16 *)(r7 +56)\n     91: .1.....7.9 (07) r1 += -1\n     92: .1.....7.9 (6b) *(u16 *)(r7 +56) = r1\n     93: .......7.9 (61) r1 = *(u32 *)(r7 +34)\n     94: .1.....7.9 (67) r1 <<= 32\n     95: .1.....7.9 (61) r2 = *(u32 *)(r7 +30)\n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 476
+          }
+        ],
+        "exit_code": 1,
+        "program_counts": {
+          "applied": 2,
+          "not_applied": 1,
+          "requested": 3
+        }
+      },
+      "runner": "katran",
+      "selected_workload": "xdp_traffic",
+      "status": "ok"
+    },
+    {
+      "app": "tracee/monitor",
+      "baseline": {
+        "bpf": {
+          "493": {
+            "bytes_jited": 234,
+            "bytes_xlated": 264,
+            "id": 493,
+            "name": "tracepoint__raw_syscalls__sys_enter",
+            "run_cnt_delta": 32169821,
+            "run_time_ns_delta": 5568795415,
+            "type": "raw_tracepoint"
+          },
+          "494": {
+            "bytes_jited": 2513,
+            "bytes_xlated": 4552,
+            "id": 494,
+            "name": "sys_enter_init",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "495": {
+            "bytes_jited": 17446,
+            "bytes_xlated": 30376,
+            "id": 495,
+            "name": "sys_enter_submit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "496": {
+            "bytes_jited": 263,
+            "bytes_xlated": 320,
+            "id": 496,
+            "name": "tracepoint__raw_syscalls__sys_exit",
+            "run_cnt_delta": 32170124,
+            "run_time_ns_delta": 9826144284,
+            "type": "raw_tracepoint"
+          },
+          "497": {
+            "bytes_jited": 2093,
+            "bytes_xlated": 3800,
+            "id": 497,
+            "name": "sys_exit_init",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "498": {
+            "bytes_jited": 11583,
+            "bytes_xlated": 19880,
+            "id": 498,
+            "name": "sys_exit_submit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "499": {
+            "bytes_jited": 8156,
+            "bytes_xlated": 13688,
+            "id": 499,
+            "name": "trace_sys_enter",
+            "run_cnt_delta": 32169821,
+            "run_time_ns_delta": 8678693899,
+            "type": "raw_tracepoint"
+          },
+          "500": {
+            "bytes_jited": 8189,
+            "bytes_xlated": 13744,
+            "id": 500,
+            "name": "trace_sys_exit",
+            "run_cnt_delta": 32170124,
+            "run_time_ns_delta": 9171603099,
+            "type": "raw_tracepoint"
+          },
+          "501": {
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 501,
+            "name": "trace_ptrace",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "502": {
+            "bytes_jited": 11319,
+            "bytes_xlated": 19504,
+            "id": 502,
+            "name": "trace_ret_ptrace",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "503": {
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 503,
+            "name": "trace_process_vm_writev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "504": {
+            "bytes_jited": 11319,
+            "bytes_xlated": 19504,
+            "id": 504,
+            "name": "trace_ret_process_vm_writev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "505": {
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 505,
+            "name": "trace_arch_prctl",
+            "run_cnt_delta": 948117,
+            "run_time_ns_delta": 66658766,
+            "type": "kprobe"
+          },
+          "506": {
+            "bytes_jited": 11319,
+            "bytes_xlated": 19504,
+            "id": 506,
+            "name": "trace_ret_arch_prctl",
+            "run_cnt_delta": 948117,
+            "run_time_ns_delta": 254114396,
+            "type": "kprobe"
+          },
+          "507": {
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 507,
+            "name": "trace_dup",
+            "run_cnt_delta": 4022,
+            "run_time_ns_delta": 1218029,
+            "type": "kprobe"
+          },
+          "508": {
+            "bytes_jited": 11319,
+            "bytes_xlated": 19504,
+            "id": 508,
+            "name": "trace_ret_dup",
+            "run_cnt_delta": 4022,
+            "run_time_ns_delta": 4416908,
+            "type": "kprobe"
+          },
+          "509": {
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 509,
+            "name": "trace_dup2",
+            "run_cnt_delta": 5189,
+            "run_time_ns_delta": 820014,
+            "type": "kprobe"
+          },
+          "510": {
+            "bytes_jited": 11319,
+            "bytes_xlated": 19504,
+            "id": 510,
+            "name": "trace_ret_dup2",
+            "run_cnt_delta": 5189,
+            "run_time_ns_delta": 3666020,
+            "type": "kprobe"
+          },
+          "511": {
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 511,
+            "name": "trace_dup3",
+            "run_cnt_delta": 5552,
+            "run_time_ns_delta": 743990,
+            "type": "kprobe"
+          },
+          "512": {
+            "bytes_jited": 11319,
+            "bytes_xlated": 19504,
+            "id": 512,
+            "name": "trace_ret_dup3",
+            "run_cnt_delta": 5552,
+            "run_time_ns_delta": 3436730,
+            "type": "kprobe"
+          },
+          "513": {
+            "bytes_jited": 20734,
+            "bytes_xlated": 31992,
+            "id": 513,
+            "name": "syscall__execve_enter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "514": {
+            "bytes_jited": 20705,
+            "bytes_xlated": 32008,
+            "id": 514,
+            "name": "syscall__execve_exit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "515": {
+            "bytes_jited": 20997,
+            "bytes_xlated": 32400,
+            "id": 515,
+            "name": "syscall__execveat_enter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "516": {
+            "bytes_jited": 20965,
+            "bytes_xlated": 32408,
+            "id": 516,
+            "name": "syscall__execveat_exit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "517": {
+            "bytes_jited": 12292,
+            "bytes_xlated": 18744,
+            "id": 517,
+            "name": "sys_dup_exit_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "518": {
+            "bytes_jited": 19722,
+            "bytes_xlated": 32248,
+            "id": 518,
+            "name": "tracepoint__sched__sched_process_fork",
+            "run_cnt_delta": 7007,
+            "run_time_ns_delta": 21226945,
+            "type": "raw_tracepoint"
+          },
+          "519": {
+            "bytes_jited": 59266,
+            "bytes_xlated": 108072,
+            "id": 519,
+            "name": "lkm_seeker_modtree_loop",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "520": {
+            "bytes_jited": 6232,
+            "bytes_xlated": 10320,
+            "id": 520,
+            "name": "uprobe_lkm_seeker_submitter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "521": {
+            "bytes_jited": 4339,
+            "bytes_xlated": 7784,
+            "id": 521,
+            "name": "uprobe_lkm_seeker",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "522": {
+            "bytes_jited": 62309,
+            "bytes_xlated": 111768,
+            "id": 522,
+            "name": "lkm_seeker_kset_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "523": {
+            "bytes_jited": 652,
+            "bytes_xlated": 1048,
+            "id": 523,
+            "name": "lkm_seeker_mod_tree_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "524": {
+            "bytes_jited": 57791,
+            "bytes_xlated": 102120,
+            "id": 524,
+            "name": "lkm_seeker_proc_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "525": {
+            "bytes_jited": 3889,
+            "bytes_xlated": 6456,
+            "id": 525,
+            "name": "lkm_seeker_new_mod_only_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "526": {
+            "bytes_jited": 20556,
+            "bytes_xlated": 35424,
+            "id": 526,
+            "name": "tracepoint__sched__sched_process_exec",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 12187,
+            "type": "raw_tracepoint"
+          },
+          "527": {
+            "bytes_jited": 24434,
+            "bytes_xlated": 38432,
+            "id": 527,
+            "name": "sched_process_exec_event_submit_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "528": {
+            "bytes_jited": 8700,
+            "bytes_xlated": 14536,
+            "id": 528,
+            "name": "tracepoint__sched__sched_process_exit",
+            "run_cnt_delta": 6897,
+            "run_time_ns_delta": 8873611,
+            "type": "raw_tracepoint"
+          },
+          "529": {
+            "bytes_jited": 248,
+            "bytes_xlated": 440,
+            "id": 529,
+            "name": "tracepoint__sched__sched_process_free",
+            "run_cnt_delta": 6912,
+            "run_time_ns_delta": 6072716,
+            "type": "raw_tracepoint"
+          },
+          "530": {
+            "bytes_jited": 9155,
+            "bytes_xlated": 13888,
+            "id": 530,
+            "name": "syscall__accept4",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "531": {
+            "bytes_jited": 8945,
+            "bytes_xlated": 14912,
+            "id": 531,
+            "name": "tracepoint__sched__sched_switch",
+            "run_cnt_delta": 664695,
+            "run_time_ns_delta": 316032307,
+            "type": "raw_tracepoint"
+          },
+          "532": {
+            "bytes_jited": 8201,
+            "bytes_xlated": 13776,
+            "id": 532,
+            "name": "trace_filldir64",
+            "run_cnt_delta": 379745,
+            "run_time_ns_delta": 6611229,
+            "type": "kprobe"
+          },
+          "533": {
+            "bytes_jited": 23523,
+            "bytes_xlated": 36784,
+            "id": 533,
+            "name": "trace_call_usermodehelper",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "534": {
+            "bytes_jited": 7959,
+            "bytes_xlated": 13408,
+            "id": 534,
+            "name": "trace_do_exit",
+            "run_cnt_delta": 6897,
+            "run_time_ns_delta": 5539984,
+            "type": "kprobe"
+          },
+          "535": {
+            "bytes_jited": 56303,
+            "bytes_xlated": 97056,
+            "id": 535,
+            "name": "uprobe_syscall_table_check",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "536": {
+            "bytes_jited": 6788,
+            "bytes_xlated": 11256,
+            "id": 536,
+            "name": "uprobe_seq_ops_trigger",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "537": {
+            "bytes_jited": 6553,
+            "bytes_xlated": 10976,
+            "id": 537,
+            "name": "uprobe_mem_dump_trigger",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "538": {
+            "bytes_jited": 11476,
+            "bytes_xlated": 18328,
+            "id": 538,
+            "name": "trace_security_file_ioctl",
+            "run_cnt_delta": 4143475,
+            "run_time_ns_delta": 439089615,
+            "type": "kprobe"
+          },
+          "539": {
+            "bytes_jited": 9747,
+            "bytes_xlated": 15688,
+            "id": 539,
+            "name": "trace_tracepoint_probe_register_prio_may_exist",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "540": {
+            "bytes_jited": 8649,
+            "bytes_xlated": 14440,
+            "id": 540,
+            "name": "tracepoint__cgroup__cgroup_attach_task",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "541": {
+            "bytes_jited": 8624,
+            "bytes_xlated": 14416,
+            "id": 541,
+            "name": "tracepoint__cgroup__cgroup_mkdir",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "542": {
+            "bytes_jited": 8624,
+            "bytes_xlated": 14416,
+            "id": 542,
+            "name": "tracepoint__cgroup__cgroup_rmdir",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "543": {
+            "bytes_jited": 33399,
+            "bytes_xlated": 52904,
+            "id": 543,
+            "name": "trace_security_bprm_check",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 8640,
+            "type": "kprobe"
+          },
+          "544": {
+            "bytes_jited": 22985,
+            "bytes_xlated": 37160,
+            "id": 544,
+            "name": "trace_security_file_open",
+            "run_cnt_delta": 520823,
+            "run_time_ns_delta": 320401964,
+            "type": "kprobe"
+          },
+          "545": {
+            "bytes_jited": 18653,
+            "bytes_xlated": 30680,
+            "id": 545,
+            "name": "trace_security_sb_mount",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "546": {
+            "bytes_jited": 9997,
+            "bytes_xlated": 16416,
+            "id": 546,
+            "name": "trace_security_inode_unlink",
+            "run_cnt_delta": 2764,
+            "run_time_ns_delta": 3851160,
+            "type": "kprobe"
+          },
+          "547": {
+            "bytes_jited": 10745,
+            "bytes_xlated": 16960,
+            "id": 547,
+            "name": "trace_commit_creds",
+            "run_cnt_delta": 99399,
+            "run_time_ns_delta": 31352938,
+            "type": "kprobe"
+          },
+          "548": {
+            "bytes_jited": 10034,
+            "bytes_xlated": 16552,
+            "id": 548,
+            "name": "trace_switch_task_namespaces",
+            "run_cnt_delta": 6897,
+            "run_time_ns_delta": 4629837,
+            "type": "kprobe"
+          },
+          "549": {
+            "bytes_jited": 8199,
+            "bytes_xlated": 13760,
+            "id": 549,
+            "name": "trace_cap_capable",
+            "run_cnt_delta": 1919119,
+            "run_time_ns_delta": 252136103,
+            "type": "kprobe"
+          },
+          "550": {
+            "bytes_jited": 8478,
+            "bytes_xlated": 14176,
+            "id": 550,
+            "name": "trace_security_socket_create",
+            "run_cnt_delta": 55857,
+            "run_time_ns_delta": 21940085,
+            "type": "kprobe"
+          },
+          "551": {
+            "bytes_jited": 9217,
+            "bytes_xlated": 15344,
+            "id": 551,
+            "name": "trace_security_inode_symlink",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "552": {
+            "bytes_jited": 8301,
+            "bytes_xlated": 13904,
+            "id": 552,
+            "name": "trace_proc_create",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "553": {
+            "bytes_jited": 9523,
+            "bytes_xlated": 15840,
+            "id": 553,
+            "name": "trace_debugfs_create_file",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "554": {
+            "bytes_jited": 9235,
+            "bytes_xlated": 15424,
+            "id": 554,
+            "name": "trace_debugfs_create_dir",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "555": {
+            "bytes_jited": 10837,
+            "bytes_xlated": 16632,
+            "id": 555,
+            "name": "trace_security_socket_listen",
+            "run_cnt_delta": 20,
+            "run_time_ns_delta": 37267,
+            "type": "kprobe"
+          },
+          "556": {
+            "bytes_jited": 10093,
+            "bytes_xlated": 15472,
+            "id": 556,
+            "name": "trace_security_socket_connect",
+            "run_cnt_delta": 36335,
+            "run_time_ns_delta": 19248338,
+            "type": "kprobe"
+          },
+          "557": {
+            "bytes_jited": 11320,
+            "bytes_xlated": 17368,
+            "id": 557,
+            "name": "trace_security_socket_accept",
+            "run_cnt_delta": 37106,
+            "run_time_ns_delta": 24939961,
+            "type": "kprobe"
+          },
+          "558": {
+            "bytes_jited": 10606,
+            "bytes_xlated": 16152,
+            "id": 558,
+            "name": "trace_security_socket_bind",
+            "run_cnt_delta": 24,
+            "run_time_ns_delta": 33987,
+            "type": "kprobe"
+          },
+          "559": {
+            "bytes_jited": 11072,
+            "bytes_xlated": 17024,
+            "id": 559,
+            "name": "trace_security_socket_setsockopt",
+            "run_cnt_delta": 35739,
+            "run_time_ns_delta": 19323313,
+            "type": "kprobe"
+          },
+          "560": {
+            "bytes_jited": 949,
+            "bytes_xlated": 1568,
+            "id": 560,
+            "name": "send_bin",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "561": {
+            "bytes_jited": 949,
+            "bytes_xlated": 1568,
+            "id": 561,
+            "name": "send_bin_tp",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "562": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 562,
+            "name": "trace_vfs_write",
+            "run_cnt_delta": 261832,
+            "run_time_ns_delta": 22582193,
+            "type": "kprobe"
+          },
+          "563": {
+            "bytes_jited": 279,
+            "bytes_xlated": 432,
+            "id": 563,
+            "name": "vfs_write_magic_enter",
+            "run_cnt_delta": 261832,
+            "run_time_ns_delta": 9332603,
+            "type": "kprobe"
+          },
+          "564": {
+            "bytes_jited": 19139,
+            "bytes_xlated": 31808,
+            "id": 564,
+            "name": "trace_ret_vfs_write",
+            "run_cnt_delta": 261832,
+            "run_time_ns_delta": 170258003,
+            "type": "kprobe"
+          },
+          "565": {
+            "bytes_jited": 23804,
+            "bytes_xlated": 36792,
+            "id": 565,
+            "name": "vfs_write_magic_return",
+            "run_cnt_delta": 261832,
+            "run_time_ns_delta": 16914224,
+            "type": "kprobe"
+          },
+          "566": {
+            "bytes_jited": 29921,
+            "bytes_xlated": 51704,
+            "id": 566,
+            "name": "trace_ret_vfs_write_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "567": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 567,
+            "name": "trace_vfs_writev",
+            "run_cnt_delta": 109,
+            "run_time_ns_delta": 64438,
+            "type": "kprobe"
+          },
+          "568": {
+            "bytes_jited": 279,
+            "bytes_xlated": 432,
+            "id": 568,
+            "name": "vfs_writev_magic_enter",
+            "run_cnt_delta": 109,
+            "run_time_ns_delta": 35746,
+            "type": "kprobe"
+          },
+          "569": {
+            "bytes_jited": 19138,
+            "bytes_xlated": 31800,
+            "id": 569,
+            "name": "trace_ret_vfs_writev",
+            "run_cnt_delta": 109,
+            "run_time_ns_delta": 481962,
+            "type": "kprobe"
+          },
+          "570": {
+            "bytes_jited": 24540,
+            "bytes_xlated": 37648,
+            "id": 570,
+            "name": "vfs_writev_magic_return",
+            "run_cnt_delta": 109,
+            "run_time_ns_delta": 376158,
+            "type": "kprobe"
+          },
+          "571": {
+            "bytes_jited": 29845,
+            "bytes_xlated": 51680,
+            "id": 571,
+            "name": "trace_ret_vfs_writev_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "572": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 572,
+            "name": "trace_kernel_write",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "573": {
+            "bytes_jited": 279,
+            "bytes_xlated": 432,
+            "id": 573,
+            "name": "kernel_write_magic_enter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "574": {
+            "bytes_jited": 19142,
+            "bytes_xlated": 31808,
+            "id": 574,
+            "name": "trace_ret_kernel_write",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "575": {
+            "bytes_jited": 23804,
+            "bytes_xlated": 36792,
+            "id": 575,
+            "name": "kernel_write_magic_return",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "576": {
+            "bytes_jited": 29921,
+            "bytes_xlated": 51704,
+            "id": 576,
+            "name": "trace_ret_kernel_write_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "577": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 577,
+            "name": "trace_vfs_read",
+            "run_cnt_delta": 1203466,
+            "run_time_ns_delta": 91445651,
+            "type": "kprobe"
+          },
+          "578": {
+            "bytes_jited": 19142,
+            "bytes_xlated": 31808,
+            "id": 578,
+            "name": "trace_ret_vfs_read",
+            "run_cnt_delta": 1203466,
+            "run_time_ns_delta": 807999257,
+            "type": "kprobe"
+          },
+          "579": {
+            "bytes_jited": 17164,
+            "bytes_xlated": 29848,
+            "id": 579,
+            "name": "trace_ret_vfs_read_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "580": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 580,
+            "name": "trace_vfs_readv",
+            "run_cnt_delta": 109,
+            "run_time_ns_delta": 48741,
+            "type": "kprobe"
+          },
+          "581": {
+            "bytes_jited": 19138,
+            "bytes_xlated": 31800,
+            "id": 581,
+            "name": "trace_ret_vfs_readv",
+            "run_cnt_delta": 109,
+            "run_time_ns_delta": 268481,
+            "type": "kprobe"
+          },
+          "582": {
+            "bytes_jited": 17892,
+            "bytes_xlated": 30816,
+            "id": 582,
+            "name": "trace_ret_vfs_readv_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "583": {
+            "bytes_jited": 20742,
+            "bytes_xlated": 32864,
+            "id": 583,
+            "name": "trace_mmap_alert",
+            "run_cnt_delta": 558415,
+            "run_time_ns_delta": 74280167,
+            "type": "kprobe"
+          },
+          "584": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 584,
+            "name": "trace_do_mmap",
+            "run_cnt_delta": 506481,
+            "run_time_ns_delta": 39562756,
+            "type": "kprobe"
+          },
+          "585": {
+            "bytes_jited": 19582,
+            "bytes_xlated": 31944,
+            "id": 585,
+            "name": "trace_ret_do_mmap",
+            "run_cnt_delta": 506481,
+            "run_time_ns_delta": 179197636,
+            "type": "kprobe"
+          },
+          "586": {
+            "bytes_jited": 36984,
+            "bytes_xlated": 60888,
+            "id": 586,
+            "name": "trace_security_mmap_file",
+            "run_cnt_delta": 506477,
+            "run_time_ns_delta": 65085893,
+            "type": "kprobe"
+          },
+          "587": {
+            "bytes_jited": 34612,
+            "bytes_xlated": 59616,
+            "id": 587,
+            "name": "trace_security_file_mprotect",
+            "run_cnt_delta": 2634145,
+            "run_time_ns_delta": 1197516387,
+            "type": "kprobe"
+          },
+          "588": {
+            "bytes_jited": 622,
+            "bytes_xlated": 1000,
+            "id": 588,
+            "name": "syscall__init_module",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "589": {
+            "bytes_jited": 15620,
+            "bytes_xlated": 26984,
+            "id": 589,
+            "name": "trace_security_bpf",
+            "run_cnt_delta": 8196,
+            "run_time_ns_delta": 2394281,
+            "type": "kprobe"
+          },
+          "590": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 590,
+            "name": "trace_register_kprobe",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "591": {
+            "bytes_jited": 8826,
+            "bytes_xlated": 14712,
+            "id": 591,
+            "name": "trace_ret_register_kprobe",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "592": {
+            "bytes_jited": 8362,
+            "bytes_xlated": 13992,
+            "id": 592,
+            "name": "trace_security_bpf_map",
+            "run_cnt_delta": 2608,
+            "run_time_ns_delta": 765455,
+            "type": "kprobe"
+          },
+          "593": {
+            "bytes_jited": 9601,
+            "bytes_xlated": 15520,
+            "id": 593,
+            "name": "trace_security_bpf_prog",
+            "run_cnt_delta": 161,
+            "run_time_ns_delta": 137602,
+            "type": "kprobe"
+          },
+          "594": {
+            "bytes_jited": 6376,
+            "bytes_xlated": 10616,
+            "id": 594,
+            "name": "trace_bpf_check",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "595": {
+            "bytes_jited": 6612,
+            "bytes_xlated": 11096,
+            "id": 595,
+            "name": "trace_check_map_func_compatibility",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "596": {
+            "bytes_jited": 6618,
+            "bytes_xlated": 11104,
+            "id": 596,
+            "name": "trace_check_helper_call",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "597": {
+            "bytes_jited": 18650,
+            "bytes_xlated": 30720,
+            "id": 597,
+            "name": "trace_security_kernel_read_file",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "598": {
+            "bytes_jited": 17285,
+            "bytes_xlated": 30536,
+            "id": 598,
+            "name": "trace_security_kernel_post_read_file",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "599": {
+            "bytes_jited": 9251,
+            "bytes_xlated": 15432,
+            "id": 599,
+            "name": "trace_security_inode_mknod",
+            "run_cnt_delta": 2490,
+            "run_time_ns_delta": 3139433,
+            "type": "kprobe"
+          },
+          "600": {
+            "bytes_jited": 8685,
+            "bytes_xlated": 14440,
+            "id": 600,
+            "name": "trace_device_add",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "601": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 601,
+            "name": "trace___register_chrdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "602": {
+            "bytes_jited": 8828,
+            "bytes_xlated": 14704,
+            "id": 602,
+            "name": "trace_ret__register_chrdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "603": {
+            "bytes_jited": 19884,
+            "bytes_xlated": 32720,
+            "id": 603,
+            "name": "tracepoint__module__module_load",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "604": {
+            "bytes_jited": 9004,
+            "bytes_xlated": 15024,
+            "id": 604,
+            "name": "tracepoint__module__module_free",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "605": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 605,
+            "name": "trace_do_init_module",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "606": {
+            "bytes_jited": 14587,
+            "bytes_xlated": 24016,
+            "id": 606,
+            "name": "trace_ret_do_init_module",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "607": {
+            "bytes_jited": 18493,
+            "bytes_xlated": 30424,
+            "id": 607,
+            "name": "trace_load_elf_phdrs",
+            "run_cnt_delta": 4,
+            "run_time_ns_delta": 6743,
+            "type": "kprobe"
+          },
+          "608": {
+            "bytes_jited": 8719,
+            "bytes_xlated": 14592,
+            "id": 608,
+            "name": "trace_security_file_permission",
+            "run_cnt_delta": 2025750,
+            "run_time_ns_delta": 96952573,
+            "type": "kprobe"
+          },
+          "609": {
+            "bytes_jited": 8512,
+            "bytes_xlated": 14208,
+            "id": 609,
+            "name": "tracepoint__task__task_rename",
+            "run_cnt_delta": 4555,
+            "run_time_ns_delta": 4391338,
+            "type": "raw_tracepoint"
+          },
+          "610": {
+            "bytes_jited": 9837,
+            "bytes_xlated": 16448,
+            "id": 610,
+            "name": "trace_security_inode_rename",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "611": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 611,
+            "name": "trace_kallsyms_lookup_name",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "612": {
+            "bytes_jited": 8431,
+            "bytes_xlated": 14104,
+            "id": 612,
+            "name": "trace_ret_kallsyms_lookup_name",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "613": {
+            "bytes_jited": 10070,
+            "bytes_xlated": 16296,
+            "id": 613,
+            "name": "trace_do_sigaction",
+            "run_cnt_delta": 9177,
+            "run_time_ns_delta": 9577174,
+            "type": "kprobe"
+          },
+          "614": {
+            "bytes_jited": 18577,
+            "bytes_xlated": 30600,
+            "id": 614,
+            "name": "trace_vfs_utimes",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "615": {
+            "bytes_jited": 18577,
+            "bytes_xlated": 30600,
+            "id": 615,
+            "name": "trace_utimes_common",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "616": {
+            "bytes_jited": 9550,
+            "bytes_xlated": 15896,
+            "id": 616,
+            "name": "trace_do_truncate",
+            "run_cnt_delta": 482,
+            "run_time_ns_delta": 1177860,
+            "type": "kprobe"
+          },
+          "617": {
+            "bytes_jited": 17005,
+            "bytes_xlated": 27568,
+            "id": 617,
+            "name": "trace_fd_install",
+            "run_cnt_delta": 763794,
+            "run_time_ns_delta": 222417388,
+            "type": "kprobe"
+          },
+          "618": {
+            "bytes_jited": 16933,
+            "bytes_xlated": 27416,
+            "id": 618,
+            "name": "trace_filp_close",
+            "run_cnt_delta": 394076,
+            "run_time_ns_delta": 123297262,
+            "type": "kprobe"
+          },
+          "619": {
+            "bytes_jited": 469,
+            "bytes_xlated": 784,
+            "id": 619,
+            "name": "trace_file_update_time",
+            "run_cnt_delta": 16581,
+            "run_time_ns_delta": 4165518,
+            "type": "kprobe"
+          },
+          "620": {
+            "bytes_jited": 20045,
+            "bytes_xlated": 31224,
+            "id": 620,
+            "name": "trace_ret_file_update_time",
+            "run_cnt_delta": 16581,
+            "run_time_ns_delta": 16172783,
+            "type": "kprobe"
+          },
+          "621": {
+            "bytes_jited": 483,
+            "bytes_xlated": 800,
+            "id": 621,
+            "name": "trace_file_modified",
+            "run_cnt_delta": 192179,
+            "run_time_ns_delta": 22211004,
+            "type": "kprobe"
+          },
+          "622": {
+            "bytes_jited": 20180,
+            "bytes_xlated": 31400,
+            "id": 622,
+            "name": "trace_ret_file_modified",
+            "run_cnt_delta": 192179,
+            "run_time_ns_delta": 96774460,
+            "type": "kprobe"
+          },
+          "623": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 623,
+            "name": "trace_inotify_find_inode",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "624": {
+            "bytes_jited": 18061,
+            "bytes_xlated": 30032,
+            "id": 624,
+            "name": "trace_ret_inotify_find_inode",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "625": {
+            "bytes_jited": 12887,
+            "bytes_xlated": 20216,
+            "id": 625,
+            "name": "process_execute_failed_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "626": {
+            "bytes_jited": 16503,
+            "bytes_xlated": 28960,
+            "id": 626,
+            "name": "trace_exec_binprm",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 294,
+            "type": "kprobe"
+          },
+          "627": {
+            "bytes_jited": 16714,
+            "bytes_xlated": 29144,
+            "id": 627,
+            "name": "trace_security_bprm_creds_for_exec",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 7719,
+            "type": "kprobe"
+          },
+          "628": {
+            "bytes_jited": 24495,
+            "bytes_xlated": 38400,
+            "id": 628,
+            "name": "trace_execute_finished",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 12421,
+            "type": "kprobe"
+          },
+          "629": {
+            "bytes_jited": 18408,
+            "bytes_xlated": 30272,
+            "id": 629,
+            "name": "trace_security_path_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "630": {
+            "bytes_jited": 18267,
+            "bytes_xlated": 30048,
+            "id": 630,
+            "name": "trace_set_fs_pwd",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 6299,
+            "type": "kprobe"
+          },
+          "631": {
+            "bytes_jited": 8645,
+            "bytes_xlated": 14424,
+            "id": 631,
+            "name": "trace_security_task_setrlimit",
+            "run_cnt_delta": 215774,
+            "run_time_ns_delta": 65847976,
+            "type": "kprobe"
+          },
+          "632": {
+            "bytes_jited": 8670,
+            "bytes_xlated": 14480,
+            "id": 632,
+            "name": "trace_security_settime64",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "633": {
+            "bytes_jited": 17596,
+            "bytes_xlated": 29272,
+            "id": 633,
+            "name": "trace_chmod_common",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "634": {
+            "bytes_jited": 47182,
+            "bytes_xlated": 76688,
+            "id": 634,
+            "name": "trace_security_task_prctl",
+            "run_cnt_delta": 333781,
+            "run_time_ns_delta": 115946238,
+            "type": "kprobe"
+          },
+          "635": {
+            "bytes_jited": 14930,
+            "bytes_xlated": 24112,
+            "id": 635,
+            "name": "syscall_checker",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "636": {
+            "bytes_jited": 9521,
+            "bytes_xlated": 15856,
+            "id": 636,
+            "name": "trace_security_sb_umount",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "637": {
+            "bytes_jited": 331,
+            "bytes_xlated": 528,
+            "id": 637,
+            "name": "trace_sock_alloc_file",
+            "run_cnt_delta": 92948,
+            "run_time_ns_delta": 10189138,
+            "type": "kprobe"
+          },
+          "638": {
+            "bytes_jited": 8648,
+            "bytes_xlated": 13456,
+            "id": 638,
+            "name": "trace_ret_sock_alloc_file",
+            "run_cnt_delta": 92948,
+            "run_time_ns_delta": 58258826,
+            "type": "kprobe"
+          },
+          "639": {
+            "bytes_jited": 344,
+            "bytes_xlated": 592,
+            "id": 639,
+            "name": "trace_security_sk_clone",
+            "run_cnt_delta": 35053,
+            "run_time_ns_delta": 34924666,
+            "type": "kprobe"
+          },
+          "640": {
+            "bytes_jited": 8895,
+            "bytes_xlated": 13696,
+            "id": 640,
+            "name": "trace_security_socket_recvmsg",
+            "run_cnt_delta": 569768,
+            "run_time_ns_delta": 160876848,
+            "type": "kprobe"
+          },
+          "641": {
+            "bytes_jited": 8895,
+            "bytes_xlated": 13696,
+            "id": 641,
+            "name": "trace_security_socket_sendmsg",
+            "run_cnt_delta": 1605579,
+            "run_time_ns_delta": 484873390,
+            "type": "kprobe"
+          },
+          "642": {
+            "bytes_jited": 5668,
+            "bytes_xlated": 8808,
+            "id": 642,
+            "name": "cgroup_bpf_run_filter_skb",
+            "run_cnt_delta": 2114016,
+            "run_time_ns_delta": 576647248,
+            "type": "kprobe"
+          },
+          "644": {
+            "bytes_jited": 19660,
+            "bytes_xlated": 31088,
+            "id": 644,
+            "name": "cgroup_skb_ingress",
+            "run_cnt_delta": 745124,
+            "run_time_ns_delta": 225251202,
+            "type": "cgroup_skb"
+          },
+          "645": {
+            "bytes_jited": 19660,
+            "bytes_xlated": 31088,
+            "id": 645,
+            "name": "cgroup_skb_egress",
+            "run_cnt_delta": 1339313,
+            "run_time_ns_delta": 363282833,
+            "type": "cgroup_skb"
+          },
+          "646": {
+            "bytes_jited": 928,
+            "bytes_xlated": 1584,
+            "id": 646,
+            "name": "cgroup_mkdir_signal",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "647": {
+            "bytes_jited": 910,
+            "bytes_xlated": 1544,
+            "id": 647,
+            "name": "cgroup_rmdir_signal",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "648": {
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 648,
+            "name": "empty_kprobe",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 209,
+            "type": "kprobe"
+          },
+          "649": {
+            "bytes_jited": 58693,
+            "bytes_xlated": 96032,
+            "id": 649,
+            "name": "tracepoint__exec_test",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 2501,
+            "type": "raw_tracepoint"
+          },
+          "650": {
+            "bytes_jited": 7328,
+            "bytes_xlated": 13360,
+            "id": 650,
+            "name": "lsm_file_open_test",
+            "run_cnt_delta": 520823,
+            "run_time_ns_delta": 148157613,
+            "type": "lsm"
+          },
+          "651": {
+            "bytes_jited": 5384,
+            "bytes_xlated": 9160,
+            "id": 651,
+            "name": "uprobe__features_fallback_arena",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.272539694999978,
+            "ops_per_sec": 3269433.3276138706,
+            "ops_total": 17238217.0,
+            "stderr": "",
+            "stdout": "stress-ng: metrc: [29430] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [29430]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [29430] cap              364207      5.06      0.23      3.84     71995.17       89421.07\nstress-ng: metrc: [29430] eventfd           93110      5.00      0.12      2.46     18612.20       36181.83\nstress-ng: metrc: [29430] get                2919      5.00      0.06      1.94       583.44        1461.94\nstress-ng: metrc: [29430] prctl              3605      5.00      2.59      0.93       720.49        1024.46\nstress-ng: metrc: [29430] set                9414      5.03      0.02      1.45      1872.82        6379.90\nstress-ng: metrc: [29430] dup                1237      5.04      0.42      0.44       245.51        1440.78\nstress-ng: metrc: [29430] kill              23272      5.06      0.02      2.85      4603.69        8121.24\nstress-ng: metrc: [29430] sigfd            538463      5.06      0.09      3.14    106450.15      166674.30\nstress-ng: metrc: [29430] signal                0      5.03      0.03      0.90         0.00           0.00\nstress-ng: metrc: [29430] pty                  62      5.02      0.12      3.50        12.35          17.17\nstress-ng: metrc: [29430] itimer              183      5.02      0.04      1.69        36.44         105.32\nstress-ng: metrc: [29430] timerfd          182272      5.08      0.05      1.59     35850.46      111329.71\nstress-ng: metrc: [29430] aio               25326      5.06      0.02      0.30      5007.89       77425.63\nstress-ng: metrc: [29430] aiol               5423      5.13      0.10      0.49      1056.68        9197.50\nstress-ng: metrc: [29430] hdd               55085      5.09      1.08      0.93     10832.83       27400.37\nstress-ng: metrc: [29430] io                  138      5.08      0.02      0.04        27.15        2400.54\nstress-ng: metrc: [29430] iomix              4787      5.09      0.09      2.96       939.96        1568.02\nstress-ng: metrc: [29430] io-uring          30808      5.09      0.00      1.69      6055.67       18201.68\nstress-ng: metrc: [29430] sync-file           123      5.06      0.07      1.53        24.30          76.89\nstress-ng: metrc: [29430] epoll               979      5.15      0.05      0.09       190.20        6930.83\nstress-ng: metrc: [29430] netdev           132453      5.03      0.18      3.98     26346.73       31835.65\nstress-ng: metrc: [29430] sctp               5278      5.00      0.05      0.00      1055.33       97147.06\nstress-ng: metrc: [29430] sock               1042      5.03      0.06      2.00       207.11         506.17\nstress-ng: metrc: [29430] sockdiag       13241958      5.05      0.03      1.43   2623391.50     9062063.22\nstress-ng: metrc: [29430] sockfd           162478      5.05      0.05      1.75     32187.43       90197.16\nstress-ng: metrc: [29430] sockpair            520      5.06      0.04      0.12       102.75        3137.22\nstress-ng: metrc: [29430] sockmany          35039      5.05      0.05      2.80      6940.10       12300.98\nstress-ng: metrc: [29430] udp               60664      5.02      0.06      1.93     12076.46       30462.59\nstress-ng: metrc: [29430] udp-flood        305665      5.01      0.18      2.49     60988.62      114647.92\nstress-ng: metrc: [29430] mmap                434      5.02      0.02      1.63        86.43         262.08\nstress-ng: metrc: [29430] mprotect        1949483      5.01      0.64     15.52    388907.63      120628.11\nstress-ng: metrc: [29430] mremap             1733      5.01      0.04      1.70       346.23         994.73\nstress-ng: metrc: [29430] madvise              57      5.00      0.16      3.60        11.39          15.15\nstress-ng: info:  [29430] skipped: 0\nstress-ng: info:  [29430] passed: 132: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4)\nstress-ng: info:  [29430] failed: 0\nstress-ng: info:  [29430] metrics untrustworthy: 0\nstress-ng: info:  [29430] successful run completed in 5.24 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "493": {
+            "bytes_jited": 237,
+            "bytes_xlated": 280,
+            "id": 493,
+            "name": "tracepoint__raw_syscalls__sys_enter",
+            "run_cnt_delta": 30806354,
+            "run_time_ns_delta": 5357928508,
+            "type": "raw_tracepoint"
+          },
+          "494": {
+            "bytes_jited": 2516,
+            "bytes_xlated": 4568,
+            "id": 494,
+            "name": "sys_enter_init",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "495": {
+            "bytes_jited": 17485,
+            "bytes_xlated": 30584,
+            "id": 495,
+            "name": "sys_enter_submit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "496": {
+            "bytes_jited": 266,
+            "bytes_xlated": 336,
+            "id": 496,
+            "name": "tracepoint__raw_syscalls__sys_exit",
+            "run_cnt_delta": 30806636,
+            "run_time_ns_delta": 9508979643,
+            "type": "raw_tracepoint"
+          },
+          "497": {
+            "bytes_jited": 2096,
+            "bytes_xlated": 3816,
+            "id": 497,
+            "name": "sys_exit_init",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "498": {
+            "bytes_jited": 11622,
+            "bytes_xlated": 20088,
+            "id": 498,
+            "name": "sys_exit_submit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "499": {
+            "bytes_jited": 8168,
+            "bytes_xlated": 13824,
+            "id": 499,
+            "name": "trace_sys_enter",
+            "run_cnt_delta": 30806354,
+            "run_time_ns_delta": 8675131481,
+            "type": "raw_tracepoint"
+          },
+          "500": {
+            "bytes_jited": 8201,
+            "bytes_xlated": 13880,
+            "id": 500,
+            "name": "trace_sys_exit",
+            "run_cnt_delta": 30806636,
+            "run_time_ns_delta": 9070888410,
+            "type": "raw_tracepoint"
+          },
+          "501": {
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 501,
+            "name": "trace_ptrace",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "502": {
+            "bytes_jited": 11358,
+            "bytes_xlated": 19712,
+            "id": 502,
+            "name": "trace_ret_ptrace",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "503": {
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 503,
+            "name": "trace_process_vm_writev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "504": {
+            "bytes_jited": 11358,
+            "bytes_xlated": 19712,
+            "id": 504,
+            "name": "trace_ret_process_vm_writev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "505": {
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 505,
+            "name": "trace_arch_prctl",
+            "run_cnt_delta": 907878,
+            "run_time_ns_delta": 62844680,
+            "type": "kprobe"
+          },
+          "506": {
+            "bytes_jited": 11358,
+            "bytes_xlated": 19712,
+            "id": 506,
+            "name": "trace_ret_arch_prctl",
+            "run_cnt_delta": 907878,
+            "run_time_ns_delta": 249555155,
+            "type": "kprobe"
+          },
+          "507": {
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 507,
+            "name": "trace_dup",
+            "run_cnt_delta": 4072,
+            "run_time_ns_delta": 1181580,
+            "type": "kprobe"
+          },
+          "508": {
+            "bytes_jited": 11358,
+            "bytes_xlated": 19712,
+            "id": 508,
+            "name": "trace_ret_dup",
+            "run_cnt_delta": 4072,
+            "run_time_ns_delta": 4295672,
+            "type": "kprobe"
+          },
+          "509": {
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 509,
+            "name": "trace_dup2",
+            "run_cnt_delta": 5965,
+            "run_time_ns_delta": 883892,
+            "type": "kprobe"
+          },
+          "510": {
+            "bytes_jited": 11358,
+            "bytes_xlated": 19712,
+            "id": 510,
+            "name": "trace_ret_dup2",
+            "run_cnt_delta": 5965,
+            "run_time_ns_delta": 4142864,
+            "type": "kprobe"
+          },
+          "511": {
+            "bytes_jited": 2356,
+            "bytes_xlated": 4424,
+            "id": 511,
+            "name": "trace_dup3",
+            "run_cnt_delta": 6298,
+            "run_time_ns_delta": 801726,
+            "type": "kprobe"
+          },
+          "512": {
+            "bytes_jited": 11358,
+            "bytes_xlated": 19712,
+            "id": 512,
+            "name": "trace_ret_dup3",
+            "run_cnt_delta": 6298,
+            "run_time_ns_delta": 4401834,
+            "type": "kprobe"
+          },
+          "513": {
+            "bytes_jited": 20767,
+            "bytes_xlated": 32168,
+            "id": 513,
+            "name": "syscall__execve_enter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "514": {
+            "bytes_jited": 20738,
+            "bytes_xlated": 32184,
+            "id": 514,
+            "name": "syscall__execve_exit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "515": {
+            "bytes_jited": 21030,
+            "bytes_xlated": 32576,
+            "id": 515,
+            "name": "syscall__execveat_enter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "516": {
+            "bytes_jited": 20998,
+            "bytes_xlated": 32584,
+            "id": 516,
+            "name": "syscall__execveat_exit",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "517": {
+            "bytes_jited": 12292,
+            "bytes_xlated": 18744,
+            "id": 517,
+            "name": "sys_dup_exit_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "518": {
+            "bytes_jited": 19689,
+            "bytes_xlated": 32160,
+            "id": 518,
+            "name": "tracepoint__sched__sched_process_fork",
+            "run_cnt_delta": 7392,
+            "run_time_ns_delta": 23151061,
+            "type": "raw_tracepoint"
+          },
+          "519": {
+            "bytes_jited": 59335,
+            "bytes_xlated": 108440,
+            "id": 519,
+            "name": "lkm_seeker_modtree_loop",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "520": {
+            "bytes_jited": 6211,
+            "bytes_xlated": 10280,
+            "id": 520,
+            "name": "uprobe_lkm_seeker_submitter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "521": {
+            "bytes_jited": 4359,
+            "bytes_xlated": 7880,
+            "id": 521,
+            "name": "uprobe_lkm_seeker",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "522": {
+            "bytes_jited": 62384,
+            "bytes_xlated": 112168,
+            "id": 522,
+            "name": "lkm_seeker_kset_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "523": {
+            "bytes_jited": 655,
+            "bytes_xlated": 1064,
+            "id": 523,
+            "name": "lkm_seeker_mod_tree_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "524": {
+            "bytes_jited": 57802,
+            "bytes_xlated": 102168,
+            "id": 524,
+            "name": "lkm_seeker_proc_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "525": {
+            "bytes_jited": 3900,
+            "bytes_xlated": 6504,
+            "id": 525,
+            "name": "lkm_seeker_new_mod_only_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "526": {
+            "bytes_jited": 20625,
+            "bytes_xlated": 35792,
+            "id": 526,
+            "name": "tracepoint__sched__sched_process_exec",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 8839,
+            "type": "raw_tracepoint"
+          },
+          "527": {
+            "bytes_jited": 24436,
+            "bytes_xlated": 38432,
+            "id": 527,
+            "name": "sched_process_exec_event_submit_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "528": {
+            "bytes_jited": 8709,
+            "bytes_xlated": 14656,
+            "id": 528,
+            "name": "tracepoint__sched__sched_process_exit",
+            "run_cnt_delta": 7092,
+            "run_time_ns_delta": 9086669,
+            "type": "raw_tracepoint"
+          },
+          "529": {
+            "bytes_jited": 251,
+            "bytes_xlated": 456,
+            "id": 529,
+            "name": "tracepoint__sched__sched_process_free",
+            "run_cnt_delta": 7091,
+            "run_time_ns_delta": 6060538,
+            "type": "raw_tracepoint"
+          },
+          "530": {
+            "bytes_jited": 9104,
+            "bytes_xlated": 13856,
+            "id": 530,
+            "name": "syscall__accept4",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "531": {
+            "bytes_jited": 8954,
+            "bytes_xlated": 15032,
+            "id": 531,
+            "name": "tracepoint__sched__sched_switch",
+            "run_cnt_delta": 803635,
+            "run_time_ns_delta": 357383955,
+            "type": "raw_tracepoint"
+          },
+          "532": {
+            "bytes_jited": 8210,
+            "bytes_xlated": 13896,
+            "id": 532,
+            "name": "trace_filldir64",
+            "run_cnt_delta": 324188,
+            "run_time_ns_delta": 5592851,
+            "type": "kprobe"
+          },
+          "533": {
+            "bytes_jited": 23532,
+            "bytes_xlated": 36904,
+            "id": 533,
+            "name": "trace_call_usermodehelper",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "534": {
+            "bytes_jited": 7968,
+            "bytes_xlated": 13528,
+            "id": 534,
+            "name": "trace_do_exit",
+            "run_cnt_delta": 7092,
+            "run_time_ns_delta": 5427468,
+            "type": "kprobe"
+          },
+          "535": {
+            "bytes_jited": 56360,
+            "bytes_xlated": 97432,
+            "id": 535,
+            "name": "uprobe_syscall_table_check",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "536": {
+            "bytes_jited": 6767,
+            "bytes_xlated": 11216,
+            "id": 536,
+            "name": "uprobe_seq_ops_trigger",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "537": {
+            "bytes_jited": 6540,
+            "bytes_xlated": 10968,
+            "id": 537,
+            "name": "uprobe_mem_dump_trigger",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "538": {
+            "bytes_jited": 11482,
+            "bytes_xlated": 18448,
+            "id": 538,
+            "name": "trace_security_file_ioctl",
+            "run_cnt_delta": 2865036,
+            "run_time_ns_delta": 340832897,
+            "type": "kprobe"
+          },
+          "539": {
+            "bytes_jited": 9756,
+            "bytes_xlated": 15808,
+            "id": 539,
+            "name": "trace_tracepoint_probe_register_prio_may_exist",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "540": {
+            "bytes_jited": 8658,
+            "bytes_xlated": 14560,
+            "id": 540,
+            "name": "tracepoint__cgroup__cgroup_attach_task",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "541": {
+            "bytes_jited": 8633,
+            "bytes_xlated": 14536,
+            "id": 541,
+            "name": "tracepoint__cgroup__cgroup_mkdir",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "542": {
+            "bytes_jited": 8633,
+            "bytes_xlated": 14536,
+            "id": 542,
+            "name": "tracepoint__cgroup__cgroup_rmdir",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "543": {
+            "bytes_jited": 33408,
+            "bytes_xlated": 53024,
+            "id": 543,
+            "name": "trace_security_bprm_check",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 6538,
+            "type": "kprobe"
+          },
+          "544": {
+            "bytes_jited": 23006,
+            "bytes_xlated": 37344,
+            "id": 544,
+            "name": "trace_security_file_open",
+            "run_cnt_delta": 401916,
+            "run_time_ns_delta": 266749487,
+            "type": "kprobe"
+          },
+          "545": {
+            "bytes_jited": 18662,
+            "bytes_xlated": 30800,
+            "id": 545,
+            "name": "trace_security_sb_mount",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "546": {
+            "bytes_jited": 10006,
+            "bytes_xlated": 16536,
+            "id": 546,
+            "name": "trace_security_inode_unlink",
+            "run_cnt_delta": 3034,
+            "run_time_ns_delta": 4205016,
+            "type": "kprobe"
+          },
+          "547": {
+            "bytes_jited": 10751,
+            "bytes_xlated": 17080,
+            "id": 547,
+            "name": "trace_commit_creds",
+            "run_cnt_delta": 114839,
+            "run_time_ns_delta": 34199487,
+            "type": "kprobe"
+          },
+          "548": {
+            "bytes_jited": 10043,
+            "bytes_xlated": 16672,
+            "id": 548,
+            "name": "trace_switch_task_namespaces",
+            "run_cnt_delta": 7092,
+            "run_time_ns_delta": 4729526,
+            "type": "kprobe"
+          },
+          "549": {
+            "bytes_jited": 8208,
+            "bytes_xlated": 13880,
+            "id": 549,
+            "name": "trace_cap_capable",
+            "run_cnt_delta": 2006141,
+            "run_time_ns_delta": 287249924,
+            "type": "kprobe"
+          },
+          "550": {
+            "bytes_jited": 8487,
+            "bytes_xlated": 14296,
+            "id": 550,
+            "name": "trace_security_socket_create",
+            "run_cnt_delta": 98670,
+            "run_time_ns_delta": 39054555,
+            "type": "kprobe"
+          },
+          "551": {
+            "bytes_jited": 9226,
+            "bytes_xlated": 15464,
+            "id": 551,
+            "name": "trace_security_inode_symlink",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "552": {
+            "bytes_jited": 8310,
+            "bytes_xlated": 14024,
+            "id": 552,
+            "name": "trace_proc_create",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "553": {
+            "bytes_jited": 9532,
+            "bytes_xlated": 15960,
+            "id": 553,
+            "name": "trace_debugfs_create_file",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "554": {
+            "bytes_jited": 9244,
+            "bytes_xlated": 15544,
+            "id": 554,
+            "name": "trace_debugfs_create_dir",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "555": {
+            "bytes_jited": 10798,
+            "bytes_xlated": 16648,
+            "id": 555,
+            "name": "trace_security_socket_listen",
+            "run_cnt_delta": 20,
+            "run_time_ns_delta": 37630,
+            "type": "kprobe"
+          },
+          "556": {
+            "bytes_jited": 10099,
+            "bytes_xlated": 15592,
+            "id": 556,
+            "name": "trace_security_socket_connect",
+            "run_cnt_delta": 25704,
+            "run_time_ns_delta": 13264943,
+            "type": "kprobe"
+          },
+          "557": {
+            "bytes_jited": 11281,
+            "bytes_xlated": 17384,
+            "id": 557,
+            "name": "trace_security_socket_accept",
+            "run_cnt_delta": 25140,
+            "run_time_ns_delta": 16716224,
+            "type": "kprobe"
+          },
+          "558": {
+            "bytes_jited": 10612,
+            "bytes_xlated": 16272,
+            "id": 558,
+            "name": "trace_security_socket_bind",
+            "run_cnt_delta": 24,
+            "run_time_ns_delta": 38237,
+            "type": "kprobe"
+          },
+          "559": {
+            "bytes_jited": 11030,
+            "bytes_xlated": 17040,
+            "id": 559,
+            "name": "trace_security_socket_setsockopt",
+            "run_cnt_delta": 182715,
+            "run_time_ns_delta": 65977713,
+            "type": "kprobe"
+          },
+          "560": {
+            "bytes_jited": 952,
+            "bytes_xlated": 1584,
+            "id": 560,
+            "name": "send_bin",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "561": {
+            "bytes_jited": 952,
+            "bytes_xlated": 1584,
+            "id": 561,
+            "name": "send_bin_tp",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "562": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 562,
+            "name": "trace_vfs_write",
+            "run_cnt_delta": 237412,
+            "run_time_ns_delta": 21981305,
+            "type": "kprobe"
+          },
+          "563": {
+            "bytes_jited": 279,
+            "bytes_xlated": 432,
+            "id": 563,
+            "name": "vfs_write_magic_enter",
+            "run_cnt_delta": 237412,
+            "run_time_ns_delta": 14756380,
+            "type": "kprobe"
+          },
+          "564": {
+            "bytes_jited": 19178,
+            "bytes_xlated": 32016,
+            "id": 564,
+            "name": "trace_ret_vfs_write",
+            "run_cnt_delta": 237412,
+            "run_time_ns_delta": 161579490,
+            "type": "kprobe"
+          },
+          "565": {
+            "bytes_jited": 23822,
+            "bytes_xlated": 36976,
+            "id": 565,
+            "name": "vfs_write_magic_return",
+            "run_cnt_delta": 237412,
+            "run_time_ns_delta": 16117260,
+            "type": "kprobe"
+          },
+          "566": {
+            "bytes_jited": 29990,
+            "bytes_xlated": 52040,
+            "id": 566,
+            "name": "trace_ret_vfs_write_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "567": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 567,
+            "name": "trace_vfs_writev",
+            "run_cnt_delta": 82,
+            "run_time_ns_delta": 40154,
+            "type": "kprobe"
+          },
+          "568": {
+            "bytes_jited": 279,
+            "bytes_xlated": 432,
+            "id": 568,
+            "name": "vfs_writev_magic_enter",
+            "run_cnt_delta": 82,
+            "run_time_ns_delta": 31026,
+            "type": "kprobe"
+          },
+          "569": {
+            "bytes_jited": 19177,
+            "bytes_xlated": 32008,
+            "id": 569,
+            "name": "trace_ret_vfs_writev",
+            "run_cnt_delta": 82,
+            "run_time_ns_delta": 391592,
+            "type": "kprobe"
+          },
+          "570": {
+            "bytes_jited": 24558,
+            "bytes_xlated": 37832,
+            "id": 570,
+            "name": "vfs_writev_magic_return",
+            "run_cnt_delta": 82,
+            "run_time_ns_delta": 310040,
+            "type": "kprobe"
+          },
+          "571": {
+            "bytes_jited": 29913,
+            "bytes_xlated": 52016,
+            "id": 571,
+            "name": "trace_ret_vfs_writev_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "572": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 572,
+            "name": "trace_kernel_write",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "573": {
+            "bytes_jited": 279,
+            "bytes_xlated": 432,
+            "id": 573,
+            "name": "kernel_write_magic_enter",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "574": {
+            "bytes_jited": 19181,
+            "bytes_xlated": 32016,
+            "id": 574,
+            "name": "trace_ret_kernel_write",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "575": {
+            "bytes_jited": 23822,
+            "bytes_xlated": 36976,
+            "id": 575,
+            "name": "kernel_write_magic_return",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "576": {
+            "bytes_jited": 29990,
+            "bytes_xlated": 52040,
+            "id": 576,
+            "name": "trace_ret_kernel_write_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "577": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 577,
+            "name": "trace_vfs_read",
+            "run_cnt_delta": 1359562,
+            "run_time_ns_delta": 114289959,
+            "type": "kprobe"
+          },
+          "578": {
+            "bytes_jited": 19181,
+            "bytes_xlated": 32016,
+            "id": 578,
+            "name": "trace_ret_vfs_read",
+            "run_cnt_delta": 1359562,
+            "run_time_ns_delta": 828458154,
+            "type": "kprobe"
+          },
+          "579": {
+            "bytes_jited": 17198,
+            "bytes_xlated": 30008,
+            "id": 579,
+            "name": "trace_ret_vfs_read_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "580": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 580,
+            "name": "trace_vfs_readv",
+            "run_cnt_delta": 82,
+            "run_time_ns_delta": 29302,
+            "type": "kprobe"
+          },
+          "581": {
+            "bytes_jited": 19177,
+            "bytes_xlated": 32008,
+            "id": 581,
+            "name": "trace_ret_vfs_readv",
+            "run_cnt_delta": 82,
+            "run_time_ns_delta": 242915,
+            "type": "kprobe"
+          },
+          "582": {
+            "bytes_jited": 17924,
+            "bytes_xlated": 30976,
+            "id": 582,
+            "name": "trace_ret_vfs_readv_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "583": {
+            "bytes_jited": 20691,
+            "bytes_xlated": 32888,
+            "id": 583,
+            "name": "trace_mmap_alert",
+            "run_cnt_delta": 821383,
+            "run_time_ns_delta": 117684195,
+            "type": "kprobe"
+          },
+          "584": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 584,
+            "name": "trace_do_mmap",
+            "run_cnt_delta": 753251,
+            "run_time_ns_delta": 56540503,
+            "type": "kprobe"
+          },
+          "585": {
+            "bytes_jited": 19591,
+            "bytes_xlated": 32064,
+            "id": 585,
+            "name": "trace_ret_do_mmap",
+            "run_cnt_delta": 753251,
+            "run_time_ns_delta": 274440951,
+            "type": "kprobe"
+          },
+          "586": {
+            "bytes_jited": 37038,
+            "bytes_xlated": 61248,
+            "id": 586,
+            "name": "trace_security_mmap_file",
+            "run_cnt_delta": 753247,
+            "run_time_ns_delta": 102565873,
+            "type": "kprobe"
+          },
+          "587": {
+            "bytes_jited": 34684,
+            "bytes_xlated": 60000,
+            "id": 587,
+            "name": "trace_security_file_mprotect",
+            "run_cnt_delta": 2470263,
+            "run_time_ns_delta": 1142267948,
+            "type": "kprobe"
+          },
+          "588": {
+            "bytes_jited": 622,
+            "bytes_xlated": 1000,
+            "id": 588,
+            "name": "syscall__init_module",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "589": {
+            "bytes_jited": 15692,
+            "bytes_xlated": 27368,
+            "id": 589,
+            "name": "trace_security_bpf",
+            "run_cnt_delta": 8196,
+            "run_time_ns_delta": 2038952,
+            "type": "kprobe"
+          },
+          "590": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 590,
+            "name": "trace_register_kprobe",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "591": {
+            "bytes_jited": 8835,
+            "bytes_xlated": 14832,
+            "id": 591,
+            "name": "trace_ret_register_kprobe",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "592": {
+            "bytes_jited": 8371,
+            "bytes_xlated": 14112,
+            "id": 592,
+            "name": "trace_security_bpf_map",
+            "run_cnt_delta": 2608,
+            "run_time_ns_delta": 618279,
+            "type": "kprobe"
+          },
+          "593": {
+            "bytes_jited": 9616,
+            "bytes_xlated": 15672,
+            "id": 593,
+            "name": "trace_security_bpf_prog",
+            "run_cnt_delta": 161,
+            "run_time_ns_delta": 105977,
+            "type": "kprobe"
+          },
+          "594": {
+            "bytes_jited": 6385,
+            "bytes_xlated": 10736,
+            "id": 594,
+            "name": "trace_bpf_check",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "595": {
+            "bytes_jited": 6624,
+            "bytes_xlated": 11232,
+            "id": 595,
+            "name": "trace_check_map_func_compatibility",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "596": {
+            "bytes_jited": 6630,
+            "bytes_xlated": 11240,
+            "id": 596,
+            "name": "trace_check_helper_call",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "597": {
+            "bytes_jited": 18659,
+            "bytes_xlated": 30840,
+            "id": 597,
+            "name": "trace_security_kernel_read_file",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "598": {
+            "bytes_jited": 17324,
+            "bytes_xlated": 30744,
+            "id": 598,
+            "name": "trace_security_kernel_post_read_file",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "599": {
+            "bytes_jited": 9260,
+            "bytes_xlated": 15552,
+            "id": 599,
+            "name": "trace_security_inode_mknod",
+            "run_cnt_delta": 2814,
+            "run_time_ns_delta": 3331842,
+            "type": "kprobe"
+          },
+          "600": {
+            "bytes_jited": 8694,
+            "bytes_xlated": 14560,
+            "id": 600,
+            "name": "trace_device_add",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "601": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 601,
+            "name": "trace___register_chrdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "602": {
+            "bytes_jited": 8836,
+            "bytes_xlated": 14816,
+            "id": 602,
+            "name": "trace_ret__register_chrdev",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "603": {
+            "bytes_jited": 19893,
+            "bytes_xlated": 32840,
+            "id": 603,
+            "name": "tracepoint__module__module_load",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "604": {
+            "bytes_jited": 9013,
+            "bytes_xlated": 15144,
+            "id": 604,
+            "name": "tracepoint__module__module_free",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "605": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 605,
+            "name": "trace_do_init_module",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "606": {
+            "bytes_jited": 14629,
+            "bytes_xlated": 24312,
+            "id": 606,
+            "name": "trace_ret_do_init_module",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "607": {
+            "bytes_jited": 18502,
+            "bytes_xlated": 30544,
+            "id": 607,
+            "name": "trace_load_elf_phdrs",
+            "run_cnt_delta": 4,
+            "run_time_ns_delta": 4867,
+            "type": "kprobe"
+          },
+          "608": {
+            "bytes_jited": 8728,
+            "bytes_xlated": 14712,
+            "id": 608,
+            "name": "trace_security_file_permission",
+            "run_cnt_delta": 2174493,
+            "run_time_ns_delta": 110738785,
+            "type": "kprobe"
+          },
+          "609": {
+            "bytes_jited": 8521,
+            "bytes_xlated": 14328,
+            "id": 609,
+            "name": "tracepoint__task__task_rename",
+            "run_cnt_delta": 4402,
+            "run_time_ns_delta": 4237803,
+            "type": "raw_tracepoint"
+          },
+          "610": {
+            "bytes_jited": 9846,
+            "bytes_xlated": 16568,
+            "id": 610,
+            "name": "trace_security_inode_rename",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "611": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 611,
+            "name": "trace_kallsyms_lookup_name",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "612": {
+            "bytes_jited": 8440,
+            "bytes_xlated": 14224,
+            "id": 612,
+            "name": "trace_ret_kallsyms_lookup_name",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "613": {
+            "bytes_jited": 10079,
+            "bytes_xlated": 16416,
+            "id": 613,
+            "name": "trace_do_sigaction",
+            "run_cnt_delta": 9059,
+            "run_time_ns_delta": 9200415,
+            "type": "kprobe"
+          },
+          "614": {
+            "bytes_jited": 18586,
+            "bytes_xlated": 30720,
+            "id": 614,
+            "name": "trace_vfs_utimes",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "615": {
+            "bytes_jited": 18586,
+            "bytes_xlated": 30720,
+            "id": 615,
+            "name": "trace_utimes_common",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "616": {
+            "bytes_jited": 9559,
+            "bytes_xlated": 16016,
+            "id": 616,
+            "name": "trace_do_truncate",
+            "run_cnt_delta": 395,
+            "run_time_ns_delta": 943571,
+            "type": "kprobe"
+          },
+          "617": {
+            "bytes_jited": 17014,
+            "bytes_xlated": 27688,
+            "id": 617,
+            "name": "trace_fd_install",
+            "run_cnt_delta": 604612,
+            "run_time_ns_delta": 210145291,
+            "type": "kprobe"
+          },
+          "618": {
+            "bytes_jited": 16942,
+            "bytes_xlated": 27536,
+            "id": 618,
+            "name": "trace_filp_close",
+            "run_cnt_delta": 372554,
+            "run_time_ns_delta": 123270210,
+            "type": "kprobe"
+          },
+          "619": {
+            "bytes_jited": 469,
+            "bytes_xlated": 784,
+            "id": 619,
+            "name": "trace_file_update_time",
+            "run_cnt_delta": 16167,
+            "run_time_ns_delta": 4166373,
+            "type": "kprobe"
+          },
+          "620": {
+            "bytes_jited": 20054,
+            "bytes_xlated": 31360,
+            "id": 620,
+            "name": "trace_ret_file_update_time",
+            "run_cnt_delta": 16167,
+            "run_time_ns_delta": 17335953,
+            "type": "kprobe"
+          },
+          "621": {
+            "bytes_jited": 483,
+            "bytes_xlated": 800,
+            "id": 621,
+            "name": "trace_file_modified",
+            "run_cnt_delta": 184827,
+            "run_time_ns_delta": 22037178,
+            "type": "kprobe"
+          },
+          "622": {
+            "bytes_jited": 20189,
+            "bytes_xlated": 31536,
+            "id": 622,
+            "name": "trace_ret_file_modified",
+            "run_cnt_delta": 184827,
+            "run_time_ns_delta": 96433821,
+            "type": "kprobe"
+          },
+          "623": {
+            "bytes_jited": 152,
+            "bytes_xlated": 232,
+            "id": 623,
+            "name": "trace_inotify_find_inode",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "624": {
+            "bytes_jited": 18070,
+            "bytes_xlated": 30152,
+            "id": 624,
+            "name": "trace_ret_inotify_find_inode",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "625": {
+            "bytes_jited": 12889,
+            "bytes_xlated": 20216,
+            "id": 625,
+            "name": "process_execute_failed_tail",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "626": {
+            "bytes_jited": 16542,
+            "bytes_xlated": 29168,
+            "id": 626,
+            "name": "trace_exec_binprm",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 630,
+            "type": "kprobe"
+          },
+          "627": {
+            "bytes_jited": 16753,
+            "bytes_xlated": 29352,
+            "id": 627,
+            "name": "trace_security_bprm_creds_for_exec",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 6237,
+            "type": "kprobe"
+          },
+          "628": {
+            "bytes_jited": 24504,
+            "bytes_xlated": 38520,
+            "id": 628,
+            "name": "trace_execute_finished",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 10180,
+            "type": "kprobe"
+          },
+          "629": {
+            "bytes_jited": 18417,
+            "bytes_xlated": 30392,
+            "id": 629,
+            "name": "trace_security_path_notify",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "630": {
+            "bytes_jited": 18276,
+            "bytes_xlated": 30168,
+            "id": 630,
+            "name": "trace_set_fs_pwd",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 7013,
+            "type": "kprobe"
+          },
+          "631": {
+            "bytes_jited": 8654,
+            "bytes_xlated": 14544,
+            "id": 631,
+            "name": "trace_security_task_setrlimit",
+            "run_cnt_delta": 232140,
+            "run_time_ns_delta": 71283741,
+            "type": "kprobe"
+          },
+          "632": {
+            "bytes_jited": 8679,
+            "bytes_xlated": 14600,
+            "id": 632,
+            "name": "trace_security_settime64",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "633": {
+            "bytes_jited": 17605,
+            "bytes_xlated": 29392,
+            "id": 633,
+            "name": "trace_chmod_common",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "634": {
+            "bytes_jited": 47191,
+            "bytes_xlated": 76808,
+            "id": 634,
+            "name": "trace_security_task_prctl",
+            "run_cnt_delta": 320249,
+            "run_time_ns_delta": 113277290,
+            "type": "kprobe"
+          },
+          "635": {
+            "bytes_jited": 14963,
+            "bytes_xlated": 24432,
+            "id": 635,
+            "name": "syscall_checker",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "636": {
+            "bytes_jited": 9530,
+            "bytes_xlated": 15976,
+            "id": 636,
+            "name": "trace_security_sb_umount",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          "637": {
+            "bytes_jited": 331,
+            "bytes_xlated": 528,
+            "id": 637,
+            "name": "trace_sock_alloc_file",
+            "run_cnt_delta": 123801,
+            "run_time_ns_delta": 8059743,
+            "type": "kprobe"
+          },
+          "638": {
+            "bytes_jited": 8563,
+            "bytes_xlated": 13368,
+            "id": 638,
+            "name": "trace_ret_sock_alloc_file",
+            "run_cnt_delta": 123801,
+            "run_time_ns_delta": 42885492,
+            "type": "kprobe"
+          },
+          "639": {
+            "bytes_jited": 344,
+            "bytes_xlated": 592,
+            "id": 639,
+            "name": "trace_security_sk_clone",
+            "run_cnt_delta": 24465,
+            "run_time_ns_delta": 18692238,
+            "type": "kprobe"
+          },
+          "640": {
+            "bytes_jited": 8816,
+            "bytes_xlated": 13608,
+            "id": 640,
+            "name": "trace_security_socket_recvmsg",
+            "run_cnt_delta": 461138,
+            "run_time_ns_delta": 124664489,
+            "type": "kprobe"
+          },
+          "641": {
+            "bytes_jited": 8816,
+            "bytes_xlated": 13608,
+            "id": 641,
+            "name": "trace_security_socket_sendmsg",
+            "run_cnt_delta": 1323201,
+            "run_time_ns_delta": 413478605,
+            "type": "kprobe"
+          },
+          "642": {
+            "bytes_jited": 5563,
+            "bytes_xlated": 8648,
+            "id": 642,
+            "name": "cgroup_bpf_run_filter_skb",
+            "run_cnt_delta": 2072562,
+            "run_time_ns_delta": 509508827,
+            "type": "kprobe"
+          },
+          "644": {
+            "bytes_jited": 19692,
+            "bytes_xlated": 31248,
+            "id": 644,
+            "name": "cgroup_skb_ingress",
+            "run_cnt_delta": 657655,
+            "run_time_ns_delta": 179267781,
+            "type": "cgroup_skb"
+          },
+          "645": {
+            "bytes_jited": 19692,
+            "bytes_xlated": 31248,
+            "id": 645,
+            "name": "cgroup_skb_egress",
+            "run_cnt_delta": 1341088,
+            "run_time_ns_delta": 353764509,
+            "type": "cgroup_skb"
+          },
+          "646": {
+            "bytes_jited": 928,
+            "bytes_xlated": 1584,
+            "id": 646,
+            "name": "cgroup_mkdir_signal",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "647": {
+            "bytes_jited": 910,
+            "bytes_xlated": 1544,
+            "id": 647,
+            "name": "cgroup_rmdir_signal",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "raw_tracepoint"
+          },
+          "648": {
+            "bytes_jited": 16,
+            "bytes_xlated": 16,
+            "id": 648,
+            "name": "empty_kprobe",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 62,
+            "type": "kprobe"
+          },
+          "649": {
+            "bytes_jited": 58993,
+            "bytes_xlated": 97720,
+            "id": 649,
+            "name": "tracepoint__exec_test",
+            "run_cnt_delta": 2,
+            "run_time_ns_delta": 1981,
+            "type": "raw_tracepoint"
+          },
+          "650": {
+            "bytes_jited": 7334,
+            "bytes_xlated": 13480,
+            "id": 650,
+            "name": "lsm_file_open_test",
+            "run_cnt_delta": 401916,
+            "run_time_ns_delta": 123834308,
+            "type": "lsm"
+          },
+          "651": {
+            "bytes_jited": 5363,
+            "bytes_xlated": 9120,
+            "id": 651,
+            "name": "uprobe__features_fallback_arena",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.286447419000069,
+            "ops_per_sec": 6412692.742986225,
+            "ops_total": 33900363.0,
+            "stderr": "",
+            "stdout": "stress-ng: metrc: [12642] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [12642]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [12642] cap              294074      5.03      0.06      3.07     58470.15       93961.28\nstress-ng: metrc: [12642] eventfd           76057      5.01      0.09      2.00     15175.02       36384.26\nstress-ng: metrc: [12642] get                2651      5.01      0.18      1.54       528.90        1543.47\nstress-ng: metrc: [12642] prctl              3452      5.01      2.50      0.88       689.67        1020.96\nstress-ng: metrc: [12642] set               11119      5.05      0.05      1.64      2201.68        6591.08\nstress-ng: metrc: [12642] dup                1399      5.01      0.48      0.47       279.34        1469.38\nstress-ng: metrc: [12642] kill              52424      5.06      0.09      4.34     10364.83       11829.55\nstress-ng: metrc: [12642] sigfd            567629      5.08      0.08      3.48    111800.08      159416.93\nstress-ng: metrc: [12642] signal                0      5.02      0.00      0.01         0.00           0.00\nstress-ng: metrc: [12642] pty                  45      5.06      0.06      3.42         8.90          12.91\nstress-ng: metrc: [12642] itimer              339      5.04      0.06      2.87        67.21         115.69\nstress-ng: metrc: [12642] timerfd          360448      5.06      0.06      3.51     71180.65      101028.57\nstress-ng: metrc: [12642] aio               20549      5.04      0.06      0.21      4074.24       75023.46\nstress-ng: metrc: [12642] aiol               5866      5.16      0.06      0.55      1135.82        9608.06\nstress-ng: metrc: [12642] hdd               41246      5.02      0.77      0.78      8215.47       26585.74\nstress-ng: metrc: [12642] io                  193      5.07      0.03      0.01        38.10        4023.77\nstress-ng: metrc: [12642] iomix              3180      5.09      0.11      2.41       624.34        1260.85\nstress-ng: metrc: [12642] io-uring          25328      5.07      0.01      1.44      4993.63       17412.65\nstress-ng: metrc: [12642] sync-file           103      5.03      0.08      1.28        20.46          75.71\nstress-ng: metrc: [12642] epoll               286      5.17      0.03      0.02        55.37        6154.38\nstress-ng: metrc: [12642] netdev            74521      5.02      0.09      2.37     14833.41       30267.41\nstress-ng: metrc: [12642] sctp              23256      5.01      0.01      1.32      4645.67       17411.06\nstress-ng: metrc: [12642] sock                479      5.04      0.00      1.00        95.13         479.82\nstress-ng: metrc: [12642] sockdiag       29906730      5.03      0.05      2.96   5947653.16     9928692.18\nstress-ng: metrc: [12642] sockfd            83030      5.03      0.00      1.05     16497.68       78696.42\nstress-ng: metrc: [12642] sockpair          27056      5.04      0.04      0.91      5369.41       28315.95\nstress-ng: metrc: [12642] sockmany          16865      5.06      0.00      1.24      3333.87       13623.13\nstress-ng: metrc: [12642] udp              124106      5.01      0.04      2.76     24765.81       44262.68\nstress-ng: metrc: [12642] udp-flood        345637      5.01      0.04      2.30     69034.60      147944.13\nstress-ng: metrc: [12642] mmap                664      5.02      0.05      2.49       132.25         261.42\nstress-ng: metrc: [12642] mprotect        1829288      5.04      0.72     14.59    362783.63      119494.30\nstress-ng: metrc: [12642] mremap             2283      5.02      0.04      2.28       454.77         980.51\nstress-ng: metrc: [12642] madvise              60      5.05      0.16      3.80        11.89          15.14\nstress-ng: info:  [12642] skipped: 0\nstress-ng: info:  [12642] passed: 132: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4)\nstress-ng: info:  [12642] failed: 0\nstress-ng: info:  [12642] metrics untrustworthy: 0\nstress-ng: info:  [12642] successful run completed in 5.26 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "prog 517: prog 517 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nfunc#1 @2329\nLive regs before insn:\n      0: .1........ (bf) r8 = r1\n      1: ........8. (b7) r1 = 0\n      2: .1......8. (63) *(u32 *)(r10 -176) = r1\n      3: ........8. (bf) r2 = r10\n      4: ..2.....8. (07) r2 += -176\n      5: ..2.....8. (18) r1 = 0xffff8bbf83e9a000\n      7: .12.....8. (85) call bpf_map_lookup_elem#1\n      8: 0.......8. (bf) r7 = r0\n      9: .......78. (15) if r7 == 0x0 goto pc+23\n     10: .......78. (bf) r2 = r10\n     11: ..2....78. (07) r2 += -176\n     12: ..2....78. (18) r1 = 0xffff8bbe9104a800\n     14: .12....78. (85) call bpf_map_lookup_elem#1\n     15: 0......78. (7b) *(u64 *)(r10 -208) = r0\n     16: 0......78. (15) if r0 == 0x0 goto pc+16\n     17: .......78. (bf) r6 = r7\n     18: ......678. (07) r6 += 40\n     19: ......678. (18) r1 = 0xffff8bbe9104d800\n     21: .1....678. (bf) r2 = r6\n     22: .12...678. (85) call bpf_map_lookup_elem#1\n     23: 0.....678. (7b) *(u64 *)(r10 -184) = r0\n     24: 0.....678. (15) if r0 == 0x0 goto pc+8\n     25: ......678. (bf) r9 = r7\n     26: ......6789 (07) r9 += 36\n     27: ......6789 (18) r1 = 0xffff8bbad6e1e800\n     29: .1....6789 (bf) r2 = r9\n     30: .12...6789 (85) call bpf_map_lookup_elem#1\n     31: 0.....6789 (7b) *(u64 *)(r10 -216) = r0\n     32: 0.....6789 (55) if r0 != 0x0 goto pc+1\n     33: .......... (05) goto pc+38\n     34: ......6789 (7b) *(u64 *)(r10 -192) = r7\n     35: ......6.89 (79) r1 = *(u64 *)(r10 -184)\n     36: .1....6.89 (79) r1 = *(u64 *)(r1 +168)\n     37: .1....6.89 (15) if r1 == 0xffffffff goto pc+34\n     38: ......6.89 (79) r7 = *(u64 *)(r10 -192)\n     39: ......6789 (b7) r1 = 0\n     40: .1....6789 (6b) *(u16 *)(r7 +32146) = r1\n     41: .1....6789 (73) *(u8 *)(r7 +144) = r1\n     42: ......6789 (b7) r1 = -1\n     43: .1....6789 (63) *(u32 *)(r7 +32148) = r1\n     44: .1....6789 (63) *(u32 *)(r7 +32156) = r1\n     45: .1....6789 (63) *(u32 *)(r7 +32164) = r1\n     46: .1....6789 (63) *(u32 *)(r7 +32172) = r1\n     47: .1....6789 (63) *(u32 *)(r7 +32180) = r1\n     48: .1....6789 (63) *(u32 *)(r7 +32188) = r1\n     49: .1....6789 (63) *(u32 *)(r7 +32196) = r1\n     50: .1....6789 (63) *(u32 *)(r7 +32204) = r1\n     51: .1....6789 (7b) *(u64 *)(r7 +32224) = r1\n     52: .1....6789 (77) r1 >>= 32\n     53: .1....6789 (63) *(u32 *)(r7 +32152) = r1\n     54: .1....6789 (63) *(u32 *)(r7 +32160) = r1\n     55: .1....6789 (63) *(u32 *)(r7 +32168) = r1\n     56: .1....6789 (63) *(u32 *)(r7 +32176) = r1\n     57: .1....6789 (63) *(u32 *)(r7 +32184) = r1\n     58: .1....6789 (63) *(u32 *)(r7 +32192) = r1\n     59: .1....6789 (63) *(u32 *)(r7 +32200) = r1\n     60: .1....6789 (63) *(u32 *)(r7 +32208) = r1\n     61: ......6789 (b7) r1 = 749\n     62: .1....6789 (63) *(u32 *)(r7 +112) = r1\n     63: .1....6789 (69) r2 = *(u16 *)(r7 +134)\n     64: .12...6789 (63) *(u32 *)(r10 -176) = r1\n     65: ..2...6789 (6b) *(u16 *)(r10 -64) = r2\n     66: ......6789 (bf) r2 = r10\n     67: ..2...6789 (07) r2 += -64\n     68: ..2...6789 (18) r1 = 0xffff8bbf09f5b000\n     70: .12...6789 (85) call bpf_map_lookup_elem#1\n     71: 0.....6789 (55) if r0 != 0x0 goto pc+2\n     72: .......... (b7) r0 = 0\n     73: 0......... (95) exit\n     74: 0.....6789 (bf) r2 = r10\n     75: 0.2...6789 (07) r2 += -176\n     76: 0.2...6789 (bf) r1 = r0\n     77: .12...6789 (85) call bpf_map_lookup_elem#1\n     78: 0....56789 (15) if r0 == 0x0 goto pc-7\n     79: 0....56789 (79) r1 = *(u64 *)(r0 +8)\n     80: 01...56789 (7b) *(u64 *)(r7 +32232) = r1\n     81: 0....56789 (79) r1 = *(u64 *)(r0 +0)\n     82: 01...56789 (7b) *(u64 *)(r7 +136) = r1\n     83: 01...56789 (7b) *(u64 *)(r7 +32224) = r1\n     84: 01...56789 (79) r2 = *(u64 *)(r0 +56)\n     85: 012..56789 (7b) *(u64 *)(r7 +32280) = r2\n     86: 01...56789 (79) r2 = *(u64 *)(r0 +48)\n     87: 012..56789 (7b) *(u64 *)(r7 +32272) = r2\n     88: 01...56789 (79) r2 = *(u64 *)(r0 +40)\n     89: 012..56789 (7b) *(u64 *)(r7 +32264) = r2\n     90: 01...56789 (79) r2 = *(u64 *)(r0 +32)\n     91: 012..56789 (7b) *(u64 *)(r7 +32256) = r2\n     92: 01...56789 (79) r2 = *(u64 *)(r0 +24)\n     93: 012..56789 (7b) *(u64 *)(r7 +32248) = r2\n     94: 01...56789 (79) r2 = *(u64 *)(r0 +16)\n  \n... verifier log truncated ...; prog 518: prog 518 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 7: Argument list too long (os error 7)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (7b) *(u64 *)(r10 -208) = r1\n      1: .......... (b7) r1 = 0\n      2: .1........ (63) *(u32 *)(r10 -136) = r1\n      3: .......... (bf) r2 = r10\n      4: ..2....... (07) r2 += -136\n      5: ..2....... (18) r1 = 0xffff8bbf83e9a000\n      7: .12....... (85) call bpf_map_lookup_elem#1\n      8: 0......... (7b) *(u64 *)(r10 -184) = r0\n      9: 0......... (15) if r0 == 0x0 goto pc+3907\n     10: .......... (bf) r2 = r10\n     11: ..2....... (07) r2 += -136\n     12: ..2....... (18) r1 = 0xffff8bbe9104a800\n     14: .12....... (85) call bpf_map_lookup_elem#1\n     15: 0......... (bf) r7 = r0\n     16: .......7.. (15) if r7 == 0x0 goto pc+3900\n     17: .......7.. (79) r9 = *(u64 *)(r10 -184)\n     18: .......7.9 (b7) r1 = -1\n     19: .1.....7.9 (63) *(u32 *)(r9 +32148) = r1\n     20: .1.....7.9 (63) *(u32 *)(r9 +32156) = r1\n     21: .1.....7.9 (63) *(u32 *)(r9 +32164) = r1\n     22: .1.....7.9 (63) *(u32 *)(r9 +32172) = r1\n     23: .1.....7.9 (63) *(u32 *)(r9 +32180) = r1\n     24: .1.....7.9 (63) *(u32 *)(r9 +32188) = r1\n     25: .1.....7.9 (63) *(u32 *)(r9 +32196) = r1\n     26: .1.....7.9 (63) *(u32 *)(r9 +32204) = r1\n     27: .1.....7.9 (77) r1 >>= 32\n     28: .1.....7.9 (63) *(u32 *)(r9 +32152) = r1\n     29: .1.....7.9 (63) *(u32 *)(r9 +32160) = r1\n     30: .1.....7.9 (63) *(u32 *)(r9 +32168) = r1\n     31: .1.....7.9 (63) *(u32 *)(r9 +32176) = r1\n     32: .1.....7.9 (63) *(u32 *)(r9 +32184) = r1\n     33: .1.....7.9 (63) *(u32 *)(r9 +32192) = r1\n     34: .1.....7.9 (63) *(u32 *)(r9 +32200) = r1\n     35: .1.....7.9 (63) *(u32 *)(r9 +32208) = r1\n     36: .......7.9 (b7) r6 = 0\n     37: ......67.9 (73) *(u8 *)(r9 +144) = r6\n     38: ......67.9 (6b) *(u16 *)(r9 +32146) = r6\n     39: .......7.9 (85) call bpf_get_current_task#35\n     40: 0......7.9 (7b) *(u64 *)(r9 +32216) = r0\n     41: .......7.9 (72) *(u8 *)(r9 +8) = 0\n     42: .......7.9 (72) *(u8 *)(r9 +9) = 0\n     43: .......7.9 (72) *(u8 *)(r9 +10) = 0\n     44: .......7.9 (72) *(u8 *)(r9 +11) = 0\n     45: .......7.9 (72) *(u8 *)(r9 +12) = 0\n     46: .......7.9 (72) *(u8 *)(r9 +13) = 0\n     47: .......7.9 (72) *(u8 *)(r9 +14) = 0\n     48: .......7.9 (72) *(u8 *)(r9 +15) = 0\n     49: .......7.9 (72) *(u8 *)(r9 +16) = 0\n     50: .......7.9 (72) *(u8 *)(r9 +17) = 0\n     51: .......7.9 (72) *(u8 *)(r9 +18) = 0\n     52: .......7.9 (72) *(u8 *)(r9 +19) = 0\n     53: .......7.9 (72) *(u8 *)(r9 +20) = 0\n     54: .......7.9 (72) *(u8 *)(r9 +21) = 0\n     55: .......7.9 (72) *(u8 *)(r9 +22) = 0\n     56: .......7.9 (72) *(u8 *)(r9 +23) = 0\n     57: .......7.9 (72) *(u8 *)(r9 +24) = 0\n     58: .......7.9 (72) *(u8 *)(r9 +25) = 0\n     59: .......7.9 (72) *(u8 *)(r9 +26) = 0\n     60: .......7.9 (72) *(u8 *)(r9 +27) = 0\n     61: .......7.9 (72) *(u8 *)(r9 +28) = 0\n     62: .......7.9 (72) *(u8 *)(r9 +29) = 0\n     63: .......7.9 (72) *(u8 *)(r9 +30) = 0\n     64: .......7.9 (72) *(u8 *)(r9 +31) = 0\n     65: .......7.9 (72) *(u8 *)(r9 +32) = 0\n     66: .......7.9 (72) *(u8 *)(r9 +33) = 0\n     67: .......7.9 (72) *(u8 *)(r9 +34) = 0\n     68: .......7.9 (72) *(u8 *)(r9 +35) = 0\n     69: .......7.9 (72) *(u8 *)(r9 +36) = 0\n     70: .......7.9 (72) *(u8 *)(r9 +37) = 0\n     71: .......7.9 (72) *(u8 *)(r9 +38) = 0\n     72: .......7.9 (72) *(u8 *)(r9 +39) = 0\n     73: .......7.9 (72) *(u8 *)(r9 +40) = 0\n     74: .......7.9 (72) *(u8 *)(r9 +41) = 0\n     75: .......7.9 (72) *(u8 *)(r9 +42) = 0\n     76: .......7.9 (72) *(u8 *)(r9 +43) = 0\n     77: .......7.9 (72) *(u8 *)(r9 +44) = 0\n     78: .......7.9 (72) *(u8 *)(r9 +45) = 0\n     79: .......7.9 (72) *(u8 *)(r9 +46) = 0\n     80: .......7.9 (72) *(u8 *)(r9 +47) = 0\n     81: .......7.9 (72) *(u8 *)(r9 +48) = 0\n     82: .......7.9 (72) *(u8 *)(r9 +49) = 0\n     83: .......7.9 (72) *(u8 *)(r9 +50) = 0\n     84: .......7.9 (72) *(u8 *)(r9 +51) = 0\n     85: .......7.9 (72) *(u8 *)(r9 +52) = 0\n     86: .......7.9 (72) *(u8 *)(r9 +53) = 0\n     87: .......7.9 (72) *(u8 *)(r9 +54) = 0\n     88: .......7.9 (72) *(u8 *)(r9 +55) = 0\n     89: .......7.9 (72) *(u8 *)(r9 +56) = 0\n     90: .......7.9 (72) *(u8 *)(r9 +57) = 0\n     91: \n... verifier log truncated ...",
+        "error_programs": [
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 517 pass rotate failed after 0 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nfunc#1 @2329\nLive regs before insn:\n      0: .1........ (bf) r8 = r1\n      1: ........8. (b7) r1 = 0\n      2: .1......8. (63) *(u32 *)(r10 -176) = r1\n      3: ........8. (bf) r2 = r10\n      4: ..2.....8. (07) r2 += -176\n      5: ..2.....8. (18) r1 = 0xffff8bbf83e9a000\n      7: .12.....8. (85) call bpf_map_lookup_elem#1\n      8: 0.......8. (bf) r7 = r0\n      9: .......78. (15) if r7 == 0x0 goto pc+23\n     10: .......78. (bf) r2 = r10\n     11: ..2....78. (07) r2 += -176\n     12: ..2....78. (18) r1 = 0xffff8bbe9104a800\n     14: .12....78. (85) call bpf_map_lookup_elem#1\n     15: 0......78. (7b) *(u64 *)(r10 -208) = r0\n     16: 0......78. (15) if r0 == 0x0 goto pc+16\n     17: .......78. (bf) r6 = r7\n     18: ......678. (07) r6 += 40\n     19: ......678. (18) r1 = 0xffff8bbe9104d800\n     21: .1....678. (bf) r2 = r6\n     22: .12...678. (85) call bpf_map_lookup_elem#1\n     23: 0.....678. (7b) *(u64 *)(r10 -184) = r0\n     24: 0.....678. (15) if r0 == 0x0 goto pc+8\n     25: ......678. (bf) r9 = r7\n     26: ......6789 (07) r9 += 36\n     27: ......6789 (18) r1 = 0xffff8bbad6e1e800\n     29: .1....6789 (bf) r2 = r9\n     30: .12...6789 (85) call bpf_map_lookup_elem#1\n     31: 0.....6789 (7b) *(u64 *)(r10 -216) = r0\n     32: 0.....6789 (55) if r0 != 0x0 goto pc+1\n     33: .......... (05) goto pc+38\n     34: ......6789 (7b) *(u64 *)(r10 -192) = r7\n     35: ......6.89 (79) r1 = *(u64 *)(r10 -184)\n     36: .1....6.89 (79) r1 = *(u64 *)(r1 +168)\n     37: .1....6.89 (15) if r1 == 0xffffffff goto pc+34\n     38: ......6.89 (79) r7 = *(u64 *)(r10 -192)\n     39: ......6789 (b7) r1 = 0\n     40: .1....6789 (6b) *(u16 *)(r7 +32146) = r1\n     41: .1....6789 (73) *(u8 *)(r7 +144) = r1\n     42: ......6789 (b7) r1 = -1\n     43: .1....6789 (63) *(u32 *)(r7 +32148) = r1\n     44: .1....6789 (63) *(u32 *)(r7 +32156) = r1\n     45: .1....6789 (63) *(u32 *)(r7 +32164) = r1\n     46: .1....6789 (63) *(u32 *)(r7 +32172) = r1\n     47: .1....6789 (63) *(u32 *)(r7 +32180) = r1\n     48: .1....6789 (63) *(u32 *)(r7 +32188) = r1\n     49: .1....6789 (63) *(u32 *)(r7 +32196) = r1\n     50: .1....6789 (63) *(u32 *)(r7 +32204) = r1\n     51: .1....6789 (7b) *(u64 *)(r7 +32224) = r1\n     52: .1....6789 (77) r1 >>= 32\n     53: .1....6789 (63) *(u32 *)(r7 +32152) = r1\n     54: .1....6789 (63) *(u32 *)(r7 +32160) = r1\n     55: .1....6789 (63) *(u32 *)(r7 +32168) = r1\n     56: .1....6789 (63) *(u32 *)(r7 +32176) = r1\n     57: .1....6789 (63) *(u32 *)(r7 +32184) = r1\n     58: .1....6789 (63) *(u32 *)(r7 +32192) = r1\n     59: .1....6789 (63) *(u32 *)(r7 +32200) = r1\n     60: .1....6789 (63) *(u32 *)(r7 +32208) = r1\n     61: ......6789 (b7) r1 = 749\n     62: .1....6789 (63) *(u32 *)(r7 +112) = r1\n     63: .1....6789 (69) r2 = *(u16 *)(r7 +134)\n     64: .12...6789 (63) *(u32 *)(r10 -176) = r1\n     65: ..2...6789 (6b) *(u16 *)(r10 -64) = r2\n     66: ......6789 (bf) r2 = r10\n     67: ..2...6789 (07) r2 += -64\n     68: ..2...6789 (18) r1 = 0xffff8bbf09f5b000\n     70: .12...6789 (85) call bpf_map_lookup_elem#1\n     71: 0.....6789 (55) if r0 != 0x0 goto pc+2\n     72: .......... (b7) r0 = 0\n     73: 0......... (95) exit\n     74: 0.....6789 (bf) r2 = r10\n     75: 0.2...6789 (07) r2 += -176\n     76: 0.2...6789 (bf) r1 = r0\n     77: .12...6789 (85) call bpf_map_lookup_elem#1\n     78: 0....56789 (15) if r0 == 0x0 goto pc-7\n     79: 0....56789 (79) r1 = *(u64 *)(r0 +8)\n     80: 01...56789 (7b) *(u64 *)(r7 +32232) = r1\n     81: 0....56789 (79) r1 = *(u64 *)(r0 +0)\n     82: 01...56789 (7b) *(u64 *)(r7 +136) = r1\n     83: 01...56789 (7b) *(u64 *)(r7 +32224) = r1\n     84: 01...56789 (79) r2 = *(u64 *)(r0 +56)\n     85: 012..56789 (7b) *(u64 *)(r7 +32280) = r2\n     86: 01...56789 (79) r2 = *(u64 *)(r0 +48)\n     87: 012..56789 (7b) *(u64 *)(r7 +32272) = r2\n     88: 01...56789 (79) r2 = *(u64 *)(r0 +40)\n     89: 012..56789 (7b) *(u64 *)(r7 +32264) = r2\n     90: 01...56789 (79) r2 = *(u64 *)(r0 +32)\n     91: 012..56789 (7b) *(u64 *)(r7 +32256) = r2\n     92: 01...56789 (79) r2 = *(u64 *)(r0 +24)\n     93: 012..56789 (7b) *(u64 *)(r7 +32248) = r2\n     94: 01...56789 (79) r2 = *(u64 *)(r0 +16)\n  \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 517
+          },
+          {
+            "applied": false,
+            "changed": false,
+            "error": "prog 518 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 7: Argument list too long (os error 7)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (7b) *(u64 *)(r10 -208) = r1\n      1: .......... (b7) r1 = 0\n      2: .1........ (63) *(u32 *)(r10 -136) = r1\n      3: .......... (bf) r2 = r10\n      4: ..2....... (07) r2 += -136\n      5: ..2....... (18) r1 = 0xffff8bbf83e9a000\n      7: .12....... (85) call bpf_map_lookup_elem#1\n      8: 0......... (7b) *(u64 *)(r10 -184) = r0\n      9: 0......... (15) if r0 == 0x0 goto pc+3907\n     10: .......... (bf) r2 = r10\n     11: ..2....... (07) r2 += -136\n     12: ..2....... (18) r1 = 0xffff8bbe9104a800\n     14: .12....... (85) call bpf_map_lookup_elem#1\n     15: 0......... (bf) r7 = r0\n     16: .......7.. (15) if r7 == 0x0 goto pc+3900\n     17: .......7.. (79) r9 = *(u64 *)(r10 -184)\n     18: .......7.9 (b7) r1 = -1\n     19: .1.....7.9 (63) *(u32 *)(r9 +32148) = r1\n     20: .1.....7.9 (63) *(u32 *)(r9 +32156) = r1\n     21: .1.....7.9 (63) *(u32 *)(r9 +32164) = r1\n     22: .1.....7.9 (63) *(u32 *)(r9 +32172) = r1\n     23: .1.....7.9 (63) *(u32 *)(r9 +32180) = r1\n     24: .1.....7.9 (63) *(u32 *)(r9 +32188) = r1\n     25: .1.....7.9 (63) *(u32 *)(r9 +32196) = r1\n     26: .1.....7.9 (63) *(u32 *)(r9 +32204) = r1\n     27: .1.....7.9 (77) r1 >>= 32\n     28: .1.....7.9 (63) *(u32 *)(r9 +32152) = r1\n     29: .1.....7.9 (63) *(u32 *)(r9 +32160) = r1\n     30: .1.....7.9 (63) *(u32 *)(r9 +32168) = r1\n     31: .1.....7.9 (63) *(u32 *)(r9 +32176) = r1\n     32: .1.....7.9 (63) *(u32 *)(r9 +32184) = r1\n     33: .1.....7.9 (63) *(u32 *)(r9 +32192) = r1\n     34: .1.....7.9 (63) *(u32 *)(r9 +32200) = r1\n     35: .1.....7.9 (63) *(u32 *)(r9 +32208) = r1\n     36: .......7.9 (b7) r6 = 0\n     37: ......67.9 (73) *(u8 *)(r9 +144) = r6\n     38: ......67.9 (6b) *(u16 *)(r9 +32146) = r6\n     39: .......7.9 (85) call bpf_get_current_task#35\n     40: 0......7.9 (7b) *(u64 *)(r9 +32216) = r0\n     41: .......7.9 (72) *(u8 *)(r9 +8) = 0\n     42: .......7.9 (72) *(u8 *)(r9 +9) = 0\n     43: .......7.9 (72) *(u8 *)(r9 +10) = 0\n     44: .......7.9 (72) *(u8 *)(r9 +11) = 0\n     45: .......7.9 (72) *(u8 *)(r9 +12) = 0\n     46: .......7.9 (72) *(u8 *)(r9 +13) = 0\n     47: .......7.9 (72) *(u8 *)(r9 +14) = 0\n     48: .......7.9 (72) *(u8 *)(r9 +15) = 0\n     49: .......7.9 (72) *(u8 *)(r9 +16) = 0\n     50: .......7.9 (72) *(u8 *)(r9 +17) = 0\n     51: .......7.9 (72) *(u8 *)(r9 +18) = 0\n     52: .......7.9 (72) *(u8 *)(r9 +19) = 0\n     53: .......7.9 (72) *(u8 *)(r9 +20) = 0\n     54: .......7.9 (72) *(u8 *)(r9 +21) = 0\n     55: .......7.9 (72) *(u8 *)(r9 +22) = 0\n     56: .......7.9 (72) *(u8 *)(r9 +23) = 0\n     57: .......7.9 (72) *(u8 *)(r9 +24) = 0\n     58: .......7.9 (72) *(u8 *)(r9 +25) = 0\n     59: .......7.9 (72) *(u8 *)(r9 +26) = 0\n     60: .......7.9 (72) *(u8 *)(r9 +27) = 0\n     61: .......7.9 (72) *(u8 *)(r9 +28) = 0\n     62: .......7.9 (72) *(u8 *)(r9 +29) = 0\n     63: .......7.9 (72) *(u8 *)(r9 +30) = 0\n     64: .......7.9 (72) *(u8 *)(r9 +31) = 0\n     65: .......7.9 (72) *(u8 *)(r9 +32) = 0\n     66: .......7.9 (72) *(u8 *)(r9 +33) = 0\n     67: .......7.9 (72) *(u8 *)(r9 +34) = 0\n     68: .......7.9 (72) *(u8 *)(r9 +35) = 0\n     69: .......7.9 (72) *(u8 *)(r9 +36) = 0\n     70: .......7.9 (72) *(u8 *)(r9 +37) = 0\n     71: .......7.9 (72) *(u8 *)(r9 +38) = 0\n     72: .......7.9 (72) *(u8 *)(r9 +39) = 0\n     73: .......7.9 (72) *(u8 *)(r9 +40) = 0\n     74: .......7.9 (72) *(u8 *)(r9 +41) = 0\n     75: .......7.9 (72) *(u8 *)(r9 +42) = 0\n     76: .......7.9 (72) *(u8 *)(r9 +43) = 0\n     77: .......7.9 (72) *(u8 *)(r9 +44) = 0\n     78: .......7.9 (72) *(u8 *)(r9 +45) = 0\n     79: .......7.9 (72) *(u8 *)(r9 +46) = 0\n     80: .......7.9 (72) *(u8 *)(r9 +47) = 0\n     81: .......7.9 (72) *(u8 *)(r9 +48) = 0\n     82: .......7.9 (72) *(u8 *)(r9 +49) = 0\n     83: .......7.9 (72) *(u8 *)(r9 +50) = 0\n     84: .......7.9 (72) *(u8 *)(r9 +51) = 0\n     85: .......7.9 (72) *(u8 *)(r9 +52) = 0\n     86: .......7.9 (72) *(u8 *)(r9 +53) = 0\n     87: .......7.9 (72) *(u8 *)(r9 +54) = 0\n     88: .......7.9 (72) *(u8 *)(r9 +55) = 0\n     89: .......7.9 (72) *(u8 *)(r9 +56) = 0\n     90: .......7.9 (72) *(u8 *)(r9 +57) = 0\n     91: \n... verifier log truncated ...",
+            "exit_code": 1,
+            "prog_id": 518
+          }
+        ],
+        "exit_code": 1,
+        "program_counts": {
+          "applied": 156,
+          "not_applied": 2,
+          "requested": 158
+        }
+      },
+      "runner": "tracee",
+      "selected_workload": "stress_ng_os_io_network",
+      "status": "ok"
+    },
+    {
+      "app": "bpftrace/capable",
+      "baseline": {
+        "bpf": {
+          "657": {
+            "bytes_jited": 769,
+            "bytes_xlated": 1360,
+            "id": 657,
+            "name": "cap_capable",
+            "run_cnt_delta": 1565609,
+            "run_time_ns_delta": 245265946,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.042042003000006,
+            "ops_per_sec": 5404768.896611441,
+            "ops_total": 16441534.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [1878] setting to a 3 secs run per stressor\nstress-ng: info:  [1878] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [1878] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [1878] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1878]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1878] cap             6544796      3.00      1.72      5.74   2179524.74      876506.73\nstress-ng: metrc: [1878] eventfd          799059      3.00      0.84      3.28    266055.17      193974.33\nstress-ng: metrc: [1878] get                7275      3.00      0.11      1.29      2423.81        5210.61\nstress-ng: metrc: [1878] prctl              7870      3.00      1.83      1.53      2621.13        2343.78\nstress-ng: metrc: [1878] set               60825      3.01      0.14      2.93     20239.64       19839.65\nstress-ng: metrc: [1878] dup                3309      3.00      0.80      0.82      1102.74        2047.95\nstress-ng: metrc: [1878] kill              65431      3.00      0.11      4.60     21786.17       13890.78\nstress-ng: metrc: [1878] sigfd           8053247      3.00      1.37      4.92   2680310.50     1279358.70\nstress-ng: metrc: [1878] signal                0      3.00      0.31      0.85         0.00           0.00\nstress-ng: metrc: [1878] pty                  82      3.01      0.14      3.89        27.26          20.36\nstress-ng: metrc: [1878] itimer              568      3.00      1.33      3.50       189.28         117.61\nstress-ng: metrc: [1878] timerfd          899072      3.00      0.22      4.17    299458.74      204764.32\nstress-ng: info:  [1878] skipped: 0\nstress-ng: info:  [1878] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [1878] failed: 0\nstress-ng: info:  [1878] metrics untrustworthy: 0\nstress-ng: info:  [1878] successful run completed in 3.03 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "657": {
+            "bytes_jited": 772,
+            "bytes_xlated": 1376,
+            "id": 657,
+            "name": "cap_capable",
+            "run_cnt_delta": 1403244,
+            "run_time_ns_delta": 239495276,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.0572664159999476,
+            "ops_per_sec": 4628000.00875038,
+            "ops_total": 14149029.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [28614] setting to a 3 secs run per stressor\nstress-ng: info:  [28614] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [28614] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [28614] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [28614]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [28614] cap             5401453      3.00      1.73      5.09   1799542.37      791181.26\nstress-ng: metrc: [28614] eventfd          767294      3.00      0.40      3.00    255711.36      225412.70\nstress-ng: metrc: [28614] get                6215      3.00      0.12      1.19      2071.13        4740.72\nstress-ng: metrc: [28614] prctl              5943      3.00      1.36      1.14      1978.35        2380.59\nstress-ng: metrc: [28614] set               64080      3.00      0.16      3.19     21357.76       19122.02\nstress-ng: metrc: [28614] dup                2761      3.00      0.71      0.64       920.21        2043.76\nstress-ng: metrc: [28614] kill              62686      3.01      0.10      4.29     20859.88       14270.52\nstress-ng: metrc: [28614] sigfd           6815709      3.01      1.44      5.41   2267701.78      996088.26\nstress-ng: metrc: [28614] signal                0      3.00      0.06      0.34         0.00           0.00\nstress-ng: metrc: [28614] pty               36018      3.01      0.15      4.14     11981.86        8409.56\nstress-ng: metrc: [28614] itimer              758      3.00      1.63      4.84       252.67         117.23\nstress-ng: metrc: [28614] timerfd          986112      3.01      0.20      4.95    328123.69      191669.17\nstress-ng: info:  [28614] skipped: 0\nstress-ng: info:  [28614] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [28614] failed: 0\nstress-ng: info:  [28614] metrics untrustworthy: 0\nstress-ng: info:  [28614] successful run completed in 3.05 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 1,
+          "not_applied": 0,
+          "requested": 1
+        }
+      },
+      "runner": "bpftrace",
+      "selected_workload": "stress_ng_os",
+      "status": "ok"
+    },
+    {
+      "app": "bpftrace/biosnoop",
+      "baseline": {
+        "bpf": {
+          "664": {
+            "bytes_jited": 222,
+            "bytes_xlated": 408,
+            "id": 664,
+            "name": "block_io_start",
+            "run_cnt_delta": 1176017,
+            "run_time_ns_delta": 528981462,
+            "type": "tracepoint"
+          },
+          "665": {
+            "bytes_jited": 931,
+            "bytes_xlated": 1576,
+            "id": 665,
+            "name": "block_io_done",
+            "run_cnt_delta": 1176032,
+            "run_time_ns_delta": 1058108265,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.384868252999695,
+            "ops_per_sec": 292286.6309910608,
+            "ops_total": 1573925.0,
+            "stderr": "",
+            "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.029302,\n        \"1000\" : 4.012078\n      },\n      \"latency_us\" : {\n        \"2\" : 42.478947,\n        \"4\" : 2.767126,\n        \"10\" : 5.157148,\n        \"20\" : 40.407425,\n        \"50\" : 2.289376,\n        \"100\" : 2.077892,\n        \"250\" : 0.729237,\n        \"500\" : 0.050960,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "664": {
+            "bytes_jited": 222,
+            "bytes_xlated": 408,
+            "id": 664,
+            "name": "block_io_start",
+            "run_cnt_delta": 1192128,
+            "run_time_ns_delta": 553524574,
+            "type": "tracepoint"
+          },
+          "665": {
+            "bytes_jited": 943,
+            "bytes_xlated": 1640,
+            "id": 665,
+            "name": "block_io_done",
+            "run_cnt_delta": 1192143,
+            "run_time_ns_delta": 1066876948,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.38560422799992,
+            "ops_per_sec": 296587.7053674995,
+            "ops_total": 1597304.0,
+            "stderr": "",
+            "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.016117,\n        \"1000\" : 3.929926\n      },\n      \"latency_us\" : {\n        \"2\" : 42.612760,\n        \"4\" : 2.732029,\n        \"10\" : 5.374544,\n        \"20\" : 39.720548,\n        \"50\" : 2.529197,\n        \"100\" : 2.338020,\n        \"250\" : 0.684619,\n        \"500\" : 0.060502,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 2,
+          "not_applied": 0,
+          "requested": 2
+        }
+      },
+      "runner": "bpftrace",
+      "selected_workload": "fio_randrw",
+      "status": "ok"
+    },
+    {
+      "app": "bpftrace/vfsstat",
+      "baseline": {
+        "bpf": {
+          "672": {
+            "bytes_jited": 362,
+            "bytes_xlated": 680,
+            "id": 672,
+            "name": "1",
+            "run_cnt_delta": 3,
+            "run_time_ns_delta": 6980,
+            "type": "perf_event"
+          },
+          "673": {
+            "bytes_jited": 140,
+            "bytes_xlated": 224,
+            "id": 673,
+            "name": "vfs_create",
+            "run_cnt_delta": 4270937,
+            "run_time_ns_delta": 173931795,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.3096276139999645,
+            "ops_per_sec": 1327820.9854820382,
+            "ops_total": 4394593.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [22998] setting to a 3 secs run per stressor\nstress-ng: info:  [22998] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [22998] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [23076] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [23021] dentry: 245023 dentries allocated\nstress-ng: metrc: [22998] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [22998]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [22998] access            32101      3.02      0.57      3.04     10641.73        8897.72\nstress-ng: metrc: [22998] chdir               196      3.19      0.62      4.46        61.53          38.59\nstress-ng: metrc: [22998] chmod               220      3.02      0.01      0.09        72.75        2330.19\nstress-ng: metrc: [22998] chown               242      3.02      0.00      0.07        80.17        3634.18\nstress-ng: metrc: [22998] dentry            24950      3.13      0.04      0.83      7976.22       28576.70\nstress-ng: metrc: [22998] dir               32723      3.26      0.26      3.19     10053.06        9481.85\nstress-ng: metrc: [22998] dirmany           22673      3.02      0.03      0.56      7509.13       38454.75\nstress-ng: metrc: [22998] fallocate             0      3.02      0.01      0.01         0.00           0.00\nstress-ng: metrc: [22998] file-ioctl       164059      3.01      0.43      1.69     54557.85       77541.55\nstress-ng: metrc: [22998] filename           6496      3.04      0.14      1.38      2137.52        4290.60\nstress-ng: metrc: [22998] flock           2637171      3.02      0.59      0.91    874109.84     1754114.62\nstress-ng: metrc: [22998] fpunch             1479      3.06      0.01      2.55       483.92         577.79\nstress-ng: metrc: [22998] fstat              9799      3.01      0.69      2.29      3255.50        3284.95\nstress-ng: metrc: [22998] getdent         1018145      3.01      0.66      6.90    337812.30      134674.09\nstress-ng: metrc: [22998] hdd               51625      3.06      1.17      0.61     16896.63       28885.87\nstress-ng: metrc: [22998] inotify               8      3.02      0.02      0.00         2.64         419.93\nstress-ng: metrc: [22998] open              17408      3.12      0.01      0.27      5584.86       61649.61\nstress-ng: metrc: [22998] rename           121340      3.00      0.08      0.80     40425.39      137080.08\nstress-ng: metrc: [22998] touch            110054      3.12      0.06      3.61     35230.76       30003.20\nstress-ng: metrc: [22998] utime            123084      3.03      0.16      2.18     40630.32       52599.48\nstress-ng: metrc: [22998] link                 10      3.08      0.07      1.26         3.25           7.49\nstress-ng: metrc: [22998] symlink               4      3.16      0.05      1.25         1.27           3.07\nstress-ng: metrc: [22998] mknod                74      3.12      0.04      0.00        23.71        2102.39\nstress-ng: metrc: [22998] fcntl             20732      3.02      0.10      0.26      6867.59       57114.05\nstress-ng: info:  [22998] skipped: 0\nstress-ng: info:  [22998] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [22998] failed: 0\nstress-ng: info:  [22998] metrics untrustworthy: 0\nstress-ng: info:  [22998] successful run completed in 3.29 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "672": {
+            "bytes_jited": 362,
+            "bytes_xlated": 680,
+            "id": 672,
+            "name": "1",
+            "run_cnt_delta": 4,
+            "run_time_ns_delta": 7783,
+            "type": "perf_event"
+          },
+          "673": {
+            "bytes_jited": 143,
+            "bytes_xlated": 240,
+            "id": 673,
+            "name": "vfs_create",
+            "run_cnt_delta": 4274806,
+            "run_time_ns_delta": 174200332,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.3870236520001527,
+            "ops_per_sec": 1510208.8221259841,
+            "ops_total": 5115113.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [4009] setting to a 3 secs run per stressor\nstress-ng: info:  [4009] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [4009] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [4082] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [4026] dentry: 382276 dentries allocated\nstress-ng: metrc: [4009] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [4009]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [4009] access            36331      3.03      0.61      3.65     11996.59        8528.79\nstress-ng: metrc: [4009] chdir               326      3.19      1.10      6.34       102.25          43.80\nstress-ng: metrc: [4009] chmod               228      3.09      0.01      0.07        73.68        2854.60\nstress-ng: metrc: [4009] chown               226      3.06      0.01      0.02        73.78        9972.64\nstress-ng: metrc: [4009] dentry            35287      3.09      0.13      1.20     11411.21       26623.64\nstress-ng: metrc: [4009] dir               31057      3.30      0.20      3.84      9423.48        7684.57\nstress-ng: metrc: [4009] dirmany           28622      3.07      0.02      0.74      9310.42       37635.86\nstress-ng: metrc: [4009] fallocate             0      3.07      0.02      0.00         0.00           0.00\nstress-ng: metrc: [4009] file-ioctl       166013      3.02      0.27      1.90     54962.52       76629.51\nstress-ng: metrc: [4009] filename           7254      3.03      0.10      1.57      2392.06        4356.78\nstress-ng: metrc: [4009] flock           3559605      3.01      0.93      1.03   1180873.09     1821151.75\nstress-ng: metrc: [4009] fpunch             1126      3.09      0.00      1.99       364.70         566.41\nstress-ng: metrc: [4009] fstat              9208      3.00      0.61      1.64      3068.08        4082.58\nstress-ng: metrc: [4009] getdent          890975      3.00      0.44      6.48    296901.19      128635.16\nstress-ng: metrc: [4009] hdd               40779      3.05      0.71      0.66     13389.92       29811.22\nstress-ng: metrc: [4009] inotify               8      3.08      0.02      0.00         2.60         507.13\nstress-ng: metrc: [4009] open              23504      3.07      0.03      0.35      7657.15       60937.29\nstress-ng: metrc: [4009] rename           105369      3.02      0.03      0.71     34927.31      141049.62\nstress-ng: metrc: [4009] touch             90692      3.10      0.08      2.90     29234.58       30504.83\nstress-ng: metrc: [4009] utime             75752      3.00      0.05      1.36     25238.74       54030.38\nstress-ng: metrc: [4009] link                  9      3.08      0.10      1.02         2.92           8.03\nstress-ng: metrc: [4009] symlink               4      3.18      0.05      1.26         1.26           3.04\nstress-ng: metrc: [4009] mknod               119      3.09      0.02      0.02        38.55        2643.74\nstress-ng: metrc: [4009] fcntl             12619      3.00      0.03      0.19      4205.65       57113.24\nstress-ng: info:  [4009] skipped: 0\nstress-ng: info:  [4009] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [4009] failed: 0\nstress-ng: info:  [4009] metrics untrustworthy: 0\nstress-ng: info:  [4009] successful run completed in 3.38 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 2,
+          "not_applied": 0,
+          "requested": 2
+        }
+      },
+      "runner": "bpftrace",
+      "selected_workload": "stress_ng_filesystem",
+      "status": "ok"
+    },
+    {
+      "app": "bpftrace/runqlat",
+      "baseline": {
+        "bpf": {
+          "680": {
+            "bytes_jited": 86,
+            "bytes_xlated": 136,
+            "id": 680,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 9147951,
+            "run_time_ns_delta": 826427454,
+            "type": "tracepoint"
+          },
+          "681": {
+            "bytes_jited": 86,
+            "bytes_xlated": 136,
+            "id": 681,
+            "name": "tracepoint_sched_sched_wakeup_new",
+            "run_cnt_delta": 78,
+            "run_time_ns_delta": 25782,
+            "type": "tracepoint"
+          },
+          "682": {
+            "bytes_jited": 515,
+            "bytes_xlated": 896,
+            "id": 682,
+            "name": "sched_switch",
+            "run_cnt_delta": 33086297,
+            "run_time_ns_delta": 4770971204,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.0279951640000036,
+            "ops_per_sec": 9687866.198983125,
+            "ops_total": 29334812.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [10308] setting to a 3 secs run per stressor\nstress-ng: info:  [10308] dispatching hogs: 4 futex, 4 sem, 4 sem-sysv, 4 switch, 4 yield\nstress-ng: info:  [10308] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [10308] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [10308]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [10308] futex           2738736      6.00      1.07     14.05    456435.16      181210.92\nstress-ng: metrc: [10308] sem             5332293      3.00      1.28      3.69   1777076.73     1072082.96\nstress-ng: metrc: [10308] sem-sysv        1193229      3.00      0.45      2.47    397616.69      408168.16\nstress-ng: metrc: [10308] switch          4024430      3.00      1.25     10.72   1341290.18      336061.99\nstress-ng: metrc: [10308] yield          16046124      3.00      4.83     11.35   5346224.26      992097.53\nstress-ng: info:  [10308] skipped: 0\nstress-ng: info:  [10308] passed: 20: futex (4) sem (4) sem-sysv (4) switch (4) yield (4)\nstress-ng: info:  [10308] failed: 0\nstress-ng: info:  [10308] metrics untrustworthy: 0\nstress-ng: info:  [10308] successful run completed in 3.02 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "680": {
+            "bytes_jited": 86,
+            "bytes_xlated": 136,
+            "id": 680,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 7740721,
+            "run_time_ns_delta": 585370325,
+            "type": "tracepoint"
+          },
+          "681": {
+            "bytes_jited": 86,
+            "bytes_xlated": 136,
+            "id": 681,
+            "name": "tracepoint_sched_sched_wakeup_new",
+            "run_cnt_delta": 78,
+            "run_time_ns_delta": 28439,
+            "type": "tracepoint"
+          },
+          "682": {
+            "bytes_jited": 518,
+            "bytes_xlated": 912,
+            "id": 682,
+            "name": "sched_switch",
+            "run_cnt_delta": 36819204,
+            "run_time_ns_delta": 5337675192,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.0170118989999537,
+            "ops_per_sec": 11012606.549882391,
+            "ops_total": 33225165.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [10499] setting to a 3 secs run per stressor\nstress-ng: info:  [10499] dispatching hogs: 4 futex, 4 sem, 4 sem-sysv, 4 switch, 4 yield\nstress-ng: info:  [10499] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [10499] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [10499]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [10499] futex           2573200      6.00      1.38     12.72    428839.17      182472.10\nstress-ng: metrc: [10499] sem             6817110      3.00      1.71      4.81   2272290.90     1046687.46\nstress-ng: metrc: [10499] sem-sysv         512644      3.00      0.25      1.04    170840.67      398219.89\nstress-ng: metrc: [10499] switch          3649659      3.00      1.09      7.67   1216487.31      416694.86\nstress-ng: metrc: [10499] yield          19672552      3.00      5.94     14.59   6554422.41      958456.19\nstress-ng: info:  [10499] skipped: 0\nstress-ng: info:  [10499] passed: 20: futex (4) sem (4) sem-sysv (4) switch (4) yield (4)\nstress-ng: info:  [10499] failed: 0\nstress-ng: info:  [10499] metrics untrustworthy: 0\nstress-ng: info:  [10499] successful run completed in 3.01 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 3,
+          "not_applied": 0,
+          "requested": 3
+        }
+      },
+      "runner": "bpftrace",
+      "selected_workload": "stress_ng_scheduler",
+      "status": "ok"
+    },
+    {
+      "app": "bpftrace/tcplife",
+      "baseline": {
+        "bpf": {
+          "690": {
+            "bytes_jited": 2017,
+            "bytes_xlated": 3384,
+            "id": 690,
+            "name": "tcp_set_state",
+            "run_cnt_delta": 152409,
+            "run_time_ns_delta": 73481025,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.106415577000007,
+            "ops_per_sec": 5596.160452166044,
+            "ops_total": 17384.0,
+            "stderr": "",
+            "stdout": "Running 3s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     4.17ms   21.80ms 231.37ms   97.48%\n    Req/Sec     2.82k   725.72     5.06k    69.35%\n  17384 requests in 3.10s, 2.57MB read\n  Socket errors: connect 0, read 17383, write 0, timeout 0\nRequests/sec:   5607.42\nTransfer/sec:    848.82KB"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "690": {
+            "bytes_jited": 2023,
+            "bytes_xlated": 3416,
+            "id": 690,
+            "name": "tcp_set_state",
+            "run_cnt_delta": 150921,
+            "run_time_ns_delta": 72524950,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.1093233439996766,
+            "ops_per_sec": 5546.22279258255,
+            "ops_total": 17245.0,
+            "stderr": "",
+            "stdout": "Running 3s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     5.97ms   35.45ms 461.27ms   97.49%\n    Req/Sec     2.80k     1.21k    5.00k    66.13%\n  17245 requests in 3.10s, 2.55MB read\n  Socket errors: connect 0, read 17245, write 0, timeout 0\nRequests/sec:   5561.54\nTransfer/sec:    841.88KB"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 1,
+          "not_applied": 0,
+          "requested": 1
+        }
+      },
+      "runner": "bpftrace",
+      "selected_workload": "tcp_connect",
+      "status": "ok"
+    }
+  ],
+  "samples": 1,
+  "status": "ok",
+  "suite_name": "macro_apps",
+  "workload_seconds": 3.0
+}
+```

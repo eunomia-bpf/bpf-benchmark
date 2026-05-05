@@ -7,7 +7,7 @@ use crate::pass::*;
 
 use super::utils::{
     emit_packed_kinsn_call_with_off, fixup_all_branches, kinsn_replacement_subprog_skip_reason,
-    map_replacement_range, remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_target,
+    remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_target,
 };
 
 /// ENDIAN_FUSION optimization pass: replaces LDX_MEM + ENDIAN_TO_BE patterns
@@ -29,8 +29,11 @@ use super::utils::{
 /// packed call instead of using any legacy call ABI.
 pub struct EndianFusionPass;
 
-/// An endian fusion site: a LDX_MEM immediately followed by ENDIAN_TO_BE
-/// on the same destination register, with matching sizes.
+const BPF_TO_LE: u8 = 0x00;
+const MAX_NARROW_SCAN: usize = 32;
+
+/// An endian fusion site: a LDX_MEM followed by a byte-swap
+/// on the same destination register, with matching or safely narrowed sizes.
 struct EndianFusionSite {
     start_pc: usize,
     old_len: usize,
@@ -46,60 +49,181 @@ struct SafeEndianFusionSite {
     site: EndianFusionSite,
 }
 
-/// Scan for LDX_MEM + ENDIAN_TO_BE patterns with matching sizes.
+/// Scan for LDX_MEM + endian byte-swap patterns with matching or narrowed sizes.
 fn scan_endian_fusion_sites(insns: &[BpfInsn]) -> Vec<EndianFusionSite> {
     let mut sites = Vec::new();
-    let n = insns.len();
     let mut pc = 0;
 
-    while pc + 1 < n {
-        let i0 = &insns[pc];
-        let i1 = &insns[pc + 1];
-
-        // i0 must be LDX_MEM of some size.
-        if !i0.is_ldx_mem() {
-            pc += 1;
-            continue;
-        }
-
-        // i1 must be ALU|END|TO_BE with matching size.
-        let is_endian_to_be = i1.code == (BPF_ALU | BPF_END | BPF_TO_BE);
-        if !is_endian_to_be {
-            pc += 1;
-            continue;
-        }
-
-        // dst registers must match.
-        if i0.dst_reg() != i1.dst_reg() {
-            pc += 1;
-            continue;
-        }
-
-        // Match load size with endian size.
-        let load_size = bpf_size(i0.code);
-        let endian_size = i1.imm;
-
-        let sizes_match = matches!(
-            (load_size, endian_size),
-            (BPF_H, 16) | (BPF_W, 32) | (BPF_DW, 64)
-        );
-
-        if sizes_match {
-            sites.push(EndianFusionSite {
-                start_pc: pc,
-                old_len: 2,
-                dst_reg: i0.dst_reg(),
-                src_reg: i0.src_reg(),
-                offset: i0.off,
-                size: load_size,
-            });
-            pc += 2;
+    while pc + 1 < insns.len() {
+        if let Some(site) = scan_endian_site(insns, pc) {
+            pc = site.start_pc + site.old_len;
+            sites.push(site);
         } else {
             pc += 1;
         }
     }
 
     sites
+}
+
+fn scan_endian_site(insns: &[BpfInsn], pc: usize) -> Option<EndianFusionSite> {
+    let load = &insns[pc];
+    if !load.is_ldx_mem() {
+        return None;
+    }
+
+    let load_size = bpf_size(load.code);
+    let dst = load.dst_reg();
+
+    if let Some(endian) = insns.get(pc + 1) {
+        if endian.dst_reg() == dst {
+            if let Some(fused_size) =
+                endian_swap_size(endian).and_then(|size| fusion_size(load_size, size))
+            {
+                return Some(endian_site(load, pc, 2, fused_size));
+            }
+        }
+    }
+
+    if !matches!(load_size, BPF_W | BPF_DW) {
+        return None;
+    }
+
+    let end = insns.len().min(pc + MAX_NARROW_SCAN + 1);
+    for scan_pc in pc + 1..end {
+        let insn = &insns[scan_pc];
+        if insn.dst_reg() == dst
+            && endian_swap_size(insn).is_some_and(|size| is_narrowing(load_size, size))
+        {
+            return Some(endian_site(
+                load,
+                pc,
+                scan_pc - pc + 1,
+                bpf_size_from_endian(insn),
+            ));
+        }
+        if blocks_narrow_window(insn, dst) {
+            break;
+        }
+    }
+
+    None
+}
+
+fn endian_site(load: &BpfInsn, start_pc: usize, old_len: usize, size: u8) -> EndianFusionSite {
+    EndianFusionSite {
+        start_pc,
+        old_len,
+        dst_reg: load.dst_reg(),
+        src_reg: load.src_reg(),
+        offset: load.off,
+        size,
+    }
+}
+
+fn bpf_size_from_endian(insn: &BpfInsn) -> u8 {
+    endian_swap_size(insn).expect("caller checked endian size")
+}
+
+fn endian_swap_size(insn: &BpfInsn) -> Option<u8> {
+    if insn.code != (BPF_ALU | BPF_END | BPF_TO_BE)
+        && insn.code != (BPF_ALU64 | BPF_END | BPF_TO_LE)
+    {
+        return None;
+    }
+    Some(match insn.imm {
+        16 => Some(BPF_H),
+        32 => Some(BPF_W),
+        64 => Some(BPF_DW),
+        _ => None,
+    }?)
+}
+
+fn fusion_size(load_size: u8, endian_size: u8) -> Option<u8> {
+    if matches!(
+        (load_size, endian_size),
+        (BPF_H, BPF_H) | (BPF_W, BPF_W) | (BPF_DW, BPF_DW)
+    ) {
+        return Some(load_size);
+    }
+    if is_narrowing(load_size, endian_size) {
+        return Some(endian_size);
+    }
+    None
+}
+
+fn is_narrowing(load_size: u8, endian_size: u8) -> bool {
+    matches!(
+        (load_size, endian_size),
+        (BPF_W, BPF_H) | (BPF_DW, BPF_H) | (BPF_DW, BPF_W)
+    )
+}
+
+fn find_blocked_narrow_sites(insns: &[BpfInsn]) -> Vec<SkipReason> {
+    let mut skips = Vec::new();
+
+    for load_pc in 0..insns.len().saturating_sub(2) {
+        let load = &insns[load_pc];
+        if !load.is_ldx_mem() || !matches!(bpf_size(load.code), BPF_W | BPF_DW) {
+            continue;
+        }
+
+        let load_size = bpf_size(load.code);
+        let dst = load.dst_reg();
+        let mut read_before_endian = false;
+        let end = insns.len().min(load_pc + MAX_NARROW_SCAN + 1);
+
+        for pc in load_pc + 1..end {
+            let insn = &insns[pc];
+            if insn.dst_reg() == dst
+                && endian_swap_size(insn).is_some_and(|size| is_narrowing(load_size, size))
+            {
+                if read_before_endian {
+                    skips.push(SkipReason {
+                        pc: load_pc,
+                        reason:
+                            "narrow endian fusion blocked: possible upper bits read before endian"
+                                .into(),
+                    });
+                }
+                break;
+            }
+            if is_window_barrier(insn) || writes_reg(insn, dst) {
+                break;
+            }
+            read_before_endian |= reads_reg(insn, dst);
+        }
+    }
+
+    skips
+}
+
+fn blocks_narrow_window(insn: &BpfInsn, reg: u8) -> bool {
+    is_window_barrier(insn) || reads_reg(insn, reg) || writes_reg(insn, reg)
+}
+
+fn is_window_barrier(insn: &BpfInsn) -> bool {
+    insn.is_ldimm64() || insn.is_jmp_class()
+}
+
+fn reads_reg(insn: &BpfInsn, reg: u8) -> bool {
+    if insn.is_call() {
+        return (BPF_REG_1..=BPF_REG_5).contains(&reg);
+    }
+    if insn.is_exit() {
+        return reg == BPF_REG_0;
+    }
+    (bpf_src(insn.code) == BPF_X && insn.src_reg() == reg)
+        || (matches!(insn.class(), BPF_ALU64 | BPF_ALU | BPF_ST | BPF_STX) && insn.dst_reg() == reg)
+        || (matches!(insn.class(), BPF_JMP | BPF_JMP32) && !insn.is_ja() && insn.dst_reg() == reg)
+        || (insn.class() == BPF_LDX && insn.src_reg() == reg)
+}
+
+fn writes_reg(insn: &BpfInsn, reg: u8) -> bool {
+    if insn.is_call() {
+        return reg <= BPF_REG_5;
+    }
+    matches!(insn.class(), BPF_ALU64 | BPF_ALU | BPF_LDX | BPF_LD) && insn.dst_reg() == reg
 }
 
 /// Select the appropriate BTF ID for a given load size.
@@ -274,7 +398,7 @@ impl BpfPass for EndianFusionPass {
 
         let sites = scan_endian_fusion_sites(&program.insns);
         let mut safe_sites: Vec<SafeEndianFusionSite> = Vec::new();
-        let mut skipped = Vec::new();
+        let mut skipped = find_blocked_narrow_sites(&program.insns);
 
         for site in sites {
             // Check if the specific size kfunc is available.
@@ -331,7 +455,7 @@ impl BpfPass for EndianFusionPass {
                 site.offset,
                 ctx.platform.arch,
                 site.size,
-            );
+            ) + site.old_len.saturating_sub(2);
             if let Some(reason) = kinsn_replacement_subprog_skip_reason(
                 &program.insns,
                 site.start_pc,
@@ -385,8 +509,19 @@ impl BpfPass for EndianFusionPass {
                     ctx.platform.arch,
                     site.size,
                 );
+                let call_len = replacement.len();
                 new_insns.extend_from_slice(&replacement);
-                map_replacement_range(&mut addr_map, pc, site.old_len, new_pc, replacement.len());
+                let copy_start = pc + 1;
+                let copy_end = pc + site.old_len - 1;
+                new_insns.extend_from_slice(&program.insns[copy_start..copy_end]);
+                map_endian_replacement(
+                    &mut addr_map,
+                    pc,
+                    site.old_len,
+                    new_pc,
+                    call_len,
+                    new_insns.len() - new_pc,
+                );
 
                 pc += site.old_len;
                 site_idx += 1;
@@ -422,6 +557,21 @@ impl BpfPass for EndianFusionPass {
             ..Default::default()
         })
     }
+}
+
+fn map_endian_replacement(
+    addr_map: &mut [usize],
+    old_start: usize,
+    old_len: usize,
+    new_start: usize,
+    call_len: usize,
+    new_len: usize,
+) {
+    addr_map[old_start] = new_start;
+    for old_pc in old_start + 1..old_start + old_len - 1 {
+        addr_map[old_pc] = new_start + call_len + (old_pc - old_start - 1);
+    }
+    addr_map[old_start + old_len - 1] = new_start + new_len;
 }
 
 #[cfg(test)]
@@ -639,6 +789,54 @@ mod tests {
 
         // Verify the last instruction is still EXIT.
         assert!(prog.insns.last().unwrap().is_exit());
+    }
+
+    #[test]
+    fn test_endian_fusion_narrowing_cases() {
+        let sites = scan_endian_fusion_sites(&[
+            BpfInsn::ldx_mem(BPF_DW, 2, 6, 8),
+            endian_to_be(2, 32),
+            BpfInsn::ldx_mem(BPF_DW, 3, 6, 16),
+            endian_to_be(3, 16),
+            BpfInsn::ldx_mem(BPF_W, 4, 6, 24),
+            endian_to_be(4, 16),
+        ]);
+        assert_eq!(sites.len(), 3);
+        assert_eq!(sites[0].size, BPF_W);
+        assert_eq!(sites[1].size, BPF_H);
+        assert_eq!(sites[2].size, BPF_H);
+
+        let mut prog = make_program(vec![
+            BpfInsn::ldx_mem(BPF_DW, 2, 6, 8),
+            BpfInsn::mov64_imm(3, 7),
+            endian_to_be(2, 32),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let result = EndianFusionPass
+            .run(&mut prog, &mut cache, &ctx_with_endian32_kfunc(8888))
+            .unwrap();
+        assert!(result.changed);
+        assert_eq!(result.sites_applied, 1);
+        assert!(prog.insns[0].is_kinsn_sidecar());
+        assert!(prog.insns[1].is_call());
+        assert_eq!(prog.insns[2], BpfInsn::mov64_imm(3, 7));
+
+        let mut prog = make_program(vec![
+            BpfInsn::ldx_mem(BPF_DW, 2, 6, 8),
+            BpfInsn::mov64_reg(3, 2),
+            endian_to_be(2, 32),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let result = EndianFusionPass
+            .run(&mut prog, &mut cache, &ctx_with_endian32_kfunc(8888))
+            .unwrap();
+        assert!(!result.changed);
+        assert!(result
+            .sites_skipped
+            .iter()
+            .any(|skip| skip.reason.contains("upper bits read")));
     }
 
     #[test]

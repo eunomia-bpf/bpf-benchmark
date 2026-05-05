@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 //! COND_SELECT optimization pass.
 
-use crate::analysis::BranchTargetAnalysis;
+use std::collections::HashSet;
+
+use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
@@ -26,12 +28,6 @@ use super::utils::{
 /// The kfunc signature is: `u64 bpf_select64(u64 a, u64 b, u64 cond)`
 /// Semantics: returns `a` if `cond != 0`, otherwise returns `b`.
 ///
-/// Currently only handles cases where the JCC condition maps cleanly to
-/// the kfunc's `cond != 0` test:
-///   - JNE reg, 0: cond = reg (direct)
-///   - JEQ reg, 0: cond = reg (swap true/false values)
-///
-/// Other JCC conditions are skipped (no simple mapping to a single register).
 pub struct CondSelectPass;
 
 /// A detected cond-select site.
@@ -48,17 +44,31 @@ pub struct CondSelectSite {
     pub jcc_imm: i32,
     /// The JCC source kind (BPF_K or BPF_X).
     pub jcc_src: u8,
+    /// The full JCC instruction code (BPF_JMP/BPF_JMP32 + op + source).
+    pub jcc_code: u8,
+    /// The JCC source register for BPF_X conditions.
+    pub jcc_src_reg: u8,
 }
 
 /// A cond_select site that has passed safety checks, ready for transformation.
 struct SafeCondSelectSite {
     site: CondSelectSite,
+    lowering: CondSelectLowering,
+}
+
+struct CondSelectLowering {
+    prefix: Vec<BpfInsn>,
+    a_reg: u8,
+    b_reg: u8,
+    cond_reg: u8,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum CondSelectValue {
     Reg(u8),
+    Reg32(u8),
     Imm(i32),
+    Imm32(i32),
 }
 
 impl CondSelectPass {
@@ -71,55 +81,13 @@ impl CondSelectPass {
     }
 }
 
-/// Check whether a site's JCC condition can be mapped to the kfunc's `cond != 0`.
-///
-/// Returns `true` if we can use `cond_reg` directly (JNE reg, 0) or with
-/// a true/false swap (JEQ reg, 0).
-fn is_simple_zero_test(site: &CondSelectSite) -> bool {
-    if site.jcc_src != BPF_K || site.jcc_imm != 0 {
-        return false;
-    }
-    matches!(site.jcc_op, BPF_JNE | BPF_JEQ)
-}
-
-/// For JEQ reg, 0: the JCC jumps (to true_val) when reg == 0.
-/// But bpf_select64 returns `a` when cond != 0.
-/// So for JEQ: we need to swap a/b so that a=false_val, b=true_val.
-/// Returns (a_val, b_val) in the order for the kfunc call.
-fn kfunc_args_for_site(site: &CondSelectSite) -> (CondSelectValue, CondSelectValue) {
-    match site.jcc_op {
-        BPF_JNE => {
-            // JNE jumps when cond != 0 -> true_val selected
-            // bpf_select64(a, b, cond) returns a when cond != 0
-            // So a = true_val, b = false_val
-            (site.true_val, site.false_val)
-        }
-        BPF_JEQ => {
-            // JEQ jumps when cond == 0 -> true_val selected
-            // bpf_select64(a, b, cond) returns b when cond == 0
-            // So a = false_val, b = true_val
-            (site.false_val, site.true_val)
-        }
-        _ => unreachable!("is_simple_zero_test should have filtered this"),
-    }
-}
-
-fn packed_supported_for_site(ctx: &PassContext, site: &CondSelectSite) -> bool {
-    if !ctx.kinsn_registry.packed_supported_for_pass("cond_select") {
-        return false;
-    }
-
-    let (a_val, b_val) = kfunc_args_for_site(site);
-    matches!(a_val, CondSelectValue::Reg(_)) && matches!(b_val, CondSelectValue::Reg(_))
-}
-
 impl BpfPass for CondSelectPass {
     fn name(&self) -> &str {
         "cond_select"
     }
 
     fn required_analyses(&self) -> Vec<&str> {
-        vec!["branch_targets"]
+        vec!["branch_targets", "liveness"]
     }
 
     fn run(
@@ -180,6 +148,8 @@ impl BpfPass for CondSelectPass {
 
         let bt_analysis = BranchTargetAnalysis;
         let bt = analyses.get(&bt_analysis, program);
+        let liveness_analysis = LivenessAnalysis;
+        let liveness = analyses.get(&liveness_analysis, program);
 
         let sites = self.analyze(&program.insns);
         let btf_id = ctx.kinsn_registry.select64_btf_id;
@@ -187,19 +157,26 @@ impl BpfPass for CondSelectPass {
         let mut skipped = Vec::new();
 
         for site in sites {
-            // Safety check 1: only handle simple zero-test conditions.
-            if !is_simple_zero_test(&site) {
+            let Some(live_after) = liveness.live_out.get(site.start_pc + site.old_len - 1) else {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
-                    reason: format!(
-                        "JCC condition not a simple zero test (op={:#x} imm={} src={:#x})",
-                        site.jcc_op, site.jcc_imm, site.jcc_src
-                    ),
+                    reason: "missing liveness for cond_select site".into(),
                 });
                 continue;
-            }
+            };
 
-            // Safety check 2: interior branch target (excluding the JCC's own target).
+            let lowering = match build_lowering(&site, live_after) {
+                Ok(lowering) => lowering,
+                Err(reason) => {
+                    skipped.push(SkipReason {
+                        pc: site.start_pc,
+                        reason,
+                    });
+                    continue;
+                }
+            };
+
+            // Safety check 1: interior branch target (excluding the JCC's own target).
             // For Pattern C (3-insn), the JCC is at start_pc+1, not start_pc.
             let jcc_pc = if site.old_len == 3 {
                 site.start_pc + 1
@@ -218,19 +195,11 @@ impl BpfPass for CondSelectPass {
                 continue;
             }
 
-            if !packed_supported_for_site(ctx, &site) {
-                skipped.push(SkipReason {
-                    pc: site.start_pc,
-                    reason: "packed ABI requires register true/false operands".into(),
-                });
-                continue;
-            }
-
             if let Some(reason) = kinsn_replacement_subprog_skip_reason(
                 &program.insns,
                 site.start_pc,
                 site.old_len,
-                2,
+                lowering.prefix.len() + 2,
             )? {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
@@ -239,7 +208,7 @@ impl BpfPass for CondSelectPass {
                 continue;
             }
 
-            safe_sites.push(SafeCondSelectSite { site });
+            safe_sites.push(SafeCondSelectSite { site, lowering });
         }
 
         if safe_sites.is_empty() {
@@ -266,23 +235,15 @@ impl BpfPass for CondSelectPass {
             if site_idx < safe_sites.len() && pc == safe_sites[site_idx].site.start_pc {
                 let safe_site = &safe_sites[site_idx];
                 let site = &safe_site.site;
-                let (a_val, b_val) = kfunc_args_for_site(site);
-
-                let a_reg = match a_val {
-                    CondSelectValue::Reg(r) => r,
-                    CondSelectValue::Imm(_) => unreachable!("packed path requires register inputs"),
-                };
-                let b_reg = match b_val {
-                    CondSelectValue::Reg(r) => r,
-                    CondSelectValue::Imm(_) => unreachable!("packed path requires register inputs"),
-                };
+                new_insns.extend_from_slice(&safe_site.lowering.prefix);
                 let payload = (site.dst_reg as u64)
-                    | ((a_reg as u64) << 4)
-                    | ((b_reg as u64) << 8)
-                    | ((site.cond_reg as u64) << 12);
+                    | ((safe_site.lowering.a_reg as u64) << 4)
+                    | ((safe_site.lowering.b_reg as u64) << 8)
+                    | ((safe_site.lowering.cond_reg as u64) << 12);
                 let replacement = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
                 new_insns.extend_from_slice(&replacement);
-                map_replacement_range(&mut addr_map, pc, site.old_len, new_pc, replacement.len());
+                let replacement_len = safe_site.lowering.prefix.len() + replacement.len();
+                map_replacement_range(&mut addr_map, pc, site.old_len, new_pc, replacement_len);
 
                 pc += site.old_len;
                 site_idx += 1;
@@ -348,7 +309,7 @@ fn try_match_cond_select(insns: &[BpfInsn], pc: usize) -> Option<CondSelectSite>
             let ja = &insns[pc + 2];
             let mov_true = &insns[pc + 3];
 
-            if is_mov64(mov_false) && ja.is_ja() && ja.off == 1 && is_mov64(mov_true) {
+            if is_select_mov(mov_false) && ja.is_ja() && ja.off == 1 && is_select_mov(mov_true) {
                 let dst_f = mov_false.dst_reg();
                 let dst_t = mov_true.dst_reg();
                 if dst_f == dst_t {
@@ -362,6 +323,8 @@ fn try_match_cond_select(insns: &[BpfInsn], pc: usize) -> Option<CondSelectSite>
                         jcc_op: bpf_op(jcc.code),
                         jcc_imm: jcc.imm,
                         jcc_src: bpf_src(jcc.code),
+                        jcc_code: jcc.code,
+                        jcc_src_reg: jcc.src_reg(),
                     });
                 }
             }
@@ -383,7 +346,8 @@ fn try_match_cond_select(insns: &[BpfInsn], pc: usize) -> Option<CondSelectSite>
         let jcc = &insns[pc];
         let mov_false = &insns[pc + 1];
 
-        if jcc.is_cond_jmp() && jcc.off == 1 && is_mov64(mov_true) && is_mov64(mov_false) {
+        if jcc.is_cond_jmp() && jcc.off == 1 && is_select_mov(mov_true) && is_select_mov(mov_false)
+        {
             let dst_t = mov_true.dst_reg();
             let dst_f = mov_false.dst_reg();
             if dst_t == dst_f {
@@ -412,6 +376,8 @@ fn try_match_cond_select(insns: &[BpfInsn], pc: usize) -> Option<CondSelectSite>
                         jcc_op: bpf_op(jcc.code),
                         jcc_imm: jcc.imm,
                         jcc_src: bpf_src(jcc.code),
+                        jcc_code: jcc.code,
+                        jcc_src_reg: jcc.src_reg(),
                     });
                 }
             }
@@ -425,12 +391,245 @@ fn is_mov64(insn: &BpfInsn) -> bool {
     bpf_class(insn.code) == BPF_ALU64 && bpf_op(insn.code) == BPF_MOV
 }
 
+fn is_select_mov(insn: &BpfInsn) -> bool {
+    is_mov64(insn) || (bpf_class(insn.code) == BPF_ALU && bpf_op(insn.code) == BPF_MOV)
+}
+
 fn extract_mov_value(insn: &BpfInsn) -> CondSelectValue {
-    if bpf_src(insn.code) == BPF_X {
+    if bpf_class(insn.code) == BPF_ALU {
+        if bpf_src(insn.code) == BPF_X {
+            CondSelectValue::Reg32(insn.src_reg())
+        } else {
+            CondSelectValue::Imm32(insn.imm)
+        }
+    } else if bpf_src(insn.code) == BPF_X {
         CondSelectValue::Reg(insn.src_reg())
     } else {
         CondSelectValue::Imm(insn.imm)
     }
+}
+
+fn build_lowering(
+    site: &CondSelectSite,
+    live_after: &HashSet<u8>,
+) -> Result<CondSelectLowering, String> {
+    let (mut prefix, cond_reg, inverted) = condition_prefix(site, live_after)?;
+    let (a_val, b_val) = if inverted {
+        (site.false_val, site.true_val)
+    } else {
+        (site.true_val, site.false_val)
+    };
+
+    let mut protected = vec![cond_reg];
+    for value in [a_val, b_val] {
+        match value {
+            CondSelectValue::Reg(reg) | CondSelectValue::Reg32(reg) => protected.push(reg),
+            CondSelectValue::Imm(_) | CondSelectValue::Imm32(_) => {}
+        }
+    }
+
+    let mut allocated = Vec::new();
+    let mut imm_regs = Vec::new();
+    let a_reg = materialize_value(
+        site,
+        a_val,
+        live_after,
+        &protected,
+        &mut allocated,
+        &mut imm_regs,
+        &mut prefix,
+    )?;
+    let b_reg = materialize_value(
+        site,
+        b_val,
+        live_after,
+        &protected,
+        &mut allocated,
+        &mut imm_regs,
+        &mut prefix,
+    )?;
+    Ok(CondSelectLowering {
+        prefix,
+        a_reg,
+        b_reg,
+        cond_reg,
+    })
+}
+
+fn condition_prefix(
+    site: &CondSelectSite,
+    live_after: &HashSet<u8>,
+) -> Result<(Vec<BpfInsn>, u8, bool), String> {
+    if site.jcc_src == BPF_K
+        && site.jcc_imm == 0
+        && bpf_class(site.jcc_code) == BPF_JMP
+        && matches!(site.jcc_op, BPF_JNE | BPF_JEQ)
+    {
+        return Ok((Vec::new(), site.cond_reg, site.jcc_op == BPF_JEQ));
+    }
+
+    if site.jcc_src == BPF_K
+        && site.jcc_imm == 0
+        && bpf_class(site.jcc_code) == BPF_JMP32
+        && matches!(site.jcc_op, BPF_JNE | BPF_JEQ)
+    {
+        let forbidden = value_source_regs(site);
+        let pred = choose_temp_reg(site, live_after, &forbidden, &[]).ok_or_else(|| {
+            "no dead register available for cond_select compare predicate".to_string()
+        })?;
+        return Ok((
+            vec![mov32_reg(pred, site.cond_reg)],
+            pred,
+            site.jcc_op == BPF_JEQ,
+        ));
+    }
+
+    if site.jcc_src == BPF_K
+        && bpf_class(site.jcc_code) == BPF_JMP
+        && matches!(site.jcc_op, BPF_JNE | BPF_JEQ)
+    {
+        let forbidden = value_source_regs(site);
+        let pred = choose_temp_reg(site, live_after, &forbidden, &[]).ok_or_else(|| {
+            "no dead register available for cond_select compare predicate".to_string()
+        })?;
+        return Ok((
+            vec![
+                BpfInsn::mov64_reg(pred, site.cond_reg),
+                BpfInsn::alu64_imm(BPF_XOR, pred, site.jcc_imm),
+            ],
+            pred,
+            site.jcc_op == BPF_JEQ,
+        ));
+    }
+
+    let mut forbidden = value_source_regs(site);
+    forbidden.push(site.cond_reg);
+    if site.jcc_src == BPF_X {
+        forbidden.push(site.jcc_src_reg);
+    }
+    let pred = choose_temp_reg(site, live_after, &forbidden, &[]).ok_or_else(|| {
+        "no dead register available for cond_select compare predicate".to_string()
+    })?;
+    if let Some(inverse_op) = inverse_jcc_op(site.jcc_op) {
+        return Ok((
+            vec![
+                BpfInsn::mov64_imm(pred, 0),
+                BpfInsn::new(
+                    (site.jcc_code & !0xf0) | inverse_op,
+                    BpfInsn::make_regs(site.cond_reg, site.jcc_src_reg),
+                    1,
+                    site.jcc_imm,
+                ),
+                BpfInsn::mov64_imm(pred, 1),
+            ],
+            pred,
+            false,
+        ));
+    }
+
+    let prefix = if site.old_len == 3 {
+        vec![
+            BpfInsn::new(
+                site.jcc_code,
+                BpfInsn::make_regs(site.cond_reg, site.jcc_src_reg),
+                2,
+                site.jcc_imm,
+            ),
+            BpfInsn::mov64_imm(pred, 0),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(pred, 1),
+        ]
+    } else {
+        vec![
+            BpfInsn::mov64_imm(pred, 1),
+            BpfInsn::new(
+                site.jcc_code,
+                BpfInsn::make_regs(site.cond_reg, site.jcc_src_reg),
+                1,
+                site.jcc_imm,
+            ),
+            BpfInsn::mov64_imm(pred, 0),
+        ]
+    };
+    Ok((prefix, pred, false))
+}
+
+fn inverse_jcc_op(op: u8) -> Option<u8> {
+    match op {
+        BPF_JEQ => Some(BPF_JNE),
+        BPF_JNE => Some(BPF_JEQ),
+        BPF_JGT => Some(BPF_JLE),
+        BPF_JGE => Some(BPF_JLT),
+        BPF_JLT => Some(BPF_JGE),
+        BPF_JLE => Some(BPF_JGT),
+        BPF_JSGT => Some(BPF_JSLE),
+        BPF_JSGE => Some(BPF_JSLT),
+        BPF_JSLT => Some(BPF_JSGE),
+        BPF_JSLE => Some(BPF_JSGT),
+        _ => None,
+    }
+}
+
+fn materialize_value(
+    site: &CondSelectSite,
+    value: CondSelectValue,
+    live_after: &HashSet<u8>,
+    protected: &[u8],
+    allocated: &mut Vec<u8>,
+    imm_regs: &mut Vec<(CondSelectValue, u8)>,
+    prefix: &mut Vec<BpfInsn>,
+) -> Result<u8, String> {
+    if let CondSelectValue::Reg(reg) = value {
+        return Ok(reg);
+    }
+    if let Some((_, reg)) = imm_regs.iter().find(|(seen, _)| *seen == value) {
+        return Ok(*reg);
+    }
+    let reg = choose_temp_reg(site, live_after, protected, allocated)
+        .ok_or_else(|| "no dead register available to materialize immediate operand".to_string())?;
+    match value {
+        CondSelectValue::Imm(imm) => prefix.push(BpfInsn::mov64_imm(reg, imm)),
+        CondSelectValue::Reg32(src) => prefix.push(mov32_reg(reg, src)),
+        CondSelectValue::Imm32(imm) => prefix.push(BpfInsn::mov32_imm(reg, imm)),
+        CondSelectValue::Reg(_) => unreachable!(),
+    }
+    allocated.push(reg);
+    imm_regs.push((value, reg));
+    Ok(reg)
+}
+
+fn mov32_reg(dst: u8, src: u8) -> BpfInsn {
+    BpfInsn::new(
+        BPF_ALU | BPF_MOV | BPF_X,
+        BpfInsn::make_regs(dst, src),
+        0,
+        0,
+    )
+}
+
+fn choose_temp_reg(
+    site: &CondSelectSite,
+    live_after: &HashSet<u8>,
+    forbidden: &[u8],
+    allocated: &[u8],
+) -> Option<u8> {
+    std::iter::once(site.dst_reg)
+        .chain(BPF_REG_0..=BPF_REG_9)
+        .find(|&reg| {
+            !forbidden.contains(&reg)
+                && !allocated.contains(&reg)
+                && (reg == site.dst_reg || !live_after.contains(&reg))
+        })
+}
+
+fn value_source_regs(site: &CondSelectSite) -> Vec<u8> {
+    [site.true_val, site.false_val]
+        .into_iter()
+        .filter_map(|value| match value {
+            CondSelectValue::Reg(reg) | CondSelectValue::Reg32(reg) => Some(reg),
+            CondSelectValue::Imm(_) | CondSelectValue::Imm32(_) => None,
+        })
+        .collect()
 }
 
 #[cfg(test)]

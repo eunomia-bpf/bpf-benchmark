@@ -15,6 +15,15 @@ fn jne_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
     )
 }
 
+fn jne32_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
+    BpfInsn::new(
+        BPF_JMP32 | BPF_JNE | BPF_K,
+        BpfInsn::make_regs(dst, 0),
+        off,
+        imm,
+    )
+}
+
 fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
     BpfInsn::new(
         BPF_JMP | BPF_JEQ | BPF_K,
@@ -30,6 +39,24 @@ fn jgt_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
         BpfInsn::make_regs(dst, 0),
         off,
         imm,
+    )
+}
+
+fn jle_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
+    BpfInsn::new(
+        BPF_JMP | BPF_JLE | BPF_K,
+        BpfInsn::make_regs(dst, 0),
+        off,
+        imm,
+    )
+}
+
+fn mov32_reg(dst: u8, src: u8) -> BpfInsn {
+    BpfInsn::new(
+        BPF_ALU | BPF_MOV | BPF_X,
+        BpfInsn::make_regs(dst, src),
+        0,
+        0,
     )
 }
 
@@ -247,12 +274,11 @@ fn test_cond_select_skip_when_kfunc_unavailable() {
 }
 
 #[test]
-fn test_cond_select_skip_immediate_values_without_legacy() {
+fn test_cond_select_emit_imm_true_reg_false() {
     let mut prog = make_program(vec![
-        jne_imm(1, 0, 2),
-        BpfInsn::mov64_imm(0, 0),
-        BpfInsn::ja(1),
-        BpfInsn::mov64_imm(0, 1),
+        BpfInsn::mov32_imm(0, 1),
+        jne_imm(1, 0, 1),
+        BpfInsn::mov64_reg(0, 6),
         exit_insn(),
     ]);
     let mut cache = AnalysisCache::new();
@@ -261,12 +287,78 @@ fn test_cond_select_skip_immediate_values_without_legacy() {
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
-    assert!(!result.changed);
-    assert_eq!(result.sites_applied, 0);
-    assert!(result
-        .sites_skipped
-        .iter()
-        .any(|s| s.reason.contains("register true/false operands")));
+    assert!(result.changed);
+    assert_eq!(result.sites_applied, 1);
+    assert_eq!(prog.insns[0], BpfInsn::mov32_imm(0, 1));
+    assert!(prog.insns[1].is_kinsn_sidecar());
+    assert_eq!(payload_regs(sidecar_payload(&prog.insns[1])), (0, 0, 6, 1));
+}
+
+#[test]
+fn test_cond_select_emit_reg_true_imm_false() {
+    let mut prog = make_program(vec![
+        jne_imm(1, 0, 2),
+        BpfInsn::mov64_imm(0, 0),
+        BpfInsn::ja(1),
+        BpfInsn::mov64_reg(0, 7),
+        exit_insn(),
+    ]);
+    let mut cache = AnalysisCache::new();
+    let ctx = ctx_with_select_kfunc(5555);
+
+    let pass = CondSelectPass;
+    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+    assert!(result.changed);
+    assert_eq!(result.sites_applied, 1);
+    assert_eq!(prog.insns[0], BpfInsn::mov64_imm(0, 0));
+    assert!(prog.insns[1].is_kinsn_sidecar());
+    assert_eq!(payload_regs(sidecar_payload(&prog.insns[1])), (0, 7, 0, 1));
+}
+
+#[test]
+fn test_cond_select_emit_reg32_true_imm_false() {
+    let mut prog = make_program(vec![
+        jne_imm(1, 0, 2),
+        BpfInsn::mov32_imm(0, 0),
+        BpfInsn::ja(1),
+        mov32_reg(0, 6),
+        exit_insn(),
+    ]);
+    let mut cache = AnalysisCache::new();
+    let ctx = ctx_with_select_kfunc(5555);
+
+    let pass = CondSelectPass;
+    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+    assert!(result.changed);
+    assert_eq!(result.sites_applied, 1);
+    assert_eq!(prog.insns[0], mov32_reg(0, 6));
+    assert_eq!(prog.insns[1], BpfInsn::mov32_imm(2, 0));
+    assert!(prog.insns[2].is_kinsn_sidecar());
+    assert_eq!(payload_regs(sidecar_payload(&prog.insns[2])), (0, 0, 2, 1));
+}
+
+#[test]
+fn test_cond_select_emit_both_immediate_values() {
+    let mut prog = make_program(vec![
+        BpfInsn::mov32_imm(0, 1),
+        jne_imm(1, 0, 1),
+        BpfInsn::mov32_imm(0, 0),
+        exit_insn(),
+    ]);
+    let mut cache = AnalysisCache::new();
+    let ctx = ctx_with_select_kfunc(5555);
+
+    let pass = CondSelectPass;
+    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+    assert!(result.changed);
+    assert_eq!(result.sites_applied, 1);
+    assert_eq!(prog.insns[0], BpfInsn::mov32_imm(0, 1));
+    assert_eq!(prog.insns[1], BpfInsn::mov32_imm(2, 0));
+    assert!(prog.insns[2].is_kinsn_sidecar());
+    assert_eq!(payload_regs(sidecar_payload(&prog.insns[2])), (0, 0, 2, 1));
 }
 
 #[test]
@@ -318,13 +410,12 @@ fn test_cond_select_emit_jeq_swaps_args() {
 }
 
 #[test]
-fn test_cond_select_skip_non_zero_imm() {
-    // JNE r1, 42, +2 — not a simple zero test, should be skipped
+fn test_cond_select_emit_non_zero_compare_imm() {
     let mut prog = make_program(vec![
-        jne_imm(1, 42, 2),
-        BpfInsn::mov64_imm(0, 0),
+        jeq_imm(1, 5, 2),
+        BpfInsn::mov64_reg(0, 6),
         BpfInsn::ja(1),
-        BpfInsn::mov64_imm(0, 1),
+        BpfInsn::mov64_reg(0, 7),
         exit_insn(),
     ]);
     let mut cache = AnalysisCache::new();
@@ -333,22 +424,21 @@ fn test_cond_select_skip_non_zero_imm() {
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
-    assert!(!result.changed);
-    assert_eq!(result.sites_applied, 0);
-    assert!(result
-        .sites_skipped
-        .iter()
-        .any(|s| s.reason.contains("not a simple zero test")));
+    assert!(result.changed);
+    assert_eq!(result.sites_applied, 1);
+    assert_eq!(prog.insns[0], BpfInsn::mov64_reg(0, 1));
+    assert_eq!(prog.insns[1], BpfInsn::alu64_imm(BPF_XOR, 0, 5));
+    assert!(prog.insns[2].is_kinsn_sidecar());
+    assert_eq!(payload_regs(sidecar_payload(&prog.insns[2])), (0, 6, 7, 0));
 }
 
 #[test]
-fn test_cond_select_skip_jgt() {
-    // JGT r1, 0, +2 — not JNE/JEQ, should be skipped
+fn test_cond_select_emit_jmp32_zero_compare_predicate() {
     let mut prog = make_program(vec![
-        jgt_imm(1, 0, 2),
-        BpfInsn::mov64_imm(0, 0),
+        jne32_imm(1, 0, 2),
+        BpfInsn::mov64_reg(0, 6),
         BpfInsn::ja(1),
-        BpfInsn::mov64_imm(0, 1),
+        BpfInsn::mov64_reg(0, 7),
         exit_insn(),
     ]);
     let mut cache = AnalysisCache::new();
@@ -357,8 +447,35 @@ fn test_cond_select_skip_jgt() {
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
-    assert!(!result.changed);
-    assert_eq!(result.sites_applied, 0);
+    assert!(result.changed);
+    assert_eq!(result.sites_applied, 1);
+    assert_eq!(prog.insns[0], mov32_reg(0, 1));
+    assert!(prog.insns[1].is_kinsn_sidecar());
+    assert_eq!(payload_regs(sidecar_payload(&prog.insns[1])), (0, 7, 6, 0));
+}
+
+#[test]
+fn test_cond_select_emit_jgt_predicate_prefix() {
+    let mut prog = make_program(vec![
+        jgt_imm(1, 0, 2),
+        BpfInsn::mov64_reg(0, 6),
+        BpfInsn::ja(1),
+        BpfInsn::mov64_reg(0, 7),
+        exit_insn(),
+    ]);
+    let mut cache = AnalysisCache::new();
+    let ctx = ctx_with_select_kfunc(5555);
+
+    let pass = CondSelectPass;
+    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+    assert!(result.changed);
+    assert_eq!(result.sites_applied, 1);
+    assert_eq!(prog.insns[0], BpfInsn::mov64_imm(0, 0));
+    assert_eq!(prog.insns[1], jle_imm(1, 0, 1));
+    assert_eq!(prog.insns[2], BpfInsn::mov64_imm(0, 1));
+    assert!(prog.insns[3].is_kinsn_sidecar());
+    assert_eq!(payload_regs(sidecar_payload(&prog.insns[3])), (0, 7, 6, 0));
 }
 
 #[test]
@@ -507,11 +624,24 @@ fn test_cond_select_register_alias_safety() {
 
 /// Decode the packed sidecar payload and map its logical (a, b, cond)
 /// operands back to the provided initial register values.
+fn sidecar_payload(sidecar: &BpfInsn) -> u64 {
+    (sidecar.dst_reg() as u64)
+        | ((sidecar.off as u16 as u64) << 4)
+        | ((sidecar.imm as u32 as u64) << 20)
+}
+
+fn payload_regs(payload: u64) -> (u8, u8, u8, u8) {
+    (
+        (payload & 0xf) as u8,
+        ((payload >> 4) & 0xf) as u8,
+        ((payload >> 8) & 0xf) as u8,
+        ((payload >> 12) & 0xf) as u8,
+    )
+}
+
 fn simulate_param_setup(insns: &[BpfInsn], initial_regs: &[u64; 11]) -> [u64; 11] {
     let sidecar = insns.iter().find(|insn| insn.is_kinsn_sidecar()).unwrap();
-    let payload = (sidecar.dst_reg() as u64)
-        | ((sidecar.off as u16 as u64) << 4)
-        | ((sidecar.imm as u32 as u64) << 20);
+    let payload = sidecar_payload(sidecar);
     let a_reg = ((payload >> 4) & 0xf) as usize;
     let b_reg = ((payload >> 8) & 0xf) as usize;
     let cond_reg = ((payload >> 12) & 0xf) as usize;
