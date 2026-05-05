@@ -126,9 +126,7 @@ pub struct BpfProgram {
 
 /// Pre-loaded map metadata used by snapshot/offline map providers.
 ///
-/// Maps that should not be inlined (e.g. mutated by kernel-side BPF programs)
-/// must be excluded by the caller before populating this metadata. The pass
-/// itself unconditionally treats every map present here as inlinable.
+/// The pass unconditionally treats every map present here as inlinable.
 #[derive(Clone, Debug)]
 pub struct MapMetadata {
     pub map_type: u32,
@@ -500,7 +498,7 @@ pub struct PassResult {
     pub sites_skipped: Vec<SkipReason>,
     /// Diagnostic messages (read by tests and debug output).
     pub diagnostics: Vec<String>,
-    /// Map-inline dependencies produced by this pass.
+    /// Map-inline sites produced by this pass.
     pub map_inline_records: Vec<MapInlineRecord>,
     /// Instruction count before this pass ran.
     pub insns_before: usize,
@@ -558,7 +556,6 @@ pub struct SkipReason {
 pub struct MapInlineRecord {
     pub map_id: u32,
     pub key: Vec<u8>,
-    pub expected_value: Vec<u8>,
 }
 
 /// High-level pass classification used by diagnostics and tests.

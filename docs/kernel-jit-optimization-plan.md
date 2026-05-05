@@ -109,7 +109,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 - `bpfopt` 作为零内核依赖的纯 bytecode optimizer，优化入口是 `--pass <name>` 单 pass CLI。
 - `bpfprof` 保持 standalone CLI，负责 profile 采集。
 - `bpfget` 是 daemon-owned library，负责读取 bytecode/metadata/map 信息和 target probing；per-pass ReJIT 由 daemon 通过 `kernel-sys` 直接执行。
-- `bpfrejit-daemon` 保留 runner socket 边界和 watch/map invalidation，进程内持有 prog/map fd；字节码变换仍只通过外部 `bpfopt` CLI，主路径逐 pass 直接 `BPF_PROG_REJIT`。
+- `bpfrejit-daemon` 保留 runner socket 边界和 live program watch，进程内持有 prog/map fd；字节码变换仍只通过外部 `bpfopt` CLI，主路径逐 pass 直接 `BPF_PROG_REJIT`。
 
 ### 1.8 类比定位
 
@@ -168,7 +168,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 7. **Mandatory Falsification**：如果 fixed kernel heuristics 在所有测试硬件和 workload 上恢复相同收益，正确结论是"用 kernel peepholes"，不是发布 userspace-guided interface
 8. **`bpfopt` 零 syscall 依赖**：`bpfopt` 只读写 raw `struct bpf_insn[]` bytecode；所有 raw BPF syscall 都在 `kernel-sys` 内实现，并由 daemon-owned `bpfget`、daemon 主体或 `bpfprof` CLI 调用。
 9. **Pipeline 是 bpfopt shell/file 协议 + daemon in-memory kernel state**：`bpfopt --pass <name>` stdin/stdout 只传 raw binary bytecode，profile/verifier states/map values/report 等 `bpfopt` side-input/output 走文件；prog info、snapshot-owned map fd、minimal fd_array 在 daemon 进程内传递。
-10. **Daemon 是 runner 稳定边界**：`bpfrejit-daemon` watch 新程序、检测 map invalidation、维护 runner socket，并进程内编排 live snapshot、per-pass side-input 准备和 per-pass ReJIT；benchmark runner Python 不直接改成调 kernel-facing CLI。
+10. **Daemon 是 runner 稳定边界**：`bpfrejit-daemon` watch 新程序、维护 runner socket，并进程内编排 live snapshot、per-pass side-input 准备和 per-pass ReJIT；benchmark runner Python 不直接改成调 kernel-facing CLI。
 
 
 ---
@@ -207,7 +207,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 | **BITFIELD_EXTRACT** | 是 | ✅ 已实现 | shift+and → `bpf_extract64()` kinsn → JIT emit BEXTR | 524 sites, 4 applied |
 | **BRANCH_FLIP** | 否 | ✅ 已实现；Paper B PGO pass（非默认） | if/else body 重排。policy-sensitive；默认 benchmark profile 不启用。显式启用时要求 `bpfprof --per-site` 真实 profile；缺 program/site PMU 数据直接 exit 1，无 heuristic fallback | 非默认 benchmark pass |
 | **ENDIAN_FUSION** | 可选 | ✅ 已实现 | load+bswap → combined kinsn → JIT emit MOVBE | 256 sites, 17 corpus applied |
-| **Dynamic map inlining** | 否 | ✅ pass 已实现；daemon in-process wiring 已接入 | JVM deopt 模型：map 稳定 → inline → invalidation → re-REJIT。**论文核心 story** | **11556 个 map_lookup site；Katran 22→2 条（-91%）；Tetragon 447→2（-99.6%）**。v3 pivot 后 daemon-owned `bpfget` snapshot 直接持有 map fd 并生成 `bpfopt map-inline --map-values` side-input；`bpfopt --report` 产出 invalidation hints，daemon 读取 hints 并触发 re-optimize。设计：`dynamic_map_inlining_design_20260324.md` |
+| **Dynamic map inlining** | 否 | ✅ pass 已实现；daemon in-process wiring 已接入 | Paper benchmark 模型：snapshot once → inline → ReJIT → measure；不做 production invalidation polling | **11556 个 map_lookup site；Katran 22→2 条（-91%）；Tetragon 447→2（-99.6%）**。daemon-owned `bpfget` snapshot 直接持有 map fd 并生成 `bpfopt map-inline --map-values` side-input；daemon 从 `map_inline` report 的 `(map_id,key)` 结合 snapshot 生成 `inlined_map_entries`。设计：`dynamic_map_inlining_design_20260324.md` |
 | **Verifier const prop** | 否 | ✅ 已实现 | `log_level=2` → tnum/range 常量 → `MOV imm` → branch folding。verifier-in-the-loop 已接入（#624） | **23% verifier state 含精确常量；62.5% 分支和立即数比较** |
 | **DCE** | 否 | ✅ 已实现 | const prop / map inline 后的 unreachable block / dead store 消除 | bpfopt DCE 让更多条件变常量 |
 | **Bounds check merge** | 否 | ✅ 已实现 | ~~冗余 check 删除~~ → **guard window merge / hoisting**。合并小窗口为大窗口 | **42 guard sites，严格冗余=0%，但 83.3% 可合并（ladder 结构）**。实现：`BoundsCheckMergePass`。**测试**：`cargo test bounds_check` 14/14、`cargo test` 365 pass/12 ignored、`make daemon`、`make daemon-tests`。**commit**：`639926cb28e9`。调研：`bounds_check_elimination_research_20260324.md` |
@@ -276,8 +276,8 @@ BpfReJIT 的设计基于三个层次的 insight：
 │                         ↑                                    │
 │                  bpfprof profile CLI                         │
 │                                                              │
-│  Daemon watches events, detects invalidation, preserves      │
-│  runner protocol, and never transforms bytecode in-process.  │
+│  Daemon watches events, preserves runner protocol, and       │
+│  never transforms bytecode in-process.                       │
 └───────┬────────────┬────────────┬───────────────┬────────────┘
         │            │            │               │
    GET_NEXT_ID  GET_ORIGINAL                 PROG_REJIT
@@ -378,7 +378,7 @@ Packed（sidecar pseudo-insn + CALL pair，零 argument setup，N→1 指令替�
 - **`bpfopt` 是纯 bytecode CLI**：不直接调用 BPF syscall；stdin/stdout 传 raw `struct bpf_insn[]` binary；必须显式传 `--pass <name>`，一次只跑一个 pass；`--target`、`--profile`、`--verifier-states`、`--map-values`、`--report` 等 side-input/output 全部走文件。
 - **`bpfprof` 是独立 profile CLI**：PMU profiling 和 per-site branch profile 仍由外部 CLI 输出文件；daemon socket 不管理 profile lifecycle，也不把 profile path 传给 `bpfopt`。
 - **kernel-facing 功能在 daemon 进程内**：`bpfget` 读取 live program bytecode/metadata/map info；daemon 只从 `prog_info.used_maps` 构造 in-memory map fd array；每个 pass 的 ReJIT 直接调用 `kernel_sys::prog_rejit()`。
-- **daemon 是 runner socket + kernel syscall orchestrator**：保留 socket + JSON 协议，watch 新程序、检测 map invalidation、维护 session 生命周期；收到 optimize 请求后只 fork+exec `bpfopt` 做 bytecode transform。
+- **daemon 是 runner socket + kernel syscall orchestrator**：保留 socket + JSON 协议，watch 新程序、维护 session 生命周期；收到 optimize 请求后只 fork+exec `bpfopt` 做 bytecode transform。
 - **主路径不 dry-run**：daemon 不调用 `BPF_PROG_LOAD` 接受 candidate。kernel 在每次 `BPF_PROG_REJIT` 内 re-verify；失败直接 surface error。
 - **verifier states 来自真实 ReJIT log**：默认 12-pass policy 包含 `map_inline` / `const_prop`。daemon 解析前一个成功 per-pass ReJIT 的 `log_level=2` verifier log 生成 `verifier-states.json`。缺失 states 或 parse 失败直接 error，不允许空结果 fallback。
 - **main ReJIT 无 watchdog**：`BPF_PROG_REJIT` 是同步 syscall，daemon 不加 timeout；kernel verifier hang 会卡住 daemon。当前选择文档化接受该限制，不加 subprocess fallback。
@@ -409,7 +409,7 @@ Packed（sidecar pseudo-insn + CALL pair，零 argument setup，N→1 指令替�
 1. **Phase 1：核心 bytecode CLI**。保留 `bpfopt`，实现 `bpfopt --pass <name>` 单 pass CLI 和 `list-passes`。
 2. **Phase 2：kernel syscall libs + profile CLI**。`bpfprof` 保持 CLI；`bpfget` 归 daemon-owned library；per-pass ReJIT orchestration 在 daemon 内直接调 `kernel-sys`。
 3. **Phase 3：集成**。runner Python 保持 daemon socket + JSON 边界，daemon 内部链接 kernel-facing libs，只 fork+exec `bpfopt`；`bpfprof` 保持 daemon 外 standalone CLI。
-4. **Phase 4：增强**。完善 map invalidation lifecycle、target probing、kinsn BTF capability 扩展。
+4. **Phase 4：增强**。完善 target probing、kinsn BTF capability 扩展。
 
 ---
 

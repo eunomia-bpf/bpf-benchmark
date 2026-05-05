@@ -6,7 +6,6 @@
 
 mod bpf;
 mod commands;
-mod invalidation;
 mod server;
 
 use anyhow::Result;

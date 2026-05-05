@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
-//! Small BPF access adapter for daemon watch/invalidation paths.
+//! Small BPF access adapter for daemon watch and map snapshot paths.
 //!
 //! Standard BPF access is routed through `kernel-sys`/libbpf. The optimize path
 //! uses `bpfget` for live program discovery and calls `kernel-sys` directly for
-//! optional verifier-state capture and `BPF_PROG_REJIT`; this module only covers
-//! map watch/invalidation helpers.
+//! `BPF_PROG_REJIT`; this module covers the remaining map/watch helpers.
 
 use std::collections::HashMap;
 use std::os::fd::{BorrowedFd, OwnedFd, RawFd};

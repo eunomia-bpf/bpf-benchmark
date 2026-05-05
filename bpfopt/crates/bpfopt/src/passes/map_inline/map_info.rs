@@ -67,8 +67,8 @@ impl MapInfo {
         )
     }
 
-    /// Returns whether this inline is speculative and depends on runtime stability.
-    pub fn has_speculative_invalidation(&self) -> bool {
+    /// Returns whether lookup removal must prove the snapshot key is present.
+    pub fn requires_entry_presence_check(&self) -> bool {
         matches!(self.map_type, BPF_MAP_TYPE_HASH | BPF_MAP_TYPE_LRU_HASH)
     }
 }
@@ -303,11 +303,11 @@ mod tests {
         assert_eq!(result.unique_maps.len(), 2);
         assert!(result.unique_maps[0].supports_direct_value_inline());
         assert!(result.unique_maps[1].supports_direct_value_inline());
-        assert!(result.unique_maps[1].has_speculative_invalidation());
+        assert!(result.unique_maps[1].requires_entry_presence_check());
     }
 
     #[test]
-    fn map_info_marks_lru_hash_as_speculative_inlineable() {
+    fn map_info_marks_lru_hash_as_entry_presence_checked() {
         let ld = make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 10);
         let insns = vec![ld[0], ld[1]];
 
@@ -321,7 +321,7 @@ mod tests {
 
         assert_eq!(result.unique_maps.len(), 1);
         assert!(result.unique_maps[0].supports_direct_value_inline());
-        assert!(result.unique_maps[0].has_speculative_invalidation());
+        assert!(result.unique_maps[0].requires_entry_presence_check());
         assert!(!result.unique_maps[0].has_removable_lookup_pattern());
     }
 
@@ -513,8 +513,8 @@ mod tests {
             "PERCPU_ARRAY should remove the lookup pattern when the key is in range"
         );
         assert!(
-            !percpu_array.has_speculative_invalidation(),
-            "PERCPU_ARRAY should not use HASH-style speculative null handling"
+            !percpu_array.requires_entry_presence_check(),
+            "PERCPU_ARRAY should not use HASH-style null handling"
         );
 
         let percpu_hash = MapInfo {
@@ -533,8 +533,8 @@ mod tests {
             "PERCPU_HASH must not be inlineable"
         );
         assert!(
-            !percpu_hash.has_speculative_invalidation(),
-            "PERCPU_HASH must not be speculative (not inlineable at all)"
+            !percpu_hash.requires_entry_presence_check(),
+            "PERCPU_HASH must not use HASH/LRU_HASH lookup-removal handling"
         );
 
         let lru_percpu_hash = MapInfo {
@@ -553,8 +553,8 @@ mod tests {
             "LRU_PERCPU_HASH must not be inlineable"
         );
         assert!(
-            !lru_percpu_hash.has_speculative_invalidation(),
-            "LRU_PERCPU_HASH must not be speculative (not inlineable at all)"
+            !lru_percpu_hash.requires_entry_presence_check(),
+            "LRU_PERCPU_HASH must not use HASH/LRU_HASH lookup-removal handling"
         );
     }
 }

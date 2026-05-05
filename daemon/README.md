@@ -50,5 +50,4 @@ daemon/
   src/server.rs      # socket server and request dispatch
   src/commands.rs    # in-process BPF orchestration + bpfopt CLI calls
   src/bpf.rs         # libbpf-backed map/watch helpers used by the daemon
-  src/invalidation.rs
 ```

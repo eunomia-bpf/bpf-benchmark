@@ -127,12 +127,7 @@ fn ja(off: i16) -> BpfInsn {
     BpfInsn::ja(off)
 }
 
-fn install_map(
-    map_id: u32,
-    map_type: u32,
-    max_entries: u32,
-    values: HashMap<Vec<u8>, Vec<u8>>,
-) {
+fn install_map(map_id: u32, map_type: u32, max_entries: u32, values: HashMap<Vec<u8>, Vec<u8>>) {
     install_map_with_key_size(map_id, map_type, 4, max_entries, values);
 }
 
@@ -1263,10 +1258,6 @@ fn map_inline_pass_removes_hash_lookup_and_null_path_when_entry_present() {
         .diagnostics
         .iter()
         .any(|diag| diag.contains("site at PC=5: inlined successfully, value=0x7")));
-    assert!(result.pass_results[0]
-        .diagnostics
-        .iter()
-        .any(|diag| diag.contains("speculative map-inline sites: 1")));
 }
 
 #[test]
@@ -1594,7 +1585,6 @@ fn map_inline_pass_inlines_mutable_array_across_readonly_helper_call() {
     );
 }
 
-
 #[test]
 fn map_inline_pass_errors_when_array_snapshot_key_is_absent() {
     install_empty_map(311, 2, 8, 8);
@@ -1621,9 +1611,8 @@ fn map_inline_pass_errors_when_array_snapshot_key_is_absent() {
 }
 
 #[test]
-fn map_inline_pass_records_inlined_sites_for_tracker() {
-    let value = vec![7, 0, 0, 0];
-    install_array_map(115, value.clone());
+fn map_inline_pass_records_inlined_sites() {
+    install_array_map(115, vec![7, 0, 0, 0]);
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
@@ -1646,7 +1635,6 @@ fn map_inline_pass_records_inlined_sites_for_tracker() {
         vec![MapInlineRecord {
             map_id: 115,
             key: 1u32.to_le_bytes().to_vec(),
-            expected_value: value,
         }]
     );
 }
@@ -1683,11 +1671,7 @@ fn map_inline_pass_inlines_uniform_percpu_array_maps() {
         .insns
         .iter()
         .any(|insn| insn == &BpfInsn::mov32_imm(6, 7)));
-    assert!(
-        result.pass_results[0].map_inline_records[0].expected_value == blob,
-        "tracker should store the full per-cpu blob: {:?}",
-        result.pass_results[0].map_inline_records
-    );
+    assert_eq!(result.pass_results[0].map_inline_records[0].map_id, 112);
 }
 
 #[test]

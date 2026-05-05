@@ -5,10 +5,10 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::Write as _;
 use std::sync::OnceLock;
 
+use super::utils::{emit_ldimm64, insn_width};
 use crate::analysis::BranchTargetAnalysis;
 use crate::insn::*;
 use crate::pass::*;
-use super::utils::{emit_ldimm64, insn_width};
 
 mod map_info;
 pub use map_info::{MapInfo, MapInfoAnalysis, MapInfoResult, MapReference};
@@ -602,7 +602,6 @@ struct SiteRewrite {
     call_pc: usize,
     diagnostic_value: String,
     removed_null_check: bool,
-    speculative: bool,
     map_inline_record: MapInlineRecord,
     skipped_pcs: HashSet<usize>,
     replacements: BTreeMap<usize, Vec<BpfInsn>>,
@@ -811,8 +810,8 @@ fn run_map_inline_round(
             info.has_removable_lookup_pattern(),
         );
         let null_check_pc = uses.null_check_pc;
-        if info.has_speculative_invalidation() && null_check_pc.is_none() {
-            let reason = "speculative map inline requires an immediate null check".to_string();
+        if info.requires_entry_presence_check() && null_check_pc.is_none() {
+            let reason = "hash map inline requires an immediate null check".to_string();
             record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
             continue;
         }
@@ -893,11 +892,10 @@ fn run_map_inline_round(
         }
 
         log_map_inline_debug(&format!(
-            "site at PC={}: rewrite prepared with {} replacement load(s), removed_null_check={}, speculative={}",
+            "site at PC={}: rewrite prepared with {} replacement load(s), removed_null_check={}",
             site.call_pc,
             rewrite.replacements.len(),
-            rewrite.removed_null_check,
-            rewrite.speculative
+            rewrite.removed_null_check
         ));
         rewrites.push(rewrite);
     }
@@ -916,7 +914,6 @@ fn run_map_inline_round(
     let mut map_inline_records = Vec::new();
     let mut applied = direct_sites_applied;
     let mut removed_any_null_check = false;
-    let mut speculative_sites = 0usize;
 
     for rewrite in rewrites {
         let conflict = rewrite
@@ -942,7 +939,6 @@ fn run_map_inline_round(
         }
 
         removed_any_null_check |= rewrite.removed_null_check;
-        speculative_sites += usize::from(rewrite.speculative);
         record_diagnostic(
             &mut diagnostics,
             format!(
@@ -1016,13 +1012,6 @@ fn run_map_inline_round(
     program.insns = final_insns;
     super::utils::remap_btf_metadata(program, &final_addr_map)?;
     program.remap_annotations(&final_addr_map);
-
-    if speculative_sites > 0 {
-        record_diagnostic(
-            &mut diagnostics,
-            format!("speculative map-inline sites: {}", speculative_sites),
-        );
-    }
 
     log_map_inline_debug(&format!(
         "applied {} map_inline rewrite(s), skipped {} site(s)",
@@ -1214,11 +1203,9 @@ fn build_site_rewrite(
         call_pc: site.call_pc,
         diagnostic_value: format_inlined_value_diagnostic(&inline_value, &uses.fixed_loads),
         removed_null_check: can_remove_lookup_pattern && removable_null_check_pc.is_some(),
-        speculative: info.has_speculative_invalidation(),
         map_inline_record: MapInlineRecord {
             map_id: info.map_id,
             key: encoded_key,
-            expected_value: value,
         },
         skipped_pcs,
         replacements,
@@ -1235,7 +1222,7 @@ fn site_can_attempt_lookup_pattern_removal(
         return true;
     }
 
-    info.has_speculative_invalidation()
+    info.requires_entry_presence_check()
         && uses.other_uses.is_empty()
         && null_check_pc.is_some_and(|pc| null_check_is_fallthrough_non_null(&program.insns[pc]))
 }
@@ -1534,7 +1521,10 @@ fn lookup_pattern_removal_is_safe(
         return false;
     }
 
-    let min_removed_pc = *skipped_pcs.iter().min().expect("skipped_pcs non-empty (checked above)");
+    let min_removed_pc = *skipped_pcs
+        .iter()
+        .min()
+        .expect("skipped_pcs non-empty (checked above)");
     let end_pc = lookup_call_pc + insn_width(&program.insns[lookup_call_pc]);
     let mut pc = min_removed_pc;
     while pc < end_pc {

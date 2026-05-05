@@ -40,23 +40,6 @@ pub struct MapInfo {
     pub key_size: u32,
     pub value_size: u32,
     pub max_entries: u32,
-    pub name: String,
-    #[serde(default, skip_serializing_if = "is_zero_u32")]
-    pub map_flags: u32,
-    #[serde(default, skip_serializing_if = "is_zero_u32")]
-    pub ifindex: u32,
-    #[serde(default, skip_serializing_if = "is_zero_u32")]
-    pub btf_id: u32,
-    #[serde(default, skip_serializing_if = "is_zero_u32")]
-    pub btf_key_type_id: u32,
-    #[serde(default, skip_serializing_if = "is_zero_u32")]
-    pub btf_value_type_id: u32,
-    #[serde(default, skip_serializing_if = "is_zero_u32")]
-    pub btf_vmlinux_value_type_id: u32,
-    #[serde(default, skip_serializing_if = "is_zero_u32")]
-    pub btf_vmlinux_id: u32,
-    #[serde(default, skip_serializing_if = "is_zero_u64")]
-    pub map_extra: u64,
 }
 
 #[derive(Clone, Debug)]
@@ -236,15 +219,6 @@ fn get_map_infos(map_ids: &[u32]) -> Result<Vec<MapInfo>> {
             key_size: info.key_size,
             value_size: info.value_size,
             max_entries: info.max_entries,
-            name: c_name_i8(&info.name),
-            map_flags: info.map_flags,
-            ifindex: info.ifindex,
-            btf_id: info.btf_id,
-            btf_key_type_id: info.btf_key_type_id,
-            btf_value_type_id: info.btf_value_type_id,
-            btf_vmlinux_value_type_id: info.btf_vmlinux_value_type_id,
-            btf_vmlinux_id: info.btf_vmlinux_id,
-            map_extra: info.map_extra,
         });
     }
     Ok(maps)
@@ -445,11 +419,6 @@ fn c_name_u8(bytes: &[u8]) -> String {
     String::from_utf8_lossy(&bytes[..end]).to_string()
 }
 
-fn c_name_i8(bytes: &[std::os::raw::c_char]) -> String {
-    let bytes = bytes.iter().map(|&b| b as u8).collect::<Vec<_>>();
-    c_name_u8(&bytes)
-}
-
 fn prog_type_name(value: u32) -> &'static str {
     match value {
         v if v == kernel_sys::BPF_PROG_TYPE_UNSPEC => "unspec",
@@ -551,12 +520,4 @@ fn attach_type_name(value: u32) -> Option<&'static str> {
         _ => return None,
     };
     Some(name)
-}
-
-fn is_zero_u32(value: &u32) -> bool {
-    *value == 0
-}
-
-fn is_zero_u64(value: &u64) -> bool {
-    *value == 0
 }

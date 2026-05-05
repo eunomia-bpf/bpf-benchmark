@@ -12,7 +12,6 @@ use std::os::fd::{AsFd, AsRawFd, OwnedFd};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -21,7 +20,6 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::bpf;
-use crate::invalidation::{BpfMapValueReader, MapInvalidationTracker};
 
 static NEXT_WORKDIR_ID: AtomicU64 = AtomicU64::new(0);
 /// CLI binary directory set once at startup; None means use PATH lookup.
@@ -239,15 +237,11 @@ struct ApplyOneRequest<'a> {
     prog_id: u32,
     config: &'a CliConfig,
     enabled_passes: &'a [String],
-    invalidation_tracker: Option<&'a SharedInvalidationTracker>,
 }
-
-pub(crate) type SharedInvalidationTracker = Arc<Mutex<MapInvalidationTracker<BpfMapValueReader>>>;
 
 trait KernelOps {
     fn snapshot_program(&mut self, prog_id: u32) -> Result<bpfget::ProgramSnapshot>;
     fn probe_target(&mut self) -> Result<bpfget::TargetJson>;
-    fn bpf_mutated_map_ids(&mut self) -> Result<std::collections::HashSet<u32>>;
     fn rejit(
         &mut self,
         prog_id: u32,
@@ -266,10 +260,6 @@ impl KernelOps for LiveKernelOps {
 
     fn probe_target(&mut self) -> Result<bpfget::TargetJson> {
         bpfget::probe_target_json()
-    }
-
-    fn bpf_mutated_map_ids(&mut self) -> Result<std::collections::HashSet<u32>> {
-        compute_bpf_mutated_map_ids()
     }
 
     fn rejit(
@@ -347,16 +337,15 @@ struct BpfoptPassReport {
 struct BpfoptMapInlineRecord {
     map_id: u32,
     key_hex: String,
-    #[serde(alias = "expected_value_hex")]
-    value_hex: String,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct MapInlineRecord {
     map_id: u32,
     key: Vec<u8>,
-    expected_value: Vec<u8>,
 }
+
+type MapValueSnapshot = BTreeMap<(u32, Vec<u8>), Vec<u8>>;
 
 #[derive(Debug, Serialize)]
 struct MapValuesJson {
@@ -392,10 +381,6 @@ struct TargetKinsnJson {
     btf_id: u32,
     /// Non-zero fd_array index for the BTF module fd (0 = vmlinux, no fd needed).
     call_offset: u32,
-}
-
-pub(crate) fn new_invalidation_tracker() -> SharedInvalidationTracker {
-    Arc::new(Mutex::new(MapInvalidationTracker::new(BpfMapValueReader)))
 }
 
 pub(crate) fn default_worker_count() -> usize {
@@ -462,89 +447,38 @@ fn collect_map_inline_records(reports: &[BpfoptPassReport]) -> Result<Vec<MapInl
                 map_id: record.map_id,
                 key: decode_hex(&record.key_hex)
                     .with_context(|| format!("decode map_inline key for map {}", record.map_id))?,
-                expected_value: decode_hex(&record.value_hex).with_context(|| {
-                    format!("decode map_inline value for map {}", record.map_id)
-                })?,
             });
         }
     }
     Ok(records)
 }
 
-fn collect_inlined_map_entries(map_inline_records: &[MapInlineRecord]) -> Vec<InlinedMapEntry> {
+fn collect_inlined_map_entries(
+    map_inline_records: &[MapInlineRecord],
+    map_values: &MapValueSnapshot,
+) -> Result<Vec<InlinedMapEntry>> {
     let mut deduped: BTreeMap<(u32, String), String> = BTreeMap::new();
     for record in map_inline_records {
-        deduped.insert(
-            (record.map_id, hex_bytes(&record.key)),
-            hex_bytes(&record.expected_value),
-        );
+        let value = map_values
+            .get(&(record.map_id, record.key.clone()))
+            .with_context(|| {
+                format!(
+                    "map_inline report referenced map {} key {} missing from live snapshot",
+                    record.map_id,
+                    hex_bytes(&record.key)
+                )
+            })?;
+        deduped.insert((record.map_id, hex_bytes(&record.key)), hex_bytes(value));
     }
 
-    deduped
+    Ok(deduped
         .into_iter()
         .map(|((map_id, key_hex), value_hex)| InlinedMapEntry {
             map_id,
             key_hex,
             value_hex,
         })
-        .collect()
-}
-
-fn record_map_inline_records<A, F>(
-    tracker: &mut MapInvalidationTracker<A>,
-    prog_id: u32,
-    map_inline_records: &[MapInlineRecord],
-    mut open_map_fd: F,
-) -> Result<()>
-where
-    F: FnMut(u32) -> Result<OwnedFd>,
-{
-    let mut raw_fds_by_map_id: HashMap<u32, u32> = HashMap::new();
-    let mut owned_fds = Vec::new();
-    let mut tracked_sites = Vec::new();
-    for record in map_inline_records {
-        let map_fd = match raw_fds_by_map_id.get(&record.map_id) {
-            Some(&map_fd) => map_fd,
-            None => {
-                let fd = open_map_fd(record.map_id)?;
-                let raw_fd = fd.as_raw_fd() as u32;
-                raw_fds_by_map_id.insert(record.map_id, raw_fd);
-                owned_fds.push(fd);
-                raw_fd
-            }
-        };
-
-        tracked_sites.push((map_fd, record.key.clone(), record.expected_value.clone()));
-    }
-
-    tracker.remove_prog(prog_id);
-    for fd in owned_fds {
-        tracker.remember_map_fd(fd);
-    }
-    for (map_fd, key, expected_value) in tracked_sites {
-        tracker.record_inline_site(prog_id, map_fd, key, expected_value);
-    }
-
-    Ok(())
-}
-
-fn refresh_invalidation_tracking<F>(
-    tracker: Option<&SharedInvalidationTracker>,
-    prog_id: u32,
-    map_inline_records: &[MapInlineRecord],
-    open_map_fd: F,
-) -> Result<()>
-where
-    F: FnMut(u32) -> Result<OwnedFd>,
-{
-    let Some(tracker) = tracker else {
-        return Ok(());
-    };
-
-    let mut tracker = tracker
-        .lock()
-        .map_err(|_| anyhow!("invalidation tracker lock poisoned"))?;
-    record_map_inline_records(&mut tracker, prog_id, map_inline_records, open_map_fd)
+        .collect())
 }
 
 fn live_bpf_map_lookup(_map: &MapInfoJson, fd: i32, key: &[u8]) -> Result<Option<Vec<u8>>> {
@@ -588,7 +522,6 @@ pub(crate) fn try_apply_one(
     prog_id: u32,
     config: &CliConfig,
     enabled_passes: &[String],
-    invalidation_tracker: Option<&SharedInvalidationTracker>,
 ) -> Result<OptimizeOneResult> {
     let mut kernel = LiveKernelOps;
     try_apply_one_with_map_access(
@@ -596,7 +529,6 @@ pub(crate) fn try_apply_one(
             prog_id,
             config,
             enabled_passes,
-            invalidation_tracker,
         },
         &mut kernel,
         bpf::bpf_map_get_fd_by_id,
@@ -670,14 +602,12 @@ pub(crate) fn try_apply_programs(
     prog_ids: &[u32],
     config: &CliConfig,
     enabled_passes: &[String],
-    invalidation_tracker: Option<&SharedInvalidationTracker>,
 ) -> Result<Vec<ApplyProgramOutcome>> {
     let config = config.clone();
     let passes = enabled_passes.to_vec();
-    let tracker = invalidation_tracker.cloned();
 
     try_apply_programs_with(prog_ids, default_worker_count(), |prog_id| {
-        try_apply_one(prog_id, &config, &passes, tracker.as_ref())
+        try_apply_one(prog_id, &config, &passes)
     })
 }
 
@@ -697,7 +627,6 @@ where
         prog_id,
         config,
         enabled_passes,
-        invalidation_tracker,
     } = request;
     if enabled_passes.is_empty() {
         bail!("no enabled_passes provided by runner");
@@ -747,13 +676,10 @@ where
             .any(|pass| canonical_pass(pass) == "map_inline");
 
         let mut skipped_maps = Vec::<SkippedMapEntry>::new();
+        let mut map_value_snapshot = MapValueSnapshot::new();
         if wants_map_inline {
-            let bpf_mutated = kernel.bpf_mutated_map_ids().with_context(|| {
-                format!("scan loaded BPF programs for kernel-side map writes (prog {prog_id})")
-            })?;
-            skipped_maps = write_live_map_values(
+            (skipped_maps, map_value_snapshot) = write_live_map_values(
                 &snapshot.maps,
-                &bpf_mutated,
                 &map_values_json,
                 &mut open_map_fd,
                 &mut lookup_map_value,
@@ -877,12 +803,7 @@ where
             let pass_bytes = fs::read(&pass_output)
                 .with_context(|| format!("read {}", pass_output.display()))?;
             let pass_insns = decode_insns(&pass_bytes, pass_output.to_string_lossy().as_ref())?;
-            let rejit_result = kernel.rejit(
-                prog_id,
-                &pass_insns,
-                &fd_array,
-                &pass_verifier_log,
-            );
+            let rejit_result = kernel.rejit(prog_id, &pass_insns, &fd_array, &pass_verifier_log);
             let rejit_report = match rejit_result {
                 Ok(report) => report,
                 Err(err) => {
@@ -915,7 +836,8 @@ where
             .map(pass_detail_from_report)
             .collect::<Vec<_>>();
         let map_inline_records = collect_map_inline_records(&reports)?;
-        let inlined_map_entries = collect_inlined_map_entries(&map_inline_records);
+        let inlined_map_entries =
+            collect_inlined_map_entries(&map_inline_records, &map_value_snapshot)?;
         let opt_bytes = current_bytes;
         let final_insn_count = insn_count_from_bytes(&opt_bytes, "opt.bin")?;
         let changed = opt_bytes != orig_bytes;
@@ -939,18 +861,6 @@ where
         let committed_passes_before_failure = failure_artifacts
             .as_ref()
             .map(|artifacts| artifacts.committed_passes);
-
-        if last_rejit {
-            refresh_invalidation_tracking(
-                invalidation_tracker,
-                prog_id,
-                &map_inline_records,
-                &mut open_map_fd,
-            )
-            .with_context(|| {
-                format!("refresh map-inline invalidation tracking for prog {prog_id}")
-            })?;
-        }
 
         let passes_applied = passes
             .iter()
@@ -1114,29 +1024,22 @@ fn pass_detail_from_report(report: &BpfoptPassReport) -> PassDetail {
 
 fn write_live_map_values<F, G, H>(
     maps: &[MapInfoJson],
-    bpf_mutated: &std::collections::HashSet<u32>,
     output: &Path,
     open_map_fd: &mut F,
     lookup_map_value: &mut G,
     scan_map_keys: &mut H,
-) -> Result<Vec<SkippedMapEntry>>
+) -> Result<(Vec<SkippedMapEntry>, MapValueSnapshot)>
 where
     F: FnMut(u32) -> Result<OwnedFd>,
     G: FnMut(&MapInfoJson, i32, &[u8]) -> Result<Option<Vec<u8>>>,
     H: FnMut(&MapInfoJson, i32) -> Result<Vec<Vec<u8>>>,
 {
     let mut entries_by_map = BTreeMap::<u32, BTreeMap<Vec<u8>, Option<Vec<u8>>>>::new();
+    let mut value_snapshot = MapValueSnapshot::new();
     let mut skipped = Vec::<SkippedMapEntry>::new();
 
     for map in maps {
         if !is_map_inlineable_map_type(map.map_type) {
-            continue;
-        }
-        if bpf_mutated.contains(&map.map_id) {
-            skipped.push(SkippedMapEntry {
-                map_id: map.map_id,
-                reason: "mutated by kernel-side BPF program".to_string(),
-            });
             continue;
         }
         let fd = open_map_fd(map.map_id)
@@ -1160,8 +1063,7 @@ where
                     });
                     continue;
                 }
-                return Err(err)
-                    .with_context(|| format!("scan live keys for map {}", map.map_id));
+                return Err(err).with_context(|| format!("scan live keys for map {}", map.map_id));
             }
         };
         for key in keys {
@@ -1179,6 +1081,9 @@ where
                     hex_bytes(&key)
                 );
             }
+            if let Some(value) = value.as_ref() {
+                value_snapshot.insert((map.map_id, key.clone()), value.clone());
+            }
             entries_by_map
                 .entry(map.map_id)
                 .or_default()
@@ -1187,7 +1092,7 @@ where
     }
 
     write_map_values_snapshot(maps, &entries_by_map, output)?;
-    Ok(skipped)
+    Ok((skipped, value_snapshot))
 }
 
 fn write_map_values_snapshot(
@@ -1229,70 +1134,6 @@ fn is_array_like_map(map_type: u32) -> bool {
         map_type,
         kernel_sys::BPF_MAP_TYPE_ARRAY | kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY
     )
-}
-
-// Helpers that mutate a map's contents from inside a BPF program. Programs that
-// call any of these on a map make that map unsafe for map_inline constantization
-// because the map value can change without going through user-space (so the
-// MapInvalidationTracker user-space watcher cannot observe the write).
-const BPF_FUNC_MAP_UPDATE_ELEM: i32 = 2;
-const BPF_FUNC_MAP_DELETE_ELEM: i32 = 3;
-const BPF_FUNC_MAP_PUSH_ELEM: i32 = 87;
-const BPF_FUNC_MAP_POP_ELEM: i32 = 88;
-
-fn is_bpf_helper_call(insn: &kernel_sys::bpf_insn) -> bool {
-    let call_code = ((kernel_sys::BPF_JMP | kernel_sys::BPF_CALL) & 0xff) as u8;
-    insn.code == call_code && insn.src_reg() == 0
-}
-
-fn program_writes_to_any_map(insns: &[kernel_sys::bpf_insn]) -> bool {
-    insns.iter().any(|insn| {
-        is_bpf_helper_call(insn)
-            && matches!(
-                insn.imm,
-                BPF_FUNC_MAP_UPDATE_ELEM
-                    | BPF_FUNC_MAP_DELETE_ELEM
-                    | BPF_FUNC_MAP_PUSH_ELEM
-                    | BPF_FUNC_MAP_POP_ELEM,
-            )
-    })
-}
-
-/// Enumerate all loaded BPF programs and return the set of map ids that any
-/// program mutates from kernel-side BPF code (via `bpf_map_update_elem` and
-/// friends). Used to gate map_inline so the daemon never feeds a BPF-mutated
-/// map to bpfopt. Race: programs may be unloaded mid-enumeration; ENOENT on
-/// open is treated as "program disappeared" and skipped.
-fn compute_bpf_mutated_map_ids() -> Result<std::collections::HashSet<u32>> {
-    use std::os::fd::AsFd;
-    let mut mutated = std::collections::HashSet::new();
-    let mut start_id = 0u32;
-    loop {
-        let Some(prog_id) = kernel_sys::prog_get_next_id(start_id)
-            .context("enumerate loaded BPF programs for kernel-side write detection")?
-        else {
-            break;
-        };
-        start_id = prog_id;
-        let Some(fd) = kernel_sys::prog_try_get_fd_by_id(prog_id)
-            .with_context(|| format!("open BPF program id {prog_id} for write detection"))?
-        else {
-            continue;
-        };
-        let insns = kernel_sys::prog_get_original(fd.as_fd())
-            .with_context(|| format!("read original bytecode for BPF program id {prog_id}"))?;
-        if !program_writes_to_any_map(&insns) {
-            continue;
-        }
-        let info = kernel_sys::obj_get_info_by_fd(fd.as_fd())
-            .with_context(|| format!("read info for BPF program id {prog_id}"))?;
-        let map_ids = kernel_sys::prog_map_ids(fd.as_fd(), info.nr_map_ids)
-            .with_context(|| format!("read map ids for BPF program id {prog_id}"))?;
-        for map_id in map_ids {
-            mutated.insert(map_id);
-        }
-    }
-    Ok(mutated)
 }
 
 fn is_map_inlineable_map_type(map_type: u32) -> bool {
@@ -1995,15 +1836,6 @@ mod tests {
                 key_size: 4,
                 value_size: 4,
                 max_entries: 8,
-                name: "array_map".to_string(),
-                map_flags: 0,
-                ifindex: 0,
-                btf_id: 0,
-                btf_key_type_id: 0,
-                btf_value_type_id: 0,
-                btf_vmlinux_value_type_id: 0,
-                btf_vmlinux_id: 0,
-                map_extra: 0,
             },
             MapInfoJson {
                 map_id: 222,
@@ -2011,21 +1843,11 @@ mod tests {
                 key_size: 4,
                 value_size: 4,
                 max_entries: 8,
-                name: "hash_map".to_string(),
-                map_flags: 0,
-                ifindex: 0,
-                btf_id: 0,
-                btf_key_type_id: 0,
-                btf_value_type_id: 0,
-                btf_vmlinux_value_type_id: 0,
-                btf_vmlinux_id: 0,
-                map_extra: 0,
             },
         ];
 
-        let skipped = write_live_map_values(
+        let (skipped, _) = write_live_map_values(
             &maps,
-            &std::collections::HashSet::new(),
             &output,
             &mut |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
             &mut |map, _fd, key| {
@@ -2066,15 +1888,6 @@ mod tests {
                 key_size: 4,
                 value_size: 4,
                 max_entries: 1,
-                name: "overflow_map".to_string(),
-                map_flags: 0,
-                ifindex: 0,
-                btf_id: 0,
-                btf_key_type_id: 0,
-                btf_value_type_id: 0,
-                btf_vmlinux_value_type_id: 0,
-                btf_vmlinux_id: 0,
-                map_extra: 0,
             },
             MapInfoJson {
                 map_id: 20,
@@ -2082,21 +1895,11 @@ mod tests {
                 key_size: 4,
                 value_size: 4,
                 max_entries: 8,
-                name: "normal_map".to_string(),
-                map_flags: 0,
-                ifindex: 0,
-                btf_id: 0,
-                btf_key_type_id: 0,
-                btf_value_type_id: 0,
-                btf_vmlinux_value_type_id: 0,
-                btf_vmlinux_id: 0,
-                map_extra: 0,
             },
         ];
 
-        let skipped = write_live_map_values(
+        let (skipped, _) = write_live_map_values(
             &maps,
-            &std::collections::HashSet::new(),
             &output,
             &mut |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
             &mut |_map, _fd, _key| Ok(Some(42u32.to_le_bytes().to_vec())),
@@ -2358,7 +2161,6 @@ mod tests {
                     prog_id: 42,
                     config: &self.config,
                     enabled_passes,
-                    invalidation_tracker: None,
                 },
                 kernel,
                 |_map_id| -> Result<OwnedFd> { bail!("test did not expect map fd opens") },
@@ -2409,10 +2211,6 @@ mod tests {
     impl KernelOps for MockKernelOps {
         fn snapshot_program(&mut self, prog_id: u32) -> Result<bpfget::ProgramSnapshot> {
             Ok(test_snapshot(prog_id))
-        }
-
-        fn bpf_mutated_map_ids(&mut self) -> Result<std::collections::HashSet<u32>> {
-            Ok(std::collections::HashSet::new())
         }
 
         fn probe_target(&mut self) -> Result<bpfget::TargetJson> {

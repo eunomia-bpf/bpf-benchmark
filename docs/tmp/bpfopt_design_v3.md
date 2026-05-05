@@ -8,7 +8,7 @@ bpfopt-suite v3 的稳定边界是：
 
 - `bpfopt`：standalone pure bytecode CLI，只做 `struct bpf_insn[]` 变换；一次 invocation 只跑一个 `--pass <name>`。
 - `bpfprof`：standalone profiling CLI，负责 PMU/per-site profile。
-- `bpfrejit-daemon`：runner socket + JSON 边界，负责 live discovery、map invalidation、runner 提供 pass list 的 per-pass orchestration、minimal fd-array 构造、每个 pass 后的 `BPF_PROG_REJIT(log_level=2)`。
+- `bpfrejit-daemon`：runner socket + JSON 边界，负责 live discovery、runner 提供 pass list 的 per-pass orchestration、minimal fd-array 构造、每个 pass 后的 `BPF_PROG_REJIT(log_level=2)`。
 - `bpfget`：daemon-owned library，只做 live program snapshot 和 target probing。
 - `kernel-sys`：唯一 BPF syscall 边界。
 
@@ -21,7 +21,7 @@ bpfopt-suite v3 的稳定边界是：
 | `bpfopt` | standalone CLI | BPF 字节码单 pass 优化器，stdin/stdout 传 raw bytecode | 否 |
 | `bpfprof` | standalone CLI | 采集 PMU/per-site profile | 是 |
 | `bpfget` | daemon-owned lib | 读取原始 bytecode、prog info、map metadata、target kinsn capability | 是 |
-| `bpfrejit-daemon` | standalone daemon | runner socket、watch、map invalidation、per-pass ReJIT | 是 |
+| `bpfrejit-daemon` | standalone daemon | runner socket、watch、per-pass ReJIT | 是 |
 | `kernel-sys` | shared lib | libbpf/libbpf-sys wrappers 和 fork syscall wrappers | 是 |
 
 典型 runner path：
@@ -126,11 +126,10 @@ daemon 是事件源 + runner socket boundary + kernel syscall orchestrator。
 职责：
 
 1. watch 新 BPF 程序加载。
-2. 检测 map invalidation。
-3. 维护 runner socket + JSON protocol。
-4. 对 `optimize` 请求执行 snapshot -> per-pass `bpfopt` CLI -> per-pass `BPF_PROG_REJIT`。
-5. 将每次成功 ReJIT 的 verifier log 解析为 register states，作为后续 pass side-input。
-6. 对 `optimize` 的 `prog_ids` 列表使用 per-program worker pool；默认 worker 数为 `min(num_cpus, 16)`，小 VM 中减半。
+2. 维护 runner socket + JSON protocol。
+3. 对 `optimize` 请求执行 snapshot -> per-pass `bpfopt` CLI -> per-pass `BPF_PROG_REJIT`。
+4. 将每次成功 ReJIT 的 verifier log 解析为 register states，作为后续 pass side-input。
+5. 对 `optimize` 的 `prog_ids` 列表使用 per-program worker pool；默认 worker 数为 `min(num_cpus, 16)`，小 VM 中减半。
 
 不做的事：
 
@@ -206,7 +205,6 @@ daemon/
   crates/bpfget/         # live program snapshot + target probing only
   src/commands.rs        # socket command orchestration + per-pass ReJIT
   src/server.rs          # socket server
-  src/invalidation.rs    # map invalidation watch
 ```
 
 Standalone CLI binary crates (`bpfopt`, `bpfprof`, `bpfrejit-daemon`) must not depend on each other at compile time. Runtime composition is through stdin/stdout and side-input files only.
