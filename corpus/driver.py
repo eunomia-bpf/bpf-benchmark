@@ -88,6 +88,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="Disable loading kinsn modules for this corpus run.",
     )
+    parser.add_argument(
+        "--keep-failure-artifacts",
+        action="store_true",
+        help="Persist daemon failure-artifact tarballs under details/failure-artifacts/ for debug; default discards them.",
+    )
     args = parser.parse_args(argv)
     if args.samples is not None and int(args.samples) < 0:
         raise SystemExit("--samples must be >= 0")
@@ -684,7 +689,10 @@ def run_suite(
     ) as daemon_session:
         prepared_daemon_session = prepare_daemon_session(
             daemon_session,
-            failure_artifacts_dir=artifact_session.run_dir / "details" / "failure-artifacts",
+            failure_artifacts_dir=(
+                artifact_session.run_dir / "details" / "failure-artifacts"
+                if args.keep_failure_artifacts else None
+            ),
         )
 
         with enable_bpf_stats():

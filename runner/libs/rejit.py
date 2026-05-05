@@ -240,8 +240,9 @@ def _write_failure_workdir_tar(
         return
     if not isinstance(workdir_tar_b64, str):
         raise RuntimeError(f"daemon response field workdir_tar_b64 for prog {prog_id} must be a string")
+    # Caller passes failure_artifacts_dir=None to deliberately discard the tar.
     if failure_artifacts_dir is None:
-        raise RuntimeError(f"daemon returned workdir_tar_b64 for prog {prog_id} without failure_artifacts_dir")
+        return
     failure_artifacts_dir.mkdir(parents=True, exist_ok=True)
     tar_path = failure_artifacts_dir / f"{prog_id}.tar.gz"
     tar_path.write_bytes(base64.b64decode(workdir_tar_b64, validate=True))
