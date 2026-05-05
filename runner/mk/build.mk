@@ -51,83 +51,45 @@ ACTIVE_TEST_NEGATIVE_BUILD_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT
 ACTIVE_TEST_UNITTEST_PRIMARY := $(ACTIVE_TEST_UNITTEST_BUILD_DIR)/rejit_regression
 ACTIVE_TEST_NEGATIVE_PRIMARY := $(ACTIVE_TEST_NEGATIVE_BUILD_DIR)/adversarial_rejit
 RUNNER_RUNTIME_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/runner-runtime.Dockerfile
-KERNEL_FORK_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/kernel-fork.Dockerfile
 KATRAN_ARTIFACTS_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/katran-artifacts.Dockerfile
 BPFREJIT_INSTALL_SCRIPT := $(RUNNER_DIR)/scripts/bpfrejit-install
-KERNEL_FORK_COMMIT_SHORT_LEN := 7
-KERNEL_FORK_COMMIT := $(shell cd "$(KERNEL_DIR)" && hash=$$(git rev-parse HEAD) && printf '%.$(KERNEL_FORK_COMMIT_SHORT_LEN)s\n' "$$hash")
-KERNEL_FORK_COMMIT_X86 := $(KERNEL_FORK_COMMIT)
-KERNEL_FORK_COMMIT_ARM64 := $(KERNEL_FORK_COMMIT)
 X86_RUNNER_RUNTIME_IMAGE := bpf-benchmark/runner-runtime:x86_64
 ARM64_RUNNER_RUNTIME_IMAGE := bpf-benchmark/runner-runtime:arm64
-X86_KERNEL_FORK_IMAGE := bpf-benchmark/kernel-fork:x86_64-$(KERNEL_FORK_COMMIT_X86)
-ARM64_KERNEL_FORK_IMAGE := bpf-benchmark/kernel-fork:arm64-$(KERNEL_FORK_COMMIT_ARM64)
 X86_KATRAN_ARTIFACTS_IMAGE := bpf-benchmark/katran-artifacts:x86_64
 ARM64_KATRAN_ARTIFACTS_IMAGE := bpf-benchmark/katran-artifacts:arm64
 GHCR_IMAGE_PREFIX ?= ghcr.io/eunomia-bpf
-GHCR_KERNEL_FORK_IMAGE_REPOSITORY := $(GHCR_IMAGE_PREFIX)/bpf-benchmark-kernel-fork
 GHCR_KATRAN_ARTIFACTS_IMAGE_REPOSITORY := $(GHCR_IMAGE_PREFIX)/bpf-benchmark-katran-artifacts
-X86_KERNEL_FORK_GHCR_IMAGE := $(GHCR_KERNEL_FORK_IMAGE_REPOSITORY):x86_64-$(KERNEL_FORK_COMMIT_X86)
-ARM64_KERNEL_FORK_GHCR_IMAGE := $(GHCR_KERNEL_FORK_IMAGE_REPOSITORY):arm64-$(KERNEL_FORK_COMMIT_ARM64)
 X86_KATRAN_ARTIFACTS_GHCR_IMAGE := $(GHCR_KATRAN_ARTIFACTS_IMAGE_REPOSITORY):x86_64
 ARM64_KATRAN_ARTIFACTS_GHCR_IMAGE := $(GHCR_KATRAN_ARTIFACTS_IMAGE_REPOSITORY):arm64
 X86_RUNNER_RUNTIME_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/x86_64-runner-runtime.image.tar
 ARM64_RUNNER_RUNTIME_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/arm64-runner-runtime.image.tar
-X86_KERNEL_FORK_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/x86_64-kernel-fork-$(KERNEL_FORK_COMMIT_X86).image.tar
-ARM64_KERNEL_FORK_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/arm64-kernel-fork-$(KERNEL_FORK_COMMIT_ARM64).image.tar
 X86_KATRAN_ARTIFACTS_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/x86_64-katran-artifacts.image.tar
 ARM64_KATRAN_ARTIFACTS_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/arm64-katran-artifacts.image.tar
-ACTIVE_KERNEL_FORK_IMAGE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_KERNEL_FORK_IMAGE),$(X86_KERNEL_FORK_IMAGE))
 ACTIVE_KATRAN_ARTIFACTS_IMAGE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_KATRAN_ARTIFACTS_IMAGE),$(X86_KATRAN_ARTIFACTS_IMAGE))
-ACTIVE_KERNEL_FORK_GHCR_IMAGE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_KERNEL_FORK_GHCR_IMAGE),$(X86_KERNEL_FORK_GHCR_IMAGE))
 ACTIVE_KATRAN_ARTIFACTS_GHCR_IMAGE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_KATRAN_ARTIFACTS_GHCR_IMAGE),$(X86_KATRAN_ARTIFACTS_GHCR_IMAGE))
 ACTIVE_RUNNER_RUNTIME_IMAGE_TAR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_RUNNER_RUNTIME_IMAGE_TAR),$(X86_RUNNER_RUNTIME_IMAGE_TAR))
-ACTIVE_KERNEL_FORK_IMAGE_TAR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_KERNEL_FORK_IMAGE_TAR),$(X86_KERNEL_FORK_IMAGE_TAR))
 ACTIVE_KATRAN_ARTIFACTS_IMAGE_TAR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR),$(X86_KATRAN_ARTIFACTS_IMAGE_TAR))
-KERNEL_FORK_BUILD_PLATFORM ?= linux/amd64
-X86_KERNEL_FORK_PULL_PLATFORM := $(KERNEL_FORK_BUILD_PLATFORM)
-ARM64_KERNEL_FORK_PULL_PLATFORM := $(KERNEL_FORK_BUILD_PLATFORM)
 X86_KATRAN_ARTIFACTS_PULL_PLATFORM := linux/amd64
 ARM64_KATRAN_ARTIFACTS_PULL_PLATFORM := linux/arm64
 X86_RUNTIME_KERNEL_DIR := $(ARTIFACT_ROOT)/runtime-kernel/x86_64
 X86_RUNTIME_KERNEL_IMAGE := $(X86_RUNTIME_KERNEL_DIR)/bzImage
 ACTIVE_X86_KINSN_SOURCE_DIR := $(ROOT_DIR)/module/x86
 ACTIVE_KINSN_SOURCE_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/module/arm64,$(ACTIVE_X86_KINSN_SOURCE_DIR))
-USE_HOST_KERNEL_BUILD ?= 1
-HOST_BUILD_ROOT ?= $(ACTIVE_BUILD_ARTIFACT_ROOT)/repo-build/host
+HOST_BUILD_ROOT := $(ACTIVE_BUILD_ARTIFACT_ROOT)/repo-build/host
 HOST_KERNEL_BUILD_DIR_X86 := $(HOST_BUILD_ROOT)/kernel/x86_64
 HOST_KERNEL_BUILD_DIR_ARM64 := $(HOST_BUILD_ROOT)/kernel/arm64
 HOST_KERNEL_ARTIFACT_DIR_X86 := $(HOST_BUILD_ROOT)/kernel-artifacts/x86_64
 HOST_KERNEL_ARTIFACT_DIR_ARM64 := $(HOST_BUILD_ROOT)/kernel-artifacts/arm64
-HOST_KERNEL_ARTIFACT_STAMP_X86 := $(HOST_KERNEL_ARTIFACT_DIR_X86)/.host-kernel-artifacts.stamp
-HOST_KERNEL_ARTIFACT_STAMP_ARM64 := $(HOST_KERNEL_ARTIFACT_DIR_ARM64)/.host-kernel-artifacts.stamp
-HOST_KINSN_BUILD_DIR_X86 := $(HOST_BUILD_ROOT)/kinsn-build/x86_64
-HOST_KINSN_BUILD_DIR_ARM64 := $(HOST_BUILD_ROOT)/kinsn-build/arm64
 HOST_KINSN_DIR_X86 := $(HOST_BUILD_ROOT)/kinsn/x86_64
 HOST_KINSN_DIR_ARM64 := $(HOST_BUILD_ROOT)/kinsn/arm64
-HOST_KERNEL_BUILD_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(HOST_KERNEL_BUILD_DIR_ARM64),$(HOST_KERNEL_BUILD_DIR_X86))
-HOST_KERNEL_ARTIFACT_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(HOST_KERNEL_ARTIFACT_DIR_ARM64),$(HOST_KERNEL_ARTIFACT_DIR_X86))
-HOST_KINSN_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(HOST_KINSN_DIR_ARM64),$(HOST_KINSN_DIR_X86))
-HOST_KERNEL_MAKE_FLAGS_ARM64 := ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
-HOST_KERNEL_MAKE_FLAGS_X86 := ARCH=x86_64
-HOST_KERNEL_MAKE_FLAGS := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(HOST_KERNEL_MAKE_FLAGS_ARM64),$(HOST_KERNEL_MAKE_FLAGS_X86))
-HOST_KERNEL_IMAGE_X86 := $(HOST_KERNEL_BUILD_DIR_X86)/arch/x86/boot/bzImage
-HOST_KERNEL_IMAGE_ARM64 := $(HOST_KERNEL_BUILD_DIR_ARM64)/arch/arm64/boot/Image
-HOST_KERNEL_EFI_IMAGE_ARM64 := $(HOST_KERNEL_BUILD_DIR_ARM64)/arch/arm64/boot/vmlinuz.efi
-HOST_KERNEL_IMAGE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(HOST_KERNEL_IMAGE_ARM64),$(HOST_KERNEL_IMAGE_X86))
+HOST_KERNEL_IMAGE_X86 := $(HOST_KERNEL_ARTIFACT_DIR_X86)/kernel/bzImage
+HOST_KERNEL_IMAGE_ARM64 := $(HOST_KERNEL_ARTIFACT_DIR_ARM64)/kernel/Image
+HOST_KERNEL_MANIFEST_X86 := $(HOST_KERNEL_ARTIFACT_DIR_X86)/manifest.json
+HOST_KERNEL_MANIFEST_ARM64 := $(HOST_KERNEL_ARTIFACT_DIR_ARM64)/manifest.json
 HOST_KINSN_MODULES_X86 := $(patsubst %.o,%,$(shell awk '/^obj-m[[:space:]]*\+=/ { print $$3 }' "$(ROOT_DIR)/module/x86/Makefile" 2>/dev/null))
 HOST_KINSN_MODULES_ARM64 := $(patsubst %.o,%,$(shell awk '/^obj-m[[:space:]]*\+=/ { print $$3 }' "$(ROOT_DIR)/module/arm64/Makefile" 2>/dev/null))
 HOST_KINSN_KO_FILES_X86 := $(addprefix $(HOST_KINSN_DIR_X86)/,$(addsuffix .ko,$(HOST_KINSN_MODULES_X86)))
 HOST_KINSN_KO_FILES_ARM64 := $(addprefix $(HOST_KINSN_DIR_ARM64)/,$(addsuffix .ko,$(HOST_KINSN_MODULES_ARM64)))
-HOST_KINSN_KO_FILES := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(HOST_KINSN_KO_FILES_ARM64),$(HOST_KINSN_KO_FILES_X86))
-RUNNER_RUNTIME_KERNEL_ARTIFACT_STAGE := $(if $(filter 1,$(USE_HOST_KERNEL_BUILD)),runner-runtime-kernel-artifacts-host,runner-runtime-kernel-artifacts-docker)
-RUNNER_RUNTIME_KINSN_ARTIFACT_STAGE := $(if $(filter 1,$(USE_HOST_KERNEL_BUILD)),runner-runtime-kinsn-artifacts-host,runner-runtime-kinsn-artifacts-docker)
-X86_RUNNER_RUNTIME_KERNEL_DEPS := $(if $(filter 1,$(USE_HOST_KERNEL_BUILD)),$(HOST_KERNEL_ARTIFACT_STAMP_X86) $(HOST_KINSN_KO_FILES_X86),$(X86_KERNEL_FORK_IMAGE_TAR))
-ARM64_RUNNER_RUNTIME_KERNEL_DEPS := $(if $(filter 1,$(USE_HOST_KERNEL_BUILD)),$(HOST_KERNEL_ARTIFACT_STAMP_ARM64) $(HOST_KINSN_KO_FILES_ARM64),$(ARM64_KERNEL_FORK_IMAGE_TAR))
-X86_RUNNER_RUNTIME_KERNEL_LOAD := $(if $(filter 1,$(USE_HOST_KERNEL_BUILD)),true,docker load -i "$(X86_KERNEL_FORK_IMAGE_TAR)")
-ARM64_RUNNER_RUNTIME_KERNEL_LOAD := $(if $(filter 1,$(USE_HOST_KERNEL_BUILD)),true,docker load -i "$(ARM64_KERNEL_FORK_IMAGE_TAR)")
-X86_RUNNER_RUNTIME_HOST_CONTEXT_ARGS := $(if $(filter 1,$(USE_HOST_KERNEL_BUILD)),--build-context runner-runtime-host-kernel-artifacts="$(HOST_KERNEL_ARTIFACT_DIR_X86)" --build-context runner-runtime-host-kinsn-artifacts="$(HOST_KINSN_DIR_X86)",)
-ARM64_RUNNER_RUNTIME_HOST_CONTEXT_ARGS := $(if $(filter 1,$(USE_HOST_KERNEL_BUILD)),--build-context runner-runtime-host-kernel-artifacts="$(HOST_KERNEL_ARTIFACT_DIR_ARM64)" --build-context runner-runtime-host-kinsn-artifacts="$(HOST_KINSN_DIR_ARM64)",)
 ACTIVE_KATRAN_REQUIRED := $(REPO_KATRAN_ROOT)/bin/katran_server_grpc $(REPO_KATRAN_ROOT)/bpf/balancer.bpf.o $(REPO_KATRAN_ROOT)/bpf/healthchecking_ipip.bpf.o $(REPO_KATRAN_ROOT)/bpf/xdp_root.bpf.o
 
 REQUIRE_IMAGE_BUILD = @if [ "$(BPFREJIT_IMAGE_BUILD)" != "1" ]; then echo "$@ must be run from the runner Dockerfile with BPFREJIT_IMAGE_BUILD=1" >&2; exit 1; fi
@@ -212,8 +174,6 @@ CORPUS_RUNTIME_SOURCE_FILES = $(shell find "$(ROOT_DIR)/corpus" \( -path '*/__py
 KERNEL_BUILD_META_FILES = $(shell find "$(KERNEL_DIR)" \( -path '*/.git' -o -path '*/build*' -o -path '*/.cache' \) -prune -o -type f \( -name 'Makefile' -o -name 'Kconfig*' -o -name '*.mk' -o -path '*/scripts/config' \) -print 2>/dev/null)
 KERNEL_SOURCE_FILES = $(shell find "$(KERNEL_DIR)" \( -path '*/.git' -o -path '*/build*' -o -path '*/.cache' \) -prune -o -type f \( -name '*.c' -o -name '*.h' -o -name '*.S' -o -name '*.lds' -o -name '*.dts' -o -name '*.dtsi' -o -name '*.sh' \) -print 2>/dev/null)
 HOST_KERNEL_SOURCE_FILES = $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES) $(DEFCONFIG_SRC) $(ARM64_DEFCONFIG_SRC) $(BUILD_RULE_FILES)
-KERNEL_FORK_IMAGE_SOURCE_FILES = $(KERNEL_FORK_CONTAINERFILE) \
-	$(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES) $(DEFCONFIG_SRC) $(ARM64_DEFCONFIG_SRC)
 KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES = $(ROOT_DIR)/Makefile $(KATRAN_ARTIFACTS_BUILD_RULE_FILE) \
 	$(KATRAN_ARTIFACTS_CONTAINERFILE) $(DOCKERIGNORE_FILE) $(KATRAN_SOURCE_FILES) $(BPFTOOL_SOURCE_FILES)
 RUNNER_RUNTIME_IMAGE_SOURCE_FILES = $(BUILD_RULE_FILES) $(RUNNER_RUNTIME_CONTAINERFILE) $(DOCKERIGNORE_FILE) \
@@ -229,172 +189,75 @@ BUILD_INPUT_SOURCE_FILES = $(sort \
 	$(LIBBPF_SOURCE_FILES) $(VENDOR_LINUX_RUNTIME_SOURCE_FILES) \
 	$(RUNNER_RUNTIME_SOURCE_FILES) $(RUNNER_SCRIPT_SOURCE_FILES) $(MICRO_RUNTIME_SOURCE_FILES) $(CORPUS_RUNTIME_SOURCE_FILES) \
 	$(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES) \
-	$(KERNEL_FORK_CONTAINERFILE) $(RUNNER_RUNTIME_CONTAINERFILE) $(KATRAN_ARTIFACTS_CONTAINERFILE) $(DOCKERIGNORE_FILE))
+	$(RUNNER_RUNTIME_CONTAINERFILE) $(KATRAN_ARTIFACTS_CONTAINERFILE) $(DOCKERIGNORE_FILE))
 
 $(BUILD_INPUT_SOURCE_FILES): ;
 
 .PHONY: FORCE
 FORCE:
 
-.PHONY: host-kernel host-kernel-x86 host-kernel-arm64 host-kinsn host-kinsn-x86 host-kinsn-arm64
-host-kernel: $(HOST_KERNEL_IMAGE)
-host-kernel-x86: $(HOST_KERNEL_IMAGE_X86)
-host-kernel-arm64: $(HOST_KERNEL_IMAGE_ARM64)
-host-kinsn: $(HOST_KINSN_KO_FILES)
+.PHONY: host-kernel-x86 host-kernel-arm64 host-kinsn-x86 host-kinsn-arm64
+host-kernel-x86: $(HOST_KERNEL_MANIFEST_X86)
+host-kernel-arm64: $(HOST_KERNEL_MANIFEST_ARM64)
 host-kinsn-x86: $(HOST_KINSN_KO_FILES_X86)
 host-kinsn-arm64: $(HOST_KINSN_KO_FILES_ARM64)
 
-$(HOST_KERNEL_BUILD_DIR_X86) $(HOST_KERNEL_BUILD_DIR_ARM64) \
-$(HOST_KERNEL_ARTIFACT_DIR_X86) $(HOST_KERNEL_ARTIFACT_DIR_ARM64) \
-$(HOST_KINSN_BUILD_DIR_X86) $(HOST_KINSN_BUILD_DIR_ARM64) \
-$(HOST_KINSN_DIR_X86) $(HOST_KINSN_DIR_ARM64):
-	mkdir -p "$@"
-
-$(HOST_KERNEL_ARTIFACT_STAMP_X86) $(HOST_KERNEL_IMAGE_X86) $(HOST_KERNEL_BUILD_DIR_X86)/Module.symvers &: $(HOST_KERNEL_SOURCE_FILES) | $(HOST_KERNEL_BUILD_DIR_X86) $(HOST_KERNEL_ARTIFACT_DIR_X86)
-	@case "$(IMAGE_BUILD_JOBS)" in ''|*[!0-9]*|0) echo "IMAGE_BUILD_JOBS must be a positive integer: $(IMAGE_BUILD_JOBS)" >&2; exit 1 ;; esac
-	rm -rf "$(HOST_KERNEL_ARTIFACT_DIR_X86)" "$(HOST_KERNEL_BUILD_DIR_X86)/.host-modules-install"
-	mkdir -p "$(HOST_KERNEL_BUILD_DIR_X86)" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/kernel" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/headers" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/modules"
+# Build the fork kernel + modules + extmod-build headers natively on the host.
+# Group target (&:) declares the rule produces all named outputs in one invocation.
+$(HOST_KERNEL_IMAGE_X86) $(HOST_KERNEL_ARTIFACT_DIR_X86)/kernel/Module.symvers $(HOST_KERNEL_MANIFEST_X86) &: $(HOST_KERNEL_SOURCE_FILES)
+	rm -rf "$(HOST_KERNEL_ARTIFACT_DIR_X86)" "$(HOST_KERNEL_BUILD_DIR_X86)/.modinst"
+	mkdir -p "$(HOST_KERNEL_BUILD_DIR_X86)" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/kernel" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/modules"
 	cp "$(DEFCONFIG_SRC)" "$(HOST_KERNEL_BUILD_DIR_X86)/.config"
-	"$(KERNEL_DIR)/scripts/config" --file "$(HOST_KERNEL_BUILD_DIR_X86)/.config" --enable BLK_DEV_LOOP
-	"$(KERNEL_DIR)/scripts/config" --file "$(HOST_KERNEL_BUILD_DIR_X86)/.config" --enable VIRTIO_CONSOLE
-	"$(KERNEL_DIR)/scripts/config" --file "$(HOST_KERNEL_BUILD_DIR_X86)/.config" --enable EXT4_FS
-	"$(KERNEL_DIR)/scripts/config" --file "$(HOST_KERNEL_BUILD_DIR_X86)/.config" --enable JBD2
-	"$(KERNEL_DIR)/scripts/config" --file "$(HOST_KERNEL_BUILD_DIR_X86)/.config" --enable FS_MBCACHE
-	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" $(HOST_KERNEL_MAKE_FLAGS_X86) olddefconfig
-	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" $(HOST_KERNEL_MAKE_FLAGS_X86) bzImage modules -j"$(IMAGE_BUILD_JOBS)"
-	test -s "$(HOST_KERNEL_IMAGE_X86)"
-	test -s "$(HOST_KERNEL_BUILD_DIR_X86)/System.map"
-	test -s "$(HOST_KERNEL_BUILD_DIR_X86)/Module.symvers"
-	test -s "$(HOST_KERNEL_BUILD_DIR_X86)/.config"
-	test -f "$(HOST_KERNEL_BUILD_DIR_X86)/include/config/kernel.release"
-	install -m 0644 "$(HOST_KERNEL_IMAGE_X86)" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/kernel/bzImage"
-	install -m 0644 "$(HOST_KERNEL_BUILD_DIR_X86)/System.map" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/kernel/System.map"
-	install -m 0644 "$(HOST_KERNEL_BUILD_DIR_X86)/Module.symvers" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/kernel/Module.symvers"
-	install -m 0644 "$(HOST_KERNEL_BUILD_DIR_X86)/.config" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/kernel/.config"
-	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" $(HOST_KERNEL_MAKE_FLAGS_X86) INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_X86)/.host-modules-install" DEPMOD=true modules_install >/dev/null
-	kernel_release="$$(tr -d '\n' < "$(HOST_KERNEL_BUILD_DIR_X86)/include/config/kernel.release")"; \
-		test -n "$$kernel_release"; \
-		depmod -b "$(HOST_KERNEL_BUILD_DIR_X86)/.host-modules-install" "$$kernel_release" >/dev/null; \
-		cp -a "$(HOST_KERNEL_BUILD_DIR_X86)/.host-modules-install/lib/modules/$$kernel_release" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/modules/$$kernel_release"; \
-		rm -f "$(HOST_KERNEL_ARTIFACT_DIR_X86)/modules/$$kernel_release/build" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/modules/$$kernel_release/source"; \
-		test -f "$(HOST_KERNEL_ARTIFACT_DIR_X86)/modules/$$kernel_release/kernel/drivers/block/null_blk/null_blk.ko"; \
-		test -f "$(HOST_KERNEL_ARTIFACT_DIR_X86)/modules/$$kernel_release/kernel/net/sched/sch_netem.ko"; \
-		$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" $(HOST_KERNEL_MAKE_FLAGS_X86) INSTALL_HDR_PATH="$(HOST_KERNEL_ARTIFACT_DIR_X86)/headers/usr" headers_install; \
-		cd "$(HOST_KERNEL_BUILD_DIR_X86)"; \
-		srctree="$(KERNEL_DIR)" SRCARCH=x86 MAKE="$(MAKE)" CC=gcc HOSTCC=gcc "$(KERNEL_DIR)/scripts/package/install-extmod-build" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/headers"; \
+	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 olddefconfig
+	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
+	install -m 0644 "$(HOST_KERNEL_BUILD_DIR_X86)/arch/x86/boot/bzImage" "$(HOST_KERNEL_IMAGE_X86)"
+	install -m 0644 "$(HOST_KERNEL_BUILD_DIR_X86)/System.map" "$(HOST_KERNEL_BUILD_DIR_X86)/.config" "$(HOST_KERNEL_BUILD_DIR_X86)/Module.symvers" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/kernel/"
+	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_X86)/.modinst" DEPMOD=true modules_install >/dev/null
+	rel=$$(cat "$(HOST_KERNEL_BUILD_DIR_X86)/include/config/kernel.release"); \
+		depmod -b "$(HOST_KERNEL_BUILD_DIR_X86)/.modinst" "$$rel" >/dev/null; \
+		cp -a "$(HOST_KERNEL_BUILD_DIR_X86)/.modinst/lib/modules/$$rel" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/modules/$$rel"; \
+		rm -f "$(HOST_KERNEL_ARTIFACT_DIR_X86)/modules/$$rel/build" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/modules/$$rel/source"; \
+		$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_HDR_PATH="$(HOST_KERNEL_ARTIFACT_DIR_X86)/headers/usr" headers_install; \
+		cd "$(HOST_KERNEL_BUILD_DIR_X86)" && srctree="$(KERNEL_DIR)" SRCARCH=x86 MAKE="$(MAKE)" CC=gcc HOSTCC=gcc "$(KERNEL_DIR)/scripts/package/install-extmod-build" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/headers"; \
 		install -m 0644 "$(HOST_KERNEL_BUILD_DIR_X86)/vmlinux" "$(HOST_KERNEL_ARTIFACT_DIR_X86)/headers/vmlinux"; \
-		test -f "$(HOST_KERNEL_ARTIFACT_DIR_X86)/headers/Makefile"; \
-		test -f "$(HOST_KERNEL_ARTIFACT_DIR_X86)/headers/Module.symvers"; \
-		test -s "$(HOST_KERNEL_ARTIFACT_DIR_X86)/headers/vmlinux"; \
-		test -f "$(HOST_KERNEL_ARTIFACT_DIR_X86)/headers/include/config/kernel.release"; \
-		test -d "$(HOST_KERNEL_ARTIFACT_DIR_X86)/headers/arch/x86/include"; \
-		printf '{\n  "kernel_release": "%s",\n  "target_arch": "%s",\n  "kernel_image": "%s"\n}\n' "$$kernel_release" "x86_64" "bzImage" >"$(HOST_KERNEL_ARTIFACT_DIR_X86)/manifest.json"
-	rm -rf "$(HOST_KERNEL_BUILD_DIR_X86)/.host-modules-install"
-	touch "$(HOST_KERNEL_ARTIFACT_STAMP_X86)"
+		printf '{"kernel_release":"%s","target_arch":"x86_64","kernel_image":"bzImage"}\n' "$$rel" >"$(HOST_KERNEL_MANIFEST_X86)"
+	rm -rf "$(HOST_KERNEL_BUILD_DIR_X86)/.modinst"
 
-$(HOST_KERNEL_ARTIFACT_STAMP_ARM64) $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_IMAGE_ARM64) $(HOST_KERNEL_BUILD_DIR_ARM64)/Module.symvers &: $(HOST_KERNEL_SOURCE_FILES) | $(HOST_KERNEL_BUILD_DIR_ARM64) $(HOST_KERNEL_ARTIFACT_DIR_ARM64)
-	@case "$(IMAGE_BUILD_JOBS)" in ''|*[!0-9]*|0) echo "IMAGE_BUILD_JOBS must be a positive integer: $(IMAGE_BUILD_JOBS)" >&2; exit 1 ;; esac
-	command -v aarch64-linux-gnu-gcc >/dev/null
-	rm -rf "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)" "$(HOST_KERNEL_BUILD_DIR_ARM64)/.host-modules-install"
-	mkdir -p "$(HOST_KERNEL_BUILD_DIR_ARM64)" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/kernel" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/headers" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/modules"
+$(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_ARTIFACT_DIR_ARM64)/kernel/Module.symvers $(HOST_KERNEL_MANIFEST_ARM64) &: $(HOST_KERNEL_SOURCE_FILES)
+	@command -v aarch64-linux-gnu-gcc >/dev/null
+	rm -rf "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)" "$(HOST_KERNEL_BUILD_DIR_ARM64)/.modinst"
+	mkdir -p "$(HOST_KERNEL_BUILD_DIR_ARM64)" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/kernel" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/modules"
 	cp "$(ARM64_DEFCONFIG_SRC)" "$(HOST_KERNEL_BUILD_DIR_ARM64)/.config"
-	"$(KERNEL_DIR)/scripts/config" --file "$(HOST_KERNEL_BUILD_DIR_ARM64)/.config" --enable BLK_DEV_LOOP
-	"$(KERNEL_DIR)/scripts/config" --file "$(HOST_KERNEL_BUILD_DIR_ARM64)/.config" --enable VIRTIO_CONSOLE
-	"$(KERNEL_DIR)/scripts/config" --file "$(HOST_KERNEL_BUILD_DIR_ARM64)/.config" --enable EXT4_FS
-	"$(KERNEL_DIR)/scripts/config" --file "$(HOST_KERNEL_BUILD_DIR_ARM64)/.config" --enable JBD2
-	"$(KERNEL_DIR)/scripts/config" --file "$(HOST_KERNEL_BUILD_DIR_ARM64)/.config" --enable FS_MBCACHE
-	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" $(HOST_KERNEL_MAKE_FLAGS_ARM64) olddefconfig
-	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" $(HOST_KERNEL_MAKE_FLAGS_ARM64) Image vmlinuz.efi modules -j"$(IMAGE_BUILD_JOBS)"
-	test -s "$(HOST_KERNEL_IMAGE_ARM64)"
-	test -s "$(HOST_KERNEL_EFI_IMAGE_ARM64)"
-	test -s "$(HOST_KERNEL_BUILD_DIR_ARM64)/System.map"
-	test -s "$(HOST_KERNEL_BUILD_DIR_ARM64)/Module.symvers"
-	test -s "$(HOST_KERNEL_BUILD_DIR_ARM64)/.config"
-	test -f "$(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/kernel.release"
-	install -m 0644 "$(HOST_KERNEL_EFI_IMAGE_ARM64)" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/kernel/vmlinuz.efi"
-	install -m 0644 "$(HOST_KERNEL_IMAGE_ARM64)" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/kernel/Image"
-	install -m 0644 "$(HOST_KERNEL_BUILD_DIR_ARM64)/System.map" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/kernel/System.map"
-	install -m 0644 "$(HOST_KERNEL_BUILD_DIR_ARM64)/Module.symvers" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/kernel/Module.symvers"
-	install -m 0644 "$(HOST_KERNEL_BUILD_DIR_ARM64)/.config" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/kernel/.config"
-	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" $(HOST_KERNEL_MAKE_FLAGS_ARM64) INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_ARM64)/.host-modules-install" DEPMOD=true modules_install >/dev/null
-	kernel_release="$$(tr -d '\n' < "$(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/kernel.release")"; \
-		test -n "$$kernel_release"; \
-		depmod -b "$(HOST_KERNEL_BUILD_DIR_ARM64)/.host-modules-install" "$$kernel_release" >/dev/null; \
-		cp -a "$(HOST_KERNEL_BUILD_DIR_ARM64)/.host-modules-install/lib/modules/$$kernel_release" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/modules/$$kernel_release"; \
-		rm -f "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/modules/$$kernel_release/build" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/modules/$$kernel_release/source"; \
-		test -f "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/modules/$$kernel_release/kernel/drivers/block/null_blk/null_blk.ko"; \
-		test -f "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/modules/$$kernel_release/kernel/net/sched/sch_netem.ko"; \
-		$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" $(HOST_KERNEL_MAKE_FLAGS_ARM64) INSTALL_HDR_PATH="$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/headers/usr" headers_install; \
-		cd "$(HOST_KERNEL_BUILD_DIR_ARM64)"; \
-		srctree="$(KERNEL_DIR)" SRCARCH=arm64 MAKE="$(MAKE)" CC=gcc HOSTCC=gcc "$(KERNEL_DIR)/scripts/package/install-extmod-build" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/headers"; \
+	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
+	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image vmlinuz.efi modules -j"$(IMAGE_BUILD_JOBS)"
+	install -m 0644 "$(HOST_KERNEL_BUILD_DIR_ARM64)/arch/arm64/boot/Image" "$(HOST_KERNEL_IMAGE_ARM64)"
+	install -m 0644 "$(HOST_KERNEL_BUILD_DIR_ARM64)/arch/arm64/boot/vmlinuz.efi" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/kernel/vmlinuz.efi"
+	install -m 0644 "$(HOST_KERNEL_BUILD_DIR_ARM64)/System.map" "$(HOST_KERNEL_BUILD_DIR_ARM64)/.config" "$(HOST_KERNEL_BUILD_DIR_ARM64)/Module.symvers" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/kernel/"
+	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_ARM64)/.modinst" DEPMOD=true modules_install >/dev/null
+	rel=$$(cat "$(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/kernel.release"); \
+		depmod -b "$(HOST_KERNEL_BUILD_DIR_ARM64)/.modinst" "$$rel" >/dev/null; \
+		cp -a "$(HOST_KERNEL_BUILD_DIR_ARM64)/.modinst/lib/modules/$$rel" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/modules/$$rel"; \
+		rm -f "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/modules/$$rel/build" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/modules/$$rel/source"; \
+		$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_HDR_PATH="$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/headers/usr" headers_install; \
+		cd "$(HOST_KERNEL_BUILD_DIR_ARM64)" && srctree="$(KERNEL_DIR)" SRCARCH=arm64 MAKE="$(MAKE)" CC=gcc HOSTCC=gcc "$(KERNEL_DIR)/scripts/package/install-extmod-build" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/headers"; \
 		install -m 0644 "$(HOST_KERNEL_BUILD_DIR_ARM64)/vmlinux" "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/headers/vmlinux"; \
-		test -f "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/headers/Makefile"; \
-		test -f "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/headers/Module.symvers"; \
-		test -s "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/headers/vmlinux"; \
-		test -f "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/headers/include/config/kernel.release"; \
-		test -d "$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/headers/arch/arm64/include"; \
-		printf '{\n  "kernel_release": "%s",\n  "target_arch": "%s",\n  "kernel_image": "%s"\n}\n' "$$kernel_release" "arm64" "vmlinuz.efi" >"$(HOST_KERNEL_ARTIFACT_DIR_ARM64)/manifest.json"
-	rm -rf "$(HOST_KERNEL_BUILD_DIR_ARM64)/.host-modules-install"
-	touch "$(HOST_KERNEL_ARTIFACT_STAMP_ARM64)"
+		printf '{"kernel_release":"%s","target_arch":"arm64","kernel_image":"Image"}\n' "$$rel" >"$(HOST_KERNEL_MANIFEST_ARM64)"
+	rm -rf "$(HOST_KERNEL_BUILD_DIR_ARM64)/.modinst"
 
-$(HOST_KINSN_KO_FILES_X86) &: $(HOST_KERNEL_BUILD_DIR_X86)/Module.symvers $(KINSN_SOURCE_FILES_X86) $(BUILD_RULE_FILES) | $(HOST_KINSN_BUILD_DIR_X86) $(HOST_KINSN_DIR_X86)
-	@case "$(IMAGE_BUILD_JOBS)" in ''|*[!0-9]*|0) echo "IMAGE_BUILD_JOBS must be a positive integer: $(IMAGE_BUILD_JOBS)" >&2; exit 1 ;; esac
-	rm -rf "$(HOST_KINSN_BUILD_DIR_X86)" "$(HOST_KINSN_DIR_X86)"
-	mkdir -p "$(HOST_KINSN_BUILD_DIR_X86)" "$(HOST_KINSN_DIR_X86)"
-	find "$(ROOT_DIR)/module/x86" -maxdepth 1 -type f \( -name '*.ko' -o -name '*.o' -o -name '*.mod' -o -name '*.mod.c' -o -name '*.cmd' -o -name 'Module.symvers' -o -name 'modules.order' \) -delete
-	find "$(ROOT_DIR)/module/x86" -maxdepth 1 -type d -name '.tmp_versions' -exec rm -rf {} +
-	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_X86)" $(HOST_KERNEL_MAKE_FLAGS_X86) M="$(ROOT_DIR)/module/x86" MO="$(HOST_KINSN_BUILD_DIR_X86)" modules -j"$(IMAGE_BUILD_JOBS)"
-	install -m 0644 "$(HOST_KINSN_BUILD_DIR_X86)"/*.ko "$(HOST_KINSN_DIR_X86)/"
-	module_count="$$(find "$(HOST_KINSN_DIR_X86)" -maxdepth 1 -type f -name '*.ko' | wc -l)"; test "$$module_count" -eq "$(words $(HOST_KINSN_KO_FILES_X86))"
-	for ko_path in "$(HOST_KINSN_DIR_X86)"/*.ko; do \
-		readelf -S "$$ko_path" | awk '$$2 == ".BTF" { found = 1 } END { exit(found ? 0 : 1) }'; \
-	done
+# kinsn .ko build against the fork kernel; depends on Module.symvers from the kernel rule.
+# kbuild MO= drops .ko/.o/.mod.c/.cmd into one tree; install only .ko to the publish dir.
+$(HOST_KINSN_KO_FILES_X86) &: $(HOST_KERNEL_ARTIFACT_DIR_X86)/kernel/Module.symvers $(KINSN_SOURCE_FILES_X86) $(BUILD_RULE_FILES)
+	rm -rf "$(HOST_KINSN_DIR_X86)" "$(HOST_BUILD_ROOT)/kinsn-build/x86_64"
+	mkdir -p "$(HOST_KINSN_DIR_X86)" "$(HOST_BUILD_ROOT)/kinsn-build/x86_64"
+	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 M="$(ROOT_DIR)/module/x86" MO="$(HOST_BUILD_ROOT)/kinsn-build/x86_64" modules -j"$(IMAGE_BUILD_JOBS)"
+	install -m 0644 "$(HOST_BUILD_ROOT)/kinsn-build/x86_64"/*.ko "$(HOST_KINSN_DIR_X86)/"
 
-$(HOST_KINSN_KO_FILES_ARM64) &: $(HOST_KERNEL_BUILD_DIR_ARM64)/Module.symvers $(KINSN_SOURCE_FILES_ARM64) $(BUILD_RULE_FILES) | $(HOST_KINSN_BUILD_DIR_ARM64) $(HOST_KINSN_DIR_ARM64)
-	@case "$(IMAGE_BUILD_JOBS)" in ''|*[!0-9]*|0) echo "IMAGE_BUILD_JOBS must be a positive integer: $(IMAGE_BUILD_JOBS)" >&2; exit 1 ;; esac
-	command -v aarch64-linux-gnu-gcc >/dev/null
-	rm -rf "$(HOST_KINSN_BUILD_DIR_ARM64)" "$(HOST_KINSN_DIR_ARM64)"
-	mkdir -p "$(HOST_KINSN_BUILD_DIR_ARM64)" "$(HOST_KINSN_DIR_ARM64)"
-	find "$(ROOT_DIR)/module/arm64" -maxdepth 1 -type f \( -name '*.ko' -o -name '*.o' -o -name '*.mod' -o -name '*.mod.c' -o -name '*.cmd' -o -name 'Module.symvers' -o -name 'modules.order' \) -delete
-	find "$(ROOT_DIR)/module/arm64" -maxdepth 1 -type d -name '.tmp_versions' -exec rm -rf {} +
-	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_ARM64)" $(HOST_KERNEL_MAKE_FLAGS_ARM64) M="$(ROOT_DIR)/module/arm64" MO="$(HOST_KINSN_BUILD_DIR_ARM64)" modules -j"$(IMAGE_BUILD_JOBS)"
-	install -m 0644 "$(HOST_KINSN_BUILD_DIR_ARM64)"/*.ko "$(HOST_KINSN_DIR_ARM64)/"
-	module_count="$$(find "$(HOST_KINSN_DIR_ARM64)" -maxdepth 1 -type f -name '*.ko' | wc -l)"; test "$$module_count" -eq "$(words $(HOST_KINSN_KO_FILES_ARM64))"
-	for ko_path in "$(HOST_KINSN_DIR_ARM64)"/*.ko; do \
-		readelf -S "$$ko_path" | awk '$$2 == ".BTF" { found = 1 } END { exit(found ? 0 : 1) }'; \
-	done
-
-$(X86_KERNEL_FORK_IMAGE_TAR): $(KERNEL_FORK_IMAGE_SOURCE_FILES)
-	@mkdir -p "$(dir $@)"
-	@if docker pull --platform "$(X86_KERNEL_FORK_PULL_PLATFORM)" "$(X86_KERNEL_FORK_GHCR_IMAGE)"; then \
-		docker tag "$(X86_KERNEL_FORK_GHCR_IMAGE)" "$(X86_KERNEL_FORK_IMAGE)"; \
-		echo "using GHCR kernel-fork image: $(X86_KERNEL_FORK_GHCR_IMAGE)"; \
-	else \
-		echo "GHCR kernel-fork image unavailable, building locally: $(X86_KERNEL_FORK_IMAGE)"; \
-		docker build --platform "$(KERNEL_FORK_BUILD_PLATFORM)" \
-			--target kernel-fork \
-			--build-arg IMAGE_BUILD_JOBS="$(IMAGE_BUILD_JOBS)" \
-			--build-arg RUN_TARGET_ARCH=x86_64 \
-			-t "$(X86_KERNEL_FORK_IMAGE)" -f "$(KERNEL_FORK_CONTAINERFILE)" "$(ROOT_DIR)"; \
-		docker tag "$(X86_KERNEL_FORK_IMAGE)" "$(X86_KERNEL_FORK_GHCR_IMAGE)"; \
-	fi
-	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(X86_KERNEL_FORK_IMAGE)"; mv -f "$$tmp" "$@"
-
-$(ARM64_KERNEL_FORK_IMAGE_TAR): $(KERNEL_FORK_IMAGE_SOURCE_FILES)
-	@mkdir -p "$(dir $@)"
-	@if docker pull --platform "$(ARM64_KERNEL_FORK_PULL_PLATFORM)" "$(ARM64_KERNEL_FORK_GHCR_IMAGE)"; then \
-		docker tag "$(ARM64_KERNEL_FORK_GHCR_IMAGE)" "$(ARM64_KERNEL_FORK_IMAGE)"; \
-		echo "using GHCR kernel-fork image: $(ARM64_KERNEL_FORK_GHCR_IMAGE)"; \
-	else \
-		echo "GHCR kernel-fork image unavailable, building locally: $(ARM64_KERNEL_FORK_IMAGE)"; \
-		docker build --platform "$(KERNEL_FORK_BUILD_PLATFORM)" \
-			--target kernel-fork \
-			--build-arg IMAGE_BUILD_JOBS="$(ARM64_IMAGE_BUILD_JOBS)" \
-			--build-arg RUN_TARGET_ARCH=arm64 \
-			-t "$(ARM64_KERNEL_FORK_IMAGE)" -f "$(KERNEL_FORK_CONTAINERFILE)" "$(ROOT_DIR)"; \
-		docker tag "$(ARM64_KERNEL_FORK_IMAGE)" "$(ARM64_KERNEL_FORK_GHCR_IMAGE)"; \
-	fi
-	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(ARM64_KERNEL_FORK_IMAGE)"; mv -f "$$tmp" "$@"
+$(HOST_KINSN_KO_FILES_ARM64) &: $(HOST_KERNEL_ARTIFACT_DIR_ARM64)/kernel/Module.symvers $(KINSN_SOURCE_FILES_ARM64) $(BUILD_RULE_FILES)
+	@command -v aarch64-linux-gnu-gcc >/dev/null
+	rm -rf "$(HOST_KINSN_DIR_ARM64)" "$(HOST_BUILD_ROOT)/kinsn-build/arm64"
+	mkdir -p "$(HOST_KINSN_DIR_ARM64)" "$(HOST_BUILD_ROOT)/kinsn-build/arm64"
+	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- M="$(ROOT_DIR)/module/arm64" MO="$(HOST_BUILD_ROOT)/kinsn-build/arm64" modules -j"$(IMAGE_BUILD_JOBS)"
+	install -m 0644 "$(HOST_BUILD_ROOT)/kinsn-build/arm64"/*.ko "$(HOST_KINSN_DIR_ARM64)/"
 
 $(X86_KATRAN_ARTIFACTS_IMAGE_TAR): $(KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES)
 	@mkdir -p "$(dir $@)"
@@ -430,60 +293,39 @@ $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR): $(KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES)
 	fi
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(ARM64_KATRAN_ARTIFACTS_IMAGE)"; mv -f "$$tmp" "$@"
 
-$(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRAN_ARTIFACTS_IMAGE_TAR) $(X86_RUNNER_RUNTIME_KERNEL_DEPS) $(X86_DAEMON_BINARY) $(X86_BPFOPT_BINARIES)
+$(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRAN_ARTIFACTS_IMAGE_TAR) $(HOST_KERNEL_MANIFEST_X86) $(HOST_KINSN_KO_FILES_X86) $(X86_DAEMON_BINARY) $(X86_BPFOPT_BINARIES)
 	@mkdir -p "$(dir $@)"
 	docker load -i "$(X86_KATRAN_ARTIFACTS_IMAGE_TAR)"
-	$(X86_RUNNER_RUNTIME_KERNEL_LOAD)
 	docker build --platform linux/amd64 \
 		--target runner-runtime \
 		--build-context runner-runtime-katran-upstream=docker-image://$(X86_KATRAN_ARTIFACTS_IMAGE) \
-		$(X86_RUNNER_RUNTIME_HOST_CONTEXT_ARGS) \
+		--build-context runner-runtime-host-kernel-artifacts="$(HOST_KERNEL_ARTIFACT_DIR_X86)" \
+		--build-context runner-runtime-host-kinsn-artifacts="$(HOST_KINSN_DIR_X86)" \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
 		--build-arg IMAGE_BUILD_JOBS="$(IMAGE_BUILD_JOBS)" \
 		--build-arg RUN_TARGET_ARCH=x86_64 \
-		--build-arg VENDOR_LINUX_FRAMEWORK_COMMIT="$(KERNEL_FORK_COMMIT_X86)" \
-		--build-arg KERNEL_FORK_IMAGE_PLATFORM="$(KERNEL_FORK_BUILD_PLATFORM)" \
-		--build-arg KERNEL_ARTIFACTS_STAGE="$(RUNNER_RUNTIME_KERNEL_ARTIFACT_STAGE)" \
-		--build-arg KINSN_ARTIFACTS_STAGE="$(RUNNER_RUNTIME_KINSN_ARTIFACT_STAGE)" \
 		--build-arg DAEMON_HOST_BIN_DIR="$(patsubst $(ROOT_DIR)/%,%,$(X86_DAEMON_BIN_DIR))" \
 		--build-arg BPFOPT_HOST_BIN_DIR="$(patsubst $(ROOT_DIR)/%,%,$(X86_BPFOPT_BIN_DIR))" \
 		-t "$(X86_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"; mv -f "$$tmp" "$@"
 
-$(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR) $(ARM64_RUNNER_RUNTIME_KERNEL_DEPS)
+$(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR) $(HOST_KERNEL_MANIFEST_ARM64) $(HOST_KINSN_KO_FILES_ARM64)
 	@mkdir -p "$(dir $@)"
 	docker load -i "$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR)"
-	$(ARM64_RUNNER_RUNTIME_KERNEL_LOAD)
 	docker build --platform linux/arm64 \
 		--target runner-runtime \
 		--build-context runner-runtime-katran-upstream=docker-image://$(ARM64_KATRAN_ARTIFACTS_IMAGE) \
-		$(ARM64_RUNNER_RUNTIME_HOST_CONTEXT_ARGS) \
+		--build-context runner-runtime-host-kernel-artifacts="$(HOST_KERNEL_ARTIFACT_DIR_ARM64)" \
+		--build-context runner-runtime-host-kinsn-artifacts="$(HOST_KINSN_DIR_ARM64)" \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
 		--build-arg IMAGE_BUILD_JOBS="$(ARM64_IMAGE_BUILD_JOBS)" \
 		--build-arg RUN_TARGET_ARCH=arm64 \
-		--build-arg VENDOR_LINUX_FRAMEWORK_COMMIT="$(KERNEL_FORK_COMMIT_ARM64)" \
-		--build-arg KERNEL_FORK_IMAGE_PLATFORM="$(KERNEL_FORK_BUILD_PLATFORM)" \
-		--build-arg KERNEL_ARTIFACTS_STAGE="$(RUNNER_RUNTIME_KERNEL_ARTIFACT_STAGE)" \
-		--build-arg KINSN_ARTIFACTS_STAGE="$(RUNNER_RUNTIME_KINSN_ARTIFACT_STAGE)" \
 		-t "$(ARM64_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(ARM64_RUNNER_RUNTIME_IMAGE)"; mv -f "$$tmp" "$@"
 
-.PHONY: image-kernel-fork-image-tar image-katran-artifacts-image-tar image-runner-runtime-image-tar \
-	image-push-kernel-fork image-push-katran-artifacts
-image-kernel-fork-image-tar: $(ACTIVE_KERNEL_FORK_IMAGE_TAR)
+.PHONY: image-katran-artifacts-image-tar image-runner-runtime-image-tar image-push-katran-artifacts
 image-katran-artifacts-image-tar: $(ACTIVE_KATRAN_ARTIFACTS_IMAGE_TAR)
 image-runner-runtime-image-tar: $(ACTIVE_RUNNER_RUNTIME_IMAGE_TAR)
-
-image-push-kernel-fork:
-	@if docker image inspect "$(ACTIVE_KERNEL_FORK_IMAGE)" >/dev/null 2>&1; then \
-		echo "using local kernel-fork image: $(ACTIVE_KERNEL_FORK_IMAGE)"; \
-	elif [ -f "$(ACTIVE_KERNEL_FORK_IMAGE_TAR)" ]; then \
-		docker load -i "$(ACTIVE_KERNEL_FORK_IMAGE_TAR)"; \
-	else \
-		$(MAKE) image-kernel-fork-image-tar RUN_TARGET_ARCH="$(RUN_TARGET_ARCH)"; \
-	fi
-	docker tag "$(ACTIVE_KERNEL_FORK_IMAGE)" "$(ACTIVE_KERNEL_FORK_GHCR_IMAGE)"
-	docker push "$(ACTIVE_KERNEL_FORK_GHCR_IMAGE)"
 
 image-push-katran-artifacts:
 	@if docker image inspect "$(ACTIVE_KATRAN_ARTIFACTS_IMAGE)" >/dev/null 2>&1; then \

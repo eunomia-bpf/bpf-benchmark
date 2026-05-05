@@ -5,10 +5,6 @@ ARG CILIUM_IMAGE=quay.io/cilium/cilium:v1.19.3@sha256:2e61680593cddca8b6c055f6d4
 ARG CALICO_NODE_IMAGE=quay.io/calico/node:v3.31.3@sha256:f2339c4ff3a57228cbc39a1f67ab81abded1997d843e0e0b1e86664c7c4eb6c0
 ARG CALICO_CTL_IMAGE=quay.io/calico/ctl:v3.31.3
 ARG RUN_TARGET_ARCH=x86_64
-ARG VENDOR_LINUX_FRAMEWORK_COMMIT
-ARG KERNEL_FORK_IMAGE_PLATFORM=linux/amd64
-ARG KERNEL_ARTIFACTS_STAGE=runner-runtime-kernel-artifacts-host
-ARG KINSN_ARTIFACTS_STAGE=runner-runtime-kinsn-artifacts-host
 
 FROM docker.io/library/ubuntu:24.04 AS runner-runtime-runtime-base
 
@@ -319,13 +315,9 @@ RUN set -eux; \
     ln -sfn /usr/local/bin/cilium-dbg "${repo_artifact_root}/cilium/bin/cilium-dbg"; \
     ln -sfn /usr/local/bin/otelcol-ebpf-profiler "${repo_artifact_root}/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
 
-FROM scratch AS runner-runtime-kernel-artifacts-host
+FROM scratch AS runner-runtime-kernel-base
 
 COPY --link --from=runner-runtime-host-kernel-artifacts / /artifacts
-
-FROM --platform=${KERNEL_FORK_IMAGE_PLATFORM} bpf-benchmark/kernel-fork:${RUN_TARGET_ARCH}-${VENDOR_LINUX_FRAMEWORK_COMMIT} AS runner-runtime-kernel-artifacts-docker
-
-FROM ${KERNEL_ARTIFACTS_STAGE} AS runner-runtime-kernel-base
 
 FROM runner-runtime-app-artifacts AS runner-runtime-artifacts
 
@@ -392,73 +384,9 @@ RUN set -eux; \
     find ./runner -maxdepth 3 -type f \( -name CMakeCache.txt -o -name cmake_install.cmake -o -name Makefile \) -delete; \
     find ./tests -type f \( \( -name '*.o' ! -name '*.bpf.o' \) -o -name '*.d' -o -name '*.cmd' \) -delete
 
-FROM scratch AS runner-runtime-kinsn-artifacts-host
+FROM scratch AS runner-runtime-kinsn-artifacts
 
 COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn
-
-FROM --platform=${KERNEL_FORK_IMAGE_PLATFORM} runner-runtime-build-base AS runner-runtime-kinsn-artifacts-docker
-
-ARG IMAGE_BUILD_JOBS=4
-ARG KERNEL_FORK_IMAGE_PLATFORM=linux/amd64
-ARG RUN_TARGET_ARCH=x86_64
-
-WORKDIR /src
-
-COPY --link --from=runner-runtime-kernel-base /artifacts /artifacts
-COPY module ./module
-
-RUN --mount=type=cache,target=/tmp/kinsn-build,id=kinsn-build-${RUN_TARGET_ARCH},sharing=locked <<'EOF'
-set -eux
-
-case "${IMAGE_BUILD_JOBS}" in
-    ''|*[!0-9]*|0)
-        echo "IMAGE_BUILD_JOBS must be a positive integer: ${IMAGE_BUILD_JOBS}" >&2
-        exit 1
-        ;;
-esac
-
-case "${RUN_TARGET_ARCH}" in
-    x86_64)
-        kernel_arch=x86_64
-        module_arch=x86
-        cross_compile=
-        expected_modules=6
-        ;;
-    arm64)
-        kernel_arch=arm64
-        module_arch=arm64
-        cross_compile=aarch64-linux-gnu-
-        expected_modules=8
-        command -v aarch64-linux-gnu-gcc >/dev/null
-        ;;
-    *)
-        echo "unsupported RUN_TARGET_ARCH: ${RUN_TARGET_ARCH}" >&2
-        exit 1
-        ;;
-esac
-
-mkdir -p /tmp/kinsn-build /artifacts/kinsn
-find /tmp/kinsn-build -mindepth 1 -maxdepth 1 -exec rm -rf {} +
-find ./module -type f \( \
-    -name '*.ko' -o -name '*.o' -o -name '*.mod' -o -name '*.mod.c' \
-    -o -name '*.cmd' -o -name 'Module.symvers' -o -name 'modules.order' \
-\) -delete
-
-make_args="ARCH=${kernel_arch}"
-if [ -n "${cross_compile}" ]; then
-    make_args="${make_args} CROSS_COMPILE=${cross_compile}"
-fi
-
-make -C /artifacts/headers ${make_args} M="${PWD}/module/${module_arch}" MO=/tmp/kinsn-build modules -j"${IMAGE_BUILD_JOBS}"
-install -m 0644 /tmp/kinsn-build/*.ko /artifacts/kinsn/
-module_count="$(find /artifacts/kinsn -maxdepth 1 -type f -name '*.ko' | wc -l)"
-test "${module_count}" -eq "${expected_modules}"
-for ko_path in /artifacts/kinsn/*.ko; do
-    readelf -S "${ko_path}" | awk '$2 == ".BTF" { found = 1 } END { exit(found ? 0 : 1) }'
-done
-EOF
-
-FROM ${KINSN_ARTIFACTS_STAGE} AS runner-runtime-kinsn-artifacts
 
 FROM runner-runtime-runtime-base AS runner-runtime-daemon-artifact-x86_64
 
