@@ -392,6 +392,7 @@ fn map_inline_skips_hash_lookup_when_snapshot_value_is_null() {
     assert_eq!(report["sites_applied"], 1);
     assert_eq!(report["map_inline_records"].as_array().unwrap().len(), 1);
     assert_eq!(report["map_inline_records"][0]["key_hex"], "02000000");
+    assert_eq!(report["map_inline_records"][0]["value_hex"], "09000000");
 }
 
 #[test]

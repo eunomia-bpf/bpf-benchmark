@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 //! bpfopt CLI entry point.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs;
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
@@ -156,6 +156,10 @@ struct ListPassesArgs {
 struct PassReport {
     pass: String,
     sites_applied: usize,
+    sites_matched: usize,
+    sites_skipped: usize,
+    skip_reasons: BTreeMap<String, usize>,
+    diagnostics: Vec<String>,
     insn_count_before: usize,
     insn_count_after: usize,
     insn_delta: isize,
@@ -167,6 +171,7 @@ struct PassReport {
 struct MapInlineRecordReport {
     map_id: u32,
     key_hex: String,
+    value_hex: String,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -1148,9 +1153,17 @@ fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Res
 }
 
 fn pass_report(result: &PassResult) -> PassReport {
+    let mut skip_reasons = BTreeMap::new();
+    for skip in &result.sites_skipped {
+        *skip_reasons.entry(skip.reason.clone()).or_insert(0) += 1;
+    }
     PassReport {
         pass: result.pass_name.clone(),
         sites_applied: result.sites_applied,
+        sites_matched: result.sites_applied + result.sites_skipped.len(),
+        sites_skipped: result.sites_skipped.len(),
+        skip_reasons,
+        diagnostics: result.diagnostics.clone(),
         insn_count_before: result.insns_before,
         insn_count_after: result.insns_after,
         insn_delta: result.insns_after as isize - result.insns_before as isize,
@@ -1166,6 +1179,7 @@ fn map_inline_record_report(record: &bpfopt::pass::MapInlineRecord) -> MapInline
     MapInlineRecordReport {
         map_id: record.map_id,
         key_hex: hex_bytes(&record.key),
+        value_hex: hex_bytes(&record.value),
     }
 }
 
@@ -1327,6 +1341,7 @@ mod tests {
             map_inline_records: vec![bpfopt::pass::MapInlineRecord {
                 map_id: 7,
                 key: vec![1, 0, 0, 0],
+                value: vec![42, 0, 0, 0],
             }],
             insns_before: 4,
             insns_after: 2,
@@ -1337,7 +1352,7 @@ mod tests {
 
         assert_eq!(report["map_inline_records"][0]["map_id"], 7);
         assert_eq!(report["map_inline_records"][0]["key_hex"], "01000000");
-        assert!(report["map_inline_records"][0].get("value_hex").is_none());
+        assert_eq!(report["map_inline_records"][0]["value_hex"], "2a000000");
     }
 
     #[test]

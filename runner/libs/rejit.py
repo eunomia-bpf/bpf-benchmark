@@ -130,88 +130,6 @@ def _normalize_pass_list(raw: Any) -> list[str]:
     return _ordered_unique_passes(raw) if isinstance(raw, list) else []
 
 
-def _strict_non_negative_int(value: object, *, field_name: str) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise RuntimeError(f"daemon response field {field_name!r} must be a non-negative integer")
-    if value < 0:
-        raise RuntimeError(f"daemon response field {field_name!r} must be a non-negative integer")
-    return value
-
-
-def _normalize_apply_passes(
-    raw_passes: object,
-    *,
-    field_name: str = "passes",
-) -> list[dict[str, object]]:
-    if not isinstance(raw_passes, list):
-        raise RuntimeError(f"daemon response field {field_name!r} must be a list")
-
-    normalized: list[dict[str, object]] = []
-    for index, item in enumerate(raw_passes):
-        if not isinstance(item, Mapping):
-            raise RuntimeError(f"daemon response field {field_name}[{index}] must be an object")
-        pass_name = _pass_name_from_item(item)
-        if not pass_name:
-            raise RuntimeError(
-                f"daemon response field {field_name}[{index}].pass must be a non-empty string"
-            )
-        changed = item.get("changed")
-        if not isinstance(changed, bool):
-            raise RuntimeError(
-                f"daemon response field {field_name}[{index}].changed must be a boolean"
-            )
-        compact: dict[str, object] = {
-            "pass_name": pass_name,
-            "changed": changed,
-            "sites_applied": _strict_non_negative_int(
-                item.get("sites_applied"),
-                field_name=f"{field_name}[{index}].sites_applied",
-            ),
-        }
-        status = str(item.get("status") or "").strip()
-        if status:
-            compact["status"] = status
-        for int_field in ("insns_before", "insns_after"):
-            if int_field in item:
-                compact[int_field] = _strict_non_negative_int(
-                    item.get(int_field),
-                    field_name=f"{field_name}[{index}].{int_field}",
-                )
-        if "insn_delta" in item:
-            insn_delta = item.get("insn_delta")
-            if isinstance(insn_delta, bool) or not isinstance(insn_delta, int):
-                raise RuntimeError(
-                    f"daemon response field {field_name}[{index}].insn_delta must be an integer"
-                )
-            compact["insn_delta"] = insn_delta
-        for text_field in ("error", "verifier_log"):
-            text = str(item.get(text_field) or "").strip()
-            if text:
-                compact[text_field] = text
-        normalized.append(compact)
-    return normalized
-
-
-def _pass_name_from_item(item: Mapping[str, Any]) -> str:
-    return str(item.get("pass_name") or item.get("pass") or "").strip()
-
-
-def _compact_pass_summaries_from_result(result: Mapping[str, Any]) -> list[dict[str, object]]:
-    raw_passes = result.get("passes")
-    if raw_passes is None:
-        return []
-    return _normalize_apply_passes(raw_passes, field_name="passes")
-
-
-def _is_successful_noop_result(result: Mapping[str, Any]) -> bool:
-    return (
-        not str(result.get("error") or "").strip()
-        and int(result.get("exit_code", 0) or 0) == 0
-        and not bool(result.get("applied", False))
-        and not bool(result.get("changed", False))
-    )
-
-
 def _policy_pass_list(raw: Any, *, field_name: str) -> list[str] | None:
     if raw is None:
         return None
@@ -304,153 +222,11 @@ def benchmark_run_provenance() -> dict[str, object]:
         "config": {"enabled_passes": benchmark_rejit_enabled_passes()},
     }
 
-_ARTIFACT_REJIT_RESULT_KEYS = frozenset(
-    {
-        "applied",
-        "changed",
-        "enabled_passes",
-        "error",
-        "exit_code",
-        "inlined_map_entries",
-        "output",
-        "passes",
-        "per_program",
-        "prog_id",
-    }
-)
-
-
-def _compact_single_rejit_result_for_artifact(result: Mapping[str, Any]) -> dict[str, object]:
-    compact: dict[str, object] = {}
-
-    for key in ("prog_id", "applied", "changed", "exit_code"):
-        if key in result:
-            compact[key] = result.get(key)
-
-    if "error" in result:
-        compact["error"] = str(result.get("error") or "")
-
-    enabled_passes = result.get("enabled_passes")
-    if isinstance(enabled_passes, Sequence) and not isinstance(enabled_passes, (str, bytes, bytearray)):
-        compact["enabled_passes"] = [str(name).strip() for name in enabled_passes if str(name).strip()]
-
-    raw_per_program = result.get("per_program")
-    if isinstance(raw_per_program, Mapping):
-        error_programs: list[dict[str, object]] = []
-        noop_programs: list[dict[str, object]] = []
-        for prog_id, record in raw_per_program.items():
-            if not isinstance(record, Mapping):
-                raise RuntimeError(f"daemon response field per_program[{prog_id!r}] must be an object")
-            error = str(record.get("error") or "")
-            exit_code = int(record.get("exit_code", 0) or 0)
-            applied = bool(record.get("applied", False))
-            changed = bool(record.get("changed", False))
-            record_prog_id = int(record.get("prog_id", prog_id) or prog_id)
-            if not error and exit_code == 0 and not applied and not changed:
-                noop_programs.append(
-                    {
-                        "prog_id": record_prog_id,
-                        "applied": False,
-                        "changed": False,
-                        "exit_code": 0,
-                        "passes": _compact_pass_summaries_from_result(record),
-                    }
-                )
-                continue
-            if not error and exit_code == 0:
-                continue
-            error_programs.append(
-                {
-                    "prog_id": record_prog_id,
-                    "applied": applied,
-                    "changed": changed,
-                    "exit_code": exit_code,
-                    "error": error,
-                }
-            )
-        if error_programs:
-            compact["error_programs"] = error_programs
-        if noop_programs:
-            compact["noop_programs"] = noop_programs
-    elif raw_per_program is not None:
-        raise RuntimeError("daemon response field 'per_program' must be an object")
-    elif _is_successful_noop_result(result):
-        compact["passes"] = _compact_pass_summaries_from_result(result)
-
-    return compact
-
-
-def compact_rejit_result_for_artifact(result: Mapping[str, Any] | None) -> dict[str, object] | None:
-    if not isinstance(result, Mapping):
-        return None
-    if any(str(key) in _ARTIFACT_REJIT_RESULT_KEYS for key in result.keys()):
-        return _compact_single_rejit_result_for_artifact(result)
-    return {
-        key: compact_rejit_result_for_artifact(value if isinstance(value, Mapping) else None) if isinstance(value, Mapping) else value
-        for key, value in result.items()
-    }
-
-
-def compact_rejit_results_for_artifact(payload: Any) -> Any:
-    if isinstance(payload, Mapping):
-        compacted: dict[str, Any] = {}
-        for key, value in payload.items():
-            if str(key) == "rejit_result":
-                compacted[key] = compact_rejit_result_for_artifact(
-                    value if isinstance(value, Mapping) else None
-                )
-            else:
-                compacted[key] = compact_rejit_results_for_artifact(value)
-        return compacted
-    if isinstance(payload, list):
-        return [compact_rejit_results_for_artifact(item) for item in payload]
-    return payload
-
-
 def _apply_result_from_response(
     response: dict[str, Any],
-    *,
-    output: str,
-    exit_code: int,
-    enabled_passes: Sequence[str] | None,
 ) -> dict[str, object]:
-    status = str(response.get("status") or "").strip()
-    error = str(response.get("error_message") or "").strip()
-    normalized_enabled_passes = (
-        _normalize_pass_list(list(enabled_passes))
-        if enabled_passes is not None
-        else None
-    )
-    passes: list[dict[str, object]] = []
-    prog_id_value = response.get("prog_id")
-    prog_id = (
-        _strict_non_negative_int(prog_id_value, field_name="prog_id")
-        if prog_id_value is not None
-        else None
-    )
-
-    applied = False
-    changed = False
-    if status == "ok":
-        changed = response.get("changed")
-        if not isinstance(changed, bool):
-            raise RuntimeError("daemon response field 'changed' must be a boolean")
-        passes = _normalize_apply_passes(response.get("passes"), field_name="passes")
-        applied = exit_code == 0 and changed
-        changed = exit_code == 0 and changed
-
-    result = {
-        "applied": applied,
-        "changed": changed,
-        "output": output,
-        "exit_code": exit_code,
-        "enabled_passes": normalized_enabled_passes,
-        "passes": passes,
-        "inlined_map_entries": [dict(e) for e in (response.get("inlined_map_entries") or []) if isinstance(e, Mapping)],
-        "error": error,
-    }
-    if prog_id is not None:
-        result["prog_id"] = prog_id
+    result: dict[str, object] = dict(response)
+    result["error"] = str(response.get("error_message") or "").strip()
     return result
 
 
@@ -555,7 +331,6 @@ def apply_daemon_rejit(
     daemon_proc: subprocess.Popen[str] | None = None,
     daemon_stdout_path: Path | None = None,
     daemon_stderr_path: Path | None = None,
-    failure_artifacts_dir: Path | None = None,
 ) -> dict[str, object]:
     prog_ids = [int(v) for v in (prog_ids or []) if int(v) > 0]
     if not prog_ids:
@@ -570,10 +345,6 @@ def apply_daemon_rejit(
         else None
     )
     per_program: dict[int, dict[str, object]] = {}
-    outputs: list[str] = []
-    exit_code = 0
-    applied = False
-    changed = False
     errors: list[str] = []
 
     payload: dict[str, object] = {"cmd": "optimize", "prog_ids": prog_ids}
@@ -582,20 +353,13 @@ def apply_daemon_rejit(
     _resp = _daemon_request(daemon_socket_path, payload,
                             daemon_proc=daemon_proc, stdout_path=daemon_stdout_path,
                             stderr_path=daemon_stderr_path)
-    response_output = json.dumps(_resp, sort_keys=True)
     if str(_resp.get("status") or "") != "ok":
         msg = str(_resp.get("error_message") or "optimize failed")
         return {
-            "applied": False,
-            "changed": False,
-            "output": response_output,
-            "exit_code": 1,
+            "status": "error",
             "error": msg,
-            "enabled_passes": normalized_enabled_passes,
-            "passes": [],
-            "per_program": {int(pid): {"prog_id": int(pid), "applied": False, "changed": False,
-                                       "output": response_output, "exit_code": 1, "error": msg,
-                                       "enabled_passes": normalized_enabled_passes, "passes": []}
+            "per_program": {int(pid): {"status": "error", "prog_id": int(pid),
+                                       "error": msg}
                             for pid in prog_ids},
         }
 
@@ -618,30 +382,15 @@ def apply_daemon_rejit(
         if not isinstance(record, Mapping):
             raise RuntimeError(f"daemon response field per_program[{prog_id!r}] must be an object")
         record_dict = dict(record)
-        artifacts = record_dict.pop("failure_artifacts", None)
-        if str(record_dict.get("status") or "") == "error" and isinstance(artifacts, Mapping) and failure_artifacts_dir is not None:
-            out_dir = failure_artifacts_dir / "failures" / str(prog_id)
-            out_dir.mkdir(parents=True, exist_ok=True)
-            (out_dir / "verifier_log.txt").write_text(str(artifacts.get("verifier_log") or ""))
-            (out_dir / "pass_error.txt").write_text(str(artifacts.get("pass_error") or ""))
-            partial = artifacts.get("partial_failure_json")
-            (out_dir / "partial_failure.json").write_text(json.dumps(partial, indent=2, sort_keys=True) + "\n")
-        result = _apply_result_from_response(record_dict, output=json.dumps(record_dict, sort_keys=True),
-                                              exit_code=0 if str(record_dict.get("status") or "") == "ok" else 1,
-                                              enabled_passes=normalized_enabled_passes)
+        result = _apply_result_from_response(record_dict)
         per_program[prog_id] = result
-        outputs.append(str(result.get("output") or ""))
-        exit_code = max(exit_code, int(result.get("exit_code", 0) or 0))
-        applied = applied or bool(result.get("applied", False))
-        changed = changed or bool(result.get("changed", False))
         if error := str(result.get("error") or "").strip():
             errors.append(f"prog {prog_id}: {error}")
+    error = "; ".join(errors)
     return {
-        "applied": applied,
-        "changed": changed,
-        "output": "\n".join(o for o in outputs if o), "exit_code": exit_code, "per_program": per_program,
-        "enabled_passes": normalized_enabled_passes,
-        "error": "; ".join(errors),
+        "status": "ok" if not error else "error",
+        "per_program": per_program,
+        "error": error,
     }
 
 
@@ -696,7 +445,7 @@ class DaemonSession:
         enabled_passes: Sequence[str] | None = None,
         failure_artifacts_dir: Path | None = None,
     ) -> dict[str, object]:
+        del failure_artifacts_dir
         return apply_daemon_rejit([int(p) for p in prog_ids if int(p) > 0], enabled_passes=enabled_passes,
                                    daemon_socket_path=self.socket_path, daemon_proc=self.proc,
-                                   daemon_stdout_path=self.stdout_path, daemon_stderr_path=self.stderr_path,
-                                   failure_artifacts_dir=failure_artifacts_dir)
+                                   daemon_stdout_path=self.stdout_path, daemon_stderr_path=self.stderr_path)

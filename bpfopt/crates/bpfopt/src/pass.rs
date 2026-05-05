@@ -544,6 +544,7 @@ pub struct SkipReason {
 pub struct MapInlineRecord {
     pub map_id: u32,
     pub key: Vec<u8>,
+    pub value: Vec<u8>,
 }
 
 /// High-level pass classification used by diagnostics and tests.

@@ -18,6 +18,7 @@ use std::time::{Duration, Instant};
 use anyhow::{anyhow, bail, Context, Result};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 use crate::bpf;
 
@@ -146,7 +147,6 @@ impl OptimizeOneResult {
                 prog_type: 0,
                 orig_insn_count: 0,
                 final_insn_count: 0,
-                insn_delta: 0,
             },
             passes: Vec::new(),
             inlined_map_entries: Vec::new(),
@@ -169,7 +169,6 @@ pub(crate) struct ProgramInfo {
     pub prog_type: u32,
     pub orig_insn_count: usize,
     pub final_insn_count: usize,
-    pub insn_delta: i64,
 }
 
 #[derive(Clone, Debug, Serialize, PartialEq, Eq)]
@@ -186,12 +185,8 @@ pub(crate) struct PassDetail {
     #[serde(rename = "pass")]
     pub pass_name: String,
     pub status: PassStatus,
-    pub sites_applied: usize,
-    pub insns_before: usize,
-    pub insns_after: usize,
-    pub insn_delta: i64,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
+    pub bpfopt_summary: Value,
 }
 
 #[derive(Clone, Debug)]
@@ -241,30 +236,6 @@ fn c_log_string(buf: &[u8]) -> String {
 
 type ProgInfoJson = bpfget::ProgramInfo;
 type MapInfoJson = bpfget::MapInfo;
-
-#[derive(Clone, Debug, Deserialize)]
-struct BpfoptPassReport {
-    pass: String,
-    sites_applied: usize,
-    insn_count_before: usize,
-    insn_count_after: usize,
-    #[serde(default)]
-    map_inline_records: Vec<BpfoptMapInlineRecord>,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-struct BpfoptMapInlineRecord {
-    map_id: u32,
-    key_hex: String,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-struct MapInlineRecord {
-    map_id: u32,
-    key: Vec<u8>,
-}
-
-type MapValueSnapshot = BTreeMap<(u32, Vec<u8>), Vec<u8>>;
 
 #[derive(Debug, Serialize)]
 struct MapValuesJson {
@@ -324,70 +295,37 @@ fn hex_bytes(bytes: &[u8]) -> String {
     out
 }
 
-fn decode_hex(input: &str) -> Result<Vec<u8>> {
-    let mut hex = input
-        .chars()
-        .filter(|ch| !ch.is_ascii_whitespace())
-        .collect::<String>();
-    if let Some(stripped) = hex.strip_prefix("0x") {
-        hex = stripped.to_string();
-    }
-    if !hex.len().is_multiple_of(2) {
-        bail!("hex string has odd length");
-    }
-
-    let bytes = hex.as_bytes();
-    let mut out = Vec::with_capacity(bytes.len() / 2);
-    for pair in bytes.chunks_exact(2) {
-        let hi = hex_nibble(pair[0]).ok_or_else(|| anyhow!("invalid hex digit"))?;
-        let lo = hex_nibble(pair[1]).ok_or_else(|| anyhow!("invalid hex digit"))?;
-        out.push((hi << 4) | lo);
-    }
-    Ok(out)
-}
-
-fn hex_nibble(byte: u8) -> Option<u8> {
-    match byte {
-        b'0'..=b'9' => Some(byte - b'0'),
-        b'a'..=b'f' => Some(byte - b'a' + 10),
-        b'A'..=b'F' => Some(byte - b'A' + 10),
-        _ => None,
-    }
-}
-
-fn collect_map_inline_records(reports: &[BpfoptPassReport]) -> Result<Vec<MapInlineRecord>> {
-    let mut records = Vec::new();
-    for pass in reports {
-        if canonical_pass(&pass.pass) != "map_inline" {
+fn collect_inlined_map_entries(passes: &[PassDetail]) -> Result<Vec<InlinedMapEntry>> {
+    let mut deduped: BTreeMap<(u32, String), String> = BTreeMap::new();
+    for pass in passes {
+        if pass.status != PassStatus::Ok || canonical_pass(&pass.pass_name) != "map_inline" {
             continue;
         }
-        for record in &pass.map_inline_records {
-            records.push(MapInlineRecord {
-                map_id: record.map_id,
-                key: decode_hex(&record.key_hex)
-                    .with_context(|| format!("decode map_inline key for map {}", record.map_id))?,
-            });
+        let Some(records_value) = pass.bpfopt_summary.get("map_inline_records") else {
+            continue;
+        };
+        let records = records_value
+            .as_array()
+            .with_context(|| "map_inline summary field map_inline_records must be an array")?;
+        for (idx, record) in records.iter().enumerate() {
+            let map_id = record
+                .get("map_id")
+                .and_then(Value::as_u64)
+                .filter(|value| *value <= u32::MAX as u64)
+                .with_context(|| format!("map_inline record {idx} missing u32 map_id"))?
+                as u32;
+            let key_hex = required_json_string(record, "key_hex")
+                .with_context(|| format!("map_inline record {idx} for map {map_id}"))?
+                .to_string();
+            let value_hex = required_json_string(record, "value_hex")
+                .with_context(|| format!("map_inline record {idx} for map {map_id}"))?
+                .to_string();
+            if let Some(previous) = deduped.insert((map_id, key_hex.clone()), value_hex.clone()) {
+                if previous != value_hex {
+                    bail!("map_inline report emitted conflicting values for map {map_id} key {key_hex}");
+                }
+            }
         }
-    }
-    Ok(records)
-}
-
-fn collect_inlined_map_entries(
-    map_inline_records: &[MapInlineRecord],
-    map_values: &MapValueSnapshot,
-) -> Result<Vec<InlinedMapEntry>> {
-    let mut deduped: BTreeMap<(u32, String), String> = BTreeMap::new();
-    for record in map_inline_records {
-        let value = map_values
-            .get(&(record.map_id, record.key.clone()))
-            .with_context(|| {
-                format!(
-                    "map_inline report referenced map {} key {} missing from live snapshot",
-                    record.map_id,
-                    hex_bytes(&record.key)
-                )
-            })?;
-        deduped.insert((record.map_id, hex_bytes(&record.key)), hex_bytes(value));
     }
 
     Ok(deduped
@@ -398,6 +336,14 @@ fn collect_inlined_map_entries(
             value_hex,
         })
         .collect())
+}
+
+fn required_json_string<'a>(record: &'a Value, field: &str) -> Result<&'a str> {
+    record
+        .get(field)
+        .and_then(Value::as_str)
+        .filter(|value| !value.is_empty())
+        .with_context(|| format!("missing non-empty {field}"))
 }
 
 fn live_bpf_map_lookup(_map: &MapInfoJson, fd: i32, key: &[u8]) -> Result<Option<Vec<u8>>> {
@@ -510,7 +456,6 @@ pub(crate) fn try_apply_one(
     let target_json = workdir.path().join("target.json");
     let verifier_states_json = workdir.path().join(VERIFIER_STATES_FILE);
     let map_values_json = workdir.path().join(MAP_VALUES_FILE);
-    let opt_bin = workdir.path().join("opt.bin");
     let mut open_map_fd = bpf::bpf_map_get_fd_by_id;
     let mut lookup_map_value = live_bpf_map_lookup;
     let mut scan_map_keys = live_bpf_map_keys;
@@ -529,9 +474,8 @@ pub(crate) fn try_apply_one(
             .iter()
             .any(|pass| canonical_pass(pass) == "map_inline");
 
-        let mut map_value_snapshot = MapValueSnapshot::new();
         if wants_map_inline {
-            map_value_snapshot = write_live_map_values(
+            write_live_map_values(
                 &snapshot.maps,
                 &map_values_json,
                 &mut open_map_fd,
@@ -591,7 +535,6 @@ pub(crate) fn try_apply_one(
         };
 
         let mut current_bytes = orig_bytes.clone();
-        let mut committed_reports = Vec::new();
         let mut verifier_states_ready = false;
         let reports = run_pass_chain(&pass_list, |idx, pass| -> Result<PassDetail> {
             let stem = pass_file_stem(idx, pass);
@@ -604,14 +547,13 @@ pub(crate) fn try_apply_one(
 
             let needs_states = pass_needs_verifier_states(pass);
             if needs_states && !verifier_states_ready {
-                return pass_detail_without_report(
+                return Ok(pass_detail_without_report(
                     pass,
                     PassStatus::SkippedMissingStates,
-                    &current_bytes,
                     Some(format!(
                         "pass {pass} requires verifier states from a previous per-pass ReJIT — insert a `noop` pass before {pass} in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,{pass},...\")"
                     )),
-                );
+                ));
             }
             let target_arg = pass_needs_target(pass).then_some(target_json.as_path());
             let verifier_states_arg = needs_states.then_some(verifier_states_json.as_path());
@@ -639,35 +581,32 @@ pub(crate) fn try_apply_one(
             ) {
                 Ok(report) => report,
                 Err(err) => {
-                    return pass_detail_without_report(
+                    return Ok(pass_detail_without_report(
                         pass,
                         PassStatus::FailedBpfopt,
-                        &current_bytes,
                         Some(format!("{err:#}")),
-                    );
+                    ));
                 }
             };
             let pass_bytes = match fs::read(&pass_output) {
                 Ok(bytes) => bytes,
                 Err(err) => {
-                    return pass_detail_without_report(
+                    return Ok(pass_detail_without_report(
                         pass,
                         PassStatus::FailedBpfopt,
-                        &current_bytes,
                         Some(format!("read {}: {err}", pass_output.display())),
-                    );
+                    ));
                 }
             };
             let pass_insns = match decode_insns(&pass_bytes, pass_output.to_string_lossy().as_ref())
             {
                 Ok(insns) => insns,
                 Err(err) => {
-                    return pass_detail_without_report(
+                    return Ok(pass_detail_without_report(
                         pass,
                         PassStatus::FailedBpfopt,
-                        &current_bytes,
                         Some(format!("{err:#}")),
-                    );
+                    ));
                 }
             };
             let rejit_result = rejit_program(prog_id, &pass_insns, &fd_array, &pass_verifier_log);
@@ -675,6 +614,7 @@ pub(crate) fn try_apply_one(
                 Ok(report) => report,
                 Err(err) => {
                     return Ok(pass_detail_from_report(
+                        pass,
                         &report,
                         PassStatus::FailedRejit,
                         Some(format!("{err:#}")),
@@ -685,17 +625,11 @@ pub(crate) fn try_apply_one(
                 .with_context(|| format!("write verifier states after pass {pass}"))?;
             verifier_states_ready = true;
             current_bytes = pass_bytes;
-            committed_reports.push(report.clone());
-            Ok(pass_detail_from_report(&report, PassStatus::Ok, None))
+            Ok(pass_detail_from_report(pass, &report, PassStatus::Ok, None))
         })?;
-        fs::write(&opt_bin, &current_bytes)
-            .with_context(|| format!("write {}", opt_bin.display()))?;
         let passes = reports;
-        let map_inline_records = collect_map_inline_records(&committed_reports)?;
-        let inlined_map_entries =
-            collect_inlined_map_entries(&map_inline_records, &map_value_snapshot)?;
-        let opt_bytes = current_bytes;
-        let final_insn_count = insn_count_from_bytes(&opt_bytes, "opt.bin")?;
+        let inlined_map_entries = collect_inlined_map_entries(&passes)?;
+        let final_insn_count = insn_count_from_bytes(&current_bytes, "opt.bin")?;
         let status = "ok".to_string();
         Ok(OptimizeOneResult {
             status,
@@ -706,7 +640,6 @@ pub(crate) fn try_apply_one(
                 prog_type: prog_info.prog_type.numeric,
                 orig_insn_count,
                 final_insn_count,
-                insn_delta: final_insn_count as i64 - orig_insn_count as i64,
             },
             passes,
             inlined_map_entries,
@@ -764,7 +697,7 @@ fn run_bpfopt_pass(
     input: &Path,
     output: &Path,
     report: &Path,
-) -> Result<BpfoptPassReport> {
+) -> Result<Value> {
     let mut bpfopt = config.command("bpfopt");
     bpfopt.arg("--pass").arg(pass).arg("--report").arg(report);
     append_bpfopt_context_args(&mut bpfopt, prog_info);
@@ -796,37 +729,26 @@ fn write_verifier_states_for_next_pass(path: &Path, report: &RejitReport) -> Res
 }
 
 fn pass_detail_from_report(
-    report: &BpfoptPassReport,
+    pass: &str,
+    report: &Value,
     status: PassStatus,
     error: Option<String>,
 ) -> PassDetail {
     PassDetail {
-        pass_name: report.pass.clone(),
+        pass_name: pass.to_string(),
         status,
-        sites_applied: report.sites_applied,
-        insns_before: report.insn_count_before,
-        insns_after: report.insn_count_after,
-        insn_delta: report.insn_count_after as i64 - report.insn_count_before as i64,
         error,
+        bpfopt_summary: report.clone(),
     }
 }
 
-fn pass_detail_without_report(
-    pass: &str,
-    status: PassStatus,
-    current_bytes: &[u8],
-    error: Option<String>,
-) -> Result<PassDetail> {
-    let insn_count = insn_count_from_bytes(current_bytes, "current pass input")?;
-    Ok(PassDetail {
+fn pass_detail_without_report(pass: &str, status: PassStatus, error: Option<String>) -> PassDetail {
+    PassDetail {
         pass_name: pass.to_string(),
         status,
-        sites_applied: 0,
-        insns_before: insn_count,
-        insns_after: insn_count,
-        insn_delta: 0,
         error,
-    })
+        bpfopt_summary: Value::Null,
+    }
 }
 
 fn write_live_map_values<F, G, H>(
@@ -835,14 +757,13 @@ fn write_live_map_values<F, G, H>(
     open_map_fd: &mut F,
     lookup_map_value: &mut G,
     scan_map_keys: &mut H,
-) -> Result<MapValueSnapshot>
+) -> Result<()>
 where
     F: FnMut(u32) -> Result<OwnedFd>,
     G: FnMut(&MapInfoJson, i32, &[u8]) -> Result<Option<Vec<u8>>>,
     H: FnMut(&MapInfoJson, i32) -> Result<Vec<Vec<u8>>>,
 {
     let mut entries_by_map = BTreeMap::<u32, BTreeMap<Vec<u8>, Option<Vec<u8>>>>::new();
-    let mut value_snapshot = MapValueSnapshot::new();
 
     for map in maps {
         if !is_map_inlineable_map_type(map.map_type) {
@@ -867,9 +788,6 @@ where
                     hex_bytes(&key)
                 );
             }
-            if let Some(value) = value.as_ref() {
-                value_snapshot.insert((map.map_id, key.clone()), value.clone());
-            }
             entries_by_map
                 .entry(map.map_id)
                 .or_default()
@@ -878,7 +796,7 @@ where
     }
 
     write_map_values_snapshot(maps, &entries_by_map, output)?;
-    Ok(value_snapshot)
+    Ok(())
 }
 
 fn write_map_values_snapshot(
@@ -1394,21 +1312,16 @@ mod tests {
         let mut attempted = Vec::new();
         let reports = run_pass_chain(&pass_list, |idx, pass| {
             attempted.push(pass.to_string());
-            let report = BpfoptPassReport {
-                pass: pass.to_string(),
-                sites_applied: 1,
-                insn_count_before: 1,
-                insn_count_after: 2,
-                map_inline_records: Vec::new(),
-            };
+            let report = serde_json::json!({"pass": pass, "sites_applied": 1});
             Ok(match idx {
-                0 => pass_detail_from_report(&report, PassStatus::Ok, None),
+                0 => pass_detail_from_report(pass, &report, PassStatus::Ok, None),
                 1 => pass_detail_from_report(
+                    pass,
                     &report,
                     PassStatus::FailedRejit,
                     Some("kernel rejected BPF_PROG_REJIT: EINVAL".to_string()),
                 ),
-                2 => pass_detail_from_report(&report, PassStatus::Ok, None),
+                2 => pass_detail_from_report(pass, &report, PassStatus::Ok, None),
                 _ => unreachable!(),
             })
         })
@@ -1642,7 +1555,7 @@ mod tests {
             },
         ];
 
-        let _snapshot = write_live_map_values(
+        write_live_map_values(
             &maps,
             &output,
             &mut |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
@@ -1710,7 +1623,6 @@ mod tests {
                 prog_type: kernel_sys::BPF_PROG_TYPE_XDP,
                 orig_insn_count: 1,
                 final_insn_count: 2,
-                insn_delta: 1,
             },
             passes: Vec::new(),
             inlined_map_entries: Vec::new(),

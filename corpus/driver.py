@@ -37,7 +37,6 @@ from runner.libs.rejit import (
     DaemonSession,
     benchmark_rejit_enabled_passes,
     benchmark_run_provenance,
-    compact_rejit_results_for_artifact,
 )
 from runner.libs.run_artifacts import (
     ArtifactSession,
@@ -559,7 +558,6 @@ def _run_suite_lifecycle_sessions(
             result.rejit_result = active_daemon_session.apply_rejit(
                 result.rejit_prog_ids,
                 enabled_passes=apply_enabled_passes,
-                failure_artifacts_dir=prepared_daemon_session.failure_artifacts_dir,
             )
             _print_progress(
                 "rejit_done",
@@ -683,11 +681,7 @@ def run_suite(
         stdout_path=daemon_log_dir / "daemon.stdout.log",
         stderr_path=daemon_log_dir / "daemon.stderr.log",
     ) as daemon_session:
-        failure_artifacts_dir = daemon_log_dir
-        prepared_daemon_session = prepare_daemon_session(
-            daemon_session,
-            failure_artifacts_dir=failure_artifacts_dir,
-        )
+        prepared_daemon_session = prepare_daemon_session(daemon_session)
 
         with enable_bpf_stats():
             for app in suite.apps:
@@ -841,7 +835,6 @@ def _finalize_partial(
     }
     if fatal_error:
         payload["fatal_error"] = fatal_error
-    payload = compact_rejit_results_for_artifact(payload)
     session.write(
         status="error",
         progress_payload={
@@ -922,7 +915,6 @@ def main(argv: list[str] | None = None) -> int:
     try:
         payload = run_suite(args, suite, artifact_session=session, partial_results=_partial_results)
 
-        payload = compact_rejit_results_for_artifact(payload)
         payload_status = str(payload.get("status") or "error").lower()
         error_message = str(payload.get("fatal_error") or "").strip()
         if payload_status == "ok":

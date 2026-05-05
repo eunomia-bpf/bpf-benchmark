@@ -1209,6 +1209,7 @@ fn build_site_rewrite(
         map_inline_record: MapInlineRecord {
             map_id: info.map_id,
             key: encoded_key,
+            value: inline_value,
         },
         skipped_pcs,
         replacements,
@@ -1319,6 +1320,7 @@ fn build_direct_map_value_load_rewrites(
         map_inline_records.push(MapInlineRecord {
             map_id: map_value.map_id,
             key: map_value.key.clone(),
+            value: map_value.value.clone(),
         });
         record_diagnostic(
             &mut diagnostics,

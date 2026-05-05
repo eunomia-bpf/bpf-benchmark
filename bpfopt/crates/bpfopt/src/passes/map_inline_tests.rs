@@ -366,6 +366,7 @@ fn map_inline_constantizes_snapshot_pseudo_map_value_loads() {
         vec![MapInlineRecord {
             map_id: 901,
             key: 0u32.to_le_bytes().to_vec(),
+            value: vec![0, 0, 0, 0, 42, 0, 0, 0],
         }]
     );
 }
@@ -392,6 +393,7 @@ fn map_inline_constantizes_snapshot_pseudo_map_idx_value_loads() {
         vec![MapInlineRecord {
             map_id: 1901,
             key: 0u32.to_le_bytes().to_vec(),
+            value: vec![0, 0, 0, 0, 99, 0, 0, 0],
         }]
     );
 }
@@ -1537,6 +1539,7 @@ fn map_inline_pass_records_inlined_sites() {
         vec![MapInlineRecord {
             map_id: 115,
             key: 1u32.to_le_bytes().to_vec(),
+            value: vec![7, 0, 0, 0],
         }]
     );
 }

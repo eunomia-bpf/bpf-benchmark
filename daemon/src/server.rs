@@ -300,7 +300,6 @@ mod tests {
                 prog_type: 6,
                 orig_insn_count: 2,
                 final_insn_count: 2,
-                insn_delta: 0,
             },
             passes: Vec::new(),
             inlined_map_entries: Vec::new(),
