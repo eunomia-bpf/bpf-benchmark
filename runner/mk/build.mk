@@ -163,7 +163,6 @@ RUNNER_RUNTIME_SOURCE_FILES = $(shell find "$(RUNNER_DIR)" \( -path "$(RUNNER_DI
 RUNNER_SCRIPT_SOURCE_FILES = $(shell find "$(RUNNER_DIR)/scripts" -type f -print 2>/dev/null)
 MICRO_RUNTIME_SOURCE_FILES = $(shell find "$(MICRO_DIR)" \( -path "$(MICRO_PROGRAM_SOURCE_ROOT)" -o -path '*/__pycache__' -o -path '*/build' -o -path '*/build-*' -o -path '*/jit-dumps' -o -path '*/results' \) -prune -o -type f -print 2>/dev/null)
 CORPUS_RUNTIME_SOURCE_FILES = $(shell find "$(ROOT_DIR)/corpus" \( -path '*/__pycache__' -o -path '*/build' -o -path '*/results' \) -prune -o -type f -print 2>/dev/null)
-E2E_RUNTIME_SOURCE_FILES = $(shell find "$(ROOT_DIR)/e2e" \( -path '*/__pycache__' -o -path '*/results' \) -prune -o -type f -print 2>/dev/null)
 KERNEL_BUILD_META_FILES = $(shell find "$(KERNEL_DIR)" \( -path '*/.git' -o -path '*/build*' -o -path '*/.cache' \) -prune -o -type f \( -name 'Makefile' -o -name 'Kconfig*' -o -name '*.mk' -o -path '*/scripts/config' \) -print 2>/dev/null)
 KERNEL_SOURCE_FILES = $(shell find "$(KERNEL_DIR)" \( -path '*/.git' -o -path '*/build*' -o -path '*/.cache' \) -prune -o -type f \( -name '*.c' -o -name '*.h' -o -name '*.S' -o -name '*.lds' -o -name '*.dts' -o -name '*.dtsi' -o -name '*.sh' \) -print 2>/dev/null)
 KERNEL_FORK_IMAGE_SOURCE_FILES = $(KERNEL_FORK_CONTAINERFILE) $(DOCKERIGNORE_FILE) \
@@ -175,14 +174,14 @@ RUNNER_RUNTIME_IMAGE_SOURCE_FILES = $(BUILD_RULE_FILES) $(RUNNER_RUNTIME_CONTAIN
 	$(MICRO_PROGRAM_SOURCE_FILES) $(KINSN_SOURCE_FILES) \
 	$(LIBBPF_SOURCE_FILES) $(VENDOR_LINUX_RUNTIME_SOURCE_FILES) $(RUNNER_SCRIPT_SOURCE_FILES)
 RUNNER_RUNTIME_IMAGE_LAYER_FILES = $(RUNNER_RUNTIME_SOURCE_FILES) $(MICRO_RUNTIME_SOURCE_FILES) \
-	$(CORPUS_RUNTIME_SOURCE_FILES) $(E2E_RUNTIME_SOURCE_FILES)
+	$(CORPUS_RUNTIME_SOURCE_FILES)
 RUNNER_RUNTIME_IMAGE_INPUT_FILES = $(RUNNER_RUNTIME_IMAGE_SOURCE_FILES) $(RUNNER_RUNTIME_IMAGE_LAYER_FILES)
 BUILD_INPUT_SOURCE_FILES = $(sort \
 	$(DAEMON_SOURCE_FILES) $(BPFOPT_SOURCE_FILES) $(RUNNER_SOURCE_FILES) $(TEST_UNITTEST_SOURCE_FILES) $(TEST_NEGATIVE_SOURCE_FILES) \
 	$(MICRO_PROGRAM_SOURCE_FILES) $(KINSN_SOURCE_FILES) $(KATRAN_SOURCE_FILES) \
 	$(LIBBPF_SOURCE_FILES) $(VENDOR_LINUX_RUNTIME_SOURCE_FILES) \
 	$(RUNNER_RUNTIME_SOURCE_FILES) $(RUNNER_SCRIPT_SOURCE_FILES) $(MICRO_RUNTIME_SOURCE_FILES) $(CORPUS_RUNTIME_SOURCE_FILES) \
-	$(E2E_RUNTIME_SOURCE_FILES) $(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES) \
+	$(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES) \
 	$(KERNEL_FORK_CONTAINERFILE) $(RUNNER_RUNTIME_CONTAINERFILE) $(KATRAN_ARTIFACTS_CONTAINERFILE) $(DOCKERIGNORE_FILE))
 
 $(BUILD_INPUT_SOURCE_FILES): ;

@@ -10,7 +10,6 @@ from typing import Any, Sequence
 
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
-RESULTS_DIR = ROOT_DIR / "e2e" / "results"
 DEFAULT_BPFTOOL_CANDIDATES = (
     ROOT_DIR / "vendor" / "linux-framework" / "tools" / "bpf" / "bpftool" / "bpftool",
     ROOT_DIR / "runner" / "build" / "vendor" / "bpftool" / "bpftool",

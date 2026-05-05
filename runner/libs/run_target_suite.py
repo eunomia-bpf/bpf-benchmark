@@ -118,18 +118,18 @@ def _run_action(target_name: str, suite_name: str, suite_args: list[str] | None 
 
 def _parse_benchmark_suites(mode: str) -> list[str]:
     mode_text = str(mode).strip()
-    allowed_suites = {"micro", "corpus", "e2e"}
-    ordered_suites = ["micro", "corpus", "e2e"]
+    allowed_suites = {"micro", "corpus"}
+    ordered_suites = ["micro", "corpus"]
     if not mode_text:
         _die("benchmark mode is empty")
     if mode_text == "all":
         return ordered_suites
     suites = [suite.strip() for suite in mode_text.split(",")]
     if any(not suite for suite in suites):
-        _die(f"unsupported benchmark mode: {mode}; use one of micro, corpus, e2e, all")
+        _die(f"unsupported benchmark mode: {mode}; use one of micro, corpus, all")
     invalid = [suite for suite in suites if suite not in allowed_suites]
     if invalid:
-        _die(f"unsupported benchmark mode: {mode}; use one of micro, corpus, e2e, all")
+        _die(f"unsupported benchmark mode: {mode}; use one of micro, corpus, all")
     return suites
 
 
@@ -180,7 +180,7 @@ def main(argv: list[str] | None = None) -> None:
         return
     if action == "benchmark":
         if not target_name or not suite_name:
-            _die("usage: run_target_suite.py benchmark <target> <micro|corpus|e2e> [-- suite-args...]")
+            _die("usage: run_target_suite.py benchmark <target> <micro|corpus> [-- suite-args...]")
         _benchmark_action(target_name, suite_name, _suite_args_from_cli(args, 3))
         return
     if action == "terminate":

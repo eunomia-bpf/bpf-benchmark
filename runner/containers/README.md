@@ -9,7 +9,7 @@ Current policy:
 2. The Dockerfiles own the user-space build graph.
 3. The runtime Dockerfile copies only the source groups needed by each layer:
    stable app artifacts, kernel/kinsn artifacts, bpftool and native C++/BPF/test
-   artifacts, Rust daemon artifacts, then runtime Python/config/corpus/e2e data.
+   artifacts, Rust daemon artifacts, then runtime Python/config/corpus data.
    Build-only make rules, source trees, Go/Rust toolchain files, and common
    CMake/Cargo/test intermediates are removed after their artifacts are produced.
 4. `runner/mk/build.mk` keeps the outer host entrypoints for `docker build`,

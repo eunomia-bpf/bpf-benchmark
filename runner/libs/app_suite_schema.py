@@ -19,7 +19,7 @@ class AppSpec:
 
     def workload_for(self, mode: str) -> str:
         normalized = str(mode or "").strip().lower()
-        if normalized not in {"corpus", "e2e"}:
+        if normalized != "corpus":
             raise ValueError(f"unsupported app workload mode: {mode!r}")
         return self.workload
 

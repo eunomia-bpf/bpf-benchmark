@@ -35,7 +35,6 @@ VM_CORPUS_SAMPLES ?= 30
 VM_TEST_TIMEOUT ?= 3600
 VM_MICRO_TIMEOUT ?= 7200
 VM_CORPUS_TIMEOUT ?= 7200
-VM_E2E_TIMEOUT ?= 7200
 DOCKER_BUILD_CACHE_KEEP_STORAGE ?= 50GB
 BENCH      ?=
 FUZZ_ROUNDS ?= 1000
@@ -46,37 +45,35 @@ _VENV_FOUND := $(firstword $(foreach v,$(_VENV_CANDIDATES),$(if $(wildcard $(v)/
 VENV ?= $(_VENV_FOUND)
 PYTHON := $(if $(VENV),$(VENV)/bin/python3,python3)
 export BZIMAGE PYTHON LLVM_DIR RUN_LLVM_DIR
-export VM_TEST_TIMEOUT VM_MICRO_TIMEOUT VM_CORPUS_TIMEOUT VM_E2E_TIMEOUT
+export VM_TEST_TIMEOUT VM_MICRO_TIMEOUT VM_CORPUS_TIMEOUT
 export FUZZ_ROUNDS
 
 # Benchmark args
 ROOT_VM_CORPUS_SAMPLES_IS_EXPLICIT := $(or $(findstring command line,$(origin SAMPLES)),$(findstring environment,$(origin SAMPLES)),$(findstring override,$(origin SAMPLES)))
 ROOT_VM_CORPUS_SAMPLES_VALUE := $(if $(strip $(ROOT_VM_CORPUS_SAMPLES_IS_EXPLICIT)),$(SAMPLES),$(VM_CORPUS_SAMPLES))
 VM_CORPUS_SUITE_ARGS = --samples "$(ROOT_VM_CORPUS_SAMPLES_VALUE)"
-VM_E2E_SUITE_ARGS =
 VM_TEST_COMMON_SUITE_ARGS = --fuzz-rounds "$(FUZZ_ROUNDS)"
 VM_TEST_SUITE_ARGS = --test-mode "$(TEST_MODE)" $(VM_TEST_COMMON_SUITE_ARGS)
 
 .PHONY: check validate daemon-tests \
-	vm-selftest vm-negative-test vm-test vm-micro vm-corpus vm-e2e vm-all \
-	aws-e2e aws-corpus \
-	aws-arm64-test aws-arm64-benchmark aws-arm64-corpus aws-arm64-e2e aws-arm64-terminate \
-	aws-x86-test aws-x86-benchmark aws-x86-corpus aws-x86-e2e aws-x86-terminate \
+	vm-selftest vm-negative-test vm-test vm-micro vm-corpus vm-all \
+	aws-corpus \
+	aws-arm64-test aws-arm64-benchmark aws-arm64-corpus aws-arm64-terminate \
+	aws-x86-test aws-x86-benchmark aws-x86-corpus aws-x86-terminate \
 	lint help clean clean-build clean-results clean-vm-tmp clean-docker-cache
 
 help:
 	@echo "Canonical run targets:"
-	@echo "  VM x86:   vm-selftest vm-negative-test vm-test vm-micro vm-corpus vm-e2e vm-all"
-	@echo "  AWS ARM:  aws-arm64-test aws-arm64-benchmark aws-arm64-corpus aws-arm64-e2e aws-arm64-terminate"
-	@echo "  AWS x86:  aws-x86-test aws-x86-benchmark aws-x86-corpus aws-x86-e2e aws-x86-terminate"
+	@echo "  VM x86:   vm-selftest vm-negative-test vm-test vm-micro vm-corpus vm-all"
+	@echo "  AWS ARM:  aws-arm64-test aws-arm64-benchmark aws-arm64-corpus aws-arm64-terminate"
+	@echo "  AWS x86:  aws-x86-test aws-x86-benchmark aws-x86-corpus aws-x86-terminate"
 	@echo "Params: vm-micro overrides use SAMPLES/WARMUPS/INNER_REPEAT/BENCH; defaults come from runner.libs.suite_args"
 	@echo "        vm-corpus SAMPLES=$(VM_CORPUS_SAMPLES)"
-	@echo "        vm-e2e"
 	@echo "        aws-arm64-test/aws-arm64-benchmark AWS_ARM64_REGION=<region> AWS_ARM64_PROFILE=<profile> AWS_ARM64_ROOT_VOLUME_GB=<override>"
 	@echo "        aws-arm64-test AWS_ARM64_TEST_MODE=<selftest|negative|test>"
-	@echo "        aws-arm64-benchmark AWS_ARM64_BENCH_MODE=<micro|corpus|e2e>"
+	@echo "        aws-arm64-benchmark AWS_ARM64_BENCH_MODE=<micro|corpus>"
 	@echo "        aws-x86-test AWS_X86_REGION=<region> AWS_X86_PROFILE=<profile> AWS_X86_TEST_MODE=<selftest|negative|test>"
-	@echo "        aws-x86-benchmark AWS_X86_BENCH_MODE=<micro|corpus|e2e>"
+	@echo "        aws-x86-benchmark AWS_X86_BENCH_MODE=<micro|corpus>"
 	@echo "Cleanup: clean-build clean-results clean-vm-tmp clean-docker-cache"
 	@echo "Docker GC: make clean-docker-cache DOCKER_BUILD_CACHE_KEEP_STORAGE=$(DOCKER_BUILD_CACHE_KEEP_STORAGE)"
 
@@ -111,10 +108,7 @@ vm-micro: $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(X86_RUNTIME_KERNEL_IMAGE)
 vm-corpus: $(_VM_COMMON_DEPS)
 	$(RUN_TARGET_SUITE_CMD) run x86-kvm corpus -- $(VM_CORPUS_SUITE_ARGS)
 
-vm-e2e: $(_VM_COMMON_DEPS)
-	$(RUN_TARGET_SUITE_CMD) run x86-kvm e2e -- $(VM_E2E_SUITE_ARGS)
-
-vm-all: vm-test vm-micro vm-corpus vm-e2e
+vm-all: vm-test vm-micro vm-corpus
 
 _AWS_ARM64_SUITE_DEPS = $(ARM64_RUNNER_RUNTIME_IMAGE_TAR) $(DAEMON_DIR)/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon
 _AWS_X86_SUITE_DEPS  = $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(DAEMON_DIR)/target/release/bpfrejit-daemon
@@ -128,9 +122,6 @@ aws-arm64-benchmark: $(_AWS_ARM64_SUITE_DEPS)
 aws-arm64-corpus: $(_AWS_ARM64_SUITE_DEPS)
 	$(RUN_TARGET_SUITE_CMD) run aws-arm64 corpus
 
-aws-arm64-e2e: $(_AWS_ARM64_SUITE_DEPS)
-	$(RUN_TARGET_SUITE_CMD) run aws-arm64 e2e
-
 aws-arm64-terminate:
 	$(RUN_TARGET_SUITE_CMD) terminate aws-arm64
 
@@ -143,18 +134,8 @@ aws-x86-benchmark: $(_AWS_X86_SUITE_DEPS)
 aws-x86-corpus: $(_AWS_X86_SUITE_DEPS)
 	$(RUN_TARGET_SUITE_CMD) run aws-x86 corpus
 
-aws-x86-e2e: $(_AWS_X86_SUITE_DEPS)
-	$(RUN_TARGET_SUITE_CMD) run aws-x86 e2e
-
 aws-x86-terminate:
 	$(RUN_TARGET_SUITE_CMD) terminate aws-x86
-
-aws-e2e:
-	case "$(RUN_TARGET_ARCH)" in \
-		arm64) $(MAKE) aws-arm64-e2e ;; \
-		x86_64) $(MAKE) aws-x86-e2e ;; \
-		*) echo "unsupported RUN_TARGET_ARCH for aws-e2e: $(RUN_TARGET_ARCH)" >&2; exit 2 ;; \
-	esac
 
 aws-corpus:
 	case "$(RUN_TARGET_ARCH)" in \

@@ -5,7 +5,7 @@ import unittest
 from http.client import HTTPConnection
 from unittest import mock
 
-from runner.libs import benchmark_catalog, workload
+from runner.libs import workload
 from runner.libs.app_runners import get_app_runner
 from runner.libs.app_runners import cilium as cilium_runner
 
@@ -63,7 +63,6 @@ class WorkloadContractTests(unittest.TestCase):
     def test_stress_ng_os_excludes_timerfd(self) -> None:
         self.assertNotIn("timerfd", workload._STRESS_NG_WORKLOAD_STRESSORS["stress_ng_os"])
         self.assertNotIn("timerfd", workload._STRESS_NG_WORKLOAD_STRESSORS["stress_ng_os_io_network"])
-        self.assertNotIn("timerfd", benchmark_catalog.TRACEE_E2E_WORKLOADS[0]["command"])
 
     def test_interface_bound_network_client_runs_in_root_namespace(self) -> None:
         command = workload._network_client_command(["wrk", "http://198.18.0.2:18080/"], workload.BENCHMARK_IFACE)

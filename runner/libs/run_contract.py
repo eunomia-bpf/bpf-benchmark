@@ -358,8 +358,6 @@ def _build_run_config_mapping(
         run_vm_timeout_seconds = _env_or_default(values, "VM_MICRO_TIMEOUT", run_vm_timeout_seconds)
     elif suite_name == "corpus":
         run_vm_timeout_seconds = _env_or_default(values, "VM_CORPUS_TIMEOUT", run_vm_timeout_seconds)
-    elif suite_name == "e2e":
-        run_vm_timeout_seconds = _env_or_default(values, "VM_E2E_TIMEOUT", run_vm_timeout_seconds)
 
     _validate_test_mode(run_test_mode)
     if not run_remote_python_bin:
@@ -377,7 +375,7 @@ def _build_run_config_mapping(
             _die(f"unsupported test mode: {run_test_mode}")
     elif suite_name == "micro":
         run_native_repos = ""
-    elif suite_name not in ("corpus", "e2e"):
+    elif suite_name != "corpus":
         _die(f"unsupported suite: {suite_name}")
 
     arch = target.get("TARGET_ARCH", "").strip()

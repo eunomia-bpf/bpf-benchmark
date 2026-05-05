@@ -572,7 +572,7 @@ def _ensure_instance_for_suite(ctx: aws_common.AwsExecutorContext) -> str:
 
 def _suite_results_relative_path(suite_name: str) -> str:
     suite = suite_name.strip()
-    if suite in {"micro", "corpus", "e2e"}:
+    if suite in {"micro", "corpus"}:
         return f"{suite}/results"
     if suite == "test":
         return "tests/results"

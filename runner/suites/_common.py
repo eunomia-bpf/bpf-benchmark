@@ -277,7 +277,7 @@ def suite_main_setup(args: argparse.Namespace, default_workspace: str, die: obje
 
 
 # ---------------------------------------------------------------------------
-# Shared runtime env base (corpus / e2e / test share the same core)
+# Shared runtime env base (corpus / test share the same core)
 # ---------------------------------------------------------------------------
 
 def base_suite_runtime_env(
@@ -286,7 +286,7 @@ def base_suite_runtime_env(
     scratch_suffix: str,
     die: object,
 ) -> dict[str, str]:
-    """Build the common portion of the runtime env for corpus/e2e/test suites.
+    """Build the common portion of the runtime env for corpus/test suites.
 
     Sets: TMPDIR, PATH, BPFREJIT_WORKLOAD_TOOL_BIN_DIR (if present),
     BPFREJIT_REPO_ARTIFACT_ROOT, BPFREJIT_REMOTE_PYTHON_BIN,

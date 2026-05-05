@@ -123,7 +123,7 @@ def run_tetragon_workload(spec: Mapping[str, object], duration_s: int) -> Worklo
 
 
 DEFAULT_LOAD_TIMEOUT_S = 45
-DEFAULT_POLICY_DIR = ROOT_DIR / "e2e" / "cases" / "tetragon" / "policies"
+DEFAULT_POLICY_DIR = ROOT_DIR / "runner" / "assets" / "tetragon_policies"
 
 
 def _free_loopback_address() -> str:

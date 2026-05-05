@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import threading
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -11,50 +10,7 @@ from ..workload import WorkloadResult, run_named_workload
 from .base import AppRunner
 from .process_support import ProcessOutputCollector, programs_after, wait_until_program_set_stable
 
-DEFAULT_SCRIPT_DIR = ROOT_DIR / "e2e" / "cases" / "bpftrace" / "scripts"
-
-
-@dataclass(frozen=True)
-class ScriptSpec:
-    name: str
-    script_path: Path
-    workload_spec: Mapping[str, object]
-
-
-SCRIPTS: tuple[ScriptSpec, ...] = (
-    ScriptSpec(
-        name="tcplife",
-        script_path=DEFAULT_SCRIPT_DIR / "tcplife.bt",
-        workload_spec={"kind": "stress_ng_network"},
-    ),
-    ScriptSpec(
-        name="biosnoop",
-        script_path=DEFAULT_SCRIPT_DIR / "biosnoop.bt",
-        workload_spec={"kind": "fio_randrw"},
-    ),
-    ScriptSpec(
-        name="runqlat",
-        script_path=DEFAULT_SCRIPT_DIR / "runqlat.bt",
-        workload_spec={"kind": "stress_ng_scheduler"},
-    ),
-    ScriptSpec(
-        name="tcpretrans",
-        script_path=DEFAULT_SCRIPT_DIR / "tcpretrans.bt",
-        workload_spec={"kind": "stress_ng_network"},
-    ),
-    ScriptSpec(
-        name="capable",
-        script_path=DEFAULT_SCRIPT_DIR / "capable.bt",
-        workload_spec={"kind": "stress_ng_os"},
-    ),
-    ScriptSpec(
-        name="vfsstat",
-        script_path=DEFAULT_SCRIPT_DIR / "vfsstat.bt",
-        workload_spec={"kind": "stress_ng_filesystem"},
-    ),
-)
-
-SCRIPT_BY_NAME: dict[str, ScriptSpec] = {spec.name: spec for spec in SCRIPTS}
+DEFAULT_SCRIPT_DIR = ROOT_DIR / "runner" / "assets" / "bpftrace_scripts"
 
 
 DEFAULT_ATTACH_TIMEOUT_S = 60
@@ -83,11 +39,11 @@ class BpftraceRunner(AppRunner):
     def pid(self) -> int | None:
         return None if self.process is None else int(self.process.pid or 0)
 
-    def _resolve_script_spec(self) -> ScriptSpec:
-        script_spec = SCRIPT_BY_NAME.get(self.script_name)
-        if script_spec is None:
+    def _resolve_script_path(self) -> Path:
+        script_path = (DEFAULT_SCRIPT_DIR / f"{self.script_name}.bt").resolve()
+        if not script_path.exists():
             raise RuntimeError(f"unknown bpftrace script: {self.script_name}")
-        return script_spec
+        return script_path
 
     def _discover_script_programs(self, before_ids: Sequence[int]) -> list[dict[str, object]]:
         programs = [dict(program) for program in programs_after(before_ids)]
@@ -101,8 +57,7 @@ class BpftraceRunner(AppRunner):
         bpftrace_binary = which("bpftrace")
         if bpftrace_binary is None:
             raise RuntimeError("bpftrace is required but not present in PATH")
-        script_spec = self._resolve_script_spec()
-        script_path = script_spec.script_path.resolve()
+        script_path = self._resolve_script_path()
         before_ids = {
             int(record.get("id", 0) or 0)
             for record in bpftool_prog_show_records()

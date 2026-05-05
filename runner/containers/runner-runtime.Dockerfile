@@ -546,7 +546,7 @@ RUN set -eux; \
     esac
 
 COPY --link corpus/bcf ./corpus/bcf
-COPY --link e2e/cases ./e2e/cases
+COPY --link runner/assets ./runner/assets
 COPY runner/__init__.py runner/repos.yaml ./runner/
 COPY runner/libs ./runner/libs
 COPY runner/suites ./runner/suites
@@ -556,12 +556,11 @@ COPY micro/config ./micro/config
 COPY corpus/*.py ./corpus/
 COPY corpus/config ./corpus/config
 COPY corpus/inputs ./corpus/inputs
-COPY e2e/*.py ./e2e/
 
 RUN set -eux; \
-    find ./runner ./micro ./corpus ./e2e -type d -name __pycache__ -prune -exec rm -rf {} +; \
-    find ./e2e/cases/tetragon/policies -type f \( -name '*.yaml' -o -name '*.yml' \) | grep -q .; \
-    mkdir -p micro/results corpus/results e2e/results tests/results /var/tmp/bpfrejit-runtime
+    find ./runner ./micro ./corpus -type d -name __pycache__ -prune -exec rm -rf {} +; \
+    find ./runner/assets/tetragon_policies -type f \( -name '*.yaml' -o -name '*.yml' \) | grep -q .; \
+    mkdir -p micro/results corpus/results tests/results /var/tmp/bpfrejit-runtime
 
 RUN printf '#!/usr/bin/env bash\nexec "$@"\n' > /usr/local/bin/bpfrejit-runtime-entrypoint && \
     chmod +x /usr/local/bin/bpfrejit-runtime-entrypoint

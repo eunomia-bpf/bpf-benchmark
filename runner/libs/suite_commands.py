@@ -12,7 +12,6 @@ from runner.libs.workspace_layout import RUNTIME_IMAGE_WORKSPACE
 _CONTAINER_RESULT_DIR_BY_SUITE = {
     "micro": "micro/results",
     "corpus": "corpus/results",
-    "e2e": "e2e/results",
     "test": "tests/results",
 }
 _RUNTIME_CONTAINER_ENV_PASSTHROUGH = (
@@ -192,22 +191,6 @@ def build_corpus_suite_argv(
     return command
 
 
-def build_e2e_suite_argv(
-    workspace: Path,
-    config: Any,
-    suite_args: list[str],
-    *,
-    die: Any,
-) -> list[str]:
-    command = _build_base_suite_argv(workspace, "runner.suites.e2e", config, die=die)
-    _append_artifact_args(
-        command,
-        native_repos=config.artifacts.native_repos,
-    )
-    command.extend(suite_args)
-    return command
-
-
 def build_test_suite_argv(
     workspace: Path,
     config: Any,
@@ -240,8 +223,6 @@ def build_suite_argv(
         return build_micro_suite_argv(workspace, config, suite_args, die=die)
     if suite_name == "corpus":
         return build_corpus_suite_argv(workspace, config, suite_args, die=die)
-    if suite_name == "e2e":
-        return build_e2e_suite_argv(workspace, config, suite_args, die=die)
     if suite_name == "test":
         return build_test_suite_argv(workspace, config, suite_args, die=die, config_path=config_path)
     die(f"unsupported suite: {suite_name}")

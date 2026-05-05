@@ -77,9 +77,6 @@ def suite_args_from_env(
         args.extend(["--samples", samples])
         return args
 
-    if suite_name == "e2e":
-        return args
-
     if suite_name == "test":
         mode = _prefixed_env(values, prefix, "TEST_MODE", "test") if prefix else _env(values, "TEST_MODE", "test")
         args.extend([

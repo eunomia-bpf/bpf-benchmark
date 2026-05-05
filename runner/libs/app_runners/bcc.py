@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Mapping, Sequence
 
 from .. import ROOT_DIR, tail_text, which
-from ..benchmark_catalog import BCC_TOOL_SPECS
+from ..benchmark_catalog import MACRO_APP_DEFINITIONS
 from ..agent import bpftool_prog_show_records, stop_agent
 from ..workload import WorkloadResult, run_named_workload
 from .base import AppRunner
@@ -201,8 +201,12 @@ def _drain_stream(stream: io.TextIOBase, capture: _TailCapture) -> None:
 
 def inspect_bcc_setup() -> dict[str, object]:
     resolved_tools: dict[str, str] = {}
-    for spec in BCC_TOOL_SPECS:
-        tool_name = spec.name
+    for app in MACRO_APP_DEFINITIONS:
+        if app.runner != "bcc":
+            continue
+        tool_name = str(app.runner_args.get("tool") or "").strip()
+        if not tool_name:
+            continue
         resolved = next((path for name in _tool_binary_names(tool_name) if (path := which(name)) is not None), None)
         if resolved is None:
             return {
