@@ -98,11 +98,12 @@ Docker image layers must be ordered by change frequency (bottom = stable, top = 
 
 Changing Python must NOT trigger recompilation of apps, kernel, or daemon. `RUNNER_RUNTIME_IMAGE_SOURCE_FILES` in build.mk must only include files that participate in compilation, not runtime Python/YAML/config files.
 
-## Supported Apps (8)
-tracee, tetragon, bpftrace, bcc, katran, calico, cilium, otelcol-ebpf-profiler
+## Supported Apps (7)
+tracee, tetragon, bpftrace, bcc, katran, cilium, otelcol-ebpf-profiler
 
 ## Removed Apps
 - **scx**: struct_ops ReJIT crashes the scheduler
 - **suricata**: upstream eBPF assets incompatible with libbpf v1.0+
 - **systemd**: Ubuntu default packages compiled without BPF framework
 - **loxilb**: no arm64 support
+- **calico**: BPF dataplane requires K8s pod model; bare-metal single-veth setup architecturally incompatible (Felix removes host IP from WEP iface)

@@ -890,7 +890,7 @@ def _network_client_command(command: list[str], network_device: str | None = Non
             f"got {normalized_device}"
         )
     # Run the client in the root network namespace so traffic crosses the bpfbench0
-    # veth and hits TC BPF programs attached there (cilium/calico datapath).
+    # veth and hits TC BPF programs attached there (cilium datapath).
     # The HTTP server stays inside bpfbenchns (see _network_http_server), so packets
     # travel: root-ns client → bpfbench0 → bpfbench1/bpfbenchns → server.
     return list(command)

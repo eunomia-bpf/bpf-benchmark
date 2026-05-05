@@ -7,7 +7,6 @@ from unittest import mock
 
 from runner.libs import benchmark_catalog, workload
 from runner.libs.app_runners import get_app_runner
-from runner.libs.app_runners import calico as calico_runner
 from runner.libs.app_runners import cilium as cilium_runner
 
 
@@ -70,7 +69,7 @@ class WorkloadContractTests(unittest.TestCase):
         command = workload._network_client_command(["wrk", "http://198.18.0.2:18080/"], workload.BENCHMARK_IFACE)
 
         # Client must NOT be wrapped in `ip netns exec bpfbenchns` so that HTTP
-        # traffic crosses bpfbench0 and hits TC BPF programs (cilium/calico datapath).
+        # traffic crosses bpfbench0 and hits TC BPF programs (cilium datapath).
         self.assertEqual(command, ["wrk", "http://198.18.0.2:18080/"])
         self.assertNotIn("netns", command)
         self.assertNotIn(workload.BENCHMARK_NETNS, command)
@@ -113,19 +112,6 @@ class WorkloadContractTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, r"wrk.*198\.18\.0\.2"):
                 workload.run_network_load(1, network_device=workload.BENCHMARK_IFACE)
 
-    def test_calico_network_workload_passes_benchmark_device(self) -> None:
-        result = _workload_result()
-        runner = calico_runner.CalicoRunner(workload_kind="network")
-        runner.device = workload.BENCHMARK_IFACE
-        with mock.patch.object(
-            calico_runner,
-            "run_named_workload",
-            return_value=result,
-        ) as run_named:
-            self.assertIs(runner._run_workload(1), result)
-
-        run_named.assert_called_once_with("network", 1, network_device=workload.BENCHMARK_IFACE)
-
     def test_cilium_network_workload_passes_benchmark_device(self) -> None:
         result = _workload_result()
         runner = cilium_runner.CiliumRunner(workload_kind="network")
@@ -141,7 +127,6 @@ class WorkloadContractTests(unittest.TestCase):
 
     def test_corpus_runner_adapter_preserves_network_device_path(self) -> None:
         for runner_name, runner_module in (
-            ("calico", calico_runner),
             ("cilium", cilium_runner),
         ):
             with self.subTest(runner=runner_name):
@@ -162,14 +147,10 @@ class WorkloadContractTests(unittest.TestCase):
                     network_device=workload.BENCHMARK_IFACE,
                 )
 
-    def test_calico_cilium_network_workload_fail_fast_without_device(self) -> None:
-        for runner in (
-            calico_runner.CalicoRunner(workload_kind="network"),
-            cilium_runner.CiliumRunner(workload_kind="network"),
-        ):
-            with self.subTest(runner=type(runner).__name__):
-                with self.assertRaisesRegex(RuntimeError, "could not determine a network device"):
-                    runner._run_workload(1)
+    def test_cilium_network_workload_fail_fast_without_device(self) -> None:
+        runner = cilium_runner.CiliumRunner(workload_kind="network")
+        with self.assertRaisesRegex(RuntimeError, "could not determine a network device"):
+            runner._run_workload(1)
 
 
 if __name__ == "__main__":

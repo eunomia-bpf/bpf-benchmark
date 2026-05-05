@@ -75,7 +75,6 @@ def _adapt_native_process(workload: str, kwargs: dict[str, object]) -> dict[str,
 _RUNNERS = {
     "bcc": ("runner.libs.app_runners.bcc", "BCCRunner", _adapt_bcc),
     "bpftrace": ("runner.libs.app_runners.bpftrace", "BpftraceRunner", _adapt_bpftrace),
-    "calico": ("runner.libs.app_runners.calico", "CalicoRunner", _adapt_native_process),
     "cilium": ("runner.libs.app_runners.cilium", "CiliumRunner", _adapt_native_process),
     "katran": ("runner.libs.app_runners.katran", "KatranRunner", _adapt_katran),
     "otelcol-ebpf-profiler": ("runner.libs.app_runners.otel_profiler", "OtelProfilerRunner", _adapt_native_process),

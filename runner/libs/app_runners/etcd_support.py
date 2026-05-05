@@ -61,7 +61,7 @@ class LocalEtcdSession:
     def start(self) -> "LocalEtcdSession":
         binary = which("etcd")
         if binary is None:
-            raise RuntimeError("etcd is required to run Cilium/Calico without Kubernetes")
+            raise RuntimeError("etcd is required to run Cilium without Kubernetes")
         shutil.rmtree(self.work_dir, ignore_errors=True)
         self.data_dir.mkdir(parents=True, exist_ok=True)
         client_port = _reserve_local_port()

@@ -129,13 +129,6 @@ repos:
     compile_include_dirs:
       - .
 
-  - name: calico
-    url: https://github.com/projectcalico/calico.git
-    branch: master
-    harvest_globs: []
-    compile_include_dirs:
-      - .
-
   - name: coroot-node-agent
     url: https://github.com/coroot/coroot-node-agent.git
     branch: main
