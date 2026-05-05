@@ -93,10 +93,16 @@ struct ConstantStackBytes {
 #[derive(Clone, Debug)]
 struct FrozenMapValue {
     map_id: u32,
+    key: Vec<u8>,
     value: Vec<u8>,
 }
 
-type DirectMapValueLoadRewrites = (BTreeMap<usize, Vec<BpfInsn>>, usize, Vec<String>);
+type DirectMapValueLoadRewrites = (
+    BTreeMap<usize, Vec<BpfInsn>>,
+    usize,
+    Vec<String>,
+    Vec<MapInlineRecord>,
+);
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum KeyPointerOrigin {
@@ -696,7 +702,7 @@ fn run_map_inline_round(
     let mut skipped = Vec::new();
     let mut rewrites = Vec::new();
     let mut diagnostics = Vec::new();
-    let (direct_replacements, direct_sites_applied, direct_diagnostics) =
+    let (direct_replacements, direct_sites_applied, direct_diagnostics, direct_records) =
         build_direct_map_value_load_rewrites(program)?;
     diagnostics.extend(direct_diagnostics);
     let sites = find_map_lookup_sites(&program.insns);
@@ -911,7 +917,7 @@ fn run_map_inline_round(
 
     let mut skip_pcs = HashSet::new();
     let mut replacements: BTreeMap<usize, Vec<BpfInsn>> = direct_replacements;
-    let mut map_inline_records = Vec::new();
+    let mut map_inline_records = direct_records;
     let mut applied = direct_sites_applied;
     let mut removed_any_null_check = false;
 
@@ -1233,6 +1239,7 @@ fn build_direct_map_value_load_rewrites(
     let mut replacements = BTreeMap::new();
     let mut sites_applied = 0usize;
     let mut diagnostics = Vec::new();
+    let mut map_inline_records = Vec::new();
     let mut map_cache: HashMap<MapRefKey, Option<FrozenMapValue>> = HashMap::new();
     let mut pc = 0usize;
 
@@ -1312,6 +1319,10 @@ fn build_direct_map_value_load_rewrites(
             emit_constant_load(insn.dst_reg(), scalar, bpf_size(insn.code)),
         );
         sites_applied += 1;
+        map_inline_records.push(MapInlineRecord {
+            map_id: map_value.map_id,
+            key: map_value.key.clone(),
+        });
         record_diagnostic(
             &mut diagnostics,
             format!(
@@ -1323,7 +1334,7 @@ fn build_direct_map_value_load_rewrites(
         pc += insn_width(insn);
     }
 
-    Ok((replacements, sites_applied, diagnostics))
+    Ok((replacements, sites_applied, diagnostics, map_inline_records))
 }
 
 fn resolve_frozen_map_value(
@@ -1365,7 +1376,7 @@ fn resolve_frozen_map_value(
             }
             Err(err) => return Err(anyhow::Error::msg(err)),
         };
-        Ok(Some(FrozenMapValue { map_id, value }))
+        Ok(Some(FrozenMapValue { map_id, key, value }))
     })();
 
     let cached = resolved?;

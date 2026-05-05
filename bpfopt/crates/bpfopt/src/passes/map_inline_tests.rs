@@ -364,6 +364,13 @@ fn map_inline_constantizes_frozen_pseudo_map_value_loads() {
     assert!(result.program_changed);
     assert_eq!(result.total_sites_applied, 1);
     assert_eq!(program.insns[2], BpfInsn::mov32_imm(2, 42));
+    assert_eq!(
+        result.pass_results[0].map_inline_records,
+        vec![MapInlineRecord {
+            map_id: 901,
+            key: 0u32.to_le_bytes().to_vec(),
+        }]
+    );
 }
 
 #[test]
@@ -386,6 +393,13 @@ fn map_inline_constantizes_frozen_pseudo_map_idx_value_loads() {
     assert!(result.program_changed);
     assert_eq!(result.total_sites_applied, 1);
     assert_eq!(program.insns[2], BpfInsn::mov32_imm(2, 99));
+    assert_eq!(
+        result.pass_results[0].map_inline_records,
+        vec![MapInlineRecord {
+            map_id: 1901,
+            key: 0u32.to_le_bytes().to_vec(),
+        }]
+    );
 }
 
 #[test]
