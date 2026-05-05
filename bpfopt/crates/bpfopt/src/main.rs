@@ -6,7 +6,6 @@ use std::fs;
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
-use std::sync::Arc;
 
 use anyhow::{anyhow, bail, Context, Result};
 use bpfopt::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
@@ -14,7 +13,7 @@ use bpfopt::insn::BpfInsn;
 use bpfopt::pass::{
     Arch, BpfProgram, BranchProfile, BtfInfoRecords, KinsnRegistry, MapMetadata, PassContext,
     PassManager, PassResult, PlatformCapabilities, ProfilingData, RegState, ScalarRange,
-    StackState, StaticKinsnCallResolver, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
+    StackState, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
 use bpfopt::passes::{MapInfoAnalysis, PASS_REGISTRY};
 use clap::{Args, Parser, Subcommand};
@@ -646,7 +645,6 @@ fn write_btf_info_outputs(common: &CommonArgs, program: &BpfProgram) -> Result<(
 fn build_pass_context(common: &CommonArgs) -> Result<PassContext> {
     let mut ctx = PassContext::test_default();
     ctx.platform = detect_platform();
-    ctx.kinsn_call_resolver = Arc::new(StaticKinsnCallResolver);
 
     if let Some(platform) = common.platform.as_deref() {
         ctx.platform.arch = parse_arch(platform)?;

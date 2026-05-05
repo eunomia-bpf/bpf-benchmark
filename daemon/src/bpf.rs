@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-//! Small BPF access adapter for daemon watch and map snapshot paths.
+//! Small BPF access adapter for map snapshot paths.
 //!
 //! Standard BPF access is routed through `kernel-sys`/libbpf. The optimize path
 //! uses `bpfget` for live program discovery and calls `kernel-sys` directly for
-//! `BPF_PROG_REJIT`; this module covers the remaining map/watch helpers.
+//! `BPF_PROG_REJIT`; this module covers the remaining map helpers.
 
 use std::collections::HashMap;
 use std::os::fd::{BorrowedFd, OwnedFd, RawFd};
@@ -358,45 +358,6 @@ fn parse_possible_cpu_list(text: &str) -> Result<usize> {
         bail!("possible CPU list resolved to zero CPUs");
     }
     Ok(count)
-}
-
-pub(crate) struct ProgIdIter {
-    next_start_id: u32,
-    done: bool,
-}
-
-impl Iterator for ProgIdIter {
-    type Item = Result<u32>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.done {
-            return None;
-        }
-
-        match kernel_sys::prog_get_next_id(self.next_start_id) {
-            Ok(Some(prog_id)) => {
-                self.next_start_id = prog_id;
-                Some(Ok(prog_id))
-            }
-            Ok(None) => {
-                self.done = true;
-                None
-            }
-            Err(err) => {
-                self.done = true;
-                Some(Err(err).with_context(|| {
-                    format!("enumerate BPF programs after id {}", self.next_start_id)
-                }))
-            }
-        }
-    }
-}
-
-pub(crate) fn iter_prog_ids() -> ProgIdIter {
-    ProgIdIter {
-        next_start_id: 0,
-        done: false,
-    }
 }
 
 #[cfg(test)]

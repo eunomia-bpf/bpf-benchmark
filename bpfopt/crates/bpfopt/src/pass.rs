@@ -607,8 +607,6 @@ pub trait BpfPass: Send + Sync {
 pub struct PassContext {
     /// Available kinsn targets and static metadata.
     pub kinsn_registry: KinsnRegistry,
-    /// Resolves CALL.off for kinsn calls introduced by passes.
-    pub kinsn_call_resolver: Arc<dyn KinsnCallResolver>,
     /// CPU capabilities (detected at startup, checked by kinsn passes).
     pub platform: PlatformCapabilities,
     /// Policy configuration (which passes are enabled, parameters, etc.).
@@ -702,36 +700,6 @@ impl KinsnRegistry {
 
     pub(crate) fn packed_supported_for_target_name(&self, target_name: &str) -> bool {
         (self.supported_encodings_for_target_name(target_name) & BPF_KINSN_ENC_PACKED_CALL) != 0
-    }
-}
-
-/// Adapter for encoding kinsn CALL.off in different execution modes.
-pub trait KinsnCallResolver: Send + Sync + std::fmt::Debug {
-    fn call_off_for_target_name(
-        &self,
-        registry: &KinsnRegistry,
-        target_name: &str,
-    ) -> anyhow::Result<i16>;
-
-    fn call_off_for_pass(&self, registry: &KinsnRegistry, pass_name: &str) -> anyhow::Result<i16> {
-        match KinsnRegistry::target_name_for_pass(pass_name) {
-            Some(target_name) => self.call_off_for_target_name(registry, target_name),
-            None => Ok(0),
-        }
-    }
-}
-
-/// Offline resolver: CALL.off comes from precomputed target metadata.
-#[derive(Clone, Debug, Default)]
-pub struct StaticKinsnCallResolver;
-
-impl KinsnCallResolver for StaticKinsnCallResolver {
-    fn call_off_for_target_name(
-        &self,
-        registry: &KinsnRegistry,
-        target_name: &str,
-    ) -> anyhow::Result<i16> {
-        Ok(registry.call_off_for_target_name(target_name))
     }
 }
 
@@ -1023,7 +991,6 @@ impl Default for PassContext {
     fn default() -> Self {
         Self {
             kinsn_registry: KinsnRegistry::default(),
-            kinsn_call_resolver: Arc::new(StaticKinsnCallResolver),
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig::default(),
             prog_type: 0,
@@ -1050,7 +1017,6 @@ impl PassContext {
                 target_call_offsets: HashMap::new(),
                 target_supported_encodings: HashMap::new(),
             },
-            kinsn_call_resolver: Arc::new(StaticKinsnCallResolver),
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig::default(),
             prog_type: 0,

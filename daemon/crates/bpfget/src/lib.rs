@@ -21,16 +21,6 @@ pub struct ProgramInfo {
     pub prog_type: TypeInfo,
     pub insn_cnt: u32,
     pub map_ids: Vec<u32>,
-    pub load_time: u64,
-    pub created_by_uid: u32,
-    pub xlated_prog_len: u32,
-    pub orig_prog_len: u32,
-    pub jited_prog_len: u32,
-    pub btf_id: u32,
-    pub attach_btf_obj_id: u32,
-    pub attach_btf_id: u32,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub expected_attach_type: Option<TypeInfo>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -115,10 +105,9 @@ pub fn snapshot_program(prog_id: u32) -> Result<ProgramSnapshot> {
         bail!("program has no original bytecode (not loaded by fork kernel?)");
     }
     let (info, map_ids) = get_prog_info_with_map_ids_from_fd(fd.as_fd(), prog_id)?;
-    let expected_attach_type = expected_attach_type_json(info.id, info.prog_type)?;
     let maps = get_map_infos(&map_ids)?;
     Ok(ProgramSnapshot {
-        info: ProgramInfo::from_info(info, map_ids, expected_attach_type),
+        info: ProgramInfo::from_info(info, map_ids),
         maps,
         insns,
     })
@@ -147,11 +136,7 @@ pub fn encode_insns(insns: &[kernel_sys::bpf_insn]) -> Vec<u8> {
 }
 
 impl ProgramInfo {
-    fn from_info(
-        info: kernel_sys::BpfProgInfoFork,
-        map_ids: Vec<u32>,
-        expected_attach_type: Option<TypeInfo>,
-    ) -> Self {
+    fn from_info(info: kernel_sys::BpfProgInfoFork, map_ids: Vec<u32>) -> Self {
         let insn_size = std::mem::size_of::<kernel_sys::bpf_insn>() as u32;
         let insn_bytes = if info.orig_prog_len != 0 {
             info.orig_prog_len
@@ -167,32 +152,8 @@ impl ProgramInfo {
             },
             insn_cnt: insn_bytes / insn_size,
             map_ids,
-            load_time: info.load_time,
-            created_by_uid: info.created_by_uid,
-            xlated_prog_len: info.xlated_prog_len,
-            orig_prog_len: info.orig_prog_len,
-            jited_prog_len: info.jited_prog_len,
-            btf_id: info.btf_id,
-            attach_btf_obj_id: info.attach_btf_obj_id,
-            attach_btf_id: info.attach_btf_id,
-            expected_attach_type,
         }
     }
-}
-
-fn expected_attach_type_json(
-    prog_id: u32,
-    prog_type: kernel_sys::bpf_prog_type,
-) -> Result<Option<TypeInfo>> {
-    let Some(value) = kernel_sys::expected_attach_type_for_prog(prog_id, prog_type)
-        .with_context(|| format!("recover expected attach type for BPF program id {prog_id}"))?
-    else {
-        return Ok(None);
-    };
-    Ok(Some(TypeInfo {
-        name: attach_type_name(value).unwrap_or("").to_string(),
-        numeric: value,
-    }))
 }
 
 fn get_prog_info_with_map_ids_from_fd(
@@ -456,68 +417,4 @@ fn prog_type_name(value: u32) -> &'static str {
         v if v == kernel_sys::BPF_PROG_TYPE_NETFILTER => "netfilter",
         _ => "unknown",
     }
-}
-
-fn attach_type_name(value: u32) -> Option<&'static str> {
-    let name = match value {
-        v if v == kernel_sys::BPF_CGROUP_INET_INGRESS => "cgroup_inet_ingress",
-        v if v == kernel_sys::BPF_CGROUP_INET_EGRESS => "cgroup_inet_egress",
-        v if v == kernel_sys::BPF_CGROUP_INET_SOCK_CREATE => "cgroup_inet_sock_create",
-        v if v == kernel_sys::BPF_CGROUP_SOCK_OPS => "cgroup_sock_ops",
-        v if v == kernel_sys::BPF_SK_SKB_STREAM_PARSER => "sk_skb_stream_parser",
-        v if v == kernel_sys::BPF_SK_SKB_STREAM_VERDICT => "sk_skb_stream_verdict",
-        v if v == kernel_sys::BPF_CGROUP_DEVICE => "cgroup_device",
-        v if v == kernel_sys::BPF_SK_MSG_VERDICT => "sk_msg_verdict",
-        v if v == kernel_sys::BPF_CGROUP_INET4_BIND => "cgroup_inet4_bind",
-        v if v == kernel_sys::BPF_CGROUP_INET6_BIND => "cgroup_inet6_bind",
-        v if v == kernel_sys::BPF_CGROUP_INET4_CONNECT => "cgroup_inet4_connect",
-        v if v == kernel_sys::BPF_CGROUP_INET6_CONNECT => "cgroup_inet6_connect",
-        v if v == kernel_sys::BPF_CGROUP_INET4_POST_BIND => "cgroup_inet4_post_bind",
-        v if v == kernel_sys::BPF_CGROUP_INET6_POST_BIND => "cgroup_inet6_post_bind",
-        v if v == kernel_sys::BPF_CGROUP_UDP4_SENDMSG => "cgroup_udp4_sendmsg",
-        v if v == kernel_sys::BPF_CGROUP_UDP6_SENDMSG => "cgroup_udp6_sendmsg",
-        v if v == kernel_sys::BPF_CGROUP_SYSCTL => "cgroup_sysctl",
-        v if v == kernel_sys::BPF_CGROUP_UDP4_RECVMSG => "cgroup_udp4_recvmsg",
-        v if v == kernel_sys::BPF_CGROUP_UDP6_RECVMSG => "cgroup_udp6_recvmsg",
-        v if v == kernel_sys::BPF_CGROUP_GETSOCKOPT => "cgroup_getsockopt",
-        v if v == kernel_sys::BPF_CGROUP_SETSOCKOPT => "cgroup_setsockopt",
-        v if v == kernel_sys::BPF_TRACE_RAW_TP => "trace_raw_tp",
-        v if v == kernel_sys::BPF_TRACE_FENTRY => "trace_fentry",
-        v if v == kernel_sys::BPF_TRACE_FEXIT => "trace_fexit",
-        v if v == kernel_sys::BPF_MODIFY_RETURN => "modify_return",
-        v if v == kernel_sys::BPF_LSM_MAC => "lsm_mac",
-        v if v == kernel_sys::BPF_TRACE_ITER => "trace_iter",
-        v if v == kernel_sys::BPF_CGROUP_INET4_GETPEERNAME => "cgroup_inet4_getpeername",
-        v if v == kernel_sys::BPF_CGROUP_INET6_GETPEERNAME => "cgroup_inet6_getpeername",
-        v if v == kernel_sys::BPF_CGROUP_INET4_GETSOCKNAME => "cgroup_inet4_getsockname",
-        v if v == kernel_sys::BPF_CGROUP_INET6_GETSOCKNAME => "cgroup_inet6_getsockname",
-        v if v == kernel_sys::BPF_XDP_DEVMAP => "xdp_devmap",
-        v if v == kernel_sys::BPF_CGROUP_INET_SOCK_RELEASE => "cgroup_inet_sock_release",
-        v if v == kernel_sys::BPF_XDP_CPUMAP => "xdp_cpumap",
-        v if v == kernel_sys::BPF_SK_LOOKUP => "sk_lookup",
-        v if v == kernel_sys::BPF_XDP => "xdp",
-        v if v == kernel_sys::BPF_SK_SKB_VERDICT => "sk_skb_verdict",
-        v if v == kernel_sys::BPF_SK_REUSEPORT_SELECT => "sk_reuseport_select",
-        v if v == kernel_sys::BPF_SK_REUSEPORT_SELECT_OR_MIGRATE => {
-            "sk_reuseport_select_or_migrate"
-        }
-        v if v == kernel_sys::BPF_TRACE_KPROBE_MULTI => "trace_kprobe_multi",
-        v if v == kernel_sys::BPF_LSM_CGROUP => "lsm_cgroup",
-        v if v == kernel_sys::BPF_NETFILTER => "netfilter",
-        v if v == kernel_sys::BPF_TCX_INGRESS => "tcx_ingress",
-        v if v == kernel_sys::BPF_TCX_EGRESS => "tcx_egress",
-        v if v == kernel_sys::BPF_TRACE_UPROBE_MULTI => "trace_uprobe_multi",
-        v if v == kernel_sys::BPF_CGROUP_UNIX_CONNECT => "cgroup_unix_connect",
-        v if v == kernel_sys::BPF_CGROUP_UNIX_SENDMSG => "cgroup_unix_sendmsg",
-        v if v == kernel_sys::BPF_CGROUP_UNIX_RECVMSG => "cgroup_unix_recvmsg",
-        v if v == kernel_sys::BPF_CGROUP_UNIX_GETPEERNAME => "cgroup_unix_getpeername",
-        v if v == kernel_sys::BPF_CGROUP_UNIX_GETSOCKNAME => "cgroup_unix_getsockname",
-        v if v == kernel_sys::BPF_NETKIT_PRIMARY => "netkit_primary",
-        v if v == kernel_sys::BPF_NETKIT_PEER => "netkit_peer",
-        v if v == kernel_sys::BPF_TRACE_KPROBE_SESSION => "trace_kprobe_session",
-        v if v == kernel_sys::BPF_TRACE_UPROBE_SESSION => "trace_uprobe_session",
-        v if v == kernel_sys::BPF_TRACE_FSESSION => "trace_fsession",
-        _ => return None,
-    };
-    Some(name)
 }

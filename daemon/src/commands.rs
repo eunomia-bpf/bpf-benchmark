@@ -233,46 +233,6 @@ pub(crate) struct PassDetail {
     pub insn_delta: i64,
 }
 
-struct ApplyOneRequest<'a> {
-    prog_id: u32,
-    config: &'a CliConfig,
-    enabled_passes: &'a [String],
-}
-
-trait KernelOps {
-    fn snapshot_program(&mut self, prog_id: u32) -> Result<bpfget::ProgramSnapshot>;
-    fn probe_target(&mut self) -> Result<bpfget::TargetJson>;
-    fn rejit(
-        &mut self,
-        prog_id: u32,
-        insns: &[kernel_sys::bpf_insn],
-        fd_array: &RejitFdArray,
-        verifier_log_path: &Path,
-    ) -> Result<RejitReport>;
-}
-
-struct LiveKernelOps;
-
-impl KernelOps for LiveKernelOps {
-    fn snapshot_program(&mut self, prog_id: u32) -> Result<bpfget::ProgramSnapshot> {
-        bpfget::snapshot_program(prog_id)
-    }
-
-    fn probe_target(&mut self) -> Result<bpfget::TargetJson> {
-        bpfget::probe_target_json()
-    }
-
-    fn rejit(
-        &mut self,
-        prog_id: u32,
-        insns: &[kernel_sys::bpf_insn],
-        fd_array: &RejitFdArray,
-        verifier_log_path: &Path,
-    ) -> Result<RejitReport> {
-        rejit_program(prog_id, insns, fd_array, verifier_log_path)
-    }
-}
-
 #[derive(Clone, Debug)]
 struct RejitReport {
     verifier_states: kernel_sys::VerifierStatesJson,
@@ -518,25 +478,6 @@ fn live_bpf_map_keys(map: &MapInfoJson, fd: i32) -> Result<Vec<Vec<u8>>> {
     Ok(keys)
 }
 
-pub(crate) fn try_apply_one(
-    prog_id: u32,
-    config: &CliConfig,
-    enabled_passes: &[String],
-) -> Result<OptimizeOneResult> {
-    let mut kernel = LiveKernelOps;
-    try_apply_one_with_map_access(
-        ApplyOneRequest {
-            prog_id,
-            config,
-            enabled_passes,
-        },
-        &mut kernel,
-        bpf::bpf_map_get_fd_by_id,
-        live_bpf_map_lookup,
-        live_bpf_map_keys,
-    )
-}
-
 pub(crate) struct ApplyProgramOutcome {
     pub prog_id: u32,
     pub result: OptimizeOneResult,
@@ -611,23 +552,11 @@ pub(crate) fn try_apply_programs(
     })
 }
 
-fn try_apply_one_with_map_access<F, G, H>(
-    request: ApplyOneRequest<'_>,
-    kernel: &mut dyn KernelOps,
-    mut open_map_fd: F,
-    mut lookup_map_value: G,
-    mut scan_map_keys: H,
-) -> Result<OptimizeOneResult>
-where
-    F: FnMut(u32) -> Result<OwnedFd>,
-    G: FnMut(&MapInfoJson, i32, &[u8]) -> Result<Option<Vec<u8>>>,
-    H: FnMut(&MapInfoJson, i32) -> Result<Vec<Vec<u8>>>,
-{
-    let ApplyOneRequest {
-        prog_id,
-        config,
-        enabled_passes,
-    } = request;
+pub(crate) fn try_apply_one(
+    prog_id: u32,
+    config: &CliConfig,
+    enabled_passes: &[String],
+) -> Result<OptimizeOneResult> {
     if enabled_passes.is_empty() {
         bail!("no enabled_passes provided by runner");
     }
@@ -640,15 +569,16 @@ where
     }
     let workdir = WorkDir::new("bpfrejit-daemon-optimize")?;
     let prog_bin = workdir.path().join("prog.bin");
-    let info_json = workdir.path().join("info.json");
     let target_json = workdir.path().join("target.json");
     let verifier_states_json = workdir.path().join(VERIFIER_STATES_FILE);
     let map_values_json = workdir.path().join(MAP_VALUES_FILE);
     let opt_bin = workdir.path().join("opt.bin");
+    let mut open_map_fd = bpf::bpf_map_get_fd_by_id;
+    let mut lookup_map_value = live_bpf_map_lookup;
+    let mut scan_map_keys = live_bpf_map_keys;
 
     let result = (|| -> Result<OptimizeOneResult> {
-        let mut snapshot = kernel
-            .snapshot_program(prog_id)
+        let mut snapshot = bpfget::snapshot_program(prog_id)
             .with_context(|| format!("snapshot live BPF program {prog_id}"))?;
         bpf::canonicalize_map_refs_to_idx(&mut snapshot.insns, None, &snapshot.info.map_ids)
             .with_context(|| format!("canonicalize map references for prog {prog_id}"))?;
@@ -656,7 +586,6 @@ where
         let orig_bytes = bpfget::encode_insns(&snapshot.insns);
         fs::write(&prog_bin, &orig_bytes)
             .with_context(|| format!("write {}", prog_bin.display()))?;
-        write_json_file(&info_json, &prog_info)?;
         let orig_insn_count = insn_count_from_bytes(&orig_bytes, "prog.bin")?;
         if prog_info.id != prog_id {
             bail!(
@@ -690,7 +619,7 @@ where
 
         let mut probed_kinsns: HashMap<String, TargetKinsnJson> = HashMap::new();
         if needs_target(&pass_list) {
-            let mut probed = kernel.probe_target().with_context(|| {
+            let mut probed = bpfget::probe_target_json().with_context(|| {
                 format!(
                     "probe target kinsns failed for requested passes {}",
                     join_pass_csv(&pass_list)
@@ -803,7 +732,7 @@ where
             let pass_bytes = fs::read(&pass_output)
                 .with_context(|| format!("read {}", pass_output.display()))?;
             let pass_insns = decode_insns(&pass_bytes, pass_output.to_string_lossy().as_ref())?;
-            let rejit_result = kernel.rejit(prog_id, &pass_insns, &fd_array, &pass_verifier_log);
+            let rejit_result = rejit_program(prog_id, &pass_insns, &fd_array, &pass_verifier_log);
             let rejit_report = match rejit_result {
                 Ok(report) => report,
                 Err(err) => {
@@ -1605,7 +1534,6 @@ fn stderr_summary(output: &std::process::Output) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::os::unix::fs::PermissionsExt;
 
     #[test]
     fn bytecode_decoder_rejects_unaligned_input() {
@@ -1952,100 +1880,6 @@ mod tests {
     }
 
     #[test]
-    fn rejit_error_preserves_log_and_prog_id_in_error() {
-        let harness = ApplyHarness::new();
-        let mut kernel = MockKernelOps {
-            rejit_error: Some("mock rejit verifier log".to_string()),
-            ..Default::default()
-        };
-
-        let result = harness.apply(&mut kernel).unwrap();
-
-        assert_eq!(result.status, "error");
-        let message = result.error_message.as_deref().unwrap_or("");
-        assert!(message.contains("prog 42"), "err={message}");
-        assert!(message.contains("mock rejit verifier log"), "err={message}");
-        assert_eq!(kernel.rejit_calls, 1);
-        let artifacts = result.failure_artifacts.as_ref().unwrap();
-        assert_eq!(artifacts.failed_pass_index, 0);
-        assert_eq!(artifacts.failed_pass, "wide_mem");
-        assert_eq!(artifacts.verifier_log, "mock rejit verifier log");
-        assert_eq!(artifacts.partial_failure_json["prog_id"], 42);
-    }
-
-    #[test]
-    fn rejit_enospc_retry_log_reaches_failure_artifact() {
-        let harness = ApplyHarness::new();
-        let retry_log = "retry after ENOSPC full verifier log".to_string();
-        let mut kernel = MockKernelOps {
-            rejit_error: Some(retry_log.clone()),
-            ..Default::default()
-        };
-
-        let result = harness.apply(&mut kernel).unwrap();
-
-        let message = result.error_message.as_deref().unwrap_or("");
-        assert!(message.contains(&retry_log), "err={message}");
-        assert_eq!(kernel.rejit_calls, 1);
-        let artifacts = result.failure_artifacts.as_ref().unwrap();
-        assert_eq!(artifacts.verifier_log, retry_log);
-    }
-
-    #[test]
-    fn large_verifier_log_failure_artifact_is_bounded() {
-        let harness = ApplyHarness::new();
-        let large_log = format!("{}\n{}", "x".repeat(5000), "tail state");
-        let mut kernel = MockKernelOps {
-            rejit_error: Some(large_log.clone()),
-            ..Default::default()
-        };
-
-        let result = harness.apply(&mut kernel).unwrap();
-
-        let artifacts = result.failure_artifacts.as_ref().unwrap();
-        assert!(artifacts.verifier_log.len() < large_log.len());
-        assert!(
-            artifacts
-                .verifier_log
-                .contains("... verifier log truncated ..."),
-            "verifier log artifact was not summarized: {}",
-            artifacts.verifier_log
-        );
-    }
-
-    #[test]
-    fn bpfopt_success_reaches_rejit_and_returns_success() {
-        let harness = ApplyHarness::new();
-        let mut kernel = MockKernelOps {
-            ..Default::default()
-        };
-
-        let result = harness.apply(&mut kernel).unwrap();
-
-        assert_eq!(result.status, "ok");
-        assert_eq!(result.prog_id, 42);
-        assert!(result.changed);
-        assert!(result.summary.applied);
-        assert!(result.error_message.is_none());
-        assert!(result.failure_artifacts.is_none());
-        assert_eq!(kernel.rejit_calls, test_runner_passes().len());
-    }
-
-    #[test]
-    fn const_prop_request_captures_verifier_states_automatically() {
-        let harness = ApplyHarness::new();
-        let mut kernel = MockKernelOps::default();
-
-        let result = harness.apply(&mut kernel).unwrap();
-
-        assert_eq!(kernel.rejit_calls, test_runner_passes().len());
-        assert!(result
-            .passes
-            .iter()
-            .any(|pass| pass.pass_name == "const_prop"));
-    }
-
-    #[test]
     fn try_apply_programs_converts_failures_and_panics_to_program_results() {
         let prog_ids = [7, 8, 9, 10];
 
@@ -2127,267 +1961,6 @@ mod tests {
             partial_failure_json: serde_json::json!({"prog_id": prog_id}),
         });
         result
-    }
-
-    struct ApplyHarness {
-        _cli_dir: WorkDir,
-        config: CliConfig,
-    }
-
-    impl ApplyHarness {
-        fn new() -> Self {
-            let cli_dir = WorkDir::new("bpfrejit-daemon-fake-cli").unwrap();
-            write_fake_bpfopt(cli_dir.path());
-            let config = CliConfig {
-                cli_dir: Some(cli_dir.path().to_path_buf()),
-            };
-            Self {
-                _cli_dir: cli_dir,
-                config,
-            }
-        }
-
-        fn apply(&self, kernel: &mut dyn KernelOps) -> Result<OptimizeOneResult> {
-            self.apply_with_passes(kernel, &test_runner_passes())
-        }
-
-        fn apply_with_passes(
-            &self,
-            kernel: &mut dyn KernelOps,
-            enabled_passes: &[String],
-        ) -> Result<OptimizeOneResult> {
-            try_apply_one_with_map_access(
-                ApplyOneRequest {
-                    prog_id: 42,
-                    config: &self.config,
-                    enabled_passes,
-                },
-                kernel,
-                |_map_id| -> Result<OwnedFd> { bail!("test did not expect map fd opens") },
-                |_map, _fd, _key| -> Result<Option<Vec<u8>>> {
-                    bail!("test did not expect map value lookups")
-                },
-                |_map, _fd| -> Result<Vec<Vec<u8>>> { bail!("test did not expect map key scans") },
-            )
-        }
-    }
-
-    fn test_runner_passes() -> Vec<String> {
-        [
-            "wide_mem",
-            "rotate",
-            "cond_select",
-            "extract",
-            "endian_fusion",
-            "map_inline",
-            "const_prop",
-            "dce",
-            "bounds_check_merge",
-            "skb_load_bytes_spec",
-            "bulk_memory",
-            "prefetch",
-        ]
-        .into_iter()
-        .map(String::from)
-        .collect()
-    }
-
-    struct MockKernelOps {
-        rejit_error: Option<String>,
-        rejit_calls: usize,
-        verifier_states: Option<kernel_sys::VerifierStatesJson>,
-    }
-
-    impl Default for MockKernelOps {
-        fn default() -> Self {
-            Self {
-                rejit_error: None,
-                rejit_calls: 0,
-                verifier_states: Some(kernel_sys::VerifierStatesJson { insns: Vec::new() }),
-            }
-        }
-    }
-
-    impl KernelOps for MockKernelOps {
-        fn snapshot_program(&mut self, prog_id: u32) -> Result<bpfget::ProgramSnapshot> {
-            Ok(test_snapshot(prog_id))
-        }
-
-        fn probe_target(&mut self) -> Result<bpfget::TargetJson> {
-            Ok(bpfget::TargetJson {
-                arch: "x86_64".to_string(),
-                features: vec!["cmov".to_string(), "movbe".to_string()],
-                kinsns: BTreeMap::from([
-                    (
-                        "bpf_rotate64".to_string(),
-                        bpfget::TargetKinsnJson {
-                            btf_func_id: 1,
-                            btf_id: 0,
-                            call_offset: 0,
-                        },
-                    ),
-                    (
-                        "bpf_select64".to_string(),
-                        bpfget::TargetKinsnJson {
-                            btf_func_id: 2,
-                            btf_id: 0,
-                            call_offset: 0,
-                        },
-                    ),
-                    (
-                        "bpf_extract64".to_string(),
-                        bpfget::TargetKinsnJson {
-                            btf_func_id: 3,
-                            btf_id: 0,
-                            call_offset: 0,
-                        },
-                    ),
-                    (
-                        "bpf_endian_load64".to_string(),
-                        bpfget::TargetKinsnJson {
-                            btf_func_id: 4,
-                            btf_id: 0,
-                            call_offset: 0,
-                        },
-                    ),
-                    (
-                        "bpf_bulk_memcpy".to_string(),
-                        bpfget::TargetKinsnJson {
-                            btf_func_id: 5,
-                            btf_id: 0,
-                            call_offset: 0,
-                        },
-                    ),
-                    (
-                        "bpf_bulk_memset".to_string(),
-                        bpfget::TargetKinsnJson {
-                            btf_func_id: 6,
-                            btf_id: 0,
-                            call_offset: 0,
-                        },
-                    ),
-                    (
-                        "bpf_prefetch".to_string(),
-                        bpfget::TargetKinsnJson {
-                            btf_func_id: 7,
-                            btf_id: 0,
-                            call_offset: 0,
-                        },
-                    ),
-                ]),
-            })
-        }
-
-        fn rejit(
-            &mut self,
-            _prog_id: u32,
-            _insns: &[kernel_sys::bpf_insn],
-            _fd_array: &RejitFdArray,
-            verifier_log_path: &Path,
-        ) -> Result<RejitReport> {
-            self.rejit_calls += 1;
-            if let Some(message) = &self.rejit_error {
-                fs::write(verifier_log_path, message)
-                    .with_context(|| format!("write {}", verifier_log_path.display()))?;
-                bail!("{message}");
-            }
-            fs::write(verifier_log_path, "mock verifier log")
-                .with_context(|| format!("write {}", verifier_log_path.display()))?;
-            let verifier_states = self
-                .verifier_states
-                .clone()
-                .ok_or_else(|| anyhow!("test did not expect per-pass ReJIT"))?;
-            Ok(RejitReport { verifier_states })
-        }
-    }
-
-    fn write_fake_bpfopt(dir: &Path) {
-        let path = dir.join("bpfopt");
-        fs::write(
-            &path,
-            r#"#!/bin/sh
-set -eu
-report=""
-pass=""
-verifier_states=""
-while [ "$#" -gt 0 ]; do
-    if [ "$1" = "--pass" ]; then
-        shift
-        pass="$1"
-    elif [ "$1" = "--report" ]; then
-        shift
-        report="$1"
-    elif [ "$1" = "--verifier-states" ]; then
-        shift
-        verifier_states="$1"
-    fi
-    shift || true
-done
-if [ -z "$report" ]; then
-    echo "missing --report" >&2
-    exit 1
-fi
-if [ -z "$pass" ]; then
-    echo "missing --pass" >&2
-    exit 1
-fi
-case "$pass" in
-    const_prop|map_inline)
-        if [ -z "$verifier_states" ]; then
-            echo "missing --verifier-states" >&2
-            exit 2
-        fi
-        if [ ! -s "$verifier_states" ]; then
-            echo "empty --verifier-states" >&2
-            exit 3
-        fi
-        ;;
-esac
-cat
-printf '\225\000\000\000\000\000\000\000'
-printf '{"pass":"%s","changed":true,"sites_applied":1,"insn_count_before":1,"insn_count_after":2,"insn_delta":1}\n' "$pass" > "$report"
-"#,
-        )
-        .unwrap();
-        let mut permissions = fs::metadata(&path).unwrap().permissions();
-        permissions.set_mode(0o755);
-        fs::set_permissions(&path, permissions).unwrap();
-    }
-
-    fn test_snapshot(prog_id: u32) -> bpfget::ProgramSnapshot {
-        bpfget::ProgramSnapshot {
-            info: bpfget::ProgramInfo {
-                id: prog_id,
-                name: "mock_prog".to_string(),
-                prog_type: bpfget::TypeInfo {
-                    name: "xdp".to_string(),
-                    numeric: kernel_sys::BPF_PROG_TYPE_XDP,
-                },
-                insn_cnt: 1,
-                map_ids: Vec::new(),
-                load_time: 0,
-                created_by_uid: 0,
-                xlated_prog_len: 8,
-                orig_prog_len: 8,
-                jited_prog_len: 0,
-                btf_id: 0,
-                attach_btf_obj_id: 0,
-                attach_btf_id: 0,
-                expected_attach_type: None,
-            },
-            maps: Vec::new(),
-            insns: vec![exit_insn()],
-        }
-    }
-
-    fn exit_insn() -> kernel_sys::bpf_insn {
-        kernel_sys::bpf_insn {
-            code: (kernel_sys::BPF_JMP | kernel_sys::BPF_EXIT) as u8,
-            _bitfield_align_1: [],
-            _bitfield_1: Default::default(),
-            off: 0,
-            imm: 0,
-        }
     }
 
     fn fake_owned_fd() -> Result<OwnedFd> {

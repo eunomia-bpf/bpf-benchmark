@@ -1155,16 +1155,16 @@ pub fn emit_packed_kinsn_call_with_off(
 }
 
 pub fn resolve_kinsn_call_off_for_pass(ctx: &PassContext, pass_name: &str) -> anyhow::Result<i16> {
-    ctx.kinsn_call_resolver
-        .call_off_for_pass(&ctx.kinsn_registry, pass_name)
+    Ok(KinsnRegistry::target_name_for_pass(pass_name)
+        .map(|target_name| ctx.kinsn_registry.call_off_for_target_name(target_name))
+        .unwrap_or(0))
 }
 
 pub fn resolve_kinsn_call_off_for_target(
     ctx: &PassContext,
     target_name: &str,
 ) -> anyhow::Result<i16> {
-    ctx.kinsn_call_resolver
-        .call_off_for_target_name(&ctx.kinsn_registry, target_name)
+    Ok(ctx.kinsn_registry.call_off_for_target_name(target_name))
 }
 // ── Tests ──────────────────────────────────────────────────────────
 

@@ -3,9 +3,8 @@
 
 use std::collections::{BTreeMap, HashSet};
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
-use crate::bpf;
 use crate::commands::{self, CliConfig};
 use anyhow::{Context, Result};
 
@@ -19,31 +18,6 @@ fn register_signal_handlers() {
     unsafe {
         libc::signal(libc::SIGTERM, handle_signal as libc::sighandler_t);
         libc::signal(libc::SIGINT, handle_signal as libc::sighandler_t);
-    }
-}
-
-struct ProgramWatcher {
-    seen: HashSet<u32>,
-}
-
-impl ProgramWatcher {
-    fn from_live() -> Result<Self> {
-        let mut seen = HashSet::new();
-        for prog_id in bpf::iter_prog_ids() {
-            let prog_id = prog_id.context("initialize BPF program watcher")?;
-            seen.insert(prog_id);
-        }
-        Ok(Self { seen })
-    }
-
-    fn tick(&mut self) -> Result<()> {
-        for prog_id in bpf::iter_prog_ids() {
-            let prog_id = prog_id.context("watch live BPF programs")?;
-            if self.seen.insert(prog_id) {
-                eprintln!("serve: observed new BPF program id {prog_id}");
-            }
-        }
-        Ok(())
     }
 }
 
@@ -62,8 +36,6 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
 
     commands::init_cli_dir()?;
     let config = CliConfig::from_global();
-    let mut last_watch_check = Instant::now();
-    let mut watcher = ProgramWatcher::from_live()?;
 
     remove_socket_file_if_present(socket_path)?;
 
@@ -74,11 +46,6 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
     println!("serve: listening on {socket_path}");
 
     while !SHUTDOWN_FLAG.load(Ordering::Relaxed) {
-        if last_watch_check.elapsed() >= Duration::from_secs(1) {
-            watcher.tick()?;
-            last_watch_check = Instant::now();
-        }
-
         match listener.accept() {
             Ok((stream, _addr)) => {
                 if let Err(err) = handle_client(stream, &config) {

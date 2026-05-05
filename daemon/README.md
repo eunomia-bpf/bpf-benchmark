@@ -1,7 +1,7 @@
 # bpfrejit-daemon
 
 `bpfrejit-daemon` keeps the benchmark runner on the socket JSON boundary while
-running live BPF discovery, automatic side-input preparation, fd-array
+running live BPF program snapshotting, automatic side-input preparation, fd-array
 construction, and final ReJIT in-process. `bpfopt` remains an
 external pure bytecode CLI. `bpfprof` remains a standalone profiling CLI outside
 the daemon socket protocol.
@@ -49,5 +49,5 @@ daemon/
   src/main.rs        # CLI entry point
   src/server.rs      # socket server and request dispatch
   src/commands.rs    # in-process BPF orchestration + bpfopt CLI calls
-  src/bpf.rs         # libbpf-backed map/watch helpers used by the daemon
+  src/bpf.rs         # libbpf-backed map helpers used by the daemon
 ```
