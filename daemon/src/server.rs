@@ -186,7 +186,7 @@ pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
             run_invalidation_tick_logged("serve", &tracker, |prog_id| {
                 let enabled_passes =
                     reoptimization_passes_for(&reoptimization_state_for_apply, prog_id)?;
-                let result = commands::try_reapply_one(
+                let result = commands::try_apply_one(
                     prog_id,
                     &config,
                     &enabled_passes,

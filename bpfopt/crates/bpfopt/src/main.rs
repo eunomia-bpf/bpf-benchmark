@@ -244,8 +244,6 @@ struct MapSnapshotJson {
     key_size: u32,
     value_size: u32,
     max_entries: u32,
-    #[serde(default = "default_frozen")]
-    frozen: bool,
     #[serde(default)]
     entries: Vec<MapEntryJson>,
 }
@@ -1068,7 +1066,6 @@ fn read_map_values(path: &Path) -> Result<MapSnapshot> {
                 key_size: map.key_size,
                 value_size: map.value_size,
                 max_entries: map.max_entries,
-                frozen: map.frozen,
                 map_id: map.map_id,
             },
         );
@@ -1199,10 +1196,6 @@ fn hex_bytes(bytes: &[u8]) -> String {
         out.push(HEX[(byte & 0x0f) as usize] as char);
     }
     out
-}
-
-fn default_frozen() -> bool {
-    true
 }
 
 #[cfg(test)]

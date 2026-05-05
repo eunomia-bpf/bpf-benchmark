@@ -732,14 +732,13 @@ fn run_map_inline_round(
             continue;
         };
         log_map_inline_debug(&format!(
-            "site at PC={}: resolved map_id={} map_type={} key_size={} value_size={} max_entries={} frozen={}",
+            "site at PC={}: resolved map_id={} map_type={} key_size={} value_size={} max_entries={}",
             site.call_pc,
             info.map_id,
             info.map_type,
             info.key_size,
             info.value_size,
             info.max_entries,
-            info.frozen
         ));
         if !info.supports_direct_value_inline() {
             log_map_inline_debug(&format!(
@@ -808,7 +807,7 @@ fn run_map_inline_round(
         let uses = classify_r0_uses_with_options(
             &program.insns,
             site.call_pc,
-            info.frozen && info.has_removable_lookup_pattern(),
+            info.has_removable_lookup_pattern(),
             info.has_removable_lookup_pattern(),
         );
         let null_check_pc = uses.null_check_pc;
@@ -828,20 +827,6 @@ fn run_map_inline_round(
         if uses.fixed_loads.is_empty() {
             let reason = "lookup result is not consumed by fixed-offset scalar loads".to_string();
             record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
-            continue;
-        }
-        if !info.frozen && !uses.other_uses.is_empty() {
-            let reason = "mutable lookup result has non-load uses".to_string();
-            record_skip(
-                &mut skipped,
-                &mut diagnostics,
-                site.call_pc,
-                reason,
-                Some(format!(
-                    "site at PC={}: mutable map lookup value escapes beyond fixed loads at pcs {:?}",
-                    site.call_pc, uses.other_uses
-                )),
-            );
             continue;
         }
         let mut rewrite = match build_site_rewrite(program, &site, &key, &uses, info, null_check_pc)
@@ -1374,9 +1359,6 @@ fn resolve_frozen_map_value(
         else {
             return Ok(None);
         };
-        if !info.frozen {
-            return Ok(None);
-        }
 
         let key = vec![0u8; info.key_size as usize];
         let value_size = program

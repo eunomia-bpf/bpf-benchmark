@@ -474,6 +474,22 @@ pub fn prog_get_fd_by_id(id: u32) -> Result<OwnedFd> {
     Ok(unsafe { OwnedFd::from_raw_fd(fd) })
 }
 
+/// Like `prog_get_fd_by_id` but returns `Ok(None)` if the program has been
+/// unloaded between enumeration and open. Use this when iterating program ids
+/// returned from `prog_get_next_id`, where the kernel does not provide an
+/// atomic snapshot.
+pub fn prog_try_get_fd_by_id(id: u32) -> Result<Option<OwnedFd>> {
+    let fd = unsafe { bpf_prog_get_fd_by_id(id) };
+    if fd < 0 {
+        let errno = errno_from_libbpf_ret(fd);
+        if errno == libc::ENOENT {
+            return Ok(None);
+        }
+        return Err(libbpf_error("BPF_PROG_GET_FD_BY_ID", fd));
+    }
+    Ok(Some(unsafe { OwnedFd::from_raw_fd(fd) }))
+}
+
 /// Return the next live BTF object ID after `start_id`.
 pub fn btf_get_next_id(start_id: u32) -> Result<Option<u32>> {
     let mut next_id = 0;

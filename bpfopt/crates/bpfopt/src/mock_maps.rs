@@ -18,7 +18,6 @@ pub struct BpfMapInfo {
 #[derive(Clone, Debug)]
 pub struct MockMapState {
     pub info: BpfMapInfo,
-    pub frozen: bool,
     pub values: HashMap<Vec<u8>, Vec<u8>>,
 }
 
@@ -106,7 +105,6 @@ fn map_info_from_metadata(metadata: &MapMetadata) -> crate::passes::MapInfo {
         key_size: metadata.key_size,
         value_size: metadata.value_size,
         max_entries: metadata.max_entries,
-        frozen: metadata.frozen,
         map_id: metadata.map_id,
     }
 }
@@ -118,7 +116,6 @@ fn mock_map_metadata(map_id: u32) -> Option<MapMetadata> {
             key_size: state.info.key_size,
             value_size: state.info.value_size,
             max_entries: state.info.max_entries,
-            frozen: state.frozen,
             map_id,
         })
     })

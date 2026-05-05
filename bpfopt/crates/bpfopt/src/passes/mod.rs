@@ -62,7 +62,7 @@ pub struct PassRegistryEntry {
 pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
     PassRegistryEntry {
         name: "map_inline",
-        description: "Inline stable map lookups and frozen pseudo-map-value loads",
+        description: "Inline stable map lookups and pseudo-map-value loads",
         make: || Box::new(MapInlinePass),
     },
     PassRegistryEntry {

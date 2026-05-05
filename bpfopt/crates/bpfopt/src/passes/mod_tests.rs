@@ -63,7 +63,6 @@ fn install_map(map_id: u32, map_type: u32, value: Vec<u8>) {
         map_id,
         MockMapState {
             info,
-            frozen: true,
             values,
         },
     );

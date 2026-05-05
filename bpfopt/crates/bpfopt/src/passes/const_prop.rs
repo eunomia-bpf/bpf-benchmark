@@ -892,7 +892,6 @@ mod tests {
             map_id,
             MockMapState {
                 info,
-                frozen: true,
                 values,
             },
         );

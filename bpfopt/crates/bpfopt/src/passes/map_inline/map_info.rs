@@ -18,13 +18,17 @@ const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
 const BPF_PSEUDO_MAP_IDX: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX as u8;
 
 /// Runtime metadata for a live kernel map referenced by the program.
+///
+/// `map_inline` treats every map referenced via this struct as safe to inline.
+/// Callers that do not want a map to be inlined (e.g. because a kernel-side
+/// BPF program writes to it) must filter the map out before constructing the
+/// metadata; there is no per-map gate at this layer.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MapInfo {
     pub map_type: u32,
     pub key_size: u32,
     pub value_size: u32,
     pub max_entries: u32,
-    pub frozen: bool,
     pub map_id: u32,
 }
 
@@ -250,7 +254,6 @@ mod tests {
             key_size: 4,
             value_size: 8,
             max_entries,
-            frozen: true,
             map_id,
         }
     }
@@ -261,7 +264,6 @@ mod tests {
             key_size: 4,
             value_size: 8,
             max_entries: 16,
-            frozen: true,
             map_id,
         }
     }
@@ -272,25 +274,8 @@ mod tests {
             key_size: 4,
             value_size: 8,
             max_entries: 16,
-            frozen: true,
             map_id,
         }
-    }
-
-    #[test]
-    fn mutable_maps_are_still_inlineable_when_direct_access_is_supported() {
-        let array = MapInfo {
-            frozen: false,
-            ..array_map(101, 4)
-        };
-        let hash = MapInfo {
-            frozen: false,
-            ..hash_map(202)
-        };
-
-        assert!(array.supports_direct_value_inline());
-        assert!(hash.supports_direct_value_inline());
-        assert!(hash.has_speculative_invalidation());
     }
 
     #[test]
@@ -489,7 +474,6 @@ mod tests {
                 key_size: 4,
                 value_size: 8,
                 max_entries: 16,
-                frozen: true,
                 map_id: 999,
             };
             assert!(
@@ -514,7 +498,6 @@ mod tests {
             key_size: 4,
             value_size: 8,
             max_entries: 16,
-            frozen: true,
             map_id: 501,
         };
         assert!(
@@ -539,7 +522,6 @@ mod tests {
             key_size: 4,
             value_size: 8,
             max_entries: 16,
-            frozen: true,
             map_id: 502,
         };
         assert!(
@@ -560,7 +542,6 @@ mod tests {
             key_size: 4,
             value_size: 8,
             max_entries: 16,
-            frozen: true,
             map_id: 503,
         };
         assert!(

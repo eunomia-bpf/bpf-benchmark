@@ -125,13 +125,16 @@ pub struct BpfProgram {
 }
 
 /// Pre-loaded map metadata used by snapshot/offline map providers.
+///
+/// Maps that should not be inlined (e.g. mutated by kernel-side BPF programs)
+/// must be excluded by the caller before populating this metadata. The pass
+/// itself unconditionally treats every map present here as inlinable.
 #[derive(Clone, Debug)]
 pub struct MapMetadata {
     pub map_type: u32,
     pub key_size: u32,
     pub value_size: u32,
     pub max_entries: u32,
-    pub frozen: bool,
     pub map_id: u32,
 }
 
@@ -179,7 +182,6 @@ impl MapProvider for SnapshotMapProvider {
             key_size: metadata.key_size,
             value_size: metadata.value_size,
             max_entries: metadata.max_entries,
-            frozen: metadata.frozen,
             map_id: metadata.map_id,
         }))
     }

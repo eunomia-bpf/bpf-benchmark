@@ -131,10 +131,9 @@ fn install_map(
     map_id: u32,
     map_type: u32,
     max_entries: u32,
-    frozen: bool,
     values: HashMap<Vec<u8>, Vec<u8>>,
 ) {
-    install_map_with_key_size(map_id, map_type, 4, max_entries, frozen, values);
+    install_map_with_key_size(map_id, map_type, 4, max_entries, values);
 }
 
 fn install_map_with_key_size(
@@ -142,7 +141,6 @@ fn install_map_with_key_size(
     map_type: u32,
     key_size: u32,
     max_entries: u32,
-    frozen: bool,
     values: HashMap<Vec<u8>, Vec<u8>>,
 ) {
     let info = BpfMapInfo {
@@ -152,17 +150,10 @@ fn install_map_with_key_size(
         max_entries,
     };
 
-    install_mock_map(
-        map_id,
-        MockMapState {
-            info,
-            frozen,
-            values,
-        },
-    );
+    install_mock_map(map_id, MockMapState { info, values });
 }
 
-fn install_empty_map(map_id: u32, map_type: u32, value_size: u32, max_entries: u32, frozen: bool) {
+fn install_empty_map(map_id: u32, map_type: u32, value_size: u32, max_entries: u32) {
     let info = BpfMapInfo {
         map_type,
         key_size: 4,
@@ -174,7 +165,6 @@ fn install_empty_map(map_id: u32, map_type: u32, value_size: u32, max_entries: u
         map_id,
         MockMapState {
             info,
-            frozen,
             values: HashMap::new(),
         },
     );
@@ -184,7 +174,6 @@ fn install_percpu_array_map(
     map_id: u32,
     value_size: u32,
     max_entries: u32,
-    frozen: bool,
     values: HashMap<Vec<u8>, Vec<u8>>,
 ) {
     let info = BpfMapInfo {
@@ -194,14 +183,7 @@ fn install_percpu_array_map(
         max_entries,
     };
 
-    install_mock_map(
-        map_id,
-        MockMapState {
-            info,
-            frozen,
-            values,
-        },
-    );
+    install_mock_map(map_id, MockMapState { info, values });
 }
 
 fn make_percpu_blob(slot_value: &[u8], slots: usize) -> Vec<u8> {
@@ -217,10 +199,10 @@ fn make_percpu_blob(slot_value: &[u8], slots: usize) -> Vec<u8> {
 fn install_array_map(map_id: u32, value: Vec<u8>) {
     let mut values = HashMap::new();
     values.insert(1u32.to_le_bytes().to_vec(), value);
-    install_map(map_id, 2, 8, true, values);
+    install_map(map_id, 2, 8, values);
 }
 
-fn install_array_map_entry(map_id: u32, max_entries: u32, key: u32, value: Vec<u8>, frozen: bool) {
+fn install_array_map_entry(map_id: u32, max_entries: u32, key: u32, value: Vec<u8>) {
     let mut values = HashMap::new();
     values.insert(key.to_le_bytes().to_vec(), value.clone());
 
@@ -231,26 +213,13 @@ fn install_array_map_entry(map_id: u32, max_entries: u32, key: u32, value: Vec<u
         max_entries,
     };
 
-    install_mock_map(
-        map_id,
-        MockMapState {
-            info,
-            frozen,
-            values,
-        },
-    );
+    install_mock_map(map_id, MockMapState { info, values });
 }
 
 fn install_hash_map(map_id: u32, value: Vec<u8>) {
     let mut values = HashMap::new();
     values.insert(1u32.to_le_bytes().to_vec(), value);
-    install_map(map_id, 1, 8, true, values);
-}
-
-fn install_mutable_array_map(map_id: u32, value: Vec<u8>) {
-    let mut values = HashMap::new();
-    values.insert(1u32.to_le_bytes().to_vec(), value);
-    install_map(map_id, 2, 8, false, values);
+    install_map(map_id, 1, 8, values);
 }
 
 fn run_map_inline_pass(program: &mut BpfProgram) -> PipelineResult {
@@ -384,7 +353,7 @@ fn find_map_lookup_sites_ignores_calls_without_map_load() {
 fn map_inline_constantizes_frozen_pseudo_map_value_loads() {
     let mut values = HashMap::new();
     values.insert(0u32.to_le_bytes().to_vec(), vec![0, 0, 0, 0, 42, 0, 0, 0]);
-    install_map(901, 2, 1, true, values);
+    install_map(901, 2, 1, values);
 
     let map_value = ld_imm64_parts(1, BPF_PSEUDO_MAP_VALUE, 77, 4);
     let mut program = BpfProgram::new(vec![
@@ -406,7 +375,7 @@ fn map_inline_constantizes_frozen_pseudo_map_value_loads() {
 fn map_inline_constantizes_frozen_pseudo_map_idx_value_loads() {
     let mut values = HashMap::new();
     values.insert(0u32.to_le_bytes().to_vec(), vec![0, 0, 0, 0, 99, 0, 0, 0]);
-    install_map(1901, 2, 1, true, values);
+    install_map(1901, 2, 1, values);
 
     let map_value = ld_imm64_parts(1, BPF_PSEUDO_MAP_IDX_VALUE, 0, 4);
     let mut program = BpfProgram::new(vec![
@@ -425,32 +394,10 @@ fn map_inline_constantizes_frozen_pseudo_map_idx_value_loads() {
 }
 
 #[test]
-fn map_inline_skips_mutable_pseudo_map_value_loads() {
-    let mut values = HashMap::new();
-    values.insert(0u32.to_le_bytes().to_vec(), vec![7, 0, 0, 0]);
-    install_map(902, 2, 1, false, values);
-
-    let map_value = ld_imm64_parts(1, BPF_PSEUDO_MAP_VALUE, 78, 0);
-    let original = vec![
-        map_value[0],
-        map_value[1],
-        BpfInsn::ldx_mem(BPF_W, 2, 1, 0),
-        exit_insn(),
-    ];
-    let mut program = BpfProgram::new(original.clone());
-    program.set_map_ids(vec![902]);
-
-    let result = run_map_inline_pass(&mut program);
-
-    assert!(!result.program_changed);
-    assert_eq!(program.insns, original);
-}
-
-#[test]
 fn map_inline_pseudo_map_value_feeds_const_prop_and_dce() {
     let mut values = HashMap::new();
     values.insert(0u32.to_le_bytes().to_vec(), vec![1, 0, 0, 0]);
-    install_map(903, 2, 1, true, values);
+    install_map(903, 2, 1, values);
 
     let map_value = ld_imm64_parts(1, BPF_PSEUDO_MAP_VALUE, 79, 0);
     let mut program = BpfProgram::new(vec![
@@ -892,7 +839,7 @@ fn map_inline_pass_rewrites_lookup_and_scalar_loads() {
 
 #[test]
 fn map_inline_pass_rewrites_lookup_with_fp_alias_store_key_and_offset_load() {
-    install_array_map_entry(9251, 16, 7, vec![0, 0, 0, 0, 42, 0, 0, 0], true);
+    install_array_map_entry(9251, 16, 7, vec![0, 0, 0, 0, 42, 0, 0, 0]);
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
@@ -1151,11 +1098,11 @@ fn map_inline_pass_skips_non_constant_key() {
 #[test]
 fn map_inline_pass_skips_pseudo_map_value_lookup_key_without_verifier_state() {
     let key_bytes = (0u8..20).collect::<Vec<_>>();
-    install_array_map_entry(9401, 1, 0, key_bytes.clone(), true);
+    install_array_map_entry(9401, 1, 0, key_bytes.clone());
 
     let mut values = HashMap::new();
     values.insert(key_bytes.clone(), 42u32.to_le_bytes().to_vec());
-    install_map_with_key_size(9402, 1, 20, 16, true, values);
+    install_map_with_key_size(9402, 1, 20, 16, values);
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let key = ld_imm64_parts(2, BPF_PSEUDO_MAP_VALUE, 43, 0);
@@ -1192,7 +1139,7 @@ fn map_inline_pass_skips_16_byte_key_without_verifier_support() {
 
     let mut values = HashMap::new();
     values.insert(key_bytes.clone(), 42u32.to_le_bytes().to_vec());
-    install_map_with_key_size(9302, 1, 16, 8, true, values);
+    install_map_with_key_size(9302, 1, 16, 8, values);
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let key_lo = emit_ldimm64(3, lo);
@@ -1233,7 +1180,7 @@ fn map_inline_pass_skips_16_byte_key_without_verifier_support() {
 fn map_inline_pass_uses_verifier_guided_wide_zero_store_key() {
     let mut values = HashMap::new();
     values.insert(0u32.to_le_bytes().to_vec(), 42u32.to_le_bytes().to_vec());
-    install_map(7001, 2, 8, true, values);
+    install_map(7001, 2, 8, values);
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 123);
     let mut program = BpfProgram::new(vec![
@@ -1328,7 +1275,7 @@ fn map_inline_pass_skips_20_byte_constant_key_without_verifier_support() {
     let mut key_bytes = vec![0u8; 20];
     key_bytes[16..20].copy_from_slice(&1u32.to_le_bytes());
     values.insert(key_bytes.clone(), 7u32.to_le_bytes().to_vec());
-    install_map_with_key_size(9310, 1, 20, 8, true, values);
+    install_map_with_key_size(9310, 1, 20, 8, values);
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
@@ -1513,7 +1460,7 @@ fn map_inline_pass_removes_hash_lookup_before_helper_using_loaded_scalar() {
 #[test]
 fn map_inline_pass_does_not_use_non_verifier_fixpoint_fallback() {
     install_array_map(9203, 2u32.to_le_bytes().to_vec());
-    install_array_map_entry(9204, 8, 2, 11u32.to_le_bytes().to_vec(), true);
+    install_array_map_entry(9204, 8, 2, 11u32.to_le_bytes().to_vec());
 
     let map0 = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let map1 = ld_imm64(1, BPF_PSEUDO_MAP_FD, 43);
@@ -1613,38 +1560,8 @@ fn map_inline_pass_rewrites_lookup_inside_subprog() {
 }
 
 #[test]
-fn map_inline_pass_skips_mutable_array_lookup_with_store_back() {
-    install_mutable_array_map(415, vec![7, 0, 0, 0]);
-
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-    let original = vec![
-        map[0],
-        map[1],
-        st_mem(BPF_W, 10, -4, 1),
-        BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
-        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
-        add64_imm(6, 1),
-        BpfInsn::stx_mem(BPF_W, 0, 6, 0),
-        BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
-    ];
-    let mut program = BpfProgram::new(original.clone());
-    program.set_map_ids(vec![415]);
-
-    let result = run_map_inline_pass(&mut program);
-
-    assert!(!result.program_changed);
-    assert_eq!(program.insns, original);
-    assert!(result.pass_results[0].sites_skipped.iter().any(|skip| skip
-        .reason
-        .contains("mutable lookup result has non-load uses")));
-}
-
-#[test]
 fn map_inline_pass_inlines_mutable_array_across_readonly_helper_call() {
-    install_mutable_array_map(411, vec![7, 0, 0, 0]);
+    install_array_map(411, vec![7, 0, 0, 0]);
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
@@ -1677,40 +1594,10 @@ fn map_inline_pass_inlines_mutable_array_across_readonly_helper_call() {
     );
 }
 
-#[test]
-fn map_inline_pass_skips_mutable_array_across_side_effect_helper_call() {
-    install_mutable_array_map(412, vec![7, 0, 0, 0]);
-
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-    let original = vec![
-        map[0],
-        map[1],
-        st_mem(BPF_W, 10, -4, 1),
-        BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
-        BpfInsn::mov64_reg(9, 0),
-        call_helper(2),
-        BpfInsn::ldx_mem(BPF_W, 6, 9, 0),
-        BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
-    ];
-    let mut program = BpfProgram::new(original.clone());
-    program.set_map_ids(vec![412]);
-
-    let result = run_map_inline_pass(&mut program);
-
-    assert!(!result.program_changed);
-    assert_eq!(program.insns, original);
-    assert!(result.pass_results[0]
-        .sites_skipped
-        .iter()
-        .any(|skip| skip.reason.contains("fixed-offset scalar loads")));
-}
 
 #[test]
 fn map_inline_pass_errors_when_array_snapshot_key_is_absent() {
-    install_empty_map(311, 2, 8, 8, true);
+    install_empty_map(311, 2, 8, 8);
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
@@ -1769,7 +1656,7 @@ fn map_inline_pass_inlines_uniform_percpu_array_maps() {
     let blob = make_percpu_blob(&7u32.to_le_bytes(), 2);
     let mut values = HashMap::new();
     values.insert(1u32.to_le_bytes().to_vec(), blob.clone());
-    install_percpu_array_map(112, 4, 8, true, values);
+    install_percpu_array_map(112, 4, 8, values);
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
@@ -1805,7 +1692,7 @@ fn map_inline_pass_inlines_uniform_percpu_array_maps() {
 
 #[test]
 fn map_inline_pass_errors_when_percpu_array_default_snapshot_is_absent() {
-    install_percpu_array_map(916, 4, 8, true, HashMap::new());
+    install_percpu_array_map(916, 4, 8, HashMap::new());
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
@@ -1833,7 +1720,7 @@ fn map_inline_pass_skips_mixed_percpu_array_maps() {
     blob[8..12].copy_from_slice(&9u32.to_le_bytes());
     let mut values = HashMap::new();
     values.insert(1u32.to_le_bytes().to_vec(), blob);
-    install_percpu_array_map(212, 4, 8, true, values);
+    install_percpu_array_map(212, 4, 8, values);
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let original = vec![
@@ -1871,7 +1758,7 @@ fn map_inline_pass_skips_percpu_hash_family_maps() {
     ] {
         let mut values = HashMap::new();
         values.insert(1u32.to_le_bytes().to_vec(), vec![7, 0, 0, 0]);
-        install_map(map_id, map_type, 8, true, values);
+        install_map(map_id, map_type, 8, values);
 
         let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
         let original = vec![

@@ -247,10 +247,10 @@ pub(crate) type SharedInvalidationTracker = Arc<Mutex<MapInvalidationTracker<Bpf
 trait KernelOps {
     fn snapshot_program(&mut self, prog_id: u32) -> Result<bpfget::ProgramSnapshot>;
     fn probe_target(&mut self) -> Result<bpfget::TargetJson>;
+    fn bpf_mutated_map_ids(&mut self) -> Result<std::collections::HashSet<u32>>;
     fn rejit(
         &mut self,
         prog_id: u32,
-        snapshot: &bpfget::ProgramSnapshot,
         insns: &[kernel_sys::bpf_insn],
         fd_array: &RejitFdArray,
         verifier_log_path: &Path,
@@ -268,35 +268,28 @@ impl KernelOps for LiveKernelOps {
         bpfget::probe_target_json()
     }
 
+    fn bpf_mutated_map_ids(&mut self) -> Result<std::collections::HashSet<u32>> {
+        compute_bpf_mutated_map_ids()
+    }
+
     fn rejit(
         &mut self,
         prog_id: u32,
-        snapshot: &bpfget::ProgramSnapshot,
         insns: &[kernel_sys::bpf_insn],
         fd_array: &RejitFdArray,
         verifier_log_path: &Path,
     ) -> Result<RejitReport> {
-        rejit_program(prog_id, snapshot, insns, fd_array, verifier_log_path)
+        rejit_program(prog_id, insns, fd_array, verifier_log_path)
     }
-}
-
-#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
-struct RejitSummary {
-    status: String,
-    prog_id: u32,
-    insn_count_before: usize,
-    insn_count_after: usize,
 }
 
 #[derive(Clone, Debug)]
 struct RejitReport {
-    summary: RejitSummary,
     verifier_states: kernel_sys::VerifierStatesJson,
 }
 
 fn rejit_program(
     prog_id: u32,
-    snapshot: &bpfget::ProgramSnapshot,
     insns: &[kernel_sys::bpf_insn],
     fd_array: &RejitFdArray,
     verifier_log_path: &Path,
@@ -327,15 +320,7 @@ fn rejit_program(
     if verifier_states.insns.is_empty() {
         bail!("BPF_PROG_REJIT verifier log for prog {prog_id} did not contain parseable state snapshots");
     }
-    Ok(RejitReport {
-        summary: RejitSummary {
-            status: "ok".to_string(),
-            prog_id,
-            insn_count_before: snapshot.insns.len(),
-            insn_count_after: insns.len(),
-        },
-        verifier_states,
-    })
+    Ok(RejitReport { verifier_states })
 }
 
 fn c_log_string(buf: &[u8]) -> String {
@@ -385,7 +370,6 @@ struct MapValuesMapJson {
     key_size: u32,
     value_size: u32,
     max_entries: u32,
-    frozen: bool,
     entries: Vec<MapValuesEntryJson>,
 }
 
@@ -621,27 +605,6 @@ pub(crate) fn try_apply_one(
     )
 }
 
-pub(crate) fn try_reapply_one(
-    prog_id: u32,
-    config: &CliConfig,
-    enabled_passes: &[String],
-    invalidation_tracker: Option<&SharedInvalidationTracker>,
-) -> Result<OptimizeOneResult> {
-    let mut kernel = LiveKernelOps;
-    try_apply_one_with_map_access(
-        ApplyOneRequest {
-            prog_id,
-            config,
-            enabled_passes,
-            invalidation_tracker,
-        },
-        &mut kernel,
-        bpf::bpf_map_get_fd_by_id,
-        live_bpf_map_lookup,
-        live_bpf_map_keys,
-    )
-}
-
 pub(crate) struct ApplyProgramOutcome {
     pub prog_id: u32,
     pub result: OptimizeOneResult,
@@ -753,7 +716,6 @@ where
     let verifier_states_json = workdir.path().join(VERIFIER_STATES_FILE);
     let map_values_json = workdir.path().join(MAP_VALUES_FILE);
     let opt_bin = workdir.path().join("opt.bin");
-    let rejit_summary_json = workdir.path().join("bpfrejit_summary.json");
 
     let result = (|| -> Result<OptimizeOneResult> {
         let mut snapshot = kernel
@@ -786,8 +748,12 @@ where
 
         let mut skipped_maps = Vec::<SkippedMapEntry>::new();
         if wants_map_inline {
+            let bpf_mutated = kernel.bpf_mutated_map_ids().with_context(|| {
+                format!("scan loaded BPF programs for kernel-side map writes (prog {prog_id})")
+            })?;
             skipped_maps = write_live_map_values(
                 &snapshot.maps,
+                &bpf_mutated,
                 &map_values_json,
                 &mut open_map_fd,
                 &mut lookup_map_value,
@@ -848,7 +814,7 @@ where
         let mut current_bytes = orig_bytes.clone();
         let mut reports = Vec::new();
         let mut verifier_states_ready = false;
-        let mut last_rejit_summary = None;
+        let mut last_rejit = false;
         let mut partial_error = None;
         let mut failure_artifacts = None;
         for (idx, pass) in pass_list.iter().enumerate() {
@@ -911,20 +877,11 @@ where
             let pass_bytes = fs::read(&pass_output)
                 .with_context(|| format!("read {}", pass_output.display()))?;
             let pass_insns = decode_insns(&pass_bytes, pass_output.to_string_lossy().as_ref())?;
-            let tid = unsafe { libc::syscall(libc::SYS_gettid) };
-            let t0 = std::time::Instant::now();
-            eprintln!("[trace] tid={tid} REJIT_ENTER prog={prog_id} pass={pass}");
             let rejit_result = kernel.rejit(
                 prog_id,
-                &snapshot,
                 &pass_insns,
                 &fd_array,
                 &pass_verifier_log,
-            );
-            eprintln!(
-                "[trace] tid={tid} REJIT_EXIT prog={prog_id} pass={pass} ok={} elapsed_us={}",
-                rejit_result.is_ok(),
-                t0.elapsed().as_micros()
             );
             let rejit_report = match rejit_result {
                 Ok(report) => report,
@@ -948,7 +905,7 @@ where
                 .with_context(|| format!("write verifier states after pass {pass}"))?;
             verifier_states_ready = true;
             current_bytes = pass_bytes;
-            last_rejit_summary = Some(rejit_report.summary);
+            last_rejit = true;
             reports.push(report);
         }
         fs::write(&opt_bin, &current_bytes)
@@ -975,7 +932,7 @@ where
             "ok"
         }
         .to_string();
-        let applied = last_rejit_summary.is_some();
+        let applied = last_rejit;
         let failed_pass = failure_artifacts
             .as_ref()
             .map(|artifacts| artifacts.failed_pass.clone());
@@ -983,8 +940,7 @@ where
             .as_ref()
             .map(|artifacts| artifacts.committed_passes);
 
-        if let Some(rejit_summary) = last_rejit_summary.as_ref() {
-            write_json_file(&rejit_summary_json, &rejit_summary)?;
+        if last_rejit {
             refresh_invalidation_tracking(
                 invalidation_tracker,
                 prog_id,
@@ -1158,6 +1114,7 @@ fn pass_detail_from_report(report: &BpfoptPassReport) -> PassDetail {
 
 fn write_live_map_values<F, G, H>(
     maps: &[MapInfoJson],
+    bpf_mutated: &std::collections::HashSet<u32>,
     output: &Path,
     open_map_fd: &mut F,
     lookup_map_value: &mut G,
@@ -1173,6 +1130,13 @@ where
 
     for map in maps {
         if !is_map_inlineable_map_type(map.map_type) {
+            continue;
+        }
+        if bpf_mutated.contains(&map.map_id) {
+            skipped.push(SkippedMapEntry {
+                map_id: map.map_id,
+                reason: "mutated by kernel-side BPF program".to_string(),
+            });
             continue;
         }
         let fd = open_map_fd(map.map_id)
@@ -1252,7 +1216,6 @@ fn write_map_values_snapshot(
                     key_size: map.key_size,
                     value_size: map.value_size,
                     max_entries: map.max_entries,
-                    frozen: false,
                     entries,
                 }
             })
@@ -1266,6 +1229,70 @@ fn is_array_like_map(map_type: u32) -> bool {
         map_type,
         kernel_sys::BPF_MAP_TYPE_ARRAY | kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY
     )
+}
+
+// Helpers that mutate a map's contents from inside a BPF program. Programs that
+// call any of these on a map make that map unsafe for map_inline constantization
+// because the map value can change without going through user-space (so the
+// MapInvalidationTracker user-space watcher cannot observe the write).
+const BPF_FUNC_MAP_UPDATE_ELEM: i32 = 2;
+const BPF_FUNC_MAP_DELETE_ELEM: i32 = 3;
+const BPF_FUNC_MAP_PUSH_ELEM: i32 = 87;
+const BPF_FUNC_MAP_POP_ELEM: i32 = 88;
+
+fn is_bpf_helper_call(insn: &kernel_sys::bpf_insn) -> bool {
+    let call_code = ((kernel_sys::BPF_JMP | kernel_sys::BPF_CALL) & 0xff) as u8;
+    insn.code == call_code && insn.src_reg() == 0
+}
+
+fn program_writes_to_any_map(insns: &[kernel_sys::bpf_insn]) -> bool {
+    insns.iter().any(|insn| {
+        is_bpf_helper_call(insn)
+            && matches!(
+                insn.imm,
+                BPF_FUNC_MAP_UPDATE_ELEM
+                    | BPF_FUNC_MAP_DELETE_ELEM
+                    | BPF_FUNC_MAP_PUSH_ELEM
+                    | BPF_FUNC_MAP_POP_ELEM,
+            )
+    })
+}
+
+/// Enumerate all loaded BPF programs and return the set of map ids that any
+/// program mutates from kernel-side BPF code (via `bpf_map_update_elem` and
+/// friends). Used to gate map_inline so the daemon never feeds a BPF-mutated
+/// map to bpfopt. Race: programs may be unloaded mid-enumeration; ENOENT on
+/// open is treated as "program disappeared" and skipped.
+fn compute_bpf_mutated_map_ids() -> Result<std::collections::HashSet<u32>> {
+    use std::os::fd::AsFd;
+    let mut mutated = std::collections::HashSet::new();
+    let mut start_id = 0u32;
+    loop {
+        let Some(prog_id) = kernel_sys::prog_get_next_id(start_id)
+            .context("enumerate loaded BPF programs for kernel-side write detection")?
+        else {
+            break;
+        };
+        start_id = prog_id;
+        let Some(fd) = kernel_sys::prog_try_get_fd_by_id(prog_id)
+            .with_context(|| format!("open BPF program id {prog_id} for write detection"))?
+        else {
+            continue;
+        };
+        let insns = kernel_sys::prog_get_original(fd.as_fd())
+            .with_context(|| format!("read original bytecode for BPF program id {prog_id}"))?;
+        if !program_writes_to_any_map(&insns) {
+            continue;
+        }
+        let info = kernel_sys::obj_get_info_by_fd(fd.as_fd())
+            .with_context(|| format!("read info for BPF program id {prog_id}"))?;
+        let map_ids = kernel_sys::prog_map_ids(fd.as_fd(), info.nr_map_ids)
+            .with_context(|| format!("read map ids for BPF program id {prog_id}"))?;
+        for map_id in map_ids {
+            mutated.insert(map_id);
+        }
+    }
+    Ok(mutated)
 }
 
 fn is_map_inlineable_map_type(map_type: u32) -> bool {
@@ -1998,6 +2025,7 @@ mod tests {
 
         let skipped = write_live_map_values(
             &maps,
+            &std::collections::HashSet::new(),
             &output,
             &mut |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
             &mut |map, _fd, key| {
@@ -2068,6 +2096,7 @@ mod tests {
 
         let skipped = write_live_map_values(
             &maps,
+            &std::collections::HashSet::new(),
             &output,
             &mut |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
             &mut |_map, _fd, _key| Ok(Some(42u32.to_le_bytes().to_vec())),
@@ -2382,6 +2411,10 @@ mod tests {
             Ok(test_snapshot(prog_id))
         }
 
+        fn bpf_mutated_map_ids(&mut self) -> Result<std::collections::HashSet<u32>> {
+            Ok(std::collections::HashSet::new())
+        }
+
         fn probe_target(&mut self) -> Result<bpfget::TargetJson> {
             Ok(bpfget::TargetJson {
                 arch: "x86_64".to_string(),
@@ -2449,9 +2482,8 @@ mod tests {
 
         fn rejit(
             &mut self,
-            prog_id: u32,
-            _snapshot: &bpfget::ProgramSnapshot,
-            insns: &[kernel_sys::bpf_insn],
+            _prog_id: u32,
+            _insns: &[kernel_sys::bpf_insn],
             _fd_array: &RejitFdArray,
             verifier_log_path: &Path,
         ) -> Result<RejitReport> {
@@ -2467,15 +2499,7 @@ mod tests {
                 .verifier_states
                 .clone()
                 .ok_or_else(|| anyhow!("test did not expect per-pass ReJIT"))?;
-            Ok(RejitReport {
-                summary: RejitSummary {
-                    status: "ok".to_string(),
-                    prog_id,
-                    insn_count_before: 1,
-                    insn_count_after: insns.len(),
-                },
-                verifier_states,
-            })
+            Ok(RejitReport { verifier_states })
         }
     }
 
