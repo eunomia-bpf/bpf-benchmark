@@ -43,9 +43,8 @@ micro/programs/.cache
 micro/programs/.cache/**
 daemon/target
 daemon/target/**
-# Re-include host-built daemon binaries needed by runner-runtime image COPY.
+# Re-include the host-built x86 daemon binary needed by runner-runtime image COPY.
 !daemon/target/release/bpfrejit-daemon
-!daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon
 daemon/build
 daemon/build/**
 daemon/tests/results
@@ -68,11 +67,9 @@ bpfopt-suite/target
 bpfopt-suite/target/**
 bpfopt/target
 bpfopt/target/**
-# Re-include host-built bpfopt-suite binaries needed by runner-runtime image COPY.
+# Re-include the host-built x86 bpfopt-suite binaries needed by runner-runtime image COPY.
 !bpfopt/target/release/bpfopt
 !bpfopt/target/release/bpfprof
-!bpfopt/target/aarch64-unknown-linux-gnu/release/bpfopt
-!bpfopt/target/aarch64-unknown-linux-gnu/release/bpfprof
 
 vendor/llvmbpf/build
 vendor/linux

@@ -446,31 +446,51 @@ for ko_path in /artifacts/kinsn/*.ko; do
 done
 EOF
 
-FROM runner-runtime-runtime-base AS runner-runtime-daemon-artifact
+FROM runner-runtime-runtime-base AS runner-runtime-daemon-artifact-x86_64
 
-ARG RUN_TARGET_ARCH=x86_64
-# DAEMON_HOST_BIN_DIR is the host-relative directory containing the
-# pre-built bpfrejit-daemon binary. Make passes the arch-specific path
-# so the docker build only copies one file (no internal cargo build).
+# DAEMON_HOST_BIN_DIR is the host-relative directory containing the pre-built
+# x86_64 bpfrejit-daemon binary. ARM64 builds this artifact inside Docker.
 ARG DAEMON_HOST_BIN_DIR=daemon/target/release
 
 COPY ${DAEMON_HOST_BIN_DIR}/bpfrejit-daemon /tmp/bpfrejit-daemon
 RUN set -eux; \
-    case "${RUN_TARGET_ARCH}" in \
-        arm64) image_dir=/artifacts/rust/daemon/target/aarch64-unknown-linux-gnu/release ;; \
-        *)     image_dir=/artifacts/rust/daemon/target/release ;; \
-    esac; \
+    image_dir=/artifacts/rust/daemon/target/release; \
     install -d /artifacts/rust/usr-local-bin "${image_dir}"; \
     install -m 0755 /tmp/bpfrejit-daemon /artifacts/rust/usr-local-bin/bpfrejit-daemon; \
     install -m 0755 /tmp/bpfrejit-daemon "${image_dir}/bpfrejit-daemon"; \
     rm /tmp/bpfrejit-daemon
 
-FROM runner-runtime-runtime-base AS runner-runtime-bpfopt-artifacts
+FROM runner-runtime-build-base AS runner-runtime-daemon-artifact-arm64
 
+ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
-# BPFOPT_HOST_BIN_DIR is the host-relative directory containing pre-built
-# bpfopt + bpfprof CLIs. Make passes the arch-specific path so the docker
-# build only copies the binaries (no internal cargo build).
+
+WORKDIR ${IMAGE_WORKSPACE}
+
+COPY bpfopt/Cargo.toml bpfopt/Cargo.lock ./bpfopt/
+COPY bpfopt/crates/kernel-sys ./bpfopt/crates/kernel-sys
+COPY daemon/Cargo.toml daemon/Cargo.lock daemon/Makefile ./daemon/
+COPY daemon/crates ./daemon/crates
+COPY daemon/src ./daemon/src
+
+RUN --mount=type=cache,target=/opt/cargo/registry,id=cargo-registry-${RUN_TARGET_ARCH},sharing=locked \
+    --mount=type=cache,target=/opt/cargo/git,id=cargo-git-${RUN_TARGET_ARCH},sharing=locked \
+    --mount=type=cache,target=/tmp/cargo-daemon-target,id=cargo-daemon-target-${RUN_TARGET_ARCH},sharing=locked <<'EOF'
+set -eux
+test "${RUN_TARGET_ARCH}" = arm64
+make -C daemon release TARGET_DIR=/tmp/cargo-daemon-target TARGET_TRIPLE=aarch64-unknown-linux-gnu
+image_dir=/artifacts/rust/daemon/target/aarch64-unknown-linux-gnu/release
+install -d /artifacts/rust/usr-local-bin "${image_dir}"
+install -m 0755 /tmp/cargo-daemon-target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon /artifacts/rust/usr-local-bin/bpfrejit-daemon
+install -m 0755 /tmp/cargo-daemon-target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon "${image_dir}/bpfrejit-daemon"
+EOF
+
+FROM runner-runtime-daemon-artifact-${RUN_TARGET_ARCH} AS runner-runtime-daemon-artifact
+
+FROM runner-runtime-runtime-base AS runner-runtime-bpfopt-artifacts-x86_64
+
+# BPFOPT_HOST_BIN_DIR is the host-relative directory containing pre-built x86_64
+# bpfopt + bpfprof CLIs. ARM64 builds these artifacts inside Docker.
 ARG BPFOPT_HOST_BIN_DIR=bpfopt/target/release
 
 COPY ${BPFOPT_HOST_BIN_DIR}/bpfopt /tmp/bpfopt
@@ -479,6 +499,32 @@ RUN set -eux; \
     install -d /artifacts/rust/usr-local-bin; \
     install -m 0755 /tmp/bpfopt /tmp/bpfprof /artifacts/rust/usr-local-bin/; \
     rm /tmp/bpfopt /tmp/bpfprof
+
+FROM runner-runtime-build-base AS runner-runtime-bpfopt-artifacts-arm64
+
+ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
+ARG RUN_TARGET_ARCH=x86_64
+
+WORKDIR ${IMAGE_WORKSPACE}
+
+COPY bpfopt/Cargo.toml bpfopt/Cargo.lock ./bpfopt/
+COPY bpfopt/crates ./bpfopt/crates
+
+RUN --mount=type=cache,target=/opt/cargo/registry,id=cargo-registry-${RUN_TARGET_ARCH},sharing=locked \
+    --mount=type=cache,target=/opt/cargo/git,id=cargo-git-${RUN_TARGET_ARCH},sharing=locked \
+    --mount=type=cache,target=/tmp/cargo-bpfopt-target,id=cargo-bpfopt-target-${RUN_TARGET_ARCH},sharing=locked <<'EOF'
+set -eux
+test "${RUN_TARGET_ARCH}" = arm64
+cargo build --release --workspace --target aarch64-unknown-linux-gnu --target-dir /tmp/cargo-bpfopt-target --manifest-path bpfopt/Cargo.toml \
+    -p bpfopt -p bpfprof
+install -d /artifacts/rust/usr-local-bin
+install -m 0755 \
+    /tmp/cargo-bpfopt-target/aarch64-unknown-linux-gnu/release/bpfopt \
+    /tmp/cargo-bpfopt-target/aarch64-unknown-linux-gnu/release/bpfprof \
+    /artifacts/rust/usr-local-bin/
+EOF
+
+FROM runner-runtime-bpfopt-artifacts-${RUN_TARGET_ARCH} AS runner-runtime-bpfopt-artifacts
 
 FROM runner-runtime-runtime-base AS runner-runtime
 

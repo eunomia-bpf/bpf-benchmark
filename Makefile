@@ -110,7 +110,7 @@ vm-corpus: $(_VM_COMMON_DEPS)
 
 vm-all: vm-test vm-micro vm-corpus
 
-_AWS_ARM64_SUITE_DEPS = $(ARM64_RUNNER_RUNTIME_IMAGE_TAR) $(DAEMON_DIR)/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon
+_AWS_ARM64_SUITE_DEPS = $(ARM64_RUNNER_RUNTIME_IMAGE_TAR)
 _AWS_X86_SUITE_DEPS  = $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(DAEMON_DIR)/target/release/bpfrejit-daemon
 
 aws-arm64-test: $(_AWS_ARM64_SUITE_DEPS)

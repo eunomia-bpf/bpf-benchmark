@@ -31,15 +31,16 @@ RUNNER_CONTAINER_CXX := /usr/bin/g++
 CONTAINER_IMAGE_ARTIFACT_ROOT := $(ARTIFACT_ROOT)/container-images
 KATRAN_BUILD_ROOT := $(REPO_BUILD_ROOT)/katran
 X86_DAEMON_BIN_DIR := $(DAEMON_DIR)/target/release
-ARM64_DAEMON_BIN_DIR := $(DAEMON_DIR)/target/aarch64-unknown-linux-gnu/release
+ARM64_RUST_TARGET := aarch64-unknown-linux-gnu
+ARM64_DAEMON_BIN_DIR := $(DAEMON_DIR)/target/$(ARM64_RUST_TARGET)/release
 X86_DAEMON_BINARY := $(X86_DAEMON_BIN_DIR)/bpfrejit-daemon
 ARM64_DAEMON_BINARY := $(ARM64_DAEMON_BIN_DIR)/bpfrejit-daemon
 ACTIVE_DAEMON_BINARY := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_DAEMON_BINARY),$(X86_DAEMON_BINARY))
-ACTIVE_DAEMON_TARGET_TRIPLE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),aarch64-unknown-linux-gnu,)
+ACTIVE_DAEMON_TARGET_TRIPLE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_RUST_TARGET),)
 ACTIVE_DAEMON_TARGET_ARG := $(if $(strip $(ACTIVE_DAEMON_TARGET_TRIPLE)),TARGET_TRIPLE="$(ACTIVE_DAEMON_TARGET_TRIPLE)",)
 ACTIVE_BPFOPT_TARGET_ARG := $(if $(strip $(ACTIVE_DAEMON_TARGET_TRIPLE)),--target "$(ACTIVE_DAEMON_TARGET_TRIPLE)",)
 X86_BPFOPT_BIN_DIR := $(ROOT_DIR)/bpfopt/target/release
-ARM64_BPFOPT_BIN_DIR := $(ROOT_DIR)/bpfopt/target/aarch64-unknown-linux-gnu/release
+ARM64_BPFOPT_BIN_DIR := $(ROOT_DIR)/bpfopt/target/$(ARM64_RUST_TARGET)/release
 X86_BPFOPT_BINARIES := $(addprefix $(X86_BPFOPT_BIN_DIR)/,bpfopt bpfprof)
 ARM64_BPFOPT_BINARIES := $(addprefix $(ARM64_BPFOPT_BIN_DIR)/,bpfopt bpfprof)
 ACTIVE_BPFOPT_BINARY_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_BPFOPT_BIN_DIR),$(X86_BPFOPT_BIN_DIR))
@@ -280,7 +281,7 @@ $(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRA
 		-t "$(X86_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"; mv -f "$$tmp" "$@"
 
-$(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR) $(ARM64_KERNEL_FORK_IMAGE_TAR) $(ARM64_DAEMON_BINARY) $(ARM64_BPFOPT_BINARIES)
+$(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR) $(ARM64_KERNEL_FORK_IMAGE_TAR)
 	@mkdir -p "$(dir $@)"
 	docker load -i "$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR)"
 	docker load -i "$(ARM64_KERNEL_FORK_IMAGE_TAR)"
@@ -292,8 +293,6 @@ $(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_K
 		--build-arg RUN_TARGET_ARCH=arm64 \
 		--build-arg VENDOR_LINUX_FRAMEWORK_COMMIT="$(KERNEL_FORK_COMMIT_ARM64)" \
 		--build-arg KERNEL_FORK_IMAGE_PLATFORM="$(KERNEL_FORK_BUILD_PLATFORM)" \
-		--build-arg DAEMON_HOST_BIN_DIR="$(patsubst $(ROOT_DIR)/%,%,$(ARM64_DAEMON_BIN_DIR))" \
-		--build-arg BPFOPT_HOST_BIN_DIR="$(patsubst $(ROOT_DIR)/%,%,$(ARM64_BPFOPT_BIN_DIR))" \
 		-t "$(ARM64_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(ARM64_RUNNER_RUNTIME_IMAGE)"; mv -f "$$tmp" "$@"
 
@@ -332,16 +331,16 @@ $(X86_RUNTIME_KERNEL_IMAGE): $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(BPFREJIT_INSTALL_
 	test -s "$@"
 	touch "$@"
 
-# Daemon binary is host-built (cargo handles cross-compile to aarch64 via
-# TARGET_TRIPLE). Per-arch rules so the runner-runtime image can depend on
-# the matching binary directly without RUN_TARGET_ARCH ambiguity.
+# x86 Rust runtime binaries are host-built before the image stage. ARM64
+# builds happen inside the arm64 Docker stage because the host lacks a complete
+# aarch64 userspace sysroot for libbpf's dynamic libraries.
 $(X86_DAEMON_BINARY): $(DAEMON_SOURCE_FILES) $(BUILD_RULE_FILES)
 	mkdir -p "$(dir $@)"
 	make -C "$(ROOT_DIR)/daemon" release TARGET_DIR="$(DAEMON_DIR)/target"
 
-$(ARM64_DAEMON_BINARY): $(DAEMON_SOURCE_FILES) $(BUILD_RULE_FILES)
-	mkdir -p "$(dir $@)"
-	make -C "$(ROOT_DIR)/daemon" release TARGET_DIR="$(DAEMON_DIR)/target" TARGET_TRIPLE=aarch64-unknown-linux-gnu
+$(X86_BPFOPT_BINARIES) &: $(BPFOPT_SOURCE_FILES) $(BUILD_RULE_FILES)
+	cargo build --release --workspace --target-dir "$(ROOT_DIR)/bpfopt/target" --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml" \
+		-p bpfopt -p bpfprof
 
 .PHONY: image-katran-artifacts image-runner-artifacts \
 	image-micro-program-artifacts image-test-artifacts
@@ -361,14 +360,6 @@ $(RUNNER_LIBBPF_A): $(LIBBPF_SOURCE_FILES) $(BUILD_RULE_FILES)
 	make -C "$(ROOT_DIR)/vendor/libbpf/src" -j"$(JOBS)" BUILD_STATIC_ONLY=1 \
 		OBJDIR="$(RUNNER_LIBBPF_OBJDIR)" DESTDIR= PREFIX="$(RUNNER_LIBBPF_PREFIX)" \
 		"$(RUNNER_LIBBPF_A)" install_headers
-
-$(X86_BPFOPT_BINARIES) &: $(BPFOPT_SOURCE_FILES) $(BUILD_RULE_FILES)
-	cargo build --release --workspace --target-dir "$(ROOT_DIR)/bpfopt/target" --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml" \
-		-p bpfopt -p bpfprof
-
-$(ARM64_BPFOPT_BINARIES) &: $(BPFOPT_SOURCE_FILES) $(BUILD_RULE_FILES)
-	cargo build --release --workspace --target aarch64-unknown-linux-gnu --target-dir "$(ROOT_DIR)/bpfopt/target" --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml" \
-		-p bpfopt -p bpfprof
 
 $(ACTIVE_RUNNER_BINARY): $(RUNNER_LIBBPF_A) $(RUNNER_SOURCE_FILES) $(BUILD_RULE_FILES)
 	mkdir -p "$(dir $@)"
