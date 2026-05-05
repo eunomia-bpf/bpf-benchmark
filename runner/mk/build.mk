@@ -165,7 +165,7 @@ MICRO_RUNTIME_SOURCE_FILES = $(shell find "$(MICRO_DIR)" \( -path "$(MICRO_PROGR
 CORPUS_RUNTIME_SOURCE_FILES = $(shell find "$(ROOT_DIR)/corpus" \( -path '*/__pycache__' -o -path '*/build' -o -path '*/results' \) -prune -o -type f -print 2>/dev/null)
 KERNEL_BUILD_META_FILES = $(shell find "$(KERNEL_DIR)" \( -path '*/.git' -o -path '*/build*' -o -path '*/.cache' \) -prune -o -type f \( -name 'Makefile' -o -name 'Kconfig*' -o -name '*.mk' -o -path '*/scripts/config' \) -print 2>/dev/null)
 KERNEL_SOURCE_FILES = $(shell find "$(KERNEL_DIR)" \( -path '*/.git' -o -path '*/build*' -o -path '*/.cache' \) -prune -o -type f \( -name '*.c' -o -name '*.h' -o -name '*.S' -o -name '*.lds' -o -name '*.dts' -o -name '*.dtsi' -o -name '*.sh' \) -print 2>/dev/null)
-KERNEL_FORK_IMAGE_SOURCE_FILES = $(KERNEL_FORK_CONTAINERFILE) $(DOCKERIGNORE_FILE) \
+KERNEL_FORK_IMAGE_SOURCE_FILES = $(KERNEL_FORK_CONTAINERFILE) \
 	$(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES) $(DEFCONFIG_SRC) $(ARM64_DEFCONFIG_SRC)
 KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES = $(ROOT_DIR)/Makefile $(KATRAN_ARTIFACTS_BUILD_RULE_FILE) \
 	$(KATRAN_ARTIFACTS_CONTAINERFILE) $(DOCKERIGNORE_FILE) $(KATRAN_SOURCE_FILES) $(BPFTOOL_SOURCE_FILES)
