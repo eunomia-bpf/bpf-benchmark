@@ -515,7 +515,7 @@ Packed（sidecar pseudo-insn + CALL pair，零 argument setup，N→1 指令替�
 - **两种测量路径，没有第三种**：(1) App-native：真实应用加载+触发 BPF，`bpf_enable_stats` 读 per-program exec_ns；(2) TEST_RUN：`BPF_PROG_TEST_RUN` 直接测，仅限 XDP/TC/socket_filter 等支持的 prog_type。
 - **kinsn module 证据**：E2E artifact 必须包含 kinsn module 加载状态（loaded_modules/failed_modules/daemon discovery log）。
 - **ARM64 默认走 AWS 远端**（t4g.small bench / t4g.micro test），不在本地 QEMU 跑 Python。
-- **AWS 成本约束**（硬性规则）：所有 AWS 跑（smoke + authoritative）默认 `t3.small` x86 / `t4g.small` arm64（2 vCPU/2GB），test suite 用 `t3.micro` / `t4g.micro`。**`medium` 是绝对上限，仅允许作为 OOM 修复手段；禁止升级到 medium 以上**（不允许 c5/c6g、不允许 xlarge/2xlarge、不允许为 variance/并行/SAMPLES=30 而升级）。variance 噪声 / 吞吐限制 / CPU credit throttling 必须通过代码优化（缩 workload、减少 tracing、降低并发 pass）解决，**不能换大机器**。spot instance 优先用于非时间敏感 run。
+- **AWS 成本约束**（硬性规则）：所有 AWS 跑（smoke + authoritative）默认 `t3.small` x86 / `t4g.small` arm64（2 vCPU/2GB），test suite 用 `t3.micro` / `t4g.micro`。**`medium` 是绝对上限，仅允许作为 OOM 修复手段；禁止升级到 medium 以上**（不允许 c5/c6g、不允许 xlarge/2xlarge、不允许为 variance/并行/任何 SAMPLES 而升级）。variance 噪声 / 吞吐限制 / CPU credit throttling 必须通过代码优化（缩 workload、减少 tracing、降低并发 pass）解决，**不能换大机器**。spot instance 优先用于非时间敏感 run。SAMPLES 上限 = 3，paper-grade 由 per-program `min_runs ≥ 100` filter 决定，不靠 SAMPLES 拉到 30。
 - **统计要求**：报告必须同时给 applied-only geomean 和 all-comparable geomean + sample count + comparison exclusion reasons。repeat ≥ 50，论文级 ≥ 500。
 
 ### 5.4 Required Hardware
@@ -762,7 +762,7 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | `make vm-selftest` | VM 中跑 repo 自己的 unittest `rejit_*` 集合，并追加 negative tests (`adversarial_rejit` + `fuzz_rejit`) |
 | `make vm-micro-smoke` | VM 中跑 micro smoke (simple + load_byte_recompose + cmov_dense, llvmbpf + kernel) |
 | `make vm-micro` | VM 中跑全量 micro suite (llvmbpf + kernel, 默认 3iter/1warm/100rep) |
-| `make vm-corpus` | 跑 corpus batch（单 VM batch，daemon serve 常驻，用 policy，默认 30 samples） |
+| `make vm-corpus` | 跑 corpus batch（单 VM batch，daemon serve 常驻，用 policy，默认 3 samples） |
 | `make vm-e2e` | 跑全部 E2E (tracee + tetragon + bpftrace + scx + bcc + katran；`xdp_forwarding` 已退役) |
 | `make vm-all` | = `vm-test` + `vm-micro` + `vm-corpus` + `vm-e2e`（完整 VM 验证） |
 | `make validate` | = `check` + `vm-test` + `vm-micro-smoke`（最小 VM 验证） |

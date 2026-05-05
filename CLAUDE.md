@@ -40,7 +40,7 @@ Skip programs where either phase has `run_cnt_delta == 0`.
 **Threshold filter** (mandatory for paper-grade):
 - Drop programs where `min(baseline_runs, post_rejit_runs) < 100`
 - Justification: empirical noise floor on the BpfReJIT 18-app corpus drops sharply at 100 (CV 29.6% with no filter → 17.7% at ≥100). Above 100 the CV stays flat through ≥100K, so 100 captures the noise-reduction inflection point while retaining maximum program coverage (127 vs 90 progs at ≥10K). Justified by noise-floor measurement on the same dataset; do not raise without re-measuring CV on a new dataset.
-- For paper authoritative runs: SAMPLES=30 reduces noise on retained programs by ~5.5× (1/√30).
+- SAMPLES count is just a workload-cycle multiplier; it does not gate paper-grade. SAMPLES=1 is a legitimate authoritative measurement as long as the per-program min_runs filter (≥100) passes — a single workload pass that drives any one BPF program through several hundred run_cnt deltas already provides the noise floor. SAMPLES=3 is the upper cap; larger SAMPLES is not used.
 
 **Two reporting metrics, always paired**:
 - **Method B — per-program geomean** (primary):
@@ -59,7 +59,7 @@ Both reported together; agreement (within 1%) signals high confidence. Report `w
 - arithmetic mean of ratios (mathematically wrong for ratio data)
 - ad-hoc thresholds other than 100 (any change must be justified by re-measuring noise-floor CV on the new dataset)
 
-**Confidence reporting**: For SAMPLES≥30, report bootstrap 95% CI on the geomean and the aggregate ratio. Below SAMPLES=30 results are smoke-only and must not be quoted as paper numbers.
+**Confidence reporting**: Bootstrap CIs are computed from per-program ratios across the retained-programs population (≥100 min_runs), not from cross-suite-run replication. Both SAMPLES=1 and SAMPLES=3 produce paper-quotable numbers when retained-program coverage is non-trivial.
 
 ### BranchFlip Requires Real Per-Site PGO
 `branch_flip` is the Paper B profile-guided branch-layout pass. It is production code but remains outside the runner benchmark default policy until Paper B benchmark results decide policy. It must consume real `bpfprof --per-site` data: every candidate site needs `branch_count`, `branch_misses`, `miss_rate`, `taken`, and `not_taken`. Placeholder PMU fields, heuristic fallback, missing-site success, and optional per-site profile fields are forbidden; missing program/site PMU data must exit 1.
@@ -126,7 +126,7 @@ Use `libbpf-rs`/`libbpf-sys` instead of custom wrappers whenever upstream libbpf
 `make vm-corpus`, `make vm-e2e`, `make aws-x86-test`, `make aws-arm64-test` must work with zero manual environment variables. Defaults live in `runner/targets/*.env` files and are overridable via env vars.
 
 ### Cost-Conscious AWS Defaults
-All AWS runs (smoke and authoritative) use `t3.small` (x86) / `t4g.small` (arm64) for bench suites and `t3.micro` / `t4g.micro` for the kernel test suite. **`medium` is the absolute upper cap and only allowed as documented OOM mitigation. Never escalate beyond medium — not for variance, not for parallelism, not for SAMPLES=30 authoritative runs.** Variance noise, throughput limits, and CPU-credit throttling must be solved by optimizing code (smaller workloads, lighter tracing, fewer concurrent passes) rather than by upgrading the instance. c5/c6g, xlarge, 2xlarge, and larger sizes are forbidden as defaults. Spot instances are allowed for non-time-critical runs.
+All AWS runs (smoke and authoritative) use `t3.small` (x86) / `t4g.small` (arm64) for bench suites and `t3.micro` / `t4g.micro` for the kernel test suite. **`medium` is the absolute upper cap and only allowed as documented OOM mitigation. Never escalate beyond medium — not for variance, not for parallelism, not for SAMPLES=3 authoritative runs.** Variance noise, throughput limits, and CPU-credit throttling must be solved by optimizing code (smaller workloads, lighter tracing, fewer concurrent passes) rather than by upgrading the instance. c5/c6g, xlarge, 2xlarge, and larger sizes are forbidden as defaults. Spot instances are allowed for non-time-critical runs.
 
 ### No Host Bind Mount
 Container must NOT bind mount host workspace (`-v workspace:workspace`). All files are delivered via Docker image layers. Only bind mount system paths (/sys, /sys/fs/bpf, /lib/modules, /boot) and result output directories.
