@@ -17,6 +17,7 @@ mod dce;
 mod endian;
 mod extract;
 mod map_inline;
+mod noop;
 mod prefetch;
 mod rotate;
 mod skb_load_bytes;
@@ -33,6 +34,7 @@ pub use dce::DcePass;
 pub use endian::EndianFusionPass;
 pub use extract::ExtractPass;
 pub use map_inline::{MapInfo, MapInfoAnalysis, MapInfoResult, MapInlinePass, MapReference};
+pub use noop::NoopPass;
 pub use prefetch::PrefetchPass;
 pub use rotate::RotatePass;
 pub use skb_load_bytes::SkbLoadBytesSpecPass;
@@ -60,6 +62,11 @@ pub struct PassRegistryEntry {
 /// Canonical pass ordering and metadata. Pipeline builders iterate this array in
 /// order, guaranteeing consistent pass sequencing regardless of selected names.
 pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
+    PassRegistryEntry {
+        name: "noop",
+        description: "Identity pass — measures ReJIT pipeline overhead with no transform",
+        make: || Box::new(NoopPass),
+    },
     PassRegistryEntry {
         name: "map_inline",
         description: "Inline stable map lookups and pseudo-map-value loads",

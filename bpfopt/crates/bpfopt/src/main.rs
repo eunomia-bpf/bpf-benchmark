@@ -22,6 +22,7 @@ use kernel_sys::{VerifierRegJson, VerifierStatesJson};
 use serde::{Deserialize, Serialize};
 
 const PASS_ALIASES: &[(&str, &str)] = &[
+    ("noop", "noop"),
     ("wide-mem", "wide_mem"),
     ("wide_mem", "wide_mem"),
     ("rotate", "rotate"),
@@ -394,6 +395,7 @@ fn canonicalize_pass_name(input: &str) -> Result<&'static str> {
 
 fn cli_name_for_pass(canonical: &str) -> &'static str {
     match canonical {
+        "noop" => "noop",
         "wide_mem" => "wide-mem",
         "rotate" => "rotate",
         "const_prop" => "const-prop",

@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 
-DEFAULT_CORPUS_SAMPLES = 30
+DEFAULT_CORPUS_SAMPLES = 3
 DEFAULT_CORPUS_WORKLOAD_DURATION_S = 3.0
 
 

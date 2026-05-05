@@ -23,6 +23,7 @@ _LANGUAGE_RUNTIME_PROBES: tuple[tuple[str, tuple[str, ...]], ...] = (
 
 _MINIMAL_CONFIG = """receivers:
   profiling:
+    samples_per_second: 99
 
 exporters:
   debug:
