@@ -302,7 +302,6 @@ mod tests {
                 final_insn_count: 2,
             },
             passes: Vec::new(),
-            inlined_map_entries: Vec::new(),
             error_message: None,
         }
     }

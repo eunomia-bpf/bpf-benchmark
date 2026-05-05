@@ -592,38 +592,6 @@ fn simulate_param_setup(insns: &[BpfInsn], initial_regs: &[u64; 11]) -> [u64; 11
 }
 
 #[test]
-fn test_cond_select_alias_cond_reg_is_r2() {
-    // The bug from the review: cond_reg == r2 means we need r3 = old r2,
-    // but writing r2 = b_val first would clobber it.
-    // JNE r2, 0, +2 ; MOV r0, r6 (false) ; JA +1 ; MOV r0, r7 (true)
-    let mut prog = make_program(vec![
-        jne_imm(2, 0, 2),
-        BpfInsn::mov64_reg(0, 6), // false_val = r6
-        BpfInsn::ja(1),
-        BpfInsn::mov64_reg(0, 7), // true_val = r7
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let ctx = ctx_with_select_kfunc(5555);
-
-    let pass = CondSelectPass;
-    let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    // Simulate with known register values.
-    // r2=COND_VAL(200), r6=FALSE_VAL(600), r7=TRUE_VAL(700)
-    let mut initial = [0u64; 11];
-    initial[2] = 200; // cond
-    initial[6] = 600; // false_val
-    initial[7] = 700; // true_val
-    let after = simulate_param_setup(&prog.insns, &initial);
-
-    // For JNE: a=true_val=r7=700, b=false_val=r6=600, cond=r2=200
-    assert_eq!(after[1], 700, "r1 should be true_val (a)");
-    assert_eq!(after[2], 600, "r2 should be false_val (b)");
-    assert_eq!(after[3], 200, "r3 should be original cond (r2=200)");
-}
-
-#[test]
 fn test_cond_select_alias_all_overlap_combinations() {
     // Exhaustive test: for all (cond_reg, true_src, false_src) combinations
     // among r1/r2/r3, verify the output semantics are correct.

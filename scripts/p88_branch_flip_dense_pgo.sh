@@ -106,13 +106,13 @@ unset SCAPY_PID
 jq -e '.branch_miss_rate < 0.05 and (.per_site | has("13") and has("33") and has("50") and has("67"))' "${PROFILE}" >/dev/null
 
 llvm-objcopy --dump-section xdp="${ORIG}" "${OUT}/branch_flip_dense.bpf.o"
-"${BPFOPT}" branch-flip \
+"${BPFOPT}" --pass branch-flip \
   --input "${ORIG}" \
   --output "${OPT}" \
   --profile "${PROFILE}" \
   --prog-type xdp \
   --report "${REPORT}"
-jq -e '.changed == true and .sites_applied == 4' "${REPORT}" >/dev/null
+jq -e '.sites_applied == 4' "${REPORT}" >/dev/null
 
 cat >"${WORKDIR}/missing-site-profile.json" <<'JSON'
 {

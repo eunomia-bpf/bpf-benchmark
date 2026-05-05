@@ -164,11 +164,11 @@ struct PassReport {
     insn_count_after: usize,
     insn_delta: isize,
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    map_inline_records: Vec<MapInlineRecordReport>,
+    inlined_map_entries: Vec<InlinedMapEntryReport>,
 }
 
 #[derive(Clone, Debug, Serialize)]
-struct MapInlineRecordReport {
+struct InlinedMapEntryReport {
     map_id: u32,
     key_hex: String,
     value_hex: String,
@@ -1167,16 +1167,16 @@ fn pass_report(result: &PassResult) -> PassReport {
         insn_count_before: result.insns_before,
         insn_count_after: result.insns_after,
         insn_delta: result.insns_after as isize - result.insns_before as isize,
-        map_inline_records: result
+        inlined_map_entries: result
             .map_inline_records
             .iter()
-            .map(map_inline_record_report)
+            .map(inlined_map_entry_report)
             .collect(),
     }
 }
 
-fn map_inline_record_report(record: &bpfopt::pass::MapInlineRecord) -> MapInlineRecordReport {
-    MapInlineRecordReport {
+fn inlined_map_entry_report(record: &bpfopt::pass::MapInlineRecord) -> InlinedMapEntryReport {
+    InlinedMapEntryReport {
         map_id: record.map_id,
         key_hex: hex_bytes(&record.key),
         value_hex: hex_bytes(&record.value),
@@ -1334,7 +1334,7 @@ mod tests {
     }
 
     #[test]
-    fn pass_report_serializes_map_inline_records_as_hex() {
+    fn pass_report_serializes_inlined_map_entries_as_hex() {
         let result = PassResult {
             pass_name: "map_inline".to_string(),
             sites_applied: 1,
@@ -1350,9 +1350,9 @@ mod tests {
 
         let report = serde_json::to_value(pass_report(&result)).unwrap();
 
-        assert_eq!(report["map_inline_records"][0]["map_id"], 7);
-        assert_eq!(report["map_inline_records"][0]["key_hex"], "01000000");
-        assert_eq!(report["map_inline_records"][0]["value_hex"], "2a000000");
+        assert_eq!(report["inlined_map_entries"][0]["map_id"], 7);
+        assert_eq!(report["inlined_map_entries"][0]["key_hex"], "01000000");
+        assert_eq!(report["inlined_map_entries"][0]["value_hex"], "2a000000");
     }
 
     #[test]

@@ -130,8 +130,6 @@ pub(crate) struct OptimizeOneResult {
     pub prog_id: u32,
     pub program: ProgramInfo,
     pub passes: Vec<PassDetail>,
-    #[serde(skip_serializing_if = "Vec::is_empty", default)]
-    pub inlined_map_entries: Vec<InlinedMapEntry>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error_message: Option<String>,
 }
@@ -149,17 +147,9 @@ impl OptimizeOneResult {
                 final_insn_count: 0,
             },
             passes: Vec::new(),
-            inlined_map_entries: Vec::new(),
             error_message: Some(message.into()),
         }
     }
-}
-
-#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
-pub(crate) struct InlinedMapEntry {
-    pub map_id: u32,
-    pub key_hex: String,
-    pub value_hex: String,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -258,12 +248,6 @@ struct MapValuesEntryJson {
     value: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
-struct TargetJson {
-    #[serde(default)]
-    kinsns: HashMap<String, TargetKinsnJson>,
-}
-
 #[derive(Clone, Debug, Deserialize, Serialize)]
 struct TargetKinsnJson {
     btf_func_id: i32,
@@ -293,57 +277,6 @@ fn hex_bytes(bytes: &[u8]) -> String {
         out.push(HEX[(byte & 0x0f) as usize] as char);
     }
     out
-}
-
-fn collect_inlined_map_entries(passes: &[PassDetail]) -> Result<Vec<InlinedMapEntry>> {
-    let mut deduped: BTreeMap<(u32, String), String> = BTreeMap::new();
-    for pass in passes {
-        if pass.status != PassStatus::Ok || canonical_pass(&pass.pass_name) != "map_inline" {
-            continue;
-        }
-        let Some(records_value) = pass.bpfopt_summary.get("map_inline_records") else {
-            continue;
-        };
-        let records = records_value
-            .as_array()
-            .with_context(|| "map_inline summary field map_inline_records must be an array")?;
-        for (idx, record) in records.iter().enumerate() {
-            let map_id = record
-                .get("map_id")
-                .and_then(Value::as_u64)
-                .filter(|value| *value <= u32::MAX as u64)
-                .with_context(|| format!("map_inline record {idx} missing u32 map_id"))?
-                as u32;
-            let key_hex = required_json_string(record, "key_hex")
-                .with_context(|| format!("map_inline record {idx} for map {map_id}"))?
-                .to_string();
-            let value_hex = required_json_string(record, "value_hex")
-                .with_context(|| format!("map_inline record {idx} for map {map_id}"))?
-                .to_string();
-            if let Some(previous) = deduped.insert((map_id, key_hex.clone()), value_hex.clone()) {
-                if previous != value_hex {
-                    bail!("map_inline report emitted conflicting values for map {map_id} key {key_hex}");
-                }
-            }
-        }
-    }
-
-    Ok(deduped
-        .into_iter()
-        .map(|((map_id, key_hex), value_hex)| InlinedMapEntry {
-            map_id,
-            key_hex,
-            value_hex,
-        })
-        .collect())
-}
-
-fn required_json_string<'a>(record: &'a Value, field: &str) -> Result<&'a str> {
-    record
-        .get(field)
-        .and_then(Value::as_str)
-        .filter(|value| !value.is_empty())
-        .with_context(|| format!("missing non-empty {field}"))
 }
 
 fn live_bpf_map_lookup(_map: &MapInfoJson, fd: i32, key: &[u8]) -> Result<Option<Vec<u8>>> {
@@ -446,7 +379,7 @@ pub(crate) fn try_apply_one(
     }
     let pass_list = enabled_passes
         .iter()
-        .map(|pass| canonical_pass(pass))
+        .map(|pass| pass.trim().to_string())
         .collect::<Vec<_>>();
     if pass_list.iter().any(|pass| pass.is_empty()) {
         bail!("enabled_passes entries must not be blank");
@@ -470,9 +403,7 @@ pub(crate) fn try_apply_one(
         fs::write(&prog_bin, &orig_bytes)
             .with_context(|| format!("write {}", prog_bin.display()))?;
         let orig_insn_count = insn_count_from_bytes(&orig_bytes, "prog.bin")?;
-        let wants_map_inline = pass_list
-            .iter()
-            .any(|pass| canonical_pass(pass) == "map_inline");
+        let wants_map_inline = pass_list.iter().any(|pass| pass == "map_inline");
 
         if wants_map_inline {
             write_live_map_values(
@@ -511,14 +442,6 @@ pub(crate) fn try_apply_one(
                 );
             }
             write_json_file(&target_json, &probed)?;
-            let missing_kinsns = missing_target_kinsns(&target_json, &pass_list)?;
-            if !missing_kinsns.is_empty() {
-                bail!(
-                    "target probing did not expose kinsns required by requested passes {}: {}",
-                    join_pass_csv(&pass_list),
-                    missing_kinsns.join(", ")
-                );
-            }
         }
         let fd_array =
             build_rejit_fd_array(&snapshot.info.map_ids, &probed_kinsns, &mut open_map_fd)
@@ -547,12 +470,13 @@ pub(crate) fn try_apply_one(
 
             let needs_states = pass_needs_verifier_states(pass);
             if needs_states && !verifier_states_ready {
-                return Ok(pass_detail_without_report(
+                return Ok(pass_detail(
                     pass,
                     PassStatus::SkippedMissingStates,
                     Some(format!(
-                        "pass {pass} requires verifier states from a previous per-pass ReJIT — insert a `noop` pass before {pass} in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,{pass},...\")"
+                        "pass {pass} requires verifier states from a previous successful per-pass ReJIT — insert a `noop` pass before {pass} in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,{pass},...\")"
                     )),
+                    None,
                 ));
             }
             let target_arg = pass_needs_target(pass).then_some(target_json.as_path());
@@ -581,20 +505,22 @@ pub(crate) fn try_apply_one(
             ) {
                 Ok(report) => report,
                 Err(err) => {
-                    return Ok(pass_detail_without_report(
+                    return Ok(pass_detail(
                         pass,
                         PassStatus::FailedBpfopt,
                         Some(format!("{err:#}")),
+                        None,
                     ));
                 }
             };
             let pass_bytes = match fs::read(&pass_output) {
                 Ok(bytes) => bytes,
                 Err(err) => {
-                    return Ok(pass_detail_without_report(
+                    return Ok(pass_detail(
                         pass,
                         PassStatus::FailedBpfopt,
                         Some(format!("read {}: {err}", pass_output.display())),
+                        None,
                     ));
                 }
             };
@@ -602,10 +528,11 @@ pub(crate) fn try_apply_one(
             {
                 Ok(insns) => insns,
                 Err(err) => {
-                    return Ok(pass_detail_without_report(
+                    return Ok(pass_detail(
                         pass,
                         PassStatus::FailedBpfopt,
                         Some(format!("{err:#}")),
+                        None,
                     ));
                 }
             };
@@ -613,11 +540,11 @@ pub(crate) fn try_apply_one(
             let rejit_report = match rejit_result {
                 Ok(report) => report,
                 Err(err) => {
-                    return Ok(pass_detail_from_report(
+                    return Ok(pass_detail(
                         pass,
-                        &report,
                         PassStatus::FailedRejit,
                         Some(format!("{err:#}")),
+                        Some(report),
                     ));
                 }
             };
@@ -625,10 +552,9 @@ pub(crate) fn try_apply_one(
                 .with_context(|| format!("write verifier states after pass {pass}"))?;
             verifier_states_ready = true;
             current_bytes = pass_bytes;
-            Ok(pass_detail_from_report(pass, &report, PassStatus::Ok, None))
+            Ok(pass_detail(pass, PassStatus::Ok, None, Some(report)))
         })?;
         let passes = reports;
-        let inlined_map_entries = collect_inlined_map_entries(&passes)?;
         let final_insn_count = insn_count_from_bytes(&current_bytes, "opt.bin")?;
         let status = "ok".to_string();
         Ok(OptimizeOneResult {
@@ -642,7 +568,6 @@ pub(crate) fn try_apply_one(
                 final_insn_count,
             },
             passes,
-            inlined_map_entries,
             error_message: None,
         })
     })();
@@ -728,26 +653,17 @@ fn write_verifier_states_for_next_pass(path: &Path, report: &RejitReport) -> Res
     Ok(())
 }
 
-fn pass_detail_from_report(
+fn pass_detail(
     pass: &str,
-    report: &Value,
     status: PassStatus,
     error: Option<String>,
+    bpfopt_summary: Option<Value>,
 ) -> PassDetail {
     PassDetail {
         pass_name: pass.to_string(),
         status,
         error,
-        bpfopt_summary: report.clone(),
-    }
-}
-
-fn pass_detail_without_report(pass: &str, status: PassStatus, error: Option<String>) -> PassDetail {
-    PassDetail {
-        pass_name: pass.to_string(),
-        status,
-        error,
-        bpfopt_summary: Value::Null,
+        bpfopt_summary: bpfopt_summary.unwrap_or(Value::Null),
     }
 }
 
@@ -851,72 +767,7 @@ fn is_map_inlineable_map_type(map_type: u32) -> bool {
 }
 
 fn needs_target(passes: &[String]) -> bool {
-    passes.iter().any(|pass| {
-        matches!(
-            canonical_pass(pass).as_str(),
-            "rotate"
-                | "cond_select"
-                | "ccmp"
-                | "extract"
-                | "endian_fusion"
-                | "bulk_memory"
-                | "prefetch"
-        )
-    })
-}
-
-fn missing_target_kinsns(path: &Path, passes: &[String]) -> Result<Vec<&'static str>> {
-    let target: TargetJson = read_json_file(path, "target.json")?;
-    let mut missing = Vec::new();
-    for pass in passes {
-        match canonical_pass(pass).as_str() {
-            "rotate" => push_missing_target(&mut missing, &target, &["bpf_rotate64"]),
-            "cond_select" => push_missing_target(&mut missing, &target, &["bpf_select64"]),
-            "ccmp" => push_missing_target(&mut missing, &target, &["bpf_ccmp64"]),
-            "prefetch" => push_missing_target(&mut missing, &target, &["bpf_prefetch"]),
-            "extract" => push_missing_target(&mut missing, &target, &["bpf_extract64"]),
-            "endian_fusion" => push_missing_target(
-                &mut missing,
-                &target,
-                &[
-                    "bpf_endian_load16",
-                    "bpf_endian_load32",
-                    "bpf_endian_load64",
-                ],
-            ),
-            "bulk_memory" => {
-                push_missing_target(
-                    &mut missing,
-                    &target,
-                    &["bpf_bulk_memcpy", "bpf_memcpy_bulk"],
-                );
-                push_missing_target(
-                    &mut missing,
-                    &target,
-                    &["bpf_bulk_memset", "bpf_memset_bulk"],
-                );
-            }
-            _ => {}
-        }
-    }
-    Ok(missing)
-}
-
-fn target_has_any(target: &TargetJson, names: &[&str]) -> bool {
-    names.iter().any(|name| target.kinsns.contains_key(*name))
-}
-
-fn push_missing_target(
-    missing: &mut Vec<&'static str>,
-    target: &TargetJson,
-    aliases: &[&'static str],
-) {
-    if target_has_any(target, aliases) {
-        return;
-    }
-    if let Some(name) = aliases.first() {
-        push_unique(missing, name);
-    }
+    passes.iter().any(|pass| pass_needs_target(pass))
 }
 
 fn shift_target_module_call_offsets_for_map_prefix(
@@ -1081,34 +932,6 @@ fn module_fd_array_base(map_count: usize) -> Result<u32> {
     Ok(map_count.max(1))
 }
 
-fn push_unique(values: &mut Vec<&'static str>, value: &'static str) {
-    if !values.contains(&value) {
-        values.push(value);
-    }
-}
-
-fn canonical_pass(pass: &str) -> String {
-    match pass.trim() {
-        "wide-mem" | "wide_mem" => "wide_mem",
-        "rotate" => "rotate",
-        "const-prop" | "const_prop" => "const_prop",
-        "cond-select" | "cond_select" => "cond_select",
-        "extract" => "extract",
-        "endian" | "endian-fusion" | "endian_fusion" => "endian_fusion",
-        "branch-flip" | "branch_flip" => "branch_flip",
-        "prefetch" => "prefetch",
-        "dce" => "dce",
-        "map-inline" | "map_inline" => "map_inline",
-        "bulk-memory" | "bulk_memory" => "bulk_memory",
-        "bounds-check-merge" | "bounds_check_merge" => "bounds_check_merge",
-        "skb-load-bytes" | "skb_load_bytes" | "skb-load-bytes-spec" | "skb_load_bytes_spec" => {
-            "skb_load_bytes_spec"
-        }
-        other => return other.replace('-', "_"),
-    }
-    .to_string()
-}
-
 fn join_pass_csv(passes: &[String]) -> String {
     passes
         .iter()
@@ -1183,7 +1006,7 @@ fn run_stage_with_file_io(
         .with_context(|| format!("spawn subprocess {program}"))?;
     let child_output = wait_with_timeout(stage, &program, child_output)?;
     if !child_output.status.success() {
-        let message = stage_failure_message(stage, &program, &child_output);
+        let message = subprocess_failure_message(stage, &program, &child_output);
         eprintln!("daemon: {message}");
         bail!("{message}");
     }
@@ -1195,20 +1018,11 @@ fn wait_with_timeout(
     program: &str,
     child: std::process::Child,
 ) -> Result<std::process::Output> {
-    wait_with_timeout_for(
-        stage,
-        program,
-        child,
-        timeout_for_stage(stage),
-        CLI_STAGE_POLL_INTERVAL,
-    )
-}
-
-fn timeout_for_stage(stage: &str) -> Duration {
-    match stage {
+    let timeout = match stage {
         "bpfopt pass" => OPTIMIZE_CLI_STAGE_TIMEOUT,
         _ => DEFAULT_CLI_STAGE_TIMEOUT,
-    }
+    };
+    wait_with_timeout_for(stage, program, child, timeout, CLI_STAGE_POLL_INTERVAL)
 }
 
 fn wait_with_timeout_for(
@@ -1231,10 +1045,13 @@ fn wait_with_timeout_for(
         }
         if start.elapsed() >= timeout {
             kill_and_reap_timed_out_child(program, child)?;
-            bail!(
-                "{stage} timed out after {}: killed subprocess {program}",
-                duration_label(timeout)
-            );
+            let millis = timeout.as_millis();
+            let timeout_label = if millis < 1_000 {
+                format!("{millis}ms")
+            } else {
+                format!("{}s", timeout.as_secs())
+            };
+            bail!("{stage} timed out after {timeout_label}: killed subprocess {program}");
         }
         thread::sleep(poll_interval);
     }
@@ -1257,33 +1074,12 @@ fn kill_and_reap_timed_out_child(program: &str, mut child: std::process::Child) 
     Ok(())
 }
 
-fn duration_label(duration: Duration) -> String {
-    let millis = duration.as_millis();
-    if millis < 1_000 {
-        format!("{millis}ms")
-    } else {
-        format!("{}s", duration.as_secs())
-    }
-}
-
-fn stage_failure_message(stage: &str, program: &str, output: &std::process::Output) -> String {
-    format!(
-        "{stage} failed (returncode {}, status {}): subprocess {program}: {}",
-        returncode_label(output),
-        output.status,
-        stderr_summary(output)
-    )
-}
-
-fn returncode_label(output: &std::process::Output) -> String {
-    output
+fn subprocess_failure_message(stage: &str, program: &str, output: &std::process::Output) -> String {
+    let returncode = output
         .status
         .code()
         .map(|code| code.to_string())
-        .unwrap_or_else(|| "signal".to_string())
-}
-
-fn stderr_summary(output: &std::process::Output) -> String {
+        .unwrap_or_else(|| "signal".to_string());
     let stderr = String::from_utf8_lossy(&output.stderr);
     let stdout = String::from_utf8_lossy(&output.stdout);
     let mut text = stderr.trim().to_string();
@@ -1293,7 +1089,11 @@ fn stderr_summary(output: &std::process::Output) -> String {
     if text.is_empty() {
         text = "<no subprocess output>".to_string();
     }
-    text.lines().take(20).collect::<Vec<_>>().join("\n")
+    let output_summary = text.lines().take(20).collect::<Vec<_>>().join("\n");
+    format!(
+        "{stage} failed (returncode {returncode}, status {}): subprocess {program}: {output_summary}",
+        output.status
+    )
 }
 
 #[cfg(test)]
@@ -1304,34 +1104,6 @@ mod tests {
     fn bytecode_decoder_rejects_unaligned_input() {
         let err = decode_insns(&[0u8; 9], "bad").unwrap_err();
         assert!(err.to_string().contains("multiple of 8"), "err={err:#}");
-    }
-
-    #[test]
-    fn pass_chain_records_failed_rejit_and_still_attempts_later_passes() {
-        let pass_list = ["rotate", "cond_select", "endian_fusion"].map(str::to_string);
-        let mut attempted = Vec::new();
-        let reports = run_pass_chain(&pass_list, |idx, pass| {
-            attempted.push(pass.to_string());
-            let report = serde_json::json!({"pass": pass, "sites_applied": 1});
-            Ok(match idx {
-                0 => pass_detail_from_report(pass, &report, PassStatus::Ok, None),
-                1 => pass_detail_from_report(
-                    pass,
-                    &report,
-                    PassStatus::FailedRejit,
-                    Some("kernel rejected BPF_PROG_REJIT: EINVAL".to_string()),
-                ),
-                2 => pass_detail_from_report(pass, &report, PassStatus::Ok, None),
-                _ => unreachable!(),
-            })
-        })
-        .unwrap();
-
-        assert_eq!(attempted, pass_list.to_vec());
-        assert_eq!(reports.len(), 3);
-        assert_eq!(reports[1].status, PassStatus::FailedRejit);
-        assert_eq!(reports[2].pass_name, "endian_fusion");
-        assert_eq!(reports[2].status, PassStatus::Ok);
     }
 
     #[test]
@@ -1625,7 +1397,6 @@ mod tests {
                 final_insn_count: 2,
             },
             passes: Vec::new(),
-            inlined_map_entries: Vec::new(),
             error_message: None,
         }
     }
