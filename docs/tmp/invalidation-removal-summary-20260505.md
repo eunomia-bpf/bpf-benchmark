@@ -7,4 +7,4 @@ Near-net-zero touched: docs/kernel-jit-optimization-plan.md and docs/tmp/bpfopt_
 Result reporting: daemon/src/commands.rs:439 collects (map_id,key) records; daemon/src/commands.rs:456 resolves value_hex from the snapshot; daemon/src/commands.rs:839 still fills OptimizeOneResult.inlined_map_entries.
 Verification: daemon+bpfopt workspace cargo test pass; release builds pass; clippy pass with pre-existing warnings; root cargo test --workspace cannot run because repo root has no Cargo.toml.
 LoC delta with summary: +98/-1033 net -935.
-Commit: pending.
+Commit: 8b75920e (https://github.com/eunomia-bpf/bpf-benchmark/commit/8b75920e).
