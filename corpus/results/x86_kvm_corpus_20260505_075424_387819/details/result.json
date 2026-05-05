@@ -1,0 +1,192 @@
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+  "generated_at": "2026-05-05T07:54:42.335038+00:00",
+  "kinsn_modules": {
+    "captured_at": "2026-05-05T07:54:24.421567+00:00",
+    "daemon_binary": "daemon/target/release/bpfrejit-daemon",
+    "expected_modules": [
+      "bpf_bulk_memory",
+      "bpf_endian",
+      "bpf_extract",
+      "bpf_prefetch",
+      "bpf_rotate",
+      "bpf_select"
+    ],
+    "module_load": {
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "failed_modules": [],
+      "invoked_at": "2026-05-05T07:54:24.421503+00:00",
+      "loaded_count": 6,
+      "loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loader": "runner.libs.kinsn.load_kinsn_modules",
+      "module_dir": "/artifacts/kinsn",
+      "newly_loaded_modules": [],
+      "snapshot_after": {
+        "captured_at": "2026-05-05T07:54:24.421496+00:00",
+        "expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "loaded_bpf_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "missing_expected_modules": [],
+        "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_prefetch           12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+        "resident_expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "source": "lsmod"
+      },
+      "status": "ok",
+      "total_count": 6
+    },
+    "module_snapshot_before_daemon": {
+      "captured_at": "2026-05-05T07:54:24.403839+00:00",
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loaded_bpf_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "missing_expected_modules": [],
+      "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_prefetch           12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_bulk_memory        12288  0",
+      "resident_expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "source": "lsmod"
+    }
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "results": [
+    {
+      "app": "bcc/syscount",
+      "baseline": {
+        "bpf": {
+          "6": {
+            "bytes_jited": 72,
+            "bytes_xlated": 112,
+            "id": 6,
+            "name": "tracepoint__raw_syscalls__sys_enter",
+            "run_cnt_delta": 78331976,
+            "run_time_ns_delta": 8818199415,
+            "type": "tracepoint"
+          },
+          "7": {
+            "bytes_jited": 236,
+            "bytes_xlated": 400,
+            "id": 7,
+            "name": "tracepoint__raw_syscalls__sys_exit",
+            "run_cnt_delta": 78332399,
+            "run_time_ns_delta": 2155291370,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.035036255999998,
+            "ops_per_sec": 2664112.161433107,
+            "ops_total": 8085677.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [19674] setting to a 3 secs run per stressor\nstress-ng: info:  [19674] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [19674] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [19674] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [19674]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [19674] cap             2213936      3.00      0.69      6.47    737267.70      309119.79\nstress-ng: metrc: [19674] eventfd          906563      3.00      0.60      4.72    302098.03      170397.71\nstress-ng: metrc: [19674] get                7398      3.00      0.14      1.35      2465.41        4950.77\nstress-ng: metrc: [19674] prctl              8434      3.00      2.09      0.90      2810.98        2818.04\nstress-ng: metrc: [19674] set               80826      3.00      0.26      3.06     26934.05       24305.96\nstress-ng: metrc: [19674] dup                3751      3.00      0.60      0.50      1250.14        3382.55\nstress-ng: metrc: [19674] kill             363949      3.00      0.25      5.29    121279.09       65693.32\nstress-ng: metrc: [19674] sigfd           3780920      3.00      0.51      5.87   1259641.23      592449.18\nstress-ng: metrc: [19674] signal                0      3.00      0.01      0.24         0.00           0.00\nstress-ng: metrc: [19674] pty                 432      3.01      0.18      4.31       143.74          96.29\nstress-ng: metrc: [19674] itimer              620      3.00      0.44      4.80       206.56         118.29\nstress-ng: metrc: [19674] timerfd          718848      3.00      0.52      3.60    239462.86      174276.45\nstress-ng: info:  [19674] skipped: 0\nstress-ng: info:  [19674] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [19674] failed: 0\nstress-ng: info:  [19674] metrics untrustworthy: 0\nstress-ng: info:  [19674] successful run completed in 3.03 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "6": {
+            "bytes_jited": 72,
+            "bytes_xlated": 112,
+            "id": 6,
+            "name": "tracepoint__raw_syscalls__sys_enter",
+            "run_cnt_delta": 79582322,
+            "run_time_ns_delta": 8630550321,
+            "type": "tracepoint"
+          },
+          "7": {
+            "bytes_jited": 236,
+            "bytes_xlated": 400,
+            "id": 7,
+            "name": "tracepoint__raw_syscalls__sys_exit",
+            "run_cnt_delta": 79582683,
+            "run_time_ns_delta": 2185813496,
+            "type": "tracepoint"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 3.0404255889999945,
+            "ops_per_sec": 2153659.02184558,
+            "ops_total": 6548040.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [20395] setting to a 3 secs run per stressor\nstress-ng: info:  [20395] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [20395] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [20395] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [20395]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [20395] cap             1623245      3.00      0.47      4.51    540981.63      325778.21\nstress-ng: metrc: [20395] eventfd          736932      3.00      0.43      3.58    245513.30      183828.90\nstress-ng: metrc: [20395] get                7315      3.00      0.16      1.45      2436.10        4549.16\nstress-ng: metrc: [20395] prctl             10577      3.00      2.50      1.16      3525.08        2884.75\nstress-ng: metrc: [20395] set               83539      3.00      0.26      2.89     27842.94       26509.86\nstress-ng: metrc: [20395] dup                4596      3.00      0.71      0.63      1531.95        3428.79\nstress-ng: metrc: [20395] kill             291586      3.00      0.29      4.46     97109.38       61348.89\nstress-ng: metrc: [20395] sigfd           3039424      3.01      0.67      5.10   1011034.20      527190.58\nstress-ng: metrc: [20395] signal                0      3.00      0.17      2.29         0.00           0.00\nstress-ng: metrc: [20395] pty                 510      3.01      0.20      4.02       169.62         120.67\nstress-ng: metrc: [20395] itimer              748      3.00      0.58      6.39       249.33         107.24\nstress-ng: metrc: [20395] timerfd          749568      3.00      0.39      4.15    249568.39      165223.07\nstress-ng: info:  [20395] skipped: 0\nstress-ng: info:  [20395] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [20395] failed: 0\nstress-ng: info:  [20395] metrics untrustworthy: 0\nstress-ng: info:  [20395] successful run completed in 3.03 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "noop"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "program_counts": {
+          "applied": 2,
+          "not_applied": 0,
+          "requested": 2
+        }
+      },
+      "runner": "bcc",
+      "selected_workload": "stress_ng_os",
+      "status": "ok"
+    }
+  ],
+  "samples": 1,
+  "status": "ok",
+  "suite_name": "macro_apps",
+  "workload_seconds": 3.0
+}

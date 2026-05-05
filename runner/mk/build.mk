@@ -30,12 +30,20 @@ RUNNER_CONTAINER_CC := /usr/bin/gcc
 RUNNER_CONTAINER_CXX := /usr/bin/g++
 CONTAINER_IMAGE_ARTIFACT_ROOT := $(ARTIFACT_ROOT)/container-images
 KATRAN_BUILD_ROOT := $(REPO_BUILD_ROOT)/katran
-ACTIVE_DAEMON_BINARY := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(DAEMON_DIR)/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon,$(DAEMON_DIR)/target/release/bpfrejit-daemon)
+X86_DAEMON_BIN_DIR := $(DAEMON_DIR)/target/release
+ARM64_DAEMON_BIN_DIR := $(DAEMON_DIR)/target/aarch64-unknown-linux-gnu/release
+X86_DAEMON_BINARY := $(X86_DAEMON_BIN_DIR)/bpfrejit-daemon
+ARM64_DAEMON_BINARY := $(ARM64_DAEMON_BIN_DIR)/bpfrejit-daemon
+ACTIVE_DAEMON_BINARY := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_DAEMON_BINARY),$(X86_DAEMON_BINARY))
 ACTIVE_DAEMON_TARGET_TRIPLE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),aarch64-unknown-linux-gnu,)
 ACTIVE_DAEMON_TARGET_ARG := $(if $(strip $(ACTIVE_DAEMON_TARGET_TRIPLE)),TARGET_TRIPLE="$(ACTIVE_DAEMON_TARGET_TRIPLE)",)
 ACTIVE_BPFOPT_TARGET_ARG := $(if $(strip $(ACTIVE_DAEMON_TARGET_TRIPLE)),--target "$(ACTIVE_DAEMON_TARGET_TRIPLE)",)
-ACTIVE_BPFOPT_BINARY_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/bpfopt/target/aarch64-unknown-linux-gnu/release,$(ROOT_DIR)/bpfopt/target/release)
-ACTIVE_BPFOPT_BINARIES := $(addprefix $(ACTIVE_BPFOPT_BINARY_DIR)/,bpfopt bpfprof)
+X86_BPFOPT_BIN_DIR := $(ROOT_DIR)/bpfopt/target/release
+ARM64_BPFOPT_BIN_DIR := $(ROOT_DIR)/bpfopt/target/aarch64-unknown-linux-gnu/release
+X86_BPFOPT_BINARIES := $(addprefix $(X86_BPFOPT_BIN_DIR)/,bpfopt bpfprof)
+ARM64_BPFOPT_BINARIES := $(addprefix $(ARM64_BPFOPT_BIN_DIR)/,bpfopt bpfprof)
+ACTIVE_BPFOPT_BINARY_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_BPFOPT_BIN_DIR),$(X86_BPFOPT_BIN_DIR))
+ACTIVE_BPFOPT_BINARIES := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_BPFOPT_BINARIES),$(X86_BPFOPT_BINARIES))
 ACTIVE_RUNNER_BINARY := $(RUNNER_BUILD_DIR_ACTIVE)/micro_exec
 ACTIVE_TEST_UNITTEST_BUILD_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/tests/unittest/build-arm64,$(ROOT_DIR)/tests/unittest/build)
 ACTIVE_TEST_NEGATIVE_BUILD_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/tests/negative/build-arm64,$(ROOT_DIR)/tests/negative/build)
@@ -255,7 +263,7 @@ $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR): $(KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES)
 	fi
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(ARM64_KATRAN_ARTIFACTS_IMAGE)"; mv -f "$$tmp" "$@"
 
-$(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRAN_ARTIFACTS_IMAGE_TAR) $(X86_KERNEL_FORK_IMAGE_TAR)
+$(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRAN_ARTIFACTS_IMAGE_TAR) $(X86_KERNEL_FORK_IMAGE_TAR) $(X86_DAEMON_BINARY) $(X86_BPFOPT_BINARIES)
 	@mkdir -p "$(dir $@)"
 	docker load -i "$(X86_KATRAN_ARTIFACTS_IMAGE_TAR)"
 	docker load -i "$(X86_KERNEL_FORK_IMAGE_TAR)"
@@ -267,10 +275,12 @@ $(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRA
 		--build-arg RUN_TARGET_ARCH=x86_64 \
 		--build-arg VENDOR_LINUX_FRAMEWORK_COMMIT="$(KERNEL_FORK_COMMIT_X86)" \
 		--build-arg KERNEL_FORK_IMAGE_PLATFORM="$(KERNEL_FORK_BUILD_PLATFORM)" \
+		--build-arg DAEMON_HOST_BIN_DIR="$(patsubst $(ROOT_DIR)/%,%,$(X86_DAEMON_BIN_DIR))" \
+		--build-arg BPFOPT_HOST_BIN_DIR="$(patsubst $(ROOT_DIR)/%,%,$(X86_BPFOPT_BIN_DIR))" \
 		-t "$(X86_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"; mv -f "$$tmp" "$@"
 
-$(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR) $(ARM64_KERNEL_FORK_IMAGE_TAR)
+$(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR) $(ARM64_KERNEL_FORK_IMAGE_TAR) $(ARM64_DAEMON_BINARY) $(ARM64_BPFOPT_BINARIES)
 	@mkdir -p "$(dir $@)"
 	docker load -i "$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR)"
 	docker load -i "$(ARM64_KERNEL_FORK_IMAGE_TAR)"
@@ -282,6 +292,8 @@ $(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_K
 		--build-arg RUN_TARGET_ARCH=arm64 \
 		--build-arg VENDOR_LINUX_FRAMEWORK_COMMIT="$(KERNEL_FORK_COMMIT_ARM64)" \
 		--build-arg KERNEL_FORK_IMAGE_PLATFORM="$(KERNEL_FORK_BUILD_PLATFORM)" \
+		--build-arg DAEMON_HOST_BIN_DIR="$(patsubst $(ROOT_DIR)/%,%,$(ARM64_DAEMON_BIN_DIR))" \
+		--build-arg BPFOPT_HOST_BIN_DIR="$(patsubst $(ROOT_DIR)/%,%,$(ARM64_BPFOPT_BIN_DIR))" \
 		-t "$(ARM64_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(ARM64_RUNNER_RUNTIME_IMAGE)"; mv -f "$$tmp" "$@"
 
@@ -320,24 +332,26 @@ $(X86_RUNTIME_KERNEL_IMAGE): $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(BPFREJIT_INSTALL_
 	test -s "$@"
 	touch "$@"
 
-# Daemon binary is buildable on the host (cargo handles cross-compile to
-# aarch64 via TARGET_TRIPLE). Suite targets depend on this path directly
-# so make can detect daemon/src changes and rebuild before running.
-$(ACTIVE_DAEMON_BINARY): $(DAEMON_SOURCE_FILES) $(BUILD_RULE_FILES)
+# Daemon binary is host-built (cargo handles cross-compile to aarch64 via
+# TARGET_TRIPLE). Per-arch rules so the runner-runtime image can depend on
+# the matching binary directly without RUN_TARGET_ARCH ambiguity.
+$(X86_DAEMON_BINARY): $(DAEMON_SOURCE_FILES) $(BUILD_RULE_FILES)
 	mkdir -p "$(dir $@)"
-	make -C "$(ROOT_DIR)/daemon" release TARGET_DIR="$(DAEMON_DIR)/target" $(ACTIVE_DAEMON_TARGET_ARG)
+	make -C "$(ROOT_DIR)/daemon" release TARGET_DIR="$(DAEMON_DIR)/target"
 
-.PHONY: image-katran-artifacts image-runner-artifacts image-daemon-artifact image-bpfopt-artifacts \
+$(ARM64_DAEMON_BINARY): $(DAEMON_SOURCE_FILES) $(BUILD_RULE_FILES)
+	mkdir -p "$(dir $@)"
+	make -C "$(ROOT_DIR)/daemon" release TARGET_DIR="$(DAEMON_DIR)/target" TARGET_TRIPLE=aarch64-unknown-linux-gnu
+
+.PHONY: image-katran-artifacts image-runner-artifacts \
 	image-micro-program-artifacts image-test-artifacts
 ifneq ($(BPFREJIT_IMAGE_BUILD),1)
-image-katran-artifacts image-runner-artifacts image-daemon-artifact image-bpfopt-artifacts image-micro-program-artifacts image-test-artifacts:
+image-katran-artifacts image-runner-artifacts image-micro-program-artifacts image-test-artifacts:
 	@echo "$@ must be run from the runner Dockerfile with BPFREJIT_IMAGE_BUILD=1" >&2
 	@exit 1
 else
 image-katran-artifacts: $(ACTIVE_KATRAN_REQUIRED)
 image-runner-artifacts: $(ACTIVE_RUNNER_BINARY)
-image-daemon-artifact: $(ACTIVE_DAEMON_BINARY)
-image-bpfopt-artifacts: $(ACTIVE_BPFOPT_BINARIES)
 image-micro-program-artifacts: $(MICRO_PROGRAM_OBJECTS)
 image-test-artifacts: $(ACTIVE_TEST_UNITTEST_PRIMARY) $(ACTIVE_TEST_NEGATIVE_PRIMARY)
 
@@ -348,8 +362,12 @@ $(RUNNER_LIBBPF_A): $(LIBBPF_SOURCE_FILES) $(BUILD_RULE_FILES)
 		OBJDIR="$(RUNNER_LIBBPF_OBJDIR)" DESTDIR= PREFIX="$(RUNNER_LIBBPF_PREFIX)" \
 		"$(RUNNER_LIBBPF_A)" install_headers
 
-$(ACTIVE_BPFOPT_BINARIES) &: $(BPFOPT_SOURCE_FILES) $(BUILD_RULE_FILES)
-	cargo build --release --workspace $(ACTIVE_BPFOPT_TARGET_ARG) --target-dir "$(ROOT_DIR)/bpfopt/target" --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml" \
+$(X86_BPFOPT_BINARIES) &: $(BPFOPT_SOURCE_FILES) $(BUILD_RULE_FILES)
+	cargo build --release --workspace --target-dir "$(ROOT_DIR)/bpfopt/target" --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml" \
+		-p bpfopt -p bpfprof
+
+$(ARM64_BPFOPT_BINARIES) &: $(BPFOPT_SOURCE_FILES) $(BUILD_RULE_FILES)
+	cargo build --release --workspace --target aarch64-unknown-linux-gnu --target-dir "$(ROOT_DIR)/bpfopt/target" --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml" \
 		-p bpfopt -p bpfprof
 
 $(ACTIVE_RUNNER_BINARY): $(RUNNER_LIBBPF_A) $(RUNNER_SOURCE_FILES) $(BUILD_RULE_FILES)

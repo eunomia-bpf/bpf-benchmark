@@ -446,64 +446,39 @@ for ko_path in /artifacts/kinsn/*.ko; do
 done
 EOF
 
-FROM runner-runtime-build-base AS runner-runtime-daemon-artifact
+FROM runner-runtime-runtime-base AS runner-runtime-daemon-artifact
 
-ARG IMAGE_BUILD_JOBS=4
 ARG RUN_TARGET_ARCH=x86_64
+# DAEMON_HOST_BIN_DIR is the host-relative directory containing the
+# pre-built bpfrejit-daemon binary. Make passes the arch-specific path
+# so the docker build only copies one file (no internal cargo build).
+ARG DAEMON_HOST_BIN_DIR=daemon/target/release
 
-COPY Makefile ./Makefile
-COPY runner/mk ./runner/mk
-COPY bpfopt/Cargo.toml bpfopt/Cargo.lock ./bpfopt/
-COPY bpfopt/crates/kernel-sys ./bpfopt/crates/kernel-sys
-COPY daemon ./daemon
+COPY ${DAEMON_HOST_BIN_DIR}/bpfrejit-daemon /tmp/bpfrejit-daemon
+RUN set -eux; \
+    case "${RUN_TARGET_ARCH}" in \
+        arm64) image_dir=/artifacts/rust/daemon/target/aarch64-unknown-linux-gnu/release ;; \
+        *)     image_dir=/artifacts/rust/daemon/target/release ;; \
+    esac; \
+    install -d /artifacts/rust/usr-local-bin "${image_dir}"; \
+    install -m 0755 /tmp/bpfrejit-daemon /artifacts/rust/usr-local-bin/bpfrejit-daemon; \
+    install -m 0755 /tmp/bpfrejit-daemon "${image_dir}/bpfrejit-daemon"; \
+    rm /tmp/bpfrejit-daemon
 
-# Build the daemon against kernel-sys without copying the rest of bpfopt.
-RUN --mount=type=cache,target=/bpfopt/target,id=bpfopt-cargo-target,sharing=locked \
-    --mount=type=cache,target=/opt/cargo/registry,id=opt-cargo-registry,sharing=locked \
-    --mount=type=cache,target=/opt/cargo/git,id=opt-cargo-git,sharing=locked \
-    set -eux; \
-    mkdir -p ./vendor/linux-framework; \
-    touch ./vendor/linux-framework/Makefile; \
-    ln -sfn /bpfopt/target ./daemon/target; \
-    make image-daemon-artifact RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
-    daemon_bin_dir="/bpfopt/target/release"; \
-    daemon_image_dir="/artifacts/rust/daemon/target/release"; \
-    if [ "${RUN_TARGET_ARCH}" = "arm64" ]; then \
-        daemon_bin_dir="/bpfopt/target/aarch64-unknown-linux-gnu/release"; \
-        daemon_image_dir="/artifacts/rust/daemon/target/aarch64-unknown-linux-gnu/release"; \
-    fi; \
-    install -d /artifacts/rust/usr-local-bin "${daemon_image_dir}"; \
-    install -m 0755 "${daemon_bin_dir}/bpfrejit-daemon" /artifacts/rust/usr-local-bin/bpfrejit-daemon; \
-    install -m 0755 "${daemon_bin_dir}/bpfrejit-daemon" "${daemon_image_dir}/bpfrejit-daemon"
+FROM runner-runtime-runtime-base AS runner-runtime-bpfopt-artifacts
 
-FROM runner-runtime-build-base AS runner-runtime-bpfopt-artifacts
-
-ARG IMAGE_BUILD_JOBS=4
 ARG RUN_TARGET_ARCH=x86_64
+# BPFOPT_HOST_BIN_DIR is the host-relative directory containing pre-built
+# bpfopt + bpfprof CLIs. Make passes the arch-specific path so the docker
+# build only copies the binaries (no internal cargo build).
+ARG BPFOPT_HOST_BIN_DIR=bpfopt/target/release
 
-COPY Makefile ./Makefile
-COPY runner/mk ./runner/mk
-COPY bpfopt/Cargo.toml bpfopt/Cargo.lock ./bpfopt/
-COPY bpfopt/crates/bpfopt ./bpfopt/crates/bpfopt
-COPY bpfopt/crates/bpfprof ./bpfopt/crates/bpfprof
-COPY bpfopt/crates/kernel-sys ./bpfopt/crates/kernel-sys
-
-# Build bpfopt-suite CLIs in this upper layer; kernel-sys is a library crate only.
-RUN --mount=type=cache,target=/bpfopt/target,id=bpfopt-cargo-target,sharing=locked \
-    --mount=type=cache,target=/opt/cargo/registry,id=opt-cargo-registry,sharing=locked \
-    --mount=type=cache,target=/opt/cargo/git,id=opt-cargo-git,sharing=locked \
-    set -eux; \
-    mkdir -p ./vendor/linux-framework; \
-    touch ./vendor/linux-framework/Makefile; \
-    ln -sfn /bpfopt/target ./bpfopt/target; \
-    make image-bpfopt-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
-    bpfopt_bin_dir="./bpfopt/target/release"; \
-    if [ "${RUN_TARGET_ARCH}" = "arm64" ]; then bpfopt_bin_dir="./bpfopt/target/aarch64-unknown-linux-gnu/release"; fi; \
+COPY ${BPFOPT_HOST_BIN_DIR}/bpfopt /tmp/bpfopt
+COPY ${BPFOPT_HOST_BIN_DIR}/bpfprof /tmp/bpfprof
+RUN set -eux; \
     install -d /artifacts/rust/usr-local-bin; \
-    install -m 0755 \
-        "$bpfopt_bin_dir/bpfopt" \
-        "$bpfopt_bin_dir/bpfprof" \
-        /artifacts/rust/usr-local-bin/
+    install -m 0755 /tmp/bpfopt /tmp/bpfprof /artifacts/rust/usr-local-bin/; \
+    rm /tmp/bpfopt /tmp/bpfprof
 
 FROM runner-runtime-runtime-base AS runner-runtime
 
