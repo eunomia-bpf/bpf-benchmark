@@ -2,12 +2,23 @@ from __future__ import annotations
 
 import os
 import shutil
+import subprocess
 import tempfile
 from pathlib import Path
+from typing import Sequence
 
-from .. import ROOT_DIR
+from .. import ROOT_DIR, which
 from .process_support import NativeProcessRunner
 from .setup_support import optional_repo_artifact_path
+
+
+_LANGUAGE_RUNTIME_PROBES: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("python3", ("-c", "x=0\nwhile True:\n    x+=1")),
+    ("ruby", ("-e", "x=0; loop { x+=1 }")),
+    ("nodejs", ("-e", "let x=0; while(true){x++;}")),
+    ("perl", ("-e", "my $x=0; while(1){$x++;}")),
+    ("php", ("-r", "$x=0; while(true){$x++;}")),
+)
 
 
 _MINIMAL_CONFIG = """receivers:
@@ -60,6 +71,7 @@ class OtelProfilerRunner(NativeProcessRunner):
         self.feature_gates = str(feature_gates or "").strip()
         self._runtime_dir: Path | None = None
         self._config_path: Path | None = None
+        self._language_idlers: list[subprocess.Popen[bytes]] = []
 
     def _default_binary_candidates(self) -> tuple[Path, ...]:
         return tuple(
@@ -105,13 +117,50 @@ class OtelProfilerRunner(NativeProcessRunner):
             raise
         if self._config_path is not None:
             self.artifacts["config_path"] = str(self._config_path)
+        # Pre-spawn long-running language interpreters so otel's periodic /proc
+        # scan identifies each runtime well before workload measurement starts.
+        # Each interpreter runs an idle CPU loop and is sampled by perf_event,
+        # which routes the sample to the matching perf_unwind_<lang> program.
+        self._spawn_language_idlers()
         return programs
 
     def stop(self) -> None:
         try:
+            self._kill_language_idlers()
             super().stop()
         finally:
             self._cleanup_runtime_dir()
+
+    def _spawn_language_idlers(self) -> None:
+        spawned: list[str] = []
+        for tool, args in _LANGUAGE_RUNTIME_PROBES:
+            binary = which(tool)
+            if binary is None:
+                continue
+            proc = subprocess.Popen(
+                [binary, *args],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                stdin=subprocess.DEVNULL,
+            )
+            self._language_idlers.append(proc)
+            spawned.append(tool)
+        self.artifacts["language_idlers"] = spawned
+
+    def _kill_language_idlers(self) -> None:
+        for proc in self._language_idlers:
+            if proc.poll() is None:
+                proc.terminate()
+        for proc in self._language_idlers:
+            try:
+                proc.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                try:
+                    proc.wait(timeout=2)
+                except subprocess.TimeoutExpired:
+                    pass
+        self._language_idlers.clear()
 
     def _cleanup_runtime_dir(self) -> None:
         runtime_dir = self._runtime_dir

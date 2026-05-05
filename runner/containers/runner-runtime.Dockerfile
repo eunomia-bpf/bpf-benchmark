@@ -88,11 +88,14 @@ RUN apt-get update \
         lz4 \
         nftables \
         openssl \
+        nodejs \
         perl \
+        php-cli \
         procps \
         python3 \
         python3-bpfcc \
         python3-yaml \
+        ruby \
         rt-tests \
         stress-ng \
         tar \
