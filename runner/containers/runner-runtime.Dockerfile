@@ -320,15 +320,17 @@ FROM runner-runtime-app-artifacts AS runner-runtime-artifacts
 ARG IMAGE_BUILD_JOBS=4
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
-# arch-specific paths inside the host kernel build dir, set by the runner-runtime image build:
-#   x86_64 → KERNEL_BOOT_SUBDIR=arch/x86/boot   KERNEL_IMAGE_NAME=bzImage
-#   arm64  → KERNEL_BOOT_SUBDIR=arch/arm64/boot KERNEL_IMAGE_NAME=vmlinuz.efi
-ARG KERNEL_BOOT_SUBDIR
+# Narrow build-contexts pointing at subdirs of the host kbuild O= dir to avoid
+# shipping the full kbuild output (~6 GB) as Docker context. Set by the image rule:
+#   x86_64 → image-context = $(O)/arch/x86/boot   KERNEL_IMAGE_NAME=bzImage
+#   arm64  → image-context = $(O)/arch/arm64/boot KERNEL_IMAGE_NAME=vmlinuz.efi
+# Manifest JSON is tiny (<200B) so we inline it as a build-arg instead of a context.
 ARG KERNEL_IMAGE_NAME
+ARG KERNEL_MANIFEST_JSON
 
-COPY --link --from=runner-runtime-host-kernel-build /${KERNEL_BOOT_SUBDIR}/${KERNEL_IMAGE_NAME} /artifacts/kernel/${KERNEL_IMAGE_NAME}
-COPY --link --from=runner-runtime-host-kernel-build /modules-install/lib/modules /artifacts/modules
-COPY --link --from=runner-runtime-host-kernel-build /manifest.json /artifacts/manifest.json
+COPY --link --from=runner-runtime-host-kernel-image /${KERNEL_IMAGE_NAME} /artifacts/kernel/${KERNEL_IMAGE_NAME}
+COPY --link --from=runner-runtime-host-kernel-modules / /artifacts/modules
+RUN mkdir -p /artifacts && printf '%s\n' "${KERNEL_MANIFEST_JSON}" > /artifacts/manifest.json
 
 COPY Makefile ./Makefile
 COPY runner/mk ./runner/mk
