@@ -629,19 +629,18 @@ impl BpfPass for MapInlinePass {
         _ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         let mut total_applied = 0usize;
-        let mut total_changed = false;
         let mut final_skipped = Vec::new();
         let mut diagnostics = Vec::new();
         let mut map_inline_records = Vec::new();
         let mut hit_iteration_cap = false;
 
         for iter in 0..MAP_INLINE_FIXED_POINT_MAX_ITERS {
+            let before_round = program.insns.clone();
             let round = run_map_inline_round(program, analyses, iter == 0)?;
-            let round_changed = round.changed;
+            let round_modified = program.insns != before_round;
 
             final_skipped = round.sites_skipped;
             total_applied += round.sites_applied;
-            total_changed |= round_changed;
             map_inline_records.extend(round.map_inline_records);
             if iter == 0 {
                 diagnostics.extend(round.diagnostics);
@@ -654,7 +653,7 @@ impl BpfPass for MapInlinePass {
                 );
             }
 
-            if !round_changed {
+            if !round_modified {
                 break;
             }
 
@@ -672,7 +671,7 @@ impl BpfPass for MapInlinePass {
             );
         }
 
-        if total_changed {
+        if total_applied > 0 {
             program.log_transform(TransformEntry {
                 sites_applied: total_applied,
             });
@@ -680,7 +679,6 @@ impl BpfPass for MapInlinePass {
 
         Ok(PassResult {
             pass_name: self.name().into(),
-            changed: total_changed,
             sites_applied: total_applied,
             sites_skipped: final_skipped,
             diagnostics,
@@ -1027,7 +1025,6 @@ fn run_map_inline_round(
 
     Ok(PassResult {
         pass_name: "map_inline".into(),
-        changed: true,
         sites_applied: applied,
         sites_skipped: skipped,
         diagnostics,

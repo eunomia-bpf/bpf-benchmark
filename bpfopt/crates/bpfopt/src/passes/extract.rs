@@ -227,7 +227,6 @@ impl BpfPass for ExtractPass {
 
         Ok(PassResult {
             pass_name: self.name().into(),
-            changed: applied > 0,
             sites_applied: applied,
             sites_skipped: skipped,
             diagnostics: vec![],
@@ -402,8 +401,6 @@ mod tests {
 
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(!result.changed);
         assert_eq!(result.sites_applied, 0);
         assert!(result.sites_skipped[0]
             .reason
@@ -422,8 +419,6 @@ mod tests {
 
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
 
         // Verify a kfunc call exists.
@@ -458,8 +453,6 @@ mod tests {
 
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
         assert!(prog
             .insns
@@ -482,11 +475,6 @@ mod tests {
 
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(
-            result.changed,
-            "packed ABI should apply without save/restore"
-        );
         assert_eq!(result.sites_applied, 1);
         let has_kfunc_call = prog
             .insns
@@ -513,11 +501,6 @@ mod tests {
 
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(
-            result.changed,
-            "packed ABI should not depend on free callee-saved regs"
-        );
         assert_eq!(result.sites_applied, 1);
     }
 
@@ -535,8 +518,6 @@ mod tests {
 
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(!result.changed);
         assert!(result
             .sites_skipped
             .iter()
@@ -557,9 +538,7 @@ mod tests {
         let ctx = ctx_with_extract_kfunc(7777);
 
         let pass = ExtractPass;
-        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
+        let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         // The branch at pc=0 should still reach the EXIT instruction.
         let last_pc = prog.insns.len() - 1;
         assert!(prog.insns[last_pc].is_exit());
@@ -582,9 +561,7 @@ mod tests {
             .insert("bpf_extract64".to_string(), 42);
 
         let pass = ExtractPass;
-        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
+        let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(prog
             .insns
             .iter()
@@ -599,8 +576,6 @@ mod tests {
 
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(!result.changed);
         assert_eq!(result.sites_applied, 0);
     }
 
@@ -631,8 +606,6 @@ mod tests {
 
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
         // Verify kfunc call with correct btf_id.
         let call = prog
@@ -669,8 +642,6 @@ mod tests {
 
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(!result.changed);
         assert_eq!(result.sites_applied, 0);
     }
 
@@ -712,8 +683,6 @@ mod tests {
 
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
     }
 
@@ -733,8 +702,6 @@ mod tests {
 
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 2);
         // Verify two kfunc calls exist.
         let call_count = prog
@@ -797,8 +764,6 @@ mod tests {
 
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
         // Count: should not have a trailing MOV r0, r0.
         let mov_r0_r0_count = prog

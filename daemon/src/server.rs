@@ -294,7 +294,6 @@ mod tests {
         OptimizeOneResult {
             status: "ok".to_string(),
             prog_id,
-            changed: true,
             program: ProgramInfo {
                 prog_id,
                 prog_name: "demo".to_string(),

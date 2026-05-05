@@ -236,7 +236,6 @@ impl BpfPass for PrefetchPass {
 
         Ok(PassResult {
             pass_name: self.name().into(),
-            changed: true,
             sites_applied: candidates.len(),
             sites_skipped: skipped,
             ..Default::default()
@@ -862,8 +861,6 @@ mod tests {
         let ctx = ctx_with_prefetch_kfunc(7777);
 
         let result = run_prefetch_pass(&mut program, &ctx);
-
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
         assert!(program.insns[2].is_kinsn_sidecar());
         assert_eq!(
@@ -882,8 +879,6 @@ mod tests {
         let ctx = ctx_with_prefetch_kfunc(7777);
 
         let result = run_prefetch_pass(&mut program, &ctx);
-
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
         assert!(program.insns[3].is_kinsn_sidecar());
         assert_eq!(
@@ -899,8 +894,6 @@ mod tests {
         let ctx = ctx_with_prefetch_kfunc(7777);
 
         let result = run_prefetch_pass(&mut program, &ctx);
-
-        assert!(!result.changed);
         assert_eq!(result.sites_applied, 0);
         assert!(result
             .sites_skipped
@@ -915,8 +908,6 @@ mod tests {
         ctx.prog_type = BPF_PROG_TYPE_XDP;
 
         let result = run_prefetch_pass(&mut program, &ctx);
-
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
         assert!(program.insns[1].is_kinsn_sidecar());
         assert_eq!(
@@ -937,9 +928,7 @@ mod tests {
         let mut ctx = ctx_with_prefetch_kfunc(7777);
         ctx.prog_type = BPF_PROG_TYPE_XDP;
 
-        let result = run_prefetch_pass(&mut program, &ctx);
-
-        assert!(result.changed);
+        let _result = run_prefetch_pass(&mut program, &ctx);
         assert!(program.insns[1].is_ldimm64());
         assert_eq!(program.insns[2].code, 0);
         assert!(program.insns[3].is_kinsn_sidecar());

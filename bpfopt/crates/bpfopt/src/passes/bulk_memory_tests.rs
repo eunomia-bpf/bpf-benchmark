@@ -344,8 +344,6 @@ fn test_empty_program() {
     let mut program = make_program(vec![]);
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(!result.program_changed);
     assert!(program.insns.is_empty());
     assert_eq!(result.pass_results[0].sites_applied, 0);
 }
@@ -356,8 +354,6 @@ fn test_no_consecutive_stores() {
     let mut program = make_program(original.clone());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(!result.program_changed);
     assert_eq!(program.insns, original);
     assert_eq!(result.pass_results[0].sites_applied, 0);
 }
@@ -369,8 +365,6 @@ fn test_memcpy_pattern_8_pairs() {
     expected.push(exit_insn());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(result.program_changed);
     assert_eq!(result.pass_results[0].sites_applied, 1);
     assert_eq!(program.insns, expected);
 }
@@ -383,8 +377,6 @@ fn test_memcpy_pattern_inside_multi_subprog_program() {
     let mut program = make_program(insns);
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(result.program_changed);
     assert_eq!(result.pass_results[0].sites_applied, 1);
     assert_eq!(bulk_call_count(&program.insns, MEMCPY_BTF_ID), 1);
 }
@@ -396,8 +388,6 @@ fn test_memset_zero_pattern() {
     expected.push(exit_insn());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(result.program_changed);
     assert_eq!(result.pass_results[0].sites_applied, 1);
     assert_eq!(program.insns, expected);
 }
@@ -409,8 +399,6 @@ fn test_memset_nonzero_immediate_pattern() {
     expected.push(exit_insn());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(result.program_changed);
     assert_eq!(result.pass_results[0].sites_applied, 1);
     assert_eq!(program.insns, expected);
 }
@@ -422,8 +410,6 @@ fn test_memset_byte_immediate_truncates_to_imm8() {
     expected.push(exit_insn());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(result.program_changed);
     assert_eq!(result.pass_results[0].sites_applied, 1);
     assert_eq!(program.insns, expected);
 }
@@ -435,8 +421,6 @@ fn test_memset_negative_dw_immediate_uses_ff_fill() {
     expected.push(exit_insn());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(result.program_changed);
     assert_eq!(result.pass_results[0].sites_applied, 1);
     assert_eq!(program.insns, expected);
 }
@@ -447,8 +431,6 @@ fn test_memset_non_repeated_immediate_unchanged() {
     let mut program = make_program(original.clone());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(!result.program_changed);
     assert_eq!(program.insns, original);
     assert_eq!(result.pass_results[0].sites_applied, 0);
 }
@@ -459,8 +441,6 @@ fn test_below_threshold_unchanged() {
     let mut program = make_program(original.clone());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(!result.program_changed);
     assert_eq!(program.insns, original);
     assert_eq!(result.pass_results[0].sites_applied, 0);
 }
@@ -473,8 +453,6 @@ fn test_different_base_regs_not_merged() {
     expected.push(exit_insn());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(result.program_changed);
     assert_eq!(result.pass_results[0].sites_applied, 2);
     assert_eq!(bulk_call_count(&program.insns, MEMCPY_BTF_ID), 2);
     assert_eq!(program.insns, expected);
@@ -486,8 +464,6 @@ fn test_non_stack_base_memcpy_skipped_by_alias_gate() {
     let mut program = make_program(original.clone());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(!result.program_changed);
     assert_eq!(program.insns, original);
     assert!(result.pass_results[0]
         .sites_skipped
@@ -503,8 +479,6 @@ fn test_non_consecutive_offsets_split() {
     expected.push(exit_insn());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(result.program_changed);
     assert_eq!(result.pass_results[0].sites_applied, 2);
     assert_eq!(bulk_call_count(&program.insns, MEMCPY_BTF_ID), 2);
     assert_eq!(program.insns, expected);
@@ -515,8 +489,6 @@ fn test_mixed_widths_handled() {
     let mut program = make_program(make_mixed_widths_program());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(result.program_changed);
     assert_eq!(result.pass_results[0].sites_applied, 1);
     assert_eq!(bulk_call_count(&program.insns, MEMSET_BTF_ID), 1);
     assert_eq!(program.insns.last(), Some(&exit_insn()));
@@ -531,8 +503,6 @@ fn test_memcpy_preserves_surrounding() {
     expected.push(exit_insn());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(result.program_changed);
     assert_eq!(program.insns, expected);
     assert_eq!(result.pass_results[0].sites_applied, 1);
 }
@@ -542,8 +512,6 @@ fn test_branch_fixup_after_replacement() {
     let mut program = make_program(make_branch_fixup_program());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(result.program_changed);
     assert_eq!(result.pass_results[0].sites_applied, 1);
     assert_eq!(bulk_call_count(&program.insns, MEMCPY_BTF_ID), 1);
     assert_eq!(program.insns[0], jeq_imm(0, 0, 3));
@@ -558,8 +526,6 @@ fn test_interleaved_non_store_splits() {
     expected.push(exit_insn());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(result.program_changed);
     assert_eq!(result.pass_results[0].sites_applied, 2);
     assert_eq!(bulk_call_count(&program.insns, MEMSET_BTF_ID), 2);
     assert_eq!(program.insns, expected);
@@ -571,8 +537,6 @@ fn test_kfunc_not_available_skipped() {
     let mut program = make_program(original.clone());
 
     let result = run_bulk_memory_pass(&mut program, &PassContext::test_default());
-
-    assert!(!result.program_changed);
     assert_eq!(program.insns, original);
     assert_eq!(result.pass_results[0].sites_applied, 0);
     assert!(result.pass_results[0]
@@ -587,8 +551,6 @@ fn test_same_base_chunked_overlap_skipped() {
     let mut program = make_program(original.clone());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(!result.program_changed);
     assert_eq!(program.insns, original);
     assert!(result.pass_results[0]
         .sites_skipped
@@ -604,8 +566,6 @@ fn test_memset_nonzero_reg_pattern() {
     expected.push(exit_insn());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(result.program_changed);
     assert_eq!(program.insns, expected);
     assert_eq!(bulk_call_count(&program.insns, MEMSET_BTF_ID), 1);
     assert_eq!(result.pass_results[0].sites_applied, 1);
@@ -619,8 +579,6 @@ fn test_memcpy_proof_tmp_live_out_skipped() {
     let mut program = make_program(original.clone());
 
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-
-    assert!(!result.program_changed);
     assert_eq!(program.insns, original);
     assert!(result.pass_results[0]
         .sites_skipped

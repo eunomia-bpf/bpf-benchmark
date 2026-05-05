@@ -23,7 +23,7 @@
 > - **bpfopt-suite v3 设计约束见 §4.6，Benchmark 设计约束见 §5.35。**
 > **v1 权威数据**（#256 rerun，native-level rewrite 架构）：micro **1.057x** / applied-only **1.193x**；corpus **0.983x**；Tracee **+8.1%**；Tetragon **+20.3%/+32.2%**；Katran BPF **1.108-1.168x**；gap **0.581x**。vm-selftest **35/35**。v1 代码保存在 `v1-native-rewrite` 分支。
 > **v2 当前权威数据**（#644，2026-04-02 本地重跑，artifact 时间戳为 2026-04-03 UTC）：benchmark 默认尝试当前全部 in-scope performance passes，报告只统计**实际 applied sites**。`make vm-corpus` **20/20 app ok**，applied-only / all-comparable geomean **1.033x**，applied sample **61**；`make vm-e2e` **6/6 ok**；apply-side site totals：bpftrace **33**、BCC **961**、SCX **359**。`make vm-selftest`、`make vm-test`、`make vm-negative-test`、`make vm-micro-smoke`、`make vm-micro` 全通过。**2026-04-03 再验证**：private-stack 覆盖迁移到 repo-owned tests 后，`make all`、`make check`、`make vm-test` 仍全部通过。
-> **2026-04-21/22 Wave 1 后三目标 corpus 权威重跑**（见 #663）：`x86_kvm_corpus_20260421_232916_947372`（30 samples）all-comparable geomean **1.010x**，applied sample **12**，20/20 app ok；`aws_x86_corpus_20260422_012001_472335`（1 sample）**0.983x**，applied sample **10**，20/20 app ok；`aws_arm64_corpus_20260422_044304_037607`（1 sample）**0.986x**，applied sample **10**，20/20 app ok。三目标 `no_programs_changed_in_loader` 统一 **36**。**注意**：该 reason 并非 bytes_jited/xlated same-size gap（`corpus/driver.py:471-540` 根本没比 bytes）。它是命名不准的 observability bucket，混了 "0 site 命中"、"pass 命中但 verifier 全 rollback"、"apply 成功但最终 program_changed=false" 三类情况，属 corpus 侧 taxonomy 过粗，非 apply correctness bug。详情见 #664。
+> **2026-04-21/22 Wave 1 后三目标 corpus 权威重跑**（见 #663）：`x86_kvm_corpus_20260421_232916_947372`（30 samples）all-comparable geomean **1.010x**，applied sample **12**，20/20 app ok；`aws_x86_corpus_20260422_012001_472335`（1 sample）**0.983x**，applied sample **10**，20/20 app ok；`aws_arm64_corpus_20260422_044304_037607`（1 sample）**0.986x**，applied sample **10**，20/20 app ok。三目标 `no_programs_changed_in_loader` 统一 **36**。**注意**：该 reason 并非 bytes_jited/xlated same-size gap（`corpus/driver.py:471-540` 根本没比 bytes）。它是命名不准的历史 observability bucket，混了 "0 site 命中"、"pass 命中但 verifier 全 rollback"、"apply 成功但最终 bytecode 无差异" 三类情况，属 corpus 侧 taxonomy 过粗，非 apply correctness bug。详情见 #664。
 
 ---
 
@@ -383,7 +383,7 @@ Packed（sidecar pseudo-insn + CALL pair，零 argument setup，N→1 指令替�
 - **verifier states 来自真实 ReJIT log**：默认 12-pass policy 包含 `map_inline` / `const_prop`。daemon 解析前一个成功 per-pass ReJIT 的 `log_level=2` verifier log 生成 `verifier-states.json`。缺失 states 记录 per-pass skip 并继续；parse 失败直接 error，不允许空结果 fallback。
 - **main ReJIT 无 watchdog**：`BPF_PROG_REJIT` 是同步 syscall，daemon 不加 timeout；kernel verifier hang 会卡住 daemon。当前选择文档化接受该限制，不加 subprocess fallback。
 - **安全 pass 不在 OSDI 范围**：`speculation_barrier`、`dangerous_helper_firewall`、`live_patch` 不在默认 pipeline。
-- **结构化 per-pass 记录**：每个 program 的每个 pass 记录 `pass`/`status`/`changed`/`sites_applied`/`insn_delta` 等事实字段；pass ReJIT errno 记录在该 pass detail 中，已成功 ReJIT 的 bytecode 保持提交。
+- **结构化 per-pass 记录**：每个 program 的每个 pass 记录 `pass`/`status`/`sites_applied`/`insn_delta` 等事实字段；pass ReJIT errno 记录在该 pass detail 中，已成功 ReJIT 的 bytecode 保持提交。
 - **Benchmark runner Python 保持不动**：v3 迁移采用 §8 方案 B，`runner/libs/`、`corpus/`、`e2e/`、`micro/` 继续走 daemon socket + JSON 稳定边界；daemon 内部适配到 CLI。v3 迁移期只允许 runner bug fix 和 stale test data 更新。
 
 #### Fail-fast 原则：禁止 dead code / fallback / silence

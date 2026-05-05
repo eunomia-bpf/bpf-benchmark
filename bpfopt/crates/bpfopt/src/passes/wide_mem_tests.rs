@@ -264,8 +264,6 @@ fn test_wide_mem_pass_no_sites() {
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(!result.changed);
     assert_eq!(result.sites_applied, 0);
     assert_eq!(prog.insns.len(), 2);
 }
@@ -284,8 +282,6 @@ fn test_wide_mem_pass_transforms_correctly() {
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
     assert_eq!(result.sites_applied, 1);
     assert_eq!(prog.insns.len(), 2);
     assert_eq!(bpf_size(prog.insns[0].code), BPF_H);
@@ -308,8 +304,6 @@ fn test_wide_mem_pass_skips_misaligned_halfword_site() {
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(!result.changed);
     assert_eq!(result.sites_applied, 0);
     assert!(result
         .sites_skipped
@@ -333,8 +327,6 @@ fn test_wide_mem_pass_skips_site_with_interior_branch_target() {
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(!result.changed);
     assert_eq!(result.sites_applied, 0);
     assert!(!result.sites_skipped.is_empty());
     assert!(result.sites_skipped[0]
@@ -360,8 +352,6 @@ fn test_wide_mem_pass_multiple_sites() {
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
     assert_eq!(result.sites_applied, 2);
     assert_eq!(prog.insns.len(), 3);
 }
@@ -381,8 +371,6 @@ fn test_wide_mem_pass_skips_site_with_live_scratch_reg() {
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(!result.changed);
     assert_eq!(result.sites_applied, 0);
     assert!(!result.sites_skipped.is_empty());
     assert!(result.sites_skipped[0]
@@ -409,9 +397,7 @@ fn test_branch_fixup_forward_across_site() {
     let ctx = PassContext::test_default();
 
     let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
+    let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
     assert_eq!(prog.insns.len(), 3);
     let ja = &prog.insns[0];
     assert!(ja.is_ja());
@@ -431,9 +417,7 @@ fn test_branch_fixup_backward_across_site() {
     let ctx = PassContext::test_default();
 
     let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
+    let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
     assert_eq!(prog.insns.len(), 4);
     let ja = &prog.insns[2];
     assert!(ja.is_ja());
@@ -457,9 +441,7 @@ fn test_conditional_branch_fixup() {
     let ctx = PassContext::test_default();
 
     let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
+    let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
     assert_eq!(prog.insns.len(), 3);
     let jeq = &prog.insns[0];
     assert!(jeq.is_cond_jmp());
@@ -486,8 +468,6 @@ fn test_wide_mem_skips_byte_ladder_with_pseudo_func_boundary_inside() {
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(!result.changed);
     assert_eq!(result.sites_applied, 0);
     assert!(result
         .sites_skipped
@@ -526,7 +506,6 @@ fn test_wide_mem_pass_skips_unsupported_width_3() {
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert!(!result.changed, "width=3 should be skipped, not applied");
     assert_eq!(result.sites_applied, 0);
     assert!(result
         .sites_skipped
@@ -567,7 +546,6 @@ fn test_wide_mem_pass_applies_width4_skips_width3_mixed() {
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert!(result.changed, "width=4 site should be applied");
     assert_eq!(result.sites_applied, 1);
     // The width=3 site should be in sites_skipped.
     assert!(result
@@ -610,8 +588,6 @@ fn test_wide_mem_skips_non_stack_in_xdp() {
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(!result.changed, "should skip non-stack base in XDP");
     assert_eq!(result.sites_applied, 0);
     assert!(result
         .sites_skipped
@@ -641,8 +617,6 @@ fn test_wide_mem_allows_stack_base_in_xdp() {
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed, "R10-based wide_mem should apply in XDP");
     assert_eq!(result.sites_applied, 1);
     assert_eq!(prog.insns.len(), 2);
     assert_eq!(bpf_size(prog.insns[0].code), BPF_W);
@@ -670,8 +644,6 @@ fn test_wide_mem_allows_map_value_base_in_xdp() {
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed, "map-value base in XDP should be allowed");
     assert_eq!(result.sites_applied, 1);
 }
 
@@ -691,11 +663,6 @@ fn test_wide_mem_allows_non_stack_in_tracing() {
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(
-        result.changed,
-        "non-stack base should work in tracing progs"
-    );
     assert_eq!(result.sites_applied, 1);
 }
 
@@ -723,8 +690,6 @@ fn test_wide_mem_mixed_sites_xdp_some_skipped() {
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed, "stack-based site should still apply");
     assert_eq!(result.sites_applied, 1);
     assert_eq!(
         result
@@ -797,10 +762,6 @@ fn test_wide_mem_skips_merge_when_base_is_btf_struct_ptr() {
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
     // The merge must be skipped because r6 is a BTF struct pointer.
-    assert!(
-        !result.changed,
-        "wide_mem must not merge byte-ladder from a BTF struct pointer base register"
-    );
     assert_eq!(result.sites_applied, 0);
     assert!(
         result
@@ -833,11 +794,6 @@ fn test_wide_mem_applies_without_verifier_states() {
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(
-        result.changed,
-        "wide_mem should apply when no verifier states are available"
-    );
     assert_eq!(result.sites_applied, 1);
 }
 
@@ -862,7 +818,5 @@ fn test_wide_mem_applies_when_verifier_shows_scalar_base() {
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed, "scalar base should still be merged");
     assert_eq!(result.sites_applied, 1);
 }

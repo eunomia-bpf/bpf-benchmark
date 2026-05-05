@@ -272,7 +272,6 @@ impl BpfPass for CondSelectPass {
 
         Ok(PassResult {
             pass_name: self.name().into(),
-            changed: applied > 0,
             sites_applied: applied,
             sites_skipped: skipped,
             diagnostics: vec![],

@@ -550,7 +550,6 @@ impl BpfPass for EndianFusionPass {
 
         Ok(PassResult {
             pass_name: self.name().into(),
-            changed: applied > 0,
             sites_applied: applied,
             sites_skipped: skipped,
             diagnostics: vec![],
@@ -764,8 +763,6 @@ mod tests {
 
         let pass = EndianFusionPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(!result.changed);
         assert_eq!(result.sites_applied, 0);
         assert!(result.sites_skipped[0]
             .reason
@@ -784,8 +781,6 @@ mod tests {
 
         let pass = EndianFusionPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
 
         // Verify a kfunc call exists with the correct btf_id.
@@ -830,7 +825,6 @@ mod tests {
         let result = EndianFusionPass
             .run(&mut prog, &mut cache, &ctx_with_endian32_kfunc(8888))
             .unwrap();
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
         assert!(prog.insns[0].is_kinsn_sidecar());
         assert!(prog.insns[1].is_call());
@@ -846,7 +840,6 @@ mod tests {
         let result = EndianFusionPass
             .run(&mut prog, &mut cache, &ctx_with_endian32_kfunc(8888))
             .unwrap();
-        assert!(!result.changed);
         assert!(result
             .sites_skipped
             .iter()
@@ -867,8 +860,6 @@ mod tests {
 
         let pass = EndianFusionPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
 
         assert!(prog.insns[0].is_kinsn_sidecar());
@@ -889,9 +880,7 @@ mod tests {
         let ctx = ctx_with_endian32_kfunc(8888);
 
         let pass = EndianFusionPass;
-        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
+        let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert_eq!(prog.insns.len(), 3);
         assert!(prog.insns[0].is_kinsn_sidecar());
         assert_eq!(sidecar_payload(&prog.insns[0]), endian_payload(2, 6, 12));
@@ -910,9 +899,7 @@ mod tests {
         let ctx = ctx_with_endian_kfuncs(-1, -1, 3333);
 
         let pass = EndianFusionPass;
-        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
+        let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert_eq!(prog.insns.len(), 3);
         assert!(prog.insns[0].is_kinsn_sidecar());
         assert_eq!(
@@ -937,11 +924,6 @@ mod tests {
 
         let pass = EndianFusionPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(
-            result.changed,
-            "packed ABI should apply without save/restore"
-        );
         assert_eq!(result.sites_applied, 1);
         let has_kfunc_call = prog
             .insns
@@ -968,11 +950,6 @@ mod tests {
 
         let pass = EndianFusionPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(
-            result.changed,
-            "packed ABI should not depend on free callee-saved regs"
-        );
         assert_eq!(result.sites_applied, 1);
     }
 
@@ -990,8 +967,6 @@ mod tests {
 
         let pass = EndianFusionPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(!result.changed);
         assert!(result
             .sites_skipped
             .iter()
@@ -1012,9 +987,7 @@ mod tests {
         let ctx = ctx_with_endian32_kfunc(8888);
 
         let pass = EndianFusionPass;
-        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
+        let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         // The branch at pc=0 should still reach the EXIT instruction.
         let last_pc = prog.insns.len() - 1;
         assert!(prog.insns[last_pc].is_exit());
@@ -1036,9 +1009,7 @@ mod tests {
             .insert("bpf_endian_load32".to_string(), 42);
 
         let pass = EndianFusionPass;
-        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
+        let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(prog
             .insns
             .iter()
@@ -1066,8 +1037,6 @@ mod tests {
 
         let pass = EndianFusionPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 3);
         assert!(prog
             .insns
@@ -1096,8 +1065,6 @@ mod tests {
 
         let pass = EndianFusionPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(!result.changed);
         assert_eq!(result.sites_applied, 0);
         assert!(result
             .sites_skipped
@@ -1118,8 +1085,6 @@ mod tests {
 
         let pass = EndianFusionPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
         // No redundant MOV r0, r0.
         let mov_r0_r0_count = prog
@@ -1140,8 +1105,6 @@ mod tests {
 
         let pass = EndianFusionPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(!result.changed);
         assert_eq!(result.sites_applied, 0);
     }
 
@@ -1160,8 +1123,6 @@ mod tests {
 
         let pass = EndianFusionPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 2);
         // Verify two kfunc calls exist.
         let call_count = prog
@@ -1190,8 +1151,6 @@ mod tests {
 
         let pass = EndianFusionPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 3);
 
         // Check we got the right BTF IDs for each size.

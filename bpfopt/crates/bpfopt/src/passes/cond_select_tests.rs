@@ -175,8 +175,6 @@ fn test_cond_select_short_pattern_c_emit_jne() {
 
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
     assert_eq!(result.sites_applied, 1);
     let has_kfunc_call = prog
         .insns
@@ -268,8 +266,6 @@ fn test_cond_select_skip_when_kfunc_unavailable() {
 
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(!result.changed);
     assert_eq!(result.sites_applied, 0);
     assert_eq!(prog.insns, orig_insns);
     assert!(!result.diagnostics.is_empty());
@@ -289,8 +285,6 @@ fn test_cond_select_emit_imm_true_reg_false() {
 
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
     assert_eq!(result.sites_applied, 1);
     assert_eq!(prog.insns[0], BpfInsn::mov32_imm(0, 1));
     assert!(prog.insns[1].is_kinsn_sidecar());
@@ -311,8 +305,6 @@ fn test_cond_select_emit_reg_true_imm_false() {
 
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
     assert_eq!(result.sites_applied, 1);
     assert_eq!(prog.insns[0], BpfInsn::mov64_imm(0, 0));
     assert!(prog.insns[1].is_kinsn_sidecar());
@@ -333,8 +325,6 @@ fn test_cond_select_emit_reg32_true_imm_false() {
 
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
     assert_eq!(result.sites_applied, 1);
     assert_eq!(prog.insns[0], mov32_reg(0, 6));
     assert_eq!(prog.insns[1], BpfInsn::mov32_imm(2, 0));
@@ -355,8 +345,6 @@ fn test_cond_select_emit_both_immediate_values() {
 
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
     assert_eq!(result.sites_applied, 1);
     assert_eq!(prog.insns[0], BpfInsn::mov32_imm(0, 1));
     assert_eq!(prog.insns[1], BpfInsn::mov32_imm(2, 0));
@@ -378,8 +366,6 @@ fn test_cond_select_no_emit_3insn_pattern_b() {
 
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(!result.changed, "Pattern B should not be transformed");
     assert_eq!(result.sites_applied, 0);
 }
 
@@ -398,8 +384,6 @@ fn test_cond_select_emit_jeq_swaps_args() {
 
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
     assert_eq!(result.sites_applied, 1);
 
     let mut initial = [0u64; 11];
@@ -426,8 +410,6 @@ fn test_cond_select_emit_non_zero_compare_imm() {
 
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
     assert_eq!(result.sites_applied, 1);
     assert_eq!(prog.insns[0], BpfInsn::mov64_reg(0, 1));
     assert_eq!(prog.insns[1], BpfInsn::alu64_imm(BPF_XOR, 0, 5));
@@ -449,8 +431,6 @@ fn test_cond_select_emit_jmp32_zero_compare_predicate() {
 
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
     assert_eq!(result.sites_applied, 1);
     assert_eq!(prog.insns[0], mov32_reg(0, 1));
     assert!(prog.insns[1].is_kinsn_sidecar());
@@ -471,8 +451,6 @@ fn test_cond_select_emit_jgt_predicate_prefix() {
 
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
     assert_eq!(result.sites_applied, 1);
     assert_eq!(prog.insns[0], BpfInsn::mov64_imm(0, 0));
     assert_eq!(prog.insns[1], jle_imm(1, 0, 1));
@@ -497,8 +475,6 @@ fn test_cond_select_emit_with_reg_values() {
 
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
     assert_eq!(result.sites_applied, 1);
     // Verify semantics: r1 = r7 (true_val, a), r2 = r6 (false_val, b), r3 = cond(r1)
     let mut initial = [0u64; 11];
@@ -527,11 +503,6 @@ fn test_cond_select_packed_keeps_live_regs() {
 
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(
-        result.changed,
-        "packed ABI should apply without save/restore"
-    );
     assert_eq!(result.sites_applied, 1);
 }
 
@@ -555,11 +526,6 @@ fn test_cond_select_packed_no_callee_saved_dependency() {
 
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(
-        result.changed,
-        "packed ABI should not depend on free callee-saved regs"
-    );
     assert_eq!(result.sites_applied, 1);
 }
 
@@ -571,8 +537,6 @@ fn test_cond_select_no_sites_linear() {
 
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(!result.changed);
     assert_eq!(result.sites_applied, 0);
 }
 
@@ -590,9 +554,7 @@ fn test_cond_select_emit_cond_reg_is_r3() {
     let ctx = ctx_with_select_kfunc(5555);
 
     let pass = CondSelectPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    assert!(result.changed);
+    let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
     assert!(prog.insns[0].is_kinsn_sidecar());
 }
 
@@ -645,8 +607,7 @@ fn test_cond_select_alias_cond_reg_is_r2() {
     let ctx = ctx_with_select_kfunc(5555);
 
     let pass = CondSelectPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert!(result.changed);
+    let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
     // Simulate with known register values.
     // r2=COND_VAL(200), r6=FALSE_VAL(600), r7=TRUE_VAL(700)
@@ -682,12 +643,7 @@ fn test_cond_select_alias_all_overlap_combinations() {
                 let ctx = ctx_with_select_kfunc(5555);
 
                 let pass = CondSelectPass;
-                let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-                assert!(
-                    result.changed,
-                    "should transform: cond=r{} true=r{} false=r{}",
-                    cond_reg, true_src, false_src
-                );
+                let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
                 // Simulate with distinct values.
                 let mut initial = [0u64; 11];

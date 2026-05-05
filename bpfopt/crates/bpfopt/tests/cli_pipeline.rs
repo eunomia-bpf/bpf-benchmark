@@ -389,7 +389,6 @@ fn map_inline_skips_hash_lookup_when_snapshot_value_is_null() {
     remove_file_if_exists(report_path);
 
     assert_eq!(report["pass"], "map_inline");
-    assert_eq!(report["changed"], true);
     assert_eq!(report["sites_applied"], 1);
     assert_eq!(report["map_inline_records"].as_array().unwrap().len(), 1);
     assert_eq!(report["map_inline_records"][0]["key_hex"], "02000000");

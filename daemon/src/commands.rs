@@ -127,7 +127,6 @@ fn require_nonempty_file(path: &Path, description: &str) -> Result<()> {
 pub(crate) struct OptimizeOneResult {
     pub status: String,
     pub prog_id: u32,
-    pub changed: bool,
     pub program: ProgramInfo,
     pub passes: Vec<PassDetail>,
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
@@ -141,7 +140,6 @@ impl OptimizeOneResult {
         Self {
             status: "error".to_string(),
             prog_id,
-            changed: false,
             program: ProgramInfo {
                 prog_id,
                 prog_name: String::new(),
@@ -178,7 +176,6 @@ pub(crate) struct ProgramInfo {
 #[serde(rename_all = "snake_case")]
 pub(crate) enum PassStatus {
     Ok,
-    Unchanged,
     SkippedMissingStates,
     FailedBpfopt,
     FailedRejit,
@@ -189,7 +186,6 @@ pub(crate) struct PassDetail {
     #[serde(rename = "pass")]
     pub pass_name: String,
     pub status: PassStatus,
-    pub changed: bool,
     pub sites_applied: usize,
     pub insns_before: usize,
     pub insns_after: usize,
@@ -249,7 +245,6 @@ type MapInfoJson = bpfget::MapInfo;
 #[derive(Clone, Debug, Deserialize)]
 struct BpfoptPassReport {
     pass: String,
-    changed: bool,
     sites_applied: usize,
     insn_count_before: usize,
     insn_count_after: usize,
@@ -363,7 +358,7 @@ fn hex_nibble(byte: u8) -> Option<u8> {
 fn collect_map_inline_records(reports: &[BpfoptPassReport]) -> Result<Vec<MapInlineRecord>> {
     let mut records = Vec::new();
     for pass in reports {
-        if canonical_pass(&pass.pass) != "map_inline" || !pass.changed {
+        if canonical_pass(&pass.pass) != "map_inline" {
             continue;
         }
         for record in &pass.map_inline_records {
@@ -598,7 +593,6 @@ pub(crate) fn try_apply_one(
         let mut current_bytes = orig_bytes.clone();
         let mut committed_reports = Vec::new();
         let mut verifier_states_ready = false;
-        let mut committed_passes = 0usize;
         let reports = run_pass_chain(&pass_list, |idx, pass| -> Result<PassDetail> {
             let stem = pass_file_stem(idx, pass);
             let pass_input = workdir.path().join(format!("{stem}.in.bin"));
@@ -615,7 +609,7 @@ pub(crate) fn try_apply_one(
                     PassStatus::SkippedMissingStates,
                     &current_bytes,
                     Some(format!(
-                        "pass {pass} requires verifier states from a previous successful per-pass ReJIT"
+                        "pass {pass} requires verifier states from a previous per-pass ReJIT — insert a `noop` pass before {pass} in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,{pass},...\")"
                     )),
                 );
             }
@@ -664,14 +658,6 @@ pub(crate) fn try_apply_one(
                     );
                 }
             };
-            if !report.changed {
-                return Ok(pass_detail_from_report(
-                    &report,
-                    PassStatus::Unchanged,
-                    false,
-                    None,
-                ));
-            }
             let pass_insns = match decode_insns(&pass_bytes, pass_output.to_string_lossy().as_ref())
             {
                 Ok(insns) => insns,
@@ -691,7 +677,6 @@ pub(crate) fn try_apply_one(
                     return Ok(pass_detail_from_report(
                         &report,
                         PassStatus::FailedRejit,
-                        false,
                         Some(format!("{err:#}")),
                     ));
                 }
@@ -700,9 +685,8 @@ pub(crate) fn try_apply_one(
                 .with_context(|| format!("write verifier states after pass {pass}"))?;
             verifier_states_ready = true;
             current_bytes = pass_bytes;
-            committed_passes += 1;
             committed_reports.push(report.clone());
-            Ok(pass_detail_from_report(&report, PassStatus::Ok, true, None))
+            Ok(pass_detail_from_report(&report, PassStatus::Ok, None))
         })?;
         fs::write(&opt_bin, &current_bytes)
             .with_context(|| format!("write {}", opt_bin.display()))?;
@@ -712,12 +696,10 @@ pub(crate) fn try_apply_one(
             collect_inlined_map_entries(&map_inline_records, &map_value_snapshot)?;
         let opt_bytes = current_bytes;
         let final_insn_count = insn_count_from_bytes(&opt_bytes, "opt.bin")?;
-        let changed = opt_bytes != orig_bytes;
         let status = "ok".to_string();
         Ok(OptimizeOneResult {
             status,
             prog_id,
-            changed,
             program: ProgramInfo {
                 prog_id,
                 prog_name: prog_info.name,
@@ -816,23 +798,15 @@ fn write_verifier_states_for_next_pass(path: &Path, report: &RejitReport) -> Res
 fn pass_detail_from_report(
     report: &BpfoptPassReport,
     status: PassStatus,
-    changed: bool,
     error: Option<String>,
 ) -> PassDetail {
-    let sites_applied = if changed { report.sites_applied } else { 0 };
-    let insns_after = if changed {
-        report.insn_count_after
-    } else {
-        report.insn_count_before
-    };
     PassDetail {
         pass_name: report.pass.clone(),
         status,
-        changed,
-        sites_applied,
+        sites_applied: report.sites_applied,
         insns_before: report.insn_count_before,
-        insns_after,
-        insn_delta: insns_after as i64 - report.insn_count_before as i64,
+        insns_after: report.insn_count_after,
+        insn_delta: report.insn_count_after as i64 - report.insn_count_before as i64,
         error,
     }
 }
@@ -847,7 +821,6 @@ fn pass_detail_without_report(
     Ok(PassDetail {
         pass_name: pass.to_string(),
         status,
-        changed: false,
         sites_applied: 0,
         insns_before: insn_count,
         insns_after: insn_count,
@@ -1423,21 +1396,19 @@ mod tests {
             attempted.push(pass.to_string());
             let report = BpfoptPassReport {
                 pass: pass.to_string(),
-                changed: idx != 2,
                 sites_applied: 1,
                 insn_count_before: 1,
                 insn_count_after: 2,
                 map_inline_records: Vec::new(),
             };
             Ok(match idx {
-                0 => pass_detail_from_report(&report, PassStatus::Ok, true, None),
+                0 => pass_detail_from_report(&report, PassStatus::Ok, None),
                 1 => pass_detail_from_report(
                     &report,
                     PassStatus::FailedRejit,
-                    false,
                     Some("kernel rejected BPF_PROG_REJIT: EINVAL".to_string()),
                 ),
-                2 => pass_detail_from_report(&report, PassStatus::Unchanged, false, None),
+                2 => pass_detail_from_report(&report, PassStatus::Ok, None),
                 _ => unreachable!(),
             })
         })
@@ -1447,7 +1418,7 @@ mod tests {
         assert_eq!(reports.len(), 3);
         assert_eq!(reports[1].status, PassStatus::FailedRejit);
         assert_eq!(reports[2].pass_name, "endian_fusion");
-        assert_eq!(reports[2].status, PassStatus::Unchanged);
+        assert_eq!(reports[2].status, PassStatus::Ok);
     }
 
     #[test]
@@ -1733,7 +1704,6 @@ mod tests {
         OptimizeOneResult {
             status: "ok".to_string(),
             prog_id,
-            changed: true,
             program: ProgramInfo {
                 prog_id,
                 prog_name: "mock_prog".to_string(),

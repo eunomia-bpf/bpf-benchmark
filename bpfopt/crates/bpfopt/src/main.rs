@@ -155,7 +155,6 @@ struct ListPassesArgs {
 #[derive(Clone, Debug, Serialize)]
 struct PassReport {
     pass: String,
-    changed: bool,
     sites_applied: usize,
     insn_count_before: usize,
     insn_count_after: usize,
@@ -1151,7 +1150,6 @@ fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Res
 fn pass_report(result: &PassResult) -> PassReport {
     PassReport {
         pass: result.pass_name.clone(),
-        changed: result.changed,
         sites_applied: result.sites_applied,
         insn_count_before: result.insns_before,
         insn_count_after: result.insns_after,
@@ -1325,7 +1323,6 @@ mod tests {
     fn pass_report_serializes_map_inline_records_as_hex() {
         let result = PassResult {
             pass_name: "map_inline".to_string(),
-            changed: true,
             sites_applied: 1,
             map_inline_records: vec![bpfopt::pass::MapInlineRecord {
                 map_id: 7,

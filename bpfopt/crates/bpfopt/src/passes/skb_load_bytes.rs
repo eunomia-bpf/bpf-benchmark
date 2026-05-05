@@ -91,7 +91,6 @@ impl BpfPass for SkbLoadBytesSpecPass {
 
         Ok(PassResult {
             pass_name: self.name().into(),
-            changed: true,
             sites_applied: scan.sites.len(),
             sites_skipped: scan.skips,
             diagnostics: vec![],
@@ -644,8 +643,6 @@ mod tests {
         let mut program = BpfProgram::new(vec![]);
 
         let result = run_skb_load_bytes_pass(&mut program, BPF_PROG_TYPE_SCHED_CLS);
-
-        assert!(!result.program_changed);
         assert!(program.insns.is_empty());
         assert_eq!(result.pass_results[0].sites_applied, 0);
     }
@@ -656,8 +653,6 @@ mod tests {
         let mut program = BpfProgram::new(original.clone());
 
         let result = run_skb_load_bytes_pass(&mut program, BPF_PROG_TYPE_SCHED_CLS);
-
-        assert!(!result.program_changed);
         assert_eq!(program.insns, original);
         assert_eq!(result.pass_results[0].sites_applied, 0);
     }
@@ -668,8 +663,6 @@ mod tests {
         let mut program = BpfProgram::new(original.clone());
 
         let result = run_skb_load_bytes_pass(&mut program, BPF_PROG_TYPE_SCHED_CLS);
-
-        assert!(!result.program_changed);
         assert_eq!(program.insns, original);
         assert_eq!(result.pass_results[0].sites_applied, 0);
     }
@@ -679,8 +672,6 @@ mod tests {
         let mut program = BpfProgram::new(make_skb_load_bytes_program(14, -8, 1));
 
         let result = run_skb_load_bytes_pass(&mut program, BPF_PROG_TYPE_SCHED_CLS);
-
-        assert!(result.program_changed);
         assert_eq!(result.pass_results[0].sites_applied, 1);
         assert_eq!(program.insns, expected_rewritten_program(14, -8, 1));
     }
@@ -689,14 +680,12 @@ mod tests {
     fn test_constant_offset_and_len_required() {
         let variable_offset = make_variable_offset_program();
         let mut offset_program = BpfProgram::new(variable_offset.clone());
-        let offset_result = run_skb_load_bytes_pass(&mut offset_program, BPF_PROG_TYPE_SCHED_CLS);
-        assert!(!offset_result.program_changed);
+        let _offset_result = run_skb_load_bytes_pass(&mut offset_program, BPF_PROG_TYPE_SCHED_CLS);
         assert_eq!(offset_program.insns, variable_offset);
 
         let variable_len = make_variable_len_program();
         let mut len_program = BpfProgram::new(variable_len.clone());
-        let len_result = run_skb_load_bytes_pass(&mut len_program, BPF_PROG_TYPE_SCHED_CLS);
-        assert!(!len_result.program_changed);
+        let _len_result = run_skb_load_bytes_pass(&mut len_program, BPF_PROG_TYPE_SCHED_CLS);
         assert_eq!(len_program.insns, variable_len);
     }
 
@@ -706,8 +695,6 @@ mod tests {
         let mut program = BpfProgram::new(original.clone());
 
         let result = run_skb_load_bytes_pass(&mut program, BPF_PROG_TYPE_SCHED_CLS);
-
-        assert!(!result.program_changed);
         assert_eq!(program.insns, original);
         assert!(result.pass_results[0]
             .sites_skipped
@@ -724,8 +711,6 @@ mod tests {
         let mut program = BpfProgram::new(make_prior_helper_with_ctx_reload_program());
 
         let result = run_skb_load_bytes_pass(&mut program, BPF_PROG_TYPE_SCHED_CLS);
-
-        assert!(result.program_changed);
         assert_eq!(result.pass_results[0].sites_applied, 1);
         assert_eq!(program.insns, expected);
     }
@@ -736,8 +721,6 @@ mod tests {
         let mut program = BpfProgram::new(original.clone());
 
         let result = run_skb_load_bytes_pass(&mut program, BPF_PROG_TYPE_SCHED_CLS);
-
-        assert!(!result.program_changed);
         assert_eq!(program.insns, original);
         assert!(result.pass_results[0]
             .sites_skipped
@@ -751,21 +734,18 @@ mod tests {
 
         let mut cls_program = BpfProgram::new(make_skb_load_bytes_program(14, -8, 1));
         let cls_result = run_skb_load_bytes_pass(&mut cls_program, BPF_PROG_TYPE_SCHED_CLS);
-        assert!(cls_result.program_changed);
         assert_eq!(cls_result.pass_results[0].sites_applied, 1);
         assert_eq!(cls_program.insns, expected);
 
         let mut act_program = BpfProgram::new(make_skb_load_bytes_program(14, -8, 1));
         let act_result = run_skb_load_bytes_pass(&mut act_program, BPF_PROG_TYPE_SCHED_ACT);
-        assert!(act_result.program_changed);
         assert_eq!(act_result.pass_results[0].sites_applied, 1);
         assert_eq!(act_program.insns, expected_rewritten_program(14, -8, 1));
 
         let original = make_skb_load_bytes_program(14, -8, 1);
         let mut socket_filter_program = BpfProgram::new(original.clone());
-        let socket_filter_result =
+        let _socket_filter_result =
             run_skb_load_bytes_pass(&mut socket_filter_program, BPF_PROG_TYPE_SOCKET_FILTER);
-        assert!(!socket_filter_result.program_changed);
         assert_eq!(socket_filter_program.insns, original);
     }
 
@@ -775,8 +755,6 @@ mod tests {
             let mut program = BpfProgram::new(make_skb_load_bytes_program(14, -16, len));
 
             let result = run_skb_load_bytes_pass(&mut program, BPF_PROG_TYPE_SCHED_CLS);
-
-            assert!(result.program_changed, "len={len}");
             assert_eq!(result.pass_results[0].sites_applied, 1, "len={len}");
             assert_eq!(program.insns, expected_rewritten_program(14, -16, len));
         }
@@ -786,9 +764,7 @@ mod tests {
     fn test_error_check_preserved() {
         let mut program = BpfProgram::new(make_skb_load_bytes_program(14, -8, 1));
 
-        let result = run_skb_load_bytes_pass(&mut program, BPF_PROG_TYPE_SCHED_CLS);
-
-        assert!(result.program_changed);
+        let _result = run_skb_load_bytes_pass(&mut program, BPF_PROG_TYPE_SCHED_CLS);
         assert_eq!(program.insns[8], jgt_reg(2, 0, 5));
         assert_eq!(program.insns[17], jne_imm(0, 0, 2));
     }
@@ -800,8 +776,6 @@ mod tests {
         let mut program = BpfProgram::new(original);
 
         let result = run_skb_load_bytes_pass(&mut program, BPF_PROG_TYPE_SCHED_ACT);
-
-        assert!(result.program_changed);
         assert_eq!(result.pass_results[0].sites_applied, 2);
         assert_eq!(count_ctx_access(&program.insns, SKB_DATA_OFF), 2);
         assert_eq!(count_ctx_access(&program.insns, SKB_DATA_END_OFF), 2);
@@ -815,8 +789,6 @@ mod tests {
         let mut program = BpfProgram::new(original);
 
         let result = run_skb_load_bytes_pass(&mut program, BPF_PROG_TYPE_SCHED_CLS);
-
-        assert!(result.program_changed);
         assert_eq!(result.pass_results[0].sites_applied, 1);
         assert!(program.insns.len() > original_len);
         assert!(program.insns.len() <= original_len + 12);
@@ -826,9 +798,7 @@ mod tests {
     fn test_branch_fixup_correct() {
         let mut program = BpfProgram::new(make_branch_around_program());
 
-        let result = run_skb_load_bytes_pass(&mut program, BPF_PROG_TYPE_SCHED_CLS);
-
-        assert!(result.program_changed);
+        let _result = run_skb_load_bytes_pass(&mut program, BPF_PROG_TYPE_SCHED_CLS);
         assert_eq!(program.insns[0], jeq_imm(0, 0, 18));
     }
 }

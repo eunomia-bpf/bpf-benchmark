@@ -274,7 +274,6 @@ impl BpfPass for ConstPropPass {
 
         Ok(PassResult {
             pass_name: self.name().into(),
-            changed: true,
             sites_applied: replacements.len(),
             sites_skipped: vec![],
             diagnostics: vec![],
@@ -290,10 +289,10 @@ fn solve_block_entry_states(
 ) -> Vec<RegConstState> {
     let mut block_in = vec![unknown_state(); cfg.blocks.len()];
     let mut block_out = vec![unknown_state(); cfg.blocks.len()];
-    let mut changed = true;
+    let mut updated = true;
 
-    while changed {
-        changed = false;
+    while updated {
+        updated = false;
 
         for (block_idx, block) in cfg.blocks.iter().enumerate() {
             let in_state = merge_predecessor_states(&block.preds, &block_out);
@@ -309,7 +308,7 @@ fn solve_block_entry_states(
             if block_in[block_idx] != in_state || block_out[block_idx] != out_state {
                 block_in[block_idx] = in_state;
                 block_out[block_idx] = out_state;
-                changed = true;
+                updated = true;
             }
         }
     }
@@ -915,9 +914,7 @@ mod tests {
             exit_insn(),
         ]);
 
-        let result = run_const_prop_pass(&mut program);
-
-        assert!(result.program_changed);
+        let _result = run_const_prop_pass(&mut program);
         assert_eq!(
             program.insns,
             vec![
@@ -937,9 +934,7 @@ mod tests {
             exit_insn(),
         ]);
 
-        let result = run_const_prop_pass(&mut program);
-
-        assert!(result.program_changed);
+        let _result = run_const_prop_pass(&mut program);
         assert_eq!(
             program.insns,
             vec![
@@ -955,9 +950,7 @@ mod tests {
         let wide = ld_imm64(1, 0, 0, 1);
         let mut program = BpfProgram::new(vec![wide[0], wide[1], add64_imm(1, 1), exit_insn()]);
 
-        let result = run_const_prop_pass(&mut program);
-
-        assert!(result.program_changed);
+        let _result = run_const_prop_pass(&mut program);
         assert_eq!(program.insns.len(), 5);
         assert!(program.insns[2].is_ldimm64());
         assert_eq!(program.insns[2].dst_reg(), 1);
@@ -972,9 +965,7 @@ mod tests {
         let original = vec![typed[0], typed[1], add64_imm(1, 16), exit_insn()];
         let mut program = BpfProgram::new(original.clone());
 
-        let result = run_const_prop_pass(&mut program);
-
-        assert!(!result.program_changed);
+        let _result = run_const_prop_pass(&mut program);
         assert_eq!(program.insns, original);
     }
 
@@ -990,9 +981,7 @@ mod tests {
             exit_insn(),
         ]);
 
-        let result = run_const_prop_pass(&mut program);
-
-        assert!(result.program_changed);
+        let _result = run_const_prop_pass(&mut program);
         assert_eq!(
             program.insns,
             vec![
@@ -1022,9 +1011,7 @@ mod tests {
             verifier_delta_state(3, HashMap::from([(0, scalar_reg(1))])),
         ]);
 
-        let result = run_const_prop_pass(&mut program);
-
-        assert!(result.program_changed);
+        let _result = run_const_prop_pass(&mut program);
         assert_eq!(
             program.insns,
             vec![
@@ -1070,8 +1057,6 @@ mod tests {
 
         use_mock_maps(&mut program);
         let result = pm.run(&mut program, &PassContext::test_default()).unwrap();
-
-        assert!(result.program_changed);
         assert_eq!(result.pass_results[0].pass_name, "map_inline");
         assert_eq!(result.pass_results[1].pass_name, "const_prop");
         assert_eq!(result.pass_results[1].sites_applied, 1);
@@ -1097,9 +1082,7 @@ mod tests {
             exit_insn(),
         ]);
 
-        let result = run_const_prop_pass(&mut program);
-
-        assert!(result.program_changed);
+        let _result = run_const_prop_pass(&mut program);
         assert_eq!(
             program.insns,
             vec![
@@ -1123,9 +1106,7 @@ mod tests {
             exit_insn(),
         ]);
 
-        let result = run_const_prop_pass(&mut program);
-
-        assert!(result.program_changed);
+        let _result = run_const_prop_pass(&mut program);
         assert_eq!(
             program.insns,
             vec![
@@ -1150,9 +1131,7 @@ mod tests {
             exit_insn(),
         ]);
 
-        let result = run_const_prop_pass(&mut program);
-
-        assert!(result.program_changed);
+        let _result = run_const_prop_pass(&mut program);
         assert_eq!(
             program.insns,
             vec![BpfInsn::mov64_imm(2, 7), BpfInsn::ja(0), exit_insn(),]
@@ -1183,9 +1162,7 @@ mod tests {
             exit_insn(),
         ]);
 
-        let result = run_const_prop_pass(&mut program);
-
-        assert!(result.program_changed);
+        let _result = run_const_prop_pass(&mut program);
         assert_eq!(
             program.insns,
             vec![BpfInsn::mov64_imm(1, -1), BpfInsn::ja(0), exit_insn(),]
@@ -1218,12 +1195,8 @@ mod tests {
         ]);
 
         let result = run_const_prop_then_dce(&mut program);
-
-        assert!(result.program_changed);
         assert_eq!(result.pass_results[0].pass_name, "const_prop");
         assert_eq!(result.pass_results[1].pass_name, "dce");
-        assert!(result.pass_results[0].changed);
-        assert!(result.pass_results[1].changed);
         assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]);
     }
 

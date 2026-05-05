@@ -46,7 +46,6 @@ impl BpfPass for NoOpPass {
     ) -> anyhow::Result<PassResult> {
         Ok(PassResult {
             pass_name: self.name().into(),
-            changed: false,
             sites_applied: 0,
             sites_skipped: vec![],
             diagnostics: vec![],
@@ -74,7 +73,6 @@ impl BpfPass for AppendNopPass {
         program.insns.push(BpfInsn::nop());
         Ok(PassResult {
             pass_name: self.name().into(),
-            changed: true,
             sites_applied: 1,
             sites_skipped: vec![],
             diagnostics: vec![],
@@ -105,7 +103,6 @@ impl BpfPass for PrependNopPass {
         program.remap_annotations(&addr_map);
         Ok(PassResult {
             pass_name: self.name().into(),
-            changed: true,
             sites_applied: 1,
             sites_skipped: vec![],
             diagnostics: vec![],
@@ -141,7 +138,6 @@ impl BpfPass for RewriteMovImmPass {
         }
         Ok(PassResult {
             pass_name: self.name().into(),
-            changed: applied > 0,
             sites_applied: applied,
             sites_skipped: vec![],
             diagnostics: vec![],
@@ -159,9 +155,7 @@ fn test_prepend_nop_pass_shifts_annotations_forward() {
     program.annotations[1].branch_profile = Some(branch_profile(7, 3, 1));
 
     let ctx = ctx_for_pass_manager(&pm);
-    let result = pm.run(&mut program, &ctx).unwrap();
-
-    assert!(result.program_changed);
+    let _result = pm.run(&mut program, &ctx).unwrap();
     assert_eq!(program.insns.len(), 3);
     assert!(program.annotations[0].branch_profile.is_none());
     assert!(program.annotations[1].branch_profile.is_none());
@@ -211,7 +205,6 @@ impl BpfPass for CountReportingPass {
         let count = analyses.get(&analysis, _program);
         Ok(PassResult {
             pass_name: self.name().into(),
-            changed: false,
             sites_applied: 0,
             sites_skipped: vec![],
             diagnostics: vec![format!("insn_count={}", count)],
@@ -256,7 +249,6 @@ impl BpfPass for VerifierStateCountPass {
     ) -> anyhow::Result<PassResult> {
         Ok(PassResult {
             pass_name: self.name().into(),
-            changed: false,
             diagnostics: vec![format!("verifier_states={}", program.verifier_states.len())],
             ..Default::default()
         })
@@ -341,7 +333,6 @@ fn test_pass_manager_empty_pipeline() {
     let result = pm.run(&mut prog, &ctx).unwrap();
 
     assert_eq!(result.pass_results.len(), 0);
-    assert!(!result.program_changed);
     // Program should be unchanged.
     assert_eq!(prog.insns.len(), 2);
 }
@@ -358,14 +349,10 @@ fn test_pass_manager_multiple_passes_sequential() {
     let result = pm.run(&mut prog, &ctx).unwrap();
 
     assert_eq!(result.pass_results.len(), 2);
-    // First pass: rewrite_mov_imm changed the MOV IMM value.
-    assert!(result.pass_results[0].changed);
+    // First pass: rewrite_mov_imm rewrote the MOV IMM value.
     assert_eq!(result.pass_results[0].sites_applied, 1);
     // Second pass: append_nop added a NOP.
-    assert!(result.pass_results[1].changed);
     assert_eq!(result.pass_results[1].sites_applied, 1);
-
-    assert!(result.program_changed);
 
     // Check the MOV IMM was rewritten.
     assert_eq!(prog.insns[0].imm, 99);
@@ -397,7 +384,6 @@ fn test_pass_manager_analysis_cache_invalidation() {
     // First count_reporter sees 2 instructions.
     assert_eq!(result.pass_results[0].diagnostics, vec!["insn_count=2"]);
     // append_nop runs.
-    assert!(result.pass_results[1].changed);
     // Second count_reporter should see 3 instructions (cache was invalidated).
     assert_eq!(result.pass_results[2].diagnostics, vec!["insn_count=3"]);
 }
@@ -439,7 +425,6 @@ fn test_pass_manager_invalidates_verifier_states_after_transform() {
     let result = pm.run(&mut prog, &ctx).unwrap();
 
     assert_eq!(result.pass_results.len(), 2);
-    assert!(result.pass_results[0].changed);
     assert_eq!(
         result.pass_results[1].diagnostics,
         vec!["verifier_states=0"]
@@ -462,7 +447,6 @@ fn test_pass_manager_enabled_pass_policy() {
     // Only append_nop should run.
     assert_eq!(result.pass_results.len(), 1);
     assert_eq!(result.pass_results[0].pass_name, "append_nop");
-    assert!(result.program_changed);
     assert_eq!(prog.insns.len(), 2);
 }
 
@@ -546,13 +530,9 @@ fn test_run_with_profiling_enables_branch_flip() {
     let mut pdata = ProfilingData::default();
     pdata.branch_profiles.insert(0, branch_profile(90, 10, 1));
     pdata.branch_miss_rate = Some(0.02);
-    let result = pm
+    let _result = pm
         .run_with_profiling(&mut prog, &ctx, Some(&pdata))
         .unwrap();
-    assert!(
-        result.program_changed,
-        "should flip with PGO data showing hot branch"
-    );
 }
 
 // ── BranchFlipPass import for testing ───────────────────────
@@ -592,7 +572,6 @@ fn test_pass_skips_without_platform_capability() {
 
     let result = pm.run(&mut prog, &ctx).unwrap();
     // Should not apply anything because platform lacks CMOV.
-    assert!(!result.program_changed);
     // Should have a skip reason about CMOV.
     assert!(result.pass_results[0]
         .sites_skipped

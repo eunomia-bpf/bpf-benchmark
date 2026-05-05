@@ -167,7 +167,6 @@ impl BpfPass for RotatePass {
 
         Ok(PassResult {
             pass_name: self.name().into(),
-            changed: applied > 0,
             sites_applied: applied,
             sites_skipped: skipped,
             diagnostics: vec![],
@@ -525,8 +524,6 @@ mod tests {
 
         let pass = RotatePass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
         let has_kfunc_call = prog
             .insns
@@ -555,8 +552,6 @@ mod tests {
 
         let pass = RotatePass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(!result.changed);
         assert_eq!(result.sites_applied, 0);
         assert!(!result.sites_skipped.is_empty());
         assert!(result.sites_skipped[0]
@@ -580,11 +575,6 @@ mod tests {
 
         let pass = RotatePass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(
-            result.changed,
-            "packed ABI should apply without save/restore"
-        );
         assert_eq!(result.sites_applied, 1);
         let has_kfunc_call = prog
             .insns
@@ -614,11 +604,6 @@ mod tests {
 
         let pass = RotatePass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(
-            result.changed,
-            "packed ABI should not depend on free callee-saved regs"
-        );
         assert_eq!(result.sites_applied, 1);
     }
 
@@ -638,11 +623,6 @@ mod tests {
 
         let pass = RotatePass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(
-            !result.changed,
-            "should skip when tmp_reg is live after site"
-        );
         assert!(result
             .sites_skipped
             .iter()
@@ -665,8 +645,6 @@ mod tests {
 
         let pass = RotatePass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
         assert!(prog
             .insns

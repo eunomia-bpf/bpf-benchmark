@@ -96,7 +96,6 @@ impl BpfPass for DcePass {
 
         Ok(PassResult {
             pass_name: self.name().into(),
-            changed: true,
             sites_applied,
             sites_skipped: vec![],
             diagnostics,
@@ -188,8 +187,6 @@ mod tests {
         ]);
 
         let result = run_const_prop_then_dce(&mut program);
-
-        assert!(result.program_changed);
         assert_eq!(result.pass_results[1].pass_name, "dce");
         assert_eq!(result.pass_results[1].sites_applied, 2);
         assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]);
@@ -206,9 +203,7 @@ mod tests {
             exit_insn(),
         ]);
 
-        let result = run_dce_pass(&mut program);
-
-        assert!(result.program_changed);
+        let _result = run_dce_pass(&mut program);
         assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 1), exit_insn()]);
         assert!(
             !program.insns.iter().any(BpfInsn::is_ldimm64),
@@ -227,8 +222,6 @@ mod tests {
         ]);
 
         let result = run_dce_pass(&mut program);
-
-        assert!(result.program_changed);
         assert_eq!(result.pass_results[0].sites_applied, 3);
         assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]);
     }
@@ -246,8 +239,6 @@ mod tests {
         ]);
 
         let result = run_const_prop_then_dce(&mut program);
-
-        assert!(result.program_changed);
         assert_eq!(result.pass_results[1].pass_name, "dce");
         assert!(result.pass_results[1]
             .diagnostics
@@ -266,8 +257,6 @@ mod tests {
         ]);
 
         let result = run_dce_pass(&mut program);
-
-        assert!(!result.program_changed);
         assert_eq!(result.pass_results[0].sites_applied, 0);
         assert_eq!(
             program.insns,
@@ -292,9 +281,7 @@ mod tests {
             exit_insn(),
         ]);
 
-        let result = run_dce_pass(&mut program);
-
-        assert!(result.program_changed);
+        let _result = run_dce_pass(&mut program);
         assert_eq!(
             program.insns,
             vec![
@@ -322,9 +309,7 @@ mod tests {
             exit_insn(),              // 8
         ]);
 
-        let result = run_dce_pass(&mut program);
-
-        assert!(result.program_changed);
+        let _result = run_dce_pass(&mut program);
         assert_eq!(
             program.insns,
             vec![
@@ -372,9 +357,7 @@ mod tests {
             exit_insn(),              // 7
         ]);
 
-        let result = run_const_prop_then_dce(&mut program);
-
-        assert!(result.program_changed);
+        let _result = run_const_prop_then_dce(&mut program);
         // The orphaned subprog should be removed entirely.
         // After const_prop: jeq becomes JA +2, dead block (call+exit) becomes
         // unreachable, subprog has no remaining callers.
@@ -411,9 +394,7 @@ mod tests {
             exit_insn(),              // 7
         ]);
 
-        let result = run_const_prop_then_dce(&mut program);
-
-        assert!(result.program_changed);
+        let _result = run_const_prop_then_dce(&mut program);
         // Subprog must be preserved because pc 0 still calls it.
         let has_subprog = program.insns.iter().any(|i| *i == BpfInsn::mov64_imm(0, 3));
         assert!(

@@ -490,8 +490,6 @@ impl AnalysisCache {
 pub struct PassResult {
     /// Pass name.
     pub pass_name: String,
-    /// Whether the program was modified (triggers analysis invalidation).
-    pub changed: bool,
     /// Number of sites applied.
     pub sites_applied: usize,
     /// Sites that were skipped (with reasons).
@@ -510,7 +508,6 @@ impl PassResult {
     pub fn unchanged(pass_name: impl Into<String>) -> Self {
         Self {
             pass_name: pass_name.into(),
-            changed: false,
             sites_applied: 0,
             diagnostics: Vec::new(),
             ..Default::default()
@@ -770,7 +767,6 @@ impl AnalysisRegistry {
 #[derive(Clone, Debug)]
 pub struct PipelineResult {
     pub pass_results: Vec<PassResult>,
-    pub program_changed: bool,
 }
 
 /// PassManager — manages and executes the pass pipeline.
@@ -883,7 +879,6 @@ impl PassManager {
     ) -> anyhow::Result<PipelineResult> {
         let mut cache = AnalysisCache::new();
         let mut pass_results = Vec::new();
-        let mut any_changed = false;
         for pass in &self.passes {
             let pass = pass.as_ref();
             if !self.pass_allowed(pass, ctx)? {
@@ -891,14 +886,10 @@ impl PassManager {
             }
 
             let result = self.run_single_pass(pass, program, &mut cache, ctx)?;
-            any_changed |= result.changed;
             pass_results.push(result);
         }
 
-        Ok(PipelineResult {
-            pass_results,
-            program_changed: any_changed,
-        })
+        Ok(PipelineResult { pass_results })
     }
 
     /// Execute the pipeline with optional profiling data.
@@ -926,12 +917,13 @@ impl PassManager {
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         self.run_required_analyses(pass, program, cache)?;
+        let before_insns = program.insns.clone();
         let insns_before = program.insns.len();
         let mut result = pass.run(program, cache, ctx)?;
         result.insns_before = insns_before;
         result.insns_after = program.insns.len();
 
-        if result.changed {
+        if program.insns != before_insns {
             cache.invalidate_all();
             program.verifier_states = Arc::from([]);
             program.sync_annotations();

@@ -28,9 +28,9 @@ impl Analysis for LivenessAnalysis {
         let mut live_out = vec![HashSet::new(); n];
 
         // Standard backward dataflow to fixed point.
-        let mut changed = true;
-        while changed {
-            changed = false;
+        let mut updated = true;
+        while updated {
+            updated = false;
             for pc in (0..n).rev() {
                 let insn = &program.insns[pc];
                 let (uses, defs) = insn_use_def(insn);
@@ -48,7 +48,7 @@ impl Analysis for LivenessAnalysis {
                 if new_in != live_in[pc] || new_out != live_out[pc] {
                     live_in[pc] = new_in;
                     live_out[pc] = new_out;
-                    changed = true;
+                    updated = true;
                 }
             }
         }

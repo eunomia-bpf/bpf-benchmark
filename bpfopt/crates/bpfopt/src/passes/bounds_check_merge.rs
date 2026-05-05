@@ -237,7 +237,6 @@ impl BpfPass for BoundsCheckMergePass {
 
         Ok(PassResult {
             pass_name: self.name().into(),
-            changed: true,
             sites_applied: rewrites.len(),
             sites_skipped: scan.skips,
             diagnostics: vec![],
@@ -819,8 +818,6 @@ mod tests {
         let mut program = BpfProgram::new(original.clone());
 
         let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-
-        assert!(!result.program_changed);
         assert_eq!(program.insns, original);
         assert_eq!(result.pass_results[0].sites_applied, 0);
         assert!(
@@ -834,8 +831,6 @@ mod tests {
         let mut program = BpfProgram::new(make_two_adjacent_checks_program());
 
         let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-
-        assert!(result.program_changed);
         assert_eq!(result.pass_results[0].sites_applied, 1);
         assert_eq!(program.insns.len(), 11);
         assert_eq!(compare_pcs(&program.insns), vec![4]);
@@ -847,8 +842,6 @@ mod tests {
         let mut program = BpfProgram::new(make_three_ladder_checks_program());
 
         let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-
-        assert!(result.program_changed);
         assert_eq!(result.pass_results[0].sites_applied, 1);
         assert_eq!(program.insns.len(), 12);
         assert_eq!(compare_pcs(&program.insns), vec![4]);
@@ -861,8 +854,6 @@ mod tests {
         let mut program = BpfProgram::new(original.clone());
 
         let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-
-        assert!(!result.program_changed);
         assert_eq!(program.insns, original);
         assert_eq!(compare_pcs(&program.insns), vec![4, 8]);
         assert!(
@@ -877,8 +868,6 @@ mod tests {
         let mut program = BpfProgram::new(original.clone());
 
         let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-
-        assert!(!result.program_changed);
         assert_eq!(program.insns, original);
         assert_eq!(compare_pcs(&program.insns), vec![5, 9]);
         assert!(
@@ -893,8 +882,6 @@ mod tests {
         let mut program = BpfProgram::new(original.clone());
 
         let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-
-        assert!(!result.program_changed);
         assert_eq!(program.insns, original);
         assert_eq!(compare_pcs(&program.insns), vec![4, 8]);
         assert!(
@@ -909,8 +896,6 @@ mod tests {
         let mut program = BpfProgram::new(original.clone());
 
         let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-
-        assert!(!result.program_changed);
         assert_eq!(program.insns, original);
         assert_eq!(compare_pcs(&program.insns), vec![4, 9]);
         assert!(
@@ -924,8 +909,6 @@ mod tests {
         let mut program = BpfProgram::new(make_interleaved_checks_program());
 
         let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-
-        assert!(result.program_changed);
         assert_eq!(result.pass_results[0].sites_applied, 1);
         assert_eq!(program.insns.len(), 13);
         assert_eq!(compare_pcs(&program.insns), vec![4]);
@@ -938,8 +921,6 @@ mod tests {
         let mut program = BpfProgram::new(original.clone());
 
         let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-
-        assert!(!result.program_changed);
         assert_eq!(program.insns, original);
         assert_eq!(compare_pcs(&program.insns), vec![4, 8]);
         assert!(
@@ -951,33 +932,28 @@ mod tests {
     #[test]
     fn test_packet_program_ctx_layouts() {
         let mut xdp_program = BpfProgram::new(make_two_adjacent_checks_program());
-        let xdp_result = run_bounds_check_merge_pass(&mut xdp_program, BPF_PROG_TYPE_XDP);
-        assert!(xdp_result.program_changed);
+        let _xdp_result = run_bounds_check_merge_pass(&mut xdp_program, BPF_PROG_TYPE_XDP);
         assert_eq!(xdp_program.insns.len(), 11);
 
         let mut tc_program = BpfProgram::new(make_two_adjacent_tc_checks_program());
-        let tc_result = run_bounds_check_merge_pass(&mut tc_program, BPF_PROG_TYPE_SCHED_CLS);
-        assert!(tc_result.program_changed);
+        let _tc_result = run_bounds_check_merge_pass(&mut tc_program, BPF_PROG_TYPE_SCHED_CLS);
         assert_eq!(tc_program.insns.len(), 11);
 
         let mut tc_action_program = BpfProgram::new(make_two_adjacent_tc_checks_program());
-        let tc_action_result =
+        let _tc_action_result =
             run_bounds_check_merge_pass(&mut tc_action_program, BPF_PROG_TYPE_SCHED_ACT);
-        assert!(tc_action_result.program_changed);
         assert_eq!(tc_action_program.insns.len(), 11);
 
         let xdp_layout_in_tc = make_two_adjacent_checks_program();
         let mut xdp_layout_tc_program = BpfProgram::new(xdp_layout_in_tc.clone());
-        let xdp_layout_tc_result =
+        let _xdp_layout_tc_result =
             run_bounds_check_merge_pass(&mut xdp_layout_tc_program, BPF_PROG_TYPE_SCHED_CLS);
-        assert!(!xdp_layout_tc_result.program_changed);
         assert_eq!(xdp_layout_tc_program.insns, xdp_layout_in_tc);
 
         let original = make_two_adjacent_checks_program();
         let mut non_packet_program = BpfProgram::new(original.clone());
-        let non_packet_result =
+        let _non_packet_result =
             run_bounds_check_merge_pass(&mut non_packet_program, BPF_PROG_TYPE_SOCKET_FILTER);
-        assert!(!non_packet_result.program_changed);
         assert_eq!(non_packet_program.insns, original);
     }
 
@@ -986,8 +962,6 @@ mod tests {
         let mut program = BpfProgram::new(vec![]);
 
         let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-
-        assert!(!result.program_changed);
         assert!(program.insns.is_empty());
         assert_eq!(result.pass_results[0].sites_applied, 0);
     }
@@ -998,8 +972,6 @@ mod tests {
         let mut program = BpfProgram::new(original.clone());
 
         let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-
-        assert!(!result.program_changed);
         assert_eq!(program.insns, original);
         assert!(compare_pcs(&program.insns).is_empty());
         assert_eq!(result.pass_results[0].sites_applied, 0);
@@ -1009,9 +981,7 @@ mod tests {
     fn test_merge_preserves_largest_check() {
         let mut program = BpfProgram::new(make_three_ladder_checks_program());
 
-        let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-
-        assert!(result.program_changed);
+        let _result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
         assert_eq!(program.insns[3], BpfInsn::alu64_imm(BPF_ADD, 4, 54));
         assert_eq!(program.insns[4].code, BPF_JMP | BPF_JGT | BPF_X);
         assert_eq!(compare_pcs(&program.insns), vec![4]);
@@ -1021,9 +991,7 @@ mod tests {
     fn test_branch_fixup_after_merge() {
         let mut program = BpfProgram::new(make_two_adjacent_checks_program());
 
-        let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-
-        assert!(result.program_changed);
+        let _result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
         assert_eq!(program.insns.len(), 11);
         assert_eq!(compare_pcs(&program.insns), vec![4]);
         assert_eq!(program.insns[4].off, 4);

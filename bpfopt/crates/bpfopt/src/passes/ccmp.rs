@@ -313,7 +313,6 @@ impl BpfPass for CcmpPass {
 
         Ok(PassResult {
             pass_name: self.name().into(),
-            changed: applied > 0,
             sites_applied: applied,
             sites_skipped: skipped,
             diagnostics: vec![],
@@ -588,8 +587,6 @@ mod tests {
                 &ccmp_ctx(Arch::X86_64),
             )
             .unwrap();
-
-        assert!(!result.changed);
         assert!(result.sites_skipped[0].reason.contains("aarch64"));
     }
 
@@ -611,8 +608,6 @@ mod tests {
                 &ccmp_ctx(Arch::Aarch64),
             )
             .unwrap();
-
-        assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
         assert!(program.insns[0].is_kinsn_sidecar());
         assert_eq!(program.insns[1].src_reg(), BPF_PSEUDO_KINSN_CALL);
@@ -645,8 +640,6 @@ mod tests {
                 &ccmp_ctx(Arch::Aarch64),
             )
             .unwrap();
-
-        assert!(!result.changed);
         assert!(result.sites_skipped[0].reason.contains("exceeds maximum"));
         assert_eq!(program.insns[0].code, BPF_JMP | BPF_JEQ | BPF_K);
     }
@@ -673,8 +666,6 @@ mod tests {
                 &ccmp_ctx(Arch::Aarch64),
             )
             .unwrap();
-
-        assert!(!result.changed);
         assert!(result.sites_skipped[0].reason.contains("subprog boundary"));
     }
 }
