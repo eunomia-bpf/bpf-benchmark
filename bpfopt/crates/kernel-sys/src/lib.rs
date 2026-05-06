@@ -454,22 +454,14 @@ fn format_prog_rejit_failure(failure: ProgRejitFailure) -> anyhow::Error {
     let errno = failure.error.raw_os_error().unwrap_or(libc::EIO);
     let log = failure.log.trim();
     if log.is_empty() {
-        return anyhow!("BPF_PROG_REJIT errno {errno}: {}", failure.error);
-    }
-    const MAX_TAIL_CHARS: usize = 65536;
-    let total = log.chars().count();
-    let formatted_log = if total > MAX_TAIL_CHARS {
-        let skip = total - MAX_TAIL_CHARS;
-        let tail: String = log.chars().skip(skip).collect();
-        format!("... verifier log head truncated ({skip} chars) ...\n{tail}")
+        anyhow!("BPF_PROG_REJIT errno {errno}: {}", failure.error)
     } else {
-        log.to_string()
-    };
-    anyhow!(
-        "BPF_PROG_REJIT errno {errno}: {}\nverifier log:\n{}",
-        failure.error,
-        formatted_log
-    )
+        anyhow!(
+            "BPF_PROG_REJIT errno {errno}: {}\nverifier log:\n{}",
+            failure.error,
+            log
+        )
+    }
 }
 
 unsafe fn sys_bpf<T>(cmd: u32, attr: *mut T, size: usize) -> libc::c_long {
@@ -1233,19 +1225,10 @@ pub fn attach_branch_snapshot_sidecar(
         };
         let log = log.trim();
         if !log.is_empty() {
-            const MAX_TAIL_CHARS: usize = 65536;
-            let total = log.chars().count();
-            let formatted_log = if total > MAX_TAIL_CHARS {
-                let skip = total - MAX_TAIL_CHARS;
-                let tail: String = log.chars().skip(skip).collect();
-                format!("... verifier log head truncated ({skip} chars) ...\n{tail}")
-            } else {
-                log.to_string()
-            };
             return Err(anyhow!(
                 "load branch snapshot sidecar: {}\nverifier log:\n{}",
                 os_error(errno_from_libbpf_ret(prog_fd)),
-                formatted_log
+                log
             ));
         }
         return Err(libbpf_error("load branch snapshot sidecar", prog_fd));
