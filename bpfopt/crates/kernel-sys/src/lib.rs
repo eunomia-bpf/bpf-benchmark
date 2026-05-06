@@ -357,18 +357,19 @@ fn extract_log_string(buf: &[u8]) -> String {
     String::from_utf8_lossy(&buf[..end]).trim_end().to_string()
 }
 
-pub fn verifier_log_summary(log: &str) -> String {
+pub fn verifier_log_tail(log: &str) -> String {
     let log = log.trim();
     if log.is_empty() {
         return "<empty verifier log>".to_string();
     }
-    const MAX_SUMMARY_CHARS: usize = 4096;
-    let mut chars = log.chars();
-    let summary: String = chars.by_ref().take(MAX_SUMMARY_CHARS).collect();
-    if chars.next().is_some() {
-        format!("{summary}\n... verifier log truncated ...")
+    const MAX_TAIL_CHARS: usize = 65536;
+    let total = log.chars().count();
+    if total > MAX_TAIL_CHARS {
+        let skip = total - MAX_TAIL_CHARS;
+        let tail: String = log.chars().skip(skip).collect();
+        format!("... verifier log head truncated ({skip} chars) ...\n{tail}")
     } else {
-        summary
+        log.to_string()
     }
 }
 
@@ -469,9 +470,9 @@ fn format_prog_rejit_failure(failure: ProgRejitFailure) -> anyhow::Error {
     let errno = failure.error.raw_os_error().unwrap_or(libc::EIO);
     if !failure.log.is_empty() {
         anyhow!(
-            "BPF_PROG_REJIT errno {errno}: {}\nverifier log summary:\n{}",
+            "BPF_PROG_REJIT errno {errno}: {}\nverifier log:\n{}",
             failure.error,
-            verifier_log_summary(&failure.log)
+            verifier_log_tail(&failure.log)
         )
     } else {
         anyhow!("BPF_PROG_REJIT errno {errno}: {}", failure.error)
@@ -1239,9 +1240,9 @@ pub fn attach_branch_snapshot_sidecar(
         };
         if !log.is_empty() {
             return Err(anyhow!(
-                "load branch snapshot sidecar: {}\nverifier log summary:\n{}",
+                "load branch snapshot sidecar: {}\nverifier log:\n{}",
                 os_error(errno_from_libbpf_ret(prog_fd)),
-                verifier_log_summary(&log)
+                verifier_log_tail(&log)
             ));
         }
         return Err(libbpf_error("load branch snapshot sidecar", prog_fd));
