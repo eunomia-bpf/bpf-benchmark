@@ -241,6 +241,8 @@ struct MapValuesJson {
 #[derive(Debug, Deserialize)]
 struct MapSnapshotJson {
     map_id: u32,
+    #[serde(default)]
+    name: String,
     map_type: MapTypeJson,
     key_size: u32,
     value_size: u32,
@@ -1084,6 +1086,7 @@ fn read_map_values(path: &Path) -> Result<MapSnapshot> {
                 value_size: map.value_size,
                 max_entries: map.max_entries,
                 map_id: map.map_id,
+                name: map.name,
             },
         );
         for entry in map.entries {

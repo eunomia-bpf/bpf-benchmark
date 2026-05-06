@@ -138,6 +138,7 @@ pub struct MapMetadata {
     pub value_size: u32,
     pub max_entries: u32,
     pub map_id: u32,
+    pub name: String,
 }
 
 /// Provider for resolving map metadata and values.

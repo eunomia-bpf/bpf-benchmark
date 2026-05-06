@@ -117,6 +117,7 @@ fn mock_map_metadata(map_id: u32) -> Option<MapMetadata> {
             value_size: state.info.value_size,
             max_entries: state.info.max_entries,
             map_id,
+            name: String::new(),
         })
     })
 }

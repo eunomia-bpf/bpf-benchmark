@@ -234,6 +234,7 @@ struct MapValuesJson {
 #[derive(Debug, Serialize)]
 struct MapValuesMapJson {
     map_id: u32,
+    name: String,
     map_type: u32,
     key_size: u32,
     value_size: u32,
@@ -1058,6 +1059,7 @@ fn write_map_values_snapshot(
 
                 MapValuesMapJson {
                     map_id: map.map_id,
+                    name: map.name.clone(),
                     map_type: map.map_type,
                     key_size: map.key_size,
                     value_size: map.value_size,
@@ -1569,6 +1571,7 @@ mod tests {
         let maps = vec![
             MapInfoJson {
                 map_id: 111,
+                name: String::new(),
                 map_type: kernel_sys::BPF_MAP_TYPE_ARRAY,
                 key_size: 4,
                 value_size: 4,
@@ -1576,6 +1579,7 @@ mod tests {
             },
             MapInfoJson {
                 map_id: 222,
+                name: String::new(),
                 map_type: kernel_sys::BPF_MAP_TYPE_HASH,
                 key_size: 4,
                 value_size: 4,
@@ -1622,6 +1626,7 @@ mod tests {
     fn live_bpf_map_keys_caps_at_max_entries_and_marks_partial() {
         let map = MapInfoJson {
             map_id: 123,
+            name: String::new(),
             map_type: kernel_sys::BPF_MAP_TYPE_HASH,
             key_size: 4,
             value_size: 8,
@@ -1657,6 +1662,7 @@ mod tests {
         let inner_map_id = 444u32;
         let maps = vec![MapInfoJson {
             map_id: outer_map_id,
+            name: String::new(),
             map_type: kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS,
             key_size: 4,
             value_size: 4,
@@ -1697,6 +1703,7 @@ mod tests {
                 }
                 Ok(MapInfoJson {
                     map_id: inner_map_id,
+                    name: String::new(),
                     map_type: kernel_sys::BPF_MAP_TYPE_ARRAY,
                     key_size: 4,
                     value_size: 4,

@@ -31,6 +31,7 @@ pub(crate) struct ProgramInfo {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub(crate) struct MapInfo {
     pub(crate) map_id: u32,
+    pub(crate) name: String,
     pub(crate) map_type: u32,
     pub(crate) key_size: u32,
     pub(crate) value_size: u32,
@@ -153,6 +154,9 @@ pub(crate) fn bpf_map_info_by_id(map_id: u32) -> Result<MapInfo> {
         .with_context(|| format!("read info for BPF map id {map_id}"))?;
     Ok(MapInfo {
         map_id,
+        name: c_name_u8(unsafe {
+            std::slice::from_raw_parts(info.name.as_ptr() as *const u8, info.name.len())
+        }),
         map_type: info.type_,
         key_size: info.key_size,
         value_size: info.value_size,
