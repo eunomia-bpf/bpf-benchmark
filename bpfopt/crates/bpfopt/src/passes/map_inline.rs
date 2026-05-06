@@ -40,7 +40,7 @@ pub struct MapLookupSite {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ConstantKey {
     pub stack_off: i16,
-    pub width: u8,
+    pub width: usize,
     pub value: u64,
     pub bytes: Vec<u8>,
     pub store_pc: usize,
@@ -174,7 +174,7 @@ pub fn try_extract_constant_key(insns: &[BpfInsn], call_pc: usize) -> Result<Con
 
     Ok(ConstantKey {
         stack_off,
-        width,
+        width: usize::from(width),
         value: constant_key_value(&stack_bytes.bytes),
         bytes: stack_bytes.bytes,
         store_pc: stack_bytes.latest_store_pc,
@@ -206,7 +206,7 @@ fn try_extract_constant_key_sized(
 
     Ok(ConstantKey {
         stack_off,
-        width: key_width,
+        width: usize::from(key_width),
         value: constant_key_value(&stack_bytes.bytes),
         bytes: stack_bytes.bytes,
         store_pc: stack_bytes.latest_store_pc,
@@ -229,15 +229,9 @@ fn try_extract_constant_key_verifier_guided(
     if key_size == 0 {
         return Err("map key size is zero".to_string());
     }
-    if key_size > 8 {
-        return Err(format!(
-            "verifier-guided constant-key extraction currently supports up to 8-byte keys (got {})",
-            key_size
-        ));
-    }
-    let key_width: u8 = key_size
+    let key_width: usize = key_size
         .try_into()
-        .map_err(|_| format!("map key size {} does not fit in u8", key_size))?;
+        .map_err(|_| format!("map key size {} does not fit in usize", key_size))?;
 
     let occurrences = verifier_states
         .iter()
@@ -288,34 +282,33 @@ fn try_extract_constant_key_for_occurrence(
     insns: &[BpfInsn],
     verifier_states: &[VerifierInsn],
     call_pc: usize,
-    key_width: u8,
+    key_width: usize,
     occurrence_idx: usize,
     frame: usize,
 ) -> Result<ConstantKey, String> {
-    let key_off =
-        find_latest_r2_stack_offset(verifier_states, occurrence_idx, frame).ok_or_else(|| {
-            format!(
-                "verifier log did not expose r2 stack pointer before pc {}",
-                call_pc
-            )
-        })?;
-    let bounds = subprog_bounds(insns, call_pc);
-
-    let (store_pc, source_imm_pc, value) = find_verifier_guided_stack_store(
-        insns,
-        verifier_states,
-        occurrence_idx,
-        frame,
-        key_off,
-        key_width,
-        bounds,
-    )
-    .ok_or_else(|| {
+    let state = verifier_states.get(occurrence_idx).ok_or_else(|| {
         format!(
-            "verifier log did not expose a constant stack store covering fp{} width {} before pc {}",
-            key_off, key_width, call_pc
+            "verifier state occurrence {} is out of range",
+            occurrence_idx
         )
     })?;
+    if state.frame != frame {
+        return Err(format!(
+            "verifier state occurrence frame {} does not match expected frame {} at pc {}",
+            state.frame, frame, call_pc
+        ));
+    }
+    let key_off = r2_stack_range_at_call(state, call_pc)?;
+    let bounds = subprog_bounds(insns, call_pc);
+    let bytes = constant_stack_bytes_for_range(&state.stack, key_off, key_width).ok_or_else(
+        || {
+            format!(
+                "verifier log did not expose constant stack bytes covering fp{key_off} width {key_width} at call pc {call_pc}"
+            )
+        },
+    )?;
+    let materialization =
+        materialization_for_snapshot_key(insns, call_pc, bounds, key_off, key_width, &bytes);
 
     let removable_setup = find_r2_stack_pointer_setup_simple(insns, call_pc, bounds)
         .filter(|(_, _, off)| *off == key_off);
@@ -323,35 +316,120 @@ fn try_extract_constant_key_for_occurrence(
     Ok(ConstantKey {
         stack_off: key_off,
         width: key_width,
-        value,
-        bytes: value.to_le_bytes()[..key_width as usize].to_vec(),
-        store_pc,
-        source_imm_pc,
-        materialization_pcs: materialization_pcs_for_store(insns, store_pc, source_imm_pc),
+        value: constant_key_value(&bytes),
+        bytes,
+        store_pc: materialization
+            .as_ref()
+            .map(|stack_bytes| stack_bytes.latest_store_pc)
+            .unwrap_or(call_pc),
+        source_imm_pc: materialization
+            .as_ref()
+            .and_then(|stack_bytes| stack_bytes.latest_source_imm_pc),
+        materialization_pcs: materialization
+            .map(|stack_bytes| stack_bytes.materialization_pcs)
+            .unwrap_or_default(),
         r2_mov_pc: removable_setup.map(|(mov_pc, _, _)| mov_pc),
         r2_add_pc: removable_setup.map(|(_, add_pc, _)| add_pc),
     })
 }
 
-fn find_latest_r2_stack_offset(
-    verifier_states: &[VerifierInsn],
-    before_idx: usize,
-    frame: usize,
-) -> Option<i16> {
-    for idx in (0..before_idx).rev() {
-        let state = &verifier_states[idx];
-        if state.frame != frame {
-            continue;
+fn r2_stack_range_at_call(state: &VerifierInsn, call_pc: usize) -> Result<i16, String> {
+    let reg = state.regs.get(&2).ok_or_else(|| {
+        format!(
+            "verifier log did not expose r2 stack pointer at call pc {}",
+            call_pc
+        )
+    })?;
+    if reg.reg_type != "fp" {
+        return Err(format!(
+            "verifier log r2 at call pc {} has type {}, expected fp",
+            call_pc, reg.reg_type
+        ));
+    }
+    let offset = reg.offset.ok_or_else(|| {
+        format!(
+            "verifier log r2 stack pointer at call pc {} has no fixed offset",
+            call_pc
+        )
+    })?;
+    i16::try_from(offset).map_err(|_| {
+        format!(
+            "verifier log r2 stack pointer offset {} at call pc {} does not fit in i16",
+            offset, call_pc
+        )
+    })
+}
+
+fn constant_stack_bytes_for_range(
+    stack: &HashMap<i16, StackState>,
+    stack_off: i16,
+    key_width: usize,
+) -> Option<Vec<u8>> {
+    let start = i32::from(stack_off);
+    let width = i32::try_from(key_width).ok()?;
+    let end = start.checked_add(width)?;
+    if start >= 0 || end > 0 {
+        return None;
+    }
+
+    let mut bytes = Vec::with_capacity(key_width);
+    for absolute_off in start..end {
+        bytes.push(constant_stack_byte(stack, absolute_off)?);
+    }
+    Some(bytes)
+}
+
+fn constant_stack_byte(stack: &HashMap<i16, StackState>, absolute_off: i32) -> Option<u8> {
+    if absolute_off >= 0 {
+        return None;
+    }
+    let slot_index = ((-absolute_off - 1) / 8) + 1;
+    let slot_start_i32 = -slot_index * 8;
+    let slot_start = i16::try_from(slot_start_i32).ok()?;
+    let byte_index = usize::try_from(absolute_off - slot_start_i32).ok()?;
+    if byte_index >= 8 {
+        return None;
+    }
+
+    let state = stack.get(&slot_start)?;
+    let type_index = 7usize.checked_sub(byte_index)?;
+    if let Some(slot_types) = state.slot_types.as_deref() {
+        let slot_type = slot_types
+            .as_bytes()
+            .get(type_index)
+            .copied()
+            .or(Some(b'r'));
+        if slot_type == Some(b'0') {
+            return Some(0);
         }
-        let Some(reg) = state.regs.get(&2) else {
-            continue;
-        };
-        if reg.reg_type != "fp" {
+        if slot_type != Some(b'r') {
             return None;
         }
-        return reg.offset.map(|off| off as i16);
     }
-    None
+
+    let value = verifier_known_scalar_value(state.value.as_ref()?)?;
+    Some(value.to_le_bytes()[byte_index])
+}
+
+fn materialization_for_snapshot_key(
+    insns: &[BpfInsn],
+    call_pc: usize,
+    bounds: (usize, usize),
+    stack_off: i16,
+    key_width: usize,
+    snapshot_bytes: &[u8],
+) -> Option<ConstantStackBytes> {
+    let key_width = u8::try_from(key_width).ok()?;
+    let stack_bytes = find_constant_stack_bytes_with_limit(
+        insns,
+        call_pc,
+        bounds,
+        stack_off,
+        key_width,
+        Some(CONST_STACK_VALUE_LOOKBACK_LIMIT),
+    )
+    .ok()?;
+    (stack_bytes.bytes == snapshot_bytes).then_some(stack_bytes)
 }
 
 fn constant_key_value(bytes: &[u8]) -> u64 {
@@ -519,78 +597,8 @@ fn constant_stack_store_source_pc(
     Ok(resolve_constant_reg_value(insns, store_pc, insn.src_reg(), bounds)?.source_pc)
 }
 
-fn find_verifier_guided_stack_store(
-    insns: &[BpfInsn],
-    verifier_states: &[VerifierInsn],
-    before_idx: usize,
-    frame: usize,
-    key_off: i16,
-    key_width: u8,
-    bounds: (usize, usize),
-) -> Option<(usize, Option<usize>, u64)> {
-    for idx in (0..before_idx).rev() {
-        let state = &verifier_states[idx];
-        if state.frame != frame {
-            continue;
-        }
-        let pc = state.pc;
-        let Some(insn) = insns.get(pc) else {
-            continue;
-        };
-        let Some((store_pc, source_imm_pc, value)) =
-            verifier_guided_stack_store_value(insns, pc, insn, state, key_off, key_width, bounds)
-        else {
-            continue;
-        };
-        return Some((store_pc, source_imm_pc, value));
-    }
-    None
-}
-
-fn verifier_guided_stack_store_value(
-    insns: &[BpfInsn],
-    pc: usize,
-    insn: &BpfInsn,
-    state: &VerifierInsn,
-    key_off: i16,
-    key_width: u8,
-    bounds: (usize, usize),
-) -> Option<(usize, Option<usize>, u64)> {
-    let (store_off, store_width) = resolve_stack_store_slot(insns, pc, insn, bounds)?;
-    let store_start = i32::from(store_off);
-    let store_end = store_start + i32::from(store_width);
-    let key_start = i32::from(key_off);
-    let key_end = key_start + i32::from(key_width);
-    if store_start > key_start || store_end < key_end {
-        return None;
-    }
-
-    let raw_value = match bpf_class(insn.code) {
-        BPF_ST => truncate_imm(insn.imm, store_width),
-        BPF_STX => truncate_value(
-            verifier_known_scalar_value(state.regs.get(&insn.src_reg())?)?,
-            store_width,
-        ),
-        _ => return None,
-    };
-
-    let full_bytes = raw_value.to_le_bytes();
-    let subrange_start = match usize::try_from(key_start - store_start) {
-        Ok(start) => start,
-        Err(_) => return None,
-    };
-    let subrange_end = subrange_start + key_width as usize;
-    let mut key_bytes = [0u8; 8];
-    key_bytes[..key_width as usize].copy_from_slice(&full_bytes[subrange_start..subrange_end]);
-
-    let source_imm_pc = constant_stack_store_source_pc(insns, pc, bounds)
-        .map_or_else(|_| None, std::convert::identity);
-
-    Some((state.pc, source_imm_pc, u64::from_le_bytes(key_bytes)))
-}
-
 fn verifier_known_scalar_value(reg: &crate::pass::RegState) -> Option<u64> {
-    if reg.reg_type != "scalar" {
+    if reg.reg_type != "scalar" || !reg.precise {
         return None;
     }
 
@@ -787,7 +795,7 @@ fn run_map_inline_round(
                 continue;
             }
         };
-        if (key.width as u32) < info.key_size {
+        if key.width < info.key_size as usize {
             let reason = format!(
                 "key width {} is smaller than map key size {}",
                 key.width, info.key_size
@@ -1564,21 +1572,6 @@ fn lookup_pattern_removal_is_safe(
     }
 
     true
-}
-
-fn materialization_pcs_for_store(
-    insns: &[BpfInsn],
-    store_pc: usize,
-    source_imm_pc: Option<usize>,
-) -> Vec<usize> {
-    let mut pcs = HashSet::new();
-    insert_materialization_pc(&mut pcs, insns, store_pc);
-    if let Some(source_imm_pc) = source_imm_pc {
-        insert_materialization_pc(&mut pcs, insns, source_imm_pc);
-    }
-    let mut pcs = pcs.into_iter().collect::<Vec<_>>();
-    pcs.sort_unstable();
-    pcs
 }
 
 fn insert_materialization_pc(

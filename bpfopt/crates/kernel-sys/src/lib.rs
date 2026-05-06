@@ -196,14 +196,26 @@ pub struct VerifierInsnJson {
     pub pc: usize,
     #[serde(default, skip_serializing_if = "is_zero_usize")]
     pub frame: usize,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub stack: BTreeMap<String, VerifierStackJson>,
     #[serde(default)]
     pub regs: BTreeMap<String, VerifierRegJson>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+pub struct VerifierStackJson {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub slot_types: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<VerifierRegJson>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct VerifierRegJson {
     #[serde(rename = "type", default = "default_reg_type")]
     pub reg_type: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub precise: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub offset: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -382,10 +394,26 @@ fn convert_verifier_state(state: &VerifierInsn) -> Option<VerifierInsnJson> {
         .iter()
         .filter_map(|(&regno, reg)| convert_reg_state(reg).map(|reg| (format!("r{regno}"), reg)))
         .collect::<BTreeMap<_, _>>();
-    (!regs.is_empty()).then_some(VerifierInsnJson {
+    let stack = state
+        .stack
+        .iter()
+        .filter_map(|(&off, state)| {
+            convert_stack_state(state).map(|state| (format!("fp{off}"), state))
+        })
+        .collect::<BTreeMap<_, _>>();
+    (!regs.is_empty() || !stack.is_empty()).then_some(VerifierInsnJson {
         pc: state.pc,
         frame: state.frame,
+        stack,
         regs,
+    })
+}
+
+fn convert_stack_state(state: &StackState) -> Option<VerifierStackJson> {
+    let value = state.value.as_ref().and_then(convert_reg_state);
+    (state.slot_types.is_some() || value.is_some()).then_some(VerifierStackJson {
+        slot_types: state.slot_types.clone(),
+        value,
     })
 }
 
@@ -407,13 +435,15 @@ fn convert_reg_state(reg: &RegState) -> Option<VerifierRegJson> {
         .tnum
         .map(|tnum| format!("0x{:x}/0x{:x}", tnum.value, tnum.mask));
 
-    (reg.offset.is_some()
+    (reg.precise
+        || reg.offset.is_some()
         || const_val.is_some()
         || min.is_some()
         || max.is_some()
         || tnum.is_some())
     .then_some(VerifierRegJson {
         reg_type: reg.reg_type.clone(),
+        precise: Some(reg.precise),
         offset: reg.offset,
         const_val,
         min,
@@ -1696,10 +1726,26 @@ mod tests {
             insns: vec![VerifierInsnJson {
                 pc: 7,
                 frame: 1,
+                stack: BTreeMap::from([(
+                    "fp-16".to_string(),
+                    VerifierStackJson {
+                        slot_types: Some("rrrrrrrr".to_string()),
+                        value: Some(VerifierRegJson {
+                            reg_type: "scalar".to_string(),
+                            precise: Some(true),
+                            offset: None,
+                            const_val: Some(0x1122),
+                            min: None,
+                            max: None,
+                            tnum: Some("0x1122/0x0".to_string()),
+                        }),
+                    },
+                )]),
                 regs: BTreeMap::from([(
                     "r2".to_string(),
                     VerifierRegJson {
                         reg_type: "scalar".to_string(),
+                        precise: Some(false),
                         offset: Some(-8),
                         const_val: Some(42),
                         min: Some(0),
@@ -1714,6 +1760,8 @@ mod tests {
         assert!(encoded.contains("\"pc\":7"));
         assert!(encoded.contains("\"frame\":1"));
         assert!(encoded.contains("\"type\":\"scalar\""));
+        assert!(encoded.contains("\"stack\""));
+        assert!(encoded.contains("\"precise\":false"));
 
         let decoded: VerifierStatesJson = serde_json::from_str(&encoded).unwrap();
         assert_eq!(decoded, states);
@@ -1726,6 +1774,22 @@ mod tests {
 
         assert_eq!(decoded.insns[0].frame, 0);
         assert_eq!(decoded.insns[0].regs["r1"].reg_type, "scalar");
+        assert_eq!(decoded.insns[0].regs["r1"].precise, None);
         assert_eq!(decoded.insns[0].regs["r1"].const_val, Some(9));
+    }
+
+    #[test]
+    fn verifier_states_from_log_preserves_stack_and_precise_marker() {
+        let states =
+            verifier_states_from_log("5: R2=fp-16 R3=P42 fp-16=rrrrrrrr P72623859790382856\n");
+
+        assert_eq!(states.insns.len(), 1);
+        let insn = &states.insns[0];
+        assert_eq!(insn.regs["r3"].precise, Some(true));
+        let stack = &insn.stack["fp-16"];
+        assert_eq!(stack.slot_types.as_deref(), Some("rrrrrrrr"));
+        let value = stack.value.as_ref().expect("stack scalar value");
+        assert_eq!(value.precise, Some(true));
+        assert_eq!(value.const_val, Some(0x0102_0304_0506_0708));
     }
 }

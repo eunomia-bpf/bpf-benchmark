@@ -664,7 +664,6 @@ impl KinsnRegistry {
     pub fn kinsn_registered_for_target_name(&self, target_name: &str) -> bool {
         self.btf_id_for_target_name(target_name) >= 0
     }
-
 }
 
 /// CPU platform capabilities.

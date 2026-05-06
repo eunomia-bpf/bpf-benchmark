@@ -4,8 +4,8 @@ use std::collections::{BTreeSet, HashMap};
 use crate::bpf::{install_mock_map, use_mock_maps, BpfMapInfo, MockMapState};
 use crate::insn::*;
 use crate::pass::{
-    BpfProgram, PassContext, PassManager, PipelineResult, RegState, ScalarRange, VerifierInsn,
-    VerifierInsnKind, VerifierValueWidth,
+    BpfProgram, PassContext, PassManager, PipelineResult, RegState, ScalarRange, StackState,
+    VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
 use crate::passes::test_helpers::{call_helper, exit_insn};
 
@@ -83,7 +83,19 @@ fn fp_reg(offset: i32) -> RegState {
     }
 }
 
-fn verifier_delta_state(pc: usize, regs: HashMap<u8, RegState>) -> VerifierInsn {
+fn install_single_lookup_verifier_states(program: &mut BpfProgram) {
+    program.set_verifier_states(vec![verifier_delta_state_with_stack(
+        5,
+        HashMap::from([(2, fp_reg(-4))]),
+        stack_snapshot_from_key(-4, &1u32.to_le_bytes()),
+    )]);
+}
+
+fn verifier_delta_state_with_stack(
+    pc: usize,
+    regs: HashMap<u8, RegState>,
+    stack: HashMap<i16, StackState>,
+) -> VerifierInsn {
     VerifierInsn {
         pc,
         frame: 0,
@@ -91,16 +103,46 @@ fn verifier_delta_state(pc: usize, regs: HashMap<u8, RegState>) -> VerifierInsn 
         kind: VerifierInsnKind::InsnDeltaState,
         speculative: false,
         regs,
-        stack: HashMap::new(),
+        stack,
     }
 }
 
-fn install_single_lookup_verifier_states(program: &mut BpfProgram) {
-    program.set_verifier_states(vec![
-        verifier_delta_state(2, HashMap::new()),
-        verifier_delta_state(4, HashMap::from([(2, fp_reg(-4))])),
-        verifier_delta_state(5, HashMap::new()),
-    ]);
+fn stack_snapshot_from_key(stack_off: i16, key: &[u8]) -> HashMap<i16, StackState> {
+    let mut slots = HashMap::<i16, ([u8; 8], [u8; 8])>::new();
+    for (idx, byte) in key.iter().enumerate() {
+        let absolute_off = i32::from(stack_off) + idx as i32;
+        let slot_index = ((-absolute_off - 1) / 8) + 1;
+        let slot_start_i32 = -slot_index * 8;
+        let slot_start = i16::try_from(slot_start_i32).unwrap();
+        let byte_index = usize::try_from(absolute_off - slot_start_i32).unwrap();
+        let type_index = 7 - byte_index;
+        let entry = slots.entry(slot_start).or_insert(([0u8; 8], [b'?'; 8]));
+        entry.0[byte_index] = *byte;
+        entry.1[type_index] = b'r';
+    }
+
+    slots
+        .into_iter()
+        .map(|(off, (bytes, types))| {
+            let value = u64::from_le_bytes(bytes);
+            (
+                off,
+                StackState {
+                    slot_types: Some(String::from_utf8(types.to_vec()).unwrap()),
+                    value: Some(RegState {
+                        reg_type: "scalar".to_string(),
+                        value_width: VerifierValueWidth::Bits64,
+                        precise: true,
+                        exact_value: Some(value),
+                        tnum: None,
+                        range: ScalarRange::default(),
+                        offset: None,
+                        id: None,
+                    }),
+                },
+            )
+        })
+        .collect()
 }
 
 fn run_pipeline_with_passes(program: &mut BpfProgram, pass_names: &[&str]) -> PipelineResult {

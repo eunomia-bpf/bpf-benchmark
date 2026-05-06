@@ -876,6 +876,41 @@ mod tests {
         }
     }
 
+    fn verifier_delta_state_with_stack(
+        pc: usize,
+        regs: HashMap<u8, RegState>,
+        stack: HashMap<i16, StackState>,
+    ) -> VerifierInsn {
+        VerifierInsn {
+            pc,
+            frame: 0,
+            from_pc: None,
+            kind: VerifierInsnKind::InsnDeltaState,
+            speculative: false,
+            regs,
+            stack,
+        }
+    }
+
+    fn stack_snapshot_from_key(stack_off: i16, key: &[u8]) -> HashMap<i16, StackState> {
+        let mut slot_bytes = [0u8; 8];
+        let mut slot_types = [b'?'; 8];
+        for (idx, byte) in key.iter().enumerate() {
+            let absolute_off = i32::from(stack_off) + idx as i32;
+            let byte_index = usize::try_from(absolute_off + 8).unwrap();
+            let type_index = 7 - byte_index;
+            slot_bytes[byte_index] = *byte;
+            slot_types[type_index] = b'r';
+        }
+        HashMap::from([(
+            -8,
+            StackState {
+                slot_types: Some(String::from_utf8(slot_types.to_vec()).unwrap()),
+                value: Some(scalar_reg(u64::from_le_bytes(slot_bytes))),
+            },
+        )])
+    }
+
     fn install_array_map(map_id: u32, value: Vec<u8>) {
         let mut values = HashMap::new();
         values.insert(1u32.to_le_bytes().to_vec(), value.clone());
@@ -1042,11 +1077,11 @@ mod tests {
             exit_insn(),
         ]);
         program.set_map_ids(vec![201]);
-        program.set_verifier_states(vec![
-            verifier_delta_state(2, HashMap::new()),
-            verifier_delta_state(4, HashMap::from([(2, fp_reg(-4))])),
-            verifier_delta_state(5, HashMap::new()),
-        ]);
+        program.set_verifier_states(vec![verifier_delta_state_with_stack(
+            5,
+            HashMap::from([(2, fp_reg(-4))]),
+            stack_snapshot_from_key(-4, &1u32.to_le_bytes()),
+        )]);
 
         let mut pm = PassManager::new();
         pm.register_analysis(BranchTargetAnalysis);

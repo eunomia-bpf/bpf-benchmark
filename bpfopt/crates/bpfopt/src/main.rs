@@ -17,7 +17,7 @@ use bpfopt::pass::{
 };
 use bpfopt::passes::{MapInfoAnalysis, PASS_REGISTRY};
 use clap::{Args, Parser, Subcommand};
-use kernel_sys::{VerifierRegJson, VerifierStatesJson};
+use kernel_sys::{VerifierRegJson, VerifierStackJson, VerifierStatesJson};
 use serde::{Deserialize, Serialize};
 
 const PASS_ALIASES: &[(&str, &str)] = &[
@@ -925,6 +925,11 @@ fn read_verifier_states(path: &Path) -> Result<Vec<VerifierInsn>> {
                 .into_iter()
                 .map(|(reg, state)| Ok((parse_reg_name(&reg)?, verifier_reg_state(state)?)))
                 .collect::<Result<HashMap<_, _>>>()?;
+            let stack = insn
+                .stack
+                .into_iter()
+                .map(|(off, state)| Ok((parse_stack_name(&off)?, verifier_stack_state(state)?)))
+                .collect::<Result<HashMap<_, _>>>()?;
             Ok(VerifierInsn {
                 pc: insn.pc,
                 frame: insn.frame,
@@ -932,7 +937,7 @@ fn read_verifier_states(path: &Path) -> Result<Vec<VerifierInsn>> {
                 kind: VerifierInsnKind::InsnDeltaState,
                 speculative: false,
                 regs,
-                stack: HashMap::<i16, StackState>::new(),
+                stack,
             })
         })
         .collect()
@@ -952,13 +957,44 @@ fn parse_reg_name(reg: &str) -> Result<u8> {
     Ok(value)
 }
 
+fn parse_stack_name(off: &str) -> Result<i16> {
+    let off = off
+        .strip_prefix("fp")
+        .or_else(|| off.strip_prefix("FP"))
+        .unwrap_or(off);
+    let value = off
+        .parse::<i16>()
+        .with_context(|| format!("invalid stack slot name: {off}"))?;
+    if value >= 0 || value % 8 != 0 {
+        bail!("invalid BPF stack slot fp{value}");
+    }
+    Ok(value)
+}
+
+fn verifier_stack_state(state: VerifierStackJson) -> Result<StackState> {
+    if let Some(slot_types) = &state.slot_types {
+        if slot_types.is_empty()
+            || slot_types.len() > 8
+            || !slot_types
+                .chars()
+                .all(|ch| matches!(ch, '?' | 'r' | 'm' | '0' | 'd' | 'i' | 'f'))
+        {
+            bail!("invalid verifier stack slot type string: {slot_types}");
+        }
+    }
+    Ok(StackState {
+        slot_types: state.slot_types,
+        value: state.value.map(verifier_reg_state).transpose()?,
+    })
+}
+
 fn verifier_reg_state(state: VerifierRegJson) -> Result<RegState> {
     let exact_value = state.const_val.map(|value| value as u64);
     let tnum = state.tnum.as_deref().map(parse_tnum).transpose()?;
     Ok(RegState {
         reg_type: state.reg_type,
         value_width: VerifierValueWidth::Unknown,
-        precise: exact_value.is_some(),
+        precise: state.precise.unwrap_or(false),
         exact_value,
         tnum,
         range: ScalarRange {
@@ -1275,10 +1311,12 @@ mod tests {
         let state = kernel_sys::VerifierInsnJson {
             pc: 5,
             frame: 0,
+            stack: BTreeMap::new(),
             regs: std::collections::BTreeMap::from([(
                 "r1".to_string(),
                 VerifierRegJson {
                     reg_type: "scalar".to_string(),
+                    precise: Some(false),
                     offset: None,
                     const_val: Some(42),
                     min: None,
@@ -1296,6 +1334,34 @@ mod tests {
             .unwrap();
 
         assert_eq!(regs[&1].exact_value, Some(42));
+        assert!(!regs[&1].precise);
         assert_eq!(regs[&1].tnum.unwrap().value, 42);
+    }
+
+    #[test]
+    fn verifier_states_json_builds_stack_states() {
+        let path = std::env::temp_dir().join(format!(
+            "bpfopt-verifier-states-{}-{}.json",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        fs::write(
+            &path,
+            r#"{"insns":[{"pc":9,"regs":{"r2":{"type":"fp","offset":-16}},"stack":{"fp-16":{"slot_types":"rrrrrrrr","value":{"type":"scalar","precise":true,"const_val":42}}}}]}"#,
+        )
+        .unwrap();
+
+        let states = read_verifier_states(&path).unwrap();
+        assert_eq!(states.len(), 1);
+        assert_eq!(states[0].regs[&2].offset, Some(-16));
+        let stack = states[0].stack.get(&-16).unwrap();
+        assert_eq!(stack.slot_types.as_deref(), Some("rrrrrrrr"));
+        let value = stack.value.as_ref().unwrap();
+        assert_eq!(value.exact_value, Some(42));
+        assert!(value.precise);
+        fs::remove_file(path).unwrap();
     }
 }

@@ -5,8 +5,8 @@ use crate::analysis::{BranchTargetAnalysis, CFGAnalysis};
 use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
 use crate::mock_maps::use_mock_maps;
 use crate::pass::{
-    MapInlineRecord, PassContext, PassManager, RegState, ScalarRange, Tnum, VerifierInsn,
-    VerifierInsnKind, VerifierValueWidth,
+    MapInlineRecord, PassContext, PassManager, RegState, ScalarRange, StackState, Tnum,
+    VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
 use crate::passes::test_helpers::{call_helper, exit_insn};
 use crate::passes::MapInfoAnalysis;
@@ -80,6 +80,12 @@ fn scalar_reg(value: u64) -> RegState {
     }
 }
 
+fn imprecise_scalar_reg(value: u64) -> RegState {
+    let mut reg = scalar_reg(value);
+    reg.precise = false;
+    reg
+}
+
 fn fp_reg(offset: i32) -> RegState {
     RegState {
         reg_type: "fp".to_string(),
@@ -103,6 +109,50 @@ fn verifier_delta_state(pc: usize, regs: HashMap<u8, RegState>) -> VerifierInsn 
         regs,
         stack: HashMap::new(),
     }
+}
+
+fn verifier_delta_state_with_stack(
+    pc: usize,
+    regs: HashMap<u8, RegState>,
+    stack: HashMap<i16, StackState>,
+) -> VerifierInsn {
+    VerifierInsn {
+        pc,
+        frame: 0,
+        from_pc: None,
+        kind: VerifierInsnKind::InsnDeltaState,
+        speculative: false,
+        regs,
+        stack,
+    }
+}
+
+fn stack_snapshot_from_key(stack_off: i16, key: &[u8]) -> HashMap<i16, StackState> {
+    let mut slots = HashMap::<i16, ([u8; 8], [u8; 8])>::new();
+    for (idx, byte) in key.iter().enumerate() {
+        let absolute_off = i32::from(stack_off) + idx as i32;
+        let slot_index = ((-absolute_off - 1) / 8) + 1;
+        let slot_start_i32 = -slot_index * 8;
+        let slot_start = i16::try_from(slot_start_i32).unwrap();
+        let byte_index = usize::try_from(absolute_off - slot_start_i32).unwrap();
+        let type_index = 7 - byte_index;
+        let entry = slots.entry(slot_start).or_insert(([0u8; 8], [b'?'; 8]));
+        entry.0[byte_index] = *byte;
+        entry.1[type_index] = b'r';
+    }
+
+    slots
+        .into_iter()
+        .map(|(off, (bytes, types))| {
+            (
+                off,
+                StackState {
+                    slot_types: Some(String::from_utf8(types.to_vec()).unwrap()),
+                    value: Some(scalar_reg(u64::from_le_bytes(bytes))),
+                },
+            )
+        })
+        .collect()
 }
 
 fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
@@ -276,19 +326,13 @@ fn install_synthetic_verifier_states_for_map_inline_tests(program: &mut BpfProgr
                     stack_off,
                     key_width,
                 ) {
-                    let store = program.insns[stack_bytes.latest_store_pc];
-                    let mut regs = HashMap::new();
-                    if bpf_class(store.code) == BPF_STX {
-                        if let Ok(value) = resolve_constant_reg_value(
-                            &program.insns,
-                            stack_bytes.latest_store_pc,
-                            store.src_reg(),
-                            bounds,
-                        ) {
-                            regs.insert(store.src_reg(), scalar_reg(value.value));
-                        }
-                    }
-                    states.push(verifier_delta_state(stack_bytes.latest_store_pc, regs));
+                    let stack = stack_snapshot_from_key(stack_off, &stack_bytes.bytes);
+                    states.push(verifier_delta_state_with_stack(
+                        site.call_pc,
+                        HashMap::from([(2, fp_reg(i32::from(stack_off)))]),
+                        stack,
+                    ));
+                    continue;
                 }
             }
             let setup_pc = add_pc.max(mov_pc);
@@ -510,11 +554,11 @@ fn verifier_guided_key_extracts_wide_zero_store_subrange() {
     assert_eq!(plain.value, 0);
     assert_eq!(plain.store_pc, 1);
 
-    let states = vec![
-        verifier_delta_state(1, HashMap::from([(3, scalar_reg(0))])),
-        verifier_delta_state(3, HashMap::from([(2, fp_reg(-4))])),
-        verifier_delta_state(6, HashMap::new()),
-    ];
+    let states = vec![verifier_delta_state_with_stack(
+        6,
+        HashMap::from([(2, fp_reg(-4))]),
+        stack_snapshot_from_key(-4, &0u32.to_le_bytes()),
+    )];
 
     let key = try_extract_constant_key_verifier_guided(&insns, &states, 6, 4).unwrap();
     assert_eq!(key.stack_off, -4);
@@ -556,11 +600,11 @@ fn verifier_guided_key_extracts_store_via_fp_alias_base() {
         call_helper(HELPER_MAP_LOOKUP_ELEM),
     ];
 
-    let states = vec![
-        verifier_delta_state(2, HashMap::new()),
-        verifier_delta_state(4, HashMap::from([(2, fp_reg(-4))])),
-        verifier_delta_state(7, HashMap::new()),
-    ];
+    let states = vec![verifier_delta_state_with_stack(
+        7,
+        HashMap::from([(2, fp_reg(-4))]),
+        stack_snapshot_from_key(-4, &7u32.to_le_bytes()),
+    )];
 
     let key = try_extract_constant_key_verifier_guided(&insns, &states, 7, 4).unwrap();
     assert_eq!(key.stack_off, -4);
@@ -1084,7 +1128,7 @@ fn map_inline_pass_skips_pseudo_map_value_lookup_key_without_verifier_state() {
 }
 
 #[test]
-fn map_inline_pass_skips_16_byte_key_without_verifier_support() {
+fn map_inline_pass_uses_stack_snapshot_for_16_byte_key() {
     let lo = 0x0706_0504_0302_0100u64;
     let hi = 0x0f0e_0d0c_0b0a_0908u64;
     let mut key_bytes = lo.to_le_bytes().to_vec();
@@ -1119,11 +1163,109 @@ fn map_inline_pass_skips_16_byte_key_without_verifier_support() {
     program.set_map_ids(vec![9302]);
 
     let result = run_map_inline_pass(&mut program);
+    assert_eq!(result.pass_results[0].sites_applied, 1);
+    assert!(program.insns.contains(&BpfInsn::mov32_imm(6, 42)));
+    assert_eq!(result.pass_results[0].map_inline_records[0].key, key_bytes);
+}
+
+#[test]
+fn map_inline_pass_uses_stack_snapshot_for_256_byte_key() {
+    let key_bytes = (0u8..=255).collect::<Vec<_>>();
+    let mut values = HashMap::new();
+    values.insert(key_bytes.clone(), 99u32.to_le_bytes().to_vec());
+    install_map_with_key_size(9320, 2, 256, 1, values);
+
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let mut program = BpfProgram::new(vec![
+        map[0],
+        map[1],
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -256),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+        exit_insn(),
+    ]);
+    program.set_map_ids(vec![9320]);
+    program.set_verifier_states(vec![verifier_delta_state_with_stack(
+        4,
+        HashMap::from([(2, fp_reg(-256))]),
+        stack_snapshot_from_key(-256, &key_bytes),
+    )]);
+
+    let result = run_map_inline_pass(&mut program);
+    assert_eq!(result.pass_results[0].sites_applied, 1);
+    assert!(program.insns.contains(&BpfInsn::mov32_imm(6, 99)));
+    assert_eq!(result.pass_results[0].map_inline_records[0].key, key_bytes);
+}
+
+#[test]
+fn map_inline_pass_reports_unavailable_when_call_stack_snapshot_is_absent() {
+    let mut values = HashMap::new();
+    values.insert(1u32.to_le_bytes().to_vec(), 7u32.to_le_bytes().to_vec());
+    install_map(9321, 2, 8, values);
+
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let original = vec![
+        map[0],
+        map[1],
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+        exit_insn(),
+    ];
+    let mut program = BpfProgram::new(original.clone());
+    program.set_map_ids(vec![9321]);
+    program.set_verifier_states(vec![verifier_delta_state(
+        4,
+        HashMap::from([(2, fp_reg(-4))]),
+    )]);
+
+    let result = run_map_inline_pass(&mut program);
+    assert_eq!(program.insns, original);
     assert!(has_non_constant_key_skip(&result));
-    assert!(result.pass_results[0]
-        .diagnostics
-        .iter()
-        .any(|diag| diag.contains("supports up to 8-byte keys")));
+    assert!(result.pass_results[0].diagnostics.iter().any(|diag| {
+        diag.contains("did not expose constant stack bytes covering fp-4 width 4")
+    }));
+}
+
+#[test]
+fn map_inline_pass_requires_explicit_precise_stack_scalar() {
+    let mut values = HashMap::new();
+    values.insert(1u32.to_le_bytes().to_vec(), 7u32.to_le_bytes().to_vec());
+    install_map(9322, 2, 8, values);
+
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let original = vec![
+        map[0],
+        map[1],
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+        exit_insn(),
+    ];
+    let mut stack = HashMap::new();
+    stack.insert(
+        -8,
+        StackState {
+            slot_types: Some("rrrrrrrr".to_string()),
+            value: Some(imprecise_scalar_reg(u64::from_le_bytes([
+                0, 0, 0, 0, 1, 0, 0, 0,
+            ]))),
+        },
+    );
+    let mut program = BpfProgram::new(original.clone());
+    program.set_map_ids(vec![9322]);
+    program.set_verifier_states(vec![verifier_delta_state_with_stack(
+        4,
+        HashMap::from([(2, fp_reg(-4))]),
+        stack,
+    )]);
+
+    let result = run_map_inline_pass(&mut program);
+    assert_eq!(program.insns, original);
+    assert!(has_non_constant_key_skip(&result));
 }
 
 #[test]
@@ -1150,12 +1292,11 @@ fn map_inline_pass_uses_verifier_guided_wide_zero_store_key() {
         exit_insn(),
     ]);
     program.set_map_ids(vec![7001]);
-    program.set_verifier_states(vec![
-        verifier_delta_state(1, HashMap::from([(3, scalar_reg(0))])),
-        verifier_delta_state(3, HashMap::from([(2, fp_reg(-4))])),
-        verifier_delta_state(6, HashMap::new()),
-        verifier_delta_state(8, HashMap::from([(6, scalar_reg(42))])),
-    ]);
+    program.set_verifier_states(vec![verifier_delta_state_with_stack(
+        6,
+        HashMap::from([(2, fp_reg(-4))]),
+        stack_snapshot_from_key(-4, &0u32.to_le_bytes()),
+    )]);
 
     let _result = run_map_inline_pass(&mut program);
     assert!(program.insns.contains(&BpfInsn::mov32_imm(6, 42)));
@@ -1206,7 +1347,7 @@ fn map_inline_pass_removes_hash_lookup_and_null_path_when_entry_present() {
 }
 
 #[test]
-fn map_inline_pass_skips_20_byte_constant_key_without_verifier_support() {
+fn map_inline_pass_uses_stack_snapshot_for_20_byte_key() {
     let mut values = HashMap::new();
     let mut key_bytes = vec![0u8; 20];
     key_bytes[16..20].copy_from_slice(&1u32.to_le_bytes());
@@ -1234,11 +1375,9 @@ fn map_inline_pass_skips_20_byte_constant_key_without_verifier_support() {
     program.set_map_ids(vec![9310]);
 
     let result = run_map_inline_pass(&mut program);
-    assert!(has_non_constant_key_skip(&result));
-    assert!(result.pass_results[0]
-        .diagnostics
-        .iter()
-        .any(|diag| diag.contains("supports up to 8-byte keys")));
+    assert_eq!(result.pass_results[0].sites_applied, 1);
+    assert!(program.insns.contains(&BpfInsn::mov32_imm(6, 7)));
+    assert_eq!(result.pass_results[0].map_inline_records[0].key, key_bytes);
 }
 
 #[test]

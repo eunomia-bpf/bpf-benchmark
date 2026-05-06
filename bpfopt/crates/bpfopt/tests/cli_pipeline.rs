@@ -147,20 +147,14 @@ fn unreachable_idx_then_live_idx_program_bytes() -> Vec<u8> {
 
 fn map_lookup_verifier_states_json() -> &'static str {
     r#"{"insns":[
-        {"pc":2,"regs":{}},
-        {"pc":4,"regs":{"r2":{"type":"fp","offset":-4}}},
-        {"pc":5,"regs":{}}
+        {"pc":5,"regs":{"r2":{"type":"fp","offset":-4}},"stack":{"fp-8":{"slot_types":"rrrr????","value":{"type":"scalar","precise":true,"const_val":4294967296}}}}
     ]}"#
 }
 
 fn two_hash_lookup_verifier_states_json() -> &'static str {
     r#"{"insns":[
-        {"pc":2,"regs":{}},
-        {"pc":4,"regs":{"r2":{"type":"fp","offset":-4}}},
-        {"pc":5,"regs":{}},
-        {"pc":13,"regs":{}},
-        {"pc":15,"regs":{"r2":{"type":"fp","offset":-8}}},
-        {"pc":16,"regs":{}}
+        {"pc":5,"regs":{"r2":{"type":"fp","offset":-4}},"stack":{"fp-8":{"slot_types":"rrrr????","value":{"type":"scalar","precise":true,"const_val":4294967296}}}},
+        {"pc":16,"regs":{"r2":{"type":"fp","offset":-8}},"stack":{"fp-8":{"slot_types":"????rrrr","value":{"type":"scalar","precise":true,"const_val":2}}}}
     ]}"#
 }
 
