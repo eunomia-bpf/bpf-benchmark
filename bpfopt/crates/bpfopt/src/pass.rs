@@ -1010,6 +1010,14 @@ impl PassContext {
             prog_type: 0,
         }
     }
+
+    /// Whether cond_select can lower to a target branchless-select kinsn.
+    pub fn has_branchless_select(&self) -> bool {
+        self.platform.has_cmov
+            || self
+                .kinsn_registry
+                .kinsn_registered_for_target_name("bpf_select64")
+    }
 }
 
 // ── Tests ───────────────────────────────────────────────────────────

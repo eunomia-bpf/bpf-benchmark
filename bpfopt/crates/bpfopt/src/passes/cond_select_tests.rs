@@ -1,5 +1,5 @@
 use super::*;
-use crate::pass::{AnalysisCache, PassContext};
+use crate::pass::{AnalysisCache, Arch, PassContext};
 use crate::passes::test_helpers::exit_insn;
 
 fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
@@ -63,7 +63,6 @@ fn mov32_reg(dst: u8, src: u8) -> BpfInsn {
 fn ctx_with_select_kfunc(btf_id: i32) -> PassContext {
     let mut ctx = PassContext::test_default();
     ctx.kinsn_registry.select64_btf_id = btf_id;
-    ctx.platform.has_cmov = true;
     ctx
 }
 
@@ -267,6 +266,29 @@ fn test_cond_select_skip_when_kfunc_unavailable() {
     assert_eq!(prog.insns, orig_insns);
     assert!(!result.diagnostics.is_empty());
     assert!(result.diagnostics[0].contains("kfunc unavailable"));
+}
+
+#[test]
+fn test_cond_select_emit_on_arm64_select_kfunc_without_cmov() {
+    let mut prog = make_program(vec![
+        jne_imm(1, 0, 2),
+        BpfInsn::mov64_imm(0, 0),
+        BpfInsn::ja(1),
+        BpfInsn::mov64_imm(0, 1),
+        exit_insn(),
+    ]);
+    let mut cache = AnalysisCache::new();
+    let mut ctx = ctx_with_select_kfunc(5555);
+    ctx.platform.arch = Arch::Aarch64;
+    assert!(!ctx.platform.has_cmov);
+
+    let pass = CondSelectPass;
+    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+    assert_eq!(result.sites_applied, 1);
+    assert!(prog
+        .insns
+        .iter()
+        .any(|i| i.is_call() && i.src_reg() == BPF_PSEUDO_KINSN_CALL));
 }
 
 #[test]

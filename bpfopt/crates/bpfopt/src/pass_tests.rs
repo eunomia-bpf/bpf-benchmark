@@ -541,9 +541,9 @@ use crate::passes::BranchFlipPass;
 // ── PlatformCapabilities tests ──────────────────────────────
 
 #[test]
-fn test_pass_skips_without_platform_capability() {
-    // A pass that requires CMOV (cond_select on x86) should skip when the
-    // platform capability is unavailable.
+fn test_pass_skips_without_branchless_select_capability() {
+    // cond_select should skip when neither an x86 CMOV capability nor a
+    // registered select kinsn is available.
     use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
     use crate::passes::CondSelectPass;
 
@@ -552,10 +552,8 @@ fn test_pass_skips_without_platform_capability() {
     pm.register_analysis(LivenessAnalysis);
     pm.add_pass(CondSelectPass);
 
-    // Context has select kinsn available but platform lacks CMOV.
-    let mut ctx = PassContext::test_default();
-    ctx.kinsn_registry.select64_btf_id = 1234;
-    // has_cmov is false by default in test_default().
+    // Context has no select kinsn and no CMOV capability.
+    let ctx = PassContext::test_default();
 
     let mut prog = make_program(vec![
         BpfInsn::new(
@@ -571,12 +569,11 @@ fn test_pass_skips_without_platform_capability() {
     ]);
 
     let result = pm.run(&mut prog, &ctx).unwrap();
-    // Should not apply anything because platform lacks CMOV.
-    // Should have a skip reason about CMOV.
+    // Should not apply anything because branchless select is unavailable.
     assert!(result.pass_results[0]
         .sites_skipped
         .iter()
-        .any(|s| s.reason.contains("CMOV")));
+        .any(|s| s.reason.contains("branchless select")));
 }
 
 #[test]

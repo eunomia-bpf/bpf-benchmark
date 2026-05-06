@@ -13,7 +13,7 @@ use super::utils::{
 };
 
 /// COND_SELECT pass: replaces branch+mov diamond patterns with
-/// bpf_select64() kfunc calls (lowered to CMOV by the JIT).
+/// bpf_select64() kfunc calls (lowered to branchless select by the JIT).
 ///
 /// Pattern A (4-insn diamond):
 ///   Jcc r_cond, X, +2 ; MOV r_dst, val_false ; JA +1 ; MOV r_dst, val_true
@@ -75,7 +75,7 @@ impl CondSelectPass {
     /// Analyze the program and return all detected cond-select sites.
     ///
     /// This is the pure detection phase. Each returned `CondSelectSite`
-    /// describes a JCC+MOV pattern that could be lowered to a CMOV/kfunc.
+    /// describes a JCC+MOV pattern that could be lowered to a select kfunc.
     pub fn analyze(&self, insns: &[BpfInsn]) -> Vec<CondSelectSite> {
         scan_cond_select_sites(insns)
     }
@@ -96,20 +96,21 @@ impl BpfPass for CondSelectPass {
         analyses: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        // Check if platform has CMOV support.
-        if !ctx.platform.has_cmov {
+        // Check if the target can lower bpf_select64 to branchless select
+        // (CMOV on x86, CSEL on ARM64).
+        if !ctx.has_branchless_select() {
             return Ok(PassResult::skipped(
                 self.name(),
                 SkipReason {
                     pc: 0,
-                    reason: "platform lacks CMOV support".into(),
+                    reason: "platform lacks branchless select support".into(),
                 },
             ));
         }
 
         // Check if bpf_select64 kfunc is available.
         if ctx.kinsn_registry.select64_btf_id < 0 {
-            // Fall back to detection-only mode.
+            // Report detected sites without emitting when the target kfunc is absent.
             let sites = self.analyze(&program.insns);
             let diagnostics: Vec<String> = sites
                 .iter()
