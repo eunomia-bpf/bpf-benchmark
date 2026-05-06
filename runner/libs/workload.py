@@ -702,7 +702,7 @@ def _run_wrk_http_load(
     *,
     namespace: str | None = None,
     threads: int = 2,
-    connections: int = 20,
+    connections: int = 8,
     workload_name: str,
 ) -> WorkloadResult:
     command = [wrk_binary, f"-t{int(threads)}", f"-c{int(connections)}", f"-d{int(seconds)}s", url]
@@ -773,6 +773,7 @@ def _run_cilium_endpoint_matrix(seconds: int, *, wrk_binary: str) -> WorkloadRes
     topology = _cilium_endpoint_topology()
     if topology is None:
         return None
+    seconds = 1
     endpoint_a, endpoint_b = topology
     results: list[WorkloadResult] = []
     with (

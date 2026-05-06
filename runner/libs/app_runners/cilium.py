@@ -26,6 +26,7 @@ from .setup_support import optional_repo_artifact_path
 
 
 _CILIUM_API_TIMEOUT_S = 30.0
+_CILIUM_API_BASE = "/v1"
 _CILIUM_ENDPOINT_PEER_IFACE = "eth0"
 
 
@@ -95,7 +96,7 @@ def _api_json(
 
 
 def _endpoint_api_path(endpoint_id: int | str) -> str:
-    return "/endpoint/" + urllib.parse.quote(str(endpoint_id), safe="")
+    return _CILIUM_API_BASE + "/endpoint/" + urllib.parse.quote(str(endpoint_id), safe="")
 
 
 def _link_exists(name: str) -> bool:
@@ -287,6 +288,8 @@ class CiliumRunner(NativeProcessRunner):
             "--enable-health-checking=false",
             "--enable-endpoint-health-checking=false",
             "--enable-endpoint-routes=true",
+            "--enable-policy=always",
+            "--policy-audit-mode=false",
             "--ipam=cluster-pool",
             f"--ipv4-range={self.ipv4_range}",
             f"--ipv4-native-routing-cidr={self.ipv4_range}",
@@ -325,7 +328,7 @@ class CiliumRunner(NativeProcessRunner):
                     raise RuntimeError(f"cilium-agent exited before API became ready (rc={returncode}): {details}")
             if socket_path.exists():
                 try:
-                    config = _api_json(socket_path, "GET", "/config", expected_status=(200,))
+                    config = _api_json(socket_path, "GET", f"{_CILIUM_API_BASE}/config", expected_status=(200,))
                     if isinstance(config, Mapping):
                         return config
                     raise RuntimeError("Cilium API /config returned a non-object payload")
@@ -339,7 +342,7 @@ class CiliumRunner(NativeProcessRunner):
         payload = _api_json(
             self._api_socket_path(),
             "POST",
-            f"/ipam?family=ipv4&owner={owner}",
+            f"{_CILIUM_API_BASE}/ipam?family=ipv4&owner={owner}",
             expected_status=(201,),
         )
         if not isinstance(payload, Mapping):

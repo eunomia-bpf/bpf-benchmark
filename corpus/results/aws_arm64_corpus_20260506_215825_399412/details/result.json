@@ -1,0 +1,790 @@
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
+  "generated_at": "2026-05-06T21:59:02.506591+00:00",
+  "kinsn_modules": {
+    "captured_at": "2026-05-06T21:58:25.535603+00:00",
+    "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
+    "expected_modules": [
+      "bpf_bulk_memory",
+      "bpf_ccmp",
+      "bpf_endian",
+      "bpf_extract",
+      "bpf_ldp",
+      "bpf_prefetch",
+      "bpf_rotate",
+      "bpf_select"
+    ],
+    "module_load": {
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_ccmp",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_ldp",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "failed_modules": [],
+      "invoked_at": "2026-05-06T21:58:25.535414+00:00",
+      "loaded_count": 8,
+      "loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_ccmp",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_ldp",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loader": "runner.libs.kinsn.load_kinsn_modules",
+      "module_dir": "/artifacts/kinsn",
+      "newly_loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_ccmp",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_ldp",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "snapshot_after": {
+        "captured_at": "2026-05-06T21:58:25.535391+00:00",
+        "expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_ccmp",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_ldp",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "loaded_bpf_modules": [
+          "bpf_bulk_memory",
+          "bpf_ccmp",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_ldp",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "missing_expected_modules": [],
+        "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_prefetch           12288  0\nbpf_ldp                12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_ccmp               12288  0\nbpf_bulk_memory        12288  0",
+        "resident_expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_ccmp",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_ldp",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "source": "lsmod"
+      },
+      "status": "ok",
+      "total_count": 8
+    },
+    "module_snapshot_before_daemon": {
+      "captured_at": "2026-05-06T21:58:25.407526+00:00",
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_ccmp",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_ldp",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loaded_bpf_modules": [],
+      "missing_expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_ccmp",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_ldp",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "raw_output": "",
+      "resident_expected_modules": [],
+      "source": "lsmod"
+    }
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "results": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "baseline": {
+        "bpf": {
+          "79": {
+            "bytes_jited": 3928,
+            "bytes_xlated": 6224,
+            "id": 79,
+            "name": "perf_unwind_stop",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "80": {
+            "bytes_jited": 22080,
+            "bytes_xlated": 36904,
+            "id": 80,
+            "name": "perf_unwind_native",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "81": {
+            "bytes_jited": 14936,
+            "bytes_xlated": 24552,
+            "id": 81,
+            "name": "perf_unwind_hotspot",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "82": {
+            "bytes_jited": 18032,
+            "bytes_xlated": 29128,
+            "id": 82,
+            "name": "perf_unwind_perl",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "83": {
+            "bytes_jited": 15312,
+            "bytes_xlated": 25064,
+            "id": 83,
+            "name": "perf_unwind_php",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "84": {
+            "bytes_jited": 18808,
+            "bytes_xlated": 33248,
+            "id": 84,
+            "name": "perf_unwind_python",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "85": {
+            "bytes_jited": 17352,
+            "bytes_xlated": 27984,
+            "id": 85,
+            "name": "perf_unwind_ruby",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "86": {
+            "bytes_jited": 20608,
+            "bytes_xlated": 34256,
+            "id": 86,
+            "name": "perf_unwind_v8",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "87": {
+            "bytes_jited": 1624,
+            "bytes_xlated": 2496,
+            "id": 87,
+            "name": "perf_go_labels",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "88": {
+            "bytes_jited": 840,
+            "bytes_xlated": 1088,
+            "id": 88,
+            "name": "perf_unwind_beam",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "89": {
+            "bytes_jited": 928,
+            "bytes_xlated": 1320,
+            "id": 89,
+            "name": "tracepoint__sched_process_free",
+            "run_cnt_delta": 4,
+            "run_time_ns_delta": 39138,
+            "type": "tracepoint"
+          },
+          "90": {
+            "bytes_jited": 3768,
+            "bytes_xlated": 5592,
+            "id": 90,
+            "name": "native_tracer_entry",
+            "run_cnt_delta": 1036,
+            "run_time_ns_delta": 16206575,
+            "type": "perf_event"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.226625236,
+            "ops_per_sec": 172.19524250580875,
+            "ops_total": 900.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [2718] setting to a 5 secs run per stressor\nstress-ng: info:  [2718] dispatching hogs: 4 cpu\nstress-ng: info:  [2718] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [2718] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2718]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2718] cpu                 900      5.03      4.45      0.01       178.82         201.81\nstress-ng: info:  [2718] skipped: 0\nstress-ng: info:  [2718] passed: 4: cpu (4)\nstress-ng: info:  [2718] failed: 0\nstress-ng: info:  [2718] metrics untrustworthy: 0\nstress-ng: info:  [2718] successful run completed in 5.15 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "79": {
+            "bytes_jited": 3928,
+            "bytes_xlated": 6224,
+            "id": 79,
+            "name": "perf_unwind_stop",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "80": {
+            "bytes_jited": 22080,
+            "bytes_xlated": 36904,
+            "id": 80,
+            "name": "perf_unwind_native",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "81": {
+            "bytes_jited": 14936,
+            "bytes_xlated": 24552,
+            "id": 81,
+            "name": "perf_unwind_hotspot",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "82": {
+            "bytes_jited": 18032,
+            "bytes_xlated": 29128,
+            "id": 82,
+            "name": "perf_unwind_perl",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "83": {
+            "bytes_jited": 15312,
+            "bytes_xlated": 25064,
+            "id": 83,
+            "name": "perf_unwind_php",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "84": {
+            "bytes_jited": 18808,
+            "bytes_xlated": 33248,
+            "id": 84,
+            "name": "perf_unwind_python",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "85": {
+            "bytes_jited": 17352,
+            "bytes_xlated": 27984,
+            "id": 85,
+            "name": "perf_unwind_ruby",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "86": {
+            "bytes_jited": 20608,
+            "bytes_xlated": 34256,
+            "id": 86,
+            "name": "perf_unwind_v8",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "87": {
+            "bytes_jited": 1624,
+            "bytes_xlated": 2496,
+            "id": 87,
+            "name": "perf_go_labels",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "88": {
+            "bytes_jited": 840,
+            "bytes_xlated": 1088,
+            "id": 88,
+            "name": "perf_unwind_beam",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "perf_event"
+          },
+          "89": {
+            "bytes_jited": 928,
+            "bytes_xlated": 1320,
+            "id": 89,
+            "name": "tracepoint__sched_process_free",
+            "run_cnt_delta": 6,
+            "run_time_ns_delta": 27913,
+            "type": "tracepoint"
+          },
+          "90": {
+            "bytes_jited": 3768,
+            "bytes_xlated": 5592,
+            "id": 90,
+            "name": "native_tracer_entry",
+            "run_cnt_delta": 1086,
+            "run_time_ns_delta": 23035377,
+            "type": "perf_event"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 5.4877318459999955,
+            "ops_per_sec": 165.27775508220427,
+            "ops_total": 907.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [2772] setting to a 5 secs run per stressor\nstress-ng: info:  [2772] dispatching hogs: 4 cpu\nstress-ng: info:  [2772] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [2772] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2772]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2772] cpu                 907      5.24      4.56      0.04       173.18         197.33\nstress-ng: info:  [2772] skipped: 0\nstress-ng: info:  [2772] passed: 4: cpu (4)\nstress-ng: info:  [2772] failed: 0\nstress-ng: info:  [2772] metrics untrustworthy: 0\nstress-ng: info:  [2772] successful run completed in 5.37 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "error": "",
+        "per_program": {
+          "79": {
+            "error": "",
+            "passes": [
+              {
+                "bpfopt_summary": {
+                  "diagnostics": [],
+                  "insn_count_after": 1616,
+                  "insn_count_before": 1616,
+                  "insn_delta": 0,
+                  "pass": "noop",
+                  "sites_applied": 0,
+                  "sites_matched": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {}
+                },
+                "error": null,
+                "status": "ok",
+                "step": {
+                  "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+                  "log_level": 2,
+                  "name": "noop"
+                }
+              }
+            ],
+            "prog_id": 79,
+            "program": {
+              "final_insn_count": 1616,
+              "orig_insn_count": 1616,
+              "prog_id": 79,
+              "prog_name": "perf_unwind_sto",
+              "prog_type": 7
+            },
+            "status": "ok"
+          },
+          "80": {
+            "error": "",
+            "passes": [
+              {
+                "bpfopt_summary": {
+                  "diagnostics": [],
+                  "insn_count_after": 7152,
+                  "insn_count_before": 7152,
+                  "insn_delta": 0,
+                  "pass": "noop",
+                  "sites_applied": 0,
+                  "sites_matched": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {}
+                },
+                "error": null,
+                "status": "ok",
+                "step": {
+                  "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+                  "log_level": 2,
+                  "name": "noop"
+                }
+              }
+            ],
+            "prog_id": 80,
+            "program": {
+              "final_insn_count": 7152,
+              "orig_insn_count": 7152,
+              "prog_id": 80,
+              "prog_name": "perf_unwind_nat",
+              "prog_type": 7
+            },
+            "status": "ok"
+          },
+          "81": {
+            "error": "",
+            "passes": [
+              {
+                "bpfopt_summary": {
+                  "diagnostics": [],
+                  "insn_count_after": 6448,
+                  "insn_count_before": 6448,
+                  "insn_delta": 0,
+                  "pass": "noop",
+                  "sites_applied": 0,
+                  "sites_matched": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {}
+                },
+                "error": null,
+                "status": "ok",
+                "step": {
+                  "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+                  "log_level": 2,
+                  "name": "noop"
+                }
+              }
+            ],
+            "prog_id": 81,
+            "program": {
+              "final_insn_count": 6448,
+              "orig_insn_count": 6448,
+              "prog_id": 81,
+              "prog_name": "perf_unwind_hot",
+              "prog_type": 7
+            },
+            "status": "ok"
+          },
+          "82": {
+            "error": "",
+            "passes": [
+              {
+                "bpfopt_summary": {
+                  "diagnostics": [],
+                  "insn_count_after": 7396,
+                  "insn_count_before": 7396,
+                  "insn_delta": 0,
+                  "pass": "noop",
+                  "sites_applied": 0,
+                  "sites_matched": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {}
+                },
+                "error": null,
+                "status": "ok",
+                "step": {
+                  "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+                  "log_level": 2,
+                  "name": "noop"
+                }
+              }
+            ],
+            "prog_id": 82,
+            "program": {
+              "final_insn_count": 7396,
+              "orig_insn_count": 7396,
+              "prog_id": 82,
+              "prog_name": "perf_unwind_per",
+              "prog_type": 7
+            },
+            "status": "ok"
+          },
+          "83": {
+            "error": "",
+            "passes": [
+              {
+                "bpfopt_summary": {
+                  "diagnostics": [],
+                  "insn_count_after": 6939,
+                  "insn_count_before": 6939,
+                  "insn_delta": 0,
+                  "pass": "noop",
+                  "sites_applied": 0,
+                  "sites_matched": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {}
+                },
+                "error": null,
+                "status": "ok",
+                "step": {
+                  "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+                  "log_level": 2,
+                  "name": "noop"
+                }
+              }
+            ],
+            "prog_id": 83,
+            "program": {
+              "final_insn_count": 6939,
+              "orig_insn_count": 6939,
+              "prog_id": 83,
+              "prog_name": "perf_unwind_php",
+              "prog_type": 7
+            },
+            "status": "ok"
+          },
+          "84": {
+            "error": "",
+            "passes": [
+              {
+                "bpfopt_summary": {
+                  "diagnostics": [],
+                  "insn_count_after": 5869,
+                  "insn_count_before": 5869,
+                  "insn_delta": 0,
+                  "pass": "noop",
+                  "sites_applied": 0,
+                  "sites_matched": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {}
+                },
+                "error": null,
+                "status": "ok",
+                "step": {
+                  "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+                  "log_level": 2,
+                  "name": "noop"
+                }
+              }
+            ],
+            "prog_id": 84,
+            "program": {
+              "final_insn_count": 5869,
+              "orig_insn_count": 5869,
+              "prog_id": 84,
+              "prog_name": "perf_unwind_pyt",
+              "prog_type": 7
+            },
+            "status": "ok"
+          },
+          "85": {
+            "error": "",
+            "passes": [
+              {
+                "bpfopt_summary": {
+                  "diagnostics": [],
+                  "insn_count_after": 5178,
+                  "insn_count_before": 5178,
+                  "insn_delta": 0,
+                  "pass": "noop",
+                  "sites_applied": 0,
+                  "sites_matched": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {}
+                },
+                "error": null,
+                "status": "ok",
+                "step": {
+                  "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+                  "log_level": 2,
+                  "name": "noop"
+                }
+              }
+            ],
+            "prog_id": 85,
+            "program": {
+              "final_insn_count": 5178,
+              "orig_insn_count": 5178,
+              "prog_id": 85,
+              "prog_name": "perf_unwind_rub",
+              "prog_type": 7
+            },
+            "status": "ok"
+          },
+          "86": {
+            "error": "",
+            "passes": [
+              {
+                "bpfopt_summary": {
+                  "diagnostics": [],
+                  "insn_count_after": 7940,
+                  "insn_count_before": 7940,
+                  "insn_delta": 0,
+                  "pass": "noop",
+                  "sites_applied": 0,
+                  "sites_matched": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {}
+                },
+                "error": null,
+                "status": "ok",
+                "step": {
+                  "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+                  "log_level": 2,
+                  "name": "noop"
+                }
+              }
+            ],
+            "prog_id": 86,
+            "program": {
+              "final_insn_count": 7940,
+              "orig_insn_count": 7940,
+              "prog_id": 86,
+              "prog_name": "perf_unwind_v8",
+              "prog_type": 7
+            },
+            "status": "ok"
+          },
+          "87": {
+            "error": "",
+            "passes": [
+              {
+                "bpfopt_summary": {
+                  "diagnostics": [],
+                  "insn_count_after": 679,
+                  "insn_count_before": 679,
+                  "insn_delta": 0,
+                  "pass": "noop",
+                  "sites_applied": 0,
+                  "sites_matched": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {}
+                },
+                "error": null,
+                "status": "ok",
+                "step": {
+                  "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+                  "log_level": 2,
+                  "name": "noop"
+                }
+              }
+            ],
+            "prog_id": 87,
+            "program": {
+              "final_insn_count": 679,
+              "orig_insn_count": 679,
+              "prog_id": 87,
+              "prog_name": "perf_go_labels",
+              "prog_type": 7
+            },
+            "status": "ok"
+          },
+          "88": {
+            "error": "",
+            "passes": [
+              {
+                "bpfopt_summary": {
+                  "diagnostics": [],
+                  "insn_count_after": 242,
+                  "insn_count_before": 242,
+                  "insn_delta": 0,
+                  "pass": "noop",
+                  "sites_applied": 0,
+                  "sites_matched": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {}
+                },
+                "error": null,
+                "status": "ok",
+                "step": {
+                  "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+                  "log_level": 2,
+                  "name": "noop"
+                }
+              }
+            ],
+            "prog_id": 88,
+            "program": {
+              "final_insn_count": 242,
+              "orig_insn_count": 242,
+              "prog_id": 88,
+              "prog_name": "perf_unwind_bea",
+              "prog_type": 7
+            },
+            "status": "ok"
+          },
+          "89": {
+            "error": "",
+            "passes": [
+              {
+                "bpfopt_summary": {
+                  "diagnostics": [],
+                  "insn_count_after": 283,
+                  "insn_count_before": 283,
+                  "insn_delta": 0,
+                  "pass": "noop",
+                  "sites_applied": 0,
+                  "sites_matched": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {}
+                },
+                "error": null,
+                "status": "ok",
+                "step": {
+                  "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+                  "log_level": 2,
+                  "name": "noop"
+                }
+              }
+            ],
+            "prog_id": 89,
+            "program": {
+              "final_insn_count": 283,
+              "orig_insn_count": 283,
+              "prog_id": 89,
+              "prog_name": "tracepoint__sch",
+              "prog_type": 5
+            },
+            "status": "ok"
+          },
+          "90": {
+            "error": "",
+            "passes": [
+              {
+                "bpfopt_summary": {
+                  "diagnostics": [],
+                  "insn_count_after": 1332,
+                  "insn_count_before": 1332,
+                  "insn_delta": 0,
+                  "pass": "noop",
+                  "sites_applied": 0,
+                  "sites_matched": 0,
+                  "sites_skipped": 0,
+                  "skip_reasons": {}
+                },
+                "error": null,
+                "status": "ok",
+                "step": {
+                  "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+                  "log_level": 2,
+                  "name": "noop"
+                }
+              }
+            ],
+            "prog_id": 90,
+            "program": {
+              "final_insn_count": 1332,
+              "orig_insn_count": 1332,
+              "prog_id": 90,
+              "prog_name": "native_tracer_e",
+              "prog_type": 7
+            },
+            "status": "ok"
+          }
+        },
+        "status": "ok"
+      },
+      "runner": "otelcol-ebpf-profiler",
+      "selected_workload": "stress_ng_cpu",
+      "status": "ok"
+    }
+  ],
+  "samples": 1,
+  "status": "ok",
+  "suite_name": "macro_apps",
+  "workload_seconds": 3.0
+}

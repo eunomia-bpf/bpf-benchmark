@@ -4,6 +4,8 @@ Scope: read-only diagnosis of whether the current corpus workloads execute the m
 
 Source note: the checked-out worktree currently reports `88e43e83`, while the requested pinned source was `e3c3388b`. Source inspection below used `git show e3c3388b:<path>` for framework files. Local upstream app source under `runner/repos/` was read only for role identification. No code or test changes were made; this file is the requested report.
 
+Update note: `bcc_set` and `bpftrace_set` startup is now intentionally simple: snapshot `bpftool prog show -j`, spawn every tool/script, fixed-wait for attach, fail if any child exited, then use the after-minus-before program-ID diff as the tracked union. The set runners no longer use fdinfo, per-tool/script program attribution, `runner_details.*.tool_startup`, or a global stable-program-set wait.
+
 Result data:
 
 - `corpus/results/x86_kvm_corpus_20260506_073134_900272/details/result.json`
