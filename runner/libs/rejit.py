@@ -14,6 +14,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from . import rejit_plan
+
 import yaml
 
 from . import ROOT_DIR, tail_text
@@ -261,6 +263,14 @@ def _daemon_log_tail(stdout_path: Path | None, stderr_path: Path | None) -> str:
 
 
 _DAEMON_SOCKET_PATH = Path("/var/tmp/bpfrejit-daemon.sock")
+_PASS_METADATA: dict[str, Any] | None = None
+
+
+def _pass_metadata_cache() -> dict[str, dict[str, Any]]:
+    global _PASS_METADATA
+    if _PASS_METADATA is None:
+        _PASS_METADATA = rejit_plan.load_pass_metadata()
+    return _PASS_METADATA  # type: ignore[return-value]
 
 
 def _start_daemon_server(
@@ -366,9 +376,14 @@ def apply_daemon_rejit(
     per_program: dict[int, dict[str, object]] = {}
     errors: list[str] = []
 
-    payload: dict[str, object] = {"cmd": "optimize", "prog_ids": prog_ids}
-    if normalized_enabled_passes is not None:
-        payload["enabled_passes"] = [str(n).strip() for n in normalized_enabled_passes if str(n).strip()]
+    if not normalized_enabled_passes:
+        raise ValueError("apply_daemon_rejit requires non-empty enabled_passes")
+    pass_metas = _pass_metadata_cache()
+    payload = rejit_plan.build_execute_plan_payload(
+        prog_ids,
+        [str(n).strip() for n in normalized_enabled_passes if str(n).strip()],
+        pass_metas,
+    )
     _resp = _daemon_request(daemon_socket_path, payload,
                             daemon_proc=daemon_proc, stdout_path=daemon_stdout_path,
                             stderr_path=daemon_stderr_path)
