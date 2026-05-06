@@ -118,6 +118,8 @@ pub struct BpfProgram {
     pub map_value_nulls: HashSet<(u32, Vec<u8>)>,
     /// Map-in-map outer entries: (outer_map_id, outer_key_bytes) -> inner map id.
     pub map_inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
+    /// Maps whose key scan reached `max_entries` before the kernel reported EOF.
+    pub map_entries_partial: HashSet<u32>,
     /// Pre-loaded map metadata: map_id -> MapMetadata.
     /// Used by offline snapshot callers and unit tests.
     pub map_metadata: HashMap<u32, MapMetadata>,
@@ -223,6 +225,9 @@ impl MapProvider for SnapshotMapProvider {
         if program.map_value_nulls.contains(&(map_id, key.to_vec())) {
             return Err(null_map_value_snapshot_message(map_id, key));
         }
+        if program.map_entries_partial.contains(&map_id) {
+            return Err(partial_map_value_snapshot_message(map_id, key));
+        }
 
         if !program.map_metadata.contains_key(&map_id) {
             return Err(format!(
@@ -250,12 +255,24 @@ pub fn null_map_value_snapshot_message(map_id: u32, key: &[u8]) -> String {
     )
 }
 
+pub fn partial_map_value_snapshot_message(map_id: u32, key: &[u8]) -> String {
+    format!(
+        "map_values snapshot partial map {} missing key {}",
+        map_id,
+        hex_bytes(key)
+    )
+}
+
 pub fn is_missing_map_value_snapshot_error(message: &str) -> bool {
     message.contains("map_values snapshot missing map ")
 }
 
 pub fn is_null_map_value_snapshot_error(message: &str) -> bool {
     message.contains("map_values snapshot has explicit null for map ")
+}
+
+pub fn is_partial_map_value_snapshot_error(message: &str) -> bool {
+    message.contains("map_values snapshot partial map ")
 }
 
 fn hex_bytes(bytes: &[u8]) -> String {
@@ -292,6 +309,7 @@ impl BpfProgram {
             map_values: HashMap::new(),
             map_value_nulls: HashSet::new(),
             map_inner_map_ids: HashMap::new(),
+            map_entries_partial: HashSet::new(),
             map_metadata: HashMap::new(),
             map_provider: Arc::new(SnapshotMapProvider),
         }
@@ -299,6 +317,10 @@ impl BpfProgram {
 
     pub fn has_null_map_value_snapshot(&self, map_id: u32, key: &[u8]) -> bool {
         self.map_value_nulls.contains(&(map_id, key.to_vec()))
+    }
+
+    pub fn has_partial_map_entries_snapshot(&self, map_id: u32) -> bool {
+        self.map_entries_partial.contains(&map_id)
     }
 
     /// Install a map provider for specialized test execution.

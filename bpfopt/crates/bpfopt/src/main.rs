@@ -246,6 +246,8 @@ struct MapSnapshotJson {
     value_size: u32,
     max_entries: u32,
     #[serde(default)]
+    entries_partial: bool,
+    #[serde(default)]
     entries: Vec<MapEntryJson>,
 }
 
@@ -577,6 +579,7 @@ fn attach_program_inputs(program: &mut BpfProgram, common: &CommonArgs) -> Resul
         program.map_values = snapshot.values;
         program.map_value_nulls = snapshot.nulls;
         program.map_inner_map_ids = snapshot.inner_map_ids;
+        program.map_entries_partial = snapshot.partial_maps;
     }
     program.func_info = read_btf_info_records(
         common.func_info.as_deref(),
@@ -1057,6 +1060,7 @@ struct MapSnapshot {
     values: HashMap<(u32, Vec<u8>), Vec<u8>>,
     nulls: HashSet<(u32, Vec<u8>)>,
     inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
+    partial_maps: HashSet<u32>,
 }
 
 fn read_map_values(path: &Path) -> Result<MapSnapshot> {
@@ -1065,9 +1069,13 @@ fn read_map_values(path: &Path) -> Result<MapSnapshot> {
     let mut values = HashMap::new();
     let mut nulls = HashSet::new();
     let mut inner_map_ids = HashMap::new();
+    let mut partial_maps = HashSet::new();
 
     for map in raw.maps {
         let map_type = parse_map_type(&map.map_type)?;
+        if map.entries_partial {
+            partial_maps.insert(map.map_id);
+        }
         metadata.insert(
             map.map_id,
             MapMetadata {
@@ -1101,6 +1109,7 @@ fn read_map_values(path: &Path) -> Result<MapSnapshot> {
         values,
         nulls,
         inner_map_ids,
+        partial_maps,
     })
 }
 
@@ -1352,10 +1361,11 @@ mod tests {
               "maps": [{
                 "map_id": 90,
                 "map_type": "hash_of_maps",
-                "key_size": 4,
-                "value_size": 4,
-                "max_entries": 8,
-                "entries": [{
+	                "key_size": 4,
+	                "value_size": 4,
+	                "max_entries": 8,
+	                "entries_partial": true,
+	                "entries": [{
                   "key": "01000000",
                   "value": "5b000000",
                   "inner_map_id": 91
@@ -1380,6 +1390,7 @@ mod tests {
             snapshot.values[&(90, 1u32.to_le_bytes().to_vec())],
             91u32.to_le_bytes().to_vec()
         );
+        assert!(snapshot.partial_maps.contains(&90));
     }
 
     #[test]

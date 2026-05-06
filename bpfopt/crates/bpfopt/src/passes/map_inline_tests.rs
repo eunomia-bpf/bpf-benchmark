@@ -1475,6 +1475,51 @@ fn map_inline_pass_rewrites_map_in_map_chain_loads() {
 }
 
 #[test]
+fn map_inline_pass_skips_missing_outer_entry_from_partial_snapshot() {
+    let outer_map_id = 9511;
+    install_mock_map(
+        outer_map_id,
+        MockMapState {
+            info: BpfMapInfo {
+                map_type: BPF_MAP_TYPE_HASH_OF_MAPS,
+                key_size: 4,
+                value_size: 4,
+                max_entries: 8,
+            },
+            values: HashMap::new(),
+        },
+    );
+
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let original = vec![
+        map[0],
+        map[1],
+        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        jeq_imm(0, 0, 7),
+        BpfInsn::mov64_reg(1, 0),
+        st_mem(BPF_W, 10, -8, 2),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -8),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+        exit_insn(),
+    ];
+    let mut program = BpfProgram::new(original.clone());
+    program.set_map_ids(vec![outer_map_id]);
+    program.map_entries_partial.insert(outer_map_id);
+
+    let result = run_map_inline_pass(&mut program);
+    assert_eq!(program.insns, original);
+    assert!(result.pass_results[0]
+        .sites_skipped
+        .iter()
+        .any(|skip| { skip.reason.contains("outer entry not in partial snapshot") }));
+}
+
+#[test]
 fn map_inline_pass_uses_verifier_guided_wide_zero_store_key() {
     let mut values = HashMap::new();
     values.insert(0u32.to_le_bytes().to_vec(), 42u32.to_le_bytes().to_vec());

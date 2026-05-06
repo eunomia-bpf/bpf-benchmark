@@ -1300,6 +1300,13 @@ fn build_site_rewrite(
                 format_bytes_preview(&encoded_key),
                 err
             ));
+            if is_partial_map_value_snapshot_error(&err) {
+                return Err(site_level_inline_veto(format!(
+                    "entry not in partial snapshot for map {} key {}",
+                    info.map_id,
+                    format_bytes_preview(&encoded_key)
+                )));
+            }
             return Err(anyhow::Error::msg(err));
         }
     };
@@ -1422,6 +1429,13 @@ fn build_map_in_map_chain_rewrite(
         .get(&(outer_info.map_id, encoded_outer_key.clone()))
         .copied()
         .ok_or_else(|| {
+            if program.has_partial_map_entries_snapshot(outer_info.map_id) {
+                return site_level_inline_veto(format!(
+                    "outer entry not in partial snapshot for map {} key {}",
+                    outer_info.map_id,
+                    format_bytes_preview(&encoded_outer_key)
+                ));
+            }
             anyhow::anyhow!(
                 "map_values snapshot missing inner_map_id for outer map {} key {}",
                 outer_info.map_id,
@@ -1502,15 +1516,24 @@ fn build_map_in_map_chain_rewrite(
             &encoded_inner_key
         )));
     }
-    let value = program
-        .map_provider
-        .lookup_elem(
-            program,
-            inner_info.map_id,
-            &encoded_inner_key,
-            lookup_value_size,
-        )
-        .map_err(anyhow::Error::msg)?;
+    let value = match program.map_provider.lookup_elem(
+        program,
+        inner_info.map_id,
+        &encoded_inner_key,
+        lookup_value_size,
+    ) {
+        Ok(value) => value,
+        Err(err) => {
+            if is_partial_map_value_snapshot_error(&err) {
+                return Err(site_level_inline_veto(format!(
+                    "inner entry not in partial snapshot for map {} key {}",
+                    inner_info.map_id,
+                    format_bytes_preview(&encoded_inner_key)
+                )));
+            }
+            return Err(anyhow::Error::msg(err));
+        }
+    };
     let inline_value = prepare_inline_value(&inner_info, &value).map_err(site_level_inline_veto)?;
 
     let mut replacements = BTreeMap::new();
@@ -1780,6 +1803,7 @@ fn resolve_snapshot_map_value(
             {
                 return Ok(None);
             }
+            Err(err) if is_partial_map_value_snapshot_error(&err) => return Ok(None),
             Err(err) => return Err(anyhow::Error::msg(err)),
         };
         Ok(Some(SnapshotMapValue { map_id, key, value }))
