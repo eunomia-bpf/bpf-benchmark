@@ -297,3 +297,71 @@
 | 299 | **x86 新优化调研（2026-03-20）** | ✅ | Top-5 新机会。报告：`docs/tmp/20260320/x86_new_optimization_opportunities_20260320.md`。 |
 | 302 | **E2E profiler（2026-03-20）** | 🔄 已被 #304 搁置 | PGO policy 设计。 |
 | 303 | **目录整理（2026-03-20）** | ✅ | runner/docker, runner/scripts, docs/reference。报告：`docs/tmp/20260320/directory_reorganization_20260320.md`。 |
+
+---
+
+## Archived: v3 implementation progress snapshot (as of 2026-05-01)
+
+**Status: superseded by current state (Phase 4 全平台验证 已开始：KVM x86 + AWS x86 + AWS ARM64 corpus + e2e 在持续跑；架构边界由主 plan §4 描述）。** 本节是 v3 重构期的进度快照，所有 Phase 1-3 任务已完成、Phase 4 已开始。Phase 4 状态以 git history 为准。保留作为历史记录。
+
+## v3 实施进度（截至 2026-05-01）
+
+该节只记录当前实施状态；权威设计仍是 `docs/tmp/bpfopt_design_v3.md`，不在此重复 v3 细节。
+
+### Phase 1（核心工具最小可用）— 完成
+
+- **1.1 `bpfopt-core` 合并进 `bpfopt`**：`bpfopt` 现在同时提供 lib + bin，消除 `-core` 命名（`7d34960`、`d973a4f`、`de64cde`；见 `docs/tmp/bpfopt-merge-review-20260428.md`、`docs/tmp/unit-test-audit-20260428.md`）。
+- **1.2 `kernel-sys` crate**：标准 BPF 命令走 `libbpf-rs`/`libbpf-sys`，项目 fork 的 `BPF_PROG_REJIT`/`BPF_PROG_GET_ORIGINAL` 留在 syscall 边界内（`9f59ee4`、`588da36`；见 `docs/tmp/kernel-sys-review-20260428.md`、`docs/tmp/kernel-sys-fix-review-20260428.md`、`docs/tmp/libbpf-rs-eval-20260428.md`）。其中 `GET_ORIGINAL` 通过 `BPF_OBJ_GET_INFO_BY_FD` 加 fork 扩展 `orig_prog_*` 实现，不是独立 syscall cmd。
+- **1.2.5 `bpfopt` 切到 `kernel-sys` 类型**：`BpfInsn = #[repr(transparent)] kernel_sys::bpf_insn`（`a441e22`；见 `docs/tmp/bpfopt-kernel-sys-migration-plan-20260428.md`、`docs/tmp/bpfopt-kernel-sys-fix-review-20260428.md`）。
+- **1.3 `bpfopt` CLI 单 pass 化**：优化入口要求 `--pass <name>`，一次只跑一个 pass；删除默认 `optimize` pipeline 和多 pass list。`list-passes` 保留。缺少 required side-input 或 kinsn 不可用时退出 1（见 `docs/tmp/full-matrix-20260430/per-pass-rejit-impl.md`）。
+- **1.4 daemon-owned `bpfget` library**：live bytecode/metadata/map snapshot 已移入 daemon workspace；`ProgramSnapshot` 不再保存 BTF func_info/line_info bytes，不做 BTF normalize/replay；kinsn target probing 由 daemon 进程内调用（见 `docs/tmp/full-matrix-20260430/v3-arch-pivot.md`）。
+- **1.5 per-pass direct ReJIT**：`bpfverify` / `bpfrejit` crate 和 daemon `dry_run.rs` 已删除；daemon 对默认 12 pass 逐个调用 `bpfopt --pass`，每个 pass 输出立即 `kernel_sys::prog_rejit()`，主路径不做 `BPF_PROG_LOAD` dry-run。
+- **1.6 minimal fd_array**：daemon 只从 `prog_info.used_maps` / `map_ids` 打开 map fd 构造 `fd_array`；不追加 BTF fd，不做 pseudo-map fd 到 idx 的 rewrite。
+- **3.3 verifier states from ReJIT log**：daemon 解析每次成功 per-pass `BPF_PROG_REJIT(log_level=2)` 的 verifier log，写 `verifier-states.json` 供后续 `map_inline` / `const_prop` 使用。
+
+测试现状：`bpfopt` workspace 和 daemon workspace 单独 `cargo test --workspace` 均通过；`make daemon-tests` 和 `make check` 通过。
+
+### Phase 2（完整工具链）— 进行中
+
+- **2.1 verifier-state parser 迁移**：verifier log parser 已移到 `kernel-sys`，供 daemon per-pass ReJIT log side-input 使用。
+- **2.2 `bpfprof` CLI**：task #43 进行中（见 `docs/tmp/bpfprof-design-20260428.md`）。
+- **target probing**：daemon-owned `bpfget` library 负责 kinsn BTF 自动探测并写 `bpfopt --target` side-input。
+
+### Phase 3（集成）— 完成（#44 + #45）
+
+#### Phase 3 实施方针：runner socket boundary + daemon in-process kernel libs
+
+- runner Python 不动，daemon socket + JSON 协议保持不变。
+- daemon 只 fork+exec `bpfopt`；`bpfprof` 保持 daemon 外 standalone CLI；`bpfget` 是唯一 daemon-owned kernel-facing library，per-pass ReJIT orchestration 在 daemon 内直接调 `kernel-sys`。
+- Task #45 daemon 瘦身仍成立：删除 `PassManager` / pass code / profiler；daemon 不做 bytecode transform。
+- 2026-05-01 pivot 的动机和验证见 `docs/tmp/full-matrix-20260430/v3-arch-pivot.md`。
+
+- **3.1 daemon socket orchestration**：`optimize` 接收 `prog_ids` 列表并使用 per-program worker pool；每个程序走 daemon snapshot → `bpfopt --pass` loop → per-pass daemon direct ReJIT；profile lifecycle、status、旧的 all/batch 独立命令已删除。
+- **3.2 daemon 瘦身**：`daemon/Cargo.toml` 依赖 daemon-owned `bpfget` 和 `kernel-sys`；删除旧 `bpfverify`/`bpfrejit` crates、`pipeline.rs`、`profiler.rs`、`kfunc_discovery.rs`、`platform_detect.rs` 及对应旧测试文件。
+- **3.3 runner 边界确认**：`runner/libs/`、`corpus/`、`e2e/`、`micro/` 在本阶段不改；Docker/build 依赖也收窄为 daemon 只跟踪 `kernel-sys` 而不是整个 `bpfopt` 源码。
+
+### Phase 4（增强）— 未开始
+
+- **4.1 全平台验证**：KVM x86 + AWS x86 + AWS ARM64 corpus + e2e + micro 尚未完成。
+- **4.2 micro `BpfReJIT` 入口恢复**：重构期间被移除，task #53；当前限制见 `docs/tmp/micro-rejit-smoke-20260428.md`（known limitation）。
+
+参考报告：
+
+- `docs/tmp/bpfopt-merge-review-20260428.md`
+- `docs/tmp/kernel-sys-review-20260428.md`
+- `docs/tmp/kernel-sys-fix-review-20260428.md`
+- `docs/tmp/bpfopt-kernel-sys-migration-plan-20260428.md`
+- `docs/tmp/bpfopt-kernel-sys-fix-review-20260428.md`
+- `docs/tmp/bpfopt-cli-review-20260428.md`
+- `docs/tmp/bpfget-design-20260428.md`
+- `docs/tmp/bpfget-bpfrejit-review-20260428.md`
+- `docs/tmp/bpfprof-design-20260428.md`
+- `docs/tmp/bpfverify-design-20260428.md`
+- `docs/tmp/bpfrejit-design-20260428.md`
+- `docs/tmp/runner-cli-migration-20260428.md`
+- `docs/tmp/daemon-slim-design-20260428.md`
+- `docs/tmp/libbpf-rs-eval-20260428.md`
+- `docs/tmp/unit-test-audit-20260428.md`
+- `docs/tmp/micro-rejit-smoke-20260428.md`（known limitation）
+
+---

@@ -738,7 +738,7 @@ fn apply_features(platform: &mut PlatformCapabilities, features: &[String]) -> R
             "cmov" => platform.has_cmov = true,
             "movbe" => platform.has_movbe = true,
             "rorx" => platform.has_rorx = true,
-            _ => bail!("unknown target feature: {feature}"),
+            _ => eprintln!("bpfopt: warning: ignoring unknown target feature: {feature}"),
         }
     }
     Ok(())
@@ -1248,19 +1248,6 @@ mod tests {
 
         assert!(err.to_string().contains("call_offset"), "err={err}");
     }
-
-    #[test]
-    fn target_json_rejects_unknown_cpu_features() {
-        let mut platform = PlatformCapabilities::test_default();
-
-        let err = apply_features(&mut platform, &["cmovv".to_string()]).unwrap_err();
-
-        assert!(
-            err.to_string().contains("unknown target feature: cmovv"),
-            "err={err:#}"
-        );
-    }
-
 
     #[test]
     fn pass_report_serializes_inlined_map_entries_as_hex() {

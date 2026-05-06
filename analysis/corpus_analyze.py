@@ -8,7 +8,8 @@ is the analysis-side tool.
 Usage:
     python analysis/corpus_analyze.py <result_dir|metadata.json|result.json>
         [--threshold N]    Filter min(b_runs, p_runs) >= N (default: 100)
-        [--per-app]        Print per-app breakdown
+        [--per-app]        Print per-app breakdown (rich table sorted by Method B)
+        [--per-pass]       Add per-pass apply-count columns to the per-app table
         [--verbose]        Print every retained per-program ratio
 """
 from __future__ import annotations
@@ -94,7 +95,128 @@ def fmt(x: float, fmt_spec: str = ".4f") -> str:
     return format(x, fmt_spec)
 
 
-def report(path: Path, threshold: int, per_app: bool, verbose: bool) -> int:
+def collect_app_pass_stats(payload: dict) -> dict:
+    """For each app, accumulate per-pass {applied, matched, skipped, errors} and
+    raw base/post run_time_ns + run_cnt totals across paper-grade progs."""
+    from collections import defaultdict
+    apps: dict[str, dict] = {}
+    for app in payload.get("results", []):
+        name = app["app"]
+        per_prog = (app.get("rejit_result") or {}).get("per_program") or {}
+        pass_apply: dict[str, int] = defaultdict(int)
+        pass_match: dict[str, int] = defaultdict(int)
+        pass_skip: dict[str, int] = defaultdict(int)
+        pass_err: dict[str, int] = defaultdict(int)
+        for pinfo in per_prog.values():
+            for ps in pinfo.get("passes", []):
+                sm = ps.get("bpfopt_summary") or {}
+                pn = ps.get("pass") or sm.get("pass") or "?"
+                pass_apply[pn] += int(sm.get("sites_applied") or 0)
+                pass_match[pn] += int(sm.get("sites_matched") or 0)
+                pass_skip[pn] += int(sm.get("sites_skipped") or 0)
+                if ps.get("error"):
+                    pass_err[pn] += 1
+        apps[name] = {
+            "pass_apply": dict(pass_apply),
+            "pass_match": dict(pass_match),
+            "pass_skip": dict(pass_skip),
+            "pass_err": dict(pass_err),
+        }
+    return apps
+
+
+def print_per_app(payload: dict, progs: list[dict], per_pass: bool) -> None:
+    from collections import defaultdict
+    by_app: dict[str, list[dict]] = defaultdict(list)
+    for p in progs:
+        by_app[p["app"]].append(p)
+    pass_stats = collect_app_pass_stats(payload)
+
+    pass_names: list[str] = []
+    for app_stat in pass_stats.values():
+        for pn in app_stat["pass_apply"]:
+            if pn not in pass_names:
+                pass_names.append(pn)
+    pass_names = [pn for pn in pass_names if any(pass_stats[a]["pass_apply"].get(pn, 0) > 0 or pass_stats[a]["pass_err"].get(pn, 0) > 0 for a in pass_stats)]
+
+    rows = []
+    for app, pp in by_app.items():
+        rs = [p["ratio"] for p in pp]
+        b_geomean = geomean(rs)
+        c_agg = run_weighted_aggregate(pp)
+        wins = sum(1 for r in rs if r < 1.0)
+        losses = sum(1 for r in rs if r > 1.0)
+        # weighted per-iter ns across paper-grade progs in this app:
+        b_ns_iter = sum(p["b_avg_ns"] * p["min_runs"] for p in pp) / sum(p["min_runs"] for p in pp)
+        p_ns_iter = sum(p["p_avg_ns"] * p["min_runs"] for p in pp) / sum(p["min_runs"] for p in pp)
+        applied_total = sum(pass_stats.get(app, {}).get("pass_apply", {}).values())
+        err_total = sum(pass_stats.get(app, {}).get("pass_err", {}).values())
+        rows.append({
+            "app": app,
+            "progs": len(pp),
+            "min_runs": sum(p["min_runs"] for p in pp),
+            "applied": applied_total,
+            "errors": err_total,
+            "base_ns": b_ns_iter,
+            "post_ns": p_ns_iter,
+            "delta_ns": p_ns_iter - b_ns_iter,
+            "B": b_geomean,
+            "C": c_agg,
+            "wins": wins,
+            "losses": losses,
+        })
+
+    rows.sort(key=lambda r: r["B"] if r["B"] == r["B"] else 1.0)
+
+    print(f"\n## Per-app breakdown (sorted by Method B ascending = best speedup first)")
+
+    base_cols = [
+        ("App", 33, "left"),
+        ("progs", 5, "right"),
+        ("min_runs", 13, "right"),
+        ("applied", 7, "right"),
+        ("errs", 5, "right"),
+        ("base_ns/iter", 13, "right"),
+        ("post_ns/iter", 13, "right"),
+        ("delta_ns", 11, "right"),
+        ("Method B*", 9, "right"),
+        ("Method C", 9, "right"),
+        ("W/L", 7, "right"),
+    ]
+
+    pass_cols = [(pn, max(7, len(pn)), "right") for pn in pass_names] if per_pass else []
+    cols = base_cols[:3] + pass_cols + base_cols[3:]
+
+    def render_cell(value, col):
+        name, width, align = col
+        s = str(value)
+        return s.ljust(width) if align == "left" else s.rjust(width)
+
+    header = "  ".join(render_cell(c[0], c) for c in cols)
+    print(header)
+    print("  ".join("-" * c[1] for c in cols))
+
+    for r in rows:
+        cells = [
+            r["app"], f"{r['progs']}", f"{r['min_runs']:,}",
+        ]
+        if per_pass:
+            ps = pass_stats.get(r["app"], {}).get("pass_apply", {})
+            cells.extend(str(ps.get(pn, 0)) for pn in pass_names)
+        cells.extend([
+            f"{r['applied']}",
+            f"{r['errors']}",
+            f"{r['base_ns']:,.1f}",
+            f"{r['post_ns']:,.1f}",
+            f"{r['delta_ns']:+,.1f}",
+            f"{r['B']:.4f}" if r["B"] == r["B"] else "n/a",
+            f"{r['C']:.4f}" if r["C"] == r["C"] else "n/a",
+            f"{r['wins']}/{r['losses']}",
+        ])
+        print("  ".join(render_cell(v, c) for v, c in zip(cells, cols)))
+
+
+def report(path: Path, threshold: int, per_app: bool, verbose: bool, per_pass: bool = False) -> int:
     payload = json.loads(Path(path).read_text())
     suite_status = payload.get("status", "?")
     samples = payload.get("samples", "?")
@@ -130,20 +252,7 @@ def report(path: Path, threshold: int, per_app: bool, verbose: bool) -> int:
         print(f"  ratio CV (across progs):          {cv:.1f}%")
 
     if per_app:
-        print(f"\n## Per-app breakdown")
-        from collections import defaultdict
-        groups = defaultdict(list)
-        for p in progs:
-            groups[p["app"]].append(p)
-        header = f"{'App':<40} {'N':<5} {'B geomean':<11} {'C run-wt':<11} {'wins/losses':<14} {'top runs':<10}"
-        print(header)
-        print("=" * len(header))
-        for app, pp in sorted(groups.items()):
-            rs = [p["ratio"] for p in pp]
-            w = sum(1 for r in rs if r < 1.0)
-            l = sum(1 for r in rs if r > 1.0)
-            top = max(p["min_runs"] for p in pp)
-            print(f"{app:<40} {len(pp):<5} {fmt(geomean(rs)):<11} {fmt(run_weighted_aggregate(pp)):<11} {w}/{l:<11} {top:>9}")
+        print_per_app(payload, progs, per_pass=per_pass)
 
     if verbose:
         print(f"\n## Per-program detail")
@@ -161,7 +270,9 @@ def main() -> int:
                     help="corpus result dir, metadata.json, or result.json")
     ap.add_argument("--threshold", type=int, default=100,
                     help="min_runs filter (default: 100, per CLAUDE.md)")
-    ap.add_argument("--per-app", action="store_true", help="print per-app breakdown")
+    ap.add_argument("--per-app", action="store_true", help="print per-app breakdown (sorted by Method B)")
+    ap.add_argument("--per-pass", action="store_true",
+                    help="add per-pass apply-count columns to the per-app table")
     ap.add_argument("--verbose", action="store_true",
                     help="print every retained per-program ratio")
     args = ap.parse_args()
@@ -170,7 +281,7 @@ def main() -> int:
     except FileNotFoundError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
-    return report(result_json, args.threshold, args.per_app, args.verbose)
+    return report(result_json, args.threshold, args.per_app, args.verbose, args.per_pass)
 
 
 if __name__ == "__main__":

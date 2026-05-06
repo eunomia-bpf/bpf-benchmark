@@ -39,6 +39,10 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--samples", type=nonnegative_int, required=True, help="Measured samples per corpus app; 0 uses suite defaults.")
     parser.add_argument("--output-json", default="", help="JSON output path.")
     parser.add_argument("--native-repos", default="", help="Comma-separated native repo artifacts to validate.")
+    parser.add_argument(
+        "--keep-failure-artifacts", action="store_true",
+        help="Persist daemon failure-artifact tarballs under details/failure-artifacts/ for debug; default discards them.",
+    )
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
 
     args.native_repos = csv_tokens(args.native_repos)
@@ -61,6 +65,8 @@ def _corpus_driver_argv(workspace: Path, args: argparse.Namespace, daemon_binary
     ]
     if args.suite:
         argv.extend(["--suite", str(resolve_workspace_path(workspace, args.suite))])
+    if args.keep_failure_artifacts:
+        argv.append("--keep-failure-artifacts")
     return argv
 
 

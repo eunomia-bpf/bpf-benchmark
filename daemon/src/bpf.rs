@@ -682,15 +682,9 @@ fn detect_features() -> Vec<String> {
         }
     }
 
-    #[cfg(target_arch = "aarch64")]
-    {
-        let cpu_features = cpuinfo_feature_tokens();
-        for feature in ["lse", "atomics", "crc32", "asimd"] {
-            if cpu_features.iter().any(|token| token == feature) {
-                features.push(feature.to_string());
-            }
-        }
-    }
+    // ARM64: bpfopt does not consume per-CPU ARM64 features yet (passes branch
+    // on PlatformCapabilities.arch == Aarch64). Emit nothing here; add features
+    // back when bpfopt grows ARM64 fine-grained feature gating.
 
     #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
     {
