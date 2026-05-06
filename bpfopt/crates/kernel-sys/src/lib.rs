@@ -196,6 +196,8 @@ pub struct VerifierInsnJson {
     pub pc: usize,
     #[serde(default, skip_serializing_if = "is_zero_usize")]
     pub frame: usize,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kind: Option<String>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub stack: BTreeMap<String, VerifierStackJson>,
     #[serde(default)]
@@ -376,13 +378,9 @@ pub fn verifier_states_from_log(log: &str) -> VerifierStatesJson {
 }
 
 fn convert_verifier_states(states: &[VerifierInsn]) -> VerifierStatesJson {
-    let has_delta = states
-        .iter()
-        .any(|state| state.kind == VerifierInsnKind::InsnDeltaState);
     let insns = states
         .iter()
         .filter(|state| state.kind != VerifierInsnKind::BranchDeltaState)
-        .filter(|state| !has_delta || state.kind == VerifierInsnKind::InsnDeltaState)
         .filter_map(convert_verifier_state)
         .collect();
     VerifierStatesJson { insns }
@@ -404,9 +402,19 @@ fn convert_verifier_state(state: &VerifierInsn) -> Option<VerifierInsnJson> {
     (!regs.is_empty() || !stack.is_empty()).then_some(VerifierInsnJson {
         pc: state.pc,
         frame: state.frame,
+        kind: verifier_insn_kind_json(state.kind),
         stack,
         regs,
     })
+}
+
+fn verifier_insn_kind_json(kind: VerifierInsnKind) -> Option<String> {
+    match kind {
+        VerifierInsnKind::InsnDeltaState => None,
+        VerifierInsnKind::EdgeFullState => Some("edge_full_state".to_string()),
+        VerifierInsnKind::PcFullState => Some("pc_full_state".to_string()),
+        VerifierInsnKind::BranchDeltaState => Some("branch_delta_state".to_string()),
+    }
 }
 
 fn convert_stack_state(state: &StackState) -> Option<VerifierStackJson> {
@@ -1726,6 +1734,7 @@ mod tests {
             insns: vec![VerifierInsnJson {
                 pc: 7,
                 frame: 1,
+                kind: Some("edge_full_state".to_string()),
                 stack: BTreeMap::from([(
                     "fp-16".to_string(),
                     VerifierStackJson {
@@ -1759,6 +1768,7 @@ mod tests {
         let encoded = serde_json::to_string(&states).unwrap();
         assert!(encoded.contains("\"pc\":7"));
         assert!(encoded.contains("\"frame\":1"));
+        assert!(encoded.contains("\"kind\":\"edge_full_state\""));
         assert!(encoded.contains("\"type\":\"scalar\""));
         assert!(encoded.contains("\"stack\""));
         assert!(encoded.contains("\"precise\":false"));
@@ -1787,6 +1797,27 @@ mod tests {
         let insn = &states.insns[0];
         assert_eq!(insn.regs["r3"].precise, Some(true));
         let stack = &insn.stack["fp-16"];
+        assert_eq!(stack.slot_types.as_deref(), Some("rrrrrrrr"));
+        let value = stack.value.as_ref().expect("stack scalar value");
+        assert_eq!(value.precise, Some(true));
+        assert_eq!(value.const_val, Some(0x0102_0304_0506_0708));
+    }
+
+    #[test]
+    fn verifier_states_from_log_keeps_full_stack_state_when_delta_exists() {
+        let states = verifier_states_from_log(
+            "1: (b7) r0 = 1 ; R0=1\nfrom 8 to 10: R2=fp-16 fp-16=rrrrrrrr P72623859790382856\n",
+        );
+
+        assert_eq!(states.insns.len(), 2);
+        let full = states
+            .insns
+            .iter()
+            .find(|insn| insn.pc == 10)
+            .expect("full-state call-pc snapshot");
+        assert_eq!(full.kind.as_deref(), Some("edge_full_state"));
+        assert_eq!(full.regs["r2"].offset, Some(-16));
+        let stack = &full.stack["fp-16"];
         assert_eq!(stack.slot_types.as_deref(), Some("rrrrrrrr"));
         let value = stack.value.as_ref().expect("stack scalar value");
         assert_eq!(value.precise, Some(true));

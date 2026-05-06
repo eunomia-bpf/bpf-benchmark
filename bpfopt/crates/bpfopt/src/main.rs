@@ -941,13 +941,23 @@ fn read_verifier_states(path: &Path) -> Result<Vec<VerifierInsn>> {
                 pc: insn.pc,
                 frame: insn.frame,
                 from_pc: None,
-                kind: VerifierInsnKind::InsnDeltaState,
+                kind: verifier_insn_kind(insn.kind.as_deref())?,
                 speculative: false,
                 regs,
                 stack,
             })
         })
         .collect()
+}
+
+fn verifier_insn_kind(kind: Option<&str>) -> Result<VerifierInsnKind> {
+    match kind.unwrap_or("insn_delta_state") {
+        "edge_full_state" => Ok(VerifierInsnKind::EdgeFullState),
+        "pc_full_state" => Ok(VerifierInsnKind::PcFullState),
+        "branch_delta_state" => Ok(VerifierInsnKind::BranchDeltaState),
+        "insn_delta_state" => Ok(VerifierInsnKind::InsnDeltaState),
+        other => bail!("invalid verifier state kind: {other}"),
+    }
 }
 
 fn parse_reg_name(reg: &str) -> Result<u8> {
@@ -1377,6 +1387,7 @@ mod tests {
         let state = kernel_sys::VerifierInsnJson {
             pc: 5,
             frame: 0,
+            kind: None,
             stack: BTreeMap::new(),
             regs: std::collections::BTreeMap::from([(
                 "r1".to_string(),
@@ -1428,6 +1439,30 @@ mod tests {
         let value = stack.value.as_ref().unwrap();
         assert_eq!(value.exact_value, Some(42));
         assert!(value.precise);
+        fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn verifier_states_json_preserves_full_state_kind() {
+        let path = std::env::temp_dir().join(format!(
+            "bpfopt-verifier-kind-{}-{}.json",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        fs::write(
+            &path,
+            r#"{"insns":[{"pc":11,"kind":"edge_full_state","regs":{"r2":{"type":"fp","offset":-4}},"stack":{"fp-8":{"slot_types":"rrrr????","value":{"type":"scalar","precise":true,"const_val":4294967296}}}}]}"#,
+        )
+        .unwrap();
+
+        let states = read_verifier_states(&path).unwrap();
+        assert_eq!(states.len(), 1);
+        assert_eq!(states[0].kind, VerifierInsnKind::EdgeFullState);
+        assert_eq!(states[0].regs[&2].reg_type, "fp");
+        assert!(states[0].stack.contains_key(&-8));
         fs::remove_file(path).unwrap();
     }
 }

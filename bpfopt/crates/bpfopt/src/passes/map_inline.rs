@@ -168,11 +168,13 @@ fn find_map_in_map_chain_for_outer(
     outer_site: &MapLookupSite,
 ) -> Option<MapInMapChain> {
     let mut alias_regs = HashMap::from([(0u8, 0i16)]);
+    let mut alias_stack_slots = HashMap::new();
     let mut alias_copy_pcs = Vec::new();
     let mut null_check_pc = None;
+    let bounds = subprog_bounds(insns, outer_site.call_pc);
     let mut pc = outer_site.call_pc + 1;
 
-    while pc < insns.len() && !alias_regs.is_empty() {
+    while pc < insns.len() && (!alias_regs.is_empty() || !alias_stack_slots.is_empty()) {
         let insn = &insns[pc];
         let allow_null_check = null_check_pc.is_none();
 
@@ -206,6 +208,31 @@ fn find_map_in_map_chain_for_outer(
             alias_regs.insert(dst_reg, alias_off);
             pc += insn_width(insn);
             continue;
+        }
+
+        if let Some((stack_off, width)) = resolve_stack_store_slot(insns, pc, insn, bounds) {
+            kill_overlapping_alias_stack_slots(&mut alias_stack_slots, stack_off, width);
+            if insn.class() == BPF_STX
+                && bpf_mode(insn.code) == BPF_MEM
+                && width == 8
+                && alias_regs.contains_key(&insn.src_reg())
+            {
+                alias_copy_pcs.push(pc);
+                alias_stack_slots.insert(stack_off, alias_regs[&insn.src_reg()]);
+                pc += insn_width(insn);
+                continue;
+            }
+        }
+
+        if let Some(stack_off) = resolve_stack_load_slot(insns, pc, insn, bounds) {
+            if let Some(&alias_off) = alias_stack_slots.get(&stack_off) {
+                alias_copy_pcs.push(pc);
+                alias_stack_slots.remove(&stack_off);
+                kill_defined_alias_regs(&mut alias_regs, insn);
+                alias_regs.insert(insn.dst_reg(), alias_off);
+                pc += insn_width(insn);
+                continue;
+            }
         }
 
         if insn_uses_any_alias(insn, &alias_regs) {

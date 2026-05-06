@@ -128,6 +128,22 @@ fn verifier_delta_state_with_stack(
     }
 }
 
+fn verifier_full_state_with_stack(
+    pc: usize,
+    regs: HashMap<u8, RegState>,
+    stack: HashMap<i16, StackState>,
+) -> VerifierInsn {
+    VerifierInsn {
+        pc,
+        frame: 0,
+        from_pc: Some(pc.saturating_sub(1)),
+        kind: VerifierInsnKind::EdgeFullState,
+        speculative: false,
+        regs,
+        stack,
+    }
+}
+
 fn stack_snapshot_from_key(stack_off: i16, key: &[u8]) -> HashMap<i16, StackState> {
     let mut slots = HashMap::<i16, ([u8; 8], [u8; 8])>::new();
     for (idx, byte) in key.iter().enumerate() {
@@ -415,6 +431,36 @@ fn find_map_in_map_chains_detects_r0_to_r1_alias() {
     assert_eq!(chains[0].outer_site.call_pc, 5);
     assert_eq!(chains[0].inner_call_pc, 11);
     assert_eq!(chains[0].outer_alias_copy_pcs, vec![7]);
+    assert_eq!(chains[0].outer_null_check_pc, Some(6));
+}
+
+#[test]
+fn find_map_in_map_chains_detects_stack_spilled_r0_to_r1_alias() {
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let insns = vec![
+        map[0],
+        map[1],
+        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        jeq_imm(0, 0, 8),
+        BpfInsn::stx_mem(BPF_DW, 10, 0, -16),
+        BpfInsn::ldx_mem(BPF_DW, 1, 10, -16),
+        st_mem(BPF_W, 10, -8, 2),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -8),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+        exit_insn(),
+    ];
+    let outer_sites = find_map_lookup_sites(&insns);
+
+    let chains = find_map_in_map_chains(&insns, &outer_sites);
+    assert_eq!(chains.len(), 1);
+    assert_eq!(chains[0].outer_site.call_pc, 5);
+    assert_eq!(chains[0].inner_call_pc, 12);
+    assert_eq!(chains[0].outer_alias_copy_pcs, vec![7, 8]);
     assert_eq!(chains[0].outer_null_check_pc, Some(6));
 }
 
@@ -1249,6 +1295,41 @@ fn map_inline_pass_uses_stack_snapshot_for_256_byte_key() {
     assert_eq!(result.pass_results[0].sites_applied, 1);
     assert!(program.insns.contains(&BpfInsn::mov32_imm(6, 99)));
     assert_eq!(result.pass_results[0].map_inline_records[0].key, key_bytes);
+}
+
+#[test]
+fn map_inline_pass_uses_full_state_stack_snapshot_for_key() {
+    let mut values = HashMap::new();
+    values.insert(1u32.to_le_bytes().to_vec(), 42u32.to_le_bytes().to_vec());
+    install_map(9323, 2, 8, values);
+
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let mut program = BpfProgram::new(vec![
+        map[0],
+        map[1],
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+        exit_insn(),
+    ]);
+    program.set_map_ids(vec![9323]);
+    program.set_verifier_states(vec![
+        verifier_delta_state(0, HashMap::from([(0, scalar_reg(0))])),
+        verifier_full_state_with_stack(
+            4,
+            HashMap::from([(2, fp_reg(-4))]),
+            stack_snapshot_from_key(-4, &1u32.to_le_bytes()),
+        ),
+    ]);
+
+    let result = run_map_inline_pass(&mut program);
+    assert_eq!(result.pass_results[0].sites_applied, 1);
+    assert!(program.insns.contains(&BpfInsn::mov32_imm(6, 42)));
+    assert_eq!(
+        result.pass_results[0].map_inline_records[0].key,
+        1u32.to_le_bytes().to_vec()
+    );
 }
 
 #[test]
