@@ -1301,6 +1301,7 @@ pub fn prog_rejit(
     new_insns: &[bpf_insn],
     fd_array: &[i32],
     log_buf: Option<&mut Vec<u8>>,
+    log_level: u32,
 ) -> Result<()> {
     if prog_fd.as_raw_fd() < 0 {
         bail!("BPF_PROG_REJIT prog_fd must be non-negative");
@@ -1323,12 +1324,21 @@ pub fn prog_rejit(
                 fd_array_cnt,
                 fd_array,
                 Some(log_buf),
+                log_level,
             )
         });
     }
 
-    prog_rejit_once(prog_fd, insn_cnt, new_insns, fd_array_cnt, fd_array, None)
-        .map_err(format_prog_rejit_failure)
+    prog_rejit_once(
+        prog_fd,
+        insn_cnt,
+        new_insns,
+        fd_array_cnt,
+        fd_array,
+        None,
+        log_level,
+    )
+    .map_err(format_prog_rejit_failure)
 }
 
 fn prog_rejit_with_log_buf<F>(log_buf: &mut Vec<u8>, mut run_once: F) -> Result<()>
@@ -1390,6 +1400,7 @@ fn prog_rejit_once(
     fd_array_cnt: u32,
     fd_array: &[i32],
     mut log_buf: Option<&mut [u8]>,
+    log_level: u32,
 ) -> std::result::Result<(), ProgRejitFailure> {
     let mut attr: AttrRejit = zeroed();
     attr.prog_fd = prog_fd.as_raw_fd() as u32;
@@ -1397,7 +1408,7 @@ fn prog_rejit_once(
     attr.insns = new_insns.as_ptr() as u64;
     if let Some(buf) = log_buf.as_deref_mut() {
         buf.fill(0);
-        attr.log_level = 2;
+        attr.log_level = log_level;
         attr.log_size = buf.len() as u32;
         attr.log_buf = buf.as_mut_ptr() as u64;
     }

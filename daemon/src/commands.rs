@@ -30,7 +30,8 @@ const VERIFIER_STATES_FILE: &str = "verifier-states.json";
 const DEFAULT_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(5);
 const OPTIMIZE_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(60);
 const CLI_STAGE_POLL_INTERVAL: Duration = Duration::from_millis(100);
-const REJIT_LOG_BUF_SIZE: usize = 16 * 1024 * 1024;
+const REJIT_VERBOSE_LOG_BUF_SIZE: usize = 16 * 1024 * 1024;
+const REJIT_BASIC_LOG_BUF_SIZE: usize = 1024 * 1024;
 
 #[derive(Clone, Debug)]
 pub(crate) struct CliConfig {
@@ -192,29 +193,35 @@ fn rejit_program(
     insns: &[kernel_sys::bpf_insn],
     fd_array: &RejitFdArray,
     verifier_log_path: &Path,
+    log_level: u32,
+    log_buf_size: usize,
 ) -> Result<RejitReport> {
     let prog_fd = kernel_sys::prog_get_fd_by_id(prog_id)
         .with_context(|| format!("open BPF program id {prog_id} for BPF_PROG_REJIT"))?;
-    let mut log_buf = vec![0u8; REJIT_LOG_BUF_SIZE];
+    let mut log_buf = vec![0u8; log_buf_size];
     if let Err(err) = kernel_sys::prog_rejit(
         prog_fd.as_fd(),
         insns,
         fd_array.as_slice(),
         Some(&mut log_buf),
+        log_level,
     ) {
         let log = c_log_string(&log_buf);
-        if !log.is_empty() {
-            fs::write(verifier_log_path, log)
-                .with_context(|| format!("write {}", verifier_log_path.display()))?;
-        }
+        fs::write(verifier_log_path, log)
+            .with_context(|| format!("write {}", verifier_log_path.display()))?;
         return Err(err).context("kernel rejected BPF_PROG_REJIT");
     }
     let verifier_log = c_log_string(&log_buf);
+    fs::write(verifier_log_path, &verifier_log)
+        .with_context(|| format!("write {}", verifier_log_path.display()))?;
+    if log_level != 2 {
+        return Ok(RejitReport {
+            verifier_states: kernel_sys::VerifierStatesJson { insns: Vec::new() },
+        });
+    }
     if verifier_log.is_empty() {
         bail!("BPF_PROG_REJIT for prog {prog_id} returned an empty verifier log");
     }
-    fs::write(verifier_log_path, &verifier_log)
-        .with_context(|| format!("write {}", verifier_log_path.display()))?;
     let verifier_states = kernel_sys::verifier_states_from_log(&verifier_log);
     if verifier_states.insns.is_empty() {
         bail!("BPF_PROG_REJIT verifier log for prog {prog_id} did not contain parseable state snapshots");
@@ -579,7 +586,20 @@ pub(crate) fn try_apply_one(
                     ));
                 }
             };
-            let rejit_result = rejit_program(prog_id, &pass_insns, &fd_array, &pass_verifier_log);
+            let needs_verifier_log = pass_needs_verifier_log(pass);
+            let (log_level, log_buf_size) = if needs_verifier_log {
+                (2, REJIT_VERBOSE_LOG_BUF_SIZE)
+            } else {
+                (1, REJIT_BASIC_LOG_BUF_SIZE)
+            };
+            let rejit_result = rejit_program(
+                prog_id,
+                &pass_insns,
+                &fd_array,
+                &pass_verifier_log,
+                log_level,
+                log_buf_size,
+            );
             let rejit_report = match rejit_result {
                 Ok(report) => report,
                 Err(err) => {
@@ -591,9 +611,11 @@ pub(crate) fn try_apply_one(
                     ));
                 }
             };
-            write_verifier_states_for_next_pass(&verifier_states_json, &rejit_report)
-                .with_context(|| format!("write verifier states after pass {pass}"))?;
-            verifier_states_ready = true;
+            if needs_verifier_log {
+                write_verifier_states_for_next_pass(&verifier_states_json, &rejit_report)
+                    .with_context(|| format!("write verifier states after pass {pass}"))?;
+            }
+            verifier_states_ready = needs_verifier_log;
             current_bytes = pass_bytes;
             Ok(pass_detail(pass, PassStatus::Ok, None, Some(report)))
         })?;
@@ -641,6 +663,10 @@ fn append_bpfopt_context_args(command: &mut Command, prog_info: &ProgInfoJson) {
 
 fn pass_needs_verifier_states(pass: &str) -> bool {
     matches!(pass, "const_prop" | "map_inline")
+}
+
+fn pass_needs_verifier_log(pass: &str) -> bool {
+    matches!(pass, "noop" | "const_prop" | "map_inline")
 }
 
 fn pass_needs_target(pass: &str) -> bool {
