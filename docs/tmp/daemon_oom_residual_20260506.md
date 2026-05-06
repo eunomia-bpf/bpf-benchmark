@@ -1,5 +1,8 @@
 # Daemon residual OOM after bpftool map snapshot change - 2026-05-06
 
++ Fix: replaced 64KB delete-file with skip-marker JSON. daemon writes `{skipped:true,...}` when oversized; bpfopt skips silently. (`daemon/src/commands.rs:875-907`, `bpfopt/crates/bpfopt/src/main.rs:1167-1207`, `bpfopt/crates/bpfopt/src/passes/map_inline.rs:835-887`, `bpfopt/crates/bpfopt/src/passes/map_inline.rs:2793-2806`)
++ Deleted daemon verifier_states parsing/retention; bpfopt reads file directly.
+
 ## 1. Eliminated hypothesis: map values are no longer daemon-resident
 
 The dirty working tree has removed the old daemon-side map entry materialization path. There is no remaining `write_live_map_values`, `MapKeySnapshot`, `MapValueSnapshotEntry`, `entries_by_map`, or recursive daemon-owned map-value structure under `daemon/src`.

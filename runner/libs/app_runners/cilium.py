@@ -1,10 +1,16 @@
 from __future__ import annotations
 
+import http.client
+import json
 import shutil
+import socket
+import time
+import urllib.parse
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Mapping
+from typing import Any, Mapping, Sequence
 
-from .. import ROOT_DIR, run_command
+from .. import ROOT_DIR, run_command, tail_text
 from ..benchmark_net import (
     BENCHMARK_IFACE,
     BENCHMARK_IFACE_CIDR,
@@ -15,8 +21,81 @@ from ..benchmark_net import (
 )
 from ..workload import WorkloadResult, run_named_workload
 from .etcd_support import LocalEtcdSession
-from .process_support import NativeProcessRunner
+from .process_support import NativeProcessRunner, wait_until_program_set_stable
 from .setup_support import optional_repo_artifact_path
+
+
+_CILIUM_API_TIMEOUT_S = 30.0
+_CILIUM_ENDPOINT_PEER_IFACE = "eth0"
+
+
+@dataclass(frozen=True)
+class _CiliumEndpointSpec:
+    namespace: str
+    host_if: str
+    container_id: str
+    label: str
+
+
+_CILIUM_ENDPOINT_SPECS: tuple[_CiliumEndpointSpec, ...] = (
+    _CiliumEndpointSpec("bpfbench-cepa", "lxcbench0", "bpfbench-cepa", "a"),
+    _CiliumEndpointSpec("bpfbench-cepb", "lxcbench1", "bpfbench-cepb", "b"),
+)
+
+
+class _UnixHTTPConnection(http.client.HTTPConnection):
+    def __init__(self, socket_path: Path, *, timeout: float) -> None:
+        super().__init__("localhost", timeout=timeout)
+        self.socket_path = Path(socket_path)
+
+    def connect(self) -> None:
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.settimeout(self.timeout)
+        try:
+            sock.connect(str(self.socket_path))
+        except Exception:
+            sock.close()
+            raise
+        self.sock = sock
+
+
+def _api_json(
+    socket_path: Path,
+    method: str,
+    path: str,
+    *,
+    body: Mapping[str, object] | None = None,
+    expected_status: Sequence[int] = (200,),
+    timeout: float = _CILIUM_API_TIMEOUT_S,
+) -> Any:
+    payload = None if body is None else json.dumps(body, sort_keys=True).encode()
+    headers = {"Accept": "application/json", "Host": "localhost"}
+    if payload is not None:
+        headers["Content-Type"] = "application/json"
+        headers["Content-Length"] = str(len(payload))
+    connection = _UnixHTTPConnection(socket_path, timeout=timeout)
+    try:
+        connection.request(method, path, body=payload, headers=headers)
+        response = connection.getresponse()
+        raw = response.read()
+    finally:
+        connection.close()
+    text = raw.decode("utf-8", errors="replace")
+    if response.status not in {int(status) for status in expected_status}:
+        raise RuntimeError(
+            f"Cilium API {method} {path} returned HTTP {response.status}: "
+            f"{tail_text(text, max_lines=20, max_chars=4000)}"
+        )
+    if not text.strip():
+        return {}
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"Cilium API {method} {path} returned invalid JSON: {tail_text(text)}") from exc
+
+
+def _endpoint_api_path(endpoint_id: int | str) -> str:
+    return "/endpoint/" + urllib.parse.quote(str(endpoint_id), safe="")
 
 
 def _link_exists(name: str) -> bool:
@@ -106,6 +185,36 @@ def _ensure_benchmark_interface() -> str:
     return BENCHMARK_IFACE
 
 
+def _delete_netns_if_exists(name: str) -> None:
+    if _netns_exists(name):
+        run_command(["ip", "netns", "delete", name], check=False, timeout=100)
+
+
+def _link_json(name: str, *, namespace: str | None = None) -> dict[str, object]:
+    command = ["ip", "-j"]
+    if namespace is not None:
+        command += ["-n", namespace]
+    command += ["link", "show", "dev", name]
+    payload = json.loads(run_command(command, timeout=100).stdout)
+    if not isinstance(payload, list) or not payload or not isinstance(payload[0], dict):
+        raise RuntimeError(f"could not read link metadata for {name}")
+    return dict(payload[0])
+
+
+def _link_address(name: str, *, namespace: str | None = None) -> str:
+    address = str(_link_json(name, namespace=namespace).get("address") or "").strip()
+    if not address:
+        raise RuntimeError(f"link {name} has no MAC address")
+    return address
+
+
+def _link_ifindex(name: str, *, namespace: str | None = None) -> int:
+    ifindex = int(_link_json(name, namespace=namespace).get("ifindex", 0) or 0)
+    if ifindex <= 0:
+        raise RuntimeError(f"link {name} has no ifindex")
+    return ifindex
+
+
 class CiliumRunner(NativeProcessRunner):
     def __init__(
         self,
@@ -128,6 +237,7 @@ class CiliumRunner(NativeProcessRunner):
         self.runtime_dir: Path | None = None
         self._bpf_root: Path | None = None
         self._state_dir: Path | None = None
+        self._managed_endpoint_ids: list[int] = []
 
     def _default_binary_candidates(self) -> tuple[Path, ...]:
         return tuple(
@@ -176,6 +286,7 @@ class CiliumRunner(NativeProcessRunner):
             "--enable-l7-proxy=false",
             "--enable-health-checking=false",
             "--enable-endpoint-health-checking=false",
+            "--enable-endpoint-routes=true",
             "--ipam=cluster-pool",
             f"--ipv4-range={self.ipv4_range}",
             f"--ipv4-native-routing-cidr={self.ipv4_range}",
@@ -186,10 +297,221 @@ class CiliumRunner(NativeProcessRunner):
             "--routing-mode=native",
             f"--bpf-root={self._bpf_root}",
             f"--state-dir={self._state_dir}",
+            f"--socket-path={self._api_socket_path()}",
             f"--devices={self.device}",
             f"--direct-routing-device={self.device}",
             *self.loader_args,
         ]
+
+    def _api_socket_path(self) -> Path:
+        if self._state_dir is None:
+            raise RuntimeError("CiliumRunner state directory is not prepared")
+        return self._state_dir / "cilium.sock"
+
+    def _wait_for_api(self) -> Mapping[str, object]:
+        socket_path = self._api_socket_path()
+        deadline = time.monotonic() + float(self.load_timeout_s)
+        last_error = ""
+        while time.monotonic() < deadline:
+            if self.session is not None and self.session.process is not None:
+                returncode = self.session.process.poll()
+                if returncode is not None:
+                    snapshot = self.session.collector_snapshot()
+                    details = tail_text(
+                        "\n".join((snapshot.get("stderr_tail") or []) + (snapshot.get("stdout_tail") or [])),
+                        max_lines=40,
+                        max_chars=8000,
+                    )
+                    raise RuntimeError(f"cilium-agent exited before API became ready (rc={returncode}): {details}")
+            if socket_path.exists():
+                try:
+                    config = _api_json(socket_path, "GET", "/config", expected_status=(200,))
+                    if isinstance(config, Mapping):
+                        return config
+                    raise RuntimeError("Cilium API /config returned a non-object payload")
+                except Exception as exc:
+                    last_error = str(exc)
+            time.sleep(0.2)
+        raise TimeoutError(f"Cilium API socket did not become ready at {socket_path}: {last_error}")
+
+    def _allocate_endpoint_ip(self, spec: _CiliumEndpointSpec) -> Mapping[str, object]:
+        owner = urllib.parse.quote(spec.container_id, safe="")
+        payload = _api_json(
+            self._api_socket_path(),
+            "POST",
+            f"/ipam?family=ipv4&owner={owner}",
+            expected_status=(201,),
+        )
+        if not isinstance(payload, Mapping):
+            raise RuntimeError(f"Cilium IPAM returned a non-object payload for {spec.container_id}")
+        address = payload.get("address")
+        ipv4 = payload.get("ipv4")
+        host_addressing = payload.get("host-addressing")
+        if not isinstance(address, Mapping) or not isinstance(ipv4, Mapping) or not isinstance(host_addressing, Mapping):
+            raise RuntimeError(f"Cilium IPAM returned incomplete endpoint addressing for {spec.container_id}: {payload!r}")
+        if not str(address.get("ipv4") or "").strip():
+            raise RuntimeError(f"Cilium IPAM did not allocate an IPv4 address for {spec.container_id}: {payload!r}")
+        return payload
+
+    def _prepare_endpoint_link(self, spec: _CiliumEndpointSpec, ipv4: str, gateway: str) -> None:
+        _delete_link_if_exists(spec.host_if)
+        _delete_netns_if_exists(spec.namespace)
+        run_command(["ip", "netns", "add", spec.namespace], timeout=100)
+        run_command(
+            [
+                "ip",
+                "link",
+                "add",
+                "dev",
+                spec.host_if,
+                "type",
+                "veth",
+                "peer",
+                "name",
+                f"{spec.host_if}p",
+            ],
+            timeout=100,
+        )
+        run_command(["ip", "link", "set", "dev", f"{spec.host_if}p", "netns", spec.namespace], timeout=100)
+        run_command(["ip", "link", "set", "dev", spec.host_if, "up"], timeout=100)
+        run_command(["sysctl", "-qw", f"net.ipv4.conf.{spec.host_if}.rp_filter=0"], timeout=100)
+        run_command(["ip", "-n", spec.namespace, "link", "set", "dev", f"{spec.host_if}p", "name", _CILIUM_ENDPOINT_PEER_IFACE], timeout=100)
+        run_command(["ip", "netns", "exec", spec.namespace, "sysctl", "-qw", "net.ipv4.conf.all.rp_filter=0"], timeout=100)
+        run_command(["ip", "netns", "exec", spec.namespace, "sysctl", "-qw", f"net.ipv4.conf.{_CILIUM_ENDPOINT_PEER_IFACE}.rp_filter=0"], timeout=100)
+        run_command(["ip", "-n", spec.namespace, "link", "set", "dev", "lo", "up"], timeout=100)
+        run_command(["ip", "-n", spec.namespace, "link", "set", "dev", _CILIUM_ENDPOINT_PEER_IFACE, "up"], timeout=100)
+        run_command(["ip", "-n", spec.namespace, "addr", "replace", f"{ipv4}/32", "dev", _CILIUM_ENDPOINT_PEER_IFACE], timeout=100)
+        run_command(
+            ["ip", "-n", spec.namespace, "route", "replace", f"{gateway}/32", "dev", _CILIUM_ENDPOINT_PEER_IFACE, "scope", "link"],
+            timeout=100,
+        )
+        run_command(
+            ["ip", "-n", spec.namespace, "route", "replace", "default", "via", gateway, "dev", _CILIUM_ENDPOINT_PEER_IFACE],
+            timeout=100,
+        )
+
+    def _create_endpoint(self, spec: _CiliumEndpointSpec) -> int:
+        ipam_payload = self._allocate_endpoint_ip(spec)
+        addressing = dict(ipam_payload["address"])
+        ipv4_payload = dict(ipam_payload["ipv4"])
+        host_addressing = dict(ipam_payload["host-addressing"])
+        host_ipv4 = host_addressing.get("ipv4")
+        if not isinstance(host_ipv4, Mapping):
+            raise RuntimeError(f"Cilium IPAM did not return IPv4 host addressing for {spec.container_id}")
+        ipv4 = str(addressing.get("ipv4") or "").strip()
+        gateway = str(host_ipv4.get("ip") or "").strip()
+        if not gateway:
+            raise RuntimeError(f"Cilium IPAM did not return an IPv4 endpoint gateway for {spec.container_id}")
+        self._prepare_endpoint_link(spec, ipv4, gateway)
+
+        host_mac = _link_address(spec.host_if)
+        peer_mac = _link_address(_CILIUM_ENDPOINT_PEER_IFACE, namespace=spec.namespace)
+        host_ifindex = _link_ifindex(spec.host_if)
+        endpoint_request = {
+            "addressing": {
+                "ipv4": ipv4,
+                "ipv4-pool-name": str(addressing.get("ipv4-pool-name") or ""),
+                "ipv4-expiration-uuid": str(ipv4_payload.get("expiration-uuid") or ""),
+            },
+            "container-id": spec.container_id,
+            "container-interface-name": _CILIUM_ENDPOINT_PEER_IFACE,
+            "container-name": spec.container_id,
+            "container-netns-path": f"/var/run/netns/{spec.namespace}",
+            "datapath-configuration": {},
+            "host-mac": host_mac,
+            "interface-index": host_ifindex,
+            "interface-name": spec.host_if,
+            "labels": [
+                "container:app=bpfbench-cilium",
+                f"container:instance={spec.label}",
+            ],
+            "mac": peer_mac,
+            "state": "waiting-for-identity",
+            "sync-build-endpoint": True,
+        }
+        response = _api_json(
+            self._api_socket_path(),
+            "PUT",
+            _endpoint_api_path("0"),
+            body=endpoint_request,
+            expected_status=(201,),
+            timeout=max(_CILIUM_API_TIMEOUT_S, float(self.load_timeout_s)),
+        )
+        if not isinstance(response, Mapping):
+            raise RuntimeError(f"Cilium endpoint create returned a non-object payload for {spec.container_id}")
+        endpoint_id = int(response.get("id", 0) or 0)
+        if endpoint_id <= 0:
+            raise RuntimeError(f"Cilium endpoint create did not return a valid ID for {spec.container_id}: {response!r}")
+        networking = response.get("status", {})
+        if isinstance(networking, Mapping):
+            networking = networking.get("networking", {})
+        if isinstance(networking, Mapping):
+            realized_mac = str(networking.get("mac") or "").strip()
+            if realized_mac and realized_mac.lower() != peer_mac.lower():
+                run_command(
+                    ["ip", "-n", spec.namespace, "link", "set", "dev", _CILIUM_ENDPOINT_PEER_IFACE, "address", realized_mac],
+                    timeout=100,
+                )
+        return endpoint_id
+
+    def _wait_endpoint_ready(self, endpoint_id: int) -> None:
+        deadline = time.monotonic() + float(self.load_timeout_s)
+        last_state = ""
+        while time.monotonic() < deadline:
+            payload = _api_json(self._api_socket_path(), "GET", _endpoint_api_path(endpoint_id), expected_status=(200,))
+            if isinstance(payload, Mapping):
+                status = payload.get("status")
+                if isinstance(status, Mapping):
+                    state = status.get("state")
+                    last_state = str(state or "")
+                    if last_state == "ready":
+                        return
+            time.sleep(0.2)
+        raise TimeoutError(f"Cilium endpoint {endpoint_id} did not become ready; last_state={last_state!r}")
+
+    def _setup_managed_endpoints(self) -> None:
+        self._wait_for_api()
+        self._managed_endpoint_ids = []
+        for spec in _CILIUM_ENDPOINT_SPECS:
+            endpoint_id = self._create_endpoint(spec)
+            self._managed_endpoint_ids.append(endpoint_id)
+            self._wait_endpoint_ready(endpoint_id)
+        run_command(
+            ["ip", "-n", BENCHMARK_NETNS, "route", "replace", self.ipv4_range, "via", BENCHMARK_IFACE_CIDR.split("/", 1)[0]],
+            timeout=100,
+        )
+
+    def refresh_programs(self) -> list[dict[str, object]]:
+        if self.session is None:
+            return [dict(program) for program in self.programs]
+        programs = wait_until_program_set_stable(
+            before_ids=self.session.before_ids,
+            timeout_s=self.load_timeout_s,
+            discover_programs=self.session._discover_programs,
+            process=self.session.process,
+            collector_snapshot=self.session.collector_snapshot,
+            process_name="cilium-agent",
+        )
+        self.session.programs = [dict(program) for program in programs]
+        self.programs = [dict(program) for program in programs]
+        return [dict(program) for program in self.programs]
+
+    def _delete_managed_endpoints(self) -> None:
+        if self._state_dir is None:
+            return
+        socket_path = self._api_socket_path()
+        if socket_path.exists():
+            for endpoint_id in reversed(self._managed_endpoint_ids):
+                try:
+                    _api_json(socket_path, "DELETE", _endpoint_api_path(endpoint_id), expected_status=(200, 202, 204, 404))
+                except Exception:
+                    pass
+        self._managed_endpoint_ids = []
+
+    def _cleanup_managed_endpoint_links(self) -> None:
+        for spec in _CILIUM_ENDPOINT_SPECS:
+            _delete_link_if_exists(spec.host_if)
+            _delete_netns_if_exists(spec.namespace)
 
     def start(self) -> list[int]:
         if self.etcd_session is not None:
@@ -203,18 +525,23 @@ class CiliumRunner(NativeProcessRunner):
             self._state_dir.mkdir(parents=True, exist_ok=True)
             if self.device is None:
                 self.device = _ensure_benchmark_interface()
+            self._cleanup_managed_endpoint_links()
             self.etcd_session = LocalEtcdSession(
                 work_dir=self.runtime_dir / "etcd",
                 name=type(self).__name__.replace("Runner", "").lower() or "runner",
                 startup_timeout_s=self.etcd_startup_timeout_s,
             ).start()
-            return super().start()
+            super().start()
+            self._setup_managed_endpoints()
+            return [int(program["id"]) for program in self.refresh_programs() if int(program.get("id", 0) or 0) > 0]
         except Exception:
             self.stop()
             raise
 
     def stop(self) -> None:
+        self._delete_managed_endpoints()
         super().stop()
+        self._cleanup_managed_endpoint_links()
         if self.etcd_session is not None:
             self.etcd_session.close()
             self.etcd_session = None

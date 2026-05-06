@@ -11,7 +11,7 @@ use std::io::Write;
 use std::os::fd::{AsFd, AsRawFd, OwnedFd};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 
 use anyhow::{anyhow, bail, Context, Result};
 use rayon::prelude::*;
@@ -24,6 +24,15 @@ static NEXT_WORKDIR_ID: AtomicU64 = AtomicU64::new(0);
 const REJIT_VERBOSE_LOG_BUF_SIZE: usize = 16 * 1024 * 1024;
 const REJIT_BASIC_LOG_BUF_SIZE: usize = 1024 * 1024;
 const MAP_SNAPSHOT_MAX_BYTES: u64 = 64 * 1024;
+const MAX_FAILURE_ARTIFACTS_PER_REQUEST: usize = 128;
+static FAILURE_ARTIFACT_COUNT: AtomicUsize = AtomicUsize::new(0);
+
+fn maybe_tar_workdir(workdir: &Path) -> Result<Option<String>> {
+    if FAILURE_ARTIFACT_COUNT.fetch_add(1, Ordering::Relaxed) >= MAX_FAILURE_ARTIFACTS_PER_REQUEST {
+        return Ok(None);
+    }
+    Ok(Some(tar_workdir(workdir)?))
+}
 
 #[derive(Serialize)]
 struct MapSnapshotSkipMarker {
@@ -100,30 +109,6 @@ impl Drop for WorkDir {
     }
 }
 
-fn require_regular_file(path: &Path, description: &str) -> Result<()> {
-    match fs::metadata(path) {
-        Ok(metadata) => {
-            if !metadata.is_file() {
-                bail!("{description} {} is not a regular file", path.display());
-            }
-            Ok(())
-        }
-        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
-            bail!("{description} {} is missing", path.display())
-        }
-        Err(err) => Err(err).with_context(|| format!("stat {}", path.display())),
-    }
-}
-
-fn require_nonempty_file(path: &Path, description: &str) -> Result<()> {
-    require_regular_file(path, description)?;
-    let metadata = fs::metadata(path).with_context(|| format!("stat {}", path.display()))?;
-    if metadata.len() == 0 {
-        bail!("{description} {} is empty", path.display());
-    }
-    Ok(())
-}
-
 #[derive(Clone, Debug, Serialize)]
 pub(crate) struct OptimizeOneResult {
     pub status: String,
@@ -182,11 +167,6 @@ pub(crate) struct PassDetail {
     pub bpfopt_summary: Value,
 }
 
-#[derive(Clone, Debug)]
-struct RejitReport {
-    verifier_states: kernel_sys::VerifierStatesJson,
-}
-
 fn rejit_program(
     prog_id: u32,
     insns: &[kernel_sys::bpf_insn],
@@ -194,7 +174,7 @@ fn rejit_program(
     verifier_log_path: &Path,
     log_level: u32,
     log_buf_size: usize,
-) -> Result<RejitReport> {
+) -> Result<()> {
     let prog_fd = kernel_sys::prog_get_fd_by_id(prog_id)
         .with_context(|| format!("open BPF program id {prog_id} for BPF_PROG_REJIT"))?;
     let mut log_buf = vec![0u8; log_buf_size];
@@ -205,32 +185,18 @@ fn rejit_program(
         Some(&mut log_buf),
         log_level,
     ) {
-        let log = c_log_string(&log_buf);
-        fs::write(verifier_log_path, log)
+        fs::write(verifier_log_path, c_log_bytes(&log_buf))
             .with_context(|| format!("write {}", verifier_log_path.display()))?;
         return Err(err).context("kernel rejected BPF_PROG_REJIT");
     }
-    let verifier_log = c_log_string(&log_buf);
-    fs::write(verifier_log_path, &verifier_log)
+    fs::write(verifier_log_path, c_log_bytes(&log_buf))
         .with_context(|| format!("write {}", verifier_log_path.display()))?;
-    if log_level != 2 {
-        return Ok(RejitReport {
-            verifier_states: kernel_sys::VerifierStatesJson { insns: Vec::new() },
-        });
-    }
-    if verifier_log.is_empty() {
-        bail!("BPF_PROG_REJIT for prog {prog_id} returned an empty verifier log");
-    }
-    let verifier_states = kernel_sys::verifier_states_from_log(&verifier_log);
-    if verifier_states.insns.is_empty() {
-        bail!("BPF_PROG_REJIT verifier log for prog {prog_id} did not contain parseable state snapshots");
-    }
-    Ok(RejitReport { verifier_states })
+    Ok(())
 }
 
-fn c_log_string(buf: &[u8]) -> String {
+fn c_log_bytes(buf: &[u8]) -> &[u8] {
     let end = buf.iter().position(|&b| b == 0).unwrap_or(buf.len());
-    String::from_utf8_lossy(&buf[..end]).trim_end().to_string()
+    &buf[..end]
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -372,6 +338,7 @@ pub(crate) fn try_execute_plan(
     if plans.is_empty() {
         return Ok(Vec::new());
     }
+    FAILURE_ARTIFACT_COUNT.store(0, Ordering::Relaxed);
     let prog_ids: Vec<u32> = plans.iter().map(|plan| plan.prog_id).collect();
     let plans_by_id: HashMap<u32, Vec<StepSpec>> = plans
         .iter()
@@ -413,13 +380,13 @@ fn execute_one(
                 .iter()
                 .any(|step| step.status != PassStatus::Ok);
             if result.status != "ok" || any_failed {
-                result.workdir_tar_b64 = Some(tar_workdir(workdir.path())?);
+                result.workdir_tar_b64 = maybe_tar_workdir(workdir.path())?;
             }
             Ok(result)
         }
         Err(err) => {
             let mut result = OptimizeOneResult::error(prog_id, format!("{err:#}"));
-            result.workdir_tar_b64 = Some(tar_workdir(workdir.path())?);
+            result.workdir_tar_b64 = maybe_tar_workdir(workdir.path())?;
             Ok(result)
         }
     }
@@ -503,7 +470,7 @@ fn run_program_steps(
     // ENOENT, forcing the runner to put a state-producing pass (`noop`) first
     // in the plan. Daemon does not silently provide an empty placeholder.
     let mut input_path = initial_input_path.clone();
-    let mut verifier_states_path = workdir.path().join("verifier_states_initial.json");
+    let mut verifier_states_path = workdir.path().join("verifier_log_initial.log");
     let mut current_bytes = orig_bytes.clone();
     let mut step_details: Vec<PassDetail> = Vec::with_capacity(steps.len());
 
@@ -511,9 +478,6 @@ fn run_program_steps(
         let output_path = workdir.path().join(format!("output_step{idx}.bin"));
         let report_path = workdir.path().join(format!("report_step{idx}.json"));
         let verifier_log_path = workdir.path().join(format!("verifier_log_step{idx}.log"));
-        let next_states_path = workdir
-            .path()
-            .join(format!("verifier_states_step{idx}.json"));
 
         let vars = step_vars(
             prog_id,
@@ -675,7 +639,7 @@ fn run_program_steps(
         } else {
             REJIT_BASIC_LOG_BUF_SIZE
         };
-        let rejit_report = match rejit_program(
+        match rejit_program(
             prog_id,
             &pass_insns,
             &fd_array,
@@ -683,7 +647,7 @@ fn run_program_steps(
             step.log_level,
             log_buf_size,
         ) {
-            Ok(report) => report,
+            Ok(()) => {}
             Err(err) => {
                 step_details.push(pass_detail(
                     step,
@@ -695,11 +659,7 @@ fn run_program_steps(
             }
         };
 
-        write_json_file(&next_states_path, &rejit_report.verifier_states)
-            .with_context(|| format!("write verifier states after step {idx}"))?;
-        require_nonempty_file(&next_states_path, "verifier states")?;
-
-        verifier_states_path = next_states_path;
+        verifier_states_path = verifier_log_path;
         input_path = output_path;
         current_bytes = pass_bytes;
 

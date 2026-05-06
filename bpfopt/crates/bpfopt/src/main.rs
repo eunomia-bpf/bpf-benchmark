@@ -17,7 +17,7 @@ use bpfopt::pass::{
 };
 use bpfopt::passes::{MapInfoAnalysis, PASS_REGISTRY};
 use clap::{Args, Parser, Subcommand};
-use kernel_sys::{VerifierRegJson, VerifierStackJson, VerifierStatesJson};
+use kernel_sys::{VerifierRegJson, VerifierStackJson};
 use serde::{Deserialize, Serialize};
 
 const PASS_ALIASES: &[(&str, &str)] = &[
@@ -955,7 +955,15 @@ fn read_profile(path: Option<&Path>) -> Result<Option<ProfilingData>> {
 }
 
 fn read_verifier_states(path: &Path) -> Result<Vec<VerifierInsn>> {
-    let states: VerifierStatesJson = read_json_file(path, "verifier-states.json")?;
+    let log = fs::read_to_string(path)
+        .with_context(|| format!("failed to read verifier log from {}", path.display()))?;
+    let states = kernel_sys::verifier_states_from_log(&log);
+    if states.insns.is_empty() {
+        bail!(
+            "verifier log {} did not contain parseable state snapshots",
+            path.display()
+        );
+    }
     states
         .insns
         .into_iter()
@@ -1655,7 +1663,10 @@ mod tests {
         )
         .unwrap();
 
-        let err = read_map_values(&dir, &[92]).unwrap_err();
+        let err = match read_map_values(&dir, &[92]) {
+            Ok(_) => panic!("unexpectedly accepted malformed size-skip marker"),
+            Err(err) => err,
+        };
         let _ = std::fs::remove_dir_all(&dir);
 
         assert!(
@@ -1699,20 +1710,16 @@ mod tests {
     }
 
     #[test]
-    fn verifier_states_json_builds_stack_states() {
+    fn verifier_states_log_builds_stack_states() {
         let path = std::env::temp_dir().join(format!(
-            "bpfopt-verifier-states-{}-{}.json",
+            "bpfopt-verifier-states-{}-{}.log",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()
                 .as_nanos()
         ));
-        fs::write(
-            &path,
-            r#"{"insns":[{"pc":9,"regs":{"r2":{"type":"fp","offset":-16}},"stack":{"fp-16":{"slot_types":"rrrrrrrr","value":{"type":"scalar","precise":true,"const_val":42}}}}]}"#,
-        )
-        .unwrap();
+        fs::write(&path, "9: R2=fp-16 fp-16=rrrrrrrr P42\n").unwrap();
 
         let states = read_verifier_states(&path).unwrap();
         assert_eq!(states.len(), 1);
@@ -1726,20 +1733,16 @@ mod tests {
     }
 
     #[test]
-    fn verifier_states_json_preserves_full_state_kind() {
+    fn verifier_states_log_preserves_full_state_kind() {
         let path = std::env::temp_dir().join(format!(
-            "bpfopt-verifier-kind-{}-{}.json",
+            "bpfopt-verifier-kind-{}-{}.log",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()
                 .as_nanos()
         ));
-        fs::write(
-            &path,
-            r#"{"insns":[{"pc":11,"kind":"edge_full_state","regs":{"r2":{"type":"fp","offset":-4}},"stack":{"fp-8":{"slot_types":"rrrr????","value":{"type":"scalar","precise":true,"const_val":4294967296}}}}]}"#,
-        )
-        .unwrap();
+        fs::write(&path, "from 8 to 11: R2=fp-4 fp-8=rrrr???? P4294967296\n").unwrap();
 
         let states = read_verifier_states(&path).unwrap();
         assert_eq!(states.len(), 1);

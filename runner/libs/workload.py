@@ -21,6 +21,9 @@ from typing import Iterator, Mapping, Sequence
 from . import run_command, tail_text, which
 from .benchmark_net import BENCHMARK_IFACE, BENCHMARK_NETNS, BENCHMARK_PEER_IFACE_IP
 
+_CILIUM_ENDPOINT_NAMESPACES = ("bpfbench-cepa", "bpfbench-cepb")
+_CILIUM_ENDPOINT_IFACE = "eth0"
+
 
 def resolve_workload_tool(name: str) -> str:
     tool_dir = os.environ.get("BPFREJIT_WORKLOAD_TOOL_BIN_DIR", "").strip()
@@ -132,6 +135,45 @@ print("READY", flush=True)
 server.serve_forever()
 """
 _NAMESPACED_HTTP_READY_MARKER = "READY"
+_NAMESPACED_UDP_SERVER_SCRIPT = """
+import socket
+import sys
+
+host = sys.argv[1]
+port = int(sys.argv[2])
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.bind((host, port))
+print("READY", flush=True)
+while True:
+    sock.recvfrom(65535)
+"""
+_UDP_CLIENT_SCRIPT = """
+import socket
+import sys
+import time
+
+host = sys.argv[1]
+port = int(sys.argv[2])
+duration = float(sys.argv[3])
+deadline = time.monotonic() + duration
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+payload = b"bpfbench-cilium-udp" * 4
+sent = 0
+while time.monotonic() < deadline:
+    try:
+        sock.sendto(payload, (host, port))
+        sent += 1
+    except OSError:
+        pass
+print(sent)
+"""
+
+
+@dataclass(frozen=True)
+class _CiliumEndpoint:
+    namespace: str
+    ipv4: str
+    gateway: str
 
 
 def _wait_for_stdout_marker(
@@ -215,6 +257,73 @@ class NamespacedHttpServer:
             raise RuntimeError(
                 f"interface-bound HTTP server in namespace {self.namespace} did not report ready at {self.url}"
             ) from exc
+        except RuntimeError:
+            self.__exit__(None, None, None)
+            raise
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> None:
+        del exc_type, exc, tb
+        if self.process is None:
+            return
+        process = self.process
+        self.process = None
+        if process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=5)
+        if process.stdout is not None:
+            process.stdout.close()
+        if process.stderr is not None:
+            process.stderr.close()
+
+
+class NamespacedUdpServer:
+    def __init__(self, namespace: str, host: str, port: int = 18081) -> None:
+        self.namespace = str(namespace).strip()
+        self.host = str(host).strip()
+        self.port = int(port)
+        self.process: subprocess.Popen[str] | None = None
+
+    def __enter__(self) -> "NamespacedUdpServer":
+        ip_binary = which("ip")
+        if ip_binary is None:
+            raise RuntimeError("ip is required for namespace UDP workloads")
+        python_binary = sys.executable or which("python3")
+        if not python_binary:
+            raise RuntimeError("python3 is required for namespace UDP workloads")
+        self.process = subprocess.Popen(
+            [
+                ip_binary,
+                "netns",
+                "exec",
+                self.namespace,
+                python_binary,
+                "-u",
+                "-c",
+                _NAMESPACED_UDP_SERVER_SCRIPT,
+                self.host,
+                str(self.port),
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+        )
+        deadline = time.monotonic() + 5.0
+        try:
+            _wait_for_stdout_marker(
+                self.process,
+                marker=_NAMESPACED_HTTP_READY_MARKER,
+                deadline=deadline,
+                description="namespace UDP server",
+            )
+        except TimeoutError as exc:
+            self.__exit__(None, None, None)
+            raise RuntimeError(f"namespace UDP server in {self.namespace} did not report ready at {self.host}:{self.port}") from exc
         except RuntimeError:
             self.__exit__(None, None, None)
             raise
@@ -543,6 +652,225 @@ def _network_client_command(command: list[str], network_device: str | None = Non
     return list(command)
 
 
+def _namespaced_client_command(namespace: str, command: Sequence[str]) -> list[str]:
+    ip_binary = which("ip")
+    if ip_binary is None:
+        raise RuntimeError("ip is required for namespaced network workloads")
+    return [ip_binary, "netns", "exec", str(namespace), *[str(part) for part in command]]
+
+
+def _netns_exists(namespace: str) -> bool:
+    completed = run_command(["ip", "netns", "list"], check=False, timeout=10)
+    if completed.returncode != 0:
+        return False
+    return any(line.split(maxsplit=1)[0].strip() == namespace for line in completed.stdout.splitlines())
+
+
+def _namespace_ipv4(namespace: str, iface: str) -> str | None:
+    completed = run_command(["ip", "-n", namespace, "-4", "-o", "addr", "show", "dev", iface], check=False, timeout=10)
+    if completed.returncode != 0:
+        return None
+    match = re.search(r"\binet\s+([0-9.]+)/", completed.stdout)
+    return None if match is None else match.group(1)
+
+
+def _namespace_default_gateway(namespace: str) -> str | None:
+    completed = run_command(["ip", "-n", namespace, "-4", "route", "show", "default"], check=False, timeout=10)
+    if completed.returncode != 0:
+        return None
+    match = re.search(r"\bvia\s+([0-9.]+)\b", completed.stdout)
+    return None if match is None else match.group(1)
+
+
+def _cilium_endpoint_topology() -> tuple[_CiliumEndpoint, _CiliumEndpoint] | None:
+    endpoints: list[_CiliumEndpoint] = []
+    for namespace in _CILIUM_ENDPOINT_NAMESPACES:
+        if not _netns_exists(namespace):
+            return None
+        ipv4 = _namespace_ipv4(namespace, _CILIUM_ENDPOINT_IFACE)
+        gateway = _namespace_default_gateway(namespace)
+        if not ipv4 or not gateway:
+            return None
+        endpoints.append(_CiliumEndpoint(namespace=namespace, ipv4=ipv4, gateway=gateway))
+    return endpoints[0], endpoints[1]
+
+
+def _run_wrk_http_load(
+    wrk_binary: str,
+    url: str,
+    seconds: int,
+    *,
+    namespace: str | None = None,
+    threads: int = 2,
+    connections: int = 20,
+    workload_name: str,
+) -> WorkloadResult:
+    command = [wrk_binary, f"-t{int(threads)}", f"-c{int(connections)}", f"-d{int(seconds)}s", url]
+    if namespace:
+        command = _namespaced_client_command(namespace, command)
+    start = time.monotonic()
+    completed = run_command(command, check=False, timeout=float(seconds) + 30)
+    elapsed = time.monotonic() - start
+    if completed.returncode != 0:
+        raise RuntimeError(
+            f"{workload_name} wrk load failed via {_render_command(command)}: "
+            f"{tail_text(completed.stderr or completed.stdout)}"
+        )
+    total_requests = next(
+        (float(m.group(1)) for line in completed.stdout.splitlines() if (m := re.search(r"([0-9]+)\s+requests in", line.strip()))),
+        None,
+    )
+    if total_requests is None:
+        raise RuntimeError(
+            f"{workload_name} wrk did not report requests metric: "
+            f"{tail_text(completed.stdout or completed.stderr)}"
+        )
+    return _finish_result(total_requests, elapsed, completed.stdout or "", completed.stderr or "")
+
+
+def _start_ping(target: str, seconds: int, *, namespace: str | None = None) -> subprocess.Popen[object] | None:
+    ping_binary = which("ping")
+    if ping_binary is None:
+        return None
+    command: list[str] = [ping_binary, "-i", "0.01", "-q", "-w", str(seconds), target]
+    if namespace:
+        command = _namespaced_client_command(namespace, command)
+    return subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def _stop_background_process(process: subprocess.Popen[object] | None) -> None:
+    if process is None:
+        return
+    if process.poll() is None:
+        process.terminate()
+        try:
+            process.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait(timeout=2)
+
+
+def _run_udp_burst(host: str, port: int, seconds: int, *, namespace: str | None = None) -> WorkloadResult:
+    python_binary = sys.executable or which("python3")
+    if not python_binary:
+        raise RuntimeError("python3 is required for UDP workloads")
+    command: list[str] = [python_binary, "-u", "-c", _UDP_CLIENT_SCRIPT, host, str(port), str(seconds)]
+    if namespace:
+        command = _namespaced_client_command(namespace, command)
+    start = time.monotonic()
+    completed = run_command(command, check=False, timeout=float(seconds) + 10)
+    elapsed = time.monotonic() - start
+    if completed.returncode != 0:
+        raise RuntimeError(f"UDP workload failed via {_render_command(command)}: {tail_text(completed.stderr or completed.stdout)}")
+    try:
+        sent = float(completed.stdout.strip().splitlines()[-1])
+    except (IndexError, ValueError) as exc:
+        raise RuntimeError(f"UDP workload did not report packet count: {tail_text(completed.stdout or completed.stderr)}") from exc
+    return _finish_result(sent, elapsed, completed.stdout or "", completed.stderr or "")
+
+
+def _run_cilium_endpoint_matrix(seconds: int, *, wrk_binary: str) -> WorkloadResult | None:
+    topology = _cilium_endpoint_topology()
+    if topology is None:
+        return None
+    endpoint_a, endpoint_b = topology
+    results: list[WorkloadResult] = []
+    with (
+        NamespacedHttpServer(endpoint_a.namespace, endpoint_a.ipv4) as server_a,
+        NamespacedHttpServer(endpoint_b.namespace, endpoint_b.ipv4) as server_b,
+        NamespacedHttpServer(BENCHMARK_NETNS, BENCHMARK_PEER_IFACE_IP) as external_server,
+        LocalHttpServer(endpoint_a.gateway) as host_server,
+    ):
+        ping_proc = _start_ping(endpoint_a.ipv4, seconds)
+        try:
+            results.append(
+                _run_wrk_http_load(
+                    wrk_binary,
+                    server_a.url,
+                    seconds,
+                    threads=2,
+                    connections=20,
+                    workload_name="cilium host-to-endpoint",
+                )
+            )
+        finally:
+            _stop_background_process(ping_proc)
+
+        ping_proc = _start_ping(endpoint_a.gateway, seconds, namespace=endpoint_a.namespace)
+        try:
+            results.append(
+                _run_wrk_http_load(
+                    wrk_binary,
+                    host_server.url,
+                    seconds,
+                    namespace=endpoint_a.namespace,
+                    threads=2,
+                    connections=20,
+                    workload_name="cilium endpoint-to-host",
+                )
+            )
+        finally:
+            _stop_background_process(ping_proc)
+
+        ping_proc = _start_ping(endpoint_b.ipv4, seconds, namespace=endpoint_a.namespace)
+        try:
+            results.append(
+                _run_wrk_http_load(
+                    wrk_binary,
+                    server_b.url,
+                    seconds,
+                    namespace=endpoint_a.namespace,
+                    threads=2,
+                    connections=20,
+                    workload_name="cilium endpoint-to-endpoint",
+                )
+            )
+            results.append(
+                _run_wrk_http_load(
+                    wrk_binary,
+                    server_a.url,
+                    seconds,
+                    namespace=endpoint_b.namespace,
+                    threads=2,
+                    connections=20,
+                    workload_name="cilium reverse-endpoint-to-endpoint",
+                )
+            )
+        finally:
+            _stop_background_process(ping_proc)
+
+        results.append(
+            _run_wrk_http_load(
+                wrk_binary,
+                external_server.url,
+                seconds,
+                namespace=endpoint_a.namespace,
+                threads=2,
+                connections=20,
+                workload_name="cilium endpoint-to-external",
+            )
+        )
+        results.append(
+            _run_wrk_http_load(
+                wrk_binary,
+                server_a.url,
+                seconds,
+                namespace=BENCHMARK_NETNS,
+                threads=2,
+                connections=20,
+                workload_name="cilium external-to-endpoint",
+            )
+        )
+
+        with NamespacedUdpServer(endpoint_b.namespace, endpoint_b.ipv4) as udp_server:
+            results.append(_run_udp_burst(endpoint_b.ipv4, udp_server.port, seconds, namespace=endpoint_a.namespace))
+        with NamespacedUdpServer(endpoint_a.namespace, endpoint_a.ipv4) as udp_server:
+            results.append(_run_udp_burst(endpoint_a.ipv4, udp_server.port, seconds, namespace=BENCHMARK_NETNS))
+        with NamespacedUdpServer(BENCHMARK_NETNS, BENCHMARK_PEER_IFACE_IP) as udp_server:
+            results.append(_run_udp_burst(BENCHMARK_PEER_IFACE_IP, udp_server.port, seconds, namespace=endpoint_a.namespace))
+    return _merge_workload_results(results)
+
+
 def _render_command(command: Sequence[str]) -> str:
     return " ".join(shlex.quote(str(part)) for part in command)
 
@@ -587,6 +915,7 @@ def run_network_lossy_multi_load(
     wrk_binary = resolve_workload_tool("wrk")
     ping_binary = which("ping")
     seconds = max(1, int(round(float(duration_s))))
+    results: list[WorkloadResult] = []
     with _netem_qdisc(network_device, loss_pct=20.0, delay_ms=50):
         with _network_http_server(network_device) as server:
             ping_proc = None
@@ -622,15 +951,13 @@ def run_network_lossy_multi_load(
                         f"network_lossy_multi wrk did not report requests metric: "
                         f"{tail_text(c.stdout or c.stderr)}"
                     )
-                return _finish_result(total_requests, elapsed, c.stdout or "", c.stderr or "")
+                results.append(_finish_result(total_requests, elapsed, c.stdout or "", c.stderr or ""))
             finally:
-                if ping_proc is not None:
-                    ping_proc.terminate()
-                    try:
-                        ping_proc.wait(timeout=2)
-                    except subprocess.TimeoutExpired:
-                        ping_proc.kill()
-                        ping_proc.wait(timeout=2)
+                _stop_background_process(ping_proc)
+    endpoint_result = _run_cilium_endpoint_matrix(seconds, wrk_binary=wrk_binary)
+    if endpoint_result is not None:
+        results.append(endpoint_result)
+    return _merge_workload_results(results)
 
 
 def run_xdp_traffic_load(duration_s: int | float, *, network_device: str | None = None) -> WorkloadResult:
