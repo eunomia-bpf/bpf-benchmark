@@ -266,9 +266,13 @@ fn find_provenance_mov(
         return None;
     }
 
+    is_reg_mov_for_width(insn, width).then_some(mov_pc)
+}
+
+fn is_reg_mov_for_width(insn: &BpfInsn, width: RotateWidth) -> bool {
     let mov64 = insn.code == (BPF_ALU64 | BPF_MOV | BPF_X);
     let mov32 = insn.code == (BPF_ALU | BPF_MOV | BPF_X);
-    (mov64 || (width == RotateWidth::W32 && mov32)).then_some(mov_pc)
+    mov64 || (width == RotateWidth::W32 && mov32)
 }
 
 fn try_match_rotate(
@@ -278,8 +282,82 @@ fn try_match_rotate(
     i2: &BpfInsn,
     pc: usize,
 ) -> Option<RotateSite> {
-    try_match_rotate_width(insns, i0, i1, i2, pc, RotateWidth::W64)
+    try_match_split_copy_rotate(insns, pc)
+        .or_else(|| try_match_rotate_width(insns, i0, i1, i2, pc, RotateWidth::W64))
         .or_else(|| try_match_rotate_width(insns, i0, i1, i2, pc, RotateWidth::W32))
+}
+
+/// Clang often lowers 32-bit hash rotates with two explicit copies:
+///
+///   MOV tmp, val; RSH tmp, W-k; MOV dst, val; LSH dst, k; OR dst, tmp
+///
+/// This is the shape seen in Cilium's Jenkins hash paths. The older matcher
+/// only saw adjacent `shift; shift; OR` triples and missed this form.
+fn try_match_split_copy_rotate(insns: &[BpfInsn], pc: usize) -> Option<RotateSite> {
+    try_match_split_copy_rotate_width(insns, pc, RotateWidth::W64)
+        .or_else(|| try_match_split_copy_rotate_width(insns, pc, RotateWidth::W32))
+}
+
+fn try_match_split_copy_rotate_width(
+    insns: &[BpfInsn],
+    pc: usize,
+    width: RotateWidth,
+) -> Option<RotateSite> {
+    if pc + 4 >= insns.len() {
+        return None;
+    }
+
+    let mov0 = &insns[pc];
+    let shift0 = &insns[pc + 1];
+    let mov1 = &insns[pc + 2];
+    let shift1 = &insns[pc + 3];
+    let or_insn = &insns[pc + 4];
+
+    if !is_reg_mov_for_width(mov0, width) || !is_reg_mov_for_width(mov1, width) {
+        return None;
+    }
+
+    let val_reg = mov0.src_reg();
+    if mov1.src_reg() != val_reg {
+        return None;
+    }
+
+    let reg0 = mov0.dst_reg();
+    let reg1 = mov1.dst_reg();
+    if reg0 == reg1 || shift0.dst_reg() != reg0 || shift1.dst_reg() != reg1 {
+        return None;
+    }
+
+    let alu_class = width.alu_class();
+    let shift0_is_lsh = shift0.code == (alu_class | BPF_LSH | BPF_K);
+    let shift0_is_rsh = shift0.code == (alu_class | BPF_RSH | BPF_K);
+    let shift1_is_lsh = shift1.code == (alu_class | BPF_LSH | BPF_K);
+    let shift1_is_rsh = shift1.code == (alu_class | BPF_RSH | BPF_K);
+
+    let (lsh_amount, rsh_amount) = if shift0_is_lsh && shift1_is_rsh {
+        (shift0.imm as u32, shift1.imm as u32)
+    } else if shift0_is_rsh && shift1_is_lsh {
+        (shift1.imm as u32, shift0.imm as u32)
+    } else {
+        return None;
+    };
+
+    if lsh_amount + rsh_amount != width.bits() {
+        return None;
+    }
+
+    if or_insn.code != (alu_class | BPF_OR | BPF_X) {
+        return None;
+    }
+
+    let or_dst = or_insn.dst_reg();
+    let or_src = or_insn.src_reg();
+    let or_uses_both = (or_dst == reg0 && or_src == reg1) || (or_dst == reg1 && or_src == reg0);
+    if !or_uses_both {
+        return None;
+    }
+
+    rotate_site(pc, 5, or_dst, val_reg, or_src, lsh_amount, width)
 }
 
 fn try_match_rotate_width(
@@ -413,8 +491,8 @@ fn rotate_site(
     width: RotateWidth,
 ) -> Option<RotateSite> {
     // The packed rotate kinsn uses tmp_reg as verifier proof scratch. It cannot
-    // encode sites where the original OR writes the result into that same temp.
-    (dst_reg != tmp_reg).then_some(RotateSite {
+    // encode sites where the scratch is also the result or source register.
+    (dst_reg != tmp_reg && val_reg != tmp_reg).then_some(RotateSite {
         start_pc,
         old_len,
         dst_reg,
@@ -529,6 +607,29 @@ mod tests {
         let sites = scan_rotate_sites(&insns);
         assert_eq!(sites.len(), 1);
         assert_eq!(sites[0].shift_amount, 7);
+        assert_eq!(sites[0].width, RotateWidth::W32);
+    }
+
+    #[test]
+    fn test_rotate32_pass_cilium_split_copy_shape() {
+        // From Cilium bpf_xdp.bpf.o LBB6_177:
+        // w1 = w6; w1 >>= 0x1c; w2 = w6; w2 <<= 0x4; w2 |= w1
+        let insns = vec![
+            mov32_reg(1, 6),
+            alu32_imm(BPF_RSH, 1, 28),
+            mov32_reg(2, 6),
+            alu32_imm(BPF_LSH, 2, 4),
+            alu32_reg(BPF_OR, 2, 1),
+        ];
+
+        let sites = scan_rotate_sites(&insns);
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].start_pc, 0);
+        assert_eq!(sites[0].old_len, 5);
+        assert_eq!(sites[0].shift_amount, 4);
+        assert_eq!(sites[0].dst_reg, 2);
+        assert_eq!(sites[0].val_reg, 6);
+        assert_eq!(sites[0].tmp_reg, 1);
         assert_eq!(sites[0].width, RotateWidth::W32);
     }
 
