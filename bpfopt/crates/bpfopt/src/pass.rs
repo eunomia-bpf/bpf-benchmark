@@ -116,6 +116,8 @@ pub struct BpfProgram {
     pub map_values: HashMap<(u32, Vec<u8>), Vec<u8>>,
     /// Explicit lookup misses from map-values.json: (map_id, key_bytes).
     pub map_value_nulls: HashSet<(u32, Vec<u8>)>,
+    /// Map-in-map outer entries: (outer_map_id, outer_key_bytes) -> inner map id.
+    pub map_inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
     /// Pre-loaded map metadata: map_id -> MapMetadata.
     /// Used by offline snapshot callers and unit tests.
     pub map_metadata: HashMap<u32, MapMetadata>,
@@ -289,6 +291,7 @@ impl BpfProgram {
             line_info: None,
             map_values: HashMap::new(),
             map_value_nulls: HashSet::new(),
+            map_inner_map_ids: HashMap::new(),
             map_metadata: HashMap::new(),
             map_provider: Arc::new(SnapshotMapProvider),
         }

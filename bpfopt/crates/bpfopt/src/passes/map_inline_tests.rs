@@ -15,6 +15,7 @@ use crate::passes::{ConstPropPass, DcePass};
 const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
 const BPF_MAP_TYPE_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_HASH;
 const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
+const BPF_MAP_TYPE_HASH_OF_MAPS: u32 = kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS;
 
 fn ld_imm64(dst: u8, src: u8, imm: i32) -> [BpfInsn; 2] {
     [
@@ -386,6 +387,58 @@ fn find_map_lookup_sites_ignores_calls_without_map_load() {
     ];
 
     assert!(find_map_lookup_sites(&insns).is_empty());
+}
+
+#[test]
+fn find_map_in_map_chains_detects_r0_to_r1_alias() {
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let insns = vec![
+        map[0],
+        map[1],
+        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        jeq_imm(0, 0, 7),
+        BpfInsn::mov64_reg(1, 0),
+        st_mem(BPF_W, 10, -8, 2),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -8),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+        exit_insn(),
+    ];
+    let outer_sites = find_map_lookup_sites(&insns);
+
+    let chains = find_map_in_map_chains(&insns, &outer_sites);
+    assert_eq!(chains.len(), 1);
+    assert_eq!(chains[0].outer_site.call_pc, 5);
+    assert_eq!(chains[0].inner_call_pc, 11);
+    assert_eq!(chains[0].outer_alias_copy_pcs, vec![7]);
+    assert_eq!(chains[0].outer_null_check_pc, Some(6));
+}
+
+#[test]
+fn find_map_in_map_chains_ignores_absent_alias() {
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let inner = ld_imm64(1, BPF_PSEUDO_MAP_FD, 43);
+    let insns = vec![
+        map[0],
+        map[1],
+        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        inner[0],
+        inner[1],
+        st_mem(BPF_W, 10, -8, 2),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -8),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+    ];
+    let outer_sites = find_map_lookup_sites(&insns);
+
+    assert!(find_map_in_map_chains(&insns, &outer_sites).is_empty());
 }
 
 #[test]
@@ -1266,6 +1319,78 @@ fn map_inline_pass_requires_explicit_precise_stack_scalar() {
     let result = run_map_inline_pass(&mut program);
     assert_eq!(program.insns, original);
     assert!(has_non_constant_key_skip(&result));
+}
+
+#[test]
+fn map_inline_pass_rewrites_map_in_map_chain_loads() {
+    let outer_map_id = 9501;
+    let inner_map_id = 9502;
+    install_mock_map(
+        outer_map_id,
+        MockMapState {
+            info: BpfMapInfo {
+                map_type: BPF_MAP_TYPE_HASH_OF_MAPS,
+                key_size: 4,
+                value_size: 4,
+                max_entries: 8,
+            },
+            values: HashMap::new(),
+        },
+    );
+    install_array_map_entry(inner_map_id, 8, 2, 77u32.to_le_bytes().to_vec());
+
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let mut program = BpfProgram::new(vec![
+        map[0],
+        map[1],
+        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        jeq_imm(0, 0, 8),
+        BpfInsn::mov64_reg(1, 0),
+        st_mem(BPF_W, 10, -8, 2),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -8),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+        BpfInsn::mov64_imm(0, 0),
+        exit_insn(),
+        BpfInsn::mov64_imm(0, 1),
+        exit_insn(),
+    ]);
+    program.set_map_ids(vec![outer_map_id]);
+    program
+        .map_inner_map_ids
+        .insert((outer_map_id, 1u32.to_le_bytes().to_vec()), inner_map_id);
+    program.set_verifier_states(vec![
+        verifier_delta_state_with_stack(
+            5,
+            HashMap::from([(2, fp_reg(-4))]),
+            stack_snapshot_from_key(-4, &1u32.to_le_bytes()),
+        ),
+        verifier_delta_state_with_stack(
+            11,
+            HashMap::from([(2, fp_reg(-8))]),
+            stack_snapshot_from_key(-8, &2u32.to_le_bytes()),
+        ),
+    ]);
+
+    let result = run_map_inline_pass(&mut program);
+    assert_eq!(result.pass_results[0].sites_applied, 1);
+    assert!(program.insns.contains(&BpfInsn::mov32_imm(6, 77)));
+    assert!(!program
+        .insns
+        .iter()
+        .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
+    assert_eq!(
+        result.pass_results[0].map_inline_records[0].map_id,
+        inner_map_id
+    );
+    assert_eq!(
+        result.pass_results[0].map_inline_records[0].key,
+        2u32.to_le_bytes().to_vec()
+    );
 }
 
 #[test]

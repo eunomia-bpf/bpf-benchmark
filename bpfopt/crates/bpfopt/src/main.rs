@@ -251,6 +251,8 @@ struct MapSnapshotJson {
 struct MapEntryJson {
     key: String,
     value: Option<String>,
+    #[serde(default)]
+    inner_map_id: Option<u32>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -572,6 +574,7 @@ fn attach_program_inputs(program: &mut BpfProgram, common: &CommonArgs) -> Resul
         program.map_metadata = snapshot.metadata;
         program.map_values = snapshot.values;
         program.map_value_nulls = snapshot.nulls;
+        program.map_inner_map_ids = snapshot.inner_map_ids;
     }
     program.func_info = read_btf_info_records(
         common.func_info.as_deref(),
@@ -1039,6 +1042,7 @@ struct MapSnapshot {
     metadata: HashMap<u32, MapMetadata>,
     values: HashMap<(u32, Vec<u8>), Vec<u8>>,
     nulls: HashSet<(u32, Vec<u8>)>,
+    inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
 }
 
 fn read_map_values(path: &Path) -> Result<MapSnapshot> {
@@ -1046,6 +1050,7 @@ fn read_map_values(path: &Path) -> Result<MapSnapshot> {
     let mut metadata = HashMap::new();
     let mut values = HashMap::new();
     let mut nulls = HashSet::new();
+    let mut inner_map_ids = HashMap::new();
 
     for map in raw.maps {
         let map_type = parse_map_type(&map.map_type)?;
@@ -1064,12 +1069,15 @@ fn read_map_values(path: &Path) -> Result<MapSnapshot> {
                 .with_context(|| format!("invalid key hex for map {}", map.map_id))?;
             if let Some(value) = entry.value {
                 values.insert(
-                    (map.map_id, key),
+                    (map.map_id, key.clone()),
                     decode_hex(&value)
                         .with_context(|| format!("invalid value hex for map {}", map.map_id))?,
                 );
             } else {
-                nulls.insert((map.map_id, key));
+                nulls.insert((map.map_id, key.clone()));
+            }
+            if let Some(inner_map_id) = entry.inner_map_id {
+                inner_map_ids.insert((map.map_id, key), inner_map_id);
             }
         }
     }
@@ -1078,6 +1086,7 @@ fn read_map_values(path: &Path) -> Result<MapSnapshot> {
         metadata,
         values,
         nulls,
+        inner_map_ids,
     })
 }
 
@@ -1100,6 +1109,8 @@ fn parse_map_type(map_type: &MapTypeJson) -> Result<u32> {
                 "lru_percpu_hash" | "lru_per_cpu_hash" => {
                     Ok(kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH)
                 }
+                "array_of_maps" => Ok(kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS),
+                "hash_of_maps" => Ok(kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS),
                 _ => bail!("unsupported map_type: {name}"),
             }
         }
@@ -1304,6 +1315,48 @@ mod tests {
         assert_eq!(report["inlined_map_entries"][0]["map_id"], 7);
         assert_eq!(report["inlined_map_entries"][0]["key_hex"], "01000000");
         assert_eq!(report["inlined_map_entries"][0]["value_hex"], "2a000000");
+    }
+
+    #[test]
+    fn read_map_values_accepts_map_in_map_inner_ids() {
+        let path = std::env::temp_dir().join(format!(
+            "bpfopt-map-values-map-in-map-{}.json",
+            std::process::id()
+        ));
+        std::fs::write(
+            &path,
+            r#"{
+              "maps": [{
+                "map_id": 90,
+                "map_type": "hash_of_maps",
+                "key_size": 4,
+                "value_size": 4,
+                "max_entries": 8,
+                "entries": [{
+                  "key": "01000000",
+                  "value": "5b000000",
+                  "inner_map_id": 91
+                }]
+              }]
+            }"#,
+        )
+        .unwrap();
+
+        let snapshot = read_map_values(&path).unwrap();
+        let _ = std::fs::remove_file(&path);
+
+        assert_eq!(
+            snapshot.metadata[&90].map_type,
+            kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS
+        );
+        assert_eq!(
+            snapshot.inner_map_ids[&(90, 1u32.to_le_bytes().to_vec())],
+            91
+        );
+        assert_eq!(
+            snapshot.values[&(90, 1u32.to_le_bytes().to_vec())],
+            91u32.to_le_bytes().to_vec()
+        );
     }
 
     #[test]

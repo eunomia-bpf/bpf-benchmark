@@ -141,19 +141,23 @@ fn get_prog_info_with_map_ids_from_fd(
 fn get_map_infos(map_ids: &[u32]) -> Result<Vec<MapInfo>> {
     let mut maps = Vec::with_capacity(map_ids.len());
     for &map_id in map_ids {
-        let fd = kernel_sys::map_get_fd_by_id(map_id)
-            .with_context(|| format!("open BPF map id {map_id}"))?;
-        let info = kernel_sys::map_obj_get_info_by_fd(fd.as_fd())
-            .with_context(|| format!("read info for BPF map id {map_id}"))?;
-        maps.push(MapInfo {
-            map_id,
-            map_type: info.type_,
-            key_size: info.key_size,
-            value_size: info.value_size,
-            max_entries: info.max_entries,
-        });
+        maps.push(bpf_map_info_by_id(map_id)?);
     }
     Ok(maps)
+}
+
+pub(crate) fn bpf_map_info_by_id(map_id: u32) -> Result<MapInfo> {
+    let fd = kernel_sys::map_get_fd_by_id(map_id)
+        .with_context(|| format!("open BPF map id {map_id}"))?;
+    let info = kernel_sys::map_obj_get_info_by_fd(fd.as_fd())
+        .with_context(|| format!("read info for BPF map id {map_id}"))?;
+    Ok(MapInfo {
+        map_id,
+        map_type: info.type_,
+        key_size: info.key_size,
+        value_size: info.value_size,
+        max_entries: info.max_entries,
+    })
 }
 
 fn probe_target_kinsns(targets: &[KinsnProbeTarget]) -> Result<BTreeMap<String, TargetKinsnJson>> {

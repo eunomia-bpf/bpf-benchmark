@@ -8,9 +8,11 @@ use crate::pass::{Analysis, BpfProgram};
 
 const BPF_MAP_TYPE_HASH: u32 = kernel_sys::BPF_MAP_TYPE_HASH;
 const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY;
+const BPF_MAP_TYPE_ARRAY_OF_MAPS: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS;
 #[cfg(test)]
 const BPF_MAP_TYPE_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_HASH;
 const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
+const BPF_MAP_TYPE_HASH_OF_MAPS: u32 = kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS;
 const BPF_MAP_TYPE_LRU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_HASH;
 #[cfg(test)]
 const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
@@ -57,6 +59,14 @@ impl MapInfo {
     /// Returns whether userspace can read this map's backing values correctly.
     pub fn supports_direct_value_inline(&self) -> bool {
         self.supports_direct_value_access()
+    }
+
+    /// Returns whether this map stores inner map references as values.
+    pub fn is_map_in_map(&self) -> bool {
+        matches!(
+            self.map_type,
+            BPF_MAP_TYPE_ARRAY_OF_MAPS | BPF_MAP_TYPE_HASH_OF_MAPS
+        )
     }
 
     /// Returns whether map_inline can eliminate the lookup/null-check sequence.
@@ -556,5 +566,21 @@ mod tests {
             !lru_percpu_hash.requires_entry_presence_check(),
             "LRU_PERCPU_HASH must not use HASH/LRU_HASH lookup-removal handling"
         );
+    }
+
+    #[test]
+    fn map_in_map_types_are_not_direct_value_inlineable() {
+        for map_type in [BPF_MAP_TYPE_ARRAY_OF_MAPS, BPF_MAP_TYPE_HASH_OF_MAPS] {
+            let info = MapInfo {
+                map_type,
+                key_size: 4,
+                value_size: 4,
+                max_entries: 16,
+                map_id: 700,
+            };
+            assert!(info.is_map_in_map());
+            assert!(!info.supports_direct_value_access());
+            assert!(!info.supports_direct_value_inline());
+        }
     }
 }

@@ -36,6 +36,16 @@ pub struct MapLookupSite {
     pub map_load_pc: usize,
 }
 
+/// A two-level map-in-map lookup chain: outer lookup result flows into the
+/// inner lookup's map argument.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MapInMapChain {
+    pub outer_site: MapLookupSite,
+    pub inner_call_pc: usize,
+    pub outer_alias_copy_pcs: Vec<usize>,
+    pub outer_null_check_pc: Option<usize>,
+}
+
 /// Constant key materialized on the stack for a map lookup.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ConstantKey {
@@ -140,6 +150,73 @@ pub fn find_map_lookup_sites(insns: &[BpfInsn]) -> Vec<MapLookupSite> {
     }
 
     sites
+}
+
+/// Find outer-to-inner map-in-map lookup chains among direct outer lookup sites.
+pub fn find_map_in_map_chains(
+    insns: &[BpfInsn],
+    outer_sites: &[MapLookupSite],
+) -> Vec<MapInMapChain> {
+    outer_sites
+        .iter()
+        .filter_map(|outer_site| find_map_in_map_chain_for_outer(insns, outer_site))
+        .collect()
+}
+
+fn find_map_in_map_chain_for_outer(
+    insns: &[BpfInsn],
+    outer_site: &MapLookupSite,
+) -> Option<MapInMapChain> {
+    let mut alias_regs = HashMap::from([(0u8, 0i16)]);
+    let mut alias_copy_pcs = Vec::new();
+    let mut null_check_pc = None;
+    let mut pc = outer_site.call_pc + 1;
+
+    while pc < insns.len() && !alias_regs.is_empty() {
+        let insn = &insns[pc];
+        let allow_null_check = null_check_pc.is_none();
+
+        if allow_null_check && is_null_check_on_alias(insn, &alias_regs) {
+            null_check_pc = Some(pc);
+            let Some(next_pc) = advance_to_non_null_path(pc, insn, insns.len()) else {
+                break;
+            };
+            pc = next_pc;
+            continue;
+        }
+
+        if insn.is_call() && insn.src_reg() == 0 && insn.imm == HELPER_MAP_LOOKUP_ELEM {
+            if alias_regs.get(&1).copied() == Some(0) {
+                return Some(MapInMapChain {
+                    outer_site: outer_site.clone(),
+                    inner_call_pc: pc,
+                    outer_alias_copy_pcs: alias_copy_pcs,
+                    outer_null_check_pc: null_check_pc,
+                });
+            }
+            break;
+        }
+
+        if let Some((dst_reg, alias_off)) = alias_copy(insn, &alias_regs) {
+            if alias_off != 0 {
+                break;
+            }
+            alias_copy_pcs.push(pc);
+            kill_defined_alias_regs(&mut alias_regs, insn);
+            alias_regs.insert(dst_reg, alias_off);
+            pc += insn_width(insn);
+            continue;
+        }
+
+        if insn_uses_any_alias(insn, &alias_regs) {
+            break;
+        }
+        kill_defined_alias_regs(&mut alias_regs, insn);
+
+        pc += insn_width(insn);
+    }
+
+    None
 }
 
 /// Recover a stack-materialized constant key for a lookup helper call.
@@ -751,6 +828,62 @@ fn run_map_inline_round(
             info.value_size,
             info.max_entries,
         ));
+        if info.is_map_in_map() {
+            match build_map_in_map_chain_rewrite(program, &site, info, use_verifier_guided_keys) {
+                Ok(Some(mut rewrite)) => {
+                    if rewrite
+                        .skipped_pcs
+                        .iter()
+                        .any(|&pc| pc < bt.is_target.len() && bt.is_target[pc])
+                    {
+                        record_diagnostic(
+                            &mut diagnostics,
+                            format!(
+                                "site at PC={}: keeping map-in-map lookup chain because removal would cross a branch target",
+                                site.call_pc
+                            ),
+                        );
+                        rewrite.skipped_pcs.clear();
+                        rewrite.removed_null_check = false;
+                    }
+                    if rewrite
+                        .replacements
+                        .keys()
+                        .any(|pc| rewrite.skipped_pcs.contains(pc))
+                    {
+                        let reason = "internal rewrite overlap".to_string();
+                        record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
+                        continue;
+                    }
+                    log_map_inline_debug(&format!(
+                        "site at PC={}: map-in-map rewrite prepared with {} replacement load(s), removed_null_check={}",
+                        site.call_pc,
+                        rewrite.replacements.len(),
+                        rewrite.removed_null_check
+                    ));
+                    rewrites.push(rewrite);
+                }
+                Ok(None) => {
+                    let reason = "map-in-map chain is not inlineable".to_string();
+                    record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
+                }
+                Err(err) => {
+                    let message = format!("{err:#}");
+                    if let Some(reason) = site_level_inline_veto_reason(&err) {
+                        record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
+                        continue;
+                    }
+                    if is_concrete_map_value_snapshot_error(&message) {
+                        return Err(err.context(format!(
+                            "map_inline requires a concrete map-in-map snapshot at outer lookup pc {}",
+                            site.call_pc
+                        )));
+                    }
+                    return Err(err);
+                }
+            }
+            continue;
+        }
         if !info.supports_direct_value_inline() {
             log_map_inline_debug(&format!(
                 "site pc={} skip: map type {} not inlineable",
@@ -1217,6 +1350,245 @@ fn build_site_rewrite(
         map_inline_record: MapInlineRecord {
             map_id: info.map_id,
             key: encoded_key,
+            value: inline_value,
+        },
+        skipped_pcs,
+        replacements,
+    }))
+}
+
+fn build_map_in_map_chain_rewrite(
+    program: &BpfProgram,
+    outer_site: &MapLookupSite,
+    outer_info: &MapInfo,
+    use_verifier_guided_keys: bool,
+) -> anyhow::Result<Option<SiteRewrite>> {
+    let Some(chain) = find_map_in_map_chains(&program.insns, std::slice::from_ref(outer_site))
+        .into_iter()
+        .next()
+    else {
+        return Ok(None);
+    };
+    let outer_key = extract_site_constant_key(
+        program,
+        outer_site.call_pc,
+        outer_info,
+        use_verifier_guided_keys,
+    )
+    .map_err(|err| site_level_inline_veto(format!("map-in-map outer key unavailable: {err}")))?;
+    if outer_key.width < outer_info.key_size as usize {
+        return Err(site_level_inline_veto(format!(
+            "map-in-map outer key width {} is smaller than map key size {}",
+            outer_key.width, outer_info.key_size
+        )));
+    }
+    let encoded_outer_key = encode_key_bytes(&outer_key.bytes, outer_info.key_size as usize);
+    if program.has_null_map_value_snapshot(outer_info.map_id, &encoded_outer_key) {
+        return Err(site_level_inline_veto(format!(
+            "map-in-map outer map {} has no live inner map for key {}",
+            outer_info.map_id,
+            format_bytes_preview(&encoded_outer_key)
+        )));
+    }
+    let inner_map_id = program
+        .map_inner_map_ids
+        .get(&(outer_info.map_id, encoded_outer_key.clone()))
+        .copied()
+        .ok_or_else(|| {
+            anyhow::anyhow!(
+                "map_values snapshot missing inner_map_id for outer map {} key {}",
+                outer_info.map_id,
+                format_bytes_preview(&encoded_outer_key)
+            )
+        })?;
+    let inner_info = program
+        .map_provider
+        .map_info(program, inner_map_id)
+        .map_err(anyhow::Error::msg)?
+        .ok_or_else(|| {
+            anyhow::anyhow!(
+                "map_values snapshot has no metadata for inner map {} from outer map {} key {}",
+                inner_map_id,
+                outer_info.map_id,
+                format_bytes_preview(&encoded_outer_key)
+            )
+        })?;
+    if inner_info.is_map_in_map() {
+        return Err(site_level_inline_veto(format!(
+            "nested map-in-map inner map type {} not inlineable",
+            inner_info.map_type
+        )));
+    }
+    if !inner_info.supports_direct_value_inline() {
+        return Err(site_level_inline_veto(format!(
+            "inner map type {} not inlineable",
+            inner_info.map_type
+        )));
+    }
+
+    let inner_key = extract_site_constant_key(
+        program,
+        chain.inner_call_pc,
+        &inner_info,
+        use_verifier_guided_keys,
+    )
+    .map_err(|err| site_level_inline_veto(format!("map-in-map inner key unavailable: {err}")))?;
+    if inner_key.width < inner_info.key_size as usize {
+        return Err(site_level_inline_veto(format!(
+            "map-in-map inner key width {} is smaller than map key size {}",
+            inner_key.width, inner_info.key_size
+        )));
+    }
+    let encoded_inner_key = encode_key_bytes(&inner_key.bytes, inner_info.key_size as usize);
+
+    let uses = classify_r0_uses_with_options(
+        &program.insns,
+        chain.inner_call_pc,
+        inner_info.has_removable_lookup_pattern(),
+        inner_info.has_removable_lookup_pattern(),
+    );
+    if inner_info.requires_entry_presence_check() && uses.null_check_pc.is_none() {
+        return Err(site_level_inline_veto(
+            "map-in-map inner hash map inline requires an immediate null check",
+        ));
+    }
+    if uses.fixed_loads.is_empty() {
+        return Err(site_level_inline_veto(
+            "map-in-map inner lookup result is not consumed by fixed-offset scalar loads",
+        ));
+    }
+
+    let lookup_value_size = program
+        .map_provider
+        .lookup_value_size(program, &inner_info)
+        .map_err(anyhow::Error::msg)?;
+    if program.has_null_map_value_snapshot(inner_info.map_id, &encoded_inner_key) {
+        if is_hash_like_map_type(inner_info.map_type) {
+            return Err(site_level_inline_veto(format!(
+                "inner hash-like map {} has no live entry for key {}",
+                inner_info.map_id,
+                format_bytes_preview(&encoded_inner_key)
+            )));
+        }
+        return Err(anyhow::anyhow!(null_map_value_snapshot_message(
+            inner_info.map_id,
+            &encoded_inner_key
+        )));
+    }
+    let value = program
+        .map_provider
+        .lookup_elem(
+            program,
+            inner_info.map_id,
+            &encoded_inner_key,
+            lookup_value_size,
+        )
+        .map_err(anyhow::Error::msg)?;
+    let inline_value = prepare_inline_value(&inner_info, &value).map_err(site_level_inline_veto)?;
+
+    let mut replacements = BTreeMap::new();
+    for load in &uses.fixed_loads {
+        let scalar =
+            read_scalar_from_value(&inline_value, load.offset, load.size).ok_or_else(|| {
+                anyhow::anyhow!(
+                    "inner map value read out of bounds for load pc {} (offset {}, size {})",
+                    load.pc,
+                    load.offset,
+                    load.size
+                )
+            })?;
+        replacements.insert(load.pc, emit_constant_load(load.dst_reg, scalar, load.size));
+    }
+    if replacements.is_empty() {
+        return Ok(None);
+    }
+
+    let replacement_pcs = uses
+        .fixed_loads
+        .iter()
+        .map(|load| load.pc)
+        .collect::<HashSet<_>>();
+    let mut outer_lookup_pcs = HashSet::new();
+    outer_lookup_pcs.insert(outer_site.call_pc);
+    outer_lookup_pcs.insert(outer_site.map_load_pc);
+    outer_lookup_pcs.insert(outer_site.map_load_pc + 1);
+    outer_lookup_pcs.extend(outer_key.materialization_pcs.iter().copied());
+    if let Some(r2_mov_pc) = outer_key.r2_mov_pc {
+        outer_lookup_pcs.insert(r2_mov_pc);
+    }
+    if let Some(r2_add_pc) = outer_key.r2_add_pc {
+        outer_lookup_pcs.insert(r2_add_pc);
+    }
+
+    let mut inner_lookup_pcs = HashSet::new();
+    if let Some(outer_null_check_pc) = chain.outer_null_check_pc {
+        inner_lookup_pcs.insert(outer_null_check_pc);
+    }
+    inner_lookup_pcs.extend(chain.outer_alias_copy_pcs.iter().copied());
+    inner_lookup_pcs.insert(chain.inner_call_pc);
+    inner_lookup_pcs.extend(inner_key.materialization_pcs.iter().copied());
+    if let Some(r2_mov_pc) = inner_key.r2_mov_pc {
+        inner_lookup_pcs.insert(r2_mov_pc);
+    }
+    if let Some(r2_add_pc) = inner_key.r2_add_pc {
+        inner_lookup_pcs.insert(r2_add_pc);
+    }
+    if let Some(inner_null_check_pc) = uses.null_check_pc {
+        inner_lookup_pcs.insert(inner_null_check_pc);
+    }
+    inner_lookup_pcs.extend(uses.alias_copy_pcs.iter().copied());
+
+    let mut lookup_pattern_pcs = outer_lookup_pcs.clone();
+    lookup_pattern_pcs.extend(inner_lookup_pcs.iter().copied());
+    let outer_null_check_blocks_removal =
+        if let Some(outer_null_check_pc) = chain.outer_null_check_pc {
+            !null_check_removal_window_is_trivial(
+                program,
+                &uses,
+                outer_null_check_pc,
+                &lookup_pattern_pcs,
+                &replacement_pcs,
+            )
+        } else {
+            false
+        };
+    let inner_null_check_blocks_removal = if let Some(inner_null_check_pc) = uses.null_check_pc {
+        !null_check_removal_window_is_trivial(
+            program,
+            &uses,
+            inner_null_check_pc,
+            &lookup_pattern_pcs,
+            &replacement_pcs,
+        )
+    } else {
+        false
+    };
+    let can_remove_lookup_pattern = uses.other_uses.is_empty()
+        && !outer_null_check_blocks_removal
+        && !inner_null_check_blocks_removal
+        && lookup_pattern_removal_is_safe(program, outer_site.call_pc, &outer_lookup_pcs)
+        && lookup_pattern_removal_is_safe(program, chain.inner_call_pc, &inner_lookup_pcs);
+    let skipped_pcs = if can_remove_lookup_pattern {
+        lookup_pattern_pcs
+    } else {
+        HashSet::new()
+    };
+
+    Ok(Some(SiteRewrite {
+        call_pc: outer_site.call_pc,
+        diagnostic_value: format!(
+            "outer_map_id={} outer_key={} inner_map_id={} inner_key={} {}",
+            outer_info.map_id,
+            format_bytes_preview(&encoded_outer_key),
+            inner_info.map_id,
+            format_bytes_preview(&encoded_inner_key),
+            format_inlined_value_diagnostic(&inline_value, &uses.fixed_loads)
+        ),
+        removed_null_check: can_remove_lookup_pattern
+            && (chain.outer_null_check_pc.is_some() || uses.null_check_pc.is_some()),
+        map_inline_record: MapInlineRecord {
+            map_id: inner_info.map_id,
+            key: encoded_inner_key,
             value: inline_value,
         },
         skipped_pcs,
