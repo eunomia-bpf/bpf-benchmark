@@ -41,13 +41,29 @@ def find_result_json(target: Path) -> Path:
     raise FileNotFoundError(f"no result.json under {target}")
 
 
-def collect_per_program(payload: dict, min_runs: int) -> list[dict]:
-    """Build per-program ratio records from raw counter deltas."""
+def _prog_apply_count(per_prog_entry: dict) -> int:
+    """Sum sites_applied across all passes for one program."""
+    total = 0
+    for ps in (per_prog_entry or {}).get("passes", []):
+        sm = ps.get("bpfopt_summary") or {}
+        total += int(sm.get("sites_applied") or 0)
+    return total
+
+
+def collect_per_program(payload: dict, min_runs: int, applied_only: bool = False) -> list[dict]:
+    """Build per-program ratio records from raw counter deltas.
+
+    applied_only: when True, drop programs with zero sites_applied across all passes.
+    Lets you isolate the ratio of programs the optimizer actually changed.
+    """
     out: list[dict] = []
     for app in payload.get("results", []):
         baseline = (app.get("baseline") or {}).get("bpf") or {}
         post = (app.get("post_rejit") or {}).get("bpf") or {}
+        per_prog = (app.get("rejit_result") or {}).get("per_program") or {}
         for pid in set(baseline) & set(post):
+            if applied_only and _prog_apply_count(per_prog.get(pid) or per_prog.get(str(pid)) or {}) == 0:
+                continue
             b, p = baseline[pid], post[pid]
             b_runs = int(b.get("run_cnt_delta") or 0)
             p_runs = int(p.get("run_cnt_delta") or 0)
@@ -216,18 +232,19 @@ def print_per_app(payload: dict, progs: list[dict], per_pass: bool) -> None:
         print("  ".join(render_cell(v, c) for v, c in zip(cells, cols)))
 
 
-def report(path: Path, threshold: int, per_app: bool, verbose: bool, per_pass: bool = False) -> int:
+def report(path: Path, threshold: int, per_app: bool, verbose: bool, per_pass: bool = False, applied_only: bool = False) -> int:
     payload = json.loads(Path(path).read_text())
     suite_status = payload.get("status", "?")
     samples = payload.get("samples", "?")
     duration = payload.get("workload_seconds", "?")
-    progs = collect_per_program(payload, threshold)
+    progs = collect_per_program(payload, threshold, applied_only=applied_only)
 
     print(f"# Corpus analysis: {path}")
     print(f"  suite status:    {suite_status}")
     print(f"  samples:         {samples}")
     print(f"  workload_secs:   {duration}")
     print(f"  threshold:       min(b_runs, p_runs) >= {threshold}")
+    print(f"  applied-only:    {applied_only}")
     print(f"  retained progs:  {len(progs)}")
 
     if not progs:
@@ -275,13 +292,15 @@ def main() -> int:
                     help="add per-pass apply-count columns to the per-app table")
     ap.add_argument("--verbose", action="store_true",
                     help="print every retained per-program ratio")
+    ap.add_argument("--applied-only", action="store_true",
+                    help="drop programs where no pass applied any sites (isolates true optimizer effect)")
     args = ap.parse_args()
     try:
         result_json = find_result_json(args.target)
     except FileNotFoundError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
-    return report(result_json, args.threshold, args.per_app, args.verbose, args.per_pass)
+    return report(result_json, args.threshold, args.per_app, args.verbose, args.per_pass, args.applied_only)
 
 
 if __name__ == "__main__":
