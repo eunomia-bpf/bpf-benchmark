@@ -357,22 +357,6 @@ fn extract_log_string(buf: &[u8]) -> String {
     String::from_utf8_lossy(&buf[..end]).trim_end().to_string()
 }
 
-pub fn verifier_log_tail(log: &str) -> String {
-    let log = log.trim();
-    if log.is_empty() {
-        return "<empty verifier log>".to_string();
-    }
-    const MAX_TAIL_CHARS: usize = 65536;
-    let total = log.chars().count();
-    if total > MAX_TAIL_CHARS {
-        let skip = total - MAX_TAIL_CHARS;
-        let tail: String = log.chars().skip(skip).collect();
-        format!("... verifier log head truncated ({skip} chars) ...\n{tail}")
-    } else {
-        log.to_string()
-    }
-}
-
 pub fn verifier_states_from_log(log: &str) -> VerifierStatesJson {
     let parsed = verifier_log::parse_verifier_log(log);
     convert_verifier_states(&parsed)
@@ -468,15 +452,24 @@ struct ProgRejitFailure {
 
 fn format_prog_rejit_failure(failure: ProgRejitFailure) -> anyhow::Error {
     let errno = failure.error.raw_os_error().unwrap_or(libc::EIO);
-    if !failure.log.is_empty() {
-        anyhow!(
-            "BPF_PROG_REJIT errno {errno}: {}\nverifier log:\n{}",
-            failure.error,
-            verifier_log_tail(&failure.log)
-        )
-    } else {
-        anyhow!("BPF_PROG_REJIT errno {errno}: {}", failure.error)
+    let log = failure.log.trim();
+    if log.is_empty() {
+        return anyhow!("BPF_PROG_REJIT errno {errno}: {}", failure.error);
     }
+    const MAX_TAIL_CHARS: usize = 65536;
+    let total = log.chars().count();
+    let formatted_log = if total > MAX_TAIL_CHARS {
+        let skip = total - MAX_TAIL_CHARS;
+        let tail: String = log.chars().skip(skip).collect();
+        format!("... verifier log head truncated ({skip} chars) ...\n{tail}")
+    } else {
+        log.to_string()
+    };
+    anyhow!(
+        "BPF_PROG_REJIT errno {errno}: {}\nverifier log:\n{}",
+        failure.error,
+        formatted_log
+    )
 }
 
 unsafe fn sys_bpf<T>(cmd: u32, attr: *mut T, size: usize) -> libc::c_long {
@@ -1238,11 +1231,21 @@ pub fn attach_branch_snapshot_sidecar(
             Some(buf) => extract_log_string(buf),
             None => String::new(),
         };
+        let log = log.trim();
         if !log.is_empty() {
+            const MAX_TAIL_CHARS: usize = 65536;
+            let total = log.chars().count();
+            let formatted_log = if total > MAX_TAIL_CHARS {
+                let skip = total - MAX_TAIL_CHARS;
+                let tail: String = log.chars().skip(skip).collect();
+                format!("... verifier log head truncated ({skip} chars) ...\n{tail}")
+            } else {
+                log.to_string()
+            };
             return Err(anyhow!(
                 "load branch snapshot sidecar: {}\nverifier log:\n{}",
                 os_error(errno_from_libbpf_ret(prog_fd)),
-                verifier_log_tail(&log)
+                formatted_log
             ));
         }
         return Err(libbpf_error("load branch snapshot sidecar", prog_fd));
