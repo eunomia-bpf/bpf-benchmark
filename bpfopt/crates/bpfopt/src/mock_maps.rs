@@ -5,7 +5,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::pass::{BpfProgram, MapMetadata, MapProvider, SnapshotMapProvider};
+use crate::pass::{BpfProgram, MapLookupError, MapMetadata, MapProvider, SnapshotMapProvider};
 
 #[derive(Clone, Debug, Default)]
 pub struct BpfMapInfo {
@@ -71,20 +71,17 @@ impl MapProvider for MockMapProvider {
         map_id: u32,
         key: &[u8],
         value_size: usize,
-    ) -> std::result::Result<Vec<u8>, String> {
+    ) -> std::result::Result<Vec<u8>, MapLookupError> {
         if let Some(value) = program.map_values.get(&(map_id, key.to_vec())) {
             if value.len() != value_size {
-                return Err(format!(
+                return Err(MapLookupError::Failed(format!(
                     "snapshot map {} returned value size {}, expected {}",
                     map_id,
                     value.len(),
                     value_size
-                ));
+                )));
             }
             return Ok(value.clone());
-        }
-        if program.map_value_nulls.contains(&(map_id, key.to_vec())) {
-            return Err(crate::pass::null_map_value_snapshot_message(map_id, key));
         }
 
         if let Some(result) = mock_lookup_elem(map_id, key, value_size) {
@@ -136,25 +133,30 @@ fn mock_lookup_value_size(map_id: u32) -> Option<usize> {
     })
 }
 
-fn mock_lookup_elem(map_id: u32, key: &[u8], value_size: usize) -> Option<Result<Vec<u8>, String>> {
+fn mock_lookup_elem(
+    map_id: u32,
+    key: &[u8],
+    value_size: usize,
+) -> Option<Result<Vec<u8>, MapLookupError>> {
     MOCK_MAPS.with(|maps| {
         let maps = maps.borrow();
         let state = maps.get(&map_id)?;
         if let Some(value) = state.values.get(key) {
             if value.len() != value_size {
-                return Some(Err(format!(
+                return Some(Err(MapLookupError::Failed(format!(
                     "mock map {} returned value size {}, expected {}",
                     map_id,
                     value.len(),
                     value_size
-                )));
+                ))));
             }
             return Some(Ok(value.clone()));
         }
 
-        Some(Err(crate::pass::missing_map_value_snapshot_message(
-            map_id, key,
-        )))
+        Some(Err(MapLookupError::MissingKey {
+            map_id,
+            key: key.to_vec(),
+        }))
     })
 }
 

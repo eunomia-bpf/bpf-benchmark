@@ -14,7 +14,7 @@ from .process_support import ProcessOutputCollector, programs_after, wait_until_
 DEFAULT_SCRIPT_DIR = ROOT_DIR / "runner" / "assets" / "bpftrace_scripts"
 
 
-DEFAULT_ATTACH_TIMEOUT_S = 60
+DEFAULT_ATTACH_TIMEOUT_S = 600
 
 
 class BpftraceRunner(AppRunner):
@@ -129,14 +129,14 @@ class BpftraceRunner(AppRunner):
         self.process = None
         stop_error: Exception | None = None
         try:
-            stop_agent(process, timeout=8)
+            stop_agent(process, timeout=80)
         except Exception as exc:
             stop_error = exc
         if self.stdout_thread is not None:
-            self.stdout_thread.join(timeout=2.0)
+            self.stdout_thread.join(timeout=20.0)
             self.stdout_thread = None
         if self.stderr_thread is not None:
-            self.stderr_thread.join(timeout=2.0)
+            self.stderr_thread.join(timeout=20.0)
             self.stderr_thread = None
         snapshot = self.collector.snapshot()
         self.process_output = {

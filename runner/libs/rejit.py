@@ -293,7 +293,7 @@ def _start_daemon_server(
         if proc.poll() is not None:
             raise RuntimeError(f"daemon exited early (rc={proc.returncode}): {_daemon_log_tail(stdout_path, stderr_path)}")
         time.sleep(0.05)
-    _kill_proc(proc, timeout=1)
+    _kill_proc(proc, timeout=10)
     raise RuntimeError(f"timed out waiting for daemon socket: {_daemon_log_tail(stdout_path, stderr_path)}")
 
 
@@ -304,7 +304,7 @@ def _kill_proc(proc: subprocess.Popen[str], *, timeout: int) -> None:
 
 
 def _stop_daemon_server(proc: subprocess.Popen[str], socket_dir: str) -> None:
-    _kill_proc(proc, timeout=5)
+    _kill_proc(proc, timeout=50)
     _DAEMON_SOCKET_PATH.unlink(missing_ok=True)
     shutil.rmtree(socket_dir, ignore_errors=True)
 

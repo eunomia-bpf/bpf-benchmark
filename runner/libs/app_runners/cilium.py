@@ -21,7 +21,7 @@ from .setup_support import optional_repo_artifact_path
 
 def _link_exists(name: str) -> bool:
     try:
-        run_command(["ip", "-o", "link", "show", "dev", name], timeout=10)
+        run_command(["ip", "-o", "link", "show", "dev", name], timeout=100)
     except Exception:
         return False
     return True
@@ -31,14 +31,14 @@ def _delete_link_if_exists(name: str) -> None:
     if not _link_exists(name):
         return
     try:
-        run_command(["ip", "link", "delete", "dev", name], timeout=10)
+        run_command(["ip", "link", "delete", "dev", name], timeout=100)
     except Exception:
         pass
 
 
 def _netns_exists(name: str) -> bool:
     try:
-        completed = run_command(["ip", "netns", "list"], timeout=10)
+        completed = run_command(["ip", "netns", "list"], timeout=100)
     except Exception:
         return False
     return any(line.split(maxsplit=1)[0].strip() == name for line in completed.stdout.splitlines())
@@ -48,7 +48,7 @@ def _link_exists_in_netns(namespace: str, name: str) -> bool:
     if not _netns_exists(namespace):
         return False
     try:
-        run_command(["ip", "-n", namespace, "-o", "link", "show", "dev", name], timeout=10)
+        run_command(["ip", "-n", namespace, "-o", "link", "show", "dev", name], timeout=100)
     except Exception:
         return False
     return True
@@ -62,7 +62,7 @@ def _ensure_benchmark_interface() -> str:
         run_command(
             ["ip", "-n", BENCHMARK_NETNS, "link", "delete", "dev", BENCHMARK_PEER_IFACE],
             check=False,
-            timeout=10,
+            timeout=100,
         )
         peer_exists_in_netns = False
     if iface_exists and not peer_exists_in_netns:
@@ -71,7 +71,7 @@ def _ensure_benchmark_interface() -> str:
         peer_exists_in_root = False
         peer_exists_in_netns = False
     if not _netns_exists(BENCHMARK_NETNS):
-        run_command(["ip", "netns", "add", BENCHMARK_NETNS], timeout=10)
+        run_command(["ip", "netns", "add", BENCHMARK_NETNS], timeout=100)
     if not iface_exists:
         run_command(
             [
@@ -86,23 +86,23 @@ def _ensure_benchmark_interface() -> str:
                 "name",
                 BENCHMARK_PEER_IFACE,
             ],
-            timeout=10,
+            timeout=100,
         )
         peer_exists_in_root = True
     if peer_exists_in_root:
-        run_command(["ip", "link", "set", "dev", BENCHMARK_PEER_IFACE, "netns", BENCHMARK_NETNS], timeout=10)
+        run_command(["ip", "link", "set", "dev", BENCHMARK_PEER_IFACE, "netns", BENCHMARK_NETNS], timeout=100)
     if not _link_exists_in_netns(BENCHMARK_NETNS, BENCHMARK_PEER_IFACE):
         raise RuntimeError(
             f"benchmark peer interface {BENCHMARK_PEER_IFACE} is unavailable in namespace {BENCHMARK_NETNS}"
         )
-    run_command(["ip", "addr", "replace", BENCHMARK_IFACE_CIDR, "dev", BENCHMARK_IFACE], timeout=10)
-    run_command(["ip", "link", "set", "dev", BENCHMARK_IFACE, "up"], timeout=10)
+    run_command(["ip", "addr", "replace", BENCHMARK_IFACE_CIDR, "dev", BENCHMARK_IFACE], timeout=100)
+    run_command(["ip", "link", "set", "dev", BENCHMARK_IFACE, "up"], timeout=100)
     run_command(
         ["ip", "-n", BENCHMARK_NETNS, "addr", "replace", BENCHMARK_PEER_IFACE_CIDR, "dev", BENCHMARK_PEER_IFACE],
-        timeout=10,
+        timeout=100,
     )
-    run_command(["ip", "-n", BENCHMARK_NETNS, "link", "set", "dev", "lo", "up"], timeout=10)
-    run_command(["ip", "-n", BENCHMARK_NETNS, "link", "set", "dev", BENCHMARK_PEER_IFACE, "up"], timeout=10)
+    run_command(["ip", "-n", BENCHMARK_NETNS, "link", "set", "dev", "lo", "up"], timeout=100)
+    run_command(["ip", "-n", BENCHMARK_NETNS, "link", "set", "dev", BENCHMARK_PEER_IFACE, "up"], timeout=100)
     return BENCHMARK_IFACE
 
 
@@ -114,10 +114,10 @@ class CiliumRunner(NativeProcessRunner):
         cluster_name: str = "default",
         cluster_id: int = 0,
         ipv4_range: str = "10.244.0.0/24",
-        etcd_startup_timeout_s: int = 20,
+        etcd_startup_timeout_s: int = 200,
         **kwargs: object,
     ) -> None:
-        kwargs.setdefault("load_timeout_s", 120)
+        kwargs.setdefault("load_timeout_s", 1200)
         super().__init__(**kwargs)
         self.device = str(device or "").strip() or None
         self.cluster_name = str(cluster_name or "").strip() or "default"
@@ -220,7 +220,7 @@ class CiliumRunner(NativeProcessRunner):
             self.etcd_session = None
         if self.runtime_dir is not None:
             if self._bpf_root is not None and self._bpf_root.is_mount():
-                run_command(["umount", str(self._bpf_root)], check=False, timeout=10)
+                run_command(["umount", str(self._bpf_root)], check=False, timeout=100)
             shutil.rmtree(self.runtime_dir, ignore_errors=True)
             self.runtime_dir = None
         self._bpf_root = None

@@ -1,7 +1,5 @@
 use super::*;
 
-use std::collections::HashMap;
-
 use crate::pass::{BpfProgram, PassContext, PassManager, PipelineResult};
 use crate::passes::test_helpers::{exit_insn, pseudo_call_to};
 const MEMCPY_BTF_ID: i32 = 4101;

@@ -172,9 +172,47 @@ fn remove_file_if_exists(path: impl AsRef<Path>) {
     }
 }
 
+fn remove_dir_if_exists(path: impl AsRef<Path>) {
+    let path = path.as_ref();
+    match fs::remove_dir_all(path) {
+        Ok(()) => {}
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {}
+        Err(err) => panic!("remove {}: {err}", path.display()),
+    }
+}
+
 fn write_temp_file(name: &str, contents: &str) -> PathBuf {
     let path = temp_path(name);
     fs::write(&path, contents).expect("write temp file");
+    path
+}
+
+fn write_bpftool_map_values_dir(
+    name: &str,
+    map_id: u32,
+    map_type: &str,
+    dump_json: &str,
+) -> PathBuf {
+    let path = temp_path(name);
+    remove_dir_if_exists(&path);
+    fs::create_dir(&path).expect("create map-values dir");
+    fs::write(
+        path.join(format!("map-{map_id}.show.json")),
+        format!(
+            r#"{{
+              "id": {map_id},
+              "type": "{map_type}",
+              "name": "test_map",
+              "flags": 0,
+              "bytes_key": 4,
+              "bytes_value": 4,
+              "max_entries": 8
+            }}"#
+        ),
+    )
+    .expect("write bpftool map show");
+    fs::write(path.join(format!("map-{map_id}.dump.json")), dump_json)
+        .expect("write bpftool map dump");
     path
 }
 
@@ -303,10 +341,7 @@ fn invalid_bytecode_length_exits_with_error() {
 
 #[test]
 fn map_inline_errors_when_snapshot_key_is_absent() {
-    let map_values_path = write_temp_file(
-        "map-values-absent-key.json",
-        r#"{"maps":[{"map_id":111,"map_type":2,"key_size":4,"value_size":4,"max_entries":8,"bpf_writable":true,"entries":[]}]}"#,
-    );
+    let map_values_path = write_bpftool_map_values_dir("map-values-absent-key", 111, "array", "[]");
     let verifier_path = write_temp_file(
         "map-lookup-verifier-states.json",
         map_lookup_verifier_states_json(),
@@ -326,7 +361,7 @@ fn map_inline_errors_when_snapshot_key_is_absent() {
         ],
         &map_lookup_program_bytes(),
     );
-    remove_file_if_exists(map_values_path);
+    remove_dir_if_exists(map_values_path);
     remove_file_if_exists(verifier_path);
 
     assert!(!output.status.success());
@@ -342,11 +377,16 @@ fn map_inline_errors_when_snapshot_key_is_absent() {
 }
 
 #[test]
-fn map_inline_skips_hash_lookup_when_snapshot_value_is_null() {
+fn map_inline_skips_hash_lookup_when_snapshot_entry_is_absent() {
     let report_path = temp_path("map-inline-hash-null-report.json");
-    let map_values_path = write_temp_file(
-        "map-values-hash-null.json",
-        r#"{"maps":[{"map_id":111,"map_type":"hash","key_size":4,"value_size":4,"max_entries":8,"bpf_writable":true,"entries":[{"key":"01000000","value":null},{"key":"02000000","value":"09000000"}]}]}"#,
+    let map_values_path = write_bpftool_map_values_dir(
+        "map-values-hash-missing",
+        111,
+        "hash",
+        r#"[{
+          "key": ["0x02", "0x00", "0x00", "0x00"],
+          "value": ["0x09", "0x00", "0x00", "0x00"]
+        }]"#,
     );
     let report_arg = report_path.to_string_lossy().to_string();
     let map_values_arg = map_values_path.to_string_lossy().to_string();
@@ -370,7 +410,7 @@ fn map_inline_skips_hash_lookup_when_snapshot_value_is_null() {
         ],
         &two_hash_lookup_program_bytes(),
     );
-    remove_file_if_exists(map_values_path);
+    remove_dir_if_exists(map_values_path);
     remove_file_if_exists(verifier_path);
 
     assert!(

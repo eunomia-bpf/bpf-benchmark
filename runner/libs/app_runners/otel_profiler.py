@@ -154,11 +154,11 @@ class OtelProfilerRunner(NativeProcessRunner):
                 proc.terminate()
         for proc in self._language_idlers:
             try:
-                proc.wait(timeout=2)
+                proc.wait(timeout=20)
             except subprocess.TimeoutExpired:
                 proc.kill()
                 try:
-                    proc.wait(timeout=2)
+                    proc.wait(timeout=20)
                 except subprocess.TimeoutExpired:
                     pass
         self._language_idlers.clear()

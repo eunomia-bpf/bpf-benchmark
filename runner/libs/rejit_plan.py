@@ -45,7 +45,7 @@ def load_pass_metadata(bpfopt: str = "bpfopt") -> dict[str, dict[str, Any]]:
     return metadata
 
 
-BPFOPT_STEP_TIMEOUT_SECS = 600  # 10 min hard cap per bpfopt invocation; killed by `timeout(1)`
+BPFOPT_STEP_TIMEOUT_SECS = 6000  # 10 min hard cap per bpfopt invocation; killed by `timeout(1)`
 
 
 def build_step_spec(pass_name: str, pass_meta: dict[str, Any]) -> dict[str, Any]:

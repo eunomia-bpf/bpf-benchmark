@@ -19,7 +19,7 @@ from ..workload import WorkloadResult, run_named_workload
 from .base import AppRunner
 from .process_support import wait_until_program_set_stable
 
-DEFAULT_ATTACH_TIMEOUT_SECONDS = 15
+DEFAULT_ATTACH_TIMEOUT_SECONDS = 150
 KHEADERS_READY_MARKER = ".bpfrejit-kheaders-ready"
 BCC_COMPAT_CFLAGS_ENV = "BPFREJIT_BCC_EXTRA_CFLAGS"
 BCC_COMPAT_HEADER_ENV = "BPFREJIT_BCC_COMPAT_HEADER"
@@ -455,13 +455,13 @@ class BCCRunner(AppRunner):
         self.session = None
         stop_error: Exception | None = None
         try:
-            stop_agent(session.process, timeout=8)
+            stop_agent(session.process, timeout=80)
         except Exception as exc:
             stop_error = exc
 
         io_errors: list[str] = []
         for name, thread in (("stdout", session.stdout_thread), ("stderr", session.stderr_thread)):
-            thread.join(timeout=2.0)
+            thread.join(timeout=20.0)
             if thread.is_alive():
                 io_errors.append(f"timed out waiting for BCC {name} capture thread to drain")
         self.process_output = {

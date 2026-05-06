@@ -75,7 +75,7 @@ class TetragonAgentSession(AgentSession):
     def close(self) -> None:
         stop_error: Exception | None = None
         if self.process is not None:
-            try: stop_agent(self.process, timeout=8)
+            try: stop_agent(self.process, timeout=80)
             except Exception as exc: stop_error = exc
             finally: self.process = None
         self._join_io_threads()
@@ -92,7 +92,7 @@ def inspect_tetragon_setup() -> dict[str, object]:
     if bpf_lib_dir is None or not any(bpf_lib_dir.glob("*.o")) and not any(bpf_lib_dir.glob("*.bpf.o")):
         return {"returncode": 1, "tetragon_binary": str(tetragon_binary), "tetragon_bpf_lib_dir": None,
                 "stdout_tail": "", "stderr_tail": f"missing Tetragon .bpf.o artifacts under {artifact_root}"}
-    help_probe = run_command(["timeout", "5s", str(tetragon_binary), "--help"], check=False, timeout=15)
+    help_probe = run_command(["timeout", "50s", str(tetragon_binary), "--help"], check=False, timeout=150)
     if help_probe.returncode != 0:
         return {"returncode": help_probe.returncode, "tetragon_binary": str(tetragon_binary), "tetragon_bpf_lib_dir": str(bpf_lib_dir),
                 "stdout_tail": tail_text(help_probe.stdout or "", max_lines=60, max_chars=12000),
@@ -119,7 +119,7 @@ def run_tetragon_workload(spec: Mapping[str, object], duration_s: int) -> Worklo
     raise RuntimeError(f"unsupported workload kind: {kind}")
 
 
-DEFAULT_LOAD_TIMEOUT_S = 45
+DEFAULT_LOAD_TIMEOUT_S = 450
 DEFAULT_POLICY_DIR = ROOT_DIR / "runner" / "assets" / "tetragon_policies"
 
 

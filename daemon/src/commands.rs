@@ -5,7 +5,7 @@
 //! pass orchestration, per-pass verifier acceptance, short-lived fd_array
 //! construction, and per-pass `BPF_PROG_REJIT`.
 
-use std::collections::{BTreeMap, HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::io::Write;
 use std::os::fd::{AsFd, AsRawFd, OwnedFd};
@@ -23,6 +23,7 @@ use crate::bpf;
 static NEXT_WORKDIR_ID: AtomicU64 = AtomicU64::new(0);
 const REJIT_VERBOSE_LOG_BUF_SIZE: usize = 16 * 1024 * 1024;
 const REJIT_BASIC_LOG_BUF_SIZE: usize = 1024 * 1024;
+const MAP_SNAPSHOT_MAX_BYTES: u64 = 64 * 1024;
 
 /// Variables daemon substitutes inside step templates.
 ///
@@ -224,46 +225,6 @@ fn c_log_string(buf: &[u8]) -> String {
     String::from_utf8_lossy(&buf[..end]).trim_end().to_string()
 }
 
-type MapInfoJson = bpf::MapInfo;
-
-#[derive(Debug, Serialize)]
-struct MapValuesJson {
-    maps: Vec<MapValuesMapJson>,
-}
-
-#[derive(Debug, Serialize)]
-struct MapValuesMapJson {
-    map_id: u32,
-    name: String,
-    map_type: u32,
-    key_size: u32,
-    value_size: u32,
-    max_entries: u32,
-    bpf_writable: bool,
-    entries_partial: bool,
-    entries: Vec<MapValuesEntryJson>,
-}
-
-#[derive(Debug, Serialize)]
-struct MapValuesEntryJson {
-    key: String,
-    value: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    inner_map_id: Option<u32>,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-struct MapValueSnapshotEntry {
-    value: Option<Vec<u8>>,
-    inner_map_id: Option<u32>,
-}
-
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
-struct MapKeySnapshot {
-    keys: Vec<Vec<u8>>,
-    entries_partial: bool,
-}
-
 #[derive(Clone, Debug, Deserialize, Serialize)]
 struct TargetKinsnJson {
     btf_func_id: i32,
@@ -285,14 +246,12 @@ pub(crate) fn default_worker_count() -> usize {
     }
 }
 
-fn hex_bytes(bytes: &[u8]) -> String {
-    const HEX: &[u8; 16] = b"0123456789abcdef";
-    let mut out = String::with_capacity(bytes.len() * 2);
-    for byte in bytes {
-        out.push(HEX[(byte >> 4) as usize] as char);
-        out.push(HEX[(byte & 0x0f) as usize] as char);
-    }
-    out
+fn bpftool_map_show_path(output_dir: &Path, map_id: u32) -> PathBuf {
+    output_dir.join(format!("map-{map_id}.show.json"))
+}
+
+fn bpftool_map_dump_path(output_dir: &Path, map_id: u32) -> PathBuf {
+    output_dir.join(format!("map-{map_id}.dump.json"))
 }
 
 fn base64_bytes(bytes: &[u8]) -> String {
@@ -333,55 +292,6 @@ fn tar_workdir(workdir: &Path) -> Result<String> {
         );
     }
     Ok(base64_bytes(&output.stdout))
-}
-
-fn live_bpf_map_lookup(_map: &MapInfoJson, fd: i32, key: &[u8]) -> Result<Option<Vec<u8>>> {
-    let info = bpf::bpf_map_get_info(fd)?;
-    let value_size = bpf::bpf_map_lookup_value_size(&info)?;
-    bpf::bpf_map_lookup_elem_optional(fd, key, value_size)
-}
-
-fn live_bpf_map_keys(map: &MapInfoJson, fd: i32) -> Result<MapKeySnapshot> {
-    live_bpf_map_keys_with(map, |previous_key, key_size| {
-        bpf::bpf_map_get_next_key(fd, previous_key, key_size)
-    })
-}
-
-fn live_bpf_map_keys_with<F>(map: &MapInfoJson, mut next_key: F) -> Result<MapKeySnapshot>
-where
-    F: FnMut(Option<&[u8]>, usize) -> Result<Option<Vec<u8>>>,
-{
-    if !is_map_snapshot_map_type(map.map_type) {
-        return Ok(MapKeySnapshot::default());
-    }
-    let key_size = map.key_size as usize;
-    if key_size == 0 {
-        bail!("map {} has zero key_size", map.map_id);
-    }
-    if map.max_entries == 0 {
-        bail!("map {} has zero max_entries", map.map_id);
-    }
-
-    let mut keys = Vec::new();
-    let mut previous_key = None;
-    loop {
-        if keys.len() == map.max_entries as usize {
-            let entries_partial = next_key(previous_key.as_deref(), key_size)?.is_some();
-            return Ok(MapKeySnapshot {
-                keys,
-                entries_partial,
-            });
-        }
-        let Some(key) = next_key(previous_key.as_deref(), key_size)? else {
-            break;
-        };
-        previous_key = Some(key.clone());
-        keys.push(key);
-    }
-    Ok(MapKeySnapshot {
-        keys,
-        entries_partial: false,
-    })
 }
 
 pub(crate) struct ApplyProgramOutcome {
@@ -544,7 +454,7 @@ fn run_program_steps(
         .with_context(|| format!("write {}", initial_input_path.display()))?;
 
     let target_path = workdir.path().join("target.json");
-    let map_values_path = workdir.path().join("map-values.json");
+    let map_values_path = workdir.path().join("map-values");
     let mut probed_kinsns: HashMap<String, TargetKinsnJson> = HashMap::new();
 
     if referenced.contains(VAR_TARGET) {
@@ -566,24 +476,8 @@ fn run_program_steps(
     }
 
     if referenced.contains(VAR_MAP_VALUES) {
-        let live_programs = bpf::live_program_bytecode_snapshots()
-            .context("enumerate live programs for map write detection")?;
-        let bpf_writable_maps =
-            bpf::detect_bpf_writable_maps(&live_programs, &snapshot.info.map_ids);
-        let mut open_map_fd = bpf::bpf_map_get_fd_by_id;
-        let mut lookup_map_value = live_bpf_map_lookup;
-        let mut scan_map_keys = live_bpf_map_keys;
-        let mut load_map_info = bpf::bpf_map_info_by_id;
-        write_live_map_values(
-            &snapshot.maps,
-            &bpf_writable_maps,
-            &map_values_path,
-            &mut open_map_fd,
-            &mut lookup_map_value,
-            &mut scan_map_keys,
-            &mut load_map_info,
-        )
-        .with_context(|| format!("build live map value snapshot for prog {prog_id}"))?;
+        write_bpftool_map_snapshots(prog_id, &snapshot.maps, &map_values_path)
+            .with_context(|| format!("build bpftool map snapshot for prog {prog_id}"))?;
     }
 
     let mut open_map_fd = bpf::bpf_map_get_fd_by_id;
@@ -945,231 +839,105 @@ fn pass_detail(
     }
 }
 
-fn write_live_map_values<F, G, H, I>(
-    maps: &[MapInfoJson],
-    bpf_writable_maps: &HashSet<u32>,
-    output: &Path,
-    open_map_fd: &mut F,
-    lookup_map_value: &mut G,
-    scan_map_keys: &mut H,
-    load_map_info: &mut I,
-) -> Result<()>
-where
-    F: FnMut(u32) -> Result<OwnedFd>,
-    G: FnMut(&MapInfoJson, i32, &[u8]) -> Result<Option<Vec<u8>>>,
-    H: FnMut(&MapInfoJson, i32) -> Result<MapKeySnapshot>,
-    I: FnMut(u32) -> Result<MapInfoJson>,
-{
-    let mut map_metadata = BTreeMap::<u32, MapInfoJson>::new();
-    let mut map_order = Vec::new();
+fn write_bpftool_map_snapshots(
+    prog_id: u32,
+    maps: &[bpf::MapInfo],
+    output_dir: &Path,
+) -> Result<()> {
+    fs::create_dir(output_dir).with_context(|| format!("create {}", output_dir.display()))?;
     for map in maps {
-        insert_snapshot_map_metadata(&mut map_metadata, &mut map_order, map.clone())?;
-    }
-
-    let mut entries_by_map = BTreeMap::<u32, BTreeMap<Vec<u8>, MapValueSnapshotEntry>>::new();
-    let mut entries_partial_by_map = BTreeMap::<u32, bool>::new();
-    let mut queue = VecDeque::from(map_order.clone());
-    let mut scanned = HashSet::new();
-
-    while let Some(map_id) = queue.pop_front() {
-        if !scanned.insert(map_id) {
-            continue;
-        }
-        let map = map_metadata
-            .get(&map_id)
-            .with_context(|| format!("missing snapshot metadata for map {map_id}"))?
-            .clone();
-        if !is_map_snapshot_map_type(map.map_type) {
-            continue;
-        }
-        let fd = open_map_fd(map.map_id)
-            .with_context(|| format!("open BPF map id {} for map-inline values", map.map_id))?;
-        let key_snapshot = scan_map_keys(&map, fd.as_raw_fd())
-            .with_context(|| format!("scan live keys for map {}", map.map_id))?;
-        entries_partial_by_map.insert(map.map_id, key_snapshot.entries_partial);
-        for key in key_snapshot.keys {
-            let value = lookup_map_value(&map, fd.as_raw_fd(), &key).with_context(|| {
-                format!(
-                    "lookup live value for map {} key {}",
-                    map.map_id,
-                    hex_bytes(&key)
-                )
-            })?;
-            if value.is_none() && is_array_like_map(map.map_type) {
-                bail!(
-                    "array-like map {} has no live value for key {}",
-                    map.map_id,
-                    hex_bytes(&key)
-                );
-            }
-            let inner_map_id = if is_map_in_map_type(map.map_type) {
-                decode_inner_map_id_from_outer_value(&map, &key, value.as_deref())?
-            } else {
-                None
-            };
-            if let Some(inner_map_id) = inner_map_id {
-                let inner_map = load_map_info(inner_map_id).with_context(|| {
-                    format!(
-                        "read metadata for inner map {} referenced by outer map {} key {}",
-                        inner_map_id,
-                        map.map_id,
-                        hex_bytes(&key)
-                    )
-                })?;
-                insert_snapshot_map_metadata(&mut map_metadata, &mut map_order, inner_map)?;
-                queue.push_back(inner_map_id);
-            }
-            entries_by_map.entry(map.map_id).or_default().insert(
-                key,
-                MapValueSnapshotEntry {
-                    value,
-                    inner_map_id,
-                },
-            );
-        }
-    }
-
-    let maps = map_order
-        .iter()
-        .map(|map_id| {
-            map_metadata
-                .get(map_id)
-                .with_context(|| format!("missing snapshot metadata for map {map_id}"))
-                .cloned()
-        })
-        .collect::<Result<Vec<_>>>()?;
-    write_map_values_snapshot(
-        &maps,
-        bpf_writable_maps,
-        &entries_by_map,
-        &entries_partial_by_map,
-        output,
-    )?;
-    Ok(())
-}
-
-fn write_map_values_snapshot(
-    maps: &[MapInfoJson],
-    bpf_writable_maps: &HashSet<u32>,
-    entries_by_map: &BTreeMap<u32, BTreeMap<Vec<u8>, MapValueSnapshotEntry>>,
-    entries_partial_by_map: &BTreeMap<u32, bool>,
-    output: &Path,
-) -> Result<()> {
-    let payload = MapValuesJson {
-        maps: maps
-            .iter()
-            .map(|map| {
-                let entries = match entries_by_map.get(&map.map_id) {
-                    Some(entries) => entries
-                        .iter()
-                        .map(|(key, entry)| MapValuesEntryJson {
-                            key: hex_bytes(key),
-                            value: entry.value.as_ref().map(|value| hex_bytes(value)),
-                            inner_map_id: entry.inner_map_id,
-                        })
-                        .collect(),
-                    None => Vec::new(),
-                };
-
-                MapValuesMapJson {
-                    map_id: map.map_id,
-                    name: map.name.clone(),
-                    map_type: map.map_type,
-                    key_size: map.key_size,
-                    value_size: map.value_size,
-                    max_entries: map.max_entries,
-                    bpf_writable: bpf_writable_maps.contains(&map.map_id),
-                    entries_partial: entries_partial_by_map
-                        .get(&map.map_id)
-                        .copied()
-                        .unwrap_or(false),
-                    entries,
-                }
-            })
-            .collect(),
-    };
-    write_json_file(output, &payload)
-}
-
-fn insert_snapshot_map_metadata(
-    map_metadata: &mut BTreeMap<u32, MapInfoJson>,
-    map_order: &mut Vec<u32>,
-    map: MapInfoJson,
-) -> Result<()> {
-    if let Some(existing) = map_metadata.get(&map.map_id) {
-        if existing != &map {
-            bail!(
-                "conflicting metadata for map {}: existing type/key/value/max={}/{}/{}/{} new={}/{}/{}/{}",
-                map.map_id,
-                existing.map_type,
-                existing.key_size,
-                existing.value_size,
-                existing.max_entries,
-                map.map_type,
-                map.key_size,
-                map.value_size,
-                map.max_entries
-            );
-        }
-        return Ok(());
-    }
-    map_order.push(map.map_id);
-    map_metadata.insert(map.map_id, map);
-    Ok(())
-}
-
-fn decode_inner_map_id_from_outer_value(
-    map: &MapInfoJson,
-    key: &[u8],
-    value: Option<&[u8]>,
-) -> Result<Option<u32>> {
-    let Some(value) = value else {
-        return Ok(None);
-    };
-    let bytes: [u8; 4] = value.try_into().with_context(|| {
-        format!(
-            "map-in-map {} key {} returned {} value bytes, expected 4-byte inner map id",
-            map.map_id,
-            hex_bytes(key),
-            value.len()
+        run_bpftool_map_json(
+            &["-j", "map", "show", "id", &map.map_id.to_string()],
+            &bpftool_map_show_path(output_dir, map.map_id),
         )
-    })?;
-    let inner_map_id = u32::from_ne_bytes(bytes);
-    if inner_map_id == 0 {
+        .with_context(|| format!("bpftool map show for map {}", map.map_id))?;
+        if !needs_bpftool_map_dump(map.map_type) {
+            log_bpftool_map_snapshot_decision(prog_id, map.map_id, map.map_type, 0, "skip_type");
+            continue;
+        }
+        let dump_path = bpftool_map_dump_path(output_dir, map.map_id);
+        run_bpftool_map_json(
+            &["-j", "map", "dump", "id", &map.map_id.to_string()],
+            &dump_path,
+        )
+        .with_context(|| format!("bpftool map dump for map {}", map.map_id))?;
+        let dump_size = fs::metadata(&dump_path)
+            .with_context(|| format!("stat {}", dump_path.display()))?
+            .len();
+        if dump_size > MAP_SNAPSHOT_MAX_BYTES {
+            fs::remove_file(&dump_path)
+                .with_context(|| format!("remove {}", dump_path.display()))?;
+            log_bpftool_map_snapshot_decision(
+                prog_id,
+                map.map_id,
+                map.map_type,
+                dump_size,
+                "skip_size",
+            );
+        } else {
+            log_bpftool_map_snapshot_decision(
+                prog_id,
+                map.map_id,
+                map.map_type,
+                dump_size,
+                "dumped",
+            );
+        }
+    }
+    Ok(())
+}
+
+fn run_bpftool_map_json(args: &[&str], output: &Path) -> Result<()> {
+    let command = format!("bpftool {}", args.join(" "));
+    let output_bytes = Command::new("bpftool")
+        .args(args)
+        .output()
+        .with_context(|| format!("run {command}"))?;
+    if !output_bytes.status.success() {
+        let stderr = String::from_utf8_lossy(&output_bytes.stderr)
+            .trim()
+            .to_string();
+        let stdout = String::from_utf8_lossy(&output_bytes.stdout)
+            .trim()
+            .to_string();
+        let detail = if stderr.is_empty() { stdout } else { stderr };
         bail!(
-            "map-in-map {} key {} returned invalid inner map id 0",
-            map.map_id,
-            hex_bytes(key)
+            "{command} failed with status {}: {}",
+            output_bytes.status,
+            if detail.is_empty() {
+                "<no output>".to_string()
+            } else {
+                detail
+            }
         );
     }
-    Ok(Some(inner_map_id))
+    fs::write(output, &output_bytes.stdout)
+        .with_context(|| format!("write {}", output.display()))?;
+    Ok(())
 }
 
-fn is_array_like_map(map_type: u32) -> bool {
-    matches!(
-        map_type,
-        kernel_sys::BPF_MAP_TYPE_ARRAY | kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY
-    )
+fn log_bpftool_map_snapshot_decision(
+    prog_id: u32,
+    map_id: u32,
+    map_type: u32,
+    size_bytes: u64,
+    action: &str,
+) {
+    eprintln!(
+        "daemon: map_snapshot prog_id={} map_id={} map_type={} size_bytes={} action={}",
+        prog_id, map_id, map_type, size_bytes, action
+    );
 }
 
-fn is_map_snapshot_map_type(map_type: u32) -> bool {
-    is_direct_value_inlineable_map_type(map_type) || is_map_in_map_type(map_type)
-}
-
-fn is_direct_value_inlineable_map_type(map_type: u32) -> bool {
+fn needs_bpftool_map_dump(map_type: u32) -> bool {
     matches!(
         map_type,
         kernel_sys::BPF_MAP_TYPE_HASH
             | kernel_sys::BPF_MAP_TYPE_ARRAY
             | kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY
             | kernel_sys::BPF_MAP_TYPE_LRU_HASH
-    )
-}
-
-fn is_map_in_map_type(map_type: u32) -> bool {
-    matches!(
-        map_type,
-        kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS | kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS
+            | kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS
+            | kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS
     )
 }
 
@@ -1384,6 +1152,8 @@ fn write_json_file<T: Serialize>(path: &Path, value: &T) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::BTreeMap;
+
     use super::*;
 
     #[test]
@@ -1577,178 +1347,6 @@ mod tests {
         assert_eq!(target.kinsns["bpf_rotate64"].call_offset, 5);
         assert_eq!(target.kinsns["bpf_extract64"].call_offset, 6);
         assert_eq!(target.kinsns["bpf_select64"].call_offset, 0);
-    }
-
-    #[test]
-    fn live_map_values_snapshot_writes_values_and_lookup_misses() {
-        let workdir = WorkDir::new("bpfrejit-daemon-map-values").unwrap();
-        let output = workdir.path().join("map-values.json");
-        let maps = vec![
-            MapInfoJson {
-                map_id: 111,
-                name: String::new(),
-                map_type: kernel_sys::BPF_MAP_TYPE_ARRAY,
-                key_size: 4,
-                value_size: 4,
-                max_entries: 8,
-            },
-            MapInfoJson {
-                map_id: 222,
-                name: String::new(),
-                map_type: kernel_sys::BPF_MAP_TYPE_HASH,
-                key_size: 4,
-                value_size: 4,
-                max_entries: 8,
-            },
-        ];
-
-        write_live_map_values(
-            &maps,
-            &HashSet::from([222]),
-            &output,
-            &mut |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
-            &mut |map, _fd, key| {
-                if map.map_id == 111 && key == 1u32.to_le_bytes().as_slice() {
-                    Ok(Some(7u32.to_le_bytes().to_vec()))
-                } else {
-                    Ok(None)
-                }
-            },
-            &mut |map, _fd| {
-                if map.map_id == 111 {
-                    Ok(MapKeySnapshot {
-                        keys: vec![1u32.to_le_bytes().to_vec()],
-                        entries_partial: false,
-                    })
-                } else {
-                    Ok(MapKeySnapshot {
-                        keys: vec![2u32.to_le_bytes().to_vec()],
-                        entries_partial: false,
-                    })
-                }
-            },
-            &mut |map_id| bail!("unexpected recursive map metadata request for {map_id}"),
-        )
-        .unwrap();
-
-        let json: serde_json::Value = serde_json::from_slice(&fs::read(output).unwrap()).unwrap();
-        assert_eq!(json["maps"][0]["entries"][0]["key"], "01000000");
-        assert_eq!(json["maps"][0]["entries"][0]["value"], "07000000");
-        assert_eq!(json["maps"][0]["bpf_writable"], false);
-        assert_eq!(json["maps"][1]["entries"][0]["key"], "02000000");
-        assert!(json["maps"][1]["entries"][0]["value"].is_null());
-        assert_eq!(json["maps"][1]["bpf_writable"], true);
-    }
-
-    #[test]
-    fn live_bpf_map_keys_caps_at_max_entries_and_marks_partial() {
-        let map = MapInfoJson {
-            map_id: 123,
-            name: String::new(),
-            map_type: kernel_sys::BPF_MAP_TYPE_HASH,
-            key_size: 4,
-            value_size: 8,
-            max_entries: 2,
-        };
-        let returned_keys = [
-            1u32.to_le_bytes().to_vec(),
-            2u32.to_le_bytes().to_vec(),
-            3u32.to_le_bytes().to_vec(),
-        ];
-        let mut calls = 0usize;
-
-        let snapshot = live_bpf_map_keys_with(&map, |_previous_key, _key_size| {
-            let key = returned_keys.get(calls).cloned();
-            calls += 1;
-            Ok(key)
-        })
-        .unwrap();
-
-        assert_eq!(
-            snapshot.keys,
-            vec![1u32.to_le_bytes().to_vec(), 2u32.to_le_bytes().to_vec()]
-        );
-        assert!(snapshot.entries_partial);
-        assert_eq!(calls, 3);
-    }
-
-    #[test]
-    fn live_map_values_snapshot_recurses_map_in_map_entries() {
-        let workdir = WorkDir::new("bpfrejit-daemon-map-in-map-values").unwrap();
-        let output = workdir.path().join("map-values.json");
-        let outer_map_id = 333u32;
-        let inner_map_id = 444u32;
-        let maps = vec![MapInfoJson {
-            map_id: outer_map_id,
-            name: String::new(),
-            map_type: kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS,
-            key_size: 4,
-            value_size: 4,
-            max_entries: 8,
-        }];
-
-        write_live_map_values(
-            &maps,
-            &HashSet::from([inner_map_id]),
-            &output,
-            &mut |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
-            &mut |map, _fd, key| {
-                if map.map_id == outer_map_id && key == 7u32.to_le_bytes().as_slice() {
-                    Ok(Some(inner_map_id.to_ne_bytes().to_vec()))
-                } else if map.map_id == inner_map_id && key == 2u32.to_le_bytes().as_slice() {
-                    Ok(Some(99u32.to_le_bytes().to_vec()))
-                } else {
-                    Ok(None)
-                }
-            },
-            &mut |map, _fd| {
-                if map.map_id == outer_map_id {
-                    Ok(MapKeySnapshot {
-                        keys: vec![7u32.to_le_bytes().to_vec()],
-                        entries_partial: false,
-                    })
-                } else if map.map_id == inner_map_id {
-                    Ok(MapKeySnapshot {
-                        keys: vec![2u32.to_le_bytes().to_vec()],
-                        entries_partial: false,
-                    })
-                } else {
-                    bail!("unexpected key scan for map {}", map.map_id)
-                }
-            },
-            &mut |map_id| {
-                if map_id != inner_map_id {
-                    bail!("unexpected recursive map metadata request for {map_id}");
-                }
-                Ok(MapInfoJson {
-                    map_id: inner_map_id,
-                    name: String::new(),
-                    map_type: kernel_sys::BPF_MAP_TYPE_ARRAY,
-                    key_size: 4,
-                    value_size: 4,
-                    max_entries: 8,
-                })
-            },
-        )
-        .unwrap();
-
-        let json: serde_json::Value = serde_json::from_slice(&fs::read(output).unwrap()).unwrap();
-        let maps = json["maps"].as_array().unwrap();
-        assert_eq!(maps.len(), 2);
-        let outer = maps
-            .iter()
-            .find(|map| map["map_id"] == outer_map_id)
-            .unwrap();
-        let inner = maps
-            .iter()
-            .find(|map| map["map_id"] == inner_map_id)
-            .unwrap();
-        assert_eq!(outer["entries"][0]["key"], "07000000");
-        assert_eq!(outer["entries"][0]["inner_map_id"], inner_map_id);
-        assert_eq!(outer["bpf_writable"], false);
-        assert_eq!(inner["entries"][0]["key"], "02000000");
-        assert_eq!(inner["entries"][0]["value"], "63000000");
-        assert_eq!(inner["bpf_writable"], true);
     }
 
     #[test]

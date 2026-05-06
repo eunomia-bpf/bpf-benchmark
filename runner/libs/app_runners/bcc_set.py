@@ -238,7 +238,7 @@ class BccSetRunner(AppRunner):
         )
         if process.stdout is None or process.stderr is None:
             process.kill()
-            process.wait(timeout=5)
+            process.wait(timeout=50)
             raise RuntimeError(f"BCC tool {child.tool_name} did not expose stdout/stderr pipes")
         stdout_capture = _TailCapture(max_lines=40, max_chars=8000)
         stderr_capture = _TailCapture(max_lines=40, max_chars=8000)

@@ -1,0 +1,539 @@
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
+  "generated_at": "2026-05-06T18:28:34.229813+00:00",
+  "kinsn_modules": {
+    "captured_at": "2026-05-06T18:27:15.510193+00:00",
+    "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
+    "expected_modules": [
+      "bpf_bulk_memory",
+      "bpf_ccmp",
+      "bpf_endian",
+      "bpf_extract",
+      "bpf_ldp",
+      "bpf_prefetch",
+      "bpf_rotate",
+      "bpf_select"
+    ],
+    "module_load": {
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_ccmp",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_ldp",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "failed_modules": [],
+      "invoked_at": "2026-05-06T18:27:15.509995+00:00",
+      "loaded_count": 8,
+      "loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_ccmp",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_ldp",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loader": "runner.libs.kinsn.load_kinsn_modules",
+      "module_dir": "/artifacts/kinsn",
+      "newly_loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_ccmp",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_ldp",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "snapshot_after": {
+        "captured_at": "2026-05-06T18:27:15.509969+00:00",
+        "expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_ccmp",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_ldp",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "loaded_bpf_modules": [
+          "bpf_bulk_memory",
+          "bpf_ccmp",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_ldp",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "missing_expected_modules": [],
+        "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_prefetch           12288  0\nbpf_ldp                12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_ccmp               12288  0\nbpf_bulk_memory        12288  0",
+        "resident_expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_ccmp",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_ldp",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "source": "lsmod"
+      },
+      "status": "ok",
+      "total_count": 8
+    },
+    "module_snapshot_before_daemon": {
+      "captured_at": "2026-05-06T18:27:15.388882+00:00",
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_ccmp",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_ldp",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loaded_bpf_modules": [],
+      "missing_expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_ccmp",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_ldp",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "raw_output": "",
+      "resident_expected_modules": [],
+      "source": "lsmod"
+    }
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "results": [
+    {
+      "app": "bcc/set",
+      "baseline": null,
+      "error": "bcc/set did not attach all BCC tools: BCC tools timed out before attachment: biosnoop, capable, runqlat, tcpconnect, tcplife",
+      "post_rejit": null,
+      "rejit_result": null,
+      "runner": "bcc_set",
+      "selected_workload": "stress_ng_os_io_network",
+      "status": "error"
+    },
+    {
+      "app": "bpftrace/set",
+      "baseline": {
+        "bpf": {
+          "119": {
+            "bytes_jited": 320,
+            "bytes_xlated": 408,
+            "id": 119,
+            "name": "block_io_start",
+            "run_cnt_delta": 26566,
+            "run_time_ns_delta": 33104596,
+            "type": "tracepoint"
+          },
+          "120": {
+            "bytes_jited": 1048,
+            "bytes_xlated": 1576,
+            "id": 120,
+            "name": "block_io_done",
+            "run_cnt_delta": 26447,
+            "run_time_ns_delta": 59110596,
+            "type": "tracepoint"
+          },
+          "126": {
+            "bytes_jited": 152,
+            "bytes_xlated": 136,
+            "id": 126,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 111337,
+            "run_time_ns_delta": 47703288,
+            "type": "tracepoint"
+          },
+          "127": {
+            "bytes_jited": 152,
+            "bytes_xlated": 136,
+            "id": 127,
+            "name": "tracepoint_sched_sched_wakeup_new",
+            "run_cnt_delta": 2901,
+            "run_time_ns_delta": 1424702,
+            "type": "tracepoint"
+          },
+          "128": {
+            "bytes_jited": 648,
+            "bytes_xlated": 896,
+            "id": 128,
+            "name": "sched_switch",
+            "run_cnt_delta": 154923,
+            "run_time_ns_delta": 86347763,
+            "type": "tracepoint"
+          },
+          "134": {
+            "bytes_jited": 488,
+            "bytes_xlated": 680,
+            "id": 134,
+            "name": "1",
+            "run_cnt_delta": 11,
+            "run_time_ns_delta": 52373,
+            "type": "perf_event"
+          },
+          "135": {
+            "bytes_jited": 216,
+            "bytes_xlated": 224,
+            "id": 135,
+            "name": "vfs_create",
+            "run_cnt_delta": 953581,
+            "run_time_ns_delta": 62908354,
+            "type": "kprobe"
+          },
+          "143": {
+            "bytes_jited": 2072,
+            "bytes_xlated": 3384,
+            "id": 143,
+            "name": "tcp_set_state",
+            "run_cnt_delta": 12608,
+            "run_time_ns_delta": 10153128,
+            "type": "kprobe"
+          },
+          "148": {
+            "bytes_jited": 856,
+            "bytes_xlated": 1360,
+            "id": 148,
+            "name": "cap_capable",
+            "run_cnt_delta": 381569,
+            "run_time_ns_delta": 109491525,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 11.003334967999997,
+            "ops_per_sec": 295764.96666369605,
+            "ops_total": 3254401.0,
+            "stderr": "",
+            "stdout": "stress-ng: metrc: [5208] sock                215      5.31      0.03      0.20        40.50         935.40\nstress-ng: metrc: [5208] sockdiag        1438473      5.52      0.01      0.27    260412.77     5077327.90\nstress-ng: metrc: [5208] sockfd            31110      5.89      0.05      0.19      5285.32      129812.69\nstress-ng: metrc: [5208] sockpair              0      6.88      0.00      0.54         0.00           0.00\nstress-ng: metrc: [5208] sockmany           1396      5.45      0.04      0.17       256.16        6692.62\nstress-ng: metrc: [5208] udp               11369      5.31      0.01      0.25      2139.61       42885.22\nstress-ng: metrc: [5208] udp-flood         36310      5.29      0.00      0.23      6860.44      160569.22\nstress-ng: metrc: [5208] mmap                 55      5.24      0.03      0.18        10.49         263.36\nstress-ng: metrc: [5208] mprotect         740771      5.59      0.14      1.74    132483.61      394128.59\nstress-ng: metrc: [5208] mremap              127      5.70      0.00      0.30        22.29         413.12\nstress-ng: metrc: [5208] madvise              13      7.63      0.08      0.56         1.70          20.27\nstress-ng: metrc: [5208] access              915      7.15      0.01      0.29       128.00        3047.44\nstress-ng: metrc: [5208] chdir                 4      7.77      0.00      0.14         0.51          29.05\nstress-ng: metrc: [5208] chmod                67      6.78      0.00      0.11         9.88         609.84\nstress-ng: metrc: [5208] chown               171      6.66      0.00      0.09        25.69        1905.99\nstress-ng: metrc: [5208] dentry             4905      7.38      0.02      0.39       664.95       12018.73\nstress-ng: metrc: [5208] dir                 330      6.94      0.03      0.37        47.57         813.35\nstress-ng: metrc: [5208] dirmany             326      6.24      0.01      0.02        52.27       10399.39\nstress-ng: metrc: [5208] fallocate             0      6.07      0.01      0.00         0.00           0.00\nstress-ng: metrc: [5208] file-ioctl           90      6.07      0.03      0.05        14.84        1108.81\nstress-ng: metrc: [5208] filename             38      6.59      0.00      0.23         5.77         164.87\nstress-ng: metrc: [5208] flock            354811      6.14      0.17      0.17     57777.29     1023761.02\nstress-ng: metrc: [5208] fpunch                0      7.52      0.00      0.59         0.00           0.00\nstress-ng: metrc: [5208] fstat               484      5.00      0.01      0.11        96.77        3842.58\nstress-ng: metrc: [5208] getdent           77993      5.04      0.06      0.95     15473.83       77463.92\nstress-ng: metrc: [5208] hdd                4853      5.86      0.15      0.02       827.72       28661.54\nstress-ng: metrc: [5208] inotify               4      5.86      0.01      0.00         0.68         392.35\nstress-ng: metrc: [5208] open               1053      8.04      0.03      0.04       130.93       14265.39\nstress-ng: metrc: [5208] rename                3      5.54      0.00      0.00         0.54         815.22\nstress-ng: metrc: [5208] touch              2325      7.89      0.06      0.15       294.59       11278.03\nstress-ng: metrc: [5208] utime              2965      5.37      0.00      0.20       552.31       14505.94\nstress-ng: metrc: [5208] link                  4      5.63      0.09      0.55         0.71           6.28\nstress-ng: metrc: [5208] symlink               4      5.91      0.01      0.69         0.68           5.73\nstress-ng: metrc: [5208] mknod                11      7.25      0.00      0.00         1.52        2221.77\nstress-ng: metrc: [5208] fcntl              9829      5.03      0.04      0.22      1954.55       37802.97\nstress-ng: info:  [5208] skipped: 0\nstress-ng: info:  [5208] passed: 228: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [5208] failed: 0\nstress-ng: info:  [5208] metrics untrustworthy: 0\nstress-ng: info:  [5208] successful run completed in 10.93 secs"
+          }
+        ]
+      },
+      "error": "",
+      "post_rejit": {
+        "bpf": {
+          "119": {
+            "bytes_jited": 320,
+            "bytes_xlated": 408,
+            "id": 119,
+            "name": "block_io_start",
+            "run_cnt_delta": 26371,
+            "run_time_ns_delta": 33103413,
+            "type": "tracepoint"
+          },
+          "120": {
+            "bytes_jited": 1048,
+            "bytes_xlated": 1576,
+            "id": 120,
+            "name": "block_io_done",
+            "run_cnt_delta": 26282,
+            "run_time_ns_delta": 63574131,
+            "type": "tracepoint"
+          },
+          "126": {
+            "bytes_jited": 152,
+            "bytes_xlated": 136,
+            "id": 126,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 132632,
+            "run_time_ns_delta": 55786053,
+            "type": "tracepoint"
+          },
+          "127": {
+            "bytes_jited": 152,
+            "bytes_xlated": 136,
+            "id": 127,
+            "name": "tracepoint_sched_sched_wakeup_new",
+            "run_cnt_delta": 2935,
+            "run_time_ns_delta": 1567124,
+            "type": "tracepoint"
+          },
+          "128": {
+            "bytes_jited": 648,
+            "bytes_xlated": 896,
+            "id": 128,
+            "name": "sched_switch",
+            "run_cnt_delta": 182813,
+            "run_time_ns_delta": 98225153,
+            "type": "tracepoint"
+          },
+          "134": {
+            "bytes_jited": 488,
+            "bytes_xlated": 680,
+            "id": 134,
+            "name": "1",
+            "run_cnt_delta": 12,
+            "run_time_ns_delta": 64007,
+            "type": "perf_event"
+          },
+          "135": {
+            "bytes_jited": 216,
+            "bytes_xlated": 224,
+            "id": 135,
+            "name": "vfs_create",
+            "run_cnt_delta": 1075043,
+            "run_time_ns_delta": 70365673,
+            "type": "kprobe"
+          },
+          "143": {
+            "bytes_jited": 2072,
+            "bytes_xlated": 3384,
+            "id": 143,
+            "name": "tcp_set_state",
+            "run_cnt_delta": 22254,
+            "run_time_ns_delta": 16540719,
+            "type": "kprobe"
+          },
+          "148": {
+            "bytes_jited": 856,
+            "bytes_xlated": 1360,
+            "id": 148,
+            "name": "cap_capable",
+            "run_cnt_delta": 501013,
+            "run_time_ns_delta": 133101911,
+            "type": "kprobe"
+          }
+        },
+        "workloads": [
+          {
+            "duration_s": 12.531453581000008,
+            "ops_per_sec": 286607.53333879326,
+            "ops_total": 3591609.0,
+            "stderr": "",
+            "stdout": "stress-ng: metrc: [9530] sock                211      6.13      0.03      0.22        34.40         841.62\nstress-ng: metrc: [9530] sockdiag        1803582      6.49      0.00      0.35    277992.41     5170716.18\nstress-ng: metrc: [9530] sockfd            36259      6.44      0.04      0.22      5630.59      136298.71\nstress-ng: metrc: [9530] sockpair              0      6.42      0.00      0.49         0.00           0.00\nstress-ng: metrc: [9530] sockmany           2473      5.83      0.02      0.31       423.95        7508.55\nstress-ng: metrc: [9530] udp                9061      5.71      0.03      0.20      1588.01       39276.97\nstress-ng: metrc: [9530] udp-flood         34395      5.70      0.02      0.22      6030.33      146893.02\nstress-ng: metrc: [9530] mmap                 52      5.49      0.02      0.23         9.47         214.47\nstress-ng: metrc: [9530] mprotect         708522      5.64      0.24      1.53    125601.32      398459.53\nstress-ng: metrc: [9530] mremap               93      5.42      0.00      0.22        17.16         418.10\nstress-ng: metrc: [9530] madvise              12      7.79      0.03      0.53         1.54          21.56\nstress-ng: metrc: [9530] access              542      7.03      0.02      0.17        77.05        2904.72\nstress-ng: metrc: [9530] chdir                 4      8.22      0.03      0.09         0.49          32.25\nstress-ng: metrc: [9530] chmod               129      6.10      0.00      0.09        21.16        1468.86\nstress-ng: metrc: [9530] chown               227      7.16      0.00      0.06        31.72        3659.81\nstress-ng: metrc: [9530] dentry             1628      7.32      0.03      0.19       222.55        7609.93\nstress-ng: metrc: [9530] dir                 445      6.96      0.03      0.37        63.96        1124.46\nstress-ng: metrc: [9530] dirmany            1737      6.85      0.00      0.13       253.70       13369.46\nstress-ng: metrc: [9530] fallocate             1      6.30      0.02      0.00         0.16          44.00\nstress-ng: metrc: [9530] file-ioctl          124      6.42      0.01      0.10        19.33        1123.17\nstress-ng: metrc: [9530] filename              0      6.40      0.03      0.18         0.00           0.00\nstress-ng: metrc: [9530] flock            157742      5.83      0.04      0.13     27046.50      913831.86\nstress-ng: metrc: [9530] fpunch                0      7.64      0.02      0.67         0.00           0.00\nstress-ng: metrc: [9530] fstat               477      5.01      0.00      0.12        95.24        3944.85\nstress-ng: metrc: [9530] getdent          102373      5.09      0.08      1.02     20128.25       93053.76\nstress-ng: metrc: [9530] hdd                6840      5.49      0.21      0.02      1245.91       29470.82\nstress-ng: metrc: [9530] inotify               5      5.53      0.02      0.00         0.90         303.05\nstress-ng: metrc: [9530] open               2279      8.55      0.03      0.08       266.66       20581.41\nstress-ng: metrc: [9530] rename            18707      5.27      0.01      0.29      3550.42       61747.63\nstress-ng: metrc: [9530] touch              3927      7.90      0.01      0.45       497.05        8514.73\nstress-ng: metrc: [9530] utime              7103      5.19      0.02      0.42      1367.82       16113.01\nstress-ng: metrc: [9530] link                  4      5.34      0.03      0.61         0.75           6.24\nstress-ng: metrc: [9530] symlink               4      5.64      0.02      0.54         0.71           7.11\nstress-ng: metrc: [9530] mknod                18      7.51      0.01      0.00         2.40        3209.13\nstress-ng: metrc: [9530] fcntl              4993      4.58      0.02      0.10      1090.76       43504.02\nstress-ng: info:  [9530] skipped: 0\nstress-ng: info:  [9530] passed: 228: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [9530] failed: 0\nstress-ng: info:  [9530] metrics untrustworthy: 0\nstress-ng: info:  [9530] successful run completed in 12.47 secs"
+          }
+        ]
+      },
+      "rejit_result": {
+        "error": "prog 119: snapshot live BPF program 119: read map ids for BPF program id 119: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7); prog 120: snapshot live BPF program 120: read map ids for BPF program id 120: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7); prog 126: snapshot live BPF program 126: read map ids for BPF program id 126: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7); prog 127: snapshot live BPF program 127: read map ids for BPF program id 127: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7); prog 128: snapshot live BPF program 128: read map ids for BPF program id 128: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7); prog 134: snapshot live BPF program 134: read map ids for BPF program id 134: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7); prog 135: snapshot live BPF program 135: read map ids for BPF program id 135: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7); prog 143: snapshot live BPF program 143: read map ids for BPF program id 143: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7); prog 148: snapshot live BPF program 148: read map ids for BPF program id 148: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+        "per_program": {
+          "119": {
+            "error": "snapshot live BPF program 119: read map ids for BPF program id 119: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+            "error_message": "snapshot live BPF program 119: read map ids for BPF program id 119: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+            "passes": [],
+            "prog_id": 119,
+            "program": {
+              "final_insn_count": 0,
+              "orig_insn_count": 0,
+              "prog_id": 119,
+              "prog_name": "",
+              "prog_type": 0
+            },
+            "status": "error"
+          },
+          "120": {
+            "error": "snapshot live BPF program 120: read map ids for BPF program id 120: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+            "error_message": "snapshot live BPF program 120: read map ids for BPF program id 120: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+            "passes": [],
+            "prog_id": 120,
+            "program": {
+              "final_insn_count": 0,
+              "orig_insn_count": 0,
+              "prog_id": 120,
+              "prog_name": "",
+              "prog_type": 0
+            },
+            "status": "error"
+          },
+          "126": {
+            "error": "snapshot live BPF program 126: read map ids for BPF program id 126: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+            "error_message": "snapshot live BPF program 126: read map ids for BPF program id 126: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+            "passes": [],
+            "prog_id": 126,
+            "program": {
+              "final_insn_count": 0,
+              "orig_insn_count": 0,
+              "prog_id": 126,
+              "prog_name": "",
+              "prog_type": 0
+            },
+            "status": "error"
+          },
+          "127": {
+            "error": "snapshot live BPF program 127: read map ids for BPF program id 127: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+            "error_message": "snapshot live BPF program 127: read map ids for BPF program id 127: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+            "passes": [],
+            "prog_id": 127,
+            "program": {
+              "final_insn_count": 0,
+              "orig_insn_count": 0,
+              "prog_id": 127,
+              "prog_name": "",
+              "prog_type": 0
+            },
+            "status": "error"
+          },
+          "128": {
+            "error": "snapshot live BPF program 128: read map ids for BPF program id 128: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+            "error_message": "snapshot live BPF program 128: read map ids for BPF program id 128: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+            "passes": [],
+            "prog_id": 128,
+            "program": {
+              "final_insn_count": 0,
+              "orig_insn_count": 0,
+              "prog_id": 128,
+              "prog_name": "",
+              "prog_type": 0
+            },
+            "status": "error"
+          },
+          "134": {
+            "error": "snapshot live BPF program 134: read map ids for BPF program id 134: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+            "error_message": "snapshot live BPF program 134: read map ids for BPF program id 134: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+            "passes": [],
+            "prog_id": 134,
+            "program": {
+              "final_insn_count": 0,
+              "orig_insn_count": 0,
+              "prog_id": 134,
+              "prog_name": "",
+              "prog_type": 0
+            },
+            "status": "error"
+          },
+          "135": {
+            "error": "snapshot live BPF program 135: read map ids for BPF program id 135: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+            "error_message": "snapshot live BPF program 135: read map ids for BPF program id 135: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+            "passes": [],
+            "prog_id": 135,
+            "program": {
+              "final_insn_count": 0,
+              "orig_insn_count": 0,
+              "prog_id": 135,
+              "prog_name": "",
+              "prog_type": 0
+            },
+            "status": "error"
+          },
+          "143": {
+            "error": "snapshot live BPF program 143: read map ids for BPF program id 143: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+            "error_message": "snapshot live BPF program 143: read map ids for BPF program id 143: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+            "passes": [],
+            "prog_id": 143,
+            "program": {
+              "final_insn_count": 0,
+              "orig_insn_count": 0,
+              "prog_id": 143,
+              "prog_name": "",
+              "prog_type": 0
+            },
+            "status": "error"
+          },
+          "148": {
+            "error": "snapshot live BPF program 148: read map ids for BPF program id 148: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+            "error_message": "snapshot live BPF program 148: read map ids for BPF program id 148: BPF_OBJ_GET_INFO_BY_FD: Argument list too long (os error 7)",
+            "passes": [],
+            "prog_id": 148,
+            "program": {
+              "final_insn_count": 0,
+              "orig_insn_count": 0,
+              "prog_id": 148,
+              "prog_name": "",
+              "prog_type": 0
+            },
+            "status": "error"
+          }
+        },
+        "status": "error"
+      },
+      "runner": "bpftrace_set",
+      "runner_details": {
+        "bpftrace_set": {
+          "tool_startup": [
+            {
+              "command": [
+                "/usr/bin/bpftrace",
+                "-q",
+                "/home/yunwei37/workspace/bpf-benchmark/runner/assets/bpftrace_scripts/capable.bt"
+              ],
+              "pid": 2708,
+              "prog_ids": [
+                148
+              ],
+              "status": "attached",
+              "tool": "capable"
+            },
+            {
+              "command": [
+                "/usr/bin/bpftrace",
+                "-q",
+                "/home/yunwei37/workspace/bpf-benchmark/runner/assets/bpftrace_scripts/biosnoop.bt"
+              ],
+              "pid": 2711,
+              "prog_ids": [
+                119,
+                120
+              ],
+              "status": "attached",
+              "tool": "biosnoop"
+            },
+            {
+              "command": [
+                "/usr/bin/bpftrace",
+                "-q",
+                "/home/yunwei37/workspace/bpf-benchmark/runner/assets/bpftrace_scripts/vfsstat.bt"
+              ],
+              "pid": 2714,
+              "prog_ids": [
+                134,
+                135
+              ],
+              "status": "attached",
+              "tool": "vfsstat"
+            },
+            {
+              "command": [
+                "/usr/bin/bpftrace",
+                "-q",
+                "/home/yunwei37/workspace/bpf-benchmark/runner/assets/bpftrace_scripts/runqlat.bt"
+              ],
+              "pid": 2717,
+              "prog_ids": [
+                126,
+                127,
+                128
+              ],
+              "status": "attached",
+              "tool": "runqlat"
+            },
+            {
+              "command": [
+                "/usr/bin/bpftrace",
+                "-q",
+                "/home/yunwei37/workspace/bpf-benchmark/runner/assets/bpftrace_scripts/tcplife.bt"
+              ],
+              "pid": 2720,
+              "prog_ids": [
+                143
+              ],
+              "status": "attached",
+              "tool": "tcplife"
+            }
+          ]
+        }
+      },
+      "selected_workload": "stress_ng_os_io_network",
+      "status": "ok"
+    }
+  ],
+  "samples": 1,
+  "status": "error",
+  "suite_name": "macro_apps",
+  "workload_seconds": 3.0
+}

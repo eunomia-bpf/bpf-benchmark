@@ -17,8 +17,8 @@ from .base import AppRunner
 from .process_support import ManagedProcessSession, wait_until_program_set_stable
 from .setup_support import repo_artifact_root
 
-DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S = 30
-DEFAULT_KATRAN_STOP_TIMEOUT_S = 20.0
+DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S = 300
+DEFAULT_KATRAN_STOP_TIMEOUT_S = 200.0
 DEFAULT_KATRAN_STOP_SETTLE_S = 2.0
 KATRAN_REQUIRED_MAP_NAMES = ("vip_map", "reals", "ch_rings", "ctl_array")
 DEFAULT_IP_CANDIDATES = (
@@ -62,8 +62,8 @@ CLIENT_MAC = "02:00:00:00:00:1c"
 ROUTER_REAL_MAC = "02:00:00:00:00:2b"
 REAL_MAC = "02:00:00:00:00:2c"
 
-HTTP_TIMEOUT_S = 5.0
-SERVER_START_TIMEOUT_S = 15.0
+HTTP_TIMEOUT_S = 50.0
+SERVER_START_TIMEOUT_S = 150.0
 TOPOLOGY_SETTLE_S = 2.0
 
 DEFAULT_ROOT_MAP_POS = 2
@@ -72,13 +72,13 @@ DEFAULT_HC_V6_TUN_IFACE = "ipip60"
 
 
 def _map_show_records() -> list[dict[str, object]]:
-    payload = run_json_command([resolve_bpftool_binary(), "-j", "map", "show"], timeout=30)
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "map", "show"], timeout=300)
     if not isinstance(payload, list): raise RuntimeError("bpftool map show returned unexpected payload")
     return [dict(record) for record in payload if isinstance(record, dict)]
 
 
 def _net_show_records(iface: str) -> list[dict[str, object]]:
-    payload = run_json_command([resolve_bpftool_binary(), "-j", "net", "show", "dev", str(iface)], timeout=30)
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "net", "show", "dev", str(iface)], timeout=300)
     if not isinstance(payload, list): raise RuntimeError(f"bpftool net show returned unexpected payload for {iface}")
     return [dict(record) for record in payload if isinstance(record, dict)]
 
@@ -110,8 +110,8 @@ def reattach_xdp_program(iface: str, prog_id: int, *, target_mode: str) -> dict[
     target_token = _bpftool_attach_token(target_mode)
     if current_mode == str(target_mode).strip().lower(): return current_attach
     if current_mode is not None:
-        run_command([resolve_bpftool_binary(), "net", "detach", _bpftool_attach_token(current_mode), "dev", str(iface)], check=False, timeout=15)
-    run_command([resolve_bpftool_binary(), "net", "attach", target_token, "id", str(prog_id), "dev", str(iface), "overwrite"], timeout=30)
+        run_command([resolve_bpftool_binary(), "net", "detach", _bpftool_attach_token(current_mode), "dev", str(iface)], check=False, timeout=150)
+    run_command([resolve_bpftool_binary(), "net", "attach", target_token, "id", str(prog_id), "dev", str(iface), "overwrite"], timeout=300)
     attach_info = _attached_xdp_info(iface)
     if (attached_mode := _attached_xdp_mode(attach_info)) != str(target_mode).strip().lower():
         raise RuntimeError(f"expected XDP attach mode {target_mode!r} on {iface}, got {attached_mode!r}: {attach_info}")
@@ -119,7 +119,7 @@ def reattach_xdp_program(iface: str, prog_id: int, *, target_mode: str) -> dict[
 
 
 def _current_prog_ids() -> set[int]:
-    payload = run_json_command([resolve_bpftool_binary(), "-j", "prog", "show"], timeout=30)
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "prog", "show"], timeout=300)
     if not isinstance(payload, list): raise RuntimeError("bpftool prog show returned unexpected payload")
     return {int(r["id"]) for r in payload if isinstance(r, dict) and "id" in r}
 
@@ -187,15 +187,15 @@ def _normalize_ip_command(command: list[str] | tuple[str, ...]) -> list[str]:
     return args[1:] if args and args[0] == "ip" else args
 
 
-def ip_command(command: list[str] | tuple[str, ...], *, check: bool = True, timeout: int | float | None = 30) -> subprocess.CompletedProcess[str]:
+def ip_command(command: list[str] | tuple[str, ...], *, check: bool = True, timeout: int | float | None = 300) -> subprocess.CompletedProcess[str]:
     return run_command([ip_binary(), *_normalize_ip_command(command)], check=check, timeout=timeout)
 
 
-def ns_exec_command(namespace: str, command: list[str] | tuple[str, ...], *, check: bool = True, timeout: int | float | None = 30) -> subprocess.CompletedProcess[str]:
+def ns_exec_command(namespace: str, command: list[str] | tuple[str, ...], *, check: bool = True, timeout: int | float | None = 300) -> subprocess.CompletedProcess[str]:
     return run_command([ip_binary(), "netns", "exec", namespace, *[str(part) for part in command]], check=check, timeout=timeout)
 
 
-def ns_ip_command(namespace: str, command: list[str] | tuple[str, ...], *, check: bool = True, timeout: int | float | None = 30) -> subprocess.CompletedProcess[str]:
+def ns_ip_command(namespace: str, command: list[str] | tuple[str, ...], *, check: bool = True, timeout: int | float | None = 300) -> subprocess.CompletedProcess[str]:
     return ns_exec_command(namespace, [ip_binary(), *_normalize_ip_command(command)], check=check, timeout=timeout)
 
 
@@ -210,19 +210,19 @@ def module_loaded(name: str) -> bool:
 def ensure_kernel_module_loaded(name: str) -> None:
     if module_loaded(name): return
     if kernel_module_is_builtin(name): return
-    load_kernel_module(name, timeout=15)
+    load_kernel_module(name, timeout=150)
     if module_loaded(name): return
     if kernel_module_is_builtin(name): return
     raise RuntimeError(f"kernel module {name} still is not resident after modprobe")
 
 
 def set_ns_sysctl(namespace: str, key: str, value: int) -> None:
-    ns_exec_command(namespace, ["sh", "-c", f"printf '%s' '{int(value)}' > /proc/sys/{key.replace('.', '/')}"], timeout=15)
+    ns_exec_command(namespace, ["sh", "-c", f"printf '%s' '{int(value)}' > /proc/sys/{key.replace('.', '/')}"], timeout=150)
 
 
 def set_link_mac(namespace: str | None, iface: str, mac: str) -> None:
     cmd = ["link", "set", "dev", iface, "address", mac]
-    (ip_command if namespace is None else lambda c, **kw: ns_ip_command(namespace, c, **kw))(cmd, timeout=15)
+    (ip_command if namespace is None else lambda c, **kw: ns_ip_command(namespace, c, **kw))(cmd, timeout=150)
 
 
 def pack_u32(value: int) -> bytes: return struct.pack("=I", int(value))
@@ -259,18 +259,18 @@ class KatranDsrTopology:
     def __enter__(self) -> "KatranDsrTopology":
         self.cleanup()
         for mod in ("veth", "tunnel4", "ip_tunnel", "ipip", "ip6_tunnel"): ensure_kernel_module_loaded(mod)
-        for ns in (ROUTER_NS, CLIENT_NS, REAL_NS): ip_command(["netns", "add", ns], timeout=15)
+        for ns in (ROUTER_NS, CLIENT_NS, REAL_NS): ip_command(["netns", "add", ns], timeout=150)
         if self.router_peer_iface is None:
-            ip_command(["link", "add", self.iface, "type", "veth", "peer", "name", ROUTER_LB_IFACE], timeout=15)
-            ip_command(["link", "set", ROUTER_LB_IFACE, "netns", ROUTER_NS], timeout=15)
+            ip_command(["link", "add", self.iface, "type", "veth", "peer", "name", ROUTER_LB_IFACE], timeout=150)
+            ip_command(["link", "set", ROUTER_LB_IFACE, "netns", ROUTER_NS], timeout=150)
         else:
             if self.router_peer_iface == self.iface: raise RuntimeError("router peer iface must differ from Katran ingress iface")
             if not link_exists(self.iface): raise RuntimeError(f"network interface does not exist: {self.iface}")
             if not link_exists(self.router_peer_iface): raise RuntimeError(f"router peer interface does not exist: {self.router_peer_iface}")
-            ip_command(["link", "set", self.router_peer_iface, "netns", ROUTER_NS], timeout=15)
-            ns_ip_command(ROUTER_NS, ["link", "set", "dev", self.router_peer_iface, "name", ROUTER_LB_IFACE], timeout=15)
-        _ipc = lambda *a: ip_command(list(a), timeout=15)
-        _nsc = lambda ns, *a: ns_ip_command(ns, list(a), timeout=15)
+            ip_command(["link", "set", self.router_peer_iface, "netns", ROUTER_NS], timeout=150)
+            ns_ip_command(ROUTER_NS, ["link", "set", "dev", self.router_peer_iface, "name", ROUTER_LB_IFACE], timeout=150)
+        _ipc = lambda *a: ip_command(list(a), timeout=150)
+        _nsc = lambda ns, *a: ns_ip_command(ns, list(a), timeout=150)
         _ipc("link", "add", ROUTER_CLIENT_IFACE, "type", "veth", "peer", "name", CLIENT_IFACE)
         _ipc("link", "set", ROUTER_CLIENT_IFACE, "netns", ROUTER_NS)
         _ipc("link", "set", CLIENT_IFACE, "netns", CLIENT_NS)
@@ -322,16 +322,16 @@ class KatranDsrTopology:
 
     def cleanup(self) -> None:
         if self.router_peer_iface is None and link_exists(self.iface):
-            ip_command(["link", "del", self.iface], check=False, timeout=15)
+            ip_command(["link", "del", self.iface], check=False, timeout=150)
         if self.router_peer_iface is not None:
-            ns_ip_command(ROUTER_NS, ["link", "set", "dev", ROUTER_LB_IFACE, "netns", "1"], check=False, timeout=15)
+            ns_ip_command(ROUTER_NS, ["link", "set", "dev", ROUTER_LB_IFACE, "netns", "1"], check=False, timeout=150)
         for hc_iface in self.created_hc_ifaces:
             if link_exists(hc_iface):
-                ip_command(["link", "del", hc_iface], check=False, timeout=15)
+                ip_command(["link", "del", hc_iface], check=False, timeout=150)
         self.created_hc_ifaces = []
-        for ns in (REAL_NS, CLIENT_NS, ROUTER_NS): ip_command(["netns", "del", ns], check=False, timeout=15)
+        for ns in (REAL_NS, CLIENT_NS, ROUTER_NS): ip_command(["netns", "del", ns], check=False, timeout=150)
         if self.router_peer_iface is not None and link_exists(ROUTER_LB_IFACE) and not link_exists(self.router_peer_iface):
-            ip_command(["link", "set", "dev", ROUTER_LB_IFACE, "name", self.router_peer_iface], check=False, timeout=15)
+            ip_command(["link", "set", "dev", ROUTER_LB_IFACE, "name", self.router_peer_iface], check=False, timeout=150)
 
     def metadata(self) -> dict[str, object]:
         return {"namespaces": {"router": ROUTER_NS, "client": CLIENT_NS, "real": REAL_NS},
@@ -395,11 +395,11 @@ class NamespaceHttpServer:
         probe = "import socket, sys; s = socket.socket(); s.settimeout(0.2); rc = s.connect_ex((sys.argv[1], int(sys.argv[2]))); s.close(); raise SystemExit(0 if rc == 0 else 1)"
         while time.monotonic() < deadline:
             if self.process.poll() is not None:
-                stdout, stderr = self.process.communicate(timeout=5)
+                stdout, stderr = self.process.communicate(timeout=50)
                 self.stdout_tail = tail_text(stdout or "", max_lines=20, max_chars=4000)
                 self.stderr_tail = tail_text(stderr or "", max_lines=20, max_chars=4000)
                 raise RuntimeError(f"http server exited early: {self.stderr_tail or self.stdout_tail}")
-            if ns_exec_command(self.namespace, [remote_python_binary(), "-c", probe, self.bind_ip, str(self.port)], check=False, timeout=5).returncode == 0: return
+            if ns_exec_command(self.namespace, [remote_python_binary(), "-c", probe, self.bind_ip, str(self.port)], check=False, timeout=50).returncode == 0: return
             time.sleep(0.1)
         raise RuntimeError("timed out waiting for namespace http server to start")
 
@@ -727,7 +727,7 @@ def run_parallel_http_load(*, duration_s: int | float, concurrency: int) -> dict
         ["ip", "netns", "exec", CLIENT_NS, remote_python_binary(), "-c", PARALLEL_CLIENT_REQUEST_SCRIPT,
          VIP_IP, str(VIP_PORT), str(max(0.0, float(duration_s))), str(max(1, int(concurrency))),
          str(HTTP_TIMEOUT_S), str(REQUEST_FAILURE_PREVIEW_LIMIT)],
-        timeout=max(30, int(float(duration_s) * 4) + 10),
+        timeout=max(300, int(float(duration_s) * 4) + 10),
     )
     if not isinstance(payload, Mapping):
         raise RuntimeError("parallel client payload is not a JSON object")
@@ -765,7 +765,7 @@ def _ensure_bpffs_mounted() -> Path:
     mount_binary = which("mount")
     if mount_binary is None:
         raise RuntimeError("mount is required to mount bpffs for Katran shared mode")
-    run_command([mount_binary, "-t", "bpf", "bpffs", str(mountpoint)], timeout=15)
+    run_command([mount_binary, "-t", "bpf", "bpffs", str(mountpoint)], timeout=150)
     return mountpoint
 
 
@@ -805,7 +805,7 @@ def _install_root_xdp_program(
                 "pinmaps",
                 str(map_dir),
             ],
-            timeout=max(30, int(load_timeout_s)),
+            timeout=max(300, int(load_timeout_s)),
         )
         run_command(
             [
@@ -819,7 +819,7 @@ def _install_root_xdp_program(
                 str(iface),
                 "overwrite",
             ],
-            timeout=30,
+            timeout=300,
         )
     except Exception:
         _cleanup_bpffs_path(install_dir)
@@ -839,7 +839,7 @@ def _cleanup_root_xdp_install(iface: str, root_install: Mapping[str, object] | N
         run_command(
             [resolve_bpftool_binary(), "net", "detach", attach_type, "dev", str(iface)],
             check=False,
-            timeout=15,
+            timeout=150,
         )
     install_dir = Path(str(root_install.get("install_dir") or "")).expanduser()
     if str(install_dir):

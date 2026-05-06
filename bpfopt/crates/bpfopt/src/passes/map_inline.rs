@@ -23,7 +23,6 @@ const R2_SETUP_LOOKBACK_LIMIT: usize = 8;
 const REG_RESOLUTION_LIMIT: usize = 64;
 const CONST_STACK_VALUE_LOOKBACK_LIMIT: usize = 256;
 const MAP_INLINE_FIXED_POINT_MAX_ITERS: usize = 8;
-const SITE_LEVEL_INLINE_VETO_PREFIX: &str = "site-level inline veto: ";
 const VALUE_PREVIEW_BYTES: usize = 32;
 
 /// Dynamic map inlining optimization pass.
@@ -731,6 +730,21 @@ struct SiteRewrite {
     replacements: BTreeMap<usize, Vec<BpfInsn>>,
 }
 
+#[derive(Debug)]
+enum SiteRewriteError {
+    Veto(String),
+    MissingSnapshot(anyhow::Error),
+    Error(anyhow::Error),
+}
+
+type SiteRewriteResult<T> = std::result::Result<T, SiteRewriteError>;
+
+impl From<anyhow::Error> for SiteRewriteError {
+    fn from(err: anyhow::Error) -> Self {
+        SiteRewriteError::Error(err)
+    }
+}
+
 impl BpfPass for MapInlinePass {
     fn name(&self) -> &str {
         "map_inline"
@@ -900,20 +914,19 @@ fn run_map_inline_round(
                     let reason = "map-in-map chain is not inlineable".to_string();
                     record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
                 }
-                Err(err) => {
-                    let message = format!("{err:#}");
-                    if let Some(reason) = site_level_inline_veto_reason(&err) {
+                Err(err) => match err {
+                    SiteRewriteError::Veto(reason) => {
                         record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
                         continue;
                     }
-                    if is_concrete_map_value_snapshot_error(&message) {
+                    SiteRewriteError::MissingSnapshot(err) => {
                         return Err(err.context(format!(
                             "map_inline requires a concrete map-in-map snapshot at outer lookup pc {}",
                             site.call_pc
                         )));
                     }
-                    return Err(err);
-                }
+                    SiteRewriteError::Error(err) => return Err(err),
+                },
             }
             continue;
         }
@@ -944,14 +957,10 @@ fn run_map_inline_round(
         ) {
             Ok(key) => key,
             Err(detail) => {
-                if is_concrete_map_value_snapshot_error(&detail) {
-                    return Err(anyhow::anyhow!(
-                        "map_inline requires a concrete snapshot value while extracting lookup key at pc {}: {}",
-                        site.call_pc,
-                        detail
-                    ));
-                }
-                if !program.bpf_writable_map(info.map_id) {
+                let bpf_writable = program
+                    .bpf_writable_map(info.map_id)
+                    .map_err(anyhow::Error::msg)?;
+                if !bpf_writable {
                     match build_runtime_key_site_rewrite(program, &site, info) {
                         Ok(Some(rewrite)) => {
                             log_map_inline_debug(&format!(
@@ -966,10 +975,13 @@ fn run_map_inline_round(
                                 "runtime-key inline emitted no replacement bytecode".to_string();
                             record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
                         }
-                        Err(err) => {
-                            let reason = site_level_inline_veto_reason(&err)
-                                .unwrap_or_else(|| format!("runtime-key inline failed: {err:#}"));
+                        Err(SiteRewriteError::Veto(reason)) => {
                             record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
+                        }
+                        Err(
+                            SiteRewriteError::MissingSnapshot(err) | SiteRewriteError::Error(err),
+                        ) => {
+                            return Err(err);
                         }
                     }
                     continue;
@@ -1037,9 +1049,12 @@ fn run_map_inline_round(
                 record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
                 continue;
             }
-            Err(err) => {
-                let message = format!("{err:#}");
-                if is_concrete_map_value_snapshot_error(&message) {
+            Err(err) => match err {
+                SiteRewriteError::Veto(reason) => {
+                    record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
+                    continue;
+                }
+                SiteRewriteError::MissingSnapshot(err) => {
                     return Err(err.context(format!(
                         "map_inline requires a concrete snapshot value for map {} key {} at lookup pc {}",
                         info.map_id,
@@ -1047,23 +1062,8 @@ fn run_map_inline_round(
                         site.call_pc
                     )));
                 }
-                if let Some(reason) = site_level_inline_veto_reason(&err) {
-                    record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
-                    continue;
-                }
-                let reason = format!("map lookup failed: {err:#}");
-                record_skip(
-                    &mut skipped,
-                    &mut diagnostics,
-                    site.call_pc,
-                    reason,
-                    Some(format!(
-                        "site at PC={}: value read failed: {:#}",
-                        site.call_pc, err
-                    )),
-                );
-                continue;
-            }
+                SiteRewriteError::Error(err) => return Err(err),
+            },
         };
 
         if rewrite
@@ -1283,7 +1283,7 @@ fn build_site_rewrite(
     uses: &R0UseClassification,
     info: &MapInfo,
     null_check_pc: Option<usize>,
-) -> anyhow::Result<Option<SiteRewrite>> {
+) -> SiteRewriteResult<Option<SiteRewrite>> {
     let remove_lookup_pattern =
         site_can_attempt_lookup_pattern_removal(program, uses, info, null_check_pc);
     let encoded_key = encode_key_bytes(&key.bytes, info.key_size as usize);
@@ -1295,19 +1295,6 @@ fn build_site_rewrite(
         "site pc={} reading map_id={} key={:?} lookup_value_size={}",
         site.call_pc, info.map_id, encoded_key, lookup_value_size
     ));
-    if program.has_null_map_value_snapshot(info.map_id, &encoded_key) {
-        if is_hash_like_map_type(info.map_type) {
-            return Err(site_level_inline_veto(format!(
-                "hash-like map {} has no live entry for key {}",
-                info.map_id,
-                format_bytes_preview(&encoded_key)
-            )));
-        }
-        return Err(anyhow::anyhow!(null_map_value_snapshot_message(
-            info.map_id,
-            &encoded_key
-        )));
-    }
     let value = match program.map_provider.lookup_elem(
         program,
         info.map_id,
@@ -1321,6 +1308,13 @@ fn build_site_rewrite(
             ));
             value
         }
+        Err(MapLookupError::MissingKey { .. }) if is_hash_like_map_type(info.map_type) => {
+            return Err(site_level_inline_veto(format!(
+                "hash-like map {} has no live entry for key {}",
+                info.map_id,
+                format_bytes_preview(&encoded_key)
+            )));
+        }
         Err(err) => {
             log_map_inline_debug(&format!(
                 "site at PC={}: map lookup(map_id={}, key={}) failed: {}",
@@ -1329,14 +1323,7 @@ fn build_site_rewrite(
                 format_bytes_preview(&encoded_key),
                 err
             ));
-            if is_partial_map_value_snapshot_error(&err) {
-                return Err(site_level_inline_veto(format!(
-                    "entry not in partial snapshot for map {} key {}",
-                    info.map_id,
-                    format_bytes_preview(&encoded_key)
-                )));
-            }
-            return Err(anyhow::Error::msg(err));
+            return Err(missing_snapshot_error(err));
         }
     };
     let inline_value = prepare_inline_value(info, &value).map_err(site_level_inline_veto)?;
@@ -1424,7 +1411,7 @@ fn build_runtime_key_site_rewrite(
     program: &BpfProgram,
     site: &MapLookupSite,
     info: &MapInfo,
-) -> anyhow::Result<Option<SiteRewrite>> {
+) -> SiteRewriteResult<Option<SiteRewrite>> {
     let uses = classify_r0_uses_with_options(&program.insns, site.call_pc, false, false);
     if uses.null_check_pc.is_none() {
         return Err(site_level_inline_veto(
@@ -1539,7 +1526,7 @@ fn collect_runtime_snapshot_entries(
 fn emit_runtime_membership_chain(
     entries: &[RuntimeMapEntry],
     result_reg: u8,
-) -> anyhow::Result<Vec<BpfInsn>> {
+) -> SiteRewriteResult<Vec<BpfInsn>> {
     let scratch_reg = 3;
     let mut insns = vec![BpfInsn::mov64_imm(result_reg, 0)];
     for entry in entries {
@@ -1553,7 +1540,7 @@ fn emit_runtime_membership_chain(
 fn emit_runtime_value_chain(
     entries: &[RuntimeMapEntry],
     load: &FixedLoadUse,
-) -> anyhow::Result<Vec<BpfInsn>> {
+) -> SiteRewriteResult<Vec<BpfInsn>> {
     let mut insns = Vec::new();
     let mut end_jump_pcs = Vec::new();
     for entry in entries {
@@ -1584,7 +1571,7 @@ fn emit_key_match_then<F>(
     scratch_reg: u8,
     insns: &mut Vec<BpfInsn>,
     emit_matched: F,
-) -> anyhow::Result<()>
+) -> SiteRewriteResult<()>
 where
     F: FnOnce() -> Vec<BpfInsn>,
 {
@@ -1614,7 +1601,7 @@ fn patch_relative_jump(
     insns: &mut [BpfInsn],
     jump_pc: usize,
     target_pc: usize,
-) -> anyhow::Result<()> {
+) -> SiteRewriteResult<()> {
     let offset = target_pc as isize - jump_pc as isize - 1;
     let offset = i16::try_from(offset).map_err(|_| {
         site_level_inline_veto(format!(
@@ -1666,7 +1653,7 @@ fn build_map_in_map_chain_rewrite(
     outer_site: &MapLookupSite,
     outer_info: &MapInfo,
     use_verifier_guided_keys: bool,
-) -> anyhow::Result<Option<SiteRewrite>> {
+) -> SiteRewriteResult<Option<SiteRewrite>> {
     let Some(chain) = find_map_in_map_chains(&program.insns, std::slice::from_ref(outer_site))
         .into_iter()
         .next()
@@ -1687,42 +1674,28 @@ fn build_map_in_map_chain_rewrite(
         )));
     }
     let encoded_outer_key = encode_key_bytes(&outer_key.bytes, outer_info.key_size as usize);
-    if program.has_null_map_value_snapshot(outer_info.map_id, &encoded_outer_key) {
-        return Err(site_level_inline_veto(format!(
-            "map-in-map outer map {} has no live inner map for key {}",
-            outer_info.map_id,
-            format_bytes_preview(&encoded_outer_key)
-        )));
-    }
     let inner_map_id = program
         .map_inner_map_ids
         .get(&(outer_info.map_id, encoded_outer_key.clone()))
         .copied()
         .ok_or_else(|| {
-            if program.has_partial_map_entries_snapshot(outer_info.map_id) {
-                return site_level_inline_veto(format!(
-                    "outer entry not in partial snapshot for map {} key {}",
-                    outer_info.map_id,
-                    format_bytes_preview(&encoded_outer_key)
-                ));
-            }
-            anyhow::anyhow!(
-                "map_values snapshot missing inner_map_id for outer map {} key {}",
+            site_level_inline_veto(format!(
+                "map-in-map outer map {} has no live inner map for key {}",
                 outer_info.map_id,
                 format_bytes_preview(&encoded_outer_key)
-            )
+            ))
         })?;
     let inner_info = program
         .map_provider
         .map_info(program, inner_map_id)
         .map_err(anyhow::Error::msg)?
         .ok_or_else(|| {
-            anyhow::anyhow!(
+            missing_snapshot_anyhow(anyhow::anyhow!(
                 "map_values snapshot has no metadata for inner map {} from outer map {} key {}",
                 inner_map_id,
                 outer_info.map_id,
                 format_bytes_preview(&encoded_outer_key)
-            )
+            ))
         })?;
     if inner_info.is_map_in_map() {
         return Err(site_level_inline_veto(format!(
@@ -1773,19 +1746,6 @@ fn build_map_in_map_chain_rewrite(
         .map_provider
         .lookup_value_size(program, &inner_info)
         .map_err(anyhow::Error::msg)?;
-    if program.has_null_map_value_snapshot(inner_info.map_id, &encoded_inner_key) {
-        if is_hash_like_map_type(inner_info.map_type) {
-            return Err(site_level_inline_veto(format!(
-                "inner hash-like map {} has no live entry for key {}",
-                inner_info.map_id,
-                format_bytes_preview(&encoded_inner_key)
-            )));
-        }
-        return Err(anyhow::anyhow!(null_map_value_snapshot_message(
-            inner_info.map_id,
-            &encoded_inner_key
-        )));
-    }
     let value = match program.map_provider.lookup_elem(
         program,
         inner_info.map_id,
@@ -1793,16 +1753,14 @@ fn build_map_in_map_chain_rewrite(
         lookup_value_size,
     ) {
         Ok(value) => value,
-        Err(err) => {
-            if is_partial_map_value_snapshot_error(&err) {
-                return Err(site_level_inline_veto(format!(
-                    "inner entry not in partial snapshot for map {} key {}",
-                    inner_info.map_id,
-                    format_bytes_preview(&encoded_inner_key)
-                )));
-            }
-            return Err(anyhow::Error::msg(err));
+        Err(MapLookupError::MissingKey { .. }) if is_hash_like_map_type(inner_info.map_type) => {
+            return Err(site_level_inline_veto(format!(
+                "inner hash-like map {} has no live entry for key {}",
+                inner_info.map_id,
+                format_bytes_preview(&encoded_inner_key)
+            )));
         }
+        Err(err) => return Err(missing_snapshot_error(err)),
     };
     let inline_value = prepare_inline_value(&inner_info, &value).map_err(site_level_inline_veto)?;
 
@@ -2067,14 +2025,10 @@ fn resolve_snapshot_map_value(
             .lookup_elem(program, map_id, &key, value_size)
         {
             Ok(value) => value,
-            Err(err)
-                if is_null_map_value_snapshot_error(&err)
-                    && is_hash_like_map_type(info.map_type) =>
-            {
+            Err(MapLookupError::MissingKey { .. }) if is_hash_like_map_type(info.map_type) => {
                 return Ok(None);
             }
-            Err(err) if is_partial_map_value_snapshot_error(&err) => return Ok(None),
-            Err(err) => return Err(anyhow::Error::msg(err)),
+            Err(err) => return Err(anyhow::Error::msg(err.to_string())),
         };
         Ok(Some(SnapshotMapValue { map_id, key, value }))
     })();
@@ -2199,18 +2153,16 @@ fn find_map_load_for_call(insns: &[BpfInsn], call_pc: usize) -> Option<usize> {
     None
 }
 
-fn site_level_inline_veto(reason: impl Into<String>) -> anyhow::Error {
-    anyhow::anyhow!("{}{}", SITE_LEVEL_INLINE_VETO_PREFIX, reason.into())
+fn site_level_inline_veto(reason: impl Into<String>) -> SiteRewriteError {
+    SiteRewriteError::Veto(reason.into())
 }
 
-fn site_level_inline_veto_reason(err: &anyhow::Error) -> Option<String> {
-    err.to_string()
-        .strip_prefix(SITE_LEVEL_INLINE_VETO_PREFIX)
-        .map(str::to_string)
+fn missing_snapshot_error(err: MapLookupError) -> SiteRewriteError {
+    missing_snapshot_anyhow(anyhow::Error::msg(err.to_string()))
 }
 
-fn is_concrete_map_value_snapshot_error(message: &str) -> bool {
-    is_missing_map_value_snapshot_error(message) || is_null_map_value_snapshot_error(message)
+fn missing_snapshot_anyhow(err: anyhow::Error) -> SiteRewriteError {
+    SiteRewriteError::MissingSnapshot(err)
 }
 
 fn is_hash_like_map_type(map_type: u32) -> bool {

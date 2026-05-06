@@ -15,7 +15,7 @@ from runner.libs.bpf_stats import list_program_ids
 from runner.libs.rejit import DaemonSession
 from runner.libs.kinsn import relpath
 
-DEFAULT_SUITE_QUIESCE_TIMEOUT_S = 20.0
+DEFAULT_SUITE_QUIESCE_TIMEOUT_S = 200.0
 DEFAULT_SUITE_QUIESCE_STABLE_S = 2.0
 DEFAULT_SUITE_QUIESCE_POLL_S = 0.2
 
@@ -350,7 +350,7 @@ def run_app_runner_lifecycle(
     )
 
 def git_sha() -> str:
-    value = run_command(["git", "rev-parse", "HEAD"], timeout=15).stdout.strip()
+    value = run_command(["git", "rev-parse", "HEAD"], timeout=150).stdout.strip()
     if not value:
         raise RuntimeError("git rev-parse returned an empty HEAD revision")
     return value

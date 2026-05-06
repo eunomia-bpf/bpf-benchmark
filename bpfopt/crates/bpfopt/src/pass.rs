@@ -9,6 +9,7 @@
 
 use std::any::{Any, TypeId};
 use std::collections::{HashMap, HashSet};
+use std::fmt;
 use std::sync::Arc;
 
 use crate::insn::BpfInsn;
@@ -114,14 +115,9 @@ pub struct BpfProgram {
     /// Pre-loaded map value snapshot: (map_id, key_bytes) -> value_bytes.
     /// Used by offline snapshot callers and unit tests.
     pub map_values: HashMap<(u32, Vec<u8>), Vec<u8>>,
-    /// Explicit lookup misses from map-values.json: (map_id, key_bytes).
-    pub map_value_nulls: HashSet<(u32, Vec<u8>)>,
     /// Map-in-map outer entries: (outer_map_id, outer_key_bytes) -> inner map id.
     pub map_inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
-    /// Maps whose key scan reached `max_entries` before the kernel reported EOF.
-    pub map_entries_partial: HashSet<u32>,
-    /// Per-map BPF-side mutability from map-values.json. Missing entries are
-    /// treated as writable, so only explicit `false` unlocks value-stability.
+    /// Per-map BPF-side mutability from bpftool `map show` flags.
     pub map_bpf_writable: HashMap<u32, bool>,
     /// Pre-loaded map metadata: map_id -> MapMetadata.
     /// Used by offline snapshot callers and unit tests.
@@ -164,8 +160,32 @@ pub trait MapProvider: Send + Sync + std::fmt::Debug {
         map_id: u32,
         key: &[u8],
         value_size: usize,
-    ) -> std::result::Result<Vec<u8>, String>;
+    ) -> std::result::Result<Vec<u8>, MapLookupError>;
 }
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum MapLookupError {
+    MissingKey { map_id: u32, key: Vec<u8> },
+    Failed(String),
+}
+
+impl fmt::Display for MapLookupError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            MapLookupError::MissingKey { map_id, key } => {
+                write!(
+                    f,
+                    "map_values snapshot missing map {} key {}",
+                    map_id,
+                    hex_bytes(key)
+                )
+            }
+            MapLookupError::Failed(message) => f.write_str(message),
+        }
+    }
+}
+
+impl std::error::Error for MapLookupError {}
 
 /// Snapshot-backed map provider used by offline snapshots.
 #[derive(Clone, Debug, Default)]
@@ -214,69 +234,30 @@ impl MapProvider for SnapshotMapProvider {
         map_id: u32,
         key: &[u8],
         value_size: usize,
-    ) -> std::result::Result<Vec<u8>, String> {
+    ) -> std::result::Result<Vec<u8>, MapLookupError> {
         if let Some(value) = program.map_values.get(&(map_id, key.to_vec())) {
             if value.len() != value_size {
-                return Err(format!(
+                return Err(MapLookupError::Failed(format!(
                     "snapshot map {} returned value size {}, expected {}",
                     map_id,
                     value.len(),
                     value_size
-                ));
+                )));
             }
             return Ok(value.clone());
         }
-        if program.map_value_nulls.contains(&(map_id, key.to_vec())) {
-            return Err(null_map_value_snapshot_message(map_id, key));
-        }
-        if program.map_entries_partial.contains(&map_id) {
-            return Err(partial_map_value_snapshot_message(map_id, key));
-        }
 
         if !program.map_metadata.contains_key(&map_id) {
-            return Err(format!(
+            return Err(MapLookupError::Failed(format!(
                 "map_values snapshot has no metadata for map {}",
                 map_id
-            ));
+            )));
         }
-        Err(missing_map_value_snapshot_message(map_id, key))
+        Err(MapLookupError::MissingKey {
+            map_id,
+            key: key.to_vec(),
+        })
     }
-}
-
-pub fn missing_map_value_snapshot_message(map_id: u32, key: &[u8]) -> String {
-    format!(
-        "map_values snapshot missing map {} key {}",
-        map_id,
-        hex_bytes(key)
-    )
-}
-
-pub fn null_map_value_snapshot_message(map_id: u32, key: &[u8]) -> String {
-    format!(
-        "map_values snapshot has explicit null for map {} key {}",
-        map_id,
-        hex_bytes(key)
-    )
-}
-
-pub fn partial_map_value_snapshot_message(map_id: u32, key: &[u8]) -> String {
-    format!(
-        "map_values snapshot partial map {} missing key {}",
-        map_id,
-        hex_bytes(key)
-    )
-}
-
-pub fn is_missing_map_value_snapshot_error(message: &str) -> bool {
-    message.contains("map_values snapshot missing map ")
-}
-
-pub fn is_null_map_value_snapshot_error(message: &str) -> bool {
-    message.contains("map_values snapshot has explicit null for map ")
-}
-
-pub fn is_partial_map_value_snapshot_error(message: &str) -> bool {
-    message.contains("map_values snapshot partial map ")
 }
 
 fn hex_bytes(bytes: &[u8]) -> String {
@@ -311,25 +292,24 @@ impl BpfProgram {
             func_info: None,
             line_info: None,
             map_values: HashMap::new(),
-            map_value_nulls: HashSet::new(),
             map_inner_map_ids: HashMap::new(),
-            map_entries_partial: HashSet::new(),
             map_bpf_writable: HashMap::new(),
             map_metadata: HashMap::new(),
             map_provider: Arc::new(SnapshotMapProvider),
         }
     }
 
-    pub fn has_null_map_value_snapshot(&self, map_id: u32, key: &[u8]) -> bool {
-        self.map_value_nulls.contains(&(map_id, key.to_vec()))
-    }
-
-    pub fn has_partial_map_entries_snapshot(&self, map_id: u32) -> bool {
-        self.map_entries_partial.contains(&map_id)
-    }
-
-    pub fn bpf_writable_map(&self, map_id: u32) -> bool {
-        self.map_bpf_writable.get(&map_id).copied().unwrap_or(true)
+    pub fn bpf_writable_map(&self, map_id: u32) -> std::result::Result<bool, String> {
+        if let Some(writable) = self.map_bpf_writable.get(&map_id).copied() {
+            return Ok(writable);
+        }
+        if self.map_metadata.contains_key(&map_id) {
+            return Err(format!(
+                "map_values snapshot missing bpftool flags for map {}",
+                map_id
+            ));
+        }
+        Ok(true)
     }
 
     /// Install a map provider for specialized test execution.

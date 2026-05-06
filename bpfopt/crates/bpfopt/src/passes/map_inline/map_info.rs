@@ -22,8 +22,8 @@ const BPF_PSEUDO_MAP_IDX: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX as u8;
 /// Runtime metadata for a live kernel map referenced by the program.
 ///
 /// `map_inline` uses this metadata for map layout and type checks. BPF-side
-/// mutability is a separate `map-values.json` field so diagnostics can still
-/// see maps that are not eligible for value-stability runtime-key rewriting.
+/// mutability comes from bpftool `map show` flags so diagnostics can still see
+/// maps that are not eligible for value-stability runtime-key rewriting.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MapInfo {
     pub map_type: u32,
@@ -403,7 +403,7 @@ mod tests {
                 _map_id: u32,
                 _key: &[u8],
                 _value_size: usize,
-            ) -> MapInfoAnalysisResult<Vec<u8>> {
+            ) -> std::result::Result<Vec<u8>, crate::pass::MapLookupError> {
                 unreachable!("map_info analysis only resolves metadata")
             }
         }

@@ -44,7 +44,7 @@ class LocalEtcdSession:
         *,
         work_dir: Path,
         name: str,
-        startup_timeout_s: int = 20,
+        startup_timeout_s: int = 200,
     ) -> None:
         self.work_dir = Path(work_dir).resolve()
         self.name = str(name).strip() or "runner"
@@ -126,7 +126,7 @@ class LocalEtcdSession:
         if not self.client_url:
             return False
         try:
-            with urllib.request.urlopen(f"{self.client_url}/health", timeout=1.0) as response:
+            with urllib.request.urlopen(f"{self.client_url}/health", timeout=10.0) as response:
                 payload = response.read().decode("utf-8", errors="replace").lower()
         except (OSError, urllib.error.URLError):
             return False
@@ -137,13 +137,13 @@ class LocalEtcdSession:
 
     def close(self) -> None:
         if self.process is not None:
-            stop_agent(self.process, timeout=8)
+            stop_agent(self.process, timeout=80)
             self.process = None
         if self.stdout_thread is not None:
-            self.stdout_thread.join(timeout=2.0)
+            self.stdout_thread.join(timeout=20.0)
             self.stdout_thread = None
         if self.stderr_thread is not None:
-            self.stderr_thread.join(timeout=2.0)
+            self.stderr_thread.join(timeout=20.0)
             self.stderr_thread = None
         shutil.rmtree(self.work_dir, ignore_errors=True)
 

@@ -152,9 +152,9 @@ def inspect_tracee_setup() -> dict[str, object]:
     if tracee_binary is None:
         return {"returncode": 1, "tracee_binary": None, "stdout_tail": "",
                 "stderr_tail": f"missing upstream Tracee container artifact under {artifact_binary}"}
-    vp = run_command([str(tracee_binary), "--version"], check=False, timeout=30)
+    vp = run_command([str(tracee_binary), "--version"], check=False, timeout=300)
     if vp.returncode != 0:
-        vp = run_command([str(tracee_binary), "version"], check=False, timeout=30)
+        vp = run_command([str(tracee_binary), "version"], check=False, timeout=300)
     if vp.returncode != 0:
         return {"returncode": vp.returncode, "tracee_binary": str(tracee_binary),
                 "stdout_tail": tail_text(vp.stdout or "", max_lines=40, max_chars=8000),
@@ -190,7 +190,7 @@ def _tracee_signatures_dir() -> Path:
 
 def _tracee_healthz_ready(host: str, port: int) -> bool:
     try:
-        with urlopen(f"http://{host}:{int(port)}/healthz", timeout=1.0) as response:
+        with urlopen(f"http://{host}:{int(port)}/healthz", timeout=10.0) as response:
             return int(getattr(response, "status", 0) or 0) == 200
     except (OSError, URLError):
         return False
@@ -230,10 +230,10 @@ def run_tracee_workload(spec: Mapping[str, object], duration_s: int) -> Workload
         return run_named_workload(kind, duration_s)
     raise RuntimeError(f"unsupported workload kind: {kind}")
 
-DEFAULT_LOAD_TIMEOUT_S = 120
+DEFAULT_LOAD_TIMEOUT_S = 1200
 DEFAULT_STARTUP_SETTLE_S = 5.0
-DEFAULT_STOP_TIMEOUT_S = 30.0
-DEFAULT_EVENT_JOIN_TIMEOUT_S = 10.0
+DEFAULT_STOP_TIMEOUT_S = 300.0
+DEFAULT_EVENT_JOIN_TIMEOUT_S = 100.0
 
 
 class TraceeRunner(AppRunner):

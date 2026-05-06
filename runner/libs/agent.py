@@ -54,7 +54,7 @@ def stop_agent(proc: subprocess.Popen[str], timeout: int | float = 10) -> int:
                 return proc.wait(timeout=timeout)
             except subprocess.TimeoutExpired:
                 proc.kill()
-                return proc.wait(timeout=max(float(timeout), 10.0))
+                return proc.wait(timeout=max(float(timeout), 100.0))
     return int(proc.returncode or 0)
 def _payload_preview(payload: object, *, limit: int = 240) -> str:
     text = repr(payload)
@@ -62,7 +62,7 @@ def _payload_preview(payload: object, *, limit: int = 240) -> str:
 
 
 def bpftool_prog_show_records() -> list[dict[str, object]]:
-    payload = run_json_command([resolve_bpftool_binary(), "-j", "prog", "show"], timeout=30)
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "prog", "show"], timeout=300)
     if not isinstance(payload, list):
         raise RuntimeError(
             "bpftool prog show returned unexpected payload type "

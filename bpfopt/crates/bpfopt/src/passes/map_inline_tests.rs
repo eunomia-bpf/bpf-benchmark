@@ -1600,7 +1600,7 @@ fn map_inline_pass_rewrites_map_in_map_chain_loads() {
 }
 
 #[test]
-fn map_inline_pass_skips_missing_outer_entry_from_partial_snapshot() {
+fn map_inline_pass_skips_missing_outer_map_in_map_entry() {
     let outer_map_id = 9511;
     install_mock_map(
         outer_map_id,
@@ -1634,14 +1634,13 @@ fn map_inline_pass_skips_missing_outer_entry_from_partial_snapshot() {
     ];
     let mut program = BpfProgram::new(original.clone());
     program.set_map_ids(vec![outer_map_id]);
-    program.map_entries_partial.insert(outer_map_id);
 
     let result = run_map_inline_pass(&mut program);
     assert_eq!(program.insns, original);
     assert!(result.pass_results[0]
         .sites_skipped
         .iter()
-        .any(|skip| { skip.reason.contains("outer entry not in partial snapshot") }));
+        .any(|skip| { skip.reason.contains("has no live inner map") }));
 }
 
 #[test]

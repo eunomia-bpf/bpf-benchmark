@@ -156,10 +156,10 @@ class AgentSession:
 
     def _join_io_threads(self) -> None:
         if self.stdout_thread is not None:
-            self.stdout_thread.join(timeout=2.0)
+            self.stdout_thread.join(timeout=20.0)
             self.stdout_thread = None
         if self.stderr_thread is not None:
-            self.stderr_thread.join(timeout=2.0)
+            self.stderr_thread.join(timeout=20.0)
             self.stderr_thread = None
 
     def collector_snapshot(self) -> dict[str, object]:
@@ -271,13 +271,13 @@ class ManagedProcessSession:
 
     def close(self) -> None:
         if self.process is not None:
-            stop_agent(self.process, timeout=8)
+            stop_agent(self.process, timeout=80)
             self.process = None
         if self.stdout_thread is not None:
-            self.stdout_thread.join(timeout=2.0)
+            self.stdout_thread.join(timeout=20.0)
             self.stdout_thread = None
         if self.stderr_thread is not None:
-            self.stderr_thread.join(timeout=2.0)
+            self.stderr_thread.join(timeout=20.0)
             self.stderr_thread = None
 
     def __exit__(self, exc_type: object, exc: object, tb: object) -> None:
@@ -291,7 +291,7 @@ class NativeProcessRunner(AppRunner):
         *,
         loader_binary: Path | str | None = None,
         loader_args: Sequence[str] = (),
-        load_timeout_s: int = 20,
+        load_timeout_s: int = 200,
         workload_kind: str | None = None,
     ) -> None:
         super().__init__()
