@@ -5,13 +5,14 @@
 //! pass orchestration, per-pass verifier acceptance, short-lived fd_array
 //! construction, and per-pass `BPF_PROG_REJIT`.
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fs;
 use std::io::Write;
 use std::os::fd::{AsFd, AsRawFd, OwnedFd};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::OnceLock;
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -24,7 +25,8 @@ use crate::bpf;
 
 static NEXT_WORKDIR_ID: AtomicU64 = AtomicU64::new(0);
 /// CLI binary directory set once at startup; None means use PATH lookup.
-static CLI_DIR: std::sync::OnceLock<Option<PathBuf>> = std::sync::OnceLock::new();
+static CLI_DIR: OnceLock<Option<PathBuf>> = OnceLock::new();
+static PASS_METADATA: OnceLock<Result<PassMetadataMap, String>> = OnceLock::new();
 const MAP_VALUES_FILE: &str = "map-values.json";
 const VERIFIER_STATES_FILE: &str = "verifier-states.json";
 const DEFAULT_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(5);
@@ -187,6 +189,13 @@ pub(crate) struct PassDetail {
 struct RejitReport {
     verifier_states: kernel_sys::VerifierStatesJson,
 }
+
+#[derive(Clone, Debug, Deserialize)]
+#[rustfmt::skip] struct PassMetadata { canonical_name: String, needs_target: bool, needs_verifier_states: bool, produces_verifier_states: bool, needs_map_values: bool, kinsns_used: Vec<KinsnMetadata> }
+
+#[derive(Clone, Debug, Deserialize)]
+#[rustfmt::skip] struct KinsnMetadata { json_name: String, probe_aliases: Vec<String> }
+type PassMetadataMap = HashMap<String, PassMetadata>;
 
 fn rejit_program(
     prog_id: u32,
@@ -434,6 +443,18 @@ pub(crate) fn try_apply_one(
     if pass_list.iter().any(|pass| pass.is_empty()) {
         bail!("enabled_passes entries must not be blank");
     }
+    let pass_catalog = pass_metadata_map(config)?;
+    let wants_map_values = pass_list.iter().try_fold(false, |any, pass| {
+        Ok::<_, anyhow::Error>(any || pass_metadata(pass_catalog, pass)?.needs_map_values)
+    })?;
+    let needs_target_json = pass_list.iter().try_fold(false, |any, pass| {
+        Ok::<_, anyhow::Error>(any || pass_metadata(pass_catalog, pass)?.needs_target)
+    })?;
+    let kinsn_probe_targets = if needs_target_json {
+        kinsn_probe_targets_for_passes(pass_catalog, &pass_list)?
+    } else {
+        Vec::new()
+    };
     let workdir = WorkDir::new("bpfrejit-daemon-optimize")?;
     let prog_bin = workdir.path().join("prog.bin");
     let target_json = workdir.path().join("target.json");
@@ -453,9 +474,8 @@ pub(crate) fn try_apply_one(
         fs::write(&prog_bin, &orig_bytes)
             .with_context(|| format!("write {}", prog_bin.display()))?;
         let orig_insn_count = insn_count_from_bytes(&orig_bytes, "prog.bin")?;
-        let wants_map_inline = pass_list.iter().any(|pass| pass == "map_inline");
 
-        if wants_map_inline {
+        if wants_map_values {
             write_live_map_values(
                 &snapshot.maps,
                 &map_values_json,
@@ -467,8 +487,8 @@ pub(crate) fn try_apply_one(
         }
 
         let mut probed_kinsns: HashMap<String, TargetKinsnJson> = HashMap::new();
-        if needs_target(&pass_list) {
-            let mut probed = bpf::probe_target_json().with_context(|| {
+        if needs_target_json {
+            let mut probed = bpf::probe_target_json(&kinsn_probe_targets).with_context(|| {
                 format!(
                     "probe target kinsns failed for requested passes {}",
                     join_pass_csv(&pass_list)
@@ -497,7 +517,7 @@ pub(crate) fn try_apply_one(
             build_rejit_fd_array(&snapshot.info.map_ids, &probed_kinsns, &mut open_map_fd)
                 .with_context(|| format!("build fd_array for prog {prog_id}"))?;
 
-        let map_ids = if wants_map_inline {
+        let map_ids = if wants_map_values {
             Some(if prog_info.map_ids.is_empty() {
                 "0".to_string()
             } else {
@@ -518,7 +538,8 @@ pub(crate) fn try_apply_one(
             fs::write(&pass_input, &current_bytes)
                 .with_context(|| format!("write {}", pass_input.display()))?;
 
-            let needs_states = pass_needs_verifier_states(pass);
+            let pass_meta = pass_metadata(pass_catalog, pass)?;
+            let needs_states = pass_meta.needs_verifier_states;
             if needs_states && !verifier_states_ready {
                 return Ok(pass_detail(
                     pass,
@@ -529,14 +550,15 @@ pub(crate) fn try_apply_one(
                     None,
                 ));
             }
-            let target_arg = pass_needs_target(pass).then_some(target_json.as_path());
+            let target_arg = pass_meta.needs_target.then_some(target_json.as_path());
             let verifier_states_arg = needs_states.then_some(verifier_states_json.as_path());
-            let map_values_arg = (pass == "map_inline").then_some(map_values_json.as_path());
-            let map_ids_arg = if pass == "map_inline" {
+            let needs_map_values = pass_meta.needs_map_values;
+            let map_values_arg = needs_map_values.then_some(map_values_json.as_path());
+            let map_ids_arg = if needs_map_values {
                 Some(
                     map_ids
                         .as_deref()
-                        .ok_or_else(|| anyhow!("map_inline pass missing map ids"))?,
+                        .ok_or_else(|| anyhow!("pass {pass} needs map ids"))?,
                 )
             } else {
                 None
@@ -586,8 +608,8 @@ pub(crate) fn try_apply_one(
                     ));
                 }
             };
-            let needs_verifier_log = pass_needs_verifier_log(pass);
-            let (log_level, log_buf_size) = if needs_verifier_log {
+            let produces_verifier_states = pass_meta.produces_verifier_states;
+            let (log_level, log_buf_size) = if produces_verifier_states {
                 (2, REJIT_VERBOSE_LOG_BUF_SIZE)
             } else {
                 (1, REJIT_BASIC_LOG_BUF_SIZE)
@@ -611,11 +633,11 @@ pub(crate) fn try_apply_one(
                     ));
                 }
             };
-            if needs_verifier_log {
+            if produces_verifier_states {
                 write_verifier_states_for_next_pass(&verifier_states_json, &rejit_report)
                     .with_context(|| format!("write verifier states after pass {pass}"))?;
             }
-            verifier_states_ready = needs_verifier_log;
+            verifier_states_ready = produces_verifier_states;
             current_bytes = pass_bytes;
             Ok(pass_detail(pass, PassStatus::Ok, None, Some(report)))
         })?;
@@ -661,25 +683,39 @@ fn append_bpfopt_context_args(command: &mut Command, prog_info: &ProgInfoJson) {
     command.arg("--prog-type").arg(&prog_info.prog_type.name);
 }
 
-fn pass_needs_verifier_states(pass: &str) -> bool {
-    matches!(pass, "const_prop" | "map_inline")
+#[rustfmt::skip] fn pass_metadata_map(config: &CliConfig) -> Result<&'static PassMetadataMap> {
+    match PASS_METADATA.get_or_init(|| load_pass_metadata(config).map_err(|err| format!("load bpfopt pass metadata via list-passes --json: {err:#}"))) {
+        Ok(metadata) => Ok(metadata),
+        Err(message) => bail!("{message}"),
+    }
 }
 
-fn pass_needs_verifier_log(pass: &str) -> bool {
-    matches!(pass, "noop" | "const_prop" | "map_inline")
+#[rustfmt::skip] fn load_pass_metadata(config: &CliConfig) -> Result<PassMetadataMap> {
+    let mut bpfopt = config.command("bpfopt");
+    bpfopt.arg("list-passes").arg("--json").stdin(Stdio::null());
+    let program = format!("{bpfopt:?}");
+    let output = bpfopt.output().with_context(|| format!("spawn subprocess {program}"))?;
+    if !output.status.success() { let message = subprocess_failure_message("bpfopt list-passes", &program, &output); eprintln!("daemon: {message}"); bail!("{message}"); }
+    let entries: Vec<PassMetadata> = serde_json::from_slice(&output.stdout).with_context(|| format!("parse bpfopt list-passes --json output from {program}"))?;
+    if entries.is_empty() { bail!("bpfopt list-passes --json returned no passes"); }
+    let count = entries.len();
+    let metadata = entries.into_iter().map(|entry| (entry.canonical_name.clone(), entry)).collect::<PassMetadataMap>();
+    if metadata.len() != count || metadata.contains_key("") { bail!("bpfopt list-passes --json returned duplicate or blank pass names"); }
+    Ok(metadata)
 }
 
-fn pass_needs_target(pass: &str) -> bool {
-    matches!(
-        pass,
-        "rotate"
-            | "cond_select"
-            | "ccmp"
-            | "extract"
-            | "endian_fusion"
-            | "bulk_memory"
-            | "prefetch"
-    )
+#[rustfmt::skip] fn pass_metadata<'a>(metadata: &'a PassMetadataMap, pass: &str) -> Result<&'a PassMetadata> {
+    metadata.get(pass).ok_or_else(|| anyhow!("bpfopt list-passes --json did not report requested pass {pass}"))
+}
+
+#[rustfmt::skip] fn kinsn_probe_targets_for_passes(metadata: &PassMetadataMap, passes: &[String]) -> Result<Vec<bpf::KinsnProbeTarget>> {
+    let mut targets = BTreeMap::<String, BTreeSet<String>>::new();
+    for pass in passes {
+        let pass_metadata = pass_metadata(metadata, pass)?;
+        if pass_metadata.needs_target && pass_metadata.kinsns_used.is_empty() { bail!("pass {pass} requires --target but declares no kinsns_used metadata"); }
+        for kinsn in &pass_metadata.kinsns_used { targets.entry(kinsn.json_name.clone()).or_default().extend(kinsn.probe_aliases.iter().cloned()); }
+    }
+    Ok(targets.into_iter().map(|(json_name, aliases)| bpf::KinsnProbeTarget { json_name, probe_names: aliases.into_iter().collect() }).collect())
 }
 
 fn pass_file_stem(index: usize, pass: &str) -> String {
@@ -850,10 +886,6 @@ fn is_map_inlineable_map_type(map_type: u32) -> bool {
             | kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY
             | kernel_sys::BPF_MAP_TYPE_LRU_HASH
     )
-}
-
-fn needs_target(passes: &[String]) -> bool {
-    passes.iter().any(|pass| pass_needs_target(pass))
 }
 
 fn shift_target_module_call_offsets_for_map_prefix(

@@ -61,53 +61,8 @@ pub(crate) struct TargetKinsnJson {
     pub(crate) call_offset: u32,
 }
 
-struct KinsnProbeTarget {
-    json_name: &'static str,
-    probe_names: &'static [&'static str],
-}
-
-const KINSN_PROBE_TARGETS: &[KinsnProbeTarget] = &[
-    KinsnProbeTarget {
-        json_name: "bpf_rotate64",
-        probe_names: &["bpf_rotate64"],
-    },
-    KinsnProbeTarget {
-        json_name: "bpf_select64",
-        probe_names: &["bpf_select64"],
-    },
-    KinsnProbeTarget {
-        json_name: "bpf_ccmp64",
-        probe_names: &["bpf_ccmp64"],
-    },
-    KinsnProbeTarget {
-        json_name: "bpf_prefetch",
-        probe_names: &["bpf_prefetch"],
-    },
-    KinsnProbeTarget {
-        json_name: "bpf_extract64",
-        probe_names: &["bpf_extract64"],
-    },
-    KinsnProbeTarget {
-        json_name: "bpf_endian_load16",
-        probe_names: &["bpf_endian_load16"],
-    },
-    KinsnProbeTarget {
-        json_name: "bpf_endian_load32",
-        probe_names: &["bpf_endian_load32"],
-    },
-    KinsnProbeTarget {
-        json_name: "bpf_endian_load64",
-        probe_names: &["bpf_endian_load64"],
-    },
-    KinsnProbeTarget {
-        json_name: "bpf_bulk_memcpy",
-        probe_names: &["bpf_bulk_memcpy", "bpf_memcpy_bulk"],
-    },
-    KinsnProbeTarget {
-        json_name: "bpf_bulk_memset",
-        probe_names: &["bpf_bulk_memset", "bpf_memset_bulk"],
-    },
-];
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[rustfmt::skip] pub(crate) struct KinsnProbeTarget { pub(crate) json_name: String, pub(crate) probe_names: Vec<String> }
 
 pub(crate) fn snapshot_program(prog_id: u32) -> Result<ProgramSnapshot> {
     let fd = kernel_sys::prog_get_fd_by_id(prog_id)
@@ -126,8 +81,11 @@ pub(crate) fn snapshot_program(prog_id: u32) -> Result<ProgramSnapshot> {
     })
 }
 
-pub(crate) fn probe_target_json() -> Result<TargetJson> {
-    let kinsns = probe_target_kinsns().with_context(|| {
+pub(crate) fn probe_target_json(targets: &[KinsnProbeTarget]) -> Result<TargetJson> {
+    if targets.is_empty() {
+        bail!("target probing requested with no kinsn targets");
+    }
+    let kinsns = probe_target_kinsns(targets).with_context(|| {
         "failed to probe target kinsn BTF; target probing requires readable kernel BTF"
     })?;
     if kinsns.is_empty() {
@@ -198,7 +156,7 @@ fn get_map_infos(map_ids: &[u32]) -> Result<Vec<MapInfo>> {
     Ok(maps)
 }
 
-fn probe_target_kinsns() -> Result<BTreeMap<String, TargetKinsnJson>> {
+fn probe_target_kinsns(targets: &[KinsnProbeTarget]) -> Result<BTreeMap<String, TargetKinsnJson>> {
     let mut found = BTreeMap::new();
     let mut start_id = 0u32;
     let mut saw_btf = false;
@@ -242,9 +200,10 @@ fn probe_target_kinsns() -> Result<BTreeMap<String, TargetKinsnJson>> {
             &mut module_slot_map,
             &mut next_slot,
             &mut found,
+            targets,
         )?;
 
-        if found.len() == KINSN_PROBE_TARGETS.len() {
+        if found.len() == targets.len() {
             break;
         }
     }
@@ -262,12 +221,13 @@ fn probe_kinsns_in_btf(
     module_slot_map: &mut BTreeMap<u32, u32>,
     next_slot: &mut u32,
     found: &mut BTreeMap<String, TargetKinsnJson>,
+    targets: &[KinsnProbeTarget],
 ) -> Result<()> {
-    for target in KINSN_PROBE_TARGETS {
-        if found.contains_key(target.json_name) {
+    for target in targets {
+        if found.contains_key(&target.json_name) {
             continue;
         }
-        for &probe_name in target.probe_names {
+        for probe_name in &target.probe_names {
             if let Some(btf_func_id) = btf
                 .find_func_by_name(probe_name)
                 .with_context(|| format!("inspect BTF id {btf_id} for {probe_name}"))?
@@ -293,7 +253,7 @@ fn probe_kinsns_in_btf(
                     0
                 };
                 found.insert(
-                    target.json_name.to_string(),
+                    target.json_name.clone(),
                     TargetKinsnJson {
                         btf_func_id,
                         btf_id,

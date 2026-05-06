@@ -179,6 +179,11 @@ struct ListPassEntry {
     name: &'static str,
     canonical_name: &'static str,
     description: &'static str,
+    needs_target: bool,
+    needs_verifier_states: bool,
+    produces_verifier_states: bool,
+    needs_map_values: bool,
+    kinsns_used: &'static [bpfopt::passes::KinsnRef],
 }
 
 #[derive(Debug, Deserialize)]
@@ -293,6 +298,11 @@ fn list_passes(common: &CommonArgs, args: &ListPassesArgs) -> Result<()> {
                 name: cli_name_for_pass(entry.name),
                 canonical_name: entry.name,
                 description: entry.description,
+                needs_target: entry.metadata.needs_target(),
+                needs_verifier_states: entry.metadata.needs_verifier_states(),
+                produces_verifier_states: entry.metadata.produces_verifier_states(),
+                needs_map_values: entry.metadata.needs_map_values(),
+                kinsns_used: entry.metadata.kinsns_used,
             })
             .collect::<Vec<_>>();
         write_json(common.output.as_deref(), &entries)
@@ -394,34 +404,23 @@ fn cli_name_for_pass(canonical: &str) -> &'static str {
 
 fn validate_required_side_inputs(common: &CommonArgs, pass_names: &[&str]) -> Result<()> {
     for &pass_name in pass_names {
-        match pass_name {
-            "rotate" | "cond_select" | "extract" | "endian_fusion" | "bulk_memory" | "prefetch" => {
-                if common.target.is_none() && common.kinsns.is_empty() {
-                    bail!(
-                        "{} requires --target or --kinsns",
-                        cli_name_for_pass(pass_name)
-                    );
-                }
+        let entry = registry_entry(pass_name)?;
+        let label = cli_name_for_pass(pass_name);
+        if entry.metadata.needs_target() && common.target.is_none() && common.kinsns.is_empty() {
+            bail!("{label} requires --target or --kinsns");
+        }
+        if pass_name == "branch_flip" && common.profile.is_none() {
+            bail!("branch-flip requires --profile");
+        }
+        if entry.metadata.needs_map_values() {
+            if common.verifier_states.is_none()
+                || common.map_values.is_none()
+                || common.map_ids.is_empty()
+            {
+                bail!("{label} requires --verifier-states, --map-values, and --map-ids");
             }
-            "branch_flip" => {
-                if common.profile.is_none() {
-                    bail!("branch-flip requires --profile");
-                }
-            }
-            "const_prop" => {
-                if common.verifier_states.is_none() {
-                    bail!("const-prop requires --verifier-states");
-                }
-            }
-            "map_inline" => {
-                if common.verifier_states.is_none()
-                    || common.map_values.is_none()
-                    || common.map_ids.is_empty()
-                {
-                    bail!("map-inline requires --verifier-states, --map-values, and --map-ids");
-                }
-            }
-            _ => {}
+        } else if entry.metadata.needs_verifier_states() && common.verifier_states.is_none() {
+            bail!("{label} requires --verifier-states");
         }
     }
     Ok(())

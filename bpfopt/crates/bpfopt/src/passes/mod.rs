@@ -45,6 +45,7 @@ use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
 use crate::pass::BpfPass;
 #[cfg(test)]
 use crate::pass::PassManager;
+use serde::Serialize;
 
 // ── Pass registry ───────────────────────────────────────────────────
 
@@ -57,91 +58,63 @@ pub struct PassRegistryEntry {
     pub description: &'static str,
     /// Constructor: returns a boxed pass instance.
     pub make: fn() -> Box<dyn BpfPass>,
+    /// Side-input and kinsn requirements consumed by `bpfopt list-passes --json`.
+    pub metadata: PassMetadata,
 }
+
+#[derive(Clone, Copy, Debug)]
+#[rustfmt::skip] pub struct PassMetadata { flags: u8, pub kinsns_used: &'static [KinsnRef] }
+
+#[derive(Clone, Copy, Debug, Serialize)]
+#[rustfmt::skip] pub struct KinsnRef { pub json_name: &'static str, pub probe_aliases: &'static [&'static str] }
+
+#[rustfmt::skip] impl KinsnRef { const fn new(json_name: &'static str, probe_aliases: &'static [&'static str]) -> Self { Self { json_name, probe_aliases } } }
+
+#[rustfmt::skip] impl PassMetadata {
+    const fn new(flags: u8, kinsns_used: &'static [KinsnRef]) -> Self { Self { flags, kinsns_used } }
+    pub fn needs_target(self) -> bool { self.flags & NEEDS_TARGET != 0 }
+    pub fn needs_verifier_states(self) -> bool { self.flags & NEEDS_VERIFIER_STATES != 0 }
+    pub fn produces_verifier_states(self) -> bool { self.flags & PRODUCES_VERIFIER_STATES != 0 }
+    pub fn needs_map_values(self) -> bool { self.flags & NEEDS_MAP_VALUES != 0 }
+}
+
+const NEEDS_TARGET: u8 = 1 << 0;
+const NEEDS_VERIFIER_STATES: u8 = 1 << 1;
+const PRODUCES_VERIFIER_STATES: u8 = 1 << 2;
+const NEEDS_MAP_VALUES: u8 = 1 << 3;
+
+const META_NONE: PassMetadata = PassMetadata::new(0, &[]);
+const META_PRODUCES_STATES: PassMetadata = PassMetadata::new(PRODUCES_VERIFIER_STATES, &[]);
+#[rustfmt::skip] const META_NEEDS_AND_PRODUCES_STATES: PassMetadata = PassMetadata::new(NEEDS_VERIFIER_STATES | PRODUCES_VERIFIER_STATES, &[]);
+#[rustfmt::skip] const META_MAP_INLINE: PassMetadata = PassMetadata::new(NEEDS_VERIFIER_STATES | PRODUCES_VERIFIER_STATES | NEEDS_MAP_VALUES, &[]);
+#[rustfmt::skip] const META_ROTATE: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_rotate64", &["bpf_rotate64"])]);
+#[rustfmt::skip] const META_SELECT: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_select64", &["bpf_select64"])]);
+#[rustfmt::skip] const META_CCMP: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_ccmp64", &["bpf_ccmp64"])]);
+#[rustfmt::skip] const META_EXTRACT: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_extract64", &["bpf_extract64"])]);
+#[rustfmt::skip] const META_ENDIAN: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_endian_load16", &["bpf_endian_load16"]), KinsnRef::new("bpf_endian_load32", &["bpf_endian_load32"]), KinsnRef::new("bpf_endian_load64", &["bpf_endian_load64"])]);
+#[rustfmt::skip] const META_BULK_MEMORY: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_bulk_memcpy", &["bpf_memcpy_bulk"]), KinsnRef::new("bpf_bulk_memset", &["bpf_memset_bulk"])]);
+#[rustfmt::skip] const META_PREFETCH: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_prefetch", &["bpf_prefetch"])]);
+
+#[rustfmt::skip] macro_rules! pass_entry { ($name:literal, $description:literal, $make:expr, $metadata:expr) => { PassRegistryEntry { name: $name, description: $description, make: || -> Box<dyn BpfPass> { Box::new($make) }, metadata: $metadata } }; }
 
 /// Canonical pass ordering and metadata. Pipeline builders iterate this array in
 /// order, guaranteeing consistent pass sequencing regardless of selected names.
-pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
-    PassRegistryEntry {
-        name: "noop",
-        description: "Identity pass — measures ReJIT pipeline overhead with no transform",
-        make: || Box::new(NoopPass),
-    },
-    PassRegistryEntry {
-        name: "map_inline",
-        description: "Inline stable map lookups and pseudo-map-value loads",
-        make: || Box::new(MapInlinePass),
-    },
-    PassRegistryEntry {
-        name: "const_prop",
-        description: "Fold register constants into MOV/LD_IMM64/JA rewrites",
-        make: || Box::new(ConstPropPass),
-    },
-    PassRegistryEntry {
-        name: "dce",
-        description: "Remove CFG-unreachable blocks and NOPs after simplification",
-        make: || Box::new(DcePass),
-    },
-    PassRegistryEntry {
-        name: "skb_load_bytes_spec",
-        description: "Specialize eligible skb_load_bytes helper sites into direct packet access",
-        make: || Box::new(SkbLoadBytesSpecPass),
-    },
-    PassRegistryEntry {
-        name: "bounds_check_merge",
-        description: "Merge direct packet bounds-check ladders into a dominant guard",
-        make: || Box::new(BoundsCheckMergePass),
-    },
-    PassRegistryEntry {
-        name: "wide_mem",
-        description: "Fuse byte-by-byte loads into wider memory accesses",
-        make: || Box::new(WideMemPass),
-    },
-    PassRegistryEntry {
-        name: "bulk_memory",
-        description: "Lower large scalarized memcpy/memset runs into bulk-memory kinsn calls",
-        make: || Box::new(BulkMemoryPass),
-    },
-    PassRegistryEntry {
-        name: "rotate",
-        description: "Replace shift+or patterns with rotate kfunc (ROL/ROR)",
-        make: || Box::new(RotatePass),
-    },
-    PassRegistryEntry {
-        name: "cond_select",
-        description: "Replace branch-over-mov with conditional select kfunc (CMOV/CSEL)",
-        make: || Box::new(CondSelectPass),
-    },
-    PassRegistryEntry {
-        name: "ccmp",
-        description: "Fold ARM64 zero-test compare chains into CCMP kfunc calls",
-        make: || Box::new(CcmpPass),
-    },
-    PassRegistryEntry {
-        name: "extract",
-        description: "Replace shift+mask with bit field extract kfunc (BEXTR)",
-        make: || Box::new(ExtractPass),
-    },
-    PassRegistryEntry {
-        name: "endian_fusion",
-        description: "Fuse endian swap patterns into endian load kfunc (MOVBE)",
-        make: || Box::new(EndianFusionPass),
-    },
-    PassRegistryEntry {
-        name: "branch_flip",
-        description: "Flip branch polarity using PGO data to improve branch prediction",
-        make: || {
-            Box::new(BranchFlipPass {
-                min_bias: 0.7,
-                max_branch_miss_rate: 0.05,
-            })
-        },
-    },
-    PassRegistryEntry {
-        name: "prefetch",
-        description: "Insert packet and map-value prefetch kinsn calls",
-        make: || Box::new(PrefetchPass),
-    },
+#[rustfmt::skip] pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
+    pass_entry!("noop", "Identity pass — measures ReJIT pipeline overhead with no transform", NoopPass, META_PRODUCES_STATES),
+    pass_entry!("map_inline", "Inline stable map lookups and pseudo-map-value loads", MapInlinePass, META_MAP_INLINE),
+    pass_entry!("const_prop", "Fold register constants into MOV/LD_IMM64/JA rewrites", ConstPropPass, META_NEEDS_AND_PRODUCES_STATES),
+    pass_entry!("dce", "Remove CFG-unreachable blocks and NOPs after simplification", DcePass, META_NONE),
+    pass_entry!("skb_load_bytes_spec", "Specialize eligible skb_load_bytes helper sites into direct packet access", SkbLoadBytesSpecPass, META_NONE),
+    pass_entry!("bounds_check_merge", "Merge direct packet bounds-check ladders into a dominant guard", BoundsCheckMergePass, META_NONE),
+    pass_entry!("wide_mem", "Fuse byte-by-byte loads into wider memory accesses", WideMemPass, META_NONE),
+    pass_entry!("bulk_memory", "Lower large scalarized memcpy/memset runs into bulk-memory kinsn calls", BulkMemoryPass, META_BULK_MEMORY),
+    pass_entry!("rotate", "Replace shift+or patterns with rotate kfunc (ROL/ROR)", RotatePass, META_ROTATE),
+    pass_entry!("cond_select", "Replace branch-over-mov with conditional select kfunc (CMOV/CSEL)", CondSelectPass, META_SELECT),
+    pass_entry!("ccmp", "Fold ARM64 zero-test compare chains into CCMP kfunc calls", CcmpPass, META_CCMP),
+    pass_entry!("extract", "Replace shift+mask with bit field extract kfunc (BEXTR)", ExtractPass, META_EXTRACT),
+    pass_entry!("endian_fusion", "Fuse endian swap patterns into endian load kfunc (MOVBE)", EndianFusionPass, META_ENDIAN),
+    pass_entry!("branch_flip", "Flip branch polarity using PGO data to improve branch prediction", BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 }, META_NONE),
+    pass_entry!("prefetch", "Insert packet and map-value prefetch kinsn calls", PrefetchPass, META_PREFETCH),
 ];
 
 // ── Pipeline constructors ───────────────────────────────────────────

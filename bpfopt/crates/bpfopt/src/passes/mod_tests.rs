@@ -1,5 +1,5 @@
 use super::*;
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 
 use crate::bpf::{install_mock_map, use_mock_maps, BpfMapInfo, MockMapState};
 use crate::insn::*;
@@ -122,6 +122,12 @@ fn default_test_pipeline() -> PassManager {
         .map(|entry| entry.name.to_string())
         .collect::<Vec<_>>();
     build_custom_pipeline(&pass_names).unwrap()
+}
+
+#[test]
+#[rustfmt::skip] fn pass_registry_declares_all_emitted_kinsn_probe_names() {
+    let declared = PASS_REGISTRY.iter().flat_map(|entry| entry.metadata.kinsns_used).flat_map(|kinsn| kinsn.probe_aliases.iter().copied()).collect::<BTreeSet<_>>();
+    assert_eq!(declared, BTreeSet::from(["bpf_rotate64", "bpf_select64", "bpf_ccmp64", "bpf_extract64", "bpf_endian_load16", "bpf_endian_load32", "bpf_endian_load64", "bpf_memcpy_bulk", "bpf_memset_bulk", "bpf_prefetch"]));
 }
 
 fn make_wide_mem_4byte_program() -> Vec<BpfInsn> {
