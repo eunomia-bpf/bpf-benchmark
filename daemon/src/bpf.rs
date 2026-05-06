@@ -88,6 +88,14 @@ const KINSN_PROBE_TARGETS: &[KinsnProbeTarget] = &[
         probe_names: &["bpf_extract64"],
     },
     KinsnProbeTarget {
+        json_name: "bpf_endian_load16",
+        probe_names: &["bpf_endian_load16"],
+    },
+    KinsnProbeTarget {
+        json_name: "bpf_endian_load32",
+        probe_names: &["bpf_endian_load32"],
+    },
+    KinsnProbeTarget {
         json_name: "bpf_endian_load64",
         probe_names: &["bpf_endian_load64"],
     },
