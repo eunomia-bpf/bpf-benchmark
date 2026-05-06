@@ -10,6 +10,7 @@ apps:
   - bcc/tcpconnect
   - bcc/tcplife
   - bcc/runqlat
+  - bcc/set
   - otelcol-ebpf-profiler/profiling
   - cilium/agent
   - tetragon/observer

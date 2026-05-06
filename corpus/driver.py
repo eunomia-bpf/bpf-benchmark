@@ -158,10 +158,14 @@ def _build_runner_state(
     if not prog_ids: raise RuntimeError(f"{app.name}: runner did not return any live prog_ids")
     programs = [dict(program) for program in runner.programs]
     if not programs: raise RuntimeError(f"{app.name}: runner did not expose any live programs")
+    artifacts: dict[str, object] = {"programs": programs, "rejit_policy_context": {
+        "repo": str(app.name).strip(), "category": str(app.runner).strip(), "level": "corpus"}}
+    result_details = runner.artifacts.get("result_details")
+    if isinstance(result_details, Mapping):
+        artifacts["result_details"] = dict(result_details)
     return CaseLifecycleState(
         runtime=runner, prog_ids=list(prog_ids),
-        artifacts={"programs": programs, "rejit_policy_context": {
-            "repo": str(app.name).strip(), "category": str(app.runner).strip(), "level": "corpus"}},
+        artifacts=artifacts,
     )
 
 
@@ -383,6 +387,14 @@ def _build_app_result_from_lifecycle(
     *,
     fatal_error: str = "",
 ) -> dict[str, object]:
+    def with_runner_details(payload: dict[str, object]) -> dict[str, object]:
+        state = lifecycle.state if lifecycle is not None else None
+        artifacts = state.artifacts if state is not None else {}
+        result_details = artifacts.get("result_details") if isinstance(artifacts, Mapping) else None
+        if isinstance(result_details, Mapping):
+            payload["runner_details"] = dict(result_details)
+        return payload
+
     baseline_measurement = (
         dict(lifecycle.baseline)
         if lifecycle is not None and isinstance(lifecycle.baseline, Mapping)
@@ -401,27 +413,33 @@ def _build_app_result_from_lifecycle(
     if stop_error:
         error_message = stop_error if not error_message else f"{error_message}; stop failed: {stop_error}"
     if error_message:
-        return _build_app_error_result(
-            app,
-            error=error_message,
-            baseline_measurement=baseline_measurement,
-            apply_result=apply_result,
-            rejit_measurement=rejit_measurement,
+        return with_runner_details(
+            _build_app_error_result(
+                app,
+                error=error_message,
+                baseline_measurement=baseline_measurement,
+                apply_result=apply_result,
+                rejit_measurement=rejit_measurement,
+            )
         )
 
     if baseline_measurement is None:
-        return _build_app_error_result(
+        return with_runner_details(
+            _build_app_error_result(
+                app,
+                error="baseline measurement is missing",
+                baseline_measurement=baseline_measurement,
+                apply_result=apply_result,
+                rejit_measurement=rejit_measurement,
+            )
+        )
+    return with_runner_details(
+        _build_app_ok_result(
             app,
-            error="baseline measurement is missing",
             baseline_measurement=baseline_measurement,
             apply_result=apply_result,
             rejit_measurement=rejit_measurement,
         )
-    return _build_app_ok_result(
-        app,
-        baseline_measurement=baseline_measurement,
-        apply_result=apply_result,
-        rejit_measurement=rejit_measurement,
     )
 
 

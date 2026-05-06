@@ -25,6 +25,12 @@ MACRO_APP_DEFINITIONS: tuple[MacroAppDefinition, ...] = (
     MacroAppDefinition(name="bcc/tcpconnect", runner="bcc", workload="tcp_connect", runner_args={"tool": "tcpconnect"}),
     MacroAppDefinition(name="bcc/tcplife", runner="bcc", workload="tcp_connect", runner_args={"tool": "tcplife"}),
     MacroAppDefinition(name="bcc/runqlat", runner="bcc", workload="stress_ng_scheduler", runner_args={"tool": "runqlat"}),
+    MacroAppDefinition(
+        name="bcc/set",
+        runner="bcc_set",
+        workload="stress_ng_os_io_network",
+        duration_s=5.0,
+    ),
     MacroAppDefinition(name="otelcol-ebpf-profiler/profiling", runner="otelcol-ebpf-profiler", workload="stress_ng_cpu", duration_s=5.0),
     MacroAppDefinition(name="cilium/agent", runner="cilium", workload="network_lossy_multi", duration_s=5.0),
     MacroAppDefinition(name="tetragon/observer", runner="tetragon", workload="stress_ng_os_io_network", duration_s=5.0),

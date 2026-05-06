@@ -28,6 +28,33 @@ def _adapt_bcc(workload: str, kwargs: dict[str, object]) -> dict[str, object]:
     return mapped
 
 
+def _adapt_bcc_set(workload: str, kwargs: dict[str, object]) -> dict[str, object]:
+    from .bcc import find_tool_binary, inspect_bcc_setup, resolve_tools_dir
+    from .bcc_set import BCC_SET_TOOL_SPECS, BCC_SET_WORKLOAD
+
+    normalized_workload = str(workload).strip()
+    if normalized_workload != BCC_SET_WORKLOAD:
+        raise RuntimeError(f"bcc_set runner requires workload {BCC_SET_WORKLOAD!r}; got {normalized_workload!r}")
+    setup_result = inspect_bcc_setup()
+    tools_dir = resolve_tools_dir("", setup_result=setup_result)
+    tool_binaries: dict[str, object] = {}
+    missing: list[str] = []
+    for tool in BCC_SET_TOOL_SPECS:
+        tool_binary = find_tool_binary(tools_dir, tool.name)
+        if tool_binary is None:
+            missing.append(tool.name)
+            continue
+        tool_binaries[tool.name] = tool_binary
+    if missing:
+        details = str(setup_result.get("stderr_tail") or "").strip()
+        suffix = f": {details}" if details else ""
+        raise RuntimeError(f"bcc_set runner missing BCC tool binaries: {', '.join(missing)}{suffix}")
+    mapped = dict(kwargs)
+    mapped["tool_binaries"] = tool_binaries
+    mapped.setdefault("workload_spec", {"kind": normalized_workload})
+    return mapped
+
+
 def _adapt_bpftrace(workload: str, kwargs: dict[str, object]) -> dict[str, object]:
     script_name = str(kwargs.pop("script", "") or "").strip()
     if not script_name:
@@ -69,6 +96,7 @@ def _adapt_native_process(workload: str, kwargs: dict[str, object]) -> dict[str,
 
 _RUNNERS = {
     "bcc": ("runner.libs.app_runners.bcc", "BCCRunner", _adapt_bcc),
+    "bcc_set": ("runner.libs.app_runners.bcc_set", "BccSetRunner", _adapt_bcc_set),
     "bpftrace": ("runner.libs.app_runners.bpftrace", "BpftraceRunner", _adapt_bpftrace),
     "cilium": ("runner.libs.app_runners.cilium", "CiliumRunner", _adapt_native_process),
     "katran": ("runner.libs.app_runners.katran", "KatranRunner", _adapt_katran),
