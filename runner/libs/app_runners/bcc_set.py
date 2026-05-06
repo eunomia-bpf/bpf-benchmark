@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import subprocess
 import threading
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping, Sequence
@@ -20,7 +21,6 @@ from .bcc import (
     _prepare_bcc_kernel_source,
     _prepare_bcc_python_compat,
 )
-from .process_support import wait_until_program_set_stable
 
 BCC_SET_WORKLOAD = "stress_ng_os_io_network"
 
@@ -59,6 +59,19 @@ def _dedupe_programs(programs: Sequence[Mapping[str, object]]) -> list[dict[str,
             continue
         deduped[prog_id] = dict(program)
     return [deduped[prog_id] for prog_id in sorted(deduped)]
+
+
+def _program_records_for_ids(program_ids: Sequence[int]) -> list[dict[str, object]]:
+    requested_ids = {int(prog_id) for prog_id in program_ids if int(prog_id) > 0}
+    records_by_id: dict[int, dict[str, object]] = {}
+    for record in bpftool_prog_show_records():
+        prog_id = int(record.get("id", 0) or 0)
+        if prog_id in requested_ids:
+            records_by_id[prog_id] = dict(record)
+    missing = sorted(requested_ids.difference(records_by_id))
+    if missing:
+        raise RuntimeError(f"bpftool did not report BCC child program IDs from fdinfo: {missing}")
+    return [records_by_id[prog_id] for prog_id in sorted(records_by_id)]
 
 
 def _program_ids_from_fdinfo(pid: int) -> list[int]:
@@ -144,47 +157,19 @@ class BccSetRunner(AppRunner):
 
         if not spawned:
             raise RuntimeError(f"bcc/set failed to start any BCC tools: {self._failure_summary()}")
+        if len(spawned) != len(BCC_SET_TOOL_SPECS):
+            self._fail_start(f"bcc/set failed to start all BCC tools: {self._failure_summary()}")
 
         try:
-            programs = wait_until_program_set_stable(
-                before_ids=self._before_ids,
-                timeout_s=self.attach_timeout_s,
-                process_name="bcc/set",
-            )
+            per_tool_prog_ids = self._wait_for_all_tool_program_ids(spawned)
         except Exception as exc:
             self._mark_exited_children()
-            self._fail_start(f"bcc/set did not attach a stable BPF program set: {exc}")
+            self._fail_start(f"bcc/set did not attach all BCC tools: {exc}")
 
-        live_programs = _dedupe_programs(programs)
+        all_prog_ids = sorted({prog_id for prog_ids in per_tool_prog_ids.values() for prog_id in prog_ids})
+        live_programs = _dedupe_programs(_program_records_for_ids(all_prog_ids))
         if not live_programs:
             self._fail_start("bcc/set did not expose any live BPF programs")
-
-        live_program_ids = {
-            int(program.get("id", 0) or 0)
-            for program in live_programs
-            if int(program.get("id", 0) or 0) > 0
-        }
-        live_tools = 0
-        for tool_name in spawned:
-            child = self._children[tool_name]
-            process = child.session.process if child.session is not None else None
-            if process is None:
-                self._record_tool_status(tool_name, status="failed", error="process handle is unavailable")
-                continue
-            if process.poll() is not None:
-                self._record_tool_status(
-                    tool_name,
-                    status="failed",
-                    error=self._process_exit_message(tool_name, child),
-                )
-                self._stop_failed_child(tool_name, child)
-                continue
-            prog_ids = [prog_id for prog_id in _program_ids_from_fdinfo(process.pid) if prog_id in live_program_ids]
-            self._record_tool_status(tool_name, status="attached", prog_ids=prog_ids)
-            live_tools += 1
-
-        if live_tools == 0:
-            self._fail_start(f"bcc/set failed to keep any BCC tools running: {self._failure_summary()}")
 
         self.programs = live_programs
         return [int(program["id"]) for program in self.programs if int(program.get("id", 0) or 0) > 0]
@@ -277,6 +262,70 @@ class BccSetRunner(AppRunner):
             stderr_thread=stderr_thread,
         )
 
+    def _wait_for_all_tool_program_ids(
+        self,
+        tool_names: Sequence[str],
+        *,
+        poll_interval_s: float = 0.2,
+    ) -> dict[str, list[int]]:
+        deadline = time.monotonic() + max(0.0, float(self.attach_timeout_s))
+        poll_interval = max(0.05, float(poll_interval_s))
+        pending = set(tool_names)
+        attached: dict[str, list[int]] = {}
+
+        while pending:
+            now = time.monotonic()
+            for tool_name in list(pending):
+                child = self._children[tool_name]
+                process = child.session.process if child.session is not None else None
+                if process is None:
+                    self._record_tool_status(tool_name, status="failed", error="process handle is unavailable")
+                    pending.remove(tool_name)
+                    continue
+                if process.poll() is not None:
+                    self._record_tool_status(
+                        tool_name,
+                        status="failed",
+                        error=self._process_exit_message(tool_name, child),
+                    )
+                    self._stop_failed_child(tool_name, child)
+                    pending.remove(tool_name)
+                    continue
+
+                prog_ids = tuple(
+                    prog_id
+                    for prog_id in _program_ids_from_fdinfo(process.pid)
+                    if prog_id not in self._before_ids
+                )
+                if prog_ids:
+                    attached[tool_name] = list(prog_ids)
+                    self._record_tool_status(tool_name, status="attached", prog_ids=prog_ids)
+                    pending.remove(tool_name)
+
+            failed = [
+                tool_name
+                for tool_name in tool_names
+                if str((self._tool_startup.get(tool_name) or {}).get("status") or "") == "failed"
+            ]
+            if failed:
+                raise RuntimeError(f"BCC tools failed before attachment: {', '.join(sorted(failed))}")
+            if not pending:
+                return attached
+            if now >= deadline:
+                for tool_name in sorted(pending):
+                    self._record_tool_status(
+                        tool_name,
+                        status="timeout",
+                        error=(
+                            f"BCC tool {tool_name} did not expose any BPF program IDs "
+                            f"within {self.attach_timeout_s}s"
+                        ),
+                    )
+                raise RuntimeError(f"BCC tools timed out before attachment: {', '.join(sorted(pending))}")
+            time.sleep(min(poll_interval, max(0.0, deadline - now)))
+
+        return attached
+
     def _record_tool_status(
         self,
         tool_name: str,
@@ -364,8 +413,8 @@ class BccSetRunner(AppRunner):
 
     def _failure_summary(self) -> str:
         failures = [
-            f"{record.get('tool')}: {record.get('error')}"
+            f"{record.get('tool')}: {record.get('status')}: {record.get('error')}"
             for record in self._tool_startup_records()
-            if str(record.get("status") or "") == "failed"
+            if str(record.get("status") or "") in {"failed", "timeout"}
         ]
         return "; ".join(failures) if failures else "no per-tool failure details recorded"
