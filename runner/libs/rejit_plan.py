@@ -45,13 +45,19 @@ def load_pass_metadata(bpfopt: str = "bpfopt") -> dict[str, dict[str, Any]]:
     return metadata
 
 
+BPFOPT_STEP_TIMEOUT_SECS = 600  # 10 min hard cap per bpfopt invocation; killed by `timeout(1)`
+
+
 def build_step_command(pass_name: str, pass_meta: dict[str, Any]) -> str:
-    """Compose the full `bpfopt --pass <name> ...` shell command for one pass,
-    using only daemon-substituted `${VAR}` placeholders for paths and inline
-    values. Side-input flags are added only when the pass declares it needs
-    them.
+    """Compose the full `timeout N bpfopt --pass <name> ...` shell command for
+    one pass, using only daemon-substituted `${VAR}` placeholders for paths
+    and inline values. Side-input flags are added only when the pass declares
+    it needs them. The `timeout` prefix kills bpfopt after
+    `BPFOPT_STEP_TIMEOUT_SECS`; daemon sees exit 124 and records it as a
+    FailedBpfopt step, so a hung pass cannot stall the whole request.
     """
     parts = [
+        f"timeout {BPFOPT_STEP_TIMEOUT_SECS}",
         "bpfopt",
         f"--pass {pass_name}",
         "--input ${INPUT}",
