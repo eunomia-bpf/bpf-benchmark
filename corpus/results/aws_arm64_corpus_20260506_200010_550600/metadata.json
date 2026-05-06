@@ -1,0 +1,29 @@
+{
+  "config": {
+    "enabled_passes": [
+      "noop",
+      "rotate",
+      "cond_select",
+      "prefetch",
+      "extract",
+      "endian_fusion",
+      "wide_mem",
+      "bulk_memory",
+      "ccmp"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "daemon session exited early (rc=-9)",
+  "generated_at": "2026-05-06T20:48:05.780491+00:00",
+  "last_updated_at": "2026-05-06T20:48:05.779348+00:00",
+  "launcher_boot_id": "7ea3c1a4-ef8d-40ad-95c6-c1f6ed982a2a",
+  "launcher_pid": 2635,
+  "launcher_start_ticks": 2001,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "run_type": "aws_arm64_corpus",
+  "samples": 1,
+  "started_at": "2026-05-06T20:00:10.550600+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_seconds": 3.0
+}

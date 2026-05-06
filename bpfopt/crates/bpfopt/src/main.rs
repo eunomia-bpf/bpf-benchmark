@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 //! bpfopt CLI entry point.
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs;
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
@@ -254,6 +254,20 @@ struct BpftoolMapEntryJson {
     values: Vec<BpftoolPerCpuValueJson>,
     #[serde(default)]
     inner_map_id: Option<u32>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct BpftoolMapDumpSkipMarker {
+    skipped: bool,
+    reason: String,
+    size_bytes: u64,
+    limit_bytes: u64,
+}
+
+enum BpftoolMapDumpSnapshot {
+    Entries(Vec<BpftoolMapEntryJson>),
+    SkippedBySize,
 }
 
 #[derive(Debug, Deserialize)]
@@ -595,6 +609,7 @@ fn attach_program_inputs(program: &mut BpfProgram, common: &CommonArgs) -> Resul
         program.map_values = snapshot.values;
         program.map_inner_map_ids = snapshot.inner_map_ids;
         program.map_bpf_writable = snapshot.bpf_writable;
+        program.map_snapshots_skipped_by_size = snapshot.maps_skipped_by_size;
     }
     program.func_info = read_btf_info_records(
         common.func_info.as_deref(),
@@ -1075,6 +1090,7 @@ struct MapSnapshot {
     values: HashMap<(u32, Vec<u8>), Vec<u8>>,
     inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
     bpf_writable: HashMap<u32, bool>,
+    maps_skipped_by_size: HashSet<u32>,
 }
 
 fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
@@ -1088,6 +1104,7 @@ fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
     let mut values = HashMap::new();
     let mut inner_map_ids = HashMap::new();
     let mut bpf_writable = HashMap::new();
+    let mut maps_skipped_by_size = HashSet::new();
 
     for &map_id in map_ids.iter().filter(|&&map_id| map_id != 0) {
         let show = read_bpftool_map_show(path, map_id)?;
@@ -1103,14 +1120,21 @@ fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
         };
         bpf_writable.insert(show.id, flags & bpf_f_rdonly_prog() == 0);
         if needs_bpftool_map_dump(map_type) {
-            for entry in read_bpftool_map_dump(path, show.id)? {
-                let key = decode_bpftool_hex_bytes(&entry.key)
-                    .with_context(|| format!("invalid key bytes for map {}", show.id))?;
-                let value = decode_bpftool_entry_value(&entry, &map_metadata)
-                    .with_context(|| format!("invalid value bytes for map {}", show.id))?;
-                values.insert((show.id, key.clone()), value);
-                if let Some(inner_map_id) = entry.inner_map_id {
-                    inner_map_ids.insert((show.id, key), inner_map_id);
+            match read_bpftool_map_dump(path, show.id)? {
+                BpftoolMapDumpSnapshot::Entries(entries) => {
+                    for entry in entries {
+                        let key = decode_bpftool_hex_bytes(&entry.key)
+                            .with_context(|| format!("invalid key bytes for map {}", show.id))?;
+                        let value = decode_bpftool_entry_value(&entry, &map_metadata)
+                            .with_context(|| format!("invalid value bytes for map {}", show.id))?;
+                        values.insert((show.id, key.clone()), value);
+                        if let Some(inner_map_id) = entry.inner_map_id {
+                            inner_map_ids.insert((show.id, key), inner_map_id);
+                        }
+                    }
+                }
+                BpftoolMapDumpSnapshot::SkippedBySize => {
+                    maps_skipped_by_size.insert(show.id);
                 }
             }
         }
@@ -1122,6 +1146,7 @@ fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
         values,
         inner_map_ids,
         bpf_writable,
+        maps_skipped_by_size,
     })
 }
 
@@ -1139,11 +1164,52 @@ fn read_bpftool_map_show(path: &Path, map_id: u32) -> Result<BpftoolMapShowJson>
     Ok(show)
 }
 
-fn read_bpftool_map_dump(path: &Path, map_id: u32) -> Result<Vec<BpftoolMapEntryJson>> {
-    read_json_file(
-        &bpftool_map_dump_path(path, map_id),
-        "bpftool map dump JSON",
-    )
+fn read_bpftool_map_dump(path: &Path, map_id: u32) -> Result<BpftoolMapDumpSnapshot> {
+    let dump_path = bpftool_map_dump_path(path, map_id);
+    let data =
+        fs::read(&dump_path).with_context(|| format!("failed to read {}", dump_path.display()))?;
+    let Some(first) = data
+        .iter()
+        .copied()
+        .find(|byte| !byte.is_ascii_whitespace())
+    else {
+        bail!("{} is empty", dump_path.display());
+    };
+
+    match first {
+        b'[' => {
+            let entries = serde_json::from_slice(&data).with_context(|| {
+                format!(
+                    "failed to parse bpftool map dump JSON from {}",
+                    dump_path.display()
+                )
+            })?;
+            Ok(BpftoolMapDumpSnapshot::Entries(entries))
+        }
+        b'{' => {
+            let marker: BpftoolMapDumpSkipMarker =
+                serde_json::from_slice(&data).with_context(|| {
+                    format!(
+                        "failed to parse bpftool map dump skip marker from {}",
+                        dump_path.display()
+                    )
+                })?;
+            if !marker.skipped
+                || marker.reason != "size_limit"
+                || marker.size_bytes <= marker.limit_bytes
+            {
+                bail!(
+                    "unexpected bpftool map dump skip marker in {}",
+                    dump_path.display()
+                );
+            }
+            Ok(BpftoolMapDumpSnapshot::SkippedBySize)
+        }
+        _ => bail!(
+            "{} is neither a bpftool map dump array nor a skip marker object",
+            dump_path.display()
+        ),
+    }
 }
 
 fn bpftool_map_show_path(path: &Path, map_id: u32) -> PathBuf {
@@ -1521,6 +1587,81 @@ mod tests {
         assert_eq!(
             snapshot.values[&(90, 1u32.to_le_bytes().to_vec())],
             91u32.to_le_bytes().to_vec()
+        );
+    }
+
+    #[test]
+    fn read_map_values_accepts_size_skip_marker() {
+        let dir = std::env::temp_dir().join(format!(
+            "bpfopt-bpftool-map-values-size-skip-{}",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir(&dir).unwrap();
+        std::fs::write(
+            bpftool_map_show_path(&dir, 91),
+            r#"{
+              "id": 91,
+              "type": "array",
+              "name": "oversized",
+              "flags": 0,
+              "bytes_key": 4,
+              "bytes_value": 8,
+              "max_entries": 4096
+            }"#,
+        )
+        .unwrap();
+        std::fs::write(
+            bpftool_map_dump_path(&dir, 91),
+            r#"{"skipped":true,"reason":"size_limit","size_bytes":65537,"limit_bytes":65536}"#,
+        )
+        .unwrap();
+
+        let snapshot = read_map_values(&dir, &[91]).unwrap();
+        let _ = std::fs::remove_dir_all(&dir);
+
+        assert!(snapshot.maps_skipped_by_size.contains(&91));
+        assert!(snapshot.values.is_empty());
+        assert_eq!(
+            snapshot.metadata[&91].map_type,
+            kernel_sys::BPF_MAP_TYPE_ARRAY
+        );
+    }
+
+    #[test]
+    fn read_map_values_rejects_unexpected_size_skip_marker() {
+        let dir = std::env::temp_dir().join(format!(
+            "bpfopt-bpftool-map-values-bad-skip-{}",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir(&dir).unwrap();
+        std::fs::write(
+            bpftool_map_show_path(&dir, 92),
+            r#"{
+              "id": 92,
+              "type": "array",
+              "name": "bad_marker",
+              "flags": 0,
+              "bytes_key": 4,
+              "bytes_value": 8,
+              "max_entries": 4096
+            }"#,
+        )
+        .unwrap();
+        std::fs::write(
+            bpftool_map_dump_path(&dir, 92),
+            r#"{"skipped":true,"reason":"unknown","size_bytes":65537,"limit_bytes":65536}"#,
+        )
+        .unwrap();
+
+        let err = read_map_values(&dir, &[92]).unwrap_err();
+        let _ = std::fs::remove_dir_all(&dir);
+
+        assert!(
+            err.to_string()
+                .contains("unexpected bpftool map dump skip marker"),
+            "err={err:#}"
         );
     }
 

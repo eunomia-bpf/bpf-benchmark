@@ -832,6 +832,9 @@ fn run_map_inline_round(
     let mut skipped = Vec::new();
     let mut rewrites = Vec::new();
     let mut diagnostics = Vec::new();
+    if use_verifier_guided_keys {
+        record_maps_skipped_by_size_counter(program, &mut diagnostics);
+    }
     let (direct_replacements, direct_sites_applied, direct_diagnostics, direct_records) =
         build_direct_map_value_load_rewrites(program)?;
     diagnostics.extend(direct_diagnostics);
@@ -875,6 +878,13 @@ fn run_map_inline_round(
             info.value_size,
             info.max_entries,
         ));
+        if map_snapshot_skipped_by_size(program, info.map_id) {
+            log_map_inline_debug(&format!(
+                "site pc={} skip: map {} snapshot skipped by size",
+                site.call_pc, info.map_id
+            ));
+            continue;
+        }
         if info.is_map_in_map() {
             match build_map_in_map_chain_rewrite(program, &site, info, use_verifier_guided_keys) {
                 Ok(Some(mut rewrite)) => {
@@ -1315,6 +1325,11 @@ fn build_site_rewrite(
                 format_bytes_preview(&encoded_key)
             )));
         }
+        Err(MapLookupError::SkippedBySize { map_id }) => {
+            return Err(site_level_inline_veto(map_snapshot_skipped_by_size_reason(
+                map_id,
+            )));
+        }
         Err(err) => {
             log_map_inline_debug(&format!(
                 "site at PC={}: map lookup(map_id={}, key={}) failed: {}",
@@ -1499,6 +1514,9 @@ fn collect_runtime_snapshot_entries(
     program: &BpfProgram,
     info: &MapInfo,
 ) -> Result<Vec<RuntimeMapEntry>, String> {
+    if map_snapshot_skipped_by_size(program, info.map_id) {
+        return Ok(Vec::new());
+    }
     let key_size = info.key_size as usize;
     let mut entries = Vec::new();
     for ((map_id, key), value) in &program.map_values {
@@ -1697,6 +1715,9 @@ fn build_map_in_map_chain_rewrite(
                 format_bytes_preview(&encoded_outer_key)
             ))
         })?;
+    if map_snapshot_skipped_by_size(program, inner_info.map_id) {
+        return Ok(None);
+    }
     if inner_info.is_map_in_map() {
         return Err(site_level_inline_veto(format!(
             "nested map-in-map inner map type {} not inlineable",
@@ -1758,6 +1779,11 @@ fn build_map_in_map_chain_rewrite(
                 "inner hash-like map {} has no live entry for key {}",
                 inner_info.map_id,
                 format_bytes_preview(&encoded_inner_key)
+            )));
+        }
+        Err(MapLookupError::SkippedBySize { map_id }) => {
+            return Err(site_level_inline_veto(map_snapshot_skipped_by_size_reason(
+                map_id,
             )));
         }
         Err(err) => return Err(missing_snapshot_error(err)),
@@ -2007,6 +2033,9 @@ fn resolve_snapshot_map_value(
         let Some(map_id) = map_id_for_ref(program, map_ref)? else {
             return Ok(None);
         };
+        if map_snapshot_skipped_by_size(program, map_id) {
+            return Ok(None);
+        }
         let Some(info) = program
             .map_provider
             .map_info(program, map_id)
@@ -2028,6 +2057,7 @@ fn resolve_snapshot_map_value(
             Err(MapLookupError::MissingKey { .. }) if is_hash_like_map_type(info.map_type) => {
                 return Ok(None);
             }
+            Err(MapLookupError::SkippedBySize { .. }) => return Ok(None),
             Err(err) => return Err(anyhow::Error::msg(err.to_string())),
         };
         Ok(Some(SnapshotMapValue { map_id, key, value }))
@@ -2158,7 +2188,12 @@ fn site_level_inline_veto(reason: impl Into<String>) -> SiteRewriteError {
 }
 
 fn missing_snapshot_error(err: MapLookupError) -> SiteRewriteError {
-    missing_snapshot_anyhow(anyhow::Error::msg(err.to_string()))
+    match err {
+        MapLookupError::SkippedBySize { map_id } => {
+            site_level_inline_veto(map_snapshot_skipped_by_size_reason(map_id))
+        }
+        err => missing_snapshot_anyhow(anyhow::Error::msg(err.to_string())),
+    }
 }
 
 fn missing_snapshot_anyhow(err: anyhow::Error) -> SiteRewriteError {
@@ -2753,6 +2788,21 @@ fn log_map_inline_debug(message: &str) {
 fn record_diagnostic(diagnostics: &mut Vec<String>, message: String) {
     log_map_inline_debug(&message);
     diagnostics.push(message);
+}
+
+fn record_maps_skipped_by_size_counter(program: &BpfProgram, diagnostics: &mut Vec<String>) {
+    let count = program.map_snapshots_skipped_by_size.len();
+    if count > 0 {
+        record_diagnostic(diagnostics, format!("maps_skipped_by_size={count}"));
+    }
+}
+
+fn map_snapshot_skipped_by_size(program: &BpfProgram, map_id: u32) -> bool {
+    program.map_snapshots_skipped_by_size.contains(&map_id)
+}
+
+fn map_snapshot_skipped_by_size_reason(map_id: u32) -> String {
+    format!("map {map_id} snapshot skipped by size")
 }
 
 fn record_skip(

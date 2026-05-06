@@ -1,0 +1,137 @@
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
+  "generated_at": "2026-05-06T21:02:12.465326+00:00",
+  "kinsn_modules": {
+    "captured_at": "2026-05-06T21:01:15.044310+00:00",
+    "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
+    "expected_modules": [
+      "bpf_bulk_memory",
+      "bpf_ccmp",
+      "bpf_endian",
+      "bpf_extract",
+      "bpf_ldp",
+      "bpf_prefetch",
+      "bpf_rotate",
+      "bpf_select"
+    ],
+    "module_load": {
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_ccmp",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_ldp",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "failed_modules": [],
+      "invoked_at": "2026-05-06T21:01:15.044095+00:00",
+      "loaded_count": 8,
+      "loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_ccmp",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_ldp",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loader": "runner.libs.kinsn.load_kinsn_modules",
+      "module_dir": "/artifacts/kinsn",
+      "newly_loaded_modules": [
+        "bpf_bulk_memory",
+        "bpf_ccmp",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_ldp",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "snapshot_after": {
+        "captured_at": "2026-05-06T21:01:15.044068+00:00",
+        "expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_ccmp",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_ldp",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "loaded_bpf_modules": [
+          "bpf_bulk_memory",
+          "bpf_ccmp",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_ldp",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "missing_expected_modules": [],
+        "raw_output": "bpf_select             12288  0\nbpf_rotate             12288  0\nbpf_prefetch           12288  0\nbpf_ldp                12288  0\nbpf_extract            12288  0\nbpf_endian             12288  0\nbpf_ccmp               12288  0\nbpf_bulk_memory        12288  0",
+        "resident_expected_modules": [
+          "bpf_bulk_memory",
+          "bpf_ccmp",
+          "bpf_endian",
+          "bpf_extract",
+          "bpf_ldp",
+          "bpf_prefetch",
+          "bpf_rotate",
+          "bpf_select"
+        ],
+        "source": "lsmod"
+      },
+      "status": "ok",
+      "total_count": 8
+    },
+    "module_snapshot_before_daemon": {
+      "captured_at": "2026-05-06T21:01:14.894067+00:00",
+      "expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_ccmp",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_ldp",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "loaded_bpf_modules": [],
+      "missing_expected_modules": [
+        "bpf_bulk_memory",
+        "bpf_ccmp",
+        "bpf_endian",
+        "bpf_extract",
+        "bpf_ldp",
+        "bpf_prefetch",
+        "bpf_rotate",
+        "bpf_select"
+      ],
+      "raw_output": "",
+      "resident_expected_modules": [],
+      "source": "lsmod"
+    }
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "results": [
+    {
+      "app": "tetragon/observer",
+      "baseline": null,
+      "error": "stress_ng_os_io_network workload failed: stress-ng: metrc: [2844] rename             1012      5.16      0.00      0.02       196.09       53482.72\nstress-ng: metrc: [2844] touch               513      5.20      0.01      0.20        98.71        2495.14\nstress-ng: metrc: [2844] utime              1603      5.58      0.01      0.10       287.49       13907.69\nstress-ng: metrc: [2844] link                  4      6.09      0.05      0.59         0.66           6.34\nstress-ng: metrc: [2844] symlink               4      6.15      0.03      0.53         0.65           7.15\nstress-ng: metrc: [2844] mknod                 1      5.30      0.01      0.00         0.19         198.53\nstress-ng: metrc: [2844] fcntl                 3      5.21      0.00      0.00         0.58        1264.76\nstress-ng: info:  [2844] skipped: 0\nstress-ng: info:  [2844] passed: 227: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (3)\nstress-ng: info:  [2844] failed: 1: fcntl (1)\nstress-ng: info:  [2844] metrics untrustworthy: 0\nstress-ng: info:  [2844] unsuccessful run completed in 8.02 secs",
+      "post_rejit": null,
+      "rejit_result": {},
+      "runner": "tetragon",
+      "selected_workload": "stress_ng_os_io_network",
+      "status": "error"
+    }
+  ],
+  "samples": 1,
+  "status": "error",
+  "suite_name": "macro_apps",
+  "workload_seconds": 3.0
+}

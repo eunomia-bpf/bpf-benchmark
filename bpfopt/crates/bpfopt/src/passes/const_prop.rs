@@ -190,7 +190,6 @@ impl BpfPass for ConstPropPass {
         let oracle = VerifierExactConstOracle::from_states(program.verifier_states.as_ref());
         let block_in = solve_block_entry_states(program, &cfg, &oracle);
         let mut replacements = BTreeMap::new();
-        let protected_prefix_end = super::utils::tail_call_protected_prefix_end(&program.insns);
         let mut nop_pcs = HashSet::new();
 
         for (block_idx, block) in cfg.blocks.iter().enumerate() {
@@ -202,12 +201,6 @@ impl BpfPass for ConstPropPass {
                 &oracle,
                 Some(&mut replacements),
             );
-        }
-
-        if let Some(prefix_end) = protected_prefix_end {
-            replacements.retain(|&pc, replacement| {
-                tail_safe_const_prop_replacement(&program.insns, pc, replacement, prefix_end)
-            });
         }
 
         for (&pc, replacement) in &replacements {
@@ -698,24 +691,6 @@ fn replacement_if_changed(
     (original != candidate).then(|| candidate.to_vec())
 }
 
-fn tail_safe_const_prop_replacement(
-    insns: &[BpfInsn],
-    pc: usize,
-    replacement: &[BpfInsn],
-    protected_prefix_end: usize,
-) -> bool {
-    let old_insn = &insns[pc];
-    if old_insn.is_cond_jmp() {
-        return false;
-    }
-    if pc >= protected_prefix_end {
-        return true;
-    }
-
-    replacement.len() == insn_width(old_insn)
-        && !replacement.iter().any(|insn| insn.is_ja() && insn.off == 0)
-}
-
 fn fixup_folded_jumps(
     new_insns: &mut [BpfInsn],
     old_insns: &[BpfInsn],
@@ -1124,33 +1099,6 @@ mod tests {
                 BpfInsn::mov64_imm(1, 1),
                 BpfInsn::nop(),
                 BpfInsn::mov64_imm(0, 0),
-                exit_insn(),
-            ]
-        );
-    }
-
-    #[test]
-    fn const_prop_skips_tail_sensitive_branch_folding_but_keeps_safe_alu_fold() {
-        let mut program = BpfProgram::new(vec![
-            BpfInsn::mov64_imm(1, 7),
-            jeq_imm(1, 7, 1),
-            BpfInsn::mov64_imm(0, 0),
-            BpfInsn::mov64_imm(2, 5),
-            add64_imm(2, 2),
-            call_helper(12),
-            exit_insn(),
-        ]);
-
-        let _result = run_const_prop_pass(&mut program);
-        assert_eq!(
-            program.insns,
-            vec![
-                BpfInsn::mov64_imm(1, 7),
-                jeq_imm(1, 7, 1),
-                BpfInsn::mov64_imm(0, 0),
-                BpfInsn::mov64_imm(2, 5),
-                BpfInsn::mov64_imm(2, 7),
-                call_helper(12),
                 exit_insn(),
             ]
         );

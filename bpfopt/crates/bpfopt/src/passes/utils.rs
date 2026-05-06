@@ -10,9 +10,6 @@ use crate::analysis::{CFGAnalysis, CFGResult, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::{Analysis, BpfProgram, BtfInfoRecords, KinsnRegistry, PassContext};
 
-const BPF_FUNC_TAIL_CALL: i32 = kernel_sys::BPF_FUNC_tail_call as i32;
-const BPF_TAIL_CALL: u8 = 0xf0;
-
 // ── Branch fixup ───────────────────────────────────────────────────
 
 /// Fix up branch and pseudo-call offsets after rewriting using an address map.
@@ -776,71 +773,7 @@ pub fn kinsn_replacement_subprog_skip_reason(
         )));
     }
 
-    Ok(kinsn_replacement_tail_call_skip_reason(
-        insns,
-        start_pc,
-        old_len,
-        replacement_len,
-    ))
-}
-
-fn kinsn_replacement_tail_call_skip_reason(
-    insns: &[BpfInsn],
-    start_pc: usize,
-    old_len: usize,
-    replacement_len: usize,
-) -> Option<String> {
-    let last_tail_end = tail_call_protected_prefix_end(insns)?;
-    if replacement_len == old_len && start_pc >= last_tail_end {
-        return None;
-    }
-
-    let old_end = start_pc + old_len;
-    let pc = tail_call_skip_report_pc(insns, start_pc, old_end)?;
-    Some(format!(
-        "kinsn site in program with tail-call helper (tail call pc {pc}, site pc {start_pc})"
-    ))
-}
-
-fn tail_call_skip_report_pc(insns: &[BpfInsn], start_pc: usize, old_end: usize) -> Option<usize> {
-    let mut first_tail_pc = None;
-    let mut pc = 0usize;
-    while pc < insns.len() {
-        let insn = &insns[pc];
-        if is_tail_call_insn(insn) {
-            if first_tail_pc.is_none() {
-                first_tail_pc = Some(pc);
-            }
-            if pc >= start_pc && pc < old_end {
-                return Some(pc);
-            }
-        }
-        pc += insn_width(insn);
-    }
-    first_tail_pc
-}
-
-/// Return the exclusive prefix end before which instruction-count changes must
-/// be avoided to preserve tail-call poke descriptor indices during REJIT.
-pub fn tail_call_protected_prefix_end(insns: &[BpfInsn]) -> Option<usize> {
-    last_tail_call_pc(insns).map(|pc| pc + insn_width(&insns[pc]))
-}
-
-fn last_tail_call_pc(insns: &[BpfInsn]) -> Option<usize> {
-    let mut last = None;
-    let mut pc = 0usize;
-    while pc < insns.len() {
-        if is_tail_call_insn(&insns[pc]) {
-            last = Some(pc);
-        }
-        pc += insn_width(&insns[pc]);
-    }
-    last
-}
-
-fn is_tail_call_insn(insn: &BpfInsn) -> bool {
-    insn.code == (BPF_JMP | BPF_TAIL_CALL)
-        || (insn.is_call() && insn.src_reg() == 0 && insn.imm == BPF_FUNC_TAIL_CALL)
+    Ok(None)
 }
 
 /// Remove all CFG-unreachable basic blocks from the instruction stream.
@@ -1351,19 +1284,6 @@ mod tests {
     }
 
     #[test]
-    fn test_tail_call_protected_prefix_end_tracks_last_tail_call() {
-        let insns = vec![
-            BpfInsn::mov64_imm(1, 1),
-            call_helper(12),
-            BpfInsn::mov64_imm(2, 2),
-            call_helper(12),
-            exit_insn(),
-        ];
-
-        assert_eq!(tail_call_protected_prefix_end(&insns), Some(4));
-    }
-
-    #[test]
     fn kinsn_replacement_subprog_check_allows_site_inside_one_subprog() {
         let insns = vec![
             BpfInsn::alu64_imm(BPF_RSH, 2, 8),
@@ -1397,68 +1317,6 @@ mod tests {
         assert!(skip
             .as_deref()
             .is_some_and(|reason| reason.contains("subprog boundary")));
-    }
-
-    #[test]
-    fn kinsn_replacement_subprog_check_rejects_fixed_length_site_before_tail_call() {
-        let insns = vec![
-            BpfInsn::alu64_imm(BPF_RSH, 2, 8),
-            BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
-            call_helper(BPF_FUNC_TAIL_CALL),
-            exit_insn(),
-        ];
-
-        let skip = kinsn_replacement_subprog_skip_reason(&insns, 0, 2, 2).unwrap();
-
-        assert!(skip
-            .as_deref()
-            .is_some_and(|reason| reason.contains("tail-call helper")));
-    }
-
-    #[test]
-    fn kinsn_replacement_subprog_check_rejects_size_changing_site_before_tail_call() {
-        let insns = vec![
-            BpfInsn::alu64_imm(BPF_RSH, 2, 8),
-            BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
-            call_helper(BPF_FUNC_TAIL_CALL),
-            exit_insn(),
-        ];
-
-        let skip = kinsn_replacement_subprog_skip_reason(&insns, 0, 2, 3).unwrap();
-
-        assert!(skip
-            .as_deref()
-            .is_some_and(|reason| reason.contains("tail-call helper")));
-    }
-
-    #[test]
-    fn kinsn_replacement_subprog_check_allows_fixed_length_site_after_tail_call() {
-        let insns = vec![
-            call_helper(BPF_FUNC_TAIL_CALL),
-            BpfInsn::alu64_imm(BPF_RSH, 2, 8),
-            BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
-            exit_insn(),
-        ];
-
-        let skip = kinsn_replacement_subprog_skip_reason(&insns, 1, 2, 2).unwrap();
-
-        assert_eq!(skip, None);
-    }
-
-    #[test]
-    fn kinsn_replacement_subprog_check_rejects_size_changing_site_after_tail_call() {
-        let insns = vec![
-            call_helper(BPF_FUNC_TAIL_CALL),
-            BpfInsn::alu64_imm(BPF_RSH, 2, 8),
-            BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
-            exit_insn(),
-        ];
-
-        let skip = kinsn_replacement_subprog_skip_reason(&insns, 1, 2, 3).unwrap();
-
-        assert!(skip
-            .as_deref()
-            .is_some_and(|reason| reason.contains("tail-call helper")));
     }
 
     #[test]

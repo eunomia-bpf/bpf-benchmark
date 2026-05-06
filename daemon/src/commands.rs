@@ -10,7 +10,7 @@ use std::fs;
 use std::io::Write;
 use std::os::fd::{AsFd, AsRawFd, OwnedFd};
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use anyhow::{anyhow, bail, Context, Result};
@@ -24,6 +24,14 @@ static NEXT_WORKDIR_ID: AtomicU64 = AtomicU64::new(0);
 const REJIT_VERBOSE_LOG_BUF_SIZE: usize = 16 * 1024 * 1024;
 const REJIT_BASIC_LOG_BUF_SIZE: usize = 1024 * 1024;
 const MAP_SNAPSHOT_MAX_BYTES: u64 = 64 * 1024;
+
+#[derive(Serialize)]
+struct MapSnapshotSkipMarker {
+    skipped: bool,
+    reason: &'static str,
+    size_bytes: u64,
+    limit_bytes: u64,
+}
 
 /// Variables daemon substitutes inside step templates.
 ///
@@ -865,8 +873,7 @@ fn write_bpftool_map_snapshots(
             .with_context(|| format!("stat {}", dump_path.display()))?
             .len();
         if dump_size > MAP_SNAPSHOT_MAX_BYTES {
-            fs::remove_file(&dump_path)
-                .with_context(|| format!("remove {}", dump_path.display()))?;
+            write_map_snapshot_skip_marker(&dump_path, dump_size)?;
             log_bpftool_map_snapshot_decision(
                 prog_id,
                 map.map_id,
@@ -887,32 +894,44 @@ fn write_bpftool_map_snapshots(
     Ok(())
 }
 
+fn write_map_snapshot_skip_marker(path: &Path, size_bytes: u64) -> Result<()> {
+    let marker = MapSnapshotSkipMarker {
+        skipped: true,
+        reason: "size_limit",
+        size_bytes,
+        limit_bytes: MAP_SNAPSHOT_MAX_BYTES,
+    };
+    let mut file = fs::File::create(path).with_context(|| format!("create {}", path.display()))?;
+    serde_json::to_writer(&mut file, &marker)
+        .with_context(|| format!("write skip marker {}", path.display()))?;
+    writeln!(file).with_context(|| format!("write newline {}", path.display()))?;
+    Ok(())
+}
+
 fn run_bpftool_map_json(args: &[&str], output: &Path) -> Result<()> {
     let command = format!("bpftool {}", args.join(" "));
-    let output_bytes = Command::new("bpftool")
+    let file = fs::File::create(output).with_context(|| format!("create {}", output.display()))?;
+    let status = Command::new("bpftool")
         .args(args)
-        .output()
-        .with_context(|| format!("run {command}"))?;
-    if !output_bytes.status.success() {
-        let stderr = String::from_utf8_lossy(&output_bytes.stderr)
-            .trim()
-            .to_string();
-        let stdout = String::from_utf8_lossy(&output_bytes.stdout)
-            .trim()
-            .to_string();
-        let detail = if stderr.is_empty() { stdout } else { stderr };
+        .stdout(Stdio::from(file))
+        .stderr(Stdio::piped())
+        .spawn()
+        .with_context(|| format!("spawn {command}"))?
+        .wait_with_output()
+        .with_context(|| format!("wait {command}"))?;
+    if !status.status.success() {
+        let stderr = String::from_utf8_lossy(&status.stderr).trim().to_string();
+        let _ = fs::remove_file(output);
         bail!(
             "{command} failed with status {}: {}",
-            output_bytes.status,
-            if detail.is_empty() {
-                "<no output>".to_string()
+            status.status,
+            if stderr.is_empty() {
+                "<no stderr>".to_string()
             } else {
-                detail
+                stderr
             }
         );
     }
-    fs::write(output, &output_bytes.stdout)
-        .with_context(|| format!("write {}", output.display()))?;
     Ok(())
 }
 

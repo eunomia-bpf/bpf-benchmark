@@ -119,6 +119,8 @@ pub struct BpfProgram {
     pub map_inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
     /// Per-map BPF-side mutability from bpftool `map show` flags.
     pub map_bpf_writable: HashMap<u32, bool>,
+    /// Map IDs whose bpftool dump snapshot was intentionally omitted by size.
+    pub map_snapshots_skipped_by_size: HashSet<u32>,
     /// Pre-loaded map metadata: map_id -> MapMetadata.
     /// Used by offline snapshot callers and unit tests.
     pub map_metadata: HashMap<u32, MapMetadata>,
@@ -166,6 +168,7 @@ pub trait MapProvider: Send + Sync + std::fmt::Debug {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum MapLookupError {
     MissingKey { map_id: u32, key: Vec<u8> },
+    SkippedBySize { map_id: u32 },
     Failed(String),
 }
 
@@ -179,6 +182,9 @@ impl fmt::Display for MapLookupError {
                     map_id,
                     hex_bytes(key)
                 )
+            }
+            MapLookupError::SkippedBySize { map_id } => {
+                write!(f, "map_values snapshot skipped map {} by size", map_id)
             }
             MapLookupError::Failed(message) => f.write_str(message),
         }
@@ -235,6 +241,9 @@ impl MapProvider for SnapshotMapProvider {
         key: &[u8],
         value_size: usize,
     ) -> std::result::Result<Vec<u8>, MapLookupError> {
+        if program.map_snapshots_skipped_by_size.contains(&map_id) {
+            return Err(MapLookupError::SkippedBySize { map_id });
+        }
         if let Some(value) = program.map_values.get(&(map_id, key.to_vec())) {
             if value.len() != value_size {
                 return Err(MapLookupError::Failed(format!(
@@ -294,6 +303,7 @@ impl BpfProgram {
             map_values: HashMap::new(),
             map_inner_map_ids: HashMap::new(),
             map_bpf_writable: HashMap::new(),
+            map_snapshots_skipped_by_size: HashSet::new(),
             map_metadata: HashMap::new(),
             map_provider: Arc::new(SnapshotMapProvider),
         }

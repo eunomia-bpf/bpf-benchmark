@@ -5,8 +5,8 @@ use crate::analysis::{BranchTargetAnalysis, CFGAnalysis};
 use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
 use crate::mock_maps::use_mock_maps;
 use crate::pass::{
-    MapInlineRecord, PassContext, PassManager, RegState, ScalarRange, StackState, Tnum,
-    VerifierInsn, VerifierInsnKind, VerifierValueWidth,
+    MapInlineRecord, MapMetadata, PassContext, PassManager, RegState, ScalarRange, StackState,
+    Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
 use crate::passes::test_helpers::{call_helper, exit_insn};
 use crate::passes::MapInfoAnalysis;
@@ -2026,6 +2026,45 @@ fn map_inline_pass_errors_when_array_snapshot_key_is_absent() {
     let message = format!("{err:#}");
     assert!(message.contains("map_inline requires a concrete snapshot value"));
     assert!(message.contains("map_values snapshot missing map 311 key 02000000"));
+}
+
+#[test]
+fn map_inline_pass_skips_size_skipped_array_map() {
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let original = vec![
+        map[0],
+        map[1],
+        st_mem(BPF_W, 10, -4, 2),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+        BpfInsn::mov64_imm(0, 0),
+        exit_insn(),
+    ];
+    let mut program = BpfProgram::new(original.clone());
+    program.set_map_ids(vec![312]);
+    program.map_metadata.insert(
+        312,
+        MapMetadata {
+            map_type: kernel_sys::BPF_MAP_TYPE_ARRAY,
+            key_size: 4,
+            value_size: 8,
+            max_entries: 8,
+            map_id: 312,
+            name: "oversized".to_string(),
+        },
+    );
+    program.map_bpf_writable.insert(312, true);
+    program.map_snapshots_skipped_by_size.insert(312);
+
+    let result = try_run_map_inline_pass(&mut program).unwrap();
+
+    assert_eq!(program.insns, original);
+    assert!(result.pass_results[0]
+        .diagnostics
+        .iter()
+        .any(|diag| diag == "maps_skipped_by_size=1"));
 }
 
 #[test]

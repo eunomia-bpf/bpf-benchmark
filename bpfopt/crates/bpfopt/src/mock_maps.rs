@@ -72,6 +72,9 @@ impl MapProvider for MockMapProvider {
         key: &[u8],
         value_size: usize,
     ) -> std::result::Result<Vec<u8>, MapLookupError> {
+        if program.map_snapshots_skipped_by_size.contains(&map_id) {
+            return Err(MapLookupError::SkippedBySize { map_id });
+        }
         if let Some(value) = program.map_values.get(&(map_id, key.to_vec())) {
             if value.len() != value_size {
                 return Err(MapLookupError::Failed(format!(
