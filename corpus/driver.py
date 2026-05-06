@@ -955,12 +955,14 @@ def main(argv: list[str] | None = None) -> int:
         )
         # Per-app failures (verifier reject after rewrite, EBUSY tail-calls,
         # transient stats-sample errors) are recorded in result.json for
-        # analysis; they should not fail the make target. Only fail when
-        # the suite never started (fatal_error) or every app failed.
-        all_apps_failed = bool(payload.get("results")) and all(
-            str(r.get("status") or "error") != "ok" for r in payload.get("results", [])
+        # analysis; they should not fail the make target. Only fail when the
+        # suite never started (payload.fatal_error) or every app failed.
+        suite_fatal = bool(str(payload.get("fatal_error") or "").strip())
+        results = payload.get("results") or []
+        all_apps_failed = bool(results) and all(
+            str(r.get("status") or "error") != "ok" for r in results
         )
-        return 1 if (fatal_error or all_apps_failed) else 0
+        return 1 if (suite_fatal or all_apps_failed) else 0
     except Exception as exc:
         exc_message = str(exc)
         _finalize_partial(
