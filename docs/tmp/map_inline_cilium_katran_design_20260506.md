@@ -1,0 +1,1196 @@
+# map_inline Cilium/Katran Coverage Gap and Key-Inference Design
+
+## 0. Executive Summary
+
+- Date: 2026-05-06.
+- Scope: read-only investigation, no benchmark rerun, no daemon spawn, no code changes.
+- Output target: `docs/tmp/map_inline_cilium_katran_design_20260506.md`.
+- Primary artifact: `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/`.
+- The artifact is the latest local cilium+katran corpus result with `map_inline` enabled.
+- Later local cilium+katran artifacts use rotate/cond_select/extract/endian_fusion/bulk_memory, not map_inline.
+- Evidence for later non-map_inline cilium steps appears in `corpus/results/x86_kvm_corpus_20260506_045651_518539/details/apps/cilium__agent.json:534`.
+- Evidence for later non-map_inline katran steps appears in `corpus/results/x86_kvm_corpus_20260506_045651_518539/details/apps/katran.json:96`.
+- The map_inline artifact predates commit `98bfbca2` and commit `58de347b`.
+- Commit `98bfbca2` is Issue 1: verifier-state stack snapshot key extraction unlock.
+- Commit `58de347b` is Issue 2: map-in-map chain inline support.
+- Therefore all site-count facts below describe pre-Issue-1 and pre-Issue-2 behavior.
+- The design recommendation accounts for the current post-commit code shape.
+- Cilium in the artifact has 342 matched sites, 279 applies, and 63 skips.
+- Cilium's applies are direct pseudo-map-value constantizations, not helper lookup inlines.
+- Cilium's skip reasons are 53 `map type 5 not inlineable`, 8 `map type 11 not inlineable`, and 2 key-state skips.
+- Type 5 is `BPF_MAP_TYPE_PERCPU_HASH`; type 11 is `BPF_MAP_TYPE_LPM_TRIE`, per `vendor/linux-framework/include/uapi/linux/bpf.h:1000`.
+- Katran in the artifact has 68 matched sites, 0 applies, and 68 skips.
+- Katran's skip reasons are 64 key-state skips, 2 `ARRAY_OF_MAPS`, and 2 `HASH_OF_MAPS`.
+- Type 12 is `BPF_MAP_TYPE_ARRAY_OF_MAPS`; type 13 is `BPF_MAP_TYPE_HASH_OF_MAPS`, per `vendor/linux-framework/include/uapi/linux/bpf.h:1012`.
+- The old key-state bucket is not a single root cause.
+- In Katran, some key-state sites are statically constant stats/control keys.
+- Katran PC 13 is a constant `stats_key = MAX_VIPS + XDP_TOTAL_CNTR` lookup.
+- That source is `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:1100`.
+- The pre-Issue-1 artifact skipped PC 13 because no verifier state snapshot was recorded for the call PC.
+- That skip appears in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/katran.json:155`.
+- Issue 1 should unlock this category if the new verifier stack JSON contains the call state.
+- Other Katran key-state sites are packet-derived and should remain uninlineable by any constant-key proof.
+- Katran PC 512 and PC 520 are `vip_map` lookups whose key is built from packet destination, port, and proto.
+- The source for those packet-derived fields is `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:779`.
+- The `vip_map` lookup itself is `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:787`.
+- These sites are not theoretically recoverable as compile-time constants.
+- Katran's heaviest LB paths are mostly packet-derived, CPU-derived, or map-derived.
+- The same pattern holds for Cilium's hot LB/CT/policy paths.
+- Cilium service keys are passed to `map_lookup_elem()` as runtime keys in `runner/repos/cilium/bpf/lib/lb.h:947`.
+- Cilium CT lookup keys are runtime tuples in `runner/repos/cilium/bpf/lib/conntrack.h:362`.
+- Cilium policy LPM keys include remote identity, direction, protocol, and dport in `runner/repos/cilium/bpf/lib/policy.h:227`.
+- The honest finding is that `map_inline` can recover some constant stats/config/control lookups.
+- It cannot safely erase the hot cilium/katran packet lookup paths under the current correctness model.
+- User hints can be useful only as explicit correctness contracts for stable maps/keys or stable values.
+- A hint saying "inline all lookups against this map" is unsound for variable keys.
+- Static analysis can identify constant-key call sites and classify variable-key sites.
+- Static analysis will not make packet-derived LB/CT keys constant.
+- BTF alone can describe map/key/value types but cannot prove key values.
+- Runtime profile-guided hot-key inlining is a poor fit for correctness and v3 architecture.
+- Best path: validate Issue 1 and Issue 2 on a fresh cilium/katran map_inline run, then add a narrow exact-key/value-stability hint side input.
+- Estimated core LoC for that narrow hint design: roughly 300 to 450 gross LoC.
+- Expected cilium/katran unlock from the narrow hint alone is low after Issue 1 and Issue 2.
+- Expected scientific value of the hint is high because it provides an explicit operator contract instead of a heuristic.
+- Expected hot-path unlock for packet-derived LB/CT/service keys is near zero without changing the optimization model.
+
+## 1. Required Reading and Boundaries
+
+- The framework forbids filtering programs out of ReJIT; failures must surface naturally.
+- This is stated in `CLAUDE.md:5`.
+- The benchmark framework must use app-level loaders, not direct `.bpf.o` loading.
+- This is stated in `CLAUDE.md:12`.
+- The framework must collect raw measurements and not compute ratios or summaries in framework code.
+- This is stated in `CLAUDE.md:15`.
+- The framework is fail-fast: no dead code, no fallback, no silenced errors.
+- This is stated in `CLAUDE.md:70`.
+- v3 says every transform is a separate `bpfopt --pass <name>` invocation followed by ReJIT.
+- This is stated in `CLAUDE.md:86`.
+- v3 says the daemon watches live programs and owns map-value side-input preparation.
+- This is stated in `CLAUDE.md:89`.
+- v3 says bpfopt is a pure bytecode CLI with zero kernel dependency.
+- This is stated in `CLAUDE.md:90`.
+- v3 says bpfprof remains a standalone CLI for PMU profiling.
+- This is stated in `CLAUDE.md:91`.
+- v3 says transforms remain bpfopt CLI invocations and the kernel re-verifies every candidate.
+- This is stated in `CLAUDE.md:92`.
+- v3 says benchmark runner Python stays on the existing daemon socket boundary during migration.
+- This is stated in `CLAUDE.md:93`.
+- v3 says stdin/stdout carry raw binary bytecode and side inputs use files at CLI boundaries.
+- This is stated in `CLAUDE.md:94`.
+- v3 option B says runner Python is the stable boundary and should not be refactored.
+- This is stated in `CLAUDE.md:96`.
+- v3 says verifier states for map_inline come only from prior successful per-pass ReJIT logs.
+- This is stated in `CLAUDE.md:99`.
+- v3 says the main BPF_PROG_REJIT syscall is synchronous with no daemon-side timeout.
+- This is stated in `CLAUDE.md:100`.
+- The standalone CLI crates must not depend on each other.
+- This is stated in `CLAUDE.md:103`.
+- Runtime composition happens through stdin/stdout pipelines and bash orchestration.
+- This is stated in `CLAUDE.md:105`.
+- `kernel-sys` is the only direct BPF syscall boundary.
+- This is stated in `CLAUDE.md:118`.
+- The design plan separates kernel mechanism from userspace optimization policy.
+- This is stated in `docs/kernel-jit-optimization-plan.md:90`.
+- The design plan says userspace bpfopt-suite defines how to optimize.
+- This is stated in `docs/kernel-jit-optimization-plan.md:95`.
+- The design plan says safety is kernel verifier responsibility and correctness is userspace responsibility.
+- This is stated in `docs/kernel-jit-optimization-plan.md:101`.
+- The design plan says transparency means no `.bpf.o` and no app changes.
+- This is stated in `docs/kernel-jit-optimization-plan.md:108`.
+- The design plan says bpfopt is a pure bytecode optimizer with `--pass <name>`.
+- This is stated in `docs/kernel-jit-optimization-plan.md:128`.
+- The design plan says bpfprof is standalone and bpfget is daemon-owned.
+- This is stated in `docs/kernel-jit-optimization-plan.md:130`.
+- The design plan says the daemon retains the runner socket boundary and live program watch.
+- This is stated in `docs/kernel-jit-optimization-plan.md:132`.
+- The benchmark architecture says production BPF programs are loaded and triggered by native apps.
+- This is stated in `docs/kernel-jit-optimization-plan.md:489`.
+- The benchmark architecture forbids object-level scheduling and says runtime discovery finds programs.
+- This is stated in `docs/kernel-jit-optimization-plan.md:498`.
+- The benchmark architecture says YAML lists apps, not objects or programs.
+- This is stated in `docs/kernel-jit-optimization-plan.md:499`.
+- The benchmark architecture says Python orchestrator coordinates app runner, daemon, and measurements.
+- This is stated in `docs/kernel-jit-optimization-plan.md:523`.
+- The benchmark architecture uses same-image paired measurement.
+- This is stated in `docs/kernel-jit-optimization-plan.md:527`.
+
+## 2. Current map_inline Implementation Facts
+
+- The prior deep dive says all 1,604 applies in the 2026-05-05 artifact were direct pseudo-map-value applies.
+- This is stated in `docs/tmp/map_inline_deepdive_20260505.md:67`.
+- The prior deep dive says helper lookup inlining succeeded zero times in that artifact.
+- This is stated in `docs/tmp/map_inline_deepdive_20260505.md:72`.
+- The prior deep dive says helper lookup path matched/skipped 6,277 sites.
+- This is stated in `docs/tmp/map_inline_deepdive_20260505.md:74`.
+- The prior deep dive says 4,588 helper skips were key-state skips.
+- This is stated in `docs/tmp/map_inline_deepdive_20260505.md:76`.
+- The prior deep dive says Cilium had 342 matched, 279 applied, and 63 skipped.
+- This is stated in `docs/tmp/map_inline_deepdive_20260505.md:182`.
+- The prior deep dive says Katran had 68 matched, 0 applied, and 68 skipped.
+- This is stated in `docs/tmp/map_inline_deepdive_20260505.md:183`.
+- The prior deep dive says verifier-state/key extraction was the top expected coverage gain.
+- This is stated in `docs/tmp/map_inline_deepdive_20260505.md:699`.
+- The prior fix plan says daemon currently passes verifier states, map values, and map IDs to bpfopt.
+- This is stated in `docs/tmp/map_inline_fix_plans_20260506.md:35`.
+- The prior fix plan says bpfopt reads `--verifier-states`, `--map-values`, and `--map-ids`.
+- This is stated in `docs/tmp/map_inline_fix_plans_20260506.md:37`.
+- The prior fix plan says map_inline metadata needs verifier states, produces verifier states, and needs map values.
+- This is stated in `docs/tmp/map_inline_fix_plans_20260506.md:39`.
+- The current bpfopt CLI exposes `--verifier-states`.
+- This is visible in `bpfopt/crates/bpfopt/src/main.rs:120`.
+- The current bpfopt CLI exposes `--map-values`.
+- This is visible in `bpfopt/crates/bpfopt/src/main.rs:123`.
+- The current bpfopt CLI exposes `--map-ids`.
+- This is visible in `bpfopt/crates/bpfopt/src/main.rs:126`.
+- `validate_required_side_inputs()` requires verifier states, map values, and map IDs for map-value passes.
+- This is visible in `bpfopt/crates/bpfopt/src/main.rs:421`.
+- `attach_program_inputs()` installs verifier states into `BpfProgram`.
+- This is visible in `bpfopt/crates/bpfopt/src/main.rs:573`.
+- `attach_program_inputs()` installs map metadata and values from `map-values.json`.
+- This is visible in `bpfopt/crates/bpfopt/src/main.rs:576`.
+- `BpfProgram` stores map IDs in kernel `used_maps` order.
+- This is visible in `bpfopt/crates/bpfopt/src/pass.rs:93`.
+- `BpfProgram` stores parsed log-level-2 verifier snapshots.
+- This is visible in `bpfopt/crates/bpfopt/src/pass.rs:108`.
+- `BpfProgram` stores map value snapshots.
+- This is visible in `bpfopt/crates/bpfopt/src/pass.rs:114`.
+- `BpfProgram` stores explicit null map lookups from snapshots.
+- This is visible in `bpfopt/crates/bpfopt/src/pass.rs:117`.
+- `BpfProgram` stores map-in-map outer entries after Issue 2.
+- This is visible in `bpfopt/crates/bpfopt/src/pass.rs:119`.
+- `BpfProgram` stores partial-map markers.
+- This is visible in `bpfopt/crates/bpfopt/src/pass.rs:121`.
+- `BpfProgram` stores map metadata.
+- This is visible in `bpfopt/crates/bpfopt/src/pass.rs:123`.
+- `SnapshotMapProvider` exposes map info, value size, and lookup_elem.
+- This is visible in `bpfopt/crates/bpfopt/src/pass.rs:143`.
+- `SnapshotMapProvider::lookup_elem()` returns a snapshot value or an explicit miss/partial/missing error.
+- This is visible in `bpfopt/crates/bpfopt/src/pass.rs:207`.
+- `MapInfo::supports_direct_value_access()` currently allows HASH, ARRAY, PERCPU_ARRAY, and LRU_HASH.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline/map_info.rs:49`.
+- PERCPU_HASH and LRU_PERCPU_HASH are deliberately excluded due per-CPU blob semantics.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline/map_info.rs:44`.
+- PERCPU_ARRAY is special-cased only when all per-CPU slots are byte-identical.
+- This is stated in `bpfopt/crates/bpfopt/src/passes/map_inline/map_info.rs:46`.
+- map-in-map maps are now recognized as ARRAY_OF_MAPS and HASH_OF_MAPS.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline/map_info.rs:65`.
+- Lookup-pattern removal is only unconditional for ARRAY and PERCPU_ARRAY.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline/map_info.rs:72`.
+- HASH and LRU_HASH require entry-presence/null-check proof.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline/map_info.rs:80`.
+- `find_map_lookup_sites()` matches helper calls to BPF_FUNC_map_lookup_elem.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline.rs:133`.
+- map_inline runs fixed-point rounds.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline.rs:749`.
+- map_inline builds direct pseudo-map-value rewrites before helper-site evaluation.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline.rs:815`.
+- map_inline skips unsupported map types before key extraction.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline.rs:914`.
+- map_inline records unsupported map type skips as `map type N not inlineable`.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline.rs:919`.
+- map_inline extracts a constant key after the map type gate.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline.rs:933`.
+- key extraction failure records `lookup key is not available from verifier-guided state`.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline.rs:948`.
+- hash-like maps require an immediate null check.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline.rs:985`.
+- map_inline requires fixed-offset scalar loads from the returned map value.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline.rs:998`.
+- direct pseudo-map-value rewriting records `constantized pseudo-map-value load`.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline.rs:1755`.
+- direct pseudo-map-value rewriting reads key zero from the map snapshot.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline.rs:1790`.
+- verifier-guided key extraction requires nonempty verifier states.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline.rs:330`.
+- verifier-guided key extraction requires at least one verifier state whose PC equals the call PC.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline.rs:340`.
+- verifier-guided key extraction rejects disagreeing candidates across verifier state occurrences.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline.rs:364`.
+- verifier-guided extraction reads R2's stack range at the call.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline.rs:405`.
+- verifier-guided extraction reads constant stack bytes from the verifier stack snapshot.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline.rs:407`.
+- post-Issue-1 kernel-sys `VerifierInsn` stores stack state.
+- This is visible in `bpfopt/crates/kernel-sys/src/lib.rs:126`.
+- post-Issue-1 verifier JSON serializes stack state.
+- This is visible in `bpfopt/crates/kernel-sys/src/lib.rs:194`.
+- post-Issue-1 bpfopt reads stack JSON into `VerifierInsn`.
+- This is visible in `bpfopt/crates/bpfopt/src/main.rs:927`.
+- the verifier log parser is explicitly for log-level-2 verifier logs.
+- This is visible in `bpfopt/crates/kernel-sys/src/verifier_log.rs:1`.
+- the parser extracts state snapshots from log lines.
+- This is visible in `bpfopt/crates/kernel-sys/src/verifier_log.rs:20`.
+- the parser can parse stack state tokens.
+- This is visible in `bpfopt/crates/kernel-sys/src/verifier_log.rs:330`.
+
+## 3. Daemon and Runner Architecture Facts
+
+- `daemon/src/commands.rs` states bpfopt remains the external bytecode CLI.
+- This is visible in `daemon/src/commands.rs:4`.
+- `daemon/src/commands.rs` states the daemon owns live discovery and pass orchestration.
+- This is visible in `daemon/src/commands.rs:4`.
+- `daemon/src/commands.rs` states the daemon owns per-pass verifier acceptance and fd-array construction.
+- This is visible in `daemon/src/commands.rs:5`.
+- `daemon/src/commands.rs` states the daemon owns per-pass BPF_PROG_REJIT.
+- This is visible in `daemon/src/commands.rs:6`.
+- The daemon substitutes known variables into runner-supplied step templates.
+- This is visible in `daemon/src/commands.rs:27`.
+- The daemon has vars for `VERIFIER_STATES`, `MAP_VALUES`, and `MAP_IDS`.
+- This is visible in `daemon/src/commands.rs:38`.
+- `StepSpec` is exactly `name`, `command`, and `log_level`.
+- This is visible in `daemon/src/commands.rs:431`.
+- `ProgramPlan` is a program ID plus a sequence of step specs.
+- This is visible in `daemon/src/commands.rs:438`.
+- `execute_one()` validates all step templates before touching the kernel.
+- This is visible in `daemon/src/commands.rs:477`.
+- `run_program_steps()` snapshots the live BPF program before running steps.
+- This is visible in `daemon/src/commands.rs:532`.
+- The daemon canonicalizes map references to stable map indexes.
+- This is visible in `daemon/src/commands.rs:534`.
+- The daemon writes an initial bytecode input file.
+- This is visible in `daemon/src/commands.rs:540`.
+- The daemon creates `target.json` and `map-values.json` paths.
+- This is visible in `daemon/src/commands.rs:544`.
+- The daemon builds live map values only when a step references `MAP_VALUES`.
+- This is visible in `daemon/src/commands.rs:566`.
+- The daemon builds a ReJIT fd_array from snapshot map IDs.
+- This is visible in `daemon/src/commands.rs:582`.
+- The daemon computes the map ID CSV from `prog_info.map_ids`.
+- This is visible in `daemon/src/commands.rs:586`.
+- The first verifier state path is intentionally nonexistent.
+- This is visible in `daemon/src/commands.rs:592`.
+- The first verifier state path being nonexistent forces a bootstrap state-producing pass.
+- This is visible in `daemon/src/commands.rs:593`.
+- The daemon executes each step by spawning `sh -c`.
+- This is visible in `daemon/src/commands.rs:638`.
+- The daemon treats unreadable step reports as failures.
+- This is visible in `daemon/src/commands.rs:652`.
+- The daemon treats nonzero bpfopt exit as `FailedBpfopt`.
+- This is visible in `daemon/src/commands.rs:676`.
+- The daemon ReJITs produced bytecode.
+- This is visible in `daemon/src/commands.rs:769`.
+- The daemon writes verifier states after each ReJIT.
+- This is visible in `daemon/src/commands.rs:789`.
+- The daemon substitutes `VERIFIER_STATES`, `MAP_VALUES`, and `MAP_IDS` into commands.
+- This is visible in `daemon/src/commands.rs:837`.
+- The daemon only allows known `${VAR}` placeholders.
+- This is visible in `daemon/src/commands.rs:867`.
+- The daemon writes live map values by scanning map keys and reading map values.
+- This is visible in `daemon/src/commands.rs:941`.
+- The daemon recursively snapshots map-in-map inner maps after Issue 2.
+- This is visible in `daemon/src/commands.rs:997`.
+- The daemon writes `inner_map_id` in map-values entries.
+- This is visible in `daemon/src/commands.rs:1050`.
+- The daemon currently snapshots HASH, ARRAY, PERCPU_ARRAY, LRU_HASH, and map-in-map types.
+- This is visible in `daemon/src/commands.rs:1138`.
+- The daemon's `MapInfo` has map ID, type, key size, value size, and max entries.
+- This is visible in `daemon/src/bpf.rs:31`.
+- The daemon's `MapInfo` currently does not expose map name.
+- This follows from the fields in `daemon/src/bpf.rs:31`.
+- The daemon reads map IDs from program info.
+- This is visible in `daemon/src/bpf.rs:130`.
+- The daemon obtains map info from `kernel_sys::map_obj_get_info_by_fd`.
+- This is visible in `daemon/src/bpf.rs:149`.
+- The daemon drops map names when converting kernel map info into daemon `MapInfo`.
+- This is visible in `daemon/src/bpf.rs:154`.
+- `bpf_map_info` retrieval itself is available through kernel-sys.
+- This is visible in `bpfopt/crates/kernel-sys/src/lib.rs:872`.
+- Kernel BTF enumeration is available in kernel-sys.
+- This is visible in `bpfopt/crates/kernel-sys/src/lib.rs:532`.
+- Kernel BTF loading by ID is available in kernel-sys.
+- This is visible in `bpfopt/crates/kernel-sys/src/lib.rs:575`.
+- Current kernel-sys BTF helper only exposes function lookup by name.
+- This is visible in `bpfopt/crates/kernel-sys/src/lib.rs:587`.
+- Runner `rejit_plan.py` translates legacy apply_rejit calls to execute_plan payloads.
+- This is visible in `runner/libs/rejit_plan.py:1`.
+- Runner `rejit_plan.py` builds bpfopt step templates from bpfopt pass metadata.
+- This is visible in `runner/libs/rejit_plan.py:6`.
+- Runner callers stay on the old apply_rejit surface.
+- This is visible in `runner/libs/rejit_plan.py:11`.
+- Runner step templates pass `--verifier-states` when metadata needs verifier states.
+- This is visible in `runner/libs/rejit_plan.py:76`.
+- Runner step templates pass `--map-values` and `--map-ids` when metadata needs map values.
+- This is visible in `runner/libs/rejit_plan.py:78`.
+- Runner emits the same step list for every program.
+- This is visible in `runner/libs/rejit_plan.py:129`.
+
+## 4. Part A Artifact Selection
+
+- Candidate cilium/katran artifacts were searched under `corpus/results/*/details/apps/`.
+- The only local cilium+katran artifact with map_inline pass reports after the deep-dive work is `x86_kvm_corpus_20260505_173741_854355`.
+- `x86_kvm_corpus_20260505_173741_854355` has map_inline reports for both cilium and katran.
+- `x86_kvm_corpus_20260505_173242_158725` has cilium map_inline but not katran map_inline.
+- `x86_kvm_corpus_20260506_045651_518539` has cilium and katran, but no map_inline pass entries.
+- Therefore Part A uses `x86_kvm_corpus_20260505_173741_854355`.
+- This is important because the counts are pre-Issue-1 and pre-Issue-2.
+- Post-Issue-1 and post-Issue-2 counts for cilium/katran were not available locally without running benchmarks.
+- Running benchmarks was outside this task.
+- Running the daemon was outside this task.
+- The cilium result path is `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/cilium__agent.json`.
+- The katran result path is `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/katran.json`.
+- The prior deep dive identifies this artifact path as its data source.
+- This is stated in `docs/tmp/map_inline_deepdive_20260505.md:46`.
+
+## 5. Part A Cilium Program Table
+
+- App: cilium/agent.
+- Total matched: 342.
+- Total applied: 279.
+- Total skipped: 63.
+- Direct pseudo-map-value applies: 279.
+- Helper lookup inline applies: 0.
+- Cilium primary skip reasons are visible in the prior deep-dive table.
+- This is visible in `docs/tmp/map_inline_deepdive_20260505.md:182`.
+- Program 63 `dump_bpf_map`: matched 0, applied 0, skipped 0, reasons `{}`.
+- Program 64 `dump_bpf_prog`: matched 0, applied 0, skipped 0, reasons `{}`.
+- Program 136 `cil_from_host`: matched 48, applied 41, skipped 7, reasons `LPM_TRIE=1, PERCPU_HASH=6`.
+- Program 136 skip reasons are visible in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/cilium__agent.json:867`.
+- Program 137 `tail_handle_ipv`: matched 8, applied 4, skipped 4, reasons `key-state=1, LPM_TRIE=1, PERCPU_HASH=2`.
+- Program 137 diagnostics show direct applies and key/LPM/PERCPU skips.
+- This is visible in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/cilium__agent.json:912`.
+- Program 137 summary reasons are visible in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/cilium__agent.json:959`.
+- Program 138 `cil_to_netdev`: matched 19, applied 17, skipped 2, reasons `PERCPU_HASH=2`.
+- Program 139 `tail_drop_notif`: matched 4, applied 4, skipped 0, reasons `{}`.
+- Program 140 `cil_from_netdev`: matched 34, applied 26, skipped 8, reasons `LPM_TRIE=1, PERCPU_HASH=7`.
+- Program 141 `cil_to_host`: matched 6, applied 5, skipped 1, reasons `PERCPU_HASH=1`.
+- Program 142 `tail_handle_ipv`: matched 4, applied 3, skipped 1, reasons `PERCPU_HASH=1`.
+- Program 143 `cil_host_policy`: matched 0, applied 0, skipped 0, reasons `{}`.
+- Program 144 `tail_drop_notif`: matched 4, applied 4, skipped 0, reasons `{}`.
+- Program 145 `cil_from_netdev`: matched 34, applied 26, skipped 8, reasons `LPM_TRIE=1, PERCPU_HASH=7`.
+- Program 146 `cil_host_policy`: matched 0, applied 0, skipped 0, reasons `{}`.
+- Program 147 `tail_handle_ipv`: matched 8, applied 4, skipped 4, reasons `key-state=1, LPM_TRIE=1, PERCPU_HASH=2`.
+- Program 148 `cil_to_host`: matched 6, applied 5, skipped 1, reasons `PERCPU_HASH=1`.
+- Program 149 `cil_from_host`: matched 48, applied 41, skipped 7, reasons `LPM_TRIE=1, PERCPU_HASH=6`.
+- Program 150 `cil_to_netdev`: matched 19, applied 17, skipped 2, reasons `PERCPU_HASH=2`.
+- Program 151 `tail_handle_ipv`: matched 4, applied 3, skipped 1, reasons `PERCPU_HASH=1`.
+- Program 152 `tail_drop_notif`: matched 4, applied 4, skipped 0, reasons `{}`.
+- Program 153 `cil_to_host`: matched 6, applied 5, skipped 1, reasons `PERCPU_HASH=1`.
+- Program 154 `cil_host_policy`: matched 0, applied 0, skipped 0, reasons `{}`.
+- Program 155 `tail_handle_ipv`: matched 0, applied 0, skipped 0, reasons `{}`.
+- Program 157 `tail_handle_ipv`: matched 4, applied 3, skipped 1, reasons `PERCPU_HASH=1`.
+- Program 158 `cil_from_netdev`: matched 34, applied 26, skipped 8, reasons `LPM_TRIE=1, PERCPU_HASH=7`.
+- Program 159 `cil_from_host`: matched 48, applied 41, skipped 7, reasons `LPM_TRIE=1, PERCPU_HASH=6`.
+- Cilium direct diagnostics include repeated `constantized pseudo-map-value load` entries.
+- Example direct diagnostics are visible in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/cilium__agent.json:587`.
+- Example unsupported PERCPU_HASH and LPM_TRIE diagnostics are visible in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/cilium__agent.json:628`.
+- Cilium's `tail_handle_ipv` key-state skip was pre-Issue-1 key-size related.
+- The diagnostic says key extraction supported only up to 8 bytes and got 20.
+- This appears in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/cilium__agent.json:917`.
+- The same program then repeats the key-state skip in round 2 because verifier-guided extraction is unavailable after a prior rewrite.
+- This appears in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/cilium__agent.json:925`.
+
+## 6. Part A Katran Program Table
+
+- App: katran.
+- Total matched: 68.
+- Total applied: 0.
+- Total skipped: 68.
+- Direct pseudo-map-value applies: 0.
+- Helper lookup inline applies: 0.
+- Katran primary skip reasons are visible in the prior deep-dive table.
+- This is visible in `docs/tmp/map_inline_deepdive_20260505.md:183`.
+- Program 470 `xdp_root`: matched 0, applied 0, skipped 0, reasons `{}`.
+- Program 476 `balancer_ingres`: matched 64, applied 0, skipped 64.
+- Program 476 reasons: `key-state=60, ARRAY_OF_MAPS=2, HASH_OF_MAPS=2`.
+- Program 476 summary appears in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/katran.json:287`.
+- Program 478 `healthcheck_enc`: matched 4, applied 0, skipped 4.
+- Program 478 reasons: `key-state=4`.
+- Program 478 summary appears in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/katran.json:346`.
+- Katran PC 13 skipped because the verifier log had no state snapshot at call PC 13.
+- This appears in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/katran.json:155`.
+- Katran PC 365 and PC 464 also skipped for missing call-PC state snapshots.
+- This appears in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/katran.json:157`.
+- Katran PC 512 and PC 520 skipped because the old extractor supported only up to 8-byte keys.
+- This appears in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/katran.json:161`.
+- Katran PC 562 skipped because map type 12 was not inlineable.
+- This appears in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/katran.json:167`.
+- Katran PC 814 skipped because map type 12 was not inlineable.
+- This appears in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/katran.json:183`.
+- Healthcheck PC 17, 32, 56, and 68 skipped for missing call-PC state snapshots.
+- This appears in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/katran.json:334`.
+
+## 7. Combined Top Skip Reasons
+
+- Combined cilium+katran skips: 131.
+- Combined key-state skips: 66.
+- Combined PERCPU_HASH skips: 53.
+- Combined LPM_TRIE skips: 8.
+- Combined ARRAY_OF_MAPS skips: 2.
+- Combined HASH_OF_MAPS skips: 2.
+- Combined top skip reason 1 is key-state.
+- Combined top skip reason 2 is PERCPU_HASH unsupported map type.
+- Combined top skip reason 3 is LPM_TRIE unsupported map type.
+- Combined map-in-map skips are fourth by count in this two-app scope.
+- Across the full prior corpus, map-in-map was second by coverage gain.
+- That broader ranking is visible in `docs/tmp/map_inline_deepdive_20260505.md:704`.
+- For cilium specifically, map-in-map is not the main blocker.
+- The prior fix plan states Cilium has only 2 key-state skips and map-in-map is not Cilium's main blocker.
+- This is visible in `docs/tmp/map_inline_fix_plans_20260506.md:113`.
+- For katran specifically, Issue 2 targets the 4 map-in-map skips.
+- Commit `58de347b` expects Katran to unlock 4 map-in-map helper sites.
+
+## 8. Skip Reason 1: Key Not Available from Verifier-Guided State
+
+- Key-state is the largest combined cilium+katran skip reason.
+- In pre-Issue-1 results, key-state means the pass could not recover a constant key.
+- It does not necessarily mean the source key was non-constant.
+- The pre-Issue-1 implementation lost useful verifier stack information in JSON.
+- The prior fix plan says JSON discarded the parser's stack information before Issue 1.
+- This is visible in `docs/tmp/map_inline_fix_plans_20260506.md:173`.
+- Issue 1 changed this by carrying stack snapshots through JSON.
+- Current `VerifierInsnJson` includes stack JSON.
+- This is visible in `bpfopt/crates/kernel-sys/src/lib.rs:201`.
+- Current bpfopt reads verifier stack JSON.
+- This is visible in `bpfopt/crates/bpfopt/src/main.rs:938`.
+- Therefore the pre-Issue-1 key-state bucket overstates the remaining key-inference problem.
+- Katran PC 13 is the cleanest representative constant-key example.
+- Katran source sets `stats_key = MAX_VIPS + XDP_TOTAL_CNTR`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:1100`.
+- Katran source immediately looks up `&stats` with `&stats_key`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:1101`.
+- The corresponding old result skipped PC 13 for missing verifier state.
+- This is visible in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/katran.json:155`.
+- This key is theoretically recoverable at compile time.
+- This key is also recoverable from verifier stack snapshots if the verifier emits the state.
+- Katran PC 512 and PC 520 are different.
+- Their source constructs `vip` from packet destination fields.
+- IPv6 VIP bytes come from `pckt.flow.dstv6`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:779`.
+- IPv4 VIP comes from `pckt.flow.dst`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:781`.
+- The VIP port comes from `pckt.flow.port16[1]`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:785`.
+- The VIP proto comes from `pckt.flow.proto`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:786`.
+- The lookup uses `bpf_map_lookup_elem(&vip_map, &vip)`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:787`.
+- The fallback lookup uses the same `vip` after setting port to zero.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:789`.
+- The old result skipped PC 512 and PC 520 due the 20-byte key-size limitation.
+- This is visible in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/katran.json:161`.
+- Issue 1 removes the old width limitation, but packet-derived bytes still are not constants.
+- Therefore these VIP lookup keys are not theoretically recoverable as compile-time constants.
+- Katran `mac_addr_pos` is another constant-key example.
+- Source initializes `mac_addr_pos = 0`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:696`.
+- Source looks up `ctl_array` with `&mac_addr_pos`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:1033`.
+- This key is theoretically recoverable at compile time.
+- Katran `quic_packets_stats_key = 0` is another constant-key example.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:874`.
+- Source looks up `quic_stats_map` with that constant key.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:876`.
+- Katran `server_id_map` lookup is not a constant-key example.
+- Source derives `key = qpr.server_id`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:885`.
+- Source then looks up `server_id_map` with that packet-parsed server ID.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:886`.
+- That key is packet-derived and not compile-time recoverable.
+- Katran connection table lookup is not a constant-key example.
+- Source calls `connection_table_lookup(&dst, &pckt, lru_map, false)`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:984`.
+- The helper inside uses `bpf_map_lookup_elem(lru_map, &pckt->flow)`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:185`.
+- The flow key is packet-derived.
+- Katran consistent hash ring lookup is not a constant-key example.
+- Source computes `hash = get_packet_hash(pckt, hash_16bytes) % RING_SIZE`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:143`.
+- Source computes `key = RING_SIZE * vip_info->vip_num + hash`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:144`.
+- Source looks up `ch_rings` with that key.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:146`.
+- The key is both packet-derived and map-value-derived.
+- Katran per-VIP stats lookup is map-derived.
+- Source looks up `stats` with `&vip_num`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:1039`.
+- Source sets `vip_num = vip_info->vip_num`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:837`.
+- Katran real stats lookup is packet/path-derived.
+- Source looks up `reals_stats` with `&pckt.real_index`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:1047`.
+- That key is derived from earlier routing decisions.
+- Cilium's two key-state skips were 20-byte key-size failures in the old extractor.
+- This is visible in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/cilium__agent.json:917`.
+- Cilium's key-state bucket is too small to explain cilium's map_inline coverage gap.
+- The main Cilium skips are unsupported map types.
+
+## 9. Skip Reason 2: PERCPU_HASH Unsupported
+
+- Cilium has 53 PERCPU_HASH skips.
+- PERCPU_HASH type ID 5 is defined in `vendor/linux-framework/include/uapi/linux/bpf.h:1006`.
+- The map_inline type policy deliberately excludes PERCPU_HASH.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline/map_info.rs:44`.
+- The reason is userspace lookup returns a concatenated per-CPU blob.
+- This is stated in `bpfopt/crates/bpfopt/src/passes/map_inline/map_info.rs:45`.
+- The running BPF program observes only the current CPU slot.
+- This is stated in `bpfopt/crates/bpfopt/src/passes/map_inline/map_info.rs:46`.
+- The dominant Cilium PERCPU_HASH example is `cilium_metrics`.
+- `cilium_metrics` is declared as `BPF_MAP_TYPE_PERCPU_HASH`.
+- This is visible in `runner/repos/cilium/bpf/lib/metrics.h:28`.
+- Its key type is `struct metrics_key`.
+- This is visible in `runner/repos/cilium/bpf/lib/metrics.h:30`.
+- Its value type is `struct metrics_value`.
+- This is visible in `runner/repos/cilium/bpf/lib/metrics.h:31`.
+- The metrics key contains reason, direction, line, file, and reserved fields.
+- This is visible in `runner/repos/cilium/bpf/lib/metrics.h:14`.
+- The update macro passes `__MAGIC_LINE__` and `__MAGIC_FILE__`.
+- This is visible in `runner/repos/cilium/bpf/lib/metrics.h:45`.
+- `_update_metrics()` fills the key fields.
+- This is visible in `runner/repos/cilium/bpf/lib/metrics.h:53`.
+- `_update_metrics()` performs `map_lookup_elem(&cilium_metrics, &key)`.
+- This is visible in `runner/repos/cilium/bpf/lib/metrics.h:58`.
+- `_update_metrics()` can write the map on a miss.
+- This is visible in `runner/repos/cilium/bpf/lib/metrics.h:65`.
+- Some call-site values may be compile-time constants after inlining the macro.
+- The map type still blocks safe direct value inlining.
+- A single userspace snapshot value is not semantically equivalent to current-CPU-slot semantics.
+- A safe PERCPU_HASH design would need per-CPU-slot equality or a way to preserve current-CPU selection.
+- The current direct support only gives that equality rule for PERCPU_ARRAY.
+- The PERCPU_ARRAY special case is described in `bpfopt/crates/bpfopt/src/passes/map_inline/map_info.rs:46`.
+- Cilium PERCPU_HASH skips are not evidence that verifier-state key extraction failed.
+- They are evidence that the map type policy correctly refuses unsafe value materialization.
+
+## 10. Skip Reason 3: LPM_TRIE Unsupported
+
+- Cilium has 8 LPM_TRIE skips.
+- LPM_TRIE type ID 11 is defined in `vendor/linux-framework/include/uapi/linux/bpf.h:1012`.
+- map_inline's direct-value type policy does not include LPM_TRIE.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline/map_info.rs:49`.
+- Cilium policy uses an LPM trie map.
+- `cilium_policy_v2` is declared as `BPF_MAP_TYPE_LPM_TRIE`.
+- This is visible in `runner/repos/cilium/bpf/lib/policy.h:162`.
+- The policy key type is `struct policy_key`.
+- This is visible in `runner/repos/cilium/bpf/lib/policy.h:165`.
+- `policy_can_access()` builds a policy key with a full prefix.
+- This is visible in `runner/repos/cilium/bpf/lib/policy.h:227`.
+- The policy key includes `remote_id`.
+- This is visible in `runner/repos/cilium/bpf/lib/policy.h:229`.
+- The policy key includes direction, protocol, and dport.
+- This is visible in `runner/repos/cilium/bpf/lib/policy.h:230`.
+- These fields are runtime policy/packet attributes.
+- Cilium LB source-range maps are also LPM tries.
+- `cilium_lb6_source_range` is declared as `BPF_MAP_TYPE_LPM_TRIE`.
+- This is visible in `runner/repos/cilium/bpf/lib/lb.h:226`.
+- `cilium_lb4_source_range` is declared as `BPF_MAP_TYPE_LPM_TRIE`.
+- This is visible in `runner/repos/cilium/bpf/lib/lb.h:306`.
+- `lb6_src_range_ok()` builds a key with rev_nat_id and source address.
+- This is visible in `runner/repos/cilium/bpf/lib/lb.h:922`.
+- `lb6_src_range_ok()` looks up `cilium_lb6_source_range`.
+- This is visible in `runner/repos/cilium/bpf/lib/lb.h:928`.
+- `lb4_src_range_ok()` builds a key with rev_nat_id and source address.
+- This is visible in `runner/repos/cilium/bpf/lib/lb.h:1666`.
+- `lb4_src_range_ok()` looks up `cilium_lb4_source_range`.
+- This is visible in `runner/repos/cilium/bpf/lib/lb.h:1672`.
+- LPM_TRIE semantics are longest-prefix semantics, not exact-key array semantics.
+- BTF can describe the key type but cannot choose the runtime prefix match.
+- Even a constant key would require a snapshot operation that returns the matched entry.
+- The daemon's current snapshot scanner reads exact live keys, not longest-prefix query results.
+- The snapshot scanner is visible in `daemon/src/commands.rs:979`.
+- LPM_TRIE support could be added for constant keys, but it would not unlock the packet-source-range hot path.
+
+## 11. Map-in-Map Residuals in Katran
+
+- Katran has 2 ARRAY_OF_MAPS skips and 2 HASH_OF_MAPS skips in the old artifact.
+- Program 476 summary shows these four skips.
+- This is visible in `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/katran.json:291`.
+- Katran `lru_mapping` is an ARRAY_OF_MAPS.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer_maps.h:49`.
+- `lru_mapping` maps CPU core to LRU map.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer_maps.h:49`.
+- The source key is `cpu_num = bpf_get_smp_processor_id()`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:838`.
+- The lookup is `bpf_map_lookup_elem(&lru_mapping, &cpu_num)`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:839`.
+- `cpu_num` is runtime data, not compile-time constant.
+- It is bounded by CPU count but not a single constant.
+- Static analysis can identify the helper source as current CPU.
+- Static analysis cannot replace the lookup with one global inner map without changing semantics.
+- Katran `vip_to_down_reals_map` is a HASH_OF_MAPS.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer_maps.h:230`.
+- Its key type is `struct vip_definition`.
+- This is visible in `runner/repos/katran/katran/lib/bpf/balancer_maps.h:233`.
+- VIP definitions are packet/service-derived in the LB path.
+- The source VIP construction is visible in `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:779`.
+- Issue 2 gives bpfopt and the daemon map-in-map machinery.
+- Current map_info recognizes map-in-map types.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline/map_info.rs:65`.
+- Current map_inline can build map-in-map chain rewrites.
+- This is visible in `bpfopt/crates/bpfopt/src/passes/map_inline.rs:1394`.
+- Current daemon snapshots inner map IDs recursively.
+- This is visible in `daemon/src/commands.rs:997`.
+- Issue 2 can unlock the four old Katran map-in-map sites if both outer and inner keys are constant.
+- It cannot make CPU-derived or packet-derived outer keys constant.
+
+## 12. Cilium Hot Path Reality Check
+
+- Cilium service lookup functions pass runtime keys to map lookup.
+- IPv6 service lookup returns `map_lookup_elem(&cilium_lb6_services_v2, key)`.
+- This is visible in `runner/repos/cilium/bpf/lib/lb.h:944`.
+- IPv4 service lookup returns `map_lookup_elem(&cilium_lb4_services_v2, key)`.
+- This is visible in `runner/repos/cilium/bpf/lib/lb.h:1688`.
+- Those keys are constructed from packet/service fields before the call.
+- Cilium backend lookups use backend IDs chosen by service logic.
+- IPv6 backend lookup is visible in `runner/repos/cilium/bpf/lib/lb.h:1038`.
+- IPv4 backend lookup is visible in `runner/repos/cilium/bpf/lib/lb.h:1782`.
+- Cilium CT map types are LRU_HASH.
+- IPv6 CT maps are declared as LRU_HASH in `runner/repos/cilium/bpf/lib/conntrack_map.h:10`.
+- IPv4 CT maps are declared as LRU_HASH in `runner/repos/cilium/bpf/lib/conntrack_map.h:104`.
+- The generic CT lookup helper calls `map_lookup_elem(map, tuple)`.
+- This is visible in `runner/repos/cilium/bpf/lib/conntrack.h:362`.
+- The IPv6 CT path populates tuple fields before lookup.
+- This is visible in `runner/repos/cilium/bpf/lib/conntrack.h:664`.
+- The IPv4 CT path extracts ports from packet headers.
+- This is visible in `runner/repos/cilium/bpf/lib/conntrack.h:1029`.
+- The IPv4 CT path then calls `__ct_lookup4`.
+- This is visible in `runner/repos/cilium/bpf/lib/conntrack.h:1036`.
+- These are exactly the heavy map lookup paths named in the user prompt.
+- They are runtime packet/flow keys, not constant keys.
+- Verifier state should not prove these keys constant under normal workloads.
+- Source analysis should classify them as variable.
+- BTF should classify their type shapes but not their runtime values.
+- User hints should not force-inline these variable-key lookups unless the operator intentionally changes program semantics.
+
+## 13. Part A Root Cause Answer
+
+- Cilium's low helper-map_inline apply count is not mainly a verifier-key gap.
+- Cilium's observed skips are dominated by unsupported PERCPU_HASH and LPM_TRIE map types.
+- Cilium's 279 applies are direct pseudo-map-value constantizations from global-data-like maps.
+- That direct apply class is visible in cilium diagnostics at `corpus/results/x86_kvm_corpus_20260505_173741_854355/details/apps/cilium__agent.json:587`.
+- Cilium's hot service, conntrack, source-range, and policy lookups use runtime keys.
+- The service lookup key path is visible in `runner/repos/cilium/bpf/lib/lb.h:947`.
+- The CT tuple lookup is visible in `runner/repos/cilium/bpf/lib/conntrack.h:362`.
+- The policy key construction is visible in `runner/repos/cilium/bpf/lib/policy.h:227`.
+- Therefore Cilium's hot path is mostly unrecoverable by constant-key extraction.
+- Katran's old key-state bucket is mixed.
+- Some Katran key-state sites are constant stats/control keys and should be unlocked by Issue 1.
+- Examples: stats key at `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:1100`.
+- Examples: control array key at `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:696`.
+- Examples: QUIC stats key zero at `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:874`.
+- Some Katran key-state sites are packet-derived and should remain uninlineable.
+- Examples: VIP key from packet flow at `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:779`.
+- Examples: LRU flow key at `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:185`.
+- Examples: consistent hash ring key at `runner/repos/katran/katran/lib/bpf/balancer.bpf.c:143`.
+- Katran's map-in-map skips should be reduced by Issue 2 when keys are constant.
+- Katran's CPU-indexed LRU map selection remains runtime-dependent.
+- Overall answer: yes, the important cilium/katran lookup keys are often packet-derived.
+- But the old result's skip reasons also include unsupported map types and pre-Issue-1 verifier-state plumbing failures.
+- The post-Issue-1/2 expected remaining gap is smaller for stats/control maps and still large for hot packet paths.
+
+## 14. Part B Current Fit Matrix
+
+- A design fits v3 best if it preserves the daemon socket boundary.
+- That boundary is required by `CLAUDE.md:93`.
+- A design fits v3 best if runner Python remains untouched except bug fixes or stale data updates.
+- That boundary is required by `CLAUDE.md:96`.
+- A design fits v3 best if bytecode transforms remain `bpfopt --pass` invocations.
+- That boundary is required by `CLAUDE.md:88`.
+- A design fits v3 best if side inputs are files at bpfopt/bpfprof CLI boundaries.
+- That boundary is required by `CLAUDE.md:94`.
+- A design fits v3 best if daemon owns live map metadata and snapshots.
+- That boundary is required by `CLAUDE.md:89`.
+- A design does not fit v3 if the daemon starts doing bytecode transforms in-process.
+- That is forbidden by `CLAUDE.md:88`.
+- A design does not fit v3 if the daemon does profiling internally.
+- That is forbidden by `CLAUDE.md:88`.
+- A design does not fit v3 if bpfopt calls BPF syscalls directly.
+- That is forbidden by `CLAUDE.md:118`.
+- A design does not fit benchmarking if it requires framework `.bpf.o` loading.
+- That is forbidden by `CLAUDE.md:12`.
+- A design is less attractive if it requires runner protocol changes.
+- Runner stability is required by `CLAUDE.md:93`.
+- A design is acceptable if it adds a bpfopt side-input file and daemon prepares it.
+- Side-input files are part of the v3 CLI boundary per `CLAUDE.md:94`.
+- A design is acceptable if it adds a new standalone CLI tool and the runner/daemon invokes it as a step.
+- Runtime composition through bash orchestration is allowed by `CLAUDE.md:105`.
+- A design is acceptable if it adds kernel-sys read-only helpers for metadata.
+- kernel-sys is the syscall boundary per `CLAUDE.md:118`.
+- A design is not acceptable if it requires changes under `vendor/linux-framework/` for this task.
+- The user explicitly forbids kernel changes for the recommended path.
+
+## 15. B1 User-Specified Force-Inline Hint: Mechanism
+
+- Proposed user syntax in the prompt names a map and behavior such as `constant_after_init`.
+- Current daemon `MapInfo` lacks map names, so map-name matching needs daemon metadata expansion.
+- The missing field follows from `daemon/src/bpf.rs:31`.
+- Kernel map info retrieval is already present and can expose names through `bpf_map_info`.
+- The current daemon conversion drops all fields except ID/type/key/value/max.
+- This is visible in `daemon/src/bpf.rs:154`.
+- The safest B1 mechanism is not "force inline all lookups."
+- The safest B1 mechanism is "operator attests these map values are stable for exact keys or for statically recovered keys."
+- End-to-end B1 flow:
+- Step 1: operator provides a daemon-readable hint policy file.
+- Step 2: daemon loads the policy at startup or from a daemon CLI/env path.
+- Step 3: daemon matches live maps by name, ID, type, or pinned path.
+- Step 4: daemon validates that each hinted map exists in the live program's used map set.
+- Step 5: daemon snapshots the map values exactly as it already does for `map-values.json`.
+- Step 6: daemon emits a new `map-inline-hints.json` side input beside `map-values.json`.
+- Step 7: runner step template passes `--map-inline-hints ${MAP_INLINE_HINTS}` only when map_inline needs it.
+- Step 8: bpfopt reads hints into `BpfProgram` or `PassContext`.
+- Step 9: map_inline uses hints only after key recovery identifies a specific key or call site.
+- Step 10: map_inline never synthesizes values for an unknown runtime key.
+- The reason for Step 9 is correctness.
+- A map-level stability claim says values do not change.
+- It does not say a variable lookup key equals a specific key.
+- "Inline all lookups against map" would replace a dynamic map read with one or more constants independent of key.
+- That changes semantics when the packet key differs.
+- A safer YAML shape should distinguish value stability from key certainty.
+- Example field: `map_name: stats`.
+- Example field: `stable_values_after: baseline_snapshot`.
+- Example field: `allowed_keys: ["00000000", "10020000"]`.
+- Example field: `callsite_pcs: [13, 1001]`.
+- Example field: `key_source: verifier_or_static_only`.
+- Example field: `on_missing_map: error`.
+- Example field: `on_missing_key: error` or `skip`.
+- The default should be fail-fast on missing maps for authoritative runs.
+- Fail-fast behavior follows project rules in `CLAUDE.md:70`.
+- The default should never downgrade to a heuristic.
+- No-fallback behavior follows `CLAUDE.md:73`.
+
+## 16. B1 Component Changes
+
+- Daemon change: add map name or pin path to map metadata.
+- Relevant current daemon map metadata is `daemon/src/bpf.rs:31`.
+- Daemon change: read a hint policy path from daemon CLI/env or fixed config path.
+- Daemon change: validate hinted maps against live map IDs from `snapshot.info.map_ids`.
+- The live map IDs come from `daemon/src/bpf.rs:130`.
+- Daemon change: emit `${MAP_INLINE_HINTS}` as a new known step variable.
+- The current known var list is in `daemon/src/commands.rs:44`.
+- Daemon change: add the hints path to `step_vars()`.
+- Current `step_vars()` is in `daemon/src/commands.rs:837`.
+- Daemon change: write `map-inline-hints.json` into the per-program workdir.
+- The current workdir-file pattern is in `daemon/src/commands.rs:540`.
+- bpfopt change: add a CLI flag `--map-inline-hints FILE`.
+- Current map_inline CLI flags sit beside `--map-values` and `--map-ids` in `bpfopt/crates/bpfopt/src/main.rs:120`.
+- bpfopt change: parse hint JSON with schema validation.
+- bpfopt change: store hints in `BpfProgram` or `PassContext`.
+- Current `BpfProgram` side-input state is in `bpfopt/crates/bpfopt/src/pass.rs:86`.
+- bpfopt change: map_inline consults hints after key extraction and before snapshot lookup.
+- Current key extraction site is `bpfopt/crates/bpfopt/src/passes/map_inline.rs:933`.
+- bpfopt change: report hint usage in diagnostics without adding benchmark summary fields.
+- Result summary restrictions are in `CLAUDE.md:15`.
+- Runner change option A: extend `rejit_plan.py` to pass `--map-inline-hints`.
+- Current step template side inputs are in `runner/libs/rejit_plan.py:65`.
+- Runner change option A is less desirable because runner Python is stable in v3.
+- Runner stability is stated in `CLAUDE.md:93`.
+- Runner change option B: avoid runner changes by embedding `--map-inline-hints ${WORKDIR}/map-inline-hints.json` in the map_inline step only after daemon writes that file.
+- Option B still needs the runner template to contain the flag unless daemon recognizes map_inline and mutates commands.
+- Mutating commands by pass name in the daemon would reintroduce pass policy into daemon.
+- Daemon pass-policy ownership is discouraged by v3 in `CLAUDE.md:88`.
+- Cleaner fit: add the variable and update `rejit_plan.py` once, but keep it generic metadata-driven.
+- To keep runner changes minimal, expose a new bpfopt metadata boolean such as `needs_map_inline_hints`.
+- Current metadata already drives target, verifier, and map values.
+- That pattern is in `runner/libs/rejit_plan.py:74`.
+- kernel-sys change: optional, only if map names or BTF metadata are not already exposed by libbpf-sys.
+- Direct BPF syscall changes should remain in kernel-sys.
+- This boundary is required by `CLAUDE.md:118`.
+
+## 17. B1 Fit, Site Estimate, Risk, Verification
+
+- Fit with v3: moderate to good if implemented as a bpfopt side-input file.
+- Fit with v3: poor if implemented as daemon in-process pass policy.
+- Fit with v3: poor if implemented as runner benchmark YAML exclusions or per-app special cases.
+- No ReJIT filtering is allowed by `CLAUDE.md:5`.
+- Expected Cilium unlock from B1 map-value stability hints: low.
+- Cilium's dominant skips are PERCPU_HASH and LPM_TRIE, not value-stability uncertainty.
+- Cilium PERCPU_HASH cannot be made safe by a map-level stable-value hint unless all CPU slots are equal or current-CPU semantics are preserved.
+- Cilium LPM_TRIE needs longest-prefix lookup semantics, not just map value stability.
+- Expected Katran unlock from B1 after Issue 1 and Issue 2: low to moderate.
+- Katran constant stats/control sites should be handled by Issue 1 without hints.
+- Katran map-in-map constant chains should be handled by Issue 2 without hints.
+- Katran CPU-derived `lru_mapping` keys are not single constants.
+- Katran packet-derived VIP/flow keys are not single constants.
+- B1 can still unlock operator-known exact keys that verifier/static analysis cannot prove.
+- Example: an operator may know a control map key zero is immutable after init.
+- Example: an operator may know a stats map is read-only during a benchmark window.
+- That is a correctness contract, not an inference.
+- B1 risk: stale snapshots if app mutates the hinted map after baseline.
+- B1 risk: map-name ambiguity across programs or namespaces.
+- B1 risk: user specifies a map that is writable by BPF.
+- B1 risk: a map-level hint hides variable-key semantics if implemented too broadly.
+- B1 verification: schema tests for invalid map names, duplicate keys, and malformed hex.
+- B1 verification: daemon integration test that hint map name resolves to map ID.
+- B1 verification: bpfopt test that hint cannot bypass key extraction unless explicit exact key/callsite mode is used.
+- B1 verification: negative test where variable key with map-level stability still skips.
+- B1 verification: ReJIT test that missing hinted map exits nonzero.
+- B1 verification: corpus dry run that diagnostics identify hint-assisted sites.
+- B1 rough LoC: 300 to 450 gross for a narrow exact-key/value-stability side input.
+- B1 rough LoC: 600+ if map names, pinned paths, and BTF matching are all included.
+- B1 recommendation: implement only the narrow variant if a hint mechanism is needed.
+
+## 18. B2 LLVM IR or Source-Level Static Analysis: Mechanism
+
+- Static analysis can identify keys that are compile-time constants.
+- Static analysis can identify keys that are packet-derived or helper-derived.
+- Static analysis can emit a hint file consumed by bpfopt.
+- The hint file should bind findings to program identity and call-site PC.
+- Binding only by source line is unstable after compiler changes.
+- Binding only by map name is too coarse.
+- Preferred static-analysis output record:
+- Field: object build ID or `.BTF`/line-info digest.
+- Field: function/subprogram name.
+- Field: call-site instruction PC in original bytecode.
+- Field: map name or map ID placeholder.
+- Field: key bytes when fully static.
+- Field: proof kind such as `llvm_const_stack`, `dwarf_line_const`, or `btf_ext_line_const`.
+- Field: source location for auditing.
+- Field: failure classification when variable, such as packet, helper, map-value, or unknown.
+- Approach 1: llvm-objdump/DWARF/line-info on `.bpf.o`.
+- Approach 1 is useful for human triage.
+- Approach 1 is brittle as a production mechanism because v3 transparency does not require `.bpf.o`.
+- Transparency says no `.bpf.o` is required in `docs/kernel-jit-optimization-plan.md:111`.
+- Benchmark architecture forbids object-level scheduling.
+- This is stated in `docs/kernel-jit-optimization-plan.md:498`.
+- Approach 2: separate `bpfopt-static-analyze` CLI tool.
+- Approach 2 best fits architecture if it remains optional and offline.
+- Standalone CLIs are composed through files and bash orchestration.
+- Runtime composition through bash orchestration is allowed by `CLAUDE.md:105`.
+- Approach 2 should live in the bpfopt crate family or a new independent crate.
+- It should not become a compile-time dependency of bpfrejit-daemon.
+- CLI cross-dependencies are forbidden by `CLAUDE.md:103`.
+- Approach 3: extend bpfopt to read DWARF directly.
+- Approach 3 is less clean because bpfopt's current primary input is raw bytecode.
+- bpfopt raw bytecode input is established in `CLAUDE.md:94`.
+- Current bpfopt reads `struct bpf_insn[]` from stdin or `--input`.
+- This is visible in `bpfopt/crates/bpfopt/src/main.rs:96`.
+- DWARF requires an ELF object path, not just raw bytecode.
+- Extending bpfopt to take both raw bytecode and object context would complicate the contract.
+- Approach 4: run source/IR analysis during app build.
+- Approach 4 conflicts with app-native transparency if required.
+- It can be useful for paper analysis and optional hints.
+- It should not become required for the benchmark runner.
+
+## 19. B2 Component Changes
+
+- Daemon changes for optional B2: none if static hints are produced before daemon execution.
+- Daemon changes for integrated B2: add a step variable for static hint file.
+- Daemon changes for integrated B2: copy or mount the hint file into the workdir.
+- Runner changes for optional B2: provide step command or env path to the hint file.
+- Runner changes are undesirable during v3 migration.
+- Runner boundary stability is stated in `CLAUDE.md:96`.
+- bpfopt changes: add `--map-inline-hints` and parse call-site constant-key records.
+- bpfopt changes: reject hint records whose bytecode digest or PC binding does not match.
+- bpfopt changes: feed static-key records into map_inline before verifier fallback or after verifier failure.
+- The current key extraction entry point is `bpfopt/crates/bpfopt/src/passes/map_inline.rs:1204`.
+- bpfopt changes: distinguish static proof from user assertion in diagnostics.
+- kernel-sys changes: none if analysis uses LLVM/DWARF libraries outside kernel-sys.
+- kernel-sys changes: none if bpfopt-static-analyze reads `.bpf.o` as a normal file.
+- kernel-sys changes are needed only for live kernel BTF/BPF metadata.
+- B2 should not add BPF syscalls to bpfopt.
+- bpfopt direct BPF syscalls are forbidden by `CLAUDE.md:118`.
+
+## 20. B2 Site Estimate, Risk, Verification
+
+- Expected Cilium unlock from B2 alone: low.
+- Cilium metrics keys may be statically constant at some macro-expanded call sites.
+- Cilium metrics map type is PERCPU_HASH, which B2 does not fix.
+- Cilium LPM/policy/source-range keys are runtime packet/policy fields.
+- Cilium LB service and CT keys are runtime packet/tuple fields.
+- Expected Katran unlock from B2 alone after Issue 1: low.
+- Katran constant stats/control keys should already be recovered by Issue 1.
+- Static analysis can confirm and explain those sites.
+- Static analysis can also classify VIP/flow/server-id keys as variable.
+- B2 may unlock constant sites that verifier does not emit due missing call-PC snapshots.
+- That could matter if Issue 1 still misses some constant stats sites.
+- B2 risk: source/object mismatch with live loaded program.
+- B2 risk: compiler optimization changes PC mapping.
+- B2 risk: dead code or inlining changes source location semantics.
+- B2 risk: optional source artifacts are unavailable for app-native production.
+- B2 risk: using `.bpf.o` as a required framework input violates transparency.
+- B2 verification: fixture with constant stack key in LLVM IR emits exact key bytes.
+- B2 verification: fixture with packet load into key emits variable classification.
+- B2 verification: digest mismatch causes hard error.
+- B2 verification: PC mismatch causes hard error.
+- B2 verification: generated hint cannot override runtime key unless proof says constant.
+- B2 verification: compare static classifications with verifier-guided classifications on known micro programs.
+- B2 rough LoC: 500 to 900 for a minimal separate analyzer over ELF/DWARF/BTF.ext.
+- B2 rough LoC: 1,200+ if full LLVM IR provenance is required.
+- B2 recommendation: useful as an offline analysis assistant and optional hint generator, not as the primary production unlock path.
+
+## 21. B3 BTF Type-Aware Inlining: Mechanism
+
+- BTF can describe map key and value types.
+- BTF can describe map names for BTF-declared maps in the original object.
+- Live kernel map info also exposes map type, key size, value size, max entries, and name.
+- The daemon currently keeps only ID/type/key/value/max.
+- This is visible in `daemon/src/bpf.rs:154`.
+- BTF alone can identify `BPF_MAP_TYPE_PERCPU_ARRAY` with `__type(key, u32)`.
+- BTF alone can identify `BPF_MAP_TYPE_HASH` with a structured key type.
+- BTF alone can identify `BPF_MAP_TYPE_LPM_TRIE` key structs by shape.
+- BTF alone cannot prove which key bytes a call site uses.
+- BTF alone cannot prove that key zero is the only key ever used.
+- BTF alone cannot prove that packet-derived fields are constant.
+- BTF alone cannot decide whether a HASH map entry exists for a runtime key.
+- BTF alone cannot decide longest-prefix match results for LPM_TRIE.
+- BTF plus bytecode analysis can recognize key materialization patterns.
+- BTF plus source line info can improve diagnostics.
+- BTF plus verifier states can improve confidence in field layout and value extraction.
+- BTF type-aware support is best viewed as metadata enrichment, not key inference.
+- Example: PERCPU_ARRAY key type `u32` plus verifier key zero is safe if all CPU slots are equal.
+- Example: HASH key type `struct vip_definition` plus packet-source analysis says variable, not inlineable.
+- Example: LPM_TRIE key type plus constant key could permit a snapshot longest-prefix query.
+- Example: LPM_TRIE key type alone cannot infer a constant source IP.
+
+## 22. B3 Component Changes
+
+- Daemon change: preserve map names and optionally BTF IDs in map metadata.
+- Current daemon map metadata fields are in `daemon/src/bpf.rs:31`.
+- Daemon change: write enriched map metadata to `map-values.json` or a new side-input file.
+- Current map-values schema is written in `daemon/src/commands.rs:1037`.
+- bpfopt change: parse optional map names/BTF metadata.
+- bpfopt change: use BTF metadata for diagnostics and map-family-specific gates.
+- bpfopt change: avoid heuristics that assume key zero for a map type.
+- Runner change: none if daemon writes the richer map-values file under existing `${MAP_VALUES}`.
+- Kernel-sys change: expose more libbpf BTF APIs if daemon needs map-type/member parsing.
+- Existing kernel-sys BTF wrapper only exposes function-name lookup.
+- This is visible in `bpfopt/crates/kernel-sys/src/lib.rs:587`.
+- BTF parsing should remain in daemon/kernel-sys or an offline analyzer, not in runner Python.
+- Runner stability is required by `CLAUDE.md:96`.
+
+## 23. B3 Site Estimate, Risk, Verification
+
+- Expected Cilium unlock from BTF alone: near zero.
+- Cilium's CTF/LB/policy keys are runtime values.
+- Cilium PERCPU_HASH still needs per-CPU semantics, not just type recognition.
+- Cilium LPM_TRIE still needs longest-prefix semantics and constant key proof.
+- Expected Katran unlock from BTF alone: near zero.
+- Katran stats/control constant sites are already targetable by verifier Issue 1.
+- Katran packet-derived VIP/flow keys remain variable.
+- Katran CPU-derived map-in-map keys remain runtime CPU values.
+- BTF can improve audit output by saying which struct field makes a key variable.
+- BTF can help avoid unsafe hints by validating expected map key/value types.
+- BTF risk: type names and layout differ across app versions.
+- BTF risk: CO-RE and compiler optimization can obscure source-level intent.
+- BTF risk: heuristic "99 percent key zero" is a paper-review red flag.
+- BTF verification: parse map metadata and validate exact key/value sizes.
+- BTF verification: reject hints whose declared key/value struct does not match live map metadata.
+- BTF verification: ensure no type-only rule produces an inline without a constant key proof.
+- BTF rough LoC: 150 to 250 for map-name/type diagnostic enrichment.
+- BTF rough LoC: 500+ for robust BTF type parsing and schema validation.
+- B3 recommendation: useful as a validation and diagnostics layer; not a primary unlock path.
+
+## 24. B4 Runtime Profile-Guided Key/Value Stability: Mechanism
+
+- Proposed B4 profiles map access keys and value stability during baseline.
+- The mechanism would need to observe map lookup keys.
+- The mechanism would need to observe map writes or repeated snapshots.
+- The mechanism would need to decide that a small key set has high hit rate.
+- The mechanism would need to decide that values remain stable.
+- Existing bpfprof does not profile map access keys.
+- Existing bpfprof profiles per-site branch behavior using LBR.
+- This is visible in `bpfopt/crates/bpfprof/src/main.rs:4`.
+- Existing bpfprof requires `--per-site`.
+- This is visible in `bpfopt/crates/bpfprof/src/main.rs:196`.
+- Existing bpfprof output has `branch_miss_rate`, `branch_misses`, branch instructions, and `per_site`.
+- This is visible in `bpfopt/crates/bpfprof/src/main.rs:65`.
+- Existing bpfprof attaches a branch-snapshot sidecar.
+- This is visible in `bpfopt/crates/bpfprof/src/main.rs:248`.
+- Existing bpfprof builds branch-profile rows from LBR-derived site counts.
+- This is visible in `bpfopt/crates/bpfprof/src/main.rs:873`.
+- A map-access profiler is a different tool.
+- It would likely need fentry/kprobe tracing of map helpers or BPF program instrumentation.
+- It would likely need to copy key bytes for every helper call.
+- It would impose overhead on exactly the hot paths being measured.
+- It would be workload-sensitive by construction.
+- It would not be a correctness proof.
+- A high hit rate on a small key set does not mean future packets use only those keys.
+- Low write count during baseline does not mean values are immutable after ReJIT.
+- Replacing variable-key lookups with constants based on observed hot keys changes semantics for unobserved keys.
+- Therefore B4 should not be used as a correctness gate for map_inline.
+
+## 25. B4 Component Changes
+
+- Best-fit version: implement `bpfprof --map-access-profile` as a standalone CLI mode.
+- bpfprof standalone status is required by `CLAUDE.md:91`.
+- Daemon should not do profiling internally.
+- This is forbidden by `CLAUDE.md:88`.
+- bpfprof would emit a profile side-output file.
+- Side-output files at CLI boundaries fit `CLAUDE.md:94`.
+- bpfopt would read a new profile or hint file.
+- Current bpfopt already reads profile JSON for branch/prefetch passes.
+- This is visible in `bpfopt/crates/bpfopt/src/main.rs:832`.
+- The profile schema would need per-map and per-callsite key distributions.
+- The profile schema would need write counters or repeated value digests.
+- The daemon would need to schedule bpfprof before map_inline.
+- That would require a runner plan containing a profiling step.
+- Current runner plan steps are command templates.
+- This is visible in `runner/libs/rejit_plan.py:51`.
+- The current legacy adapter gives every program the same step list.
+- This is visible in `runner/libs/rejit_plan.py:129`.
+- B4 would likely need per-prog/per-pass planning.
+- That would stretch the current runner adapter beyond its legacy surface.
+- Kernel-sys might need helpers for attaching tracing programs or reading helper args.
+- Any direct BPF syscalls must remain in kernel-sys.
+- This is required by `CLAUDE.md:118`.
+
+## 26. B4 Site Estimate, Risk, Verification
+
+- Expected Cilium apparent unlock from B4 could be high in a narrow workload.
+- Expected Katran apparent unlock from B4 could be high in a narrow workload.
+- Correctness-adjusted unlock is near zero unless the hint is treated as advisory only.
+- B4 can identify hot maps and hot call sites.
+- B4 can prioritize future engineering.
+- B4 should not authorize constant replacement of variable-key lookups.
+- B4 risk: workload overfitting.
+- B4 risk: unobserved keys take wrong path after ReJIT.
+- B4 risk: values mutate after profiling.
+- B4 risk: profiling overhead perturbs benchmark results.
+- B4 risk: tracing helper keys may expose sensitive packet data in artifacts.
+- B4 risk: new tracing stack adds failures unrelated to ReJIT.
+- B4 verification: compare profiled key distributions across independent workloads.
+- B4 verification: force an unobserved key after ReJIT and prove behavior remains correct.
+- B4 verification: measure profiling overhead separately from benchmark measurement.
+- B4 verification: fail if write observation is incomplete.
+- B4 rough LoC: 1,000 to 2,000+ plus substantial test infrastructure.
+- B4 recommendation: use only as an offline diagnostic/profitability advisor, not as map_inline correctness input.
+
+## 27. Recommended Path
+
+- Recommendation 1: first validate Issue 1 and Issue 2 on a fresh map_inline cilium/katran corpus artifact.
+- Reason: the available cilium/katran map_inline counts predate both fixes.
+- Reason: Issue 1 directly targets the old 64 Katran key-state skips.
+- Reason: Issue 2 directly targets the old 4 Katran map-in-map skips.
+- Recommendation 2: do not implement "inline all lookups against this map."
+- Reason: it is unsound for packet-derived and CPU-derived keys.
+- Recommendation 3: implement at most a narrow user-hint side input.
+- The hint should express value stability and exact-key/callsite authorization.
+- The hint should never synthesize a key for a variable-key lookup by default.
+- The hint should be a bpfopt side-input file prepared by the daemon.
+- This respects the side-input boundary in `CLAUDE.md:94`.
+- The hint should be loaded through bpfopt CLI, not by daemon in-process transforms.
+- This respects the transform boundary in `CLAUDE.md:88`.
+- The hint should fail fast on malformed schema or missing maps.
+- This respects fail-fast rules in `CLAUDE.md:70`.
+- Recommendation 4: add static analysis only as an optional offline assistant.
+- The static analyzer can generate exact-key hints.
+- The static analyzer can generate "variable: packet" classifications.
+- The static analyzer should not be required by the benchmark framework.
+- Required `.bpf.o` source analysis would violate the transparency goal in `docs/kernel-jit-optimization-plan.md:111`.
+- Recommendation 5: use BTF type awareness for validation and diagnostics.
+- Do not use BTF-only heuristics to assume key zero.
+- Recommendation 6: do not use runtime hot-key PGO as a correctness gate.
+- Existing bpfprof is branch-site PMU oriented, not map-key oriented.
+- This is visible in `bpfopt/crates/bpfprof/src/main.rs:4`.
+- Runtime hot-key observations are workload facts, not semantic facts.
+- Recommendation 7: no kernel changes.
+- The requested path should stay in daemon/bpfopt/kernel-sys userland metadata only.
+- This matches the user constraint and the design plan's userspace policy model.
+- That model is stated in `docs/kernel-jit-optimization-plan.md:95`.
+
+## 28. Expected Unlock After Recommendations
+
+- Cilium after Issue 1: the 2 old key-state skips may become recoverable or reclassified.
+- Cilium after Issue 2: no major change expected from map-in-map.
+- Cilium after narrow hints: likely low unlock unless operators target metrics/control maps.
+- Cilium hot LB service lookups: near-zero unlock because keys are runtime packet/service keys.
+- Cilium hot CT lookups: near-zero unlock because keys are runtime tuples.
+- Cilium policy/source-range lookups: near-zero unlock unless constant-key LPM support is added for narrow cases.
+- Cilium PERCPU_HASH metrics: possible only with a separate per-CPU-safe design.
+- Katran after Issue 1: constant stats/control key sites should unlock if verifier snapshots exist.
+- Katran after Issue 2: up to 4 old map-in-map skips may unlock if keys are constant.
+- Katran after narrow hints: possible small incremental unlock for exact control/stats keys missed by verifier.
+- Katran VIP/service lookups: near-zero unlock because keys are packet-derived.
+- Katran LRU flow lookups: near-zero unlock because keys are flow-derived.
+- Katran current-CPU map selection: unsafe to collapse to one map without per-CPU semantics.
+- Katran consistent hash ring lookup: near-zero constant-key unlock because key depends on packet hash and vip_info.
+- Overall cilium/katran hot-path helper elimination remains mostly out of reach for map_inline.
+- This is not a failure of verifier-guided extraction.
+- It is a consequence of the program semantics.
+
+## 29. Paper-Grade Risk Position
+
+- A paper-grade optimization must preserve semantics for all workload inputs, not just measured inputs.
+- The safety/correctness split puts semantic correctness in userspace.
+- This is stated in `docs/kernel-jit-optimization-plan.md:101`.
+- The verifier will reject unsafe bytecode but cannot prove the userland pass preserved map lookup semantics.
+- Therefore map_inline should only replace lookups when the key and value are semantically fixed.
+- Verifier-guided constants are strong evidence.
+- Static compile-time constants are strong evidence if bound to the exact loaded bytecode.
+- User hints are strong only as explicit operator contracts.
+- BTF type heuristics are weak evidence.
+- Runtime hot-key profiles are weak correctness evidence.
+- For cilium/katran hot packet paths, the honest paper-grade answer is "no good answer inside map_inline."
+- Future work may target different optimizations for those paths.
+- Examples include prefetch, branch layout, bounds-check merging, or program-specific data-structure changes.
+- This document does not recommend kernel changes.
+- This document does not recommend app source changes.
+- This document does not recommend runner Python refactors during v3 migration.
+
+## 30. Rough LoC Estimates
+
+- Validate Issue 1/2 on fresh artifact: no code, benchmark-only, outside this task.
+- B1 narrow hints: 300 to 450 gross LoC.
+- B1 narrow hints daemon portion: 120 to 180 LoC.
+- B1 narrow hints bpfopt CLI/schema portion: 80 to 140 LoC.
+- B1 narrow hints map_inline integration: 80 to 120 LoC.
+- B1 narrow hints tests: 80 to 140 LoC.
+- B1 map-name metadata expansion: add 40 to 100 LoC.
+- B2 standalone static analyzer minimal prototype: 500 to 900 gross LoC.
+- B2 robust LLVM provenance: 1,200+ gross LoC.
+- B3 map-name/BTF diagnostic enrichment: 150 to 250 gross LoC.
+- B3 full BTF type parsing and hint validation: 500+ gross LoC.
+- B4 map-access profiler: 1,000 to 2,000+ gross LoC plus overhead tests.
+- Recommended first implementation: B1 narrow hints only, after fresh Issue 1/2 measurement.
+- Recommended first implementation expected code size: roughly 350 gross LoC.
+- Recommended first implementation expected hot-path impact: low.
+- Recommended first implementation expected engineering value: high as a correctness-preserving control surface.
+
+## 31. Verification Plan for the Recommended Design
+
+- Unit test: hint schema rejects unknown behavior values.
+- Unit test: hint schema rejects malformed hex keys.
+- Unit test: hint schema rejects duplicate exact-key records.
+- Unit test: hint schema rejects map names that resolve ambiguously.
+- Unit test: hint schema rejects call-site PC outside program length.
+- Unit test: static/verifier constant key plus stable-value hint inlines.
+- Unit test: variable key plus map-level stable-value hint does not inline.
+- Unit test: explicit exact-key/callsite hint can inline only the named PC.
+- Unit test: hint cannot bypass unsupported PERCPU_HASH semantics.
+- Unit test: hint cannot bypass unsupported LPM_TRIE semantics without dedicated LPM implementation.
+- Unit test: bpfopt diagnostics distinguish verifier, static, and user-hint proof sources.
+- Daemon test: live map metadata includes names without losing existing fields.
+- Daemon test: missing hinted map exits with friendly error.
+- Daemon test: hint file is emitted only when map_inline step needs it.
+- Daemon test: hint validation happens before bpfopt execution where possible.
+- CLI test: bpfopt `--map-inline-hints` requires JSON object schema.
+- CLI test: bpfopt without hints behaves identically to current behavior.
+- Integration test: micro constant-key map lookup inlines with verifier proof.
+- Integration test: micro packet-derived key remains skipped with map-level hint.
+- Integration test: map-in-map constant chain still works after hint plumbing.
+- Regression test: no result.json rollup fields are added.
+- Regression test: no runner app filtering or pass exclusions are added.
+- Regression test: no daemon in-process transform path appears.
+
+## 32. Open Questions
+
+- Do we want map names, pinned paths, or map IDs as the stable user-facing selector?
+- Map IDs are live-run-specific and not stable.
+- Map names are readable but may collide.
+- Pinned paths are stable only for pinned maps.
+- Do we want call-site PC hints, source-line hints, or both?
+- PC hints are precise but compiler-version-sensitive.
+- Source-line hints are user-friendly but ambiguous after inlining.
+- Do we require bytecode digest binding for user hints?
+- Digest binding reduces stale-hint risk.
+- Digest binding requires deciding which byte stream to hash.
+- The daemon canonicalizes map references before bpfopt.
+- That canonicalization is visible in `daemon/src/commands.rs:534`.
+- Hashing canonicalized original bytecode is likely the right binding.
+- Do we expose hint usage in `bpfopt_summary.diagnostics` only?
+- Diagnostics already carry site details.
+- This avoids adding forbidden summary fields.
+- Do we allow hint-assisted inlining in authoritative paper runs?
+- If yes, the paper must describe the hint contract and list hinted maps.
+- If no, hints remain a development and deployment feature.
+
+## 33. Bottom Line
+
+- Cilium's old near-zero helper inlining is mainly unsupported PERCPU_HASH/LPM_TRIE plus runtime keys in hot paths.
+- Katran's old zero applies are partly pre-Issue-1 verifier-state plumbing and partly real runtime-key semantics.
+- Issue 1 should recover constant stats/control keys.
+- Issue 2 should recover some constant map-in-map chains.
+- Neither issue makes packet-derived VIP/flow/service/CT keys constant.
+- User hints are useful only when they state a real semantic contract.
+- Static analysis is useful as an assistant and proof generator.
+- BTF is useful as validation and diagnostics.
+- Runtime key profiling is useful as an advisor, not a correctness gate.
+- The best path is narrow hint side input plus fresh measurement, not a broad forced-inline policy.
