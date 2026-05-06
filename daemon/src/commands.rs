@@ -5,16 +5,13 @@
 //! pass orchestration, per-pass verifier acceptance, short-lived fd_array
 //! construction, and per-pass `BPF_PROG_REJIT`.
 
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs;
 use std::io::Write;
 use std::os::fd::{AsFd, AsRawFd, OwnedFd};
 use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
+use std::process::Command;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::OnceLock;
-use std::thread;
-use std::time::{Duration, Instant};
 
 use anyhow::{anyhow, bail, Context, Result};
 use rayon::prelude::*;
@@ -24,39 +21,37 @@ use serde_json::Value;
 use crate::bpf;
 
 static NEXT_WORKDIR_ID: AtomicU64 = AtomicU64::new(0);
-/// CLI binary directory set once at startup; None means use PATH lookup.
-static CLI_DIR: OnceLock<Option<PathBuf>> = OnceLock::new();
-static PASS_METADATA: OnceLock<Result<PassMetadataMap, String>> = OnceLock::new();
-const MAP_VALUES_FILE: &str = "map-values.json";
-const VERIFIER_STATES_FILE: &str = "verifier-states.json";
-const DEFAULT_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(5);
-const OPTIMIZE_CLI_STAGE_TIMEOUT: Duration = Duration::from_secs(60);
-const CLI_STAGE_POLL_INTERVAL: Duration = Duration::from_millis(100);
 const REJIT_VERBOSE_LOG_BUF_SIZE: usize = 16 * 1024 * 1024;
-const REJIT_BASIC_LOG_BUF_SIZE: usize = 1024 * 1024;
 
-#[derive(Clone, Debug)]
-pub(crate) struct CliConfig {
-    cli_dir: Option<PathBuf>,
-}
+/// Variables daemon substitutes inside step templates.
+///
+/// Steps are bash command strings sent by runner. Daemon prepares per-prog
+/// side-input files lazily based on which `${VAR}` placeholders the steps
+/// reference, then `${VAR}` is replaced with either a path (file inputs) or
+/// an inline value (`PROG_ID`, `MAP_IDS`, `PROG_TYPE`, `WORKDIR`).
+const VAR_PROG_ID: &str = "PROG_ID";
+const VAR_WORKDIR: &str = "WORKDIR";
+const VAR_INPUT: &str = "INPUT";
+const VAR_OUTPUT: &str = "OUTPUT";
+const VAR_TARGET: &str = "TARGET";
+const VAR_VERIFIER_STATES: &str = "VERIFIER_STATES";
+const VAR_MAP_VALUES: &str = "MAP_VALUES";
+const VAR_MAP_IDS: &str = "MAP_IDS";
+const VAR_PROG_TYPE: &str = "PROG_TYPE";
+const VAR_REPORT: &str = "REPORT";
 
-impl CliConfig {
-    /// Read cli_dir from the process-global set by init_cli_dir.
-    /// In tests where init_cli_dir was not called, returns CliConfig { cli_dir: None }.
-    pub(crate) fn from_global() -> Self {
-        let cli_dir = CLI_DIR.get().and_then(|opt| opt.clone());
-        Self { cli_dir }
-    }
-
-    fn command(&self, name: &str) -> Command {
-        let path = self
-            .cli_dir
-            .as_ref()
-            .map(|dir| dir.join(name))
-            .unwrap_or_else(|| PathBuf::from(name));
-        Command::new(path)
-    }
-}
+const ALL_VARS: &[&str] = &[
+    VAR_PROG_ID,
+    VAR_WORKDIR,
+    VAR_INPUT,
+    VAR_OUTPUT,
+    VAR_TARGET,
+    VAR_VERIFIER_STATES,
+    VAR_MAP_VALUES,
+    VAR_MAP_IDS,
+    VAR_PROG_TYPE,
+    VAR_REPORT,
+];
 
 #[derive(Debug)]
 struct WorkDir {
@@ -93,14 +88,6 @@ impl Drop for WorkDir {
             );
         }
     }
-}
-
-/// Initialise the CLI dir (None = use PATH lookup).
-/// Must be called exactly once before the server loop starts.
-pub(crate) fn init_cli_dir() -> Result<()> {
-    CLI_DIR
-        .set(None)
-        .map_err(|_| anyhow!("CLI dir already initialised"))
 }
 
 fn require_regular_file(path: &Path, description: &str) -> Result<()> {
@@ -171,7 +158,6 @@ pub(crate) struct ProgramInfo {
 #[serde(rename_all = "snake_case")]
 pub(crate) enum PassStatus {
     Ok,
-    SkippedMissingStates,
     FailedBpfopt,
     FailedRejit,
 }
@@ -189,13 +175,6 @@ pub(crate) struct PassDetail {
 struct RejitReport {
     verifier_states: kernel_sys::VerifierStatesJson,
 }
-
-#[derive(Clone, Debug, Deserialize)]
-#[rustfmt::skip] struct PassMetadata { canonical_name: String, needs_target: bool, needs_verifier_states: bool, produces_verifier_states: bool, needs_map_values: bool, kinsns_used: Vec<KinsnMetadata> }
-
-#[derive(Clone, Debug, Deserialize)]
-#[rustfmt::skip] struct KinsnMetadata { json_name: String, probe_aliases: Vec<String> }
-type PassMetadataMap = HashMap<String, PassMetadata>;
 
 fn rejit_program(
     prog_id: u32,
@@ -243,7 +222,6 @@ fn c_log_string(buf: &[u8]) -> String {
     String::from_utf8_lossy(&buf[..end]).trim_end().to_string()
 }
 
-type ProgInfoJson = bpf::ProgramInfo;
 type MapInfoJson = bpf::MapInfo;
 
 #[derive(Debug, Serialize)]
@@ -415,258 +393,64 @@ where
     }))
 }
 
-pub(crate) fn try_apply_programs(
-    prog_ids: &[u32],
-    config: &CliConfig,
-    enabled_passes: &[String],
-) -> Result<Vec<ApplyProgramOutcome>> {
-    let config = config.clone();
-    let passes = enabled_passes.to_vec();
+/// One program plan: the prog_id to operate on plus a sequence of bash step
+/// templates. An empty `steps` list means the runner deliberately skipped this
+/// program — daemon performs no work and returns a status-`ok` result with no
+/// step details.
+#[derive(Clone, Debug)]
+pub(crate) struct ProgramPlan {
+    pub prog_id: u32,
+    pub steps: Vec<String>,
+}
 
-    try_apply_programs_with(prog_ids, default_worker_count(), |prog_id| {
-        try_apply_one(prog_id, &config, &passes)
+pub(crate) fn try_execute_plan(
+    plans: &[ProgramPlan],
+    kinsn_probes: &[bpf::KinsnProbeTarget],
+) -> Result<Vec<ApplyProgramOutcome>> {
+    if plans.is_empty() {
+        return Ok(Vec::new());
+    }
+    let prog_ids: Vec<u32> = plans.iter().map(|plan| plan.prog_id).collect();
+    let plans_by_id: HashMap<u32, Vec<String>> = plans
+        .iter()
+        .map(|plan| (plan.prog_id, plan.steps.clone()))
+        .collect();
+    let kinsn_probes = kinsn_probes.to_vec();
+
+    try_apply_programs_with(&prog_ids, default_worker_count(), |prog_id| {
+        let steps = plans_by_id.get(&prog_id).cloned().unwrap_or_default();
+        execute_one(prog_id, &steps, &kinsn_probes)
     })
 }
 
-pub(crate) fn try_apply_one(
+fn execute_one(
     prog_id: u32,
-    config: &CliConfig,
-    enabled_passes: &[String],
+    steps: &[String],
+    kinsn_probes: &[bpf::KinsnProbeTarget],
 ) -> Result<OptimizeOneResult> {
-    if enabled_passes.is_empty() {
-        bail!("no enabled_passes provided by runner");
+    if steps.is_empty() {
+        return Ok(skipped_program_result(prog_id));
     }
-    let pass_list = enabled_passes
-        .iter()
-        .map(|pass| pass.trim().to_string())
-        .collect::<Vec<_>>();
-    if pass_list.iter().any(|pass| pass.is_empty()) {
-        bail!("enabled_passes entries must not be blank");
+
+    // Validate every step template references only known vars before we touch
+    // the kernel. Bad templates fail-fast without snapshotting bytecode.
+    for (idx, step) in steps.iter().enumerate() {
+        validate_step_template(step)
+            .map_err(|err| anyhow!("programs[].steps[{idx}] invalid template: {err}"))?;
     }
-    let pass_catalog = pass_metadata_map(config)?;
-    let wants_map_values = pass_list.iter().try_fold(false, |any, pass| {
-        Ok::<_, anyhow::Error>(any || pass_metadata(pass_catalog, pass)?.needs_map_values)
-    })?;
-    let needs_target_json = pass_list.iter().try_fold(false, |any, pass| {
-        Ok::<_, anyhow::Error>(any || pass_metadata(pass_catalog, pass)?.needs_target)
-    })?;
-    let kinsn_probe_targets = if needs_target_json {
-        kinsn_probe_targets_for_passes(pass_catalog, &pass_list)?
-    } else {
-        Vec::new()
-    };
-    let workdir = WorkDir::new("bpfrejit-daemon-optimize")?;
-    let prog_bin = workdir.path().join("prog.bin");
-    let target_json = workdir.path().join("target.json");
-    let verifier_states_json = workdir.path().join(VERIFIER_STATES_FILE);
-    let map_values_json = workdir.path().join(MAP_VALUES_FILE);
-    let mut open_map_fd = bpf::bpf_map_get_fd_by_id;
-    let mut lookup_map_value = live_bpf_map_lookup;
-    let mut scan_map_keys = live_bpf_map_keys;
 
-    let result = (|| -> Result<OptimizeOneResult> {
-        let mut snapshot = bpf::snapshot_program(prog_id)
-            .with_context(|| format!("snapshot live BPF program {prog_id}"))?;
-        bpf::canonicalize_map_refs_to_idx(&mut snapshot.insns, None, &snapshot.info.map_ids)
-            .with_context(|| format!("canonicalize map references for prog {prog_id}"))?;
-        let prog_info = snapshot.info.clone();
-        let orig_bytes = bpf::encode_insns(&snapshot.insns);
-        fs::write(&prog_bin, &orig_bytes)
-            .with_context(|| format!("write {}", prog_bin.display()))?;
-        let orig_insn_count = insn_count_from_bytes(&orig_bytes, "prog.bin")?;
+    let referenced = collect_referenced_vars(steps);
+    let workdir = WorkDir::new("bpfrejit-daemon-plan")?;
 
-        if wants_map_values {
-            write_live_map_values(
-                &snapshot.maps,
-                &map_values_json,
-                &mut open_map_fd,
-                &mut lookup_map_value,
-                &mut scan_map_keys,
-            )
-            .with_context(|| format!("build live map value snapshot for prog {prog_id}"))?;
-        }
-
-        let mut probed_kinsns: HashMap<String, TargetKinsnJson> = HashMap::new();
-        if needs_target_json {
-            let mut probed = bpf::probe_target_json(&kinsn_probe_targets).with_context(|| {
-                format!(
-                    "probe target kinsns failed for requested passes {}",
-                    join_pass_csv(&pass_list)
-                )
-            })?;
-            shift_target_module_call_offsets_for_map_prefix(
-                &mut probed,
-                snapshot.info.map_ids.len(),
-            )
-            .with_context(|| format!("shift target module call_offsets for prog {prog_id}"))?;
-            // Keep kinsns in memory for fd_array construction; also write to file
-            // so bpfopt CLI can read it.
-            for (name, kinsn) in &probed.kinsns {
-                probed_kinsns.insert(
-                    name.clone(),
-                    TargetKinsnJson {
-                        btf_func_id: kinsn.btf_func_id,
-                        btf_id: kinsn.btf_id,
-                        call_offset: kinsn.call_offset,
-                    },
-                );
-            }
-            write_json_file(&target_json, &probed)?;
-        }
-        let fd_array =
-            build_rejit_fd_array(&snapshot.info.map_ids, &probed_kinsns, &mut open_map_fd)
-                .with_context(|| format!("build fd_array for prog {prog_id}"))?;
-
-        let map_ids = if wants_map_values {
-            Some(if prog_info.map_ids.is_empty() {
-                "0".to_string()
-            } else {
-                join_u32_csv(&prog_info.map_ids)
-            })
-        } else {
-            None
-        };
-
-        let mut current_bytes = orig_bytes.clone();
-        let mut verifier_states_ready = false;
-        let reports = run_pass_chain(&pass_list, |idx, pass| -> Result<PassDetail> {
-            let stem = pass_file_stem(idx, pass);
-            let pass_input = workdir.path().join(format!("{stem}.in.bin"));
-            let pass_output = workdir.path().join(format!("{stem}.out.bin"));
-            let pass_report = workdir.path().join(format!("{stem}.report.json"));
-            let pass_verifier_log = workdir.path().join(format!("{stem}.verifier.log"));
-            fs::write(&pass_input, &current_bytes)
-                .with_context(|| format!("write {}", pass_input.display()))?;
-
-            let pass_meta = pass_metadata(pass_catalog, pass)?;
-            let needs_states = pass_meta.needs_verifier_states;
-            if needs_states && !verifier_states_ready {
-                return Ok(pass_detail(
-                    pass,
-                    PassStatus::SkippedMissingStates,
-                    Some(format!(
-                        "pass {pass} requires verifier states from a previous per-pass ReJIT — insert a `noop` pass before {pass} in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,{pass},...\")"
-                    )),
-                    None,
-                ));
-            }
-            let target_arg = pass_meta.needs_target.then_some(target_json.as_path());
-            let verifier_states_arg = needs_states.then_some(verifier_states_json.as_path());
-            let needs_map_values = pass_meta.needs_map_values;
-            let map_values_arg = needs_map_values.then_some(map_values_json.as_path());
-            let map_ids_arg = if needs_map_values {
-                Some(
-                    map_ids
-                        .as_deref()
-                        .ok_or_else(|| anyhow!("pass {pass} needs map ids"))?,
-                )
-            } else {
-                None
-            };
-            let report = match run_bpfopt_pass(
-                config,
-                pass,
-                &prog_info,
-                target_arg,
-                verifier_states_arg,
-                map_values_arg,
-                map_ids_arg,
-                &pass_input,
-                &pass_output,
-                &pass_report,
-            ) {
-                Ok(report) => report,
-                Err(err) => {
-                    return Ok(pass_detail(
-                        pass,
-                        PassStatus::FailedBpfopt,
-                        Some(format!("{err:#}")),
-                        None,
-                    ));
-                }
-            };
-            let pass_bytes = match fs::read(&pass_output) {
-                Ok(bytes) => bytes,
-                Err(err) => {
-                    return Ok(pass_detail(
-                        pass,
-                        PassStatus::FailedBpfopt,
-                        Some(format!("read {}: {err}", pass_output.display())),
-                        None,
-                    ));
-                }
-            };
-            let pass_insns = match decode_insns(&pass_bytes, pass_output.to_string_lossy().as_ref())
-            {
-                Ok(insns) => insns,
-                Err(err) => {
-                    return Ok(pass_detail(
-                        pass,
-                        PassStatus::FailedBpfopt,
-                        Some(format!("{err:#}")),
-                        None,
-                    ));
-                }
-            };
-            let produces_verifier_states = pass_meta.produces_verifier_states;
-            let (log_level, log_buf_size) = if produces_verifier_states {
-                (2, REJIT_VERBOSE_LOG_BUF_SIZE)
-            } else {
-                (1, REJIT_BASIC_LOG_BUF_SIZE)
-            };
-            let rejit_result = rejit_program(
-                prog_id,
-                &pass_insns,
-                &fd_array,
-                &pass_verifier_log,
-                log_level,
-                log_buf_size,
-            );
-            let rejit_report = match rejit_result {
-                Ok(report) => report,
-                Err(err) => {
-                    return Ok(pass_detail(
-                        pass,
-                        PassStatus::FailedRejit,
-                        Some(format!("{err:#}")),
-                        Some(report),
-                    ));
-                }
-            };
-            if produces_verifier_states {
-                write_verifier_states_for_next_pass(&verifier_states_json, &rejit_report)
-                    .with_context(|| format!("write verifier states after pass {pass}"))?;
-            }
-            verifier_states_ready = produces_verifier_states;
-            current_bytes = pass_bytes;
-            Ok(pass_detail(pass, PassStatus::Ok, None, Some(report)))
-        })?;
-        let passes = reports;
-        let final_insn_count = insn_count_from_bytes(&current_bytes, "opt.bin")?;
-        let status = "ok".to_string();
-        Ok(OptimizeOneResult {
-            status,
-            prog_id,
-            program: ProgramInfo {
-                prog_id,
-                prog_name: prog_info.name,
-                prog_type: prog_info.prog_type.numeric,
-                orig_insn_count,
-                final_insn_count,
-            },
-            passes,
-            error_message: None,
-            workdir_tar_b64: None,
-        })
-    })();
+    let result = run_program_steps(prog_id, steps, kinsn_probes, &referenced, &workdir);
 
     match result {
         Ok(mut result) => {
-            let failed_pass = result
+            let any_failed = result
                 .passes
                 .iter()
-                .any(|pass| pass.status != PassStatus::Ok);
-            if result.status != "ok" || failed_pass {
+                .any(|step| step.status != PassStatus::Ok);
+            if result.status != "ok" || any_failed {
                 result.workdir_tar_b64 = Some(tar_workdir(workdir.path())?);
             }
             Ok(result)
@@ -679,100 +463,378 @@ pub(crate) fn try_apply_one(
     }
 }
 
-fn append_bpfopt_context_args(command: &mut Command, prog_info: &ProgInfoJson) {
-    command.arg("--prog-type").arg(&prog_info.prog_type.name);
-}
-
-#[rustfmt::skip] fn pass_metadata_map(config: &CliConfig) -> Result<&'static PassMetadataMap> {
-    match PASS_METADATA.get_or_init(|| load_pass_metadata(config).map_err(|err| format!("load bpfopt pass metadata via list-passes --json: {err:#}"))) {
-        Ok(metadata) => Ok(metadata),
-        Err(message) => bail!("{message}"),
+fn skipped_program_result(prog_id: u32) -> OptimizeOneResult {
+    OptimizeOneResult {
+        status: "ok".to_string(),
+        prog_id,
+        program: ProgramInfo {
+            prog_id,
+            prog_name: String::new(),
+            prog_type: 0,
+            orig_insn_count: 0,
+            final_insn_count: 0,
+        },
+        passes: Vec::new(),
+        error_message: None,
+        workdir_tar_b64: None,
     }
 }
 
-#[rustfmt::skip] fn load_pass_metadata(config: &CliConfig) -> Result<PassMetadataMap> {
-    let mut bpfopt = config.command("bpfopt");
-    bpfopt.arg("list-passes").arg("--json").stdin(Stdio::null());
-    let program = format!("{bpfopt:?}");
-    let output = bpfopt.output().with_context(|| format!("spawn subprocess {program}"))?;
-    if !output.status.success() { let message = subprocess_failure_message("bpfopt list-passes", &program, &output); eprintln!("daemon: {message}"); bail!("{message}"); }
-    let entries: Vec<PassMetadata> = serde_json::from_slice(&output.stdout).with_context(|| format!("parse bpfopt list-passes --json output from {program}"))?;
-    if entries.is_empty() { bail!("bpfopt list-passes --json returned no passes"); }
-    let count = entries.len();
-    let metadata = entries.into_iter().map(|entry| (entry.canonical_name.clone(), entry)).collect::<PassMetadataMap>();
-    if metadata.len() != count || metadata.contains_key("") { bail!("bpfopt list-passes --json returned duplicate or blank pass names"); }
-    Ok(metadata)
+fn run_program_steps(
+    prog_id: u32,
+    steps: &[String],
+    kinsn_probes: &[bpf::KinsnProbeTarget],
+    referenced: &HashSet<String>,
+    workdir: &WorkDir,
+) -> Result<OptimizeOneResult> {
+    let mut snapshot = bpf::snapshot_program(prog_id)
+        .with_context(|| format!("snapshot live BPF program {prog_id}"))?;
+    bpf::canonicalize_map_refs_to_idx(&mut snapshot.insns, None, &snapshot.info.map_ids)
+        .with_context(|| format!("canonicalize map references for prog {prog_id}"))?;
+    let prog_info = snapshot.info.clone();
+    let orig_bytes = bpf::encode_insns(&snapshot.insns);
+    let orig_insn_count = insn_count_from_bytes(&orig_bytes, "snapshot")?;
+
+    let initial_input_path = workdir.path().join("input_step0.bin");
+    fs::write(&initial_input_path, &orig_bytes)
+        .with_context(|| format!("write {}", initial_input_path.display()))?;
+
+    let target_path = workdir.path().join("target.json");
+    let map_values_path = workdir.path().join("map-values.json");
+    let mut probed_kinsns: HashMap<String, TargetKinsnJson> = HashMap::new();
+
+    if referenced.contains(VAR_TARGET) {
+        let mut probed = bpf::probe_target_json(kinsn_probes)
+            .with_context(|| format!("probe target kinsns for prog {prog_id}"))?;
+        shift_target_module_call_offsets_for_map_prefix(&mut probed, snapshot.info.map_ids.len())
+            .with_context(|| format!("shift target module call_offsets for prog {prog_id}"))?;
+        for (name, kinsn) in &probed.kinsns {
+            probed_kinsns.insert(
+                name.clone(),
+                TargetKinsnJson {
+                    btf_func_id: kinsn.btf_func_id,
+                    btf_id: kinsn.btf_id,
+                    call_offset: kinsn.call_offset,
+                },
+            );
+        }
+        write_json_file(&target_path, &probed)?;
+    }
+
+    if referenced.contains(VAR_MAP_VALUES) {
+        let mut open_map_fd = bpf::bpf_map_get_fd_by_id;
+        let mut lookup_map_value = live_bpf_map_lookup;
+        let mut scan_map_keys = live_bpf_map_keys;
+        write_live_map_values(
+            &snapshot.maps,
+            &map_values_path,
+            &mut open_map_fd,
+            &mut lookup_map_value,
+            &mut scan_map_keys,
+        )
+        .with_context(|| format!("build live map value snapshot for prog {prog_id}"))?;
+    }
+
+    let mut open_map_fd = bpf::bpf_map_get_fd_by_id;
+    let fd_array = build_rejit_fd_array(&snapshot.info.map_ids, &probed_kinsns, &mut open_map_fd)
+        .with_context(|| format!("build fd_array for prog {prog_id}"))?;
+
+    let map_ids_csv = if prog_info.map_ids.is_empty() {
+        "0".to_string()
+    } else {
+        join_u32_csv(&prog_info.map_ids)
+    };
+
+    // Initial empty verifier states placeholder; bpfopt passes that need real
+    // states must run after at least one earlier ReJIT in the same plan.
+    let initial_states_path = workdir.path().join("verifier_states_initial.json");
+    write_json_file(
+        &initial_states_path,
+        &kernel_sys::VerifierStatesJson { insns: Vec::new() },
+    )?;
+
+    let mut input_path = initial_input_path.clone();
+    let mut verifier_states_path = initial_states_path;
+    let mut current_bytes = orig_bytes.clone();
+    let mut step_details: Vec<PassDetail> = Vec::with_capacity(steps.len());
+
+    for (idx, step_template) in steps.iter().enumerate() {
+        let step_name = format!("step_{idx}");
+        let output_path = workdir.path().join(format!("output_step{idx}.bin"));
+        let report_path = workdir.path().join(format!("report_step{idx}.json"));
+        let verifier_log_path = workdir.path().join(format!("verifier_log_step{idx}.log"));
+        let next_states_path = workdir
+            .path()
+            .join(format!("verifier_states_step{idx}.json"));
+
+        let vars = step_vars(
+            prog_id,
+            workdir.path(),
+            &input_path,
+            &output_path,
+            &target_path,
+            &verifier_states_path,
+            &map_values_path,
+            &map_ids_csv,
+            &prog_info.prog_type.name,
+            &report_path,
+        );
+
+        let cmd = match substitute_vars(step_template, &vars) {
+            Ok(cmd) => cmd,
+            Err(err) => {
+                step_details.push(pass_detail(
+                    &step_name,
+                    PassStatus::FailedBpfopt,
+                    Some(format!("substitute vars in step {idx}: {err}")),
+                    None,
+                ));
+                break;
+            }
+        };
+
+        let exit_status = match Command::new("sh").arg("-c").arg(&cmd).status() {
+            Ok(status) => status,
+            Err(err) => {
+                step_details.push(pass_detail(
+                    &step_name,
+                    PassStatus::FailedBpfopt,
+                    Some(format!("spawn sh for step {idx}: {err}")),
+                    None,
+                ));
+                break;
+            }
+        };
+
+        let bpfopt_summary = if report_path.exists() {
+            read_json_file::<Value>(&report_path, "step report").unwrap_or(Value::Null)
+        } else {
+            Value::Null
+        };
+
+        if !exit_status.success() {
+            let code = exit_status
+                .code()
+                .map(|c| c.to_string())
+                .unwrap_or_else(|| "signal".to_string());
+            step_details.push(pass_detail(
+                &step_name,
+                PassStatus::FailedBpfopt,
+                Some(format!("step {idx} failed (exit {code}): {cmd}")),
+                Some(bpfopt_summary),
+            ));
+            break;
+        }
+
+        // Step succeeded. If it produced a non-empty bytecode at $OUTPUT,
+        // ReJIT and chain. Otherwise (e.g., bpfprof / `test` / pipeline),
+        // move on with input/states unchanged.
+        let produced_bytecode = match fs::metadata(&output_path) {
+            Ok(meta) => meta.len() > 0,
+            Err(err) if err.kind() == std::io::ErrorKind::NotFound => false,
+            Err(err) => {
+                step_details.push(pass_detail(
+                    &step_name,
+                    PassStatus::FailedBpfopt,
+                    Some(format!("stat {}: {err}", output_path.display())),
+                    Some(bpfopt_summary),
+                ));
+                break;
+            }
+        };
+
+        if !produced_bytecode {
+            step_details.push(pass_detail(
+                &step_name,
+                PassStatus::Ok,
+                None,
+                Some(bpfopt_summary),
+            ));
+            continue;
+        }
+
+        let pass_bytes = match fs::read(&output_path) {
+            Ok(bytes) => bytes,
+            Err(err) => {
+                step_details.push(pass_detail(
+                    &step_name,
+                    PassStatus::FailedBpfopt,
+                    Some(format!("read {}: {err}", output_path.display())),
+                    Some(bpfopt_summary),
+                ));
+                break;
+            }
+        };
+
+        let pass_insns = match decode_insns(&pass_bytes, output_path.to_string_lossy().as_ref()) {
+            Ok(insns) => insns,
+            Err(err) => {
+                step_details.push(pass_detail(
+                    &step_name,
+                    PassStatus::FailedBpfopt,
+                    Some(format!("{err:#}")),
+                    Some(bpfopt_summary),
+                ));
+                break;
+            }
+        };
+
+        let rejit_report = match rejit_program(
+            prog_id,
+            &pass_insns,
+            &fd_array,
+            &verifier_log_path,
+            /*log_level=*/ 2,
+            REJIT_VERBOSE_LOG_BUF_SIZE,
+        ) {
+            Ok(report) => report,
+            Err(err) => {
+                step_details.push(pass_detail(
+                    &step_name,
+                    PassStatus::FailedRejit,
+                    Some(format!("{err:#}")),
+                    Some(bpfopt_summary),
+                ));
+                break;
+            }
+        };
+
+        write_json_file(&next_states_path, &rejit_report.verifier_states)
+            .with_context(|| format!("write verifier states after step {idx}"))?;
+        require_nonempty_file(&next_states_path, "verifier states")?;
+
+        verifier_states_path = next_states_path;
+        input_path = output_path;
+        current_bytes = pass_bytes;
+
+        step_details.push(pass_detail(
+            &step_name,
+            PassStatus::Ok,
+            None,
+            Some(bpfopt_summary),
+        ));
+    }
+
+    let final_insn_count = insn_count_from_bytes(&current_bytes, "final")?;
+    let any_failed = step_details
+        .iter()
+        .any(|step| step.status != PassStatus::Ok);
+    let status = if any_failed { "error" } else { "ok" }.to_string();
+    let error_message = if any_failed {
+        let combined = step_details
+            .iter()
+            .filter_map(|step| step.error.clone())
+            .collect::<Vec<_>>()
+            .join("; ");
+        Some(combined)
+    } else {
+        None
+    };
+
+    Ok(OptimizeOneResult {
+        status,
+        prog_id,
+        program: ProgramInfo {
+            prog_id,
+            prog_name: prog_info.name,
+            prog_type: prog_info.prog_type.numeric,
+            orig_insn_count,
+            final_insn_count,
+        },
+        passes: step_details,
+        error_message,
+        workdir_tar_b64: None,
+    })
 }
 
-#[rustfmt::skip] fn pass_metadata<'a>(metadata: &'a PassMetadataMap, pass: &str) -> Result<&'a PassMetadata> {
-    metadata.get(pass).ok_or_else(|| anyhow!("bpfopt list-passes --json did not report requested pass {pass}"))
+#[allow(clippy::too_many_arguments)]
+fn step_vars(
+    prog_id: u32,
+    workdir: &Path,
+    input_path: &Path,
+    output_path: &Path,
+    target_path: &Path,
+    verifier_states_path: &Path,
+    map_values_path: &Path,
+    map_ids_csv: &str,
+    prog_type_name: &str,
+    report_path: &Path,
+) -> HashMap<&'static str, String> {
+    HashMap::from([
+        (VAR_PROG_ID, prog_id.to_string()),
+        (VAR_WORKDIR, workdir.display().to_string()),
+        (VAR_INPUT, input_path.display().to_string()),
+        (VAR_OUTPUT, output_path.display().to_string()),
+        (VAR_TARGET, target_path.display().to_string()),
+        (
+            VAR_VERIFIER_STATES,
+            verifier_states_path.display().to_string(),
+        ),
+        (VAR_MAP_VALUES, map_values_path.display().to_string()),
+        (VAR_MAP_IDS, map_ids_csv.to_string()),
+        (VAR_PROG_TYPE, prog_type_name.to_string()),
+        (VAR_REPORT, report_path.display().to_string()),
+    ])
 }
 
-#[rustfmt::skip] fn kinsn_probe_targets_for_passes(metadata: &PassMetadataMap, passes: &[String]) -> Result<Vec<bpf::KinsnProbeTarget>> {
-    let mut targets = BTreeMap::<String, BTreeSet<String>>::new();
-    for pass in passes {
-        let pass_metadata = pass_metadata(metadata, pass)?;
-        if pass_metadata.needs_target && pass_metadata.kinsns_used.is_empty() { bail!("pass {pass} requires --target but declares no kinsns_used metadata"); }
-        for kinsn in &pass_metadata.kinsns_used { targets.entry(kinsn.json_name.clone()).or_default().extend(kinsn.probe_aliases.iter().cloned()); }
+/// Replace `${VAR}` placeholders in `template` with looked-up values.
+///
+/// Supports only the daemon-known set in [`ALL_VARS`]. Unknown vars and
+/// unterminated `${` are errors. `$VAR` (no braces) and `$$` are left alone
+/// so steps can still use shell positional/process expansions like `$(cmd)`.
+fn substitute_vars(
+    template: &str,
+    vars: &HashMap<&'static str, String>,
+) -> std::result::Result<String, String> {
+    let mut out = String::with_capacity(template.len());
+    let mut chars = template.char_indices().peekable();
+    while let Some((i, ch)) = chars.next() {
+        if ch != '$' {
+            out.push(ch);
+            continue;
+        }
+        match chars.peek() {
+            Some(&(_, '{')) => {
+                chars.next();
+                let mut name = String::new();
+                let mut closed = false;
+                for (_, c) in chars.by_ref() {
+                    if c == '}' {
+                        closed = true;
+                        break;
+                    }
+                    name.push(c);
+                }
+                if !closed {
+                    return Err(format!("unterminated ${{ at byte {i}"));
+                }
+                let value = vars
+                    .get(name.as_str())
+                    .ok_or_else(|| format!("unknown var ${{{name}}}"))?;
+                out.push_str(value);
+            }
+            _ => out.push('$'),
+        }
     }
-    Ok(targets.into_iter().map(|(json_name, aliases)| bpf::KinsnProbeTarget { json_name, probe_names: aliases.into_iter().collect() }).collect())
+    Ok(out)
 }
 
-fn pass_file_stem(index: usize, pass: &str) -> String {
-    format!("pass-{index:02}-{pass}")
+fn collect_referenced_vars(steps: &[String]) -> HashSet<String> {
+    let mut refs = HashSet::new();
+    for step in steps {
+        for var in ALL_VARS {
+            if step.contains(&format!("${{{var}}}")) {
+                refs.insert((*var).to_string());
+            }
+        }
+    }
+    refs
 }
 
-fn run_pass_chain<F>(pass_list: &[String], mut run_pass: F) -> Result<Vec<PassDetail>>
-where
-    F: FnMut(usize, &str) -> Result<PassDetail>,
-{
-    let mut reports = Vec::with_capacity(pass_list.len());
-    for (idx, pass) in pass_list.iter().enumerate() {
-        reports.push(run_pass(idx, pass)?);
-    }
-    Ok(reports)
-}
-
-fn run_bpfopt_pass(
-    config: &CliConfig,
-    pass: &str,
-    prog_info: &ProgInfoJson,
-    target: Option<&Path>,
-    verifier_states: Option<&Path>,
-    map_values: Option<&Path>,
-    map_ids: Option<&str>,
-    input: &Path,
-    output: &Path,
-    report: &Path,
-) -> Result<Value> {
-    let mut bpfopt = config.command("bpfopt");
-    bpfopt.arg("--pass").arg(pass).arg("--report").arg(report);
-    append_bpfopt_context_args(&mut bpfopt, prog_info);
-    if let Some(target) = target {
-        bpfopt.arg("--target").arg(target);
-    }
-    if let Some(verifier_states) = verifier_states {
-        bpfopt.arg("--verifier-states").arg(verifier_states);
-    }
-    if let Some(map_values) = map_values {
-        bpfopt.arg("--map-values").arg(map_values);
-    }
-    if let Some(map_ids) = map_ids {
-        bpfopt.arg("--map-ids").arg(map_ids);
-    }
-    run_stage_with_file_io("bpfopt pass", &mut bpfopt, input, output)
-        .with_context(|| format!("bpfopt pass {pass} failed"))?;
-    read_json_file(report, "bpfopt pass report")
-        .with_context(|| format!("read bpfopt report for pass {pass}"))
-}
-
-fn write_verifier_states_for_next_pass(path: &Path, report: &RejitReport) -> Result<()> {
-    if path.exists() {
-        fs::remove_file(path).with_context(|| format!("remove stale {}", path.display()))?;
-    }
-    write_json_file(path, &report.verifier_states)?;
-    require_nonempty_file(path, "verifier states")?;
-    Ok(())
+fn validate_step_template(step: &str) -> std::result::Result<(), String> {
+    let dummy: HashMap<&'static str, String> =
+        ALL_VARS.iter().map(|v| (*v, String::new())).collect();
+    substitute_vars(step, &dummy).map(|_| ())
 }
 
 fn pass_detail(
@@ -1050,15 +1112,6 @@ fn module_fd_array_base(map_count: usize) -> Result<u32> {
     Ok(map_count.max(1))
 }
 
-fn join_pass_csv(passes: &[String]) -> String {
-    passes
-        .iter()
-        .map(|pass| pass.trim())
-        .filter(|pass| !pass.is_empty())
-        .collect::<Vec<_>>()
-        .join(",")
-}
-
 fn join_u32_csv(values: &[u32]) -> String {
     values
         .iter()
@@ -1104,114 +1157,6 @@ fn write_json_file<T: Serialize>(path: &Path, value: &T) -> Result<()> {
     writeln!(file)?;
     file.flush()?;
     Ok(())
-}
-
-fn run_stage_with_file_io(
-    stage: &str,
-    command: &mut Command,
-    input: &Path,
-    output: &Path,
-) -> Result<()> {
-    let program = format!("{command:?}");
-    let input_file = fs::File::open(input).with_context(|| format!("open {}", input.display()))?;
-    let output_file =
-        fs::File::create(output).with_context(|| format!("create {}", output.display()))?;
-    let child_output = command
-        .stdin(Stdio::from(input_file))
-        .stdout(Stdio::from(output_file))
-        .stderr(Stdio::piped())
-        .spawn()
-        .with_context(|| format!("spawn subprocess {program}"))?;
-    let child_output = wait_with_timeout(stage, &program, child_output)?;
-    if !child_output.status.success() {
-        let message = subprocess_failure_message(stage, &program, &child_output);
-        eprintln!("daemon: {message}");
-        bail!("{message}");
-    }
-    Ok(())
-}
-
-fn wait_with_timeout(
-    stage: &str,
-    program: &str,
-    child: std::process::Child,
-) -> Result<std::process::Output> {
-    let timeout = match stage {
-        "bpfopt pass" => OPTIMIZE_CLI_STAGE_TIMEOUT,
-        _ => DEFAULT_CLI_STAGE_TIMEOUT,
-    };
-    wait_with_timeout_for(stage, program, child, timeout, CLI_STAGE_POLL_INTERVAL)
-}
-
-fn wait_with_timeout_for(
-    stage: &str,
-    program: &str,
-    mut child: std::process::Child,
-    timeout: Duration,
-    poll_interval: Duration,
-) -> Result<std::process::Output> {
-    let start = Instant::now();
-    loop {
-        if child
-            .try_wait()
-            .with_context(|| format!("poll subprocess {program}"))?
-            .is_some()
-        {
-            return child
-                .wait_with_output()
-                .with_context(|| format!("collect subprocess {program}"));
-        }
-        if start.elapsed() >= timeout {
-            kill_and_reap_timed_out_child(program, child)?;
-            let millis = timeout.as_millis();
-            let timeout_label = if millis < 1_000 {
-                format!("{millis}ms")
-            } else {
-                format!("{}s", timeout.as_secs())
-            };
-            bail!("{stage} timed out after {timeout_label}: killed subprocess {program}");
-        }
-        thread::sleep(poll_interval);
-    }
-}
-
-fn kill_and_reap_timed_out_child(program: &str, mut child: std::process::Child) -> Result<()> {
-    match child.kill() {
-        Ok(()) => {}
-        Err(err) if err.kind() == std::io::ErrorKind::InvalidInput => {}
-        Err(err) => {
-            return Err(err).with_context(|| format!("kill timed-out subprocess {program}"))
-        }
-    }
-    let program = program.to_string();
-    thread::spawn(move || {
-        if let Err(err) = child.wait() {
-            eprintln!("daemon: failed to reap timed-out subprocess {program}: {err}");
-        }
-    });
-    Ok(())
-}
-
-fn subprocess_failure_message(stage: &str, program: &str, output: &std::process::Output) -> String {
-    let returncode = output
-        .status
-        .code()
-        .map(|code| code.to_string())
-        .unwrap_or_else(|| "signal".to_string());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let mut text = stderr.trim().to_string();
-    if text.is_empty() {
-        text = stdout.trim().to_string();
-    }
-    if text.is_empty() {
-        text = "<no subprocess output>".to_string();
-    }
-    let output_summary = text.lines().take(20).collect::<Vec<_>>().join("\n");
-    format!(
-        "{stage} failed (returncode {returncode}, status {}): subprocess {program}: {output_summary}",
-        output.status
-    )
 }
 
 #[cfg(test)]
@@ -1414,7 +1359,7 @@ mod tests {
     #[test]
     fn live_map_values_snapshot_writes_values_and_lookup_misses() {
         let workdir = WorkDir::new("bpfrejit-daemon-map-values").unwrap();
-        let output = workdir.path().join(MAP_VALUES_FILE);
+        let output = workdir.path().join("map-values.json");
         let maps = vec![
             MapInfoJson {
                 map_id: 111,
