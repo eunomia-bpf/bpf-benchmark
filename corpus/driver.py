@@ -953,7 +953,14 @@ def main(argv: list[str] | None = None) -> int:
                 indent=2,
             )
         )
-        return 0 if payload_status == "ok" else 1
+        # Per-app failures (verifier reject after rewrite, EBUSY tail-calls,
+        # transient stats-sample errors) are recorded in result.json for
+        # analysis; they should not fail the make target. Only fail when
+        # the suite never started (fatal_error) or every app failed.
+        all_apps_failed = bool(payload.get("results")) and all(
+            str(r.get("status") or "error") != "ok" for r in payload.get("results", [])
+        )
+        return 1 if (fatal_error or all_apps_failed) else 0
     except Exception as exc:
         exc_message = str(exc)
         _finalize_partial(

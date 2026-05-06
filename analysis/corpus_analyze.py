@@ -126,7 +126,7 @@ def collect_app_pass_stats(payload: dict) -> dict:
         for pinfo in per_prog.values():
             for ps in pinfo.get("passes", []):
                 sm = ps.get("bpfopt_summary") or {}
-                pn = ps.get("pass") or sm.get("pass") or "?"
+                pn = (ps.get("step") or {}).get("name") or sm.get("pass") or "?"
                 pass_apply[pn] += int(sm.get("sites_applied") or 0)
                 pass_match[pn] += int(sm.get("sites_matched") or 0)
                 pass_skip[pn] += int(sm.get("sites_skipped") or 0)

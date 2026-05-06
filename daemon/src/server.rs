@@ -129,16 +129,11 @@ fn parse_execute_plan(req: &serde_json::Value) -> std::result::Result<ParsedPlan
             Some(value) => {
                 let array = value
                     .as_array()
-                    .ok_or_else(|| format!("programs[{idx}].steps must be a JSON string array"))?;
+                    .ok_or_else(|| format!("programs[{idx}].steps must be a JSON array"))?;
                 let mut steps = Vec::with_capacity(array.len());
                 for (j, entry) in array.iter().enumerate() {
-                    let raw = entry
-                        .as_str()
-                        .ok_or_else(|| format!("programs[{idx}].steps[{j}] must be a string"))?;
-                    if raw.trim().is_empty() {
-                        return Err(format!("programs[{idx}].steps[{j}] must not be blank"));
-                    }
-                    steps.push(raw.to_string());
+                    let step = parse_step_spec(idx, j, entry)?;
+                    steps.push(step);
                 }
                 steps
             }
@@ -151,6 +146,61 @@ fn parse_execute_plan(req: &serde_json::Value) -> std::result::Result<ParsedPlan
     Ok(ParsedPlan {
         plans,
         kinsn_probes,
+    })
+}
+
+fn parse_step_spec(
+    program_idx: usize,
+    step_idx: usize,
+    entry: &serde_json::Value,
+) -> std::result::Result<commands::StepSpec, String> {
+    let obj = entry.as_object().ok_or_else(|| {
+        format!("programs[{program_idx}].steps[{step_idx}] must be a JSON object")
+    })?;
+    let name = obj
+        .get("name")
+        .and_then(|v| v.as_str())
+        .ok_or_else(|| format!("programs[{program_idx}].steps[{step_idx}].name must be a string"))?
+        .trim()
+        .to_string();
+    if name.is_empty() {
+        return Err(format!(
+            "programs[{program_idx}].steps[{step_idx}].name must not be blank"
+        ));
+    }
+    let command = obj
+        .get("command")
+        .and_then(|v| v.as_str())
+        .ok_or_else(|| {
+            format!("programs[{program_idx}].steps[{step_idx}].command must be a string")
+        })?
+        .trim()
+        .to_string();
+    if command.is_empty() {
+        return Err(format!(
+            "programs[{program_idx}].steps[{step_idx}].command must not be blank"
+        ));
+    }
+    let log_level_value = obj
+        .get("log_level")
+        .ok_or_else(|| {
+            format!("programs[{program_idx}].steps[{step_idx}].log_level must be 1 or 2")
+        })?
+        .as_u64()
+        .ok_or_else(|| {
+            format!(
+                "programs[{program_idx}].steps[{step_idx}].log_level must be a positive integer"
+            )
+        })?;
+    if log_level_value != 1 && log_level_value != 2 {
+        return Err(format!(
+            "programs[{program_idx}].steps[{step_idx}].log_level must be 1 or 2 (got {log_level_value})"
+        ));
+    }
+    Ok(commands::StepSpec {
+        name,
+        command,
+        log_level: log_level_value as u32,
     })
 }
 
@@ -398,16 +448,48 @@ mod tests {
     }
 
     #[test]
-    fn parse_execute_plan_rejects_blank_step() {
+    fn parse_execute_plan_rejects_blank_step_command() {
         let err = parse_execute_plan(&serde_json::json!({
             "cmd": "execute_plan",
             "programs": [{
                 "prog_id": 42,
-                "steps": ["bpfopt --pass noop", "   "],
+                "steps": [
+                    {"name": "noop", "command": "bpfopt --pass noop", "log_level": 2},
+                    {"name": "blank", "command": "   ", "log_level": 1},
+                ],
             }],
         }))
         .unwrap_err();
-        assert_eq!(err, "programs[0].steps[1] must not be blank");
+        assert_eq!(err, "programs[0].steps[1].command must not be blank");
+    }
+
+    #[test]
+    fn parse_execute_plan_rejects_invalid_log_level() {
+        let err = parse_execute_plan(&serde_json::json!({
+            "cmd": "execute_plan",
+            "programs": [{
+                "prog_id": 42,
+                "steps": [{"name": "noop", "command": "bpfopt --pass noop", "log_level": 3}],
+            }],
+        }))
+        .unwrap_err();
+        assert!(
+            err.contains("log_level must be 1 or 2 (got 3)"),
+            "err={err}"
+        );
+    }
+
+    #[test]
+    fn parse_execute_plan_rejects_missing_log_level() {
+        let err = parse_execute_plan(&serde_json::json!({
+            "cmd": "execute_plan",
+            "programs": [{
+                "prog_id": 42,
+                "steps": [{"name": "noop", "command": "bpfopt --pass noop"}],
+            }],
+        }))
+        .unwrap_err();
+        assert_eq!(err, "programs[0].steps[0].log_level must be 1 or 2");
     }
 
     #[test]
@@ -437,7 +519,12 @@ mod tests {
     fn parse_execute_plan_parses_kinsn_probes() {
         let parsed = parse_execute_plan(&serde_json::json!({
             "cmd": "execute_plan",
-            "programs": [{"prog_id": 470, "steps": ["bpfopt --pass noop"]}],
+            "programs": [{
+                "prog_id": 470,
+                "steps": [
+                    {"name": "noop", "command": "bpfopt --pass noop", "log_level": 2},
+                ],
+            }],
             "kinsn_probes": [
                 {"name": "bpf_rotate64", "aliases": ["bpf_rotate64"]},
                 {"name": "bpf_select64", "aliases": ["bpf_select64", "bpf_select32"]},
@@ -447,6 +534,8 @@ mod tests {
         assert_eq!(parsed.kinsn_probes.len(), 2);
         assert_eq!(parsed.kinsn_probes[0].json_name, "bpf_rotate64");
         assert_eq!(parsed.kinsn_probes[1].probe_names.len(), 2);
+        assert_eq!(parsed.plans[0].steps[0].name, "noop");
+        assert_eq!(parsed.plans[0].steps[0].log_level, 2);
     }
 
     #[test]

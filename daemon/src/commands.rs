@@ -22,6 +22,7 @@ use crate::bpf;
 
 static NEXT_WORKDIR_ID: AtomicU64 = AtomicU64::new(0);
 const REJIT_VERBOSE_LOG_BUF_SIZE: usize = 16 * 1024 * 1024;
+const REJIT_BASIC_LOG_BUF_SIZE: usize = 1024 * 1024;
 
 /// Variables daemon substitutes inside step templates.
 ///
@@ -164,8 +165,9 @@ pub(crate) enum PassStatus {
 
 #[derive(Clone, Debug, Serialize)]
 pub(crate) struct PassDetail {
-    #[serde(rename = "pass")]
-    pub pass_name: String,
+    /// Echo of the input StepSpec so consumers see {name, command, log_level}
+    /// without any field duplication. `name` doubles as the legacy pass label.
+    pub step: StepSpec,
     pub status: PassStatus,
     pub error: Option<String>,
     pub bpfopt_summary: Value,
@@ -401,14 +403,27 @@ where
     }))
 }
 
-/// One program plan: the prog_id to operate on plus a sequence of bash step
-/// templates. An empty `steps` list means the runner deliberately skipped this
+/// One step in a program plan. `command` is the bash template the daemon
+/// runs through `sh -c`, after substituting `${VAR}` placeholders.
+/// `name` is the human-readable label echoed back inside `step` in the
+/// response so analysis tools see canonical pass names. `log_level` is the
+/// BPF_PROG_REJIT verifier log level used when the step produces a
+/// non-empty `${OUTPUT}` bytecode and triggers a ReJIT.
+#[derive(Clone, Debug, Serialize)]
+pub(crate) struct StepSpec {
+    pub name: String,
+    pub command: String,
+    pub log_level: u32,
+}
+
+/// One program plan: the prog_id to operate on plus a sequence of step
+/// specs. An empty `steps` list means the runner deliberately skipped this
 /// program — daemon performs no work and returns a status-`ok` result with no
 /// step details.
 #[derive(Clone, Debug)]
 pub(crate) struct ProgramPlan {
     pub prog_id: u32,
-    pub steps: Vec<String>,
+    pub steps: Vec<StepSpec>,
 }
 
 pub(crate) fn try_execute_plan(
@@ -419,7 +434,7 @@ pub(crate) fn try_execute_plan(
         return Ok(Vec::new());
     }
     let prog_ids: Vec<u32> = plans.iter().map(|plan| plan.prog_id).collect();
-    let plans_by_id: HashMap<u32, Vec<String>> = plans
+    let plans_by_id: HashMap<u32, Vec<StepSpec>> = plans
         .iter()
         .map(|plan| (plan.prog_id, plan.steps.clone()))
         .collect();
@@ -433,18 +448,18 @@ pub(crate) fn try_execute_plan(
 
 fn execute_one(
     prog_id: u32,
-    steps: &[String],
+    steps: &[StepSpec],
     kinsn_probes: &[bpf::KinsnProbeTarget],
 ) -> Result<OptimizeOneResult> {
     if steps.is_empty() {
         return Ok(skipped_program_result(prog_id));
     }
 
-    // Validate every step template references only known vars before we touch
+    // Validate every step command references only known vars before we touch
     // the kernel. Bad templates fail-fast without snapshotting bytecode.
     for (idx, step) in steps.iter().enumerate() {
-        validate_step_template(step)
-            .map_err(|err| anyhow!("programs[].steps[{idx}] invalid template: {err}"))?;
+        validate_step_template(&step.command)
+            .map_err(|err| anyhow!("programs[].steps[{idx}].command invalid template: {err}"))?;
     }
 
     let referenced = collect_referenced_vars(steps);
@@ -490,7 +505,7 @@ fn skipped_program_result(prog_id: u32) -> OptimizeOneResult {
 
 fn run_program_steps(
     prog_id: u32,
-    steps: &[String],
+    steps: &[StepSpec],
     kinsn_probes: &[bpf::KinsnProbeTarget],
     referenced: &HashSet<String>,
     workdir: &WorkDir,
@@ -564,8 +579,7 @@ fn run_program_steps(
     let mut current_bytes = orig_bytes.clone();
     let mut step_details: Vec<PassDetail> = Vec::with_capacity(steps.len());
 
-    for (idx, step_template) in steps.iter().enumerate() {
-        let step_name = format!("step_{idx}");
+    for (idx, step) in steps.iter().enumerate() {
         let output_path = workdir.path().join(format!("output_step{idx}.bin"));
         let report_path = workdir.path().join(format!("report_step{idx}.json"));
         let verifier_log_path = workdir.path().join(format!("verifier_log_step{idx}.log"));
@@ -586,11 +600,11 @@ fn run_program_steps(
             &report_path,
         );
 
-        let cmd = match substitute_vars(step_template, &vars) {
+        let cmd = match substitute_vars(&step.command, &vars) {
             Ok(cmd) => cmd,
             Err(err) => {
                 step_details.push(pass_detail(
-                    &step_name,
+                    step,
                     PassStatus::FailedBpfopt,
                     Some(format!("substitute vars in step {idx}: {err}")),
                     None,
@@ -599,11 +613,14 @@ fn run_program_steps(
             }
         };
 
-        let exit_status = match Command::new("sh").arg("-c").arg(&cmd).status() {
-            Ok(status) => status,
+        // Capture stdout+stderr so we can attribute bpfopt failures per-step
+        // instead of cross-referencing a global daemon stderr log when many
+        // progs run concurrently.
+        let cmd_output = match Command::new("sh").arg("-c").arg(&cmd).output() {
+            Ok(out) => out,
             Err(err) => {
                 step_details.push(pass_detail(
-                    &step_name,
+                    step,
                     PassStatus::FailedBpfopt,
                     Some(format!("spawn sh for step {idx}: {err}")),
                     None,
@@ -611,6 +628,7 @@ fn run_program_steps(
                 break;
             }
         };
+        let exit_status = cmd_output.status;
 
         // Surface a corrupt or unreadable step report as a step failure
         // rather than silently degrading to null. Steps that legitimately
@@ -621,7 +639,7 @@ fn run_program_steps(
                 Ok(value) => value,
                 Err(err) => {
                     step_details.push(pass_detail(
-                        &step_name,
+                        step,
                         PassStatus::FailedBpfopt,
                         Some(format!(
                             "read step report at {}: {err:#}",
@@ -641,10 +659,27 @@ fn run_program_steps(
                 .code()
                 .map(|c| c.to_string())
                 .unwrap_or_else(|| "signal".to_string());
+            let stderr_text = String::from_utf8_lossy(&cmd_output.stderr)
+                .trim()
+                .to_string();
+            let summary = if stderr_text.is_empty() {
+                String::from_utf8_lossy(&cmd_output.stdout)
+                    .trim()
+                    .to_string()
+            } else {
+                stderr_text
+            };
+            let captured = if summary.is_empty() {
+                "<no subprocess output>".to_string()
+            } else {
+                summary.lines().take(40).collect::<Vec<_>>().join("\n")
+            };
             step_details.push(pass_detail(
-                &step_name,
+                step,
                 PassStatus::FailedBpfopt,
-                Some(format!("step {idx} failed (exit {code}): {cmd}")),
+                Some(format!(
+                    "step {idx} failed (exit {code}): {cmd}\nsubprocess output:\n{captured}"
+                )),
                 Some(bpfopt_summary),
             ));
             break;
@@ -658,7 +693,7 @@ fn run_program_steps(
             Err(err) if err.kind() == std::io::ErrorKind::NotFound => false,
             Err(err) => {
                 step_details.push(pass_detail(
-                    &step_name,
+                    step,
                     PassStatus::FailedBpfopt,
                     Some(format!("stat {}: {err}", output_path.display())),
                     Some(bpfopt_summary),
@@ -669,7 +704,7 @@ fn run_program_steps(
 
         if !produced_bytecode {
             step_details.push(pass_detail(
-                &step_name,
+                step,
                 PassStatus::Ok,
                 None,
                 Some(bpfopt_summary),
@@ -681,7 +716,7 @@ fn run_program_steps(
             Ok(bytes) => bytes,
             Err(err) => {
                 step_details.push(pass_detail(
-                    &step_name,
+                    step,
                     PassStatus::FailedBpfopt,
                     Some(format!("read {}: {err}", output_path.display())),
                     Some(bpfopt_summary),
@@ -694,7 +729,7 @@ fn run_program_steps(
             Ok(insns) => insns,
             Err(err) => {
                 step_details.push(pass_detail(
-                    &step_name,
+                    step,
                     PassStatus::FailedBpfopt,
                     Some(format!("{err:#}")),
                     Some(bpfopt_summary),
@@ -703,18 +738,27 @@ fn run_program_steps(
             }
         };
 
+        // log_level=1 uses a smaller log buffer (no mark_precise traces) for
+        // passes that don't need to chain verifier states downstream. Steps
+        // that require log_level=2 (e.g., a bootstrap noop feeding map_inline)
+        // declare it explicitly in the step spec.
+        let log_buf_size = if step.log_level == 2 {
+            REJIT_VERBOSE_LOG_BUF_SIZE
+        } else {
+            REJIT_BASIC_LOG_BUF_SIZE
+        };
         let rejit_report = match rejit_program(
             prog_id,
             &pass_insns,
             &fd_array,
             &verifier_log_path,
-            /*log_level=*/ 2,
-            REJIT_VERBOSE_LOG_BUF_SIZE,
+            step.log_level,
+            log_buf_size,
         ) {
             Ok(report) => report,
             Err(err) => {
                 step_details.push(pass_detail(
-                    &step_name,
+                    step,
                     PassStatus::FailedRejit,
                     Some(format!("{err:#}")),
                     Some(bpfopt_summary),
@@ -732,7 +776,7 @@ fn run_program_steps(
         current_bytes = pass_bytes;
 
         step_details.push(pass_detail(
-            &step_name,
+            step,
             PassStatus::Ok,
             None,
             Some(bpfopt_summary),
@@ -843,11 +887,11 @@ fn substitute_vars(
     Ok(out)
 }
 
-fn collect_referenced_vars(steps: &[String]) -> HashSet<String> {
+fn collect_referenced_vars(steps: &[StepSpec]) -> HashSet<String> {
     let mut refs = HashSet::new();
     for step in steps {
         for var in ALL_VARS {
-            if step.contains(&format!("${{{var}}}")) {
+            if step.command.contains(&format!("${{{var}}}")) {
                 refs.insert((*var).to_string());
             }
         }
@@ -862,13 +906,13 @@ fn validate_step_template(step: &str) -> std::result::Result<(), String> {
 }
 
 fn pass_detail(
-    pass: &str,
+    step: &StepSpec,
     status: PassStatus,
     error: Option<String>,
     bpfopt_summary: Option<Value>,
 ) -> PassDetail {
     PassDetail {
-        pass_name: pass.to_string(),
+        step: step.clone(),
         status,
         error,
         bpfopt_summary: bpfopt_summary.unwrap_or(Value::Null),

@@ -48,13 +48,19 @@ def load_pass_metadata(bpfopt: str = "bpfopt") -> dict[str, dict[str, Any]]:
 BPFOPT_STEP_TIMEOUT_SECS = 600  # 10 min hard cap per bpfopt invocation; killed by `timeout(1)`
 
 
-def build_step_command(pass_name: str, pass_meta: dict[str, Any]) -> str:
-    """Compose the full `timeout N bpfopt --pass <name> ...` shell command for
-    one pass, using only daemon-substituted `${VAR}` placeholders for paths
-    and inline values. Side-input flags are added only when the pass declares
-    it needs them. The `timeout` prefix kills bpfopt after
-    `BPFOPT_STEP_TIMEOUT_SECS`; daemon sees exit 124 and records it as a
-    FailedBpfopt step, so a hung pass cannot stall the whole request.
+def build_step_spec(pass_name: str, pass_meta: dict[str, Any]) -> dict[str, Any]:
+    """Compose one structured step entry for the daemon `execute_plan` socket
+    call. Each step is `{name, command, log_level}`:
+
+    - `name`: canonical pass name; daemon echoes it back as `pass_name` in
+      the response so analysis tools see real pass names instead of `step_N`.
+    - `command`: full bash template using daemon-substituted `${VAR}`
+      placeholders. The `timeout` prefix kills bpfopt after
+      `BPFOPT_STEP_TIMEOUT_SECS`; daemon sees exit 124 and records it as a
+      FailedBpfopt step, so a hung pass cannot stall the whole request.
+    - `log_level`: BPF_PROG_REJIT verifier log level. Passes that produce
+      verifier states (`noop`, `map_inline`, …) need 2 to capture
+      mark_precise traces; the rest run cheaper at 1 with a 1 MiB log buffer.
     """
     parts = [
         f"timeout {BPFOPT_STEP_TIMEOUT_SECS}",
@@ -72,7 +78,12 @@ def build_step_command(pass_name: str, pass_meta: dict[str, Any]) -> str:
     if bool(pass_meta.get("needs_map_values")):
         parts.append("--map-values ${MAP_VALUES}")
         parts.append("--map-ids ${MAP_IDS}")
-    return " ".join(parts)
+    log_level = 2 if bool(pass_meta.get("produces_verifier_states")) else 1
+    return {
+        "name": pass_name,
+        "command": " ".join(parts),
+        "log_level": log_level,
+    }
 
 
 def build_kinsn_probes(
@@ -124,7 +135,7 @@ def build_execute_plan_payload(
     passes = [str(p).strip() for p in enabled_passes if str(p).strip()]
     if not passes:
         raise ValueError("execute_plan requires at least one pass")
-    steps = [build_step_command(p, pass_metas[p]) for p in passes]
+    steps = [build_step_spec(p, pass_metas[p]) for p in passes]
     return {
         "cmd": "execute_plan",
         "programs": [
