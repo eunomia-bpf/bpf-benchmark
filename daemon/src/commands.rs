@@ -545,16 +545,12 @@ fn run_program_steps(
         join_u32_csv(&prog_info.map_ids)
     };
 
-    // Initial empty verifier states placeholder; bpfopt passes that need real
-    // states must run after at least one earlier ReJIT in the same plan.
-    let initial_states_path = workdir.path().join("verifier_states_initial.json");
-    write_json_file(
-        &initial_states_path,
-        &kernel_sys::VerifierStatesJson { insns: Vec::new() },
-    )?;
-
+    // First step starts with a non-existent verifier states path. Any pass
+    // that requires `--verifier-states` will fail at bpfopt's `fs::read` with
+    // ENOENT, forcing the runner to put a state-producing pass (`noop`) first
+    // in the plan. Daemon does not silently provide an empty placeholder.
     let mut input_path = initial_input_path.clone();
-    let mut verifier_states_path = initial_states_path;
+    let mut verifier_states_path = workdir.path().join("verifier_states_initial.json");
     let mut current_bytes = orig_bytes.clone();
     let mut step_details: Vec<PassDetail> = Vec::with_capacity(steps.len());
 
@@ -606,8 +602,26 @@ fn run_program_steps(
             }
         };
 
+        // Surface a corrupt or unreadable step report as a step failure
+        // rather than silently degrading to null. Steps that legitimately
+        // produce no report (e.g., `bpfprof profile > prof.json`) leave
+        // ${REPORT} absent — that path stays Null.
         let bpfopt_summary = if report_path.exists() {
-            read_json_file::<Value>(&report_path, "step report").unwrap_or(Value::Null)
+            match read_json_file::<Value>(&report_path, "step report") {
+                Ok(value) => value,
+                Err(err) => {
+                    step_details.push(pass_detail(
+                        &step_name,
+                        PassStatus::FailedBpfopt,
+                        Some(format!(
+                            "read step report at {}: {err:#}",
+                            report_path.display()
+                        )),
+                        None,
+                    ));
+                    break;
+                }
+            }
         } else {
             Value::Null
         };
