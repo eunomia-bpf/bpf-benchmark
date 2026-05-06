@@ -353,6 +353,7 @@ _STRESS_NG_WORKLOAD_STRESSORS: Mapping[str, tuple[str, ...]] = {
         *_STRESS_NG_IO_STRESSORS,
         *_STRESS_NG_NETWORK_STRESSORS,
         *_STRESS_NG_MEMORY_STRESSORS,
+        *_STRESS_NG_FILESYSTEM_STRESSORS,
     ),
 }
 

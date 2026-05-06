@@ -2,22 +2,10 @@ schema_version: 2
 suite_name: macro_apps
 
 apps:
-  - bcc/capable
-  - bcc/biosnoop
-  - bcc/vfsstat
-  - bcc/opensnoop
-  - bcc/syscount
-  - bcc/tcpconnect
-  - bcc/tcplife
-  - bcc/runqlat
   - bcc/set
   - otelcol-ebpf-profiler/profiling
   - cilium/agent
   - tetragon/observer
   - katran
   - tracee/monitor
-  - bpftrace/capable
-  - bpftrace/biosnoop
-  - bpftrace/vfsstat
-  - bpftrace/runqlat
-  - bpftrace/tcplife
+  - bpftrace/set

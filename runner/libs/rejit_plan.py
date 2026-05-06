@@ -79,9 +79,22 @@ def build_step_spec(pass_name: str, pass_meta: dict[str, Any]) -> dict[str, Any]
         parts.append("--map-values ${MAP_VALUES}")
         parts.append("--map-ids ${MAP_IDS}")
     log_level = 2 if bool(pass_meta.get("produces_verifier_states")) else 1
+    command = " ".join(parts)
+    # When BPFREJIT_DAEMON_KEEP_ALL_WORKDIRS is set, prefix the step with a cp
+    # dumping the daemon-fed INPUT to the workdir, then force the step to fail
+    # so daemon's failure_artifacts mechanism tarballs the whole workdir (incl.
+    # the captured input) back to the host. Repurposes the existing env var as
+    # an opt-in debug capture trigger.
+    import os as _os
+    if _os.environ.get("BPFREJIT_DAEMON_KEEP_ALL_WORKDIRS", "").strip():
+        command = (
+            "cp ${INPUT} ${WORKDIR}/captured-input-" + pass_name + ".bin && "
+            + command
+            + " && false"
+        )
     return {
         "name": pass_name,
-        "command": " ".join(parts),
+        "command": command,
         "log_level": log_level,
     }
 

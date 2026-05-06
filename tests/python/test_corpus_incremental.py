@@ -102,9 +102,9 @@ class TestWriteIncrementalAppResult(unittest.TestCase):
 
     def test_slash_in_app_name_becomes_double_underscore(self) -> None:
         session = self._session()
-        result = {"app": "bcc/capable", "status": "error", "error": "fail"}
-        driver._write_incremental_app_result(session.run_dir, "bcc/capable", result, apps_done=1, total_apps=2)
-        app_path = session.run_dir / "details" / "apps" / "bcc__capable.json"
+        result = {"app": "bcc/set", "status": "error", "error": "fail"}
+        driver._write_incremental_app_result(session.run_dir, "bcc/set", result, apps_done=1, total_apps=2)
+        app_path = session.run_dir / "details" / "apps" / "bcc__set.json"
         self.assertTrue(app_path.exists(), f"expected {app_path}")
 
     def test_progress_json_updated(self) -> None:
