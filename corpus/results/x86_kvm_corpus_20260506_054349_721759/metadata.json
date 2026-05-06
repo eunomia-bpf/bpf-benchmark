@@ -9,8 +9,9 @@
     ]
   },
   "details_dir": "details",
-  "generated_at": "2026-05-06T05:43:49.725751+00:00",
-  "last_updated_at": "2026-05-06T05:43:49.725747+00:00",
+  "error_message": "name 'fatal_error' is not defined",
+  "generated_at": "2026-05-06T05:45:03.903301+00:00",
+  "last_updated_at": "2026-05-06T05:45:03.903299+00:00",
   "launcher_boot_id": "85c9ad8f-4a1d-423a-befa-46d18c53316c",
   "launcher_pid": 1848,
   "launcher_start_ticks": 10166,
@@ -18,7 +19,7 @@
   "run_type": "x86_kvm_corpus",
   "samples": 1,
   "started_at": "2026-05-06T05:43:49.721759+00:00",
-  "status": "running",
+  "status": "error",
   "suite": "corpus",
   "workload_seconds": 3.0
 }
