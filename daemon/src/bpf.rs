@@ -5,7 +5,7 @@
 //! live program discovery, target probing, map helpers, and bytecode
 //! canonicalization; per-pass `BPF_PROG_REJIT` is still called by commands.rs.
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::os::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 use std::sync::OnceLock;
 
@@ -45,6 +45,13 @@ pub(crate) struct ProgramSnapshot {
     pub(crate) insns: Vec<kernel_sys::bpf_insn>,
 }
 
+#[derive(Clone, Debug)]
+pub(crate) struct LiveProgramBytecode {
+    pub(crate) prog_id: u32,
+    pub(crate) insns: Vec<kernel_sys::bpf_insn>,
+    pub(crate) map_ids: Vec<u32>,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub(crate) struct TargetJson {
     pub(crate) arch: String,
@@ -80,6 +87,61 @@ pub(crate) fn snapshot_program(prog_id: u32) -> Result<ProgramSnapshot> {
         maps,
         insns,
     })
+}
+
+pub(crate) fn live_program_bytecode_snapshots() -> Result<Vec<LiveProgramBytecode>> {
+    let mut snapshots = Vec::new();
+    let mut start_id = 0u32;
+
+    while let Some(prog_id) = kernel_sys::prog_get_next_id(start_id)
+        .with_context(|| format!("enumerate BPF programs after id {start_id}"))?
+    {
+        start_id = prog_id;
+        let Some(fd) = kernel_sys::prog_try_get_fd_by_id(prog_id)
+            .with_context(|| format!("open BPF program id {prog_id} during live enumeration"))?
+        else {
+            continue;
+        };
+        let (info, map_ids) = get_prog_info_with_map_ids_from_fd(fd.as_fd(), prog_id)?;
+        let mut insns = kernel_sys::prog_get_original(fd.as_fd())
+            .with_context(|| format!("read original bytecode for live BPF program id {prog_id}"))?;
+        if insns.is_empty() {
+            bail!("live BPF program id {prog_id} has no original bytecode");
+        }
+        canonicalize_map_refs_to_idx(&mut insns, None, &map_ids).with_context(|| {
+            format!("canonicalize map references for live BPF program id {prog_id}")
+        })?;
+
+        snapshots.push(LiveProgramBytecode {
+            prog_id: info.id,
+            insns,
+            map_ids,
+        });
+    }
+
+    Ok(snapshots)
+}
+
+pub(crate) fn detect_bpf_writable_maps(
+    live_programs: &[LiveProgramBytecode],
+    target_map_ids: &[u32],
+) -> HashSet<u32> {
+    let target_map_ids = target_map_ids.iter().copied().collect::<HashSet<_>>();
+    let mut writable = HashSet::new();
+
+    for program in live_programs {
+        debug_assert_ne!(program.prog_id, 0, "live BPF program IDs are nonzero");
+        if !program
+            .map_ids
+            .iter()
+            .any(|map_id| target_map_ids.contains(map_id))
+        {
+            continue;
+        }
+        scan_program_map_writes(program, &target_map_ids, &mut writable);
+    }
+
+    writable
 }
 
 pub(crate) fn probe_target_json(targets: &[KinsnProbeTarget]) -> Result<TargetJson> {
@@ -480,6 +542,379 @@ fn map_idx_value_pseudo() -> u8 {
     kernel_sys::BPF_PSEUDO_MAP_IDX_VALUE as u8
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum TrackedPtr {
+    Map(u32),
+    UnknownMap,
+    MapValue(u32),
+    UnknownMapValue,
+}
+
+#[derive(Clone, Debug)]
+struct MapWriteScanState {
+    regs: [Option<TrackedPtr>; 11],
+    stack: HashMap<i16, TrackedPtr>,
+}
+
+impl Default for MapWriteScanState {
+    fn default() -> Self {
+        Self {
+            regs: [None; 11],
+            stack: HashMap::new(),
+        }
+    }
+}
+
+fn scan_program_map_writes(
+    program: &LiveProgramBytecode,
+    target_map_ids: &HashSet<u32>,
+    writable: &mut HashSet<u32>,
+) {
+    let mut state = MapWriteScanState::default();
+    let mut pc = 0usize;
+
+    while pc < program.insns.len() {
+        let insn = &program.insns[pc];
+        if is_ldimm64(insn) {
+            if is_map_pseudo(insn.src_reg()) {
+                if pc + 1 >= program.insns.len() {
+                    mark_program_target_maps(program, target_map_ids, writable);
+                    return;
+                }
+                let origin = tracked_ptr_for_map_pseudo(program, insn.src_reg(), insn.imm);
+                set_reg_ptr(&mut state, insn.dst_reg(), origin);
+            } else {
+                clear_reg_ptr(&mut state, insn.dst_reg());
+            }
+            pc += 2;
+            continue;
+        }
+
+        if is_call(insn) {
+            handle_call_for_map_writes(insn, program, target_map_ids, writable, &mut state);
+            pc += 1;
+            continue;
+        }
+
+        if is_mem_store(insn) {
+            handle_mem_store_for_map_writes(insn, program, target_map_ids, writable, &mut state);
+            pc += 1;
+            continue;
+        }
+
+        if is_mem_load(insn) {
+            handle_mem_load_for_map_writes(insn, &mut state);
+            pc += 1;
+            continue;
+        }
+
+        handle_non_memory_reg_effects(insn, &mut state);
+        pc += 1;
+    }
+}
+
+fn tracked_ptr_for_map_pseudo(
+    program: &LiveProgramBytecode,
+    src_reg: u8,
+    imm: i32,
+) -> Option<TrackedPtr> {
+    if src_reg == map_fd_pseudo() {
+        return Some(TrackedPtr::UnknownMap);
+    }
+    if src_reg == map_value_pseudo() {
+        return Some(TrackedPtr::UnknownMapValue);
+    }
+    let Ok(index) = usize::try_from(imm) else {
+        return Some(if src_reg == map_idx_value_pseudo() {
+            TrackedPtr::UnknownMapValue
+        } else {
+            TrackedPtr::UnknownMap
+        });
+    };
+    let Some(&map_id) = program.map_ids.get(index) else {
+        return Some(if src_reg == map_idx_value_pseudo() {
+            TrackedPtr::UnknownMapValue
+        } else {
+            TrackedPtr::UnknownMap
+        });
+    };
+    Some(if src_reg == map_idx_value_pseudo() {
+        TrackedPtr::MapValue(map_id)
+    } else {
+        TrackedPtr::Map(map_id)
+    })
+}
+
+fn handle_call_for_map_writes(
+    insn: &kernel_sys::bpf_insn,
+    program: &LiveProgramBytecode,
+    target_map_ids: &HashSet<u32>,
+    writable: &mut HashSet<u32>,
+    state: &mut MapWriteScanState,
+) {
+    if insn.src_reg() == 0 {
+        let helper_id = insn.imm;
+        if map_writer_helper(helper_id) {
+            mark_ptr_map(state.regs[1], program, target_map_ids, writable);
+        } else if helper_id == kernel_sys::BPF_FUNC_map_lookup_elem as i32
+            || helper_id == kernel_sys::BPF_FUNC_map_lookup_percpu_elem as i32
+        {
+            let value_ptr = match state.regs[1] {
+                Some(TrackedPtr::Map(map_id)) => Some(TrackedPtr::MapValue(map_id)),
+                Some(TrackedPtr::UnknownMap) => Some(TrackedPtr::UnknownMapValue),
+                _ => None,
+            };
+            clear_helper_clobbered_regs(state);
+            state.regs[0] = value_ptr;
+            return;
+        } else if helper_id < 1 || helper_id > kernel_sys::BPF_FUNC_cgrp_storage_delete as i32 {
+            mark_program_target_maps(program, target_map_ids, writable);
+        }
+
+        mark_escaped_value_ptr_args(state, program, target_map_ids, writable);
+        clear_helper_clobbered_regs(state);
+        return;
+    }
+
+    mark_escaped_call_ptr_args(state, program, target_map_ids, writable);
+    clear_helper_clobbered_regs(state);
+}
+
+fn map_writer_helper(helper_id: i32) -> bool {
+    matches!(
+        helper_id,
+        value
+            if value == kernel_sys::BPF_FUNC_map_update_elem as i32
+                || value == kernel_sys::BPF_FUNC_map_delete_elem as i32
+                || value == kernel_sys::BPF_FUNC_for_each_map_elem as i32
+                || value == kernel_sys::BPF_FUNC_map_push_elem as i32
+                || value == kernel_sys::BPF_FUNC_map_pop_elem as i32
+                || value == kernel_sys::BPF_FUNC_map_peek_elem as i32
+    )
+}
+
+fn mark_escaped_value_ptr_args(
+    state: &MapWriteScanState,
+    program: &LiveProgramBytecode,
+    target_map_ids: &HashSet<u32>,
+    writable: &mut HashSet<u32>,
+) {
+    for reg in 1..=5 {
+        if matches!(
+            state.regs[reg],
+            Some(TrackedPtr::MapValue(_) | TrackedPtr::UnknownMapValue)
+        ) {
+            mark_ptr_map(state.regs[reg], program, target_map_ids, writable);
+        }
+    }
+}
+
+fn mark_escaped_call_ptr_args(
+    state: &MapWriteScanState,
+    program: &LiveProgramBytecode,
+    target_map_ids: &HashSet<u32>,
+    writable: &mut HashSet<u32>,
+) {
+    for reg in 1..=5 {
+        if state.regs[reg].is_some() {
+            mark_ptr_map(state.regs[reg], program, target_map_ids, writable);
+        }
+    }
+}
+
+fn handle_mem_store_for_map_writes(
+    insn: &kernel_sys::bpf_insn,
+    program: &LiveProgramBytecode,
+    target_map_ids: &HashSet<u32>,
+    writable: &mut HashSet<u32>,
+    state: &mut MapWriteScanState,
+) {
+    if let Some(origin) = ptr_in_reg(state, insn.dst_reg()) {
+        if matches!(
+            origin,
+            TrackedPtr::MapValue(_) | TrackedPtr::UnknownMapValue
+        ) {
+            mark_ptr_map(Some(origin), program, target_map_ids, writable);
+        }
+    }
+
+    if insn.dst_reg() == kernel_sys::BPF_REG_10 as u8 {
+        kill_stack_aliases(&mut state.stack, insn.off, store_width(insn));
+        if bpf_class(insn.code) == kernel_sys::BPF_STX as u8
+            && bpf_size(insn.code) == kernel_sys::BPF_DW as u8
+        {
+            if let Some(origin) = ptr_in_reg(state, insn.src_reg()) {
+                state.stack.insert(insn.off, origin);
+            }
+        }
+    }
+}
+
+fn handle_mem_load_for_map_writes(insn: &kernel_sys::bpf_insn, state: &mut MapWriteScanState) {
+    let restored = if insn.src_reg() == kernel_sys::BPF_REG_10 as u8
+        && bpf_size(insn.code) == kernel_sys::BPF_DW as u8
+    {
+        state.stack.get(&insn.off).copied()
+    } else {
+        None
+    };
+    set_reg_ptr(state, insn.dst_reg(), restored);
+}
+
+fn handle_non_memory_reg_effects(insn: &kernel_sys::bpf_insn, state: &mut MapWriteScanState) {
+    match bpf_class(insn.code) {
+        value if value == kernel_sys::BPF_ALU as u8 || value == kernel_sys::BPF_ALU64 as u8 => {
+            handle_alu_reg_effect(insn, state);
+        }
+        value if value == kernel_sys::BPF_ST as u8 => {}
+        _ => {
+            if insn_defines_dst_reg(insn) {
+                clear_reg_ptr(state, insn.dst_reg());
+            }
+        }
+    }
+}
+
+fn handle_alu_reg_effect(insn: &kernel_sys::bpf_insn, state: &mut MapWriteScanState) {
+    match (bpf_op(insn.code), bpf_src(insn.code)) {
+        (op, src) if op == kernel_sys::BPF_MOV as u8 && src == kernel_sys::BPF_X as u8 => {
+            set_reg_ptr(state, insn.dst_reg(), ptr_in_reg(state, insn.src_reg()));
+        }
+        (op, _) if op == kernel_sys::BPF_ADD as u8 || op == kernel_sys::BPF_SUB as u8 => {
+            if !matches!(
+                ptr_in_reg(state, insn.dst_reg()),
+                Some(TrackedPtr::MapValue(_) | TrackedPtr::UnknownMapValue)
+            ) {
+                clear_reg_ptr(state, insn.dst_reg());
+            }
+        }
+        _ => clear_reg_ptr(state, insn.dst_reg()),
+    }
+}
+
+fn clear_helper_clobbered_regs(state: &mut MapWriteScanState) {
+    for reg in 0..=5 {
+        state.regs[reg] = None;
+    }
+}
+
+fn set_reg_ptr(state: &mut MapWriteScanState, reg: u8, origin: Option<TrackedPtr>) {
+    if let Some(slot) = state.regs.get_mut(reg as usize) {
+        *slot = origin;
+    }
+}
+
+fn clear_reg_ptr(state: &mut MapWriteScanState, reg: u8) {
+    set_reg_ptr(state, reg, None);
+}
+
+fn ptr_in_reg(state: &MapWriteScanState, reg: u8) -> Option<TrackedPtr> {
+    state.regs.get(reg as usize).copied().flatten()
+}
+
+fn mark_ptr_map(
+    origin: Option<TrackedPtr>,
+    program: &LiveProgramBytecode,
+    target_map_ids: &HashSet<u32>,
+    writable: &mut HashSet<u32>,
+) {
+    match origin {
+        Some(TrackedPtr::Map(map_id) | TrackedPtr::MapValue(map_id)) => {
+            if target_map_ids.contains(&map_id) {
+                writable.insert(map_id);
+            }
+        }
+        Some(TrackedPtr::UnknownMap | TrackedPtr::UnknownMapValue) | None => {
+            mark_program_target_maps(program, target_map_ids, writable);
+        }
+    }
+}
+
+fn mark_program_target_maps(
+    program: &LiveProgramBytecode,
+    target_map_ids: &HashSet<u32>,
+    writable: &mut HashSet<u32>,
+) {
+    writable.extend(
+        program
+            .map_ids
+            .iter()
+            .copied()
+            .filter(|map_id| target_map_ids.contains(map_id)),
+    );
+}
+
+fn kill_stack_aliases(stack: &mut HashMap<i16, TrackedPtr>, off: i16, width: u8) {
+    let start = i32::from(off);
+    let end = start + i32::from(width);
+    stack.retain(|&slot_off, _| {
+        let slot_start = i32::from(slot_off);
+        let slot_end = slot_start + 8;
+        slot_end <= start || slot_start >= end
+    });
+}
+
+fn store_width(insn: &kernel_sys::bpf_insn) -> u8 {
+    size_bytes(bpf_size(insn.code)).unwrap_or(8)
+}
+
+fn size_bytes(size: u8) -> Option<u8> {
+    match size {
+        value if value == kernel_sys::BPF_B as u8 => Some(1),
+        value if value == kernel_sys::BPF_H as u8 => Some(2),
+        value if value == kernel_sys::BPF_W as u8 => Some(4),
+        value if value == kernel_sys::BPF_DW as u8 => Some(8),
+        _ => None,
+    }
+}
+
+fn is_call(insn: &kernel_sys::bpf_insn) -> bool {
+    insn.code == (kernel_sys::BPF_JMP | kernel_sys::BPF_CALL) as u8
+}
+
+fn is_mem_store(insn: &kernel_sys::bpf_insn) -> bool {
+    matches!(
+        bpf_class(insn.code),
+        value if value == kernel_sys::BPF_ST as u8 || value == kernel_sys::BPF_STX as u8
+    ) && bpf_mode(insn.code) == kernel_sys::BPF_MEM as u8
+}
+
+fn is_mem_load(insn: &kernel_sys::bpf_insn) -> bool {
+    bpf_class(insn.code) == kernel_sys::BPF_LDX as u8
+        && bpf_mode(insn.code) == kernel_sys::BPF_MEM as u8
+}
+
+fn insn_defines_dst_reg(insn: &kernel_sys::bpf_insn) -> bool {
+    matches!(
+        bpf_class(insn.code),
+        value
+            if value == kernel_sys::BPF_LD as u8
+                || value == kernel_sys::BPF_LDX as u8
+                || value == kernel_sys::BPF_ALU as u8
+                || value == kernel_sys::BPF_ALU64 as u8
+    )
+}
+
+fn bpf_class(code: u8) -> u8 {
+    code & 0x07
+}
+
+fn bpf_size(code: u8) -> u8 {
+    code & 0x18
+}
+
+fn bpf_mode(code: u8) -> u8 {
+    code & 0xe0
+}
+
+fn bpf_op(code: u8) -> u8 {
+    code & 0xf0
+}
+
+fn bpf_src(code: u8) -> u8 {
+    code & 0x08
+}
+
 pub(crate) type BpfMapInfo = kernel_sys::bpf_map_info;
 
 pub(crate) fn bpf_map_get_info(fd: RawFd) -> Result<BpfMapInfo> {
@@ -778,6 +1213,59 @@ mod tests {
         pair
     }
 
+    fn make_insn(code: u32, dst: u8, src: u8, off: i16, imm: i32) -> kernel_sys::bpf_insn {
+        let mut insn = kernel_sys::bpf_insn {
+            code: code as u8,
+            off,
+            imm,
+            ..Default::default()
+        };
+        insn.set_dst_reg(dst);
+        insn.set_src_reg(src);
+        insn
+    }
+
+    fn call_helper(helper_id: i32) -> kernel_sys::bpf_insn {
+        make_insn(
+            kernel_sys::BPF_JMP | kernel_sys::BPF_CALL,
+            0,
+            0,
+            0,
+            helper_id,
+        )
+    }
+
+    fn stx_mem(size: u32, dst: u8, src: u8, off: i16) -> kernel_sys::bpf_insn {
+        make_insn(
+            kernel_sys::BPF_STX | kernel_sys::BPF_MEM | size,
+            dst,
+            src,
+            off,
+            0,
+        )
+    }
+
+    fn ldx_mem(size: u32, dst: u8, src: u8, off: i16) -> kernel_sys::bpf_insn {
+        make_insn(
+            kernel_sys::BPF_LDX | kernel_sys::BPF_MEM | size,
+            dst,
+            src,
+            off,
+            0,
+        )
+    }
+
+    fn writable_maps_for(insns: Vec<kernel_sys::bpf_insn>, map_ids: Vec<u32>) -> HashSet<u32> {
+        detect_bpf_writable_maps(
+            &[LiveProgramBytecode {
+                prog_id: 7,
+                insns,
+                map_ids,
+            }],
+            &[42],
+        )
+    }
+
     fn decode_fixture_insns(bytes: &[u8]) -> Vec<kernel_sys::bpf_insn> {
         assert_eq!(bytes.len() % 8, 0);
         bytes
@@ -906,5 +1394,53 @@ mod tests {
 
         let err = canonicalize_map_refs_to_idx(&mut insns, None, &[42]).unwrap_err();
         assert!(format!("{err:#}").contains("2 unique loader map fds"));
+    }
+
+    #[test]
+    fn write_detection_marks_helper_update_target_writable() {
+        let mut insns = Vec::new();
+        insns.extend(make_ld_imm64(1, map_idx_pseudo(), 0));
+        insns.push(call_helper(kernel_sys::BPF_FUNC_map_update_elem as i32));
+
+        let writable = writable_maps_for(insns, vec![42]);
+
+        assert_eq!(writable, HashSet::from([42]));
+    }
+
+    #[test]
+    fn write_detection_marks_direct_store_after_lookup_writable() {
+        let mut insns = Vec::new();
+        insns.extend(make_ld_imm64(1, map_idx_pseudo(), 0));
+        insns.push(call_helper(kernel_sys::BPF_FUNC_map_lookup_elem as i32));
+        insns.push(stx_mem(kernel_sys::BPF_W, 0, 2, 0));
+
+        let writable = writable_maps_for(insns, vec![42]);
+
+        assert_eq!(writable, HashSet::from([42]));
+    }
+
+    #[test]
+    fn write_detection_keeps_read_only_lookup_map_unwritable() {
+        let mut insns = Vec::new();
+        insns.extend(make_ld_imm64(1, map_idx_pseudo(), 0));
+        insns.push(call_helper(kernel_sys::BPF_FUNC_map_lookup_elem as i32));
+        insns.push(ldx_mem(kernel_sys::BPF_W, 2, 0, 0));
+
+        let writable = writable_maps_for(insns, vec![42]);
+
+        assert!(writable.is_empty());
+    }
+
+    #[test]
+    fn write_detection_marks_unknown_helper_target_writable() {
+        let mut insns = Vec::new();
+        insns.extend(make_ld_imm64(1, map_idx_pseudo(), 0));
+        insns.push(call_helper(
+            kernel_sys::BPF_FUNC_cgrp_storage_delete as i32 + 1,
+        ));
+
+        let writable = writable_maps_for(insns, vec![42]);
+
+        assert_eq!(writable, HashSet::from([42]));
     }
 }

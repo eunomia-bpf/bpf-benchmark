@@ -239,6 +239,7 @@ struct MapValuesMapJson {
     key_size: u32,
     value_size: u32,
     max_entries: u32,
+    bpf_writable: bool,
     entries_partial: bool,
     entries: Vec<MapValuesEntryJson>,
 }
@@ -565,12 +566,17 @@ fn run_program_steps(
     }
 
     if referenced.contains(VAR_MAP_VALUES) {
+        let live_programs = bpf::live_program_bytecode_snapshots()
+            .context("enumerate live programs for map write detection")?;
+        let bpf_writable_maps =
+            bpf::detect_bpf_writable_maps(&live_programs, &snapshot.info.map_ids);
         let mut open_map_fd = bpf::bpf_map_get_fd_by_id;
         let mut lookup_map_value = live_bpf_map_lookup;
         let mut scan_map_keys = live_bpf_map_keys;
         let mut load_map_info = bpf::bpf_map_info_by_id;
         write_live_map_values(
             &snapshot.maps,
+            &bpf_writable_maps,
             &map_values_path,
             &mut open_map_fd,
             &mut lookup_map_value,
@@ -941,6 +947,7 @@ fn pass_detail(
 
 fn write_live_map_values<F, G, H, I>(
     maps: &[MapInfoJson],
+    bpf_writable_maps: &HashSet<u32>,
     output: &Path,
     open_map_fd: &mut F,
     lookup_map_value: &mut G,
@@ -1031,12 +1038,19 @@ where
                 .cloned()
         })
         .collect::<Result<Vec<_>>>()?;
-    write_map_values_snapshot(&maps, &entries_by_map, &entries_partial_by_map, output)?;
+    write_map_values_snapshot(
+        &maps,
+        bpf_writable_maps,
+        &entries_by_map,
+        &entries_partial_by_map,
+        output,
+    )?;
     Ok(())
 }
 
 fn write_map_values_snapshot(
     maps: &[MapInfoJson],
+    bpf_writable_maps: &HashSet<u32>,
     entries_by_map: &BTreeMap<u32, BTreeMap<Vec<u8>, MapValueSnapshotEntry>>,
     entries_partial_by_map: &BTreeMap<u32, bool>,
     output: &Path,
@@ -1064,6 +1078,7 @@ fn write_map_values_snapshot(
                     key_size: map.key_size,
                     value_size: map.value_size,
                     max_entries: map.max_entries,
+                    bpf_writable: bpf_writable_maps.contains(&map.map_id),
                     entries_partial: entries_partial_by_map
                         .get(&map.map_id)
                         .copied()
@@ -1589,6 +1604,7 @@ mod tests {
 
         write_live_map_values(
             &maps,
+            &HashSet::from([222]),
             &output,
             &mut |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
             &mut |map, _fd, key| {
@@ -1618,8 +1634,10 @@ mod tests {
         let json: serde_json::Value = serde_json::from_slice(&fs::read(output).unwrap()).unwrap();
         assert_eq!(json["maps"][0]["entries"][0]["key"], "01000000");
         assert_eq!(json["maps"][0]["entries"][0]["value"], "07000000");
+        assert_eq!(json["maps"][0]["bpf_writable"], false);
         assert_eq!(json["maps"][1]["entries"][0]["key"], "02000000");
         assert!(json["maps"][1]["entries"][0]["value"].is_null());
+        assert_eq!(json["maps"][1]["bpf_writable"], true);
     }
 
     #[test]
@@ -1671,6 +1689,7 @@ mod tests {
 
         write_live_map_values(
             &maps,
+            &HashSet::from([inner_map_id]),
             &output,
             &mut |_map_id| Ok(std::fs::File::open("/dev/null")?.into()),
             &mut |map, _fd, key| {
@@ -1726,8 +1745,10 @@ mod tests {
             .unwrap();
         assert_eq!(outer["entries"][0]["key"], "07000000");
         assert_eq!(outer["entries"][0]["inner_map_id"], inner_map_id);
+        assert_eq!(outer["bpf_writable"], false);
         assert_eq!(inner["entries"][0]["key"], "02000000");
         assert_eq!(inner["entries"][0]["value"], "63000000");
+        assert_eq!(inner["bpf_writable"], true);
     }
 
     #[test]
