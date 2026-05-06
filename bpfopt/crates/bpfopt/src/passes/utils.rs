@@ -302,7 +302,16 @@ fn kinsn_proof_len(
         "bpf_rotate64",
         registry.rotate64_btf_id,
     ) {
-        return rotate_proof_len(payload);
+        return rotate_proof_len(payload, 63);
+    }
+    if kinsn_call_matches(
+        registry,
+        btf_id,
+        call_off,
+        "bpf_rotate32",
+        registry.rotate32_btf_id,
+    ) {
+        return rotate_proof_len(payload, 31);
     }
     if kinsn_call_matches(
         registry,
@@ -424,10 +433,10 @@ fn validate_bpf_reg(label: &str, reg: u8) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn rotate_proof_len(payload: u64) -> anyhow::Result<usize> {
+fn rotate_proof_len(payload: u64, shift_mask: u8) -> anyhow::Result<usize> {
     let dst_reg = payload_reg(payload, 0);
     let src_reg = payload_reg(payload, 4);
-    let shift = payload_u8(payload, 8) & 63;
+    let shift = payload_u8(payload, 8) & shift_mask;
     let tmp_reg = payload_reg(payload, 16);
 
     validate_bpf_reg("rotate dst", dst_reg)?;

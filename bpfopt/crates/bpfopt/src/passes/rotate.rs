@@ -7,11 +7,12 @@ use crate::pass::*;
 
 use super::utils::{
     emit_packed_kinsn_call_with_off, fixup_all_branches, kinsn_replacement_subprog_skip_reason,
-    map_replacement_range, remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_pass,
+    map_replacement_range, remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_target,
 };
 
 /// ROTATE optimization pass: replaces shift+OR rotate patterns with
-/// bpf_rotate64() kfunc calls. JIT inlines the kfunc as a native rotate.
+/// bpf_rotate64()/bpf_rotate32() kfunc calls. JIT inlines each kfunc as a
+/// native rotate.
 pub struct RotatePass;
 
 impl BpfPass for RotatePass {
@@ -29,13 +30,13 @@ impl BpfPass for RotatePass {
         analyses: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        // Prerequisite: check if bpf_rotate64 kfunc is available.
-        if ctx.kinsn_registry.rotate64_btf_id < 0 {
+        // Prerequisite: check if at least one rotate kfunc is available.
+        if ctx.kinsn_registry.rotate64_btf_id < 0 && ctx.kinsn_registry.rotate32_btf_id < 0 {
             return Ok(PassResult::skipped(
                 self.name(),
                 SkipReason {
                     pc: 0,
-                    reason: "bpf_rotate64 kfunc not available".into(),
+                    reason: "rotate kfuncs not available".into(),
                 },
             ));
         }
@@ -48,7 +49,6 @@ impl BpfPass for RotatePass {
         let sites = scan_rotate_sites(&program.insns);
         let mut safe_sites: Vec<SafeRotateSite> = Vec::new();
         let mut skipped = Vec::new();
-        let btf_id = ctx.kinsn_registry.rotate64_btf_id;
 
         for site in sites {
             // Safety check 1: interior branch target.
@@ -71,6 +71,18 @@ impl BpfPass for RotatePass {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
                     reason,
+                });
+                continue;
+            }
+
+            if ctx
+                .kinsn_registry
+                .btf_id_for_target_name(site.width.target_name())
+                < 0
+            {
+                skipped.push(SkipReason {
+                    pc: site.start_pc,
+                    reason: format!("{} kfunc not available", site.width.target_name()),
                 });
                 continue;
             }
@@ -104,8 +116,6 @@ impl BpfPass for RotatePass {
             });
         }
 
-        let kfunc_off = resolve_kinsn_call_off_for_pass(ctx, self.name())?;
-
         // Build replacement instruction stream.
         let orig_len = program.insns.len();
         let mut new_insns = Vec::with_capacity(orig_len);
@@ -121,7 +131,11 @@ impl BpfPass for RotatePass {
             if site_idx < safe_sites.len() && pc == safe_sites[site_idx].site.start_pc {
                 let safe_site = &safe_sites[site_idx];
                 let site = &safe_site.site;
-                // Emit: bpf_rotate64(val_reg, shift_amount) -> dst_reg
+                let btf_id = ctx
+                    .kinsn_registry
+                    .btf_id_for_target_name(site.width.target_name());
+                let kfunc_off = resolve_kinsn_call_off_for_target(ctx, site.width.target_name())?;
+                // Emit: bpf_rotate{32,64}(val_reg, shift_amount) -> dst_reg
                 let payload = (site.dst_reg as u64)
                     | ((site.val_reg as u64) << 4)
                     | ((site.shift_amount as u64) << 8)
@@ -172,11 +186,41 @@ struct RotateSite {
     val_reg: u8,
     tmp_reg: u8,
     shift_amount: u32,
+    width: RotateWidth,
 }
 
 /// A rotate site that has passed safety checks, ready for transformation.
 struct SafeRotateSite {
     site: RotateSite,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum RotateWidth {
+    W32,
+    W64,
+}
+
+impl RotateWidth {
+    fn bits(self) -> u32 {
+        match self {
+            Self::W32 => 32,
+            Self::W64 => 64,
+        }
+    }
+
+    fn alu_class(self) -> u8 {
+        match self {
+            Self::W32 => BPF_ALU,
+            Self::W64 => BPF_ALU64,
+        }
+    }
+
+    fn target_name(self) -> &'static str {
+        match self {
+            Self::W32 => "bpf_rotate32",
+            Self::W64 => "bpf_rotate64",
+        }
+    }
 }
 
 fn scan_rotate_sites(insns: &[BpfInsn]) -> Vec<RotateSite> {
@@ -205,15 +249,26 @@ fn scan_rotate_sites(insns: &[BpfInsn]) -> Vec<RotateSite> {
 /// instruction immediately preceding the shift pair. If arbitrary instructions
 /// are allowed between the MOV and the rotate idiom, rewriting the whole
 /// window into sidecar+call would silently drop those side effects.
-fn find_provenance_mov(insns: &[BpfInsn], shift_pc: usize, tmp: u8, dst: u8) -> Option<usize> {
+fn find_provenance_mov(
+    insns: &[BpfInsn],
+    shift_pc: usize,
+    tmp: u8,
+    dst: u8,
+    width: RotateWidth,
+) -> Option<usize> {
     if shift_pc == 0 {
         return None;
     }
 
     let mov_pc = shift_pc - 1;
     let insn = &insns[mov_pc];
-    (insn.code == (BPF_ALU64 | BPF_MOV | BPF_X) && insn.dst_reg() == tmp && insn.src_reg() == dst)
-        .then_some(mov_pc)
+    if insn.dst_reg() != tmp || insn.src_reg() != dst {
+        return None;
+    }
+
+    let mov64 = insn.code == (BPF_ALU64 | BPF_MOV | BPF_X);
+    let mov32 = insn.code == (BPF_ALU | BPF_MOV | BPF_X);
+    (mov64 || (width == RotateWidth::W32 && mov32)).then_some(mov_pc)
 }
 
 fn try_match_rotate(
@@ -223,25 +278,38 @@ fn try_match_rotate(
     i2: &BpfInsn,
     pc: usize,
 ) -> Option<RotateSite> {
-    let is_or = i2.code == (BPF_ALU64 | BPF_OR | BPF_X);
+    try_match_rotate_width(insns, i0, i1, i2, pc, RotateWidth::W64)
+        .or_else(|| try_match_rotate_width(insns, i0, i1, i2, pc, RotateWidth::W32))
+}
+
+fn try_match_rotate_width(
+    insns: &[BpfInsn],
+    i0: &BpfInsn,
+    i1: &BpfInsn,
+    i2: &BpfInsn,
+    pc: usize,
+    width: RotateWidth,
+) -> Option<RotateSite> {
+    let alu_class = width.alu_class();
+    let is_or = i2.code == (alu_class | BPF_OR | BPF_X);
     if !is_or {
         return None;
     }
 
-    // Pattern A: RSH64_IMM(rA, S_rsh) ; LSH64_IMM(rB, S_lsh) ; OR64_REG(or_dst, or_src)
-    // where S_rsh + S_lsh = 64.
+    // Pattern A: RSH_IMM(rA, S_rsh) ; LSH_IMM(rB, S_lsh) ; OR_REG(or_dst, or_src)
+    // where S_rsh + S_lsh equals the operation width.
     //
     // The two registers rA, rB hold copies of the same original value.
     // One was copied from the other via `MOV tmp, orig` before the shifts.
     // Either register could be the original or the copy — we try both.
-    let is_rsh = i0.code == (BPF_ALU64 | BPF_RSH | BPF_K);
-    let is_lsh = i1.code == (BPF_ALU64 | BPF_LSH | BPF_K);
+    let is_rsh = i0.code == (alu_class | BPF_RSH | BPF_K);
+    let is_lsh = i1.code == (alu_class | BPF_LSH | BPF_K);
 
     if is_rsh && is_lsh {
         let rsh_amount = i0.imm as u32;
         let lsh_amount = i1.imm as u32;
 
-        if rsh_amount + lsh_amount == 64 {
+        if rsh_amount + lsh_amount == width.bits() {
             let rsh_reg = i0.dst_reg();
             let lsh_reg = i1.dst_reg();
             if rsh_reg != lsh_reg {
@@ -256,7 +324,7 @@ fn try_match_rotate(
                     // Try both provenance directions:
                     // Case 1: rsh_reg is the copy (tmp), lsh_reg is the original (dst)
                     //   => MOV rsh_reg, lsh_reg
-                    if let Some(mov_pc) = find_provenance_mov(insns, pc, rsh_reg, lsh_reg) {
+                    if let Some(mov_pc) = find_provenance_mov(insns, pc, rsh_reg, lsh_reg, width) {
                         return rotate_site(
                             mov_pc,
                             (pc + 3) - mov_pc,
@@ -264,11 +332,12 @@ fn try_match_rotate(
                             lsh_reg,
                             rsh_reg,
                             lsh_amount,
+                            width,
                         );
                     }
                     // Case 2: lsh_reg is the copy (tmp), rsh_reg is the original (dst)
                     //   => MOV lsh_reg, rsh_reg
-                    if let Some(mov_pc) = find_provenance_mov(insns, pc, lsh_reg, rsh_reg) {
+                    if let Some(mov_pc) = find_provenance_mov(insns, pc, lsh_reg, rsh_reg, width) {
                         return rotate_site(
                             mov_pc,
                             (pc + 3) - mov_pc,
@@ -276,6 +345,7 @@ fn try_match_rotate(
                             rsh_reg,
                             lsh_reg,
                             lsh_amount,
+                            width,
                         );
                     }
                 }
@@ -283,15 +353,15 @@ fn try_match_rotate(
         }
     }
 
-    // Pattern B: LSH64_IMM(rA, S_lsh) ; RSH64_IMM(rB, S_rsh) ; OR64_REG(or_dst, or_src)
-    let is_lsh_first = i0.code == (BPF_ALU64 | BPF_LSH | BPF_K);
-    let is_rsh_second = i1.code == (BPF_ALU64 | BPF_RSH | BPF_K);
+    // Pattern B: LSH_IMM(rA, S_lsh) ; RSH_IMM(rB, S_rsh) ; OR_REG(or_dst, or_src)
+    let is_lsh_first = i0.code == (alu_class | BPF_LSH | BPF_K);
+    let is_rsh_second = i1.code == (alu_class | BPF_RSH | BPF_K);
 
     if is_lsh_first && is_rsh_second {
         let lsh_amount = i0.imm as u32;
         let rsh_amount = i1.imm as u32;
 
-        if lsh_amount + rsh_amount == 64 {
+        if lsh_amount + rsh_amount == width.bits() {
             let lsh_reg = i0.dst_reg();
             let rsh_reg = i1.dst_reg();
             if lsh_reg != rsh_reg {
@@ -303,7 +373,7 @@ fn try_match_rotate(
                 if or_uses_both {
                     let result_reg = or_dst;
                     // Try both provenance directions:
-                    if let Some(mov_pc) = find_provenance_mov(insns, pc, rsh_reg, lsh_reg) {
+                    if let Some(mov_pc) = find_provenance_mov(insns, pc, rsh_reg, lsh_reg, width) {
                         return rotate_site(
                             mov_pc,
                             (pc + 3) - mov_pc,
@@ -311,9 +381,10 @@ fn try_match_rotate(
                             lsh_reg,
                             rsh_reg,
                             lsh_amount,
+                            width,
                         );
                     }
-                    if let Some(mov_pc) = find_provenance_mov(insns, pc, lsh_reg, rsh_reg) {
+                    if let Some(mov_pc) = find_provenance_mov(insns, pc, lsh_reg, rsh_reg, width) {
                         return rotate_site(
                             mov_pc,
                             (pc + 3) - mov_pc,
@@ -321,6 +392,7 @@ fn try_match_rotate(
                             rsh_reg,
                             lsh_reg,
                             lsh_amount,
+                            width,
                         );
                     }
                 }
@@ -338,6 +410,7 @@ fn rotate_site(
     val_reg: u8,
     tmp_reg: u8,
     shift_amount: u32,
+    width: RotateWidth,
 ) -> Option<RotateSite> {
     // The packed rotate kinsn uses tmp_reg as verifier proof scratch. It cannot
     // encode sites where the original OR writes the result into that same temp.
@@ -348,6 +421,7 @@ fn rotate_site(
         val_reg,
         tmp_reg,
         shift_amount,
+        width,
     })
 }
 
@@ -361,9 +435,33 @@ mod tests {
         BpfProgram::new(insns)
     }
 
+    fn mov32_reg(dst: u8, src: u8) -> BpfInsn {
+        BpfInsn::new(
+            BPF_ALU | BPF_MOV | BPF_X,
+            BpfInsn::make_regs(dst, src),
+            0,
+            0,
+        )
+    }
+
+    fn alu32_imm(op: u8, dst: u8, imm: i32) -> BpfInsn {
+        BpfInsn::new(BPF_ALU | op | BPF_K, BpfInsn::make_regs(dst, 0), 0, imm)
+    }
+
+    fn alu32_reg(op: u8, dst: u8, src: u8) -> BpfInsn {
+        BpfInsn::new(BPF_ALU | op | BPF_X, BpfInsn::make_regs(dst, src), 0, 0)
+    }
+
     fn ctx_with_rotate_kfunc(btf_id: i32) -> PassContext {
         let mut ctx = PassContext::test_default();
         ctx.kinsn_registry.rotate64_btf_id = btf_id;
+        ctx.platform.has_rorx = true;
+        ctx
+    }
+
+    fn ctx_with_rotate32_kfunc(btf_id: i32) -> PassContext {
+        let mut ctx = PassContext::test_default();
+        ctx.kinsn_registry.rotate32_btf_id = btf_id;
         ctx.platform.has_rorx = true;
         ctx
     }
@@ -384,6 +482,7 @@ mod tests {
         assert_eq!(sites[0].shift_amount, 8);
         assert_eq!(sites[0].dst_reg, 2);
         assert_eq!(sites[0].tmp_reg, 3);
+        assert_eq!(sites[0].width, RotateWidth::W64);
     }
 
     #[test]
@@ -397,6 +496,52 @@ mod tests {
         let sites = scan_rotate_sites(&insns);
         assert_eq!(sites.len(), 1);
         assert_eq!(sites[0].shift_amount, 16);
+        assert_eq!(sites[0].width, RotateWidth::W64);
+    }
+
+    #[test]
+    fn test_rotate32_pass_pattern_a_match() {
+        let insns = vec![
+            mov32_reg(3, 2),
+            alu32_imm(BPF_RSH, 2, 24),
+            alu32_imm(BPF_LSH, 3, 8),
+            alu32_reg(BPF_OR, 2, 3),
+        ];
+
+        let sites = scan_rotate_sites(&insns);
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].shift_amount, 8);
+        assert_eq!(sites[0].dst_reg, 2);
+        assert_eq!(sites[0].val_reg, 2);
+        assert_eq!(sites[0].tmp_reg, 3);
+        assert_eq!(sites[0].width, RotateWidth::W32);
+    }
+
+    #[test]
+    fn test_rotate32_pass_pattern_b_match() {
+        let insns = vec![
+            mov32_reg(3, 2),
+            alu32_imm(BPF_LSH, 2, 7),
+            alu32_imm(BPF_RSH, 3, 25),
+            alu32_reg(BPF_OR, 2, 3),
+        ];
+
+        let sites = scan_rotate_sites(&insns);
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].shift_amount, 7);
+        assert_eq!(sites[0].width, RotateWidth::W32);
+    }
+
+    #[test]
+    fn test_rotate32_pass_no_match_wrong_sum() {
+        let insns = vec![
+            mov32_reg(3, 2),
+            alu32_imm(BPF_RSH, 2, 20),
+            alu32_imm(BPF_LSH, 3, 8),
+            alu32_reg(BPF_OR, 2, 3),
+        ];
+
+        assert!(scan_rotate_sites(&insns).is_empty());
     }
 
     #[test]
@@ -526,6 +671,29 @@ mod tests {
     }
 
     #[test]
+    fn test_rotate32_pass_emit_kfunc_call() {
+        let mut prog = make_program(vec![
+            mov32_reg(3, 2),
+            alu32_imm(BPF_RSH, 2, 24),
+            alu32_imm(BPF_LSH, 3, 8),
+            alu32_reg(BPF_OR, 2, 3),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = ctx_with_rotate32_kfunc(8888);
+
+        let pass = RotatePass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+        assert_eq!(result.sites_applied, 1);
+        let call_insn = prog
+            .insns
+            .iter()
+            .find(|i| i.is_call() && i.src_reg() == BPF_PSEUDO_KINSN_CALL)
+            .unwrap();
+        assert_eq!(call_insn.imm, 8888);
+    }
+
+    #[test]
     fn test_rotate_pass_skip_when_kfunc_unavailable() {
         let mut prog = make_program(vec![
             BpfInsn::mov64_reg(3, 2),
@@ -541,9 +709,7 @@ mod tests {
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert_eq!(result.sites_applied, 0);
         assert!(!result.sites_skipped.is_empty());
-        assert!(result.sites_skipped[0]
-            .reason
-            .contains("kfunc not available"));
+        assert!(result.sites_skipped[0].reason.contains("kfunc"));
     }
 
     #[test]

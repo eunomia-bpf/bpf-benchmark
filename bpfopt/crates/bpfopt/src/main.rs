@@ -53,6 +53,8 @@ const PASS_ALIASES: &[(&str, &str)] = &[
 const KINSN_ALIASES: &[(&str, &str)] = &[
     ("bpf_rotate64", "bpf_rotate64"),
     ("rotate64", "bpf_rotate64"),
+    ("bpf_rotate32", "bpf_rotate32"),
+    ("rotate32", "bpf_rotate32"),
     ("bpf_select64", "bpf_select64"),
     ("select64", "bpf_select64"),
     ("bpf_ccmp64", "bpf_ccmp64"),
@@ -431,7 +433,7 @@ fn validate_required_side_inputs(common: &CommonArgs, pass_names: &[&str]) -> Re
 fn validate_required_kinsns(ctx: &PassContext, pass_names: &[&str]) -> Result<()> {
     for &pass_name in pass_names {
         match pass_name {
-            "rotate" => require_kinsn(ctx, "bpf_rotate64")?,
+            "rotate" => require_all_kinsns(ctx, &["bpf_rotate64", "bpf_rotate32"], "rotate")?,
             "cond_select" => require_kinsn(ctx, "bpf_select64")?,
             "ccmp" if ctx.platform.arch == Arch::Aarch64 => require_kinsn(ctx, "bpf_ccmp64")?,
             "extract" => require_kinsn(ctx, "bpf_extract64")?,
@@ -765,6 +767,7 @@ fn kinsn_registry_from_target(target: &TargetJson) -> Result<KinsnRegistry> {
 fn unavailable_kinsn_registry() -> KinsnRegistry {
     KinsnRegistry {
         rotate64_btf_id: -1,
+        rotate32_btf_id: -1,
         select64_btf_id: -1,
         ccmp64_btf_id: -1,
         extract64_btf_id: -1,
@@ -809,6 +812,7 @@ fn canonicalize_kinsn_name(input: &str) -> Result<&'static str> {
 fn set_kinsn_btf_id(registry: &mut KinsnRegistry, name: &str, btf_id: i32) {
     match name {
         "bpf_rotate64" => registry.rotate64_btf_id = btf_id,
+        "bpf_rotate32" => registry.rotate32_btf_id = btf_id,
         "bpf_select64" => registry.select64_btf_id = btf_id,
         "bpf_ccmp64" => registry.ccmp64_btf_id = btf_id,
         "bpf_extract64" => registry.extract64_btf_id = btf_id,
@@ -1241,6 +1245,13 @@ mod tests {
             features: vec!["cmov".to_string(), "movbe".to_string()],
             kinsns: HashMap::from([
                 (
+                    "rotate32".to_string(),
+                    KinsnJson {
+                        btf_func_id: 10,
+                        call_offset: 1,
+                    },
+                ),
+                (
                     "bpf_bulk_memcpy".to_string(),
                     KinsnJson {
                         btf_func_id: 11,
@@ -1272,10 +1283,12 @@ mod tests {
         };
 
         let registry = kinsn_registry_from_target(&target).unwrap();
+        assert_eq!(registry.rotate32_btf_id, 10);
         assert_eq!(registry.memcpy_bulk_btf_id, 11);
         assert_eq!(registry.endian_load64_btf_id, 12);
         assert_eq!(registry.ccmp64_btf_id, 13);
         assert_eq!(registry.prefetch_btf_id, 14);
+        assert_eq!(registry.call_off_for_target_name("bpf_rotate32"), 1);
         assert_eq!(registry.call_off_for_target_name("bpf_memcpy_bulk"), 2);
         assert_eq!(registry.call_off_for_target_name("bpf_prefetch"), 7);
     }

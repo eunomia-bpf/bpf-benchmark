@@ -614,6 +614,7 @@ pub struct PassContext {
 #[derive(Clone, Debug, Default)]
 pub struct KinsnRegistry {
     pub rotate64_btf_id: i32,
+    pub rotate32_btf_id: i32,
     pub select64_btf_id: i32,
     pub ccmp64_btf_id: i32,
     pub extract64_btf_id: i32,
@@ -643,6 +644,7 @@ impl KinsnRegistry {
     pub fn btf_id_for_target_name(&self, target_name: &str) -> i32 {
         match target_name {
             "bpf_rotate64" => self.rotate64_btf_id,
+            "bpf_rotate32" => self.rotate32_btf_id,
             "bpf_select64" => self.select64_btf_id,
             "bpf_ccmp64" => self.ccmp64_btf_id,
             "bpf_extract64" => self.extract64_btf_id,
@@ -960,6 +962,7 @@ impl PassContext {
         Self {
             kinsn_registry: KinsnRegistry {
                 rotate64_btf_id: -1,
+                rotate32_btf_id: -1,
                 select64_btf_id: -1,
                 ccmp64_btf_id: -1,
                 extract64_btf_id: -1,

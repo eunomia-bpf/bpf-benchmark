@@ -414,7 +414,7 @@ fn explicit_kinsn_pass_fails_when_target_lacks_kinsn() {
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(
-        stderr.contains("kinsn 'bpf_rotate64' not in target"),
+        stderr.contains("rotate requires target kinsns: bpf_rotate64, bpf_rotate32"),
         "stderr={stderr}"
     );
     assert!(output.stdout.is_empty());
