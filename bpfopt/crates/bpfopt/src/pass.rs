@@ -120,6 +120,9 @@ pub struct BpfProgram {
     pub map_inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
     /// Maps whose key scan reached `max_entries` before the kernel reported EOF.
     pub map_entries_partial: HashSet<u32>,
+    /// Per-map BPF-side mutability from map-values.json. Missing entries are
+    /// treated as writable, so only explicit `false` unlocks value-stability.
+    pub map_bpf_writable: HashMap<u32, bool>,
     /// Pre-loaded map metadata: map_id -> MapMetadata.
     /// Used by offline snapshot callers and unit tests.
     pub map_metadata: HashMap<u32, MapMetadata>,
@@ -311,6 +314,7 @@ impl BpfProgram {
             map_value_nulls: HashSet::new(),
             map_inner_map_ids: HashMap::new(),
             map_entries_partial: HashSet::new(),
+            map_bpf_writable: HashMap::new(),
             map_metadata: HashMap::new(),
             map_provider: Arc::new(SnapshotMapProvider),
         }
@@ -322,6 +326,10 @@ impl BpfProgram {
 
     pub fn has_partial_map_entries_snapshot(&self, map_id: u32) -> bool {
         self.map_entries_partial.contains(&map_id)
+    }
+
+    pub fn bpf_writable_map(&self, map_id: u32) -> bool {
+        self.map_bpf_writable.get(&map_id).copied().unwrap_or(true)
     }
 
     /// Install a map provider for specialized test execution.

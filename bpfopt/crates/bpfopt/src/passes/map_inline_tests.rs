@@ -284,6 +284,20 @@ fn install_hash_map(map_id: u32, value: Vec<u8>) {
     install_map(map_id, 1, 8, values);
 }
 
+fn install_snapshot_values(
+    program: &mut BpfProgram,
+    map_id: u32,
+    values: &HashMap<Vec<u8>, Vec<u8>>,
+    bpf_writable: bool,
+) {
+    for (key, value) in values {
+        program
+            .map_values
+            .insert((map_id, key.clone()), value.clone());
+    }
+    program.map_bpf_writable.insert(map_id, bpf_writable);
+}
+
 fn run_map_inline_pass(program: &mut BpfProgram) -> PipelineResult {
     try_run_map_inline_pass(program).unwrap()
 }
@@ -1192,6 +1206,117 @@ fn map_inline_pass_skips_non_constant_key() {
         .diagnostics
         .iter()
         .any(|diag| diag.contains("key extraction failed")));
+}
+
+#[test]
+fn map_inline_runtime_key_readonly_small_snapshot_emits_chain() {
+    let map_id = 9601;
+    let mut values = HashMap::new();
+    values.insert(1u32.to_le_bytes().to_vec(), 7u32.to_le_bytes().to_vec());
+    values.insert(2u32.to_le_bytes().to_vec(), 9u32.to_le_bytes().to_vec());
+    install_map(map_id, 1, 8, values.clone());
+
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let mut program = BpfProgram::new(vec![
+        map[0],
+        map[1],
+        BpfInsn::stx_mem(BPF_W, 10, 3, -4),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        jeq_imm(0, 0, 2),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+        BpfInsn::mov64_imm(0, 0),
+        exit_insn(),
+    ]);
+    program.set_map_ids(vec![map_id]);
+    install_snapshot_values(&mut program, map_id, &values, false);
+
+    let result = run_map_inline_pass(&mut program);
+
+    assert_eq!(result.pass_results[0].sites_applied, 1);
+    assert_eq!(result.pass_results[0].map_inline_records.len(), 2);
+    assert!(!program
+        .insns
+        .iter()
+        .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
+    assert!(program
+        .insns
+        .iter()
+        .any(|insn| *insn == BpfInsn::mov32_imm(6, 7)));
+    assert!(program
+        .insns
+        .iter()
+        .any(|insn| *insn == BpfInsn::mov32_imm(6, 9)));
+}
+
+#[test]
+fn map_inline_runtime_key_readonly_large_snapshot_has_no_entry_limit() {
+    let map_id = 9602;
+    let mut values = HashMap::new();
+    for key in 0..80u32 {
+        values.insert(
+            key.to_le_bytes().to_vec(),
+            (key + 100).to_le_bytes().to_vec(),
+        );
+    }
+    install_map(map_id, 1, 128, values.clone());
+
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let mut program = BpfProgram::new(vec![
+        map[0],
+        map[1],
+        BpfInsn::stx_mem(BPF_W, 10, 3, -4),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        jeq_imm(0, 0, 2),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+        BpfInsn::mov64_imm(0, 0),
+        exit_insn(),
+    ]);
+    program.set_map_ids(vec![map_id]);
+    install_snapshot_values(&mut program, map_id, &values, false);
+
+    let result = run_map_inline_pass(&mut program);
+
+    assert_eq!(result.pass_results[0].sites_applied, 1);
+    assert_eq!(result.pass_results[0].map_inline_records.len(), 80);
+    assert!(!program
+        .insns
+        .iter()
+        .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
+}
+
+#[test]
+fn map_inline_runtime_key_ignores_bpf_writable_map() {
+    let map_id = 9603;
+    let mut values = HashMap::new();
+    values.insert(1u32.to_le_bytes().to_vec(), 7u32.to_le_bytes().to_vec());
+    install_map(map_id, 1, 8, values.clone());
+
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let original = vec![
+        map[0],
+        map[1],
+        BpfInsn::stx_mem(BPF_W, 10, 3, -4),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        jeq_imm(0, 0, 2),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+        BpfInsn::mov64_imm(0, 0),
+        exit_insn(),
+    ];
+    let mut program = BpfProgram::new(original.clone());
+    program.set_map_ids(vec![map_id]);
+    install_snapshot_values(&mut program, map_id, &values, true);
+
+    let result = run_map_inline_pass(&mut program);
+
+    assert_eq!(program.insns, original);
+    assert_eq!(result.pass_results[0].sites_applied, 0);
+    assert!(has_non_constant_key_skip(&result));
 }
 
 #[test]

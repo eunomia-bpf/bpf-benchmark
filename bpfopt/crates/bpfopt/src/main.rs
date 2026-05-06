@@ -247,6 +247,7 @@ struct MapSnapshotJson {
     key_size: u32,
     value_size: u32,
     max_entries: u32,
+    bpf_writable: bool,
     #[serde(default)]
     entries_partial: bool,
     #[serde(default)]
@@ -582,6 +583,7 @@ fn attach_program_inputs(program: &mut BpfProgram, common: &CommonArgs) -> Resul
         program.map_value_nulls = snapshot.nulls;
         program.map_inner_map_ids = snapshot.inner_map_ids;
         program.map_entries_partial = snapshot.partial_maps;
+        program.map_bpf_writable = snapshot.bpf_writable;
     }
     program.func_info = read_btf_info_records(
         common.func_info.as_deref(),
@@ -1063,6 +1065,7 @@ struct MapSnapshot {
     nulls: HashSet<(u32, Vec<u8>)>,
     inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
     partial_maps: HashSet<u32>,
+    bpf_writable: HashMap<u32, bool>,
 }
 
 fn read_map_values(path: &Path) -> Result<MapSnapshot> {
@@ -1072,12 +1075,14 @@ fn read_map_values(path: &Path) -> Result<MapSnapshot> {
     let mut nulls = HashSet::new();
     let mut inner_map_ids = HashMap::new();
     let mut partial_maps = HashSet::new();
+    let mut bpf_writable = HashMap::new();
 
     for map in raw.maps {
         let map_type = parse_map_type(&map.map_type)?;
         if map.entries_partial {
             partial_maps.insert(map.map_id);
         }
+        bpf_writable.insert(map.map_id, map.bpf_writable);
         metadata.insert(
             map.map_id,
             MapMetadata {
@@ -1113,6 +1118,7 @@ fn read_map_values(path: &Path) -> Result<MapSnapshot> {
         nulls,
         inner_map_ids,
         partial_maps,
+        bpf_writable,
     })
 }
 
@@ -1367,6 +1373,7 @@ mod tests {
 	                "key_size": 4,
 	                "value_size": 4,
 	                "max_entries": 8,
+	                "bpf_writable": false,
 	                "entries_partial": true,
 	                "entries": [{
                   "key": "01000000",
@@ -1389,6 +1396,7 @@ mod tests {
             snapshot.inner_map_ids[&(90, 1u32.to_le_bytes().to_vec())],
             91
         );
+        assert_eq!(snapshot.bpf_writable[&90], false);
         assert_eq!(
             snapshot.values[&(90, 1u32.to_le_bytes().to_vec())],
             91u32.to_le_bytes().to_vec()

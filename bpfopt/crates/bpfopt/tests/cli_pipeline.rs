@@ -305,7 +305,7 @@ fn invalid_bytecode_length_exits_with_error() {
 fn map_inline_errors_when_snapshot_key_is_absent() {
     let map_values_path = write_temp_file(
         "map-values-absent-key.json",
-        r#"{"maps":[{"map_id":111,"map_type":2,"key_size":4,"value_size":4,"max_entries":8,"entries":[]}]}"#,
+        r#"{"maps":[{"map_id":111,"map_type":2,"key_size":4,"value_size":4,"max_entries":8,"bpf_writable":true,"entries":[]}]}"#,
     );
     let verifier_path = write_temp_file(
         "map-lookup-verifier-states.json",
@@ -346,7 +346,7 @@ fn map_inline_skips_hash_lookup_when_snapshot_value_is_null() {
     let report_path = temp_path("map-inline-hash-null-report.json");
     let map_values_path = write_temp_file(
         "map-values-hash-null.json",
-        r#"{"maps":[{"map_id":111,"map_type":"hash","key_size":4,"value_size":4,"max_entries":8,"entries":[{"key":"01000000","value":null},{"key":"02000000","value":"09000000"}]}]}"#,
+        r#"{"maps":[{"map_id":111,"map_type":"hash","key_size":4,"value_size":4,"max_entries":8,"bpf_writable":true,"entries":[{"key":"01000000","value":null},{"key":"02000000","value":"09000000"}]}]}"#,
     );
     let report_arg = report_path.to_string_lossy().to_string();
     let map_values_arg = map_values_path.to_string_lossy().to_string();

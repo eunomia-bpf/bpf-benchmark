@@ -107,6 +107,12 @@ struct SnapshotMapValue {
     value: Vec<u8>,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct RuntimeMapEntry {
+    key: Vec<u8>,
+    value: Vec<u8>,
+}
+
 type DirectMapValueLoadRewrites = (
     BTreeMap<usize, Vec<BpfInsn>>,
     usize,
@@ -720,7 +726,7 @@ struct SiteRewrite {
     call_pc: usize,
     diagnostic_value: String,
     removed_null_check: bool,
-    map_inline_record: MapInlineRecord,
+    map_inline_records: Vec<MapInlineRecord>,
     skipped_pcs: HashSet<usize>,
     replacements: BTreeMap<usize, Vec<BpfInsn>>,
 }
@@ -945,6 +951,29 @@ fn run_map_inline_round(
                         detail
                     ));
                 }
+                if !program.bpf_writable_map(info.map_id) {
+                    match build_runtime_key_site_rewrite(program, &site, info) {
+                        Ok(Some(rewrite)) => {
+                            log_map_inline_debug(&format!(
+                                "site at PC={}: runtime-key rewrite prepared with {} replacement block(s)",
+                                site.call_pc,
+                                rewrite.replacements.len()
+                            ));
+                            rewrites.push(rewrite);
+                        }
+                        Ok(None) => {
+                            let reason =
+                                "runtime-key inline emitted no replacement bytecode".to_string();
+                            record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
+                        }
+                        Err(err) => {
+                            let reason = site_level_inline_veto_reason(&err)
+                                .unwrap_or_else(|| format!("runtime-key inline failed: {err:#}"));
+                            record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
+                        }
+                    }
+                    continue;
+                }
                 record_skip(
                     &mut skipped,
                     &mut diagnostics,
@@ -1118,7 +1147,7 @@ fn run_map_inline_round(
                 rewrite.call_pc, rewrite.diagnostic_value
             ),
         );
-        map_inline_records.push(rewrite.map_inline_record);
+        map_inline_records.extend(rewrite.map_inline_records);
         skip_pcs.extend(rewrite.skipped_pcs);
         replacements.extend(rewrite.replacements);
         applied += 1;
@@ -1381,14 +1410,255 @@ fn build_site_rewrite(
         call_pc: site.call_pc,
         diagnostic_value: format_inlined_value_diagnostic(&inline_value, &uses.fixed_loads),
         removed_null_check: can_remove_lookup_pattern && removable_null_check_pc.is_some(),
-        map_inline_record: MapInlineRecord {
+        map_inline_records: vec![MapInlineRecord {
             map_id: info.map_id,
             key: encoded_key,
             value: inline_value,
-        },
+        }],
         skipped_pcs,
         replacements,
     }))
+}
+
+fn build_runtime_key_site_rewrite(
+    program: &BpfProgram,
+    site: &MapLookupSite,
+    info: &MapInfo,
+) -> anyhow::Result<Option<SiteRewrite>> {
+    let uses = classify_r0_uses_with_options(&program.insns, site.call_pc, false, false);
+    if uses.null_check_pc.is_none() {
+        return Err(site_level_inline_veto(
+            "runtime_key_requires_immediate_null_check",
+        ));
+    }
+    if uses.fixed_loads.is_empty() {
+        return Err(site_level_inline_veto(
+            "runtime_key_lookup_result_has_no_scalar_loads",
+        ));
+    }
+    if !uses.other_uses.is_empty() {
+        return Err(site_level_inline_veto(runtime_pointer_escape_reason(
+            program, &uses,
+        )));
+    }
+    if !runtime_key_pointer_survives_until_loads(&program.insns, site.call_pc, &uses) {
+        return Err(site_level_inline_veto("runtime_key_location_unresolved"));
+    }
+
+    let entries =
+        collect_runtime_snapshot_entries(program, info).map_err(site_level_inline_veto)?;
+    if entries.is_empty() {
+        return Err(site_level_inline_veto(
+            "runtime_key_snapshot_has_no_concrete_entries",
+        ));
+    }
+
+    let mut replacements = BTreeMap::new();
+    replacements.insert(site.call_pc, emit_runtime_membership_chain(&entries, 0)?);
+
+    let all_values_equal = entries
+        .windows(2)
+        .all(|pair| pair[0].value == pair[1].value);
+    for load in &uses.fixed_loads {
+        let replacement = if all_values_equal {
+            let scalar = read_scalar_from_value(&entries[0].value, load.offset, load.size)
+                .ok_or_else(|| {
+                    site_level_inline_veto(format!(
+                        "runtime_value_load_out_of_bounds pc={} offset={} size={}",
+                        load.pc, load.offset, load.size
+                    ))
+                })?;
+            emit_constant_load(load.dst_reg, scalar, load.size)
+        } else {
+            emit_runtime_value_chain(&entries, load)?
+        };
+        replacements.insert(load.pc, replacement);
+    }
+
+    if replacements.is_empty() {
+        return Ok(None);
+    }
+
+    let diagnostic_value = if all_values_equal {
+        format!(
+            "runtime-key entries={} common_value={}",
+            entries.len(),
+            format_inlined_value_diagnostic(&entries[0].value, &uses.fixed_loads)
+        )
+    } else {
+        format!("runtime-key entries={} value-chain", entries.len())
+    };
+
+    let map_inline_records = entries
+        .iter()
+        .map(|entry| MapInlineRecord {
+            map_id: info.map_id,
+            key: entry.key.clone(),
+            value: entry.value.clone(),
+        })
+        .collect();
+
+    Ok(Some(SiteRewrite {
+        call_pc: site.call_pc,
+        diagnostic_value,
+        removed_null_check: false,
+        map_inline_records,
+        skipped_pcs: HashSet::new(),
+        replacements,
+    }))
+}
+
+fn collect_runtime_snapshot_entries(
+    program: &BpfProgram,
+    info: &MapInfo,
+) -> Result<Vec<RuntimeMapEntry>, String> {
+    let key_size = info.key_size as usize;
+    let mut entries = Vec::new();
+    for ((map_id, key), value) in &program.map_values {
+        if *map_id != info.map_id {
+            continue;
+        }
+        if key.len() != key_size {
+            return Err(format!(
+                "runtime_snapshot_key_size_mismatch map={} key_len={} expected={}",
+                info.map_id,
+                key.len(),
+                key_size
+            ));
+        }
+        let value = prepare_inline_value(info, value)?;
+        entries.push(RuntimeMapEntry {
+            key: key.clone(),
+            value,
+        });
+    }
+    entries.sort_by(|left, right| left.key.cmp(&right.key));
+    Ok(entries)
+}
+
+fn emit_runtime_membership_chain(
+    entries: &[RuntimeMapEntry],
+    result_reg: u8,
+) -> anyhow::Result<Vec<BpfInsn>> {
+    let scratch_reg = 3;
+    let mut insns = vec![BpfInsn::mov64_imm(result_reg, 0)];
+    for entry in entries {
+        emit_key_match_then(entry, scratch_reg, &mut insns, || {
+            vec![BpfInsn::mov64_imm(result_reg, 1)]
+        })?;
+    }
+    Ok(insns)
+}
+
+fn emit_runtime_value_chain(
+    entries: &[RuntimeMapEntry],
+    load: &FixedLoadUse,
+) -> anyhow::Result<Vec<BpfInsn>> {
+    let mut insns = Vec::new();
+    let mut end_jump_pcs = Vec::new();
+    for entry in entries {
+        let scalar =
+            read_scalar_from_value(&entry.value, load.offset, load.size).ok_or_else(|| {
+                site_level_inline_veto(format!(
+                    "runtime_value_load_out_of_bounds pc={} offset={} size={}",
+                    load.pc, load.offset, load.size
+                ))
+            })?;
+        emit_key_match_then(entry, load.dst_reg, &mut insns, || {
+            let mut matched = emit_constant_load(load.dst_reg, scalar, load.size);
+            matched.push(BpfInsn::ja(0));
+            matched
+        })?;
+        end_jump_pcs.push(insns.len() - 1);
+    }
+    insns.extend(emit_constant_load(load.dst_reg, 0, load.size));
+    let end_pc = insns.len();
+    for jump_pc in end_jump_pcs {
+        patch_relative_jump(&mut insns, jump_pc, end_pc)?;
+    }
+    Ok(insns)
+}
+
+fn emit_key_match_then<F>(
+    entry: &RuntimeMapEntry,
+    scratch_reg: u8,
+    insns: &mut Vec<BpfInsn>,
+    emit_matched: F,
+) -> anyhow::Result<()>
+where
+    F: FnOnce() -> Vec<BpfInsn>,
+{
+    let mut mismatch_jump_pcs = Vec::new();
+    for (offset, byte) in entry.key.iter().copied().enumerate() {
+        let off = i16::try_from(offset).map_err(|_| {
+            site_level_inline_veto(format!("runtime_key_offset_exceeds_i16 offset={offset}"))
+        })?;
+        insns.push(BpfInsn::ldx_mem(BPF_B, scratch_reg, 2, off));
+        mismatch_jump_pcs.push(insns.len());
+        insns.push(BpfInsn::new(
+            BPF_JMP | BPF_JNE | BPF_K,
+            BpfInsn::make_regs(scratch_reg, 0),
+            0,
+            i32::from(byte),
+        ));
+    }
+    insns.extend(emit_matched());
+    let next_entry_pc = insns.len();
+    for jump_pc in mismatch_jump_pcs {
+        patch_relative_jump(insns, jump_pc, next_entry_pc)?;
+    }
+    Ok(())
+}
+
+fn patch_relative_jump(
+    insns: &mut [BpfInsn],
+    jump_pc: usize,
+    target_pc: usize,
+) -> anyhow::Result<()> {
+    let offset = target_pc as isize - jump_pc as isize - 1;
+    let offset = i16::try_from(offset).map_err(|_| {
+        site_level_inline_veto(format!(
+            "runtime_key_chain_branch_offset_overflow offset={offset}"
+        ))
+    })?;
+    insns[jump_pc].off = offset;
+    Ok(())
+}
+
+fn runtime_key_pointer_survives_until_loads(
+    insns: &[BpfInsn],
+    call_pc: usize,
+    uses: &R0UseClassification,
+) -> bool {
+    let Some(max_load_pc) = uses.fixed_loads.iter().map(|load| load.pc).max() else {
+        return false;
+    };
+    let fixed_load_pcs = uses
+        .fixed_loads
+        .iter()
+        .map(|load| load.pc)
+        .collect::<HashSet<_>>();
+    let mut pc = call_pc + 1;
+    while pc < insns.len() && pc <= max_load_pc {
+        let insn = &insns[pc];
+        let width = insn_width(insn);
+        if !fixed_load_pcs.contains(&pc) && insn_defines_reg(insn, 2) {
+            return false;
+        }
+        pc += width;
+    }
+    true
+}
+
+fn runtime_pointer_escape_reason(program: &BpfProgram, uses: &R0UseClassification) -> String {
+    if uses
+        .other_uses
+        .iter()
+        .any(|&pc| program.insns.get(pc).is_some_and(BpfInsn::is_call))
+    {
+        return "pointer_escapes_to_helper".to_string();
+    }
+    "lookup_result_pointer_escapes".to_string()
 }
 
 fn build_map_in_map_chain_rewrite(
@@ -1636,11 +1906,11 @@ fn build_map_in_map_chain_rewrite(
         ),
         removed_null_check: can_remove_lookup_pattern
             && (chain.outer_null_check_pc.is_some() || uses.null_check_pc.is_some()),
-        map_inline_record: MapInlineRecord {
+        map_inline_records: vec![MapInlineRecord {
             map_id: inner_info.map_id,
             key: encoded_inner_key,
             value: inline_value,
-        },
+        }],
         skipped_pcs,
         replacements,
     }))
