@@ -556,7 +556,7 @@ fn map_inline_constantizes_snapshot_pseudo_map_idx_value_loads() {
 }
 
 #[test]
-fn map_inline_pseudo_map_value_feeds_const_prop_and_dce() {
+fn map_inline_pseudo_map_value_feeds_const_prop_and_dce_without_branch_cleanup() {
     let mut values = HashMap::new();
     values.insert(0u32.to_le_bytes().to_vec(), vec![1, 0, 0, 0]);
     install_map(903, 2, 1, values);
@@ -577,16 +577,14 @@ fn map_inline_pseudo_map_value_feeds_const_prop_and_dce() {
     assert_eq!(result.pass_results[0].pass_name, "map_inline");
     assert_eq!(result.pass_results[1].pass_name, "const_prop");
     assert_eq!(result.pass_results[2].pass_name, "dce");
-    assert!(
-        !program.insns.iter().any(|insn| insn.is_cond_jmp()),
-        "expected const_prop+dce to remove the conditional branch after pseudo-map-value constantization"
-    );
-    assert!(
-        !program
-            .insns
-            .iter()
-            .any(|insn| *insn == BpfInsn::mov64_imm(0, 0)),
-        "expected dce to remove the dead false branch after pseudo-map-value constantization"
+    assert_eq!(
+        program.insns,
+        vec![
+            BpfInsn::mov32_imm(2, 1),
+            jeq_imm(2, 1, 0),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ]
     );
 }
 

@@ -82,7 +82,7 @@ mod tests {
     }
 
     #[test]
-    fn dce_removes_dead_defs_exposed_by_const_prop() {
+    fn dce_removes_dead_defs_exposed_by_const_prop_without_branch_cleanup() {
         let mut program = BpfProgram::new(vec![
             BpfInsn::mov32_imm(1, 20),
             BpfInsn::alu64_imm(BPF_LSH, 1, 32),
@@ -102,7 +102,12 @@ mod tests {
             .any(|diag| diag.contains("dead-def")));
         assert_eq!(
             program.insns,
-            vec![BpfInsn::ja(0), BpfInsn::mov64_imm(0, 1), exit_insn(),]
+            vec![
+                BpfInsn::mov64_imm(1, 20),
+                jeq_imm(1, 20, 0),
+                BpfInsn::mov64_imm(0, 1),
+                exit_insn(),
+            ]
         );
     }
 }

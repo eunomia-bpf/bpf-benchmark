@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-// Constant propagation and branch folding.
+// Constant propagation and ALU materialization.
 
-use std::collections::{BTreeMap, HashSet};
+use std::collections::BTreeMap;
 
 use crate::analysis::CFGAnalysis;
 use crate::insn::*;
@@ -164,7 +164,7 @@ impl VerifierExactConstOracle {
     }
 }
 
-/// Fold exact register constants into MOV32/MOV64/LD_IMM64/JA/NOP.
+/// Fold exact register constants into MOV32/MOV64/LD_IMM64.
 pub struct ConstPropPass;
 
 impl BpfPass for ConstPropPass {
@@ -190,7 +190,6 @@ impl BpfPass for ConstPropPass {
         let oracle = VerifierExactConstOracle::from_states(program.verifier_states.as_ref());
         let block_in = solve_block_entry_states(program, &cfg, &oracle);
         let mut replacements = BTreeMap::new();
-        let mut nop_pcs = HashSet::new();
 
         for (block_idx, block) in cfg.blocks.iter().enumerate() {
             simulate_block(
@@ -203,33 +202,15 @@ impl BpfPass for ConstPropPass {
             );
         }
 
-        for (&pc, replacement) in &replacements {
-            if replacement.len() == 1 && replacement[0] == BpfInsn::nop() {
-                nop_pcs.insert(pc);
-            }
-        }
-
         if replacements.is_empty() {
             return Ok(PassResult::unchanged(self.name()));
         }
 
         let mut alu_materialized = 0usize;
-        let mut branch_folded_taken = 0usize;
-        let mut branch_folded_not_taken = 0usize;
-        for (&pc, replacement) in &replacements {
+        for &pc in replacements.keys() {
             let insn = &program.insns[pc];
-            match insn.class() {
-                BPF_ALU | BPF_ALU64 => {
-                    alu_materialized += 1;
-                }
-                BPF_JMP | BPF_JMP32 if insn.is_cond_jmp() => match replacement.first() {
-                    Some(folded) if *folded == BpfInsn::nop() => {
-                        branch_folded_not_taken += 1;
-                    }
-                    Some(folded) if folded.is_ja() => branch_folded_taken += 1,
-                    _ => {}
-                },
-                _ => {}
+            if matches!(insn.class(), BPF_ALU | BPF_ALU64) {
+                alu_materialized += 1;
             }
         }
 
@@ -260,29 +241,10 @@ impl BpfPass for ConstPropPass {
         addr_map[orig_len] = new_insns.len();
 
         fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
-        fixup_folded_jumps(&mut new_insns, &program.insns, &addr_map, &replacements);
-        for old_pc in nop_pcs {
-            let new_pc = addr_map[old_pc];
-            if new_pc < new_insns.len() {
-                new_insns[new_pc] = BpfInsn::nop();
-            }
-        }
 
-        let mut final_insns = new_insns;
-        let mut final_addr_map = addr_map;
-        let mut cleanup_removed_insns = 0usize;
-        let cleanup_cfg = CFGAnalysis.run(&BpfProgram::new(final_insns.clone()));
-        if let Some((cleaned_insns, cleanup_map)) =
-            super::utils::eliminate_unreachable_blocks_with_cfg(&final_insns, &cleanup_cfg)
-        {
-            cleanup_removed_insns = final_insns.len() - cleaned_insns.len();
-            final_addr_map = super::utils::compose_addr_maps(&final_addr_map, &cleanup_map);
-            final_insns = cleaned_insns;
-        }
-
-        program.insns = final_insns;
-        super::utils::remap_btf_metadata(program, &final_addr_map)?;
-        program.remap_annotations(&final_addr_map);
+        program.insns = new_insns;
+        super::utils::remap_btf_metadata(program, &addr_map)?;
+        program.remap_annotations(&addr_map);
         program.log_transform(TransformEntry {
             sites_applied: replacements.len(),
         });
@@ -291,12 +253,7 @@ impl BpfPass for ConstPropPass {
             pass_name: self.name().into(),
             sites_applied: replacements.len(),
             sites_skipped: vec![],
-            diagnostics: vec![
-                format!("const_prop_alu_materialized={alu_materialized}"),
-                format!("const_prop_branch_folded_taken={branch_folded_taken}"),
-                format!("const_prop_branch_folded_not_taken={branch_folded_not_taken}"),
-                format!("const_prop_cleanup_removed_insns={cleanup_removed_insns}"),
-            ],
+            diagnostics: vec![format!("const_prop_alu_materialized={alu_materialized}")],
             ..Default::default()
         })
     }
@@ -412,12 +369,8 @@ fn analyze_instruction(
                 for reg in 0..=5 {
                     set_reg_unknown(&mut next, reg as u8);
                 }
-                None
-            } else if insn.is_cond_jmp() {
-                fold_jump_instruction(insns, pc, state)
-            } else {
-                None
             }
+            None
         }
         _ => None,
     };
@@ -446,21 +399,6 @@ fn fold_alu_instruction(
     replacement_if_changed(insns, pc, &candidate)
 }
 
-fn fold_jump_instruction(
-    insns: &[BpfInsn],
-    pc: usize,
-    state: &RegConstState,
-) -> Option<Vec<BpfInsn>> {
-    let insn = &insns[pc];
-    let taken = evaluate_jump_condition(insn, state)?;
-    let candidate = if taken {
-        vec![BpfInsn::ja(insn.off)]
-    } else {
-        vec![BpfInsn::nop()]
-    };
-    replacement_if_changed(insns, pc, &candidate)
-}
-
 fn evaluate_alu_result(insn: &BpfInsn, state: &RegConstState) -> Option<u64> {
     let is_32 = insn.class() == BPF_ALU;
     let op = bpf_op(insn.code);
@@ -486,36 +424,6 @@ fn evaluate_alu_result(insn: &BpfInsn, state: &RegConstState) -> Option<u64> {
     };
 
     eval_binary_alu(op, dst, rhs, is_32)
-}
-
-fn evaluate_jump_condition(insn: &BpfInsn, state: &RegConstState) -> Option<bool> {
-    let is_32 = insn.class() == BPF_JMP32;
-    let lhs = reg_const(state, insn.dst_reg(), is_32)?;
-    let rhs = if bpf_src(insn.code) == BPF_X {
-        reg_const(state, insn.src_reg(), is_32)?
-    } else {
-        jump_imm_operand(insn)
-    };
-
-    let lhs_u = normalize_jump_operand(lhs, is_32);
-    let rhs_u = normalize_jump_operand(rhs, is_32);
-    let lhs_s = normalize_signed_jump_operand(lhs, is_32);
-    let rhs_s = normalize_signed_jump_operand(rhs, is_32);
-
-    Some(match bpf_op(insn.code) {
-        BPF_JEQ => lhs_u == rhs_u,
-        BPF_JNE => lhs_u != rhs_u,
-        BPF_JGT => lhs_u > rhs_u,
-        BPF_JGE => lhs_u >= rhs_u,
-        BPF_JLT => lhs_u < rhs_u,
-        BPF_JLE => lhs_u <= rhs_u,
-        BPF_JSGT => lhs_s > rhs_s,
-        BPF_JSGE => lhs_s >= rhs_s,
-        BPF_JSLT => lhs_s < rhs_s,
-        BPF_JSLE => lhs_s <= rhs_s,
-        BPF_JSET => (lhs_u & rhs_u) != 0,
-        _ => return None,
-    })
 }
 
 fn eval_unary_alu(op: u8, lhs: u64, is_32: bool) -> Option<u64> {
@@ -598,32 +506,8 @@ fn normalize_alu_result(is_32: bool, value: u64) -> u64 {
     }
 }
 
-fn normalize_jump_operand(value: u64, is_32: bool) -> u64 {
-    if is_32 {
-        value as u32 as u64
-    } else {
-        value
-    }
-}
-
-fn normalize_signed_jump_operand(value: u64, is_32: bool) -> i64 {
-    if is_32 {
-        (value as u32 as i32) as i64
-    } else {
-        value as i64
-    }
-}
-
 fn alu_imm_operand(insn: &BpfInsn) -> u64 {
     if insn.class() == BPF_ALU {
-        insn.imm as u32 as u64
-    } else {
-        insn.imm as i64 as u64
-    }
-}
-
-fn jump_imm_operand(insn: &BpfInsn) -> u64 {
-    if insn.class() == BPF_JMP32 {
         insn.imm as u32 as u64
     } else {
         insn.imm as i64 as u64
@@ -718,83 +602,13 @@ fn replacement_if_changed(
     (original != candidate).then(|| candidate.to_vec())
 }
 
-fn fixup_folded_jumps(
-    new_insns: &mut [BpfInsn],
-    old_insns: &[BpfInsn],
-    addr_map: &[usize],
-    replacements: &BTreeMap<usize, Vec<BpfInsn>>,
-) {
-    for (&old_pc, replacement) in replacements {
-        let old_insn = &old_insns[old_pc];
-        if !old_insn.is_cond_jmp() {
-            continue;
-        }
-
-        let Some(new_branch) = replacement.first() else {
-            continue;
-        };
-        if !new_branch.is_ja() || new_branch.off == 0 {
-            continue;
-        }
-
-        let old_target = old_pc as i64 + 1 + old_insn.off as i64;
-        if !(0..=old_insns.len() as i64).contains(&old_target) {
-            continue;
-        }
-
-        let new_pc = addr_map[old_pc];
-        if new_pc >= new_insns.len() || !new_insns[new_pc].is_ja() {
-            continue;
-        }
-
-        let new_target = addr_map[old_target as usize];
-        let new_off = new_target as i64 - (new_pc as i64 + 1);
-        if let Ok(new_off) = i16::try_from(new_off) {
-            new_insns[new_pc].off = new_off;
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::collections::HashMap;
 
-    use crate::analysis::BranchTargetAnalysis;
-    use crate::bpf::{install_mock_map, use_mock_maps, BpfMapInfo, MockMapState};
-    use crate::passes::{DcePass, MapInfoAnalysis, MapInlinePass};
-
-    const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
-
     fn exit_insn() -> BpfInsn {
         BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
-    }
-
-    fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-        BpfInsn::new(
-            BPF_JMP | BPF_JEQ | BPF_K,
-            BpfInsn::make_regs(dst, 0),
-            off,
-            imm,
-        )
-    }
-
-    fn jeq32_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-        BpfInsn::new(
-            BPF_JMP32 | BPF_JEQ | BPF_K,
-            BpfInsn::make_regs(dst, 0),
-            off,
-            imm,
-        )
-    }
-
-    fn jne_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-        BpfInsn::new(
-            BPF_JMP | BPF_JNE | BPF_K,
-            BpfInsn::make_regs(dst, 0),
-            off,
-            imm,
-        )
     }
 
     fn ld_imm64(dst: u8, src: u8, imm_lo: i32, imm_hi: i32) -> [BpfInsn; 2] {
@@ -807,15 +621,6 @@ mod tests {
             ),
             BpfInsn::new(0, 0, 0, imm_hi),
         ]
-    }
-
-    fn st_mem(size: u8, dst: u8, off: i16, imm: i32) -> BpfInsn {
-        BpfInsn::new(
-            BPF_ST | size | BPF_MEM,
-            BpfInsn::make_regs(dst, 0),
-            off,
-            imm,
-        )
     }
 
     fn add64_imm(dst: u8, imm: i32) -> BpfInsn {
@@ -853,19 +658,6 @@ mod tests {
         }
     }
 
-    fn fp_reg(offset: i32) -> RegState {
-        RegState {
-            reg_type: "fp".to_string(),
-            value_width: VerifierValueWidth::Bits64,
-            precise: false,
-            exact_value: None,
-            tnum: None,
-            range: ScalarRange::default(),
-            offset: Some(offset),
-            id: None,
-        }
-    }
-
     fn verifier_delta_state(pc: usize, regs: HashMap<u8, RegState>) -> VerifierInsn {
         VerifierInsn {
             pc,
@@ -878,67 +670,10 @@ mod tests {
         }
     }
 
-    fn verifier_delta_state_with_stack(
-        pc: usize,
-        regs: HashMap<u8, RegState>,
-        stack: HashMap<i16, StackState>,
-    ) -> VerifierInsn {
-        VerifierInsn {
-            pc,
-            frame: 0,
-            from_pc: None,
-            kind: VerifierInsnKind::InsnDeltaState,
-            speculative: false,
-            regs,
-            stack,
-        }
-    }
-
-    fn stack_snapshot_from_key(stack_off: i16, key: &[u8]) -> HashMap<i16, StackState> {
-        let mut slot_bytes = [0u8; 8];
-        let mut slot_types = [b'?'; 8];
-        for (idx, byte) in key.iter().enumerate() {
-            let absolute_off = i32::from(stack_off) + idx as i32;
-            let byte_index = usize::try_from(absolute_off + 8).unwrap();
-            let type_index = 7 - byte_index;
-            slot_bytes[byte_index] = *byte;
-            slot_types[type_index] = b'r';
-        }
-        HashMap::from([(
-            -8,
-            StackState {
-                slot_types: Some(String::from_utf8(slot_types.to_vec()).unwrap()),
-                value: Some(scalar_reg(u64::from_le_bytes(slot_bytes))),
-            },
-        )])
-    }
-
-    fn install_array_map(map_id: u32, value: Vec<u8>) {
-        let mut values = HashMap::new();
-        values.insert(1u32.to_le_bytes().to_vec(), value.clone());
-
-        let info = BpfMapInfo {
-            map_type: 2,
-            key_size: 4,
-            value_size: value.len() as u32,
-            max_entries: 8,
-        };
-
-        install_mock_map(map_id, MockMapState { info, values });
-    }
-
     fn run_const_prop_pass(program: &mut BpfProgram) -> PipelineResult {
         let mut pm = PassManager::new();
         pm.register_analysis(CFGAnalysis);
         pm.add_pass(ConstPropPass);
-        pm.run(program, &PassContext::test_default()).unwrap()
-    }
-
-    fn run_const_prop_then_dce(program: &mut BpfProgram) -> PipelineResult {
-        let mut pm = PassManager::new();
-        pm.register_analysis(CFGAnalysis);
-        pm.add_pass(ConstPropPass);
-        pm.add_pass(DcePass);
         pm.run(program, &PassContext::test_default()).unwrap()
     }
 
@@ -964,18 +699,6 @@ mod tests {
         let result = run_const_prop_pass(&mut program);
         let pass = &result.pass_results[0];
         assert_eq!(diagnostic_counter(pass, "const_prop_alu_materialized"), 1);
-        assert_eq!(
-            diagnostic_counter(pass, "const_prop_branch_folded_taken"),
-            0
-        );
-        assert_eq!(
-            diagnostic_counter(pass, "const_prop_branch_folded_not_taken"),
-            0
-        );
-        assert_eq!(
-            diagnostic_counter(pass, "const_prop_cleanup_removed_insns"),
-            0
-        );
         assert_eq!(
             program.insns,
             vec![
@@ -1031,223 +754,17 @@ mod tests {
     }
 
     #[test]
-    fn const_prop_folds_constant_branches_to_ja_and_nop() {
-        let mut program = BpfProgram::new(vec![
-            BpfInsn::mov64_imm(1, 7),
-            jeq_imm(1, 7, 1),
-            BpfInsn::mov64_imm(2, 0),
-            BpfInsn::mov64_imm(3, 9),
-            jeq_imm(3, 0, 1),
-            BpfInsn::mov64_imm(0, 0),
-            exit_insn(),
-        ]);
-
-        let result = run_const_prop_pass(&mut program);
-        let pass = &result.pass_results[0];
-        assert_eq!(diagnostic_counter(pass, "const_prop_alu_materialized"), 0);
-        assert_eq!(
-            diagnostic_counter(pass, "const_prop_branch_folded_taken"),
-            1
-        );
-        assert_eq!(
-            diagnostic_counter(pass, "const_prop_branch_folded_not_taken"),
-            1
-        );
-        assert_eq!(
-            diagnostic_counter(pass, "const_prop_cleanup_removed_insns"),
-            1
-        );
-        assert_eq!(
-            program.insns,
-            vec![
-                BpfInsn::mov64_imm(1, 7),
-                BpfInsn::ja(0),
-                BpfInsn::mov64_imm(3, 9),
-                BpfInsn::nop(),
-                BpfInsn::mov64_imm(0, 0),
-                exit_insn(),
-            ]
-        );
-    }
-
-    #[test]
-    fn const_prop_uses_verifier_exact_constants_after_helper_calls() {
-        let mut program = BpfProgram::new(vec![
-            call_helper(7),
-            jeq_imm(0, 1, 1),
-            BpfInsn::mov64_imm(0, 0),
-            BpfInsn::mov64_imm(0, 1),
-            exit_insn(),
-        ]);
-        program.set_verifier_states(vec![
-            verifier_delta_state(0, HashMap::from([(0, scalar_reg(1))])),
-            verifier_delta_state(1, HashMap::from([(0, scalar_reg(1))])),
-            verifier_delta_state(2, HashMap::from([(0, scalar_reg(0))])),
-            verifier_delta_state(3, HashMap::from([(0, scalar_reg(1))])),
-        ]);
-
-        let _result = run_const_prop_pass(&mut program);
-        assert_eq!(
-            program.insns,
-            vec![
-                call_helper(7),
-                BpfInsn::ja(0),
-                BpfInsn::mov64_imm(0, 1),
-                exit_insn(),
-            ]
-        );
-    }
-
-    #[test]
-    fn const_prop_folds_branch_after_map_inline() {
-        install_array_map(201, vec![7, 0, 0, 0]);
-
-        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42, 0);
-        let mut program = BpfProgram::new(vec![
-            map[0],
-            map[1],
-            st_mem(BPF_W, 10, -4, 1),
-            BpfInsn::mov64_reg(2, 10),
-            add64_imm(2, -4),
-            call_helper(1),
-            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
-            jeq_imm(6, 7, 1),
-            BpfInsn::mov64_imm(0, 0),
-            BpfInsn::mov64_imm(0, 1),
-            exit_insn(),
-        ]);
-        program.set_map_ids(vec![201]);
-        program.set_verifier_states(vec![verifier_delta_state_with_stack(
-            5,
-            HashMap::from([(2, fp_reg(-4))]),
-            stack_snapshot_from_key(-4, &1u32.to_le_bytes()),
+    fn const_prop_uses_verifier_exact_constants_for_alu_after_helper_calls() {
+        let mut program = BpfProgram::new(vec![call_helper(7), add64_imm(0, 1), exit_insn()]);
+        program.set_verifier_states(vec![verifier_delta_state(
+            1,
+            HashMap::from([(0, scalar_reg(42))]),
         )]);
 
-        let mut pm = PassManager::new();
-        pm.register_analysis(BranchTargetAnalysis);
-        pm.register_analysis(CFGAnalysis);
-        pm.register_analysis(MapInfoAnalysis);
-        pm.add_pass(MapInlinePass);
-        pm.add_pass(ConstPropPass);
-
-        use_mock_maps(&mut program);
-        let result = pm.run(&mut program, &PassContext::test_default()).unwrap();
-        assert_eq!(result.pass_results[0].pass_name, "map_inline");
-        assert_eq!(result.pass_results[1].pass_name, "const_prop");
-        assert_eq!(result.pass_results[1].sites_applied, 1);
-        assert_eq!(
-            program.insns,
-            vec![
-                BpfInsn::mov32_imm(6, 7),
-                BpfInsn::ja(0),
-                BpfInsn::mov64_imm(0, 1),
-                exit_insn(),
-            ]
-        );
-    }
-
-    #[test]
-    fn const_prop_removes_dead_target_after_false_branch_fold() {
-        let mut program = BpfProgram::new(vec![
-            BpfInsn::mov64_imm(1, 1),
-            jeq_imm(1, 0, 2),
-            BpfInsn::mov64_imm(0, 0),
-            exit_insn(),
-            BpfInsn::mov64_imm(0, 1),
-            exit_insn(),
-        ]);
-
         let _result = run_const_prop_pass(&mut program);
         assert_eq!(
             program.insns,
-            vec![
-                BpfInsn::mov64_imm(1, 1),
-                BpfInsn::nop(),
-                BpfInsn::mov64_imm(0, 0),
-                exit_insn(),
-            ]
-        );
-    }
-
-    #[test]
-    fn const_prop_fixups_folded_jump_after_ldimm64_growth() {
-        let mut program = BpfProgram::new(vec![
-            BpfInsn::mov64_imm(2, 7),
-            jeq_imm(2, 7, 2),
-            BpfInsn::mov64_imm(1, 1),
-            BpfInsn::alu64_imm(BPF_LSH, 1, 40),
-            exit_insn(),
-        ]);
-
-        let _result = run_const_prop_pass(&mut program);
-        assert_eq!(
-            program.insns,
-            vec![BpfInsn::mov64_imm(2, 7), BpfInsn::ja(0), exit_insn(),]
-        );
-    }
-
-    #[test]
-    fn fixup_folded_jumps_remaps_backward_jump_after_growth() {
-        let old_insns = vec![BpfInsn::mov64_imm(2, 1), jne_imm(1, 0, -2), exit_insn()];
-        let wide = ld_imm64(2, 0, 1, 1);
-        let mut new_insns = vec![wide[0], wide[1], BpfInsn::ja(-2), exit_insn()];
-        let addr_map = vec![0, 2, 3, 4];
-        let replacements = BTreeMap::from([(1usize, vec![BpfInsn::ja(-2)])]);
-
-        fixup_folded_jumps(&mut new_insns, &old_insns, &addr_map, &replacements);
-
-        assert_eq!(new_insns[2], BpfInsn::ja(-3));
-        assert_eq!(2isize + 1 + new_insns[2].off as isize, 0);
-    }
-
-    #[test]
-    fn const_prop_folds_jmp32_branch_and_fixups_target_after_growth() {
-        let mut program = BpfProgram::new(vec![
-            BpfInsn::mov64_imm(1, -1),
-            jeq32_imm(1, -1, 2),
-            BpfInsn::mov64_imm(2, 1),
-            BpfInsn::alu64_imm(BPF_LSH, 2, 40),
-            exit_insn(),
-        ]);
-
-        let _result = run_const_prop_pass(&mut program);
-        assert_eq!(
-            program.insns,
-            vec![BpfInsn::mov64_imm(1, -1), BpfInsn::ja(0), exit_insn(),]
-        );
-    }
-
-    #[test]
-    fn fixup_folded_jumps_remaps_jump_to_end_sentinel() {
-        let old_insns = vec![jeq_imm(1, 7, 2), BpfInsn::mov64_imm(2, 1), exit_insn()];
-        let wide = ld_imm64(2, 0, 1, 1);
-        let mut new_insns = vec![BpfInsn::ja(2), wide[0], wide[1], exit_insn()];
-        let addr_map = vec![0, 1, 3, 4];
-        let replacements = BTreeMap::from([(0usize, vec![BpfInsn::ja(2)])]);
-
-        fixup_folded_jumps(&mut new_insns, &old_insns, &addr_map, &replacements);
-
-        assert_eq!(new_insns[0], BpfInsn::ja(3));
-        assert_eq!(1 + new_insns[0].off as usize, 4);
-    }
-
-    #[test]
-    fn const_prop_then_dce_keeps_folded_ja_for_kernel_cleanup() {
-        let mut program = BpfProgram::new(vec![
-            BpfInsn::mov64_imm(1, 7),
-            jeq_imm(1, 7, 2),
-            BpfInsn::mov64_imm(2, 1),
-            BpfInsn::alu64_imm(BPF_LSH, 2, 40),
-            BpfInsn::mov64_imm(0, 1),
-            exit_insn(),
-        ]);
-
-        let result = run_const_prop_then_dce(&mut program);
-        assert_eq!(result.pass_results[0].pass_name, "const_prop");
-        assert_eq!(result.pass_results[1].pass_name, "dce");
-        assert_eq!(
-            program.insns,
-            vec![BpfInsn::ja(0), BpfInsn::mov64_imm(0, 1), exit_insn(),]
+            vec![call_helper(7), BpfInsn::mov64_imm(0, 42), exit_insn(),]
         );
     }
 

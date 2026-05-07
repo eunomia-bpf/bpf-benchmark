@@ -367,7 +367,7 @@ fn cascade_const_prop_folds_non_zero_map_inline_output() {
 }
 
 #[test]
-fn cascade_full_pipeline_shortens_program_and_preserves_folded_semantics() {
+fn cascade_full_pipeline_materializes_alu_and_leaves_branch_cleanup_to_kernel() {
     install_array_map(304, 42u32.to_le_bytes().to_vec());
 
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
@@ -409,7 +409,7 @@ fn cascade_full_pipeline_shortens_program_and_preserves_folded_semantics() {
             .iter()
             .find(|pr| pr.pass_name == "const_prop")
             .map(|pr| pr.sites_applied),
-        Some(2)
+        Some(1)
     );
     assert!(result
         .pass_results
@@ -419,7 +419,14 @@ fn cascade_full_pipeline_shortens_program_and_preserves_folded_semantics() {
         .unwrap_or(false));
     assert_eq!(
         program.insns,
-        vec![BpfInsn::ja(0), BpfInsn::mov64_imm(0, 1), exit_insn(),]
+        vec![
+            BpfInsn::mov32_imm(6, 42),
+            jeq_imm(6, 0, 2),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]
     );
 }
 

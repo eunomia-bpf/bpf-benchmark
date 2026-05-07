@@ -123,7 +123,28 @@ Use `libbpf-rs`/`libbpf-sys` instead of custom wrappers whenever upstream libbpf
 - Inside `kernel-sys`, standard BPF commands should go through `libbpf-rs`/`libbpf-sys`; project-fork commands (`BPF_PROG_REJIT`, `BPF_PROG_GET_ORIGINAL`) are wrapped with `libc::syscall` because upstream libbpf does not support them.
 
 ### Default Config Must Work
-`make vm-corpus`, `make vm-e2e`, `make aws-x86-test`, `make aws-arm64-test` must work with zero manual environment variables. Defaults live in `runner/targets/*.env` files and are overridable via env vars.
+`make vm-corpus`, `make vm-test`, `make aws-x86-test`, `make aws-arm64-test` must work with zero manual environment variables. Defaults live in `runner/targets/*.env` files and are overridable via env vars.
+
+### Make Is the Only Benchmark Entrypoint
+**Every benchmark run must be invoked via `make <target>`. Never call `python -m runner.libs.run_target_suite`, `cargo run`, `docker run`, or any component binary directly.** Targets (`vm-corpus`, `vm-micro`, `vm-test`, `aws-arm64-*`, `aws-x86-*`, `aws-corpus`) handle build dependencies, runtime image assembly, KVM/AWS dispatch, and artifact paths consistently; bypassing them silently changes the contract.
+
+Override knobs (env vars passed to `make`):
+
+| env | scope | purpose | example |
+|-----|-------|---------|---------|
+| `SAMPLES` | corpus | per-program workload-cycle multiplier (default 3) | `SAMPLES=3 make vm-corpus` |
+| `BPFREJIT_CORPUS_APPS` | corpus | restrict to a subset of the 7 supported apps (comma- or space-separated). Names match `corpus/config/macro_apps.yaml` entries (e.g. `bcc/set`, `tetragon/observer`, `katran`) | `BPFREJIT_CORPUS_APPS="cilium/agent,tracee/monitor" make vm-corpus` |
+| `BPFREJIT_BENCH_PASSES` | corpus / micro | comma-separated bpfopt pass list overriding `corpus/config/benchmark_config.yaml`. Set to `default` to use yaml policy explicitly | `BPFREJIT_BENCH_PASSES="noop,map_inline" make vm-corpus` |
+| `KEEP_FAILURE_ARTIFACTS` | corpus | retain failure workdir tarballs at `details/failure-artifacts/<prog_id>.tar.gz` | `KEEP_FAILURE_ARTIFACTS=1 make vm-corpus` |
+| `BENCH` | micro | subset of micro benchmarks | `make vm-micro BENCH="simple bitcount"` |
+| `WARMUPS` / `INNER_REPEAT` | micro | micro-only knobs | `make vm-micro SAMPLES=1 WARMUPS=0 INNER_REPEAT=10` |
+
+Pass list reference (current `corpus/config/benchmark_config.yaml`):
+- **kinsn-class**: `wide_mem`, `rotate`, `cond_select`, `extract`, `endian_fusion`, `bulk_memory`, `prefetch`
+- **bytecode rewriting**: `noop` (verifier-state producer), `map_inline`, `const_prop`, `dce`, `bounds_check_merge`, `skb_load_bytes_spec`
+- **profile-guided** (not in default policy): `branch_flip`
+
+Per-pass + per-app combinations are how isolated benchmarks (e.g., "tetragon kinsn-only SAMPLES=3") are run. Compose env vars on a single `make` invocation; do not bypass the Makefile.
 
 ### Cost-Conscious AWS Defaults
 All AWS runs (smoke and authoritative) use `t3.small` (x86) / `t4g.small` (arm64) for bench suites and `t3.micro` / `t4g.micro` for the kernel test suite. **`medium` is the absolute upper cap and only allowed as documented OOM mitigation. Never escalate beyond medium — not for variance, not for parallelism, not for SAMPLES=3 authoritative runs.** Variance noise, throughput limits, and CPU-credit throttling must be solved by optimizing code (smaller workloads, lighter tracing, fewer concurrent passes) rather than by upgrading the instance. c5/c6g, xlarge, 2xlarge, and larger sizes are forbidden as defaults. Spot instances are allowed for non-time-critical runs.

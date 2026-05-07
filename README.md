@@ -56,20 +56,76 @@ make help
 
 ## Running Benchmarks
 
-**The root `Makefile` is the canonical user-facing entrypoint family; its thin
-aliases dispatch into `python -m runner.libs.run_target_suite`.**
+**The root `Makefile` is the only supported entrypoint. Do not invoke
+`python -m runner.libs.run_target_suite`, `cargo run`, `docker run`, or any
+component binary directly. Every benchmark must go through `make <target>`.**
 
 ```bash
 make vm-micro                        # full micro suite in VM
 make vm-micro BENCH="simple bitcount"  # subset of benchmarks
 make vm-micro SAMPLES=1 WARMUPS=0 INNER_REPEAT=10
-make vm-corpus                       # corpus benchmark in VM
+make vm-corpus                       # corpus benchmark in VM (all 7 supported apps)
 make vm-corpus SAMPLES=5
-make vm-e2e                          # E2E benchmarks in VM
+make vm-test                         # selftest + negative-test + repo unit tests in VM
+make vm-all                          # vm-test + vm-micro + vm-corpus
 make aws-arm64-test                  # AWS ARM64 correctness path
 make aws-arm64-benchmark AWS_ARM64_BENCH_MODE=micro
+make aws-arm64-corpus                # AWS ARM64 corpus benchmark
 make aws-x86-test                    # AWS x86 correctness path
-make aws-x86-benchmark AWS_X86_BENCH_MODE=e2e
+make aws-x86-benchmark AWS_X86_BENCH_MODE=micro
+make aws-x86-corpus                  # AWS x86 corpus benchmark
+make aws-corpus                      # both AWS x86 + ARM64 corpus
+```
+
+### Per-app filtering (corpus)
+
+Restrict to a subset of the 7 supported apps (bcc/set, otelcol-ebpf-profiler,
+cilium/agent, tetragon/observer, katran, tracee/monitor, bpftrace/set):
+
+```bash
+# Single app
+BPFREJIT_CORPUS_APPS="tetragon/observer" make vm-corpus
+
+# Multiple apps (comma- or space-separated)
+BPFREJIT_CORPUS_APPS="cilium/agent,tracee/monitor" make vm-corpus
+```
+
+### Per-pass override (corpus / micro)
+
+Override which bpfopt passes run, comma-separated. Default is the policy in
+`corpus/config/benchmark_config.yaml`. Set to `"default"` to use the yaml
+explicitly.
+
+```bash
+# Only noop + map_inline
+BPFREJIT_BENCH_PASSES="noop,map_inline" make vm-corpus
+
+# Only kinsn-class passes
+BPFREJIT_BENCH_PASSES="wide_mem,rotate,cond_select,extract,endian_fusion,bulk_memory,prefetch" \
+    make vm-corpus
+
+# Combine with per-app + sample count
+BPFREJIT_CORPUS_APPS="tetragon/observer" \
+BPFREJIT_BENCH_PASSES="noop,map_inline" \
+SAMPLES=3 \
+    make vm-corpus
+```
+
+Pass list reference (current `corpus/config/benchmark_config.yaml`):
+- **kinsn-class**: `wide_mem`, `rotate`, `cond_select`, `extract`,
+  `endian_fusion`, `bulk_memory`, `prefetch`
+- **bytecode rewriting**: `noop` (state producer), `map_inline`, `const_prop`,
+  `dce`, `bounds_check_merge`, `skb_load_bytes_spec`
+- **profile-guided** (not in default policy): `branch_flip`
+
+### Failure artifact retention
+
+Failure workdir tarballs are discarded by default to keep `result.json` small.
+Enable retention to inspect raw verifier logs and per-pass bytecode:
+
+```bash
+KEEP_FAILURE_ARTIFACTS=1 make vm-corpus
+# Tarballs land in: corpus/results/<run_dir>/details/failure-artifacts/<prog_id>.tar.gz
 ```
 
 AWS targets require explicit local configuration for:
