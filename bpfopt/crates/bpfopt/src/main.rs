@@ -17,7 +17,7 @@ use bpfopt::pass::{
 };
 use bpfopt::passes::{MapInfoAnalysis, PASS_REGISTRY};
 use clap::{Args, Parser, Subcommand};
-use kernel_sys::{VerifierRegJson, VerifierStackJson};
+use kernel_sys::{VerifierRegJson, VerifierStackJson, VerifierStatesJson};
 use serde::{Deserialize, Serialize};
 
 const PASS_ALIASES: &[(&str, &str)] = &[
@@ -955,12 +955,21 @@ fn read_profile(path: Option<&Path>) -> Result<Option<ProfilingData>> {
 }
 
 fn read_verifier_states(path: &Path) -> Result<Vec<VerifierInsn>> {
-    let log = fs::read_to_string(path)
-        .with_context(|| format!("failed to read verifier log from {}", path.display()))?;
-    let states = kernel_sys::verifier_states_from_log(&log);
+    let input = fs::read_to_string(path)
+        .with_context(|| format!("failed to read verifier states from {}", path.display()))?;
+    let states = if input.trim_start().starts_with('{') {
+        serde_json::from_str::<VerifierStatesJson>(&input).with_context(|| {
+            format!(
+                "failed to parse verifier states JSON from {}",
+                path.display()
+            )
+        })?
+    } else {
+        kernel_sys::verifier_states_from_log(&input)
+    };
     if states.insns.is_empty() {
         bail!(
-            "verifier log {} did not contain parseable state snapshots",
+            "verifier states {} did not contain parseable state snapshots",
             path.display()
         );
     }

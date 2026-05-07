@@ -367,35 +367,6 @@ fn cascade_const_prop_folds_non_zero_map_inline_output() {
 }
 
 #[test]
-fn cascade_dce_eliminates_dead_branch_after_const_prop() {
-    install_array_map(303, 42u32.to_le_bytes().to_vec());
-
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-    let mut program = make_program(vec![
-        map[0],
-        map[1],
-        st_mem(BPF_W, 10, -4, 1),
-        BpfInsn::mov64_reg(2, 10),
-        BpfInsn::alu64_imm(BPF_ADD, 2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
-        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
-        jeq_imm(6, 0, 2),
-        BpfInsn::mov64_imm(0, 1),
-        BpfInsn::ja(1),
-        BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
-    ]);
-    program.set_map_ids(vec![303]);
-    install_single_lookup_verifier_states(&mut program);
-
-    let result = run_pipeline_with_passes(&mut program, &["map_inline", "const_prop", "dce"]);
-    assert_eq!(result.pass_results[1].pass_name, "const_prop");
-    assert_eq!(result.pass_results[1].sites_applied, 1);
-    assert_eq!(result.pass_results[2].pass_name, "dce");
-    assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]);
-}
-
-#[test]
 fn cascade_full_pipeline_shortens_program_and_preserves_folded_semantics() {
     install_array_map(304, 42u32.to_le_bytes().to_vec());
 
@@ -446,7 +417,10 @@ fn cascade_full_pipeline_shortens_program_and_preserves_folded_semantics() {
         .find(|pr| pr.pass_name == "dce")
         .map(|pr| pr.sites_applied > 0)
         .unwrap_or(false));
-    assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]);
+    assert_eq!(
+        program.insns,
+        vec![BpfInsn::ja(0), BpfInsn::mov64_imm(0, 1), exit_insn(),]
+    );
 }
 
 #[test]

@@ -213,6 +213,26 @@ impl BpfPass for ConstPropPass {
             return Ok(PassResult::unchanged(self.name()));
         }
 
+        let mut alu_materialized = 0usize;
+        let mut branch_folded_taken = 0usize;
+        let mut branch_folded_not_taken = 0usize;
+        for (&pc, replacement) in &replacements {
+            let insn = &program.insns[pc];
+            match insn.class() {
+                BPF_ALU | BPF_ALU64 => {
+                    alu_materialized += 1;
+                }
+                BPF_JMP | BPF_JMP32 if insn.is_cond_jmp() => match replacement.first() {
+                    Some(folded) if *folded == BpfInsn::nop() => {
+                        branch_folded_not_taken += 1;
+                    }
+                    Some(folded) if folded.is_ja() => branch_folded_taken += 1,
+                    _ => {}
+                },
+                _ => {}
+            }
+        }
+
         let orig_len = program.insns.len();
         let mut new_insns = Vec::with_capacity(orig_len + replacements.len());
         let mut addr_map = vec![0usize; orig_len + 1];
@@ -250,10 +270,12 @@ impl BpfPass for ConstPropPass {
 
         let mut final_insns = new_insns;
         let mut final_addr_map = addr_map;
+        let mut cleanup_removed_insns = 0usize;
         let cleanup_cfg = CFGAnalysis.run(&BpfProgram::new(final_insns.clone()));
         if let Some((cleaned_insns, cleanup_map)) =
             super::utils::eliminate_unreachable_blocks_with_cfg(&final_insns, &cleanup_cfg)
         {
+            cleanup_removed_insns = final_insns.len() - cleaned_insns.len();
             final_addr_map = super::utils::compose_addr_maps(&final_addr_map, &cleanup_map);
             final_insns = cleaned_insns;
         }
@@ -269,7 +291,12 @@ impl BpfPass for ConstPropPass {
             pass_name: self.name().into(),
             sites_applied: replacements.len(),
             sites_skipped: vec![],
-            diagnostics: vec![],
+            diagnostics: vec![
+                format!("const_prop_alu_materialized={alu_materialized}"),
+                format!("const_prop_branch_folded_taken={branch_folded_taken}"),
+                format!("const_prop_branch_folded_not_taken={branch_folded_not_taken}"),
+                format!("const_prop_cleanup_removed_insns={cleanup_removed_insns}"),
+            ],
             ..Default::default()
         })
     }
@@ -915,6 +942,16 @@ mod tests {
         pm.run(program, &PassContext::test_default()).unwrap()
     }
 
+    fn diagnostic_counter(pass: &PassResult, key: &str) -> usize {
+        let prefix = format!("{key}=");
+        pass.diagnostics
+            .iter()
+            .find_map(|diag| diag.strip_prefix(&prefix))
+            .unwrap_or_else(|| panic!("missing diagnostic counter {key}"))
+            .parse()
+            .unwrap_or_else(|err| panic!("invalid diagnostic counter {key}: {err}"))
+    }
+
     #[test]
     fn const_prop_folds_alu_chain_to_constant_mov() {
         let mut program = BpfProgram::new(vec![
@@ -924,7 +961,21 @@ mod tests {
             exit_insn(),
         ]);
 
-        let _result = run_const_prop_pass(&mut program);
+        let result = run_const_prop_pass(&mut program);
+        let pass = &result.pass_results[0];
+        assert_eq!(diagnostic_counter(pass, "const_prop_alu_materialized"), 1);
+        assert_eq!(
+            diagnostic_counter(pass, "const_prop_branch_folded_taken"),
+            0
+        );
+        assert_eq!(
+            diagnostic_counter(pass, "const_prop_branch_folded_not_taken"),
+            0
+        );
+        assert_eq!(
+            diagnostic_counter(pass, "const_prop_cleanup_removed_insns"),
+            0
+        );
         assert_eq!(
             program.insns,
             vec![
@@ -991,7 +1042,21 @@ mod tests {
             exit_insn(),
         ]);
 
-        let _result = run_const_prop_pass(&mut program);
+        let result = run_const_prop_pass(&mut program);
+        let pass = &result.pass_results[0];
+        assert_eq!(diagnostic_counter(pass, "const_prop_alu_materialized"), 0);
+        assert_eq!(
+            diagnostic_counter(pass, "const_prop_branch_folded_taken"),
+            1
+        );
+        assert_eq!(
+            diagnostic_counter(pass, "const_prop_branch_folded_not_taken"),
+            1
+        );
+        assert_eq!(
+            diagnostic_counter(pass, "const_prop_cleanup_removed_insns"),
+            1
+        );
         assert_eq!(
             program.insns,
             vec![
@@ -1167,7 +1232,7 @@ mod tests {
     }
 
     #[test]
-    fn const_prop_then_dce_handles_folded_jump_after_dead_block_growth() {
+    fn const_prop_then_dce_keeps_folded_ja_for_kernel_cleanup() {
         let mut program = BpfProgram::new(vec![
             BpfInsn::mov64_imm(1, 7),
             jeq_imm(1, 7, 2),
@@ -1180,7 +1245,10 @@ mod tests {
         let result = run_const_prop_then_dce(&mut program);
         assert_eq!(result.pass_results[0].pass_name, "const_prop");
         assert_eq!(result.pass_results[1].pass_name, "dce");
-        assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]);
+        assert_eq!(
+            program.insns,
+            vec![BpfInsn::ja(0), BpfInsn::mov64_imm(0, 1), exit_insn(),]
+        );
     }
 
     #[test]

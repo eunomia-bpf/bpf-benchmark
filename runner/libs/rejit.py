@@ -225,11 +225,40 @@ def benchmark_run_provenance() -> dict[str, object]:
         "config": {"enabled_passes": benchmark_rejit_enabled_passes()},
     }
 
+_VERIFIER_LOG_TAIL_BYTES = 64 * 1024
+_KEEP_ALL_ARTIFACTS_ENV = "BPFREJIT_DAEMON_KEEP_ALL_WORKDIRS"
+
+
+def _keep_full_verifier_log() -> bool:
+    return bool(os.environ.get(_KEEP_ALL_ARTIFACTS_ENV, "").strip())
+
+
+def _truncate_verifier_log_tail(text: str) -> str:
+    if not text or _keep_full_verifier_log():
+        return text
+    if len(text) <= _VERIFIER_LOG_TAIL_BYTES:
+        return text
+    dropped = len(text) - _VERIFIER_LOG_TAIL_BYTES
+    return (
+        f"... [truncated {dropped} leading bytes; "
+        f"set {_KEEP_ALL_ARTIFACTS_ENV}=1 for full log]\n"
+        f"{text[-_VERIFIER_LOG_TAIL_BYTES:]}"
+    )
+
+
+def _verifier_log_summary_line(text: str) -> str:
+    if not text:
+        return ""
+    return text.split("\n", 1)[0][:512]
+
+
 def _apply_result_from_response(
     response: dict[str, Any],
 ) -> dict[str, object]:
     result: dict[str, object] = dict(response)
-    result["error"] = str(response.get("error_message") or "").strip()
+    raw_error = str(response.get("error_message") or "").strip()
+    result["error"] = _truncate_verifier_log_tail(raw_error)
+    result.pop("error_message", None)
     return result
 
 
@@ -388,7 +417,9 @@ def apply_daemon_rejit(
                             daemon_proc=daemon_proc, stdout_path=daemon_stdout_path,
                             stderr_path=daemon_stderr_path)
     if str(_resp.get("status") or "") != "ok":
-        msg = str(_resp.get("error_message") or "optimize failed")
+        msg = _truncate_verifier_log_tail(
+            str(_resp.get("error_message") or "optimize failed")
+        )
         return {
             "status": "error",
             "error": msg,
@@ -424,7 +455,7 @@ def apply_daemon_rejit(
         result = _apply_result_from_response(record_dict)
         per_program[prog_id] = result
         if error := str(result.get("error") or "").strip():
-            errors.append(f"prog {prog_id}: {error}")
+            errors.append(f"prog {prog_id}: {_verifier_log_summary_line(error)}")
     error = "; ".join(errors)
     return {
         "status": "ok" if not error else "error",
