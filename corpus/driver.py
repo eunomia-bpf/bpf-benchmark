@@ -582,7 +582,7 @@ def _run_suite_lifecycle_sessions(
                 "rejit_done",
                 app=session.app.name,
                 runner=session.app.runner,
-                status="ok" if not str(result.rejit_result.get("error") or "").strip() else "error",
+                status=str(result.rejit_result.get("status") or "error"),
             )
             check_daemon()
 
@@ -785,14 +785,13 @@ def run_suite(
 
         kinsn_metadata = dict(prepared_daemon_session.metadata)
 
-    results = [
-        results_by_name.get(app.name)
-        or _build_app_error_result(
-            app,
-            error=fatal_error or "corpus suite did not produce a result",
-        )
+    # No top-level results array. Per-app data is in details/apps/<safe>.json
+    # (incrementally written). Suite-wide status derived in-memory from
+    # results_by_name; no per-app summary copied into result.json.
+    any_app_failed = any(
+        str((results_by_name.get(app.name) or {}).get("status") or "error") != "ok"
         for app in suite.apps
-    ]
+    )
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "manifest": str(suite_path),
@@ -800,9 +799,8 @@ def run_suite(
         "daemon": str(daemon_binary),
         "samples": samples,
         "workload_seconds": workload_seconds,
-        "results": results,
         "kinsn_modules": kinsn_metadata,
-        "status": "error" if any(str(result.get("status") or "error") != "ok" for result in results) else "ok",
+        "status": "error" if any_app_failed else "ok",
     }
     if fatal_error:
         payload["fatal_error"] = fatal_error
@@ -836,23 +834,11 @@ def _finalize_partial(
     fatal_error: str = "",
 ) -> dict[str, object]:
     """Build and write a partial result payload from whatever per-app results were collected."""
-    results: list[dict[str, object]] = []
-    for app in suite.apps:
-        if app.name in partial_results:
-            results.append(partial_results[app.name])
-        else:
-            results.append(
-                _build_app_error_result(
-                    app,
-                    error=fatal_error or "corpus run terminated before this app was reached",
-                )
-            )
     payload: dict[str, object] = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "suite_name": getattr(suite, "suite_name", ""),
         "samples": 0,
         "workload_seconds": 0.0,
-        "results": results,
         "status": "error",
         "partial": True,
     }

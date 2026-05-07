@@ -24,6 +24,25 @@ static NEXT_WORKDIR_ID: AtomicU64 = AtomicU64::new(0);
 const REJIT_VERBOSE_LOG_BUF_SIZE: usize = 16 * 1024 * 1024;
 const REJIT_BASIC_LOG_BUF_SIZE: usize = 1024 * 1024;
 const MAP_SNAPSHOT_MAX_BYTES: u64 = 64 * 1024;
+/// Tail size kept in PassDetail.error / OptimizeOneResult.error_message JSON
+/// fields. Full verifier log is still written to disk by `rejit_program()` and
+/// tarred into the failure workdir.
+const RESPONSE_LOG_TAIL_BYTES: usize = 64 * 1024;
+
+fn truncate_response_log(text: String) -> String {
+    if text.len() <= RESPONSE_LOG_TAIL_BYTES {
+        return text;
+    }
+    let dropped = text.len() - RESPONSE_LOG_TAIL_BYTES;
+    let mut start = text.len() - RESPONSE_LOG_TAIL_BYTES;
+    while start < text.len() && !text.is_char_boundary(start) {
+        start += 1;
+    }
+    format!(
+        "... [truncated {dropped} leading bytes; full log in workdir tar]\n{}",
+        &text[start..]
+    )
+}
 const MAX_FAILURE_ARTIFACTS_PER_REQUEST: usize = 32;
 static FAILURE_ARTIFACT_COUNT: AtomicUsize = AtomicUsize::new(0);
 
@@ -652,7 +671,7 @@ fn run_program_steps(
                 step_details.push(pass_detail(
                     step,
                     PassStatus::FailedRejit,
-                    Some(format!("{err:#}")),
+                    Some(truncate_response_log(format!("{err:#}"))),
                     Some(bpfopt_summary),
                 ));
                 break;
@@ -676,17 +695,10 @@ fn run_program_steps(
         .iter()
         .any(|step| step.status != PassStatus::Ok);
     let status = if any_failed { "error" } else { "ok" }.to_string();
-    let error_message = if any_failed {
-        let combined = step_details
-            .iter()
-            .filter_map(|step| step.error.clone())
-            .collect::<Vec<_>>()
-            .join("; ");
-        Some(combined)
-    } else {
-        None
-    };
 
+    // No error_message aggregation: passes[*].error is the single source of
+    // truth for per-pass failures. Setting error_message here would just
+    // re-join the same strings.
     Ok(OptimizeOneResult {
         status,
         prog_id,
@@ -698,7 +710,7 @@ fn run_program_steps(
             final_insn_count,
         },
         passes: step_details,
-        error_message,
+        error_message: None,
         workdir_tar_b64: None,
     })
 }

@@ -225,43 +225,6 @@ def benchmark_run_provenance() -> dict[str, object]:
         "config": {"enabled_passes": benchmark_rejit_enabled_passes()},
     }
 
-_VERIFIER_LOG_TAIL_BYTES = 64 * 1024
-_KEEP_ALL_ARTIFACTS_ENV = "BPFREJIT_DAEMON_KEEP_ALL_WORKDIRS"
-
-
-def _keep_full_verifier_log() -> bool:
-    return bool(os.environ.get(_KEEP_ALL_ARTIFACTS_ENV, "").strip())
-
-
-def _truncate_verifier_log_tail(text: str) -> str:
-    if not text or _keep_full_verifier_log():
-        return text
-    if len(text) <= _VERIFIER_LOG_TAIL_BYTES:
-        return text
-    dropped = len(text) - _VERIFIER_LOG_TAIL_BYTES
-    return (
-        f"... [truncated {dropped} leading bytes; "
-        f"set {_KEEP_ALL_ARTIFACTS_ENV}=1 for full log]\n"
-        f"{text[-_VERIFIER_LOG_TAIL_BYTES:]}"
-    )
-
-
-def _verifier_log_summary_line(text: str) -> str:
-    if not text:
-        return ""
-    return text.split("\n", 1)[0][:512]
-
-
-def _apply_result_from_response(
-    response: dict[str, Any],
-) -> dict[str, object]:
-    result: dict[str, object] = dict(response)
-    raw_error = str(response.get("error_message") or "").strip()
-    result["error"] = _truncate_verifier_log_tail(raw_error)
-    result.pop("error_message", None)
-    return result
-
-
 def _write_failure_workdir_tar(
     prog_id: int,
     workdir_tar_b64: object,
@@ -402,9 +365,6 @@ def apply_daemon_rejit(
         if enabled_passes is not None
         else None
     )
-    per_program: dict[int, dict[str, object]] = {}
-    errors: list[str] = []
-
     if not normalized_enabled_passes:
         raise ValueError("apply_daemon_rejit requires non-empty enabled_passes")
     pass_metas = _pass_metadata_cache()
@@ -417,14 +377,11 @@ def apply_daemon_rejit(
                             daemon_proc=daemon_proc, stdout_path=daemon_stdout_path,
                             stderr_path=daemon_stderr_path)
     if str(_resp.get("status") or "") != "ok":
-        msg = _truncate_verifier_log_tail(
-            str(_resp.get("error_message") or "optimize failed")
-        )
+        msg = str(_resp.get("error_message") or "optimize failed")
         return {
             "status": "error",
-            "error": msg,
             "per_program": {int(pid): {"status": "error", "prog_id": int(pid),
-                                       "error": msg}
+                                       "error_message": msg}
                             for pid in prog_ids},
         }
 
@@ -442,6 +399,11 @@ def apply_daemon_rejit(
             f"missing={missing}, unexpected={unexpected}"
         )
 
+    # Pure pass-through: no parse, no rename, no truncate, no aggregate.
+    # daemon already truncated verifier logs in PassDetail.error;
+    # the only side effect is extracting failure workdir tars to disk.
+    per_program: dict[int, dict[str, object]] = {}
+    any_error = False
     for prog_id in prog_ids:
         record = records_by_prog_id[str(prog_id)]
         if not isinstance(record, Mapping):
@@ -452,15 +414,12 @@ def apply_daemon_rejit(
             record_dict.pop("workdir_tar_b64", None),
             failure_artifacts_dir,
         )
-        result = _apply_result_from_response(record_dict)
-        per_program[prog_id] = result
-        if error := str(result.get("error") or "").strip():
-            errors.append(f"prog {prog_id}: {_verifier_log_summary_line(error)}")
-    error = "; ".join(errors)
+        if str(record_dict.get("status") or "") != "ok":
+            any_error = True
+        per_program[prog_id] = record_dict
     return {
-        "status": "ok" if not error else "error",
+        "status": "error" if any_error else "ok",
         "per_program": per_program,
-        "error": error,
     }
 
 

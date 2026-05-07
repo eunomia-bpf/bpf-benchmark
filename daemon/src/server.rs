@@ -292,16 +292,13 @@ fn process_request(req: &serde_json::Value) -> serde_json::Value {
 fn optimize_response_from_outcomes(
     outcomes: Vec<commands::ApplyProgramOutcome>,
 ) -> Result<serde_json::Value> {
+    // Single source of truth: per_program[id]. No top-level error_message —
+    // readers inspect per_program[id].status and passes[*].error directly.
     let mut per_program = BTreeMap::new();
-    let mut errors = Vec::new();
     for outcome in outcomes {
-        let result = outcome.result;
-        if let Some(message) = result.error_message.as_deref() {
-            errors.push(format!("prog {}: {message}", outcome.prog_id));
-        }
         per_program.insert(
             outcome.prog_id,
-            serde_json::to_value(result).with_context(|| {
+            serde_json::to_value(outcome.result).with_context(|| {
                 format!("serialize optimize result for prog {}", outcome.prog_id)
             })?,
         );
@@ -309,7 +306,6 @@ fn optimize_response_from_outcomes(
     Ok(serde_json::json!({
         "status": "ok",
         "per_program": per_program,
-        "error_message": errors.join("; "),
     }))
 }
 
