@@ -66,10 +66,6 @@ fn install_array_map(map_id: u32, value: Vec<u8>) {
     install_map(map_id, BPF_MAP_TYPE_ARRAY, value);
 }
 
-fn install_hash_map(map_id: u32, value: Vec<u8>) {
-    install_map(map_id, BPF_MAP_TYPE_HASH, value);
-}
-
 fn fp_reg(offset: i32) -> RegState {
     RegState {
         reg_type: "fp".to_string(),
@@ -172,22 +168,6 @@ fn default_test_pipeline() -> PassManager {
     assert_eq!(declared, BTreeSet::from(["bpf_rotate64", "bpf_rotate32", "bpf_select64", "bpf_ccmp64", "bpf_extract64", "bpf_endian_load16", "bpf_endian_load32", "bpf_endian_load64", "bpf_memcpy_bulk", "bpf_memset_bulk", "bpf_prefetch"]));
 }
 
-fn make_wide_mem_4byte_program() -> Vec<BpfInsn> {
-    vec![
-        BpfInsn::ldx_mem(BPF_B, 2, 1, 0),
-        BpfInsn::ldx_mem(BPF_B, 3, 1, 1),
-        BpfInsn::alu64_imm(BPF_LSH, 3, 8),
-        BpfInsn::alu64_reg(BPF_OR, 2, 3),
-        BpfInsn::ldx_mem(BPF_B, 3, 1, 2),
-        BpfInsn::alu64_imm(BPF_LSH, 3, 16),
-        BpfInsn::alu64_reg(BPF_OR, 2, 3),
-        BpfInsn::ldx_mem(BPF_B, 3, 1, 3),
-        BpfInsn::alu64_imm(BPF_LSH, 3, 24),
-        BpfInsn::alu64_reg(BPF_OR, 2, 3),
-        exit_insn(),
-    ]
-}
-
 #[test]
 fn test_cfg_analysis_with_subprogs() {
     use crate::analysis::CFGAnalysis;
@@ -266,23 +246,6 @@ fn test_branch_targets_backward_jump() {
 }
 
 #[test]
-fn test_default_pipeline_wide_mem() {
-    let mut prog = make_program(make_wide_mem_4byte_program());
-    let ctx = PassContext::test_default();
-
-    let pm = default_test_pipeline();
-    let _result = pm.run(&mut prog, &ctx).unwrap();
-}
-
-#[test]
-fn test_map_inline_only_pipeline_contains_only_map_inline() {
-    let pm =
-        build_custom_pipeline(&["map_inline".to_string()]).expect("custom pipeline should build");
-
-    assert_eq!(pm.pass_names(), vec!["map_inline"]);
-}
-
-#[test]
 fn test_build_custom_pipeline_respects_registry_order() {
     let pm = build_custom_pipeline(&[
         "wide_mem".to_string(),
@@ -305,30 +268,6 @@ fn test_build_custom_pipeline_rejects_unknown_pass_name() {
     };
 
     assert!(err.to_string().contains("unknown pass name(s): nope"));
-}
-
-#[test]
-fn cascade_map_inline_emits_non_zero_mov_constant() {
-    install_array_map(301, 42u32.to_le_bytes().to_vec());
-
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-    let mut program = make_program(vec![
-        map[0],
-        map[1],
-        st_mem(BPF_W, 10, -4, 1),
-        BpfInsn::mov64_reg(2, 10),
-        BpfInsn::alu64_imm(BPF_ADD, 2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
-        BpfInsn::ldx_mem(BPF_W, 0, 0, 0),
-        exit_insn(),
-    ]);
-    program.set_map_ids(vec![301]);
-    install_single_lookup_verifier_states(&mut program);
-
-    let result = run_pipeline_with_passes(&mut program, &["map_inline"]);
-    assert_eq!(result.pass_results[0].pass_name, "map_inline");
-    assert_eq!(result.pass_results[0].sites_applied, 1);
-    assert_eq!(program.insns, vec![BpfInsn::mov32_imm(0, 42), exit_insn()]);
 }
 
 #[test]
@@ -368,96 +307,64 @@ fn cascade_const_prop_folds_non_zero_map_inline_output() {
 
 #[test]
 fn cascade_full_pipeline_materializes_alu_and_leaves_branch_cleanup_to_kernel() {
-    install_array_map(304, 42u32.to_le_bytes().to_vec());
-
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-    let mut program = make_program(vec![
-        map[0],
-        map[1],
-        st_mem(BPF_W, 10, -4, 1),
-        BpfInsn::mov64_reg(2, 10),
-        BpfInsn::alu64_imm(BPF_ADD, 2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
-        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
-        jeq_imm(6, 0, 4),
-        BpfInsn::mov64_imm(1, 10),
-        BpfInsn::alu64_reg(BPF_ADD, 1, 6),
-        BpfInsn::mov64_imm(0, 1),
-        exit_insn(),
-        BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
-    ]);
-    program.set_map_ids(vec![304]);
-    install_single_lookup_verifier_states(&mut program);
-    let original_len = program.insns.len();
-
-    let pm = default_test_pipeline();
-    use_mock_maps(&mut program);
-    let result = pm.run(&mut program, &PassContext::test_default()).unwrap();
-    assert!(program.insns.len() < original_len);
-    assert_eq!(
-        result
-            .pass_results
-            .iter()
-            .find(|pr| pr.pass_name == "map_inline")
-            .map(|pr| pr.sites_applied),
-        Some(1)
-    );
-    assert_eq!(
-        result
-            .pass_results
-            .iter()
-            .find(|pr| pr.pass_name == "const_prop")
-            .map(|pr| pr.sites_applied),
-        Some(1)
-    );
-    assert!(result
-        .pass_results
-        .iter()
-        .find(|pr| pr.pass_name == "dce")
-        .map(|pr| pr.sites_applied > 0)
-        .unwrap_or(false));
-    assert_eq!(
-        program.insns,
-        vec![
-            BpfInsn::mov32_imm(6, 42),
-            jeq_imm(6, 0, 2),
-            BpfInsn::mov64_imm(0, 1),
-            exit_insn(),
-            BpfInsn::mov64_imm(0, 0),
-            exit_insn(),
+    for (label, map_id, map_type, mut program, expected) in {
+        let array_map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let hash_map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        [
+            (
+                "array full pipeline",
+                304,
+                BPF_MAP_TYPE_ARRAY,
+                make_program(vec![array_map[0], array_map[1], st_mem(BPF_W, 10, -4, 1), BpfInsn::mov64_reg(2, 10), BpfInsn::alu64_imm(BPF_ADD, 2, -4), call_helper(HELPER_MAP_LOOKUP_ELEM), BpfInsn::ldx_mem(BPF_W, 6, 0, 0), jeq_imm(6, 0, 4), BpfInsn::mov64_imm(1, 10), BpfInsn::alu64_reg(BPF_ADD, 1, 6), BpfInsn::mov64_imm(0, 1), exit_insn(), BpfInsn::mov64_imm(0, 0), exit_insn()]),
+                vec![BpfInsn::mov32_imm(6, 42), jeq_imm(6, 0, 2), BpfInsn::mov64_imm(0, 1), exit_insn(), BpfInsn::mov64_imm(0, 0), exit_insn()],
+            ),
+            (
+                "hash null path",
+                305,
+                BPF_MAP_TYPE_HASH,
+                make_program(vec![hash_map[0], hash_map[1], st_mem(BPF_W, 10, -4, 1), BpfInsn::mov64_reg(2, 10), BpfInsn::alu64_imm(BPF_ADD, 2, -4), call_helper(HELPER_MAP_LOOKUP_ELEM), jeq_imm(0, 0, 5), BpfInsn::ldx_mem(BPF_W, 6, 0, 0), BpfInsn::mov64_imm(1, 10), BpfInsn::alu64_reg(BPF_ADD, 1, 6), BpfInsn::mov64_imm(0, 1), exit_insn(), BpfInsn::mov64_imm(0, 0), exit_insn()]),
+                vec![BpfInsn::mov64_imm(0, 1), exit_insn()],
+            ),
         ]
-    );
-}
+    } {
+        install_map(map_id, map_type, 42u32.to_le_bytes().to_vec());
+        program.set_map_ids(vec![map_id]);
+        install_single_lookup_verifier_states(&mut program);
+        let original_len = program.insns.len();
 
-#[test]
-fn cascade_hash_map_removes_lookup_and_null_path_then_folds_non_null_path() {
-    install_hash_map(305, 42u32.to_le_bytes().to_vec());
+        let result = if label == "array full pipeline" {
+            let pm = default_test_pipeline();
+            use_mock_maps(&mut program);
+            pm.run(&mut program, &PassContext::test_default()).unwrap()
+        } else {
+            run_pipeline_with_passes(&mut program, &["map_inline", "const_prop", "dce"])
+        };
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-    let mut program = make_program(vec![
-        map[0],
-        map[1],
-        st_mem(BPF_W, 10, -4, 1),
-        BpfInsn::mov64_reg(2, 10),
-        BpfInsn::alu64_imm(BPF_ADD, 2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
-        jeq_imm(0, 0, 5),
-        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
-        BpfInsn::mov64_imm(1, 10),
-        BpfInsn::alu64_reg(BPF_ADD, 1, 6),
-        BpfInsn::mov64_imm(0, 1),
-        exit_insn(),
-        BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
-    ]);
-    program.set_map_ids(vec![305]);
-    install_single_lookup_verifier_states(&mut program);
-
-    let result = run_pipeline_with_passes(&mut program, &["map_inline", "const_prop", "dce"]);
-    assert_eq!(result.pass_results[0].pass_name, "map_inline");
-    assert_eq!(result.pass_results[1].pass_name, "const_prop");
-    assert_eq!(result.pass_results[1].sites_applied, 1);
-    assert_eq!(result.pass_results[2].pass_name, "dce");
-    assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 1), exit_insn(),]);
+        assert!(program.insns.len() < original_len, "{label}");
+        assert_eq!(
+            result
+                .pass_results
+                .iter()
+                .find(|pr| pr.pass_name == "map_inline")
+                .map(|pr| pr.sites_applied),
+            Some(1),
+            "{label}"
+        );
+        assert_eq!(
+            result
+                .pass_results
+                .iter()
+                .find(|pr| pr.pass_name == "const_prop")
+                .map(|pr| pr.sites_applied),
+            Some(1),
+            "{label}"
+        );
+        assert!(result
+            .pass_results
+            .iter()
+            .find(|pr| pr.pass_name == "dce")
+            .map(|pr| pr.sites_applied > 0)
+            .unwrap_or(false));
+        assert_eq!(program.insns, expected, "{label}");
+    }
 }

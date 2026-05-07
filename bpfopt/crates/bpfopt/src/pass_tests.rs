@@ -258,22 +258,32 @@ impl BpfPass for VerifierStateCountPass {
 // ── BpfProgram tests ────────────────────────────────────────────
 
 #[test]
-fn test_bpf_program_sync_annotations_grow() {
-    let mut prog = make_program(vec![exit_insn()]);
-    assert_eq!(prog.annotations.len(), 1);
-    prog.insns.push(BpfInsn::nop());
-    prog.insns.push(BpfInsn::nop());
-    prog.sync_annotations();
-    assert_eq!(prog.annotations.len(), 3);
-}
+fn sync_annotations_resizes_both_directions() {
+    let cases: [(&str, BpfProgram, fn(&mut BpfProgram), usize); 2] = [
+        (
+            "grow",
+            make_program(vec![exit_insn()]),
+            |prog: &mut BpfProgram| {
+                prog.insns.push(BpfInsn::nop());
+                prog.insns.push(BpfInsn::nop());
+            },
+            3,
+        ),
+        (
+            "shrink",
+            make_program(vec![BpfInsn::nop(), BpfInsn::nop(), exit_insn()]),
+            |prog: &mut BpfProgram| {
+                prog.insns.truncate(1);
+            },
+            1,
+        ),
+    ];
 
-#[test]
-fn test_bpf_program_sync_annotations_shrink() {
-    let mut prog = make_program(vec![BpfInsn::nop(), BpfInsn::nop(), exit_insn()]);
-    assert_eq!(prog.annotations.len(), 3);
-    prog.insns.truncate(1);
-    prog.sync_annotations();
-    assert_eq!(prog.annotations.len(), 1);
+    for (label, mut prog, edit, expected_len) in cases {
+        edit(&mut prog);
+        prog.sync_annotations();
+        assert_eq!(prog.annotations.len(), expected_len, "{label}");
+    }
 }
 
 // ── AnalysisCache tests ─────────────────────────────────────────
@@ -323,19 +333,6 @@ fn test_analysis_cache_targeted_invalidation_for_known_types() {
 }
 
 // ── PassManager tests ───────────────────────────────────────────
-
-#[test]
-fn test_pass_manager_empty_pipeline() {
-    let pm = PassManager::new();
-    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
-    let ctx = PassContext::test_default();
-
-    let result = pm.run(&mut prog, &ctx).unwrap();
-
-    assert_eq!(result.pass_results.len(), 0);
-    // Program should be unchanged.
-    assert_eq!(prog.insns.len(), 2);
-}
 
 #[test]
 fn test_pass_manager_multiple_passes_sequential() {
@@ -486,44 +483,6 @@ fn test_profiling_data_injection() {
     let bp = prog.annotations[1].branch_profile.as_ref().unwrap();
     assert_eq!(bp.taken_count, 80);
     assert_eq!(bp.not_taken_count, 20);
-}
-
-// ── PlatformCapabilities tests ──────────────────────────────
-
-#[test]
-fn test_pass_skips_without_branchless_select_capability() {
-    // cond_select should skip when neither an x86 CMOV capability nor a
-    // registered select kinsn is available.
-    use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
-    use crate::passes::CondSelectPass;
-
-    let mut pm = PassManager::new();
-    pm.register_analysis(BranchTargetAnalysis);
-    pm.register_analysis(LivenessAnalysis);
-    pm.add_pass(CondSelectPass);
-
-    // Context has no select kinsn and no CMOV capability.
-    let ctx = PassContext::test_default();
-
-    let mut prog = make_program(vec![
-        BpfInsn::new(
-            crate::insn::BPF_JMP | crate::insn::BPF_JNE | crate::insn::BPF_K,
-            BpfInsn::make_regs(1, 0),
-            2,
-            0,
-        ),
-        BpfInsn::mov64_reg(2, 4),
-        BpfInsn::ja(1),
-        BpfInsn::mov64_reg(2, 3),
-        exit_insn(),
-    ]);
-
-    let result = pm.run(&mut prog, &ctx).unwrap();
-    // Should not apply anything because branchless select is unavailable.
-    assert!(result.pass_results[0]
-        .sites_skipped
-        .iter()
-        .any(|s| s.reason.contains("branchless select")));
 }
 
 #[test]

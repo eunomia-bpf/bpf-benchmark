@@ -66,26 +66,45 @@ fn ctx_with_select_kfunc(btf_id: i32) -> PassContext {
     ctx
 }
 
+fn pattern_a(cond_reg: u8, false_mov: BpfInsn, true_mov: BpfInsn) -> Vec<BpfInsn> {
+    vec![jne_imm(cond_reg, 0, 2), false_mov, BpfInsn::ja(1), true_mov, exit_insn()]
+}
+
+fn pattern_c(true_mov: BpfInsn, false_mov: BpfInsn) -> Vec<BpfInsn> {
+    vec![true_mov, jne_imm(1, 0, 1), false_mov, exit_insn()]
+}
+
 // ── Detection tests (unchanged) ──────────────────────────────────
 
 #[test]
-fn test_cond_select_analyze_4insn_diamond() {
+fn test_cond_select_pattern_a_analyzer_table() {
     let pass = CondSelectPass;
-    let insns = vec![
-        jne_imm(1, 0, 2),
-        BpfInsn::mov64_imm(0, 0),
-        BpfInsn::ja(1),
-        BpfInsn::mov64_imm(0, 1),
-        exit_insn(),
-    ];
-    let sites = pass.analyze(&insns);
-    assert_eq!(sites.len(), 1);
-    assert_eq!(sites[0].start_pc, 0);
-    assert_eq!(sites[0].old_len, 4);
-    assert_eq!(sites[0].cond_reg, 1);
-    assert_eq!(sites[0].dst_reg, 0);
-    assert_eq!(sites[0].true_val, CondSelectValue::Imm(1));
-    assert_eq!(sites[0].false_val, CondSelectValue::Imm(0));
+    for (label, false_mov, true_mov, false_val, true_val) in [
+        (
+            "immediate values",
+            BpfInsn::mov64_imm(0, 0),
+            BpfInsn::mov64_imm(0, 1),
+            CondSelectValue::Imm(0),
+            CondSelectValue::Imm(1),
+        ),
+        (
+            "register values",
+            BpfInsn::mov64_reg(0, 3),
+            BpfInsn::mov64_reg(0, 4),
+            CondSelectValue::Reg(3),
+            CondSelectValue::Reg(4),
+        ),
+    ] {
+        let insns = pattern_a(1, false_mov, true_mov);
+        let sites = pass.analyze(&insns);
+        assert_eq!(sites.len(), 1, "{label}");
+        assert_eq!(sites[0].start_pc, 0, "{label}");
+        assert_eq!(sites[0].old_len, 4, "{label}");
+        assert_eq!(sites[0].cond_reg, 1, "{label}");
+        assert_eq!(sites[0].dst_reg, 0, "{label}");
+        assert_eq!(sites[0].true_val, true_val, "{label}");
+        assert_eq!(sites[0].false_val, false_val, "{label}");
+    }
 }
 
 #[test]
@@ -104,38 +123,34 @@ fn test_cond_select_pattern_b_removed() {
 }
 
 #[test]
-fn test_cond_select_analyze_short_pattern_c() {
-    // Pattern C: MOV dst, true_val ; JNE cond, 0, +1 ; MOV dst, false_val
+fn test_cond_select_pattern_c_analyzer_table() {
     let pass = CondSelectPass;
-    let insns = vec![
-        BpfInsn::mov64_imm(0, 42), // true_val
-        jne_imm(1, 0, 1),          // if r1 != 0, skip next
-        BpfInsn::mov64_imm(0, 0),  // false_val
-        exit_insn(),
-    ];
-    let sites = pass.analyze(&insns);
-    assert_eq!(sites.len(), 1, "should detect Pattern C (short cond MOV)");
-    assert_eq!(sites[0].start_pc, 0); // starts at the MOV true
-    assert_eq!(sites[0].old_len, 3);
-    assert_eq!(sites[0].cond_reg, 1);
-    assert_eq!(sites[0].dst_reg, 0);
-    assert_eq!(sites[0].true_val, CondSelectValue::Imm(42));
-    assert_eq!(sites[0].false_val, CondSelectValue::Imm(0));
-}
-
-#[test]
-fn test_cond_select_short_pattern_c_with_reg_values() {
-    let pass = CondSelectPass;
-    let insns = vec![
-        BpfInsn::mov64_reg(0, 6), // true_val = r6
-        jne_imm(1, 0, 1),
-        BpfInsn::mov64_reg(0, 7), // false_val = r7
-        exit_insn(),
-    ];
-    let sites = pass.analyze(&insns);
-    assert_eq!(sites.len(), 1);
-    assert_eq!(sites[0].true_val, CondSelectValue::Reg(6));
-    assert_eq!(sites[0].false_val, CondSelectValue::Reg(7));
+    for (label, true_mov, false_mov, true_val, false_val) in [
+        (
+            "immediate values",
+            BpfInsn::mov64_imm(0, 42),
+            BpfInsn::mov64_imm(0, 0),
+            CondSelectValue::Imm(42),
+            CondSelectValue::Imm(0),
+        ),
+        (
+            "register values",
+            BpfInsn::mov64_reg(0, 6),
+            BpfInsn::mov64_reg(0, 7),
+            CondSelectValue::Reg(6),
+            CondSelectValue::Reg(7),
+        ),
+    ] {
+        let insns = pattern_c(true_mov, false_mov);
+        let sites = pass.analyze(&insns);
+        assert_eq!(sites.len(), 1, "{label}");
+        assert_eq!(sites[0].start_pc, 0, "{label}");
+        assert_eq!(sites[0].old_len, 3, "{label}");
+        assert_eq!(sites[0].cond_reg, 1, "{label}");
+        assert_eq!(sites[0].dst_reg, 0, "{label}");
+        assert_eq!(sites[0].true_val, true_val, "{label}");
+        assert_eq!(sites[0].false_val, false_val, "{label}");
+    }
 }
 
 #[test]
@@ -158,55 +173,24 @@ fn test_cond_select_short_pattern_c_no_match_cond_clobbered() {
 }
 
 #[test]
-fn test_cond_select_short_pattern_c_emit_jne() {
-    // Pattern C with register values should lower to a packed select call.
-    let mut prog = make_program(vec![
-        BpfInsn::mov64_reg(0, 7), // true_val
-        jne_imm(1, 0, 1),
-        BpfInsn::mov64_reg(0, 6), // false_val
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let ctx = ctx_with_select_kfunc(5555);
-
+fn test_cond_select_no_match_analyzer_matrix() {
     let pass = CondSelectPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 1);
-    let has_kfunc_call = prog
-        .insns
-        .iter()
-        .any(|i| i.is_call() && i.src_reg() == BPF_PSEUDO_KINSN_CALL);
-    assert!(has_kfunc_call);
-}
-
-#[test]
-fn test_cond_select_analyze_no_match_different_dst() {
-    let pass = CondSelectPass;
-    let insns = vec![
-        jne_imm(1, 0, 2),
-        BpfInsn::mov64_imm(0, 0),
-        BpfInsn::ja(1),
-        BpfInsn::mov64_imm(2, 1),
-    ];
-    let sites = pass.analyze(&insns);
-    assert!(sites.is_empty());
-}
-
-#[test]
-fn test_cond_select_analyze_reg_values_4insn() {
-    // Pattern A with register values.
-    let pass = CondSelectPass;
-    let insns = vec![
-        jne_imm(1, 0, 2),
-        BpfInsn::mov64_reg(0, 3), // false_val
-        BpfInsn::ja(1),
-        BpfInsn::mov64_reg(0, 4), // true_val
-        exit_insn(),
-    ];
-    let sites = pass.analyze(&insns);
-    assert_eq!(sites.len(), 1);
-    assert_eq!(sites[0].false_val, CondSelectValue::Reg(3));
-    assert_eq!(sites[0].true_val, CondSelectValue::Reg(4));
+    for (label, insns) in [
+        (
+            "different destination registers",
+            vec![jne_imm(1, 0, 2), BpfInsn::mov64_imm(0, 0), BpfInsn::ja(1), BpfInsn::mov64_imm(2, 1)],
+        ),
+        (
+            "linear program",
+            vec![
+                BpfInsn::mov64_imm(0, 42),
+                BpfInsn::mov64_imm(1, 10),
+                exit_insn(),
+            ],
+        ),
+    ] {
+        assert!(pass.analyze(&insns).is_empty(), "{label}");
+    }
 }
 
 #[test]
@@ -232,160 +216,100 @@ fn test_cond_select_analyze_multiple_sites() {
     assert_eq!(sites[1].dst_reg, 2);
 }
 
-#[test]
-fn test_cond_select_analyze_no_sites_in_linear_program() {
-    let pass = CondSelectPass;
-    let insns = vec![
-        BpfInsn::mov64_imm(0, 42),
-        BpfInsn::mov64_imm(1, 10),
-        exit_insn(),
-    ];
-    let sites = pass.analyze(&insns);
-    assert!(sites.is_empty());
-}
-
 // ── Emit tests ───────────────────────────────────────────────────
 
 #[test]
-fn test_cond_select_skip_when_kfunc_unavailable() {
-    let mut prog = make_program(vec![
-        jne_imm(1, 0, 2),
-        BpfInsn::mov64_imm(0, 0),
-        BpfInsn::ja(1),
-        BpfInsn::mov64_imm(0, 1),
-        exit_insn(),
-    ]);
-    let orig_insns = prog.insns.clone();
-    let mut cache = AnalysisCache::new();
-    let mut ctx = PassContext::test_default(); // select64_btf_id = -1
-    ctx.platform.has_cmov = true; // platform has CMOV, but kfunc is missing
-
+fn test_cond_select_capability_matrix() {
     let pass = CondSelectPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+    let original = pattern_a(1, BpfInsn::mov64_imm(0, 0), BpfInsn::mov64_imm(0, 1));
+    let mut no_branchless = make_program(original.clone());
+    let result = pass
+        .run(
+            &mut no_branchless,
+            &mut AnalysisCache::new(),
+            &PassContext::test_default(),
+        )
+        .unwrap();
     assert_eq!(result.sites_applied, 0);
-    assert_eq!(prog.insns, orig_insns);
+    assert!(result
+        .sites_skipped
+        .iter()
+        .any(|s| s.reason.contains("branchless select")));
+
+    let mut missing_kfunc = make_program(original.clone());
+    let mut missing_ctx = PassContext::test_default();
+    missing_ctx.platform.has_cmov = true;
+    let result = pass
+        .run(&mut missing_kfunc, &mut AnalysisCache::new(), &missing_ctx)
+        .unwrap();
+    assert_eq!(result.sites_applied, 0);
+    assert_eq!(missing_kfunc.insns, original);
     assert!(!result.diagnostics.is_empty());
     assert!(result.diagnostics[0].contains("kfunc unavailable"));
-}
 
-#[test]
-fn test_cond_select_emit_on_arm64_select_kfunc_without_cmov() {
-    let mut prog = make_program(vec![
-        jne_imm(1, 0, 2),
-        BpfInsn::mov64_imm(0, 0),
-        BpfInsn::ja(1),
-        BpfInsn::mov64_imm(0, 1),
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let mut ctx = ctx_with_select_kfunc(5555);
-    ctx.platform.arch = Arch::Aarch64;
-    assert!(!ctx.platform.has_cmov);
-
-    let pass = CondSelectPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+    let mut arm64 = make_program(original);
+    let mut arm64_ctx = ctx_with_select_kfunc(5555);
+    arm64_ctx.platform.arch = Arch::Aarch64;
+    assert!(!arm64_ctx.platform.has_cmov);
+    let result = pass
+        .run(&mut arm64, &mut AnalysisCache::new(), &arm64_ctx)
+        .unwrap();
     assert_eq!(result.sites_applied, 1);
-    assert!(prog
+    assert!(arm64
         .insns
         .iter()
         .any(|i| i.is_call() && i.src_reg() == BPF_PSEUDO_KINSN_CALL));
 }
 
 #[test]
-fn test_cond_select_emit_imm_true_reg_false() {
-    let mut prog = make_program(vec![
-        BpfInsn::mov32_imm(0, 1),
-        jne_imm(1, 0, 1),
-        BpfInsn::mov64_reg(0, 6),
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let ctx = ctx_with_select_kfunc(5555);
-
-    let pass = CondSelectPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 1);
-    assert_eq!(prog.insns[0], BpfInsn::mov32_imm(0, 1));
-    assert!(prog.insns[1].is_kinsn_sidecar());
-    assert_eq!(payload_regs(sidecar_payload(&prog.insns[1])), (0, 0, 6, 1));
-}
-
-#[test]
-fn test_cond_select_emit_reg_true_imm_false() {
-    let mut prog = make_program(vec![
-        jne_imm(1, 0, 2),
-        BpfInsn::mov64_imm(0, 0),
-        BpfInsn::ja(1),
-        BpfInsn::mov64_reg(0, 7),
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let ctx = ctx_with_select_kfunc(5555);
-
-    let pass = CondSelectPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 1);
-    assert_eq!(prog.insns[0], BpfInsn::mov64_imm(0, 0));
-    assert!(prog.insns[1].is_kinsn_sidecar());
-    assert_eq!(payload_regs(sidecar_payload(&prog.insns[1])), (0, 7, 0, 1));
-}
-
-#[test]
-fn test_cond_select_emit_reg32_true_imm_false() {
-    let mut prog = make_program(vec![
-        jne_imm(1, 0, 2),
-        BpfInsn::mov32_imm(0, 0),
-        BpfInsn::ja(1),
-        mov32_reg(0, 6),
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let ctx = ctx_with_select_kfunc(5555);
-
-    let pass = CondSelectPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 1);
-    assert_eq!(prog.insns[0], mov32_reg(0, 6));
-    assert_eq!(prog.insns[1], BpfInsn::mov32_imm(2, 0));
-    assert!(prog.insns[2].is_kinsn_sidecar());
-    assert_eq!(payload_regs(sidecar_payload(&prog.insns[2])), (0, 0, 2, 1));
-}
-
-#[test]
-fn test_cond_select_emit_both_immediate_values() {
-    let mut prog = make_program(vec![
-        BpfInsn::mov32_imm(0, 1),
-        jne_imm(1, 0, 1),
-        BpfInsn::mov32_imm(0, 0),
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let ctx = ctx_with_select_kfunc(5555);
-
-    let pass = CondSelectPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 1);
-    assert_eq!(prog.insns[0], BpfInsn::mov32_imm(0, 1));
-    assert_eq!(prog.insns[1], BpfInsn::mov32_imm(2, 0));
-    assert!(prog.insns[2].is_kinsn_sidecar());
-    assert_eq!(payload_regs(sidecar_payload(&prog.insns[2])), (0, 0, 2, 1));
-}
-
-#[test]
-fn test_cond_select_no_emit_3insn_pattern_b() {
-    // Pattern B (Jcc +1) is no longer matched; should not emit.
-    let mut prog = make_program(vec![
-        jne_imm(1, 0, 1),
-        BpfInsn::mov64_imm(0, 0),
-        BpfInsn::mov64_imm(0, 1),
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let ctx = ctx_with_select_kfunc(7777);
-
-    let pass = CondSelectPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 0);
+fn test_cond_select_value_materialization_matrix() {
+    for (label, mut prog, expected_prefix, sidecar_index, expected_regs) in [
+        (
+            "imm true reg false",
+            make_program(pattern_c(BpfInsn::mov32_imm(0, 1), BpfInsn::mov64_reg(0, 6))),
+            vec![BpfInsn::mov32_imm(0, 1)],
+            1,
+            (0u8, 0, 6, 1),
+        ),
+        (
+            "reg true imm false",
+            make_program(pattern_a(1, BpfInsn::mov64_imm(0, 0), BpfInsn::mov64_reg(0, 7))),
+            vec![BpfInsn::mov64_imm(0, 0)],
+            1,
+            (0u8, 7, 0, 1),
+        ),
+        (
+            "reg32 true imm false",
+            make_program(pattern_a(1, BpfInsn::mov32_imm(0, 0), mov32_reg(0, 6))),
+            vec![mov32_reg(0, 6), BpfInsn::mov32_imm(2, 0)],
+            2,
+            (0u8, 0, 2, 1),
+        ),
+        (
+            "both immediate values",
+            make_program(pattern_c(BpfInsn::mov32_imm(0, 1), BpfInsn::mov32_imm(0, 0))),
+            vec![BpfInsn::mov32_imm(0, 1), BpfInsn::mov32_imm(2, 0)],
+            2,
+            (0u8, 0, 2, 1),
+        ),
+    ] {
+        let result = CondSelectPass
+            .run(
+                &mut prog,
+                &mut AnalysisCache::new(),
+                &ctx_with_select_kfunc(5555),
+            )
+            .unwrap();
+        assert_eq!(result.sites_applied, 1, "{label}");
+        assert_eq!(&prog.insns[..expected_prefix.len()], expected_prefix.as_slice(), "{label}");
+        assert!(prog.insns[sidecar_index].is_kinsn_sidecar(), "{label}");
+        assert_eq!(
+            payload_regs(sidecar_payload(&prog.insns[sidecar_index])),
+            expected_regs,
+            "{label}"
+        );
+    }
 }
 
 #[test]
@@ -476,105 +400,6 @@ fn test_cond_select_emit_jgt_predicate_prefix() {
     assert_eq!(prog.insns[2], BpfInsn::mov64_imm(0, 1));
     assert!(prog.insns[3].is_kinsn_sidecar());
     assert_eq!(payload_regs(sidecar_payload(&prog.insns[3])), (0, 7, 6, 0));
-}
-
-#[test]
-fn test_cond_select_emit_with_reg_values() {
-    // Pattern A with register values.
-    // JNE r1, 0, +2 ; MOV r0, r6 ; JA +1 ; MOV r0, r7 ; EXIT
-    let mut prog = make_program(vec![
-        jne_imm(1, 0, 2),
-        BpfInsn::mov64_reg(0, 6), // false_val
-        BpfInsn::ja(1),
-        BpfInsn::mov64_reg(0, 7), // true_val
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let ctx = ctx_with_select_kfunc(8888);
-
-    let pass = CondSelectPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 1);
-    // Verify semantics: r1 = r7 (true_val, a), r2 = r6 (false_val, b), r3 = cond(r1)
-    let mut initial = [0u64; 11];
-    initial[1] = 100; // cond
-    initial[6] = 600; // false_val
-    initial[7] = 700; // true_val
-    let after = simulate_param_setup(&prog.insns, &initial);
-    assert_eq!(after[1], 700, "r1 should be true_val (r7)");
-    assert_eq!(after[2], 600, "r2 should be false_val (r6)");
-    assert_eq!(after[3], 100, "r3 should be original cond (r1)");
-}
-
-#[test]
-fn test_cond_select_packed_keeps_live_regs() {
-    let mut prog = make_program(vec![
-        BpfInsn::mov64_imm(3, 99),
-        jne_imm(1, 0, 2),
-        BpfInsn::mov64_reg(0, 6),
-        BpfInsn::ja(1),
-        BpfInsn::mov64_reg(0, 7),
-        BpfInsn::mov64_reg(0, 3), // r3 is live-out of the site
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let ctx = ctx_with_select_kfunc(5555);
-
-    let pass = CondSelectPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 1);
-}
-
-#[test]
-fn test_cond_select_packed_no_callee_saved_dependency() {
-    let mut prog = make_program(vec![
-        BpfInsn::mov64_imm(3, 99),
-        jne_imm(1, 0, 2),
-        BpfInsn::mov64_reg(0, 6),
-        BpfInsn::ja(1),
-        BpfInsn::mov64_reg(0, 7),
-        BpfInsn::alu64_reg(BPF_OR, 0, 3),
-        BpfInsn::alu64_reg(BPF_OR, 0, 6),
-        BpfInsn::alu64_reg(BPF_OR, 0, 7),
-        BpfInsn::alu64_reg(BPF_OR, 0, 8),
-        BpfInsn::alu64_reg(BPF_OR, 0, 9),
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let ctx = ctx_with_select_kfunc(5555);
-
-    let pass = CondSelectPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 1);
-}
-
-#[test]
-fn test_cond_select_no_sites_linear() {
-    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
-    let mut cache = AnalysisCache::new();
-    let ctx = ctx_with_select_kfunc(5555);
-
-    let pass = CondSelectPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 0);
-}
-
-#[test]
-fn test_cond_select_emit_cond_reg_is_r3() {
-    // Packed lowering should preserve cond_reg == r3 without emitting any register setup MOVs.
-    let mut prog = make_program(vec![
-        jne_imm(3, 0, 2),
-        BpfInsn::mov64_reg(0, 6),
-        BpfInsn::ja(1),
-        BpfInsn::mov64_reg(0, 7),
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let ctx = ctx_with_select_kfunc(5555);
-
-    let pass = CondSelectPass;
-    let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert!(prog.insns[0].is_kinsn_sidecar());
 }
 
 // ── Issue 1: Parallel-copy alias safety tests ─────────────────

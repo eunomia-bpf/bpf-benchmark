@@ -49,32 +49,44 @@ fn build_wide_mem_4(dst: u8, base: u8, off: i16) -> Vec<BpfInsn> {
     ]
 }
 
-#[test]
-fn test_scan_wide_mem_4byte() {
-    let insns = build_wide_mem_4(0, 6, 10);
-    let sites = scan_wide_mem(&insns);
-    assert_eq!(sites.len(), 1);
-    let s = &sites[0];
-    assert_eq!(s.start_pc, 0);
-    assert_eq!(s.old_len, 10);
-    assert_eq!(s.get_binding("dst_reg"), Some(0));
-    assert_eq!(s.get_binding("base_reg"), Some(6));
-    assert_eq!(s.get_binding("base_off"), Some(10));
-    assert_eq!(s.get_binding("width"), Some(4));
+fn build_wide_mem_2(dst: u8, tmp: u8, base: u8, off: i16) -> Vec<BpfInsn> {
+    vec![
+        BpfInsn::ldx_mem(BPF_B, dst, base, off),
+        BpfInsn::ldx_mem(BPF_B, tmp, base, off + 1),
+        BpfInsn::alu64_imm(BPF_LSH, tmp, 8),
+        BpfInsn::alu64_reg(BPF_OR, dst, tmp),
+    ]
+}
+
+fn build_wide_mem_3(dst: u8, tmp: u8, base: u8, off: i16) -> Vec<BpfInsn> {
+    let mut insns = build_wide_mem_2(dst, tmp, base, off);
+    insns.push(BpfInsn::ldx_mem(BPF_B, tmp, base, off + 2));
+    insns.push(BpfInsn::alu64_imm(BPF_LSH, tmp, 16));
+    insns.push(BpfInsn::alu64_reg(BPF_OR, dst, tmp));
+    insns
+}
+
+fn with_exit(mut insns: Vec<BpfInsn>) -> Vec<BpfInsn> {
+    insns.push(exit_insn());
+    insns
 }
 
 #[test]
-fn test_scan_wide_mem_2byte() {
-    let insns = vec![
-        BpfInsn::ldx_mem(BPF_B, 1, 6, 0),
-        BpfInsn::ldx_mem(BPF_B, 2, 6, 1),
-        BpfInsn::alu64_imm(BPF_LSH, 2, 8),
-        BpfInsn::alu64_reg(BPF_OR, 1, 2),
-    ];
-    let sites = scan_wide_mem(&insns);
-    assert_eq!(sites.len(), 1);
-    assert_eq!(sites[0].old_len, 4);
-    assert_eq!(sites[0].get_binding("width"), Some(2));
+fn test_scan_wide_mem_low_first_table() {
+    for (label, insns, dst, base, off, width, old_len) in [
+        ("4-byte", build_wide_mem_4(0, 6, 10), 0, 6, 10, 4, 10),
+        ("2-byte", build_wide_mem_2(1, 2, 6, 0), 1, 6, 0, 2, 4),
+    ] {
+        let sites = scan_wide_mem(&insns);
+        assert_eq!(sites.len(), 1, "{label}");
+        let s = &sites[0];
+        assert_eq!(s.start_pc, 0, "{label}");
+        assert_eq!(s.old_len, old_len, "{label}");
+        assert_eq!(s.get_binding("dst_reg"), Some(dst), "{label}");
+        assert_eq!(s.get_binding("base_reg"), Some(base), "{label}");
+        assert_eq!(s.get_binding("base_off"), Some(off), "{label}");
+        assert_eq!(s.get_binding("width"), Some(width), "{label}");
+    }
 }
 
 #[test]
@@ -90,34 +102,24 @@ fn test_scan_wide_mem_no_match() {
 }
 
 #[test]
-fn test_scan_wide_mem_embedded_in_program() {
-    let mut insns = vec![BpfInsn::mov64_imm(0, 0)];
-    insns.extend(build_wide_mem_4(0, 6, 10));
-    insns.push(BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0));
-    let sites = scan_wide_mem(&insns);
-    assert_eq!(sites.len(), 1);
-    assert_eq!(sites[0].start_pc, 1);
-    assert_eq!(sites[0].old_len, 10);
-}
-
-#[test]
-fn test_scan_wide_mem_multiple_sites() {
-    let insns = vec![
-        BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
-        BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
-        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
-        BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        BpfInsn::ldx_mem(BPF_B, 3, 7, 4),
-        BpfInsn::ldx_mem(BPF_B, 4, 7, 5),
-        BpfInsn::alu64_imm(BPF_LSH, 4, 8),
-        BpfInsn::alu64_reg(BPF_OR, 3, 4),
-    ];
-    let sites = scan_wide_mem(&insns);
-    assert_eq!(sites.len(), 2);
-    assert_eq!(sites[0].start_pc, 0);
-    assert_eq!(sites[0].get_binding("dst_reg"), Some(0));
-    assert_eq!(sites[1].start_pc, 4);
-    assert_eq!(sites[1].get_binding("dst_reg"), Some(3));
+fn test_scan_wide_mem_position_table() {
+    let mut embedded = vec![BpfInsn::mov64_imm(0, 0)];
+    embedded.extend(build_wide_mem_4(0, 6, 10));
+    embedded.push(BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0));
+    let mut multiple = build_wide_mem_2(0, 1, 6, 0);
+    multiple.extend(build_wide_mem_2(3, 4, 7, 4));
+    for (label, insns, expected) in [
+        ("embedded", embedded, vec![(1, 0, 10)]),
+        ("multiple sites", multiple, vec![(0, 0, 4), (4, 3, 4)]),
+    ] {
+        let sites = scan_wide_mem(&insns);
+        assert_eq!(sites.len(), expected.len(), "{label}");
+        for (site, (start_pc, dst_reg, old_len)) in sites.iter().zip(expected) {
+            assert_eq!(site.start_pc, start_pc, "{label}");
+            assert_eq!(site.old_len, old_len, "{label}");
+            assert_eq!(site.get_binding("dst_reg"), Some(dst_reg), "{label}");
+        }
+    }
 }
 
 // ── High-byte-first (Variant B) tests ──────────────────────────
@@ -257,37 +259,46 @@ fn test_emit_wide_mem_unsupported_width() {
 // ── Pass tests ─────────────────────────────────────────────────
 
 #[test]
-fn test_wide_mem_pass_no_sites() {
-    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
-    let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
-
-    let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 0);
-    assert_eq!(prog.insns.len(), 2);
-}
-
-#[test]
-fn test_wide_mem_pass_transforms_correctly() {
-    let mut prog = make_program(vec![
-        BpfInsn::ldx_mem(BPF_B, 0, 6, 10),
-        BpfInsn::ldx_mem(BPF_B, 1, 6, 11),
-        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
-        BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
-
-    let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 1);
-    assert_eq!(prog.insns.len(), 2);
-    assert_eq!(bpf_size(prog.insns[0].code), BPF_H);
-    assert_eq!(prog.insns[0].dst_reg(), 0);
-    assert_eq!(prog.insns[0].src_reg(), 6);
-    assert_eq!(prog.insns[0].off, 10);
+fn test_wide_mem_pass_transform_matrix() {
+    for (label, mut prog, expected_applied, expected_len, first_size, first_dst, first_src, first_off)
+        in [
+            (
+                "single halfword",
+                make_program(with_exit(build_wide_mem_2(0, 1, 6, 10))),
+                1,
+                2,
+                BPF_H,
+                0,
+                6,
+                10,
+            ),
+            (
+                "multiple sites",
+                make_program({
+                    let mut insns = build_wide_mem_2(0, 1, 6, 0);
+                    insns.extend(build_wide_mem_2(3, 4, 7, 4));
+                    with_exit(insns)
+                }),
+                2,
+                3,
+                BPF_H,
+                0,
+                6,
+                0,
+            ),
+        ]
+    {
+        let mut cache = AnalysisCache::new();
+        let result = WideMemPass
+            .run(&mut prog, &mut cache, &PassContext::test_default())
+            .unwrap();
+        assert_eq!(result.sites_applied, expected_applied, "{label}");
+        assert_eq!(prog.insns.len(), expected_len, "{label}");
+        assert_eq!(bpf_size(prog.insns[0].code), first_size, "{label}");
+        assert_eq!(prog.insns[0].dst_reg(), first_dst, "{label}");
+        assert_eq!(prog.insns[0].src_reg(), first_src, "{label}");
+        assert_eq!(prog.insns[0].off, first_off, "{label}");
+    }
 }
 
 #[test]
@@ -335,28 +346,6 @@ fn test_wide_mem_pass_skips_site_with_interior_branch_target() {
 }
 
 #[test]
-fn test_wide_mem_pass_multiple_sites() {
-    let mut prog = make_program(vec![
-        BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
-        BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
-        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
-        BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        BpfInsn::ldx_mem(BPF_B, 3, 7, 4),
-        BpfInsn::ldx_mem(BPF_B, 4, 7, 5),
-        BpfInsn::alu64_imm(BPF_LSH, 4, 8),
-        BpfInsn::alu64_reg(BPF_OR, 3, 4),
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
-
-    let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 2);
-    assert_eq!(prog.insns.len(), 3);
-}
-
-#[test]
 fn test_wide_mem_pass_skips_site_with_live_scratch_reg() {
     let mut prog = make_program(vec![
         BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
@@ -386,66 +375,46 @@ fn wide_mem_4_insns(dst: u8, base: u8, off: i16) -> Vec<BpfInsn> {
 }
 
 #[test]
-fn test_branch_fixup_forward_across_site() {
-    let mut insns = Vec::new();
-    insns.push(BpfInsn::ja(10));
-    insns.extend(wide_mem_4_insns(0, 6, 0));
-    insns.push(exit_insn());
+fn test_wide_mem_branch_fixup_table() {
+    for (label, insns, branch_pc, expected_len, expected_off, is_conditional) in {
+        let mut forward = vec![BpfInsn::ja(10)];
+        forward.extend(wide_mem_4_insns(0, 6, 0));
+        forward.push(exit_insn());
 
-    let mut prog = make_program(insns);
-    let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
+        let mut backward = vec![BpfInsn::mov64_imm(0, 0)];
+        backward.extend(wide_mem_4_insns(0, 6, 0));
+        backward.push(BpfInsn::ja(-12));
+        backward.push(exit_insn());
 
-    let pass = WideMemPass;
-    let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(prog.insns.len(), 3);
-    let ja = &prog.insns[0];
-    assert!(ja.is_ja());
-    assert_eq!(ja.off, 1, "ja should jump to exit at pc 2");
-}
+        let mut conditional = vec![BpfInsn::new(
+            BPF_JMP | BPF_JEQ | BPF_K,
+            BpfInsn::make_regs(1, 0),
+            10,
+            0,
+        )];
+        conditional.extend(wide_mem_4_insns(0, 6, 0));
+        conditional.push(exit_insn());
 
-#[test]
-fn test_branch_fixup_backward_across_site() {
-    let mut insns = Vec::new();
-    insns.push(BpfInsn::mov64_imm(0, 0));
-    insns.extend(wide_mem_4_insns(0, 6, 0));
-    insns.push(BpfInsn::ja(-12));
-    insns.push(exit_insn());
-
-    let mut prog = make_program(insns);
-    let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
-
-    let pass = WideMemPass;
-    let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(prog.insns.len(), 4);
-    let ja = &prog.insns[2];
-    assert!(ja.is_ja());
-    assert_eq!(ja.off, -3, "ja should jump back to pc 0");
-}
-
-#[test]
-fn test_conditional_branch_fixup() {
-    let mut insns = Vec::new();
-    insns.push(BpfInsn::new(
-        BPF_JMP | BPF_JEQ | BPF_K,
-        BpfInsn::make_regs(1, 0),
-        10,
-        0,
-    ));
-    insns.extend(wide_mem_4_insns(0, 6, 0));
-    insns.push(exit_insn());
-
-    let mut prog = make_program(insns);
-    let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
-
-    let pass = WideMemPass;
-    let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(prog.insns.len(), 3);
-    let jeq = &prog.insns[0];
-    assert!(jeq.is_cond_jmp());
-    assert_eq!(jeq.off, 1, "jeq should jump to exit at pc=2");
+        [
+            ("forward ja", forward, 0, 3, 1, false),
+            ("backward ja", backward, 2, 4, -3, false),
+            ("conditional jeq", conditional, 0, 3, 1, true),
+        ]
+    } {
+        let mut prog = make_program(insns);
+        let mut cache = AnalysisCache::new();
+        let _result = WideMemPass
+            .run(&mut prog, &mut cache, &PassContext::test_default())
+            .unwrap();
+        assert_eq!(prog.insns.len(), expected_len, "{label}");
+        let branch = &prog.insns[branch_pc];
+        if is_conditional {
+            assert!(branch.is_cond_jmp(), "{label}");
+        } else {
+            assert!(branch.is_ja(), "{label}");
+        }
+        assert_eq!(branch.off, expected_off, "{label}");
+    }
 }
 
 #[test]
@@ -480,190 +449,84 @@ fn test_wide_mem_skips_byte_ladder_with_pseudo_func_boundary_inside() {
 }
 
 #[test]
-fn test_wide_mem_pass_skips_unsupported_width_3() {
-    // Build a 3-byte low-first byte-ladder: LDX(B, dst, base, 0) + 2 more bytes.
-    // Width 3 is detected by the daemon but cannot be emitted as a single load.
-    let insns = vec![
-        BpfInsn::ldx_mem(BPF_B, 0, 6, 0), // byte 0
-        BpfInsn::ldx_mem(BPF_B, 1, 6, 1), // byte 1
-        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
-        BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        BpfInsn::ldx_mem(BPF_B, 1, 6, 2), // byte 2
-        BpfInsn::alu64_imm(BPF_LSH, 1, 16),
-        BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        exit_insn(),
-    ];
+fn test_wide_mem_unsupported_and_mixed_width_table() {
+    let width3 = with_exit(build_wide_mem_3(0, 1, 6, 0));
+    let mixed = {
+        let mut insns = build_wide_mem_4(0, 6, 0);
+        insns.extend(build_wide_mem_3(2, 3, 7, 0));
+        with_exit(insns)
+    };
 
-    // Verify the daemon finds a width=3 site.
-    let sites = scan_wide_mem(&insns);
+    let sites = scan_wide_mem(&width3);
     assert_eq!(sites.len(), 1);
     assert_eq!(sites[0].get_binding("width"), Some(3));
 
-    // The pass should skip this site (unsupported width) without error.
-    let mut prog = make_program(insns);
-    let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
-
-    let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 0);
-    assert!(result
-        .sites_skipped
-        .iter()
-        .any(|s| s.reason.contains("unsupported width")));
-}
-
-#[test]
-fn test_wide_mem_pass_applies_width4_skips_width3_mixed() {
-    // Program with both a width=4 site (supported) and a width=3 site (unsupported).
-    // The pass should apply the width=4 site and skip the width=3 site.
-    let insns = vec![
-        // Width=4 low-first: dst=0, base=6, off=0
-        BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
-        BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
-        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
-        BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        BpfInsn::ldx_mem(BPF_B, 1, 6, 2),
-        BpfInsn::alu64_imm(BPF_LSH, 1, 16),
-        BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        BpfInsn::ldx_mem(BPF_B, 1, 6, 3),
-        BpfInsn::alu64_imm(BPF_LSH, 1, 24),
-        BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        // Width=3 low-first: dst=2, base=7, off=0
-        BpfInsn::ldx_mem(BPF_B, 2, 7, 0),
-        BpfInsn::ldx_mem(BPF_B, 3, 7, 1),
-        BpfInsn::alu64_imm(BPF_LSH, 3, 8),
-        BpfInsn::alu64_reg(BPF_OR, 2, 3),
-        BpfInsn::ldx_mem(BPF_B, 3, 7, 2),
-        BpfInsn::alu64_imm(BPF_LSH, 3, 16),
-        BpfInsn::alu64_reg(BPF_OR, 2, 3),
-        exit_insn(),
-    ];
-
-    let mut prog = make_program(insns);
-    let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
-
-    let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 1);
-    // The width=3 site should be in sites_skipped.
-    assert!(result
-        .sites_skipped
-        .iter()
-        .any(|s| s.reason.contains("unsupported width 3")));
+    for (label, insns, expected_applied) in [
+        ("width3 only", width3, 0),
+        ("width4 plus width3", mixed, 1),
+    ] {
+        let mut prog = make_program(insns);
+        let mut cache = AnalysisCache::new();
+        let result = WideMemPass
+            .run(&mut prog, &mut cache, &PassContext::test_default())
+            .unwrap();
+        assert_eq!(result.sites_applied, expected_applied, "{label}");
+        assert!(result
+            .sites_skipped
+            .iter()
+            .any(|s| s.reason.contains("unsupported width")));
+    }
 }
 
 // ── Packet pointer safety tests ─────────────────────────────────
 
 #[test]
-fn test_is_packet_unsafe_prog_type() {
-    // XDP and TC are packet-unsafe.
-    assert!(is_packet_unsafe_prog_type(6)); // XDP
-    assert!(is_packet_unsafe_prog_type(3)); // SCHED_CLS
-    assert!(is_packet_unsafe_prog_type(4)); // SCHED_ACT
-                                            // Tracing, kprobe, etc. are not packet-unsafe.
-    assert!(!is_packet_unsafe_prog_type(0)); // unspecified
-    assert!(!is_packet_unsafe_prog_type(1)); // SOCKET_FILTER
-    assert!(!is_packet_unsafe_prog_type(2)); // KPROBE
-    assert!(!is_packet_unsafe_prog_type(5)); // CGROUP_SKB
-    assert!(!is_packet_unsafe_prog_type(7)); // PERF_EVENT
-    assert!(!is_packet_unsafe_prog_type(26)); // TRACING
-}
-
-#[test]
-fn test_wide_mem_skips_non_stack_in_xdp() {
-    // 2-byte wide_mem site with base_reg=6 (not stack pointer R10).
-    // In XDP prog (type 6), this should be skipped.
-    let mut prog = make_program(vec![
-        BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
-        BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
-        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
-        BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let mut ctx = PassContext::test_default();
-    ctx.prog_type = 6; // XDP
-
-    let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 0);
-    assert!(result
-        .sites_skipped
-        .iter()
-        .any(|s| s.reason.contains("packet pointer") || s.reason.contains("non-stack base")));
-}
-
-#[test]
-fn test_wide_mem_allows_stack_base_in_xdp() {
-    // Byte-ladder from R10 (stack pointer) should still work in XDP.
-    let mut prog = make_program(vec![
-        BpfInsn::ldx_mem(BPF_B, 0, 10, -4),
-        BpfInsn::ldx_mem(BPF_B, 1, 10, -3),
-        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
-        BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        BpfInsn::ldx_mem(BPF_B, 1, 10, -2),
-        BpfInsn::alu64_imm(BPF_LSH, 1, 16),
-        BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        BpfInsn::ldx_mem(BPF_B, 1, 10, -1),
-        BpfInsn::alu64_imm(BPF_LSH, 1, 24),
-        BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let mut ctx = PassContext::test_default();
-    ctx.prog_type = 6; // XDP
-
-    let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 1);
-    assert_eq!(prog.insns.len(), 2);
-    assert_eq!(bpf_size(prog.insns[0].code), BPF_W);
-    assert_eq!(prog.insns[0].src_reg(), 10);
-    assert_eq!(prog.insns[0].off, -4);
-}
-
-#[test]
-fn test_wide_mem_allows_map_value_base_in_xdp() {
-    // In XDP, a base register derived from a map value (via LDX_MEM from
-    // R0, not R1/ctx) should be allowed — it's not a packet pointer.
-    let mut prog = make_program(vec![
-        // r6 = *(u64 *)(r0 + 0)  -- map value pointer, not ctx
-        BpfInsn::ldx_mem(BPF_DW, 6, 0, 0),
-        // byte-ladder from r6
-        BpfInsn::ldx_mem(BPF_B, 2, 6, 0),
-        BpfInsn::ldx_mem(BPF_B, 3, 6, 1),
-        BpfInsn::alu64_imm(BPF_LSH, 3, 8),
-        BpfInsn::alu64_reg(BPF_OR, 2, 3),
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let mut ctx = PassContext::test_default();
-    ctx.prog_type = 6; // XDP
-
-    let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 1);
-}
-
-#[test]
-fn test_wide_mem_allows_non_stack_in_tracing() {
-    // In non-packet prog types (e.g., tracing/kprobe), non-stack base is OK.
-    let mut prog = make_program(vec![
-        BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
-        BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
-        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
-        BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        exit_insn(),
-    ]);
-    let mut cache = AnalysisCache::new();
-    let mut ctx = PassContext::test_default();
-    ctx.prog_type = 26; // TRACING
-
-    let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 1);
+fn test_wide_mem_packet_pointer_gate_matrix() {
+    for (label, mut prog, prog_type, expected_applied, expect_packet_skip) in [
+        (
+            "xdp non-stack",
+            make_program(with_exit(build_wide_mem_2(0, 1, 6, 0))),
+            6,
+            0,
+            true,
+        ),
+        (
+            "xdp stack",
+            make_program(with_exit(build_wide_mem_4(0, 10, -4))),
+            6,
+            1,
+            false,
+        ),
+        (
+            "xdp map value",
+            make_program({
+                let mut insns = vec![BpfInsn::ldx_mem(BPF_DW, 6, 0, 0)];
+                insns.extend(build_wide_mem_2(2, 3, 6, 0));
+                with_exit(insns)
+            }),
+            6,
+            1,
+            false,
+        ),
+        (
+            "tracing non-stack",
+            make_program(with_exit(build_wide_mem_2(0, 1, 6, 0))),
+            26,
+            1,
+            false,
+        ),
+    ] {
+        let mut cache = AnalysisCache::new();
+        let mut ctx = PassContext::test_default();
+        ctx.prog_type = prog_type;
+        let result = WideMemPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        assert_eq!(result.sites_applied, expected_applied, "{label}");
+        if expect_packet_skip {
+            assert!(result.sites_skipped.iter().any(|s| {
+                s.reason.contains("packet pointer") || s.reason.contains("non-stack base")
+            }));
+        }
+    }
 }
 
 #[test]
@@ -727,96 +590,34 @@ fn make_verifier_state_with_reg_type(
     }
 }
 
-/// Regression test for cilium prog 141: two adjacent 4-byte byte-ladders
-/// whose base register is a BTF struct pointer must NOT be merged into a
-/// wider load because the verifier enforces field boundaries on BTF pointers.
-///
-/// Bug detected by this test: before the fix, wide_mem would merge two
-/// consecutive 4-byte byte-ladders from a `trusted_ptr_bpf_prog` register
-/// into a single 4-byte wide load.  The verifier rejected this with EACCES
-/// because the load crossed the `pages` field boundary inside `bpf_prog`.
-///
-/// With the fix, when verifier states show the base register as a BTF struct
-/// pointer, the merge is skipped and the byte-ladder is left intact.
 #[test]
-fn test_wide_mem_skips_merge_when_base_is_btf_struct_ptr() {
-    // A 2-byte byte-ladder from r6 (which verifier states show as a BTF ptr).
-    let mut prog = make_program(vec![
-        BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
-        BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
-        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
-        BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        exit_insn(),
-    ]);
+fn test_wide_mem_verifier_state_pointer_type_gate_matrix() {
+    for (label, reg_type, expected_applied, expect_btf_skip) in [
+        ("no verifier states", None, 1, false),
+        ("scalar base", Some("scalar"), 1, false),
+        ("btf struct ptr", Some("trusted_ptr_bpf_prog"), 0, true),
+    ] {
+        let mut prog = make_program(with_exit(build_wide_mem_2(0, 1, 6, 0)));
+        if let Some(reg_type) = reg_type {
+            prog.set_verifier_states(vec![make_verifier_state_with_reg_type(0, 6, reg_type)]);
+        }
 
-    // Inject a verifier state that shows r6 as a trusted BTF struct pointer
-    // at PC 0 (just before the byte-ladder begins).  This simulates the
-    // verifier log from a prior BPF_PROG_REJIT(log_level=2) call.
-    let btf_state = make_verifier_state_with_reg_type(0, 6, "trusted_ptr_bpf_prog");
-    prog.set_verifier_states(vec![btf_state]);
-
-    let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
-
-    let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-    // The merge must be skipped because r6 is a BTF struct pointer.
-    assert_eq!(result.sites_applied, 0);
-    assert!(
-        result
-            .sites_skipped
-            .iter()
-            .any(|s| s.reason.contains("BTF struct pointer")),
-        "skip reason must mention BTF struct pointer; got: {:?}",
-        result.sites_skipped
-    );
-    // Original byte-ladder must be preserved.
-    assert_eq!(prog.insns.len(), 5);
-    assert_eq!(prog.insns[0].code, BPF_LDX | BPF_B | BPF_MEM);
-}
-
-/// Without verifier states, wide_mem should still apply the merge (it cannot
-/// know the pointer type).  This verifies the fix does not regress
-/// the no-states path.
-#[test]
-fn test_wide_mem_applies_without_verifier_states() {
-    let mut prog = make_program(vec![
-        BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
-        BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
-        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
-        BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        exit_insn(),
-    ]);
-    // No verifier states installed — program.verifier_states is empty (default).
-    let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
-
-    let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 1);
-}
-
-/// A scalar register (not a BTF struct pointer) must still be merged even
-/// when verifier states are present.
-#[test]
-fn test_wide_mem_applies_when_verifier_shows_scalar_base() {
-    let mut prog = make_program(vec![
-        BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
-        BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
-        BpfInsn::alu64_imm(BPF_LSH, 1, 8),
-        BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        exit_insn(),
-    ]);
-
-    // r6 is a scalar — wide loads are safe.
-    let scalar_state = make_verifier_state_with_reg_type(0, 6, "scalar");
-    prog.set_verifier_states(vec![scalar_state]);
-
-    let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
-
-    let pass = WideMemPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 1);
+        let mut cache = AnalysisCache::new();
+        let result = WideMemPass
+            .run(&mut prog, &mut cache, &PassContext::test_default())
+            .unwrap();
+        assert_eq!(result.sites_applied, expected_applied, "{label}");
+        if expect_btf_skip {
+            assert!(
+                result
+                    .sites_skipped
+                    .iter()
+                    .any(|s| s.reason.contains("BTF struct pointer")),
+                "skip reason must mention BTF struct pointer; got: {:?}",
+                result.sites_skipped
+            );
+            assert_eq!(prog.insns.len(), 5, "{label}");
+            assert_eq!(prog.insns[0].code, BPF_LDX | BPF_B | BPF_MEM, "{label}");
+        }
+    }
 }

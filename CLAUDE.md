@@ -53,7 +53,7 @@ Skip programs where either phase has `run_cnt_delta == 0`.
   Equivalent to `total_post_rejit_BPF_time / total_baseline_BPF_time`
   Answers: "real CPU-time reduction in BPF execution"
 
-Both reported together; agreement (within 1%) signals high confidence. Report `wins/losses/ties` counts as supplemental.
+Both reported together. Report `wins/losses/ties` counts as supplemental.
 
 **Forbidden in metrics**:
 - log/sqrt/log² weighted geomean (no physical justification, paper-review red flag)

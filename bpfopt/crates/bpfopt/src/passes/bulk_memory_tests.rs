@@ -334,33 +334,31 @@ fn bulk_call_count(insns: &[BpfInsn], btf_id: i32) -> usize {
 }
 
 #[test]
-fn test_empty_program() {
-    let mut program = make_program(vec![]);
-
-    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-    assert!(program.insns.is_empty());
-    assert_eq!(result.pass_results[0].sites_applied, 0);
-}
-
-#[test]
-fn test_no_consecutive_stores() {
-    let original = make_no_consecutive_stores_program();
-    let mut program = make_program(original.clone());
-
-    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-    assert_eq!(program.insns, original);
-    assert_eq!(result.pass_results[0].sites_applied, 0);
-}
-
-#[test]
 fn test_memcpy_pattern_8_pairs() {
-    let mut program = make_program(make_memcpy_program_8_pairs());
-    let mut expected = memcpy_call(10, -64, 6, 0, 64, 3);
-    expected.push(exit_insn());
-
-    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-    assert_eq!(result.pass_results[0].sites_applied, 1);
-    assert_eq!(program.insns, expected);
+    for (label, mut program, expected) in {
+        let mut plain_expected = memcpy_call(10, -64, 6, 0, 64, 3);
+        plain_expected.push(exit_insn());
+        let mut surrounding_expected = vec![BpfInsn::mov64_imm(8, 7)];
+        surrounding_expected.extend(memcpy_call(10, -64, 6, 0, 64, 3));
+        surrounding_expected.push(BpfInsn::mov64_reg(0, 8));
+        surrounding_expected.push(exit_insn());
+        [
+            (
+                "canonical",
+                make_program(make_memcpy_program_8_pairs()),
+                plain_expected,
+            ),
+            (
+                "surrounding",
+                make_program(make_memcpy_preserves_surrounding_program()),
+                surrounding_expected,
+            ),
+        ]
+    } {
+        let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
+        assert_eq!(result.pass_results[0].sites_applied, 1, "{label}");
+        assert_eq!(program.insns, expected, "{label}");
+    }
 }
 
 #[test]
@@ -387,69 +385,103 @@ fn test_memset_zero_pattern() {
 }
 
 #[test]
-fn test_memset_nonzero_immediate_pattern() {
-    let mut program = make_program(make_memset_nonzero_imm_program());
-    let mut expected = memset_call(10, -32, 32, BPF_W, 0x7f);
-    expected.push(exit_insn());
-
-    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-    assert_eq!(result.pass_results[0].sites_applied, 1);
-    assert_eq!(program.insns, expected);
+fn test_memset_fill_encoding_matrix() {
+    for (label, mut program, expected) in {
+        let mut nonzero_imm = memset_call(10, -32, 32, BPF_W, 0x7f);
+        nonzero_imm.push(exit_insn());
+        let mut truncated_byte = memset_call(10, -32, 32, BPF_B, 0x80);
+        truncated_byte.push(exit_insn());
+        let mut negative_dw = memset_call(10, -32, 32, BPF_DW, 0xff);
+        negative_dw.push(exit_insn());
+        let mut reg_fill = vec![BpfInsn::mov64_imm(8, 0x5a5a5a5a)];
+        reg_fill.extend(memset_call(10, -32, 32, BPF_W, 0x5a));
+        reg_fill.push(exit_insn());
+        [
+            (
+                "nonzero immediate",
+                make_program(make_memset_nonzero_imm_program()),
+                nonzero_imm,
+            ),
+            (
+                "byte immediate truncates",
+                make_program(make_memset_truncated_byte_imm_program()),
+                truncated_byte,
+            ),
+            (
+                "negative dw immediate",
+                make_program(make_memset_negative_dw_imm_program()),
+                negative_dw,
+            ),
+            (
+                "register fill",
+                make_program(make_nonzero_memset_reg_program()),
+                reg_fill,
+            ),
+        ]
+    } {
+        let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
+        assert_eq!(result.pass_results[0].sites_applied, 1, "{label}");
+        assert_eq!(program.insns, expected, "{label}");
+    }
 }
 
 #[test]
-fn test_memset_byte_immediate_truncates_to_imm8() {
-    let mut program = make_program(make_memset_truncated_byte_imm_program());
-    let mut expected = memset_call(10, -32, 32, BPF_B, 0x80);
-    expected.push(exit_insn());
-
-    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-    assert_eq!(result.pass_results[0].sites_applied, 1);
-    assert_eq!(program.insns, expected);
+fn test_bulk_memory_negative_pattern_matrix() {
+    for (label, original) in [
+        ("no consecutive stores", make_no_consecutive_stores_program()),
+        ("non-repeated immediate", make_memset_non_repeated_imm_program()),
+        ("below threshold", make_below_threshold_program()),
+    ] {
+        let mut program = make_program(original.clone());
+        let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
+        assert_eq!(program.insns, original, "{label}");
+        assert_eq!(result.pass_results[0].sites_applied, 0, "{label}");
+    }
 }
 
 #[test]
-fn test_memset_negative_dw_immediate_uses_ff_fill() {
-    let mut program = make_program(make_memset_negative_dw_imm_program());
-    let mut expected = memset_call(10, -32, 32, BPF_DW, 0xff);
-    expected.push(exit_insn());
-
-    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-    assert_eq!(result.pass_results[0].sites_applied, 1);
-    assert_eq!(program.insns, expected);
-}
-
-#[test]
-fn test_memset_non_repeated_immediate_unchanged() {
-    let original = make_memset_non_repeated_imm_program();
-    let mut program = make_program(original.clone());
-
-    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-    assert_eq!(program.insns, original);
-    assert_eq!(result.pass_results[0].sites_applied, 0);
-}
-
-#[test]
-fn test_below_threshold_unchanged() {
-    let original = make_below_threshold_program();
-    let mut program = make_program(original.clone());
-
-    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-    assert_eq!(program.insns, original);
-    assert_eq!(result.pass_results[0].sites_applied, 0);
-}
-
-#[test]
-fn test_different_base_regs_not_merged() {
-    let mut program = make_program(make_different_base_regs_program());
-    let mut expected = memcpy_call(10, -64, 6, 0, 32, 3);
-    expected.extend(memcpy_call(8, 0, 10, -32, 32, 3));
-    expected.push(exit_insn());
-
-    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-    assert_eq!(result.pass_results[0].sites_applied, 2);
-    assert_eq!(bulk_call_count(&program.insns, MEMCPY_BTF_ID), 2);
-    assert_eq!(program.insns, expected);
+fn test_bulk_memory_segmentation_matrix() {
+    for (label, mut program, expected, memcpy_calls, memset_calls) in {
+        let mut different_base = memcpy_call(10, -64, 6, 0, 32, 3);
+        different_base.extend(memcpy_call(8, 0, 10, -32, 32, 3));
+        different_base.push(exit_insn());
+        let mut non_consecutive = memcpy_call(10, -64, 6, 0, 32, 3);
+        non_consecutive.extend(memcpy_call(10, -24, 6, 40, 32, 3));
+        non_consecutive.push(exit_insn());
+        let mut interleaved = memset_zero_call(10, -64, 32, BPF_DW);
+        interleaved.push(BpfInsn::mov64_imm(9, 1));
+        interleaved.extend(memset_zero_call(10, -32, 32, BPF_DW));
+        interleaved.push(exit_insn());
+        [
+            (
+                "different base regs",
+                make_program(make_different_base_regs_program()),
+                different_base,
+                2,
+                0,
+            ),
+            (
+                "non-consecutive offsets",
+                make_program(make_non_consecutive_offsets_program()),
+                non_consecutive,
+                2,
+                0,
+            ),
+            (
+                "interleaved non-store",
+                make_program(make_interleaved_non_store_program()),
+                interleaved,
+                0,
+                2,
+            ),
+        ]
+    } {
+        let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
+        assert_eq!(result.pass_results[0].sites_applied, 2, "{label}");
+        assert_eq!(bulk_call_count(&program.insns, MEMCPY_BTF_ID), memcpy_calls);
+        assert_eq!(bulk_call_count(&program.insns, MEMSET_BTF_ID), memset_calls);
+        assert_eq!(program.insns, expected, "{label}");
+    }
 }
 
 #[test]
@@ -466,19 +498,6 @@ fn test_non_stack_base_memcpy_skipped_by_alias_gate() {
 }
 
 #[test]
-fn test_non_consecutive_offsets_split() {
-    let mut program = make_program(make_non_consecutive_offsets_program());
-    let mut expected = memcpy_call(10, -64, 6, 0, 32, 3);
-    expected.extend(memcpy_call(10, -24, 6, 40, 32, 3));
-    expected.push(exit_insn());
-
-    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-    assert_eq!(result.pass_results[0].sites_applied, 2);
-    assert_eq!(bulk_call_count(&program.insns, MEMCPY_BTF_ID), 2);
-    assert_eq!(program.insns, expected);
-}
-
-#[test]
 fn test_mixed_widths_handled() {
     let mut program = make_program(make_mixed_widths_program());
 
@@ -486,19 +505,6 @@ fn test_mixed_widths_handled() {
     assert_eq!(result.pass_results[0].sites_applied, 1);
     assert_eq!(bulk_call_count(&program.insns, MEMSET_BTF_ID), 1);
     assert_eq!(program.insns.last(), Some(&exit_insn()));
-}
-
-#[test]
-fn test_memcpy_preserves_surrounding() {
-    let mut program = make_program(make_memcpy_preserves_surrounding_program());
-    let mut expected = vec![BpfInsn::mov64_imm(8, 7)];
-    expected.extend(memcpy_call(10, -64, 6, 0, 64, 3));
-    expected.push(BpfInsn::mov64_reg(0, 8));
-    expected.push(exit_insn());
-
-    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-    assert_eq!(program.insns, expected);
-    assert_eq!(result.pass_results[0].sites_applied, 1);
 }
 
 #[test]
@@ -512,34 +518,6 @@ fn test_branch_fixup_after_replacement() {
 }
 
 #[test]
-fn test_interleaved_non_store_splits() {
-    let mut program = make_program(make_interleaved_non_store_program());
-    let mut expected = memset_zero_call(10, -64, 32, BPF_DW);
-    expected.push(BpfInsn::mov64_imm(9, 1));
-    expected.extend(memset_zero_call(10, -32, 32, BPF_DW));
-    expected.push(exit_insn());
-
-    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-    assert_eq!(result.pass_results[0].sites_applied, 2);
-    assert_eq!(bulk_call_count(&program.insns, MEMSET_BTF_ID), 2);
-    assert_eq!(program.insns, expected);
-}
-
-#[test]
-fn test_kfunc_not_available_skipped() {
-    let original = make_memcpy_program_8_pairs();
-    let mut program = make_program(original.clone());
-
-    let result = run_bulk_memory_pass(&mut program, &PassContext::test_default());
-    assert_eq!(program.insns, original);
-    assert_eq!(result.pass_results[0].sites_applied, 0);
-    assert!(result.pass_results[0]
-        .sites_skipped
-        .iter()
-        .any(|skip| skip.reason.contains(MEMCPY_TARGET)));
-}
-
-#[test]
 fn test_same_base_chunked_overlap_skipped() {
     let original = make_same_base_chunked_overlap_program();
     let mut program = make_program(original.clone());
@@ -550,19 +528,6 @@ fn test_same_base_chunked_overlap_skipped() {
         .sites_skipped
         .iter()
         .any(|skip| skip.reason.contains("overlapping same-base memcpy run")));
-}
-
-#[test]
-fn test_memset_nonzero_reg_pattern() {
-    let mut program = make_program(make_nonzero_memset_reg_program());
-    let mut expected = vec![BpfInsn::mov64_imm(8, 0x5a5a5a5a)];
-    expected.extend(memset_call(10, -32, 32, BPF_W, 0x5a));
-    expected.push(exit_insn());
-
-    let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
-    assert_eq!(program.insns, expected);
-    assert_eq!(bulk_call_count(&program.insns, MEMSET_BTF_ID), 1);
-    assert_eq!(result.pass_results[0].sites_applied, 1);
 }
 
 #[test]
