@@ -24,7 +24,7 @@ static NEXT_WORKDIR_ID: AtomicU64 = AtomicU64::new(0);
 const REJIT_VERBOSE_LOG_BUF_SIZE: usize = 16 * 1024 * 1024;
 const REJIT_BASIC_LOG_BUF_SIZE: usize = 1024 * 1024;
 const MAP_SNAPSHOT_MAX_BYTES: u64 = 64 * 1024;
-const MAX_FAILURE_ARTIFACTS_PER_REQUEST: usize = 128;
+const MAX_FAILURE_ARTIFACTS_PER_REQUEST: usize = 32;
 static FAILURE_ARTIFACT_COUNT: AtomicUsize = AtomicUsize::new(0);
 
 fn maybe_tar_workdir(workdir: &Path) -> Result<Option<String>> {

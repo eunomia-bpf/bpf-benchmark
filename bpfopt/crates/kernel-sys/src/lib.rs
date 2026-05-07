@@ -40,7 +40,13 @@ pub const BRANCH_SNAPSHOT_EVENT_SIZE: usize =
     BRANCH_SNAPSHOT_EVENT_HEADER_SIZE + BRANCH_SNAPSHOT_MAX_ENTRIES * BRANCH_SNAPSHOT_ENTRY_SIZE;
 
 const BPFPROF_SIDECAR_NAME: &[u8] = b"bpfprof_lbr\0";
-const MAX_REJIT_LOG_BUF_SIZE: usize = 256 * 1024 * 1024;
+// Cap the verifier log buffer at 64 MiB. Previously this was 256 MiB and the
+// loop doubled up; with 287 tetragon programs failing the daemon's
+// failure-tar buffers ballooned past 50 GiB and OOM-killed the process.
+// At 16 MiB the cap was too tight for tetragon's biggest progs (≈49% hit
+// ENOSPC); 64 MiB captures realistic verbose verifier traces while keeping
+// peak per-worker live state to ~64 MiB × 16 = 1 GiB.
+const MAX_REJIT_LOG_BUF_SIZE: usize = 64 * 1024 * 1024;
 
 const PERF_EVENT_IOC_ENABLE: libc::c_ulong = 0x2400;
 const PERF_EVENT_IOC_DISABLE: libc::c_ulong = 0x2401;

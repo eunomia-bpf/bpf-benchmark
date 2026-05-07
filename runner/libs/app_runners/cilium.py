@@ -287,9 +287,26 @@ class CiliumRunner(NativeProcessRunner):
             "--enable-l7-proxy=false",
             "--enable-health-checking=false",
             "--enable-endpoint-health-checking=false",
-            "--enable-endpoint-routes=true",
-            "--enable-policy=always",
-            "--policy-audit-mode=false",
+            # Disable userspace continuous reload features so the daemon stops
+            # rebuilding endpoint BPF every few seconds (otherwise paper-perf
+            # measurements include drift-checker / dynamic-config regenerations).
+            "--enable-drift-checker=false",
+            "--enable-dynamic-config=false",
+            "--enable-dynamic-lifecycle-manager=false",
+            "--enable-monitor=false",
+            "--enable-hubble=false",
+            "--enable-l2-neigh-discovery=false",
+            # Crank up every BPF feature that can run without k8s/external
+            # infra so cil_lxc_policy / tail_handle_ipv4_* / xdp_root /
+            # bandwidth-manager / host-firewall paths all get exercised.
+            "--enable-bpf-masquerade=true",
+            "--enable-bpf-clock-probe=true",
+            "--enable-ipv4-fragment-tracking=true",
+            "--enable-pmtu-discovery=true",
+            "--enable-extended-ip-protocols=true",
+            "--bpf-conntrack-accounting=true",
+            "--enable-xdp-prefilter=true",
+            "--bpf-lb-acceleration=native",
             "--ipam=cluster-pool",
             f"--ipv4-range={self.ipv4_range}",
             f"--ipv4-native-routing-cidr={self.ipv4_range}",
