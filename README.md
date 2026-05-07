@@ -55,8 +55,8 @@ make help
 ## Running Benchmarks
 
 **The root `Makefile` is the only supported entrypoint. Do not invoke
-`python -m runner.libs.run_target_suite`, `cargo run`, `docker run`, or any
-component binary directly. Every benchmark must go through `make <target>`.**
+`cargo run`, `docker run`, or any component binary directly. Every benchmark
+must go through `make <target>`.**
 
 ```bash
 make vm-micro                        # full micro suite in VM

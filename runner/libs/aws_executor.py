@@ -15,10 +15,9 @@ from runner.libs import ROOT_DIR
 from runner.libs import aws_common
 from runner.libs.cli_support import fail
 from runner.libs.file_lock import runner_lock
-from runner.libs.run_contract import RunConfig, read_run_config_file
+from runner.libs.run_contract import RunConfig, build_run_config, build_target_config
 from runner.libs.state_file import write_state
 from runner.libs.suite_commands import build_runtime_container_command, runtime_container_host_dirs
-from runner.libs.suite_args import read_suite_args_file
 from runner.libs.workspace_layout import (
     runtime_container_image_tar_path,
 )
@@ -632,13 +631,12 @@ def _pull_remote_dir(ctx: aws_common.AwsExecutorContext, ip: str, remote_path: s
 def _remote_runtime_container_command(
     ctx: aws_common.AwsExecutorContext,
     remote_workspace: str,
-    suite_args_path: Path | None,
+    suite_args: list[str],
 ) -> list[str]:
-    suite_args = read_suite_args_file(suite_args_path) if suite_args_path is not None else []
     return build_runtime_container_command(
         Path(remote_workspace),
-        read_run_config_file(ctx.config_path),
-        suite_args,
+        ctx.contract,
+        list(suite_args),
         die=_die,
     )
 
@@ -648,7 +646,7 @@ def _remote_result_dir_command(remote_workspace: str, suite_name: str) -> str:
     return shlex.join(["mkdir", "-p", *dirs])
 
 
-def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args_path: Path | None) -> None:
+def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args: list[str]) -> None:
     aws_common._wait_for_ssh(ctx, ip)
     _ensure_remote_docker(ctx, ip)
     stamp = f"{ctx.suite_name}_{ctx.run_token}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
@@ -665,7 +663,7 @@ def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args_pa
         f"mkdir -p {shlex.quote(remote_run_dir)} && "
         f"chown $(id -u):$(id -g) {shlex.quote(remote_run_dir)} 2>/dev/null || true"
     )
-    suite_cmd = shlex.join(_remote_runtime_container_command(ctx, remote_workspace, suite_args_path))
+    suite_cmd = shlex.join(_remote_runtime_container_command(ctx, remote_workspace, suite_args))
     log_dir_cmd = f"mkdir -p {shlex.quote(str(Path(remote_log).parent))}"
     run_cmd = (
         f"{log_dir_cmd} && "
@@ -704,19 +702,12 @@ def _cleanup_failed_run(ctx: aws_common.AwsExecutorContext, state: dict[str, str
     return cleanup_error or None
 
 
-def cleanup_failed_run_for_config(config_path: Path) -> None:
-    if not config_path.is_file():
-        return
-    ctx = aws_common._build_context("run", config_path)
-    _cleanup_failed_run(ctx)
-
-
-def _run_aws(ctx: aws_common.AwsExecutorContext, suite_args_path: Path | None) -> None:
+def _run_aws(ctx: aws_common.AwsExecutorContext, suite_args: list[str]) -> None:
     state = {}
     try:
         instance_ip = _ensure_instance_for_suite(ctx)
         state = aws_common._load_instance_state(ctx)
-        _run_remote_suite(ctx, instance_ip, suite_args_path)
+        _run_remote_suite(ctx, instance_ip, suite_args)
     except BaseException as exc:
         cleanup_error = _cleanup_failed_run(ctx, state or None)
         if cleanup_error and hasattr(exc, "add_note"):
@@ -728,26 +719,21 @@ def _run_aws(ctx: aws_common.AwsExecutorContext, suite_args_path: Path | None) -
 
 def main(argv: list[str] | None = None) -> None:
     args = list(sys.argv[1:] if argv is None else argv)
-    if len(args) < 2:
-        _die("usage: aws_executor.py <run|terminate> <config_path> [suite_args_path]")
+    if not args:
+        _die("usage: aws_executor.py <run <target> <suite> [suite_args...] | terminate <target>>")
     action = args[0]
-    config_path = Path(args[1]).resolve()
-    if not config_path.is_file():
-        _die(f"run config is missing: {config_path}")
-    ctx = aws_common._build_context(action, config_path)
     if action == "run":
         if len(args) < 3:
-            _die("usage: aws_executor.py run <config_path> <suite_args_path>")
-        if len(args) > 3:
-            _die("usage: aws_executor.py run <config_path> <suite_args_path>")
-        suite_args_path = Path(args[2]).resolve()
-        if not suite_args_path.is_file():
-            _die(f"suite args file is missing: {suite_args_path}")
-        _run_aws(ctx, suite_args_path)
+            _die("usage: aws_executor.py run <target> <suite> [suite_args...]")
+        contract = build_run_config(args[1], args[2])
+        ctx = aws_common._build_context(action, contract)
+        _run_aws(ctx, args[3:])
         return
     if action == "terminate":
         if len(args) != 2:
-            _die("usage: aws_executor.py terminate <config_path>")
+            _die("usage: aws_executor.py terminate <target>")
+        contract = build_target_config(args[1])
+        ctx = aws_common._build_context(action, contract)
         aws_common._terminate_instance(ctx)
         return
     _die(f"unsupported aws executor action: {action}")

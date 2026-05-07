@@ -380,7 +380,7 @@ def apply_daemon_rejit(
     #   1. unconditionally pop "workdir_tar_b64" so the base64 tar bytes never
     #      land in apps/<app>.json;
     #   2. write the popped tar to disk only when failure_artifacts_dir is set
-    #      (driven by `make vm-corpus KEEP_FAILURE_ARTIFACTS=1`); otherwise the
+    #      (driven by `make corpus KEEP_WORKDIRS=1`); otherwise the
     #      bytes are dropped on the floor.
     per_program = _resp.get("per_program") or {}
     if isinstance(per_program, Mapping):

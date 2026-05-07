@@ -7,8 +7,7 @@ from pathlib import Path
 
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail
-from runner.libs.run_contract import RunConfig, read_run_config_file
-from runner.libs.suite_args import read_suite_args_file, suite_args_from_env
+from runner.libs.run_contract import RunConfig, build_run_config
 from runner.libs.suite_commands import (
     build_runtime_container_command,
     runtime_container_host_dirs,
@@ -123,10 +122,7 @@ def _optional_int(value: str) -> int | None:
 
 
 def run_vm_suite(workspace_root: Path, config: RunConfig, suite_args: list[str] | None = None) -> int:
-    effective_suite_args = list(suite_args) if suite_args is not None else suite_args_from_env(
-        config.identity.target_name,
-        config.identity.suite_name,
-    )
+    effective_suite_args = list(suite_args) if suite_args is not None else []
     guest_script = write_guest_script(
         [suite_command(workspace_root, config, effective_suite_args)],
         initial_cwd=ROOT_DIR,
@@ -152,18 +148,13 @@ def run_vm_suite(workspace_root: Path, config: RunConfig, suite_args: list[str] 
 
 def main(argv: list[str] | None = None) -> None:
     args = list(sys.argv[1:] if argv is None else argv)
-    if len(args) not in {1, 2}:
-        _die("usage: kvm_executor.py <config_path> [suite_args_path]")
-    config_path = Path(args[0]).resolve()
-    if not config_path.is_file():
-        _die(f"run config is missing: {config_path}")
-    config = read_run_config_file(config_path)
-    executor = config.identity.executor
-    if executor != "kvm":
-        _die(f"run config executor is not kvm: {executor}")
-    workspace_root = ROOT_DIR
-    suite_args = read_suite_args_file(Path(args[1]).resolve()) if len(args) == 2 else None
-    raise SystemExit(run_vm_suite(workspace_root, config, suite_args))
+    if len(args) < 2:
+        _die("usage: kvm_executor.py <target> <suite> [suite_args...]")
+    target_name, suite_name = args[0], args[1]
+    config = build_run_config(target_name, suite_name)
+    if config.identity.executor != "kvm":
+        _die(f"target {target_name} executor is not kvm: {config.identity.executor}")
+    raise SystemExit(run_vm_suite(ROOT_DIR, config, args[2:]))
 
 
 if __name__ == "__main__":

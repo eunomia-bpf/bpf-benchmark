@@ -10,7 +10,7 @@ from pathlib import Path
 
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail
-from runner.libs.run_contract import RunConfig, read_run_config_file
+from runner.libs.run_contract import RunConfig
 from runner.libs.state_file import read_state
 
 _die = partial(fail, "aws-common")
@@ -19,7 +19,6 @@ _die = partial(fail, "aws-common")
 @dataclass(frozen=True)
 class AwsExecutorContext:
     action: str
-    config_path: Path
     contract: RunConfig
     target_name: str
     suite_name: str
@@ -35,14 +34,13 @@ class AwsExecutorContext:
     results_dir: Path
 
 
-def _build_context(action: str, config_path: Path) -> AwsExecutorContext:
-    contract = read_run_config_file(config_path)
+def _build_context(action: str, contract: RunConfig) -> AwsExecutorContext:
     target_name = contract.identity.target_name; run_token = contract.identity.token
     if not target_name: _die("run config target name is empty")
     if not run_token: _die("run config token is empty")
     target_root = ROOT_DIR / ".cache" / target_name
     run_state_dir = target_root / "run-state" / run_token
-    return AwsExecutorContext(action=action, config_path=config_path, contract=contract,
+    return AwsExecutorContext(action=action, contract=contract,
                               target_name=target_name, suite_name=contract.identity.suite_name,
                               run_token=run_token, remote_user=contract.remote.user,
                               remote_stage_dir=contract.remote.stage_dir,

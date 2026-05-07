@@ -43,11 +43,22 @@ from runner.libs.run_artifacts import (
     current_process_identity,
     derive_run_type,
 )
+from runner.libs.workspace_layout import inside_runtime_image
+from runner.suites._common import (
+    base_suite_runtime_env,
+    csv_tokens,
+    ensure_bpf_stats_enabled,
+    ensure_katran_artifacts,
+    env_with_suite_runtime_ld,
+    resolve_daemon_binary,
+    resolve_executable,
+    resolve_workspace_path,
+    run_checked,
+    suite_main_setup,
+)
 
 
 DEFAULT_MACRO_APPS_YAML = ROOT_DIR / "corpus" / "config" / "macro_apps.yaml"
-DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
-DEFAULT_OUTPUT_JSON = ROOT_DIR / "corpus" / "results" / "vm_corpus.json"
 _CORPUS_APPS_ENV = "BPFREJIT_CORPUS_APPS"
 
 
@@ -77,25 +88,61 @@ def _filter_suite_apps(suite: AppSuite) -> AppSuite:
     return filtered
 
 
+def _env_str(name: str, default: str = "") -> str:
+    return os.environ.get(name, "").strip() or default
+
+
+def _env_bool(name: str) -> bool:
+    return _env_str(name).lower() in ("1", "true", "yes", "on")
+
+
+def _env_int(name: str, default: int) -> int:
+    raw = _env_str(name)
+    return default if not raw else int(raw)
+
+
+def _env_float(name: str, default: float) -> float:
+    raw = _env_str(name)
+    return default if not raw else float(raw)
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run the app-native corpus suite driver.")
-    parser.add_argument("--suite", default=str(DEFAULT_MACRO_APPS_YAML))
-    parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
-    parser.add_argument("--samples", type=int, default=0)
-    parser.add_argument("--duration-s", dest="duration_s", type=float, default=0.0,
-                        help="Workload duration per sample in seconds (default: catalog default).")
-    parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
-    parser.add_argument(
-        "--keep-failure-artifacts",
-        action="store_true",
-        help="Persist daemon failure-artifact tarballs under details/failure-artifacts/ for debug; default discards them.",
+    """Build the driver Namespace entirely from env vars (no CLI args).
+
+    Infrastructure (workspace/target_arch/executor/native_repos) is rebuilt
+    in-process via runner.libs.run_contract.build_run_config(TARGET, "corpus").
+    User knobs (SAMPLES/WARMUPS/...) come straight from env. argv is accepted
+    for legacy callers but ignored.
+    """
+    del argv
+    from runner.libs.run_contract import build_run_config
+    target_name = _env_str("TARGET", "x86-kvm")
+    contract = build_run_config(target_name, "corpus")
+    ns = argparse.Namespace(
+        workspace=str(ROOT_DIR),
+        target_arch=contract.identity.target_arch,
+        target_name=contract.identity.target_name,
+        executor=contract.identity.executor,
+        run_token=contract.identity.token,
+        python_bin=contract.remote.python_bin,
+        bpftool_bin=contract.remote.bpftool_bin or "bpftool",
+        daemon_binary="",  # resolved later via resolve_daemon_binary()
+        suite=str(DEFAULT_MACRO_APPS_YAML),
+        native_repos=list(contract.artifacts.native_repos),
+        output_json="",  # filled in by _setup_runtime_env
+        samples=_env_int("SAMPLES", 0),
+        duration_s=_env_float("WORKLOAD_DURATION", 0.0),
+        warmups=_env_int("WARMUPS", 1),
+        skip_rejit=_env_bool("SKIP_REJIT"),
+        keep_failure_artifacts=_env_str("KEEP_WORKDIRS").lower() in ("1", "all"),
     )
-    args = parser.parse_args(argv)
-    if args.samples is not None and int(args.samples) < 0:
-        raise SystemExit("--samples must be >= 0")
-    if args.duration_s is not None and float(args.duration_s) < 0:
-        raise SystemExit("--duration-s must be >= 0")
-    return args
+    if ns.samples < 0:
+        raise SystemExit("SAMPLES must be >= 0")
+    if ns.warmups < 0:
+        raise SystemExit("WARMUPS must be >= 0")
+    if ns.duration_s < 0:
+        raise SystemExit("WORKLOAD_DURATION must be >= 0")
+    return ns
 
 def _print_progress(event: str, **fields: object) -> None:
     payload = {"event": event}
@@ -131,13 +178,13 @@ def _measure_runner_phase(
     *,
     workload_seconds: float,
     samples: int,
-    warmup: bool = False,
+    warmups: int = 0,
 ) -> dict[str, object]:
     logical_prog_ids = [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0]
     if not logical_prog_ids:
         raise RuntimeError("workload measurement requires at least one live BPF program id")
     workloads: list[dict[str, object]] = []
-    if warmup:
+    for _ in range(max(0, int(warmups))):
         runner.run_workload(workload_seconds)
     initial_stats = sample_bpf_stats(logical_prog_ids)
     for _ in range(samples):
@@ -456,6 +503,8 @@ def _run_suite_lifecycle_sessions(
     sessions: Sequence[CorpusAppSession],
     *,
     samples: int,
+    warmups: int = 1,
+    skip_rejit: bool = False,
 ) -> tuple[list[LifecycleRunResult], str]:
     if not hasattr(prepared_daemon_session, "session"):
         raise RuntimeError("prepared daemon session is required")
@@ -529,7 +578,7 @@ def _run_suite_lifecycle_sessions(
                         result.state.prog_ids,
                         workload_seconds=session.workload_seconds,
                         samples=samples,
-                        warmup=True,
+                        warmups=warmups,
                     )
                     _print_progress(
                         "measurement_done",
@@ -567,6 +616,18 @@ def _run_suite_lifecycle_sessions(
 
         active_pairs = surviving_pairs
         for session, result in active_pairs:
+            if skip_rejit:
+                _print_progress(
+                    "rejit_skipped",
+                    app=session.app.name,
+                    runner=session.app.runner,
+                    program_count=len(result.rejit_prog_ids),
+                )
+                result.rejit_result = {
+                    "status": "skipped",
+                    "per_program": {str(int(pid)): {"status": "skipped", "passes": []} for pid in result.rejit_prog_ids},
+                }
+                continue
             _print_progress(
                 "rejit_start",
                 app=session.app.name,
@@ -608,7 +669,7 @@ def _run_suite_lifecycle_sessions(
                     result.state.prog_ids,
                     workload_seconds=session.workload_seconds,
                     samples=samples,
-                    warmup=True,
+                    warmups=warmups,
                 )
                 _print_progress(
                     "measurement_done",
@@ -689,12 +750,14 @@ def run_suite(
     partial_results: "dict[str, dict[str, object]] | None" = None,
 ) -> dict[str, object]:
     suite_path = suite.manifest_path.resolve()
-    daemon_binary = Path(args.daemon).resolve()
+    daemon_binary = Path(args.daemon_binary).resolve()
     if not daemon_binary.exists():
         raise RuntimeError(f"daemon binary not found: {daemon_binary}")
 
     workload_seconds = _workload_seconds(args)
     samples = _sample_count(args)
+    warmups = max(0, int(getattr(args, "warmups", 1) or 0))
+    skip_rejit = bool(getattr(args, "skip_rejit", False))
     results_by_name: dict[str, dict[str, object]] = {}
     completed_apps: set[str] = set()
     fatal_error = ""
@@ -733,6 +796,8 @@ def run_suite(
                         prepared_daemon_session,
                         [session],
                         samples=samples,
+                        warmups=warmups,
+                        skip_rejit=skip_rejit,
                     )
                     wait_for_suite_quiescence()
                     fatal_error = str(app_fatal_error or "")
@@ -804,6 +869,8 @@ def run_suite(
         "suite_name": suite.suite_name,
         "daemon": str(daemon_binary),
         "samples": samples,
+        "warmups": warmups,
+        "skip_rejit": skip_rejit,
         "workload_seconds": workload_seconds,
         "kinsn_modules": kinsn_metadata,
         "status": "error" if any_app_failed else "ok",
@@ -864,8 +931,41 @@ def _finalize_partial(
     return payload
 
 
+def _setup_runtime_env(args: argparse.Namespace) -> Path:
+    """Resolve workspace, set up container runtime env, validate artifacts.
+
+    Replaces the former runner/suites/corpus.py wrapper; runs once at the
+    start of main(). Mutates args in place (workspace, target_arch, daemon_binary).
+    """
+    workspace = suite_main_setup(args, str(ROOT_DIR), _setup_die)
+    env = base_suite_runtime_env(workspace, args, "corpus", _setup_die)
+    python_bin = args.python_bin or sys.executable
+    resolve_executable(python_bin, path_value=env["PATH"], description="Python binary", die=_setup_die)
+    resolve_executable(args.bpftool_bin, path_value=env["PATH"], description="bpftool binary", die=_setup_die)
+
+    os.chdir(workspace)
+    import shutil
+    if inside_runtime_image() and shutil.which("ip", path=env["PATH"]) is not None:
+        run_checked(["ip", "link", "set", "lo", "up"], cwd=workspace, env=env, die=_setup_die)
+    ensure_bpf_stats_enabled(workspace, _setup_die)
+    runtime_env, _ = env_with_suite_runtime_ld(workspace, args.target_arch, env)
+    ensure_katran_artifacts(workspace, args.target_arch, args.native_repos, _setup_die)
+    args.daemon_binary = str(resolve_daemon_binary(workspace, args.target_arch, args.daemon_binary, _setup_die))
+    # Apply runtime env to current process (PATH, LD_LIBRARY_PATH, BPFREJIT_*, etc.)
+    os.environ.update(runtime_env)
+    if not args.output_json:
+        args.output_json = str(workspace / "corpus" / "results" / f"{args.target_name}_corpus.json")
+    args.output_json = str(resolve_workspace_path(workspace, args.output_json))
+    return workspace
+
+
+def _setup_die(message: str) -> None:
+    raise SystemExit(f"[corpus-driver] {message}")
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    _setup_runtime_env(args)
     output_json = Path(args.output_json).resolve()
     suite = _filter_suite_apps(load_app_suite_from_yaml(Path(args.suite).resolve()))
     resolved_workload_seconds = _workload_seconds(args)

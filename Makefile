@@ -13,7 +13,7 @@ X86_BUILD_DIR ?= $(ARTIFACT_ROOT)/x86-kernel-build
 RUNNER_BUILD_DIR ?= $(RUNNER_DIR)/build
 
 ARM64_BUILD_DIR     ?= $(ARTIFACT_ROOT)/arm64-kernel-build
-RUN_TARGET_SUITE_CMD  = "$(PYTHON)" -m runner.libs.run_target_suite
+
 
 NPROC        ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
 JOBS         ?= $(NPROC)
@@ -35,14 +35,16 @@ BENCH    ?=
 FUZZ_ROUNDS ?= 1000
 DOCKER_BUILD_CACHE_KEEP_STORAGE ?= 50GB
 
-# PLATFORM × ARCH → runner target name
+# PLATFORM × ARCH → runner target name + suite executor.
 ifeq ($(PLATFORM),kvm)
   ifneq ($(ARCH),x86)
     $(error PLATFORM=kvm only supports ARCH=x86)
   endif
   TARGET := x86-kvm
   COMMON_DEPS := $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(X86_RUNTIME_KERNEL_IMAGE) $(DAEMON_DIR)/target/release/bpfrejit-daemon
+  EXECUTOR_INVOKE = "$(PYTHON)" -m runner.libs.kvm_executor
 else ifeq ($(PLATFORM),aws)
+  EXECUTOR_INVOKE = "$(PYTHON)" -m runner.libs.aws_executor run
   ifeq ($(ARCH),arm64)
     TARGET := aws-arm64
     COMMON_DEPS := $(ARM64_RUNNER_RUNTIME_IMAGE_TAR)
@@ -66,12 +68,22 @@ export BZIMAGE PYTHON LLVM_DIR RUN_LLVM_DIR TIMEOUT FUZZ_ROUNDS WORKLOAD_DURATIO
 # KEEP_WORKDIRS: empty/0 = no tars (default), 1 = tar on real failures only,
 # all = tar every prog (forces success-side tar via daemon-side capture).
 KEEP_WORKDIRS ?=
-KEEP_ARG := $(if $(filter 1 all,$(KEEP_WORKDIRS)),--keep-failure-artifacts,)
 ifeq ($(KEEP_WORKDIRS),all)
 export BPFREJIT_KEEP_ALL_WORKDIRS := 1
 endif
 
-CORPUS_ARGS = --samples "$(SAMPLES)" $(KEEP_ARG)
+# All user knobs flow through to the in-container driver via the all-env
+# passthrough in suite_commands.build_runtime_container_command — no enumeration here.
+export SAMPLES WARMUPS SKIP_REJIT INNER_REPEAT KEEP_WORKDIRS
+
+# Per-run identity. RUN_TOKEN must be unique per invocation so AWS remote stage
+# dirs and local run-state directories don't collide across concurrent or
+# sequential failed runs. Random hex when not user-supplied.
+RUN_TOKEN ?= $(shell head -c 32 /dev/urandom 2>/dev/null | tr -dc 'a-z0-9' | head -c 8)
+export RUN_TOKEN TARGET
+
+# micro and test suites still consume legacy CLI args until their drivers migrate.
+MICRO_ARGS = --samples "$(SAMPLES)" --warmups "$(or $(WARMUPS),0)" --inner-repeat "$(or $(INNER_REPEAT),10)" $(foreach b,$(BENCH),--bench "$(b)")
 TEST_ARGS_COMMON = --fuzz-rounds "$(FUZZ_ROUNDS)"
 
 .PHONY: check validate daemon-tests lint clean \
@@ -93,25 +105,25 @@ daemon-tests:
 	cargo test --workspace --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 
 selftest: $(COMMON_DEPS)
-	$(RUN_TARGET_SUITE_CMD) run $(TARGET) test -- --test-mode selftest $(TEST_ARGS_COMMON)
+	$(EXECUTOR_INVOKE) $(TARGET) test --test-mode selftest $(TEST_ARGS_COMMON)
 
 negative-test: $(COMMON_DEPS)
-	$(RUN_TARGET_SUITE_CMD) run $(TARGET) test -- --test-mode negative $(TEST_ARGS_COMMON)
+	$(EXECUTOR_INVOKE) $(TARGET) test --test-mode negative $(TEST_ARGS_COMMON)
 
 test: $(COMMON_DEPS)
-	$(RUN_TARGET_SUITE_CMD) run $(TARGET) test -- --test-mode test $(TEST_ARGS_COMMON)
+	$(EXECUTOR_INVOKE) $(TARGET) test --test-mode test $(TEST_ARGS_COMMON)
 
 micro: $(COMMON_DEPS)
-	$(RUN_TARGET_SUITE_CMD) run $(TARGET) micro
+	$(EXECUTOR_INVOKE) $(TARGET) micro $(MICRO_ARGS)
 
 corpus: $(COMMON_DEPS)
-	$(RUN_TARGET_SUITE_CMD) run $(TARGET) corpus -- $(CORPUS_ARGS)
+	$(EXECUTOR_INVOKE) $(TARGET) corpus
 
 all: test micro corpus
 
 terminate:
 	@if [ "$(PLATFORM)" != aws ]; then echo "terminate requires PLATFORM=aws" >&2; exit 2; fi
-	$(RUN_TARGET_SUITE_CMD) terminate $(TARGET)
+	"$(PYTHON)" -m runner.libs.aws_executor terminate $(TARGET)
 
 clean: clean-build clean-vm-tmp
 
@@ -126,7 +138,7 @@ clean-build:
 	rm -rf "$(MICRO_DIR)/__pycache__" "$(MICRO_DIR)/build"
 	cargo clean --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml"
 	cargo clean --manifest-path "$(DAEMON_DIR)/Cargo.toml"
-	rm -rf "$(X86_BUILD_DIR)" "$(ARM64_BUILD_DIR)" "$(ARTIFACT_ROOT)/runtime-kernel" "$(ROOT_DIR)/.state/runner-contracts"
+	rm -rf "$(X86_BUILD_DIR)" "$(ARM64_BUILD_DIR)" "$(ARTIFACT_ROOT)/runtime-kernel"
 	rm -rf \
 		"$(ARTIFACT_ROOT)/container-images" \
 		"$(ARTIFACT_ROOT)/libbpf-build" \

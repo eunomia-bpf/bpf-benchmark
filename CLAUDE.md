@@ -143,7 +143,7 @@ Override knobs (env vars passed to `make`):
 
 | env | scope | purpose | example |
 |-----|-------|---------|---------|
-| `SAMPLES` | corpus / micro | per-program sample count (default 3 corpus, 1 micro) | `SAMPLES=3 make corpus` |
+| `SAMPLES` | corpus / micro | per-program sample count (default 3 for both) | `SAMPLES=3 make corpus` |
 | `WORKLOAD_DURATION` | corpus | seconds per workload sample, single global knob (default 30, applies to every app — no per-app override) | `WORKLOAD_DURATION=10 make corpus` |
 | `TIMEOUT` | all VM | suite timeout in seconds (default 7200) | `TIMEOUT=3600 make test` |
 | `BPFREJIT_CORPUS_APPS` | corpus | comma-separated subset of the 7 supported apps. Names match `corpus/config/macro_apps.yaml` (e.g. `bcc/set`, `tetragon/observer`, `katran`) | `BPFREJIT_CORPUS_APPS="cilium/agent,tracee/monitor" make vm-corpus` |

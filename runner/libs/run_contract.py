@@ -10,8 +10,6 @@ from pathlib import Path
 
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail
-from runner.libs.suite_args import join_csv, suite_args_from_env, suite_test_mode_from_args
-from runner.libs.state_file import write_json_object
 
 
 TARGETS_DIR = ROOT_DIR / "runner" / "targets"
@@ -104,7 +102,7 @@ class RunConfig:
             "RUN_VM_TIMEOUT_SECONDS": kv.timeout_seconds,
             "RUN_REMOTE_PYTHON_BIN": r.python_bin, "RUN_RUNTIME_PYTHON_BIN": r.runtime_python_bin,
             "RUN_RUNTIME_CONTAINER_IMAGE": r.runtime_container_image,
-            "RUN_NATIVE_REPOS_CSV": join_csv(list(a.native_repos)),
+            "RUN_NATIVE_REPOS_CSV": ",".join(token for token in a.native_repos if token),
             "RUN_BPFTOOL_BIN": r.bpftool_bin,
         }
 
@@ -270,16 +268,12 @@ def _build_run_config_mapping(
     suite_name: str,
     *,
     env: dict[str, str] | None = None,
-    suite_args: list[str] | None = None,
 ) -> dict[str, str | list[str]]:
     source_env = os.environ if env is None else env
     values = _filtered_run_inputs(target_name, env)
     target = _load_assignment_file(TARGETS_DIR / f"{target_name}.env")
     suite = _load_assignment_file(SUITES_DIR / f"{suite_name}.env")
-    run_test_mode = suite_test_mode_from_args(
-        suite_name,
-        list(suite_args) if suite_args is not None else suite_args_from_env(target_name, suite_name, env=source_env),
-    )
+    run_test_mode = (source_env.get("TEST_MODE", "").strip().lower() or "test") if suite_name == "test" else "test"
 
     run_token = values.get("RUN_TOKEN", "").strip() or f"{target_name}_{suite_name}"
     (run_name_tag, run_instance_type, run_remote_user, run_remote_stage_dir,
@@ -399,9 +393,8 @@ def build_run_config(
     suite_name: str,
     *,
     env: dict[str, str] | None = None,
-    suite_args: list[str] | None = None,
 ) -> RunConfig:
-    return RunConfig.from_mapping(_build_run_config_mapping(target_name, suite_name, env=env, suite_args=suite_args))
+    return RunConfig.from_mapping(_build_run_config_mapping(target_name, suite_name, env=env))
 
 
 def build_target_config(target_name: str, *, env: dict[str, str] | None = None) -> RunConfig:
@@ -424,32 +417,3 @@ def build_target_config(target_name: str, *, env: dict[str, str] | None = None) 
                                    "RUN_AWS_REGION": run_aws_region, "RUN_AWS_PROFILE": run_aws_profile})
 
 
-def write_run_config_file(path: Path, config: RunConfig) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    write_json_object(path, config.to_mapping())
-
-
-def read_run_config_file(path: Path) -> RunConfig:
-    if not path.is_file():
-        _die(f"run config is missing: {path}")
-    return RunConfig.from_json_text(path.read_text(encoding="utf-8"))
-
-
-def main(argv: list[str] | None = None) -> None:
-    args = list(sys.argv[1:] if argv is None else argv)
-    if not args: _die("usage: python -m runner.libs.run_contract <print-json|write-config|write-target-config> ...")
-    action = args[0]
-    if action == "print-json":
-        if len(args) != 2: _die("usage: python -m runner.libs.run_contract print-json <config_path>")
-        print(read_run_config_file(Path(args[1]).resolve()).to_json_text()); return
-    if action == "write-config":
-        if len(args) != 4: _die("usage: python -m runner.libs.run_contract write-config <target> <suite> <config_path>")
-        write_run_config_file(Path(args[3]).resolve(), build_run_config(args[1], args[2])); return
-    if action == "write-target-config":
-        if len(args) != 3: _die("usage: python -m runner.libs.run_contract write-target-config <target> <config_path>")
-        write_run_config_file(Path(args[2]).resolve(), build_target_config(args[1])); return
-    _die(f"unsupported action: {action}")
-
-
-if __name__ == "__main__":
-    main()
