@@ -830,8 +830,8 @@ class KatranRunner(AppRunner):
             command=tuple(str(p) for p in command),
             returncode=completed.returncode,
             duration_s=elapsed,
-            stdout=tail_text(completed.stdout or "", max_lines=400, max_chars=131072),
-            stderr=tail_text(completed.stderr or "", max_lines=400, max_chars=131072),
+            stdout=tail_text(completed.stdout or "", max_lines=200000, max_chars=8388608),
+            stderr=tail_text(completed.stderr or "", max_lines=200000, max_chars=8388608),
             config={"tool": "python_parallel", "vip": VIP_IP, "vip_port": VIP_PORT,
                     "concurrency": concurrency},
         )

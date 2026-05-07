@@ -23,7 +23,11 @@ MACRO_APP_DEFINITIONS: tuple[MacroAppDefinition, ...] = (
         workload="stress_ng_os_io_network",
         duration_s=5.0,
     ),
-    MacroAppDefinition(name="otelcol-ebpf-profiler/profiling", runner="otelcol-ebpf-profiler", workload="stress_ng_cpu", duration_s=5.0),
+    # The OtelProfilerRunner spawns 5 long-running stdlib SHA-256 loops
+    # (Python/Ruby/Node/Perl/PHP) in start(). Using a no-op workload avoids
+    # competing native CPU pressure (stress-ng-cpu was hogging perf samples)
+    # so profiler samples land in the interpreter unwinder paths.
+    MacroAppDefinition(name="otelcol-ebpf-profiler/profiling", runner="otelcol-ebpf-profiler", workload="noop", duration_s=5.0),
     MacroAppDefinition(name="cilium/agent", runner="cilium", workload="network_lossy_multi", duration_s=5.0),
     MacroAppDefinition(name="tetragon/observer", runner="tetragon", workload="stress_ng_os_io_network", duration_s=5.0),
     MacroAppDefinition(name="katran", runner="katran", workload="xdp_traffic"),

@@ -1083,6 +1083,31 @@ def run_tcp_connect_load(duration_s: int | float, *, network_device: str | None 
         )
 
 
+def run_noop(duration_s: int | float) -> WorkloadResult:
+    """Sleep workload for apps whose runner-managed background processes are
+    the actual measurement load (e.g. otelcol-ebpf-profiler with language
+    interpreter idlers spawned in `start()`).
+
+    The runner does no in-process work during measurement; perf samples
+    accumulate against the long-running background interpreters that the
+    runner already controls.
+    """
+    seconds = max(1, int(round(float(duration_s))))
+    cmd = ["sleep", str(seconds)]
+    start = time.monotonic()
+    completed = run_command(cmd, check=False, timeout=float(seconds) + 30)
+    elapsed = time.monotonic() - start
+    return _record_run(
+        workload_name="noop",
+        command=cmd,
+        returncode=completed.returncode,
+        duration_s=elapsed,
+        stdout=completed.stdout or "",
+        stderr=completed.stderr or "",
+        config={"tool": "sleep"},
+    )
+
+
 def run_named_workload(
     kind: str,
     duration_s: int | float,
@@ -1105,4 +1130,6 @@ def run_named_workload(
         return run_network_lossy_multi_load(seconds, network_device=network_device)
     if kind in {"fio", "fio_randrw"}:
         return run_file_io(seconds)
+    if kind == "noop":
+        return run_noop(seconds)
     raise RuntimeError(f"unsupported workload kind: {kind}")
