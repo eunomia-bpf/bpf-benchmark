@@ -52,7 +52,6 @@ pub struct ProfilingData {
     pub branch_profiles: HashMap<usize, BranchProfile>,
     pub branch_miss_rate: Option<f64>,
     pub prefetch_profiles: HashMap<usize, PrefetchProfile>,
-    pub cache_miss_rate: Option<f64>,
 }
 
 /// Raw BTF func_info or line_info records whose first u32 is `insn_off`.
@@ -89,8 +88,6 @@ pub struct BpfProgram {
     pub insns: Vec<BpfInsn>,
     /// Per-insn annotations (length synchronized with insns).
     pub annotations: Vec<InsnAnnotation>,
-    /// Transform log: records what each pass did.
-    pub transform_log: Vec<TransformEntry>,
     /// Map IDs referenced by this program, in the kernel's `used_maps` order.
     /// This metadata lets analyses resolve pseudo-map references found in the
     /// original bytecode back to live kernel map objects.
@@ -102,10 +99,6 @@ pub struct BpfProgram {
     /// Set by `inject_profiling` when PMU data is available.
     /// Consumed by BranchFlipPass to gate optimization.
     pub branch_miss_rate: Option<f64>,
-    /// Program-level cache miss rate from PMU hardware counters.
-    /// Set by `inject_profiling` when PMU data is available.
-    /// Consumed by PrefetchPass diagnostics.
-    pub cache_miss_rate: Option<f64>,
     /// Parsed `log_level=2` verifier state snapshots for the original program.
     pub verifier_states: Arc<[VerifierInsn]>,
     /// Optional raw func_info records for offline metadata remapping.
@@ -279,12 +272,6 @@ fn hex_bytes(bytes: &[u8]) -> String {
     out
 }
 
-/// Transform log entry — records sites applied by each pass.
-#[derive(Clone, Debug)]
-pub struct TransformEntry {
-    pub sites_applied: usize,
-}
-
 impl BpfProgram {
     /// Create from raw instructions. Annotations are default-initialized.
     pub fn new(insns: Vec<BpfInsn>) -> Self {
@@ -292,11 +279,9 @@ impl BpfProgram {
         Self {
             insns,
             annotations: vec![InsnAnnotation::default(); len],
-            transform_log: Vec::new(),
             map_ids: Vec::new(),
             map_fd_bindings: HashMap::new(),
             branch_miss_rate: None,
-            cache_miss_rate: None,
             verifier_states: Arc::from([]),
             func_info: None,
             line_info: None,
@@ -388,19 +373,11 @@ impl BpfProgram {
         if data.branch_miss_rate.is_some() {
             self.branch_miss_rate = data.branch_miss_rate;
         }
-        if data.cache_miss_rate.is_some() {
-            self.cache_miss_rate = data.cache_miss_rate;
-        }
     }
 
     /// Attach parsed verifier states to this program.
     pub fn set_verifier_states(&mut self, states: Vec<VerifierInsn>) {
         self.verifier_states = Arc::from(states);
-    }
-
-    /// Record a transform operation.
-    pub fn log_transform(&mut self, entry: TransformEntry) {
-        self.transform_log.push(entry);
     }
 }
 
@@ -899,23 +876,6 @@ impl PassManager {
         }
 
         Ok(PipelineResult { pass_results })
-    }
-
-    /// Execute the pipeline with optional profiling data.
-    ///
-    /// If `profiling` is provided, injects branch profiles into the program's
-    /// annotations before running the pipeline. This enables PGO-guided passes
-    /// like BranchFlipPass to make data-driven decisions.
-    pub fn run_with_profiling(
-        &self,
-        program: &mut BpfProgram,
-        ctx: &PassContext,
-        profiling: Option<&ProfilingData>,
-    ) -> anyhow::Result<PipelineResult> {
-        if let Some(data) = profiling {
-            program.inject_profiling(data);
-        }
-        self.run(program, ctx)
     }
 
     fn run_single_pass(

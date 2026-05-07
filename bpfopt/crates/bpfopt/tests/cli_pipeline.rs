@@ -263,7 +263,7 @@ fn list_passes_outputs_cli_names_including_experimental_passes() {
 #[test]
 fn wide_mem_accepts_stdin_and_writes_instruction_aligned_stdout() {
     let input = minimal_program_bytes();
-    let output = run_bpfopt(&["--pass", "wide-mem"], &input);
+    let output = run_bpfopt(&["--pass", "wide-mem", "--"], &input);
 
     assert!(
         output.status.success(),
@@ -354,6 +354,7 @@ fn map_inline_errors_when_snapshot_key_is_absent() {
             "map-inline",
             "--verifier-states",
             &verifier_arg,
+            "--",
             "--map-values",
             &map_values_arg,
             "--map-ids",
@@ -403,6 +404,7 @@ fn map_inline_skips_hash_lookup_when_snapshot_entry_is_absent() {
             &report_arg,
             "--verifier-states",
             &verifier_arg,
+            "--",
             "--map-values",
             &map_values_arg,
             "--map-ids",

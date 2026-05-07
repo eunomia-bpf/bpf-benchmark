@@ -3,7 +3,12 @@
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::Write as _;
+use std::fs;
+use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
+
+use anyhow::{bail, Context, Result};
+use serde::Deserialize;
 
 use super::utils::{emit_ldimm64, insn_width};
 use crate::analysis::BranchTargetAnalysis;
@@ -27,6 +32,436 @@ const VALUE_PREVIEW_BYTES: usize = 32;
 
 /// Dynamic map inlining optimization pass.
 pub struct MapInlinePass;
+
+#[derive(Clone)]
+struct MapInlineCliPass {
+    map_ids: Vec<u32>,
+    snapshot: MapSnapshot,
+}
+
+impl MapInlinePass {
+    pub fn from_cli_args(args: &[String]) -> Result<Box<dyn BpfPass>> {
+        let cli = MapInlineCliArgs::parse(args)?;
+        let map_ids = parse_u32_csv(&cli.map_ids, "--map-ids")?;
+        let snapshot = read_map_values(&cli.map_values, &map_ids)?;
+        Ok(Box::new(MapInlineCliPass { map_ids, snapshot }))
+    }
+}
+
+impl BpfPass for MapInlineCliPass {
+    fn name(&self) -> &str {
+        "map_inline"
+    }
+
+    fn required_analyses(&self) -> Vec<&str> {
+        vec!["branch_targets"]
+    }
+
+    fn run(
+        &self,
+        program: &mut BpfProgram,
+        analyses: &mut AnalysisCache,
+        ctx: &PassContext,
+    ) -> anyhow::Result<PassResult> {
+        program.set_map_ids(self.map_ids.clone());
+        program.map_metadata = self.snapshot.metadata.clone();
+        program.map_values = self.snapshot.values.clone();
+        program.map_inner_map_ids = self.snapshot.inner_map_ids.clone();
+        program.map_bpf_writable = self.snapshot.bpf_writable.clone();
+        program.map_snapshots_skipped_by_size = self.snapshot.maps_skipped_by_size.clone();
+        MapInlinePass.run(program, analyses, ctx)
+    }
+}
+
+struct MapInlineCliArgs {
+    map_values: PathBuf,
+    map_ids: String,
+}
+
+impl MapInlineCliArgs {
+    fn parse(args: &[String]) -> Result<Self> {
+        let mut map_values = None;
+        let mut map_ids = None;
+        let mut iter = args.iter();
+        while let Some(arg) = iter.next() {
+            match arg.as_str() {
+                "--map-values" => {
+                    let value = iter
+                        .next()
+                        .ok_or_else(|| anyhow::anyhow!("--map-values requires DIR"))?;
+                    map_values = Some(PathBuf::from(value));
+                }
+                "--map-ids" => {
+                    let value = iter
+                        .next()
+                        .ok_or_else(|| anyhow::anyhow!("--map-ids requires LIST"))?;
+                    map_ids = Some(value.clone());
+                }
+                other => bail!("map_inline unknown pass-local arg: {other}"),
+            }
+        }
+        Ok(Self {
+            map_values: map_values
+                .ok_or_else(|| anyhow::anyhow!("map_inline requires --map-values"))?,
+            map_ids: map_ids.ok_or_else(|| anyhow::anyhow!("map_inline requires --map-ids"))?,
+        })
+    }
+}
+
+#[derive(Clone)]
+struct MapSnapshot {
+    metadata: HashMap<u32, MapMetadata>,
+    values: HashMap<(u32, Vec<u8>), Vec<u8>>,
+    inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
+    bpf_writable: HashMap<u32, bool>,
+    maps_skipped_by_size: HashSet<u32>,
+}
+
+#[derive(Debug, Deserialize)]
+struct BpftoolMapShowJson {
+    id: u32,
+    #[serde(default)]
+    name: String,
+    #[serde(rename = "type")]
+    map_type: MapTypeJson,
+    flags: BpftoolNumberJson,
+    bytes_key: u32,
+    bytes_value: u32,
+    max_entries: u32,
+}
+
+#[derive(Debug, Deserialize)]
+struct BpftoolMapEntryJson {
+    key: Vec<String>,
+    #[serde(default)]
+    value: Option<BpftoolMapValueJson>,
+    #[serde(default)]
+    values: Vec<BpftoolPerCpuValueJson>,
+    #[serde(default)]
+    inner_map_id: Option<u32>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct BpftoolMapDumpSkipMarker {
+    skipped: bool,
+    reason: String,
+    size_bytes: u64,
+    limit_bytes: u64,
+}
+
+enum BpftoolMapDumpSnapshot {
+    Entries(Vec<BpftoolMapEntryJson>),
+    SkippedBySize,
+}
+
+#[derive(Debug, Deserialize)]
+struct BpftoolPerCpuValueJson {
+    value: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+enum BpftoolMapValueJson {
+    Bytes(Vec<String>),
+    Error { error: String },
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+enum BpftoolNumberJson {
+    Number(u64),
+    String(String),
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+enum MapTypeJson {
+    Number(u32),
+    Name(String),
+}
+
+fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
+    if !path.is_dir() {
+        bail!(
+            "--map-values must point to a bpftool snapshot directory, got {}",
+            path.display()
+        );
+    }
+    let mut metadata = HashMap::new();
+    let mut values = HashMap::new();
+    let mut inner_map_ids = HashMap::new();
+    let mut bpf_writable = HashMap::new();
+    let mut maps_skipped_by_size = HashSet::new();
+
+    for &map_id in map_ids.iter().filter(|&&map_id| map_id != 0) {
+        let show = read_bpftool_map_show(path, map_id)?;
+        let map_type = parse_map_type(&show.map_type)?;
+        let flags = parse_bpftool_number(&show.flags)?;
+        let map_metadata = MapMetadata {
+            map_type,
+            key_size: show.bytes_key,
+            value_size: show.bytes_value,
+            max_entries: show.max_entries,
+            map_id: show.id,
+            name: show.name,
+        };
+        bpf_writable.insert(show.id, flags & bpf_f_rdonly_prog() == 0);
+        if needs_bpftool_map_dump(map_type) {
+            match read_bpftool_map_dump(path, show.id)? {
+                BpftoolMapDumpSnapshot::Entries(entries) => {
+                    for entry in entries {
+                        let key = decode_bpftool_hex_bytes(&entry.key)
+                            .with_context(|| format!("invalid key bytes for map {}", show.id))?;
+                        let value = decode_bpftool_entry_value(&entry, &map_metadata)
+                            .with_context(|| format!("invalid value bytes for map {}", show.id))?;
+                        values.insert((show.id, key.clone()), value);
+                        if let Some(inner_map_id) = entry.inner_map_id {
+                            inner_map_ids.insert((show.id, key), inner_map_id);
+                        }
+                    }
+                }
+                BpftoolMapDumpSnapshot::SkippedBySize => {
+                    maps_skipped_by_size.insert(show.id);
+                }
+            }
+        }
+        metadata.insert(show.id, map_metadata);
+    }
+
+    Ok(MapSnapshot {
+        metadata,
+        values,
+        inner_map_ids,
+        bpf_writable,
+        maps_skipped_by_size,
+    })
+}
+
+fn read_bpftool_map_show(path: &Path, map_id: u32) -> Result<BpftoolMapShowJson> {
+    let show_path = bpftool_map_show_path(path, map_id);
+    let show: BpftoolMapShowJson = read_json_file(&show_path, "bpftool map show JSON")?;
+    if show.id != map_id {
+        bail!(
+            "{} contains map id {}, expected {}",
+            show_path.display(),
+            show.id,
+            map_id
+        );
+    }
+    Ok(show)
+}
+
+fn read_bpftool_map_dump(path: &Path, map_id: u32) -> Result<BpftoolMapDumpSnapshot> {
+    let dump_path = bpftool_map_dump_path(path, map_id);
+    let data =
+        fs::read(&dump_path).with_context(|| format!("failed to read {}", dump_path.display()))?;
+    let Some(first) = data
+        .iter()
+        .copied()
+        .find(|byte| !byte.is_ascii_whitespace())
+    else {
+        bail!("{} is empty", dump_path.display());
+    };
+
+    match first {
+        b'[' => {
+            let entries = serde_json::from_slice(&data).with_context(|| {
+                format!(
+                    "failed to parse bpftool map dump JSON from {}",
+                    dump_path.display()
+                )
+            })?;
+            Ok(BpftoolMapDumpSnapshot::Entries(entries))
+        }
+        b'{' => {
+            let marker: BpftoolMapDumpSkipMarker =
+                serde_json::from_slice(&data).with_context(|| {
+                    format!(
+                        "failed to parse bpftool map dump skip marker from {}",
+                        dump_path.display()
+                    )
+                })?;
+            if !marker.skipped
+                || marker.reason != "size_limit"
+                || marker.size_bytes <= marker.limit_bytes
+            {
+                bail!(
+                    "unexpected bpftool map dump skip marker in {}",
+                    dump_path.display()
+                );
+            }
+            Ok(BpftoolMapDumpSnapshot::SkippedBySize)
+        }
+        _ => bail!(
+            "{} is neither a bpftool map dump array nor a skip marker object",
+            dump_path.display()
+        ),
+    }
+}
+
+fn bpftool_map_show_path(path: &Path, map_id: u32) -> PathBuf {
+    path.join(format!("map-{map_id}.show.json"))
+}
+
+fn bpftool_map_dump_path(path: &Path, map_id: u32) -> PathBuf {
+    path.join(format!("map-{map_id}.dump.json"))
+}
+
+fn parse_bpftool_number(value: &BpftoolNumberJson) -> Result<u64> {
+    match value {
+        BpftoolNumberJson::Number(number) => Ok(*number),
+        BpftoolNumberJson::String(text) => parse_u64_auto_radix(text),
+    }
+}
+
+fn decode_bpftool_entry_value(
+    entry: &BpftoolMapEntryJson,
+    metadata: &MapMetadata,
+) -> Result<Vec<u8>> {
+    if !entry.values.is_empty() {
+        return decode_bpftool_percpu_values(&entry.values, metadata.value_size as usize);
+    }
+    let Some(value) = &entry.value else {
+        bail!("bpftool entry has neither value nor per-CPU values");
+    };
+    match value {
+        BpftoolMapValueJson::Bytes(bytes) => decode_bpftool_hex_bytes(bytes),
+        BpftoolMapValueJson::Error { error } => {
+            bail!("bpftool map dump returned lookup error: {error}")
+        }
+    }
+}
+
+fn decode_bpftool_percpu_values(
+    values: &[BpftoolPerCpuValueJson],
+    value_size: usize,
+) -> Result<Vec<u8>> {
+    let stride = round_up_8(value_size);
+    let mut out = Vec::with_capacity(values.len().saturating_mul(stride));
+    for value in values {
+        let bytes = decode_bpftool_hex_bytes(&value.value)?;
+        if bytes.len() != value_size {
+            bail!(
+                "per-CPU value has {} byte(s), expected {}",
+                bytes.len(),
+                value_size
+            );
+        }
+        out.extend_from_slice(&bytes);
+        out.resize(out.len() + (stride - value_size), 0);
+    }
+    Ok(out)
+}
+
+fn decode_bpftool_hex_bytes(input: &[String]) -> Result<Vec<u8>> {
+    input
+        .iter()
+        .map(|byte| {
+            let byte = byte.trim();
+            let hex = byte.strip_prefix("0x").unwrap_or(byte);
+            u8::from_str_radix(hex, 16).with_context(|| format!("invalid bpftool byte {byte:?}"))
+        })
+        .collect()
+}
+
+fn bpf_f_rdonly_prog() -> u64 {
+    1 << 7
+}
+
+fn needs_bpftool_map_dump(map_type: u32) -> bool {
+    matches!(
+        map_type,
+        kernel_sys::BPF_MAP_TYPE_HASH
+            | kernel_sys::BPF_MAP_TYPE_ARRAY
+            | kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY
+            | kernel_sys::BPF_MAP_TYPE_LRU_HASH
+            | kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS
+            | kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS
+    )
+}
+
+fn parse_map_type(map_type: &MapTypeJson) -> Result<u32> {
+    match map_type {
+        MapTypeJson::Number(number) => Ok(*number),
+        MapTypeJson::Name(name) => {
+            let normalized = name
+                .trim()
+                .trim_start_matches("BPF_MAP_TYPE_")
+                .trim_start_matches("bpf_map_type_")
+                .replace(['-', ' '], "_")
+                .to_ascii_lowercase();
+            match normalized.as_str() {
+                "hash" => Ok(kernel_sys::BPF_MAP_TYPE_HASH),
+                "array" => Ok(kernel_sys::BPF_MAP_TYPE_ARRAY),
+                "prog_array" => Ok(kernel_sys::BPF_MAP_TYPE_PROG_ARRAY),
+                "perf_event_array" => Ok(kernel_sys::BPF_MAP_TYPE_PERF_EVENT_ARRAY),
+                "percpu_hash" | "per_cpu_hash" => Ok(kernel_sys::BPF_MAP_TYPE_PERCPU_HASH),
+                "percpu_array" | "per_cpu_array" => Ok(kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY),
+                "stack_trace" => Ok(kernel_sys::BPF_MAP_TYPE_STACK_TRACE),
+                "cgroup_array" => Ok(kernel_sys::BPF_MAP_TYPE_CGROUP_ARRAY),
+                "lru_hash" => Ok(kernel_sys::BPF_MAP_TYPE_LRU_HASH),
+                "lru_percpu_hash" | "lru_per_cpu_hash" => {
+                    Ok(kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH)
+                }
+                "lpm_trie" => Ok(kernel_sys::BPF_MAP_TYPE_LPM_TRIE),
+                "array_of_maps" => Ok(kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS),
+                "hash_of_maps" => Ok(kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS),
+                "devmap" => Ok(kernel_sys::BPF_MAP_TYPE_DEVMAP),
+                "devmap_hash" => Ok(kernel_sys::BPF_MAP_TYPE_DEVMAP_HASH),
+                "sockmap" => Ok(kernel_sys::BPF_MAP_TYPE_SOCKMAP),
+                "cpumap" => Ok(kernel_sys::BPF_MAP_TYPE_CPUMAP),
+                "xskmap" => Ok(kernel_sys::BPF_MAP_TYPE_XSKMAP),
+                "sockhash" => Ok(kernel_sys::BPF_MAP_TYPE_SOCKHASH),
+                "cgroup_storage" => Ok(kernel_sys::BPF_MAP_TYPE_CGROUP_STORAGE),
+                "reuseport_sockarray" => Ok(kernel_sys::BPF_MAP_TYPE_REUSEPORT_SOCKARRAY),
+                "percpu_cgroup_storage" | "per_cpu_cgroup_storage" => {
+                    Ok(kernel_sys::BPF_MAP_TYPE_PERCPU_CGROUP_STORAGE)
+                }
+                "queue" => Ok(kernel_sys::BPF_MAP_TYPE_QUEUE),
+                "stack" => Ok(kernel_sys::BPF_MAP_TYPE_STACK),
+                "sk_storage" => Ok(kernel_sys::BPF_MAP_TYPE_SK_STORAGE),
+                "struct_ops" => Ok(kernel_sys::BPF_MAP_TYPE_STRUCT_OPS),
+                "ringbuf" => Ok(kernel_sys::BPF_MAP_TYPE_RINGBUF),
+                "inode_storage" => Ok(kernel_sys::BPF_MAP_TYPE_INODE_STORAGE),
+                "task_storage" => Ok(kernel_sys::BPF_MAP_TYPE_TASK_STORAGE),
+                "bloom_filter" => Ok(kernel_sys::BPF_MAP_TYPE_BLOOM_FILTER),
+                "user_ringbuf" => Ok(kernel_sys::BPF_MAP_TYPE_USER_RINGBUF),
+                "cgrp_storage" => Ok(kernel_sys::BPF_MAP_TYPE_CGRP_STORAGE),
+                "arena" => Ok(kernel_sys::BPF_MAP_TYPE_ARENA),
+                "insn_array" => Ok(kernel_sys::BPF_MAP_TYPE_INSN_ARRAY),
+                _ => bail!("unsupported map_type: {name}"),
+            }
+        }
+    }
+}
+
+fn parse_u32_csv(value: &str, flag: &str) -> Result<Vec<u32>> {
+    value
+        .split(',')
+        .map(|entry| {
+            entry
+                .trim()
+                .parse::<u32>()
+                .with_context(|| format!("invalid {flag} value: {entry}"))
+        })
+        .collect()
+}
+
+fn parse_u64_auto_radix(input: &str) -> Result<u64> {
+    let input = input.trim();
+    if let Some(hex) = input.strip_prefix("0x") {
+        Ok(u64::from_str_radix(hex, 16)?)
+    } else {
+        Ok(input.parse::<u64>()?)
+    }
+}
+
+fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Result<T> {
+    let data = fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
+    serde_json::from_slice(&data)
+        .with_context(|| format!("failed to parse {label} from {}", path.display()))
+}
 
 /// A `bpf_map_lookup_elem()` helper call and its map argument load.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -801,12 +1236,6 @@ impl BpfPass for MapInlinePass {
                     MAP_INLINE_FIXED_POINT_MAX_ITERS
                 ),
             );
-        }
-
-        if total_applied > 0 {
-            program.log_transform(TransformEntry {
-                sites_applied: total_applied,
-            });
         }
 
         Ok(PassResult {

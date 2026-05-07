@@ -75,9 +75,12 @@ def build_step_spec(pass_name: str, pass_meta: dict[str, Any]) -> dict[str, Any]
         parts.append("--target ${TARGET}")
     if bool(pass_meta.get("needs_verifier_states")):
         parts.append("--verifier-states ${VERIFIER_STATES}")
+    pass_local = ["${PASS_LOCAL_ARGS}"]
     if bool(pass_meta.get("needs_map_values")):
-        parts.append("--map-values ${MAP_VALUES}")
-        parts.append("--map-ids ${MAP_IDS}")
+        pass_local.append("--map-values ${MAP_VALUES}")
+        pass_local.append("--map-ids ${MAP_IDS}")
+    parts.append("--")
+    parts.extend(pass_local)
     log_level = 2 if bool(pass_meta.get("produces_verifier_states")) else 1
     command = " ".join(parts)
     # When BPFREJIT_KEEP_ALL_WORKDIRS is set, prefix the step with a cp

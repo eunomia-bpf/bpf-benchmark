@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 //! Concrete pass implementations and pipeline constructors.
 
-#[cfg(test)]
 use anyhow::Result;
 
 #[cfg(test)]
@@ -56,8 +55,8 @@ pub struct PassRegistryEntry {
     pub name: &'static str,
     /// Short description for help text.
     pub description: &'static str,
-    /// Constructor: returns a boxed pass instance.
-    pub make: fn() -> Box<dyn BpfPass>,
+    /// Constructor: parses pass-local CLI args and returns a boxed pass instance.
+    pub make: fn(&[String]) -> Result<Box<dyn BpfPass>>,
     /// Side-input and kinsn requirements consumed by `bpfopt list-passes --json`.
     pub metadata: PassMetadata,
 }
@@ -95,13 +94,41 @@ const META_PRODUCES_STATES: PassMetadata = PassMetadata::new(PRODUCES_VERIFIER_S
 #[rustfmt::skip] const META_BULK_MEMORY: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_bulk_memcpy", &["bpf_memcpy_bulk"]), KinsnRef::new("bpf_bulk_memset", &["bpf_memset_bulk"])]);
 #[rustfmt::skip] const META_PREFETCH: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_prefetch", &["bpf_prefetch"])]);
 
-#[rustfmt::skip] macro_rules! pass_entry { ($name:literal, $description:literal, $make:expr, $metadata:expr) => { PassRegistryEntry { name: $name, description: $description, make: || -> Box<dyn BpfPass> { Box::new($make) }, metadata: $metadata } }; }
+fn reject_pass_args(pass_name: &str, args: &[String]) -> Result<()> {
+    if !args.is_empty() {
+        anyhow::bail!(
+            "{pass_name} does not accept pass-local args: {}",
+            args.join(" ")
+        );
+    }
+    Ok(())
+}
+
+#[rustfmt::skip] macro_rules! pass_entry {
+    ($name:literal, $description:literal, $make:expr, $metadata:expr) => {
+        PassRegistryEntry {
+            name: $name,
+            description: $description,
+            make: |args| -> Result<Box<dyn BpfPass>> {
+                reject_pass_args($name, args)?;
+                Ok(Box::new($make))
+            },
+            metadata: $metadata,
+        }
+    };
+}
+
+#[rustfmt::skip] macro_rules! pass_entry_with_args {
+    ($name:literal, $description:literal, $make:expr, $metadata:expr) => {
+        PassRegistryEntry { name: $name, description: $description, make: $make, metadata: $metadata }
+    };
+}
 
 /// Canonical pass ordering and metadata. Pipeline builders iterate this array in
 /// order, guaranteeing consistent pass sequencing regardless of selected names.
 #[rustfmt::skip] pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
     pass_entry!("noop", "Identity pass — measures ReJIT pipeline overhead with no transform", NoopPass, META_PRODUCES_STATES),
-    pass_entry!("map_inline", "Inline stable map lookups and pseudo-map-value loads", MapInlinePass, META_MAP_INLINE),
+    pass_entry_with_args!("map_inline", "Inline stable map lookups and pseudo-map-value loads", MapInlinePass::from_cli_args, META_MAP_INLINE),
     pass_entry!("const_prop", "Fold register constants into MOV/LD_IMM64/JA rewrites", ConstPropPass, META_NEEDS_AND_PRODUCES_STATES),
     pass_entry!("dce", "Remove CFG-unreachable blocks and NOPs after simplification", DcePass, META_NONE),
     pass_entry!("skb_load_bytes_spec", "Specialize eligible skb_load_bytes helper sites into direct packet access", SkbLoadBytesSpecPass, META_NONE),
@@ -113,8 +140,8 @@ const META_PRODUCES_STATES: PassMetadata = PassMetadata::new(PRODUCES_VERIFIER_S
     pass_entry!("ccmp", "Fold ARM64 zero-test compare chains into CCMP kfunc calls", CcmpPass, META_CCMP),
     pass_entry!("extract", "Replace shift+mask with bit field extract kfunc (BEXTR)", ExtractPass, META_EXTRACT),
     pass_entry!("endian_fusion", "Fuse endian swap patterns into endian load kfunc (MOVBE)", EndianFusionPass, META_ENDIAN),
-    pass_entry!("branch_flip", "Flip branch polarity using PGO data to improve branch prediction", BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 }, META_NONE),
-    pass_entry!("prefetch", "Insert packet and map-value prefetch kinsn calls", PrefetchPass, META_PREFETCH),
+    pass_entry_with_args!("branch_flip", "Flip branch polarity using PGO data to improve branch prediction", BranchFlipPass::from_cli_args, META_NONE),
+    pass_entry_with_args!("prefetch", "Insert packet and map-value prefetch kinsn calls", PrefetchPass::from_cli_args, META_PREFETCH),
 ];
 
 // ── Pipeline constructors ───────────────────────────────────────────
@@ -161,10 +188,23 @@ pub fn build_custom_pipeline(names: &[String]) -> Result<PassManager> {
     register_standard_analyses(&mut pm);
 
     for entry in resolve_requested_passes(names)? {
-        pm.add_pass_boxed((entry.make)());
+        pm.add_pass_boxed(make_test_pass(entry));
     }
 
     Ok(pm)
+}
+
+#[cfg(test)]
+fn make_test_pass(entry: &PassRegistryEntry) -> Box<dyn BpfPass> {
+    match entry.name {
+        "map_inline" => Box::new(MapInlinePass),
+        "branch_flip" => Box::new(BranchFlipPass {
+            min_bias: 0.7,
+            max_branch_miss_rate: 0.05,
+        }),
+        "prefetch" => Box::new(PrefetchPass),
+        _ => (entry.make)(&[]).expect("no-arg test pass construction should succeed"),
+    }
 }
 
 // ── Cross-pass integration tests ────────────────────────────────────

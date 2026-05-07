@@ -245,9 +245,6 @@ impl BpfPass for ConstPropPass {
         program.insns = new_insns;
         super::utils::remap_btf_metadata(program, &addr_map)?;
         program.remap_annotations(&addr_map);
-        program.log_transform(TransformEntry {
-            sites_applied: replacements.len(),
-        });
 
         Ok(PassResult {
             pass_name: self.name().into(),

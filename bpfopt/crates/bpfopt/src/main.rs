@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 //! bpfopt CLI entry point.
 
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap};
 use std::fs;
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
@@ -11,9 +11,9 @@ use anyhow::{anyhow, bail, Context, Result};
 use bpfopt::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
 use bpfopt::insn::BpfInsn;
 use bpfopt::pass::{
-    Arch, BpfProgram, BranchProfile, BtfInfoRecords, KinsnRegistry, MapMetadata, PassContext,
-    PassManager, PassResult, PlatformCapabilities, ProfilingData, RegState, ScalarRange,
-    StackState, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
+    Arch, BpfProgram, BtfInfoRecords, KinsnRegistry, PassContext, PassManager, PassResult,
+    PlatformCapabilities, RegState, ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind,
+    VerifierValueWidth,
 };
 use bpfopt::passes::{MapInfoAnalysis, PASS_REGISTRY};
 use clap::{Args, Parser, Subcommand};
@@ -89,6 +89,9 @@ struct Cli {
     pass: Option<String>,
     #[command(subcommand)]
     command: Option<Command>,
+    /// Pass-local args. Must follow `--` and are parsed by the selected pass.
+    #[arg(last = true, num_args = 0.., allow_hyphen_values = true)]
+    pass_args: Vec<String>,
 }
 
 #[derive(Args, Clone, Debug, Default)]
@@ -114,18 +117,9 @@ struct CommonArgs {
     /// Target platform JSON file.
     #[arg(long, global = true, value_name = "FILE")]
     target: Option<PathBuf>,
-    /// PGO profile JSON file.
-    #[arg(long, global = true, value_name = "FILE")]
-    profile: Option<PathBuf>,
     /// Verifier states JSON file.
     #[arg(long, global = true, value_name = "FILE")]
     verifier_states: Option<PathBuf>,
-    /// bpftool map snapshot directory.
-    #[arg(long, global = true, value_name = "DIR")]
-    map_values: Option<PathBuf>,
-    /// Map IDs used by the program, comma-separated in kernel used_maps order.
-    #[arg(long, global = true, value_name = "LIST", value_delimiter = ',')]
-    map_ids: Vec<String>,
     /// Raw func_info records to remap in place when instruction offsets change.
     #[arg(long, global = true, value_name = "FILE")]
     func_info: Option<PathBuf>,
@@ -203,99 +197,6 @@ struct KinsnJson {
     call_offset: i16,
 }
 
-#[derive(Debug, Deserialize)]
-struct ProfileJson {
-    #[serde(default)]
-    branch_miss_rate: Option<f64>,
-    #[serde(default)]
-    cache_miss_rate: Option<f64>,
-    #[serde(default)]
-    per_site: HashMap<String, ProfileSiteJson>,
-    #[serde(default)]
-    prefetch_sites: HashMap<String, PrefetchSiteJson>,
-}
-
-#[derive(Debug, Deserialize)]
-struct ProfileSiteJson {
-    branch_count: u64,
-    branch_misses: u64,
-    miss_rate: f64,
-    taken: u64,
-    not_taken: u64,
-}
-
-#[derive(Debug, Deserialize)]
-struct PrefetchSiteJson {
-    execution_count: u64,
-    cache_references: u64,
-    cache_misses: u64,
-    miss_rate: f64,
-}
-
-#[derive(Debug, Deserialize)]
-struct BpftoolMapShowJson {
-    id: u32,
-    #[serde(default)]
-    name: String,
-    #[serde(rename = "type")]
-    map_type: MapTypeJson,
-    flags: BpftoolNumberJson,
-    bytes_key: u32,
-    bytes_value: u32,
-    max_entries: u32,
-}
-
-#[derive(Debug, Deserialize)]
-struct BpftoolMapEntryJson {
-    key: Vec<String>,
-    #[serde(default)]
-    value: Option<BpftoolMapValueJson>,
-    #[serde(default)]
-    values: Vec<BpftoolPerCpuValueJson>,
-    #[serde(default)]
-    inner_map_id: Option<u32>,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
-struct BpftoolMapDumpSkipMarker {
-    skipped: bool,
-    reason: String,
-    size_bytes: u64,
-    limit_bytes: u64,
-}
-
-enum BpftoolMapDumpSnapshot {
-    Entries(Vec<BpftoolMapEntryJson>),
-    SkippedBySize,
-}
-
-#[derive(Debug, Deserialize)]
-struct BpftoolPerCpuValueJson {
-    value: Vec<String>,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(untagged)]
-enum BpftoolMapValueJson {
-    Bytes(Vec<String>),
-    Error { error: String },
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(untagged)]
-enum BpftoolNumberJson {
-    Number(u64),
-    String(String),
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(untagged)]
-enum MapTypeJson {
-    Number(u32),
-    Name(String),
-}
-
 fn main() -> ExitCode {
     match run_main() {
         Ok(()) => ExitCode::SUCCESS,
@@ -314,6 +215,9 @@ fn run_main() -> Result<()> {
             if cli.pass.is_some() {
                 bail!("--pass cannot be used with list-passes");
             }
+            if !cli.pass_args.is_empty() {
+                bail!("pass-local args require --pass <name>");
+            }
             list_passes(&cli.common, &args)
         }
         None => {
@@ -321,7 +225,7 @@ fn run_main() -> Result<()> {
                 .pass
                 .as_deref()
                 .ok_or_else(|| anyhow!("bpfopt requires --pass <name> or list-passes"))?;
-            run_single_pass(&cli.common, canonicalize_pass_name(pass)?)
+            run_single_pass(&cli.common, canonicalize_pass_name(pass)?, &cli.pass_args)
         }
     }
 }
@@ -351,7 +255,11 @@ fn list_passes(common: &CommonArgs, args: &ListPassesArgs) -> Result<()> {
     }
 }
 
-fn run_single_pass(common: &CommonArgs, pass_name: &'static str) -> Result<()> {
+fn run_single_pass(
+    common: &CommonArgs,
+    pass_name: &'static str,
+    pass_args: &[String],
+) -> Result<()> {
     validate_required_side_inputs(common, &[pass_name])?;
 
     let mut program = BpfProgram::new(read_bytecode(common.input.as_deref())?);
@@ -359,9 +267,8 @@ fn run_single_pass(common: &CommonArgs, pass_name: &'static str) -> Result<()> {
     let mut ctx = build_pass_context(common)?;
     validate_required_kinsns(&ctx, &[pass_name])?;
     ctx.policy.enabled_passes = vec![pass_name.to_string()];
-    let pipeline = build_pipeline(&[pass_name])?;
-    let profiling = read_profile(common.profile.as_deref())?;
-    let result = pipeline.run_with_profiling(&mut program, &ctx, profiling.as_ref())?;
+    let pipeline = build_pipeline(&[pass_name], pass_args)?;
+    let result = pipeline.run(&mut program, &ctx)?;
     write_bytecode(common.output.as_deref(), &program.insns)?;
     write_btf_info_outputs(common, &program)?;
 
@@ -388,7 +295,7 @@ fn public_kinsn_name(target_name: &str) -> &str {
     }
 }
 
-fn build_pipeline(pass_names: &[&str]) -> Result<PassManager> {
+fn build_pipeline(pass_names: &[&str], pass_args: &[String]) -> Result<PassManager> {
     let mut pm = PassManager::new();
     pm.register_analysis(BranchTargetAnalysis);
     pm.register_analysis(CFGAnalysis);
@@ -397,7 +304,7 @@ fn build_pipeline(pass_names: &[&str]) -> Result<PassManager> {
 
     for &name in pass_names {
         let entry = registry_entry(name)?;
-        pm.add_pass_boxed((entry.make)());
+        pm.add_pass_boxed((entry.make)(pass_args)?);
     }
     Ok(pm)
 }
@@ -445,17 +352,7 @@ fn validate_required_side_inputs(common: &CommonArgs, pass_names: &[&str]) -> Re
         if entry.metadata.needs_target() && common.target.is_none() && common.kinsns.is_empty() {
             bail!("{label} requires --target or --kinsns");
         }
-        if pass_name == "branch_flip" && common.profile.is_none() {
-            bail!("branch-flip requires --profile");
-        }
-        if entry.metadata.needs_map_values() {
-            if common.verifier_states.is_none()
-                || common.map_values.is_none()
-                || common.map_ids.is_empty()
-            {
-                bail!("{label} requires --verifier-states, --map-values, and --map-ids");
-            }
-        } else if entry.metadata.needs_verifier_states() && common.verifier_states.is_none() {
+        if entry.metadata.needs_verifier_states() && common.verifier_states.is_none() {
             bail!("{label} requires --verifier-states");
         }
     }
@@ -597,19 +494,8 @@ fn write_json<T: Serialize>(output: Option<&Path>, value: &T) -> Result<()> {
 }
 
 fn attach_program_inputs(program: &mut BpfProgram, common: &CommonArgs) -> Result<()> {
-    if !common.map_ids.is_empty() {
-        program.set_map_ids(parse_u32_list(&common.map_ids, "--map-ids")?);
-    }
     if let Some(path) = common.verifier_states.as_deref() {
         program.set_verifier_states(read_verifier_states(path)?);
-    }
-    if let Some(path) = common.map_values.as_deref() {
-        let snapshot = read_map_values(path, &program.map_ids)?;
-        program.map_metadata = snapshot.metadata;
-        program.map_values = snapshot.values;
-        program.map_inner_map_ids = snapshot.inner_map_ids;
-        program.map_bpf_writable = snapshot.bpf_writable;
-        program.map_snapshots_skipped_by_size = snapshot.maps_skipped_by_size;
     }
     program.func_info = read_btf_info_records(
         common.func_info.as_deref(),
@@ -859,101 +745,6 @@ fn set_kinsn_btf_id(registry: &mut KinsnRegistry, name: &str, btf_id: i32) {
     }
 }
 
-fn read_profile(path: Option<&Path>) -> Result<Option<ProfilingData>> {
-    let Some(path) = path else {
-        return Ok(None);
-    };
-    let profile: ProfileJson = read_json_file(path, "profile.json")?;
-    let mut data = ProfilingData::default();
-    if let Some(branch_miss_rate) = profile.branch_miss_rate {
-        if !branch_miss_rate.is_finite() || !(0.0..=1.0).contains(&branch_miss_rate) {
-            bail!(
-                "profile branch_miss_rate must be finite and within [0, 1], got {}",
-                branch_miss_rate
-            );
-        }
-        data.branch_miss_rate = Some(branch_miss_rate);
-    }
-    if let Some(cache_miss_rate) = profile.cache_miss_rate {
-        if !cache_miss_rate.is_finite() || !(0.0..=1.0).contains(&cache_miss_rate) {
-            bail!(
-                "profile cache_miss_rate must be finite and within [0, 1], got {}",
-                cache_miss_rate
-            );
-        }
-        data.cache_miss_rate = Some(cache_miss_rate);
-    }
-    for (pc, counts) in profile.per_site {
-        let pc = pc
-            .parse::<usize>()
-            .with_context(|| format!("invalid per_site pc key: {pc}"))?;
-        if counts.branch_count == 0 {
-            bail!("profile per_site[{pc}] has zero branch_count");
-        }
-        if counts.branch_misses > counts.branch_count {
-            bail!(
-                "profile per_site[{pc}] branch_misses {} exceeds branch_count {}",
-                counts.branch_misses,
-                counts.branch_count
-            );
-        }
-        if !counts.miss_rate.is_finite() || !(0.0..=1.0).contains(&counts.miss_rate) {
-            bail!(
-                "profile per_site[{pc}] miss_rate must be finite and within [0, 1], got {}",
-                counts.miss_rate
-            );
-        }
-        let direction_count = counts
-            .taken
-            .checked_add(counts.not_taken)
-            .ok_or_else(|| anyhow!("profile per_site[{pc}] direction counters overflow"))?;
-        if direction_count > counts.branch_count {
-            bail!(
-                "profile per_site[{pc}] direction count {direction_count} exceeds branch_count {}",
-                counts.branch_count
-            );
-        }
-        data.branch_profiles.insert(
-            pc,
-            BranchProfile {
-                branch_count: counts.branch_count,
-                branch_misses: counts.branch_misses,
-                miss_rate: counts.miss_rate,
-                taken_count: counts.taken,
-                not_taken_count: counts.not_taken,
-            },
-        );
-    }
-    for (pc, counts) in profile.prefetch_sites {
-        let pc = pc
-            .parse::<usize>()
-            .with_context(|| format!("invalid prefetch_sites pc key: {pc}"))?;
-        if counts.cache_misses > counts.cache_references {
-            bail!(
-                "profile prefetch_sites[{pc}] cache_misses {} exceeds cache_references {}",
-                counts.cache_misses,
-                counts.cache_references
-            );
-        }
-        if !counts.miss_rate.is_finite() || !(0.0..=1.0).contains(&counts.miss_rate) {
-            bail!(
-                "profile prefetch_sites[{pc}] miss_rate must be finite and within [0, 1], got {}",
-                counts.miss_rate
-            );
-        }
-        data.prefetch_profiles.insert(
-            pc,
-            bpfopt::pass::PrefetchProfile {
-                execution_count: counts.execution_count,
-                cache_references: counts.cache_references,
-                cache_misses: counts.cache_misses,
-                miss_rate: counts.miss_rate,
-            },
-        );
-    }
-    Ok(Some(data))
-}
-
 fn read_verifier_states(path: &Path) -> Result<Vec<VerifierInsn>> {
     let input = fs::read_to_string(path)
         .with_context(|| format!("failed to read verifier states from {}", path.display()))?;
@@ -1100,285 +891,6 @@ fn parse_u64_auto_radix(input: &str) -> Result<u64> {
     } else {
         Ok(input.parse::<u64>()?)
     }
-}
-
-struct MapSnapshot {
-    metadata: HashMap<u32, MapMetadata>,
-    values: HashMap<(u32, Vec<u8>), Vec<u8>>,
-    inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
-    bpf_writable: HashMap<u32, bool>,
-    maps_skipped_by_size: HashSet<u32>,
-}
-
-fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
-    if !path.is_dir() {
-        bail!(
-            "--map-values must point to a bpftool snapshot directory, got {}",
-            path.display()
-        );
-    }
-    let mut metadata = HashMap::new();
-    let mut values = HashMap::new();
-    let mut inner_map_ids = HashMap::new();
-    let mut bpf_writable = HashMap::new();
-    let mut maps_skipped_by_size = HashSet::new();
-
-    for &map_id in map_ids.iter().filter(|&&map_id| map_id != 0) {
-        let show = read_bpftool_map_show(path, map_id)?;
-        let map_type = parse_map_type(&show.map_type)?;
-        let flags = parse_bpftool_number(&show.flags)?;
-        let map_metadata = MapMetadata {
-            map_type,
-            key_size: show.bytes_key,
-            value_size: show.bytes_value,
-            max_entries: show.max_entries,
-            map_id: show.id,
-            name: show.name,
-        };
-        bpf_writable.insert(show.id, flags & bpf_f_rdonly_prog() == 0);
-        if needs_bpftool_map_dump(map_type) {
-            match read_bpftool_map_dump(path, show.id)? {
-                BpftoolMapDumpSnapshot::Entries(entries) => {
-                    for entry in entries {
-                        let key = decode_bpftool_hex_bytes(&entry.key)
-                            .with_context(|| format!("invalid key bytes for map {}", show.id))?;
-                        let value = decode_bpftool_entry_value(&entry, &map_metadata)
-                            .with_context(|| format!("invalid value bytes for map {}", show.id))?;
-                        values.insert((show.id, key.clone()), value);
-                        if let Some(inner_map_id) = entry.inner_map_id {
-                            inner_map_ids.insert((show.id, key), inner_map_id);
-                        }
-                    }
-                }
-                BpftoolMapDumpSnapshot::SkippedBySize => {
-                    maps_skipped_by_size.insert(show.id);
-                }
-            }
-        }
-        metadata.insert(show.id, map_metadata);
-    }
-
-    Ok(MapSnapshot {
-        metadata,
-        values,
-        inner_map_ids,
-        bpf_writable,
-        maps_skipped_by_size,
-    })
-}
-
-fn read_bpftool_map_show(path: &Path, map_id: u32) -> Result<BpftoolMapShowJson> {
-    let show_path = bpftool_map_show_path(path, map_id);
-    let show: BpftoolMapShowJson = read_json_file(&show_path, "bpftool map show JSON")?;
-    if show.id != map_id {
-        bail!(
-            "{} contains map id {}, expected {}",
-            show_path.display(),
-            show.id,
-            map_id
-        );
-    }
-    Ok(show)
-}
-
-fn read_bpftool_map_dump(path: &Path, map_id: u32) -> Result<BpftoolMapDumpSnapshot> {
-    let dump_path = bpftool_map_dump_path(path, map_id);
-    let data =
-        fs::read(&dump_path).with_context(|| format!("failed to read {}", dump_path.display()))?;
-    let Some(first) = data
-        .iter()
-        .copied()
-        .find(|byte| !byte.is_ascii_whitespace())
-    else {
-        bail!("{} is empty", dump_path.display());
-    };
-
-    match first {
-        b'[' => {
-            let entries = serde_json::from_slice(&data).with_context(|| {
-                format!(
-                    "failed to parse bpftool map dump JSON from {}",
-                    dump_path.display()
-                )
-            })?;
-            Ok(BpftoolMapDumpSnapshot::Entries(entries))
-        }
-        b'{' => {
-            let marker: BpftoolMapDumpSkipMarker =
-                serde_json::from_slice(&data).with_context(|| {
-                    format!(
-                        "failed to parse bpftool map dump skip marker from {}",
-                        dump_path.display()
-                    )
-                })?;
-            if !marker.skipped
-                || marker.reason != "size_limit"
-                || marker.size_bytes <= marker.limit_bytes
-            {
-                bail!(
-                    "unexpected bpftool map dump skip marker in {}",
-                    dump_path.display()
-                );
-            }
-            Ok(BpftoolMapDumpSnapshot::SkippedBySize)
-        }
-        _ => bail!(
-            "{} is neither a bpftool map dump array nor a skip marker object",
-            dump_path.display()
-        ),
-    }
-}
-
-fn bpftool_map_show_path(path: &Path, map_id: u32) -> PathBuf {
-    path.join(format!("map-{map_id}.show.json"))
-}
-
-fn bpftool_map_dump_path(path: &Path, map_id: u32) -> PathBuf {
-    path.join(format!("map-{map_id}.dump.json"))
-}
-
-fn parse_bpftool_number(value: &BpftoolNumberJson) -> Result<u64> {
-    match value {
-        BpftoolNumberJson::Number(number) => Ok(*number),
-        BpftoolNumberJson::String(text) => parse_u64_auto_radix(text),
-    }
-}
-
-fn decode_bpftool_entry_value(
-    entry: &BpftoolMapEntryJson,
-    metadata: &MapMetadata,
-) -> Result<Vec<u8>> {
-    if !entry.values.is_empty() {
-        return decode_bpftool_percpu_values(&entry.values, metadata.value_size as usize);
-    }
-    let Some(value) = &entry.value else {
-        bail!("bpftool entry has neither value nor per-CPU values");
-    };
-    match value {
-        BpftoolMapValueJson::Bytes(bytes) => decode_bpftool_hex_bytes(bytes),
-        BpftoolMapValueJson::Error { error } => {
-            bail!("bpftool map dump returned lookup error: {error}")
-        }
-    }
-}
-
-fn decode_bpftool_percpu_values(
-    values: &[BpftoolPerCpuValueJson],
-    value_size: usize,
-) -> Result<Vec<u8>> {
-    let stride = round_up_8(value_size);
-    let mut out = Vec::with_capacity(values.len().saturating_mul(stride));
-    for value in values {
-        let bytes = decode_bpftool_hex_bytes(&value.value)?;
-        if bytes.len() != value_size {
-            bail!(
-                "per-CPU value has {} byte(s), expected {}",
-                bytes.len(),
-                value_size
-            );
-        }
-        out.extend_from_slice(&bytes);
-        out.resize(out.len() + (stride - value_size), 0);
-    }
-    Ok(out)
-}
-
-fn decode_bpftool_hex_bytes(input: &[String]) -> Result<Vec<u8>> {
-    input
-        .iter()
-        .map(|byte| {
-            let byte = byte.trim();
-            let hex = byte.strip_prefix("0x").unwrap_or(byte);
-            u8::from_str_radix(hex, 16).with_context(|| format!("invalid bpftool byte {byte:?}"))
-        })
-        .collect()
-}
-
-fn bpf_f_rdonly_prog() -> u64 {
-    1 << 7
-}
-
-fn needs_bpftool_map_dump(map_type: u32) -> bool {
-    matches!(
-        map_type,
-        kernel_sys::BPF_MAP_TYPE_HASH
-            | kernel_sys::BPF_MAP_TYPE_ARRAY
-            | kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY
-            | kernel_sys::BPF_MAP_TYPE_LRU_HASH
-            | kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS
-            | kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS
-    )
-}
-
-fn round_up_8(value: usize) -> usize {
-    (value + 7) & !7
-}
-
-fn parse_map_type(map_type: &MapTypeJson) -> Result<u32> {
-    match map_type {
-        MapTypeJson::Number(number) => Ok(*number),
-        MapTypeJson::Name(name) => {
-            let normalized = name
-                .trim()
-                .trim_start_matches("BPF_MAP_TYPE_")
-                .trim_start_matches("bpf_map_type_")
-                .replace(['-', ' '], "_")
-                .to_ascii_lowercase();
-            match normalized.as_str() {
-                "hash" => Ok(kernel_sys::BPF_MAP_TYPE_HASH),
-                "array" => Ok(kernel_sys::BPF_MAP_TYPE_ARRAY),
-                "prog_array" => Ok(kernel_sys::BPF_MAP_TYPE_PROG_ARRAY),
-                "perf_event_array" => Ok(kernel_sys::BPF_MAP_TYPE_PERF_EVENT_ARRAY),
-                "percpu_hash" | "per_cpu_hash" => Ok(kernel_sys::BPF_MAP_TYPE_PERCPU_HASH),
-                "percpu_array" | "per_cpu_array" => Ok(kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY),
-                "stack_trace" => Ok(kernel_sys::BPF_MAP_TYPE_STACK_TRACE),
-                "cgroup_array" => Ok(kernel_sys::BPF_MAP_TYPE_CGROUP_ARRAY),
-                "lru_hash" => Ok(kernel_sys::BPF_MAP_TYPE_LRU_HASH),
-                "lru_percpu_hash" | "lru_per_cpu_hash" => {
-                    Ok(kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH)
-                }
-                "lpm_trie" => Ok(kernel_sys::BPF_MAP_TYPE_LPM_TRIE),
-                "array_of_maps" => Ok(kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS),
-                "hash_of_maps" => Ok(kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS),
-                "devmap" => Ok(kernel_sys::BPF_MAP_TYPE_DEVMAP),
-                "devmap_hash" => Ok(kernel_sys::BPF_MAP_TYPE_DEVMAP_HASH),
-                "sockmap" => Ok(kernel_sys::BPF_MAP_TYPE_SOCKMAP),
-                "cpumap" => Ok(kernel_sys::BPF_MAP_TYPE_CPUMAP),
-                "xskmap" => Ok(kernel_sys::BPF_MAP_TYPE_XSKMAP),
-                "sockhash" => Ok(kernel_sys::BPF_MAP_TYPE_SOCKHASH),
-                "cgroup_storage" => Ok(kernel_sys::BPF_MAP_TYPE_CGROUP_STORAGE),
-                "reuseport_sockarray" => Ok(kernel_sys::BPF_MAP_TYPE_REUSEPORT_SOCKARRAY),
-                "percpu_cgroup_storage" | "per_cpu_cgroup_storage" => {
-                    Ok(kernel_sys::BPF_MAP_TYPE_PERCPU_CGROUP_STORAGE)
-                }
-                "queue" => Ok(kernel_sys::BPF_MAP_TYPE_QUEUE),
-                "stack" => Ok(kernel_sys::BPF_MAP_TYPE_STACK),
-                "sk_storage" => Ok(kernel_sys::BPF_MAP_TYPE_SK_STORAGE),
-                "struct_ops" => Ok(kernel_sys::BPF_MAP_TYPE_STRUCT_OPS),
-                "ringbuf" => Ok(kernel_sys::BPF_MAP_TYPE_RINGBUF),
-                "inode_storage" => Ok(kernel_sys::BPF_MAP_TYPE_INODE_STORAGE),
-                "task_storage" => Ok(kernel_sys::BPF_MAP_TYPE_TASK_STORAGE),
-                "bloom_filter" => Ok(kernel_sys::BPF_MAP_TYPE_BLOOM_FILTER),
-                "user_ringbuf" => Ok(kernel_sys::BPF_MAP_TYPE_USER_RINGBUF),
-                "cgrp_storage" => Ok(kernel_sys::BPF_MAP_TYPE_CGRP_STORAGE),
-                "arena" => Ok(kernel_sys::BPF_MAP_TYPE_ARENA),
-                "insn_array" => Ok(kernel_sys::BPF_MAP_TYPE_INSN_ARRAY),
-                _ => bail!("unsupported map_type: {name}"),
-            }
-        }
-    }
-}
-
-fn parse_u32_list(values: &[String], flag: &str) -> Result<Vec<u32>> {
-    values
-        .iter()
-        .map(|value| {
-            value
-                .trim()
-                .parse::<u32>()
-                .with_context(|| format!("invalid {flag} value: {value}"))
-        })
-        .collect()
 }
 
 fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Result<T> {
@@ -1558,131 +1070,6 @@ mod tests {
         assert_eq!(report["inlined_map_entries"][0]["map_id"], 7);
         assert_eq!(report["inlined_map_entries"][0]["key_hex"], "01000000");
         assert_eq!(report["inlined_map_entries"][0]["value_hex"], "2a000000");
-    }
-
-    #[test]
-    fn read_map_values_accepts_bpftool_map_in_map_snapshot() {
-        let dir =
-            std::env::temp_dir().join(format!("bpfopt-bpftool-map-values-{}", std::process::id()));
-        let _ = std::fs::remove_dir_all(&dir);
-        std::fs::create_dir(&dir).unwrap();
-        std::fs::write(
-            bpftool_map_show_path(&dir, 90),
-            r#"{
-              "id": 90,
-              "type": "hash_of_maps",
-              "name": "outer",
-              "flags": 128,
-              "bytes_key": 4,
-              "bytes_value": 4,
-              "max_entries": 8
-            }"#,
-        )
-        .unwrap();
-        std::fs::write(
-            bpftool_map_dump_path(&dir, 90),
-            r#"[{
-              "key": ["0x01", "0x00", "0x00", "0x00"],
-              "value": ["0x5b", "0x00", "0x00", "0x00"],
-              "inner_map_id": 91
-            }]"#,
-        )
-        .unwrap();
-
-        let snapshot = read_map_values(&dir, &[90]).unwrap();
-        let _ = std::fs::remove_dir_all(&dir);
-
-        assert_eq!(
-            snapshot.metadata[&90].map_type,
-            kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS
-        );
-        assert_eq!(
-            snapshot.inner_map_ids[&(90, 1u32.to_le_bytes().to_vec())],
-            91
-        );
-        assert_eq!(snapshot.bpf_writable[&90], false);
-        assert_eq!(
-            snapshot.values[&(90, 1u32.to_le_bytes().to_vec())],
-            91u32.to_le_bytes().to_vec()
-        );
-    }
-
-    #[test]
-    fn read_map_values_accepts_size_skip_marker() {
-        let dir = std::env::temp_dir().join(format!(
-            "bpfopt-bpftool-map-values-size-skip-{}",
-            std::process::id()
-        ));
-        let _ = std::fs::remove_dir_all(&dir);
-        std::fs::create_dir(&dir).unwrap();
-        std::fs::write(
-            bpftool_map_show_path(&dir, 91),
-            r#"{
-              "id": 91,
-              "type": "array",
-              "name": "oversized",
-              "flags": 0,
-              "bytes_key": 4,
-              "bytes_value": 8,
-              "max_entries": 4096
-            }"#,
-        )
-        .unwrap();
-        std::fs::write(
-            bpftool_map_dump_path(&dir, 91),
-            r#"{"skipped":true,"reason":"size_limit","size_bytes":65537,"limit_bytes":65536}"#,
-        )
-        .unwrap();
-
-        let snapshot = read_map_values(&dir, &[91]).unwrap();
-        let _ = std::fs::remove_dir_all(&dir);
-
-        assert!(snapshot.maps_skipped_by_size.contains(&91));
-        assert!(snapshot.values.is_empty());
-        assert_eq!(
-            snapshot.metadata[&91].map_type,
-            kernel_sys::BPF_MAP_TYPE_ARRAY
-        );
-    }
-
-    #[test]
-    fn read_map_values_rejects_unexpected_size_skip_marker() {
-        let dir = std::env::temp_dir().join(format!(
-            "bpfopt-bpftool-map-values-bad-skip-{}",
-            std::process::id()
-        ));
-        let _ = std::fs::remove_dir_all(&dir);
-        std::fs::create_dir(&dir).unwrap();
-        std::fs::write(
-            bpftool_map_show_path(&dir, 92),
-            r#"{
-              "id": 92,
-              "type": "array",
-              "name": "bad_marker",
-              "flags": 0,
-              "bytes_key": 4,
-              "bytes_value": 8,
-              "max_entries": 4096
-            }"#,
-        )
-        .unwrap();
-        std::fs::write(
-            bpftool_map_dump_path(&dir, 92),
-            r#"{"skipped":true,"reason":"unknown","size_bytes":65537,"limit_bytes":65536}"#,
-        )
-        .unwrap();
-
-        let err = match read_map_values(&dir, &[92]) {
-            Ok(_) => panic!("unexpectedly accepted malformed size-skip marker"),
-            Err(err) => err,
-        };
-        let _ = std::fs::remove_dir_all(&dir);
-
-        assert!(
-            err.to_string()
-                .contains("unexpected bpftool map dump skip marker"),
-            "err={err:#}"
-        );
     }
 
     #[test]

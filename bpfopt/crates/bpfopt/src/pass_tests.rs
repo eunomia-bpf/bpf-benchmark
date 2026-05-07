@@ -488,56 +488,6 @@ fn test_profiling_data_injection() {
     assert_eq!(bp.not_taken_count, 20);
 }
 
-#[test]
-fn test_run_with_profiling_enables_branch_flip() {
-    use crate::analysis::BranchTargetAnalysis;
-
-    let mut pm = PassManager::new();
-    pm.register_analysis(BranchTargetAnalysis);
-    pm.add_pass(BranchFlipPass {
-        min_bias: 0.7,
-        max_branch_miss_rate: 0.05,
-    });
-
-    // A simple diamond that would be flipped if PGO says the branch is hot.
-    let jne = BpfInsn::new(BPF_JMP | BPF_JNE | BPF_K, BpfInsn::make_regs(1, 0), 2, 0);
-    let mut prog = make_program(vec![
-        jne,                       // pc=0
-        BpfInsn::mov64_imm(0, 10), // then
-        BpfInsn::ja(1),            // skip else
-        BpfInsn::mov64_imm(0, 20), // else
-        exit_insn(),
-    ]);
-    let mut ctx = PassContext::test_default();
-    ctx.policy.enabled_passes = vec!["branch_flip".to_string()];
-
-    // Without profiling: branch_flip fails fast.
-    let err = pm.run_with_profiling(&mut prog, &ctx, None).unwrap_err();
-    assert!(err
-        .to_string()
-        .contains("real program-level branch_miss_rate data"));
-
-    // Reset the program.
-    let mut prog = make_program(vec![
-        jne,
-        BpfInsn::mov64_imm(0, 10),
-        BpfInsn::ja(1),
-        BpfInsn::mov64_imm(0, 20),
-        exit_insn(),
-    ]);
-
-    // With profiling data showing hot branch + PMU data: should flip.
-    let mut pdata = ProfilingData::default();
-    pdata.branch_profiles.insert(0, branch_profile(90, 10, 1));
-    pdata.branch_miss_rate = Some(0.02);
-    let _result = pm
-        .run_with_profiling(&mut prog, &ctx, Some(&pdata))
-        .unwrap();
-}
-
-// ── BranchFlipPass import for testing ───────────────────────
-use crate::passes::BranchFlipPass;
-
 // ── PlatformCapabilities tests ──────────────────────────────
 
 #[test]

@@ -297,9 +297,6 @@ impl BpfPass for CcmpPass {
         program.insns = new_insns;
         remap_kinsn_btf_metadata(program, &ctx.kinsn_registry)?;
         program.remap_annotations(&addr_map);
-        program.log_transform(TransformEntry {
-            sites_applied: applied,
-        });
 
         Ok(PassResult {
             pass_name: self.name().into(),

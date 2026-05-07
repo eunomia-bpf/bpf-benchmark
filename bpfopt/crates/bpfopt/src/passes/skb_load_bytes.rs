@@ -85,9 +85,6 @@ impl BpfPass for SkbLoadBytesSpecPass {
 
         program.insns = new_insns;
         program.remap_annotations(&addr_map);
-        program.log_transform(TransformEntry {
-            sites_applied: scan.sites.len(),
-        });
 
         Ok(PassResult {
             pass_name: self.name().into(),

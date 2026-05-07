@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: MIT
 //! BRANCH_FLIP PGO-guided pass.
 
+use std::collections::HashMap;
+use std::fs;
+use std::path::{Path, PathBuf};
+
+use anyhow::{bail, Context, Result};
+use serde::Deserialize;
+
 use crate::analysis::BranchTargetAnalysis;
 use crate::insn::*;
 use crate::pass::*;
@@ -43,6 +50,147 @@ pub struct BranchFlipPass {
     /// regression on misprediction-heavy workloads.
     /// Default: 0.05 (5%).
     pub max_branch_miss_rate: f64,
+}
+
+struct ProfiledBranchFlipPass {
+    inner: BranchFlipPass,
+    profiling: ProfilingData,
+}
+
+impl BranchFlipPass {
+    pub fn from_cli_args(args: &[String]) -> Result<Box<dyn BpfPass>> {
+        let profile = BranchFlipCliArgs::parse(args)?;
+        Ok(Box::new(ProfiledBranchFlipPass {
+            inner: BranchFlipPass {
+                min_bias: 0.7,
+                max_branch_miss_rate: 0.05,
+            },
+            profiling: read_branch_flip_profile(&profile.profile)?,
+        }))
+    }
+}
+
+impl BpfPass for ProfiledBranchFlipPass {
+    fn name(&self) -> &str {
+        self.inner.name()
+    }
+
+    fn required_analyses(&self) -> Vec<&str> {
+        self.inner.required_analyses()
+    }
+
+    fn run(
+        &self,
+        program: &mut BpfProgram,
+        analyses: &mut AnalysisCache,
+        ctx: &PassContext,
+    ) -> anyhow::Result<PassResult> {
+        program.inject_profiling(&self.profiling);
+        self.inner.run(program, analyses, ctx)
+    }
+}
+
+struct BranchFlipCliArgs {
+    profile: PathBuf,
+}
+
+impl BranchFlipCliArgs {
+    fn parse(args: &[String]) -> Result<Self> {
+        let mut profile = None;
+        let mut iter = args.iter();
+        while let Some(arg) = iter.next() {
+            match arg.as_str() {
+                "--profile" => {
+                    let value = iter
+                        .next()
+                        .ok_or_else(|| anyhow::anyhow!("--profile requires FILE"))?;
+                    profile = Some(PathBuf::from(value));
+                }
+                other => bail!("branch_flip unknown pass-local arg: {other}"),
+            }
+        }
+        Ok(Self {
+            profile: profile.ok_or_else(|| anyhow::anyhow!("branch_flip requires --profile"))?,
+        })
+    }
+}
+
+#[derive(Debug, Deserialize)]
+struct BranchProfileJson {
+    branch_miss_rate: f64,
+    #[serde(default)]
+    per_site: HashMap<String, BranchProfileSiteJson>,
+}
+
+#[derive(Debug, Deserialize)]
+struct BranchProfileSiteJson {
+    branch_count: u64,
+    branch_misses: u64,
+    miss_rate: f64,
+    taken: u64,
+    not_taken: u64,
+}
+
+fn read_branch_flip_profile(path: &Path) -> Result<ProfilingData> {
+    let profile: BranchProfileJson = read_json_file(path, "branch-flip profile JSON")?;
+    if !profile.branch_miss_rate.is_finite() || !(0.0..=1.0).contains(&profile.branch_miss_rate) {
+        bail!(
+            "profile branch_miss_rate must be finite and within [0, 1], got {}",
+            profile.branch_miss_rate
+        );
+    }
+    let mut data = ProfilingData {
+        branch_miss_rate: Some(profile.branch_miss_rate),
+        ..ProfilingData::default()
+    };
+    for (pc, counts) in profile.per_site {
+        let pc = pc
+            .parse::<usize>()
+            .with_context(|| format!("invalid per_site pc key: {pc}"))?;
+        if counts.branch_count == 0 {
+            bail!("profile per_site[{pc}] has zero branch_count");
+        }
+        if counts.branch_misses > counts.branch_count {
+            bail!(
+                "profile per_site[{pc}] branch_misses {} exceeds branch_count {}",
+                counts.branch_misses,
+                counts.branch_count
+            );
+        }
+        if !counts.miss_rate.is_finite() || !(0.0..=1.0).contains(&counts.miss_rate) {
+            bail!(
+                "profile per_site[{pc}] miss_rate must be finite and within [0, 1], got {}",
+                counts.miss_rate
+            );
+        }
+        let direction_count = counts
+            .taken
+            .checked_add(counts.not_taken)
+            .ok_or_else(|| anyhow::anyhow!("profile per_site[{pc}] direction counters overflow"))?;
+        if direction_count > counts.branch_count {
+            bail!(
+                "profile per_site[{pc}] direction count {direction_count} exceeds branch_count {}",
+                counts.branch_count
+            );
+        }
+        data.branch_profiles.insert(
+            pc,
+            BranchProfile {
+                branch_count: counts.branch_count,
+                branch_misses: counts.branch_misses,
+                miss_rate: counts.miss_rate,
+                taken_count: counts.taken,
+                not_taken_count: counts.not_taken,
+            },
+        );
+    }
+    Ok(data)
+}
+
+fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Result<T> {
+    let data = fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
+    serde_json::from_slice(&data)
+        .with_context(|| format!("failed to parse {label} from {}", path.display()))
 }
 
 /// A detected branch-flip site.
@@ -262,9 +410,6 @@ impl BpfPass for BranchFlipPass {
         program.insns = new_insns;
         remap_btf_metadata(program, &addr_map)?;
         program.remap_annotations(&addr_map);
-        program.log_transform(TransformEntry {
-            sites_applied: applied,
-        });
 
         Ok(PassResult {
             pass_name: self.name().into(),
@@ -764,10 +909,9 @@ mod tests {
 
     // ── MEDIUM #4: Profiler -> pass integration test ────────────────
 
-    /// MEDIUM #4: Test the data flow from ProfilingData -> PassManager ->
-    /// BranchFlipPass. Constructs ProfilingData in the format that the profiler
-    /// module produces and runs it through the full pass pipeline via
-    /// run_with_profiling, verifying that the branch annotations reach the pass.
+    /// MEDIUM #4: Test the data flow from ProfilingData -> BranchFlipPass.
+    /// Constructs ProfilingData in the profiler output shape and injects it
+    /// before the full pass pipeline runs.
     #[test]
     fn test_profiler_to_pass_pipeline_integration() {
         // Build a program with a biased branch
@@ -789,7 +933,7 @@ mod tests {
             ..Default::default()
         };
 
-        // Run via PassManager with profiling
+        prog.inject_profiling(&profiling);
         let mut pm = PassManager::new();
         pm.register_analysis(crate::analysis::BranchTargetAnalysis);
         pm.register_analysis(crate::analysis::LivenessAnalysis);
@@ -800,9 +944,7 @@ mod tests {
         let mut ctx = PassContext::test_default();
         ctx.policy.enabled_passes = vec!["branch_flip".to_string()];
 
-        let _result = pm
-            .run_with_profiling(&mut prog, &ctx, Some(&profiling))
-            .unwrap();
+        let _result = pm.run(&mut prog, &ctx).unwrap();
 
         // With high miss rate (0.10 > max_branch_miss_rate 0.05), the pass should skip.
         // This tests that profiling data correctly flows through the pipeline.
@@ -825,6 +967,7 @@ mod tests {
             BpfInsn::mov64_imm(0, 20),
             exit_insn(),
         ]);
+        prog2.inject_profiling(&profiling_low_miss);
 
         let mut pm2 = PassManager::new();
         pm2.register_analysis(crate::analysis::BranchTargetAnalysis);
@@ -834,9 +977,7 @@ mod tests {
             max_branch_miss_rate: 0.05,
         });
 
-        let _result2 = pm2
-            .run_with_profiling(&mut prog2, &ctx, Some(&profiling_low_miss))
-            .unwrap();
+        let _result2 = pm2.run(&mut prog2, &ctx).unwrap();
 
         // With low miss rate and high bias, the branch should be flipped
     }

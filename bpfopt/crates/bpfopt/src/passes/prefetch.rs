@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: MIT
 //! PREFETCH optimization pass.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
+use std::fs;
+use std::path::{Path, PathBuf};
+
+use anyhow::{bail, Context, Result};
+use serde::Deserialize;
 
 use crate::analysis::{BranchTargetAnalysis, BranchTargetResult, CFGAnalysis, CFGResult};
 use crate::insn::*;
@@ -40,6 +45,115 @@ const SKB_DATA_END_OFF: i16 = 80;
 /// used as an admission filter; missing PMU data does not block structural
 /// candidates.
 pub struct PrefetchPass;
+
+struct ProfiledPrefetchPass {
+    profiling: ProfilingData,
+}
+
+impl PrefetchPass {
+    pub fn from_cli_args(args: &[String]) -> Result<Box<dyn BpfPass>> {
+        let Some(profile) = PrefetchCliArgs::parse(args)? else {
+            return Ok(Box::new(PrefetchPass));
+        };
+        Ok(Box::new(ProfiledPrefetchPass {
+            profiling: read_prefetch_profile(&profile)?,
+        }))
+    }
+}
+
+impl BpfPass for ProfiledPrefetchPass {
+    fn name(&self) -> &str {
+        "prefetch"
+    }
+
+    fn required_analyses(&self) -> Vec<&str> {
+        PrefetchPass.required_analyses()
+    }
+
+    fn run(
+        &self,
+        program: &mut BpfProgram,
+        analyses: &mut AnalysisCache,
+        ctx: &PassContext,
+    ) -> anyhow::Result<PassResult> {
+        program.inject_profiling(&self.profiling);
+        PrefetchPass.run(program, analyses, ctx)
+    }
+}
+
+struct PrefetchCliArgs;
+
+impl PrefetchCliArgs {
+    fn parse(args: &[String]) -> Result<Option<PathBuf>> {
+        let mut profile = None;
+        let mut iter = args.iter();
+        while let Some(arg) = iter.next() {
+            match arg.as_str() {
+                "--profile" => {
+                    let value = iter
+                        .next()
+                        .ok_or_else(|| anyhow::anyhow!("--profile requires FILE"))?;
+                    profile = Some(PathBuf::from(value));
+                }
+                other => bail!("prefetch unknown pass-local arg: {other}"),
+            }
+        }
+        Ok(profile)
+    }
+}
+
+#[derive(Debug, Deserialize)]
+struct PrefetchProfileJson {
+    #[serde(default)]
+    prefetch_sites: HashMap<String, PrefetchProfileSiteJson>,
+}
+
+#[derive(Debug, Deserialize)]
+struct PrefetchProfileSiteJson {
+    execution_count: u64,
+    cache_references: u64,
+    cache_misses: u64,
+    miss_rate: f64,
+}
+
+fn read_prefetch_profile(path: &Path) -> Result<ProfilingData> {
+    let profile: PrefetchProfileJson = read_json_file(path, "prefetch profile JSON")?;
+    let mut data = ProfilingData::default();
+    for (pc, counts) in profile.prefetch_sites {
+        let pc = pc
+            .parse::<usize>()
+            .with_context(|| format!("invalid prefetch_sites pc key: {pc}"))?;
+        if counts.cache_misses > counts.cache_references {
+            bail!(
+                "profile prefetch_sites[{pc}] cache_misses {} exceeds cache_references {}",
+                counts.cache_misses,
+                counts.cache_references
+            );
+        }
+        if !counts.miss_rate.is_finite() || !(0.0..=1.0).contains(&counts.miss_rate) {
+            bail!(
+                "profile prefetch_sites[{pc}] miss_rate must be finite and within [0, 1], got {}",
+                counts.miss_rate
+            );
+        }
+        data.prefetch_profiles.insert(
+            pc,
+            PrefetchProfile {
+                execution_count: counts.execution_count,
+                cache_references: counts.cache_references,
+                cache_misses: counts.cache_misses,
+                miss_rate: counts.miss_rate,
+            },
+        );
+    }
+    Ok(data)
+}
+
+fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Result<T> {
+    let data = fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
+    serde_json::from_slice(&data)
+        .with_context(|| format!("failed to parse {label} from {}", path.display()))
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum PrefetchKind {
@@ -230,9 +344,6 @@ impl BpfPass for PrefetchPass {
         program.insns = new_insns;
         remap_kinsn_btf_metadata(program, &ctx.kinsn_registry)?;
         program.remap_annotations(&addr_map);
-        program.log_transform(TransformEntry {
-            sites_applied: candidates.len(),
-        });
 
         Ok(PassResult {
             pass_name: self.name().into(),

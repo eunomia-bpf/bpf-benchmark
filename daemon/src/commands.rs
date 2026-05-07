@@ -77,6 +77,7 @@ const VAR_MAP_VALUES: &str = "MAP_VALUES";
 const VAR_MAP_IDS: &str = "MAP_IDS";
 const VAR_PROG_TYPE: &str = "PROG_TYPE";
 const VAR_REPORT: &str = "REPORT";
+const VAR_PASS_LOCAL_ARGS: &str = "PASS_LOCAL_ARGS";
 
 const ALL_VARS: &[&str] = &[
     VAR_PROG_ID,
@@ -89,6 +90,7 @@ const ALL_VARS: &[&str] = &[
     VAR_MAP_IDS,
     VAR_PROG_TYPE,
     VAR_REPORT,
+    VAR_PASS_LOCAL_ARGS,
 ];
 
 #[derive(Debug)]
@@ -742,6 +744,7 @@ fn step_vars(
         (VAR_MAP_IDS, map_ids_csv.to_string()),
         (VAR_PROG_TYPE, prog_type_name.to_string()),
         (VAR_REPORT, report_path.display().to_string()),
+        (VAR_PASS_LOCAL_ARGS, String::new()),
     ])
 }
 
