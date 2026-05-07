@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import http.client
 import json
+import os
 import shutil
+import signal
 import socket
 import time
 import urllib.parse
@@ -239,6 +241,7 @@ class CiliumRunner(NativeProcessRunner):
         self._bpf_root: Path | None = None
         self._state_dir: Path | None = None
         self._managed_endpoint_ids: list[int] = []
+        self._agent_paused: bool = False
 
     def _default_binary_candidates(self) -> tuple[Path, ...]:
         return tuple(
@@ -293,6 +296,16 @@ class CiliumRunner(NativeProcessRunner):
             "--enable-drift-checker=false",
             "--enable-dynamic-config=false",
             "--enable-dynamic-lifecycle-manager=false",
+            # Disable the 30s endpoint-bpf-prog watchdog and the 2-minute
+            # periodic endpoint-regen timer. Both call orchestrator.Reinitialize
+            # / RegenerateAllEndpoints, which re-loads BPF programs mid-
+            # measurement and invalidates the prog IDs the corpus driver
+            # captured at startup. The runtime topology is fixed during a
+            # corpus run so the self-healing timers have nothing to do.
+            # Source: pkg/endpoint/watchdog/ep-bpfprog-watchdog.go:25-83 and
+            # pkg/endpointmanager/cell.go:222-244.
+            "--endpoint-bpf-prog-watchdog-interval=0",
+            "--endpoint-regen-interval=0",
             "--enable-monitor=false",
             "--enable-hubble=false",
             "--enable-l2-neigh-discovery=false",
@@ -533,6 +546,29 @@ class CiliumRunner(NativeProcessRunner):
             _delete_link_if_exists(spec.host_if)
             _delete_netns_if_exists(spec.namespace)
 
+    def _pause_agent(self) -> None:
+        # Freeze cilium-agent userspace after endpoint setup so no controller
+        # (orchestrator reinitialize, regen-recovery, devices-controller-driven
+        # local-node-config update, etc.) can call ReloadDatapath() during
+        # baseline / post_rejit measurement and invalidate the prog IDs the
+        # corpus driver captured at start.  TC/XDP datapath programs and pinned
+        # maps stay resident in the kernel; packets keep hitting them.  SIGSTOP
+        # is uncatchable by Go so this is deterministic.  Cleanup must SIGCONT
+        # before API-level endpoint deletion to avoid hangs.
+        process = None if self.session is None else self.session.process
+        if process is None or process.poll() is not None or self._agent_paused:
+            return
+        os.kill(int(process.pid), signal.SIGSTOP)
+        self._agent_paused = True
+
+    def _resume_agent(self) -> None:
+        process = None if self.session is None else self.session.process
+        if process is None or process.poll() is not None or not self._agent_paused:
+            self._agent_paused = False
+            return
+        os.kill(int(process.pid), signal.SIGCONT)
+        self._agent_paused = False
+
     def start(self) -> list[int]:
         if self.etcd_session is not None:
             raise RuntimeError(f"{type(self).__name__} is already running")
@@ -553,12 +589,15 @@ class CiliumRunner(NativeProcessRunner):
             ).start()
             super().start()
             self._setup_managed_endpoints()
-            return [int(program["id"]) for program in self.refresh_programs() if int(program.get("id", 0) or 0) > 0]
+            program_ids = [int(program["id"]) for program in self.refresh_programs() if int(program.get("id", 0) or 0) > 0]
+            self._pause_agent()
+            return program_ids
         except Exception:
             self.stop()
             raise
 
     def stop(self) -> None:
+        self._resume_agent()
         self._delete_managed_endpoints()
         super().stop()
         self._cleanup_managed_endpoint_links()
