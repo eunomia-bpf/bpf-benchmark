@@ -376,51 +376,22 @@ def apply_daemon_rejit(
     _resp = _daemon_request(daemon_socket_path, payload,
                             daemon_proc=daemon_proc, stdout_path=daemon_stdout_path,
                             stderr_path=daemon_stderr_path)
-    if str(_resp.get("status") or "") != "ok":
-        msg = str(_resp.get("error_message") or "optimize failed")
-        return {
-            "status": "error",
-            "per_program": {int(pid): {"status": "error", "prog_id": int(pid),
-                                       "error_message": msg}
-                            for pid in prog_ids},
-        }
-
-    raw_per_program = _resp.get("per_program")
-    if not isinstance(raw_per_program, Mapping):
-        raise RuntimeError("daemon response field 'per_program' must be an object")
-    records_by_prog_id = {str(key): value for key, value in raw_per_program.items()}
-    requested_prog_ids = {str(prog_id) for prog_id in prog_ids}
-    response_prog_ids = set(records_by_prog_id)
-    if response_prog_ids != requested_prog_ids:
-        missing = sorted(requested_prog_ids - response_prog_ids)
-        unexpected = sorted(response_prog_ids - requested_prog_ids)
-        raise RuntimeError(
-            "daemon response field 'per_program' does not match requested prog_ids: "
-            f"missing={missing}, unexpected={unexpected}"
-        )
-
-    # Pure pass-through: no parse, no rename, no truncate, no aggregate.
-    # daemon already truncated verifier logs in PassDetail.error;
-    # the only side effect is extracting failure workdir tars to disk.
-    per_program: dict[int, dict[str, object]] = {}
-    any_error = False
-    for prog_id in prog_ids:
-        record = records_by_prog_id[str(prog_id)]
-        if not isinstance(record, Mapping):
-            raise RuntimeError(f"daemon response field per_program[{prog_id!r}] must be an object")
-        record_dict = dict(record)
-        _write_failure_workdir_tar(
-            prog_id,
-            record_dict.pop("workdir_tar_b64", None),
-            failure_artifacts_dir,
-        )
-        if str(record_dict.get("status") or "") != "ok":
-            any_error = True
-        per_program[prog_id] = record_dict
-    return {
-        "status": "error" if any_error else "ok",
-        "per_program": per_program,
-    }
+    # Forward daemon response unchanged. Two side effects on per_program records:
+    #   1. unconditionally pop "workdir_tar_b64" so the base64 tar bytes never
+    #      land in apps/<app>.json;
+    #   2. write the popped tar to disk only when failure_artifacts_dir is set
+    #      (driven by `make vm-corpus KEEP_FAILURE_ARTIFACTS=1`); otherwise the
+    #      bytes are dropped on the floor.
+    per_program = _resp.get("per_program") or {}
+    if isinstance(per_program, Mapping):
+        for pid, record in per_program.items():
+            if isinstance(record, dict):
+                _write_failure_workdir_tar(
+                    int(pid),
+                    record.pop("workdir_tar_b64", None),
+                    failure_artifacts_dir,
+                )
+    return _resp
 
 
 @dataclass

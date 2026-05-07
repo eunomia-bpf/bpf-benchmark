@@ -582,7 +582,14 @@ def _run_suite_lifecycle_sessions(
                 "rejit_done",
                 app=session.app.name,
                 runner=session.app.runner,
-                status=str(result.rejit_result.get("status") or "error"),
+                status=(
+                    "ok"
+                    if all(
+                        str((rec or {}).get("status") or "error") == "ok"
+                        for rec in (result.rejit_result.get("per_program") or {}).values()
+                    )
+                    else "error"
+                ),
             )
             check_daemon()
 
