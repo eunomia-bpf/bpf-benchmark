@@ -82,6 +82,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--suite", default=str(DEFAULT_MACRO_APPS_YAML))
     parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
     parser.add_argument("--samples", type=int, default=0)
+    parser.add_argument("--duration-s", dest="duration_s", type=float, default=0.0,
+                        help="Workload duration per sample in seconds (default: catalog default).")
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
     parser.add_argument(
         "--keep-failure-artifacts",
@@ -91,6 +93,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     args = parser.parse_args(argv)
     if args.samples is not None and int(args.samples) < 0:
         raise SystemExit("--samples must be >= 0")
+    if args.duration_s is not None and float(args.duration_s) < 0:
+        raise SystemExit("--duration-s must be >= 0")
     return args
 
 def _print_progress(event: str, **fields: object) -> None:
@@ -106,17 +110,13 @@ def _daemon_exit_error(daemon_session: DaemonSession) -> str | None:
     return f"daemon session exited early (rc={returncode})"
 
 
-def _workload_seconds() -> float:
+def _workload_seconds(args: argparse.Namespace | None = None) -> float:
+    """Single global workload duration. CLI/env override beats catalog default."""
+    if args is not None:
+        explicit = float(getattr(args, "duration_s", 0) or 0)
+        if explicit > 0:
+            return explicit
     return float(DEFAULT_CORPUS_WORKLOAD_DURATION_S)
-
-
-def _app_workload_seconds(
-    args: argparse.Namespace,
-    app: AppSpec,
-) -> float:
-    if app.duration_s is not None:
-        return float(app.duration_s)
-    return _workload_seconds()
 
 
 def _sample_count(args: argparse.Namespace) -> int:
@@ -693,7 +693,7 @@ def run_suite(
     if not daemon_binary.exists():
         raise RuntimeError(f"daemon binary not found: {daemon_binary}")
 
-    workload_seconds = _workload_seconds()
+    workload_seconds = _workload_seconds(args)
     samples = _sample_count(args)
     results_by_name: dict[str, dict[str, object]] = {}
     completed_apps: set[str] = set()
@@ -717,7 +717,6 @@ def run_suite(
         with enable_bpf_stats():
             for app in suite.apps:
                 _print_progress("app_start", app=app.name, runner=app.runner, workload=app.workload_for("corpus"))
-                app_workload_seconds = _app_workload_seconds(args, app)
                 runner: AppRunner | None = None
                 result: dict[str, object] | None = None
                 try:
@@ -728,7 +727,7 @@ def run_suite(
                         app=app,
                         runner=runner,
                         state=state,
-                        workload_seconds=app_workload_seconds,
+                        workload_seconds=workload_seconds,
                     )
                     lifecycle_results, app_fatal_error = _run_suite_lifecycle_sessions(
                         prepared_daemon_session,
@@ -869,7 +868,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     output_json = Path(args.output_json).resolve()
     suite = _filter_suite_apps(load_app_suite_from_yaml(Path(args.suite).resolve()))
-    resolved_workload_seconds = _workload_seconds()
+    resolved_workload_seconds = _workload_seconds(args)
     resolved_samples = _sample_count(args)
     run_type = derive_run_type(output_json, "vm_corpus")
     started_at = datetime.now(timezone.utc).isoformat()

@@ -48,6 +48,9 @@ def suite_args_from_env(
 
     if suite_name == "corpus":
         args.extend(["--samples", _env(values, "SAMPLES", MICRO_BENCHMARK_DEFAULT_SAMPLES)])
+        duration = _env(values, "WORKLOAD_DURATION", "")
+        if duration:
+            args.extend(["--duration-s", duration])
         return args
 
     if suite_name == "test":

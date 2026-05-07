@@ -29,6 +29,7 @@ PLATFORM ?= kvm
 ARCH     ?= x86
 BZIMAGE  ?= $(X86_RUNTIME_KERNEL_IMAGE)
 SAMPLES  ?= 3
+WORKLOAD_DURATION ?=
 TIMEOUT  ?= 7200
 BENCH    ?=
 FUZZ_ROUNDS ?= 1000
@@ -60,7 +61,7 @@ _VENV_CANDIDATES := $(HOME)/workspace/.venv $(HOME)/.venv .venv venv
 _VENV_FOUND := $(firstword $(foreach v,$(_VENV_CANDIDATES),$(if $(wildcard $(v)/bin/activate),$(v),)))
 VENV ?= $(_VENV_FOUND)
 PYTHON := $(if $(VENV),$(VENV)/bin/python3,python3)
-export BZIMAGE PYTHON LLVM_DIR RUN_LLVM_DIR TIMEOUT FUZZ_ROUNDS
+export BZIMAGE PYTHON LLVM_DIR RUN_LLVM_DIR TIMEOUT FUZZ_ROUNDS WORKLOAD_DURATION
 
 # KEEP_WORKDIRS: empty/0 = no tars (default), 1 = tar on real failures only,
 # all = tar every prog (forces success-side tar via daemon-side capture).

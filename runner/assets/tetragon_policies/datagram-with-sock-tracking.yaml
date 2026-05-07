@@ -52,4 +52,7 @@ spec:
           - "IPPROTO_UDP"
         matchActions:
         - action: Post
-          rateLimit: "5"
+          # rateLimit removed: the upstream sample sets 5 events/sec which
+          # caps tetragon's `generic_kprobe_actions`/`output` tail invocations
+          # at 5/s and starves the BPF measurement window. We benchmark at
+          # full throughput instead.

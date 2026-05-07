@@ -14,7 +14,6 @@ class AppSpec:
     name: str
     runner: str
     workload: str
-    duration_s: float | None = None
     args: dict[str, object] | None = None
 
     def workload_for(self, mode: str) -> str:
@@ -58,25 +57,13 @@ def _workload_required(value: Any, *, field_name: str) -> str:
     return _string_required(value.get("name"), field_name=field_name)
 
 
-def _optional_positive_float(value: Any, *, field_name: str) -> float | None:
-    if value is None or value == "":
-        return None
-    try:
-        parsed = float(value)
-    except (TypeError, ValueError) as exc:
-        raise SystemExit(f"invalid app suite field: {field_name} must be a positive number") from exc
-    if parsed <= 0.0:
-        raise SystemExit(f"invalid app suite field: {field_name} must be > 0")
-    return parsed
-
-
 def _app_args(raw_app: Mapping[str, object], *, field_name: str) -> dict[str, object]:
     if raw_app.get("args") is not None:
         raise SystemExit(f"invalid app suite field: {field_name}.args is not supported; use flat app keys")
     return {
         str(key): item
         for key, item in raw_app.items()
-        if str(key) not in {"name", "runner", "workload", "duration_s", "args"}
+        if str(key) not in {"name", "runner", "workload", "args"}
     }
 
 
@@ -88,7 +75,6 @@ def _app_spec_from_v2_name(name: str) -> AppSpec:
         name=catalog_entry.name,
         runner=catalog_entry.runner,
         workload=catalog_entry.workload,
-        duration_s=catalog_entry.duration_s,
         args=dict(catalog_entry.runner_args),
     )
 
@@ -133,10 +119,6 @@ def load_app_suite_from_yaml(yaml_path: Path) -> AppSuite:
                 name=_string_required(raw_app.get("name"), field_name=f"apps[{index}].name"),
                 runner=_string_required(raw_app.get("runner"), field_name=f"apps[{index}].runner"),
                 workload=_workload_required(raw_app.get("workload"), field_name=f"apps[{index}].workload"),
-                duration_s=_optional_positive_float(
-                    raw_app.get("duration_s"),
-                    field_name=f"apps[{index}].duration_s",
-                ),
                 args=_app_args({str(key): item for key, item in raw_app.items()}, field_name=f"apps[{index}]"),
             )
         if app.name in seen_names:
