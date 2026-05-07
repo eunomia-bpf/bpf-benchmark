@@ -3,8 +3,8 @@
 Date: 2026-04-14
 Status: Active hard-cut architecture
 
-This document defines the active execution architecture for `micro`, `corpus`,
-and `e2e`.
+This document defines the active execution architecture for `micro` and
+`corpus`.
 
 ## Boundaries
 
@@ -146,7 +146,6 @@ Benchmark results are written directly into the selected suite root:
 ```text
 micro/results
 corpus/results
-e2e/results
 tests/results
 ```
 

@@ -69,22 +69,22 @@
 | 60 | 严格重跑 30×1000 | ✅ | 56/56 pass。`micro/results/pure_jit_authoritative_strict_20260312.json` |
 | 61 | Benchmark 多样性 | 🟡 | 67 micro + 79 corpus paired。`docs/tmp/2026-03-11/benchmark-diversity-audit.md` |
 | 62 | CMOV 信号增强 | ❌ | 仅 2.8% 改善。 |
-| 63 | E2E throughput | 已取消 | 随 #49。 |
+| 63 | deployment suite throughput | 已取消 | 随 #49。 |
 | 64 | Corpus 可运行性 | ✅ | 381 runnable / 3069 sites。`docs/tmp/2026-03-11/corpus-runnability-report.md` |
 | 65 | Corpus 批量 recompile | ✅ | geomean **0.847x**。`docs/tmp/2026-03-11/corpus-batch-recompile-results.md`，`docs/tmp/2026-03-11/corpus-recompile-regression-analysis.md` |
-| 66 | 非网络 E2E 研究 | ✅ | Tracee+Tetragon+bpftrace+scx。`docs/tmp/2026-03-11/non-networking-evaluation-plan.md` |
+| 66 | 非网络 deployment suite 研究 | ✅ | Tracee+Tetragon+bpftrace+scx。`docs/tmp/2026-03-11/non-networking-evaluation-plan.md` |
 | 67 | Framework 重构 Step 1-3 | ✅ | 共享 Python 层。`docs/tmp/2026-03-11/framework-improvement-step1.md` |
 | 68 | Corpus 扩展 R3 | ✅ | 560 objects（23 项目）。`docs/tmp/2026-03-11/corpus-expansion-round3.md` |
 | 69 | Selective CMOV policy | ✅ | global skip-cmov 不足。`docs/tmp/2026-03-11/selective-policy-results.md` |
-| 70 | bpftrace E2E driver | ✅ | 9 CMOV sites。`docs/tmp/2026-03-11/bpftrace-e2e-results.md` |
-| 70a | Tetragon harness | ✅ | `docs/tmp/2026-03-11/tetragon-e2e-results.md` |
-| 70b | BPF-side VM 测试 | ✅ | Tracee **2.71x**。`docs/tmp/2026-03-11/tracee-e2e-vm-summary.md`，`docs/tmp/2026-03-11/bpftrace-e2e-vm-summary.md`，`docs/tmp/2026-03-11/tetragon-e2e-vm-summary.md` |
+| 70 | bpftrace deployment suite driver | ✅ | 9 CMOV sites。`docs/tmp/2026-03-11/bpftrace-deployment-suite-results.md` |
+| 70a | Tetragon harness | ✅ | `docs/tmp/2026-03-11/tetragon-deployment-suite-results.md` |
+| 70b | BPF-side VM 测试 | ✅ | Tracee **2.71x**。`docs/tmp/2026-03-11/tracee-deployment-suite-vm-summary.md`，`docs/tmp/2026-03-11/bpftrace-deployment-suite-vm-summary.md`，`docs/tmp/2026-03-11/tetragon-deployment-suite-vm-summary.md` |
 | 70c | Framework 重构 Steps 2-7 | ✅ | `micro/driver.py` 统一入口。`docs/tmp/2026-03-11/framework-improvement-steps2-7.md` |
-| 71 | 仓库三层重组 | ✅ | micro/corpus/e2e 分离。`docs/tmp/2026-03-11/repo-restructure-report.md` |
-| 72 | Tracee E2E | ✅ | exec_storm **+21.65%**。`docs/tmp/2026-03-11/tracee-real-e2e-report.md`，`e2e/results/tracee-e2e-real.json` |
+| 71 | 仓库三层重组 | ✅ | micro/corpus/deployment-suite 分离。`docs/tmp/2026-03-11/repo-restructure-report.md` |
+| 72 | Tracee deployment suite | ✅ | exec_storm **+21.65%**。`docs/tmp/2026-03-11/tracee-real-deployment-suite-report.md`，`deployment-suite/results/tracee-deployment-suite-real.json` |
 | 73 | Kernel 重编 | ✅ | FTRACE_SYSCALLS+SCHED_CLASS_EXT。`docs/tmp/2026-03-11/kernel-rebuild-report.md` |
-| 74 | Tetragon E2E | ✅ | stress_exec **+6.7%**，BPF **-14.5%**。`e2e/results/tetragon-real-e2e.json` |
-| 75 | bpftrace E2E | ✅ | geomean **0.992x**（policy-sensitivity）。`docs/tmp/2026-03-12/bpftrace-real-e2e-report.md`，`e2e/results/bpftrace-real-e2e.json` |
+| 74 | Tetragon deployment suite | ✅ | stress_exec **+6.7%**，BPF **-14.5%**。`deployment-suite/results/tetragon-real-deployment-suite.json` |
+| 75 | bpftrace deployment suite | ✅ | geomean **0.992x**（policy-sensitivity）。`docs/tmp/2026-03-12/bpftrace-real-deployment-suite-report.md`，`deployment-suite/results/bpftrace-real-deployment-suite.json` |
 | 77 | Directive gap 分析 | ✅ | CMOV 应为 policy-sensitivity 证据。`docs/tmp/2026-03-11/directive-gap-analysis.md` |
 | 78 | cmov 识别加宽 | ✅ | `docs/tmp/2026-03-11/cmov-broadening-report.md` |
 | 79 | bitfield_extract | ✅ | **544 sites / 41 objects**。`docs/tmp/2026-03-11/bitfield-extract-implementation.md` |
@@ -120,7 +120,7 @@
 | 102 | Inventory audit | ✅ | `docs/tmp/2026-03-11/benchmark-inventory-audit.md` |
 | 103 | Policy pipeline | ✅ | `docs/tmp/2026-03-11/policy-pipeline-analysis.md` |
 | 104 | Corpus tuned policy | ✅ | geomean 0.868x→**0.898x**。`docs/tmp/2026-03-11/corpus-tuned-policy-comparison.md` |
-| 105 | E2E policy 接线 | ✅ | per-program policy lookup。 |
+| 105 | deployment suite policy 接线 | ✅ | per-program policy lookup。 |
 | 106 | 结果目录规范 | ✅ | authoritative naming + symlinks。 |
 | 107 | Code-size VM | ✅ | geomean **1.003x**。`docs/tmp/2026-03-11/code-size-full-vm-results.md` |
 | 108 | Tracing corpus VM | ✅ | applied-only **1.019x**。`docs/tmp/2026-03-11/tracing-corpus-vm-full-results.md` |
@@ -136,7 +136,7 @@
 | 118 | Recompile micro strict | ✅ | overall **1.028x**，applied **1.024x**。`docs/tmp/2026-03-11/kernel-recompile-micro-strict.md` |
 | 119 | XDP forwarding VM | ✅（已退役） | +0.27%，见 #203。`docs/tmp/2026-03-11/xdp-forwarding-live-vm-report.md` |
 | 120 | Corpus v2 policy rerun | ✅ | **0.848x**（pre-fix baseline）。`docs/tmp/2026-03-11/corpus-v2-policy-rerun.md` |
-| 121 | E2E v2 policy rerun | ✅ | wiring 验证，site 漂移导致 0 apply。`docs/tmp/2026-03-11/e2e-v2-policy-rerun.md` |
+| 121 | deployment suite v2 policy rerun | ✅ | wiring 验证，site 漂移导致 0 apply。`docs/tmp/2026-03-11/deployment-suite-v2-policy-rerun.md` |
 | 122 | v2 pipeline 迁移 | ✅ | scanner v2-only。`docs/tmp/2026-03-11/v2-pipeline-migration-report.md` |
 | 123 | Per-family 消融 | ✅ | wide **1.010x**, rotate **1.021x**, cmov **0.974x**。`docs/tmp/2026-03-11/kernel-recompile-per-family-ablation.md` |
 | 124 | 论文审计 | 已取消 | |
@@ -149,7 +149,7 @@
 | 131 | Inline policy v1→v2 | ✅ | policy_file 引用替换 inline。 |
 | 132 | v2 spec 文档 | ✅ | `docs/tmp/2026-03-12/policy-v2-authoritative-spec.md` |
 | 133 | Corpus v2 fixed rerun | ✅ | **0.875x**（91 applied）。`docs/tmp/2026-03-12/corpus-v2-fixed-rerun.md` |
-| 134 | E2E v2 fixed rerun | ✅ | cmov skip 过滤生效。`docs/tmp/2026-03-12/e2e-v2-fixed-rerun.md` |
+| 134 | deployment suite v2 fixed rerun | ✅ | cmov skip 过滤生效。`docs/tmp/2026-03-12/deployment-suite-v2-fixed-rerun.md` |
 | 135 | Parser 一致性测试 | ✅ | golden tests。`docs/tmp/2026-03-12/parser-consistency-fix.md` |
 | 136 | Plan doc 修正 | ✅ | 过时条目描述回写。 |
 | 137 | bpftrace policy artifacts | ✅ | 12 cmov sites。`docs/tmp/2026-03-12/bpftrace-policy-artifacts.md` |
@@ -162,7 +162,7 @@
 | 144 | CMOV 消融 | ✅ | CMOV 仍负面，保留 cmov:skip。`docs/tmp/2026-03-12/post-cmov-fix-corpus-ablation.md` |
 | 145 | v3 policy | ✅ | per-site directive list，614 YAML 通过。 |
 | 146 | Recompile 开销 | ✅ | scanner **4.32ms**，syscall **29.89μs**。`docs/tmp/2026-03-12/recompile-overhead-measurement.md` |
-| 147 | bpftrace v3 validation | ✅ | `docs/tmp/2026-03-12/bpftrace-e2e-v3-validation.md` |
+| 147 | bpftrace v3 validation | ✅ | `docs/tmp/2026-03-12/bpftrace-deployment-suite-v3-validation.md` |
 | 148 | 架构 Review + 图 | ✅ | `docs/tmp/2026-03-12/architecture-review-and-diagrams.md` |
 | 149 | Canonical-site hardening | ✅ | 8 form 双重校验。 |
 | 150 | Kernel cleanup | ✅ | RORX bug 等修复。`docs/tmp/2026-03-12/kernel-engineering-cleanup.md` |
@@ -179,7 +179,7 @@
 | 161 | Scanner pattern_kind fix | ✅ | `docs/tmp/2026-03-12/scanner-pattern-kind-investigation.md` |
 | 162 | Corpus validity 分析 | ✅ | corpus exec **无效**（噪声主导），code size 有效。`docs/tmp/2026-03-12/corpus-construct-validity-analysis.md` |
 | 163 | Scanner enumerate | ✅ | live program 分析，197 progs / 1920 sites。`docs/tmp/2026-03-12/scanner-enumerate-implementation.md` |
-| 164 | E2E 切 enumerate | ✅ | `docs/tmp/2026-03-13/e2e-enumerate-pipeline-switch.md` |
+| 164 | deployment suite 切 enumerate | ✅ | `docs/tmp/2026-03-13/deployment-suite-enumerate-pipeline-switch.md` |
 | 165 | 消融补全 | ✅ | byte-recompose **50.7%**，callee-saved ~0%，BMI ~0%。`docs/tmp/2026-03-13/ablation-byte-recompose-callee-bmi.md` |
 | 166 | Per-form 矛盾调查 | ✅ | emitter bug 导致零变化。`docs/tmp/2026-03-13/per-form-discrepancy-investigation.md` |
 | 167 | Emitter 修复 | ✅ | BEXTR VEX 修正，extract_dense -6.8%。`docs/tmp/2026-03-13/emitter-fix-extract-endian-bflip.md` |
@@ -188,24 +188,24 @@
 | 171 | Daemon 模式 | ❌ 暂不做 | 论文不需要。 |
 | 172 | Native code 分析 | ❌ | jited_prog_insns 未用。 |
 | 173 | Corpus 切 enumerate | ✅ | |
-| 76 | scx E2E | 🔄 | 28 sites，struct_ops -EOPNOTSUPP。`docs/tmp/2026-03-11/scx-e2e-report.md`，`docs/tmp/2026-03-11/struct-ops-recompile-investigation.md` |
+| 76 | scx deployment suite | 🔄 | 28 sites，struct_ops -EOPNOTSUPP。`docs/tmp/2026-03-11/scx-deployment-suite-report.md`，`docs/tmp/2026-03-11/struct-ops-recompile-investigation.md` |
 | 169 | Post-BEXTR rerun | ✅ | overall **1.003x**，applied **0.932x**。extract_dense **0.556x** 回归。`docs/tmp/active/micro-62bench-post-bextr-fix.md`，`micro/results/micro_62bench_post_bextr_fix_20260313.json` |
 | 174 | Patch-site 架构 | ❌ | 消除 I-cache flush 开销。 |
 | 175 | WIDE_MEM 扩展 | ❌ | byte-recompose 50.7%。 |
 | 176 | Prologue 优化 | ❌ | 占 gap 18.5%。 |
 | 177 | Cost model | ❌ | 跳过 same-size/dense 超阈值。 |
-| 178 | 更多 E2E 数据 | ❌ | 目标 ≥3 workload 正向。 |
+| 178 | 更多 deployment suite 数据 | ❌ | 目标 ≥3 workload 正向。 |
 | 179 | Per-form ablation | ✅ | ROTATE **0.923x** win，CMOV **1.068x** loss。`docs/tmp/20260313/micro-per-form-ablation_20260313.md` |
 | 180 | 框架重构 Makefile | ✅ | file-based deps + provenance + POLICY=。 |
 | 181 | CI 修复 | ✅ | driver.py + requirements.txt。 |
 | 182 | Opus review | ✅ | 架构✅，方法学有 gap。`docs/tmp/deep-review-*.md` |
-| 183 | P0.1 更多 E2E | 🔄 已被 #304 搁置 | Tracee +6.28%/+7.00%。 |
+| 183 | P0.1 更多 deployment suite | 🔄 已被 #304 搁置 | Tracee +6.28%/+7.00%。 |
 | 184 | P0.2 Corpus >1.05x | 🔄 已被 #304 搁置 | 当前 1.046x。 |
 | 185-188 | P1 优化方向 | ❌ 已被 #304 搁置 | prologue / patch-site / wide 扩展 / native 分析。 |
 | 189 | Micro policy 优化 | ✅ | applied-only **1.110x**（7 applied）。`micro/results/vm_micro_authoritative_20260318.json` |
 | 190 | 结果目录 + schema | ✅ | authoritative naming，policy 内嵌。 |
-| 191 | Corpus+E2E 分析 | ✅ | stale policy 是主因。`docs/tmp/20260318/corpus_e2e_performance_analysis_20260318.md` |
-| 192 | Katran E2E 可行性 | ✅ | 94 live sites。`docs/tmp/20260318/katran_e2e_feasibility_20260318.md` |
+| 191 | Corpus+deployment suite 分析 | ✅ | stale policy 是主因。`docs/tmp/20260318/corpus_deployment-suite_performance_analysis_20260318.md` |
+| 192 | Katran deployment suite 可行性 | ✅ | 94 live sites。`docs/tmp/20260318/katran_deployment-suite_feasibility_20260318.md` |
 | 193 | Corpus policy refresh | ✅ | 582 个 v3 policy，skip cmov+extract。 |
 | 194 | 项目卫生审计 | ✅ | `docs/tmp/20260318/project_hygiene_audit_20260318.md` |
 | 195 | 内核修改文档 | ✅ | 1017 行。`docs/tmp/20260318/kernel_modifications_analysis_20260318.md` |
@@ -215,10 +215,10 @@
 | 199 | Corpus refreshed rerun | ⚠️ | applied-only **1.077x**，overall 0.881x。 |
 | 200 | **Tetragon rerun（2026-03-18）** | ⚠️ | connect_storm **-55.96%** 回归，见 #204 修复。 |
 | 201 | **Kernel WARN_ON 排查（2026-03-18）** | ✅ | tailcall poke descriptor 冲突，暂不修。报告：`docs/tmp/20260318/kernel_warn_on_investigation_20260318.md`。 |
-| 202 | **Katran E2E 完整设计（2026-03-18）** | ✅ | DSR 拓扑设计。报告：`docs/tmp/20260318/e2e_design_katran_20260318.md`。 |
-| 203 | **XDP forwarding E2E 删除（2026-03-18）** | ✅ | 已删除 `e2e/cases/xdp_forwarding/` + 结果 + 文档引用。commit `431fdc5`。 |
+| 202 | **Katran deployment suite 完整设计（2026-03-18）** | ✅ | DSR 拓扑设计。报告：`docs/tmp/20260318/deployment-suite_design_katran_20260318.md`。 |
+| 203 | **XDP forwarding deployment suite 删除（2026-03-18）** | ✅ | 已删除 `deployment-suite/cases/xdp_forwarding/` + 结果 + 文档引用。commit `431fdc5`。 |
 | 204 | **Tetragon connect_storm 修复（2026-03-18）** | ✅ | stress_exec **+8.70%**，connect_storm **+22.29%**。3 applied / 49 bflip sites。报告：`docs/tmp/20260318/tetragon_connect_storm_investigation_20260318.md`。 |
-| 205 | **Katran E2E MVP 实现（2026-03-18）** | 🔄 | 创建 e2e/cases/katran/，注册到 e2e/run.py，第一版用 standalone bpftool load 做 smoke。 |
+| 205 | **Katran deployment suite MVP 实现（2026-03-18）** | 🔄 | 创建 deployment-suite/cases/katran/，注册到 deployment-suite/run.py，第一版用 standalone bpftool load 做 smoke。 |
 | 206 | **Sequential rerun round 2（2026-03-18）** | ✅ | Tracee/Corpus rerun。trampoline guard 是 corpus 回归根因，已 revert。报告：`docs/tmp/20260318/sequential_rerun_round2_20260318.md`。 |
 | 207 | **Tracee revert rerun（2026-03-19）** | ✅ | exec_storm +4.40%，file_io +4.69%。旧权威保持。报告：`docs/tmp/20260319/tracee_revert_rerun_20260319.md`。 |
 | 208 | **Corpus revert rerun（2026-03-19）** | ✅ | applied-only **1.023x**。瓶颈是 non-applied ultra-short 噪声。报告：`docs/tmp/20260319/corpus_improvement_analysis_20260319.md`。 |
@@ -248,7 +248,7 @@
 | 243 | **ARM64 CI baseline（2026-03-19）** | ✅ | llvmbpf **0.590x**（54/62 wins）。报告：`docs/tmp/20260319/arm64_ci_first_run_20260319.md`。 |
 | 244 | **权威 micro rerun（2026-03-19）** | ✅ | applied-only **1.152x**。报告：`docs/tmp/20260319/micro_authoritative_post_simplification_20260319.md`。 |
 | 245 | **Corpus rerun（2026-03-19）** | ✅ | applied-only **1.062x**。报告：`docs/tmp/20260319/corpus_post_simplification_20260319.md`。 |
-| 246 | **E2E rerun（待做）** | ⏳ 已被 #304 架构转向搁置 | |
+| 246 | **deployment suite rerun（待做）** | ⏳ 已被 #304 架构转向搁置 | |
 | 247 | **ROTATE fix + cleanup（2026-03-19）** | ✅ | kernel-side 完成，scanner 待对齐（见 #268）。 |
 | 248 | **Trampoline regeneration（2026-03-19）** | ✅ | selftest 25/25。报告：`docs/tmp/20260319/trampoline_regen_rotate_fix_20260319.md`。 |
 | 249-251 | **ARM64 emitter 设计+实现（2026-03-19）** | ✅ | 4 form（ROTATE/WIDE_MEM/EXTRACT/COND_SELECT）+ arch callback 拆分。selftest 24/24（x86+ARM64）。报告：`docs/tmp/20260319/arm64_emitter_implementation_20260319.md`。 |
@@ -278,8 +278,8 @@
 | 277 | **Post-refactor cleanup（2026-03-20）** | ✅ | py_compile 无错误。 |
 | 279 | **Cross-layer fix（2026-03-20）** | ✅ | 零跨层 import。报告：`docs/tmp/20260320/cross_layer_cleanup_20260320.md`。 |
 | 280 | **Trampoline leak fix（2026-03-20）** | ✅ | Double synchronize_rcu。selftest 35/35。 |
-| 281 | **ARM64 E2E smoke（2026-03-20）** | ✅ | Katran recompile 通过。Tetragon ❌。EC2 terminated。报告：`docs/tmp/20260320/arm64_e2e_smoke_20260320.md`。 |
-| 282 | **Katran harness 升级（2026-03-20）** | ✅ | BPF **1.108-1.168x**。报告：`docs/tmp/20260320/katran_e2e_quality_analysis_20260320.md`。 |
+| 281 | **ARM64 deployment suite smoke（2026-03-20）** | ✅ | Katran recompile 通过。Tetragon ❌。EC2 terminated。报告：`docs/tmp/20260320/arm64_deployment-suite_smoke_20260320.md`。 |
+| 282 | **Katran harness 升级（2026-03-20）** | ✅ | BPF **1.108-1.168x**。报告：`docs/tmp/20260320/katran_deployment-suite_quality_analysis_20260320.md`。 |
 | 283 | **ARM64 bpftool fix（2026-03-20）** | ✅ | kernel_btf fallback。Katran recompile 全通。报告：`docs/tmp/20260320/arm64_bpftool_fix_20260320.md`。 |
 | 284 | **Kernel 精简（2026-03-20）** | ✅ | **-137 LOC**。selftest 35/35。报告：`docs/tmp/20260320/kernel_low_risk_simplification_20260320.md`。 |
 | 285 | **用户态精简（2026-03-20）** | ✅ | **-32,329 行**。报告：`docs/tmp/20260320/userspace_consolidation_20260320.md`。 |
@@ -295,14 +295,14 @@
 | 297/301 | **Tetragon 未 apply 调查（2026-03-20）** | ✅ | offline scan 看不到 live bflip sites。最多 5/7 可 apply。报告：`docs/tmp/20260320/tetragon_unapplied_investigation_20260320.md`。 |
 | 298/300 | **ARM64 benchmark pipeline（2026-03-20）** | ⚠️ 已被 #304 搁置 | 改为 t4g.micro 交叉编译方案。 |
 | 299 | **x86 新优化调研（2026-03-20）** | ✅ | Top-5 新机会。报告：`docs/tmp/20260320/x86_new_optimization_opportunities_20260320.md`。 |
-| 302 | **E2E profiler（2026-03-20）** | 🔄 已被 #304 搁置 | PGO policy 设计。 |
+| 302 | **deployment suite profiler（2026-03-20）** | 🔄 已被 #304 搁置 | PGO policy 设计。 |
 | 303 | **目录整理（2026-03-20）** | ✅ | runner/docker, runner/scripts, docs/reference。报告：`docs/tmp/20260320/directory_reorganization_20260320.md`。 |
 
 ---
 
 ## Archived: v3 implementation progress snapshot (as of 2026-05-01)
 
-**Status: superseded by current state (Phase 4 全平台验证 已开始：KVM x86 + AWS x86 + AWS ARM64 corpus + e2e 在持续跑；架构边界由主 plan §4 描述）。** 本节是 v3 重构期的进度快照，所有 Phase 1-3 任务已完成、Phase 4 已开始。Phase 4 状态以 git history 为准。保留作为历史记录。
+**Status: superseded by current state (Phase 4 全平台验证 已开始：KVM x86 + AWS x86 + AWS ARM64 corpus + deployment-suite 在持续跑；架构边界由主 plan §4 描述）。** 本节是 v3 重构期的进度快照，所有 Phase 1-3 任务已完成、Phase 4 已开始。Phase 4 状态以 git history 为准。保留作为历史记录。
 
 ## v3 实施进度（截至 2026-05-01）
 
@@ -338,11 +338,11 @@
 
 - **3.1 daemon socket orchestration**：`optimize` 接收 `prog_ids` 列表并使用 per-program worker pool；每个程序走 daemon snapshot → `bpfopt --pass` loop → per-pass daemon direct ReJIT；profile lifecycle、status、旧的 all/batch 独立命令已删除。
 - **3.2 daemon 瘦身**：`daemon/Cargo.toml` 依赖 daemon-owned `bpfget` 和 `kernel-sys`；删除旧 `bpfverify`/`bpfrejit` crates、`pipeline.rs`、`profiler.rs`、`kfunc_discovery.rs`、`platform_detect.rs` 及对应旧测试文件。
-- **3.3 runner 边界确认**：`runner/libs/`、`corpus/`、`e2e/`、`micro/` 在本阶段不改；Docker/build 依赖也收窄为 daemon 只跟踪 `kernel-sys` 而不是整个 `bpfopt` 源码。
+- **3.3 runner 边界确认**：`runner/libs/`、`corpus/`、`deployment-suite/`、`micro/` 在本阶段不改；Docker/build 依赖也收窄为 daemon 只跟踪 `kernel-sys` 而不是整个 `bpfopt` 源码。
 
 ### Phase 4（增强）— 未开始
 
-- **4.1 全平台验证**：KVM x86 + AWS x86 + AWS ARM64 corpus + e2e + micro 尚未完成。
+- **4.1 全平台验证**：KVM x86 + AWS x86 + AWS ARM64 corpus + deployment-suite + micro 尚未完成。
 - **4.2 micro `BpfReJIT` 入口恢复**：重构期间被移除，task #53；当前限制见 `docs/tmp/micro-rejit-smoke-20260428.md`（known limitation）。
 
 参考报告：

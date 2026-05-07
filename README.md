@@ -2,13 +2,12 @@
 
 eBPF benchmarking suite for the BpfReJIT paper — comparing llvmbpf (userspace LLVM JIT) against kernel eBPF with and without ReJIT.
 
-Three-layer benchmarking pipeline:
+Active benchmarking pipeline:
 
 - `micro/`: isolated micro-benchmarks driven by `bpf_prog_test_run_opts`
 - `corpus/`: real-world program collection, measurement, and analysis
-- `e2e/`: end-to-end deployment benchmarks (Tracee, Tetragon, bpftrace, BCC, Katran)
 
-The historical multi-runtime userspace benchmark layer has been removed; the active tree is `micro/`, `corpus/`, and `e2e/`.
+The historical multi-runtime userspace benchmark layer has been removed; the active tree is `micro/`, `corpus/`, `runner/`, and `daemon/`.
 
 Execution architecture for the runner image, runtime containers, and
 host-kernel boundaries lives in
@@ -21,7 +20,6 @@ bpf-benchmark/
 ├── runner/                # Target/suite contracts, executors, shared libs, and micro_exec
 ├── micro/                 # Isolated micro-benchmark suites, drivers, and inputs
 ├── corpus/                # Real-world corpus, fetch/build, and measurement
-├── e2e/                   # End-to-end workloads (tracee, tetragon, bpftrace, bcc, katran)
 ├── daemon/                # Userspace BPF daemon (bpfrejit-daemon CLI)
 ├── config/                # YAML benchmark suite manifests (micro_pure_jit.yaml etc.)
 ├── tests/                 # Userspace/kernel self-tests
@@ -157,7 +155,6 @@ default. Override it for targeted debugging with:
 Results are written to:
 - `micro/results/` — authoritative micro benchmark results
 - `corpus/results/` — authoritative corpus benchmark results
-- `e2e/results/` — authoritative end-to-end benchmark results
 - `docs/tmp/` — analysis reports (.md only, never JSON results)
 
 Executor logs and transient staging state still live under `.cache/`, but those
@@ -178,7 +175,5 @@ loads and runs the same `runner-runtime` image with privileged suite containers.
 `micro/` owns the isolated benchmark manifests (`micro/config/micro_pure_jit.yaml`), input generators, and the Python suite driver (`micro/driver.py`).
 
 `corpus/` owns the real-world corpus, fetch/build tooling, declarative app suites in `corpus/config/`, and the measurement entrypoint in `corpus/driver.py`.
-
-`e2e/` owns full deployment-style evaluation via `e2e/driver.py` plus per-case assets under `e2e/cases/`.
 
 `daemon/` is the userspace front end for BpfReJIT: it scans live BPF programs via `BPF_PROG_GET_NEXT_ID`, identifies optimization sites, and triggers `BPF_PROG_REJIT`. See `daemon/README.md`.

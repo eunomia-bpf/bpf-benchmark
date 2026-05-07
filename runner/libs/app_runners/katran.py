@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import shutil
 import socket
 import struct
 import subprocess
@@ -66,7 +65,6 @@ HTTP_TIMEOUT_S = 50.0
 SERVER_START_TIMEOUT_S = 150.0
 TOPOLOGY_SETTLE_S = 2.0
 
-DEFAULT_ROOT_MAP_POS = 2
 DEFAULT_HC_V4_TUN_IFACE = "ipip0"
 DEFAULT_HC_V6_TUN_IFACE = "ipip60"
 
@@ -96,6 +94,22 @@ def _attached_xdp_mode(attach_info: Mapping[str, object] | None) -> str | None:
     return mode or None
 
 
+def _attached_xdp_prog_id(attach_info: Mapping[str, object] | None) -> int | None:
+    if not isinstance(attach_info, Mapping): return None
+    if isinstance(xdp_records := attach_info.get("xdp"), list):
+        for entry in xdp_records:
+            if not isinstance(entry, Mapping):
+                continue
+            prog_id = int(entry.get("id", entry.get("prog_id", 0)) or 0)
+            if prog_id > 0:
+                return prog_id
+    for key in ("id", "prog_id"):
+        prog_id = int(attach_info.get(key, 0) or 0)
+        if prog_id > 0:
+            return prog_id
+    return None
+
+
 def _bpftool_attach_token(mode: str) -> str:
     normalized = str(mode or "").strip().lower()
     token = {"driver": "xdp", "native": "xdp", "generic": "xdpgeneric", "skb": "xdpgeneric", "offload": "xdpoffload"}.get(normalized)
@@ -106,16 +120,29 @@ def _bpftool_attach_token(mode: str) -> str:
 def reattach_xdp_program(iface: str, prog_id: int, *, target_mode: str) -> dict[str, object]:
     prog_id = int(prog_id)
     if prog_id <= 0: raise RuntimeError(f"invalid prog_id for XDP reattach: {prog_id}")
+    normalized_target_mode = str(target_mode).strip().lower()
     current_attach = _attached_xdp_info(iface); current_mode = _attached_xdp_mode(current_attach)
-    target_token = _bpftool_attach_token(target_mode)
-    if current_mode == str(target_mode).strip().lower(): return current_attach
+    current_prog_id = _attached_xdp_prog_id(current_attach)
+    target_token = _bpftool_attach_token(normalized_target_mode)
+    if current_mode == normalized_target_mode and current_prog_id == prog_id: return current_attach
     if current_mode is not None:
         run_command([resolve_bpftool_binary(), "net", "detach", _bpftool_attach_token(current_mode), "dev", str(iface)], check=False, timeout=150)
     run_command([resolve_bpftool_binary(), "net", "attach", target_token, "id", str(prog_id), "dev", str(iface), "overwrite"], timeout=300)
     attach_info = _attached_xdp_info(iface)
-    if (attached_mode := _attached_xdp_mode(attach_info)) != str(target_mode).strip().lower():
+    if (attached_mode := _attached_xdp_mode(attach_info)) != normalized_target_mode:
         raise RuntimeError(f"expected XDP attach mode {target_mode!r} on {iface}, got {attached_mode!r}: {attach_info}")
+    if (attached_prog_id := _attached_xdp_prog_id(attach_info)) != prog_id:
+        raise RuntimeError(f"expected XDP prog id {prog_id} on {iface}, got {attached_prog_id!r}: {attach_info}")
     return attach_info
+
+
+def _detach_all_xdp_modes(iface: str) -> None:
+    for attach_type in ("xdpgeneric", "xdpdrv", "xdp", "xdpoffload"):
+        run_command(
+            [resolve_bpftool_binary(), "net", "detach", attach_type, "dev", str(iface)],
+            check=False,
+            timeout=150,
+        )
 
 
 def _current_prog_ids() -> set[int]:
@@ -430,20 +457,16 @@ class KatranServerSession:
         server_binary: Path,
         balancer_prog_path: Path,
         healthchecking_prog_path: Path,
-        xdp_root_prog_path: Path,
         iface: str,
         default_router_mac: str,
         load_timeout_s: int = DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S,
-        root_map_pos: int = DEFAULT_ROOT_MAP_POS,
     ) -> None:
         self.server_binary = server_binary.resolve()
         self.balancer_prog_path = balancer_prog_path.resolve()
         self.healthchecking_prog_path = healthchecking_prog_path.resolve()
-        self.xdp_root_prog_path = xdp_root_prog_path.resolve()
         self.iface = iface
         self.default_router_mac = default_router_mac
         self.load_timeout_s = int(load_timeout_s)
-        self.root_map_pos = int(root_map_pos)
         self.session: ManagedProcessSession | None = None
         self.command_used: list[str] = []
         self.programs: list[dict[str, object]] = []
@@ -453,7 +476,6 @@ class KatranServerSession:
         self.attach_info_before_rebind: dict[str, object] = {}
         self.ifindex = 0
         self.before_prog_ids: set[int] = set()
-        self.root_install: dict[str, str] = {}
 
     def __enter__(self) -> "KatranServerSession":
         if not link_exists(self.iface):
@@ -461,18 +483,12 @@ class KatranServerSession:
         for artifact_path, label in (
             (self.balancer_prog_path, "balancer"),
             (self.healthchecking_prog_path, "healthchecking"),
-            (self.xdp_root_prog_path, "xdp_root"),
         ):
             if not artifact_path.exists():
                 raise RuntimeError(f"Katran {label} program image not found: {artifact_path}")
         self.ifindex = int(Path("/sys/class/net").joinpath(self.iface, "ifindex").read_text().strip())
         self.before_prog_ids = _current_prog_ids()
         before_map_ids = {int(r.get("id", -1)) for r in _map_show_records() if "id" in r}
-        self.root_install = _install_root_xdp_program(
-            self.iface,
-            prog_path=self.xdp_root_prog_path,
-            load_timeout_s=self.load_timeout_s,
-        )
         command = [
             str(self.server_binary),
             f"-balancer_prog={self.balancer_prog_path}",
@@ -481,8 +497,7 @@ class KatranServerSession:
             f"-intf={self.iface}",
             f"-ipip_intf={DEFAULT_HC_V4_TUN_IFACE}",
             f"-ipip6_intf={DEFAULT_HC_V6_TUN_IFACE}",
-            f"-map_path={self.root_install['root_map_pin']}",
-            f"-prog_pos={self.root_map_pos}",
+            "-hc_forwarding=false",
             "-logtostderr",
             "-alsologtostderr",
         ]
@@ -515,17 +530,9 @@ class KatranServerSession:
 
     @property
     def attached_prog_id(self) -> int:
-        if isinstance(xdp_records := self.attach_info.get("xdp"), list):
-            for entry in xdp_records:
-                if not isinstance(entry, Mapping):
-                    continue
-                prog_id = int(entry.get("id", entry.get("prog_id", 0)) or 0)
-                if prog_id > 0:
-                    return prog_id
-        for key in ("id", "prog_id"):
-            prog_id = int(self.attach_info.get(key, 0) or 0)
-            if prog_id > 0:
-                return prog_id
+        prog_id = _attached_xdp_prog_id(self.attach_info)
+        if prog_id is not None:
+            return prog_id
         raise RuntimeError(f"Katran attached XDP program id is unavailable on {self.iface}: {self.attach_info}")
 
     @property
@@ -565,7 +572,6 @@ class KatranServerSession:
         return {
             "server_binary": str(self.server_binary), "balancer_prog_path": str(self.balancer_prog_path),
             "healthchecking_prog_path": str(self.healthchecking_prog_path),
-            "xdp_root_prog_path": str(self.xdp_root_prog_path),
             "programs": [dict(p) for p in self.programs],
             "maps": {n: dict(r) for n, r in self.maps_by_name.items()},
             "iface": self.iface, "ifindex": self.ifindex,
@@ -575,13 +581,12 @@ class KatranServerSession:
             "attach_mode": _attached_xdp_mode(self.attach_info),
             "attach_mode_before_rebind": self.attach_mode_before_rebind,
             "attach_info_before_rebind": dict(self.attach_info_before_rebind),
-            "root_install": dict(self.root_install),
             "pid": self.pid, "command_used": list(self.command_used),
         }
 
     def reattach_xdpgeneric(self) -> None:
         self.attach_info_before_rebind = dict(self.attach_info); self.attach_mode_before_rebind = _attached_xdp_mode(self.attach_info)
-        self.attach_info = reattach_xdp_program(self.iface, self.attached_prog_id, target_mode="generic")
+        self.attach_info = reattach_xdp_program(self.iface, self.prog_id, target_mode="generic")
 
     def close(self) -> None:
         errors: list[str] = []
@@ -592,10 +597,9 @@ class KatranServerSession:
             except Exception as exc:
                 errors.append(str(exc))
         try:
-            _cleanup_root_xdp_install(self.iface, self.root_install)
+            _detach_all_xdp_modes(self.iface)
         except Exception as exc:
             errors.append(str(exc))
-        self.root_install = {}
         if errors:
             raise RuntimeError("; ".join(errors))
 
@@ -627,7 +631,6 @@ def configure_katran_maps(session: KatranServerSession) -> dict[str, object]:
 PARALLEL_CLIENT_REQUEST_SCRIPT = """
 import json
 import socket
-import statistics
 import sys
 import threading
 import time
@@ -640,24 +643,12 @@ timeout = float(sys.argv[5])
 preview_limit = max(1, int(sys.argv[6]))
 payload = b"GET / HTTP/1.0\\r\\nHost: katran\\r\\nConnection: close\\r\\n\\r\\n"
 
-latencies = []
+latencies_ms = []
 failure_preview = []
 request_count = 0
 success_count = 0
 bytes_total = 0
 lock = threading.Lock()
-
-def percentile(values, pct):
-    if not values:
-        return None
-    if len(values) == 1:
-        return float(values[0])
-    ordered = sorted(float(value) for value in values)
-    rank = max(0.0, min(1.0, float(pct) / 100.0)) * (len(ordered) - 1)
-    lower = int(rank)
-    upper = min(len(ordered) - 1, lower + 1)
-    weight = rank - lower
-    return ordered[lower] * (1.0 - weight) + ordered[upper] * weight
 
 def worker(worker_id, deadline):
     global request_count, success_count, bytes_total
@@ -694,7 +685,7 @@ def worker(worker_id, deadline):
         request_count += local_requests
         success_count += local_successes
         bytes_total += local_bytes
-        latencies.extend(local_latencies)
+        latencies_ms.extend(local_latencies)
         for item in local_failures:
             if len(failure_preview) >= preview_limit:
                 break
@@ -708,30 +699,22 @@ for thread in threads:
 for thread in threads:
     thread.join()
 elapsed = max(0.000001, time.monotonic() - started)
-latency_summary = {
-    "count": len(latencies),
-    "mean": statistics.mean(latencies) if latencies else None,
-    "median": statistics.median(latencies) if latencies else None,
-    "min": min(latencies) if latencies else None,
-    "max": max(latencies) if latencies else None,
-    "p50": percentile(latencies, 50.0),
-    "p90": percentile(latencies, 90.0),
-    "p99": percentile(latencies, 99.0),
-}
-print(json.dumps({"driver": "python_parallel", "request_count": request_count, "success_count": success_count, "ops_per_sec": (success_count / elapsed) if elapsed > 0 else None, "duration_s": elapsed, "bytes_total": bytes_total, "latency_ms": latency_summary, "failure_preview": failure_preview, "concurrency": concurrency}))
+print(json.dumps({
+    "driver": "python_parallel",
+    "host": host,
+    "port": port,
+    "request_count": request_count,
+    "success_count": success_count,
+    "error_count": request_count - success_count,
+    "duration_s": elapsed,
+    "bytes_total": bytes_total,
+    "latencies_ms": latencies_ms,
+    "concurrency": concurrency,
+}))
+if request_count == 0 or success_count != request_count:
+    sys.stderr.write(json.dumps({"failure_preview": failure_preview}) + "\\n")
+    sys.exit(1)
 """
-
-
-def run_parallel_http_load(*, duration_s: int | float, concurrency: int) -> dict[str, object]:
-    payload = run_json_command(
-        ["ip", "netns", "exec", CLIENT_NS, remote_python_binary(), "-c", PARALLEL_CLIENT_REQUEST_SCRIPT,
-         VIP_IP, str(VIP_PORT), str(max(0.0, float(duration_s))), str(max(1, int(concurrency))),
-         str(HTTP_TIMEOUT_S), str(REQUEST_FAILURE_PREVIEW_LIMIT)],
-        timeout=max(300, int(float(duration_s) * 4) + 10),
-    )
-    if not isinstance(payload, Mapping):
-        raise RuntimeError("parallel client payload is not a JSON object")
-    return dict(payload)
 
 
 DEFAULT_INTERFACE = "katran0"
@@ -751,101 +734,6 @@ def _resolve_katran_bpf_artifact(*relative_candidates: str) -> Path:
     )
 
 
-def _ensure_bpffs_mounted() -> Path:
-    mountpoint = Path("/sys/fs/bpf")
-    mountpoint.mkdir(parents=True, exist_ok=True)
-    try:
-        mounts = Path("/proc/mounts").read_text(encoding="utf-8", errors="replace").splitlines()
-    except OSError as exc:
-        raise RuntimeError(f"failed to read /proc/mounts for bpffs detection: {exc}") from exc
-    for line in mounts:
-        parts = line.split()
-        if len(parts) >= 3 and parts[1] == str(mountpoint) and parts[2] == "bpf":
-            return mountpoint
-    mount_binary = which("mount")
-    if mount_binary is None:
-        raise RuntimeError("mount is required to mount bpffs for Katran shared mode")
-    run_command([mount_binary, "-t", "bpf", "bpffs", str(mountpoint)], timeout=150)
-    return mountpoint
-
-
-def _cleanup_bpffs_path(path: Path) -> None:
-    try:
-        if path.is_dir():
-            shutil.rmtree(path)
-        else:
-            path.unlink(missing_ok=True)
-    except OSError:
-        return
-
-
-def _install_root_xdp_program(
-    iface: str,
-    *,
-    prog_path: Path,
-    load_timeout_s: int,
-) -> dict[str, str]:
-    bpffs_root = _ensure_bpffs_mounted()
-    install_dir = bpffs_root / f"bpf-benchmark-katran-{os.getpid()}-{time.monotonic_ns()}"
-    map_dir = install_dir / "maps"
-    prog_pin = install_dir / "xdp_root_prog"
-    root_map = map_dir / "root_array"
-    install_dir.mkdir(parents=True, exist_ok=True)
-    map_dir.mkdir(parents=True, exist_ok=True)
-    try:
-        run_command(
-            [
-                resolve_bpftool_binary(),
-                "prog",
-                "load",
-                str(prog_path),
-                str(prog_pin),
-                "type",
-                "xdp",
-                "pinmaps",
-                str(map_dir),
-            ],
-            timeout=max(300, int(load_timeout_s)),
-        )
-        run_command(
-            [
-                resolve_bpftool_binary(),
-                "net",
-                "attach",
-                "xdp",
-                "pinned",
-                str(prog_pin),
-                "dev",
-                str(iface),
-                "overwrite",
-            ],
-            timeout=300,
-        )
-    except Exception:
-        _cleanup_bpffs_path(install_dir)
-        raise
-    return {
-        "install_dir": str(install_dir),
-        "prog_pin": str(prog_pin),
-        "root_map_pin": str(root_map),
-        "xdp_root_prog_path": str(prog_path),
-    }
-
-
-def _cleanup_root_xdp_install(iface: str, root_install: Mapping[str, object] | None) -> None:
-    if not isinstance(root_install, Mapping):
-        return
-    for attach_type in ("xdpgeneric", "xdpdrv", "xdp"):
-        run_command(
-            [resolve_bpftool_binary(), "net", "detach", attach_type, "dev", str(iface)],
-            check=False,
-            timeout=150,
-        )
-    install_dir = Path(str(root_install.get("install_dir") or "")).expanduser()
-    if str(install_dir):
-        _cleanup_bpffs_path(install_dir)
-
-
 class KatranRunner(AppRunner):
     def __init__(self, *, loader_binary: Path | str | None = None, iface: str = DEFAULT_INTERFACE,
                  router_peer_iface: str | None = None, load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
@@ -860,7 +748,6 @@ class KatranRunner(AppRunner):
             "bpf/healthchecking_ipip.o",
             "healthchecking_ipip.o",
         )
-        self.xdp_root_prog_path = _resolve_katran_bpf_artifact("bpf/xdp_root.bpf.o", "xdp_root.bpf.o")
         self.iface = str(iface); self.router_peer_iface = None if router_peer_iface is None else str(router_peer_iface)
         self.load_timeout_s = int(load_timeout_s); self.concurrency = max(1, int(concurrency))
         self.workload_spec = dict(workload_spec)
@@ -869,16 +756,13 @@ class KatranRunner(AppRunner):
             raise RuntimeError(f"KatranRunner only supports workload_spec.kind='xdp_traffic', got {self.workload_kind!r}")
         self.default_router_mac = str(default_router_mac)
         self.topology: Any | None = None; self.http_server: Any | None = None; self.session: KatranServerSession | None = None
-        self.artifacts: dict[str, object] = {}; self.last_request_summary: dict[str, object] = {}
+        self.artifacts: dict[str, object] = {}
 
     @property
     def prog_id(self) -> int | None: return None if self.session is None else int(self.session.prog_id)
 
     @property
     def pid(self) -> int | None: return None if self.session is None else self.session.pid
-
-    @property
-    def last_workload_details(self) -> Mapping[str, object]: return dict(self.last_request_summary)
 
     def start(self) -> list[int]:
         if self.session is not None: raise RuntimeError("KatranRunner is already running")
@@ -889,7 +773,6 @@ class KatranRunner(AppRunner):
             server_binary=server_binary,
             balancer_prog_path=self.balancer_prog_path,
             healthchecking_prog_path=self.healthchecking_prog_path,
-            xdp_root_prog_path=self.xdp_root_prog_path,
             iface=self.iface,
             default_router_mac=self.default_router_mac,
             load_timeout_s=self.load_timeout_s,
@@ -930,15 +813,28 @@ class KatranRunner(AppRunner):
         return [int(program["id"]) for program in self.programs if int(program.get("id", 0) or 0) > 0]
 
     def _run_network_workload(self, seconds: float) -> WorkloadResult:
-        summary = run_parallel_http_load(duration_s=max(1.0, float(seconds)), concurrency=self.concurrency)
-        self.last_request_summary = dict(summary)
-        request_count, success_count = int(summary.get("request_count", 0) or 0), int(summary.get("success_count", 0) or 0)
-        if request_count <= 0: raise RuntimeError(f"Katran workload produced zero requests: {summary.get('failure_preview')}")
-        if success_count != request_count: raise RuntimeError(f"Katran workload observed failures: {summary.get('failure_preview')}")
-        return WorkloadResult(ops_total=float(request_count),
-                              ops_per_sec=float(summary["ops_per_sec"]) if summary.get("ops_per_sec") is not None else None,
-                              duration_s=float(summary.get("duration_s") or seconds),
-                              stdout="", stderr=tail_text(str(summary.get("failure_preview") or "")))
+        duration_s = max(1.0, float(seconds))
+        concurrency = max(1, int(self.concurrency))
+        command = ["ip", "netns", "exec", CLIENT_NS, remote_python_binary(), "-c", PARALLEL_CLIENT_REQUEST_SCRIPT,
+                   VIP_IP, str(VIP_PORT), str(duration_s), str(concurrency),
+                   str(HTTP_TIMEOUT_S), str(REQUEST_FAILURE_PREVIEW_LIMIT)]
+        start = time.monotonic()
+        completed = run_command(command, check=False, timeout=max(300, int(duration_s * 4) + 10))
+        elapsed = time.monotonic() - start
+        if completed.returncode != 0:
+            raise RuntimeError(
+                f"Katran workload failed: {tail_text(completed.stderr or completed.stdout)}"
+            )
+        return WorkloadResult(
+            workload_name="katran_parallel_http",
+            command=tuple(str(p) for p in command),
+            returncode=completed.returncode,
+            duration_s=elapsed,
+            stdout=tail_text(completed.stdout or "", max_lines=400, max_chars=131072),
+            stderr=tail_text(completed.stderr or "", max_lines=400, max_chars=131072),
+            config={"tool": "python_parallel", "vip": VIP_IP, "vip_port": VIP_PORT,
+                    "concurrency": concurrency},
+        )
 
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None: raise RuntimeError("KatranRunner is not running")

@@ -24,6 +24,13 @@ _LANGUAGE_RUNTIME_PROBES: tuple[tuple[str, tuple[str, ...]], ...] = (
 _MINIMAL_CONFIG = """receivers:
   profiling:
     samples_per_second: 99
+    # `tracers: all` enables every interpreter tracer (python, php, ruby, v8,
+    # perl, hotspot, dotnet, beam, labels). Without this, perf_unwind_<lang>
+    # programs are loaded but never routed to: native_tracer_entry queries
+    # the per-language procs maps (py_procs/php_procs/...) which stay empty
+    # because IsMapEnabled() returns false when the corresponding tracer is
+    # not enabled. See tracer/types/parse.go.
+    tracers: all
 
 exporters:
   debug:

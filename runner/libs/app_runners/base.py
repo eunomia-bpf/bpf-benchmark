@@ -32,10 +32,6 @@ class AppRunner:
     def pid(self) -> int | None:
         raise NotImplementedError
 
-    @property
-    def last_workload_details(self) -> Mapping[str, object]:
-        return {}
-
     def live_rejit_programs(self) -> list[dict[str, object]]:
         return [dict(program) for program in self.programs]
 

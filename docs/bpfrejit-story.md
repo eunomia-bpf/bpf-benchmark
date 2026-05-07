@@ -323,7 +323,6 @@ Correctness（daemon 负责）：
 - **Characterization gap**: llvmbpf vs kernel **0.609x**（56 pure-JIT, strict 30×1000）
 - **Micro**: 62/62 valid, **53 applied**, 0 correctness mismatch, 1591 sites
 - **Corpus**: 764 targets, 471 compile, 292 measured, **113 applied**; exec geomean **0.854x**（rejit 快 ~17%）
-- **E2E Katran**: BPF **+8.8%**（speedup 0.919, app +1.4%, P99 -1.2%）
 - **Recompile overhead**: daemon pipeline ~2-5ms + kernel REJIT syscall ~3-7ms
 - **Map inlining coverage**: 11556 个 map_lookup site；Katran 22→2 条（-91%）；Tetragon 447→2（-99.6%）
 - **Verifier acceptance**: static_verify 340/342 accepted (99.4%)
@@ -342,7 +341,6 @@ Correctness（daemon 负责）：
 | 安全用途 | 否 | 是（live patch, firewall） |
 | Micro | 1.057x | 53/62 applied, 0 mismatch |
 | Corpus | 0.983x | 0.854x (17% improvement) |
-| E2E Katran | 1.108-1.168x | +8.8% |
 
 ---
 
@@ -428,7 +426,7 @@ Insight 3 是 principle，Insight 1 和 2 是它的推论。
 
 | 问题 | 实验 | 数据状态 |
 |------|------|:---:|
-| 优化有效吗？ | corpus/micro/e2e | ✅ |
+| 优化有效吗？ | corpus/micro | ✅ |
 | 信任边界成立吗？ | safety negative + fuzz + correctness | ✅ |
 | 信任成本翻转了吗？ | 550 LOC 支撑 15+ pass vs v1 6000 LOC | ✅ |
 | Runtime 信息有增量价值吗？ | ablation: static-only vs +map_inline vs full | ⚠️ 需要跑 |

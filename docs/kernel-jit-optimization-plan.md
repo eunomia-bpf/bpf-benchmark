@@ -15,14 +15,14 @@
 > - **⚠️ 如果需要 commit，必须在 main 分支直接做，不要开新分支。** 开分支导致合并冲突。
 > - **⚠️ 暂时性性能数据和实验计划只能出现在两个地方：(1) 开头摘要区域的权威数据行；(2) §7 任务追踪表格的条目。** §1-§6 的正文不得包含会过期的具体数字或待办计划。如果 §1-§6 需要引用性能数据，只引用任务编号（如"见 #256"），不内联数据本身。
 > - **⚠️ 禁止死代码和防御性编程**：替换子系统时（如 v1→v2）必须删除旧代码，不保留 `if v1 / else v2` 分支。内核代码中不保留"以防万一"的检查——只在有具体失败场景时才加 guard。每行内核代码都是审核负担，越少越好。
-> - **⚠️ 零静默失败（Zero Silent Failure）**：所有错误必须传播和报告。禁止 `unwrap_or_default()`、`.ok()`、`except: pass`、`let _ = result` 等静默吞错模式。禁止 `compile_only` 等标注来掩盖运行时失败——每个 corpus 程序要么跑出测量结果，要么明确报错说明原因。E2E case 失败不能伪装成 `skipped`。
+> - **⚠️ 零静默失败（Zero Silent Failure）**：所有错误必须传播和报告。禁止 `unwrap_or_default()`、`.ok()`、`except: pass`、`let _ = result` 等静默吞错模式。禁止 `compile_only` 等标注来掩盖运行时失败——每个 corpus 程序要么跑出测量结果，要么明确报错说明原因。
 > - **⚠️ Makefile 是唯一构建/测试入口**：禁止手动 `cargo build`、`insmod` 等。
 > - **⚠️ 禁止 sudo**：VM 内已是 root（vng），主机不跑 BPF。
-> - **⚠️ VM 测试每个 target 一个 agent**：vm-test/vm-micro/vm-corpus/vm-e2e 串行跑。
+> - **⚠️ VM 测试每个 target 一个 agent**：vm-test/vm-micro/vm-corpus 串行跑。
 > - **⚠️ Unit test 质量标准见 `CLAUDE.md` 的 "Unit Test Quality"**：非必要不加 unit test。新增测试必须能说明失败时定位哪一类 bug。合理测试覆盖逻辑分支、状态变化、计算/转换、边界、错误路径、外部 ABI/layout/序列化约定或 bug 回归。ABI/layout 测试不能只验 `size_of`，必须验字段 offset 或编码格式。禁止 trivial getter/setter、std/upstream lib 行为、自身重言、mock 测 mock、可读性测试、纯 const alias 和重复覆盖率测试。慢测试或真实系统依赖测试应放到集成/端到端层级，不要伪装成 unit test。
 > - **bpfopt-suite v3 设计约束见 §4.6，Benchmark 设计约束见 §5.35。**
 > **v1 权威数据**（#256 rerun，native-level rewrite 架构）：micro **1.057x** / applied-only **1.193x**；corpus **0.983x**；Tracee **+8.1%**；Tetragon **+20.3%/+32.2%**；Katran BPF **1.108-1.168x**；gap **0.581x**。vm-selftest **35/35**。v1 代码保存在 `v1-native-rewrite` 分支。
-> **v2 当前权威数据**（#644，2026-04-02 本地重跑，artifact 时间戳为 2026-04-03 UTC）：benchmark 默认尝试当前全部 in-scope performance passes，报告只统计**实际 applied sites**。`make vm-corpus` **20/20 app ok**，applied-only / all-comparable geomean **1.033x**，applied sample **61**；`make vm-e2e` **6/6 ok**；apply-side site totals：bpftrace **33**、BCC **961**、SCX **359**。`make vm-selftest`、`make vm-test`、`make vm-negative-test`、`make vm-micro-smoke`、`make vm-micro` 全通过。**2026-04-03 再验证**：private-stack 覆盖迁移到 repo-owned tests 后，`make all`、`make check`、`make vm-test` 仍全部通过。
+> **v2 当前权威数据**（#644，2026-04-02 本地重跑，artifact 时间戳为 2026-04-03 UTC）：benchmark 默认尝试当前全部 in-scope performance passes，报告只统计**实际 applied sites**。`make vm-corpus` **20/20 app ok**，applied-only / all-comparable geomean **1.033x**，applied sample **61**；apply-side site totals：bpftrace **33**、BCC **961**、SCX **359**。`make vm-selftest`、`make vm-test`、`make vm-negative-test`、`make vm-micro-smoke`、`make vm-micro` 全通过。**2026-04-03 再验证**：private-stack 覆盖迁移到 repo-owned tests 后，`make all`、`make check`、`make vm-test` 仍全部通过。
 > **2026-04-21/22 Wave 1 后三目标 corpus 权威重跑**（见 #663）：`x86_kvm_corpus_20260421_232916_947372`（30 samples）all-comparable geomean **1.010x**，applied sample **12**，20/20 app ok；`aws_x86_corpus_20260422_012001_472335`（1 sample）**0.983x**，applied sample **10**，20/20 app ok；`aws_arm64_corpus_20260422_044304_037607`（1 sample）**0.986x**，applied sample **10**，20/20 app ok。三目标 `no_programs_changed_in_loader` 统一 **36**。**注意**：该 reason 并非 bytes_jited/xlated same-size gap（`corpus/driver.py:471-540` 根本没比 bytes）。它是命名不准的历史 observability bucket，混了 "0 site 命中"、"pass 命中但 verifier 全 rollback"、"apply 成功但最终 bytecode 无差异" 三类情况，属 corpus 侧 taxonomy 过粗，非 apply correctness bug。详情见 #664。
 
 ---
@@ -41,7 +41,7 @@ eBPF is widely adopted in production for observability, networking, and customiz
 | Plan archive (history) | `docs/kernel-jit-optimization-plan-record-old.md` | superseded plan snapshots (v1 task table, v3 phase 进度 等) |
 | Task archive | `docs/kernel-jit-optimization-plan-task-archive.md` | retired task table (#1-#303 v1 era) |
 | **bpfopt-suite v3 design (authoritative)** | `docs/tmp/bpfopt_design_v3.md` | CLI-first Unix pipeline 架构（daemon owns kernel calls，bpfopt 是 pure bytecode CLI） |
-| Benchmark framework | `docs/benchmark-framework-design.md` | corpus / e2e / micro suite layout |
+| Benchmark framework | `docs/benchmark-framework-design.md` | corpus / micro suite layout |
 | Benchmark runtime | `docs/benchmark-runtime-architecture.md` | container/VM runtime model |
 | Story / pitch | `docs/bpfrejit-story.md` | high-level narrative |
 | Kinsn mechanism | `docs/kinsn-design.md` | KF_INLINE_EMIT design + 7 kinsn 列表 |
@@ -410,7 +410,7 @@ Packed（sidecar pseudo-insn + CALL pair，零 argument setup，N→1 指令替�
 - **main ReJIT 无 watchdog**：`BPF_PROG_REJIT` 是同步 syscall，daemon 不加 timeout；kernel verifier hang 会卡住 daemon。当前选择文档化接受该限制，不加 subprocess fallback。
 - **安全 pass 不在 OSDI 范围**：`speculation_barrier`、`dangerous_helper_firewall`、`live_patch` 不在默认 pipeline。
 - **结构化 per-pass 记录**：每个 program 的每个 pass 记录 `pass`/`status`/`sites_applied`/`insn_delta` 等事实字段；pass ReJIT errno 记录在该 pass detail 中，已成功 ReJIT 的 bytecode 保持提交。
-- **Benchmark runner Python 保持不动**：v3 迁移采用 §8 方案 B，`runner/libs/`、`corpus/`、`e2e/`、`micro/` 继续走 daemon socket + JSON 稳定边界；daemon 内部适配到 CLI。v3 迁移期只允许 runner bug fix 和 stale test data 更新。
+- **Benchmark runner Python 保持不动**：v3 迁移采用 §8 方案 B，`runner/libs/`、`corpus/`、`micro/` 继续走 daemon socket + JSON 稳定边界；daemon 内部适配到 CLI。v3 迁移期只允许 runner bug fix 和 stale test data 更新。
 
 #### Fail-fast 原则：禁止 dead code / fallback / silence
 
@@ -470,14 +470,14 @@ Packed（sidecar pseudo-insn + CALL pair，零 argument setup，N→1 指令替�
 - **Mechanism isolation**：load_byte_recompose, binary_search, switch_dispatch, branch_layout
 - **Policy-sensitivity**：cmov_select vs log2_fold（见 #20, #38）
 - **Real programs**：.bpf.o corpus（Cilium/Katran/loxilb/Calico/xdp-tools/selftests，见 #32-#36）
-- **End-to-end deployment**：至少一个（Cilium/Katran 级别）🔄 未完成
+- **App-native deployment workload**：至少一个（Cilium/Katran 级别）🔄 未完成
 
 ### 5.35 Benchmark 设计约束
 
 - **每个 corpus 程序必须有 exec_ns**。没有 "code size only" fallback。不能测 exec_ns 的程序不进 corpus。
 - **BPF 程序用它在生产中被使用的方式来测量**。有原生应用的程序（Tracee/Tetragon/Katran/BCC/bpftrace/scx/KubeArmor）必须用 app-native loader，不用 generic libbpf。
 - **两种测量路径，没有第三种**：(1) App-native：真实应用加载+触发 BPF，`bpf_enable_stats` 读 per-program exec_ns；(2) TEST_RUN：`BPF_PROG_TEST_RUN` 直接测，仅限 XDP/TC/socket_filter 等支持的 prog_type。
-- **kinsn module 证据**：E2E artifact 必须包含 kinsn module 加载状态（loaded_modules/failed_modules/daemon discovery log）。
+- **kinsn module 证据**：corpus artifact 必须包含 kinsn module 加载状态（loaded_modules/failed_modules/daemon discovery log）。
 - **ARM64 默认走 AWS 远端**（t4g.small bench / t4g.micro test），不在本地 QEMU 跑 Python。
 - **AWS 成本约束**（硬性规则）：所有 AWS 跑（smoke + authoritative）默认 `t3.small` x86 / `t4g.small` arm64（2 vCPU/2GB），test suite 用 `t3.micro` / `t4g.micro`。**`medium` 是绝对上限，仅允许作为 OOM 修复手段；禁止升级到 medium 以上**（不允许 c5/c6g、不允许 xlarge/2xlarge、不允许为 variance/并行/任何 SAMPLES 而升级）。variance 噪声 / 吞吐限制 / CPU credit throttling 必须通过代码优化（缩 workload、减少 tracing、降低并发 pass）解决，**不能换大机器**。spot instance 优先用于非时间敏感 run。SAMPLES 上限 = 3，paper-grade 由 per-program `min_runs ≥ 100` filter 决定，不靠 SAMPLES 拉到 30。
 - **统计要求**：报告必须同时给 applied-only geomean 和 all-comparable geomean + sample count + comparison exclusion reasons。repeat ≥ 50，论文级 ≥ 500。
@@ -493,17 +493,17 @@ Packed（sidecar pseudo-insn + CALL pair，零 argument setup，N→1 指令替�
 #### 设计原则
 
 - **BPF 程序用生产方式加载和触发**：有原生应用的程序由应用加载（app-native），不用 generic libbpf + 手写 trigger
-- **Corpus 和 E2E 共享 App Runner**：同一个 AppRunner 类（start/workload/stop），corpus 测 per-program exec_ns，E2E 测 app throughput/latency。唯一区别是采集指标，不是生命周期。
+- **Corpus 使用 App Runner**：同一个 AppRunner 类（start/workload/stop）负责真实应用生命周期，corpus 同时采集 per-program exec_ns 和原始 app workload metrics。
 - **所有 corpus 程序必须用原生 app 加载**：禁止 bpftool loadall 替代原生 loader。每个 repo 都有原生 app/tool，没有 runner 的要去实现 runner。
 - **三个正交维度：Loader × Workload × Measurement**：
   - **Loader**（谁加载 BPF）：原生 app（tracee, bcc/execsnoop, katran_server, libbpf-bootstrap/minimal, systemd, ...）。每个 repo 的程序必须由该 repo 自己的可执行文件加载。
   - **Workload driver**（什么触发 BPF 执行）：app 自身事件、exec_storm、fio、network_traffic 等。Workload 是独立维度，可叠加。
-  - **Measurement**（读什么指标）：bpf_stats per-program exec_ns（corpus）、app throughput/latency（E2E）
+  - **Measurement**（读什么指标）：bpf_stats per-program exec_ns（corpus）以及原始 app throughput/latency/error counters
 - **生命周期单元是 loader instance**：一个 loader instance = 一个可执行进程加载的所有 BPF 程序。Tracee 是一个 loader（启动一次加载 30+ BPF 程序）；BCC 的每个 tool（execsnoop, opensnoop, ...）是独立 loader（各加载 1-2 个 BPF 程序）；Katran 是一个 loader。Orchestrator 按 loader instance 分组，每个 instance 一次 start→measure→REJIT→measure→stop 生命周期。
 - **缺 runner 的 repo 必须补 runner**：不能标"不可测"然后跳过。没有 runner 是实现缺口，不是分类问题。
 - **禁止在 object (.bpf.o) 层级做规划/分流/调度**：object 是编译产物的打包格式，对测量无意义。Orchestrator 的调度单元是 loader instance（app），不是 object。YAML 里不出现 .bpf.o 路径。program 通过 bpf_stats/get_next_id 在运行时自动发现，不需要预先枚举。
 - **YAML 只列 app，不列 object/program**：YAML 定义 app（loader instance），每个 app 指定 runner + workload。启动 app 后通过 bpf_stats/get_next_id 自动发现所属 BPF 程序并测量，不需要在 YAML 里枚举 .bpf.o 或 program name。这和“单 daemon session + 运行时发现 live program”的当前架构一致；Object 只是编译产物的打包格式，和调度/测量无关。
-- **同一 YAML 服务 corpus 和 e2e**：每个 app 按用途标不同 workload。Corpus 读 bpf_stats exec_ns，E2E 读 app metrics。Orchestrator 根据 mode（corpus/e2e）选 workload。
+- **YAML 定义 corpus app workload**：每个 app 指定 runner + workload。Corpus 读 bpf_stats exec_ns，并把原始 app workload metrics 放进 per-app JSON。
 - **YAML schema**：
   ```yaml
   apps:
@@ -511,18 +511,15 @@ Packed（sidecar pseudo-insn + CALL pair，零 argument setup，N→1 指令替�
       runner: tracee
       workload:
         corpus: exec_storm     # corpus: bpf_stats + exec_storm
-        e2e: exec_storm        # e2e: tracee 检测延迟 + exec_storm
     - name: bcc/execsnoop
       runner: bcc
       tool: execsnoop
       workload:
         corpus: exec_storm
-        e2e: exec_storm
     - name: katran
       runner: katran
       workload:
         corpus: test_run       # corpus: BPF_PROG_TEST_RUN 精确测
-        e2e: network           # e2e: 真实流量测 throughput
   ```
 - **Corpus TEST_RUN 走 Python + bpftool + ctypes**：`bpftool prog loadall/run/show` + `bpf_enable_stats` 直接测 live kernel program，同一加载实例上对比 baseline/rejit
 - **micro 仍保留极简 C++ tool**：`micro_exec test-run` 只服务 isolated micro benchmark，没有 batch orchestration、没有 prepared state、没有 daemon 通信
@@ -604,10 +601,10 @@ Orchestrator                App Runner              Daemon           bpf_stats
     ├── report(baseline, rejit)│                      │                 │
 ```
 
-#### Corpus 和 E2E 共享
+#### Corpus App Runner Layer
 
 ```
-runner/libs/app_runners/        ← Corpus 和 E2E 共享层
+runner/libs/app_runners/        ← Corpus app lifecycle layer
   tracee.py                       class TraceeRunner:
     def start() -> [prog_ids]       启动 tracee，返回加载的 BPF program IDs
     def run_workload(seconds)       exec storm / file IO / network traffic
@@ -619,7 +616,6 @@ runner/libs/app_runners/        ← Corpus 和 E2E 共享层
   scx.py                          class ScxRunner: ...
 
 corpus/driver.py                使用 app_runners + bpftool + bpf_stats → per-program exec_ns
-e2e/cases/*/case.py             使用 app_runners + app benchmark → app throughput/latency
 ```
 
 #### 目录布局（理想）
@@ -627,7 +623,7 @@ e2e/cases/*/case.py             使用 app_runners + app benchmark → app throu
 ```
 runner/                     # 共享基础设施
   libs/                     #   Python 共享库
-    app_runners/            #     Per-repo app lifecycle（Corpus/E2E 共享）
+    app_runners/            #     Per-repo app lifecycle
       tracee.py
       tetragon.py
       katran.py
@@ -644,9 +640,6 @@ runner/                     # 共享基础设施
 corpus/                     # Corpus 评估层
   config/macro_corpus.yaml  #   程序列表 + 测量方式（app_native | test_run）
   driver.py                 #   调度：app_runner 或 micro_exec → 聚合结果
-
-e2e/                        # E2E 评估层
-  cases/*/case.py           #   使用 app_runners，测 app-level metrics
 
 micro/                      # Micro 评估层
   programs/                 #   62 个 BPF .bpf.c
@@ -709,7 +702,6 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | `make aws-arm64-test` | canonical AWS ARM64 测试入口 |
 | `make aws-x86-test` | canonical AWS x86 测试入口 |
 | `make aws-arm64-corpus` / `make aws-x86-corpus` | literal AWS corpus aliases，等价于对应架构的 `aws-*-benchmark AWS_*_BENCH_MODE=corpus` |
-| `make aws-arm64-e2e` / `make aws-x86-e2e` | literal AWS E2E aliases，等价于对应架构的 `aws-*-benchmark AWS_*_BENCH_MODE=e2e` |
 | `make __kernel` | 内部 x86 kernel 构建 helper；不属于公开控制面 |
 
 #### 快速验证（无需 VM）
@@ -727,8 +719,7 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | `make vm-micro-smoke` | VM 中跑 micro smoke (simple + load_byte_recompose + cmov_dense, llvmbpf + kernel) |
 | `make vm-micro` | VM 中跑全量 micro suite (llvmbpf + kernel, 默认 3iter/1warm/100rep) |
 | `make vm-corpus` | 跑 corpus batch（单 VM batch，daemon serve 常驻，用 policy，默认 3 samples） |
-| `make vm-e2e` | 跑全部 E2E (tracee + tetragon + bpftrace + scx + bcc + katran；`xdp_forwarding` 已退役) |
-| `make vm-all` | = `vm-test` + `vm-micro` + `vm-corpus` + `vm-e2e`（完整 VM 验证） |
+| `make vm-all` | = `vm-test` + `vm-micro` + `vm-corpus`（完整 VM 验证） |
 | `make validate` | = `check` + `vm-test` + `vm-micro-smoke`（最小 VM 验证） |
 
 #### 可调参数
@@ -749,7 +740,7 @@ make check                    # 本地：编译 + daemon tests + smoke
 make kernel && make validate  # 重编 bzImage + 本地验证 + VM smoke
 
 # 全量评估
-make vm-all                   # 跑全部 micro + corpus + e2e
+make vm-all                   # 跑全部 micro + corpus
 
 # 清理
 make clean

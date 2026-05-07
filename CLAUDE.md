@@ -19,6 +19,8 @@ What the framework writes to `result.json`:
 - per BPF program, per phase (baseline / post_rejit): `run_cnt_delta`, `run_time_ns_delta`, `id`, `name`, `type`, `bytes_jited`, `bytes_xlated`
 - workload `stdout`/`stderr`, lifecycle event log, app `status`, `error` string
 
+Raw app-side workload metrics are explicitly allowed and should be preserved in the corpus per-app payloads under `.baseline.workloads[]` and `.post_rejit.workloads[]`. Examples include raw `ops_per_sec`, `ops_total`, `duration_s`, `latency_ms`, `request_count`, `success_count`, `bytes_total`, and `error_count`; storing these raw fields is not a framework-side comparison or summary. Only derived computation, aggregation, ratios, and interpretation are forbidden.
+
 What the framework MUST NOT write or compute:
 - `avg_ns_per_run`, `ratio`, `per_program` ratio list
 - `per_program_geomean`, `program_count`, `wins`, `losses`, `summary` block
@@ -94,7 +96,7 @@ Before adding a test, be able to answer: what specific bug would this failure id
 - stdin/stdout carry raw binary bytecode (`struct bpf_insn[]`) for `bpfopt`; side-inputs and side-outputs use files only at the `bpfopt`/`bpfprof` CLI boundary.
 
 #### Daemon Owns Kernel Calls; Runner Stays Untouched
-- v3 §8 option B: runner Python (`runner/libs/`, `corpus/`, `e2e/`, `micro/`) is the stable boundary; do not refactor it for v3 migration.
+- v3 §8 option B: runner Python (`runner/libs/`, `corpus/`, `micro/`) is the stable boundary; do not refactor it for v3 migration.
 - The daemon retains the socket + JSON protocol. It invokes `bpfopt --pass <name>` as an external pure-bytecode CLI and `bpfprof` as an external profiling CLI, while live discovery comes from the daemon-owned `bpfget` library and every ReJIT call goes through `kernel-sys` directly.
 - Daemon internal `PassManager`, pass code, profiler, thin dry-run module, LoadAttr rebuilds, BTF metadata replay, and pseudo-map fd rewriting are removed. Verifier states for `map_inline` / `const_prop` come only from the previous successful per-pass `BPF_PROG_REJIT(log_level=2)` verifier log.
 - Main `BPF_PROG_REJIT` is a synchronous syscall with no daemon-side timeout; a kernel verifier hang can block the daemon. This limitation is accepted and documented rather than hidden behind a fallback.
@@ -167,7 +169,7 @@ Docker image layers must be ordered by change frequency (bottom = stable, top = 
 3. Kernel + kinsn modules (rarely changes)
 4. C++ runner + micro .bpf.o + test artifacts (moderate)
 5. Rust daemon (frequently changes)
-6. Python code + configs + corpus/e2e data (most frequently changes)
+6. Python code + configs + corpus data (most frequently changes)
 
 Changing Python must NOT trigger recompilation of apps, kernel, or daemon. `RUNNER_RUNTIME_IMAGE_SOURCE_FILES` in build.mk must only include files that participate in compilation, not runtime Python/YAML/config files.
 

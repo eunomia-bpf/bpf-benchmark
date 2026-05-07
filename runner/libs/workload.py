@@ -1,18 +1,16 @@
 from __future__ import annotations
 
-import json
 import os
 import re
 import select
 import shlex
-import signal
 import socket
 import subprocess
 import sys
 import tempfile
 import threading
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from contextlib import contextmanager
 from pathlib import Path
@@ -40,14 +38,42 @@ def resolve_workload_tool(name: str) -> str:
 
 @dataclass(frozen=True)
 class WorkloadResult:
-    ops_total: float
-    ops_per_sec: float | None
+    """Raw workload run record. Framework never parses tool output.
+
+    All metric extraction (ops_per_sec, latency percentiles, error rates,
+    bytes_total, etc.) happens offline in `analysis/` from `stdout`.
+
+    Fields are observed externally (return code, wallclock duration, exact
+    command) or stored verbatim (stdout, stderr). `config` records non-output
+    metadata such as the workload name, namespace, network device, or netem
+    settings — values determined before the run, not derived from the run.
+    `components` carries sub-runs of composite workloads, each itself a raw
+    `WorkloadResult`.
+    """
+
+    workload_name: str
+    command: tuple[str, ...]
+    returncode: int
     duration_s: float
     stdout: str
     stderr: str
+    config: Mapping[str, object] | None = None
+    components: tuple["WorkloadResult", ...] | None = None
 
     def to_dict(self) -> dict[str, object]:
-        return asdict(self)
+        payload: dict[str, object] = {
+            "workload_name": self.workload_name,
+            "command": list(self.command),
+            "returncode": int(self.returncode),
+            "duration_s": float(self.duration_s),
+            "stdout": self.stdout,
+            "stderr": self.stderr,
+        }
+        if self.config:
+            payload["config"] = dict(self.config)
+        if self.components:
+            payload["components"] = [c.to_dict() for c in self.components]
+        return payload
 
 
 class _SilentHandler(BaseHTTPRequestHandler):
@@ -348,28 +374,49 @@ class NamespacedUdpServer:
             process.stderr.close()
 
 
-def _finish_result(ops_total: float, duration_s: float, stdout: str, stderr: str) -> WorkloadResult:
+def _record_run(
+    *,
+    workload_name: str,
+    command: Sequence[str],
+    returncode: int,
+    duration_s: float,
+    stdout: str,
+    stderr: str,
+    config: Mapping[str, object] | None = None,
+) -> WorkloadResult:
+    # Cap raw output at 8 MiB per stream. Most tools emit a few KB; katran's
+    # per-request latency dump can reach a few MB at SAMPLES=3, and stress-ng
+    # can be verbose. Below 8 MiB tail_text is essentially a passthrough.
     return WorkloadResult(
-        ops_total=float(ops_total),
-        ops_per_sec=(float(ops_total) / duration_s) if duration_s > 0 else None,
-        duration_s=duration_s,
-        stdout=tail_text(stdout, max_lines=40, max_chars=8000),
-        stderr=tail_text(stderr, max_lines=40, max_chars=8000),
+        workload_name=workload_name,
+        command=tuple(str(part) for part in command),
+        returncode=int(returncode),
+        duration_s=float(duration_s),
+        stdout=tail_text(stdout, max_lines=200000, max_chars=8388608),
+        stderr=tail_text(stderr, max_lines=200000, max_chars=8388608),
+        config=None if config is None else dict(config),
     )
 
 
-def _merge_workload_results(results: Sequence[WorkloadResult]) -> WorkloadResult:
-    total_duration = sum(r.duration_s for r in results)
-    total_ops = sum(r.ops_total for r in results)
-    stdout = "\n".join(r.stdout for r in results if r.stdout)
-    stderr = "\n".join(r.stderr for r in results if r.stderr)
-    return WorkloadResult(ops_total=total_ops, ops_per_sec=(total_ops / total_duration) if total_duration > 0 else None,
-                          duration_s=total_duration, stdout=tail_text(stdout, max_lines=80, max_chars=12000),
-                          stderr=tail_text(stderr, max_lines=80, max_chars=12000))
+def _composite(
+    *,
+    workload_name: str,
+    components: Sequence[WorkloadResult],
+    duration_s: float,
+    config: Mapping[str, object] | None = None,
+) -> WorkloadResult:
+    return WorkloadResult(
+        workload_name=workload_name,
+        command=(),
+        returncode=0 if all(c.returncode == 0 for c in components) else 1,
+        duration_s=float(duration_s),
+        stdout="",
+        stderr="",
+        config=None if config is None else dict(config),
+        components=tuple(components),
+    )
 
 
-_FLOAT_PATTERN = r"[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?"
-_STRESS_NG_METRIC_RE = re.compile(rf"stress-ng:\s+metrc:\s+\[\d+\]\s+(\S+)\s+({_FLOAT_PATTERN})\b")
 _STRESS_NG_CPU_STRESSORS = ("cpu",)
 _STRESS_NG_FILESYSTEM_STRESSORS = (
     "access",
@@ -431,6 +478,19 @@ _STRESS_NG_OS_STRESSORS = (
     "pty",
     "itimer",
     "timerfd",
+    # Process / scheduler / ptrace stressors covering exec, fork, clone,
+    # ptrace, futex, sem syscalls. These exist in stress-ng standard set
+    # but were not in the OS-IO-network stress group; including them lets
+    # the standard workload exercise execve/execveat (security_bprm_check,
+    # syscall__execve_*), sched_process_fork (tracepoint_*), and ptrace
+    # (trace_ret_ptrace) probes that were previously dormant.
+    "exec",
+    "fork",
+    "vfork",
+    "clone",
+    "ptrace",
+    "futex",
+    "sem",
 )
 _STRESS_NG_PROCESS_STRESSORS = (
     "clone",
@@ -496,31 +556,6 @@ def _stress_ng_dynamic_stressor_args(stressors: Sequence[str]) -> list[str]:
     return args
 
 
-def _stress_ng_metric_rows(text: str) -> list[tuple[str, float]]:
-    rows: list[tuple[str, float]] = []
-    for line in text.splitlines():
-        if "stress-ng: metrc:" not in line:
-            continue
-        match = _STRESS_NG_METRIC_RE.search(line)
-        if not match:
-            continue
-        matched_stressor, bogo_ops = match.groups()
-        try:
-            rows.append((matched_stressor, float(bogo_ops)))
-        except ValueError:
-            continue
-    return rows
-
-
-def parse_stress_ng_bogo_ops(text: str, *, stressor: str | None = None) -> float | None:
-    for matched_stressor, bogo_ops in _stress_ng_metric_rows(text):
-        if stressor and matched_stressor != stressor:
-            continue
-        return bogo_ops
-    return None
-
-
-
 def run_stress_ng_class_load(duration_s: int | float, stressors: Sequence[str], *, workload_name: str) -> WorkloadResult:
     stress_ng = which("stress-ng")
     if stress_ng is None:
@@ -531,9 +566,6 @@ def run_stress_ng_class_load(duration_s: int | float, stressors: Sequence[str], 
     seconds = max(1, int(round(float(duration_s))))
     temp_root = _disk_backed_tmp_root()
     command: list[str] = [stress_ng]
-    # Use 4 workers per stressor so each rare-syscall stressor still gets
-    # enough kernel time within a 1s smoke / 5s authoritative workload to
-    # fire BPF hooks in heavy multi-policy agents (tetragon/tracee).
     for stressor in normalized_stressors:
         command += [f"--{stressor}", "4"]
         command += list(_STRESS_NG_STRESSOR_ARGS.get(stressor, ()))
@@ -555,14 +587,15 @@ def run_stress_ng_class_load(duration_s: int | float, stressors: Sequence[str], 
             f"{workload_name} workload failed: "
             f"{tail_text(completed.stderr or completed.stdout)}"
         )
-    combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
-    ops_total = sum(bogo_ops for _, bogo_ops in _stress_ng_metric_rows(combined))
-    if ops_total <= 0:
-        raise RuntimeError(
-            f"{workload_name} workload did not report bogo-ops metrics: "
-            f"{tail_text(combined)}"
-        )
-    return _finish_result(ops_total, elapsed, completed.stdout or "", completed.stderr or "")
+    return _record_run(
+        workload_name=workload_name,
+        command=command,
+        returncode=completed.returncode,
+        duration_s=elapsed,
+        stdout=completed.stdout or "",
+        stderr=completed.stderr or "",
+        config={"tool": "stress-ng", "stressors": list(normalized_stressors)},
+    )
 
 
 def run_file_io(duration_s: int | float) -> WorkloadResult:
@@ -588,21 +621,15 @@ def run_file_io(duration_s: int | float) -> WorkloadResult:
         elapsed = time.monotonic() - start
         if c.returncode != 0:
             raise RuntimeError(f"fio file_io workload failed: {tail_text(c.stderr or c.stdout)}")
-        payload = json.loads(c.stdout)
-        jobs = payload.get("jobs")
-        if not isinstance(jobs, list) or not jobs:
-            raise RuntimeError(f"fio file_io workload returned no job stats: {tail_text(c.stdout or json.dumps(payload))}")
-        ops_total = 0.0
-        for job in jobs:
-            if not isinstance(job, dict):
-                raise RuntimeError(f"fio file_io workload returned malformed job stats: {tail_text(c.stdout or json.dumps(payload))}")
-            read_stats, write_stats = job.get("read"), job.get("write")
-            if not isinstance(read_stats, dict) or not isinstance(write_stats, dict):
-                raise RuntimeError(f"fio file_io workload returned malformed read/write stats: {tail_text(c.stdout or json.dumps(payload))}")
-            ops_total += float(read_stats.get("total_ios", 0) or 0) + float(write_stats.get("total_ios", 0) or 0)
-        if ops_total <= 0:
-            raise RuntimeError(f"fio file_io workload did not report total_ios metrics: {tail_text(c.stdout or json.dumps(payload))}")
-        return _finish_result(ops_total, elapsed, c.stdout or "", c.stderr or "")
+        return _record_run(
+            workload_name="file_io",
+            command=cmd,
+            returncode=c.returncode,
+            duration_s=elapsed,
+            stdout=c.stdout or "",
+            stderr=c.stderr or "",
+            config={"tool": "fio"},
+        )
 
 
 def _disk_backed_tmp_root() -> Path:
@@ -716,16 +743,16 @@ def _run_wrk_http_load(
             f"{workload_name} wrk load failed via {_render_command(command)}: "
             f"{tail_text(completed.stderr or completed.stdout)}"
         )
-    total_requests = next(
-        (float(m.group(1)) for line in completed.stdout.splitlines() if (m := re.search(r"([0-9]+)\s+requests in", line.strip()))),
-        None,
+    return _record_run(
+        workload_name=workload_name,
+        command=command,
+        returncode=completed.returncode,
+        duration_s=elapsed,
+        stdout=completed.stdout or "",
+        stderr=completed.stderr or "",
+        config={"tool": "wrk", "url": url, "namespace": namespace,
+                "threads": int(threads), "connections": int(connections)},
     )
-    if total_requests is None:
-        raise RuntimeError(
-            f"{workload_name} wrk did not report requests metric: "
-            f"{tail_text(completed.stdout or completed.stderr)}"
-        )
-    return _finish_result(total_requests, elapsed, completed.stdout or "", completed.stderr or "")
 
 
 def _start_ping(target: str, seconds: int, *, namespace: str | None = None) -> subprocess.Popen[object] | None:
@@ -762,11 +789,16 @@ def _run_udp_burst(host: str, port: int, seconds: int, *, namespace: str | None 
     elapsed = time.monotonic() - start
     if completed.returncode != 0:
         raise RuntimeError(f"UDP workload failed via {_render_command(command)}: {tail_text(completed.stderr or completed.stdout)}")
-    try:
-        sent = float(completed.stdout.strip().splitlines()[-1])
-    except (IndexError, ValueError) as exc:
-        raise RuntimeError(f"UDP workload did not report packet count: {tail_text(completed.stdout or completed.stderr)}") from exc
-    return _finish_result(sent, elapsed, completed.stdout or "", completed.stderr or "")
+    return _record_run(
+        workload_name="udp_burst",
+        command=command,
+        returncode=completed.returncode,
+        duration_s=elapsed,
+        stdout=completed.stdout or "",
+        stderr=completed.stderr or "",
+        config={"tool": "python-udp-client", "target_host": host,
+                "target_port": int(port), "namespace": namespace},
+    )
 
 
 def _run_cilium_endpoint_matrix(seconds: int, *, wrk_binary: str) -> WorkloadResult | None:
@@ -869,7 +901,12 @@ def _run_cilium_endpoint_matrix(seconds: int, *, wrk_binary: str) -> WorkloadRes
             results.append(_run_udp_burst(endpoint_a.ipv4, udp_server.port, seconds, namespace=BENCHMARK_NETNS))
         with NamespacedUdpServer(BENCHMARK_NETNS, BENCHMARK_PEER_IFACE_IP) as udp_server:
             results.append(_run_udp_burst(BENCHMARK_PEER_IFACE_IP, udp_server.port, seconds, namespace=endpoint_a.namespace))
-    return _merge_workload_results(results)
+    total_duration = sum(r.duration_s for r in results)
+    return _composite(
+        workload_name="cilium_endpoint_matrix",
+        components=results,
+        duration_s=total_duration,
+    )
 
 
 def _render_command(command: Sequence[str]) -> str:
@@ -941,24 +978,27 @@ def run_network_lossy_multi_load(
                         f"network_lossy_multi wrk load failed via {_render_command(command)}: "
                         f"{tail_text(c.stderr or c.stdout)}"
                     )
-                total_requests = next(
-                    (float(m.group(1))
-                     for line in c.stdout.splitlines()
-                     if (m := re.search(r"([0-9]+)\s+requests in", line.strip()))),
-                    None,
-                )
-                if total_requests is None:
-                    raise RuntimeError(
-                        f"network_lossy_multi wrk did not report requests metric: "
-                        f"{tail_text(c.stdout or c.stderr)}"
-                    )
-                results.append(_finish_result(total_requests, elapsed, c.stdout or "", c.stderr or ""))
+                results.append(_record_run(
+                    workload_name="network_lossy_multi_wrk",
+                    command=command,
+                    returncode=c.returncode,
+                    duration_s=elapsed,
+                    stdout=c.stdout or "",
+                    stderr=c.stderr or "",
+                    config={"tool": "wrk", "url": server.url},
+                ))
             finally:
                 _stop_background_process(ping_proc)
     endpoint_result = _run_cilium_endpoint_matrix(seconds, wrk_binary=wrk_binary)
     if endpoint_result is not None:
         results.append(endpoint_result)
-    return _merge_workload_results(results)
+    return _composite(
+        workload_name="network_lossy_multi",
+        components=results,
+        duration_s=sum(r.duration_s for r in results),
+        config={"network_device": network_device,
+                "netem": {"loss_pct": 20.0, "delay_ms": 50}},
+    )
 
 
 def run_xdp_traffic_load(duration_s: int | float, *, network_device: str | None = None) -> WorkloadResult:
@@ -983,10 +1023,15 @@ def run_xdp_traffic_load(duration_s: int | float, *, network_device: str | None 
             raise RuntimeError(
                 f"network wrk load failed via {_render_command(command)}: {tail_text(c.stderr or c.stdout)}"
             )
-        total_requests = next((float(m.group(1)) for line in c.stdout.splitlines() if (m := re.search(r"([0-9]+)\s+requests in", line.strip()))), None)
-        if total_requests is None:
-            raise RuntimeError(f"network wrk load did not report total request metrics: {tail_text(c.stdout or c.stderr)}")
-        return _finish_result(total_requests, elapsed, c.stdout or "", c.stderr or "")
+        return _record_run(
+            workload_name="xdp_traffic",
+            command=command,
+            returncode=c.returncode,
+            duration_s=elapsed,
+            stdout=c.stdout or "",
+            stderr=c.stderr or "",
+            config={"tool": "wrk", "url": server.url},
+        )
 
 
 def run_tcp_connect_load(duration_s: int | float, *, network_device: str | None = None) -> WorkloadResult:
@@ -1011,17 +1056,15 @@ def run_tcp_connect_load(duration_s: int | float, *, network_device: str | None 
                     f"tcp connect load failed via {_render_command(command)}: "
                     f"{tail_text(c.stderr or c.stdout)}"
                 )
-            total = next(
-                (float(m.group(1)) for line in c.stdout.splitlines()
-                 if (m := re.search(r"([0-9]+)\s+requests in", line.strip()))),
-                None,
+            return _record_run(
+                workload_name="tcp_connect",
+                command=command,
+                returncode=c.returncode,
+                duration_s=elapsed,
+                stdout=c.stdout or "",
+                stderr=c.stderr or "",
+                config={"tool": "wrk", "url": server.url},
             )
-            if total is None:
-                raise RuntimeError(
-                    f"tcp connect load did not report requests metric: "
-                    f"{tail_text(c.stdout or c.stderr)}"
-                )
-            return _finish_result(total, elapsed, c.stdout or "", c.stderr or "")
     with LocalHttpServer("127.0.0.1") as server:
         command = [*wrk_args, server.url]
         start = time.monotonic()
@@ -1029,17 +1072,15 @@ def run_tcp_connect_load(duration_s: int | float, *, network_device: str | None 
         elapsed = time.monotonic() - start
         if c.returncode != 0:
             raise RuntimeError(f"tcp connect load failed: {tail_text(c.stderr or c.stdout)}")
-        total = next(
-            (float(m.group(1)) for line in c.stdout.splitlines()
-             if (m := re.search(r"([0-9]+)\s+requests in", line.strip()))),
-            None,
+        return _record_run(
+            workload_name="tcp_connect",
+            command=command,
+            returncode=c.returncode,
+            duration_s=elapsed,
+            stdout=c.stdout or "",
+            stderr=c.stderr or "",
+            config={"tool": "wrk", "url": server.url},
         )
-        if total is None:
-            raise RuntimeError(
-                f"tcp connect load did not report requests metric: "
-                f"{tail_text(c.stdout or c.stderr)}"
-            )
-        return _finish_result(total, elapsed, c.stdout or "", c.stderr or "")
 
 
 def run_named_workload(

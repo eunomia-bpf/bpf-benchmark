@@ -17,5 +17,5 @@ docker buildx prune --keep-storage 50GB
 more disk but make the next runtime image build more expensive.
 
 This policy is only for Docker builder cache. Benchmark results under
-`corpus/results` and `e2e/results` are retained manually and must not be removed
-by Docker GC or Makefile cleanup targets.
+`corpus/results` are retained manually and must not be removed by Docker GC or
+Makefile cleanup targets.
