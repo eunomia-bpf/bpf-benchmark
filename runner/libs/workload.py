@@ -1083,6 +1083,190 @@ def run_tcp_connect_load(duration_s: int | float, *, network_device: str | None 
         )
 
 
+_OTEL_INTERP_PY = """\
+import hashlib, sys, time
+buf = b"x" * 1024
+n = 0
+t0 = time.monotonic()
+deadline = t0 + float(sys.argv[1])
+while time.monotonic() < deadline:
+    hashlib.sha256(buf).digest()
+    n += 1
+    if (n & 4095) == 0:
+        sys.stderr.write(f"python3 sha256 ops={n} elapsed_s={time.monotonic()-t0:.6f}\\n")
+        sys.stderr.flush()
+sys.stderr.write(f"python3 sha256 ops={n} elapsed_s={time.monotonic()-t0:.6f}\\n")
+"""
+_OTEL_INTERP_RB = """\
+require "digest"
+buf = "x" * 1024
+n = 0
+t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+deadline = t0 + ARGV.fetch(0).to_f
+while Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline
+  Digest::SHA256.digest(buf)
+  n += 1
+  if (n & 4095) == 0
+    elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0
+    STDERR.puts "ruby sha256 ops=#{n} elapsed_s=#{format("%.6f", elapsed)}"
+    STDERR.flush
+  end
+end
+elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0
+STDERR.puts "ruby sha256 ops=#{n} elapsed_s=#{format("%.6f", elapsed)}"
+"""
+_OTEL_INTERP_NODE = """\
+const crypto = require("crypto");
+const buf = Buffer.alloc(1024, 120);
+let n = 0;
+const t0 = process.hrtime.bigint();
+const deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));
+while (process.hrtime.bigint() < deadline) {
+  crypto.createHash("sha256").update(buf).digest();
+  n++;
+  if ((n & 4095) === 0) {
+    const dt = Number(process.hrtime.bigint() - t0) / 1e9;
+    process.stderr.write(`nodejs sha256 ops=${n} elapsed_s=${dt.toFixed(6)}\\n`);
+  }
+}
+const dt = Number(process.hrtime.bigint() - t0) / 1e9;
+process.stderr.write(`nodejs sha256 ops=${n} elapsed_s=${dt.toFixed(6)}\\n`);
+"""
+_OTEL_INTERP_PERL = """\
+use Digest::SHA qw(sha256);
+use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);
+my $buf = "x" x 1024;
+my $n = 0;
+my $t0 = clock_gettime(CLOCK_MONOTONIC);
+my $deadline = $t0 + $ARGV[0];
+while (clock_gettime(CLOCK_MONOTONIC) < $deadline) {
+  sha256($buf);
+  $n++;
+  if (($n & 4095) == 0) {
+    my $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;
+    printf STDERR ("perl sha256 ops=%d elapsed_s=%.6f\\n", $n, $dt);
+  }
+}
+my $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;
+printf STDERR ("perl sha256 ops=%d elapsed_s=%.6f\\n", $n, $dt);
+"""
+_OTEL_INTERP_PHP = """\
+$buf = str_repeat("x", 1024);
+$n = 0;
+$t0 = hrtime(true);
+$deadline = $t0 + (int)((float)$argv[1] * 1e9);
+while (hrtime(true) < $deadline) {
+  hash("sha256", $buf, true);
+  $n++;
+  if (($n & 4095) === 0) {
+    $dt = (hrtime(true) - $t0) / 1e9;
+    fwrite(STDERR, sprintf("php sha256 ops=%d elapsed_s=%.6f\\n", $n, $dt));
+  }
+}
+$dt = (hrtime(true) - $t0) / 1e9;
+fwrite(STDERR, sprintf("php sha256 ops=%d elapsed_s=%.6f\\n", $n, $dt));
+"""
+
+# (tool, run_args) per language. Each script reads duration_s from argv[1]
+# and exits when elapsed >= duration. SHA-256 is in a stdlib C extension;
+# the surrounding `while ...` driver loop runs in the interpreter, so a
+# measurable fraction of perf samples lands in interpreter PC ranges,
+# triggering tail-call into the per-language perf_unwind_<lang> program.
+# (perf_unwind_<lang> run_cnt stays 0 due to BPF tail-call prologue bypass;
+# see the tail-call accounting caveat in CLAUDE.md.)
+_OTEL_INTERP_LOOPS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("python3", ("-u", "-c", _OTEL_INTERP_PY)),
+    ("ruby",    ("-e", _OTEL_INTERP_RB)),
+    ("nodejs",  ("-e", _OTEL_INTERP_NODE)),
+    ("perl",    ("-e", _OTEL_INTERP_PERL)),
+    ("php",     ("-r", _OTEL_INTERP_PHP)),
+)
+
+
+def run_otel_mixed_workload(duration_s: int | float) -> WorkloadResult:
+    """Mixed workload for OTEL profiler: 5 language SHA-256 loops + stress-ng cpu.
+
+    Concurrent processes for the measurement window:
+      - Python/Ruby/Node.js/Perl/PHP each run a bounded SHA-256(1 KiB) loop
+        using only the language standard library; these drive perf samples
+        into interpreter PC ranges so the per-language perf_unwind_<lang>
+        BPF programs are dispatched (verified via the OTEL debug exporter).
+      - stress-ng `--cpu` exercises native CPU-bound code so perf samples
+        also land in non-interpreter native stack frames, exercising
+        perf_unwind_native and the Go-binary path.
+
+    The composite WorkloadResult holds one component per concurrent process
+    (5 languages + 1 stress-ng), each with raw stdout/stderr; offline
+    analysis derives per-language ops/sec from the final stderr line and
+    stress-ng bogo-ops from its --metrics-brief output.
+
+    Note: BPF tail-called programs (perf_unwind_<lang>) skip the prologue
+    and stay at run_cnt=0; coverage of these programs is established via
+    profiler-side telemetry, not the framework's per-program run_cnt_delta.
+    See CLAUDE.md "Tail-call accounting caveat".
+    """
+    seconds = max(1, int(round(float(duration_s))))
+    stress_ng = which("stress-ng")
+    if stress_ng is None:
+        raise RuntimeError("otel_mixed_workload requires stress-ng in PATH")
+    temp_root = _disk_backed_tmp_root()
+    procs: list[tuple[str, list[str], "subprocess.Popen[bytes]"]] = []
+    start = time.monotonic()
+    # Language interpreter loops first.
+    for tool, args in _OTEL_INTERP_LOOPS:
+        binary = which(tool)
+        if binary is None:
+            for _, _, proc in procs:
+                if proc.poll() is None:
+                    proc.kill()
+            raise RuntimeError(f"otel_mixed_workload requires {tool} in PATH")
+        cmd = [binary, *list(args), str(seconds)]
+        procs.append((tool, cmd, subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL,
+        )))
+    # Concurrent native stress (cpu class). Use --cpu 1 so the 5 language
+    # idlers still get CPU time on small VMs; stress-ng itself emits
+    # --metrics-brief lines on stdout for offline ops counting.
+    stress_cmd = [stress_ng, "--cpu", "1", "--timeout", f"{seconds}s",
+                  "--metrics-brief", "--temp-path", str(temp_root)]
+    procs.append(("stress-ng", stress_cmd, subprocess.Popen(
+        stress_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        stdin=subprocess.DEVNULL, cwd=str(temp_root),
+    )))
+    components: list[WorkloadResult] = []
+    for tool, cmd, proc in procs:
+        try:
+            out, err = proc.communicate(timeout=seconds + 30)
+        except subprocess.TimeoutExpired as exc:
+            proc.kill()
+            raise RuntimeError(f"otel_mixed_workload {tool} timed out") from exc
+        elapsed = time.monotonic() - start
+        if proc.returncode != 0:
+            raise RuntimeError(
+                f"otel_mixed_workload {tool} failed (rc={proc.returncode}): "
+                f"{tail_text(err.decode('utf-8','replace') or out.decode('utf-8','replace'))}"
+            )
+        config: dict[str, object] = {"tool": tool}
+        if tool != "stress-ng":
+            config.update({"language": tool, "hash": "sha256", "buffer_bytes": 1024})
+        else:
+            config.update({"stressors": ["cpu"]})
+        components.append(_record_run(
+            workload_name=("otel_stress_ng_cpu" if tool == "stress-ng"
+                           else f"otel_{tool}_sha256"),
+            command=cmd, returncode=proc.returncode,
+            duration_s=elapsed,
+            stdout=out.decode("utf-8", "replace"),
+            stderr=err.decode("utf-8", "replace"),
+            config=config,
+        ))
+    return _composite(
+        workload_name="otel_mixed_workload",
+        components=components,
+        duration_s=time.monotonic() - start,
+    )
+
+
 def run_noop(duration_s: int | float) -> WorkloadResult:
     """Sleep workload for apps whose runner-managed background processes are
     the actual measurement load (e.g. otelcol-ebpf-profiler with language
@@ -1132,4 +1316,6 @@ def run_named_workload(
         return run_file_io(seconds)
     if kind == "noop":
         return run_noop(seconds)
+    if kind == "otel_mixed_workload":
+        return run_otel_mixed_workload(seconds)
     raise RuntimeError(f"unsupported workload kind: {kind}")
