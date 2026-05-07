@@ -62,19 +62,23 @@ component binary directly. Every benchmark must go through `make <target>`.**
 
 ```bash
 make vm-micro                        # full micro suite in VM
-make vm-micro BENCH="simple bitcount"  # subset of benchmarks
+make vm-micro BENCH="simple bitcount"
 make vm-micro SAMPLES=1 WARMUPS=0 INNER_REPEAT=10
-make vm-corpus                       # corpus benchmark in VM (all 7 supported apps)
+make vm-corpus                       # corpus benchmark, all 7 supported apps
 make vm-corpus SAMPLES=5
-make vm-test                         # selftest + negative-test + repo unit tests in VM
+make vm-selftest                     # kernel selftests
+make vm-negative-test                # negative tests
+make vm-test                         # full test suite (selftest + negative + repo units)
 make vm-all                          # vm-test + vm-micro + vm-corpus
-make aws-arm64-test                  # AWS ARM64 correctness path
-make aws-arm64-benchmark AWS_ARM64_BENCH_MODE=micro
+make aws-arm64-selftest              # AWS ARM64 selftest only
+make aws-arm64-test                  # AWS ARM64 full test
+make aws-arm64-micro                 # AWS ARM64 micro benchmark
 make aws-arm64-corpus                # AWS ARM64 corpus benchmark
-make aws-x86-test                    # AWS x86 correctness path
-make aws-x86-benchmark AWS_X86_BENCH_MODE=micro
-make aws-x86-corpus                  # AWS x86 corpus benchmark
-make aws-corpus                      # both AWS x86 + ARM64 corpus
+make aws-x86-selftest                # AWS x86 variants
+make aws-x86-test
+make aws-x86-micro
+make aws-x86-corpus
+make aws-corpus                      # auto-pick arm64/x86 by RUN_TARGET_ARCH
 ```
 
 ### Per-app filtering (corpus)
@@ -118,13 +122,20 @@ Pass list reference (current `corpus/config/benchmark_config.yaml`):
   `dce`, `bounds_check_merge`, `skb_load_bytes_spec`
 - **profile-guided** (not in default policy): `branch_flip`
 
-### Failure artifact retention
+### Workdir retention
 
-Failure workdir tarballs are discarded by default to keep `result.json` small.
-Enable retention to inspect raw verifier logs and per-pass bytecode:
+Workdir tarballs are discarded by default to keep `result.json` small. Enable
+retention to inspect raw verifier logs and per-pass bytecode:
 
 ```bash
-KEEP_FAILURE_ARTIFACTS=1 make vm-corpus
+# Retain tarballs for programs that hit a real ReJIT failure
+KEEP_WORKDIRS=1 make vm-corpus
+
+# Force-capture every prog's workdir (useful for debugging successful progs;
+# uses BPFREJIT_KEEP_ALL_WORKDIRS=1 internally to deliberately fail steps so
+# the daemon emits tars for all)
+KEEP_WORKDIRS=all make vm-corpus
+
 # Tarballs land in: corpus/results/<run_dir>/details/failure-artifacts/<prog_id>.tar.gz
 ```
 

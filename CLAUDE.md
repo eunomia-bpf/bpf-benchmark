@@ -126,18 +126,26 @@ Use `libbpf-rs`/`libbpf-sys` instead of custom wrappers whenever upstream libbpf
 `make vm-corpus`, `make vm-test`, `make aws-x86-test`, `make aws-arm64-test` must work with zero manual environment variables. Defaults live in `runner/targets/*.env` files and are overridable via env vars.
 
 ### Make Is the Only Benchmark Entrypoint
-**Every benchmark run must be invoked via `make <target>`. Never call `python -m runner.libs.run_target_suite`, `cargo run`, `docker run`, or any component binary directly.** Targets (`vm-corpus`, `vm-micro`, `vm-test`, `aws-arm64-*`, `aws-x86-*`, `aws-corpus`) handle build dependencies, runtime image assembly, KVM/AWS dispatch, and artifact paths consistently; bypassing them silently changes the contract.
+**Every benchmark run must be invoked via `make <target>`. Never call `python -m runner.libs.run_target_suite`, `cargo run`, `docker run`, or any component binary directly.** Targets handle build dependencies, runtime image assembly, KVM/AWS dispatch, and artifact paths consistently; bypassing them silently changes the contract.
+
+Targets (orthogonal — mode goes in the target name, not in env vars):
+- VM x86: `vm-{selftest,negative-test,test,micro,corpus,all}`
+- AWS:    `aws-{arm64,x86}-{selftest,negative-test,test,micro,corpus,terminate}`
+- AWS arch dispatch: `aws-corpus` (chooses arm64/x86 by `RUN_TARGET_ARCH`)
 
 Override knobs (env vars passed to `make`):
 
 | env | scope | purpose | example |
 |-----|-------|---------|---------|
-| `SAMPLES` | corpus | per-program workload-cycle multiplier (default 3) | `SAMPLES=3 make vm-corpus` |
-| `BPFREJIT_CORPUS_APPS` | corpus | restrict to a subset of the 7 supported apps (comma- or space-separated). Names match `corpus/config/macro_apps.yaml` entries (e.g. `bcc/set`, `tetragon/observer`, `katran`) | `BPFREJIT_CORPUS_APPS="cilium/agent,tracee/monitor" make vm-corpus` |
+| `SAMPLES` | corpus / micro | per-program sample count (default 3 corpus, 1 micro) | `SAMPLES=3 make vm-corpus` |
+| `TIMEOUT` | all VM | suite timeout in seconds (default 7200) | `TIMEOUT=3600 make vm-test` |
+| `BPFREJIT_CORPUS_APPS` | corpus | comma-separated subset of the 7 supported apps. Names match `corpus/config/macro_apps.yaml` (e.g. `bcc/set`, `tetragon/observer`, `katran`) | `BPFREJIT_CORPUS_APPS="cilium/agent,tracee/monitor" make vm-corpus` |
 | `BPFREJIT_BENCH_PASSES` | corpus / micro | comma-separated bpfopt pass list overriding `corpus/config/benchmark_config.yaml`. Set to `default` to use yaml policy explicitly | `BPFREJIT_BENCH_PASSES="noop,map_inline" make vm-corpus` |
-| `KEEP_FAILURE_ARTIFACTS` | corpus | retain failure workdir tarballs at `details/failure-artifacts/<prog_id>.tar.gz` | `KEEP_FAILURE_ARTIFACTS=1 make vm-corpus` |
+| `KEEP_WORKDIRS` | corpus | `1` = retain failure workdir tarballs at `details/failure-artifacts/<prog_id>.tar.gz`; `all` = also force-capture successful prog workdirs (sets `BPFREJIT_KEEP_ALL_WORKDIRS=1` for daemon) | `KEEP_WORKDIRS=1 make vm-corpus` |
 | `BENCH` | micro | subset of micro benchmarks | `make vm-micro BENCH="simple bitcount"` |
-| `WARMUPS` / `INNER_REPEAT` | micro | micro-only knobs | `make vm-micro SAMPLES=1 WARMUPS=0 INNER_REPEAT=10` |
+| `WARMUPS` / `INNER_REPEAT` | micro | micro-only knobs (same name on VM and AWS) | `make vm-micro SAMPLES=1 WARMUPS=0 INNER_REPEAT=10` |
+| `FUZZ_ROUNDS` | test | fuzz iteration count | `FUZZ_ROUNDS=5000 make vm-test` |
+| `AWS_<ARM64\|X86>_{REGION,PROFILE,SUBNET_ID,SECURITY_GROUP_ID,KEY_NAME,KEY_PATH}` | aws-* | AWS deploy params | `AWS_ARM64_REGION=us-east-1 make aws-arm64-test` |
 
 Pass list reference (current `corpus/config/benchmark_config.yaml`):
 - **kinsn-class**: `wide_mem`, `rotate`, `cond_select`, `extract`, `endian_fusion`, `bulk_memory`, `prefetch`
