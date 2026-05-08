@@ -372,21 +372,25 @@ import http.server
 import socketserver
 import sys
 
+import socket as _sock
+
 class Handler(http.server.BaseHTTPRequestHandler):
-    protocol_version = "HTTP/1.0"
+    protocol_version = "HTTP/1.1"
+    disable_nagle_algorithm = True
+    def setup(self):
+        super().setup()
+        self.connection.setsockopt(_sock.IPPROTO_TCP, _sock.TCP_NODELAY, 1)
     def do_GET(self):
         body = b"katran-ok\\n"
         self.send_response(200)
         self.send_header("Content-Type", "text/plain; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
-        self.send_header("Connection", "close")
         self.end_headers()
         try:
             self.wfile.write(body)
             self.wfile.flush()
         except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, TimeoutError):
             return
-        self.close_connection = True
     def log_message(self, fmt, *args):
         pass
 
