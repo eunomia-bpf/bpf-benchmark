@@ -336,7 +336,7 @@ pass coverage run produces.
 | `noop` + `map_inline` | 1.0097 | 1.0118 | 0.9728 | 0.9915 | **0.6567** | 1.0256 | 0.8150 | 0.8943 | 148 |
 | `prefetch` | 1.0154 | 0.9895 | — (wrk timed out) | 0.9963 | **0.7186** | 1.0175 | 0.8112 | 0.8880 | 142 |
 | 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.9896 | 1.0117 | — (kernel panic) | 0.9639 | 0.9891 | 1.0783 | 0.8171 | 0.9038 | 141 (6 apps) |
-| 6-pass kinsn + prefetch: above + `prefetch` | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | — |
+| 6-pass kinsn + prefetch: above + `prefetch` | 1.0289 | 1.0165 | 1.0066 | 0.9423 | 1.0056 | 1.0468 | 0.8067 | 0.9009 | 147 |
 | All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | — |
 
 ### Findings
