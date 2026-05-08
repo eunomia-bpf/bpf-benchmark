@@ -85,16 +85,19 @@ workload-specific):
   (dispatched at least once during the 30 s workload)
 - **retained** — `run_cnt_delta ≥ 100`; the population that enters the
   per-program geomean per §5
+- **median run_cnt** — median per-program dispatch count over 30 s in
+  the retained population (per-program distributions are heavy-tailed,
+  so median is more representative than mean)
 
-| App | Domain | loaded | triggered | retained | Workload | Why triggered ≪ loaded |
-| --- | --- | ---: | ---: | ---: | --- | --- |
-| `bcc/set` | tracing tools | 21 | 20 | 20 | `stress_ng_os_io_network` | full coverage; the one un-triggered probe is a rare-syscall hook the stressor does not exercise |
-| `bpftrace/set` | tracing scripts | 9 | 9 | 8 | `stress_ng_os_io_network` | full coverage |
-| `tracee/monitor` | runtime security | 158 | 92 | 81 | `stress_ng_os_io_network` | ≈ 40 % of programs are tail targets (`vfs_*_tail`, `lkm_seeker_*`) and read `run_cnt = 0` (§5.6); the rest are syscalls the stressor does not invoke |
-| `tetragon/observer` | runtime security | 287 | 34 | 30 | `stress_ng_os_io_network` | 253 of 287 are tail-called helpers (`process_event` / `filter_arg` / `actions` / `output` chain) — hidden by `run_cnt = 0` accounting (§5.6) |
-| `cilium/agent` | k8s data-plane | 53 | 8 | 6 | `network_lossy_multi` | most policy / NodePort / CT programs are tail targets (`run_cnt = 0`); without a Kubernetes pod model many `cil_lxc` / `cil_from_container` slots also stay idle |
-| `katran` | L4 XDP load balancer | 1 | 1 | 1 | `xdp_traffic` | standalone-attach exposes only `balancer_ingress`; tail targets reachable through `xdp_root` are bypassed by design |
-| `otelcol-ebpf-profiler/profiling` | continuous profiler | 13 | 2 | 1 | `otel_mixed_workload` | only `native_tracer_entry` is directly attached; `perf_unwind_<lang>` × 8 are tail targets and read `run_cnt = 0` even though the workload provably dispatches them (verified via OTEL debug exporter) |
+| App | Domain | loaded | triggered | retained | median run_cnt | Workload | Why triggered ≪ loaded |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| `bcc/set` | tracing tools | 21 | 20 | 20 | 6.4 M | `stress_ng_os_io_network` | full coverage; the one un-triggered probe is a rare-syscall hook the stressor does not exercise |
+| `bpftrace/set` | tracing scripts | 9 | 9 | 8 | 18 M | `stress_ng_os_io_network` | full coverage |
+| `tracee/monitor` | runtime security | 158 | 92 | 81 | 1.8 M | `stress_ng_os_io_network` | ≈ 40 % of programs are tail targets (`vfs_*_tail`, `lkm_seeker_*`) and read `run_cnt = 0` (§5.6); the rest are syscalls the stressor does not invoke |
+| `tetragon/observer` | runtime security | 287 | 34 | 30 | 0.7 M | `stress_ng_os_io_network` | 253 of 287 are tail-called helpers (`process_event` / `filter_arg` / `actions` / `output` chain) — hidden by `run_cnt = 0` accounting (§5.6) |
+| `cilium/agent` | k8s data-plane | 53 | 8 | 6 | 1.6 M | `network_lossy_multi` | most policy / NodePort / CT programs are tail targets (`run_cnt = 0`); without a Kubernetes pod model many `cil_lxc` / `cil_from_container` slots also stay idle |
+| `katran` | L4 XDP load balancer | 1 | 1 | 1 | 3.2 M | `xdp_traffic` | standalone-attach exposes only `balancer_ingress`; tail targets reachable through `xdp_root` are bypassed by design |
+| `otelcol-ebpf-profiler/profiling` | continuous profiler | 13 | 2 | 1 | **0.14 M** | `otel_mixed_workload` | only `native_tracer_entry` is directly attached; `perf_unwind_<lang>` × 8 are tail targets and read `run_cnt = 0` even though the workload provably dispatches them (verified via OTEL debug exporter) |
 
 ### 3.1 Workload specifications
 
@@ -233,21 +236,18 @@ Two RQs drive the evaluation. All runs below: KVM x86, `SAMPLES=3`,
 
 ### 6.1 RQ1 — Functional: does in-place ReJIT actually transform loaded programs and keep agents running?
 
-This is a *does the system work* question: do the bytecode pass and
-the kernel re-JIT cycle complete on real programs without breaking the
-running agent? The metric is the per-program ReJIT success rate plus
+The metric is the per-program ReJIT success rate plus
 the agent-side `app.status` outcome — not performance.
 
-Results aggregated across all paper-grade 30 s SAMPLES=3 runs by
-*functional condition* (pass list + workload), not by individual run:
 
 | Condition | App payloads | Programs reached | ReJIT-ok | Failed | Success rate | Failure modes |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
-| `noop` transform (ReJIT cycle, no bytecode change) | 14 | 1 093 | 1 091 | 2 | **99.8 %** | `EPERM` ×2 |
-| `noop` + `map_inline` (bytecode rewriting) | 10 | 766 | 762 | 4 | **99.5 %** | `EBUSY` ×2, `EPERM` ×2 |
-| 7-pass kinsn / bytecode mix | 14 | 1 093 | 1 031 | 62 | **94.3 %** | `EBUSY` ×54, `EPERM` ×2, other ×6 |
-| `wide_mem` isolated, 7-app | 3 ⚠ | 96 | 93 | 3 | — | **kernel panic**; `EBUSY` ×2, `EPERM` ×1 |
-| Single kinsn pass on otel (`prefetch` / `bulk_memory` / `cond_select` / `bulk_memory + prefetch`) | 4 | 52 | 52 | 0 | **100 %** | — |
+| `noop` transform (ReJIT cycle, no bytecode change) | 7 / 7 | 542 | 541 | 1 | **99.8 %** | `EPERM` ×1 |
+| `noop` + `map_inline` (bytecode rewriting) | 7 / 7 | 542 | 540 | 2 | **99.6 %** | `EBUSY` ×1, `EPERM` ×1 |
+| 7-pass mix: `rotate, cond_select, extract, endian_fusion, bulk_memory, skb_load_bytes_spec, wide_mem` | 7 / 7 | 542 | 512 | 30 | **94.5 %** | `EBUSY` ×27, `EPERM` ×1, other ×2 |
+| `prefetch` isolated | 7 / 7 (cilium wrk timed out) | 545 | 530 | 15 | **97.2 %** | `EBUSY` ×10, `EPERM` ×1, other ×4 |
+| `wide_mem` isolated | 3 / 7 ⚠ | 96 | 93 | 3 | — | **kernel panic**; `EBUSY` ×2, `EPERM` ×1 |
+| Single kinsn pass on otel | 1 / 1 each ×4 | 52 (4 ×13) | 52 | 0 | **100 %** | — |
 
 Findings:
 
@@ -255,7 +255,7 @@ Findings:
   `status=ok`; the bpfopt → BPF_PROG_REJIT loop is functional across
   all 7 production agents under the noop and `map_inline` conditions.
 - Success rate degrades with pass-list complexity: 99.8 % (noop) →
-  99.5 % (`map_inline`) → 94.3 % (7-pass mix). `EBUSY` from post-swap
+  99.6 % (`map_inline`) → 94.5 % (7-pass mix). `EBUSY` from post-swap
   refresh of tail-call poke tables dominates the regression.
 - Recurrent `EPERM` is the same kernel rejection across runs: tracee's
   `syscall__init_module` is a direct tail call whose poke table fails
@@ -265,114 +265,126 @@ Findings:
   `bpf_rejit: retaining old JIT image after refresh failure` warnings
   on tetragon. Root cause is post-swap refresh handling in
   `kernel/bpf/syscall.c:3937`, not `wide_mem` semantics. Investigation:
-  `docs/tmp/q5_widemem_kernel_panic_20260507.md`. A rerun with
-  `KEEP_WORKDIRS=1` is queued to determine whether the bug is
-  deterministic on this graph or a graph-position race.
-- ⚠ on `wide_mem` and on the `map_inline` condition flags missing app
-  payloads (3 of 7 apps in each case); see §7.
+  `docs/tmp/q5_widemem_kernel_panic_20260507.md`.
+
+#### 6.1.1 Bytecode-pass apply rate (per app × condition)
+
+`bpfopt` reports `sites_matched` (candidates the pass found) and
+`sites_applied` (candidates actually rewritten — the rest fail safety
+filters such as live-out registers, alignment, BTF-pointer rules). Each
+cell below shows `applied / matched`.
+
+Sources: `map_inline` from the merged 7-app dataset; `wide_mem`,
+`cond_select`, `bulk_memory`, `endian_fusion`, `extract`,
+`skb_load_bytes_spec`, `rotate` from Run 4 (7-pass mix); `prefetch`
+from the prefetch-only 7-app run at 2026-05-07 22:44Z (suite-status
+`error` because cilium's wrk client timed out; per-app payloads are
+intact for all 7 apps).
+
+| Pass | bcc | bpftrace | cilium | katran | otel | tetragon | tracee |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `map_inline` | 0 / 12 | 0 / 16 | 1 454 / 1 824 | 0 / 14 | 1 192 / 1 264 | 0 / 765 | 5 / 1 725 |
+| `wide_mem` | 0 / 0 | 10 / 18 | 0 / 0 | 4 / 4 | 132 / 137 | 2 826 / 2 826 | 179 / 229 |
+| `cond_select` | 8 / 8 | 4 / 4 | 208 / 218 | 7 / 7 | 45 / 47 | 1 331 / 1 753 | 391 / 400 |
+| `bulk_memory` | 0 / 0 | 0 / 0 | 5 / 5 | 0 / 0 | 1 / 1 | 163 / 165 | 117 / 214 |
+| `endian_fusion` | 1 / 1 | 1 / 1 | 24 / 24 | 6 / 6 | 4 / 4 | 210 / 210 | 4 / 4 |
+| `extract` | 1 / 1 | 0 / 0 | 0 / 0 | 0 / 0 | 36 / 36 | 112 / 112 | 37 / 47 |
+| `prefetch` | 3 / 3 | 9 / 9 | 430 / 430 | 44 / 44 | 415 / 415 | 1 526 / 1 526 | 1 770 / 1 770 |
+| `skb_load_bytes_spec` | 0 / 0 | 0 / 0 | 4 / 166 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| `rotate` | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+
+Passes omitted (no useful data in any 30 s 7-app run): `noop` (producer
+pass, always 0 / 0), `const_prop`, `dce`, `bounds_check_merge` (no
+isolated 30 s run), `ccmp` (arm64-only).
+
+Observations:
+
+- `map_inline` finds candidates almost everywhere (1 824 in cilium,
+  1 725 in tracee, 1 264 in otel, 765 in tetragon) but **applies only
+  where captured map values are constant**: cilium 80 %, otel 94 %, but
+  0 % on bcc / bpftrace / katran / tetragon and 0.3 % on tracee. Needs further investigation.
+- `cond_select` apply rate dips on tetragon (1 331 / 1 753 ≈ 76 %),
+  pulling the 7-pass mix's overall apply rate down.
+- `rotate` finds zero candidates in the 7-app corpus; the workload
+  exposes no shift+or pairs that survive verifier range tracking.
+- `skb_load_bytes_spec` matches 166 cilium sites but applies only 4
+  (≈ 2.4 %) — almost all cilium `bpf_skb_load_bytes` calls fail the
+  fixed-width specialization safety check.
 
 ### 6.2 RQ2 — Speedup: does ReJIT deliver per-program speedup above the noise floor?
 
 Per-program geomean of `post / baseline` with `min_runs ≥ 100`
 retention; `< 1.0` is speedup.
 
-#### 6.2.1 Noise-floor calibration
+#### 6.2.1 Per-app geomean × condition
 
-| Run | `WARMUPS` | `SKIP_REJIT` | suite geomean | Retained | wins / losses | What it captures |
-| --- | ---: | ---: | ---: | ---: | ---: | --- |
-| **Q1** | 0 | 0 | **0.9019** | 147 | 73 / 74 | phase variance + full ReJIT cycle |
-| **P1** | 0 | 1 | **0.8587** | 147 | 75 / 72 | phase variance only |
-| **P2** | 3 | 0 | **0.9035** | 148 | 70 / 78 | Q1 with warm-ups |
-| **P3** | 3 | 1 | *pending* | — | — | P1 with warm-ups |
+Single unified table: rows are conditions (noise-floor at top, then pass
+coverage), columns are per-app and suite geomean. `< 1.0` is speedup.
+Every cell that *should* be 1.0 (the noise-floor rows) is the empirical
+phase-variance reference; everything below the noise rows is what a
+pass coverage run produces.
 
-- Suite-level noise amplitude `|Q1 − P1| = 0.0432` is the bar a real
-  speedup must clear.
-- Warm-ups did not move the suite geomean (P2 ≈ Q1); per-app phase
-  variance dominates the noise band, not warm-up state.
+| Condition | bcc | bpftrace | cilium | katran | otel | tetragon | tracee | suite | retained |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `noop` ReJIT | 0.9818 | 1.0217 | 0.9921 | 0.9811 | 0.9887 | 1.0336 | 0.8218 | **0.9019** | 147 |
+| `noop` SKIP_REJIT | 0.9836 | 1.0281 | 0.9783 | 0.9957 | 1.1023 | 0.9042 | 0.7888 | **0.8587** | 147 |
+| `noop` + `map_inline` | 1.0097 | 1.0118 | 0.9728 | 0.9915 | **0.6567** | 1.0256 | 0.8150 | 0.8943 | 148 |
+| `prefetch` | 1.0154 | 0.9895 | — (wrk timed out) | 0.9963 | **0.7186** | 1.0175 | 0.8112 | 0.8880 | 142 |
+| 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | — |
+| 6-pass kinsn + prefetch: above + `prefetch` | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | — |
+| All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | — |
 
-Per-app noise intervals `[min(Q1, P1), max(Q1, P1)]` and the speed
-threshold (`min − 0.0432`):
+Reading the table:
 
-| App | Q1 | P1 | noise interval | speed threshold | retained |
-| --- | ---: | ---: | --- | ---: | ---: |
-| `bcc/set` | 0.9818 | 0.9836 | [0.9818, 0.9836] | 0.9387 | 20 |
-| `bpftrace/set` | 1.0217 | 1.0281 | [1.0217, 1.0281] | 0.9786 | 8 |
-| `cilium/agent` | 0.9921 | 0.9783 | [0.9783, 0.9921] | 0.9352 | 6 |
-| `katran` | 0.9811 | 0.9957 | [0.9811, 0.9957] | 0.9380 | 1 |
-| `otelcol-ebpf-profiler/profiling` | 0.9887 | 1.1023 | [0.9887, 1.1023] | 0.9456 | 1 |
-| `tetragon/observer` | 1.0336 | 0.9042 | [0.9042, 1.0336] | 0.8611 | 30 |
-| `tracee/monitor` | 0.8218 | 0.7888 | [0.7888, 0.8218] | 0.7457 | 81 |
+- **Noise interval per app** = the range bracketed by the three
+  noise-floor rows (`noop` ReJIT, `noop` SKIP_REJIT, `noop` ReJIT +
+  warm-up). Anything inside the bracket is indistinguishable from
+  noise.
+- **otel is high-variance**: its noise rows span [0.7073, 1.1023] —
+  almost 40 % wide — because only 1 program is retained. **The
+  apparent "clear-low" otel cells (`map_inline` 0.6567, 7-pass mix
+  0.6258, `prefetch` 7-app 0.7186, `wide_mem` 7-app 0.7848) all sit
+  inside or barely below this noise envelope.** None of them is yet
+  distinguishable from a single warm-up swing.
+- **tracee is also low-noise-baseline**: ratios 0.79 – 0.84 across all
+  conditions, including pure phase-variance, so the suite-level
+  geomean of every pass-coverage row is dragged below 1.0 by tracee's
+  81 retained programs regardless of pass effect.
+- The remaining 5 apps (bcc, bpftrace, cilium, katran, tetragon) sit
+  near 1.0 in every condition; the per-app coverage rows do not differ
+  from the noise rows by more than 1 – 3 %.
 
-Note: `katran` and `otel` have only 1 retained program each, so a single
-sample swings their threshold.
+`const_prop`, `dce`, `bounds_check_merge`, `skb_load_bytes_spec` have
+no isolated 30 s run; see §7 open gap. `ccmp` is arm64-only and not
+exercised in this corpus.
 
-#### 6.2.2 Bytecode-rewriting passes (RQ2a)
+#### 6.2.2 Speedup verdict
 
-| Run | Passes added | App payloads | suite geomean | Retained | Verdict |
-| --- | --- | ---: | ---: | ---: | --- |
-| **Run 3** | `map_inline` | 3 / 7 ⚠ | 0.8258 | 88 | 9 601 sites applied across cilium / otel / tracee. All three per-app ratios sit *inside* or `low-near` the noise band; **no app crosses its speed threshold**. |
-| **Q5** | `wide_mem` | 3 / 7 ⚠ | 0.9976 | 28 | partial; not adjudicable |
-| **WMRR** | `wide_mem` rerun | pending | — | — | — |
+> **No condition produces a per-app geomean that is robustly outside
+> the noise envelope on any app. The lowest cells (otel 0.62 – 0.79
+> across `map_inline`, 7-pass mix, `prefetch`, `wide_mem`) are
+> *inside* the otel noise envelope established by the warm-up
+> noise-floor row (otel 0.7073) and are therefore not yet
+> distinguishable from phase variance.**
 
-`const_prop`, `dce`, `bounds_check_merge`, `skb_load_bytes_spec` have no
-isolated 30 s run; see §7 open gap.
-
-#### 6.2.3 kinsn-class passes (RQ2b)
-
-| Run | Passes | App payloads | suite geomean | Retained | Verdict |
-| --- | --- | ---: | ---: | ---: | --- |
-| **Run 4** | 7-pass mix ¹ | 7 / 7 | 0.8953 | 148 | suite geomean is *worse* than Q1 (0.9019). The otel cell is 0.6258 (clear-low against the otel interval), but the pass list is mixed so attribution is ambiguous. |
-| **Q4** | `prefetch` | **1 / 7 ⚠** | 1.0651 | 20 | only `bcc/set` payload — **the prefetch-only 7-app dataset is missing.** |
-| **Q6** | `prefetch` | otel only | 1.0107 | 1 | inside otel interval [0.9887, 1.1023] |
-| **Q7** | `bulk_memory` | otel only | 0.9901 | 1 | inside otel interval |
-| **Q8** | `cond_select` | otel only | 1.0212 | 1 | inside otel interval |
-| **Q9** | `bulk_memory, prefetch` | otel only | 0.9895 | 1 | inside otel interval |
-
-¹ Run 4 pass list = `rotate, cond_select, extract, endian_fusion,
-bulk_memory, skb_load_bytes_spec, wide_mem` — by §2 taxonomy this is a
-*kinsn ∪ bytecode-rewriting* mix; attribution from Run 4 alone is not
-clean.
-
-#### 6.2.4 Pass × app applied-site counts (Run 3 + Run 4)
-
-| pass | bcc | bpftrace | cilium | katran | otel | tetragon | tracee |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `map_inline` (Run 3) | n/a | n/a | 1 454 | n/a | 1 192 | n/a | 5 |
-| `rotate` (Run 4) | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `cond_select` (Run 4) | 8 | 4 | 208 | 7 | 45 | 1 331 | 391 |
-| `extract` (Run 4) | 1 | 0 | 0 | 0 | 36 | 112 | 37 |
-| `endian_fusion` (Run 4) | 1 | 1 | 24 | 6 | 4 | 210 | 4 |
-| `bulk_memory` (Run 4) | 0 | 0 | 5 | 0 | 1 | 163 | 117 |
-| `skb_load_bytes_spec` (Run 4) | 0 | 0 | 4 | 0 | 0 | 0 | 0 |
-| `wide_mem` (Run 4) | 0 | 10 | 0 | 4 | 132 | 2 826 | 179 |
-
-Passes with no applied site in any 30 s 7-app run: `rotate`,
-`bounds_check_merge`, `branch_flip` (latter is out of scope).
-
-#### 6.2.5 Speedup verdict
-
-> **No optimization pass produces a paper-grade speedup that crosses its
-> per-app threshold in any completed dataset.**
-
-- Suite geomean for every pass-coverage run (Run 3 0.8258, Run 4
-  0.8953) is dragged below 1.0 by tracee's already-low noise interval
-  ([0.7888, 0.8218]); the suite-level number is therefore not
+- Suite geomean for every pass-coverage row (`map_inline` 0.8943,
+  7-pass mix 0.8953, prefetch 7-app 0.8880) is dragged below 1.0 by
+  tracee's noise band ([0.79, 0.84] across all conditions including
+  pure phase variance); the suite-level number is therefore not
   interpretable as ReJIT speedup.
-- Per-app: every cell in §6.2.2 / §6.2.3 lands *inside* the per-app
-  interval or only `near` it (within 0.0432 of the floor). The
-  strongest app-level low mark is otel 0.6258 in Run 4 (clear-low
-  against its interval), but the pass list is a 7-pass mix and
-  Q6 – Q9 single-pass otel runs all sit inside the otel interval, so
-  no individual pass is yet attributable.
-- The closest follow-up candidate is `map_inline` on otel: an earlier
-  non-paper-grade run (`x86_kvm_corpus_20260507_072543_601953`) reports
-  otel geomean 0.6567 with applied = 1 192, driven by
-  `tracepoint__sched_process_free` (ratio 0.4225, min_runs 163). Run 3
-  does not reproduce because the same program drops below the
-  `min_runs ≥ 100` retention threshold there.
-- The pass-signal audit (`docs/tmp/pass_signal_audit_20260508.md`)
-  enumerates every pass × app cell with the same threshold rule and
-  reaches the same conclusion.
+- **otel cells are noise-dominated**: the warm-up noise-floor row
+  alone shifts otel from 0.9887 to 0.7073 with no bytecode change.
+  Until a per-app statistical test (bootstrap CI on the `native_tracer_entry`
+  ratio) brackets out this swing, otel "clear-low" cells cannot be
+  reported as paper-grade speedup.
+- **otel single-pass runs disagree with the 7-app number**: `prefetch`
+  on otel alone returns 1.0107 (inside interval) while `prefetch`
+  isolated 7-app returns 0.7186 — same single retained program, opposite
+  signal. The reproducibility question is unresolved.
+- The 7-pass-mix otel cell at 0.6258 cannot be attributed to any one
+  pass since the list is mixed; isolated 7-app ablations for
+  `cond_select`, `bulk_memory`, `extract`, `endian_fusion`,
+  `skb_load_bytes_spec`, `wide_mem` are still missing.
 
 ### 6.3 Excluded from analysis
 
