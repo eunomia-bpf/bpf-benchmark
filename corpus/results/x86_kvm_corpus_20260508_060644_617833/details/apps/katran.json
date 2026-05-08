@@ -1,0 +1,255 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 5956480,
+        "run_time_ns_delta": 876089901,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.10167716000001,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   252.47us  165.67us   7.68ms   85.22%\n    Req/Sec     8.21k   412.19    10.16k    72.59%\n  Latency Distribution\n     50%  210.00us\n     75%  313.00us\n     90%  455.00us\n     99%  816.00us\n  984000 requests in 30.10s, 152.96MB read\nRequests/sec:  32691.63\nTransfer/sec:      5.08MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.103991297999983,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   248.19us  159.13us   4.99ms   82.02%\n    Req/Sec     8.36k   424.90    10.19k    70.76%\n  Latency Distribution\n     50%  205.00us\n     75%  309.00us\n     90%  449.00us\n     99%  810.00us\n  1000808 requests in 30.10s, 155.57MB read\nRequests/sec:  33249.55\nTransfer/sec:      5.17MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.104953062999982,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   249.74us  158.60us   5.18ms   81.02%\n    Req/Sec     8.29k   428.69    10.04k    70.60%\n  Latency Distribution\n     50%  208.00us\n     75%  311.00us\n     90%  452.00us\n     99%  810.00us\n  993365 requests in 30.10s, 154.42MB read\nRequests/sec:  33002.33\nTransfer/sec:      5.13MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13581,
+        "bytes_xlated": 23744,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 5971889,
+        "run_time_ns_delta": 900027622,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.102167906000034,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   248.01us  153.65us   4.77ms   79.32%\n    Req/Sec     8.33k   367.53     9.29k    68.60%\n  Latency Distribution\n     50%  207.00us\n     75%  307.00us\n     90%  444.00us\n     99%  788.00us\n  997798 requests in 30.10s, 155.11MB read\nRequests/sec:  33150.11\nTransfer/sec:      5.15MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.106512011000007,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   248.94us  155.34us   6.21ms   79.79%\n    Req/Sec     8.30k   380.27     9.38k    68.02%\n  Latency Distribution\n     50%  209.00us\n     75%  309.00us\n     90%  447.00us\n     99%  794.00us\n  994406 requests in 30.10s, 154.58MB read\nRequests/sec:  33037.06\nTransfer/sec:      5.14MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.103275268999994,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   249.32us  156.19us   6.91ms   80.03%\n    Req/Sec     8.30k   371.43     9.59k    67.52%\n  Latency Distribution\n     50%  209.00us\n     75%  309.00us\n     90%  448.00us\n     99%  798.00us\n  993674 requests in 30.10s, 154.47MB read\nRequests/sec:  33012.43\nTransfer/sec:      5.13MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2530,
+              "insn_count_before": 2542,
+              "insn_delta": -12,
+              "pass": "wide_mem",
+              "sites_applied": 4,
+              "sites_matched": 4,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "step 2 failed (exit 1): timeout 6000 bpfopt --pass const_prop --input /var/tmp/bpfrejit-runtime/ma6q4n/bpfrejit-daemon-plan-1847-0/output_step1.bin --output /var/tmp/bpfrejit-runtime/ma6q4n/bpfrejit-daemon-plan-1847-0/output_step2.bin --report /var/tmp/bpfrejit-runtime/ma6q4n/bpfrejit-daemon-plan-1847-0/report_step2.json --prog-type xdp --verifier-states /var/tmp/bpfrejit-runtime/ma6q4n/bpfrejit-daemon-plan-1847-0/verifier_log_step1.log -- \nsubprocess output:\nerror: verifier states /var/tmp/bpfrejit-runtime/ma6q4n/bpfrejit-daemon-plan-1847-0/verifier_log_step1.log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 2,
+              "name": "const_prop"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 2530,
+          "orig_insn_count": 2542,
+          "prog_id": 9,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}

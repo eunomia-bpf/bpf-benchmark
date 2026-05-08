@@ -335,7 +335,7 @@ pass coverage run produces.
 | `noop` SKIP_REJIT | 0.9836 | 1.0281 | 0.9783 | 0.9957 | 1.1023 | 0.9042 | 0.7888 | **0.8587** | 147 |
 | `noop` + `map_inline` | 1.0097 | 1.0118 | 0.9728 | 0.9915 | **0.6567** | 1.0256 | 0.8150 | 0.8943 | 148 |
 | `prefetch` | 1.0154 | 0.9895 | — (wrk timed out) | 0.9963 | **0.7186** | 1.0175 | 0.8112 | 0.8880 | 142 |
-| 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.9896 | 1.0117 | — (kernel panic) | 0.9639 | 0.9891 | 1.0783 | 0.8171 | 0.9038 | 141 (6 apps) |
+| 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.9896 | 1.0117 | 0.9951 | 0.9639 | 0.9891 | 1.0783 | 0.8171 | 0.9074 | 147 |
 | 6-pass kinsn + prefetch: above + `prefetch` | 1.0289 | 1.0165 | 1.0066 | 0.9423 | 1.0056 | 1.0468 | 0.8067 | 0.9009 | 147 |
 | All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | — |
 
@@ -375,7 +375,7 @@ pass coverage run produces.
   free` outlier; report tracee with an explicit phase-bias caveat or
   exclude it from suite-level claims.
 
-### 6.2.2 App-side workload throughput (independent sanity check)
+### 6.2.2 App-side workload throughput
 
 Per-app throughput recorded in `baseline.workloads[]` /
 `post_rejit.workloads[]`. Each cell is `post / baseline`, mean over 3
@@ -398,8 +398,8 @@ Per-app throughput metric:
 | `noop` ReJIT + warm-up=3 | 1.098 | 0.798 | 1.034 | 1.014 | 0.999 | 0.903 | 0.806 |
 | `noop` + `map_inline` | 0.809 | 0.913 | 1.040 | 1.004 | 0.997 | 1.279 | 1.144 |
 | `prefetch` | 1.191 | 0.913 | — | 1.006 | 0.989 | 0.766 | 0.818 |
-| 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.925 | 1.093 | — (kernel panic) | 0.995 | 1.001 | 1.242 | 1.051 |
-| 6-pass kinsn + prefetch: above + `prefetch` | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* |
+| 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.925 | 1.093 | 0.940 | 0.995 | 1.001 | 1.242 | 1.051 |
+| 6-pass kinsn + prefetch: above + `prefetch` | 1.126 | 1.058 | 0.969 | 1.013 | 1.001 | 0.977 | 1.139 |
 | All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* |
 
 How to read this:
