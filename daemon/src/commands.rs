@@ -12,6 +12,7 @@ use std::os::fd::{AsFd, AsRawFd, OwnedFd};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
+use std::time::Instant;
 
 use anyhow::{anyhow, bail, Context, Result};
 use rayon::prelude::*;
@@ -186,6 +187,15 @@ pub(crate) struct PassDetail {
     pub status: PassStatus,
     pub error: Option<String>,
     pub bpfopt_summary: Value,
+    /// Wall-clock duration of the bpfopt CLI invocation (Command::output).
+    /// None on early-exit paths that never spawned the subprocess.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bpfopt_ms: Option<u64>,
+    /// Wall-clock duration of the BPF_PROG_REJIT syscall (kernel verify+JIT+
+    /// install). None for steps that did not reach the kernel call (bpfopt
+    /// failure / no produced bytecode / `bpfprof`-style steps).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rejit_syscall_ms: Option<u64>,
 }
 
 fn rejit_program(
@@ -521,6 +531,8 @@ fn run_program_steps(
                     PassStatus::FailedBpfopt,
                     Some(format!("substitute vars in step {idx}: {err}")),
                     None,
+                    None,
+                    None,
                 ));
                 break;
             }
@@ -529,6 +541,7 @@ fn run_program_steps(
         // Capture stdout+stderr so we can attribute bpfopt failures per-step
         // instead of cross-referencing a global daemon stderr log when many
         // progs run concurrently.
+        let bpfopt_t0 = Instant::now();
         let cmd_output = match Command::new("sh").arg("-c").arg(&cmd).output() {
             Ok(out) => out,
             Err(err) => {
@@ -537,10 +550,13 @@ fn run_program_steps(
                     PassStatus::FailedBpfopt,
                     Some(format!("spawn sh for step {idx}: {err}")),
                     None,
+                    None,
+                    None,
                 ));
                 break;
             }
         };
+        let bpfopt_ms = Some(bpfopt_t0.elapsed().as_millis() as u64);
         let exit_status = cmd_output.status;
 
         // Surface a corrupt or unreadable step report as a step failure
@@ -558,6 +574,8 @@ fn run_program_steps(
                             "read step report at {}: {err:#}",
                             report_path.display()
                         )),
+                        None,
+                        bpfopt_ms,
                         None,
                     ));
                     break;
@@ -594,6 +612,8 @@ fn run_program_steps(
                     "step {idx} failed (exit {code}): {cmd}\nsubprocess output:\n{captured}"
                 )),
                 Some(bpfopt_summary),
+                bpfopt_ms,
+                None,
             ));
             break;
         }
@@ -610,6 +630,8 @@ fn run_program_steps(
                     PassStatus::FailedBpfopt,
                     Some(format!("stat {}: {err}", output_path.display())),
                     Some(bpfopt_summary),
+                    bpfopt_ms,
+                    None,
                 ));
                 break;
             }
@@ -621,6 +643,8 @@ fn run_program_steps(
                 PassStatus::Ok,
                 None,
                 Some(bpfopt_summary),
+                bpfopt_ms,
+                None,
             ));
             continue;
         }
@@ -633,6 +657,8 @@ fn run_program_steps(
                     PassStatus::FailedBpfopt,
                     Some(format!("read {}: {err}", output_path.display())),
                     Some(bpfopt_summary),
+                    bpfopt_ms,
+                    None,
                 ));
                 break;
             }
@@ -646,6 +672,8 @@ fn run_program_steps(
                     PassStatus::FailedBpfopt,
                     Some(format!("{err:#}")),
                     Some(bpfopt_summary),
+                    bpfopt_ms,
+                    None,
                 ));
                 break;
             }
@@ -660,14 +688,17 @@ fn run_program_steps(
         } else {
             REJIT_BASIC_LOG_BUF_SIZE
         };
-        match rejit_program(
+        let rejit_t0 = Instant::now();
+        let rejit_outcome = rejit_program(
             prog_id,
             &pass_insns,
             &fd_array,
             &verifier_log_path,
             step.log_level,
             log_buf_size,
-        ) {
+        );
+        let rejit_syscall_ms = Some(rejit_t0.elapsed().as_millis() as u64);
+        match rejit_outcome {
             Ok(()) => {}
             Err(err) => {
                 step_details.push(pass_detail(
@@ -675,6 +706,8 @@ fn run_program_steps(
                     PassStatus::FailedRejit,
                     Some(truncate_response_log(format!("{err:#}"))),
                     Some(bpfopt_summary),
+                    bpfopt_ms,
+                    rejit_syscall_ms,
                 ));
                 break;
             }
@@ -689,6 +722,8 @@ fn run_program_steps(
             PassStatus::Ok,
             None,
             Some(bpfopt_summary),
+            bpfopt_ms,
+            rejit_syscall_ms,
         ));
     }
 
@@ -813,12 +848,16 @@ fn pass_detail(
     status: PassStatus,
     error: Option<String>,
     bpfopt_summary: Option<Value>,
+    bpfopt_ms: Option<u64>,
+    rejit_syscall_ms: Option<u64>,
 ) -> PassDetail {
     PassDetail {
         step: step.clone(),
         status,
         error,
         bpfopt_summary: bpfopt_summary.unwrap_or(Value::Null),
+        bpfopt_ms,
+        rejit_syscall_ms,
     }
 }
 
