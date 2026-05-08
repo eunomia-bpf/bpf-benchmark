@@ -222,8 +222,27 @@ def print_per_app(payload: dict, progs: list[dict], per_pass: bool) -> None:
         print("  ".join(render_cell(v, c) for v, c in zip(cells, cols)))
 
 
+def _hydrate_results_from_apps_dir(payload: dict, result_json_path: Path) -> dict:
+    """Newer corpus driver writes per-app payloads to details/apps/*.json and
+    leaves result.json without the legacy 'results' array. Reconstruct it."""
+    if payload.get("results"):
+        return payload
+    apps_dir = result_json_path.parent / "apps"
+    if not apps_dir.is_dir():
+        return payload
+    results = []
+    for f in sorted(apps_dir.glob("*.json")):
+        try:
+            results.append(json.loads(f.read_text()))
+        except json.JSONDecodeError:
+            continue
+    payload["results"] = results
+    return payload
+
+
 def report(path: Path, threshold: int, per_app: bool, verbose: bool, per_pass: bool = False, applied_only: bool = False) -> int:
     payload = json.loads(Path(path).read_text())
+    payload = _hydrate_results_from_apps_dir(payload, Path(path))
     suite_status = payload.get("status", "?")
     samples = payload.get("samples", "?")
     duration = payload.get("workload_seconds", "?")

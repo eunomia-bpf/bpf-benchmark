@@ -1,5 +1,10 @@
 # BpfReJIT Evaluation — Methodology and Infrastructure (2026-05-07)
 
+TL'DR:
+
+- Do observe improves, but not sure whether it's noise or benchmark issues.
+- Not significant imrpovements if we exclude noise.
+
 ## 1. System Under Test
 
 - **What it does**: re-JIT already-loaded eBPF programs in place: re-generate the BPF bytecode and replace in place transparently and keep all safety model.
@@ -334,61 +339,44 @@ pass coverage run produces.
 | 6-pass kinsn + prefetch: above + `prefetch` | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | — |
 | All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | — |
 
-Reading the table:
+### Findings
 
-- **Noise interval per app** = the range bracketed by the three
-  noise-floor rows (`noop` ReJIT, `noop` SKIP_REJIT, `noop` ReJIT +
-  warm-up). Anything inside the bracket is indistinguishable from
-  noise.
-- **otel is high-variance**: its noise rows span [0.7073, 1.1023] —
-  almost 40 % wide — because only 1 program is retained. **The
-  apparent "clear-low" otel cells (`map_inline` 0.6567, 7-pass mix
-  0.6258, `prefetch` 7-app 0.7186, `wide_mem` 7-app 0.7848) all sit
-  inside or barely below this noise envelope.** None of them is yet
-  distinguishable from a single warm-up swing.
-- **tracee is also low-noise-baseline**: ratios 0.79 – 0.84 across all
-  conditions, including pure phase-variance, so the suite-level
-  geomean of every pass-coverage row is dragged below 1.0 by tracee's
-  81 retained programs regardless of pass effect.
-- The remaining 5 apps (bcc, bpftrace, cilium, katran, tetragon) sit
-  near 1.0 in every condition; the per-app coverage rows do not differ
-  from the noise rows by more than 1 – 3 %.
+- **bcc, bpftrace, cilium, katran, tetragon** — every condition lands
+  within ±1–3 % of the per-app noise bracket. No condition exceeds the
+  per-app noise floor on these 5 apps.
+- **otel — retained set is split between one stable program and one
+  unstable tracepoint.** `native_tracer_entry` (perf_event, ~140 M
+  runs) is high-frequency and balanced across phases. The remaining slot is
+  filled — only when it clears `min_runs ≥ 100` — by a low-frequency
+  tracepoint, `sched_process_free`, whose own per-phase trigger count
+  is workload-driven and not stable: in the `map_inline` 0.6567 cell
+  it fired 163 vs 1 422 times across baseline / post (8.7× asymmetry).
+  6 `map_inline` sites on it actually fired. Whether its 0.42 per-
+  program ratio reflects the optimization, the trigger asymmetry, or
+  some mix is unknown and not resolvable from this run. The "clear-
+  low" otel cells (0.6258 – 0.7186) ride on this single low-runs
+  outlier; they are not interpretable at the current threshold.
+- **tracee — phase bias dominates the geomean.** Every condition,
+  including the pure-phase-variance controls, lands in 0.79 – 0.84.
+  A systematic drift below 1.0 under no bytecode change implies a
+  baseline-vs-post phase bias on tracee's 81 retained programs that
+  is independent of any pass; per-pass speedup on tracee cannot be
+  separated from this drift.
 
-`const_prop`, `dce`, `bounds_check_merge`, `skb_load_bytes_spec` have
-no isolated 30 s run; see §7 open gap. `ccmp` is arm64-only and not
-exercised in this corpus.
+### What we cannot conclude
 
-#### 6.2.2 Speedup verdict
+- No condition produces an app-level row that clears its own noise
+  bracket by more than 1–3 %.
+- The suite geomean below 1.0 in every condition is consistent with
+  tracee's phase bias and otel's structural fragility, not with a
+  demonstrable per-pass speedup.
+- For paper-grade quotes: report otel on `native_tracer_entry` only,
+  or raise the retention threshold to ≥10 K to drop the `sched_process_
+  free` outlier; report tracee with an explicit phase-bias caveat or
+  exclude it from suite-level claims.
 
-> **No condition produces a per-app geomean that is robustly outside
-> the noise envelope on any app. The lowest cells (otel 0.62 – 0.79
-> across `map_inline`, 7-pass mix, `prefetch`, `wide_mem`) are
-> *inside* the otel noise envelope established by the warm-up
-> noise-floor row (otel 0.7073) and are therefore not yet
-> distinguishable from phase variance.**
+### TODO
 
-- Suite geomean for every pass-coverage row (`map_inline` 0.8943,
-  7-pass mix 0.8953, prefetch 7-app 0.8880) is dragged below 1.0 by
-  tracee's noise band ([0.79, 0.84] across all conditions including
-  pure phase variance); the suite-level number is therefore not
-  interpretable as ReJIT speedup.
-- **otel cells are noise-dominated**: the warm-up noise-floor row
-  alone shifts otel from 0.9887 to 0.7073 with no bytecode change.
-  Until a per-app statistical test (bootstrap CI on the `native_tracer_entry`
-  ratio) brackets out this swing, otel "clear-low" cells cannot be
-  reported as paper-grade speedup.
-- **otel single-pass runs disagree with the 7-app number**: `prefetch`
-  on otel alone returns 1.0107 (inside interval) while `prefetch`
-  isolated 7-app returns 0.7186 — same single retained program, opposite
-  signal. The reproducibility question is unresolved.
-- The 7-pass-mix otel cell at 0.6258 cannot be attributed to any one
-  pass since the list is mixed; isolated 7-app ablations for
-  `cond_select`, `bulk_memory`, `extract`, `endian_fusion`,
-  `skb_load_bytes_spec`, `wide_mem` are still missing.
-
-### 6.3 Excluded from analysis
-
-- Pre-19:00 runs on 2026-05-07: exploratory dev runs with
-  `WORKLOAD_DURATION=3 s`, superseded by 30 s reruns.
-- 22:00 – 22:39 noop SAMPLES=1 smokes: post-refactor sanity checks.
-- 22:44 prefetch run with `status=error`: aborted Q4 attempt.
+- improve map inline to make it actaully inline more; fix the 0 % apply rate in 5 of 7 apps (e.g. katran)
+- check more details about otel and tracee's improvement. Is it benchmark framework issue or actual improvement?
+- Why kinsn does not work well?
