@@ -134,7 +134,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         duration_s=_env_float("WORKLOAD_DURATION", 0.0),
         warmups=_env_int("WARMUPS", 1),
         skip_rejit=_env_bool("SKIP_REJIT"),
-        keep_failure_artifacts=_env_str("KEEP_WORKDIRS").lower() in ("1", "all"),
+        keep_failure_artifacts=_env_str("KEEP_WORKDIRS").strip() == "1",
     )
     if ns.samples < 0:
         raise SystemExit("SAMPLES must be >= 0")

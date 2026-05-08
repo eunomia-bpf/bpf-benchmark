@@ -1,0 +1,49 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 676450,
+        "run_time_ns_delta": 99563041,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d10s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 10.101783783999991,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 10s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   246.48us  164.33us   7.03ms   85.55%\n    Req/Sec     8.41k   391.41     9.61k    71.04%\n  Latency Distribution\n     50%  207.00us\n     75%  306.00us\n     90%  442.00us\n     99%  792.00us\n  338203 requests in 10.10s, 52.57MB read\nRequests/sec:  33487.35\nTransfer/sec:      5.21MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "[Errno 2] No such file or directory: '/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/noop/default.yaml'",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "error"
+}

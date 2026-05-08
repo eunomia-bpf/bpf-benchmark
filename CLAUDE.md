@@ -142,7 +142,7 @@ Override knobs (env vars passed to `make`):
 | `TIMEOUT` | all VM | suite timeout in seconds (default 7200) | `TIMEOUT=3600 make test` |
 | `BPFREJIT_CORPUS_APPS` | corpus | comma-separated subset of the 7 supported apps. Names match `corpus/config/macro_apps.yaml` (e.g. `bcc/set`, `tetragon/observer`, `katran`) | `BPFREJIT_CORPUS_APPS="cilium/agent,tracee/monitor" make vm-corpus` |
 | `BPFREJIT_BENCH_PASSES` | corpus / micro | comma-separated bpfopt pass list overriding `corpus/config/benchmark_config.yaml`. Set to `default` to use yaml policy explicitly | `BPFREJIT_BENCH_PASSES="noop,map_inline" make vm-corpus` |
-| `KEEP_WORKDIRS` | corpus | `1` = retain failure workdir tarballs at `details/failure-artifacts/<prog_id>.tar.gz`; `all` = also force-capture successful prog workdirs (sets `BPFREJIT_KEEP_ALL_WORKDIRS=1` for daemon) | `KEEP_WORKDIRS=1 make vm-corpus` |
+| `KEEP_WORKDIRS` | corpus | `1` = retain failure workdir tarballs at `details/failure-artifacts/<prog_id>.tar.gz`. To capture artifacts from a successful pass, edit the relevant `runner/config/passes/<pass>/<app>.yaml` and append `&& false` to that step's `command:` — that converts it into a controlled failure and the failure-tar pipeline writes the workdir | `KEEP_WORKDIRS=1 make vm-corpus` |
 | `BENCH` | micro | subset of micro benchmarks | `make vm-micro BENCH="simple bitcount"` |
 | `WARMUPS` / `INNER_REPEAT` | micro | micro-only knobs (same name on VM and AWS) | `make vm-micro SAMPLES=1 WARMUPS=0 INNER_REPEAT=10` |
 | `FUZZ_ROUNDS` | test | fuzz iteration count | `FUZZ_ROUNDS=5000 make vm-test` |

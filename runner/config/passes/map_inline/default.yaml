@@ -2,6 +2,5 @@
 # Read by runner/libs/pass_config.py at execute_plan build time.
 # Daemon substitutes ${...} vars; runner sends this command verbatim.
 log_level: 2
-capture_workdir: on_failure
 command: |
-  timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- ${PASS_LOCAL_ARGS} --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}
+  timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}

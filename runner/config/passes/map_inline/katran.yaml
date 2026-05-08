@@ -1,24 +1,25 @@
-# map_inline overrides for katran. balancer_ingres has 4 const-key map-lookup
+# map_inline overrides for katran. balancer_ingress has 4 const-key map-lookup
 # sites whose verifier-guided keys cannot be reconstructed; operator supplies
 # them via --inline-hint flags (Route A, see docs/tmp/katran_force_inline_recipe_20260506.md).
 # Other katran progs (e.g. xdp_root) get the plain default command.
+#
+# `--inline-hint=<call_pc>:<hex_key_bytes>` is map_inline pass-local — placed
+# AFTER `--` so MapInlineCliArgs parses it. It is intentionally NOT a global
+# bpfopt flag because only map_inline consumes it.
 log_level: 2
-capture_workdir: on_failure
 programs:
-  balancer_ingres:
+  balancer_ingress:
     command: |
       timeout 6000 bpfopt --pass map_inline
         --input ${INPUT} --output ${OUTPUT} --report ${REPORT}
         --prog-type ${PROG_TYPE}
         --verifier-states ${VERIFIER_STATES}
-        --prog-id ${PROG_ID}
         --
-        ${PASS_LOCAL_ARGS}
         --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}
-        --inline-hint=${PROG_ID}:1105:00000000
-        --inline-hint=${PROG_ID}:1807:00000000
-        --inline-hint=${PROG_ID}:863:00000000
-        --inline-hint=${PROG_ID}:895:00000000
+        --inline-hint=1105:00000000
+        --inline-hint=1807:00000000
+        --inline-hint=863:00000000
+        --inline-hint=895:00000000
   default:
     command: |
       timeout 6000 bpfopt --pass map_inline
@@ -26,5 +27,4 @@ programs:
         --prog-type ${PROG_TYPE}
         --verifier-states ${VERIFIER_STATES}
         --
-        ${PASS_LOCAL_ARGS}
         --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}

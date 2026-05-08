@@ -255,7 +255,11 @@ def run_lifecycle_sessions(
         if active_pairs:
             apply_enabled_passes = _effective_enabled_passes(enabled_passes)
             for sess, result in active_pairs:
-                yaml_app_name = str(sess.app.name).split("/")[0] if sess and sess.app else None
+                # `sess` is opaque (Sequence[object]); only corpus sessions
+                # carry an `app` attribute. Use getattr so test/micro callers
+                # pass `app_name=None` and fall back to per-pass default yaml.
+                sess_app = getattr(sess, "app", None)
+                yaml_app_name = str(sess_app.name).split("/")[0] if sess_app else None
                 prog_names_by_id: dict[int, str] = {}
                 for prog in (result.state.artifacts.get("programs") or []):
                     pid = int(prog.get("id", 0) or 0)

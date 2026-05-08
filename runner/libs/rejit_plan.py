@@ -30,7 +30,8 @@ CONFIG_ROOT = Path(__file__).resolve().parents[1] / "config" / "passes"
 class StepConfig:
     command: str        # multi-line yaml block collapsed to single shell line
     log_level: int      # 1 or 2 — predecessor must rejit at this level
-    kinsns: tuple[tuple[str, tuple[str, ...]], ...]  # ((json_name, (alias,...)),)
+    kinsns: tuple[tuple[str, tuple[str, ...]], ...]
+    """((json_name, (alias,...)),) — daemon target.json kinsn probes."""
 
 
 def _load(path: Path) -> Mapping[str, Any]:
@@ -63,6 +64,13 @@ def find_step_config(
             programs = override["programs"]
             entry = programs.get(prog_name) if prog_name else None
             if entry is None:
+                if "default" not in programs:
+                    raise RuntimeError(
+                        f"{app_path}: programs.{prog_name!r} not found and "
+                        f"programs.default fallback is missing — every app "
+                        f"override yaml must list every prog explicitly or "
+                        f"provide a default"
+                    )
                 entry = programs["default"]
             return StepConfig(
                 command=_collapse(entry["command"]),

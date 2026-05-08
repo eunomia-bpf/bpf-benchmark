@@ -65,12 +65,12 @@ VENV ?= $(_VENV_FOUND)
 PYTHON := $(if $(VENV),$(VENV)/bin/python3,python3)
 export BZIMAGE PYTHON LLVM_DIR RUN_LLVM_DIR TIMEOUT FUZZ_ROUNDS WORKLOAD_DURATION
 
-# KEEP_WORKDIRS: empty/0 = no tars (default), 1 = tar on real failures only,
-# all = tar every prog (forces success-side tar via daemon-side capture).
+# KEEP_WORKDIRS: empty/0 = no tars (default), 1 = tar on real failures only.
+# To capture an artifact from a successful pass, edit the relevant
+# runner/config/passes/<pass>/<app>.yaml `command:` to append `&& false` —
+# that turns the step into a controlled failure and the existing
+# failure-tar pipeline writes the workdir to details/failure-artifacts/.
 KEEP_WORKDIRS ?=
-ifeq ($(KEEP_WORKDIRS),all)
-export BPFREJIT_KEEP_ALL_WORKDIRS := 1
-endif
 
 # All user knobs flow through to the in-container driver via the all-env
 # passthrough in suite_commands.build_runtime_container_command — no enumeration here.

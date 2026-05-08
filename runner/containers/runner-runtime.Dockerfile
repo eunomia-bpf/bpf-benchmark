@@ -453,6 +453,7 @@ RUN set -eux; \
 COPY --link corpus/bcf ./corpus/bcf
 COPY --link runner/assets ./runner/assets
 COPY runner/__init__.py runner/repos.yaml ./runner/
+COPY runner/config ./runner/config
 COPY runner/libs ./runner/libs
 COPY runner/suites ./runner/suites
 COPY runner/targets ./runner/targets

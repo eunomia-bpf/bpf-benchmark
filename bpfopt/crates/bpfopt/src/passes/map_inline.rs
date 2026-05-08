@@ -37,6 +37,7 @@ pub struct MapInlinePass;
 struct MapInlineCliPass {
     map_ids: Vec<u32>,
     snapshot: MapSnapshot,
+    inline_hints: HashMap<usize, Vec<u8>>,
 }
 
 impl MapInlinePass {
@@ -44,7 +45,11 @@ impl MapInlinePass {
         let cli = MapInlineCliArgs::parse(args)?;
         let map_ids = parse_map_ids_arg(&cli.map_ids)?;
         let snapshot = read_map_values(&cli.map_values, &map_ids)?;
-        Ok(Box::new(MapInlineCliPass { map_ids, snapshot }))
+        Ok(Box::new(MapInlineCliPass {
+            map_ids,
+            snapshot,
+            inline_hints: cli.inline_hints,
+        }))
     }
 }
 
@@ -69,6 +74,7 @@ impl BpfPass for MapInlineCliPass {
         program.map_inner_map_ids = self.snapshot.inner_map_ids.clone();
         program.map_bpf_writable = self.snapshot.bpf_writable.clone();
         program.map_snapshots_skipped_by_size = self.snapshot.maps_skipped_by_size.clone();
+        program.map_inline_hints = self.inline_hints.clone();
         MapInlinePass.run(program, analyses, ctx)
     }
 }
@@ -76,14 +82,30 @@ impl BpfPass for MapInlineCliPass {
 struct MapInlineCliArgs {
     map_values: PathBuf,
     map_ids: String,
+    /// Operator-supplied per-call-site key hints. Each entry pre-fills
+    /// `BpfProgram.map_inline_hints` so the verifier-guided key extraction
+    /// can be bypassed for sites where the verifier never observed the key
+    /// (e.g. katran's `ctl_array[0]` lookups). Pass-local on purpose:
+    /// `--inline-hint` is a map_inline tuning knob, NOT framework-global —
+    /// adding it to `bpfopt::main::CommonArgs` would pollute every other
+    /// pass's CLI surface.
+    inline_hints: HashMap<usize, Vec<u8>>,
 }
 
 impl MapInlineCliArgs {
     fn parse(args: &[String]) -> Result<Self> {
         let mut map_values = None;
         let mut map_ids = None;
+        let mut inline_hints: HashMap<usize, Vec<u8>> = HashMap::new();
         let mut iter = args.iter();
         while let Some(arg) = iter.next() {
+            if let Some(value) = arg.strip_prefix("--inline-hint=") {
+                let (call_pc, key_bytes) = parse_inline_hint(value)?;
+                if inline_hints.insert(call_pc, key_bytes).is_some() {
+                    bail!("duplicate --inline-hint for call pc {call_pc}");
+                }
+                continue;
+            }
             match arg.as_str() {
                 "--map-values" => {
                     let value = iter
@@ -97,6 +119,15 @@ impl MapInlineCliArgs {
                         .ok_or_else(|| anyhow::anyhow!("--map-ids requires LIST"))?;
                     map_ids = Some(value.clone());
                 }
+                "--inline-hint" => {
+                    let value = iter
+                        .next()
+                        .ok_or_else(|| anyhow::anyhow!("--inline-hint requires <call_pc>:<hex>"))?;
+                    let (call_pc, key_bytes) = parse_inline_hint(value)?;
+                    if inline_hints.insert(call_pc, key_bytes).is_some() {
+                        bail!("duplicate --inline-hint for call pc {call_pc}");
+                    }
+                }
                 other => bail!("map_inline unknown pass-local arg: {other}"),
             }
         }
@@ -104,7 +135,48 @@ impl MapInlineCliArgs {
             map_values: map_values
                 .ok_or_else(|| anyhow::anyhow!("map_inline requires --map-values"))?,
             map_ids: map_ids.ok_or_else(|| anyhow::anyhow!("map_inline requires --map-ids"))?,
+            inline_hints,
         })
+    }
+}
+
+/// Parse one `--inline-hint <call_pc>:<hex_key_bytes>` value (pass-local form).
+/// `call_pc` is decimal; `hex_key_bytes` is even-length hex with no leading 0x.
+fn parse_inline_hint(input: &str) -> Result<(usize, Vec<u8>)> {
+    let (pc_str, hex_str) = input
+        .split_once(':')
+        .ok_or_else(|| anyhow::anyhow!("invalid --inline-hint '{input}': expected <call_pc>:<hex_key_bytes>"))?;
+    let call_pc = pc_str
+        .parse::<usize>()
+        .with_context(|| format!("invalid --inline-hint call_pc in '{input}'"))?;
+    let key_bytes = parse_inline_hint_hex(hex_str)
+        .with_context(|| format!("invalid --inline-hint key bytes in '{input}'"))?;
+    Ok((call_pc, key_bytes))
+}
+
+fn parse_inline_hint_hex(input: &str) -> Result<Vec<u8>> {
+    if !input.len().is_multiple_of(2) {
+        bail!("hex string must have an even number of digits");
+    }
+    input
+        .as_bytes()
+        .chunks_exact(2)
+        .map(|pair| {
+            let hi = hex_nibble(pair[0])
+                .ok_or_else(|| anyhow::anyhow!("invalid hex digit '{}'", char::from(pair[0])))?;
+            let lo = hex_nibble(pair[1])
+                .ok_or_else(|| anyhow::anyhow!("invalid hex digit '{}'", char::from(pair[1])))?;
+            Ok((hi << 4) | lo)
+        })
+        .collect()
+}
+
+fn hex_nibble(byte: u8) -> Option<u8> {
+    match byte {
+        b'0'..=b'9' => Some(byte - b'0'),
+        b'a'..=b'f' => Some(byte - b'a' + 10),
+        b'A'..=b'F' => Some(byte - b'A' + 10),
+        _ => None,
     }
 }
 

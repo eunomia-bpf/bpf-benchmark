@@ -94,6 +94,17 @@ struct Cli {
     pass_args: Vec<String>,
 }
 
+/// Framework-global CLI args shared by every pass invocation.
+///
+/// IMPORTANT: only put a flag here when *every* bpfopt run conceivably
+/// needs it (input/output/report paths, target arch, prog type, BTF
+/// remapping inputs, kinsn target metadata, verifier-states log).
+/// Per-pass tuning (e.g. map_inline's `--inline-hint`, branch_flip's
+/// `--profile`, prefetch's `--profile`) goes in the pass's own
+/// `<Pass>CliArgs` struct and is parsed AFTER `--`. Adding a pass-specific
+/// flag here pollutes the global namespace and breaks the pass-local
+/// args trait — see `runner/229 [completed] [Refactor] bpfopt CLI Pass-local
+/// args trait + --- passthrough`.
 #[derive(Args, Clone, Debug, Default)]
 struct CommonArgs {
     /// Input bytecode file. Defaults to stdin.
@@ -111,16 +122,6 @@ struct CommonArgs {
     /// BPF program type, such as xdp, sched_cls, tracing, or a numeric type.
     #[arg(long, global = true, value_name = "TYPE")]
     prog_type: Option<String>,
-    /// Live program id, used to validate --inline-hint records.
-    #[arg(long, global = true, value_name = "ID")]
-    prog_id: Option<u32>,
-    /// Force map_inline to use an explicit key: <prog_id>:<call_pc>:<hex_key_bytes>.
-    #[arg(
-        long = "inline-hint",
-        global = true,
-        value_name = "PROG_ID:CALL_PC:HEX"
-    )]
-    inline_hints: Vec<String>,
     /// Available kinsns, comma-separated. Entries may be name or name:btf_id.
     #[arg(long, global = true, value_name = "LIST", value_delimiter = ',')]
     kinsns: Vec<String>,
@@ -205,13 +206,6 @@ struct TargetJson {
 struct KinsnJson {
     btf_func_id: i32,
     call_offset: i16,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-struct InlineHint {
-    prog_id: u32,
-    call_pc: usize,
-    key_bytes: Vec<u8>,
 }
 
 fn main() -> ExitCode {
@@ -514,8 +508,6 @@ fn attach_program_inputs(program: &mut BpfProgram, common: &CommonArgs) -> Resul
     if let Some(path) = common.verifier_states.as_deref() {
         program.set_verifier_states(read_verifier_states(path)?);
     }
-    let inline_hints = parse_inline_hint_list(common.prog_id, &common.inline_hints)?;
-    program.map_inline_hints = inline_hint_map(inline_hints)?;
     program.func_info = read_btf_info_records(
         common.func_info.as_deref(),
         common.func_info_rec_size,
@@ -527,90 +519,6 @@ fn attach_program_inputs(program: &mut BpfProgram, common: &CommonArgs) -> Resul
         "line-info",
     )?;
     Ok(())
-}
-
-fn parse_inline_hint_list(
-    expected_prog_id: Option<u32>,
-    raw_hints: &[String],
-) -> Result<Vec<InlineHint>> {
-    if raw_hints.is_empty() {
-        return Ok(Vec::new());
-    }
-    let expected_prog_id =
-        expected_prog_id.ok_or_else(|| anyhow!("--inline-hint requires --prog-id"))?;
-
-    let mut hints = Vec::with_capacity(raw_hints.len());
-    for raw_hint in raw_hints {
-        let hint = parse_inline_hint(raw_hint)?;
-        if hint.prog_id != expected_prog_id {
-            bail!(
-                "--inline-hint prog_id {} does not match --prog-id {}",
-                hint.prog_id,
-                expected_prog_id
-            );
-        }
-        hints.push(hint);
-    }
-
-    Ok(hints)
-}
-
-fn inline_hint_map(inline_hints: Vec<InlineHint>) -> Result<HashMap<usize, Vec<u8>>> {
-    let mut hints = HashMap::new();
-    for hint in inline_hints {
-        let call_pc = hint.call_pc;
-        if hints.insert(call_pc, hint.key_bytes).is_some() {
-            bail!("duplicate --inline-hint for call pc {call_pc}");
-        }
-    }
-    Ok(hints)
-}
-
-fn parse_inline_hint(input: &str) -> Result<InlineHint> {
-    let parts = input.split(':').collect::<Vec<_>>();
-    if parts.len() != 3 {
-        bail!("invalid --inline-hint '{input}': expected <prog_id>:<call_pc>:<hex_key_bytes>");
-    }
-    let prog_id = parts[0]
-        .parse::<u32>()
-        .with_context(|| format!("invalid --inline-hint prog_id in '{input}'"))?;
-    let call_pc = parts[1]
-        .parse::<usize>()
-        .with_context(|| format!("invalid --inline-hint call_pc in '{input}'"))?;
-    let key_bytes = parse_inline_hint_hex(parts[2])
-        .with_context(|| format!("invalid --inline-hint key bytes in '{input}'"))?;
-    Ok(InlineHint {
-        prog_id,
-        call_pc,
-        key_bytes,
-    })
-}
-
-fn parse_inline_hint_hex(input: &str) -> Result<Vec<u8>> {
-    if !input.len().is_multiple_of(2) {
-        bail!("hex string must have an even number of digits");
-    }
-
-    input
-        .as_bytes()
-        .chunks_exact(2)
-        .map(|pair| {
-            let hi = hex_nibble(pair[0])
-                .ok_or_else(|| anyhow!("invalid hex digit '{}'", char::from(pair[0])))?;
-            let lo = hex_nibble(pair[1])
-                .ok_or_else(|| anyhow!("invalid hex digit '{}'", char::from(pair[1])))?;
-            Ok((hi << 4) | lo)
-        })
-        .collect()
-}
-
-fn hex_nibble(byte: u8) -> Option<u8> {
-    match byte {
-        b'0'..=b'9' => Some(byte - b'0'),
-        b'a'..=b'f' => Some(byte - b'a' + 10),
-        b'A'..=b'F' => Some(byte - b'A' + 10),
-        _ => None,
-    }
 }
 
 fn read_btf_info_records(
