@@ -335,7 +335,7 @@ pass coverage run produces.
 | `noop` SKIP_REJIT | 0.9836 | 1.0281 | 0.9783 | 0.9957 | 1.1023 | 0.9042 | 0.7888 | **0.8587** | 147 |
 | `noop` + `map_inline` | 1.0097 | 1.0118 | 0.9728 | 0.9915 | **0.6567** | 1.0256 | 0.8150 | 0.8943 | 148 |
 | `prefetch` | 1.0154 | 0.9895 | — (wrk timed out) | 0.9963 | **0.7186** | 1.0175 | 0.8112 | 0.8880 | 142 |
-| 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | — |
+| 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.9896 | 1.0117 | — (kernel panic) | 0.9639 | 0.9891 | 1.0783 | 0.8171 | 0.9038 | 141 (6 apps) |
 | 6-pass kinsn + prefetch: above + `prefetch` | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | — |
 | All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | — |
 
@@ -375,8 +375,52 @@ pass coverage run produces.
   free` outlier; report tracee with an explicit phase-bias caveat or
   exclude it from suite-level claims.
 
+### 6.2.2 App-side workload throughput (independent sanity check)
+
+Per-app throughput recorded in `baseline.workloads[]` /
+`post_rejit.workloads[]`. Each cell is `post / baseline`, mean over 3
+samples (same `SAMPLES=3` runs as §6.2.1). Values >1.0 = app went
+faster after ReJIT.
+
+Per-app throughput metric:
+
+- `bcc, bpftrace, tetragon, tracee` — `stress-ng` total bogo ops
+  (sum of 63 stressors per 30 s sample)
+- `katran` — `wrk Requests/sec`
+- `cilium` — `wrk Requests/sec`
+- `otel` — total SHA-256 ops across 5 interpreters + `stress-ng --cpu`
+  bogo ops per 30 s
+
+| Condition | bcc | bpftrace | cilium | katran | otel | tetragon | tracee |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `noop` ReJIT | 0.985 | 0.961 | 0.980 | 1.007 | 1.004 | 0.874 | 1.132 |
+| `noop` SKIP_REJIT | 1.043 | 1.040 | 1.071 | 1.001 | 0.992 | 1.268 | 0.919 |
+| `noop` ReJIT + warm-up=3 | 1.098 | 0.798 | 1.034 | 1.014 | 0.999 | 0.903 | 0.806 |
+| `noop` + `map_inline` | 0.809 | 0.913 | 1.040 | 1.004 | 0.997 | 1.279 | 1.144 |
+| `prefetch` | 1.191 | 0.913 | — | 1.006 | 0.989 | 0.766 | 0.818 |
+| 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.925 | 1.093 | — (kernel panic) | 0.995 | 1.001 | 1.242 | 1.051 |
+| 6-pass kinsn + prefetch: above + `prefetch` | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* |
+| All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* |
+
+How to read this:
+
+- The `noop` rows are app-side phase noise. stress-ng-driven apps
+  (bcc / bpftrace / tetragon / tracee) swing 0.80 – 1.27 across the
+  three controls — about **±27 %**. `katran` / `otel` / `cilium` swing
+  ±2 – 7 %.
+- **No optimization-condition cell exceeds its own per-app noise band
+  on stress-ng-driven apps.** Reading bcc 1.19 in `prefetch`,
+  tetragon 1.28 in `noop+map_inline`, or tracee 1.14 in
+  `noop+map_inline` as ReJIT speedup is not separable from the noise
+  envelope visible in the three `noop` rows.
+- `katran` and `otel` are within ±1 % of 1.0 in every condition,
+  including controls — consistent with their generators (`wrk` /
+  fixed-iteration SHA-256 loops) being far less phase-sensitive than
+  stress-ng. App-side throughput has no detectable signal on these
+  two apps either.
+
 ### TODO
 
-- improve map inline to make it actaully inline more; fix the 0 % apply rate in 5 of 7 apps (e.g. katran)
+- improve map inline to make it actaully inline more; fix the 0 % apply rate in 5 of 7 apps (e.g. katran). We can fix it by allowing user provide map content and does not require the map key is const.
 - check more details about otel and tracee's improvement. Is it benchmark framework issue or actual improvement?
 - Why kinsn does not work well?

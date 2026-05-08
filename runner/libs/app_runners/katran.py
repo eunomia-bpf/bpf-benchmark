@@ -11,7 +11,7 @@ from typing import Any, Mapping, Sequence
 
 from .. import ROOT_DIR, resolve_bpftool_binary, run_command, run_json_command, tail_text, which
 from ..kernel_modules import kernel_module_is_builtin, load_kernel_module
-from ..workload import WorkloadResult
+from ..workload import WorkloadResult, resolve_workload_tool
 from .base import AppRunner
 from .process_support import ManagedProcessSession, wait_until_program_set_stable
 from .setup_support import repo_artifact_root
@@ -28,7 +28,6 @@ DEFAULT_IP_CANDIDATES = (
     "/sbin/ip",
     "/bin/ip",
 )
-REQUEST_FAILURE_PREVIEW_LIMIT = 5
 TCP_PROTO = socket.IPPROTO_TCP
 F_LRU_BYPASS = 1 << 1
 CH_RING_SIZE = 65537
@@ -61,7 +60,6 @@ CLIENT_MAC = "02:00:00:00:00:1c"
 ROUTER_REAL_MAC = "02:00:00:00:00:2b"
 REAL_MAC = "02:00:00:00:00:2c"
 
-HTTP_TIMEOUT_S = 50.0
 SERVER_START_TIMEOUT_S = 150.0
 TOPOLOGY_SETTLE_S = 2.0
 
@@ -628,97 +626,9 @@ def configure_katran_maps(session: KatranServerSession) -> dict[str, object]:
             "real": {"address": REAL_IP, "real_num": REAL_NUM}, "default_gateway_mac": ROUTER_LB_MAC, "ch_ring_size": CH_RING_SIZE}
 
 
-PARALLEL_CLIENT_REQUEST_SCRIPT = """
-import json
-import socket
-import sys
-import threading
-import time
-
-host = sys.argv[1]
-port = int(sys.argv[2])
-duration_s = float(sys.argv[3])
-concurrency = max(1, int(sys.argv[4]))
-timeout = float(sys.argv[5])
-preview_limit = max(1, int(sys.argv[6]))
-payload = b"GET / HTTP/1.0\\r\\nHost: katran\\r\\nConnection: close\\r\\n\\r\\n"
-
-latencies_ms = []
-failure_preview = []
-request_count = 0
-success_count = 0
-bytes_total = 0
-lock = threading.Lock()
-
-def worker(worker_id, deadline):
-    global request_count, success_count, bytes_total
-    local_latencies = []
-    local_failures = []
-    local_requests = 0
-    local_successes = 0
-    local_bytes = 0
-    while time.monotonic() < deadline:
-        started = time.monotonic()
-        local_requests += 1
-        try:
-            with socket.create_connection((host, port), timeout=timeout) as sock:
-                sock.settimeout(timeout)
-                sock.sendall(payload)
-                chunks = []
-                while True:
-                    chunk = sock.recv(4096)
-                    if not chunk:
-                        break
-                    chunks.append(chunk)
-            data = b"".join(chunks)
-            text = data.decode("latin1", "replace")
-            if text.startswith("HTTP/1.0 200 OK") or text.startswith("HTTP/1.1 200 OK"):
-                local_successes += 1
-                local_bytes += len(data)
-                local_latencies.append((time.monotonic() - started) * 1000.0)
-            elif len(local_failures) < preview_limit:
-                local_failures.append({"worker": worker_id, "error": "non-200 response", "snippet": text[:200]})
-        except Exception as exc:
-            if len(local_failures) < preview_limit:
-                local_failures.append({"worker": worker_id, "error": str(exc), "snippet": ""})
-    with lock:
-        request_count += local_requests
-        success_count += local_successes
-        bytes_total += local_bytes
-        latencies_ms.extend(local_latencies)
-        for item in local_failures:
-            if len(failure_preview) >= preview_limit:
-                break
-            failure_preview.append(item)
-
-started = time.monotonic()
-deadline = started + max(0.0, duration_s)
-threads = [threading.Thread(target=worker, args=(index, deadline), daemon=True) for index in range(concurrency)]
-for thread in threads:
-    thread.start()
-for thread in threads:
-    thread.join()
-elapsed = max(0.000001, time.monotonic() - started)
-print(json.dumps({
-    "driver": "python_parallel",
-    "host": host,
-    "port": port,
-    "request_count": request_count,
-    "success_count": success_count,
-    "error_count": request_count - success_count,
-    "duration_s": elapsed,
-    "bytes_total": bytes_total,
-    "latencies_ms": latencies_ms,
-    "concurrency": concurrency,
-}))
-if request_count == 0 or success_count != request_count:
-    sys.stderr.write(json.dumps({"failure_preview": failure_preview}) + "\\n")
-    sys.exit(1)
-"""
-
-
 DEFAULT_INTERFACE = "katran0"
-DEFAULT_CONCURRENCY = 4
+DEFAULT_WRK_THREADS = 4
+DEFAULT_WRK_CONNECTIONS = 10
 DEFAULT_LOAD_TIMEOUT_S = DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S
 
 
@@ -737,7 +647,8 @@ def _resolve_katran_bpf_artifact(*relative_candidates: str) -> Path:
 class KatranRunner(AppRunner):
     def __init__(self, *, loader_binary: Path | str | None = None, iface: str = DEFAULT_INTERFACE,
                  router_peer_iface: str | None = None, load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
-                 concurrency: int = DEFAULT_CONCURRENCY, workload_spec: Mapping[str, object],
+                 wrk_threads: int = DEFAULT_WRK_THREADS, wrk_connections: int = DEFAULT_WRK_CONNECTIONS,
+                 workload_spec: Mapping[str, object],
                  default_router_mac: str = ROUTER_LB_MAC) -> None:
         super().__init__()
         self.loader_binary = None if loader_binary is None else Path(loader_binary).resolve()
@@ -749,7 +660,9 @@ class KatranRunner(AppRunner):
             "healthchecking_ipip.o",
         )
         self.iface = str(iface); self.router_peer_iface = None if router_peer_iface is None else str(router_peer_iface)
-        self.load_timeout_s = int(load_timeout_s); self.concurrency = max(1, int(concurrency))
+        self.load_timeout_s = int(load_timeout_s)
+        self.wrk_threads = max(1, int(wrk_threads))
+        self.wrk_connections = max(1, int(wrk_connections))
         self.workload_spec = dict(workload_spec)
         self.workload_kind = str(self.workload_spec.get("kind") or self.workload_spec.get("name") or "").strip().lower()
         if self.workload_kind != "xdp_traffic":
@@ -813,27 +726,33 @@ class KatranRunner(AppRunner):
         return [int(program["id"]) for program in self.programs if int(program.get("id", 0) or 0) > 0]
 
     def _run_network_workload(self, seconds: float) -> WorkloadResult:
-        duration_s = max(1.0, float(seconds))
-        concurrency = max(1, int(self.concurrency))
-        command = ["ip", "netns", "exec", CLIENT_NS, remote_python_binary(), "-c", PARALLEL_CLIENT_REQUEST_SCRIPT,
-                   VIP_IP, str(VIP_PORT), str(duration_s), str(concurrency),
-                   str(HTTP_TIMEOUT_S), str(REQUEST_FAILURE_PREVIEW_LIMIT)]
+        duration_s = max(1, int(float(seconds)))
+        wrk_binary = resolve_workload_tool("wrk")
+        url = f"http://{VIP_IP}:{VIP_PORT}/"
+        command = [
+            "ip", "netns", "exec", CLIENT_NS,
+            wrk_binary,
+            f"-t{self.wrk_threads}",
+            f"-c{self.wrk_connections}",
+            f"-d{duration_s}s",
+            "--latency",
+            url,
+        ]
         start = time.monotonic()
-        completed = run_command(command, check=False, timeout=max(300, int(duration_s * 4) + 10))
+        completed = run_command(command, check=False, timeout=max(300, duration_s * 4 + 10))
         elapsed = time.monotonic() - start
         if completed.returncode != 0:
             raise RuntimeError(
-                f"Katran workload failed: {tail_text(completed.stderr or completed.stdout)}"
+                f"Katran wrk workload failed: {tail_text(completed.stderr or completed.stdout)}"
             )
         return WorkloadResult(
-            workload_name="katran_parallel_http",
+            workload_name="katran_wrk_http",
             command=tuple(str(p) for p in command),
             returncode=completed.returncode,
             duration_s=elapsed,
             stdout=tail_text(completed.stdout or "", max_lines=200000, max_chars=8388608),
             stderr=tail_text(completed.stderr or "", max_lines=200000, max_chars=8388608),
-            config={"tool": "python_parallel", "vip": VIP_IP, "vip_port": VIP_PORT,
-                    "concurrency": concurrency},
+            config={"tool": "wrk", "url": url, "threads": self.wrk_threads, "connections": self.wrk_connections},
         )
 
     def run_workload(self, seconds: float) -> WorkloadResult:
