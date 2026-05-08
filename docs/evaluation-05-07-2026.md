@@ -437,10 +437,54 @@ How to read this:
   stress-ng. App-side throughput has no detectable signal on these
   two apps either.
 
+### 6.3 Binary size impact
+
+`bpftool prog show` reports `bytes_jited` (post-JIT machine code) and
+`bytes_xlated` (verifier-translated BPF bytecode) per program. We sum
+across all programs in each app and report `post / baseline`. `< 1.0`
+means ReJIT shrunk total program size; `> 1.0` means ReJIT added code
+(e.g., `prefetch` inserts extra `bpf_prefetch` calls; kinsn passes
+replace inlined sequences with kfunc calls that are slightly larger
+in raw bytecode but lower at the machine-code level).
+
+![Binary size (bytes_jited) ratio by app × condition](tmp/eval_size_jited.png)
+
+| Condition | bcc | bpftrace | cilium | katran | otel | tetragon | tracee |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `noop` ReJIT | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| `noop` + `map_inline` | 1.000 | 1.000 | 1.006 | 1.000 | 0.994 | 1.000 | 0.999 |
+| `prefetch` | 1.001 | 1.005 | — | 1.000 | 1.008 | 1.003 | 1.003 |
+| 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 1.021 | 1.015 | 1.013 | 1.001 | 1.001 | 1.009 | 0.999 |
+| 6-pass kinsn + prefetch: above + `prefetch` | 1.022 | 1.020 | 1.018 | 1.001 | 1.008 | 1.011 | 1.002 |
+| All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | 0.997 | 0.974 | *pending* | 0.996 | 0.980 | 0.995 | 0.999 |
+
+Reading the table:
+
+- `noop` ReJIT: 1.000 everywhere by definition (no transform). Acts as
+  the integrity check.
+- `prefetch` and kinsn rows sit slightly **above** 1.0: every applied
+  prefetch adds a `bpf_prefetch` call site; kinsn passes replace 2-4
+  inlined BPF instructions with one kfunc call (BTF-typed). The kfunc
+  call is larger in `bytes_jited` even though the in-kernel emitter
+  (`KFUNC_INLINE_EMIT`) lowers it back to a single x86 `MOVBE` /
+  `cmov` / `BEXTR` at run time. This row reports the kernel's view
+  before the inline emitter runs.
+- BR (bytecode-rewrite) is the only condition that **shrinks**
+  programs: `bpftrace -2.6 %`, `otel -2.0 %`, `bcc -0.3 %`,
+  `katran -0.4 %`, `tetragon -0.5 %`, `tracee -0.1 %`. The shrinkage
+  is dominated by `dce` removing instructions that `wide_mem` and
+  `const_prop` made dead, plus `wide_mem` itself collapsing byte-by-
+  byte ladders.
+- Largest per-program shrink in the entire corpus is otel's
+  `perf_unwind_python` (tail-target): xlated 33 264 → 29 048
+  (-12.7 %), jited 19 909 → 17 499 (-12.1 %). This is the source of
+  otel's 0.4864 per-program ratio in §6.2.1.
+
 ### TODO
 
 - improve map inline to make it actaully inline more; fix the 0 % apply rate in 5 of 7 apps (e.g. katran). We can fix it by allowing user provide map content and does not require the map key is const.
 - check more details about otel and tracee's improvement. Is it benchmark framework issue or actual improvement?
 - Why kinsn does not work well? Need futher investigation.
+   - analysis each prog, check source code and disasm.
 - Sometimes kernel panic still exists.
 

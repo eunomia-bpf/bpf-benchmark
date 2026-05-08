@@ -100,6 +100,17 @@ def parse_workload(w: dict, app: str) -> float:
     return 0
 
 
+def total_size_ratio(payload: dict, key: str) -> float | None:
+    """key in {bytes_jited, bytes_xlated}. Sum across all programs in payload."""
+    b = (payload.get("baseline") or {}).get("bpf") or {}
+    p = (payload.get("post_rejit") or {}).get("bpf") or {}
+    bsum = sum(int(bb.get(key) or 0) for bb in b.values())
+    psum = sum(int(pp.get(key) or 0) for pp in p.values())
+    if bsum <= 0 or psum <= 0:
+        return None
+    return psum / bsum
+
+
 def per_program_ratios(payload: dict, min_runs: int = 100) -> list[float]:
     b = (payload.get("baseline") or {}).get("bpf") or {}
     p = (payload.get("post_rejit") or {}).get("bpf") or {}
@@ -206,14 +217,16 @@ def collect() -> dict:
             ratios = per_program_ratios(payload)
             g = geomean(ratios)
             wr = app_workload_ratio(payload, app)
-            data[app][ci] = (g, wr, len(ratios))
+            sj = total_size_ratio(payload, "bytes_jited")
+            data[app][ci] = (g, wr, len(ratios), sj)
     return data
 
 
 # ─── plotting ───────────────────────────────────────────────────────────
 
-def render(data: dict, key: int, title: str, ylabel: str, out: Path) -> None:
-    """key=0 → per-program geomean ; key=1 → workload ratio."""
+def render(data: dict, key: int, title: str, ylabel: str, out: Path,
+           ymin: float = 0.5, ymax: float | None = None) -> None:
+    """key=0 → per-program geomean ; key=1 → workload ratio ; key=3 → bytes_jited."""
     n_apps = len(APPS)
     n_conds = len(CONDITIONS)
     cmap = plt.get_cmap("tab10", n_conds)
@@ -225,7 +238,7 @@ def render(data: dict, key: int, title: str, ylabel: str, out: Path) -> None:
         heights = []
         for app in APPS:
             cell = data.get(app, {}).get(ci)
-            heights.append(cell[key] if cell and cell[key] is not None else float("nan"))
+            heights.append(cell[key] if cell and len(cell) > key and cell[key] is not None else float("nan"))
         offset = (ci - n_conds / 2 + 0.5) * bar_w
         ax.bar(
             x + offset, heights, bar_w,
@@ -241,10 +254,15 @@ def render(data: dict, key: int, title: str, ylabel: str, out: Path) -> None:
     ax.set_xticklabels([APP_SHORT[a] for a in APPS])
     ax.set_ylabel(ylabel)
     ax.set_title(title)
-    ax.set_ylim(0.5, max(1.6, max(
-        (data.get(a, {}).get(ci, (None, None, 0))[key] or 0)
-        for a in APPS for ci in range(n_conds)
-        if data.get(a, {}).get(ci, (None, None, 0))[key] is not None) * 1.1))
+    vals = [data.get(a, {}).get(ci, (None,)*4)[key]
+            for a in APPS for ci in range(n_conds)
+            if data.get(a, {}).get(ci) and len(data[a][ci]) > key
+               and data[a][ci][key] is not None]
+    if ymax is not None:
+        upper = ymax
+    else:
+        upper = max(1.6, max(vals) * 1.05) if vals else 1.6
+    ax.set_ylim(ymin, upper)
     ax.grid(True, axis="y", alpha=0.25)
     ax.legend(loc="upper left", bbox_to_anchor=(1.0, 1.0), fontsize=8, frameon=False)
     plt.tight_layout()
@@ -264,6 +282,9 @@ def main() -> None:
            "post / baseline (lower = faster after ReJIT)", args.out / "eval_per_program_geomean.png")
     render(data, 1, "BpfReJIT — app-side workload throughput ratio (post / baseline)",
            "post / baseline (higher = more app work after ReJIT)", args.out / "eval_app_workload.png")
+    render(data, 3, "BpfReJIT — bytes_jited ratio (post / baseline) by condition",
+           "post / baseline (lower = smaller machine code after ReJIT)",
+           args.out / "eval_size_jited.png", ymin=0.96, ymax=1.04)
 
     # Also dump the data table to stdout for inspection.
     print(f"{'App':<35}", *(f"{c[0][:18]:>20}" for c in CONDITIONS), sep="")
