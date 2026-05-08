@@ -48,7 +48,12 @@ def load_pass_metadata(bpfopt: str = "bpfopt") -> dict[str, dict[str, Any]]:
 BPFOPT_STEP_TIMEOUT_SECS = 6000  # 100 min hard cap per bpfopt invocation; killed by `timeout(1)`
 
 
-def build_step_spec(pass_name: str, pass_meta: dict[str, Any]) -> dict[str, Any]:
+def build_step_spec(
+    pass_name: str,
+    pass_meta: dict[str, Any],
+    *,
+    next_pass_meta: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Compose one structured step entry for the daemon `execute_plan` socket
     call. Each step is `{name, command, log_level}`:
 
@@ -58,9 +63,11 @@ def build_step_spec(pass_name: str, pass_meta: dict[str, Any]) -> dict[str, Any]
       placeholders. The `timeout` prefix kills bpfopt after
       `BPFOPT_STEP_TIMEOUT_SECS`; daemon sees exit 124 and records it as a
       FailedBpfopt step, so a hung pass cannot stall the whole request.
-    - `log_level`: BPF_PROG_REJIT verifier log level. Passes that produce
-      verifier states (`noop`, `map_inline`, …) need 2 to capture
-      mark_precise traces; the rest run cheaper at 1 with a 1 MiB log buffer.
+    - `log_level`: BPF_PROG_REJIT verifier log level. The daemon overwrites
+      `verifier_states_path` to point at the most recent rejit log after every
+      step, so the only consumer of step N's log is step N+1. Therefore step N
+      uses L2 iff its IMMEDIATE successor declares `needs_verifier_states`;
+      otherwise L1 with a smaller (1 MiB) log buffer is sufficient.
     """
     parts = [
         f"timeout {BPFOPT_STEP_TIMEOUT_SECS}",
@@ -81,7 +88,7 @@ def build_step_spec(pass_name: str, pass_meta: dict[str, Any]) -> dict[str, Any]
         pass_local.append("--map-ids ${MAP_IDS}")
     parts.append("--")
     parts.extend(pass_local)
-    log_level = 2 if bool(pass_meta.get("produces_verifier_states")) else 1
+    log_level = 2 if next_pass_meta is not None and bool(next_pass_meta.get("needs_verifier_states")) else 1
     command = " ".join(parts)
     # When KEEP_WORKDIRS=all, prefix the step with a cp dumping the daemon-fed
     # INPUT to the workdir, then force the step to fail so daemon's
@@ -150,7 +157,14 @@ def build_execute_plan_payload(
     passes = [str(p).strip() for p in enabled_passes if str(p).strip()]
     if not passes:
         raise ValueError("execute_plan requires at least one pass")
-    steps = [build_step_spec(p, pass_metas[p]) for p in passes]
+    steps = [
+        build_step_spec(
+            p,
+            pass_metas[p],
+            next_pass_meta=pass_metas[passes[i + 1]] if i + 1 < len(passes) else None,
+        )
+        for i, p in enumerate(passes)
+    ]
     return {
         "cmd": "execute_plan",
         "programs": [

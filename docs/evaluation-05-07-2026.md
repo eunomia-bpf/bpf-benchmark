@@ -255,7 +255,6 @@ error, or pass-internal failure). Conditions match §6.2.1.
 | `noop` ReJIT | 7 | 542 | 408 | 134 | **75.3 %** | kernel `failed_rejit` ×134 (≈124 are tetragon tail-call subprograms) |
 | `noop` + `map_inline` | 7 | 542 | 396 | 146 | **73.1 %** | kernel `failed_rejit` ×146 |
 | `prefetch` isolated | 7 | 545 | 530 | 15 | **97.2 %** | kernel `failed_rejit` ×15 |
-| 7-pass mix: `rotate, cond_select, extract, endian_fusion, bulk_memory, skb_load_bytes_spec, wide_mem` | 7 | 542 | 512 | 30 | **94.5 %** | kernel `failed_rejit` ×30 |
 | 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 7 | 542 | 513 | 29 | **94.6 %** | kernel `failed_rejit` ×29 |
 | 6-pass kinsn + prefetch: above + `prefetch` | 7 | 542 | 510 | 32 | **94.1 %** | kernel `failed_rejit` ×32 |
 | All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` *(partial — 4 / 7 apps)* | 4 | 44 | 0 | 44 | **0.0 %** | `bpfopt_failed[const_prop]` ×44 — bpfopt-level bug, kernel ReJIT not reached for that pass |
@@ -271,15 +270,12 @@ Findings:
   unchanged. This sets a per-program success ceiling of ~75 % that is
   independent of which transform is run.
 - Optimization conditions with non-trivial transforms (5-pass kinsn,
-  6-pass kinsn + prefetch, 7-pass mix, prefetch) actually report
-  **higher** all-passes-ok rates (94–97 %) than the `noop` controls
-  (75 %). The reason: when a transform pass returns
-  `skipped_missing_states` (no candidate found / verifier state absent),
-  that is counted as `ok`, which absorbs many programs that the noop
-  baseline would mark as `failed_rejit` once a real pass is attempted.
-- The 7-pass mix's residual ~30 failures are the same tail-call
-  subprograms hitting kernel `failed_rejit` after substantive rewrite,
-  consistent with the noop baseline's structural failure.
+  6-pass kinsn + prefetch, prefetch) report **higher** all-passes-ok
+  rates (94–97 %) than the `noop` controls (75 %). The reason: when a
+  transform pass returns `skipped_missing_states` (no candidate found
+  / verifier state absent), that is counted as `ok`, which absorbs
+  many programs that the noop baseline would mark as `failed_rejit`
+  once a real pass is attempted.
 - **All bytecode-rewriting** breaks at the bpfopt CLI layer:
   `const_prop` errors out (`failed_bpfopt`) on every program tested so
   far in the BR queue, before the kernel is ever asked. Earlier passes
@@ -290,7 +286,7 @@ Findings:
   kernel panic on tetragon (post-swap refresh handling in
   `kernel/bpf/syscall.c:3937`); see
   `docs/tmp/q5_widemem_kernel_panic_20260507.md`. Not reproduced in
-  the current 5-pass / 6-pass / 7-pass conditions.
+  the current 5-pass / 6-pass conditions.
 
 #### 6.1.1 Bytecode-pass apply rate (per app × condition)
 
@@ -301,7 +297,7 @@ cell below shows `applied / matched`.
 
 Sources: `map_inline` from the merged 7-app dataset; `wide_mem`,
 `cond_select`, `bulk_memory`, `endian_fusion`, `extract`,
-`skb_load_bytes_spec`, `rotate` from Run 4 (7-pass mix); `prefetch`
+`skb_load_bytes_spec`, `rotate` from a multi-pass 7-app run; `prefetch`
 from the prefetch-only 7-app run at 2026-05-07 22:44Z (suite-status
 `error` because cilium's wrk client timed out; per-app payloads are
 intact for all 7 apps).
@@ -328,8 +324,7 @@ Observations:
   1 725 in tracee, 1 264 in otel, 765 in tetragon) but **applies only
   where captured map values are constant**: cilium 80 %, otel 94 %, but
   0 % on bcc / bpftrace / katran / tetragon and 0.3 % on tracee. Needs further investigation.
-- `cond_select` apply rate dips on tetragon (1 331 / 1 753 ≈ 76 %),
-  pulling the 7-pass mix's overall apply rate down.
+- `cond_select` apply rate dips on tetragon (1 331 / 1 753 ≈ 76 %).
 - `rotate` finds zero candidates in the 7-app corpus; the workload
   exposes no shift+or pairs that survive verifier range tracking.
 - `skb_load_bytes_spec` matches 166 cilium sites but applies only 4
@@ -348,6 +343,8 @@ coverage), columns are per-app and suite geomean. `< 1.0` is speedup.
 Every cell that *should* be 1.0 (the noise-floor rows) is the empirical
 phase-variance reference; everything below the noise rows is what a
 pass coverage run produces.
+
+![Per-program geomean by app × condition](tmp/eval_per_program_geomean.png)
 
 | Condition | bcc | bpftrace | cilium | katran | otel | tetragon | tracee | suite | retained |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -402,6 +399,8 @@ Per-app throughput recorded in `baseline.workloads[]` /
 samples (same `SAMPLES=3` runs as §6.2.1). Values >1.0 = app went
 faster after ReJIT.
 
+![App-side workload throughput by app × condition](tmp/eval_app_workload.png)
+
 Per-app throughput metric:
 
 - `bcc, bpftrace, tetragon, tracee` — `stress-ng` total bogo ops
@@ -415,7 +414,6 @@ Per-app throughput metric:
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | `noop` ReJIT | 0.985 | 0.961 | 0.980 | 1.007 | 1.004 | 0.874 | 1.132 |
 | `noop` SKIP_REJIT | 1.043 | 1.040 | 1.071 | 1.001 | 0.992 | 1.268 | 0.919 |
-| `noop` ReJIT + warm-up=3 | 1.098 | 0.798 | 1.034 | 1.014 | 0.999 | 0.903 | 0.806 |
 | `noop` + `map_inline` | 0.809 | 0.913 | 1.040 | 1.004 | 0.997 | 1.279 | 1.144 |
 | `prefetch` | 1.191 | 0.913 | — | 1.006 | 0.989 | 0.766 | 0.818 |
 | 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.925 | 1.093 | 0.940 | 0.995 | 1.001 | 1.242 | 1.051 |
@@ -443,4 +441,6 @@ How to read this:
 
 - improve map inline to make it actaully inline more; fix the 0 % apply rate in 5 of 7 apps (e.g. katran). We can fix it by allowing user provide map content and does not require the map key is const.
 - check more details about otel and tracee's improvement. Is it benchmark framework issue or actual improvement?
-- Why kinsn does not work well?
+- Why kinsn does not work well? Need futher investigation.
+- Sometimes kernel panic still exists.
+
