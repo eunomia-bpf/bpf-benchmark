@@ -245,32 +245,52 @@ The metric is the per-program ReJIT success rate plus
 the agent-side `app.status` outcome — not performance.
 
 
-| Condition | App payloads | Programs reached | ReJIT-ok | Failed | Success rate | Failure modes |
+Per-condition pass-chain outcomes. A program counts as "all-ok" only if
+every pass in the chain returned `ok`; "any-fail" means at least one
+pass returned a non-ok status (kernel verifier rejection, bpfopt-level
+error, or pass-internal failure). Conditions match §6.2.1.
+
+| Condition | apps | progs | all-ok | any-fail | success rate | dominant failure mode |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
-| `noop` transform (ReJIT cycle, no bytecode change) | 7 / 7 | 542 | 541 | 1 | **99.8 %** | `EPERM` ×1 |
-| `noop` + `map_inline` (bytecode rewriting) | 7 / 7 | 542 | 540 | 2 | **99.6 %** | `EBUSY` ×1, `EPERM` ×1 |
-| 7-pass mix: `rotate, cond_select, extract, endian_fusion, bulk_memory, skb_load_bytes_spec, wide_mem` | 7 / 7 | 542 | 512 | 30 | **94.5 %** | `EBUSY` ×27, `EPERM` ×1, other ×2 |
-| `prefetch` isolated | 7 / 7 (cilium wrk timed out) | 545 | 530 | 15 | **97.2 %** | `EBUSY` ×10, `EPERM` ×1, other ×4 |
-| `wide_mem` isolated | 3 / 7 ⚠ | 96 | 93 | 3 | — | **kernel panic**; `EBUSY` ×2, `EPERM` ×1 |
-| Single kinsn pass on otel | 1 / 1 each ×4 | 52 (4 ×13) | 52 | 0 | **100 %** | — |
+| `noop` ReJIT | 7 | 542 | 408 | 134 | **75.3 %** | kernel `failed_rejit` ×134 (≈124 are tetragon tail-call subprograms) |
+| `noop` + `map_inline` | 7 | 542 | 396 | 146 | **73.1 %** | kernel `failed_rejit` ×146 |
+| `prefetch` isolated | 7 | 545 | 530 | 15 | **97.2 %** | kernel `failed_rejit` ×15 |
+| 7-pass mix: `rotate, cond_select, extract, endian_fusion, bulk_memory, skb_load_bytes_spec, wide_mem` | 7 | 542 | 512 | 30 | **94.5 %** | kernel `failed_rejit` ×30 |
+| 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 7 | 542 | 513 | 29 | **94.6 %** | kernel `failed_rejit` ×29 |
+| 6-pass kinsn + prefetch: above + `prefetch` | 7 | 542 | 510 | 32 | **94.1 %** | kernel `failed_rejit` ×32 |
+| All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` *(partial — 4 / 7 apps)* | 4 | 44 | 0 | 44 | **0.0 %** | `bpfopt_failed[const_prop]` ×44 — bpfopt-level bug, kernel ReJIT not reached for that pass |
 
 Findings:
 
-- Every app that produced a payload completed its workload with
-  `status=ok`; the bpfopt → BPF_PROG_REJIT loop is functional across
-  all 7 production agents under the noop and `map_inline` conditions.
-- Success rate degrades with pass-list complexity: 99.8 % (noop) →
-  99.6 % (`map_inline`) → 94.5 % (7-pass mix). `EBUSY` from post-swap
-  refresh of tail-call poke tables dominates the regression.
-- Recurrent `EPERM` is the same kernel rejection across runs: tracee's
-  `syscall__init_module` is a direct tail call whose poke table fails
-  the `BPF_PROG_REJIT` compatibility check.
-- The `wide_mem` isolated 7-app condition triggers a **kernel panic**
-  in `trace_call_bpf → kprobe_perf_func` after seven
-  `bpf_rejit: retaining old JIT image after refresh failure` warnings
-  on tetragon. Root cause is post-swap refresh handling in
-  `kernel/bpf/syscall.c:3937`, not `wide_mem` semantics. Investigation:
-  `docs/tmp/q5_widemem_kernel_panic_20260507.md`.
+- Every app payload completed its workload with `status=ok`; agents
+  stayed up across all conditions. RQ1's "keep agents running" answer
+  is yes.
+- The 25 % failure floor on the three `noop` rows is **not pass-driven** —
+  it is dominated by tetragon's tail-call subprograms (≈124 of 287
+  loaded) whose kernel re-verification fails even when the bytecode is
+  unchanged. This sets a per-program success ceiling of ~75 % that is
+  independent of which transform is run.
+- Optimization conditions with non-trivial transforms (5-pass kinsn,
+  6-pass kinsn + prefetch, 7-pass mix, prefetch) actually report
+  **higher** all-passes-ok rates (94–97 %) than the `noop` controls
+  (75 %). The reason: when a transform pass returns
+  `skipped_missing_states` (no candidate found / verifier state absent),
+  that is counted as `ok`, which absorbs many programs that the noop
+  baseline would mark as `failed_rejit` once a real pass is attempted.
+- The 7-pass mix's residual ~30 failures are the same tail-call
+  subprograms hitting kernel `failed_rejit` after substantive rewrite,
+  consistent with the noop baseline's structural failure.
+- **All bytecode-rewriting** breaks at the bpfopt CLI layer:
+  `const_prop` errors out (`failed_bpfopt`) on every program tested so
+  far in the BR queue, before the kernel is ever asked. Earlier passes
+  in the chain (`noop`, `wide_mem`) succeed and apply real sites
+  (e.g. otel: 132 `wide_mem` sites applied). This is a bpfopt bug, not
+  a ReJIT functional regression.
+- The earlier `wide_mem` isolated 7-app run separately triggered a
+  kernel panic on tetragon (post-swap refresh handling in
+  `kernel/bpf/syscall.c:3937`); see
+  `docs/tmp/q5_widemem_kernel_panic_20260507.md`. Not reproduced in
+  the current 5-pass / 6-pass / 7-pass conditions.
 
 #### 6.1.1 Bytecode-pass apply rate (per app × condition)
 
@@ -337,7 +357,7 @@ pass coverage run produces.
 | `prefetch` | 1.0154 | 0.9895 | — (wrk timed out) | 0.9963 | **0.7186** | 1.0175 | 0.8112 | 0.8880 | 142 |
 | 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.9896 | 1.0117 | 0.9951 | 0.9639 | 0.9891 | 1.0783 | 0.8171 | 0.9074 | 147 |
 | 6-pass kinsn + prefetch: above + `prefetch` | 1.0289 | 1.0165 | 1.0066 | 0.9423 | 1.0056 | 1.0468 | 0.8067 | 0.9009 | 147 |
-| All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | — |
+| All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | 0.9814 | 1.0099 | *pending* | 1.0247 | 1.0152 | 1.0266 | *pending* | *pending* | — |
 
 ### Findings
 
@@ -400,7 +420,7 @@ Per-app throughput metric:
 | `prefetch` | 1.191 | 0.913 | — | 1.006 | 0.989 | 0.766 | 0.818 |
 | 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.925 | 1.093 | 0.940 | 0.995 | 1.001 | 1.242 | 1.051 |
 | 6-pass kinsn + prefetch: above + `prefetch` | 1.126 | 1.058 | 0.969 | 1.013 | 1.001 | 0.977 | 1.139 |
-| All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* | *pending* |
+| All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | 0.815 | 1.153 | *pending* | 1.003 | 0.997 | 1.192 | *pending* |
 
 How to read this:
 
