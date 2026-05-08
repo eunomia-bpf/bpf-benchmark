@@ -99,12 +99,6 @@ def geomean(xs: list[float]) -> float:
     return math.exp(sum(math.log(x) for x in xs) / len(xs))
 
 
-def run_weighted_aggregate(progs: list[dict]) -> float:
-    num = sum(p["p_avg_ns"] * p["min_runs"] for p in progs)
-    den = sum(p["b_avg_ns"] * p["min_runs"] for p in progs)
-    return num / den if den else float("nan")
-
-
 def fmt(x: float, fmt_spec: str = ".4f") -> str:
     if x != x:  # NaN
         return "n/a"
@@ -159,12 +153,11 @@ def print_per_app(payload: dict, progs: list[dict], per_pass: bool) -> None:
     for app, pp in by_app.items():
         rs = [p["ratio"] for p in pp]
         b_geomean = geomean(rs)
-        c_agg = run_weighted_aggregate(pp)
         wins = sum(1 for r in rs if r < 1.0)
         losses = sum(1 for r in rs if r > 1.0)
-        # weighted per-iter ns across paper-grade progs in this app:
-        b_ns_iter = sum(p["b_avg_ns"] * p["min_runs"] for p in pp) / sum(p["min_runs"] for p in pp)
-        p_ns_iter = sum(p["p_avg_ns"] * p["min_runs"] for p in pp) / sum(p["min_runs"] for p in pp)
+        # per-iter ns across paper-grade progs in this app, averaged uniformly:
+        b_ns_iter = sum(p["b_avg_ns"] for p in pp) / len(pp)
+        p_ns_iter = sum(p["p_avg_ns"] for p in pp) / len(pp)
         applied_total = sum(pass_stats.get(app, {}).get("pass_apply", {}).values())
         err_total = sum(pass_stats.get(app, {}).get("pass_err", {}).values())
         rows.append({
@@ -177,7 +170,6 @@ def print_per_app(payload: dict, progs: list[dict], per_pass: bool) -> None:
             "post_ns": p_ns_iter,
             "delta_ns": p_ns_iter - b_ns_iter,
             "B": b_geomean,
-            "C": c_agg,
             "wins": wins,
             "losses": losses,
         })
@@ -195,8 +187,7 @@ def print_per_app(payload: dict, progs: list[dict], per_pass: bool) -> None:
         ("base_ns/iter", 13, "right"),
         ("post_ns/iter", 13, "right"),
         ("delta_ns", 11, "right"),
-        ("Method B*", 9, "right"),
-        ("Method C", 9, "right"),
+        ("Method B", 9, "right"),
         ("W/L", 7, "right"),
     ]
 
@@ -226,7 +217,6 @@ def print_per_app(payload: dict, progs: list[dict], per_pass: bool) -> None:
             f"{r['post_ns']:,.1f}",
             f"{r['delta_ns']:+,.1f}",
             f"{r['B']:.4f}" if r["B"] == r["B"] else "n/a",
-            f"{r['C']:.4f}" if r["C"] == r["C"] else "n/a",
             f"{r['wins']}/{r['losses']}",
         ])
         print("  ".join(render_cell(v, c) for v, c in zip(cells, cols)))
@@ -257,8 +247,7 @@ def report(path: Path, threshold: int, per_app: bool, verbose: bool, per_pass: b
     ties = sum(1 for r in ratios if r == 1.0)
 
     print(f"\n## Global metrics (CLAUDE.md methodology)")
-    print(f"  Method B  per-program geomean:   {fmt(geomean(ratios))}")
-    print(f"  Method C  run-weighted aggregate: {fmt(run_weighted_aggregate(progs))}")
+    print(f"  Method B  per-program geomean:    {fmt(geomean(ratios))}")
     print(f"  wins/losses/ties:                 {wins}/{losses}/{ties}")
     print(f"  ratio min / max / median:         {min(ratios):.4f} / {max(ratios):.4f} / {sorted(ratios)[len(ratios)//2]:.4f}")
 

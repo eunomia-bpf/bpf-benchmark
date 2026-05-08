@@ -24,7 +24,7 @@ Raw app-side workload metrics are explicitly allowed and should be preserved in 
 What the framework MUST NOT write or compute:
 - `avg_ns_per_run`, `ratio`, `per_program` ratio list
 - `per_program_geomean`, `program_count`, `wins`, `losses`, `summary` block
-- bootstrap CI, run-weighted aggregate, comparison_summary, markdown summary tables
+- bootstrap CI, comparison_summary, markdown summary tables
 - "optimization_summary" or any fleet-level rollup in run_artifacts
 
 Forbidden code patterns (delete on sight): `geometric_mean()`, `_geometric_mean()`, `bootstrap_geometric_mean_ci()`, `win_counts()`, `comparison_summary()`, `summarize_phase_timings()`, `summarize_named_counters()`, `derive_perf_metrics()`, anything that takes a list of ratios and returns a summary scalar.
@@ -44,16 +44,10 @@ Skip programs where either phase has `run_cnt_delta == 0`.
 - Justification: empirical noise floor on the BpfReJIT 18-app corpus drops sharply at 100 (CV 29.6% with no filter → 17.7% at ≥100). Above 100 the CV stays flat through ≥100K, so 100 captures the noise-reduction inflection point while retaining maximum program coverage (127 vs 90 progs at ≥10K). Justified by noise-floor measurement on the same dataset; do not raise without re-measuring CV on a new dataset.
 - SAMPLES count is just a workload-cycle multiplier; it does not gate paper-grade. SAMPLES=1 is a legitimate authoritative measurement as long as the per-program min_runs filter (≥100) passes — a single workload pass that drives any one BPF program through several hundred run_cnt deltas already provides the noise floor. SAMPLES=3 is the upper cap; larger SAMPLES is not used.
 
-**Two reporting metrics, always paired**:
-- **Method B — per-program geomean** (primary):
-  `geomean = exp(mean(log(ratio_i)))` over all retained programs (≥100 min_runs)
-  Answers: "average ReJIT speedup per BPF program"
-- **Method C — run-weighted aggregate** (secondary):
-  `aggregate_ratio = sum(post_avg × min_runs) / sum(baseline_avg × min_runs)`
-  Equivalent to `total_post_rejit_BPF_time / total_baseline_BPF_time`
-  Answers: "real CPU-time reduction in BPF execution"
-
-Both reported together. Report `wins/losses/ties` counts as supplemental.
+**Reporting metric — per-program geomean**:
+`geomean = exp(mean(log(ratio_i)))` over all retained programs (≥100 min_runs).
+Answers: "average ReJIT speedup per BPF program."
+Report `wins/losses/ties` counts as supplemental.
 
 **Forbidden in metrics**:
 - log/sqrt/log² weighted geomean (no physical justification, paper-review red flag)
@@ -155,8 +149,8 @@ Override knobs (env vars passed to `make`):
 | `AWS_<ARM64\|X86>_{REGION,PROFILE,SUBNET_ID,SECURITY_GROUP_ID,KEY_NAME,KEY_PATH}` | aws-* | AWS deploy params | `AWS_ARM64_REGION=us-east-1 make aws-arm64-test` |
 
 Pass list reference (current `corpus/config/benchmark_config.yaml`):
-- **kinsn-class**: `wide_mem`, `rotate`, `cond_select`, `extract`, `endian_fusion`, `bulk_memory`, `prefetch`
-- **bytecode rewriting**: `noop` (verifier-state producer), `map_inline`, `const_prop`, `dce`, `bounds_check_merge`, `skb_load_bytes_spec`
+- **kinsn-class** (replace bytecode with a kfunc call lowered by an in-kernel kinsn module): `rotate`, `cond_select`, `extract`, `endian_fusion`, `bulk_memory`, `prefetch`
+- **bytecode rewriting** (pure BPF→BPF, no kfunc): `noop` (verifier-state producer), `wide_mem` (collapse byte-ladder into wide `LDX_MEM`), `map_inline`, `const_prop`, `dce`, `bounds_check_merge`, `skb_load_bytes_spec`
 - **profile-guided** (not in default policy): `branch_flip`
 
 Per-pass + per-app combinations are how isolated benchmarks (e.g., "tetragon kinsn-only SAMPLES=3") are run. Compose env vars on a single `make` invocation; do not bypass the Makefile.

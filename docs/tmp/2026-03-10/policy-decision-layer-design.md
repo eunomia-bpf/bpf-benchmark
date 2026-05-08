@@ -266,14 +266,6 @@ For each candidate site i:
 
 This is what the paper currently demonstrates with log2_fold (6 sites, each independently testable). The exec_ns signal is noisier than branch-miss counters but avoids the need for perf privileges.
 
-**Method C: Batch A/B (fastest)**
-
-1. Apply all cmov sites → measure exec_ns_all_cmov
-2. Apply no cmov sites → measure exec_ns_baseline
-3. If all_cmov is better: keep all. If worse: try removing sites one by one.
-
-This is a greedy approach. It works well when sites are mostly independent (no interaction effects). For cmov, sites in different code paths are independent; sites in the same basic block may interact through dependency chains.
-
 ### 4.3 Profile Data Thresholds
 
 Based on experimental evidence from the no-cmov ablation study (§7.1 of the optimization plan):

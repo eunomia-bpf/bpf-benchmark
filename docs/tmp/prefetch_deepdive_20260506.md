@@ -12,13 +12,12 @@ Definitions used below:
 
 - `ratio = post_rejit_avg_ns_per_run / baseline_avg_ns_per_run`; lower than 1.0 means faster after ReJIT.
 - `B` is Method B, the per-program geomean over retained programs with `min_runs >= 100`.
-- `C` is Method C, the run-weighted aggregate over the same retained programs.
 - Raw framework outputs are not modified; all aggregation in this report is post-hoc analysis-side.
 - The pass list in the run was `rotate, cond_select, extract, endian_fusion, bulk_memory, prefetch`; per-program ratios are final post-ReJIT ratios, so they are not a pure prefetch-only ablation.
 
 ## Executive Summary
 
-1. Tracee absorbed 1,770 prefetch sites across 128 programs, but 1,033 of those sites landed on programs with `min_runs < 100`, and 795 landed on programs with zero observed runs. Among retained tracee programs, sites split almost evenly between winners and losers, giving B=1.0071 and C=1.0061, effectively no speedup.
+1. Tracee absorbed 1,770 prefetch sites across 128 programs, but 1,033 of those sites landed on programs with `min_runs < 100`, and 795 landed on programs with zero observed runs. Among retained tracee programs, sites split almost evenly between winners and losers, giving B=1.0071, effectively no speedup.
 2. The current prefetch pass is structural when PMU data is absent. That directly contradicts the older design note that said no profile should mean no prefetch. The current paper plan acknowledges this PrefetchV2 behavior, but the tracee result is exactly the failure mode the older note predicted.
 3. Tetragon has 35 failed pass entries total, but only 9 are the prefetch step. Prefetch failures cluster into 7 EBUSY kernel-side busy races and 2 E2BIG kernel-side capacity failures. There are no observed bpfopt prefetch emit errors in this run.
 4. Cilium B=0.8144 is driven by one retained program, `cil_from_netdev`, with only 1,230 min_runs and 14 prefetch sites. It is plausible because it is a hot `sched_cls` ingress path, but the retained-program coverage is too small to call it stable without replication.
@@ -100,10 +99,9 @@ Data source: `corpus/results/x86_kvm_corpus_20260506_023522_768608/details/apps/
 - Programs with at least one prefetch site: 128.
 - Total prefetch sites applied by bpfopt summaries: 1770.
 - Prefetch step failures: 2.
-- Retained programs for Method B/C (`min_runs >= 100`): 70.
+- Retained programs for Method B (`min_runs >= 100`): 70.
 - Retained min_runs sum: 164,054,984.
 - Method B from raw JSON: 1.007135.
-- Method C from raw JSON: 1.006096.
 
 Cold-path distribution:
 
@@ -303,10 +301,9 @@ Data source: `corpus/results/x86_kvm_corpus_20260506_023522_768608/details/apps/
 - Programs in cilium detail file: 25.
 - Programs with prefetch sites: 20.
 - Total prefetch sites: 118.
-- Retained programs for Method B/C: 1.
+- Retained programs for Method B: 1.
 - Retained min_runs sum: 1,230.
 - Method B from raw JSON: 0.814420.
-- Method C from raw JSON: 0.814420.
 
 Cilium ratio drivers:
 
@@ -777,4 +774,3 @@ Representative raw-data entry line refs:
 | cilium/agent | 156 | baseline/post/rejit program entry starts | `corpus/results/x86_kvm_corpus_20260506_023522_768608/details/apps/cilium__agent.json:194; corpus/results/x86_kvm_corpus_20260506_023522_768608/details/apps/cilium__agent.json:433; corpus/results/x86_kvm_corpus_20260506_023522_768608/details/apps/cilium__agent.json:2853` |
 | cilium/agent | 151 | baseline/post/rejit program entry starts | `corpus/results/x86_kvm_corpus_20260506_023522_768608/details/apps/cilium__agent.json:158; corpus/results/x86_kvm_corpus_20260506_023522_768608/details/apps/cilium__agent.json:397; corpus/results/x86_kvm_corpus_20260506_023522_768608/details/apps/cilium__agent.json:2401` |
 | cilium/agent | 138 | baseline/post/rejit program entry starts | `corpus/results/x86_kvm_corpus_20260506_023522_768608/details/apps/cilium__agent.json:41; corpus/results/x86_kvm_corpus_20260506_023522_768608/details/apps/cilium__agent.json:280; corpus/results/x86_kvm_corpus_20260506_023522_768608/details/apps/cilium__agent.json:925` |
-

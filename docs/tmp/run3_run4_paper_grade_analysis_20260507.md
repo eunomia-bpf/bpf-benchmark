@@ -13,9 +13,9 @@
 |-----------|------|
 | "Run 3 wins 主要来自 tracee tail-call 子 prog" | tracee 那 8 个不是 tail-call 子 prog（run_cnt 全部 > 0，prologue 已计数）；它们是 kretprobe，**ratio 由 workload phase 间的 I/O 工作量主导** |
 | "KVM 噪声" | 表述不准。**主要来源是 workload phase variance**——baseline 和 post-rejit phase 跑的 syscall/IO pattern 不一致，per-prog avg_ns 被工作量主导。CPU jitter 是次要因素 |
-| Method B 0.8965 = ~10% 加速 | 误导。Run 3 applied-only Method C 实际 **+3.2% slowdown**；Run 4 applied-only Method C **+0.1% 加速**（基本持平） |
+| Method B 0.8965 = ~10% 加速 | 误导。Run 3 applied-only Method B 是 0.9378，但只有 9 个程序且受低 min_runs outlier 影响；Run 4 applied-only Method B 是 0.8305，但需要结合同程序 phase variance 解读 |
 
-**底线判断**：1898 个 kinsn site（Run 4）和 171 个 map_inline site（Run 3）都没有产生 run-weighted 的正面信号。Method C applied-only 在两次 run 都接近 1.0，浮动幅度小于 same-prog 跨 run 的 phase variance（vfs_create 同程序 applied=0 在 Run 3 是 2.232x、Run 4 是 0.388x）。要拿 paper-grade 数字必须先跑 noop-only baseline 标定噪声楼层。
+**底线判断**：Run 3 的 Method B 0.8965 被 applied=0 的 phase variance 和低 min_runs outlier 混杂；Run 4 kinsn-only Method B 0.8897 也需要结合 same-prog 跨 run 的 phase variance 解读（vfs_create 同程序 applied=0 在 Run 3 是 2.232x、Run 4 是 0.388x）。要拿 paper-grade 数字必须先跑 noop-only baseline 标定噪声楼层。
 
 ---
 
@@ -88,19 +88,19 @@ Run 3 + Run 4 cross-check：
 
 ### 证据 5：applied vs not-applied 切片揭示真信号
 
-| Run | 群体 | n | Method B (per-prog geomean) | Method C (run-weighted) |
-|-----|------|---|----------|----------|
-| 3 noop+map_inline | applied-only | 9 | 0.9378 | **1.0319 ← +3.2% slowdown** |
-| 3 noop+map_inline | not-applied | 139 | 0.8939 | 0.9767 |
-| 3 noop+map_inline | 全体 | 148 | 0.8965 | 0.9768 |
-| 4 kinsn-only | applied-only | 112 | 0.8305 | **0.9989 ← essentially flat** |
-| 4 kinsn-only | not-applied | 35 | 1.1090 | 1.0124 |
-| 4 kinsn-only | 全体 | 147 | 0.8897 | 1.0008 |
+| Run | 群体 | n | Method B (per-prog geomean) |
+|-----|------|---|----------|
+| 3 noop+map_inline | applied-only | 9 | 0.9378 |
+| 3 noop+map_inline | not-applied | 139 | 0.8939 |
+| 3 noop+map_inline | 全体 | 148 | 0.8965 |
+| 4 kinsn-only | applied-only | 112 | 0.8305 |
+| 4 kinsn-only | not-applied | 35 | 1.1090 |
+| 4 kinsn-only | 全体 | 147 | 0.8897 |
 
-**Method C 分群体看：**
-- Run 3 map_inline 实际命中的 9 个 prog 是 **+3.2% slowdown**，不是加速。九个里面只有 otel 54/sched_process_free（applied=6 sites, ratio 0.423, min_runs=163）拉低了 Method B；其他 8 个全部 ≥ 0.997。
-- Run 4 kinsn 命中的 112 个 prog 是 **+0.1% 加速**——基本持平。
-- 整体 Method C 的"加速"主要落在 not-applied 群体 → 那部分由 phase 偏置主导，不是 ReJIT 信号。
+**Method B 分群体看：**
+- Run 3 map_inline 实际命中的 9 个 prog 是 0.9378。九个里面只有 otel 54/sched_process_free（applied=6 sites, ratio 0.423, min_runs=163）拉低了 Method B；其他 8 个全部 ≥ 0.997。
+- Run 4 kinsn 命中的 112 个 prog 是 0.8305，但需要结合 applied=0 群体和 same-prog 跨 run phase variance 解读。
+- not-applied 群体也有大幅漂移 → 这些变化由 phase 偏置主导，不是 ReJIT 信号。
 
 ### 证据 6：Method B 被低 min_runs 程序主导
 
@@ -108,7 +108,7 @@ Run 3 整体 Method B 0.8965：8 个 trace_ret_* 程序的 0.07× 比值（min_r
 - 如果剔除 min_runs<10 K 的程序：Method B 接近 0.95
 - 如果剔除 not-applied 群体：Method B 0.94（applied-only）
 
-→ paper 报 0.89 会被审稿人质疑是 noise-floor 残留。**Method C 比 Method B 更稳健**（按 run 计数加权，自然抑制低-runs 噪声 prog）。
+→ paper 报 0.89 会被审稿人质疑是 noise-floor 残留。需要 paired noop baseline 对 Method B 做噪声校准。
 
 ### 证据 7：cilium / otel applied prog 单点观察
 
@@ -180,7 +180,7 @@ baseline 30 秒和 post 30 秒之间，workload 进程是**新 spawn 的两个�
 
 | Q | label | 命令 | 目的 |
 |---|------|------|------|
-| Q1 | noop-baseline-7app | `BPFREJIT_BENCH_PASSES=noop SAMPLES=3 7-app` | **噪声楼层**：所有 prog applied=0，Method B/C 应趋近 1.0；任何偏离 1.0 都是 phase variance |
+| Q1 | noop-baseline-7app | `BPFREJIT_BENCH_PASSES=noop SAMPLES=3 7-app` | **噪声楼层**：所有 prog applied=0，Method B 应趋近 1.0；任何偏离 1.0 都是 phase variance |
 | Q2 | mi-verify-3app | `noop,map_inline` on cilium+otel+tracee | #226：复测 map_inline applied prog 集中报告 |
 | Q3 | kinsn-no-prefetch-7app | kinsn 去掉 prefetch | 检查 prefetch 是 Run 4 信号源否 |
 | Q4 | prefetch-only-7app | prefetch only | prefetch 单 pass 净效应 |
@@ -192,7 +192,7 @@ baseline 30 秒和 post 30 秒之间，workload 进程是**新 spawn 的两个�
 
 **预计耗时**：5×33 min + 4×8 min ≈ 3.3 小时。串行执行不重叠。
 
-**Run 5 (Q1) 是最关键的**：噪声楼层标定。如果 Q1 的 Method C 在 [0.97, 1.03] 区间，那 Run 4 的 0.9989 + Run 3 applied-only 1.0319 都在噪声内，**ReJIT 没有可报告的加速信号**，paper 需要换数据获取方式（更长 duration / phase-paired 设计 / 真实 e2e workload throughput delta 而非 prog timer）。
+**Run 5 (Q1) 是最关键的**：噪声楼层标定。如果 Q1 的 Method B 偏离 1.0 达到同量级，那 Run 3/Run 4 的 Method B 改善需要先扣除噪声楼层，paper 需要换数据获取方式（更长 duration / phase-paired 设计 / 真实 e2e workload throughput delta 而非 prog timer）。
 
 ---
 
@@ -200,11 +200,11 @@ baseline 30 秒和 post 30 秒之间，workload 进程是**新 spawn 的两个�
 
 不要写：
 - "ReJIT 实现了 10% 几何平均加速"（Method B 0.89 是 phase 偏置主导，不是 ReJIT 信号）
-- "kinsn 在 1898 个 site 实现了加速"（applied-only Method C 0.9989，事实上没加速）
+- "kinsn 在 1898 个 site 实现了加速"（Run 4 Method B 尚未经过 noop baseline 校正）
 
 可以写（前提：Q1 baseline 噪声楼层确认 < ±5%）：
-- "ReJIT 在大流量 prog（min_runs > 10⁸）的 Method C aggregate ratio 接近 1.0，small-prog 的 ±10% 漂移由 workload phase variance 主导，非 ReJIT 优化效果"
-- "1898 kinsn sites are emitted across 112 programs without measurable run-time regression at the run-weighted aggregate (Method C 0.9989)" —— 这是 honest 的 "no harm"
+- "当前 Run 3/Run 4 中，small-prog 的 ±10% 漂移由 workload phase variance 主导，非 ReJIT 优化效果"
+- "1898 kinsn sites are emitted across 112 programs; headline speedup requires paired noop baseline correction"
 - 个别 prog 的真信号需要靠 workload-side throughput 度量（见 #217 corpus app-throughput delta 分析）
 
 不能在 paper 里报 Method B 0.89 作主指标。

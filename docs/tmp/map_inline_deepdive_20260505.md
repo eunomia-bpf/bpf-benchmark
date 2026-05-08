@@ -8,7 +8,7 @@ Run under investigation:
 - Analysis command run for this report:
   `python3 analysis/corpus_analyze.py corpus/results/x86_kvm_corpus_20260505_173741_854355 --per-app --per-pass --verbose`
 - Analyzer output: 127 retained programs at `min(baseline_runs, post_rejit_runs) >= 100`,
-  Method B `0.9930`, Method C `0.9836`, `64/63/0` W/L/T, ratio CV `12.3%`.
+  Method B `0.9930`, `64/63/0` W/L/T, ratio CV `12.3%`.
   These are post-hoc analysis metrics, not framework payload fields.
 
 Design constraints read before analysis:
@@ -247,7 +247,6 @@ I recursively checked `details/result.json` and `details/apps/*.json` for forbid
 - `summary`
 - `optimization_summary`
 - `comparison_summary`
-- `run_weighted_aggregate`
 
 None were present in this run's result/app JSON files. `analysis/corpus_analyze.py` computes
 ratios/geomeans/wins as post-hoc analysis, which is allowed by `CLAUDE.md:15-31`.
@@ -338,7 +337,6 @@ Data file:
 Analyzer output for Tracee:
 
 - `Method B = 1.0160` for 70 retained programs.
-- `Method C = 0.9993`.
 - 133 applies, 2 pass errors.
 
 The requested hypothesis was:

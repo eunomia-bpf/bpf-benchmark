@@ -15,12 +15,12 @@ Applied counts below mean successful per-program ReJIT/pass records with `sites_
 - Programs applied / failed: 0 successful applied programs (0 sites) / 0 failed programs; app failures: 1
 - App failure(s): `calico/felix`
 
-| Population | Programs | Method B geomean ratio | Geomean speedup | Method C aggregate ratio | Aggregate speedup | wins/losses/ties |
-|---|---:|---:|---:|---:|---:|---:|
-| applied + retained | 0 | N/A | N/A | N/A | N/A | 0/0/0 |
-| all retained | 0 | N/A | N/A | N/A | N/A | 0/0/0 |
+| Population | Programs | Method B geomean ratio | Geomean speedup | wins/losses/ties |
+|---|---:|---:|---:|---:|
+| applied + retained | 0 | N/A | N/A | 0/0/0 |
+| all retained | 0 | N/A | N/A | 0/0/0 |
 
-This kinsn run is not numerically usable as a kinsn-only authoritative result: the directory contains only `details/apps/calico__felix.json`, that app failed before baseline/post counters were collected, and `details/result.json` has an empty top-level `per_program` list. All Method B/Method C values are therefore `N/A` rather than zero-speedup results.
+This kinsn run is not numerically usable as a kinsn-only authoritative result: the directory contains only `details/apps/calico__felix.json`, that app failed before baseline/post counters were collected, and `details/result.json` has an empty top-level `per_program` list. All Method B values are therefore `N/A` rather than zero-speedup results.
 
 Per-app breakdown:
 
@@ -36,10 +36,10 @@ Per-app breakdown:
 - Programs: 157 comparable / 127 retained after min_runs >= 100 (535 raw baseline/post program ids)
 - Programs applied / failed: 204 successful applied programs (1211 sites) / 45 failed programs; app failures: 0
 
-| Population | Programs | Method B geomean ratio | Geomean speedup | Method C aggregate ratio | Aggregate speedup | wins/losses/ties |
-|---|---:|---:|---:|---:|---:|---:|
-| applied + retained | 33 | 1.079309 | 0.927x | 1.015124 | 0.985x | 8/20/5 |
-| all retained | 127 | 1.249066 | 0.801x | 1.243788 | 0.804x | 24/91/12 |
+| Population | Programs | Method B geomean ratio | Geomean speedup | wins/losses/ties |
+|---|---:|---:|---:|---:|
+| applied + retained | 33 | 1.079309 | 0.927x | 8/20/5 |
+| all retained | 127 | 1.249066 | 0.801x | 24/91/12 |
 
 Per-app breakdown:
 
@@ -75,10 +75,10 @@ Per-app breakdown:
 - Programs: 151 comparable / 127 retained after min_runs >= 100 (516 raw baseline/post program ids)
 - Programs applied / failed: 36 successful applied programs (1598 sites) / 81 failed programs; app failures: 0
 
-| Population | Programs | Method B geomean ratio | Geomean speedup | Method C aggregate ratio | Aggregate speedup | wins/losses/ties |
-|---|---:|---:|---:|---:|---:|---:|
-| applied + retained | 3 | 0.980383 | 1.020x | 1.016700 | 0.984x | 1/1/1 |
-| all retained | 127 | 0.993047 | 1.007x | 0.983589 | 1.017x | 56/54/17 |
+| Population | Programs | Method B geomean ratio | Geomean speedup | wins/losses/ties |
+|---|---:|---:|---:|---:|
+| applied + retained | 3 | 0.980383 | 1.020x | 1/1/1 |
+| all retained | 127 | 0.993047 | 1.007x | 56/54/17 |
 
 Map-inline retained/applied programs used for the headline applied-only Method B number:
 
@@ -117,11 +117,11 @@ Per-app breakdown:
 
 ### Cross-pass comparison
 
-| Run | Pass set | Samples | Status | Retained/applied programs | Method B geomean ratio | Method C aggregate ratio | All-retained Method B |
-|---|---|---:|---|---:|---:|---:|---:|
-| kinsn-only authoritative | `['kinsn']` | 30 | error | 0 | N/A | N/A | N/A |
-| wide_mem-only authoritative | `['wide_mem']` | 30 | completed | 33 | 1.079309 | 1.015124 | 1.249066 |
-| noop+map_inline today | `['noop', 'map_inline']` | 1 | completed | 3 | 0.980383 | 1.016700 | 0.993047 |
+| Run | Pass set | Samples | Status | Retained/applied programs | Method B geomean ratio | All-retained Method B |
+|---|---|---:|---|---:|---:|---:|
+| kinsn-only authoritative | `['kinsn']` | 30 | error | 0 | N/A | N/A |
+| wide_mem-only authoritative | `['wide_mem']` | 30 | completed | 33 | 1.079309 | 1.249066 |
+| noop+map_inline today | `['noop', 'map_inline']` | 1 | completed | 3 | 0.980383 | 0.993047 |
 
 ### Top contributors
 
@@ -140,12 +140,12 @@ None. No retained-and-applied program in these specified runs has `ratio < 0.7`.
 
 ### Answers
 
-- Map_inline applied-program question: after the mandatory min_runs filter, run #3 has 3 retained-and-applied programs, not 36. Their Method B geomean ratio is 0.980383 (1.020x geomean speedup), while Method C over the same population is 1.016700 (0.984x). The signal is mixed: Method B says about 2.0% faster per retained applied program, Method C says about 1.7% slower in run-weighted BPF time, and all-retained Method B is 0.993047 (1.007x). This run alone does not justify map_inline as a strong paper headline pass.
+- Map_inline applied-program question: after the mandatory min_runs filter, run #3 has 3 retained-and-applied programs, not 36. Their Method B geomean ratio is 0.980383 (1.020x geomean speedup), and all-retained Method B is 0.993047 (1.007x). This small retained applied population means the run alone does not justify map_inline as a strong paper headline pass.
 - Kinsn vs map_inline: the specified kinsn-only directory has no comparable program measurements, so the kinsn-vs-map_inline geomean comparison is not computable from the requested on-disk data. Among the analyzable runs here, map_inline is better than wide_mem on the retained/applied Method B metric: map_inline `0.980383` vs wide_mem `1.079309`.
 
 ### Recommendation
 
-No pass deserves a strong paper headline number from these three directories alone. Map_inline is the best candidate among the analyzable data because it is the only pass set with an applied-only Method B ratio below 1.0, but the retained applied population is only 3 programs and Method C disagrees. Wide_mem alone regresses on both applied-only and all-retained Method B, and the named kinsn-only run failed before measurements.
+No pass deserves a strong paper headline number from these three directories alone. Map_inline is the best candidate among the analyzable data because it is the only pass set with an applied-only Method B ratio below 1.0, but the retained applied population is only 3 programs. Wide_mem alone regresses on both applied-only and all-retained Method B, and the named kinsn-only run failed before measurements.
 
 ### Open questions / data gaps
 

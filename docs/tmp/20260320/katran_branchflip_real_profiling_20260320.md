@@ -60,7 +60,7 @@ Because that replay was not faithful to the live datapath, using its timing delt
 
 ## Phase 2: candidate identification
 
-With Method A blocked and Method B not trustworthy, I used Method C as the only defensible fallback:
+With Method A blocked and Method B not trustworthy, I used a structural CFG fallback for candidate screening:
 
 - artifact: `docs/tmp/katran_branchflip_structural_analysis_20260320.json`
 - input sources:
@@ -92,7 +92,7 @@ Interpretation:
 
 - every discovered branch-flip site is a small taken-side guard
 - the larger body is already on fallthrough
-- Method C therefore nominates **no** site as a plausible branch-flip candidate
+- the structural fallback therefore nominates **no** site as a plausible branch-flip candidate
 
 ## Phase 3: candidate validation
 
