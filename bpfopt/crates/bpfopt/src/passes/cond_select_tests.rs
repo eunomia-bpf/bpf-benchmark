@@ -67,7 +67,13 @@ fn ctx_with_select_kfunc(btf_id: i32) -> PassContext {
 }
 
 fn pattern_a(cond_reg: u8, false_mov: BpfInsn, true_mov: BpfInsn) -> Vec<BpfInsn> {
-    vec![jne_imm(cond_reg, 0, 2), false_mov, BpfInsn::ja(1), true_mov, exit_insn()]
+    vec![
+        jne_imm(cond_reg, 0, 2),
+        false_mov,
+        BpfInsn::ja(1),
+        true_mov,
+        exit_insn(),
+    ]
 }
 
 fn pattern_c(true_mov: BpfInsn, false_mov: BpfInsn) -> Vec<BpfInsn> {
@@ -178,7 +184,12 @@ fn test_cond_select_no_match_analyzer_matrix() {
     for (label, insns) in [
         (
             "different destination registers",
-            vec![jne_imm(1, 0, 2), BpfInsn::mov64_imm(0, 0), BpfInsn::ja(1), BpfInsn::mov64_imm(2, 1)],
+            vec![
+                jne_imm(1, 0, 2),
+                BpfInsn::mov64_imm(0, 0),
+                BpfInsn::ja(1),
+                BpfInsn::mov64_imm(2, 1),
+            ],
         ),
         (
             "linear program",
@@ -267,14 +278,21 @@ fn test_cond_select_value_materialization_matrix() {
     for (label, mut prog, expected_prefix, sidecar_index, expected_regs) in [
         (
             "imm true reg false",
-            make_program(pattern_c(BpfInsn::mov32_imm(0, 1), BpfInsn::mov64_reg(0, 6))),
+            make_program(pattern_c(
+                BpfInsn::mov32_imm(0, 1),
+                BpfInsn::mov64_reg(0, 6),
+            )),
             vec![BpfInsn::mov32_imm(0, 1)],
             1,
             (0u8, 0, 6, 1),
         ),
         (
             "reg true imm false",
-            make_program(pattern_a(1, BpfInsn::mov64_imm(0, 0), BpfInsn::mov64_reg(0, 7))),
+            make_program(pattern_a(
+                1,
+                BpfInsn::mov64_imm(0, 0),
+                BpfInsn::mov64_reg(0, 7),
+            )),
             vec![BpfInsn::mov64_imm(0, 0)],
             1,
             (0u8, 7, 0, 1),
@@ -288,7 +306,10 @@ fn test_cond_select_value_materialization_matrix() {
         ),
         (
             "both immediate values",
-            make_program(pattern_c(BpfInsn::mov32_imm(0, 1), BpfInsn::mov32_imm(0, 0))),
+            make_program(pattern_c(
+                BpfInsn::mov32_imm(0, 1),
+                BpfInsn::mov32_imm(0, 0),
+            )),
             vec![BpfInsn::mov32_imm(0, 1), BpfInsn::mov32_imm(2, 0)],
             2,
             (0u8, 0, 2, 1),
@@ -302,7 +323,11 @@ fn test_cond_select_value_materialization_matrix() {
             )
             .unwrap();
         assert_eq!(result.sites_applied, 1, "{label}");
-        assert_eq!(&prog.insns[..expected_prefix.len()], expected_prefix.as_slice(), "{label}");
+        assert_eq!(
+            &prog.insns[..expected_prefix.len()],
+            expected_prefix.as_slice(),
+            "{label}"
+        );
         assert!(prog.insns[sidecar_index].is_kinsn_sidecar(), "{label}");
         assert_eq!(
             payload_regs(sidecar_payload(&prog.insns[sidecar_index])),

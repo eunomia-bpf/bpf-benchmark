@@ -260,34 +260,41 @@ fn test_emit_wide_mem_unsupported_width() {
 
 #[test]
 fn test_wide_mem_pass_transform_matrix() {
-    for (label, mut prog, expected_applied, expected_len, first_size, first_dst, first_src, first_off)
-        in [
-            (
-                "single halfword",
-                make_program(with_exit(build_wide_mem_2(0, 1, 6, 10))),
-                1,
-                2,
-                BPF_H,
-                0,
-                6,
-                10,
-            ),
-            (
-                "multiple sites",
-                make_program({
-                    let mut insns = build_wide_mem_2(0, 1, 6, 0);
-                    insns.extend(build_wide_mem_2(3, 4, 7, 4));
-                    with_exit(insns)
-                }),
-                2,
-                3,
-                BPF_H,
-                0,
-                6,
-                0,
-            ),
-        ]
-    {
+    for (
+        label,
+        mut prog,
+        expected_applied,
+        expected_len,
+        first_size,
+        first_dst,
+        first_src,
+        first_off,
+    ) in [
+        (
+            "single halfword",
+            make_program(with_exit(build_wide_mem_2(0, 1, 6, 10))),
+            1,
+            2,
+            BPF_H,
+            0,
+            6,
+            10,
+        ),
+        (
+            "multiple sites",
+            make_program({
+                let mut insns = build_wide_mem_2(0, 1, 6, 0);
+                insns.extend(build_wide_mem_2(3, 4, 7, 4));
+                with_exit(insns)
+            }),
+            2,
+            3,
+            BPF_H,
+            0,
+            6,
+            0,
+        ),
+    ] {
         let mut cache = AnalysisCache::new();
         let result = WideMemPass
             .run(&mut prog, &mut cache, &PassContext::test_default())
@@ -461,10 +468,9 @@ fn test_wide_mem_unsupported_and_mixed_width_table() {
     assert_eq!(sites.len(), 1);
     assert_eq!(sites[0].get_binding("width"), Some(3));
 
-    for (label, insns, expected_applied) in [
-        ("width3 only", width3, 0),
-        ("width4 plus width3", mixed, 1),
-    ] {
+    for (label, insns, expected_applied) in
+        [("width3 only", width3, 0), ("width4 plus width3", mixed, 1)]
+    {
         let mut prog = make_program(insns);
         let mut cache = AnalysisCache::new();
         let result = WideMemPass

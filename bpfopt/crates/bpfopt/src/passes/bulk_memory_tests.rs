@@ -428,8 +428,14 @@ fn test_memset_fill_encoding_matrix() {
 #[test]
 fn test_bulk_memory_negative_pattern_matrix() {
     for (label, original) in [
-        ("no consecutive stores", make_no_consecutive_stores_program()),
-        ("non-repeated immediate", make_memset_non_repeated_imm_program()),
+        (
+            "no consecutive stores",
+            make_no_consecutive_stores_program(),
+        ),
+        (
+            "non-repeated immediate",
+            make_memset_non_repeated_imm_program(),
+        ),
         ("below threshold", make_below_threshold_program()),
     ] {
         let mut program = make_program(original.clone());

@@ -405,9 +405,9 @@ The failed ReJIT records are mostly EBUSY refresh/poke failures on tail-call/per
 | 1 | `noop,wide_mem` | post-rejit ok (per-prog geomean 0.9973, 6 eligible) |
 | 2 | `noop,wide_mem,const_prop,dce` | post-rejit wrk timeout 31 s — **bug reproduced** |
 | 3 | `noop,const_prop` | post-rejit wrk timeout 31 s — **bug reproduced with const_prop alone** |
-| 4 | `noop,dce` (running) | TBD |
+| 4 | `noop,dce` | post-rejit ok (per-prog geomean 0.9945, 6 eligible) |
 
-**Confirmed culprit: `const_prop` alone breaks cilium's host→endpoint datapath.** All 5 critical attached programs reach 100 % verifier-pass after const_prop (39 sites on `cil_from_host`, 50 on `cil_to_netdev`, 32 on `tail_handle_ipv4`, 19 on `cil_from_netdev`, 51 on `tail_handle_ipv4_from_netdev`); every prog reports `status=ok` and `insn_delta=0` (same-size MOV replacement). Verifier accepts the rewritten code, but at runtime no packets reach the endpoint.
+**Confirmed culprit: `const_prop` is the unique pass that breaks cilium's host→endpoint datapath; `dce` alone is fine.** All 5 critical attached programs reach 100 % verifier-pass after const_prop (39 sites on `cil_from_host`, 50 on `cil_to_netdev`, 32 on `tail_handle_ipv4`, 19 on `cil_from_netdev`, 51 on `tail_handle_ipv4_from_netdev`); every prog reports `status=ok` and `insn_delta=0` (same-size MOV replacement). Verifier accepts the rewritten code, but at runtime no packets reach the endpoint.
 
 The root-cause bug must be in `const_prop`'s abstract model on a cilium-specific shape — likely interaction with subprog calls, map-of-maps lookups, or the verifier-state oracle's `(pc, reg)` consensus when the same PC is reached via multiple control-flow paths with different per-path register narrowings.
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Constant propagation and ALU materialization.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use crate::analysis::CFGAnalysis;
 use crate::insn::*;
@@ -30,7 +30,8 @@ type RegConstState = [RegConstFact; REG_COUNT];
 
 #[derive(Default)]
 struct VerifierExactConstOracle {
-    facts: BTreeMap<(usize, u8), RegConstFact>,
+    facts: BTreeMap<(usize, usize, u8), RegConstFact>,
+    frames_by_pc: BTreeMap<usize, BTreeSet<usize>>,
 }
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -119,35 +120,84 @@ impl OracleExactAccumulator {
 
 impl VerifierExactConstOracle {
     fn from_states(states: &[VerifierInsn]) -> Self {
-        let mut accumulators: BTreeMap<(usize, u8), OracleExactAccumulator> = BTreeMap::new();
+        let mut frames_by_pc: BTreeMap<usize, BTreeSet<usize>> = BTreeMap::new();
+        let mut visit_counts: BTreeMap<(usize, usize), usize> = BTreeMap::new();
+        let mut observed_counts: BTreeMap<(usize, usize, u8), usize> = BTreeMap::new();
+        let mut accumulators: BTreeMap<(usize, usize, u8), OracleExactAccumulator> =
+            BTreeMap::new();
 
         for state in states {
-            if state.kind != VerifierInsnKind::InsnDeltaState {
+            if state.kind == VerifierInsnKind::BranchDeltaState {
                 continue;
             }
 
+            frames_by_pc
+                .entry(state.pc)
+                .or_default()
+                .insert(state.frame);
+            *visit_counts.entry((state.pc, state.frame)).or_default() += 1;
+
             for (&regno, reg_state) in &state.regs {
-                accumulators
-                    .entry((state.pc, regno))
-                    .or_default()
-                    .observe(reg_state);
+                let key = (state.pc, state.frame, regno);
+                *observed_counts.entry(key).or_default() += 1;
+                accumulators.entry(key).or_default().observe(reg_state);
             }
         }
 
         let facts = accumulators
             .into_iter()
-            .filter_map(|(key, acc)| acc.into_fact().map(|fact| (key, fact)))
+            .filter_map(|(key, acc)| {
+                let (pc, frame, _) = key;
+                let visits = visit_counts.get(&(pc, frame)).copied().unwrap_or(0);
+                let observations = observed_counts.get(&key).copied().unwrap_or(0);
+                (observations == visits)
+                    .then_some(acc)
+                    .and_then(OracleExactAccumulator::into_fact)
+                    .map(|fact| (key, fact))
+            })
             .collect();
 
-        Self { facts }
+        Self {
+            facts,
+            frames_by_pc,
+        }
     }
 
-    fn fact(&self, pc: usize, reg: u8) -> Option<RegConstFact> {
-        self.facts.get(&(pc, reg)).copied()
+    fn fact(&self, pc: usize, frame: Option<usize>, reg: u8) -> Option<RegConstFact> {
+        match frame {
+            Some(frame) => self.facts.get(&(pc, frame, reg)).copied(),
+            None => self.frame_invariant_fact(pc, reg),
+        }
     }
 
-    fn exact_for_instruction(&self, pc: usize, reg: u8, is_32: bool) -> Option<u64> {
-        let fact = self.fact(pc, reg)?;
+    fn frame_invariant_fact(&self, pc: usize, reg: u8) -> Option<RegConstFact> {
+        let frames = self.frames_by_pc.get(&pc)?;
+        let mut exact64 = Consensus::Unseen;
+        let mut exact32 = Consensus::Unseen;
+        let mut saw_frame = false;
+
+        for &frame in frames {
+            let fact = self.facts.get(&(pc, frame, reg)).copied()?;
+            saw_frame = true;
+            observe_optional(&mut exact64, fact.exact64);
+            observe_optional(&mut exact32, fact.exact32);
+        }
+
+        let fact = RegConstFact {
+            exact64: exact64.into_option(),
+            exact32: exact32.into_option(),
+        };
+        (saw_frame && (fact.exact64.is_some() || fact.exact32.is_some())).then_some(fact)
+    }
+
+    fn exact_for_instruction(
+        &self,
+        pc: usize,
+        frame: Option<usize>,
+        reg: u8,
+        is_32: bool,
+    ) -> Option<u64> {
+        let fact = self.fact(pc, frame, reg)?;
         if is_32 {
             fact.exact32.map(u64::from)
         } else {
@@ -155,12 +205,19 @@ impl VerifierExactConstOracle {
         }
     }
 
-    fn apply_post_state(&self, pc: usize, state: &mut RegConstState) {
+    fn apply_post_state(&self, pc: usize, frame: Option<usize>, state: &mut RegConstState) {
         for reg in 0..REG_COUNT {
-            if let Some(fact) = self.fact(pc, reg as u8) {
+            if let Some(fact) = self.fact(pc, frame, reg as u8) {
                 set_reg_fact(state, reg as u8, fact);
             }
         }
+    }
+}
+
+fn observe_optional<T: Copy + Eq>(consensus: &mut Consensus<T>, value: Option<T>) {
+    match value {
+        Some(value) => consensus.observe(value),
+        None => consensus.invalidate(),
     }
 }
 
@@ -312,7 +369,7 @@ fn simulate_block(
 ) -> RegConstState {
     let mut pc = start;
     while pc < end {
-        let (next_state, replacement) = analyze_instruction(insns, pc, &state, oracle);
+        let (next_state, replacement) = analyze_instruction(insns, pc, None, &state, oracle);
         if let (Some(map), Some(replacement)) = (replacements.as_deref_mut(), replacement) {
             map.insert(pc, replacement);
         }
@@ -325,6 +382,7 @@ fn simulate_block(
 fn analyze_instruction(
     insns: &[BpfInsn],
     pc: usize,
+    frame: Option<usize>,
     state: &RegConstState,
     oracle: &VerifierExactConstOracle,
 ) -> (RegConstState, Option<Vec<BpfInsn>>) {
@@ -353,7 +411,7 @@ fn analyze_instruction(
             None
         }
         BPF_ALU | BPF_ALU64 => {
-            let replacement = fold_alu_instruction(insns, pc, state, oracle);
+            let replacement = fold_alu_instruction(insns, pc, frame, state, oracle);
             let result = evaluate_alu_result(insn, state);
             match result {
                 Some(value) => set_reg_exact64(&mut next, insn.dst_reg(), value),
@@ -372,20 +430,31 @@ fn analyze_instruction(
         _ => None,
     };
 
-    oracle.apply_post_state(pc, &mut next);
+    if can_apply_oracle_post_state(insn) {
+        oracle.apply_post_state(pc, frame, &mut next);
+    }
     (next, replacement)
+}
+
+fn can_apply_oracle_post_state(insn: &BpfInsn) -> bool {
+    !insn.is_call() && !is_reg_to_reg_mov(insn)
 }
 
 fn fold_alu_instruction(
     insns: &[BpfInsn],
     pc: usize,
+    frame: Option<usize>,
     state: &RegConstState,
     oracle: &VerifierExactConstOracle,
 ) -> Option<Vec<BpfInsn>> {
     let insn = &insns[pc];
-    let result = oracle
-        .exact_for_instruction(pc, insn.dst_reg(), insn.class() == BPF_ALU)
-        .or_else(|| evaluate_alu_result(insn, state))?;
+    let result = evaluate_alu_result(insn, state).or_else(|| {
+        oracle_materializes_alu_result(insn)
+            .then(|| {
+                oracle.exact_for_instruction(pc, frame, insn.dst_reg(), insn.class() == BPF_ALU)
+            })
+            .flatten()
+    })?;
 
     let op = bpf_op(insn.code);
     let candidate = match op {
@@ -394,6 +463,16 @@ fn fold_alu_instruction(
     };
 
     replacement_if_changed(insns, pc, &candidate)
+}
+
+fn oracle_materializes_alu_result(insn: &BpfInsn) -> bool {
+    !is_reg_to_reg_mov(insn)
+}
+
+fn is_reg_to_reg_mov(insn: &BpfInsn) -> bool {
+    matches!(insn.class(), BPF_ALU | BPF_ALU64)
+        && bpf_op(insn.code) == BPF_MOV
+        && bpf_src(insn.code) == BPF_X
 }
 
 fn evaluate_alu_result(insn: &BpfInsn, state: &RegConstState) -> Option<u64> {
@@ -656,11 +735,28 @@ mod tests {
     }
 
     fn verifier_delta_state(pc: usize, regs: HashMap<u8, RegState>) -> VerifierInsn {
+        verifier_delta_state_in_frame(pc, 0, regs)
+    }
+
+    fn verifier_delta_state_in_frame(
+        pc: usize,
+        frame: usize,
+        regs: HashMap<u8, RegState>,
+    ) -> VerifierInsn {
+        verifier_state_in_frame(pc, frame, VerifierInsnKind::InsnDeltaState, regs)
+    }
+
+    fn verifier_state_in_frame(
+        pc: usize,
+        frame: usize,
+        kind: VerifierInsnKind,
+        regs: HashMap<u8, RegState>,
+    ) -> VerifierInsn {
         VerifierInsn {
             pc,
-            frame: 0,
+            frame,
             from_pc: None,
-            kind: VerifierInsnKind::InsnDeltaState,
+            kind,
             speculative: false,
             regs,
             stack: HashMap::new(),
@@ -762,6 +858,112 @@ mod tests {
         assert_eq!(
             program.insns,
             vec![call_helper(7), BpfInsn::mov64_imm(0, 42), exit_insn(),]
+        );
+    }
+
+    #[test]
+    fn const_prop_does_not_seed_caller_saved_regs_from_call_post_state() {
+        // Bug caught: a call-pc verifier post-state for R0-R5 must not repopulate
+        // caller-saved regs after call handling cleared them in the abstract model.
+        let original = vec![call_helper(7), add64_imm(0, 1), exit_insn()];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_verifier_states(vec![verifier_delta_state(
+            0,
+            HashMap::from([(0, scalar_reg(41))]),
+        )]);
+
+        let result = run_const_prop_pass(&mut program);
+        assert_eq!(result.pass_results[0].sites_applied, 0);
+        assert_eq!(program.insns, original);
+    }
+
+    #[test]
+    fn const_prop_does_not_use_oracle_for_register_mov_provenance() {
+        // Bug caught: a verifier pre-state exact value for MOV X's destination
+        // must not replace a register copy that may transfer pointer provenance.
+        let original = vec![BpfInsn::mov64_reg(2, 3), add64_imm(2, 1), exit_insn()];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_verifier_states(vec![verifier_state_in_frame(
+            0,
+            0,
+            VerifierInsnKind::PcFullState,
+            HashMap::from([(2, scalar_reg(16))]),
+        )]);
+
+        let result = run_const_prop_pass(&mut program);
+        assert_eq!(result.pass_results[0].sites_applied, 0);
+        assert_eq!(program.insns, original);
+    }
+
+    #[test]
+    fn const_prop_rejects_replacement_when_observation_missing_at_some_visit() {
+        // Bug caught: a verifier delta from one diamond arm must not prove the join-pc
+        // constant when another visit to the same pc omitted that register.
+        let original = vec![
+            call_helper(7),
+            BpfInsn::new(BPF_JMP | BPF_JEQ | BPF_K, BpfInsn::make_regs(0, 0), 1, 0),
+            BpfInsn::nop(),
+            add64_imm(3, 1),
+            exit_insn(),
+        ];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_verifier_states(vec![
+            verifier_delta_state(3, HashMap::from([(3, scalar_reg(99))])),
+            verifier_delta_state(3, HashMap::new()),
+        ]);
+
+        let result = run_const_prop_pass(&mut program);
+        assert_eq!(result.pass_results[0].sites_applied, 0);
+        assert_eq!(program.insns, original);
+    }
+
+    #[test]
+    fn const_prop_rejects_replacement_when_full_state_visit_omits_reg() {
+        // Bug caught: full verifier snapshots are visits too; ignoring a full-state
+        // omission would let one delta-state exact value masquerade as global proof.
+        let original = vec![call_helper(7), add64_imm(3, 1), exit_insn()];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_verifier_states(vec![
+            verifier_delta_state(1, HashMap::from([(3, scalar_reg(42))])),
+            verifier_state_in_frame(1, 0, VerifierInsnKind::PcFullState, HashMap::new()),
+        ]);
+
+        let result = run_const_prop_pass(&mut program);
+        assert_eq!(result.pass_results[0].sites_applied, 0);
+        assert_eq!(program.insns, original);
+    }
+
+    #[test]
+    fn const_prop_rejects_replacement_across_disagreeing_frames() {
+        // Bug caught: context-insensitive simulation must not apply a verifier fact
+        // from one call frame when the same pc has a different exact value elsewhere.
+        let original = vec![call_helper(7), add64_imm(3, 1), exit_insn()];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_verifier_states(vec![
+            verifier_delta_state_in_frame(1, 0, HashMap::from([(3, scalar_reg(42))])),
+            verifier_delta_state_in_frame(1, 1, HashMap::from([(3, scalar_reg(43))])),
+        ]);
+
+        let result = run_const_prop_pass(&mut program);
+        assert_eq!(result.pass_results[0].sites_applied, 0);
+        assert_eq!(program.insns, original);
+    }
+
+    #[test]
+    fn const_prop_accepts_when_every_visit_agrees() {
+        // Bug caught: the fail-closed oracle should still allow useful folding when
+        // every verifier visit to a pc/frame observes the same exact register value.
+        let mut program = BpfProgram::new(vec![call_helper(7), add64_imm(3, 1), exit_insn()]);
+        program.set_verifier_states(vec![
+            verifier_delta_state(1, HashMap::from([(3, scalar_reg(42))])),
+            verifier_delta_state(1, HashMap::from([(3, scalar_reg(42))])),
+        ]);
+
+        let result = run_const_prop_pass(&mut program);
+        assert_eq!(result.pass_results[0].sites_applied, 1);
+        assert_eq!(
+            program.insns,
+            vec![call_helper(7), BpfInsn::mov64_imm(3, 42), exit_insn()]
         );
     }
 
