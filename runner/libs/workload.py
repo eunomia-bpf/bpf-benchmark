@@ -732,7 +732,17 @@ def _run_wrk_http_load(
     connections: int = 8,
     workload_name: str,
 ) -> WorkloadResult:
-    command = [wrk_binary, f"-t{int(threads)}", f"-c{int(connections)}", f"-d{int(seconds)}s", url]
+
+    # `--timeout 1s` bounds wrk's per-socket wait so a broken endpoint cannot
+    # leave a request hanging until the subprocess deadline.
+    command = [
+        wrk_binary,
+        f"-t{int(threads)}",
+        f"-c{int(connections)}",
+        f"-d{int(seconds)}s",
+        "--timeout", "1s",
+        url,
+    ]
     if namespace:
         command = _namespaced_client_command(namespace, command)
     start = time.monotonic()
