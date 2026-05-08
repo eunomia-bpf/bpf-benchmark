@@ -1,0 +1,1790 @@
+
+/tmp/katran_native_compile/build/balancer_native.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <balancer_ingress>:
+       0:	8b 0f                	mov    ecx,DWORD PTR [rdi]
+       2:	8b 57 04             	mov    edx,DWORD PTR [rdi+0x4]
+       5:	48 8d 71 0e          	lea    rsi,[rcx+0xe]
+       9:	b8 01 00 00 00       	mov    eax,0x1
+       e:	48 39 d6             	cmp    rsi,rdx
+      11:	0f 87 61 1a 00 00    	ja     1a78 <balancer_ingress+0x1a78>
+      17:	55                   	push   rbp
+      18:	41 57                	push   r15
+      1a:	41 56                	push   r14
+      1c:	41 55                	push   r13
+      1e:	41 54                	push   r12
+      20:	53                   	push   rbx
+      21:	48 81 ec a8 00 00 00 	sub    rsp,0xa8
+      28:	c7 44 24 5c 10 02 00 	mov    DWORD PTR [rsp+0x5c],0x210
+      2f:	00 
+      30:	48 8d 35 00 00 00 00 	lea    rsi,[rip+0x0]        # 37 <balancer_ingress+0x37>
+      37:	4c 8d 44 24 5c       	lea    r8,[rsp+0x5c]
+      3c:	48 85 f6             	test   rsi,rsi
+      3f:	0f 84 22 1a 00 00    	je     1a67 <balancer_ingress+0x1a67>
+      45:	48 29 ca             	sub    rdx,rcx
+      48:	c4 e2 79 59 15 00 00 	vpbroadcastq xmm2,QWORD PTR [rip+0x0]        # 51 <balancer_ingress+0x51>
+      4f:	00 00 
+      51:	c4 e3 e9 22 da 01    	vpinsrq xmm3,xmm2,rdx,0x1
+      57:	c5 e1 d4 06          	vpaddq xmm0,xmm3,XMMWORD PTR [rsi]
+      5b:	c5 fa 7f 06          	vmovdqu XMMWORD PTR [rsi],xmm0
+      5f:	0f b7 49 0c          	movzx  ecx,WORD PTR [rcx+0xc]
+      63:	81 f9 86 dd 00 00    	cmp    ecx,0xdd86
+      69:	0f 84 2a 01 00 00    	je     199 <balancer_ingress+0x199>
+      6f:	83 f9 08             	cmp    ecx,0x8
+      72:	0f 85 f7 12 00 00    	jne    136f <balancer_ingress+0x136f>
+      78:	8b 17                	mov    edx,DWORD PTR [rdi]
+      7a:	8b 77 04             	mov    esi,DWORD PTR [rdi+0x4]
+      7d:	c5 f9 ef c0          	vpxor  xmm0,xmm0,xmm0
+      81:	c5 fe 7f 44 24 30    	vmovdqu YMMWORD PTR [rsp+0x30],ymm0
+      87:	c5 fe 7f 44 24 20    	vmovdqu YMMWORD PTR [rsp+0x20],ymm0
+      8d:	c5 f9 ef c0          	vpxor  xmm0,xmm0,xmm0
+      91:	c5 f9 7f 44 24 60    	vmovdqa XMMWORD PTR [rsp+0x60],xmm0
+      97:	c7 44 24 70 00 00 00 	mov    DWORD PTR [rsp+0x70],0x0
+      9e:	00 
+      9f:	c7 84 24 98 00 00 00 	mov    DWORD PTR [rsp+0x98],0x0
+      a6:	00 00 00 00 
+      aa:	4c 8d 42 22          	lea    r8,[rdx+0x22]
+      ae:	49 39 f0             	cmp    r8,rsi
+      b1:	0f 87 93 12 00 00    	ja     134a <balancer_ingress+0x134a>
+      b7:	0f b6 4a 0e          	movzx  ecx,BYTE PTR [rdx+0xe]
+      bb:	80 e1 0f             	and    cl,0xf
+      be:	80 f9 05             	cmp    cl,0x5
+      c1:	0f 85 83 12 00 00    	jne    134a <balancer_ingress+0x134a>
+      c7:	0f b6 4a 0f          	movzx  ecx,BYTE PTR [rdx+0xf]
+      cb:	88 4c 24 4d          	mov    BYTE PTR [rsp+0x4d],cl
+      cf:	44 0f b6 4a 17       	movzx  r9d,BYTE PTR [rdx+0x17]
+      d4:	44 88 4c 24 44       	mov    BYTE PTR [rsp+0x44],r9b
+      d9:	44 0f b7 52 14       	movzx  r10d,WORD PTR [rdx+0x14]
+      de:	41 f7 c2 3f ff 00 00 	test   r10d,0xff3f
+      e5:	0f 85 5f 12 00 00    	jne    134a <balancer_ingress+0x134a>
+      eb:	0f b7 6a 10          	movzx  ebp,WORD PTR [rdx+0x10]
+      ef:	41 80 f9 01          	cmp    r9b,0x1
+      f3:	0f 85 56 03 00 00    	jne    44f <balancer_ingress+0x44f>
+      f9:	48 8d 4a 2a          	lea    rcx,[rdx+0x2a]
+      fd:	48 39 f1             	cmp    rcx,rsi
+     100:	0f 87 44 12 00 00    	ja     134a <balancer_ingress+0x134a>
+     106:	45 0f b6 08          	movzx  r9d,BYTE PTR [r8]
+     10a:	41 83 f9 03          	cmp    r9d,0x3
+     10e:	0f 84 39 07 00 00    	je     84d <balancer_ingress+0x84d>
+     114:	b9 02 00 00 00       	mov    ecx,0x2
+     119:	41 83 f9 08          	cmp    r9d,0x8
+     11d:	0f 85 2c 12 00 00    	jne    134f <balancer_ingress+0x134f>
+     123:	c6 42 22 00          	mov    BYTE PTR [rdx+0x22],0x0
+     127:	66 83 42 24 08       	add    WORD PTR [rdx+0x24],0x8
+     12c:	0f b7 cd             	movzx  ecx,bp
+     12f:	c6 42 16 40          	mov    BYTE PTR [rdx+0x16],0x40
+     133:	c5 fb 10 42 1a       	vmovsd xmm0,QWORD PTR [rdx+0x1a]
+     138:	c5 f8 c6 c0 e1       	vshufps xmm0,xmm0,xmm0,0xe1
+     13d:	c5 f8 13 42 1a       	vmovlps QWORD PTR [rdx+0x1a],xmm0
+     142:	0f b7 72 0e          	movzx  esi,WORD PTR [rdx+0xe]
+     146:	0f b7 7a 12          	movzx  edi,WORD PTR [rdx+0x12]
+     14a:	48 01 f7             	add    rdi,rsi
+     14d:	48 01 cf             	add    rdi,rcx
+     150:	c4 e2 7d 34 42 1a    	vpmovzxwq ymm0,QWORD PTR [rdx+0x1a]
+     156:	0f b7 4a 16          	movzx  ecx,WORD PTR [rdx+0x16]
+     15a:	c4 e3 7d 39 c1 01    	vextracti128 xmm1,ymm0,0x1
+     160:	c5 f9 d4 c1          	vpaddq xmm0,xmm0,xmm1
+     164:	c5 f9 70 c8 ee       	vpshufd xmm1,xmm0,0xee
+     169:	c5 f9 d4 c1          	vpaddq xmm0,xmm0,xmm1
+     16d:	c4 e1 f9 7e c6       	vmovq  rsi,xmm0
+     172:	49 01 ca             	add    r10,rcx
+     175:	49 01 fa             	add    r10,rdi
+     178:	49 01 f2             	add    r10,rsi
+     17b:	4c 89 d1             	mov    rcx,r10
+     17e:	48 c1 e9 10          	shr    rcx,0x10
+     182:	41 0f b7 f2          	movzx  esi,r10w
+     186:	48 01 ce             	add    rsi,rcx
+     189:	49 81 fa 00 00 01 00 	cmp    r10,0x10000
+     190:	49 0f 42 f2          	cmovb  rsi,r10
+     194:	e9 cf 01 00 00       	jmp    368 <balancer_ingress+0x368>
+     199:	8b 17                	mov    edx,DWORD PTR [rdi]
+     19b:	8b 77 04             	mov    esi,DWORD PTR [rdi+0x4]
+     19e:	c5 f9 ef c0          	vpxor  xmm0,xmm0,xmm0
+     1a2:	c5 fe 7f 44 24 30    	vmovdqu YMMWORD PTR [rsp+0x30],ymm0
+     1a8:	c5 fe 7f 44 24 20    	vmovdqu YMMWORD PTR [rsp+0x20],ymm0
+     1ae:	c5 f9 ef c0          	vpxor  xmm0,xmm0,xmm0
+     1b2:	c5 f9 7f 44 24 60    	vmovdqa XMMWORD PTR [rsp+0x60],xmm0
+     1b8:	c7 44 24 70 00 00 00 	mov    DWORD PTR [rsp+0x70],0x0
+     1bf:	00 
+     1c0:	c7 84 24 98 00 00 00 	mov    DWORD PTR [rsp+0x98],0x0
+     1c7:	00 00 00 00 
+     1cb:	4c 8d 42 36          	lea    r8,[rdx+0x36]
+     1cf:	49 39 f0             	cmp    r8,rsi
+     1d2:	0f 87 72 11 00 00    	ja     134a <balancer_ingress+0x134a>
+     1d8:	44 0f b6 4a 14       	movzx  r9d,BYTE PTR [rdx+0x14]
+     1dd:	44 88 4c 24 44       	mov    BYTE PTR [rsp+0x44],r9b
+     1e2:	0f b6 4a 0e          	movzx  ecx,BYTE PTR [rdx+0xe]
+     1e6:	c0 e1 04             	shl    cl,0x4
+     1e9:	88 4c 24 4d          	mov    BYTE PTR [rsp+0x4d],cl
+     1ed:	44 0f b6 52 0f       	movzx  r10d,BYTE PTR [rdx+0xf]
+     1f2:	41 c0 ea 04          	shr    r10b,0x4
+     1f6:	41 08 ca             	or     r10b,cl
+     1f9:	44 88 54 24 4d       	mov    BYTE PTR [rsp+0x4d],r10b
+     1fe:	41 83 f9 2c          	cmp    r9d,0x2c
+     202:	0f 84 42 11 00 00    	je     134a <balancer_ingress+0x134a>
+     208:	0f b7 6a 12          	movzx  ebp,WORD PTR [rdx+0x12]
+     20c:	41 83 f9 3a          	cmp    r9d,0x3a
+     210:	0f 85 8e 00 00 00    	jne    2a4 <balancer_ingress+0x2a4>
+     216:	48 8d 4a 3e          	lea    rcx,[rdx+0x3e]
+     21a:	48 39 f1             	cmp    rcx,rsi
+     21d:	0f 87 27 11 00 00    	ja     134a <balancer_ingress+0x134a>
+     223:	45 0f b6 08          	movzx  r9d,BYTE PTR [r8]
+     227:	41 83 f9 01          	cmp    r9d,0x1
+     22b:	0f 84 5e 03 00 00    	je     58f <balancer_ingress+0x58f>
+     231:	41 83 f9 02          	cmp    r9d,0x2
+     235:	0f 84 23 03 00 00    	je     55e <balancer_ingress+0x55e>
+     23b:	b9 02 00 00 00       	mov    ecx,0x2
+     240:	41 81 f9 80 00 00 00 	cmp    r9d,0x80
+     247:	0f 85 02 11 00 00    	jne    134f <balancer_ingress+0x134f>
+     24d:	c6 42 36 81          	mov    BYTE PTR [rdx+0x36],0x81
+     251:	66 ff 4a 38          	dec    WORD PTR [rdx+0x38]
+     255:	c6 42 15 40          	mov    BYTE PTR [rdx+0x15],0x40
+     259:	c5 f8 10 42 16       	vmovups xmm0,XMMWORD PTR [rdx+0x16]
+     25e:	c5 f8 29 04 24       	vmovaps XMMWORD PTR [rsp],xmm0
+     263:	c5 f8 10 42 26       	vmovups xmm0,XMMWORD PTR [rdx+0x26]
+     268:	c5 f8 11 42 16       	vmovups XMMWORD PTR [rdx+0x16],xmm0
+     26d:	c5 f9 6f 04 24       	vmovdqa xmm0,XMMWORD PTR [rsp]
+     272:	c5 fa 7f 42 26       	vmovdqu XMMWORD PTR [rdx+0x26],xmm0
+     277:	0f b7 4a 0a          	movzx  ecx,WORD PTR [rdx+0xa]
+     27b:	66 89 4c 24 18       	mov    WORD PTR [rsp+0x18],cx
+     280:	8b 4a 06             	mov    ecx,DWORD PTR [rdx+0x6]
+     283:	89 4c 24 14          	mov    DWORD PTR [rsp+0x14],ecx
+     287:	8b 0a                	mov    ecx,DWORD PTR [rdx]
+     289:	89 4a 06             	mov    DWORD PTR [rdx+0x6],ecx
+     28c:	0f b7 4a 04          	movzx  ecx,WORD PTR [rdx+0x4]
+     290:	66 89 4a 0a          	mov    WORD PTR [rdx+0xa],cx
+     294:	8b 4c 24 14          	mov    ecx,DWORD PTR [rsp+0x14]
+     298:	89 0a                	mov    DWORD PTR [rdx],ecx
+     29a:	0f b7 4c 24 18       	movzx  ecx,WORD PTR [rsp+0x18]
+     29f:	e9 25 01 00 00       	jmp    3c9 <balancer_ingress+0x3c9>
+     2a4:	c5 f8 10 42 16       	vmovups xmm0,XMMWORD PTR [rdx+0x16]
+     2a9:	c5 f8 29 44 24 20    	vmovaps XMMWORD PTR [rsp+0x20],xmm0
+     2af:	c5 fa 6f 42 26       	vmovdqu xmm0,XMMWORD PTR [rdx+0x26]
+     2b4:	c5 f9 7f 44 24 30    	vmovdqa XMMWORD PTR [rsp+0x30],xmm0
+     2ba:	41 80 f9 01          	cmp    r9b,0x1
+     2be:	0f 85 1c 01 00 00    	jne    3e0 <balancer_ingress+0x3e0>
+     2c4:	48 8d 4a 3e          	lea    rcx,[rdx+0x3e]
+     2c8:	48 39 f1             	cmp    rcx,rsi
+     2cb:	0f 87 79 10 00 00    	ja     134a <balancer_ingress+0x134a>
+     2d1:	45 0f b6 08          	movzx  r9d,BYTE PTR [r8]
+     2d5:	41 83 f9 03          	cmp    r9d,0x3
+     2d9:	0f 84 94 04 00 00    	je     773 <balancer_ingress+0x773>
+     2df:	b9 02 00 00 00       	mov    ecx,0x2
+     2e4:	41 83 f9 08          	cmp    r9d,0x8
+     2e8:	0f 85 61 10 00 00    	jne    134f <balancer_ingress+0x134f>
+     2ee:	c6 42 22 00          	mov    BYTE PTR [rdx+0x22],0x0
+     2f2:	66 83 42 24 08       	add    WORD PTR [rdx+0x24],0x8
+     2f7:	c6 42 16 40          	mov    BYTE PTR [rdx+0x16],0x40
+     2fb:	c5 fb 10 42 1a       	vmovsd xmm0,QWORD PTR [rdx+0x1a]
+     300:	c5 f8 c6 c0 e1       	vshufps xmm0,xmm0,xmm0,0xe1
+     305:	c5 f8 13 42 1a       	vmovlps QWORD PTR [rdx+0x1a],xmm0
+     30a:	c4 e2 7d 34 42 0e    	vpmovzxwq ymm0,QWORD PTR [rdx+0xe]
+     310:	c4 e2 7d 34 4a 1a    	vpmovzxwq ymm1,QWORD PTR [rdx+0x1a]
+     316:	0f b7 4a 16          	movzx  ecx,WORD PTR [rdx+0x16]
+     31a:	c4 e3 7d 39 c2 01    	vextracti128 xmm2,ymm0,0x1
+     320:	c5 f9 d4 c2          	vpaddq xmm0,xmm0,xmm2
+     324:	c5 f9 70 d0 ee       	vpshufd xmm2,xmm0,0xee
+     329:	c5 f9 d4 c2          	vpaddq xmm0,xmm0,xmm2
+     32d:	c4 e1 f9 7e c6       	vmovq  rsi,xmm0
+     332:	c4 e3 7d 39 c8 01    	vextracti128 xmm0,ymm1,0x1
+     338:	c5 f1 d4 c0          	vpaddq xmm0,xmm1,xmm0
+     33c:	c5 f9 70 c8 ee       	vpshufd xmm1,xmm0,0xee
+     341:	c5 f9 d4 c1          	vpaddq xmm0,xmm0,xmm1
+     345:	c4 e1 f9 7e c7       	vmovq  rdi,xmm0
+     34a:	48 01 f7             	add    rdi,rsi
+     34d:	48 01 cf             	add    rdi,rcx
+     350:	48 89 f9             	mov    rcx,rdi
+     353:	48 c1 e9 10          	shr    rcx,0x10
+     357:	0f b7 f7             	movzx  esi,di
+     35a:	48 01 ce             	add    rsi,rcx
+     35d:	48 81 ff 00 00 01 00 	cmp    rdi,0x10000
+     364:	48 0f 42 f7          	cmovb  rsi,rdi
+     368:	48 89 f1             	mov    rcx,rsi
+     36b:	48 c1 e9 10          	shr    rcx,0x10
+     36f:	0f b7 fe             	movzx  edi,si
+     372:	48 01 cf             	add    rdi,rcx
+     375:	48 81 fe 00 00 01 00 	cmp    rsi,0x10000
+     37c:	48 0f 42 fe          	cmovb  rdi,rsi
+     380:	48 89 f9             	mov    rcx,rdi
+     383:	48 c1 e9 10          	shr    rcx,0x10
+     387:	0f b7 f7             	movzx  esi,di
+     38a:	01 f1                	add    ecx,esi
+     38c:	48 81 ff 00 00 01 00 	cmp    rdi,0x10000
+     393:	0f 42 cf             	cmovb  ecx,edi
+     396:	89 ce                	mov    esi,ecx
+     398:	c1 ee 10             	shr    esi,0x10
+     39b:	01 ce                	add    esi,ecx
+     39d:	f7 d6                	not    esi
+     39f:	66 89 72 18          	mov    WORD PTR [rdx+0x18],si
+     3a3:	0f b7 4a 0a          	movzx  ecx,WORD PTR [rdx+0xa]
+     3a7:	66 89 4c 24 04       	mov    WORD PTR [rsp+0x4],cx
+     3ac:	8b 4a 06             	mov    ecx,DWORD PTR [rdx+0x6]
+     3af:	89 0c 24             	mov    DWORD PTR [rsp],ecx
+     3b2:	8b 0a                	mov    ecx,DWORD PTR [rdx]
+     3b4:	89 4a 06             	mov    DWORD PTR [rdx+0x6],ecx
+     3b7:	0f b7 4a 04          	movzx  ecx,WORD PTR [rdx+0x4]
+     3bb:	66 89 4a 0a          	mov    WORD PTR [rdx+0xa],cx
+     3bf:	8b 0c 24             	mov    ecx,DWORD PTR [rsp]
+     3c2:	89 0a                	mov    DWORD PTR [rdx],ecx
+     3c4:	0f b7 4c 24 04       	movzx  ecx,WORD PTR [rsp+0x4]
+     3c9:	66 89 4a 04          	mov    WORD PTR [rdx+0x4],cx
+     3cd:	b9 03 00 00 00       	mov    ecx,0x3
+     3d2:	83 f9 01             	cmp    ecx,0x1
+     3d5:	0f 85 7d 0f 00 00    	jne    1358 <balancer_ingress+0x1358>
+     3db:	e9 5f 16 00 00       	jmp    1a3f <balancer_ingress+0x1a3f>
+     3e0:	45 31 d2             	xor    r10d,r10d
+     3e3:	b9 02 00 00 00       	mov    ecx,0x2
+     3e8:	41 80 f9 11          	cmp    r9b,0x11
+     3ec:	0f 84 c3 00 00 00    	je     4b5 <balancer_ingress+0x4b5>
+     3f2:	45 0f b6 d9          	movzx  r11d,r9b
+     3f6:	41 83 fb 06          	cmp    r11d,0x6
+     3fa:	0f 85 4f 0f 00 00    	jne    134f <balancer_ingress+0x134f>
+     400:	4c 8d 5a 66          	lea    r11,[rdx+0x66]
+     404:	41 f6 c2 01          	test   r10b,0x1
+     408:	4d 0f 44 d8          	cmove  r11,r8
+     40c:	49 8d 5b 14          	lea    rbx,[r11+0x14]
+     410:	48 39 f3             	cmp    rbx,rsi
+     413:	0f 87 31 0f 00 00    	ja     134a <balancer_ingress+0x134a>
+     419:	45 0f b7 73 0c       	movzx  r14d,WORD PTR [r11+0xc]
+     41e:	44 89 d3             	mov    ebx,r10d
+     421:	41 f7 c6 00 02 00 00 	test   r14d,0x200
+     428:	74 0f                	je     439 <balancer_ingress+0x439>
+     42a:	44 89 d3             	mov    ebx,r10d
+     42d:	80 cb 02             	or     bl,0x2
+     430:	88 5c 24 4c          	mov    BYTE PTR [rsp+0x4c],bl
+     434:	45 0f b7 73 0c       	movzx  r14d,WORD PTR [r11+0xc]
+     439:	41 f7 c6 00 04 00 00 	test   r14d,0x400
+     440:	0f 84 88 00 00 00    	je     4ce <balancer_ingress+0x4ce>
+     446:	80 cb 04             	or     bl,0x4
+     449:	88 5c 24 4c          	mov    BYTE PTR [rsp+0x4c],bl
+     44d:	eb 7f                	jmp    4ce <balancer_ingress+0x4ce>
+     44f:	8b 4a 1a             	mov    ecx,DWORD PTR [rdx+0x1a]
+     452:	89 4c 24 20          	mov    DWORD PTR [rsp+0x20],ecx
+     456:	8b 4a 1e             	mov    ecx,DWORD PTR [rdx+0x1e]
+     459:	89 4c 24 30          	mov    DWORD PTR [rsp+0x30],ecx
+     45d:	41 80 f9 3a          	cmp    r9b,0x3a
+     461:	0f 85 85 00 00 00    	jne    4ec <balancer_ingress+0x4ec>
+     467:	48 8d 4a 2a          	lea    rcx,[rdx+0x2a]
+     46b:	48 39 f1             	cmp    rcx,rsi
+     46e:	0f 87 d6 0e 00 00    	ja     134a <balancer_ingress+0x134a>
+     474:	45 0f b6 08          	movzx  r9d,BYTE PTR [r8]
+     478:	41 83 f9 01          	cmp    r9d,0x1
+     47c:	0f 84 2b 06 00 00    	je     aad <balancer_ingress+0xaad>
+     482:	41 83 f9 02          	cmp    r9d,0x2
+     486:	0f 84 f0 05 00 00    	je     a7c <balancer_ingress+0xa7c>
+     48c:	b9 02 00 00 00       	mov    ecx,0x2
+     491:	41 81 f9 80 00 00 00 	cmp    r9d,0x80
+     498:	0f 85 b1 0e 00 00    	jne    134f <balancer_ingress+0x134f>
+     49e:	48 8d 7a 3e          	lea    rdi,[rdx+0x3e]
+     4a2:	b9 01 00 00 00       	mov    ecx,0x1
+     4a7:	48 39 f7             	cmp    rdi,rsi
+     4aa:	0f 86 9d fd ff ff    	jbe    24d <balancer_ingress+0x24d>
+     4b0:	e9 9a 0e 00 00       	jmp    134f <balancer_ingress+0x134f>
+     4b5:	4c 8d 5a 66          	lea    r11,[rdx+0x66]
+     4b9:	41 f6 c2 01          	test   r10b,0x1
+     4bd:	4d 0f 44 d8          	cmove  r11,r8
+     4c1:	49 8d 5b 08          	lea    rbx,[r11+0x8]
+     4c5:	48 39 f3             	cmp    rbx,rsi
+     4c8:	0f 87 7c 0e 00 00    	ja     134a <balancer_ingress+0x134a>
+     4ce:	41 f6 c2 01          	test   r10b,0x1
+     4d2:	0f 85 f8 00 00 00    	jne    5d0 <balancer_ingress+0x5d0>
+     4d8:	45 0f b7 13          	movzx  r10d,WORD PTR [r11]
+     4dc:	66 44 89 54 24 40    	mov    WORD PTR [rsp+0x40],r10w
+     4e2:	45 0f b7 53 02       	movzx  r10d,WORD PTR [r11+0x2]
+     4e7:	e9 f3 00 00 00       	jmp    5df <balancer_ingress+0x5df>
+     4ec:	45 31 d2             	xor    r10d,r10d
+     4ef:	b9 02 00 00 00       	mov    ecx,0x2
+     4f4:	41 80 f9 11          	cmp    r9b,0x11
+     4f8:	0f 84 18 03 00 00    	je     816 <balancer_ingress+0x816>
+     4fe:	45 0f b6 d9          	movzx  r11d,r9b
+     502:	41 83 fb 06          	cmp    r11d,0x6
+     506:	0f 85 43 0e 00 00    	jne    134f <balancer_ingress+0x134f>
+     50c:	4c 8d 5a 3e          	lea    r11,[rdx+0x3e]
+     510:	41 f6 c2 01          	test   r10b,0x1
+     514:	4d 0f 44 d8          	cmove  r11,r8
+     518:	49 8d 5b 14          	lea    rbx,[r11+0x14]
+     51c:	48 39 f3             	cmp    rbx,rsi
+     51f:	0f 87 25 0e 00 00    	ja     134a <balancer_ingress+0x134a>
+     525:	45 0f b7 73 0c       	movzx  r14d,WORD PTR [r11+0xc]
+     52a:	44 89 d3             	mov    ebx,r10d
+     52d:	41 f7 c6 00 02 00 00 	test   r14d,0x200
+     534:	74 0f                	je     545 <balancer_ingress+0x545>
+     536:	44 89 d3             	mov    ebx,r10d
+     539:	80 cb 02             	or     bl,0x2
+     53c:	88 5c 24 4c          	mov    BYTE PTR [rsp+0x4c],bl
+     540:	45 0f b7 73 0c       	movzx  r14d,WORD PTR [r11+0xc]
+     545:	41 f7 c6 00 04 00 00 	test   r14d,0x400
+     54c:	0f 84 dd 02 00 00    	je     82f <balancer_ingress+0x82f>
+     552:	80 cb 04             	or     bl,0x4
+     555:	88 5c 24 4c          	mov    BYTE PTR [rsp+0x4c],bl
+     559:	e9 d1 02 00 00       	jmp    82f <balancer_ingress+0x82f>
+     55e:	c7 04 24 0c 02 00 00 	mov    DWORD PTR [rsp],0x20c
+     565:	48 8d 0d 00 00 00 00 	lea    rcx,[rip+0x0]        # 56c <balancer_ingress+0x56c>
+     56c:	49 89 e1             	mov    r9,rsp
+     56f:	48 85 c9             	test   rcx,rcx
+     572:	0f 84 d2 0d 00 00    	je     134a <balancer_ingress+0x134a>
+     578:	48 ff 01             	inc    QWORD PTR [rcx]
+     57b:	44 8b 4a 3a          	mov    r9d,DWORD PTR [rdx+0x3a]
+     57f:	41 0f c9             	bswap  r9d
+     582:	41 81 f9 ff 04 00 00 	cmp    r9d,0x4ff
+     589:	77 04                	ja     58f <balancer_ingress+0x58f>
+     58b:	48 ff 41 08          	inc    QWORD PTR [rcx+0x8]
+     58f:	48 8d 4a 66          	lea    rcx,[rdx+0x66]
+     593:	48 39 f1             	cmp    rcx,rsi
+     596:	0f 87 ae 0d 00 00    	ja     134a <balancer_ingress+0x134a>
+     59c:	44 0f b6 4a 44       	movzx  r9d,BYTE PTR [rdx+0x44]
+     5a1:	44 88 4c 24 44       	mov    BYTE PTR [rsp+0x44],r9b
+     5a6:	44 0f b6 54 24 4c    	movzx  r10d,BYTE PTR [rsp+0x4c]
+     5ac:	41 80 ca 01          	or     r10b,0x1
+     5b0:	44 88 54 24 4c       	mov    BYTE PTR [rsp+0x4c],r10b
+     5b5:	c5 f8 10 42 56       	vmovups xmm0,XMMWORD PTR [rdx+0x56]
+     5ba:	c5 f8 29 44 24 20    	vmovaps XMMWORD PTR [rsp+0x20],xmm0
+     5c0:	c5 fa 6f 42 46       	vmovdqu xmm0,XMMWORD PTR [rdx+0x46]
+     5c5:	c5 f9 7f 44 24 30    	vmovdqa XMMWORD PTR [rsp+0x30],xmm0
+     5cb:	e9 13 fe ff ff       	jmp    3e3 <balancer_ingress+0x3e3>
+     5d0:	45 0f b7 53 02       	movzx  r10d,WORD PTR [r11+0x2]
+     5d5:	66 44 89 54 24 40    	mov    WORD PTR [rsp+0x40],r10w
+     5db:	45 0f b7 13          	movzx  r10d,WORD PTR [r11]
+     5df:	66 44 89 54 24 42    	mov    WORD PTR [rsp+0x42],r10w
+     5e5:	c5 f9 6f 44 24 30    	vmovdqa xmm0,XMMWORD PTR [rsp+0x30]
+     5eb:	c5 f9 7f 44 24 60    	vmovdqa XMMWORD PTR [rsp+0x60],xmm0
+     5f1:	66 44 89 54 24 70    	mov    WORD PTR [rsp+0x70],r10w
+     5f7:	44 88 4c 24 72       	mov    BYTE PTR [rsp+0x72],r9b
+     5fc:	4c 8d 25 00 00 00 00 	lea    r12,[rip+0x0]        # 603 <balancer_ingress+0x603>
+     603:	4c 8d 4c 24 60       	lea    r9,[rsp+0x60]
+     608:	4d 85 e4             	test   r12,r12
+     60b:	0f 84 d7 01 00 00    	je     7e8 <balancer_ingress+0x7e8>
+     611:	49 89 f1             	mov    r9,rsi
+     614:	49 29 d1             	sub    r9,rdx
+     617:	b9 01 00 00 00       	mov    ecx,0x1
+     61c:	49 81 f9 ea 05 00 00 	cmp    r9,0x5ea
+     623:	0f 8f 26 0d 00 00    	jg     134f <balancer_ingress+0x134f>
+     629:	c7 84 24 94 00 00 00 	mov    DWORD PTR [rsp+0x94],0x200
+     630:	00 02 00 00 
+     634:	4c 8d 35 00 00 00 00 	lea    r14,[rip+0x0]        # 63b <balancer_ingress+0x63b>
+     63b:	48 8d 8c 24 94 00 00 	lea    rcx,[rsp+0x94]
+     642:	00 
+     643:	4d 85 f6             	test   r14,r14
+     646:	0f 84 fe 0c 00 00    	je     134a <balancer_ingress+0x134a>
+     64c:	49 ff 06             	inc    QWORD PTR [r14]
+     64f:	41 f6 04 24 01       	test   BYTE PTR [r12],0x1
+     654:	74 07                	je     65d <balancer_ingress+0x65d>
+     656:	66 c7 44 24 40 00 00 	mov    WORD PTR [rsp+0x40],0x0
+     65d:	45 8b 4c 24 04       	mov    r9d,DWORD PTR [r12+0x4]
+     662:	44 89 8c 24 9c 00 00 	mov    DWORD PTR [rsp+0x9c],r9d
+     669:	00 
+     66a:	83 e1 7f             	and    ecx,0x7f
+     66d:	89 8c 24 90 00 00 00 	mov    DWORD PTR [rsp+0x90],ecx
+     674:	4c 8d 3d 00 00 00 00 	lea    r15,[rip+0x0]        # 67b <balancer_ingress+0x67b>
+     67b:	48 8d 8c 24 90 00 00 	lea    rcx,[rsp+0x90]
+     682:	00 
+     683:	4d 85 ff             	test   r15,r15
+     686:	75 24                	jne    6ac <balancer_ingress+0x6ac>
+     688:	c7 04 24 03 02 00 00 	mov    DWORD PTR [rsp],0x203
+     68f:	48 8d 0d 00 00 00 00 	lea    rcx,[rip+0x0]        # 696 <balancer_ingress+0x696>
+     696:	49 89 e2             	mov    r10,rsp
+     699:	48 85 c9             	test   rcx,rcx
+     69c:	0f 84 a8 0c 00 00    	je     134a <balancer_ingress+0x134a>
+     6a2:	48 ff 01             	inc    QWORD PTR [rcx]
+     6a5:	4c 8d 3d 00 00 00 00 	lea    r15,[rip+0x0]        # 6ac <balancer_ingress+0x6ac>
+     6ac:	41 f6 04 24 04       	test   BYTE PTR [r12],0x4
+     6b1:	0f 84 d3 05 00 00    	je     c8a <balancer_ingress+0xc8a>
+     6b7:	f6 44 24 4c 01       	test   BYTE PTR [rsp+0x4c],0x1
+     6bc:	0f 85 2f 04 00 00    	jne    af1 <balancer_ingress+0xaf1>
+     6c2:	c7 44 24 14 00 00 00 	mov    DWORD PTR [rsp+0x14],0x0
+     6c9:	00 
+     6ca:	48 8d 0d 00 00 00 00 	lea    rcx,[rip+0x0]        # 6d1 <balancer_ingress+0x6d1>
+     6d1:	4c 8d 54 24 14       	lea    r10,[rsp+0x14]
+     6d6:	48 85 c9             	test   rcx,rcx
+     6d9:	0f 84 6b 0c 00 00    	je     134a <balancer_ingress+0x134a>
+     6df:	48 83 c2 66          	add    rdx,0x66
+     6e3:	f6 44 24 4c 01       	test   BYTE PTR [rsp+0x4c],0x1
+     6e8:	49 0f 44 d0          	cmove  rdx,r8
+     6ec:	4c 8d 42 09          	lea    r8,[rdx+0x9]
+     6f0:	49 39 f0             	cmp    r8,rsi
+     6f3:	0f 87 8e 05 00 00    	ja     c87 <balancer_ingress+0xc87>
+     6f9:	44 0f b6 52 08       	movzx  r10d,BYTE PTR [rdx+0x8]
+     6fe:	45 84 d2             	test   r10b,r10b
+     701:	0f 88 67 04 00 00    	js     b6e <balancer_ingress+0xb6e>
+     707:	48 83 c2 11          	add    rdx,0x11
+     70b:	48 39 f2             	cmp    rdx,rsi
+     70e:	0f 87 73 05 00 00    	ja     c87 <balancer_ingress+0xc87>
+     714:	c5 f9 6f e2          	vmovdqa xmm4,xmm2
+     718:	c5 f9 6f cb          	vmovdqa xmm1,xmm3
+     71c:	48 89 fe             	mov    rsi,rdi
+     71f:	45 0f b6 10          	movzx  r10d,BYTE PTR [r8]
+     723:	44 89 d2             	mov    edx,r10d
+     726:	c1 ea 06             	shr    edx,0x6
+     729:	83 fa 03             	cmp    edx,0x3
+     72c:	0f 84 f0 04 00 00    	je     c22 <balancer_ingress+0xc22>
+     732:	83 fa 02             	cmp    edx,0x2
+     735:	0f 84 ce 04 00 00    	je     c09 <balancer_ingress+0xc09>
+     73b:	83 fa 01             	cmp    edx,0x1
+     73e:	b8 01 00 00 00       	mov    eax,0x1
+     743:	48 89 f7             	mov    rdi,rsi
+     746:	c5 f9 6f d9          	vmovdqa xmm3,xmm1
+     74a:	c5 f9 6f d4          	vmovdqa xmm2,xmm4
+     74e:	0f 85 33 05 00 00    	jne    c87 <balancer_ingress+0xc87>
+     754:	41 83 e2 3f          	and    r10d,0x3f
+     758:	41 c1 e2 0a          	shl    r10d,0xa
+     75c:	41 0f b6 40 01       	movzx  eax,BYTE PTR [r8+0x1]
+     761:	41 8d 04 82          	lea    eax,[r10+rax*4]
+     765:	41 0f b6 78 02       	movzx  edi,BYTE PTR [r8+0x2]
+     76a:	40 c0 ef 06          	shr    dil,0x6
+     76e:	e9 d0 04 00 00       	jmp    c43 <balancer_ingress+0xc43>
+     773:	80 7a 37 04          	cmp    BYTE PTR [rdx+0x37],0x4
+     777:	75 27                	jne    7a0 <balancer_ingress+0x7a0>
+     779:	c7 04 24 0d 02 00 00 	mov    DWORD PTR [rsp],0x20d
+     780:	4c 8d 0d 00 00 00 00 	lea    r9,[rip+0x0]        # 787 <balancer_ingress+0x787>
+     787:	49 89 e2             	mov    r10,rsp
+     78a:	4d 85 c9             	test   r9,r9
+     78d:	0f 84 b7 0b 00 00    	je     134a <balancer_ingress+0x134a>
+     793:	49 ff 01             	inc    QWORD PTR [r9]
+     796:	80 7a 3c 04          	cmp    BYTE PTR [rdx+0x3c],0x4
+     79a:	77 04                	ja     7a0 <balancer_ingress+0x7a0>
+     79c:	49 ff 41 08          	inc    QWORD PTR [r9+0x8]
+     7a0:	4c 8d 4a 52          	lea    r9,[rdx+0x52]
+     7a4:	49 39 f1             	cmp    r9,rsi
+     7a7:	0f 87 9d 0b 00 00    	ja     134a <balancer_ingress+0x134a>
+     7ad:	0f b6 09             	movzx  ecx,BYTE PTR [rcx]
+     7b0:	80 e1 0f             	and    cl,0xf
+     7b3:	80 f9 05             	cmp    cl,0x5
+     7b6:	0f 85 8e 0b 00 00    	jne    134a <balancer_ingress+0x134a>
+     7bc:	44 0f b6 4a 47       	movzx  r9d,BYTE PTR [rdx+0x47]
+     7c1:	44 88 4c 24 44       	mov    BYTE PTR [rsp+0x44],r9b
+     7c6:	44 0f b6 54 24 4c    	movzx  r10d,BYTE PTR [rsp+0x4c]
+     7cc:	41 80 ca 01          	or     r10b,0x1
+     7d0:	44 88 54 24 4c       	mov    BYTE PTR [rsp+0x4c],r10b
+     7d5:	8b 4a 4e             	mov    ecx,DWORD PTR [rdx+0x4e]
+     7d8:	89 4c 24 20          	mov    DWORD PTR [rsp+0x20],ecx
+     7dc:	8b 4a 4a             	mov    ecx,DWORD PTR [rdx+0x4a]
+     7df:	89 4c 24 30          	mov    DWORD PTR [rsp+0x30],ecx
+     7e3:	e9 fb fb ff ff       	jmp    3e3 <balancer_ingress+0x3e3>
+     7e8:	66 c7 44 24 70 00 00 	mov    WORD PTR [rsp+0x70],0x0
+     7ef:	4c 8d 25 00 00 00 00 	lea    r12,[rip+0x0]        # 7f6 <balancer_ingress+0x7f6>
+     7f6:	4d 85 e4             	test   r12,r12
+     7f9:	0f 84 50 0b 00 00    	je     134f <balancer_ingress+0x134f>
+     7ff:	41 f6 04 24 88       	test   BYTE PTR [r12],0x88
+     804:	0f 85 07 fe ff ff    	jne    611 <balancer_ingress+0x611>
+     80a:	66 c7 44 24 42 00 00 	mov    WORD PTR [rsp+0x42],0x0
+     811:	e9 fb fd ff ff       	jmp    611 <balancer_ingress+0x611>
+     816:	4c 8d 5a 3e          	lea    r11,[rdx+0x3e]
+     81a:	41 f6 c2 01          	test   r10b,0x1
+     81e:	4d 0f 44 d8          	cmove  r11,r8
+     822:	49 8d 5b 08          	lea    rbx,[r11+0x8]
+     826:	48 39 f3             	cmp    rbx,rsi
+     829:	0f 87 1b 0b 00 00    	ja     134a <balancer_ingress+0x134a>
+     82f:	41 f6 c2 01          	test   r10b,0x1
+     833:	0f 85 89 00 00 00    	jne    8c2 <balancer_ingress+0x8c2>
+     839:	45 0f b7 13          	movzx  r10d,WORD PTR [r11]
+     83d:	66 44 89 54 24 40    	mov    WORD PTR [rsp+0x40],r10w
+     843:	45 0f b7 53 02       	movzx  r10d,WORD PTR [r11+0x2]
+     848:	e9 84 00 00 00       	jmp    8d1 <balancer_ingress+0x8d1>
+     84d:	80 7a 23 04          	cmp    BYTE PTR [rdx+0x23],0x4
+     851:	75 27                	jne    87a <balancer_ingress+0x87a>
+     853:	c7 04 24 0d 02 00 00 	mov    DWORD PTR [rsp],0x20d
+     85a:	4c 8d 0d 00 00 00 00 	lea    r9,[rip+0x0]        # 861 <balancer_ingress+0x861>
+     861:	49 89 e2             	mov    r10,rsp
+     864:	4d 85 c9             	test   r9,r9
+     867:	0f 84 dd 0a 00 00    	je     134a <balancer_ingress+0x134a>
+     86d:	49 ff 01             	inc    QWORD PTR [r9]
+     870:	80 7a 28 04          	cmp    BYTE PTR [rdx+0x28],0x4
+     874:	77 04                	ja     87a <balancer_ingress+0x87a>
+     876:	49 ff 41 08          	inc    QWORD PTR [r9+0x8]
+     87a:	4c 8d 4a 3e          	lea    r9,[rdx+0x3e]
+     87e:	49 39 f1             	cmp    r9,rsi
+     881:	0f 87 c3 0a 00 00    	ja     134a <balancer_ingress+0x134a>
+     887:	0f b6 09             	movzx  ecx,BYTE PTR [rcx]
+     88a:	80 e1 0f             	and    cl,0xf
+     88d:	80 f9 05             	cmp    cl,0x5
+     890:	0f 85 b4 0a 00 00    	jne    134a <balancer_ingress+0x134a>
+     896:	44 0f b6 4a 33       	movzx  r9d,BYTE PTR [rdx+0x33]
+     89b:	44 88 4c 24 44       	mov    BYTE PTR [rsp+0x44],r9b
+     8a0:	44 0f b6 54 24 4c    	movzx  r10d,BYTE PTR [rsp+0x4c]
+     8a6:	41 80 ca 01          	or     r10b,0x1
+     8aa:	44 88 54 24 4c       	mov    BYTE PTR [rsp+0x4c],r10b
+     8af:	8b 4a 3a             	mov    ecx,DWORD PTR [rdx+0x3a]
+     8b2:	89 4c 24 20          	mov    DWORD PTR [rsp+0x20],ecx
+     8b6:	8b 4a 36             	mov    ecx,DWORD PTR [rdx+0x36]
+     8b9:	89 4c 24 30          	mov    DWORD PTR [rsp+0x30],ecx
+     8bd:	e9 2d fc ff ff       	jmp    4ef <balancer_ingress+0x4ef>
+     8c2:	45 0f b7 53 02       	movzx  r10d,WORD PTR [r11+0x2]
+     8c7:	66 44 89 54 24 40    	mov    WORD PTR [rsp+0x40],r10w
+     8cd:	45 0f b7 13          	movzx  r10d,WORD PTR [r11]
+     8d1:	66 44 89 54 24 42    	mov    WORD PTR [rsp+0x42],r10w
+     8d7:	44 8b 5c 24 30       	mov    r11d,DWORD PTR [rsp+0x30]
+     8dc:	44 89 5c 24 60       	mov    DWORD PTR [rsp+0x60],r11d
+     8e1:	66 44 89 54 24 70    	mov    WORD PTR [rsp+0x70],r10w
+     8e7:	44 88 4c 24 72       	mov    BYTE PTR [rsp+0x72],r9b
+     8ec:	4c 8d 2d 00 00 00 00 	lea    r13,[rip+0x0]        # 8f3 <balancer_ingress+0x8f3>
+     8f3:	4c 8d 4c 24 60       	lea    r9,[rsp+0x60]
+     8f8:	4d 85 ed             	test   r13,r13
+     8fb:	0f 84 4d 01 00 00    	je     a4e <balancer_ingress+0xa4e>
+     901:	49 89 f1             	mov    r9,rsi
+     904:	49 29 d1             	sub    r9,rdx
+     907:	b9 01 00 00 00       	mov    ecx,0x1
+     90c:	49 81 f9 ea 05 00 00 	cmp    r9,0x5ea
+     913:	0f 8f 36 0a 00 00    	jg     134f <balancer_ingress+0x134f>
+     919:	c7 84 24 94 00 00 00 	mov    DWORD PTR [rsp+0x94],0x200
+     920:	00 02 00 00 
+     924:	4c 8d 3d 00 00 00 00 	lea    r15,[rip+0x0]        # 92b <balancer_ingress+0x92b>
+     92b:	48 8d 8c 24 94 00 00 	lea    rcx,[rsp+0x94]
+     932:	00 
+     933:	4d 85 ff             	test   r15,r15
+     936:	0f 84 0e 0a 00 00    	je     134a <balancer_ingress+0x134a>
+     93c:	49 ff 07             	inc    QWORD PTR [r15]
+     93f:	41 f6 45 00 01       	test   BYTE PTR [r13+0x0],0x1
+     944:	74 07                	je     94d <balancer_ingress+0x94d>
+     946:	66 c7 44 24 40 00 00 	mov    WORD PTR [rsp+0x40],0x0
+     94d:	45 8b 4d 04          	mov    r9d,DWORD PTR [r13+0x4]
+     951:	44 89 8c 24 9c 00 00 	mov    DWORD PTR [rsp+0x9c],r9d
+     958:	00 
+     959:	83 e1 7f             	and    ecx,0x7f
+     95c:	89 8c 24 90 00 00 00 	mov    DWORD PTR [rsp+0x90],ecx
+     963:	4c 8d 25 00 00 00 00 	lea    r12,[rip+0x0]        # 96a <balancer_ingress+0x96a>
+     96a:	48 8d 8c 24 90 00 00 	lea    rcx,[rsp+0x90]
+     971:	00 
+     972:	4d 85 e4             	test   r12,r12
+     975:	75 24                	jne    99b <balancer_ingress+0x99b>
+     977:	c7 04 24 03 02 00 00 	mov    DWORD PTR [rsp],0x203
+     97e:	48 8d 0d 00 00 00 00 	lea    rcx,[rip+0x0]        # 985 <balancer_ingress+0x985>
+     985:	49 89 e2             	mov    r10,rsp
+     988:	48 85 c9             	test   rcx,rcx
+     98b:	0f 84 b9 09 00 00    	je     134a <balancer_ingress+0x134a>
+     991:	48 ff 01             	inc    QWORD PTR [rcx]
+     994:	4c 8d 25 00 00 00 00 	lea    r12,[rip+0x0]        # 99b <balancer_ingress+0x99b>
+     99b:	41 f6 45 00 04       	test   BYTE PTR [r13+0x0],0x4
+     9a0:	48 89 bc 24 a0 00 00 	mov    QWORD PTR [rsp+0xa0],rdi
+     9a7:	00 
+     9a8:	c5 f9 7f 9c 24 80 00 	vmovdqa XMMWORD PTR [rsp+0x80],xmm3
+     9af:	00 00 
+     9b1:	0f 84 1b 0b 00 00    	je     14d2 <balancer_ingress+0x14d2>
+     9b7:	f6 44 24 4c 01       	test   BYTE PTR [rsp+0x4c],0x1
+     9bc:	0f 85 76 01 00 00    	jne    b38 <balancer_ingress+0xb38>
+     9c2:	c7 44 24 14 00 00 00 	mov    DWORD PTR [rsp+0x14],0x0
+     9c9:	00 
+     9ca:	48 8d 0d 00 00 00 00 	lea    rcx,[rip+0x0]        # 9d1 <balancer_ingress+0x9d1>
+     9d1:	48 8d 44 24 14       	lea    rax,[rsp+0x14]
+     9d6:	48 85 c9             	test   rcx,rcx
+     9d9:	0f 84 44 10 00 00    	je     1a23 <balancer_ingress+0x1a23>
+     9df:	48 83 c2 3e          	add    rdx,0x3e
+     9e3:	f6 44 24 4c 01       	test   BYTE PTR [rsp+0x4c],0x1
+     9e8:	49 0f 44 d0          	cmove  rdx,r8
+     9ec:	48 8d 7a 09          	lea    rdi,[rdx+0x9]
+     9f0:	48 39 f7             	cmp    rdi,rsi
+     9f3:	0f 87 d6 0a 00 00    	ja     14cf <balancer_ingress+0x14cf>
+     9f9:	0f b6 42 08          	movzx  eax,BYTE PTR [rdx+0x8]
+     9fd:	84 c0                	test   al,al
+     9ff:	0f 88 b1 01 00 00    	js     bb6 <balancer_ingress+0xbb6>
+     a05:	48 83 c2 11          	add    rdx,0x11
+     a09:	48 39 f2             	cmp    rdx,rsi
+     a0c:	0f 87 bd 0a 00 00    	ja     14cf <balancer_ingress+0x14cf>
+     a12:	0f b6 17             	movzx  edx,BYTE PTR [rdi]
+     a15:	89 d0                	mov    eax,edx
+     a17:	c1 e8 06             	shr    eax,0x6
+     a1a:	83 f8 03             	cmp    eax,0x3
+     a1d:	0f 84 74 09 00 00    	je     1397 <balancer_ingress+0x1397>
+     a23:	83 f8 02             	cmp    eax,0x2
+     a26:	0f 84 55 09 00 00    	je     1381 <balancer_ingress+0x1381>
+     a2c:	83 f8 01             	cmp    eax,0x1
+     a2f:	0f 85 9a 0a 00 00    	jne    14cf <balancer_ingress+0x14cf>
+     a35:	83 e2 3f             	and    edx,0x3f
+     a38:	c1 e2 0a             	shl    edx,0xa
+     a3b:	0f b6 77 01          	movzx  esi,BYTE PTR [rdi+0x1]
+     a3f:	8d 34 b2             	lea    esi,[rdx+rsi*4]
+     a42:	0f b6 57 02          	movzx  edx,BYTE PTR [rdi+0x2]
+     a46:	c0 ea 06             	shr    dl,0x6
+     a49:	e9 6a 09 00 00       	jmp    13b8 <balancer_ingress+0x13b8>
+     a4e:	66 c7 44 24 70 00 00 	mov    WORD PTR [rsp+0x70],0x0
+     a55:	4c 8d 2d 00 00 00 00 	lea    r13,[rip+0x0]        # a5c <balancer_ingress+0xa5c>
+     a5c:	4d 85 ed             	test   r13,r13
+     a5f:	0f 84 ea 08 00 00    	je     134f <balancer_ingress+0x134f>
+     a65:	41 f6 45 00 88       	test   BYTE PTR [r13+0x0],0x88
+     a6a:	0f 85 91 fe ff ff    	jne    901 <balancer_ingress+0x901>
+     a70:	66 c7 44 24 42 00 00 	mov    WORD PTR [rsp+0x42],0x0
+     a77:	e9 85 fe ff ff       	jmp    901 <balancer_ingress+0x901>
+     a7c:	c7 04 24 0c 02 00 00 	mov    DWORD PTR [rsp],0x20c
+     a83:	48 8d 0d 00 00 00 00 	lea    rcx,[rip+0x0]        # a8a <balancer_ingress+0xa8a>
+     a8a:	49 89 e1             	mov    r9,rsp
+     a8d:	48 85 c9             	test   rcx,rcx
+     a90:	0f 84 b4 08 00 00    	je     134a <balancer_ingress+0x134a>
+     a96:	48 ff 01             	inc    QWORD PTR [rcx]
+     a99:	44 8b 4a 26          	mov    r9d,DWORD PTR [rdx+0x26]
+     a9d:	41 0f c9             	bswap  r9d
+     aa0:	41 81 f9 ff 04 00 00 	cmp    r9d,0x4ff
+     aa7:	77 04                	ja     aad <balancer_ingress+0xaad>
+     aa9:	48 ff 41 08          	inc    QWORD PTR [rcx+0x8]
+     aad:	48 8d 4a 52          	lea    rcx,[rdx+0x52]
+     ab1:	48 39 f1             	cmp    rcx,rsi
+     ab4:	0f 87 90 08 00 00    	ja     134a <balancer_ingress+0x134a>
+     aba:	48 8d 4c 24 30       	lea    rcx,[rsp+0x30]
+     abf:	44 0f b6 4a 30       	movzx  r9d,BYTE PTR [rdx+0x30]
+     ac4:	44 88 4c 24 44       	mov    BYTE PTR [rsp+0x44],r9b
+     ac9:	44 0f b6 54 24 4c    	movzx  r10d,BYTE PTR [rsp+0x4c]
+     acf:	41 80 ca 01          	or     r10b,0x1
+     ad3:	44 88 54 24 4c       	mov    BYTE PTR [rsp+0x4c],r10b
+     ad8:	c5 f8 10 42 42       	vmovups xmm0,XMMWORD PTR [rdx+0x42]
+     add:	c5 f8 29 44 24 20    	vmovaps XMMWORD PTR [rsp+0x20],xmm0
+     ae3:	c5 fa 6f 42 32       	vmovdqu xmm0,XMMWORD PTR [rdx+0x32]
+     ae8:	c5 fa 7f 01          	vmovdqu XMMWORD PTR [rcx],xmm0
+     aec:	e9 fe f9 ff ff       	jmp    4ef <balancer_ingress+0x4ef>
+     af1:	c7 04 24 0b 02 00 00 	mov    DWORD PTR [rsp],0x20b
+     af8:	48 8d 0d 00 00 00 00 	lea    rcx,[rip+0x0]        # aff <balancer_ingress+0xaff>
+     aff:	48 89 e6             	mov    rsi,rsp
+     b02:	48 85 c9             	test   rcx,rcx
+     b05:	0f 84 3f 08 00 00    	je     134a <balancer_ingress+0x134a>
+     b0b:	48 ff 01             	inc    QWORD PTR [rcx]
+     b0e:	0f b6 52 37          	movzx  edx,BYTE PTR [rdx+0x37]
+     b12:	80 c2 fd             	add    dl,0xfd
+     b15:	80 fa 01             	cmp    dl,0x1
+     b18:	0f 87 6c 01 00 00    	ja     c8a <balancer_ingress+0xc8a>
+     b1e:	48 ff 41 08          	inc    QWORD PTR [rcx+0x8]
+     b22:	44 0f b7 54 24 40    	movzx  r10d,WORD PTR [rsp+0x40]
+     b28:	f6 44 24 4c 02       	test   BYTE PTR [rsp+0x4c],0x2
+     b2d:	0f 84 68 01 00 00    	je     c9b <balancer_ingress+0xc9b>
+     b33:	e9 69 02 00 00       	jmp    da1 <balancer_ingress+0xda1>
+     b38:	c7 04 24 0b 02 00 00 	mov    DWORD PTR [rsp],0x20b
+     b3f:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # b46 <balancer_ingress+0xb46>
+     b46:	48 89 e1             	mov    rcx,rsp
+     b49:	48 85 c0             	test   rax,rax
+     b4c:	0f 84 d1 0e 00 00    	je     1a23 <balancer_ingress+0x1a23>
+     b52:	48 ff 00             	inc    QWORD PTR [rax]
+     b55:	0f b6 4a 23          	movzx  ecx,BYTE PTR [rdx+0x23]
+     b59:	83 c9 02             	or     ecx,0x2
+     b5c:	83 f9 03             	cmp    ecx,0x3
+     b5f:	0f 85 6d 09 00 00    	jne    14d2 <balancer_ingress+0x14d2>
+     b65:	48 ff 40 08          	inc    QWORD PTR [rax+0x8]
+     b69:	e9 64 09 00 00       	jmp    14d2 <balancer_ingress+0x14d2>
+     b6e:	4c 8d 42 16          	lea    r8,[rdx+0x16]
+     b72:	49 39 f0             	cmp    r8,rsi
+     b75:	0f 87 0c 01 00 00    	ja     c87 <balancer_ingress+0xc87>
+     b7b:	41 f6 c2 20          	test   r10b,0x20
+     b7f:	75 6d                	jne    bee <balancer_ingress+0xbee>
+     b81:	48 ff 41 08          	inc    QWORD PTR [rcx+0x8]
+     b85:	44 89 0c 24          	mov    DWORD PTR [rsp],r9d
+     b89:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # b90 <balancer_ingress+0xb90>
+     b90:	48 89 e1             	mov    rcx,rsp
+     b93:	48 85 c0             	test   rax,rax
+     b96:	74 03                	je     b9b <balancer_ingress+0xb9b>
+     b98:	48 ff 00             	inc    QWORD PTR [rax]
+     b9b:	b8 01 00 00 00       	mov    eax,0x1
+     ba0:	44 0f b7 54 24 40    	movzx  r10d,WORD PTR [rsp+0x40]
+     ba6:	f6 44 24 4c 02       	test   BYTE PTR [rsp+0x4c],0x2
+     bab:	0f 84 ea 00 00 00    	je     c9b <balancer_ingress+0xc9b>
+     bb1:	e9 eb 01 00 00       	jmp    da1 <balancer_ingress+0xda1>
+     bb6:	48 8d 7a 16          	lea    rdi,[rdx+0x16]
+     bba:	48 39 f7             	cmp    rdi,rsi
+     bbd:	0f 87 0c 09 00 00    	ja     14cf <balancer_ingress+0x14cf>
+     bc3:	a8 20                	test   al,0x20
+     bc5:	0f 85 5c 07 00 00    	jne    1327 <balancer_ingress+0x1327>
+     bcb:	48 ff 41 08          	inc    QWORD PTR [rcx+0x8]
+     bcf:	44 89 0c 24          	mov    DWORD PTR [rsp],r9d
+     bd3:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # bda <balancer_ingress+0xbda>
+     bda:	48 89 e1             	mov    rcx,rsp
+     bdd:	48 85 c0             	test   rax,rax
+     be0:	0f 84 ec 08 00 00    	je     14d2 <balancer_ingress+0x14d2>
+     be6:	48 ff 00             	inc    QWORD PTR [rax]
+     be9:	e9 e4 08 00 00       	jmp    14d2 <balancer_ingress+0x14d2>
+     bee:	80 7a 0d 07          	cmp    BYTE PTR [rdx+0xd],0x7
+     bf2:	b8 01 00 00 00       	mov    eax,0x1
+     bf7:	0f 86 8a 00 00 00    	jbe    c87 <balancer_ingress+0xc87>
+     bfd:	48 83 c2 0e          	add    rdx,0xe
+     c01:	49 89 d0             	mov    r8,rdx
+     c04:	e9 0b fb ff ff       	jmp    714 <balancer_ingress+0x714>
+     c09:	41 0f b6 78 01       	movzx  edi,BYTE PTR [r8+0x1]
+     c0e:	c1 e7 10             	shl    edi,0x10
+     c11:	41 0f b6 40 02       	movzx  eax,BYTE PTR [r8+0x2]
+     c16:	c1 e0 08             	shl    eax,0x8
+     c19:	09 f8                	or     eax,edi
+     c1b:	41 0f b6 78 03       	movzx  edi,BYTE PTR [r8+0x3]
+     c20:	eb 21                	jmp    c43 <balancer_ingress+0xc43>
+     c22:	41 0f b6 40 01       	movzx  eax,BYTE PTR [r8+0x1]
+     c27:	c1 e0 18             	shl    eax,0x18
+     c2a:	41 0f b6 78 02       	movzx  edi,BYTE PTR [r8+0x2]
+     c2f:	c1 e7 10             	shl    edi,0x10
+     c32:	09 c7                	or     edi,eax
+     c34:	41 0f b6 40 03       	movzx  eax,BYTE PTR [r8+0x3]
+     c39:	c1 e0 08             	shl    eax,0x8
+     c3c:	09 f8                	or     eax,edi
+     c3e:	41 0f b6 78 04       	movzx  edi,BYTE PTR [r8+0x4]
+     c43:	44 0f b6 c7          	movzx  r8d,dil
+     c47:	49 09 c0             	or     r8,rax
+     c4a:	45 85 c0             	test   r8d,r8d
+     c4d:	b8 01 00 00 00       	mov    eax,0x1
+     c52:	48 89 f7             	mov    rdi,rsi
+     c55:	c5 f9 6f d9          	vmovdqa xmm3,xmm1
+     c59:	c5 f9 6f d4          	vmovdqa xmm2,xmm4
+     c5d:	7e 28                	jle    c87 <balancer_ingress+0xc87>
+     c5f:	48 89 c8             	mov    rax,rcx
+     c62:	48 83 fa 03          	cmp    rdx,0x3
+     c66:	0f 84 9d 00 00 00    	je     d09 <balancer_ingress+0xd09>
+     c6c:	83 fa 02             	cmp    edx,0x2
+     c6f:	0f 84 8e 00 00 00    	je     d03 <balancer_ingress+0xd03>
+     c75:	83 fa 01             	cmp    edx,0x1
+     c78:	0f 85 91 00 00 00    	jne    d0f <balancer_ingress+0xd0f>
+     c7e:	48 83 c0 38          	add    rax,0x38
+     c82:	e9 8c 00 00 00       	jmp    d13 <balancer_ingress+0xd13>
+     c87:	48 ff 01             	inc    QWORD PTR [rcx]
+     c8a:	44 0f b7 54 24 40    	movzx  r10d,WORD PTR [rsp+0x40]
+     c90:	f6 44 24 4c 02       	test   BYTE PTR [rsp+0x4c],0x2
+     c95:	0f 85 06 01 00 00    	jne    da1 <balancer_ingress+0xda1>
+     c9b:	41 f6 04 24 02       	test   BYTE PTR [r12],0x2
+     ca0:	0f 85 fb 00 00 00    	jne    da1 <balancer_ingress+0xda1>
+     ca6:	48 8d 54 24 20       	lea    rdx,[rsp+0x20]
+     cab:	4c 89 f9             	mov    rcx,r15
+     cae:	48 85 c9             	test   rcx,rcx
+     cb1:	0f 84 ea 00 00 00    	je     da1 <balancer_ingress+0xda1>
+     cb7:	80 7c 24 44 11       	cmp    BYTE PTR [rsp+0x44],0x11
+     cbc:	75 2d                	jne    ceb <balancer_ingress+0xceb>
+     cbe:	0f 31                	rdtsc
+     cc0:	48 89 c2             	mov    rdx,rax
+     cc3:	48 2b 51 08          	sub    rdx,QWORD PTR [rcx+0x8]
+     cc7:	48 be 00 ac 23 fc 06 	movabs rsi,0x6fc23ac00
+     cce:	00 00 00 
+     cd1:	48 39 f2             	cmp    rdx,rsi
+     cd4:	76 0c                	jbe    ce2 <balancer_ingress+0xce2>
+     cd6:	31 d2                	xor    edx,edx
+     cd8:	b8 01 00 00 00       	mov    eax,0x1
+     cdd:	e9 c1 00 00 00       	jmp    da3 <balancer_ingress+0xda3>
+     ce2:	48 89 41 08          	mov    QWORD PTR [rcx+0x8],rax
+     ce6:	b8 01 00 00 00       	mov    eax,0x1
+     ceb:	8b 09                	mov    ecx,DWORD PTR [rcx]
+     ced:	89 0c 24             	mov    DWORD PTR [rsp],ecx
+     cf0:	89 4c 24 48          	mov    DWORD PTR [rsp+0x48],ecx
+     cf4:	48 8d 15 00 00 00 00 	lea    rdx,[rip+0x0]        # cfb <balancer_ingress+0xcfb>
+     cfb:	48 89 e1             	mov    rcx,rsp
+     cfe:	e9 a0 00 00 00       	jmp    da3 <balancer_ingress+0xda3>
+     d03:	48 83 c0 40          	add    rax,0x40
+     d07:	eb 0a                	jmp    d13 <balancer_ingress+0xd13>
+     d09:	48 83 c0 48          	add    rax,0x48
+     d0d:	eb 04                	jmp    d13 <balancer_ingress+0xd13>
+     d0f:	48 83 c0 30          	add    rax,0x30
+     d13:	48 ff 00             	inc    QWORD PTR [rax]
+     d16:	44 89 44 24 1c       	mov    DWORD PTR [rsp+0x1c],r8d
+     d1b:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # d22 <balancer_ingress+0xd22>
+     d22:	48 8d 54 24 1c       	lea    rdx,[rsp+0x1c]
+     d27:	48 85 c0             	test   rax,rax
+     d2a:	74 49                	je     d75 <balancer_ingress+0xd75>
+     d2c:	8b 00                	mov    eax,DWORD PTR [rax]
+     d2e:	89 44 24 1c          	mov    DWORD PTR [rsp+0x1c],eax
+     d32:	85 c0                	test   eax,eax
+     d34:	74 3f                	je     d75 <balancer_ingress+0xd75>
+     d36:	89 44 24 48          	mov    DWORD PTR [rsp+0x48],eax
+     d3a:	48 8d 15 00 00 00 00 	lea    rdx,[rip+0x0]        # d41 <balancer_ingress+0xd41>
+     d41:	48 8d 44 24 1c       	lea    rax,[rsp+0x1c]
+     d46:	48 85 d2             	test   rdx,rdx
+     d49:	0f 84 ee 05 00 00    	je     133d <balancer_ingress+0x133d>
+     d4f:	48 8d 7c 24 20       	lea    rdi,[rsp+0x20]
+     d54:	4c 89 f8             	mov    rax,r15
+     d57:	48 85 c0             	test   rax,rax
+     d5a:	0f 84 87 06 00 00    	je     13e7 <balancer_ingress+0x13e7>
+     d60:	8b 7c 24 48          	mov    edi,DWORD PTR [rsp+0x48]
+     d64:	39 38                	cmp    DWORD PTR [rax],edi
+     d66:	0f 85 bb 06 00 00    	jne    1427 <balancer_ingress+0x1427>
+     d6c:	48 ff 41 50          	inc    QWORD PTR [rcx+0x50]
+     d70:	e9 7d 0d 00 00       	jmp    1af2 <balancer_ingress+0x1af2>
+     d75:	48 ff 41 10          	inc    QWORD PTR [rcx+0x10]
+     d79:	4c 89 41 18          	mov    QWORD PTR [rcx+0x18],r8
+     d7d:	48 ff 01             	inc    QWORD PTR [rcx]
+     d80:	b8 01 00 00 00       	mov    eax,0x1
+     d85:	48 89 f7             	mov    rdi,rsi
+     d88:	c5 f9 6f d9          	vmovdqa xmm3,xmm1
+     d8c:	c5 f9 6f d4          	vmovdqa xmm2,xmm4
+     d90:	44 0f b7 54 24 40    	movzx  r10d,WORD PTR [rsp+0x40]
+     d96:	f6 44 24 4c 02       	test   BYTE PTR [rsp+0x4c],0x2
+     d9b:	0f 84 fa fe ff ff    	je     c9b <balancer_ingress+0xc9b>
+     da1:	31 d2                	xor    edx,edx
+     da3:	80 7c 24 44 11       	cmp    BYTE PTR [rsp+0x44],0x11
+     da8:	0f 85 9a 00 00 00    	jne    e48 <balancer_ingress+0xe48>
+     dae:	41 f6 44 24 01 02    	test   BYTE PTR [r12+0x1],0x2
+     db4:	0f 84 8e 00 00 00    	je     e48 <balancer_ingress+0xe48>
+     dba:	c7 04 24 02 02 00 00 	mov    DWORD PTR [rsp],0x202
+     dc1:	48 8d 0d 00 00 00 00 	lea    rcx,[rip+0x0]        # dc8 <balancer_ingress+0xdc8>
+     dc8:	48 89 e6             	mov    rsi,rsp
+     dcb:	48 85 c9             	test   rcx,rcx
+     dce:	74 78                	je     e48 <balancer_ingress+0xe48>
+     dd0:	0f 31                	rdtsc
+     dd2:	48 89 c6             	mov    rsi,rax
+     dd5:	48 2b 71 08          	sub    rsi,QWORD PTR [rcx+0x8]
+     dd9:	48 81 fe 01 ca 9a 3b 	cmp    rsi,0x3b9aca01
+     de0:	72 12                	jb     df4 <balancer_ingress+0xdf4>
+     de2:	48 c7 01 01 00 00 00 	mov    QWORD PTR [rcx],0x1
+     de9:	48 89 41 08          	mov    QWORD PTR [rcx+0x8],rax
+     ded:	b8 01 00 00 00       	mov    eax,0x1
+     df2:	eb 16                	jmp    e0a <balancer_ingress+0xe0a>
+     df4:	48 8b 01             	mov    rax,QWORD PTR [rcx]
+     df7:	48 ff c0             	inc    rax
+     dfa:	48 89 01             	mov    QWORD PTR [rcx],rax
+     dfd:	48 3d 49 e8 01 00    	cmp    rax,0x1e849
+     e03:	b8 01 00 00 00       	mov    eax,0x1
+     e08:	73 3e                	jae    e48 <balancer_ingress+0xe48>
+     e0a:	48 8d 0d 00 00 00 00 	lea    rcx,[rip+0x0]        # e11 <balancer_ingress+0xe11>
+     e11:	48 8d 74 24 60       	lea    rsi,[rsp+0x60]
+     e16:	48 85 c9             	test   rcx,rcx
+     e19:	74 2d                	je     e48 <balancer_ingress+0xe48>
+     e1b:	48 8d 74 24 48       	lea    rsi,[rsp+0x48]
+     e20:	48 85 c9             	test   rcx,rcx
+     e23:	74 23                	je     e48 <balancer_ingress+0xe48>
+     e25:	c7 04 24 0f 02 00 00 	mov    DWORD PTR [rsp],0x20f
+     e2c:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # e33 <balancer_ingress+0xe33>
+     e33:	48 89 e1             	mov    rcx,rsp
+     e36:	48 85 c0             	test   rax,rax
+     e39:	74 03                	je     e3e <balancer_ingress+0xe3e>
+     e3b:	48 ff 00             	inc    QWORD PTR [rax]
+     e3e:	b8 01 00 00 00       	mov    eax,0x1
+     e43:	e9 a1 01 00 00       	jmp    fe9 <balancer_ingress+0xfe9>
+     e48:	48 85 d2             	test   rdx,rdx
+     e4b:	0f 84 98 01 00 00    	je     fe9 <balancer_ingress+0xfe9>
+     e51:	48 8d 35 00 00 00 00 	lea    rsi,[rip+0x0]        # e58 <balancer_ingress+0xe58>
+     e58:	48 8d 8c 24 98 00 00 	lea    rcx,[rsp+0x98]
+     e5f:	00 
+     e60:	b9 01 00 00 00       	mov    ecx,0x1
+     e65:	48 85 f6             	test   rsi,rsi
+     e68:	0f 84 e1 04 00 00    	je     134f <balancer_ingress+0x134f>
+     e6e:	4c 8d 05 00 00 00 00 	lea    r8,[rip+0x0]        # e75 <balancer_ingress+0xe75>
+     e75:	4c 8d 8c 24 9c 00 00 	lea    r9,[rsp+0x9c]
+     e7c:	00 
+     e7d:	4d 85 c0             	test   r8,r8
+     e80:	0f 84 c9 04 00 00    	je     134f <balancer_ingress+0x134f>
+     e86:	66 c1 c5 08          	rol    bp,0x8
+     e8a:	44 0f b7 cd          	movzx  r9d,bp
+     e8e:	c4 c3 e9 22 c1 01    	vpinsrq xmm0,xmm2,r9,0x1
+     e94:	c4 c1 79 d4 08       	vpaddq xmm1,xmm0,XMMWORD PTR [r8]
+     e99:	c4 c1 7a 7f 08       	vmovdqu XMMWORD PTR [r8],xmm1
+     e9e:	4c 8d 4c 24 48       	lea    r9,[rsp+0x48]
+     ea3:	4c 8d 05 00 00 00 00 	lea    r8,[rip+0x0]        # eaa <balancer_ingress+0xeaa>
+     eaa:	4d 85 c0             	test   r8,r8
+     ead:	0f 84 9c 04 00 00    	je     134f <balancer_ingress+0x134f>
+     eb3:	c4 c1 79 d4 00       	vpaddq xmm0,xmm0,XMMWORD PTR [r8]
+     eb8:	c4 c1 7a 7f 00       	vmovdqu XMMWORD PTR [r8],xmm0
+     ebd:	66 44 89 54 24 40    	mov    WORD PTR [rsp+0x40],r10w
+     ec3:	f6 42 10 01          	test   BYTE PTR [rdx+0x10],0x1
+     ec7:	0f 85 31 03 00 00    	jne    11fe <balancer_ingress+0x11fe>
+     ecd:	44 8b 44 24 20       	mov    r8d,DWORD PTR [rsp+0x20]
+     ed2:	b8 ec ff ff ff       	mov    eax,0xffffffec
+     ed7:	8b 07                	mov    eax,DWORD PTR [rdi]
+     ed9:	8b 7f 04             	mov    edi,DWORD PTR [rdi+0x4]
+     edc:	4c 8d 48 0e          	lea    r9,[rax+0xe]
+     ee0:	49 39 f9             	cmp    r9,rdi
+     ee3:	0f 87 fa 03 00 00    	ja     12e3 <balancer_ingress+0x12e3>
+     ee9:	4c 8d 48 22          	lea    r9,[rax+0x22]
+     eed:	49 39 f9             	cmp    r9,rdi
+     ef0:	0f 87 ed 03 00 00    	ja     12e3 <balancer_ingress+0x12e3>
+     ef6:	45 89 d3             	mov    r11d,r10d
+     ef9:	66 41 c1 c3 08       	rol    r11w,0x8
+     efe:	41 c1 e3 10          	shl    r11d,0x10
+     f02:	41 81 e0 00 00 ff ff 	and    r8d,0xffff0000
+     f09:	45 31 d8             	xor    r8d,r11d
+     f0c:	41 8d 88 ac 10 00 00 	lea    ecx,[r8+0x10ac]
+     f13:	0f b7 7e 04          	movzx  edi,WORD PTR [rsi+0x4]
+     f17:	66 89 78 04          	mov    WORD PTR [rax+0x4],di
+     f1b:	8b 36                	mov    esi,DWORD PTR [rsi]
+     f1d:	89 30                	mov    DWORD PTR [rax],esi
+     f1f:	8b 70 14             	mov    esi,DWORD PTR [rax+0x14]
+     f22:	89 70 06             	mov    DWORD PTR [rax+0x6],esi
+     f25:	0f b7 70 18          	movzx  esi,WORD PTR [rax+0x18]
+     f29:	66 89 70 0a          	mov    WORD PTR [rax+0xa],si
+     f2d:	66 c7 40 0c 08 00    	mov    WORD PTR [rax+0xc],0x8
+     f33:	0f b6 74 24 4d       	movzx  esi,BYTE PTR [rsp+0x4d]
+     f38:	8b 12                	mov    edx,DWORD PTR [rdx]
+     f3a:	c6 40 0e 45          	mov    BYTE PTR [rax+0xe],0x45
+     f3e:	83 c5 14             	add    ebp,0x14
+     f41:	66 c1 c5 08          	rol    bp,0x8
+     f45:	40 88 70 0f          	mov    BYTE PTR [rax+0xf],sil
+     f49:	66 89 68 10          	mov    WORD PTR [rax+0x10],bp
+     f4d:	c7 40 12 00 00 00 00 	mov    DWORD PTR [rax+0x12],0x0
+     f54:	89 50 1e             	mov    DWORD PTR [rax+0x1e],edx
+     f57:	89 48 1a             	mov    DWORD PTR [rax+0x1a],ecx
+     f5a:	66 c7 40 16 40 04    	mov    WORD PTR [rax+0x16],0x440
+     f60:	0f b7 48 0e          	movzx  ecx,WORD PTR [rax+0xe]
+     f64:	0f b7 f5             	movzx  esi,bp
+     f67:	0f b7 78 16          	movzx  edi,WORD PTR [rax+0x16]
+     f6b:	48 01 cf             	add    rdi,rcx
+     f6e:	41 c1 e8 10          	shr    r8d,0x10
+     f72:	49 01 f8             	add    r8,rdi
+     f75:	0f b7 ca             	movzx  ecx,dx
+     f78:	4c 01 c1             	add    rcx,r8
+     f7b:	48 01 f1             	add    rcx,rsi
+     f7e:	0f b7 50 20          	movzx  edx,WORD PTR [rax+0x20]
+     f82:	48 01 d1             	add    rcx,rdx
+     f85:	48 81 c1 ac 10 00 00 	add    rcx,0x10ac
+     f8c:	48 89 ca             	mov    rdx,rcx
+     f8f:	48 c1 ea 10          	shr    rdx,0x10
+     f93:	0f b7 f1             	movzx  esi,cx
+     f96:	48 01 d6             	add    rsi,rdx
+     f99:	48 81 f9 00 00 01 00 	cmp    rcx,0x10000
+     fa0:	48 0f 42 f1          	cmovb  rsi,rcx
+     fa4:	48 89 f1             	mov    rcx,rsi
+     fa7:	48 c1 e9 10          	shr    rcx,0x10
+     fab:	0f b7 d6             	movzx  edx,si
+     fae:	48 01 ca             	add    rdx,rcx
+     fb1:	48 81 fe 00 00 01 00 	cmp    rsi,0x10000
+     fb8:	48 0f 42 d6          	cmovb  rdx,rsi
+     fbc:	48 89 d1             	mov    rcx,rdx
+     fbf:	48 c1 e9 10          	shr    rcx,0x10
+     fc3:	0f b7 f2             	movzx  esi,dx
+     fc6:	01 f1                	add    ecx,esi
+     fc8:	48 81 fa 00 00 01 00 	cmp    rdx,0x10000
+     fcf:	0f 42 ca             	cmovb  ecx,edx
+     fd2:	89 ca                	mov    edx,ecx
+     fd4:	c1 ea 10             	shr    edx,0x10
+     fd7:	01 ca                	add    edx,ecx
+     fd9:	f7 d2                	not    edx
+     fdb:	66 89 50 18          	mov    WORD PTR [rax+0x18],dx
+     fdf:	b9 03 00 00 00       	mov    ecx,0x3
+     fe4:	e9 2f 03 00 00       	jmp    1318 <balancer_ingress+0x1318>
+     fe9:	80 7c 24 44 06       	cmp    BYTE PTR [rsp+0x44],0x6
+     fee:	75 28                	jne    1018 <balancer_ingress+0x1018>
+     ff0:	c7 04 24 01 02 00 00 	mov    DWORD PTR [rsp],0x201
+     ff7:	48 8d 0d 00 00 00 00 	lea    rcx,[rip+0x0]        # ffe <balancer_ingress+0xffe>
+     ffe:	48 89 e2             	mov    rdx,rsp
+    1001:	48 85 c9             	test   rcx,rcx
+    1004:	0f 84 40 03 00 00    	je     134a <balancer_ingress+0x134a>
+    100a:	31 c0                	xor    eax,eax
+    100c:	f6 44 24 4c 02       	test   BYTE PTR [rsp+0x4c],0x2
+    1011:	0f 94 c0             	sete   al
+    1014:	48 ff 04 c1          	inc    QWORD PTR [rcx+rax*8]
+    1018:	c5 f9 ef c0          	vpxor  xmm0,xmm0,xmm0
+    101c:	c5 f9 7f 04 24       	vmovdqa XMMWORD PTR [rsp],xmm0
+    1021:	c7 44 24 14 02 02 00 	mov    DWORD PTR [rsp+0x14],0x202
+    1028:	00 
+    1029:	48 8d 0d 00 00 00 00 	lea    rcx,[rip+0x0]        # 1030 <balancer_ingress+0x1030>
+    1030:	48 8d 44 24 14       	lea    rax,[rsp+0x14]
+    1035:	41 b5 01             	mov    r13b,0x1
+    1038:	48 85 c9             	test   rcx,rcx
+    103b:	74 1e                	je     105b <balancer_ingress+0x105b>
+    103d:	0f 31                	rdtsc
+    103f:	48 89 c3             	mov    rbx,rax
+    1042:	48 2b 41 08          	sub    rax,QWORD PTR [rcx+0x8]
+    1046:	48 3d 01 ca 9a 3b    	cmp    rax,0x3b9aca01
+    104c:	72 11                	jb     105f <balancer_ingress+0x105f>
+    104e:	48 c7 01 01 00 00 00 	mov    QWORD PTR [rcx],0x1
+    1055:	48 89 59 08          	mov    QWORD PTR [rcx+0x8],rbx
+    1059:	eb 15                	jmp    1070 <balancer_ingress+0x1070>
+    105b:	31 db                	xor    ebx,ebx
+    105d:	eb 14                	jmp    1073 <balancer_ingress+0x1073>
+    105f:	48 8b 01             	mov    rax,QWORD PTR [rcx]
+    1062:	48 ff c0             	inc    rax
+    1065:	48 89 01             	mov    QWORD PTR [rcx],rax
+    1068:	48 3d 48 e8 01 00    	cmp    rax,0x1e848
+    106e:	77 03                	ja     1073 <balancer_ingress+0x1073>
+    1070:	45 31 ed             	xor    r13d,r13d
+    1073:	44 89 54 24 58       	mov    DWORD PTR [rsp+0x58],r10d
+    1078:	c5 f9 7f 9c 24 80 00 	vmovdqa XMMWORD PTR [rsp+0x80],xmm3
+    107f:	00 00 
+    1081:	48 89 bc 24 a0 00 00 	mov    QWORD PTR [rsp+0xa0],rdi
+    1088:	00 
+    1089:	41 f6 04 24 08       	test   BYTE PTR [r12],0x8
+    108e:	74 10                	je     10a0 <balancer_ingress+0x10a0>
+    1090:	0f b7 44 24 42       	movzx  eax,WORD PTR [rsp+0x42]
+    1095:	66 89 44 24 40       	mov    WORD PTR [rsp+0x40],ax
+    109a:	c5 f9 7f 44 24 20    	vmovdqa XMMWORD PTR [rsp+0x20],xmm0
+    10a0:	48 8d 7c 24 20       	lea    rdi,[rsp+0x20]
+    10a5:	c5 f8 77             	vzeroupper
+    10a8:	e8 63 0b 00 00       	call   1c10 <jhash>
+    10ad:	8b 74 24 40          	mov    esi,DWORD PTR [rsp+0x40]
+    10b1:	89 c7                	mov    edi,eax
+    10b3:	e8 f8 0a 00 00       	call   1bb0 <jhash_2words>
+    10b8:	89 c1                	mov    ecx,eax
+    10ba:	ba 01 00 ff ff       	mov    edx,0xffff0001
+    10bf:	48 0f af d1          	imul   rdx,rcx
+    10c3:	48 c1 ea 30          	shr    rdx,0x30
+    10c7:	89 d1                	mov    ecx,edx
+    10c9:	c1 e1 10             	shl    ecx,0x10
+    10cc:	09 d1                	or     ecx,edx
+    10ce:	29 c8                	sub    eax,ecx
+    10d0:	41 8b 4c 24 04       	mov    ecx,DWORD PTR [r12+0x4]
+    10d5:	89 ca                	mov    edx,ecx
+    10d7:	c1 e2 10             	shl    edx,0x10
+    10da:	01 ca                	add    edx,ecx
+    10dc:	01 c2                	add    edx,eax
+    10de:	89 54 24 1c          	mov    DWORD PTR [rsp+0x1c],edx
+    10e2:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 10e9 <balancer_ingress+0x10e9>
+    10e9:	48 8d 4c 24 1c       	lea    rcx,[rsp+0x1c]
+    10ee:	48 85 c0             	test   rax,rax
+    10f1:	0f 84 2c 09 00 00    	je     1a23 <balancer_ingress+0x1a23>
+    10f7:	8b 00                	mov    eax,DWORD PTR [rax]
+    10f9:	89 44 24 1c          	mov    DWORD PTR [rsp+0x1c],eax
+    10fd:	85 c0                	test   eax,eax
+    10ff:	0f 84 9a 01 00 00    	je     129f <balancer_ingress+0x129f>
+    1105:	89 44 24 48          	mov    DWORD PTR [rsp+0x48],eax
+    1109:	48 8d 15 00 00 00 00 	lea    rdx,[rip+0x0]        # 1110 <balancer_ingress+0x1110>
+    1110:	48 8d 44 24 1c       	lea    rax,[rsp+0x1c]
+    1115:	48 85 d2             	test   rdx,rdx
+    1118:	0f 84 a3 01 00 00    	je     12c1 <balancer_ingress+0x12c1>
+    111e:	41 0f b6 04 24       	movzx  eax,BYTE PTR [r12]
+    1123:	24 02                	and    al,0x2
+    1125:	d0 e8                	shr    al,1
+    1127:	41 08 c5             	or     r13b,al
+    112a:	75 24                	jne    1150 <balancer_ingress+0x1150>
+    112c:	f6 44 24 4c 04       	test   BYTE PTR [rsp+0x4c],0x4
+    1131:	75 1d                	jne    1150 <balancer_ingress+0x1150>
+    1133:	80 7c 24 44 11       	cmp    BYTE PTR [rsp+0x44],0x11
+    1138:	75 05                	jne    113f <balancer_ingress+0x113f>
+    113a:	48 89 5c 24 08       	mov    QWORD PTR [rsp+0x8],rbx
+    113f:	8b 44 24 1c          	mov    eax,DWORD PTR [rsp+0x1c]
+    1143:	89 04 24             	mov    DWORD PTR [rsp],eax
+    1146:	31 c0                	xor    eax,eax
+    1148:	48 8d 4c 24 20       	lea    rcx,[rsp+0x20]
+    114d:	48 89 e6             	mov    rsi,rsp
+    1150:	c7 04 24 00 00 00 00 	mov    DWORD PTR [rsp],0x0
+    1157:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 115e <balancer_ingress+0x115e>
+    115e:	48 89 e1             	mov    rcx,rsp
+    1161:	48 85 c0             	test   rax,rax
+    1164:	0f 84 b9 08 00 00    	je     1a23 <balancer_ingress+0x1a23>
+    116a:	8b 30                	mov    esi,DWORD PTR [rax]
+    116c:	b1 01                	mov    cl,0x1
+    116e:	3b 74 24 60          	cmp    esi,DWORD PTR [rsp+0x60]
+    1172:	75 1c                	jne    1190 <balancer_ingress+0x1190>
+    1174:	8b 70 04             	mov    esi,DWORD PTR [rax+0x4]
+    1177:	3b 74 24 64          	cmp    esi,DWORD PTR [rsp+0x64]
+    117b:	75 13                	jne    1190 <balancer_ingress+0x1190>
+    117d:	8b 70 08             	mov    esi,DWORD PTR [rax+0x8]
+    1180:	3b 74 24 68          	cmp    esi,DWORD PTR [rsp+0x68]
+    1184:	75 0a                	jne    1190 <balancer_ingress+0x1190>
+    1186:	8b 48 0c             	mov    ecx,DWORD PTR [rax+0xc]
+    1189:	3b 4c 24 6c          	cmp    ecx,DWORD PTR [rsp+0x6c]
+    118d:	0f 95 c1             	setne  cl
+    1190:	0f b7 78 10          	movzx  edi,WORD PTR [rax+0x10]
+    1194:	44 0f b7 44 24 70    	movzx  r8d,WORD PTR [rsp+0x70]
+    119a:	0f b6 74 24 72       	movzx  esi,BYTE PTR [rsp+0x72]
+    119f:	40 88 70 12          	mov    BYTE PTR [rax+0x12],sil
+    11a3:	84 c9                	test   cl,cl
+    11a5:	75 2a                	jne    11d1 <balancer_ingress+0x11d1>
+    11a7:	66 44 39 c7          	cmp    di,r8w
+    11ab:	75 24                	jne    11d1 <balancer_ingress+0x11d1>
+    11ad:	40 84 f6             	test   sil,sil
+    11b0:	74 1f                	je     11d1 <balancer_ingress+0x11d1>
+    11b2:	8b 44 24 48          	mov    eax,DWORD PTR [rsp+0x48]
+    11b6:	89 44 24 14          	mov    DWORD PTR [rsp+0x14],eax
+    11ba:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 11c1 <balancer_ingress+0x11c1>
+    11c1:	48 8d 4c 24 14       	lea    rcx,[rsp+0x14]
+    11c6:	48 85 c0             	test   rax,rax
+    11c9:	0f 84 54 08 00 00    	je     1a23 <balancer_ingress+0x1a23>
+    11cf:	ff 00                	inc    DWORD PTR [rax]
+    11d1:	49 ff 46 08          	inc    QWORD PTR [r14+0x8]
+    11d5:	b8 01 00 00 00       	mov    eax,0x1
+    11da:	48 8b bc 24 a0 00 00 	mov    rdi,QWORD PTR [rsp+0xa0]
+    11e1:	00 
+    11e2:	c5 f9 6f 9c 24 80 00 	vmovdqa xmm3,XMMWORD PTR [rsp+0x80]
+    11e9:	00 00 
+    11eb:	c4 e2 79 59 15 00 00 	vpbroadcastq xmm2,QWORD PTR [rip+0x0]        # 11f4 <balancer_ingress+0x11f4>
+    11f2:	00 00 
+    11f4:	44 8b 54 24 58       	mov    r10d,DWORD PTR [rsp+0x58]
+    11f9:	e9 53 fc ff ff       	jmp    e51 <balancer_ingress+0xe51>
+    11fe:	b8 d8 ff ff ff       	mov    eax,0xffffffd8
+    1203:	8b 07                	mov    eax,DWORD PTR [rdi]
+    1205:	8b 7f 04             	mov    edi,DWORD PTR [rdi+0x4]
+    1208:	4c 8d 40 0e          	lea    r8,[rax+0xe]
+    120c:	49 39 f8             	cmp    r8,rdi
+    120f:	0f 87 e9 00 00 00    	ja     12fe <balancer_ingress+0x12fe>
+    1215:	4c 8d 40 36          	lea    r8,[rax+0x36]
+    1219:	49 39 f8             	cmp    r8,rdi
+    121c:	0f 87 dc 00 00 00    	ja     12fe <balancer_ingress+0x12fe>
+    1222:	0f b7 4e 04          	movzx  ecx,WORD PTR [rsi+0x4]
+    1226:	66 89 48 04          	mov    WORD PTR [rax+0x4],cx
+    122a:	8b 0e                	mov    ecx,DWORD PTR [rsi]
+    122c:	89 08                	mov    DWORD PTR [rax],ecx
+    122e:	8b 48 28             	mov    ecx,DWORD PTR [rax+0x28]
+    1231:	89 48 06             	mov    DWORD PTR [rax+0x6],ecx
+    1234:	0f b7 48 2c          	movzx  ecx,WORD PTR [rax+0x2c]
+    1238:	66 89 48 0a          	mov    WORD PTR [rax+0xa],cx
+    123c:	66 c7 40 0c 86 dd    	mov    WORD PTR [rax+0xc],0xdd86
+    1242:	0f b7 4c 24 40       	movzx  ecx,WORD PTR [rsp+0x40]
+    1247:	33 4c 24 2c          	xor    ecx,DWORD PTR [rsp+0x2c]
+    124b:	83 c5 28             	add    ebp,0x28
+    124e:	0f b6 74 24 4d       	movzx  esi,BYTE PTR [rsp+0x4d]
+    1253:	66 c7 40 10 00 00    	mov    WORD PTR [rax+0x10],0x0
+    1259:	89 f7                	mov    edi,esi
+    125b:	40 c0 ef 04          	shr    dil,0x4
+    125f:	40 80 cf 60          	or     dil,0x60
+    1263:	40 88 78 0e          	mov    BYTE PTR [rax+0xe],dil
+    1267:	40 c0 e6 04          	shl    sil,0x4
+    126b:	40 88 70 0f          	mov    BYTE PTR [rax+0xf],sil
+    126f:	66 c1 c5 08          	rol    bp,0x8
+    1273:	66 c7 40 14 29 40    	mov    WORD PTR [rax+0x14],0x4029
+    1279:	66 89 68 12          	mov    WORD PTR [rax+0x12],bp
+    127d:	48 c7 40 16 01 00 00 	mov    QWORD PTR [rax+0x16],0x1
+    1284:	00 
+    1285:	c7 40 1e 00 00 00 00 	mov    DWORD PTR [rax+0x1e],0x0
+    128c:	89 48 22             	mov    DWORD PTR [rax+0x22],ecx
+    128f:	c5 fa 6f 02          	vmovdqu xmm0,XMMWORD PTR [rdx]
+    1293:	c5 fa 7f 40 26       	vmovdqu XMMWORD PTR [rax+0x26],xmm0
+    1298:	b9 03 00 00 00       	mov    ecx,0x3
+    129d:	eb 79                	jmp    1318 <balancer_ingress+0x1318>
+    129f:	c7 44 24 14 09 02 00 	mov    DWORD PTR [rsp+0x14],0x209
+    12a6:	00 
+    12a7:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 12ae <balancer_ingress+0x12ae>
+    12ae:	48 8d 4c 24 14       	lea    rcx,[rsp+0x14]
+    12b3:	48 85 c0             	test   rax,rax
+    12b6:	0f 85 45 07 00 00    	jne    1a01 <balancer_ingress+0x1a01>
+    12bc:	e9 62 07 00 00       	jmp    1a23 <balancer_ingress+0x1a23>
+    12c1:	c7 44 24 14 09 02 00 	mov    DWORD PTR [rsp+0x14],0x209
+    12c8:	00 
+    12c9:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 12d0 <balancer_ingress+0x12d0>
+    12d0:	48 8d 4c 24 14       	lea    rcx,[rsp+0x14]
+    12d5:	48 85 c0             	test   rax,rax
+    12d8:	0f 85 42 07 00 00    	jne    1a20 <balancer_ingress+0x1a20>
+    12de:	e9 40 07 00 00       	jmp    1a23 <balancer_ingress+0x1a23>
+    12e3:	c7 04 24 07 02 00 00 	mov    DWORD PTR [rsp],0x207
+    12ea:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 12f1 <balancer_ingress+0x12f1>
+    12f1:	48 89 e2             	mov    rdx,rsp
+    12f4:	48 85 c0             	test   rax,rax
+    12f7:	74 1f                	je     1318 <balancer_ingress+0x1318>
+    12f9:	48 ff 00             	inc    QWORD PTR [rax]
+    12fc:	eb 1a                	jmp    1318 <balancer_ingress+0x1318>
+    12fe:	c7 04 24 07 02 00 00 	mov    DWORD PTR [rsp],0x207
+    1305:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 130c <balancer_ingress+0x130c>
+    130c:	48 89 e2             	mov    rdx,rsp
+    130f:	48 85 c0             	test   rax,rax
+    1312:	74 04                	je     1318 <balancer_ingress+0x1318>
+    1314:	48 ff 40 08          	inc    QWORD PTR [rax+0x8]
+    1318:	b8 01 00 00 00       	mov    eax,0x1
+    131d:	83 f9 01             	cmp    ecx,0x1
+    1320:	75 36                	jne    1358 <balancer_ingress+0x1358>
+    1322:	e9 18 07 00 00       	jmp    1a3f <balancer_ingress+0x1a3f>
+    1327:	80 7a 0d 07          	cmp    BYTE PTR [rdx+0xd],0x7
+    132b:	0f 86 9e 01 00 00    	jbe    14cf <balancer_ingress+0x14cf>
+    1331:	48 83 c2 0e          	add    rdx,0xe
+    1335:	48 89 d7             	mov    rdi,rdx
+    1338:	e9 d5 f6 ff ff       	jmp    a12 <balancer_ingress+0xa12>
+    133d:	48 ff 41 28          	inc    QWORD PTR [rcx+0x28]
+    1341:	b8 01 00 00 00       	mov    eax,0x1
+    1346:	c5 f9 6f d9          	vmovdqa xmm3,xmm1
+    134a:	b9 01 00 00 00       	mov    ecx,0x1
+    134f:	83 f9 01             	cmp    ecx,0x1
+    1352:	0f 84 e7 06 00 00    	je     1a3f <balancer_ingress+0x1a3f>
+    1358:	83 f9 03             	cmp    ecx,0x3
+    135b:	75 12                	jne    136f <balancer_ingress+0x136f>
+    135d:	c7 44 24 5c 11 02 00 	mov    DWORD PTR [rsp+0x5c],0x211
+    1364:	00 
+    1365:	b9 03 00 00 00       	mov    ecx,0x3
+    136a:	e9 dd 06 00 00       	jmp    1a4c <balancer_ingress+0x1a4c>
+    136f:	c7 44 24 5c 13 02 00 	mov    DWORD PTR [rsp+0x5c],0x213
+    1376:	00 
+    1377:	b9 02 00 00 00       	mov    ecx,0x2
+    137c:	e9 cb 06 00 00       	jmp    1a4c <balancer_ingress+0x1a4c>
+    1381:	0f b6 57 01          	movzx  edx,BYTE PTR [rdi+0x1]
+    1385:	c1 e2 10             	shl    edx,0x10
+    1388:	0f b6 77 02          	movzx  esi,BYTE PTR [rdi+0x2]
+    138c:	c1 e6 08             	shl    esi,0x8
+    138f:	09 d6                	or     esi,edx
+    1391:	0f b6 57 03          	movzx  edx,BYTE PTR [rdi+0x3]
+    1395:	eb 21                	jmp    13b8 <balancer_ingress+0x13b8>
+    1397:	0f b6 57 01          	movzx  edx,BYTE PTR [rdi+0x1]
+    139b:	c1 e2 18             	shl    edx,0x18
+    139e:	44 0f b6 47 02       	movzx  r8d,BYTE PTR [rdi+0x2]
+    13a3:	41 c1 e0 10          	shl    r8d,0x10
+    13a7:	41 09 d0             	or     r8d,edx
+    13aa:	0f b6 77 03          	movzx  esi,BYTE PTR [rdi+0x3]
+    13ae:	c1 e6 08             	shl    esi,0x8
+    13b1:	44 09 c6             	or     esi,r8d
+    13b4:	0f b6 57 04          	movzx  edx,BYTE PTR [rdi+0x4]
+    13b8:	0f b6 d2             	movzx  edx,dl
+    13bb:	48 09 f2             	or     rdx,rsi
+    13be:	85 d2                	test   edx,edx
+    13c0:	0f 8e 09 01 00 00    	jle    14cf <balancer_ingress+0x14cf>
+    13c6:	48 83 f8 03          	cmp    rax,0x3
+    13ca:	0f 84 86 00 00 00    	je     1456 <balancer_ingress+0x1456>
+    13d0:	83 f8 02             	cmp    eax,0x2
+    13d3:	74 78                	je     144d <balancer_ingress+0x144d>
+    13d5:	83 f8 01             	cmp    eax,0x1
+    13d8:	0f 85 81 00 00 00    	jne    145f <balancer_ingress+0x145f>
+    13de:	48 89 c8             	mov    rax,rcx
+    13e1:	48 83 c0 38          	add    rax,0x38
+    13e5:	eb 7f                	jmp    1466 <balancer_ingress+0x1466>
+    13e7:	c7 04 24 02 02 00 00 	mov    DWORD PTR [rsp],0x202
+    13ee:	48 8d 3d 00 00 00 00 	lea    rdi,[rip+0x0]        # 13f5 <balancer_ingress+0x13f5>
+    13f5:	48 89 e0             	mov    rax,rsp
+    13f8:	48 85 ff             	test   rdi,rdi
+    13fb:	0f 84 ed 06 00 00    	je     1aee <balancer_ingress+0x1aee>
+    1401:	0f 31                	rdtsc
+    1403:	49 89 c0             	mov    r8,rax
+    1406:	4c 2b 47 08          	sub    r8,QWORD PTR [rdi+0x8]
+    140a:	49 81 f8 01 ca 9a 3b 	cmp    r8,0x3b9aca01
+    1411:	0f 82 ac 06 00 00    	jb     1ac3 <balancer_ingress+0x1ac3>
+    1417:	48 c7 07 01 00 00 00 	mov    QWORD PTR [rdi],0x1
+    141e:	48 89 47 08          	mov    QWORD PTR [rdi+0x8],rax
+    1422:	e9 ad 06 00 00       	jmp    1ad4 <balancer_ingress+0x1ad4>
+    1427:	89 38                	mov    DWORD PTR [rax],edi
+    1429:	48 ff 41 58          	inc    QWORD PTR [rcx+0x58]
+    142d:	44 89 0c 24          	mov    DWORD PTR [rsp],r9d
+    1431:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 1438 <balancer_ingress+0x1438>
+    1438:	48 89 e7             	mov    rdi,rsp
+    143b:	48 85 c0             	test   rax,rax
+    143e:	0f 84 ae 06 00 00    	je     1af2 <balancer_ingress+0x1af2>
+    1444:	48 ff 40 08          	inc    QWORD PTR [rax+0x8]
+    1448:	e9 a5 06 00 00       	jmp    1af2 <balancer_ingress+0x1af2>
+    144d:	48 89 c8             	mov    rax,rcx
+    1450:	48 83 c0 40          	add    rax,0x40
+    1454:	eb 10                	jmp    1466 <balancer_ingress+0x1466>
+    1456:	48 89 c8             	mov    rax,rcx
+    1459:	48 83 c0 48          	add    rax,0x48
+    145d:	eb 07                	jmp    1466 <balancer_ingress+0x1466>
+    145f:	48 89 c8             	mov    rax,rcx
+    1462:	48 83 c0 30          	add    rax,0x30
+    1466:	48 ff 00             	inc    QWORD PTR [rax]
+    1469:	89 54 24 1c          	mov    DWORD PTR [rsp+0x1c],edx
+    146d:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 1474 <balancer_ingress+0x1474>
+    1474:	48 8d 74 24 1c       	lea    rsi,[rsp+0x1c]
+    1479:	48 85 c0             	test   rax,rax
+    147c:	74 49                	je     14c7 <balancer_ingress+0x14c7>
+    147e:	8b 00                	mov    eax,DWORD PTR [rax]
+    1480:	89 44 24 1c          	mov    DWORD PTR [rsp+0x1c],eax
+    1484:	85 c0                	test   eax,eax
+    1486:	74 3f                	je     14c7 <balancer_ingress+0x14c7>
+    1488:	89 44 24 48          	mov    DWORD PTR [rsp+0x48],eax
+    148c:	48 8d 15 00 00 00 00 	lea    rdx,[rip+0x0]        # 1493 <balancer_ingress+0x1493>
+    1493:	48 8d 44 24 1c       	lea    rax,[rsp+0x1c]
+    1498:	48 85 d2             	test   rdx,rdx
+    149b:	0f 84 19 06 00 00    	je     1aba <balancer_ingress+0x1aba>
+    14a1:	48 8d 74 24 20       	lea    rsi,[rsp+0x20]
+    14a6:	4c 89 e0             	mov    rax,r12
+    14a9:	48 85 c0             	test   rax,rax
+    14ac:	0f 84 5f 06 00 00    	je     1b11 <balancer_ingress+0x1b11>
+    14b2:	8b 74 24 48          	mov    esi,DWORD PTR [rsp+0x48]
+    14b6:	39 30                	cmp    DWORD PTR [rax],esi
+    14b8:	0f 85 88 06 00 00    	jne    1b46 <balancer_ingress+0x1b46>
+    14be:	48 ff 41 50          	inc    QWORD PTR [rcx+0x50]
+    14c2:	e9 cd 06 00 00       	jmp    1b94 <balancer_ingress+0x1b94>
+    14c7:	48 ff 41 10          	inc    QWORD PTR [rcx+0x10]
+    14cb:	48 89 51 18          	mov    QWORD PTR [rcx+0x18],rdx
+    14cf:	48 ff 01             	inc    QWORD PTR [rcx]
+    14d2:	0f b7 44 24 40       	movzx  eax,WORD PTR [rsp+0x40]
+    14d7:	89 44 24 58          	mov    DWORD PTR [rsp+0x58],eax
+    14db:	f6 44 24 4c 02       	test   BYTE PTR [rsp+0x4c],0x2
+    14e0:	75 3b                	jne    151d <balancer_ingress+0x151d>
+    14e2:	41 f6 45 00 02       	test   BYTE PTR [r13+0x0],0x2
+    14e7:	75 34                	jne    151d <balancer_ingress+0x151d>
+    14e9:	48 8d 44 24 20       	lea    rax,[rsp+0x20]
+    14ee:	4c 89 e1             	mov    rcx,r12
+    14f1:	48 85 c9             	test   rcx,rcx
+    14f4:	74 27                	je     151d <balancer_ingress+0x151d>
+    14f6:	80 7c 24 44 11       	cmp    BYTE PTR [rsp+0x44],0x11
+    14fb:	0f 85 bf 00 00 00    	jne    15c0 <balancer_ingress+0x15c0>
+    1501:	0f 31                	rdtsc
+    1503:	48 89 c2             	mov    rdx,rax
+    1506:	48 2b 51 08          	sub    rdx,QWORD PTR [rcx+0x8]
+    150a:	48 be 00 ac 23 fc 06 	movabs rsi,0x6fc23ac00
+    1511:	00 00 00 
+    1514:	48 39 f2             	cmp    rdx,rsi
+    1517:	0f 86 9f 00 00 00    	jbe    15bc <balancer_ingress+0x15bc>
+    151d:	31 d2                	xor    edx,edx
+    151f:	80 7c 24 44 11       	cmp    BYTE PTR [rsp+0x44],0x11
+    1524:	0f 85 b4 00 00 00    	jne    15de <balancer_ingress+0x15de>
+    152a:	41 f6 45 01 02       	test   BYTE PTR [r13+0x1],0x2
+    152f:	0f 84 a9 00 00 00    	je     15de <balancer_ingress+0x15de>
+    1535:	c7 04 24 02 02 00 00 	mov    DWORD PTR [rsp],0x202
+    153c:	48 8d 0d 00 00 00 00 	lea    rcx,[rip+0x0]        # 1543 <balancer_ingress+0x1543>
+    1543:	48 89 e0             	mov    rax,rsp
+    1546:	48 85 c9             	test   rcx,rcx
+    1549:	0f 84 8f 00 00 00    	je     15de <balancer_ingress+0x15de>
+    154f:	0f 31                	rdtsc
+    1551:	48 89 c6             	mov    rsi,rax
+    1554:	48 2b 71 08          	sub    rsi,QWORD PTR [rcx+0x8]
+    1558:	48 81 fe 01 ca 9a 3b 	cmp    rsi,0x3b9aca01
+    155f:	72 0d                	jb     156e <balancer_ingress+0x156e>
+    1561:	48 c7 01 01 00 00 00 	mov    QWORD PTR [rcx],0x1
+    1568:	48 89 41 08          	mov    QWORD PTR [rcx+0x8],rax
+    156c:	eb 11                	jmp    157f <balancer_ingress+0x157f>
+    156e:	48 8b 01             	mov    rax,QWORD PTR [rcx]
+    1571:	48 ff c0             	inc    rax
+    1574:	48 89 01             	mov    QWORD PTR [rcx],rax
+    1577:	48 3d 49 e8 01 00    	cmp    rax,0x1e849
+    157d:	73 5f                	jae    15de <balancer_ingress+0x15de>
+    157f:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 1586 <balancer_ingress+0x1586>
+    1586:	48 8d 4c 24 60       	lea    rcx,[rsp+0x60]
+    158b:	48 85 c0             	test   rax,rax
+    158e:	74 4e                	je     15de <balancer_ingress+0x15de>
+    1590:	48 8d 4c 24 48       	lea    rcx,[rsp+0x48]
+    1595:	48 85 c0             	test   rax,rax
+    1598:	74 44                	je     15de <balancer_ingress+0x15de>
+    159a:	c7 04 24 0f 02 00 00 	mov    DWORD PTR [rsp],0x20f
+    15a1:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 15a8 <balancer_ingress+0x15a8>
+    15a8:	48 89 e1             	mov    rcx,rsp
+    15ab:	48 85 c0             	test   rax,rax
+    15ae:	0f 84 e0 01 00 00    	je     1794 <balancer_ingress+0x1794>
+    15b4:	48 ff 00             	inc    QWORD PTR [rax]
+    15b7:	e9 d8 01 00 00       	jmp    1794 <balancer_ingress+0x1794>
+    15bc:	48 89 41 08          	mov    QWORD PTR [rcx+0x8],rax
+    15c0:	8b 01                	mov    eax,DWORD PTR [rcx]
+    15c2:	89 04 24             	mov    DWORD PTR [rsp],eax
+    15c5:	89 44 24 48          	mov    DWORD PTR [rsp+0x48],eax
+    15c9:	48 8d 15 00 00 00 00 	lea    rdx,[rip+0x0]        # 15d0 <balancer_ingress+0x15d0>
+    15d0:	48 89 e0             	mov    rax,rsp
+    15d3:	80 7c 24 44 11       	cmp    BYTE PTR [rsp+0x44],0x11
+    15d8:	0f 84 4c ff ff ff    	je     152a <balancer_ingress+0x152a>
+    15de:	48 85 d2             	test   rdx,rdx
+    15e1:	0f 84 ad 01 00 00    	je     1794 <balancer_ingress+0x1794>
+    15e7:	48 8d 35 00 00 00 00 	lea    rsi,[rip+0x0]        # 15ee <balancer_ingress+0x15ee>
+    15ee:	48 8d 84 24 98 00 00 	lea    rax,[rsp+0x98]
+    15f5:	00 
+    15f6:	b9 01 00 00 00       	mov    ecx,0x1
+    15fb:	48 85 f6             	test   rsi,rsi
+    15fe:	0f 84 24 04 00 00    	je     1a28 <balancer_ingress+0x1a28>
+    1604:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 160b <balancer_ingress+0x160b>
+    160b:	48 8d bc 24 9c 00 00 	lea    rdi,[rsp+0x9c]
+    1612:	00 
+    1613:	48 85 c0             	test   rax,rax
+    1616:	0f 84 0c 04 00 00    	je     1a28 <balancer_ingress+0x1a28>
+    161c:	89 ef                	mov    edi,ebp
+    161e:	66 c1 c7 08          	rol    di,0x8
+    1622:	44 0f b7 c7          	movzx  r8d,di
+    1626:	c4 e2 79 59 05 00 00 	vpbroadcastq xmm0,QWORD PTR [rip+0x0]        # 162f <balancer_ingress+0x162f>
+    162d:	00 00 
+    162f:	c4 c3 f9 22 c0 01    	vpinsrq xmm0,xmm0,r8,0x1
+    1635:	c5 f9 d4 08          	vpaddq xmm1,xmm0,XMMWORD PTR [rax]
+    1639:	c5 fa 7f 08          	vmovdqu XMMWORD PTR [rax],xmm1
+    163d:	4c 8d 44 24 48       	lea    r8,[rsp+0x48]
+    1642:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 1649 <balancer_ingress+0x1649>
+    1649:	48 85 c0             	test   rax,rax
+    164c:	0f 84 d6 03 00 00    	je     1a28 <balancer_ingress+0x1a28>
+    1652:	c5 f9 d4 00          	vpaddq xmm0,xmm0,XMMWORD PTR [rax]
+    1656:	c5 fa 7f 00          	vmovdqu XMMWORD PTR [rax],xmm0
+    165a:	8b 44 24 58          	mov    eax,DWORD PTR [rsp+0x58]
+    165e:	66 89 44 24 40       	mov    WORD PTR [rsp+0x40],ax
+    1663:	f6 42 10 01          	test   BYTE PTR [rdx+0x10],0x1
+    1667:	0f 85 d9 02 00 00    	jne    1946 <balancer_ingress+0x1946>
+    166d:	44 8b 44 24 20       	mov    r8d,DWORD PTR [rsp+0x20]
+    1672:	b8 ec ff ff ff       	mov    eax,0xffffffec
+    1677:	4c 8b 8c 24 a0 00 00 	mov    r9,QWORD PTR [rsp+0xa0]
+    167e:	00 
+    167f:	41 8b 01             	mov    eax,DWORD PTR [r9]
+    1682:	45 8b 49 04          	mov    r9d,DWORD PTR [r9+0x4]
+    1686:	4c 8d 50 0e          	lea    r10,[rax+0xe]
+    168a:	4d 39 ca             	cmp    r10,r9
+    168d:	0f 87 e9 03 00 00    	ja     1a7c <balancer_ingress+0x1a7c>
+    1693:	4c 8d 50 22          	lea    r10,[rax+0x22]
+    1697:	4d 39 ca             	cmp    r10,r9
+    169a:	0f 87 dc 03 00 00    	ja     1a7c <balancer_ingress+0x1a7c>
+    16a0:	8b 4c 24 58          	mov    ecx,DWORD PTR [rsp+0x58]
+    16a4:	66 c1 c1 08          	rol    cx,0x8
+    16a8:	c1 e1 10             	shl    ecx,0x10
+    16ab:	41 81 e0 00 00 ff ff 	and    r8d,0xffff0000
+    16b2:	41 31 c8             	xor    r8d,ecx
+    16b5:	41 8d 88 ac 10 00 00 	lea    ecx,[r8+0x10ac]
+    16bc:	44 0f b7 4e 04       	movzx  r9d,WORD PTR [rsi+0x4]
+    16c1:	66 44 89 48 04       	mov    WORD PTR [rax+0x4],r9w
+    16c6:	8b 36                	mov    esi,DWORD PTR [rsi]
+    16c8:	89 30                	mov    DWORD PTR [rax],esi
+    16ca:	8b 70 14             	mov    esi,DWORD PTR [rax+0x14]
+    16cd:	89 70 06             	mov    DWORD PTR [rax+0x6],esi
+    16d0:	0f b7 70 18          	movzx  esi,WORD PTR [rax+0x18]
+    16d4:	66 89 70 0a          	mov    WORD PTR [rax+0xa],si
+    16d8:	66 c7 40 0c 08 00    	mov    WORD PTR [rax+0xc],0x8
+    16de:	0f b6 74 24 4d       	movzx  esi,BYTE PTR [rsp+0x4d]
+    16e3:	8b 12                	mov    edx,DWORD PTR [rdx]
+    16e5:	c6 40 0e 45          	mov    BYTE PTR [rax+0xe],0x45
+    16e9:	83 c7 14             	add    edi,0x14
+    16ec:	66 c1 c7 08          	rol    di,0x8
+    16f0:	40 88 70 0f          	mov    BYTE PTR [rax+0xf],sil
+    16f4:	66 89 78 10          	mov    WORD PTR [rax+0x10],di
+    16f8:	c7 40 12 00 00 00 00 	mov    DWORD PTR [rax+0x12],0x0
+    16ff:	89 50 1e             	mov    DWORD PTR [rax+0x1e],edx
+    1702:	89 48 1a             	mov    DWORD PTR [rax+0x1a],ecx
+    1705:	66 c7 40 16 40 04    	mov    WORD PTR [rax+0x16],0x440
+    170b:	0f b7 48 0e          	movzx  ecx,WORD PTR [rax+0xe]
+    170f:	0f b7 f7             	movzx  esi,di
+    1712:	0f b7 78 16          	movzx  edi,WORD PTR [rax+0x16]
+    1716:	48 01 cf             	add    rdi,rcx
+    1719:	41 c1 e8 10          	shr    r8d,0x10
+    171d:	49 01 f8             	add    r8,rdi
+    1720:	0f b7 ca             	movzx  ecx,dx
+    1723:	4c 01 c1             	add    rcx,r8
+    1726:	48 01 f1             	add    rcx,rsi
+    1729:	0f b7 50 20          	movzx  edx,WORD PTR [rax+0x20]
+    172d:	48 01 d1             	add    rcx,rdx
+    1730:	48 81 c1 ac 10 00 00 	add    rcx,0x10ac
+    1737:	48 89 ca             	mov    rdx,rcx
+    173a:	48 c1 ea 10          	shr    rdx,0x10
+    173e:	0f b7 f1             	movzx  esi,cx
+    1741:	48 01 d6             	add    rsi,rdx
+    1744:	48 81 f9 00 00 01 00 	cmp    rcx,0x10000
+    174b:	48 0f 42 f1          	cmovb  rsi,rcx
+    174f:	48 89 f1             	mov    rcx,rsi
+    1752:	48 c1 e9 10          	shr    rcx,0x10
+    1756:	0f b7 d6             	movzx  edx,si
+    1759:	48 01 ca             	add    rdx,rcx
+    175c:	48 81 fe 00 00 01 00 	cmp    rsi,0x10000
+    1763:	48 0f 42 d6          	cmovb  rdx,rsi
+    1767:	48 89 d1             	mov    rcx,rdx
+    176a:	48 c1 e9 10          	shr    rcx,0x10
+    176e:	0f b7 f2             	movzx  esi,dx
+    1771:	01 f1                	add    ecx,esi
+    1773:	48 81 fa 00 00 01 00 	cmp    rdx,0x10000
+    177a:	0f 42 ca             	cmovb  ecx,edx
+    177d:	89 ca                	mov    edx,ecx
+    177f:	c1 ea 10             	shr    edx,0x10
+    1782:	01 ca                	add    edx,ecx
+    1784:	f7 d2                	not    edx
+    1786:	66 89 50 18          	mov    WORD PTR [rax+0x18],dx
+    178a:	b9 03 00 00 00       	mov    ecx,0x3
+    178f:	e9 94 02 00 00       	jmp    1a28 <balancer_ingress+0x1a28>
+    1794:	80 7c 24 44 06       	cmp    BYTE PTR [rsp+0x44],0x6
+    1799:	75 28                	jne    17c3 <balancer_ingress+0x17c3>
+    179b:	c7 04 24 01 02 00 00 	mov    DWORD PTR [rsp],0x201
+    17a2:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 17a9 <balancer_ingress+0x17a9>
+    17a9:	48 89 e1             	mov    rcx,rsp
+    17ac:	48 85 c0             	test   rax,rax
+    17af:	0f 84 6e 02 00 00    	je     1a23 <balancer_ingress+0x1a23>
+    17b5:	31 c9                	xor    ecx,ecx
+    17b7:	f6 44 24 4c 02       	test   BYTE PTR [rsp+0x4c],0x2
+    17bc:	0f 94 c1             	sete   cl
+    17bf:	48 ff 04 c8          	inc    QWORD PTR [rax+rcx*8]
+    17c3:	c5 f9 ef c0          	vpxor  xmm0,xmm0,xmm0
+    17c7:	c5 f9 7f 04 24       	vmovdqa XMMWORD PTR [rsp],xmm0
+    17cc:	c7 44 24 14 02 02 00 	mov    DWORD PTR [rsp+0x14],0x202
+    17d3:	00 
+    17d4:	48 8d 0d 00 00 00 00 	lea    rcx,[rip+0x0]        # 17db <balancer_ingress+0x17db>
+    17db:	48 8d 44 24 14       	lea    rax,[rsp+0x14]
+    17e0:	41 b6 01             	mov    r14b,0x1
+    17e3:	48 85 c9             	test   rcx,rcx
+    17e6:	74 1e                	je     1806 <balancer_ingress+0x1806>
+    17e8:	0f 31                	rdtsc
+    17ea:	48 89 c3             	mov    rbx,rax
+    17ed:	48 2b 41 08          	sub    rax,QWORD PTR [rcx+0x8]
+    17f1:	48 3d 01 ca 9a 3b    	cmp    rax,0x3b9aca01
+    17f7:	72 11                	jb     180a <balancer_ingress+0x180a>
+    17f9:	48 c7 01 01 00 00 00 	mov    QWORD PTR [rcx],0x1
+    1800:	48 89 59 08          	mov    QWORD PTR [rcx+0x8],rbx
+    1804:	eb 15                	jmp    181b <balancer_ingress+0x181b>
+    1806:	31 db                	xor    ebx,ebx
+    1808:	eb 14                	jmp    181e <balancer_ingress+0x181e>
+    180a:	48 8b 01             	mov    rax,QWORD PTR [rcx]
+    180d:	48 ff c0             	inc    rax
+    1810:	48 89 01             	mov    QWORD PTR [rcx],rax
+    1813:	48 3d 48 e8 01 00    	cmp    rax,0x1e848
+    1819:	77 03                	ja     181e <balancer_ingress+0x181e>
+    181b:	45 31 f6             	xor    r14d,r14d
+    181e:	41 f6 45 00 08       	test   BYTE PTR [r13+0x0],0x8
+    1823:	75 06                	jne    182b <balancer_ingress+0x182b>
+    1825:	8b 7c 24 20          	mov    edi,DWORD PTR [rsp+0x20]
+    1829:	eb 12                	jmp    183d <balancer_ingress+0x183d>
+    182b:	0f b7 44 24 42       	movzx  eax,WORD PTR [rsp+0x42]
+    1830:	66 89 44 24 40       	mov    WORD PTR [rsp+0x40],ax
+    1835:	c5 f9 7f 44 24 20    	vmovdqa XMMWORD PTR [rsp+0x20],xmm0
+    183b:	31 ff                	xor    edi,edi
+    183d:	8b 74 24 40          	mov    esi,DWORD PTR [rsp+0x40]
+    1841:	c5 f8 77             	vzeroupper
+    1844:	e8 67 03 00 00       	call   1bb0 <jhash_2words>
+    1849:	89 c1                	mov    ecx,eax
+    184b:	ba 01 00 ff ff       	mov    edx,0xffff0001
+    1850:	48 0f af d1          	imul   rdx,rcx
+    1854:	48 c1 ea 30          	shr    rdx,0x30
+    1858:	89 d1                	mov    ecx,edx
+    185a:	c1 e1 10             	shl    ecx,0x10
+    185d:	09 d1                	or     ecx,edx
+    185f:	29 c8                	sub    eax,ecx
+    1861:	41 8b 4d 04          	mov    ecx,DWORD PTR [r13+0x4]
+    1865:	89 ca                	mov    edx,ecx
+    1867:	c1 e2 10             	shl    edx,0x10
+    186a:	01 ca                	add    edx,ecx
+    186c:	01 c2                	add    edx,eax
+    186e:	89 54 24 1c          	mov    DWORD PTR [rsp+0x1c],edx
+    1872:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 1879 <balancer_ingress+0x1879>
+    1879:	48 8d 4c 24 1c       	lea    rcx,[rsp+0x1c]
+    187e:	48 85 c0             	test   rax,rax
+    1881:	0f 84 9c 01 00 00    	je     1a23 <balancer_ingress+0x1a23>
+    1887:	8b 00                	mov    eax,DWORD PTR [rax]
+    1889:	89 44 24 1c          	mov    DWORD PTR [rsp+0x1c],eax
+    188d:	85 c0                	test   eax,eax
+    188f:	0f 84 53 01 00 00    	je     19e8 <balancer_ingress+0x19e8>
+    1895:	89 44 24 48          	mov    DWORD PTR [rsp+0x48],eax
+    1899:	48 8d 15 00 00 00 00 	lea    rdx,[rip+0x0]        # 18a0 <balancer_ingress+0x18a0>
+    18a0:	48 8d 44 24 1c       	lea    rax,[rsp+0x1c]
+    18a5:	48 85 d2             	test   rdx,rdx
+    18a8:	0f 84 59 01 00 00    	je     1a07 <balancer_ingress+0x1a07>
+    18ae:	41 0f b6 45 00       	movzx  eax,BYTE PTR [r13+0x0]
+    18b3:	24 02                	and    al,0x2
+    18b5:	d0 e8                	shr    al,1
+    18b7:	41 08 c6             	or     r14b,al
+    18ba:	75 24                	jne    18e0 <balancer_ingress+0x18e0>
+    18bc:	f6 44 24 4c 04       	test   BYTE PTR [rsp+0x4c],0x4
+    18c1:	75 1d                	jne    18e0 <balancer_ingress+0x18e0>
+    18c3:	80 7c 24 44 11       	cmp    BYTE PTR [rsp+0x44],0x11
+    18c8:	75 05                	jne    18cf <balancer_ingress+0x18cf>
+    18ca:	48 89 5c 24 08       	mov    QWORD PTR [rsp+0x8],rbx
+    18cf:	8b 44 24 1c          	mov    eax,DWORD PTR [rsp+0x1c]
+    18d3:	89 04 24             	mov    DWORD PTR [rsp],eax
+    18d6:	31 c0                	xor    eax,eax
+    18d8:	48 8d 4c 24 20       	lea    rcx,[rsp+0x20]
+    18dd:	48 89 e6             	mov    rsi,rsp
+    18e0:	c7 04 24 00 00 00 00 	mov    DWORD PTR [rsp],0x0
+    18e7:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 18ee <balancer_ingress+0x18ee>
+    18ee:	48 89 e1             	mov    rcx,rsp
+    18f1:	48 85 c0             	test   rax,rax
+    18f4:	0f 84 29 01 00 00    	je     1a23 <balancer_ingress+0x1a23>
+    18fa:	44 8b 00             	mov    r8d,DWORD PTR [rax]
+    18fd:	0f b7 70 10          	movzx  esi,WORD PTR [rax+0x10]
+    1901:	0f b7 7c 24 70       	movzx  edi,WORD PTR [rsp+0x70]
+    1906:	0f b6 4c 24 72       	movzx  ecx,BYTE PTR [rsp+0x72]
+    190b:	44 3b 44 24 60       	cmp    r8d,DWORD PTR [rsp+0x60]
+    1910:	88 48 12             	mov    BYTE PTR [rax+0x12],cl
+    1913:	75 28                	jne    193d <balancer_ingress+0x193d>
+    1915:	66 39 fe             	cmp    si,di
+    1918:	75 23                	jne    193d <balancer_ingress+0x193d>
+    191a:	84 c9                	test   cl,cl
+    191c:	74 1f                	je     193d <balancer_ingress+0x193d>
+    191e:	8b 44 24 48          	mov    eax,DWORD PTR [rsp+0x48]
+    1922:	89 44 24 14          	mov    DWORD PTR [rsp+0x14],eax
+    1926:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 192d <balancer_ingress+0x192d>
+    192d:	48 8d 4c 24 14       	lea    rcx,[rsp+0x14]
+    1932:	48 85 c0             	test   rax,rax
+    1935:	0f 84 e8 00 00 00    	je     1a23 <balancer_ingress+0x1a23>
+    193b:	ff 00                	inc    DWORD PTR [rax]
+    193d:	49 ff 47 08          	inc    QWORD PTR [r15+0x8]
+    1941:	e9 a1 fc ff ff       	jmp    15e7 <balancer_ingress+0x15e7>
+    1946:	b8 d8 ff ff ff       	mov    eax,0xffffffd8
+    194b:	48 8b bc 24 a0 00 00 	mov    rdi,QWORD PTR [rsp+0xa0]
+    1952:	00 
+    1953:	8b 07                	mov    eax,DWORD PTR [rdi]
+    1955:	8b 7f 04             	mov    edi,DWORD PTR [rdi+0x4]
+    1958:	4c 8d 40 0e          	lea    r8,[rax+0xe]
+    195c:	49 39 f8             	cmp    r8,rdi
+    195f:	0f 87 32 01 00 00    	ja     1a97 <balancer_ingress+0x1a97>
+    1965:	4c 8d 40 36          	lea    r8,[rax+0x36]
+    1969:	49 39 f8             	cmp    r8,rdi
+    196c:	0f 87 25 01 00 00    	ja     1a97 <balancer_ingress+0x1a97>
+    1972:	0f b7 4e 04          	movzx  ecx,WORD PTR [rsi+0x4]
+    1976:	66 89 48 04          	mov    WORD PTR [rax+0x4],cx
+    197a:	8b 0e                	mov    ecx,DWORD PTR [rsi]
+    197c:	89 08                	mov    DWORD PTR [rax],ecx
+    197e:	8b 48 28             	mov    ecx,DWORD PTR [rax+0x28]
+    1981:	89 48 06             	mov    DWORD PTR [rax+0x6],ecx
+    1984:	0f b7 48 2c          	movzx  ecx,WORD PTR [rax+0x2c]
+    1988:	66 89 48 0a          	mov    WORD PTR [rax+0xa],cx
+    198c:	66 c7 40 0c 86 dd    	mov    WORD PTR [rax+0xc],0xdd86
+    1992:	0f b7 4c 24 40       	movzx  ecx,WORD PTR [rsp+0x40]
+    1997:	33 4c 24 20          	xor    ecx,DWORD PTR [rsp+0x20]
+    199b:	0f b6 74 24 4d       	movzx  esi,BYTE PTR [rsp+0x4d]
+    19a0:	66 c7 40 10 00 00    	mov    WORD PTR [rax+0x10],0x0
+    19a6:	89 f7                	mov    edi,esi
+    19a8:	40 c0 ef 04          	shr    dil,0x4
+    19ac:	40 80 cf 60          	or     dil,0x60
+    19b0:	40 88 78 0e          	mov    BYTE PTR [rax+0xe],dil
+    19b4:	40 c0 e6 04          	shl    sil,0x4
+    19b8:	40 88 70 0f          	mov    BYTE PTR [rax+0xf],sil
+    19bc:	66 c7 40 14 04 40    	mov    WORD PTR [rax+0x14],0x4004
+    19c2:	66 89 68 12          	mov    WORD PTR [rax+0x12],bp
+    19c6:	48 c7 40 16 01 00 00 	mov    QWORD PTR [rax+0x16],0x1
+    19cd:	00 
+    19ce:	c7 40 1e 00 00 00 00 	mov    DWORD PTR [rax+0x1e],0x0
+    19d5:	89 48 22             	mov    DWORD PTR [rax+0x22],ecx
+    19d8:	c5 fa 6f 02          	vmovdqu xmm0,XMMWORD PTR [rdx]
+    19dc:	c5 fa 7f 40 26       	vmovdqu XMMWORD PTR [rax+0x26],xmm0
+    19e1:	b9 03 00 00 00       	mov    ecx,0x3
+    19e6:	eb 40                	jmp    1a28 <balancer_ingress+0x1a28>
+    19e8:	c7 44 24 14 09 02 00 	mov    DWORD PTR [rsp+0x14],0x209
+    19ef:	00 
+    19f0:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 19f7 <balancer_ingress+0x19f7>
+    19f7:	48 8d 4c 24 14       	lea    rcx,[rsp+0x14]
+    19fc:	48 85 c0             	test   rax,rax
+    19ff:	74 22                	je     1a23 <balancer_ingress+0x1a23>
+    1a01:	48 ff 40 08          	inc    QWORD PTR [rax+0x8]
+    1a05:	eb 1c                	jmp    1a23 <balancer_ingress+0x1a23>
+    1a07:	c7 44 24 14 09 02 00 	mov    DWORD PTR [rsp+0x14],0x209
+    1a0e:	00 
+    1a0f:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 1a16 <balancer_ingress+0x1a16>
+    1a16:	48 8d 4c 24 14       	lea    rcx,[rsp+0x14]
+    1a1b:	48 85 c0             	test   rax,rax
+    1a1e:	74 03                	je     1a23 <balancer_ingress+0x1a23>
+    1a20:	48 ff 00             	inc    QWORD PTR [rax]
+    1a23:	b9 01 00 00 00       	mov    ecx,0x1
+    1a28:	b8 01 00 00 00       	mov    eax,0x1
+    1a2d:	c5 f9 6f 9c 24 80 00 	vmovdqa xmm3,XMMWORD PTR [rsp+0x80]
+    1a34:	00 00 
+    1a36:	83 f9 01             	cmp    ecx,0x1
+    1a39:	0f 85 19 f9 ff ff    	jne    1358 <balancer_ingress+0x1358>
+    1a3f:	c7 44 24 5c 12 02 00 	mov    DWORD PTR [rsp+0x5c],0x212
+    1a46:	00 
+    1a47:	b9 01 00 00 00       	mov    ecx,0x1
+    1a4c:	48 8d 15 00 00 00 00 	lea    rdx,[rip+0x0]        # 1a53 <balancer_ingress+0x1a53>
+    1a53:	48 8d 74 24 5c       	lea    rsi,[rsp+0x5c]
+    1a58:	48 85 d2             	test   rdx,rdx
+    1a5b:	74 0a                	je     1a67 <balancer_ingress+0x1a67>
+    1a5d:	c5 e1 d4 02          	vpaddq xmm0,xmm3,XMMWORD PTR [rdx]
+    1a61:	c5 fa 7f 02          	vmovdqu XMMWORD PTR [rdx],xmm0
+    1a65:	89 c8                	mov    eax,ecx
+    1a67:	48 81 c4 a8 00 00 00 	add    rsp,0xa8
+    1a6e:	5b                   	pop    rbx
+    1a6f:	41 5c                	pop    r12
+    1a71:	41 5d                	pop    r13
+    1a73:	41 5e                	pop    r14
+    1a75:	41 5f                	pop    r15
+    1a77:	5d                   	pop    rbp
+    1a78:	c5 f8 77             	vzeroupper
+    1a7b:	c3                   	ret
+    1a7c:	c7 04 24 07 02 00 00 	mov    DWORD PTR [rsp],0x207
+    1a83:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 1a8a <balancer_ingress+0x1a8a>
+    1a8a:	48 89 e2             	mov    rdx,rsp
+    1a8d:	48 85 c0             	test   rax,rax
+    1a90:	74 96                	je     1a28 <balancer_ingress+0x1a28>
+    1a92:	48 ff 00             	inc    QWORD PTR [rax]
+    1a95:	eb 91                	jmp    1a28 <balancer_ingress+0x1a28>
+    1a97:	c7 04 24 07 02 00 00 	mov    DWORD PTR [rsp],0x207
+    1a9e:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 1aa5 <balancer_ingress+0x1aa5>
+    1aa5:	48 89 e2             	mov    rdx,rsp
+    1aa8:	48 85 c0             	test   rax,rax
+    1aab:	0f 84 77 ff ff ff    	je     1a28 <balancer_ingress+0x1a28>
+    1ab1:	48 ff 40 08          	inc    QWORD PTR [rax+0x8]
+    1ab5:	e9 6e ff ff ff       	jmp    1a28 <balancer_ingress+0x1a28>
+    1aba:	48 ff 41 28          	inc    QWORD PTR [rcx+0x28]
+    1abe:	e9 60 ff ff ff       	jmp    1a23 <balancer_ingress+0x1a23>
+    1ac3:	48 8b 07             	mov    rax,QWORD PTR [rdi]
+    1ac6:	48 ff c0             	inc    rax
+    1ac9:	48 89 07             	mov    QWORD PTR [rdi],rax
+    1acc:	48 3d 49 e8 01 00    	cmp    rax,0x1e849
+    1ad2:	73 1a                	jae    1aee <balancer_ingress+0x1aee>
+    1ad4:	c5 f9 ef c0          	vpxor  xmm0,xmm0,xmm0
+    1ad8:	c5 f9 7f 04 24       	vmovdqa XMMWORD PTR [rsp],xmm0
+    1add:	8b 44 24 48          	mov    eax,DWORD PTR [rsp+0x48]
+    1ae1:	89 04 24             	mov    DWORD PTR [rsp],eax
+    1ae4:	31 c0                	xor    eax,eax
+    1ae6:	48 8d 7c 24 20       	lea    rdi,[rsp+0x20]
+    1aeb:	49 89 e0             	mov    r8,rsp
+    1aee:	48 ff 41 60          	inc    QWORD PTR [rcx+0x60]
+    1af2:	48 ff 41 20          	inc    QWORD PTR [rcx+0x20]
+    1af6:	44 0f b7 54 24 40    	movzx  r10d,WORD PTR [rsp+0x40]
+    1afc:	b8 01 00 00 00       	mov    eax,0x1
+    1b01:	48 89 f7             	mov    rdi,rsi
+    1b04:	c5 f9 6f d9          	vmovdqa xmm3,xmm1
+    1b08:	c5 f9 6f d4          	vmovdqa xmm2,xmm4
+    1b0c:	e9 40 f3 ff ff       	jmp    e51 <balancer_ingress+0xe51>
+    1b11:	c7 04 24 02 02 00 00 	mov    DWORD PTR [rsp],0x202
+    1b18:	48 8d 35 00 00 00 00 	lea    rsi,[rip+0x0]        # 1b1f <balancer_ingress+0x1b1f>
+    1b1f:	48 89 e0             	mov    rax,rsp
+    1b22:	48 85 f6             	test   rsi,rsi
+    1b25:	74 69                	je     1b90 <balancer_ingress+0x1b90>
+    1b27:	0f 31                	rdtsc
+    1b29:	48 89 c7             	mov    rdi,rax
+    1b2c:	48 2b 7e 08          	sub    rdi,QWORD PTR [rsi+0x8]
+    1b30:	48 81 ff 01 ca 9a 3b 	cmp    rdi,0x3b9aca01
+    1b37:	72 2c                	jb     1b65 <balancer_ingress+0x1b65>
+    1b39:	48 c7 06 01 00 00 00 	mov    QWORD PTR [rsi],0x1
+    1b40:	48 89 46 08          	mov    QWORD PTR [rsi+0x8],rax
+    1b44:	eb 30                	jmp    1b76 <balancer_ingress+0x1b76>
+    1b46:	89 30                	mov    DWORD PTR [rax],esi
+    1b48:	48 ff 41 58          	inc    QWORD PTR [rcx+0x58]
+    1b4c:	44 89 0c 24          	mov    DWORD PTR [rsp],r9d
+    1b50:	48 8d 05 00 00 00 00 	lea    rax,[rip+0x0]        # 1b57 <balancer_ingress+0x1b57>
+    1b57:	48 89 e6             	mov    rsi,rsp
+    1b5a:	48 85 c0             	test   rax,rax
+    1b5d:	74 35                	je     1b94 <balancer_ingress+0x1b94>
+    1b5f:	48 ff 40 08          	inc    QWORD PTR [rax+0x8]
+    1b63:	eb 2f                	jmp    1b94 <balancer_ingress+0x1b94>
+    1b65:	48 8b 06             	mov    rax,QWORD PTR [rsi]
+    1b68:	48 ff c0             	inc    rax
+    1b6b:	48 89 06             	mov    QWORD PTR [rsi],rax
+    1b6e:	48 3d 49 e8 01 00    	cmp    rax,0x1e849
+    1b74:	73 1a                	jae    1b90 <balancer_ingress+0x1b90>
+    1b76:	c5 f9 ef c0          	vpxor  xmm0,xmm0,xmm0
+    1b7a:	c5 f9 7f 04 24       	vmovdqa XMMWORD PTR [rsp],xmm0
+    1b7f:	8b 44 24 48          	mov    eax,DWORD PTR [rsp+0x48]
+    1b83:	89 04 24             	mov    DWORD PTR [rsp],eax
+    1b86:	31 c0                	xor    eax,eax
+    1b88:	48 8d 74 24 20       	lea    rsi,[rsp+0x20]
+    1b8d:	48 89 e7             	mov    rdi,rsp
+    1b90:	48 ff 41 60          	inc    QWORD PTR [rcx+0x60]
+    1b94:	48 ff 41 20          	inc    QWORD PTR [rcx+0x20]
+    1b98:	0f b7 44 24 40       	movzx  eax,WORD PTR [rsp+0x40]
+    1b9d:	89 44 24 58          	mov    DWORD PTR [rsp+0x58],eax
+    1ba1:	e9 41 fa ff ff       	jmp    15e7 <balancer_ingress+0x15e7>
+    1ba6:	66 2e 0f 1f 84 00 00 	cs nop WORD PTR [rax+rax*1+0x0]
+    1bad:	00 00 00 
+
+0000000000001bb0 <jhash_2words>:
+    1bb0:	81 c7 f7 c0 ad e0    	add    edi,0xe0adc0f7
+    1bb6:	81 c6 f7 c0 ad e0    	add    esi,0xe0adc0f7
+    1bbc:	89 f0                	mov    eax,esi
+    1bbe:	35 f7 c0 ad e0       	xor    eax,0xe0adc0f7
+    1bc3:	c4 e3 7b f0 ce 12    	rorx   ecx,esi,0x12
+    1bc9:	29 c8                	sub    eax,ecx
+    1bcb:	31 c7                	xor    edi,eax
+    1bcd:	c4 e3 7b f0 c8 15    	rorx   ecx,eax,0x15
+    1bd3:	29 cf                	sub    edi,ecx
+    1bd5:	31 fe                	xor    esi,edi
+    1bd7:	c4 e3 7b f0 cf 07    	rorx   ecx,edi,0x7
+    1bdd:	29 ce                	sub    esi,ecx
+    1bdf:	31 f0                	xor    eax,esi
+    1be1:	c4 e3 7b f0 ce 10    	rorx   ecx,esi,0x10
+    1be7:	29 c8                	sub    eax,ecx
+    1be9:	31 c7                	xor    edi,eax
+    1beb:	c4 e3 7b f0 c8 1c    	rorx   ecx,eax,0x1c
+    1bf1:	29 cf                	sub    edi,ecx
+    1bf3:	31 fe                	xor    esi,edi
+    1bf5:	c4 e3 7b f0 cf 12    	rorx   ecx,edi,0x12
+    1bfb:	29 ce                	sub    esi,ecx
+    1bfd:	31 f0                	xor    eax,esi
+    1bff:	c4 e3 7b f0 ce 08    	rorx   ecx,esi,0x8
+    1c05:	29 c8                	sub    eax,ecx
+    1c07:	c3                   	ret
+    1c08:	0f 1f 84 00 00 00 00 	nop    DWORD PTR [rax+rax*1+0x0]
+    1c0f:	00 
+
+0000000000001c10 <jhash>:
+    1c10:	8b 07                	mov    eax,DWORD PTR [rdi]
+    1c12:	8b 4f 04             	mov    ecx,DWORD PTR [rdi+0x4]
+    1c15:	8d 91 ff c0 ad de    	lea    edx,[rcx-0x21523f01]
+    1c1b:	8b 77 08             	mov    esi,DWORD PTR [rdi+0x8]
+    1c1e:	29 f0                	sub    eax,esi
+    1c20:	44 8d 86 ff c0 ad de 	lea    r8d,[rsi-0x21523f01]
+    1c27:	c4 43 7b f0 c0 1c    	rorx   r8d,r8d,0x1c
+    1c2d:	41 31 c0             	xor    r8d,eax
+    1c30:	44 29 c2             	sub    edx,r8d
+    1c33:	c4 c3 7b f0 c0 1a    	rorx   eax,r8d,0x1a
+    1c39:	31 d0                	xor    eax,edx
+    1c3b:	01 f1                	add    ecx,esi
+    1c3d:	81 c1 fe 81 5b bd    	add    ecx,0xbd5b81fe
+    1c43:	41 01 c8             	add    r8d,ecx
+    1c46:	42 8d 34 00          	lea    esi,[rax+r8*1]
+    1c4a:	29 c1                	sub    ecx,eax
+    1c4c:	c4 63 7b f0 c8 18    	rorx   r9d,eax,0x18
+    1c52:	41 31 c9             	xor    r9d,ecx
+    1c55:	45 29 c8             	sub    r8d,r9d
+    1c58:	c4 c3 7b f0 d1 10    	rorx   edx,r9d,0x10
+    1c5e:	44 31 c2             	xor    edx,r8d
+    1c61:	41 01 f1             	add    r9d,esi
+    1c64:	29 d6                	sub    esi,edx
+    1c66:	c4 e3 7b f0 ca 0d    	rorx   ecx,edx,0xd
+    1c6c:	31 f1                	xor    ecx,esi
+    1c6e:	44 01 ca             	add    edx,r9d
+    1c71:	8d 04 11             	lea    eax,[rcx+rdx*1]
+    1c74:	41 29 c9             	sub    r9d,ecx
+    1c77:	c4 e3 7b f0 c9 1c    	rorx   ecx,ecx,0x1c
+    1c7d:	44 31 c9             	xor    ecx,r9d
+    1c80:	0f b6 77 0f          	movzx  esi,BYTE PTR [rdi+0xf]
+    1c84:	c1 e6 18             	shl    esi,0x18
+    1c87:	44 0f b6 47 0e       	movzx  r8d,BYTE PTR [rdi+0xe]
+    1c8c:	41 c1 e0 10          	shl    r8d,0x10
+    1c90:	41 01 f0             	add    r8d,esi
+    1c93:	44 0f b6 4f 0d       	movzx  r9d,BYTE PTR [rdi+0xd]
+    1c98:	41 c1 e1 08          	shl    r9d,0x8
+    1c9c:	45 01 c1             	add    r9d,r8d
+    1c9f:	0f b6 77 0c          	movzx  esi,BYTE PTR [rdi+0xc]
+    1ca3:	44 01 ce             	add    esi,r9d
+    1ca6:	01 d6                	add    esi,edx
+    1ca8:	31 c1                	xor    ecx,eax
+    1caa:	c4 e3 7b f0 d0 12    	rorx   edx,eax,0x12
+    1cb0:	29 d1                	sub    ecx,edx
+    1cb2:	31 ce                	xor    esi,ecx
+    1cb4:	c4 e3 7b f0 d1 15    	rorx   edx,ecx,0x15
+    1cba:	29 d6                	sub    esi,edx
+    1cbc:	31 f0                	xor    eax,esi
+    1cbe:	c4 e3 7b f0 d6 07    	rorx   edx,esi,0x7
+    1cc4:	29 d0                	sub    eax,edx
+    1cc6:	31 c1                	xor    ecx,eax
+    1cc8:	c4 e3 7b f0 d0 10    	rorx   edx,eax,0x10
+    1cce:	29 d1                	sub    ecx,edx
+    1cd0:	31 ce                	xor    esi,ecx
+    1cd2:	c4 e3 7b f0 d1 1c    	rorx   edx,ecx,0x1c
+    1cd8:	29 d6                	sub    esi,edx
+    1cda:	31 f0                	xor    eax,esi
+    1cdc:	c4 e3 7b f0 d6 12    	rorx   edx,esi,0x12
+    1ce2:	29 d0                	sub    eax,edx
+    1ce4:	c4 e3 7b f0 d0 08    	rorx   edx,eax,0x8
+    1cea:	31 c8                	xor    eax,ecx
+    1cec:	29 d0                	sub    eax,edx
+    1cee:	c3                   	ret

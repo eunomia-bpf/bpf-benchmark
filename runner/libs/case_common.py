@@ -254,11 +254,20 @@ def run_lifecycle_sessions(
         active_pairs = surviving_pairs
         if active_pairs:
             apply_enabled_passes = _effective_enabled_passes(enabled_passes)
-            for _, result in active_pairs:
+            for sess, result in active_pairs:
+                yaml_app_name = str(sess.app.name).split("/")[0] if sess and sess.app else None
+                prog_names_by_id: dict[int, str] = {}
+                for prog in (result.state.artifacts.get("programs") or []):
+                    pid = int(prog.get("id", 0) or 0)
+                    pname = str(prog.get("name") or "").strip()
+                    if pid > 0 and pname:
+                        prog_names_by_id[pid] = pname
                 result.rejit_result = active_daemon_session.apply_rejit(
                     result.rejit_prog_ids,
                     enabled_passes=apply_enabled_passes,
                     failure_artifacts_dir=daemon_session.failure_artifacts_dir,
+                    app_name=yaml_app_name,
+                    prog_names_by_id=prog_names_by_id,
                 )
                 _check_daemon(active_daemon_session)
         for session, result in active_pairs:

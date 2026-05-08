@@ -1,0 +1,126 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 673226,
+        "run_time_ns_delta": 102144514,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d10s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 10.10367764199998,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 10s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   249.69us  171.04us   4.97ms   84.52%\n    Req/Sec     8.37k   573.46     9.88k    68.81%\n  Latency Distribution\n     50%  203.00us\n     75%  314.00us\n     90%  457.00us\n     99%    0.85ms\n  336591 requests in 10.10s, 52.32MB read\nRequests/sec:  33326.51\nTransfer/sec:      5.18MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 677437,
+        "run_time_ns_delta": 101769177,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d10s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 10.105458171999999,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 10s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   245.42us  157.81us   4.74ms   82.80%\n    Req/Sec     8.45k   550.23    12.22k    79.65%\n  Latency Distribution\n     50%  204.00us\n     75%  306.00us\n     90%  443.00us\n     99%  798.00us\n  338696 requests in 10.10s, 52.65MB read\nRequests/sec:  33534.08\nTransfer/sec:      5.21MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "passes": [
+          {
+            "bpfopt_ms": 9,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): cp /var/tmp/bpfrejit-runtime/64w/bpfrejit-daemon-plan-1855-0/input_step0.bin /var/tmp/bpfrejit-runtime/64w/bpfrejit-daemon-plan-1855-0/captured-input-noop.bin && timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/64w/bpfrejit-daemon-plan-1855-0/input_step0.bin --output /var/tmp/bpfrejit-runtime/64w/bpfrejit-daemon-plan-1855-0/output_step0.bin --report /var/tmp/bpfrejit-runtime/64w/bpfrejit-daemon-plan-1855-0/report_step0.json --prog-type xdp --  && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "cp ${INPUT} ${WORKDIR}/captured-input-noop.bin && timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS} && false",
+              "log_level": 2,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 2542,
+          "orig_insn_count": 2542,
+          "prog_id": 9,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}

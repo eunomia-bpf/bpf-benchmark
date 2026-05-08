@@ -114,6 +114,8 @@ pub struct BpfProgram {
     pub map_bpf_writable: HashMap<u32, bool>,
     /// Map IDs whose bpftool dump snapshot was intentionally omitted by size.
     pub map_snapshots_skipped_by_size: HashSet<u32>,
+    /// Explicit map_inline key hints: call_pc -> key bytes.
+    pub map_inline_hints: HashMap<usize, Vec<u8>>,
     /// Pre-loaded map metadata: map_id -> MapMetadata.
     /// Used by offline snapshot callers and unit tests.
     pub map_metadata: HashMap<u32, MapMetadata>,
@@ -289,6 +291,7 @@ impl BpfProgram {
             map_inner_map_ids: HashMap::new(),
             map_bpf_writable: HashMap::new(),
             map_snapshots_skipped_by_size: HashSet::new(),
+            map_inline_hints: HashMap::new(),
             map_metadata: HashMap::new(),
             map_provider: Arc::new(SnapshotMapProvider),
         }

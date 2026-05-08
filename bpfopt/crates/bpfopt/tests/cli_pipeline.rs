@@ -432,6 +432,61 @@ fn map_inline_skips_hash_lookup_when_snapshot_entry_is_absent() {
 }
 
 #[test]
+fn map_inline_accepts_prog_info_json_for_map_ids() {
+    let report_path = temp_path("map-inline-prog-info-report.json");
+    let map_values_path = write_bpftool_map_values_dir(
+        "map-values-prog-info",
+        111,
+        "array",
+        r#"[{
+          "key": ["0x01", "0x00", "0x00", "0x00"],
+          "value": ["0x09", "0x00", "0x00", "0x00"]
+        }]"#,
+    );
+    let prog_info_path = write_temp_file("prog-info-map-ids.json", r#"{"map_ids":[111]}"#);
+    let verifier_path = write_temp_file(
+        "map-lookup-verifier-states-json-map-ids.json",
+        map_lookup_verifier_states_json(),
+    );
+    let report_arg = report_path.to_string_lossy().to_string();
+    let map_values_arg = map_values_path.to_string_lossy().to_string();
+    let prog_info_arg = prog_info_path.to_string_lossy().to_string();
+    let verifier_arg = verifier_path.to_string_lossy().to_string();
+    let output = run_bpfopt(
+        &[
+            "--pass",
+            "map-inline",
+            "--report",
+            &report_arg,
+            "--verifier-states",
+            &verifier_arg,
+            "--",
+            "--map-values",
+            &map_values_arg,
+            "--map-ids",
+            &prog_info_arg,
+        ],
+        &map_lookup_program_bytes(),
+    );
+    remove_dir_if_exists(map_values_path);
+    remove_file_if_exists(prog_info_path);
+    remove_file_if_exists(verifier_path);
+
+    assert!(
+        output.status.success(),
+        "stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let report_text = fs::read_to_string(&report_path).expect("read report");
+    let report: serde_json::Value = serde_json::from_str(&report_text).expect("report json");
+    remove_file_if_exists(report_path);
+
+    assert_eq!(report["pass"], "map_inline");
+    assert_eq!(report["sites_applied"], 1);
+    assert_eq!(report["inlined_map_entries"][0]["map_id"], 111);
+}
+
+#[test]
 fn explicit_kinsn_pass_fails_when_target_lacks_kinsn() {
     let target_path = write_temp_file(
         "empty-target.json",

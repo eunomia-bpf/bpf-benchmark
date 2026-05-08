@@ -1,0 +1,14 @@
+# Default per-pass step config for bulk_memory.
+# Read by runner/libs/pass_config.py at execute_plan build time.
+# Daemon substitutes ${...} vars; runner sends this command verbatim.
+log_level: 1
+capture_workdir: on_failure
+kinsns:
+  - name: bpf_bulk_memcpy
+    aliases:
+      - bpf_memcpy_bulk
+  - name: bpf_bulk_memset
+    aliases:
+      - bpf_memset_bulk
+command: |
+  timeout 6000 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- ${PASS_LOCAL_ARGS}

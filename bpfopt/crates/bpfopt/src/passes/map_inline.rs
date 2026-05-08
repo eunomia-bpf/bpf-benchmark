@@ -42,7 +42,7 @@ struct MapInlineCliPass {
 impl MapInlinePass {
     pub fn from_cli_args(args: &[String]) -> Result<Box<dyn BpfPass>> {
         let cli = MapInlineCliArgs::parse(args)?;
-        let map_ids = parse_u32_csv(&cli.map_ids, "--map-ids")?;
+        let map_ids = parse_map_ids_arg(&cli.map_ids)?;
         let snapshot = read_map_values(&cli.map_values, &map_ids)?;
         Ok(Box::new(MapInlineCliPass { map_ids, snapshot }))
     }
@@ -115,6 +115,12 @@ struct MapSnapshot {
     inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
     bpf_writable: HashMap<u32, bool>,
     maps_skipped_by_size: HashSet<u32>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ProgInfoMapIdsJson {
+    #[serde(default)]
+    map_ids: Vec<u32>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -436,6 +442,14 @@ fn parse_map_type(map_type: &MapTypeJson) -> Result<u32> {
     }
 }
 
+fn parse_map_ids_arg(value: &str) -> Result<Vec<u32>> {
+    if value.contains('/') || value.ends_with(".json") {
+        let prog_info: ProgInfoMapIdsJson = read_json_file(Path::new(value), "prog_info JSON")?;
+        return Ok(prog_info.map_ids);
+    }
+    parse_u32_csv(value, "--map-ids")
+}
+
 fn parse_u32_csv(value: &str, flag: &str) -> Result<Vec<u32>> {
     value
         .split(',')
@@ -492,6 +506,18 @@ pub struct ConstantKey {
     pub materialization_pcs: Vec<usize>,
     pub r2_mov_pc: Option<usize>,
     pub r2_add_pc: Option<usize>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct ExtractedConstantKey {
+    key: ConstantKey,
+    used_inline_hint: bool,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum KeyExtractionError {
+    Unavailable(String),
+    Fatal(String),
 }
 
 /// A fixed-offset scalar load from the map value pointer returned in `r0`.
@@ -1180,6 +1206,22 @@ impl From<anyhow::Error> for SiteRewriteError {
     }
 }
 
+fn validate_inline_hint_targets(program: &BpfProgram) -> anyhow::Result<()> {
+    for &call_pc in program.map_inline_hints.keys() {
+        let Some(insn) = program.insns.get(call_pc) else {
+            bail!("inline hint at pc {call_pc} does not point to a map_lookup_elem helper call");
+        };
+        if !is_map_lookup_elem_call(insn) {
+            bail!("inline hint at pc {call_pc} does not point to a map_lookup_elem helper call");
+        }
+    }
+    Ok(())
+}
+
+fn is_map_lookup_elem_call(insn: &BpfInsn) -> bool {
+    insn.is_call() && insn.src_reg() == 0 && insn.imm == HELPER_MAP_LOOKUP_ELEM
+}
+
 impl BpfPass for MapInlinePass {
     fn name(&self) -> &str {
         "map_inline"
@@ -1195,15 +1237,18 @@ impl BpfPass for MapInlinePass {
         analyses: &mut AnalysisCache,
         _ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
+        validate_inline_hint_targets(program)?;
         let mut total_applied = 0usize;
         let mut final_skipped = Vec::new();
         let mut diagnostics = Vec::new();
         let mut map_inline_records = Vec::new();
         let mut hit_iteration_cap = false;
+        let mut inline_hints_consumed = HashSet::new();
 
         for iter in 0..MAP_INLINE_FIXED_POINT_MAX_ITERS {
             let before_round = program.insns.clone();
-            let round = run_map_inline_round(program, analyses, iter == 0)?;
+            let round =
+                run_map_inline_round(program, analyses, iter == 0, &mut inline_hints_consumed)?;
             let round_modified = program.insns != before_round;
 
             final_skipped = round.sites_skipped;
@@ -1238,6 +1283,13 @@ impl BpfPass for MapInlinePass {
             );
         }
 
+        if !program.map_inline_hints.is_empty() {
+            record_diagnostic(
+                &mut diagnostics,
+                format!("inline_hints_consumed={}", inline_hints_consumed.len()),
+            );
+        }
+
         Ok(PassResult {
             pass_name: self.name().into(),
             sites_applied: total_applied,
@@ -1253,6 +1305,7 @@ fn run_map_inline_round(
     program: &mut BpfProgram,
     analyses: &mut AnalysisCache,
     use_verifier_guided_keys: bool,
+    inline_hints_consumed: &mut HashSet<usize>,
 ) -> anyhow::Result<PassResult> {
     let bt = analyses.get(&BranchTargetAnalysis, program);
     let map_info = analyses
@@ -1315,7 +1368,13 @@ fn run_map_inline_round(
             continue;
         }
         if info.is_map_in_map() {
-            match build_map_in_map_chain_rewrite(program, &site, info, use_verifier_guided_keys) {
+            match build_map_in_map_chain_rewrite(
+                program,
+                &site,
+                info,
+                use_verifier_guided_keys,
+                inline_hints_consumed,
+            ) {
                 Ok(Some(mut rewrite)) => {
                     if rewrite
                         .skipped_pcs
@@ -1388,14 +1447,14 @@ fn run_map_inline_round(
             continue;
         }
 
-        let key = match extract_site_constant_key(
+        let extracted_key = match extract_site_constant_key(
             program,
             site.call_pc,
             info,
             use_verifier_guided_keys,
         ) {
-            Ok(key) => key,
-            Err(detail) => {
+            Ok(extracted_key) => extracted_key,
+            Err(KeyExtractionError::Unavailable(detail)) => {
                 let bpf_writable = program
                     .bpf_writable_map(info.map_id)
                     .map_err(anyhow::Error::msg)?;
@@ -1434,7 +1493,12 @@ fn run_map_inline_round(
                 );
                 continue;
             }
+            Err(KeyExtractionError::Fatal(detail)) => return Err(anyhow::anyhow!(detail)),
         };
+        if extracted_key.used_inline_hint {
+            inline_hints_consumed.insert(site.call_pc);
+        }
+        let key = extracted_key.key;
         if key.width < info.key_size as usize {
             let reason = format!(
                 "key width {} is smaller than map key size {}",
@@ -1674,7 +1738,43 @@ fn extract_site_constant_key(
     call_pc: usize,
     info: &MapInfo,
     use_verifier_guided_keys: bool,
-) -> Result<ConstantKey, String> {
+) -> std::result::Result<ExtractedConstantKey, KeyExtractionError> {
+    if let Some(hint_bytes) = program.map_inline_hints.get(&call_pc) {
+        if hint_bytes.len() != info.key_size as usize {
+            return Err(KeyExtractionError::Fatal(format!(
+                "inline hint at pc {call_pc} has {} byte(s), expected {}",
+                hint_bytes.len(),
+                info.key_size
+            )));
+        }
+        let bounds = subprog_bounds(&program.insns, call_pc);
+        let r2_setup = find_r2_stack_pointer_setup_simple(&program.insns, call_pc, bounds);
+        let key = ConstantKey {
+            stack_off: r2_setup.map(|(_, _, off)| off).unwrap_or(0),
+            width: hint_bytes.len(),
+            value: constant_key_value(hint_bytes),
+            bytes: hint_bytes.clone(),
+            store_pc: call_pc,
+            source_imm_pc: None,
+            materialization_pcs: Vec::new(),
+            r2_mov_pc: r2_setup.map(|(mov_pc, _, _)| mov_pc),
+            r2_add_pc: r2_setup.map(|(_, add_pc, _)| add_pc),
+        };
+        log_map_inline_debug(&format!(
+            "site at PC={}: inline-hint key={} width={} stack_off={} r2_mov_pc={:?} r2_add_pc={:?}",
+            call_pc,
+            format_constant_key(&key),
+            key.width,
+            key.stack_off,
+            key.r2_mov_pc,
+            key.r2_add_pc
+        ));
+        return Ok(ExtractedConstantKey {
+            key,
+            used_inline_hint: true,
+        });
+    }
+
     if use_verifier_guided_keys {
         return match try_extract_constant_key_verifier_guided(
             &program.insns,
@@ -1694,17 +1794,20 @@ fn extract_site_constant_key(
                     key.r2_mov_pc,
                     key.r2_add_pc
                 ));
-                Ok(key)
+                Ok(ExtractedConstantKey {
+                    key,
+                    used_inline_hint: false,
+                })
             }
             Err(verifier_err) => {
                 log_map_inline_debug(&format!(
                     "site pc={} skip: verifier-guided key extraction failed: {}",
                     call_pc, verifier_err
                 ));
-                Err(format!(
+                Err(KeyExtractionError::Unavailable(format!(
                     "verifier-guided key extraction failed: {}",
                     verifier_err
-                ))
+                )))
             }
         };
     }
@@ -1712,7 +1815,7 @@ fn extract_site_constant_key(
     let detail = "verifier-guided key extraction is unavailable after a prior map_inline rewrite"
         .to_string();
     log_map_inline_debug(&format!("site pc={} skip: {}", call_pc, detail));
-    Err(detail)
+    Err(KeyExtractionError::Unavailable(detail))
 }
 
 fn build_site_rewrite(
@@ -2100,6 +2203,7 @@ fn build_map_in_map_chain_rewrite(
     outer_site: &MapLookupSite,
     outer_info: &MapInfo,
     use_verifier_guided_keys: bool,
+    inline_hints_consumed: &mut HashSet<usize>,
 ) -> SiteRewriteResult<Option<SiteRewrite>> {
     let Some(chain) = find_map_in_map_chains(&program.insns, std::slice::from_ref(outer_site))
         .into_iter()
@@ -2107,13 +2211,22 @@ fn build_map_in_map_chain_rewrite(
     else {
         return Ok(None);
     };
-    let outer_key = extract_site_constant_key(
+    let extracted_outer_key = extract_site_constant_key(
         program,
         outer_site.call_pc,
         outer_info,
         use_verifier_guided_keys,
     )
-    .map_err(|err| site_level_inline_veto(format!("map-in-map outer key unavailable: {err}")))?;
+    .map_err(|err| match err {
+        KeyExtractionError::Unavailable(err) => {
+            site_level_inline_veto(format!("map-in-map outer key unavailable: {err}"))
+        }
+        KeyExtractionError::Fatal(err) => SiteRewriteError::Error(anyhow::anyhow!(err)),
+    })?;
+    if extracted_outer_key.used_inline_hint {
+        inline_hints_consumed.insert(outer_site.call_pc);
+    }
+    let outer_key = extracted_outer_key.key;
     if outer_key.width < outer_info.key_size as usize {
         return Err(site_level_inline_veto(format!(
             "map-in-map outer key width {} is smaller than map key size {}",
@@ -2160,13 +2273,22 @@ fn build_map_in_map_chain_rewrite(
         )));
     }
 
-    let inner_key = extract_site_constant_key(
+    let extracted_inner_key = extract_site_constant_key(
         program,
         chain.inner_call_pc,
         &inner_info,
         use_verifier_guided_keys,
     )
-    .map_err(|err| site_level_inline_veto(format!("map-in-map inner key unavailable: {err}")))?;
+    .map_err(|err| match err {
+        KeyExtractionError::Unavailable(err) => {
+            site_level_inline_veto(format!("map-in-map inner key unavailable: {err}"))
+        }
+        KeyExtractionError::Fatal(err) => SiteRewriteError::Error(anyhow::anyhow!(err)),
+    })?;
+    if extracted_inner_key.used_inline_hint {
+        inline_hints_consumed.insert(chain.inner_call_pc);
+    }
+    let inner_key = extracted_inner_key.key;
     if inner_key.width < inner_info.key_size as usize {
         return Err(site_level_inline_veto(format!(
             "map-in-map inner key width {} is smaller than map key size {}",

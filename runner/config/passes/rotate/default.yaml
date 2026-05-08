@@ -1,0 +1,14 @@
+# Default per-pass step config for rotate.
+# Read by runner/libs/pass_config.py at execute_plan build time.
+# Daemon substitutes ${...} vars; runner sends this command verbatim.
+log_level: 1
+capture_workdir: on_failure
+kinsns:
+  - name: bpf_rotate64
+    aliases:
+      - bpf_rotate64
+  - name: bpf_rotate32
+    aliases:
+      - bpf_rotate32
+command: |
+  timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- ${PASS_LOCAL_ARGS}

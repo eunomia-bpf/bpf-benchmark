@@ -1,0 +1,7 @@
+# Default per-pass step config for noop.
+# Read by runner/libs/pass_config.py at execute_plan build time.
+# Daemon substitutes ${...} vars; runner sends this command verbatim.
+log_level: 1
+capture_workdir: on_failure
+command: |
+  timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}

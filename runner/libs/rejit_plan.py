@@ -1,174 +1,128 @@
-"""Adapter that translates legacy `apply_rejit(prog_ids, enabled_passes)` calls
-into the daemon's `execute_plan` socket protocol.
+"""Build the daemon `execute_plan` socket payload from per-pass YAML config.
 
-Daemon no longer enumerates pass × prog itself; instead it executes a list of
-bash command strings per program with `${VAR}` placeholders the daemon
-substitutes. This module owns the translation: read pass metadata from
-`bpfopt list-passes --json`, build per-pass step templates with the right
-side-input flags, and produce the kinsn_probes list daemon needs to populate
-target.json.
+Each pass declares its daemon step in `runner/config/passes/<pass>/default.yaml`;
+optional per-app overrides live at `runner/config/passes/<pass>/<app>.yaml`
+with a `programs` map keyed by prog_name (and `default` fallback). YAML is the
+single source of truth — runner never queries `bpfopt list-passes`. Drift
+between yaml and bpfopt CLI is caught offline by `analysis/validate_pass_configs.py`.
 
-Runner callers stay on the old `apply_rejit` surface — only this file knows
-the new protocol shape.
+Lookup (no merge — first match wins):
+  1. <pass>/<app>.yaml -> programs[<prog_name>]
+  2. <pass>/<app>.yaml -> programs.default
+  3. <pass>/default.yaml -> top-level command
+
+Per-pass yaml's `log_level` is the *input* level the pass needs (predecessor's
+rejit must produce at least this verifier-log verbosity). The runner sets each
+step's outgoing daemon `log_level` to the next step's input requirement.
 """
 from __future__ import annotations
 
-import json
-import subprocess
-from typing import Any, Sequence
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Mapping, Sequence
+
+import yaml
+
+CONFIG_ROOT = Path(__file__).resolve().parents[1] / "config" / "passes"
 
 
-def load_pass_metadata(bpfopt: str = "bpfopt") -> dict[str, dict[str, Any]]:
-    """Return a map of canonical pass name → metadata dict from
-    `bpfopt list-passes --json`. Daemon used to call this internally; the
-    runner adapter calls it once per session and caches.
-    """
-    completed = subprocess.run(
-        [bpfopt, "list-passes", "--json"],
-        check=True,
-        capture_output=True,
-        text=True,
+@dataclass(frozen=True)
+class StepConfig:
+    command: str        # multi-line yaml block collapsed to single shell line
+    log_level: int      # 1 or 2 — predecessor must rejit at this level
+    kinsns: tuple[tuple[str, tuple[str, ...]], ...]  # ((json_name, (alias,...)),)
+
+
+def _load(path: Path) -> Mapping[str, Any]:
+    with open(path) as fh:
+        return yaml.safe_load(fh)
+
+
+def _collapse(s: object) -> str:
+    return " ".join(str(s).split())
+
+
+def _kinsns(payload: Mapping[str, Any]) -> tuple[tuple[str, tuple[str, ...]], ...]:
+    return tuple(sorted(
+        (str(k["name"]), tuple(sorted(str(a) for a in k["aliases"])))
+        for k in (payload.get("kinsns") or [])
+    ))
+
+
+def find_step_config(
+    pass_name: str, app_name: str | None, prog_name: str | None,
+) -> StepConfig:
+    pass_dir = CONFIG_ROOT / pass_name
+    default = _load(pass_dir / "default.yaml")
+    kinsns = _kinsns(default)
+
+    if app_name is not None:
+        app_path = pass_dir / f"{app_name}.yaml"
+        if app_path.is_file():
+            override = _load(app_path)
+            programs = override["programs"]
+            entry = programs.get(prog_name) if prog_name else None
+            if entry is None:
+                entry = programs["default"]
+            return StepConfig(
+                command=_collapse(entry["command"]),
+                log_level=int(override["log_level"]),
+                kinsns=kinsns,
+            )
+
+    return StepConfig(
+        command=_collapse(default["command"]),
+        log_level=int(default["log_level"]),
+        kinsns=kinsns,
     )
-    entries = json.loads(completed.stdout)
-    if not isinstance(entries, list):
-        raise RuntimeError(f"{bpfopt} list-passes --json did not return a JSON array")
-    metadata: dict[str, dict[str, Any]] = {}
-    for entry in entries:
-        if not isinstance(entry, dict):
-            raise RuntimeError(f"{bpfopt} list-passes --json entry is not an object")
-        canonical = str(entry.get("canonical_name") or "").strip()
-        if not canonical:
-            raise RuntimeError(f"{bpfopt} list-passes --json entry has no canonical_name")
-        metadata[canonical] = entry
-    if not metadata:
-        raise RuntimeError(f"{bpfopt} list-passes --json returned no passes")
-    return metadata
 
 
-BPFOPT_STEP_TIMEOUT_SECS = 6000  # 100 min hard cap per bpfopt invocation; killed by `timeout(1)`
-
-
-def build_step_spec(
-    pass_name: str,
-    pass_meta: dict[str, Any],
-    *,
-    next_pass_meta: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    """Compose one structured step entry for the daemon `execute_plan` socket
-    call. Each step is `{name, command, log_level}`:
-
-    - `name`: canonical pass name; daemon echoes it back as `pass_name` in
-      the response so analysis tools see real pass names instead of `step_N`.
-    - `command`: full bash template using daemon-substituted `${VAR}`
-      placeholders. The `timeout` prefix kills bpfopt after
-      `BPFOPT_STEP_TIMEOUT_SECS`; daemon sees exit 124 and records it as a
-      FailedBpfopt step, so a hung pass cannot stall the whole request.
-    - `log_level`: BPF_PROG_REJIT verifier log level. The daemon overwrites
-      `verifier_states_path` to point at the most recent rejit log after every
-      step, so the only consumer of step N's log is step N+1. Therefore step N
-      uses L2 iff its IMMEDIATE successor declares `needs_verifier_states`;
-      otherwise L1 with a smaller (1 MiB) log buffer is sufficient.
-    """
-    parts = [
-        f"timeout {BPFOPT_STEP_TIMEOUT_SECS}",
-        "bpfopt",
-        f"--pass {pass_name}",
-        "--input ${INPUT}",
-        "--output ${OUTPUT}",
-        "--report ${REPORT}",
-        "--prog-type ${PROG_TYPE}",
-    ]
-    if bool(pass_meta.get("needs_target")):
-        parts.append("--target ${TARGET}")
-    if bool(pass_meta.get("needs_verifier_states")):
-        parts.append("--verifier-states ${VERIFIER_STATES}")
-    pass_local = ["${PASS_LOCAL_ARGS}"]
-    if bool(pass_meta.get("needs_map_values")):
-        pass_local.append("--map-values ${MAP_VALUES}")
-        pass_local.append("--map-ids ${MAP_IDS}")
-    parts.append("--")
-    parts.extend(pass_local)
-    log_level = 2 if next_pass_meta is not None and bool(next_pass_meta.get("needs_verifier_states")) else 1
-    command = " ".join(parts)
-    # When KEEP_WORKDIRS=all, prefix the step with a cp dumping the daemon-fed
-    # INPUT to the workdir, then force the step to fail so daemon's
-    # failure_artifacts mechanism tarballs the whole workdir (incl. the captured
-    # input) back to the host.
-    import os as _os
-    if _os.environ.get("KEEP_WORKDIRS", "").strip().lower() == "all":
-        command = (
-            "cp ${INPUT} ${WORKDIR}/captured-input-" + pass_name + ".bin && "
-            + command
-            + " && false"
-        )
-    return {
-        "name": pass_name,
-        "command": command,
-        "log_level": log_level,
-    }
-
-
-def build_kinsn_probes(
-    pass_metas: dict[str, dict[str, Any]],
-    enabled_passes: Sequence[str],
-) -> list[dict[str, Any]]:
-    """Collect the union of `kinsns_used` across the chosen passes into the
-    `kinsn_probes` list daemon expects to populate target.json.
-    """
+def build_kinsn_probes(enabled_passes: Sequence[str]) -> list[dict[str, Any]]:
+    """Union of kinsn probes across the chosen passes (read from default.yaml)."""
     by_name: dict[str, set[str]] = {}
     for pass_name in enabled_passes:
-        meta = pass_metas.get(pass_name)
-        if meta is None:
-            raise RuntimeError(
-                f"pass {pass_name!r} not found in bpfopt list-passes --json output"
-            )
-        for kinsn in meta.get("kinsns_used") or []:
-            json_name = str(kinsn.get("json_name") or "").strip()
-            aliases = [
-                str(a).strip()
-                for a in (kinsn.get("probe_aliases") or [])
-                if str(a).strip()
-            ]
-            if not json_name or not aliases:
-                raise RuntimeError(
-                    f"pass {pass_name!r} declares an invalid kinsn metadata entry"
-                )
+        for json_name, aliases in find_step_config(pass_name, None, None).kinsns:
             by_name.setdefault(json_name, set()).update(aliases)
     return [
-        {"name": json_name, "aliases": sorted(aliases)}
-        for json_name, aliases in sorted(by_name.items())
+        {"name": n, "aliases": sorted(a)}
+        for n, a in sorted(by_name.items())
     ]
 
 
 def build_execute_plan_payload(
     prog_ids: Sequence[int],
     enabled_passes: Sequence[str],
-    pass_metas: dict[str, dict[str, Any]],
+    *,
+    app_name: str | None = None,
+    prog_names_by_id: Mapping[int, str] | None = None,
 ) -> dict[str, Any]:
-    """Assemble the full `execute_plan` socket payload for legacy callers
-    that still think in terms of (prog_ids, enabled_passes).
+    """Per-prog steps with command/log_level resolved from yaml.
 
-    Every prog gets the same step list — the legacy contract has no per-prog
-    differentiation. New per-prog/per-step planning belongs in a future
-    plan generator that bypasses this adapter.
+    `step.log_level` (daemon-side rejit verbosity *after* this step's bytecode
+    lands) = next step's declared input requirement, or 1 for the last step.
     """
     if not prog_ids:
         raise ValueError("execute_plan requires at least one prog_id")
     passes = [str(p).strip() for p in enabled_passes if str(p).strip()]
     if not passes:
         raise ValueError("execute_plan requires at least one pass")
-    steps = [
-        build_step_spec(
-            p,
-            pass_metas[p],
-            next_pass_meta=pass_metas[passes[i + 1]] if i + 1 < len(passes) else None,
-        )
-        for i, p in enumerate(passes)
-    ]
+
+    programs: list[dict[str, Any]] = []
+    for pid in prog_ids:
+        prog_name = prog_names_by_id.get(int(pid)) if prog_names_by_id else None
+        configs = [find_step_config(p, app_name, prog_name) for p in passes]
+        steps = [
+            {
+                "name": p,
+                "command": cfg.command,
+                "log_level": int(configs[i + 1].log_level if i + 1 < len(configs) else 1),
+            }
+            for i, (p, cfg) in enumerate(zip(passes, configs))
+        ]
+        programs.append({"prog_id": int(pid), "steps": steps})
+
     return {
         "cmd": "execute_plan",
-        "programs": [
-            {"prog_id": int(pid), "steps": steps} for pid in prog_ids
-        ],
-        "kinsn_probes": build_kinsn_probes(pass_metas, passes),
+        "programs": programs,
+        "kinsn_probes": build_kinsn_probes(passes),
     }

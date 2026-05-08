@@ -1,0 +1,1471 @@
+# baseline_windows from /home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260430_193236_794969/details/workdirs/553/prog.bin
+
+## window pc 13
+0008: (63) *(u32 *)(r10 -132) = r1
+0009: (bf) r2 = r10
+0010: (07) r2 += -0x84
+0011: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+0012:      <ldimm64-hi>
+0013: (85) call bpf_map_lookup_elem#1
+0014: (15) if r0 == 0 goto 1560 (64)
+0015: (1f) r9 -= r8
+0016: (79) r1 = *(u64 *)(r0 +8)
+0017: (0f) r1 += r9
+0018: (7b) *(u64 *)(r0 +8) = r1
+0019: (79) r1 = *(u64 *)(r0 +0)
+0020: (07) r1 += 1
+
+## window pc 143
+0138: (71) r1 = *(u8 *)(r7 +5)
+0139: (73) *(u8 *)(r7 +11) = r1
+0140: (61) r1 = *(u32 *)(r10 -8)
+0141: (bf) r2 = r1
+0142: (77) r2 >>= 0x10
+0143: (73) *(u8 *)(r7 +2) = r2
+0144: (bf) r2 = r1
+0145: (77) r2 >>= 0x18
+0146: (73) *(u8 *)(r7 +3) = r2
+0147: (73) *(u8 *)(r7 +0) = r1
+0148: (77) r1 >>= 8
+0149: (73) *(u8 *)(r7 +1) = r1
+0150: (69) r1 = *(u16 *)(r10 -4)
+
+## window pc 146
+0141: (bf) r2 = r1
+0142: (77) r2 >>= 0x10
+0143: (73) *(u8 *)(r7 +2) = r2
+0144: (bf) r2 = r1
+0145: (77) r2 >>= 0x18
+0146: (73) *(u8 *)(r7 +3) = r2
+0147: (73) *(u8 *)(r7 +0) = r1
+0148: (77) r1 >>= 8
+0149: (73) *(u8 *)(r7 +1) = r1
+0150: (69) r1 = *(u16 *)(r10 -4)
+0151: (05) goto 301 (pc+149)
+0152: (61) r2 = *(u32 *)(r6 +4)
+0153: (61) r7 = *(u32 *)(r6 +0)
+
+## window pc 159
+0154: (b7) r1 = 0
+0155: (7b) *(u64 *)(r10 -48) = r1
+0156: (7b) *(u64 *)(r10 -56) = r1
+0157: (7b) *(u64 *)(r10 -64) = r1
+0158: (7b) *(u64 *)(r10 -72) = r1
+0159: (7b) *(u64 *)(r10 -80) = r1
+0160: (7b) *(u64 *)(r10 -88) = r1
+0161: (63) *(u32 *)(r10 -96) = r1
+0162: (7b) *(u64 *)(r10 -104) = r1
+0163: (7b) *(u64 *)(r10 -112) = r1
+0164: (63) *(u32 *)(r10 -120) = r1
+0165: (bf) r3 = r7
+0166: (07) r3 += 0x36
+
+## window pc 365
+0360: (63) *(u32 *)(r10 -32) = r1
+0361: (bf) r2 = r10
+0362: (07) r2 += -0x20
+0363: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+0364:      <ldimm64-hi>
+0365: (85) call bpf_map_lookup_elem#1
+0366: (15) if r0 == 0 goto 1530 (64)
+0367: (79) r1 = *(u64 *)(r0 +0)
+0368: (07) r1 += 1
+0369: (7b) *(u64 *)(r0 +0) = r1
+0370: (61) r1 = *(u32 *)(r7 +58)
+0371: (dc) r1 = bswap32(r1)
+0372: (25) if r1 > 0x4ff goto 376 (64)
+
+## window pc 464
+0459: (63) *(u32 *)(r10 -32) = r1
+0460: (bf) r2 = r10
+0461: (07) r2 += -0x20
+0462: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+0463:      <ldimm64-hi>
+0464: (85) call bpf_map_lookup_elem#1
+0465: (15) if r0 == 0 goto 1530 (64)
+0466: (79) r1 = *(u64 *)(r0 +0)
+0467: (07) r1 += 1
+0468: (7b) *(u64 *)(r0 +0) = r1
+0469: (69) r1 = *(u16 *)(r7 +60)
+0470: (57) r1 &= 0xff
+0471: (25) if r1 > 4 goto 475 (64)
+
+## window pc 512
+0507: (6b) *(u16 *)(r10 -96) = r2
+0508: (bf) r2 = r10
+0509: (07) r2 += -0x70
+0510: (18) r1 = map_fd old_fd:13 name:vip_map type:1 key:20 value:8 max:512
+0511:      <ldimm64-hi>
+0512: (85) call bpf_map_lookup_elem#1
+0513: (55) if r0 != 0 goto 529 (64)
+0514: (b7) r1 = 0
+0515: (6b) *(u16 *)(r10 -96) = r1
+0516: (bf) r2 = r10
+0517: (07) r2 += -0x70
+0518: (18) r1 = map_fd old_fd:13 name:vip_map type:1 key:20 value:8 max:512
+0519:      <ldimm64-hi>
+
+## window pc 520
+0515: (6b) *(u16 *)(r10 -96) = r1
+0516: (bf) r2 = r10
+0517: (07) r2 += -0x70
+0518: (18) r1 = map_fd old_fd:13 name:vip_map type:1 key:20 value:8 max:512
+0519:      <ldimm64-hi>
+0520: (85) call bpf_map_lookup_elem#1
+0521: (b7) r8 = 2
+0522: (79) r1 = *(u64 *)(r10 -152)
+0523: (15) if r0 == 0 goto 1531 (64)
+0524: (61) r1 = *(u32 *)(r0 +0)
+0525: (57) r1 &= 0x88
+0526: (55) if r1 != 0 goto 529 (64)
+0527: (b7) r1 = 0
+
+## window pc 541
+0536: (63) *(u32 *)(r10 -124) = r1
+0537: (bf) r2 = r10
+0538: (07) r2 += -0x7c
+0539: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+0540:      <ldimm64-hi>
+0541: (85) call bpf_map_lookup_elem#1
+0542: (15) if r0 == 0 goto 1531 (64)
+0543: (79) r1 = *(u64 *)(r0 +0)
+0544: (07) r1 += 1
+0545: (7b) *(u64 *)(r10 -176) = r0
+0546: (7b) *(u64 *)(r0 +0) = r1
+0547: (79) r8 = *(u64 *)(r10 -160)
+0548: (61) r1 = *(u32 *)(r8 +0)
+
+## window pc 556
+0551: (b7) r1 = 0
+0552: (6b) *(u16 *)(r10 -56) = r1
+0553: (61) r1 = *(u32 *)(r8 +4)
+0554: (7b) *(u64 *)(r10 -184) = r1
+0555: (63) *(u32 *)(r10 -116) = r1
+0556: (85) call bpf_get_smp_processor_id#8
+0557: (63) *(u32 *)(r10 -128) = r0
+0558: (bf) r2 = r10
+0559: (07) r2 += -0x80
+0560: (18) r1 = map_fd old_fd:15 name:lru_mapping type:12 key:4 value:4 max:128
+0561:      <ldimm64-hi>
+0562: (85) call bpf_map_lookup_elem#1
+0563: (55) if r0 != 0 goto 578 (64)
+
+## window pc 562
+0557: (63) *(u32 *)(r10 -128) = r0
+0558: (bf) r2 = r10
+0559: (07) r2 += -0x80
+0560: (18) r1 = map_fd old_fd:15 name:lru_mapping type:12 key:4 value:4 max:128
+0561:      <ldimm64-hi>
+0562: (85) call bpf_map_lookup_elem#1
+0563: (55) if r0 != 0 goto 578 (64)
+0564: (b7) r1 = 0x203
+0565: (63) *(u32 *)(r10 -32) = r1
+0566: (bf) r2 = r10
+0567: (07) r2 += -0x20
+0568: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+0569:      <ldimm64-hi>
+
+## window pc 570
+0565: (63) *(u32 *)(r10 -32) = r1
+0566: (bf) r2 = r10
+0567: (07) r2 += -0x20
+0568: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+0569:      <ldimm64-hi>
+0570: (85) call bpf_map_lookup_elem#1
+0571: (15) if r0 == 0 goto 1530 (64)
+0572: (79) r1 = *(u64 *)(r0 +0)
+0573: (07) r1 += 1
+0574: (7b) *(u64 *)(r0 +0) = r1
+0575: (18) r0 = map_fd old_fd:14 name:fallback_cache type:9 key:40 value:16 max:1000
+0576:      <ldimm64-hi>
+0577: (79) r8 = *(u64 *)(r10 -160)
+
+## window pc 592
+0587: (63) *(u32 *)(r10 -32) = r1
+0588: (bf) r2 = r10
+0589: (07) r2 += -0x20
+0590: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+0591:      <ldimm64-hi>
+0592: (85) call bpf_map_lookup_elem#1
+0593: (15) if r0 == 0 goto 1530 (64)
+0594: (79) r1 = *(u64 *)(r0 +0)
+0595: (07) r1 += 1
+0596: (7b) *(u64 *)(r0 +0) = r1
+0597: (71) r1 = *(u8 *)(r7 +55)
+0598: (07) r1 += -3
+0599: (57) r1 &= 0xff
+
+## window pc 616
+0611: (63) *(u32 *)(r10 -32) = r1
+0612: (bf) r2 = r10
+0613: (07) r2 += -0x20
+0614: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+0615:      <ldimm64-hi>
+0616: (85) call bpf_map_lookup_elem#1
+0617: (15) if r0 == 0 goto 1530 (64)
+0618: (79) r1 = *(u64 *)(r0 +0)
+0619: (07) r1 += 1
+0620: (7b) *(u64 *)(r0 +0) = r1
+0621: (69) r1 = *(u16 *)(r7 +40)
+0622: (57) r1 &= 0xff
+0623: (25) if r1 > 4 goto 627 (64)
+
+## window pc 654
+0649: (63) *(u32 *)(r10 -32) = r1
+0650: (bf) r2 = r10
+0651: (07) r2 += -0x20
+0652: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+0653:      <ldimm64-hi>
+0654: (85) call bpf_map_lookup_elem#1
+0655: (15) if r0 == 0 goto 1530 (64)
+0656: (79) r1 = *(u64 *)(r0 +0)
+0657: (07) r1 += 1
+0658: (7b) *(u64 *)(r0 +0) = r1
+0659: (61) r1 = *(u32 *)(r7 +38)
+0660: (dc) r1 = bswap32(r1)
+0661: (25) if r1 > 0x4ff goto 665 (64)
+
+## window pc 762
+0757: (63) *(u32 *)(r10 -112) = r1
+0758: (bf) r2 = r10
+0759: (07) r2 += -0x70
+0760: (18) r1 = map_fd old_fd:13 name:vip_map type:1 key:20 value:8 max:512
+0761:      <ldimm64-hi>
+0762: (85) call bpf_map_lookup_elem#1
+0763: (55) if r0 != 0 goto 780 (64)
+0764: (b7) r1 = 0
+0765: (6b) *(u16 *)(r10 -96) = r1
+0766: (bf) r2 = r10
+0767: (07) r2 += -0x70
+0768: (18) r1 = map_fd old_fd:13 name:vip_map type:1 key:20 value:8 max:512
+0769:      <ldimm64-hi>
+
+## window pc 770
+0765: (6b) *(u16 *)(r10 -96) = r1
+0766: (bf) r2 = r10
+0767: (07) r2 += -0x70
+0768: (18) r1 = map_fd old_fd:13 name:vip_map type:1 key:20 value:8 max:512
+0769:      <ldimm64-hi>
+0770: (85) call bpf_map_lookup_elem#1
+0771: (b7) r8 = 2
+0772: (79) r1 = *(u64 *)(r10 -152)
+0773: (15) if r0 == 0 goto 1531 (64)
+0774: (7b) *(u64 *)(r10 -152) = r1
+0775: (61) r1 = *(u32 *)(r0 +0)
+0776: (57) r1 &= 0x88
+0777: (55) if r1 != 0 goto 780 (64)
+
+## window pc 787
+0782: (b7) r8 = 1
+0783: (79) r2 = *(u64 *)(r10 -152)
+0784: (65) if r1 s> 0x5ea goto 1531 (64)
+0785: (7b) *(u64 *)(r10 -160) = r0
+0786: (7b) *(u64 *)(r10 -152) = r2
+0787: (b7) r1 = 0x200
+0788: (63) *(u32 *)(r10 -124) = r1
+0789: (bf) r2 = r10
+0790: (07) r2 += -0x7c
+0791: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+0792:      <ldimm64-hi>
+0793: (85) call bpf_map_lookup_elem#1
+0794: (15) if r0 == 0 goto 1531 (64)
+
+## window pc 793
+0788: (63) *(u32 *)(r10 -124) = r1
+0789: (bf) r2 = r10
+0790: (07) r2 += -0x7c
+0791: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+0792:      <ldimm64-hi>
+0793: (85) call bpf_map_lookup_elem#1
+0794: (15) if r0 == 0 goto 1531 (64)
+0795: (79) r1 = *(u64 *)(r0 +0)
+0796: (07) r1 += 1
+0797: (7b) *(u64 *)(r10 -176) = r0
+0798: (7b) *(u64 *)(r0 +0) = r1
+0799: (79) r8 = *(u64 *)(r10 -160)
+0800: (61) r1 = *(u32 *)(r8 +0)
+
+## window pc 808
+0803: (b7) r1 = 0
+0804: (6b) *(u16 *)(r10 -56) = r1
+0805: (61) r1 = *(u32 *)(r8 +4)
+0806: (7b) *(u64 *)(r10 -184) = r1
+0807: (63) *(u32 *)(r10 -116) = r1
+0808: (85) call bpf_get_smp_processor_id#8
+0809: (63) *(u32 *)(r10 -128) = r0
+0810: (bf) r2 = r10
+0811: (07) r2 += -0x80
+0812: (18) r1 = map_fd old_fd:15 name:lru_mapping type:12 key:4 value:4 max:128
+0813:      <ldimm64-hi>
+0814: (85) call bpf_map_lookup_elem#1
+0815: (7b) *(u64 *)(r10 -168) = r0
+
+## window pc 814
+0809: (63) *(u32 *)(r10 -128) = r0
+0810: (bf) r2 = r10
+0811: (07) r2 += -0x80
+0812: (18) r1 = map_fd old_fd:15 name:lru_mapping type:12 key:4 value:4 max:128
+0813:      <ldimm64-hi>
+0814: (85) call bpf_map_lookup_elem#1
+0815: (7b) *(u64 *)(r10 -168) = r0
+0816: (55) if r0 != 0 goto 832 (64)
+0817: (b7) r1 = 0x203
+0818: (63) *(u32 *)(r10 -32) = r1
+0819: (bf) r2 = r10
+0820: (07) r2 += -0x20
+0821: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+
+## window pc 823
+0818: (63) *(u32 *)(r10 -32) = r1
+0819: (bf) r2 = r10
+0820: (07) r2 += -0x20
+0821: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+0822:      <ldimm64-hi>
+0823: (85) call bpf_map_lookup_elem#1
+0824: (15) if r0 == 0 goto 1530 (64)
+0825: (79) r1 = *(u64 *)(r0 +0)
+0826: (07) r1 += 1
+0827: (7b) *(u64 *)(r0 +0) = r1
+0828: (18) r1 = map_fd old_fd:14 name:fallback_cache type:9 key:40 value:16 max:1000
+0829:      <ldimm64-hi>
+0830: (7b) *(u64 *)(r10 -168) = r1
+
+## window pc 839
+0834: (15) if r1 == 0 goto 1714 (64)
+0835: (71) r1 = *(u8 *)(r10 -44)
+0836: (57) r1 &= 1
+0837: (15) if r1 == 0 goto 889 (64)
+0838: (b7) r1 = 0x20b
+0839: (63) *(u32 *)(r10 -32) = r1
+0840: (bf) r2 = r10
+0841: (07) r2 += -0x20
+0842: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+0843:      <ldimm64-hi>
+0844: (85) call bpf_map_lookup_elem#1
+0845: (15) if r0 == 0 goto 1530 (64)
+0846: (79) r1 = *(u64 *)(r0 +0)
+
+## window pc 844
+0839: (63) *(u32 *)(r10 -32) = r1
+0840: (bf) r2 = r10
+0841: (07) r2 += -0x20
+0842: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+0843:      <ldimm64-hi>
+0844: (85) call bpf_map_lookup_elem#1
+0845: (15) if r0 == 0 goto 1530 (64)
+0846: (79) r1 = *(u64 *)(r0 +0)
+0847: (07) r1 += 1
+0848: (7b) *(u64 *)(r0 +0) = r1
+0849: (71) r1 = *(u8 *)(r7 +35)
+0850: (47) r1 |= 2
+0851: (15) if r1 == 3 goto 853 (64)
+
+## window pc 863
+0858: (63) *(u32 *)(r10 -8) = r1
+0859: (bf) r2 = r10
+0860: (07) r2 += -8
+0861: (18) r1 = map_fd old_fd:22 name:quic_stats_map type:6 key:4 value:104 max:1
+0862:      <ldimm64-hi>
+0863: (85) call bpf_map_lookup_elem#1
+0864: (15) if r0 == 0 goto 1530 (64)
+0865: (71) r2 = *(u8 *)(r10 -44)
+0866: (57) r2 &= 1
+0867: (b7) r1 = 0x36
+0868: (15) if r2 == 0 goto 870 (64)
+0869: (b7) r1 = 0x66
+0870: (0f) r7 += r1
+
+## window pc 895
+0890: (63) *(u32 *)(r10 -8) = r1
+0891: (bf) r2 = r10
+0892: (07) r2 += -8
+0893: (18) r1 = map_fd old_fd:22 name:quic_stats_map type:6 key:4 value:104 max:1
+0894:      <ldimm64-hi>
+0895: (85) call bpf_map_lookup_elem#1
+0896: (bf) r8 = r0
+0897: (15) if r8 == 0 goto 1530 (64)
+0898: (71) r2 = *(u8 *)(r10 -44)
+0899: (57) r2 &= 1
+0900: (b7) r1 = 0x22
+0901: (15) if r2 == 0 goto 903 (64)
+0902: (b7) r1 = 0x3e
+
+## window pc 1001
+0996: (63) *(u32 *)(r10 -32) = r1
+0997: (bf) r2 = r10
+0998: (07) r2 += -0x20
+0999: (18) r1 = map_fd old_fd:27 name:server_id_stats type:6 key:4 value:16 max:512
+1000:      <ldimm64-hi>
+1001: (85) call bpf_map_lookup_elem#1
+1002: (15) if r0 == 0 goto 1006 (64)
+1003: (79) r1 = *(u64 *)(r0 +0)
+1004: (07) r1 += 1
+1005: (7b) *(u64 *)(r0 +0) = r1
+1006: (79) r2 = *(u64 *)(r10 -160)
+1007: (b7) r8 = 0
+1008: (69) r7 = *(u16 *)(r10 -56)
+
+## window pc 1018
+1013: (57) r1 &= 2
+1014: (55) if r1 != 0 goto 1044 (64)
+1015: (bf) r2 = r10
+1016: (07) r2 += -0x58
+1017: (79) r1 = *(u64 *)(r10 -168)
+1018: (85) call bpf_map_lookup_elem#1
+1019: (15) if r0 == 0 goto 1043 (64)
+1020: (71) r1 = *(u8 *)(r10 -52)
+1021: (55) if r1 != 0x11 goto 1034 (64)
+1022: (bf) r8 = r0
+1023: (85) call bpf_ktime_get_ns#5
+1024: (bf) r1 = r0
+1025: (bf) r0 = r8
+
+## window pc 1023
+1018: (85) call bpf_map_lookup_elem#1
+1019: (15) if r0 == 0 goto 1043 (64)
+1020: (71) r1 = *(u8 *)(r10 -52)
+1021: (55) if r1 != 0x11 goto 1034 (64)
+1022: (bf) r8 = r0
+1023: (85) call bpf_ktime_get_ns#5
+1024: (bf) r1 = r0
+1025: (bf) r0 = r8
+1026: (79) r2 = *(u64 *)(r0 +8)
+1027: (bf) r3 = r1
+1028: (1f) r3 -= r2
+1029: (18) r2 = 0x6fc23ac00
+1030:      <ldimm64-hi>
+
+## window pc 1033
+1028: (1f) r3 -= r2
+1029: (18) r2 = 0x6fc23ac00
+1030:      <ldimm64-hi>
+1031: (b7) r8 = 0
+1032: (2d) if r3 > r2 goto 1043 (64)
+1033: (7b) *(u64 *)(r0 +8) = r1
+1034: (61) r1 = *(u32 *)(r0 +0)
+1035: (63) *(u32 *)(r10 -48) = r1
+1036: (63) *(u32 *)(r10 -32) = r1
+1037: (bf) r2 = r10
+1038: (07) r2 += -0x20
+1039: (18) r1 = map_fd old_fd:18 name:reals type:2 key:4 value:20 max:4096
+1040:      <ldimm64-hi>
+
+## window pc 1041
+1036: (63) *(u32 *)(r10 -32) = r1
+1037: (bf) r2 = r10
+1038: (07) r2 += -0x20
+1039: (18) r1 = map_fd old_fd:18 name:reals type:2 key:4 value:20 max:4096
+1040:      <ldimm64-hi>
+1041: (85) call bpf_map_lookup_elem#1
+1042: (bf) r8 = r0
+1043: (79) r2 = *(u64 *)(r10 -160)
+1044: (71) r1 = *(u8 *)(r10 -52)
+1045: (55) if r1 != 0x11 goto 1098 (64)
+1046: (61) r1 = *(u32 *)(r2 +0)
+1047: (57) r1 &= 0x200
+1048: (15) if r1 == 0 goto 1098 (64)
+
+## window pc 1047
+1042: (bf) r8 = r0
+1043: (79) r2 = *(u64 *)(r10 -160)
+1044: (71) r1 = *(u8 *)(r10 -52)
+1045: (55) if r1 != 0x11 goto 1098 (64)
+1046: (61) r1 = *(u32 *)(r2 +0)
+1047: (57) r1 &= 0x200
+1048: (15) if r1 == 0 goto 1098 (64)
+1049: (7b) *(u64 *)(r10 -144) = r7
+1050: (b7) r1 = 0x202
+1051: (63) *(u32 *)(r10 -32) = r1
+1052: (bf) r2 = r10
+1053: (07) r2 += -0x20
+1054: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+
+## window pc 1056
+1051: (63) *(u32 *)(r10 -32) = r1
+1052: (bf) r2 = r10
+1053: (07) r2 += -0x20
+1054: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1055:      <ldimm64-hi>
+1056: (85) call bpf_map_lookup_elem#1
+1057: (bf) r7 = r0
+1058: (15) if r0 == 0 goto 1097 (64)
+1059: (85) call bpf_ktime_get_ns#5
+1060: (79) r1 = *(u64 *)(r7 +8)
+1061: (bf) r2 = r0
+1062: (1f) r2 -= r1
+1063: (b7) r1 = 0x3b9aca01
+
+## window pc 1059
+1054: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1055:      <ldimm64-hi>
+1056: (85) call bpf_map_lookup_elem#1
+1057: (bf) r7 = r0
+1058: (15) if r0 == 0 goto 1097 (64)
+1059: (85) call bpf_ktime_get_ns#5
+1060: (79) r1 = *(u64 *)(r7 +8)
+1061: (bf) r2 = r0
+1062: (1f) r2 -= r1
+1063: (b7) r1 = 0x3b9aca01
+1064: (2d) if r1 > r2 goto 1092 (64)
+1065: (7b) *(u64 *)(r7 +8) = r0
+1066: (b7) r1 = 1
+
+## window pc 1072
+1067: (7b) *(u64 *)(r7 +0) = r1
+1068: (bf) r2 = r10
+1069: (07) r2 += -0x70
+1070: (18) r1 = map_fd old_fd:28 name:vip_to_down_rea type:13 key:20 value:4 max:512
+1071:      <ldimm64-hi>
+1072: (85) call bpf_map_lookup_elem#1
+1073: (79) r7 = *(u64 *)(r10 -144)
+1074: (15) if r0 == 0 goto 1098 (64)
+1075: (bf) r2 = r10
+1076: (07) r2 += -0x30
+1077: (bf) r1 = r0
+1078: (85) call bpf_map_lookup_elem#1
+1079: (15) if r0 == 0 goto 1098 (64)
+
+## window pc 1078
+1073: (79) r7 = *(u64 *)(r10 -144)
+1074: (15) if r0 == 0 goto 1098 (64)
+1075: (bf) r2 = r10
+1076: (07) r2 += -0x30
+1077: (bf) r1 = r0
+1078: (85) call bpf_map_lookup_elem#1
+1079: (15) if r0 == 0 goto 1098 (64)
+1080: (b7) r1 = 0x20f
+1081: (63) *(u32 *)(r10 -32) = r1
+1082: (bf) r2 = r10
+1083: (07) r2 += -0x20
+1084: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1085:      <ldimm64-hi>
+
+## window pc 1086
+1081: (63) *(u32 *)(r10 -32) = r1
+1082: (bf) r2 = r10
+1083: (07) r2 += -0x20
+1084: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1085:      <ldimm64-hi>
+1086: (85) call bpf_map_lookup_elem#1
+1087: (15) if r0 == 0 goto 1213 (64)
+1088: (79) r1 = *(u64 *)(r0 +0)
+1089: (07) r1 += 1
+1090: (7b) *(u64 *)(r0 +0) = r1
+1091: (05) goto 1213 (pc+121)
+1092: (79) r1 = *(u64 *)(r7 +0)
+1093: (07) r1 += 1
+
+## window pc 1105
+1100: (7b) *(u64 *)(r10 -192) = r8
+1101: (bf) r2 = r10
+1102: (07) r2 += -0x78
+1103: (18) r1 = map_fd old_fd:12 name:ctl_array type:2 key:4 value:8 max:16
+1104:      <ldimm64-hi>
+1105: (85) call bpf_map_lookup_elem#1
+1106: (b7) r8 = 1
+1107: (7b) *(u64 *)(r10 -160) = r0
+1108: (15) if r0 == 0 goto 1531 (64)
+1109: (bf) r2 = r10
+1110: (07) r2 += -0x74
+1111: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1112:      <ldimm64-hi>
+
+## window pc 1113
+1108: (15) if r0 == 0 goto 1531 (64)
+1109: (bf) r2 = r10
+1110: (07) r2 += -0x74
+1111: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1112:      <ldimm64-hi>
+1113: (85) call bpf_map_lookup_elem#1
+1114: (15) if r0 == 0 goto 1531 (64)
+1115: (79) r2 = *(u64 *)(r10 -152)
+1116: (dc) r2 = bswap16(r2)
+1117: (79) r1 = *(u64 *)(r0 +8)
+1118: (7b) *(u64 *)(r10 -152) = r2
+1119: (0f) r1 += r2
+1120: (7b) *(u64 *)(r0 +8) = r1
+
+## window pc 1128
+1123: (7b) *(u64 *)(r0 +0) = r1
+1124: (bf) r2 = r10
+1125: (07) r2 += -0x30
+1126: (18) r1 = map_fd old_fd:19 name:reals_stats type:6 key:4 value:16 max:4096
+1127:      <ldimm64-hi>
+1128: (85) call bpf_map_lookup_elem#1
+1129: (15) if r0 == 0 goto 1531 (64)
+1130: (79) r1 = *(u64 *)(r0 +8)
+1131: (79) r2 = *(u64 *)(r10 -152)
+1132: (0f) r1 += r2
+1133: (7b) *(u64 *)(r0 +8) = r1
+1134: (79) r1 = *(u64 *)(r0 +0)
+1135: (0f) r1 += r8
+
+## window pc 1146
+1141: (57) r1 &= 1
+1142: (15) if r1 == 0 goto 1393 (64)
+1143: (bf) r1 = r6
+1144: (18) r2 = 0xffffffd8
+1145:      <ldimm64-hi>
+1146: (85) call bpf_xdp_adjust_head#44
+1147: (67) r0 <<= 0x20
+1148: (77) r0 >>= 0x20
+1149: (55) if r0 != 0 goto 1489 (64)
+1150: (61) r1 = *(u32 *)(r6 +0)
+1151: (61) r2 = *(u32 *)(r6 +4)
+1152: (bf) r3 = r1
+1153: (07) r3 += 0xe
+
+## window pc 1221
+1216: (63) *(u32 *)(r10 -32) = r1
+1217: (bf) r2 = r10
+1218: (07) r2 += -0x20
+1219: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1220:      <ldimm64-hi>
+1221: (85) call bpf_map_lookup_elem#1
+1222: (15) if r0 == 0 goto 1530 (64)
+1223: (71) r2 = *(u8 *)(r10 -44)
+1224: (57) r2 &= 2
+1225: (b7) r1 = 1
+1226: (15) if r2 == 0 goto 1228 (64)
+1227: (b7) r1 = 0
+1228: (67) r1 <<= 3
+
+## window pc 1245
+1240: (63) *(u32 *)(r10 -8) = r1
+1241: (bf) r2 = r10
+1242: (07) r2 += -8
+1243: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1244:      <ldimm64-hi>
+1245: (85) call bpf_map_lookup_elem#1
+1246: (b7) r8 = 1
+1247: (bf) r7 = r0
+1248: (15) if r0 == 0 goto 1265 (64)
+1249: (85) call bpf_ktime_get_ns#5
+1250: (79) r1 = *(u64 *)(r7 +8)
+1251: (bf) r2 = r0
+1252: (1f) r2 -= r1
+
+## window pc 1249
+1244:      <ldimm64-hi>
+1245: (85) call bpf_map_lookup_elem#1
+1246: (b7) r8 = 1
+1247: (bf) r7 = r0
+1248: (15) if r0 == 0 goto 1265 (64)
+1249: (85) call bpf_ktime_get_ns#5
+1250: (79) r1 = *(u64 *)(r7 +8)
+1251: (bf) r2 = r0
+1252: (1f) r2 -= r1
+1253: (b7) r1 = 0x3b9aca01
+1254: (7b) *(u64 *)(r10 -184) = r0
+1255: (2d) if r1 > r2 goto 1260 (64)
+1256: (7b) *(u64 *)(r7 +8) = r0
+
+## window pc 1276
+1271: (b7) r1 = 0
+1272: (7b) *(u64 *)(r10 -88) = r1
+1273: (7b) *(u64 *)(r10 -80) = r1
+1274: (bf) r1 = r10
+1275: (07) r1 += -0x58
+1276: (85) call pc2318 (pseudo_call off +1041)
+1277: (61) r2 = *(u32 *)(r10 -56)
+1278: (bf) r1 = r0
+1279: (85) call pc2466 (pseudo_call off +1186)
+1280: (67) r0 <<= 0x20
+1281: (77) r0 >>= 0x20
+1282: (97) r0 %= 0x10001
+1283: (79) r1 = *(u64 *)(r10 -160)
+
+## window pc 1279
+1274: (bf) r1 = r10
+1275: (07) r1 += -0x58
+1276: (85) call pc2318 (pseudo_call off +1041)
+1277: (61) r2 = *(u32 *)(r10 -56)
+1278: (bf) r1 = r0
+1279: (85) call pc2466 (pseudo_call off +1186)
+1280: (67) r0 <<= 0x20
+1281: (77) r0 >>= 0x20
+1282: (97) r0 %= 0x10001
+1283: (79) r1 = *(u64 *)(r10 -160)
+1284: (61) r1 = *(u32 *)(r1 +4)
+1285: (27) r1 *= 0x10001
+1286: (0f) r1 += r0
+
+## window pc 1292
+1287: (63) *(u32 *)(r10 -36) = r1
+1288: (bf) r2 = r10
+1289: (07) r2 += -0x24
+1290: (18) r1 = map_fd old_fd:17 name:ch_rings type:2 key:4 value:4 max:33554944
+1291:      <ldimm64-hi>
+1292: (85) call bpf_map_lookup_elem#1
+1293: (15) if r0 == 0 goto 1530 (64)
+1294: (61) r1 = *(u32 *)(r0 +0)
+1295: (63) *(u32 *)(r10 -36) = r1
+1296: (55) if r1 != 0 goto 1306 (64)
+1297: (b7) r1 = 0x209
+1298: (63) *(u32 *)(r10 -8) = r1
+1299: (bf) r2 = r10
+
+## window pc 1303
+1298: (63) *(u32 *)(r10 -8) = r1
+1299: (bf) r2 = r10
+1300: (07) r2 += -8
+1301: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1302:      <ldimm64-hi>
+1303: (85) call bpf_map_lookup_elem#1
+1304: (15) if r0 == 0 goto 1530 (64)
+1305: (05) goto 2008 (pc+702)
+1306: (63) *(u32 *)(r10 -48) = r1
+1307: (bf) r2 = r10
+1308: (07) r2 += -0x24
+1309: (18) r1 = map_fd old_fd:18 name:reals type:2 key:4 value:20 max:4096
+1310:      <ldimm64-hi>
+
+## window pc 1311
+1306: (63) *(u32 *)(r10 -48) = r1
+1307: (bf) r2 = r10
+1308: (07) r2 += -0x24
+1309: (18) r1 = map_fd old_fd:18 name:reals type:2 key:4 value:20 max:4096
+1310:      <ldimm64-hi>
+1311: (85) call bpf_map_lookup_elem#1
+1312: (7b) *(u64 *)(r10 -192) = r0
+1313: (55) if r0 != 0 goto 1323 (64)
+1314: (b7) r1 = 0x209
+1315: (63) *(u32 *)(r10 -8) = r1
+1316: (bf) r2 = r10
+1317: (07) r2 += -8
+1318: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+
+## window pc 1320
+1315: (63) *(u32 *)(r10 -8) = r1
+1316: (bf) r2 = r10
+1317: (07) r2 += -8
+1318: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1319:      <ldimm64-hi>
+1320: (85) call bpf_map_lookup_elem#1
+1321: (15) if r0 == 0 goto 1530 (64)
+1322: (05) goto 2029 (pc+706)
+1323: (79) r1 = *(u64 *)(r10 -160)
+1324: (61) r1 = *(u32 *)(r1 +0)
+1325: (57) r1 &= 2
+1326: (77) r1 >>= 1
+1327: (4f) r8 |= r1
+
+## window pc 1344
+1339: (07) r2 += -0x58
+1340: (bf) r3 = r10
+1341: (07) r3 += -0x20
+1342: (79) r1 = *(u64 *)(r10 -168)
+1343: (b7) r4 = 0
+1344: (85) call bpf_map_update_elem#2
+1345: (b7) r8 = 0
+1346: (63) *(u32 *)(r10 -32) = r8
+1347: (bf) r2 = r10
+1348: (07) r2 += -0x20
+1349: (18) r1 = map_fd old_fd:21 name:vip_miss_stats type:2 key:4 value:20 max:1
+1350:      <ldimm64-hi>
+1351: (85) call bpf_map_lookup_elem#1
+
+## window pc 1351
+1346: (63) *(u32 *)(r10 -32) = r8
+1347: (bf) r2 = r10
+1348: (07) r2 += -0x20
+1349: (18) r1 = map_fd old_fd:21 name:vip_miss_stats type:2 key:4 value:20 max:1
+1350:      <ldimm64-hi>
+1351: (85) call bpf_map_lookup_elem#1
+1352: (15) if r0 == 0 goto 1530 (64)
+1353: (61) r1 = *(u32 *)(r0 +0)
+1354: (61) r2 = *(u32 *)(r10 -112)
+1355: (5d) if r1 != r2 goto 1367 (64)
+1356: (61) r1 = *(u32 *)(r0 +4)
+1357: (61) r2 = *(u32 *)(r10 -108)
+1358: (5d) if r1 != r2 goto 1367 (64)
+
+## window pc 1381
+1376: (63) *(u32 *)(r10 -8) = r1
+1377: (bf) r2 = r10
+1378: (07) r2 += -8
+1379: (18) r1 = map_fd old_fd:20 name:lru_miss_stats type:6 key:4 value:4 max:4096
+1380:      <ldimm64-hi>
+1381: (85) call bpf_map_lookup_elem#1
+1382: (15) if r0 == 0 goto 1530 (64)
+1383: (61) r1 = *(u32 *)(r0 +0)
+1384: (07) r1 += 1
+1385: (63) *(u32 *)(r0 +0) = r1
+1386: (79) r1 = *(u64 *)(r10 -176)
+1387: (79) r2 = *(u64 *)(r1 +8)
+1388: (07) r2 += 1
+
+## window pc 1397
+1392: (05) goto 1100 (pc-293)
+1393: (61) r7 = *(u32 *)(r10 -88)
+1394: (bf) r1 = r6
+1395: (18) r2 = 0xffffffec
+1396:      <ldimm64-hi>
+1397: (85) call bpf_xdp_adjust_head#44
+1398: (67) r0 <<= 0x20
+1399: (77) r0 >>= 0x20
+1400: (55) if r0 != 0 goto 2217 (64)
+1401: (61) r1 = *(u32 *)(r6 +0)
+1402: (61) r2 = *(u32 *)(r6 +4)
+1403: (bf) r3 = r1
+1404: (07) r3 += 0xe
+
+## window pc 1495
+1490: (63) *(u32 *)(r10 -32) = r1
+1491: (bf) r2 = r10
+1492: (07) r2 += -0x20
+1493: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1494:      <ldimm64-hi>
+1495: (85) call bpf_map_lookup_elem#1
+1496: (15) if r0 == 0 goto 1531 (64)
+1497: (05) goto 2204 (pc+706)
+1498: (bf) r1 = r8
+1499: (07) r1 += 0x40
+1500: (05) goto 1506 (pc+5)
+1501: (bf) r1 = r8
+1502: (07) r1 += 0x48
+
+## window pc 1514
+1509: (63) *(u32 *)(r10 -36) = r7
+1510: (bf) r2 = r10
+1511: (07) r2 += -0x24
+1512: (18) r1 = map_fd old_fd:25 name:server_id_map type:2 key:4 value:4 max:16777214
+1513:      <ldimm64-hi>
+1514: (85) call bpf_map_lookup_elem#1
+1515: (15) if r0 == 0 goto 1562 (64)
+1516: (61) r1 = *(u32 *)(r0 +0)
+1517: (63) *(u32 *)(r10 -36) = r1
+1518: (15) if r1 == 0 goto 1562 (64)
+1519: (63) *(u32 *)(r10 -48) = r1
+1520: (bf) r2 = r10
+1521: (07) r2 += -0x24
+
+## window pc 1524
+1519: (63) *(u32 *)(r10 -48) = r1
+1520: (bf) r2 = r10
+1521: (07) r2 += -0x24
+1522: (18) r1 = map_fd old_fd:18 name:reals type:2 key:4 value:20 max:4096
+1523:      <ldimm64-hi>
+1524: (85) call bpf_map_lookup_elem#1
+1525: (7b) *(u64 *)(r10 -192) = r0
+1526: (55) if r0 != 0 goto 1570 (64)
+1527: (79) r1 = *(u64 *)(r8 +40)
+1528: (07) r1 += 1
+1529: (7b) *(u64 *)(r8 +40) = r1
+1530: (b7) r8 = 1
+1531: (15) if r8 == 1 goto 1542 (64)
+
+## window pc 1550
+1545: (b7) r8 = 1
+1546: (bf) r2 = r10
+1547: (07) r2 += -0x84
+1548: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1549:      <ldimm64-hi>
+1550: (85) call bpf_map_lookup_elem#1
+1551: (b7) r7 = 1
+1552: (15) if r0 == 0 goto 1560 (64)
+1553: (79) r1 = *(u64 *)(r0 +8)
+1554: (0f) r1 += r9
+1555: (7b) *(u64 *)(r0 +8) = r1
+1556: (79) r1 = *(u64 *)(r0 +0)
+1557: (0f) r1 += r8
+
+## window pc 1573
+1568: (7b) *(u64 *)(r8 +0) = r1
+1569: (05) goto 1006 (pc-564)
+1570: (bf) r2 = r10
+1571: (07) r2 += -0x58
+1572: (79) r1 = *(u64 *)(r10 -168)
+1573: (85) call bpf_map_lookup_elem#1
+1574: (15) if r0 == 0 goto 1628 (64)
+1575: (61) r2 = *(u32 *)(r0 +0)
+1576: (61) r1 = *(u32 *)(r10 -48)
+1577: (1d) if r2 == r1 goto 1579 (64)
+1578: (05) goto 1659 (pc+80)
+1579: (bf) r2 = r8
+1580: (79) r1 = *(u64 *)(r2 +80)
+
+## window pc 1593
+1588: (63) *(u32 *)(r10 -32) = r1
+1589: (bf) r2 = r10
+1590: (07) r2 += -0x20
+1591: (18) r1 = map_fd old_fd:27 name:server_id_stats type:6 key:4 value:16 max:512
+1592:      <ldimm64-hi>
+1593: (85) call bpf_map_lookup_elem#1
+1594: (15) if r0 == 0 goto 1713 (64)
+1595: (79) r1 = *(u64 *)(r0 +0)
+1596: (07) r1 += 1
+1597: (7b) *(u64 *)(r0 +0) = r1
+1598: (05) goto 1713 (pc+114)
+1599: (71) r2 = *(u8 *)(r7 +1)
+1600: (67) r2 <<= 0x10
+
+## window pc 1634
+1629: (63) *(u32 *)(r10 -32) = r1
+1630: (bf) r2 = r10
+1631: (07) r2 += -0x20
+1632: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1633:      <ldimm64-hi>
+1634: (85) call bpf_map_lookup_elem#1
+1635: (bf) r7 = r0
+1636: (15) if r7 == 0 goto 2247 (64)
+1637: (85) call bpf_ktime_get_ns#5
+1638: (79) r1 = *(u64 *)(r7 +8)
+1639: (bf) r2 = r0
+1640: (1f) r2 -= r1
+1641: (b7) r1 = 0x3b9aca01
+
+## window pc 1637
+1632: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1633:      <ldimm64-hi>
+1634: (85) call bpf_map_lookup_elem#1
+1635: (bf) r7 = r0
+1636: (15) if r7 == 0 goto 2247 (64)
+1637: (85) call bpf_ktime_get_ns#5
+1638: (79) r1 = *(u64 *)(r7 +8)
+1639: (bf) r2 = r0
+1640: (1f) r2 -= r1
+1641: (b7) r1 = 0x3b9aca01
+1642: (2d) if r1 > r2 goto 2242 (64)
+1643: (7b) *(u64 *)(r7 +8) = r0
+1644: (b7) r1 = 1
+
+## window pc 1657
+1652: (07) r2 += -0x58
+1653: (bf) r3 = r10
+1654: (07) r3 += -0x20
+1655: (79) r1 = *(u64 *)(r10 -168)
+1656: (b7) r4 = 0
+1657: (85) call bpf_map_update_elem#2
+1658: (05) goto 2247 (pc+588)
+1659: (63) *(u32 *)(r0 +0) = r1
+1660: (bf) r2 = r8
+1661: (79) r1 = *(u64 *)(r2 +88)
+1662: (07) r1 += 1
+1663: (7b) *(u64 *)(r2 +88) = r1
+1664: (79) r1 = *(u64 *)(r10 -184)
+
+## window pc 1670
+1665: (63) *(u32 *)(r10 -32) = r1
+1666: (bf) r2 = r10
+1667: (07) r2 += -0x20
+1668: (18) r1 = map_fd old_fd:27 name:server_id_stats type:6 key:4 value:16 max:512
+1669:      <ldimm64-hi>
+1670: (85) call bpf_map_lookup_elem#1
+1671: (15) if r0 == 0 goto 2251 (64)
+1672: (79) r1 = *(u64 *)(r0 +8)
+1673: (07) r1 += 1
+1674: (7b) *(u64 *)(r0 +8) = r1
+1675: (05) goto 2251 (pc+575)
+1676: (bf) r1 = r8
+1677: (07) r1 += 0x40
+
+## window pc 1692
+1687: (63) *(u32 *)(r10 -36) = r7
+1688: (bf) r2 = r10
+1689: (07) r2 += -0x24
+1690: (18) r1 = map_fd old_fd:25 name:server_id_map type:2 key:4 value:4 max:16777214
+1691:      <ldimm64-hi>
+1692: (85) call bpf_map_lookup_elem#1
+1693: (15) if r0 == 0 goto 1706 (64)
+1694: (61) r1 = *(u32 *)(r0 +0)
+1695: (63) *(u32 *)(r10 -36) = r1
+1696: (15) if r1 == 0 goto 1706 (64)
+1697: (63) *(u32 *)(r10 -48) = r1
+1698: (bf) r2 = r10
+1699: (07) r2 += -0x24
+
+## window pc 1702
+1697: (63) *(u32 *)(r10 -48) = r1
+1698: (bf) r2 = r10
+1699: (07) r2 += -0x24
+1700: (18) r1 = map_fd old_fd:18 name:reals type:2 key:4 value:20 max:4096
+1701:      <ldimm64-hi>
+1702: (85) call bpf_map_lookup_elem#1
+1703: (7b) *(u64 *)(r10 -144) = r0
+1704: (55) if r0 != 0 goto 2229 (64)
+1705: (05) goto 1527 (pc-179)
+1706: (7b) *(u64 *)(r8 +24) = r7
+1707: (79) r1 = *(u64 *)(r8 +16)
+1708: (07) r1 += 1
+1709: (7b) *(u64 *)(r8 +16) = r1
+
+## window pc 1726
+1721: (57) r1 &= 2
+1722: (55) if r1 != 0 goto 1749 (64)
+1723: (bf) r2 = r10
+1724: (07) r2 += -0x58
+1725: (79) r1 = *(u64 *)(r10 -168)
+1726: (85) call bpf_map_lookup_elem#1
+1727: (bf) r8 = r0
+1728: (15) if r8 == 0 goto 1748 (64)
+1729: (71) r1 = *(u8 *)(r10 -52)
+1730: (55) if r1 != 0x11 goto 1739 (64)
+1731: (85) call bpf_ktime_get_ns#5
+1732: (79) r1 = *(u64 *)(r8 +8)
+1733: (bf) r2 = r0
+
+## window pc 1731
+1726: (85) call bpf_map_lookup_elem#1
+1727: (bf) r8 = r0
+1728: (15) if r8 == 0 goto 1748 (64)
+1729: (71) r1 = *(u8 *)(r10 -52)
+1730: (55) if r1 != 0x11 goto 1739 (64)
+1731: (85) call bpf_ktime_get_ns#5
+1732: (79) r1 = *(u64 *)(r8 +8)
+1733: (bf) r2 = r0
+1734: (1f) r2 -= r1
+1735: (18) r1 = 0x6fc23ac00
+1736:      <ldimm64-hi>
+1737: (2d) if r2 > r1 goto 1748 (64)
+1738: (7b) *(u64 *)(r8 +8) = r0
+
+## window pc 1746
+1741: (63) *(u32 *)(r10 -32) = r1
+1742: (bf) r2 = r10
+1743: (07) r2 += -0x20
+1744: (18) r1 = map_fd old_fd:18 name:reals type:2 key:4 value:20 max:4096
+1745:      <ldimm64-hi>
+1746: (85) call bpf_map_lookup_elem#1
+1747: (bf) r7 = r0
+1748: (79) r8 = *(u64 *)(r10 -160)
+1749: (71) r1 = *(u8 *)(r10 -52)
+1750: (55) if r1 != 0x11 goto 1800 (64)
+1751: (61) r1 = *(u32 *)(r8 +0)
+1752: (57) r1 &= 0x200
+1753: (15) if r1 == 0 goto 1800 (64)
+
+## window pc 1760
+1755: (63) *(u32 *)(r10 -32) = r1
+1756: (bf) r2 = r10
+1757: (07) r2 += -0x20
+1758: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1759:      <ldimm64-hi>
+1760: (85) call bpf_map_lookup_elem#1
+1761: (bf) r8 = r0
+1762: (15) if r8 == 0 goto 1800 (64)
+1763: (85) call bpf_ktime_get_ns#5
+1764: (79) r1 = *(u64 *)(r8 +8)
+1765: (bf) r2 = r0
+1766: (1f) r2 -= r1
+1767: (b7) r1 = 0x3b9aca01
+
+## window pc 1763
+1758: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1759:      <ldimm64-hi>
+1760: (85) call bpf_map_lookup_elem#1
+1761: (bf) r8 = r0
+1762: (15) if r8 == 0 goto 1800 (64)
+1763: (85) call bpf_ktime_get_ns#5
+1764: (79) r1 = *(u64 *)(r8 +8)
+1765: (bf) r2 = r0
+1766: (1f) r2 -= r1
+1767: (b7) r1 = 0x3b9aca01
+1768: (2d) if r1 > r2 goto 1795 (64)
+1769: (7b) *(u64 *)(r8 +8) = r0
+1770: (b7) r1 = 1
+
+## window pc 1776
+1771: (7b) *(u64 *)(r8 +0) = r1
+1772: (bf) r2 = r10
+1773: (07) r2 += -0x70
+1774: (18) r1 = map_fd old_fd:28 name:vip_to_down_rea type:13 key:20 value:4 max:512
+1775:      <ldimm64-hi>
+1776: (85) call bpf_map_lookup_elem#1
+1777: (15) if r0 == 0 goto 1800 (64)
+1778: (bf) r2 = r10
+1779: (07) r2 += -0x30
+1780: (bf) r1 = r0
+1781: (85) call bpf_map_lookup_elem#1
+1782: (15) if r0 == 0 goto 1800 (64)
+1783: (b7) r1 = 0x20f
+
+## window pc 1781
+1776: (85) call bpf_map_lookup_elem#1
+1777: (15) if r0 == 0 goto 1800 (64)
+1778: (bf) r2 = r10
+1779: (07) r2 += -0x30
+1780: (bf) r1 = r0
+1781: (85) call bpf_map_lookup_elem#1
+1782: (15) if r0 == 0 goto 1800 (64)
+1783: (b7) r1 = 0x20f
+1784: (63) *(u32 *)(r10 -32) = r1
+1785: (bf) r2 = r10
+1786: (07) r2 += -0x20
+1787: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1788:      <ldimm64-hi>
+
+## window pc 1789
+1784: (63) *(u32 *)(r10 -32) = r1
+1785: (bf) r2 = r10
+1786: (07) r2 += -0x20
+1787: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1788:      <ldimm64-hi>
+1789: (85) call bpf_map_lookup_elem#1
+1790: (15) if r0 == 0 goto 1919 (64)
+1791: (79) r1 = *(u64 *)(r0 +0)
+1792: (07) r1 += 1
+1793: (7b) *(u64 *)(r0 +0) = r1
+1794: (05) goto 1919 (pc+124)
+1795: (79) r1 = *(u64 *)(r8 +0)
+1796: (07) r1 += 1
+
+## window pc 1807
+1802: (05) goto 1919 (pc+116)
+1803: (bf) r2 = r10
+1804: (07) r2 += -0x78
+1805: (18) r1 = map_fd old_fd:12 name:ctl_array type:2 key:4 value:8 max:16
+1806:      <ldimm64-hi>
+1807: (85) call bpf_map_lookup_elem#1
+1808: (b7) r8 = 1
+1809: (7b) *(u64 *)(r10 -160) = r0
+1810: (15) if r0 == 0 goto 1531 (64)
+1811: (bf) r2 = r10
+1812: (07) r2 += -0x74
+1813: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1814:      <ldimm64-hi>
+
+## window pc 1815
+1810: (15) if r0 == 0 goto 1531 (64)
+1811: (bf) r2 = r10
+1812: (07) r2 += -0x74
+1813: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1814:      <ldimm64-hi>
+1815: (85) call bpf_map_lookup_elem#1
+1816: (15) if r0 == 0 goto 1531 (64)
+1817: (79) r7 = *(u64 *)(r10 -152)
+1818: (dc) r7 = bswap16(r7)
+1819: (79) r1 = *(u64 *)(r0 +8)
+1820: (0f) r1 += r7
+1821: (7b) *(u64 *)(r0 +8) = r1
+1822: (79) r1 = *(u64 *)(r0 +0)
+
+## window pc 1829
+1824: (7b) *(u64 *)(r0 +0) = r1
+1825: (bf) r2 = r10
+1826: (07) r2 += -0x30
+1827: (18) r1 = map_fd old_fd:19 name:reals_stats type:6 key:4 value:16 max:4096
+1828:      <ldimm64-hi>
+1829: (85) call bpf_map_lookup_elem#1
+1830: (15) if r0 == 0 goto 1531 (64)
+1831: (79) r1 = *(u64 *)(r0 +8)
+1832: (0f) r1 += r7
+1833: (7b) *(u64 *)(r0 +8) = r1
+1834: (79) r1 = *(u64 *)(r0 +0)
+1835: (0f) r1 += r8
+1836: (7b) *(u64 *)(r0 +0) = r1
+
+## window pc 1846
+1841: (57) r1 &= 1
+1842: (15) if r1 == 0 goto 2089 (64)
+1843: (bf) r1 = r6
+1844: (18) r2 = 0xffffffd8
+1845:      <ldimm64-hi>
+1846: (85) call bpf_xdp_adjust_head#44
+1847: (67) r0 <<= 0x20
+1848: (77) r0 >>= 0x20
+1849: (55) if r0 != 0 goto 2196 (64)
+1850: (61) r1 = *(u32 *)(r6 +0)
+1851: (61) r2 = *(u32 *)(r6 +4)
+1852: (bf) r3 = r1
+1853: (07) r3 += 0xe
+
+## window pc 1927
+1922: (63) *(u32 *)(r10 -32) = r1
+1923: (bf) r2 = r10
+1924: (07) r2 += -0x20
+1925: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1926:      <ldimm64-hi>
+1927: (85) call bpf_map_lookup_elem#1
+1928: (15) if r0 == 0 goto 1530 (64)
+1929: (71) r2 = *(u8 *)(r10 -44)
+1930: (57) r2 &= 2
+1931: (b7) r1 = 1
+1932: (15) if r2 == 0 goto 1934 (64)
+1933: (b7) r1 = 0
+1934: (67) r1 <<= 3
+
+## window pc 1948
+1943: (63) *(u32 *)(r10 -8) = r1
+1944: (bf) r2 = r10
+1945: (07) r2 += -8
+1946: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+1947:      <ldimm64-hi>
+1948: (85) call bpf_map_lookup_elem#1
+1949: (b7) r1 = 1
+1950: (7b) *(u64 *)(r10 -192) = r1
+1951: (bf) r7 = r0
+1952: (15) if r0 == 0 goto 1970 (64)
+1953: (85) call bpf_ktime_get_ns#5
+1954: (bf) r8 = r0
+1955: (79) r1 = *(u64 *)(r7 +8)
+
+## window pc 1953
+1948: (85) call bpf_map_lookup_elem#1
+1949: (b7) r1 = 1
+1950: (7b) *(u64 *)(r10 -192) = r1
+1951: (bf) r7 = r0
+1952: (15) if r0 == 0 goto 1970 (64)
+1953: (85) call bpf_ktime_get_ns#5
+1954: (bf) r8 = r0
+1955: (79) r1 = *(u64 *)(r7 +8)
+1956: (bf) r2 = r8
+1957: (1f) r2 -= r1
+1958: (b7) r1 = 0x3b9aca01
+1959: (2d) if r1 > r2 goto 1964 (64)
+1960: (7b) *(u64 *)(r7 +8) = r8
+
+## window pc 1982
+1977: (6b) *(u16 *)(r10 -56) = r1
+1978: (b7) r1 = 0
+1979: (7b) *(u64 *)(r10 -88) = r1
+1980: (7b) *(u64 *)(r10 -80) = r1
+1981: (61) r2 = *(u32 *)(r10 -56)
+1982: (85) call pc2466 (pseudo_call off +483)
+1983: (67) r0 <<= 0x20
+1984: (77) r0 >>= 0x20
+1985: (97) r0 %= 0x10001
+1986: (79) r1 = *(u64 *)(r10 -160)
+1987: (61) r1 = *(u32 *)(r1 +4)
+1988: (27) r1 *= 0x10001
+1989: (0f) r1 += r0
+
+## window pc 1995
+1990: (63) *(u32 *)(r10 -36) = r1
+1991: (bf) r2 = r10
+1992: (07) r2 += -0x24
+1993: (18) r1 = map_fd old_fd:17 name:ch_rings type:2 key:4 value:4 max:33554944
+1994:      <ldimm64-hi>
+1995: (85) call bpf_map_lookup_elem#1
+1996: (15) if r0 == 0 goto 1530 (64)
+1997: (61) r1 = *(u32 *)(r0 +0)
+1998: (63) *(u32 *)(r10 -36) = r1
+1999: (55) if r1 != 0 goto 2013 (64)
+2000: (b7) r1 = 0x209
+2001: (63) *(u32 *)(r10 -8) = r1
+2002: (bf) r2 = r10
+
+## window pc 2006
+2001: (63) *(u32 *)(r10 -8) = r1
+2002: (bf) r2 = r10
+2003: (07) r2 += -8
+2004: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+2005:      <ldimm64-hi>
+2006: (85) call bpf_map_lookup_elem#1
+2007: (15) if r0 == 0 goto 1530 (64)
+2008: (79) r1 = *(u64 *)(r0 +8)
+2009: (07) r1 += 1
+2010: (7b) *(u64 *)(r0 +8) = r1
+2011: (b7) r8 = 1
+2012: (05) goto 1531 (pc-482)
+2013: (63) *(u32 *)(r10 -48) = r1
+
+## window pc 2018
+2013: (63) *(u32 *)(r10 -48) = r1
+2014: (bf) r2 = r10
+2015: (07) r2 += -0x24
+2016: (18) r1 = map_fd old_fd:18 name:reals type:2 key:4 value:20 max:4096
+2017:      <ldimm64-hi>
+2018: (85) call bpf_map_lookup_elem#1
+2019: (7b) *(u64 *)(r10 -144) = r0
+2020: (55) if r0 != 0 goto 2034 (64)
+2021: (b7) r1 = 0x209
+2022: (63) *(u32 *)(r10 -8) = r1
+2023: (bf) r2 = r10
+2024: (07) r2 += -8
+2025: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+
+## window pc 2027
+2022: (63) *(u32 *)(r10 -8) = r1
+2023: (bf) r2 = r10
+2024: (07) r2 += -8
+2025: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+2026:      <ldimm64-hi>
+2027: (85) call bpf_map_lookup_elem#1
+2028: (15) if r0 == 0 goto 1530 (64)
+2029: (79) r1 = *(u64 *)(r0 +0)
+2030: (07) r1 += 1
+2031: (7b) *(u64 *)(r0 +0) = r1
+2032: (b7) r8 = 1
+2033: (05) goto 1531 (pc-503)
+2034: (79) r1 = *(u64 *)(r10 -160)
+
+## window pc 2055
+2050: (07) r2 += -0x58
+2051: (bf) r3 = r10
+2052: (07) r3 += -0x20
+2053: (79) r1 = *(u64 *)(r10 -168)
+2054: (b7) r4 = 0
+2055: (85) call bpf_map_update_elem#2
+2056: (b7) r1 = 0
+2057: (63) *(u32 *)(r10 -32) = r1
+2058: (bf) r2 = r10
+2059: (07) r2 += -0x20
+2060: (18) r1 = map_fd old_fd:21 name:vip_miss_stats type:2 key:4 value:20 max:1
+2061:      <ldimm64-hi>
+2062: (85) call bpf_map_lookup_elem#1
+
+## window pc 2062
+2057: (63) *(u32 *)(r10 -32) = r1
+2058: (bf) r2 = r10
+2059: (07) r2 += -0x20
+2060: (18) r1 = map_fd old_fd:21 name:vip_miss_stats type:2 key:4 value:20 max:1
+2061:      <ldimm64-hi>
+2062: (85) call bpf_map_lookup_elem#1
+2063: (15) if r0 == 0 goto 1530 (64)
+2064: (69) r2 = *(u16 *)(r10 -96)
+2065: (61) r3 = *(u32 *)(r10 -112)
+2066: (71) r1 = *(u8 *)(r10 -94)
+2067: (73) *(u8 *)(r0 +18) = r1
+2068: (61) r4 = *(u32 *)(r0 +0)
+2069: (5d) if r4 != r3 goto 2084 (64)
+
+## window pc 2079
+2074: (63) *(u32 *)(r10 -8) = r1
+2075: (bf) r2 = r10
+2076: (07) r2 += -8
+2077: (18) r1 = map_fd old_fd:20 name:lru_miss_stats type:6 key:4 value:4 max:4096
+2078:      <ldimm64-hi>
+2079: (85) call bpf_map_lookup_elem#1
+2080: (15) if r0 == 0 goto 1530 (64)
+2081: (61) r1 = *(u32 *)(r0 +0)
+2082: (07) r1 += 1
+2083: (63) *(u32 *)(r0 +0) = r1
+2084: (79) r1 = *(u64 *)(r10 -176)
+2085: (79) r2 = *(u64 *)(r1 +8)
+2086: (07) r2 += 1
+
+## window pc 2094
+2089: (61) r1 = *(u32 *)(r10 -88)
+2090: (7b) *(u64 *)(r10 -152) = r1
+2091: (bf) r1 = r6
+2092: (18) r2 = 0xffffffec
+2093:      <ldimm64-hi>
+2094: (85) call bpf_xdp_adjust_head#44
+2095: (67) r0 <<= 0x20
+2096: (77) r0 >>= 0x20
+2097: (55) if r0 != 0 goto 2208 (64)
+2098: (61) r1 = *(u32 *)(r6 +0)
+2099: (61) r2 = *(u32 *)(r6 +4)
+2100: (bf) r3 = r1
+2101: (07) r3 += 0xe
+
+## window pc 2202
+2197: (63) *(u32 *)(r10 -32) = r1
+2198: (bf) r2 = r10
+2199: (07) r2 += -0x20
+2200: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+2201:      <ldimm64-hi>
+2202: (85) call bpf_map_lookup_elem#1
+2203: (15) if r0 == 0 goto 1531 (64)
+2204: (79) r1 = *(u64 *)(r0 +8)
+2205: (07) r1 += 1
+2206: (7b) *(u64 *)(r0 +8) = r1
+2207: (05) goto 1531 (pc-677)
+2208: (b7) r1 = 0x207
+2209: (63) *(u32 *)(r10 -32) = r1
+
+## window pc 2214
+2209: (63) *(u32 *)(r10 -32) = r1
+2210: (bf) r2 = r10
+2211: (07) r2 += -0x20
+2212: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+2213:      <ldimm64-hi>
+2214: (85) call bpf_map_lookup_elem#1
+2215: (15) if r0 == 0 goto 1531 (64)
+2216: (05) goto 2225 (pc+8)
+2217: (b7) r1 = 0x207
+2218: (63) *(u32 *)(r10 -32) = r1
+2219: (bf) r2 = r10
+2220: (07) r2 += -0x20
+2221: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+
+## window pc 2223
+2218: (63) *(u32 *)(r10 -32) = r1
+2219: (bf) r2 = r10
+2220: (07) r2 += -0x20
+2221: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+2222:      <ldimm64-hi>
+2223: (85) call bpf_map_lookup_elem#1
+2224: (15) if r0 == 0 goto 1531 (64)
+2225: (79) r1 = *(u64 *)(r0 +0)
+2226: (07) r1 += 1
+2227: (7b) *(u64 *)(r0 +0) = r1
+2228: (05) goto 1531 (pc-698)
+2229: (bf) r2 = r10
+2230: (07) r2 += -0x58
+
+## window pc 2232
+2227: (7b) *(u64 *)(r0 +0) = r1
+2228: (05) goto 1531 (pc-698)
+2229: (bf) r2 = r10
+2230: (07) r2 += -0x58
+2231: (79) r1 = *(u64 *)(r10 -168)
+2232: (85) call bpf_map_lookup_elem#1
+2233: (15) if r0 == 0 goto 2257 (64)
+2234: (61) r2 = *(u32 *)(r0 +0)
+2235: (61) r1 = *(u32 *)(r10 -48)
+2236: (1d) if r2 == r1 goto 2238 (64)
+2237: (05) goto 2288 (pc+50)
+2238: (79) r1 = *(u64 *)(r8 +80)
+2239: (07) r1 += 1
+
+## window pc 2263
+2258: (63) *(u32 *)(r10 -32) = r1
+2259: (bf) r2 = r10
+2260: (07) r2 += -0x20
+2261: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+2262:      <ldimm64-hi>
+2263: (85) call bpf_map_lookup_elem#1
+2264: (bf) r7 = r0
+2265: (15) if r7 == 0 goto 2309 (64)
+2266: (85) call bpf_ktime_get_ns#5
+2267: (79) r1 = *(u64 *)(r7 +8)
+2268: (bf) r2 = r0
+2269: (1f) r2 -= r1
+2270: (b7) r1 = 0x3b9aca01
+
+## window pc 2266
+2261: (18) r1 = map_fd old_fd:11 name:stats type:6 key:4 value:16 max:1024
+2262:      <ldimm64-hi>
+2263: (85) call bpf_map_lookup_elem#1
+2264: (bf) r7 = r0
+2265: (15) if r7 == 0 goto 2309 (64)
+2266: (85) call bpf_ktime_get_ns#5
+2267: (79) r1 = *(u64 *)(r7 +8)
+2268: (bf) r2 = r0
+2269: (1f) r2 -= r1
+2270: (b7) r1 = 0x3b9aca01
+2271: (2d) if r1 > r2 goto 2304 (64)
+2272: (7b) *(u64 *)(r7 +8) = r0
+2273: (b7) r1 = 1
+
+## window pc 2286
+2281: (07) r2 += -0x58
+2282: (bf) r3 = r10
+2283: (07) r3 += -0x20
+2284: (79) r1 = *(u64 *)(r10 -168)
+2285: (b7) r4 = 0
+2286: (85) call bpf_map_update_elem#2
+2287: (05) goto 2309 (pc+21)
+2288: (63) *(u32 *)(r0 +0) = r1
+2289: (79) r1 = *(u64 *)(r8 +88)
+2290: (07) r1 += 1
+2291: (7b) *(u64 *)(r8 +88) = r1
+2292: (79) r1 = *(u64 *)(r10 -184)
+2293: (63) *(u32 *)(r10 -32) = r1
+
+## window pc 2298
+2293: (63) *(u32 *)(r10 -32) = r1
+2294: (bf) r2 = r10
+2295: (07) r2 += -0x20
+2296: (18) r1 = map_fd old_fd:27 name:server_id_stats type:6 key:4 value:16 max:512
+2297:      <ldimm64-hi>
+2298: (85) call bpf_map_lookup_elem#1
+2299: (15) if r0 == 0 goto 2312 (64)
+2300: (79) r1 = *(u64 *)(r0 +8)
+2301: (07) r1 += 1
+2302: (7b) *(u64 *)(r0 +8) = r1
+2303: (05) goto 2312 (pc+8)
+2304: (79) r1 = *(u64 *)(r7 +0)
+2305: (07) r1 += 1

@@ -295,6 +295,17 @@ fn try_run_map_inline_pass(program: &mut BpfProgram) -> anyhow::Result<PipelineR
     pm.run(program, &PassContext::test_default())
 }
 
+fn try_run_map_inline_pass_without_synthetic_verifier_states(
+    program: &mut BpfProgram,
+) -> anyhow::Result<PipelineResult> {
+    use_mock_maps(program);
+    let mut pm = PassManager::new();
+    pm.register_analysis(BranchTargetAnalysis);
+    pm.register_analysis(MapInfoAnalysis);
+    pm.add_pass(MapInlinePass);
+    pm.run(program, &PassContext::test_default())
+}
+
 fn run_map_inline_const_prop_dce(program: &mut BpfProgram) -> PipelineResult {
     use_mock_maps(program);
     install_synthetic_verifier_states_for_map_inline_tests(program);
@@ -366,6 +377,85 @@ fn has_non_constant_key_skip(result: &PipelineResult) -> bool {
         skip.reason
             .contains("lookup key is not available from verifier-guided state")
     })
+}
+
+#[test]
+fn map_inline_consumes_hint_when_verifier_state_unavailable() {
+    // Bug caught: an explicit operator hint was ignored when verifier stack state was absent.
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    install_array_map_entry(301, 8, 0, vec![42, 0, 0, 0]);
+    let mut program = BpfProgram::new(vec![
+        map[0],
+        map[1],
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+        exit_insn(),
+    ]);
+    program.set_map_ids(vec![301]);
+    program
+        .map_inline_hints
+        .insert(4, 0u32.to_le_bytes().to_vec());
+
+    let result = try_run_map_inline_pass_without_synthetic_verifier_states(&mut program).unwrap();
+
+    assert_eq!(result.pass_results[0].sites_applied, 1);
+    assert!(program.insns.contains(&BpfInsn::mov32_imm(6, 42)));
+    assert!(result.pass_results[0]
+        .diagnostics
+        .iter()
+        .any(|diag| diag == "inline_hints_consumed=1"));
+}
+
+#[test]
+fn map_inline_rejects_hint_with_wrong_key_size() {
+    // Bug caught: stale or malformed hint bytes were downgraded to a normal key-extraction skip.
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    install_array_map_entry(302, 8, 0, vec![42, 0, 0, 0]);
+    let mut program = BpfProgram::new(vec![
+        map[0],
+        map[1],
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+        exit_insn(),
+    ]);
+    program.set_map_ids(vec![302]);
+    program.map_inline_hints.insert(4, vec![0, 0]);
+
+    let err = try_run_map_inline_pass_without_synthetic_verifier_states(&mut program).unwrap_err();
+
+    assert!(err
+        .to_string()
+        .contains("inline hint at pc 4 has 2 byte(s), expected 4"));
+}
+
+#[test]
+fn map_inline_rejects_hint_pointing_at_non_lookup_call() {
+    // Bug caught: a typo in call_pc could silently leave an operator hint unused.
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    install_array_map_entry(303, 8, 0, vec![42, 0, 0, 0]);
+    let mut program = BpfProgram::new(vec![
+        map[0],
+        map[1],
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+        exit_insn(),
+    ]);
+    program.set_map_ids(vec![303]);
+    program
+        .map_inline_hints
+        .insert(2, 0u32.to_le_bytes().to_vec());
+
+    let err = try_run_map_inline_pass_without_synthetic_verifier_states(&mut program).unwrap_err();
+
+    assert!(err
+        .to_string()
+        .contains("inline hint at pc 2 does not point to a map_lookup_elem helper call"));
 }
 
 #[test]

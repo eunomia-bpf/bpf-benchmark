@@ -1,0 +1,32 @@
+# Katran balancer_ingress JIT dump status
+
+Requested artifact: live x86 `bpftool prog dump jited` for the current ReJITed
+`balancer_ingress`.
+
+Status: unavailable in this session.
+
+Reason:
+
+- `bpftool prog show` on the host fails with `Operation not permitted`, so the
+  currently loaded program cannot be enumerated or dumped from this process.
+- The available `KEEP_WORKDIRS=1` run at
+  `corpus/results/x86_kvm_corpus_20260508_213022_786370/` only preserved a
+  `noop` failure workdir for prog 9; it does not contain a successful optimized
+  JIT image.
+- The useful May 8 kinsn run at
+  `corpus/results/x86_kvm_corpus_20260508_041822_768126/details/apps/katran.json`
+  contains pass reports and counter data, but no persisted workdir or machine
+  code dump.
+
+Substitute artifacts produced for this analysis:
+
+- `docs/tmp/katran_xlated_baseline.disasm`
+- `docs/tmp/katran_xlated_post_5pass.disasm`
+- `docs/tmp/katran_xlated_prefetch_attempt.disasm`
+- `docs/tmp/katran_baseline_windows.disasm`
+- `docs/tmp/katran_post5_windows.disasm`
+- `docs/tmp/katran_prefetch_attempt_windows.disasm`
+
+The main report treats native x86 assembly from
+`docs/tmp/katran_native_compile/native.disasm` and these BPF bytecode dumps as
+evidence. It does not claim to have an actual live kernel JIT dump.
