@@ -1,0 +1,91 @@
+{
+  "app": "bcc/capable",
+  "baseline": {
+    "bpf": {
+      "6": {
+        "bytes_jited": 203,
+        "bytes_xlated": 344,
+        "id": 6,
+        "name": "cap_capable",
+        "run_cnt_delta": 2707933,
+        "run_time_ns_delta": 360715386,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.057317351000009,
+        "ops_per_sec": 5003256.529779841,
+        "ops_total": 15296543.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [27513] setting to a 3 secs run per stressor\nstress-ng: info:  [27513] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [27513] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [27513] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [27513]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [27513] cap             4542891      3.01      1.07      3.37   1511538.27     1022979.42\nstress-ng: metrc: [27513] eventfd          985525      3.00      0.66      3.80    328476.72      220736.42\nstress-ng: metrc: [27513] get                7326      3.00      0.13      0.90      2441.30        7093.98\nstress-ng: metrc: [27513] prctl             11495      3.00      1.85      1.38      3830.68        3552.32\nstress-ng: metrc: [27513] set              132105      3.00      0.51      2.87     44032.96       39098.41\nstress-ng: metrc: [27513] dup                4037      3.00      0.62      0.64      1345.59        3198.61\nstress-ng: metrc: [27513] kill             374385      3.00      0.30      4.30    124642.92       81516.43\nstress-ng: metrc: [27513] sigfd           7638393      3.00      1.59      5.31   2542196.96     1107275.53\nstress-ng: metrc: [27513] signal                0      3.00      0.30      1.61         0.00           0.00\nstress-ng: metrc: [27513] pty                 243      3.01      0.25      4.56        80.79          50.54\nstress-ng: metrc: [27513] itimer              655      3.00      1.47      3.83       218.33         123.60\nstress-ng: metrc: [27513] timerfd         1599488      3.00      0.61      4.30    532298.80      325780.81\nstress-ng: info:  [27513] skipped: 0\nstress-ng: info:  [27513] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [27513] failed: 0\nstress-ng: info:  [27513] metrics untrustworthy: 0\nstress-ng: info:  [27513] successful run completed in 3.05 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "6": {
+        "bytes_jited": 203,
+        "bytes_xlated": 344,
+        "id": 6,
+        "name": "cap_capable",
+        "run_cnt_delta": 2268337,
+        "run_time_ns_delta": 286869030,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0438594729999977,
+        "ops_per_sec": 5579448.115343403,
+        "ops_total": 16983056.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [31547] setting to a 3 secs run per stressor\nstress-ng: info:  [31547] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [31547] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [31547] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [31547]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [31547] cap             4279013      3.00      0.91      2.66   1425986.01     1200606.45\nstress-ng: metrc: [31547] eventfd         1078794      3.00      0.81      3.87    359567.82      230900.86\nstress-ng: metrc: [31547] get                6611      3.00      0.14      0.89      2202.59        6409.38\nstress-ng: metrc: [31547] prctl             10373      3.00      1.79      1.19      3457.06        3480.60\nstress-ng: metrc: [31547] set              100506      3.00      0.55      2.29     33470.08       35351.28\nstress-ng: metrc: [31547] dup                4045      3.00      0.62      0.61      1348.28        3285.60\nstress-ng: metrc: [31547] kill             591098      3.00      0.48      5.82    196845.01       93824.83\nstress-ng: metrc: [31547] sigfd           9732959      3.00      2.16      6.70   3241718.65     1098284.40\nstress-ng: metrc: [31547] signal                0      3.00      0.17      1.02         0.00           0.00\nstress-ng: metrc: [31547] pty                 397      3.01      0.27      4.85       132.05          77.52\nstress-ng: metrc: [31547] itimer              636      3.00      1.36      3.56       211.97         129.48\nstress-ng: metrc: [31547] timerfd         1178624      3.00      0.61      3.27    392566.19      304204.84\nstress-ng: info:  [31547] skipped: 0\nstress-ng: info:  [31547] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [31547] failed: 0\nstress-ng: info:  [31547] metrics untrustworthy: 0\nstress-ng: info:  [31547] successful run completed in 3.03 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": false,
+    "changed": false,
+    "enabled_passes": [
+      "noop",
+      "map_inline"
+    ],
+    "error": "prog 6: prog 6 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\")",
+    "exit_code": 1,
+    "output": "{\"changed\": false, \"error_message\": \"prog 6 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 6, \"program\": {\"final_insn_count\": 43, \"insn_delta\": 0, \"orig_insn_count\": 43, \"prog_id\": 6, \"prog_name\": \"cap_capable\", \"prog_type\": 2}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "6": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "noop",
+          "map_inline"
+        ],
+        "error": "prog 6 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\")",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 6 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 43, \"insns_before\": 43, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 6, \"program\": {\"final_insn_count\": 43, \"insn_delta\": 0, \"orig_insn_count\": 43, \"prog_id\": 6, \"prog_name\": \"cap_capable\", \"prog_type\": 2}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 6,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 0,
+      "not_applied": 1,
+      "requested": 1
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "stress_ng_os",
+  "status": "ok"
+}

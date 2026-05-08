@@ -1,0 +1,194 @@
+{
+  "app": "bcc/biosnoop",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "avg_ns_per_run": 204.37866180089352,
+        "bytes_jited": 267,
+        "bytes_xlated": 448,
+        "id": 9,
+        "name": "trace_pid_start_tp",
+        "run_cnt_delta": 1734017,
+        "run_time_ns_delta": 354396074,
+        "type": "tracepoint"
+      },
+      "10": {
+        "avg_ns_per_run": 196.0241276519916,
+        "bytes_jited": 335,
+        "bytes_xlated": 616,
+        "id": 10,
+        "name": "trace_req_start",
+        "run_cnt_delta": 1734027,
+        "run_time_ns_delta": 339911130,
+        "type": "kprobe"
+      },
+      "11": {
+        "avg_ns_per_run": 94.2488616127038,
+        "bytes_jited": 550,
+        "bytes_xlated": 856,
+        "id": 11,
+        "name": "trace_req_completion_tp",
+        "run_cnt_delta": 1734032,
+        "run_time_ns_delta": 163430542,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 5.338024058000002,
+        "ops_per_sec": 434674.6988752517,
+        "ops_total": 2320304.0,
+        "stderr": "",
+        "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.299960,\n        \"1000\" : 19.819370\n      },\n      \"latency_us\" : {\n        \"2\" : 27.795504,\n        \"4\" : 1.471558,\n        \"10\" : 19.214285,\n        \"20\" : 28.079794,\n        \"50\" : 2.867524,\n        \"100\" : 0.275164,\n        \"250\" : 0.168232,\n        \"500\" : 0.010000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "avg_ns_per_run": 208.3744813660862,
+        "bytes_jited": 267,
+        "bytes_xlated": 448,
+        "id": 9,
+        "name": "trace_pid_start_tp",
+        "run_cnt_delta": 1679894,
+        "run_time_ns_delta": 350047041,
+        "type": "tracepoint"
+      },
+      "10": {
+        "avg_ns_per_run": 193.6853820218298,
+        "bytes_jited": 335,
+        "bytes_xlated": 616,
+        "id": 10,
+        "name": "trace_req_start",
+        "run_cnt_delta": 1679904,
+        "run_time_ns_delta": 325372848,
+        "type": "kprobe"
+      },
+      "11": {
+        "avg_ns_per_run": 94.92262973768221,
+        "bytes_jited": 550,
+        "bytes_xlated": 856,
+        "id": 11,
+        "name": "trace_req_completion_tp",
+        "run_cnt_delta": 1679909,
+        "run_time_ns_delta": 159461380,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 5.33324449600002,
+        "ops_per_sec": 420843.25998618,
+        "ops_total": 2244460.0,
+        "stderr": "",
+        "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.092772,\n        \"1000\" : 16.381364\n      },\n      \"latency_us\" : {\n        \"2\" : 31.337966,\n        \"4\" : 1.572126,\n        \"10\" : 17.950099,\n        \"20\" : 29.149443,\n        \"50\" : 2.790291,\n        \"100\" : 0.515954,\n        \"250\" : 0.197319,\n        \"500\" : 0.012310,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": false,
+    "enabled_passes": [
+      "wide_mem"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 56, \"insns_before\": 56, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 9, \"program\": {\"final_insn_count\": 56, \"insn_delta\": 0, \"orig_insn_count\": 56, \"prog_id\": 9, \"prog_name\": \"trace_pid_start\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 77, \"insns_before\": 77, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 10, \"program\": {\"final_insn_count\": 77, \"insn_delta\": 0, \"orig_insn_count\": 77, \"prog_id\": 10, \"prog_name\": \"trace_req_start\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 11, \"program\": {\"final_insn_count\": 103, \"insn_delta\": 0, \"orig_insn_count\": 103, \"prog_id\": 11, \"prog_name\": \"trace_req_compl\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "9": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 56, \"insns_before\": 56, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 9, \"program\": {\"final_insn_count\": 56, \"insn_delta\": 0, \"orig_insn_count\": 56, \"prog_id\": 9, \"prog_name\": \"trace_pid_start\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 9,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "10": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 77, \"insns_before\": 77, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 10, \"program\": {\"final_insn_count\": 77, \"insn_delta\": 0, \"orig_insn_count\": 77, \"prog_id\": 10, \"prog_name\": \"trace_req_start\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 10,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "11": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 11, \"program\": {\"final_insn_count\": 103, \"insn_delta\": 0, \"orig_insn_count\": 103, \"prog_id\": 11, \"prog_name\": \"trace_req_compl\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 11,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 3,
+      "not_applied": 0,
+      "requested": 3
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "fio_randrw",
+  "status": "ok"
+}

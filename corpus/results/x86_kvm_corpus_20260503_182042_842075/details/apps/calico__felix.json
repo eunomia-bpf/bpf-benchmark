@@ -1,0 +1,943 @@
+{
+  "app": "calico/felix",
+  "baseline": {
+    "bpf": {
+      "102": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 865,
+        "bytes_xlated": 1544,
+        "id": 102,
+        "name": "conntrack_cleanup",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "105": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 19,
+        "bytes_xlated": 24,
+        "id": 105,
+        "name": "cali_tcx_test",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "113": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 278,
+        "bytes_xlated": 344,
+        "id": 113,
+        "name": "calico_tc_allow",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "114": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 278,
+        "bytes_xlated": 344,
+        "id": 114,
+        "name": "calico_tc_deny",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "116": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 278,
+        "bytes_xlated": 344,
+        "id": 116,
+        "name": "calico_tc_allow",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "117": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 278,
+        "bytes_xlated": 344,
+        "id": 117,
+        "name": "calico_tc_deny",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0081173869999986,
+        "ops_per_sec": 118.04180895453612,
+        "ops_total": 119.0,
+        "stderr": "",
+        "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.97ms   11.47ms  60.12ms   94.96%\n    Req/Sec    59.60     41.20   120.00     85.00%\n  119 requests in 1.00s, 18.82KB read\nRequests/sec:    118.76\nTransfer/sec:     18.78KB"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "102": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 823,
+        "bytes_xlated": 1480,
+        "id": 102,
+        "name": "conntrack_cleanup",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "105": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 19,
+        "bytes_xlated": 24,
+        "id": 105,
+        "name": "cali_tcx_test",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "113": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 281,
+        "bytes_xlated": 360,
+        "id": 113,
+        "name": "calico_tc_allow",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "114": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 281,
+        "bytes_xlated": 360,
+        "id": 114,
+        "name": "calico_tc_deny",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "116": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 281,
+        "bytes_xlated": 360,
+        "id": 116,
+        "name": "calico_tc_allow",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "117": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 281,
+        "bytes_xlated": 360,
+        "id": 117,
+        "name": "calico_tc_deny",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0079665509999813,
+        "ops_per_sec": 119.05156959916046,
+        "ops_total": 120.0,
+        "stderr": "",
+        "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    49.34ms   11.49ms  60.13ms   95.00%\n    Req/Sec    60.00      4.59    70.00     80.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.76\nTransfer/sec:     18.94KB"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": true,
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory",
+      "prefetch"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": true, \"passes\": [{\"changed\": true, \"insn_delta\": -12, \"insns_after\": 171, \"insns_before\": 183, \"pass\": \"wide_mem\", \"sites_applied\": 4}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 4, \"insns_after\": 175, \"insns_before\": 171, \"pass\": \"prefetch\", \"sites_applied\": 2}], \"passes_applied\": [\"wide_mem\", \"prefetch\"], \"prog_id\": 102, \"program\": {\"final_insn_count\": 175, \"insn_delta\": -8, \"orig_insn_count\": 183, \"prog_id\": 102, \"prog_name\": \"conntrack_clean\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 2, \"passes_executed\": 12, \"total_sites_applied\": 6}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"prefetch\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 105, \"program\": {\"final_insn_count\": 3, \"insn_delta\": 0, \"orig_insn_count\": 3, \"prog_id\": 105, \"prog_name\": \"cali_tcx_test\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 12, \"total_sites_applied\": 0}}\n{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 2, \"insns_after\": 29, \"insns_before\": 27, \"pass\": \"prefetch\", \"sites_applied\": 1}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 113, \"program\": {\"final_insn_count\": 29, \"insn_delta\": 2, \"orig_insn_count\": 27, \"prog_id\": 113, \"prog_name\": \"calico_tc_allow\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 1}}\n{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 2, \"insns_after\": 29, \"insns_before\": 27, \"pass\": \"prefetch\", \"sites_applied\": 1}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 114, \"program\": {\"final_insn_count\": 29, \"insn_delta\": 2, \"orig_insn_count\": 27, \"prog_id\": 114, \"prog_name\": \"calico_tc_deny\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 1}}\n{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 2, \"insns_after\": 29, \"insns_before\": 27, \"pass\": \"prefetch\", \"sites_applied\": 1}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 116, \"program\": {\"final_insn_count\": 29, \"insn_delta\": 2, \"orig_insn_count\": 27, \"prog_id\": 116, \"prog_name\": \"calico_tc_allow\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 1}}\n{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 2, \"insns_after\": 29, \"insns_before\": 27, \"pass\": \"prefetch\", \"sites_applied\": 1}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 117, \"program\": {\"final_insn_count\": 29, \"insn_delta\": 2, \"orig_insn_count\": 27, \"prog_id\": 117, \"prog_name\": \"calico_tc_deny\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 1}}",
+    "per_program": {
+      "102": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": true, \"insn_delta\": -12, \"insns_after\": 171, \"insns_before\": 183, \"pass\": \"wide_mem\", \"sites_applied\": 4}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 171, \"insns_before\": 171, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 4, \"insns_after\": 175, \"insns_before\": 171, \"pass\": \"prefetch\", \"sites_applied\": 2}], \"passes_applied\": [\"wide_mem\", \"prefetch\"], \"prog_id\": 102, \"program\": {\"final_insn_count\": 175, \"insn_delta\": -8, \"orig_insn_count\": 183, \"prog_id\": 102, \"prog_name\": \"conntrack_clean\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 2, \"passes_executed\": 12, \"total_sites_applied\": 6}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 4,
+            "sites_matched": 4,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 2,
+            "sites_matched": 2,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 102,
+        "summary": {
+          "applied": true,
+          "passes_changed": 2,
+          "passes_executed": 12,
+          "total_sites_applied": 6
+        }
+      },
+      "105": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 3, \"insns_before\": 3, \"pass\": \"prefetch\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 105, \"program\": {\"final_insn_count\": 3, \"insn_delta\": 0, \"orig_insn_count\": 3, \"prog_id\": 105, \"prog_name\": \"cali_tcx_test\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 12, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 105,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 12,
+          "total_sites_applied": 0
+        }
+      },
+      "113": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 2, \"insns_after\": 29, \"insns_before\": 27, \"pass\": \"prefetch\", \"sites_applied\": 1}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 113, \"program\": {\"final_insn_count\": 29, \"insn_delta\": 2, \"orig_insn_count\": 27, \"prog_id\": 113, \"prog_name\": \"calico_tc_allow\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 1}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 1,
+            "sites_matched": 1,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 113,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 12,
+          "total_sites_applied": 1
+        }
+      },
+      "114": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 2, \"insns_after\": 29, \"insns_before\": 27, \"pass\": \"prefetch\", \"sites_applied\": 1}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 114, \"program\": {\"final_insn_count\": 29, \"insn_delta\": 2, \"orig_insn_count\": 27, \"prog_id\": 114, \"prog_name\": \"calico_tc_deny\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 1}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 1,
+            "sites_matched": 1,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 114,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 12,
+          "total_sites_applied": 1
+        }
+      },
+      "116": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 2, \"insns_after\": 29, \"insns_before\": 27, \"pass\": \"prefetch\", \"sites_applied\": 1}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 116, \"program\": {\"final_insn_count\": 29, \"insn_delta\": 2, \"orig_insn_count\": 27, \"prog_id\": 116, \"prog_name\": \"calico_tc_allow\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 1}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 1,
+            "sites_matched": 1,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 116,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 12,
+          "total_sites_applied": 1
+        }
+      },
+      "117": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 27, \"insns_before\": 27, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 2, \"insns_after\": 29, \"insns_before\": 27, \"pass\": \"prefetch\", \"sites_applied\": 1}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 117, \"program\": {\"final_insn_count\": 29, \"insn_delta\": 2, \"orig_insn_count\": 27, \"prog_id\": 117, \"prog_name\": \"calico_tc_deny\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 1}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 1,
+            "sites_matched": 1,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 117,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 12,
+          "total_sites_applied": 1
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 6,
+      "not_applied": 0,
+      "requested": 6
+    }
+  },
+  "runner": "calico",
+  "selected_workload": "network",
+  "status": "ok"
+}

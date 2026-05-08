@@ -1,0 +1,375 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "494": {
+        "bytes_jited": 176,
+        "bytes_xlated": 136,
+        "id": 494,
+        "name": "xdp_root",
+        "run_cnt_delta": 105582,
+        "run_time_ns_delta": 39358573,
+        "type": "xdp"
+      },
+      "500": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 500,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "502": {
+        "bytes_jited": 541,
+        "bytes_xlated": 1000,
+        "id": 502,
+        "name": "healthcheck_encap",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0011808639999344,
+        "ops_per_sec": 5863.358723588204,
+        "ops_total": 17597.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "494": {
+        "bytes_jited": 176,
+        "bytes_xlated": 136,
+        "id": 494,
+        "name": "xdp_root",
+        "run_cnt_delta": 104478,
+        "run_time_ns_delta": 37512015,
+        "type": "xdp"
+      },
+      "500": {
+        "bytes_jited": 13637,
+        "bytes_xlated": 23896,
+        "id": 500,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "502": {
+        "bytes_jited": 541,
+        "bytes_xlated": 1000,
+        "id": 502,
+        "name": "healthcheck_encap",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0009941109999545,
+        "ops_per_sec": 5802.410586603201,
+        "ops_total": 17413.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "494": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "step_0",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "step_1",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "step_2",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "step_3",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "step_4",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 494,
+        "program": {
+          "final_insn_count": 17,
+          "orig_insn_count": 17,
+          "prog_id": 494,
+          "prog_name": "xdp_root",
+          "prog_type": 6
+        },
+        "status": "ok"
+      },
+      "500": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "step_0",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2549,
+              "insn_count_before": 2542,
+              "insn_delta": 7,
+              "pass": "cond_select",
+              "sites_applied": 7,
+              "sites_matched": 7,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "step_1",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2549,
+              "insn_count_before": 2549,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "step_2",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2549,
+              "insn_count_before": 2549,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 6,
+              "sites_matched": 6,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "step_3",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2549,
+              "insn_count_before": 2549,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "step_4",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 500,
+        "program": {
+          "final_insn_count": 2549,
+          "orig_insn_count": 2542,
+          "prog_id": 500,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "ok"
+      },
+      "502": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 103,
+              "insn_count_before": 103,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "step_0",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 103,
+              "insn_count_before": 103,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "step_1",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 103,
+              "insn_count_before": 103,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "step_2",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 103,
+              "insn_count_before": 103,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "step_3",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 103,
+              "insn_count_before": 103,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "step_4",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 502,
+        "program": {
+          "final_insn_count": 103,
+          "orig_insn_count": 103,
+          "prog_id": 502,
+          "prog_name": "healthcheck_enc",
+          "prog_type": 3
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}

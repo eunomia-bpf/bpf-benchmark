@@ -1,0 +1,10 @@
+{
+  "app": "cilium/agent",
+  "baseline": null,
+  "error": "Cilium API socket did not become ready at /var/tmp/ciliumrunner__axpos4k/state/cilium.sock: Cilium API GET /config returned HTTP 404: {\"code\":404,\"message\":\"path /config was not found\"}",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "cilium",
+  "selected_workload": "network_lossy_multi",
+  "status": "error"
+}

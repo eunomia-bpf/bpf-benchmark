@@ -1,0 +1,132 @@
+{
+  "app": "bcc/execsnoop",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "avg_ns_per_run": 855.0,
+        "bytes_jited": 2677,
+        "bytes_xlated": 4144,
+        "id": 9,
+        "name": "syscall__execve",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 1710,
+        "type": "kprobe"
+      },
+      "10": {
+        "avg_ns_per_run": 192.0,
+        "bytes_jited": 492,
+        "bytes_xlated": 704,
+        "id": 10,
+        "name": "do_ret_sys_execve",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 384,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0178330450000033,
+        "ops_per_sec": 21902885.85098937,
+        "ops_total": 22293481.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [17790] setting to a 1 secs run per stressor\nstress-ng: info:  [17790] dispatching hogs: 1 clone, 1 fork, 1 futex, 1 sem, 1 sem-sysv, 1 switch, 1 vfork, 1 yield\nstress-ng: info:  [17790] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [17790] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [17790]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [17790] clone               748      1.01      0.16      0.68       743.26         890.47\nstress-ng: metrc: [17790] fork               2620      1.00      0.24      0.27      2618.46        5131.79\nstress-ng: metrc: [17790] futex            323802      2.00      0.11      1.13    161882.92      260344.78\nstress-ng: metrc: [17790] sem             1128210      1.00      0.21      0.63   1128159.70     1348525.32\nstress-ng: metrc: [17790] sem-sysv        4177642      1.00      0.18      0.77   4175160.38     4413084.47\nstress-ng: metrc: [17790] switch           492533      1.00      0.17      0.60    492445.30      639541.95\nstress-ng: metrc: [17790] vfork             18254      1.00      0.15      0.15     18253.70       59758.86\nstress-ng: metrc: [17790] yield          16149672      1.00      4.00      6.34  16095265.20     1561916.25\nstress-ng: info:  [17790] skipped: 0\nstress-ng: info:  [17790] passed: 8: clone (1) fork (1) futex (1) sem (1) sem-sysv (1) switch (1) vfork (1) yield (1)\nstress-ng: info:  [17790] failed: 0\nstress-ng: info:  [17790] metrics untrustworthy: 0\nstress-ng: info:  [17790] successful run completed in 1.01 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "avg_ns_per_run": 721.0,
+        "bytes_jited": 2677,
+        "bytes_xlated": 4144,
+        "id": 9,
+        "name": "syscall__execve",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 1442,
+        "type": "kprobe"
+      },
+      "10": {
+        "avg_ns_per_run": 227.5,
+        "bytes_jited": 492,
+        "bytes_xlated": 704,
+        "id": 10,
+        "name": "do_ret_sys_execve",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 455,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0165356269999961,
+        "ops_per_sec": 24768503.26860221,
+        "ops_total": 25178066.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [16358] setting to a 1 secs run per stressor\nstress-ng: info:  [16358] dispatching hogs: 1 clone, 1 fork, 1 futex, 1 sem, 1 sem-sysv, 1 switch, 1 vfork, 1 yield\nstress-ng: info:  [16358] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [16358] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [16358]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [16358] clone               544      1.00      0.13      0.52       541.63         834.05\nstress-ng: metrc: [16358] fork               3975      1.00      0.32      0.48      3973.83        4964.31\nstress-ng: metrc: [16358] futex            347624      2.00      0.12      1.18    173795.20      267046.26\nstress-ng: metrc: [16358] sem             1478298      1.00      0.23      0.43   1478237.03     2248385.91\nstress-ng: metrc: [16358] sem-sysv        2613157      1.00      0.27      0.72   2611996.82     2636918.27\nstress-ng: metrc: [16358] switch           367508      1.00      0.07      0.46    367452.37      686774.23\nstress-ng: metrc: [16358] vfork             32790      1.00      0.26      0.34     32789.94       54625.87\nstress-ng: metrc: [16358] yield          20334170      1.01      4.06      6.32  20231567.60     1958834.38\nstress-ng: info:  [16358] skipped: 0\nstress-ng: info:  [16358] passed: 8: clone (1) fork (1) futex (1) sem (1) sem-sysv (1) switch (1) vfork (1) yield (1)\nstress-ng: info:  [16358] failed: 0\nstress-ng: info:  [16358] metrics untrustworthy: 0\nstress-ng: info:  [16358] successful run completed in 1.01 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": false,
+    "changed": false,
+    "enabled_passes": [
+      "map_inline"
+    ],
+    "error": "prog 9: prog 9 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT; prog 10: prog 10 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+    "exit_code": 1,
+    "output": "{\"changed\": false, \"error_message\": \"prog 9 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 9, \"program\": {\"final_insn_count\": 516, \"insn_delta\": 0, \"orig_insn_count\": 516, \"prog_id\": 9, \"prog_name\": \"syscall__execve\", \"prog_type\": 2}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}\n{\"changed\": false, \"error_message\": \"prog 10 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 10, \"program\": {\"final_insn_count\": 86, \"insn_delta\": 0, \"orig_insn_count\": 86, \"prog_id\": 10, \"prog_name\": \"do_ret_sys_exec\", \"prog_type\": 2}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "9": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 9 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 9 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 9, \"program\": {\"final_insn_count\": 516, \"insn_delta\": 0, \"orig_insn_count\": 516, \"prog_id\": 9, \"prog_name\": \"syscall__execve\", \"prog_type\": 2}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 9,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      },
+      "10": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 10 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 10 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 10, \"program\": {\"final_insn_count\": 86, \"insn_delta\": 0, \"orig_insn_count\": 86, \"prog_id\": 10, \"prog_name\": \"do_ret_sys_exec\", \"prog_type\": 2}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 10,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 0,
+      "not_applied": 2,
+      "requested": 2
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "stress_ng_process",
+  "status": "ok"
+}

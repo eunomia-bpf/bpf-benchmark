@@ -1,0 +1,194 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "479": {
+        "avg_ns_per_run": 321.95190852530686,
+        "bytes_jited": 176,
+        "bytes_xlated": 136,
+        "id": 479,
+        "name": "xdp_root",
+        "run_cnt_delta": 35682,
+        "run_time_ns_delta": 11487888,
+        "type": "xdp"
+      },
+      "485": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 485,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "487": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 541,
+        "bytes_xlated": 1000,
+        "id": 487,
+        "name": "healthcheck_encap",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.00108101699999,
+        "ops_per_sec": 5940.578134047326,
+        "ops_total": 5947.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "479": {
+        "avg_ns_per_run": 308.92791842475384,
+        "bytes_jited": 176,
+        "bytes_xlated": 136,
+        "id": 479,
+        "name": "xdp_root",
+        "run_cnt_delta": 36972,
+        "run_time_ns_delta": 11421683,
+        "type": "xdp"
+      },
+      "485": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 13581,
+        "bytes_xlated": 23744,
+        "id": 485,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "487": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 541,
+        "bytes_xlated": 1000,
+        "id": 487,
+        "name": "healthcheck_encap",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0006393770000273,
+        "ops_per_sec": 6158.062676360009,
+        "ops_total": 6162.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": true,
+    "enabled_passes": [
+      "wide_mem"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 479, \"program\": {\"final_insn_count\": 17, \"insn_delta\": 0, \"orig_insn_count\": 17, \"prog_id\": 479, \"prog_name\": \"xdp_root\", \"prog_type\": 6}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": true, \"passes\": [{\"changed\": true, \"insn_delta\": -12, \"insns_after\": 2530, \"insns_before\": 2542, \"pass\": \"wide_mem\", \"sites_applied\": 4}], \"passes_applied\": [\"wide_mem\"], \"prog_id\": 485, \"program\": {\"final_insn_count\": 2530, \"insn_delta\": -12, \"orig_insn_count\": 2542, \"prog_id\": 485, \"prog_name\": \"balancer_ingres\", \"prog_type\": 6}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 1, \"total_sites_applied\": 4}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 487, \"program\": {\"final_insn_count\": 103, \"insn_delta\": 0, \"orig_insn_count\": 103, \"prog_id\": 487, \"prog_name\": \"healthcheck_enc\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "479": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 479, \"program\": {\"final_insn_count\": 17, \"insn_delta\": 0, \"orig_insn_count\": 17, \"prog_id\": 479, \"prog_name\": \"xdp_root\", \"prog_type\": 6}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 479,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "485": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": true, \"insn_delta\": -12, \"insns_after\": 2530, \"insns_before\": 2542, \"pass\": \"wide_mem\", \"sites_applied\": 4}], \"passes_applied\": [\"wide_mem\"], \"prog_id\": 485, \"program\": {\"final_insn_count\": 2530, \"insn_delta\": -12, \"orig_insn_count\": 2542, \"prog_id\": 485, \"prog_name\": \"balancer_ingres\", \"prog_type\": 6}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 1, \"total_sites_applied\": 4}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 4,
+            "sites_matched": 4,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 485,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 1,
+          "total_sites_applied": 4
+        }
+      },
+      "487": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 487, \"program\": {\"final_insn_count\": 103, \"insn_delta\": 0, \"orig_insn_count\": 103, \"prog_id\": 487, \"prog_name\": \"healthcheck_enc\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 487,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 3,
+      "not_applied": 0,
+      "requested": 3
+    }
+  },
+  "runner": "katran",
+  "selected_workload": "network",
+  "status": "ok"
+}

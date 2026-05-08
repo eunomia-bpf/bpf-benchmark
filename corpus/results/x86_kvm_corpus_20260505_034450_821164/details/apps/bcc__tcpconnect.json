@@ -1,0 +1,194 @@
+{
+  "app": "bcc/tcpconnect",
+  "baseline": {
+    "bpf": {
+      "34": {
+        "avg_ns_per_run": 221.44223639329675,
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 34,
+        "name": "trace_connect_entry",
+        "run_cnt_delta": 6743,
+        "run_time_ns_delta": 1493185,
+        "type": "kprobe"
+      },
+      "35": {
+        "avg_ns_per_run": 1693.6869345988432,
+        "bytes_jited": 480,
+        "bytes_xlated": 720,
+        "id": 35,
+        "name": "trace_connect_v4_return",
+        "run_cnt_delta": 6743,
+        "run_time_ns_delta": 11420531,
+        "type": "kprobe"
+      },
+      "36": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 477,
+        "bytes_xlated": 712,
+        "id": 36,
+        "name": "trace_connect_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.1024124940000206,
+        "ops_per_sec": 6106.607133572521,
+        "ops_total": 6732.0,
+        "stderr": "",
+        "stdout": "Running 1s test @ http://127.0.0.1:34807/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.89ms  298.34us   4.65ms   78.72%\n    Req/Sec     3.08k     2.12k    5.69k    81.82%\n  6732 requests in 1.10s, 1.00MB read\n  Socket errors: connect 0, read 6732, write 0, timeout 0\nRequests/sec:   6119.54\nTransfer/sec:      0.90MB"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "34": {
+        "avg_ns_per_run": 227.70623281393216,
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 34,
+        "name": "trace_connect_entry",
+        "run_cnt_delta": 6546,
+        "run_time_ns_delta": 1490565,
+        "type": "kprobe"
+      },
+      "35": {
+        "avg_ns_per_run": 1738.9660861594866,
+        "bytes_jited": 480,
+        "bytes_xlated": 720,
+        "id": 35,
+        "name": "trace_connect_v4_return",
+        "run_cnt_delta": 6546,
+        "run_time_ns_delta": 11383272,
+        "type": "kprobe"
+      },
+      "36": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 477,
+        "bytes_xlated": 712,
+        "id": 36,
+        "name": "trace_connect_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.1028429070000243,
+        "ops_per_sec": 5926.501370697809,
+        "ops_total": 6536.0,
+        "stderr": "",
+        "stdout": "Running 1s test @ http://127.0.0.1:37095/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.91ms  395.12us   7.51ms   85.88%\n    Req/Sec     3.13k     2.14k    6.42k    61.90%\n  6536 requests in 1.10s, 0.97MB read\n  Socket errors: connect 0, read 6535, write 0, timeout 0\nRequests/sec:   5945.49\nTransfer/sec:      0.88MB"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": false,
+    "enabled_passes": [
+      "wide_mem"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 34, \"program\": {\"final_insn_count\": 15, \"insn_delta\": 0, \"orig_insn_count\": 15, \"prog_id\": 34, \"prog_name\": \"trace_connect_e\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 88, \"insns_before\": 88, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 35, \"program\": {\"final_insn_count\": 88, \"insn_delta\": 0, \"orig_insn_count\": 88, \"prog_id\": 35, \"prog_name\": \"trace_connect_v\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 87, \"insns_before\": 87, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 36, \"program\": {\"final_insn_count\": 87, \"insn_delta\": 0, \"orig_insn_count\": 87, \"prog_id\": 36, \"prog_name\": \"trace_connect_v\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "34": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 34, \"program\": {\"final_insn_count\": 15, \"insn_delta\": 0, \"orig_insn_count\": 15, \"prog_id\": 34, \"prog_name\": \"trace_connect_e\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 34,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "35": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 88, \"insns_before\": 88, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 35, \"program\": {\"final_insn_count\": 88, \"insn_delta\": 0, \"orig_insn_count\": 88, \"prog_id\": 35, \"prog_name\": \"trace_connect_v\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 35,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "36": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 87, \"insns_before\": 87, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 36, \"program\": {\"final_insn_count\": 87, \"insn_delta\": 0, \"orig_insn_count\": 87, \"prog_id\": 36, \"prog_name\": \"trace_connect_v\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 36,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 3,
+      "not_applied": 0,
+      "requested": 3
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "tcp_connect",
+  "status": "ok"
+}

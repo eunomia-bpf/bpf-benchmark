@@ -1,0 +1,600 @@
+{
+  "app": "bcc/tcpconnect",
+  "baseline": {
+    "bpf": {
+      "39": {
+        "avg_ns_per_run": 939.4858331459411,
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 39,
+        "name": "trace_connect_entry",
+        "run_cnt_delta": 8894,
+        "run_time_ns_delta": 8355787,
+        "type": "kprobe"
+      },
+      "40": {
+        "avg_ns_per_run": 4424.583295913785,
+        "bytes_jited": 480,
+        "bytes_xlated": 720,
+        "id": 40,
+        "name": "trace_connect_v4_return",
+        "run_cnt_delta": 4454,
+        "run_time_ns_delta": 19707094,
+        "type": "kprobe"
+      },
+      "41": {
+        "avg_ns_per_run": 4552.712612612612,
+        "bytes_jited": 477,
+        "bytes_xlated": 712,
+        "id": 41,
+        "name": "trace_connect_v6_return",
+        "run_cnt_delta": 4440,
+        "run_time_ns_delta": 20214044,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0009328549999736,
+        "ops_per_sec": 296.72320027901156,
+        "ops_total": 297.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.001169478999941,
+        "ops_per_sec": 288.66241536715586,
+        "ops_total": 289.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0003037639999093,
+        "ops_per_sec": 294.91041683216815,
+        "ops_total": 295.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0002258780000375,
+        "ops_per_sec": 294.9333810377469,
+        "ops_total": 295.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.002610910000044,
+        "ops_per_sec": 299.21876672974446,
+        "ops_total": 300.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0010346760000175,
+        "ops_per_sec": 299.6899180343626,
+        "ops_total": 300.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0025525899999366,
+        "ops_per_sec": 318.18779701124726,
+        "ops_total": 319.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0002477710000903,
+        "ops_per_sec": 308.9234577259279,
+        "ops_total": 309.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0013379470000245,
+        "ops_per_sec": 305.59113525734836,
+        "ops_total": 306.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0009392270000035,
+        "ops_per_sec": 298.71943464155885,
+        "ops_total": 299.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0004124490000095,
+        "ops_per_sec": 300.8759040342541,
+        "ops_total": 301.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0006137400000625,
+        "ops_per_sec": 297.8172176608142,
+        "ops_total": 298.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0006469180000295,
+        "ops_per_sec": 285.81510106643987,
+        "ops_total": 286.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0024134389999517,
+        "ops_per_sec": 289.30178778260967,
+        "ops_total": 290.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0012885039999446,
+        "ops_per_sec": 289.6268146907797,
+        "ops_total": 290.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0003898889999618,
+        "ops_per_sec": 290.88658651967955,
+        "ops_total": 291.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0009742900000447,
+        "ops_per_sec": 306.7011841033263,
+        "ops_total": 307.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.002568694000047,
+        "ops_per_sec": 313.1954966070238,
+        "ops_total": 314.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0015916160000415,
+        "ops_per_sec": 296.5280412251251,
+        "ops_total": 297.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0006254109999873,
+        "ops_per_sec": 285.8212442498161,
+        "ops_total": 286.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0002863400000024,
+        "ops_per_sec": 274.9212790409588,
+        "ops_total": 275.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000895216999993,
+        "ops_per_sec": 288.7415136883425,
+        "ops_total": 289.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0026769109999805,
+        "ops_per_sec": 295.2097497735298,
+        "ops_total": 296.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.002589487000023,
+        "ops_per_sec": 301.21999473947517,
+        "ops_total": 302.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0023990070000082,
+        "ops_per_sec": 297.28680686931045,
+        "ops_total": 298.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0027396300000646,
+        "ops_per_sec": 293.1967493894512,
+        "ops_total": 294.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0035615760000383,
+        "ops_per_sec": 288.9708085037215,
+        "ops_total": 290.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0017624650000698,
+        "ops_per_sec": 285.496821843869,
+        "ops_total": 286.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.003393818999939,
+        "ops_per_sec": 294.00220971464637,
+        "ops_total": 295.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0023320029999923,
+        "ops_per_sec": 299.3020267756554,
+        "ops_total": 300.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "39": {
+        "avg_ns_per_run": 870.4660278745645,
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 39,
+        "name": "trace_connect_entry",
+        "run_cnt_delta": 9184,
+        "run_time_ns_delta": 7994360,
+        "type": "kprobe"
+      },
+      "40": {
+        "avg_ns_per_run": 4240.5642530985,
+        "bytes_jited": 480,
+        "bytes_xlated": 720,
+        "id": 40,
+        "name": "trace_connect_v4_return",
+        "run_cnt_delta": 4599,
+        "run_time_ns_delta": 19502355,
+        "type": "kprobe"
+      },
+      "41": {
+        "avg_ns_per_run": 4338.687895310796,
+        "bytes_jited": 477,
+        "bytes_xlated": 712,
+        "id": 41,
+        "name": "trace_connect_v6_return",
+        "run_cnt_delta": 4585,
+        "run_time_ns_delta": 19892884,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0011318589999973,
+        "ops_per_sec": 306.6529121415172,
+        "ops_total": 307.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0030307800000173,
+        "ops_per_sec": 287.1297728271061,
+        "ops_total": 288.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000305919000084,
+        "ops_per_sec": 281.9137572252797,
+        "ops_total": 282.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0015128179999238,
+        "ops_per_sec": 295.55288227975785,
+        "ops_total": 296.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0010337360000676,
+        "ops_per_sec": 294.6953627944264,
+        "ops_total": 295.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000150825999981,
+        "ops_per_sec": 300.9546082202663,
+        "ops_total": 301.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.002046919999998,
+        "ops_per_sec": 298.389221135474,
+        "ops_total": 299.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0013720350000312,
+        "ops_per_sec": 301.58621316001756,
+        "ops_total": 302.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0024140980000311,
+        "ops_per_sec": 297.28233131851937,
+        "ops_total": 298.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0009599680000747,
+        "ops_per_sec": 312.69981818091713,
+        "ops_total": 313.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.001329874000021,
+        "ops_per_sec": 321.5723492935489,
+        "ops_total": 322.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0029173069999615,
+        "ops_per_sec": 308.10117428755456,
+        "ops_total": 309.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000202804999958,
+        "ops_per_sec": 303.93835978095734,
+        "ops_total": 304.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.001108729000066,
+        "ops_per_sec": 317.6478146560832,
+        "ops_total": 318.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0007814790000111,
+        "ops_per_sec": 309.75793068208503,
+        "ops_total": 310.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0004331349999802,
+        "ops_per_sec": 305.8675180725657,
+        "ops_total": 306.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0021345080000401,
+        "ops_per_sec": 301.3567516028376,
+        "ops_total": 302.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0025464029999966,
+        "ops_per_sec": 296.2456392155656,
+        "ops_total": 297.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0002507519999426,
+        "ops_per_sec": 294.92604670395383,
+        "ops_total": 295.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0033083749999605,
+        "ops_per_sec": 310.9711906870231,
+        "ops_total": 312.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0028476899999532,
+        "ops_per_sec": 311.1140436490556,
+        "ops_total": 312.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.002248406999911,
+        "ops_per_sec": 316.2888539268371,
+        "ops_total": 317.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0016942009999639,
+        "ops_per_sec": 313.4689206411921,
+        "ops_total": 314.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0033406889999696,
+        "ops_per_sec": 323.9178910644277,
+        "ops_total": 325.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0007536000000528,
+        "ops_per_sec": 323.75601746522113,
+        "ops_total": 324.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.002403467000022,
+        "ops_per_sec": 328.2111553191514,
+        "ops_total": 329.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0005045149999887,
+        "ops_per_sec": 326.8351067861035,
+        "ops_total": 327.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0004269580000482,
+        "ops_per_sec": 304.8698333856626,
+        "ops_total": 305.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0029081420000239,
+        "ops_per_sec": 292.15038519449274,
+        "ops_total": 293.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0013922520000733,
+        "ops_per_sec": 281.607930795114,
+        "ops_total": 282.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": false,
+    "enabled_passes": [
+      "wide_mem"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 39, \"program\": {\"final_insn_count\": 15, \"insn_delta\": 0, \"orig_insn_count\": 15, \"prog_id\": 39, \"prog_name\": \"trace_connect_e\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 88, \"insns_before\": 88, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 40, \"program\": {\"final_insn_count\": 88, \"insn_delta\": 0, \"orig_insn_count\": 88, \"prog_id\": 40, \"prog_name\": \"trace_connect_v\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 87, \"insns_before\": 87, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 41, \"program\": {\"final_insn_count\": 87, \"insn_delta\": 0, \"orig_insn_count\": 87, \"prog_id\": 41, \"prog_name\": \"trace_connect_v\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "39": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 39, \"program\": {\"final_insn_count\": 15, \"insn_delta\": 0, \"orig_insn_count\": 15, \"prog_id\": 39, \"prog_name\": \"trace_connect_e\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 39,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "40": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 88, \"insns_before\": 88, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 40, \"program\": {\"final_insn_count\": 88, \"insn_delta\": 0, \"orig_insn_count\": 88, \"prog_id\": 40, \"prog_name\": \"trace_connect_v\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 40,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "41": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 87, \"insns_before\": 87, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 41, \"program\": {\"final_insn_count\": 87, \"insn_delta\": 0, \"orig_insn_count\": 87, \"prog_id\": 41, \"prog_name\": \"trace_connect_v\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 41,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 3,
+      "not_applied": 0,
+      "requested": 3
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "tcp_connect",
+  "status": "ok"
+}

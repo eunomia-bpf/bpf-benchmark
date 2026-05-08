@@ -1,0 +1,120 @@
+{
+  "app": "bpftrace/tcplife",
+  "baseline": {
+    "bpf": {
+      "690": {
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 690,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 42148,
+        "run_time_ns_delta": 115148218,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.01429945100017,
+        "ops_per_sec": 1574.1634423300475,
+        "ops_total": 4745.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     5.26ms   16.60ms 233.02ms   98.60%\n    Req/Sec   794.02    519.46     2.34k    61.67%\n  4745 requests in 3.01s, 718.37KB read\n  Socket errors: connect 0, read 4743, write 0, timeout 0\nRequests/sec:   1576.44\nTransfer/sec:    238.67KB"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "690": {
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 690,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 48970,
+        "run_time_ns_delta": 107209692,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0116310270000213,
+        "ops_per_sec": 1840.5309117569936,
+        "ops_total": 5543.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     4.72ms   16.33ms 235.02ms   98.59%\n    Req/Sec     0.93k   194.22     1.30k    68.33%\n  5543 requests in 3.00s, 839.03KB read\n  Socket errors: connect 0, read 5541, write 0, timeout 0\nRequests/sec:   1845.18\nTransfer/sec:    279.30KB"
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "690": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "noop",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=19: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=19: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 19",
+                "site at PC=75: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=75: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 75",
+                "site at PC=87: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=87: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 87",
+                "site at PC=114: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=114: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 114",
+                "site at PC=122: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=122: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 122",
+                "site at PC=337: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=337: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 337",
+                "site at PC=377: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=377: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 377"
+              ],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 7,
+              "sites_skipped": 7,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 7
+              }
+            },
+            "error": null,
+            "pass": "map_inline",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 690,
+        "program": {
+          "final_insn_count": 401,
+          "orig_insn_count": 401,
+          "prog_id": 690,
+          "prog_name": "tcp_set_state",
+          "prog_type": 2
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bpftrace",
+  "selected_workload": "tcp_connect",
+  "status": "ok"
+}

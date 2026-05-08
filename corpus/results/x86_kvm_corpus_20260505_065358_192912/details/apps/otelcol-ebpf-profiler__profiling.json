@@ -1,0 +1,10 @@
+{
+  "app": "otelcol-ebpf-profiler/profiling",
+  "baseline": null,
+  "error": "native app did not attach BPF programs within 20s: Error: failed to get config: cannot unmarshal the configuration: decoding failed due to the following error(s):\n'receivers' error reading configuration for \"profiling\": decoding failed due to the following error(s):\n'' has invalid keys: SamplesPerSecond\n2026/05/05 06:53:58 collector server run finished with error: failed to get config: cannot unmarshal the configuration: decoding failed due to the following error(s):\n'receivers' error reading configuration for \"profiling\": decoding failed due to the following error(s):\n'' has invalid keys: SamplesPerSecond",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "otelcol-ebpf-profiler",
+  "selected_workload": "stress_ng_cpu",
+  "status": "error"
+}

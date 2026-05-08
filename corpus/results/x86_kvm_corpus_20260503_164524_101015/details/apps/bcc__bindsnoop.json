@@ -1,0 +1,502 @@
+{
+  "app": "bcc/bindsnoop",
+  "baseline": {
+    "bpf": {
+      "13": {
+        "avg_ns_per_run": 2478.0,
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 13,
+        "name": "bindsnoop_entry",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 4956,
+        "type": "kprobe"
+      },
+      "14": {
+        "avg_ns_per_run": 7449.0,
+        "bytes_jited": 721,
+        "bytes_xlated": 1160,
+        "id": 14,
+        "name": "bindsnoop_v4_return",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 14898,
+        "type": "kprobe"
+      },
+      "15": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 742,
+        "bytes_xlated": 1184,
+        "id": 15,
+        "name": "bindsnoop_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 0.3794460270000002,
+        "ops_per_sec": 13472.271775822277,
+        "ops_total": 5112.0,
+        "stderr": "",
+        "stdout": "stress-ng: metrc: [8352]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8352] sockdiag           1012      0.00      0.00      0.00   4918465.41     2121593.29\nstress-ng: info:  [8352] skipped: 0\nstress-ng: info:  [8352] passed: 1: sockdiag (1)\nstress-ng: info:  [8352] failed: 0\nstress-ng: info:  [8352] metrics untrustworthy: 0\nstress-ng: info:  [8352] successful run completed in 0.00 secs\nstress-ng: info:  [8354] setting to a 1 secs run per stressor\nstress-ng: info:  [8354] dispatching hogs: 1 sockfd\nstress-ng: info:  [8354] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [8354] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8354]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8354] sockfd              200      0.00      0.00      0.00     84511.46       66181.34\nstress-ng: info:  [8354] skipped: 0\nstress-ng: info:  [8354] passed: 1: sockfd (1)\nstress-ng: info:  [8354] failed: 0\nstress-ng: info:  [8354] metrics untrustworthy: 0\nstress-ng: info:  [8354] successful run completed in 0.00 secs\nstress-ng: info:  [8357] setting to a 1 secs run per stressor\nstress-ng: info:  [8357] dispatching hogs: 1 sockpair\nstress-ng: info:  [8357] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [8357] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8357]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8357] sockpair            500      0.01      0.00      0.01     55442.08       45804.32\nstress-ng: info:  [8357] skipped: 0\nstress-ng: info:  [8357] passed: 1: sockpair (1)\nstress-ng: info:  [8357] failed: 0\nstress-ng: info:  [8357] metrics untrustworthy: 0\nstress-ng: info:  [8357] successful run completed in 0.01 secs\nstress-ng: info:  [8361] setting to a 1 secs run per stressor\nstress-ng: info:  [8361] dispatching hogs: 1 udp-flood\nstress-ng: info:  [8361] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [8361] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8361]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8361] udp-flood          1000      0.00      0.00      0.00    950873.72      785545.95\nstress-ng: info:  [8361] skipped: 0\nstress-ng: info:  [8361] passed: 1: udp-flood (1)\nstress-ng: info:  [8361] failed: 0\nstress-ng: info:  [8361] metrics untrustworthy: 0\nstress-ng: info:  [8361] successful run completed in 0.00 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "13": {
+        "avg_ns_per_run": 1733.0,
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 13,
+        "name": "bindsnoop_entry",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 3466,
+        "type": "kprobe"
+      },
+      "14": {
+        "avg_ns_per_run": 5321.5,
+        "bytes_jited": 723,
+        "bytes_xlated": 1160,
+        "id": 14,
+        "name": "bindsnoop_v4_return",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 10643,
+        "type": "kprobe"
+      },
+      "15": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 744,
+        "bytes_xlated": 1184,
+        "id": 15,
+        "name": "bindsnoop_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 0.291442638999996,
+        "ops_per_sec": 17540.329779953954,
+        "ops_total": 5112.0,
+        "stderr": "",
+        "stdout": "stress-ng: metrc: [8451]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8451] sockdiag           1012      0.00      0.00      0.00   4679862.90     2300000.00\nstress-ng: info:  [8451] skipped: 0\nstress-ng: info:  [8451] passed: 1: sockdiag (1)\nstress-ng: info:  [8451] failed: 0\nstress-ng: info:  [8451] metrics untrustworthy: 0\nstress-ng: info:  [8451] successful run completed in 0.00 secs\nstress-ng: info:  [8453] setting to a 1 secs run per stressor\nstress-ng: info:  [8453] dispatching hogs: 1 sockfd\nstress-ng: info:  [8453] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [8453] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8453]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8453] sockfd              200      0.00      0.00      0.00     74784.77       50748.54\nstress-ng: info:  [8453] skipped: 0\nstress-ng: info:  [8453] passed: 1: sockfd (1)\nstress-ng: info:  [8453] failed: 0\nstress-ng: info:  [8453] metrics untrustworthy: 0\nstress-ng: info:  [8453] successful run completed in 0.00 secs\nstress-ng: info:  [8457] setting to a 1 secs run per stressor\nstress-ng: info:  [8457] dispatching hogs: 1 sockpair\nstress-ng: info:  [8457] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [8457] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8457]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8457] sockpair            500      0.01      0.00      0.01     46875.25       38500.04\nstress-ng: info:  [8457] skipped: 0\nstress-ng: info:  [8457] passed: 1: sockpair (1)\nstress-ng: info:  [8457] failed: 0\nstress-ng: info:  [8457] metrics untrustworthy: 0\nstress-ng: info:  [8457] successful run completed in 0.01 secs\nstress-ng: info:  [8461] setting to a 1 secs run per stressor\nstress-ng: info:  [8461] dispatching hogs: 1 udp-flood\nstress-ng: info:  [8461] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [8461] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8461]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8461] udp-flood          1000      0.00      0.00      0.00    961334.86      755287.01\nstress-ng: info:  [8461] skipped: 0\nstress-ng: info:  [8461] passed: 1: udp-flood (1)\nstress-ng: info:  [8461] failed: 0\nstress-ng: info:  [8461] metrics untrustworthy: 0\nstress-ng: info:  [8461] successful run completed in 0.00 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": true,
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory",
+      "prefetch"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"prefetch\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 13, \"program\": {\"final_insn_count\": 15, \"insn_delta\": 0, \"orig_insn_count\": 15, \"prog_id\": 13, \"prog_name\": \"bindsnoop_entry\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 12, \"total_sites_applied\": 0}}\n{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"extract\", \"sites_applied\": 1}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"prefetch\", \"sites_applied\": 0}], \"passes_applied\": [\"extract\"], \"prog_id\": 14, \"program\": {\"final_insn_count\": 143, \"insn_delta\": 0, \"orig_insn_count\": 143, \"prog_id\": 14, \"prog_name\": \"bindsnoop_v4_re\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 1}}\n{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"extract\", \"sites_applied\": 1}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"prefetch\", \"sites_applied\": 0}], \"passes_applied\": [\"extract\"], \"prog_id\": 15, \"program\": {\"final_insn_count\": 146, \"insn_delta\": 0, \"orig_insn_count\": 146, \"prog_id\": 15, \"prog_name\": \"bindsnoop_v6_re\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 1}}",
+    "per_program": {
+      "13": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 15, \"insns_before\": 15, \"pass\": \"prefetch\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 13, \"program\": {\"final_insn_count\": 15, \"insn_delta\": 0, \"orig_insn_count\": 15, \"prog_id\": 13, \"prog_name\": \"bindsnoop_entry\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 12, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 13,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 12,
+          "total_sites_applied": 0
+        }
+      },
+      "14": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"extract\", \"sites_applied\": 1}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 143, \"insns_before\": 143, \"pass\": \"prefetch\", \"sites_applied\": 0}], \"passes_applied\": [\"extract\"], \"prog_id\": 14, \"program\": {\"final_insn_count\": 143, \"insn_delta\": 0, \"orig_insn_count\": 143, \"prog_id\": 14, \"prog_name\": \"bindsnoop_v4_re\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 1}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 1,
+            "sites_matched": 1,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 14,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 12,
+          "total_sites_applied": 1
+        }
+      },
+      "15": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"extract\", \"sites_applied\": 1}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"prefetch\", \"sites_applied\": 0}], \"passes_applied\": [\"extract\"], \"prog_id\": 15, \"program\": {\"final_insn_count\": 146, \"insn_delta\": 0, \"orig_insn_count\": 146, \"prog_id\": 15, \"prog_name\": \"bindsnoop_v6_re\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 1}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 1,
+            "sites_matched": 1,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 15,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 12,
+          "total_sites_applied": 1
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 3,
+      "not_applied": 0,
+      "requested": 3
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "stress_ng_network",
+  "status": "ok"
+}

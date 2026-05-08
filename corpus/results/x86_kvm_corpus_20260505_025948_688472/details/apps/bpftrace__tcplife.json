@@ -1,0 +1,10 @@
+{
+  "app": "bpftrace/tcplife",
+  "baseline": null,
+  "error": "interface-bound HTTP server exited before becoming ready: Traceback (most recent call last):\n  File \"<string>\", line 32, in <module>\n  File \"/usr/lib/python3.12/socketserver.py\", line 457, in __init__\n    self.server_bind()\n  File \"/usr/lib/python3.12/http/server.py\", line 136, in server_bind\n    socketserver.TCPServer.server_bind(self)\n  File \"/usr/lib/python3.12/socketserver.py\", line 473, in server_bind\n    self.socket.bind(self.server_address)\nOSError: [Errno 99] Cannot assign requested address",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "bpftrace",
+  "selected_workload": "tcp_connect",
+  "status": "error"
+}

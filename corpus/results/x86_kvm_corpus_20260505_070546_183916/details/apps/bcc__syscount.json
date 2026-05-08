@@ -1,0 +1,142 @@
+{
+  "app": "bcc/syscount",
+  "baseline": {
+    "bpf": {
+      "6": {
+        "bytes_jited": 72,
+        "bytes_xlated": 112,
+        "id": 6,
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "run_cnt_delta": 89920068,
+        "run_time_ns_delta": 9804287715,
+        "type": "tracepoint"
+      },
+      "7": {
+        "bytes_jited": 236,
+        "bytes_xlated": 400,
+        "id": 7,
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "run_cnt_delta": 89920574,
+        "run_time_ns_delta": 2370147065,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0393599680000136,
+        "ops_per_sec": 3080570.2840657923,
+        "ops_total": 9362962.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [20827] setting to a 3 secs run per stressor\nstress-ng: info:  [20827] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [20827] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [20827] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [20827]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [20827] cap             2138174      3.00      0.76      5.52    712693.77      340425.65\nstress-ng: metrc: [20827] eventfd          988329      3.00      0.72      4.33    329414.79      195892.77\nstress-ng: metrc: [20827] get                6604      3.00      0.21      1.17      2200.72        4786.62\nstress-ng: metrc: [20827] prctl              7687      3.00      1.81      0.85      2561.00        2892.30\nstress-ng: metrc: [20827] set               86834      3.00      0.31      3.36     28942.28       23681.05\nstress-ng: metrc: [20827] dup                3588      3.00      0.58      0.46      1195.88        3437.38\nstress-ng: metrc: [20827] kill             338696      3.00      0.33      5.28    112813.42       60450.11\nstress-ng: metrc: [20827] sigfd           5114149      3.00      0.69      6.32   1702589.74      729157.32\nstress-ng: metrc: [20827] signal                0      3.00      0.01      0.22         0.00           0.00\nstress-ng: metrc: [20827] pty                 347      3.01      0.18      4.86       115.41          68.83\nstress-ng: metrc: [20827] itimer              666      3.00      0.45      5.20       222.00         117.75\nstress-ng: metrc: [20827] timerfd          677888      3.01      0.52      3.27    225565.34      178884.97\nstress-ng: info:  [20827] skipped: 0\nstress-ng: info:  [20827] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [20827] failed: 0\nstress-ng: info:  [20827] metrics untrustworthy: 0\nstress-ng: info:  [20827] successful run completed in 3.03 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "6": {
+        "bytes_jited": 72,
+        "bytes_xlated": 112,
+        "id": 6,
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "run_cnt_delta": 85760533,
+        "run_time_ns_delta": 9390603353,
+        "type": "tracepoint"
+      },
+      "7": {
+        "bytes_jited": 236,
+        "bytes_xlated": 400,
+        "id": 7,
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "run_cnt_delta": 85760944,
+        "run_time_ns_delta": 2318705242,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.048242860000016,
+        "ops_per_sec": 2802131.0611714036,
+        "ops_total": 8541576.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [19170] setting to a 3 secs run per stressor\nstress-ng: info:  [19170] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [19170] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [19170] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [19170]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [19170] cap             2514798      3.00      0.63      5.82    837286.86      389899.57\nstress-ng: metrc: [19170] eventfd         1053791      3.00      0.51      4.73    350734.02      201129.49\nstress-ng: metrc: [19170] get                7579      3.00      0.10      1.17      2525.46        6011.22\nstress-ng: metrc: [19170] prctl              9392      3.00      2.22      1.05      3129.11        2878.70\nstress-ng: metrc: [19170] set               71345      3.00      0.25      2.79     23777.27       23494.21\nstress-ng: metrc: [19170] dup                4062      3.00      0.67      0.56      1353.93        3307.43\nstress-ng: metrc: [19170] kill             394692      3.00      0.37      5.66    131478.07       65538.12\nstress-ng: metrc: [19170] sigfd           3724312      3.00      0.70      5.32   1239636.56      618827.43\nstress-ng: metrc: [19170] signal                0      3.00      0.10      0.84         0.00           0.00\nstress-ng: metrc: [19170] pty                 207      3.01      0.19      4.28        68.87          46.27\nstress-ng: metrc: [19170] itimer              566      3.00      0.48      4.53       188.67         112.99\nstress-ng: metrc: [19170] timerfd          760832      3.01      0.50      3.96    253056.45      170396.55\nstress-ng: info:  [19170] skipped: 0\nstress-ng: info:  [19170] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [19170] failed: 0\nstress-ng: info:  [19170] metrics untrustworthy: 0\nstress-ng: info:  [19170] successful run completed in 3.04 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": false,
+    "enabled_passes": [
+      "noop"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 14, \"insns_before\": 14, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 6, \"program\": {\"final_insn_count\": 14, \"insn_delta\": 0, \"orig_insn_count\": 14, \"prog_id\": 6, \"prog_name\": \"raw_syscalls__s\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 44, \"insns_before\": 44, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 7, \"program\": {\"final_insn_count\": 44, \"insn_delta\": 0, \"orig_insn_count\": 44, \"prog_id\": 7, \"prog_name\": \"raw_syscalls__s\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "6": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "noop"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 14, \"insns_before\": 14, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 6, \"program\": {\"final_insn_count\": 14, \"insn_delta\": 0, \"orig_insn_count\": 14, \"prog_id\": 6, \"prog_name\": \"raw_syscalls__s\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "noop",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 6,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "7": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "noop"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 44, \"insns_before\": 44, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 7, \"program\": {\"final_insn_count\": 44, \"insn_delta\": 0, \"orig_insn_count\": 44, \"prog_id\": 7, \"prog_name\": \"raw_syscalls__s\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "noop",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 7,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 2,
+      "not_applied": 0,
+      "requested": 2
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "stress_ng_os",
+  "status": "ok"
+}

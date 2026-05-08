@@ -1,0 +1,375 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "470": {
+        "bytes_jited": 176,
+        "bytes_xlated": 136,
+        "id": 470,
+        "name": "xdp_root",
+        "run_cnt_delta": 106086,
+        "run_time_ns_delta": 35342663,
+        "type": "xdp"
+      },
+      "476": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 476,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "478": {
+        "bytes_jited": 541,
+        "bytes_xlated": 1000,
+        "id": 478,
+        "name": "healthcheck_encap",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0010220149999896,
+        "ops_per_sec": 5891.659545189995,
+        "ops_total": 17681.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "470": {
+        "bytes_jited": 176,
+        "bytes_xlated": 136,
+        "id": 470,
+        "name": "xdp_root",
+        "run_cnt_delta": 111625,
+        "run_time_ns_delta": 35593113,
+        "type": "xdp"
+      },
+      "476": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 476,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "478": {
+        "bytes_jited": 541,
+        "bytes_xlated": 1000,
+        "id": 478,
+        "name": "healthcheck_encap",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0007675869999275,
+        "ops_per_sec": 6199.747051586788,
+        "ops_total": 18604.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "470": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "noop",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "map_inline",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 470,
+        "program": {
+          "final_insn_count": 17,
+          "orig_insn_count": 17,
+          "prog_id": 470,
+          "prog_name": "xdp_root",
+          "prog_type": 6
+        },
+        "status": "ok"
+      },
+      "476": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "noop",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=13: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=13: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 13",
+                "site at PC=365: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=365: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 365",
+                "site at PC=464: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=464: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 464",
+                "site at PC=512: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=512: verifier-guided key extraction failed: verifier-guided constant-key extraction currently supports up to 8-byte keys (got 20)",
+                "site at PC=520: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=520: verifier-guided key extraction failed: verifier-guided constant-key extraction currently supports up to 8-byte keys (got 20)",
+                "site at PC=541: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=541: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 541",
+                "site at PC=562: skip reason: map type 12 not inlineable",
+                "site at PC=562: map_type=12, skip reason: unsupported map type",
+                "site at PC=570: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=570: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 570",
+                "site at PC=592: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=592: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 592",
+                "site at PC=616: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=616: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 616",
+                "site at PC=654: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=654: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 654",
+                "site at PC=762: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=762: verifier-guided key extraction failed: verifier-guided constant-key extraction currently supports up to 8-byte keys (got 20)",
+                "site at PC=770: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=770: verifier-guided key extraction failed: verifier-guided constant-key extraction currently supports up to 8-byte keys (got 20)",
+                "site at PC=793: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=793: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 793",
+                "site at PC=814: skip reason: map type 12 not inlineable",
+                "site at PC=814: map_type=12, skip reason: unsupported map type",
+                "site at PC=823: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=823: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 823",
+                "site at PC=844: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=844: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 844",
+                "site at PC=863: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=863: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 863",
+                "site at PC=895: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=895: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 895",
+                "site at PC=1001: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1001: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1001",
+                "site at PC=1041: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1041: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1041",
+                "site at PC=1056: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1056: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1056",
+                "site at PC=1072: skip reason: map type 13 not inlineable",
+                "site at PC=1072: map_type=13, skip reason: unsupported map type",
+                "site at PC=1086: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1086: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1086",
+                "site at PC=1105: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1105: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1105",
+                "site at PC=1113: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1113: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1113",
+                "site at PC=1128: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1128: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1128",
+                "site at PC=1221: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1221: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1221",
+                "site at PC=1245: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1245: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1245",
+                "site at PC=1292: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1292: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1292",
+                "site at PC=1303: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1303: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1303",
+                "site at PC=1311: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1311: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1311",
+                "site at PC=1320: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1320: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1320",
+                "site at PC=1351: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1351: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1351",
+                "site at PC=1381: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1381: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1381",
+                "site at PC=1495: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1495: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1495",
+                "site at PC=1514: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1514: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1514",
+                "site at PC=1524: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1524: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1524",
+                "site at PC=1550: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1550: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1550",
+                "site at PC=1593: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1593: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1593",
+                "site at PC=1634: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1634: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1634",
+                "site at PC=1670: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1670: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1670",
+                "site at PC=1692: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1692: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1692",
+                "site at PC=1702: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1702: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1702",
+                "site at PC=1746: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1746: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1746",
+                "site at PC=1760: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1760: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1760",
+                "site at PC=1776: skip reason: map type 13 not inlineable",
+                "site at PC=1776: map_type=13, skip reason: unsupported map type",
+                "site at PC=1789: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1789: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1789",
+                "site at PC=1807: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1807: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1807",
+                "site at PC=1815: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1815: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1815",
+                "site at PC=1829: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1829: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1829",
+                "site at PC=1927: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1927: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1927",
+                "site at PC=1948: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1948: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1948",
+                "site at PC=1995: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1995: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1995",
+                "site at PC=2006: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=2006: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 2006",
+                "site at PC=2018: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=2018: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 2018",
+                "site at PC=2027: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=2027: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 2027",
+                "site at PC=2062: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=2062: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 2062",
+                "site at PC=2079: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=2079: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 2079",
+                "site at PC=2202: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=2202: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 2202",
+                "site at PC=2214: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=2214: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 2214",
+                "site at PC=2223: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=2223: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 2223",
+                "site at PC=2263: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=2263: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 2263",
+                "site at PC=2298: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=2298: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 2298"
+              ],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 64,
+              "sites_skipped": 64,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 60,
+                "map type 12 not inlineable": 2,
+                "map type 13 not inlineable": 2
+              }
+            },
+            "error": null,
+            "pass": "map_inline",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 476,
+        "program": {
+          "final_insn_count": 2542,
+          "orig_insn_count": 2542,
+          "prog_id": 476,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "ok"
+      },
+      "478": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 103,
+              "insn_count_before": 103,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "noop",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=17: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=17: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 17",
+                "site at PC=32: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=32: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 32",
+                "site at PC=56: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=56: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 56",
+                "site at PC=68: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=68: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 68"
+              ],
+              "insn_count_after": 103,
+              "insn_count_before": 103,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 4,
+              "sites_skipped": 4,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 4
+              }
+            },
+            "error": null,
+            "pass": "map_inline",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 478,
+        "program": {
+          "final_insn_count": 103,
+          "orig_insn_count": 103,
+          "prog_id": 478,
+          "prog_name": "healthcheck_enc",
+          "prog_type": 3
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}

@@ -1,0 +1,10 @@
+{
+  "app": "tetragon/observer",
+  "baseline": null,
+  "error": "stress_ng_os_io_network workload failed: /usr/bin/stress-ng: option '--bind' is ambiguous; possibilities: '--bind-mount' '--bind-mount-ops' '--binderfs' '--binderfs-opts'",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "tetragon",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "error"
+}

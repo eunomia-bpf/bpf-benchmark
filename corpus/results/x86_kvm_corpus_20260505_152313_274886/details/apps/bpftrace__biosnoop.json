@@ -1,0 +1,131 @@
+{
+  "app": "bpftrace/biosnoop",
+  "baseline": {
+    "bpf": {
+      "664": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 664,
+        "name": "block_io_start",
+        "run_cnt_delta": 1283466,
+        "run_time_ns_delta": 545666881,
+        "type": "tracepoint"
+      },
+      "665": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 665,
+        "name": "block_io_done",
+        "run_cnt_delta": 1283481,
+        "run_time_ns_delta": 1073463875,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 5.354392873999814,
+        "ops_per_sec": 320121.6347652079,
+        "ops_total": 1714057.0,
+        "stderr": "",
+        "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.109944,\n        \"1000\" : 7.890232\n      },\n      \"latency_us\" : {\n        \"2\" : 39.270008,\n        \"4\" : 2.060873,\n        \"10\" : 7.176523,\n        \"20\" : 39.462758,\n        \"50\" : 2.085691,\n        \"100\" : 1.436464,\n        \"250\" : 0.466915,\n        \"500\" : 0.038272,\n        \"750\" : 0.010000,\n        \"1000\" : 0.010000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.010000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "664": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 664,
+        "name": "block_io_start",
+        "run_cnt_delta": 1308538,
+        "run_time_ns_delta": 579581735,
+        "type": "tracepoint"
+      },
+      "665": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 665,
+        "name": "block_io_done",
+        "run_cnt_delta": 1308553,
+        "run_time_ns_delta": 1084458910,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 5.373069361000034,
+        "ops_per_sec": 326887.0885510217,
+        "ops_total": 1756387.0,
+        "stderr": "",
+        "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.029036,\n        \"1000\" : 5.945403\n      },\n      \"latency_us\" : {\n        \"2\" : 41.417047,\n        \"4\" : 1.971747,\n        \"10\" : 7.717275,\n        \"20\" : 37.419982,\n        \"50\" : 2.846429,\n        \"100\" : 2.158118,\n        \"250\" : 0.452196,\n        \"500\" : 0.042091,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": false,
+    "changed": false,
+    "enabled_passes": [
+      "noop",
+      "map_inline"
+    ],
+    "error": "prog 664: prog 664 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\"); prog 665: prog 665 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\")",
+    "exit_code": 1,
+    "output": "{\"changed\": false, \"error_message\": \"prog 664 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 51, \"insns_before\": 51, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 664, \"program\": {\"final_insn_count\": 51, \"insn_delta\": 0, \"orig_insn_count\": 51, \"prog_id\": 664, \"prog_name\": \"block_io_start\", \"prog_type\": 5}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"error_message\": \"prog 665 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 181, \"insns_before\": 181, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 665, \"program\": {\"final_insn_count\": 181, \"insn_delta\": 0, \"orig_insn_count\": 181, \"prog_id\": 665, \"prog_name\": \"block_io_done\", \"prog_type\": 5}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "664": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "noop",
+          "map_inline"
+        ],
+        "error": "prog 664 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\")",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 664 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 51, \"insns_before\": 51, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 664, \"program\": {\"final_insn_count\": 51, \"insn_delta\": 0, \"orig_insn_count\": 51, \"prog_id\": 664, \"prog_name\": \"block_io_start\", \"prog_type\": 5}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 664,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "665": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "noop",
+          "map_inline"
+        ],
+        "error": "prog 665 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\")",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 665 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 181, \"insns_before\": 181, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 665, \"program\": {\"final_insn_count\": 181, \"insn_delta\": 0, \"orig_insn_count\": 181, \"prog_id\": 665, \"prog_name\": \"block_io_done\", \"prog_type\": 5}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 665,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 0,
+      "not_applied": 2,
+      "requested": 2
+    }
+  },
+  "runner": "bpftrace",
+  "selected_workload": "fio_randrw",
+  "status": "ok"
+}

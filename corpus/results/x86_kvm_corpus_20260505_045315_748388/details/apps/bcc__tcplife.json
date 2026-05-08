@@ -1,0 +1,98 @@
+{
+  "app": "bcc/tcplife",
+  "baseline": {
+    "bpf": {
+      "35": {
+        "avg_ns_per_run": 427.34246152345975,
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 35,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 61531,
+        "run_time_ns_delta": 26294809,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.101640056000008,
+        "ops_per_sec": 5730.546892895436,
+        "ops_total": 6313.0,
+        "stderr": "",
+        "stdout": "Running 1s test @ http://127.0.0.1:41913/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.94ms  289.03us   2.64ms   73.10%\n    Req/Sec     2.89k   238.92     3.70k    81.82%\n  6313 requests in 1.10s, 0.93MB read\n  Socket errors: connect 0, read 6311, write 0, timeout 0\nRequests/sec:   5742.23\nTransfer/sec:    869.18KB"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "35": {
+        "avg_ns_per_run": 432.495575379765,
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 35,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 55824,
+        "run_time_ns_delta": 24143633,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0049309700000038,
+        "ops_per_sec": 5722.781137892465,
+        "ops_total": 5751.0,
+        "stderr": "",
+        "stdout": "Running 1s test @ http://127.0.0.1:39545/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.95ms  336.06us   4.92ms   77.66%\n    Req/Sec     2.89k     2.00k    5.24k    75.00%\n  5751 requests in 1.00s, 0.85MB read\n  Socket errors: connect 0, read 5751, write 0, timeout 0\nRequests/sec:   5741.95\nTransfer/sec:    869.28KB"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": false,
+    "enabled_passes": [
+      "wide_mem"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 205, \"insns_before\": 205, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 35, \"program\": {\"final_insn_count\": 205, \"insn_delta\": 0, \"orig_insn_count\": 205, \"prog_id\": 35, \"prog_name\": \"sock__inet_sock\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "35": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 205, \"insns_before\": 205, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 35, \"program\": {\"final_insn_count\": 205, \"insn_delta\": 0, \"orig_insn_count\": 205, \"prog_id\": 35, \"prog_name\": \"sock__inet_sock\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 35,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 1,
+      "not_applied": 0,
+      "requested": 1
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "tcp_connect",
+  "status": "ok"
+}

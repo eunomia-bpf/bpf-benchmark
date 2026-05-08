@@ -1,0 +1,237 @@
+{
+  "app": "bpftrace/biosnoop",
+  "baseline": {
+    "bpf": {
+      "664": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 664,
+        "name": "block_io_start",
+        "run_cnt_delta": 1176017,
+        "run_time_ns_delta": 528981462,
+        "type": "tracepoint"
+      },
+      "665": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 665,
+        "name": "block_io_done",
+        "run_cnt_delta": 1176032,
+        "run_time_ns_delta": 1058108265,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 5.384868252999695,
+        "ops_per_sec": 292286.6309910608,
+        "ops_total": 1573925.0,
+        "stderr": "",
+        "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.029302,\n        \"1000\" : 4.012078\n      },\n      \"latency_us\" : {\n        \"2\" : 42.478947,\n        \"4\" : 2.767126,\n        \"10\" : 5.157148,\n        \"20\" : 40.407425,\n        \"50\" : 2.289376,\n        \"100\" : 2.077892,\n        \"250\" : 0.729237,\n        \"500\" : 0.050960,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "664": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 664,
+        "name": "block_io_start",
+        "run_cnt_delta": 1192128,
+        "run_time_ns_delta": 553524574,
+        "type": "tracepoint"
+      },
+      "665": {
+        "bytes_jited": 943,
+        "bytes_xlated": 1640,
+        "id": 665,
+        "name": "block_io_done",
+        "run_cnt_delta": 1192143,
+        "run_time_ns_delta": 1066876948,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 5.38560422799992,
+        "ops_per_sec": 296587.7053674995,
+        "ops_total": 1597304.0,
+        "stderr": "",
+        "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.016117,\n        \"1000\" : 3.929926\n      },\n      \"latency_us\" : {\n        \"2\" : 42.612760,\n        \"4\" : 2.732029,\n        \"10\" : 5.374544,\n        \"20\" : 39.720548,\n        \"50\" : 2.529197,\n        \"100\" : 2.338020,\n        \"250\" : 0.684619,\n        \"500\" : 0.060502,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": true,
+    "enabled_passes": [
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "bulk_memory",
+      "prefetch"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 51, \"insns_before\": 51, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 51, \"insns_before\": 51, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 51, \"insns_before\": 51, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 51, \"insns_before\": 51, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 51, \"insns_before\": 51, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 51, \"insns_before\": 51, \"pass\": \"prefetch\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 664, \"program\": {\"final_insn_count\": 51, \"insn_delta\": 0, \"orig_insn_count\": 51, \"prog_id\": 664, \"prog_name\": \"block_io_start\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 6, \"total_sites_applied\": 0}}\n{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 181, \"insns_before\": 181, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 181, \"insns_before\": 181, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 181, \"insns_before\": 181, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 181, \"insns_before\": 181, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 181, \"insns_before\": 181, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 8, \"insns_after\": 189, \"insns_before\": 181, \"pass\": \"prefetch\", \"sites_applied\": 4}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 665, \"program\": {\"final_insn_count\": 189, \"insn_delta\": 8, \"orig_insn_count\": 181, \"prog_id\": 665, \"prog_name\": \"block_io_done\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 6, \"total_sites_applied\": 4}}",
+    "per_program": {
+      "664": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 51, \"insns_before\": 51, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 51, \"insns_before\": 51, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 51, \"insns_before\": 51, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 51, \"insns_before\": 51, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 51, \"insns_before\": 51, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 51, \"insns_before\": 51, \"pass\": \"prefetch\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 664, \"program\": {\"final_insn_count\": 51, \"insn_delta\": 0, \"orig_insn_count\": 51, \"prog_id\": 664, \"prog_name\": \"block_io_start\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 6, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 664,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 6,
+          "total_sites_applied": 0
+        }
+      },
+      "665": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 181, \"insns_before\": 181, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 181, \"insns_before\": 181, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 181, \"insns_before\": 181, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 181, \"insns_before\": 181, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 181, \"insns_before\": 181, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 8, \"insns_after\": 189, \"insns_before\": 181, \"pass\": \"prefetch\", \"sites_applied\": 4}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 665, \"program\": {\"final_insn_count\": 189, \"insn_delta\": 8, \"orig_insn_count\": 181, \"prog_id\": 665, \"prog_name\": \"block_io_done\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 6, \"total_sites_applied\": 4}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 4,
+            "sites_matched": 4,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 665,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 6,
+          "total_sites_applied": 4
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 2,
+      "not_applied": 0,
+      "requested": 2
+    }
+  },
+  "runner": "bpftrace",
+  "selected_workload": "fio_randrw",
+  "status": "ok"
+}

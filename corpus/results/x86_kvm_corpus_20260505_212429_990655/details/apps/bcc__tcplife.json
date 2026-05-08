@@ -1,0 +1,101 @@
+{
+  "app": "bcc/tcplife",
+  "baseline": {
+    "bpf": {
+      "35": {
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 35,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 118039,
+        "run_time_ns_delta": 98088924,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.103730734999999,
+        "ops_per_sec": 3887.257313898399,
+        "ops_total": 12065.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://127.0.0.1:34079/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     2.92ms   15.09ms 221.51ms   98.69%\n    Req/Sec     1.99k   721.19     3.69k    70.49%\n  12065 requests in 3.10s, 1.78MB read\n  Socket errors: connect 0, read 12065, write 0, timeout 0\nRequests/sec:   3891.99\nTransfer/sec:    589.21KB"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "35": {
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 35,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 79644,
+        "run_time_ns_delta": 114705576,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0085106219999886,
+        "ops_per_sec": 2702.6662098319925,
+        "ops_total": 8131.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://127.0.0.1:46479/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     8.60ms   44.07ms 452.66ms   97.41%\n    Req/Sec     1.36k   608.92     2.79k    68.33%\n  8131 requests in 3.00s, 1.20MB read\n  Socket errors: connect 0, read 8130, write 0, timeout 0\nRequests/sec:   2709.77\nTransfer/sec:    410.22KB"
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "35": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass rotate failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"rotate\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-17/pass-00-rotate.report.json\" \"--prog-type\" \"tracepoint\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-17/target.json\": error: target kinsn bpf_memcpy_bulk missing supported_encodings",
+            "pass": "rotate",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass cond_select failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"cond_select\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-17/pass-01-cond_select.report.json\" \"--prog-type\" \"tracepoint\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-17/target.json\": error: target kinsn bpf_endian_load64 missing supported_encodings",
+            "pass": "cond_select",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass extract failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"extract\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-17/pass-02-extract.report.json\" \"--prog-type\" \"tracepoint\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-17/target.json\": error: target kinsn bpf_endian_load64 missing supported_encodings",
+            "pass": "extract",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass endian_fusion failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"endian_fusion\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-17/pass-03-endian_fusion.report.json\" \"--prog-type\" \"tracepoint\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-17/target.json\": error: target kinsn bpf_memcpy_bulk missing supported_encodings",
+            "pass": "endian_fusion",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass bulk_memory failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"bulk_memory\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-17/pass-04-bulk_memory.report.json\" \"--prog-type\" \"tracepoint\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-17/target.json\": error: target kinsn bpf_memcpy_bulk missing supported_encodings",
+            "pass": "bulk_memory",
+            "status": "failed_bpfopt"
+          }
+        ],
+        "prog_id": 35,
+        "program": {
+          "final_insn_count": 205,
+          "orig_insn_count": 205,
+          "prog_id": 35,
+          "prog_name": "sock__inet_sock",
+          "prog_type": 5
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bcc",
+  "selected_workload": "tcp_connect",
+  "status": "ok"
+}

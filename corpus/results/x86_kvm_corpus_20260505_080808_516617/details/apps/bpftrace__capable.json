@@ -1,0 +1,146 @@
+{
+  "app": "bpftrace/capable",
+  "baseline": {
+    "bpf": {
+      "657": {
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 657,
+        "name": "cap_capable",
+        "run_cnt_delta": 1565609,
+        "run_time_ns_delta": 245265946,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.042042003000006,
+        "ops_per_sec": 5404768.896611441,
+        "ops_total": 16441534.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [1878] setting to a 3 secs run per stressor\nstress-ng: info:  [1878] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [1878] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [1878] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1878]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1878] cap             6544796      3.00      1.72      5.74   2179524.74      876506.73\nstress-ng: metrc: [1878] eventfd          799059      3.00      0.84      3.28    266055.17      193974.33\nstress-ng: metrc: [1878] get                7275      3.00      0.11      1.29      2423.81        5210.61\nstress-ng: metrc: [1878] prctl              7870      3.00      1.83      1.53      2621.13        2343.78\nstress-ng: metrc: [1878] set               60825      3.01      0.14      2.93     20239.64       19839.65\nstress-ng: metrc: [1878] dup                3309      3.00      0.80      0.82      1102.74        2047.95\nstress-ng: metrc: [1878] kill              65431      3.00      0.11      4.60     21786.17       13890.78\nstress-ng: metrc: [1878] sigfd           8053247      3.00      1.37      4.92   2680310.50     1279358.70\nstress-ng: metrc: [1878] signal                0      3.00      0.31      0.85         0.00           0.00\nstress-ng: metrc: [1878] pty                  82      3.01      0.14      3.89        27.26          20.36\nstress-ng: metrc: [1878] itimer              568      3.00      1.33      3.50       189.28         117.61\nstress-ng: metrc: [1878] timerfd          899072      3.00      0.22      4.17    299458.74      204764.32\nstress-ng: info:  [1878] skipped: 0\nstress-ng: info:  [1878] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [1878] failed: 0\nstress-ng: info:  [1878] metrics untrustworthy: 0\nstress-ng: info:  [1878] successful run completed in 3.03 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "657": {
+        "bytes_jited": 772,
+        "bytes_xlated": 1376,
+        "id": 657,
+        "name": "cap_capable",
+        "run_cnt_delta": 1403244,
+        "run_time_ns_delta": 239495276,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0572664159999476,
+        "ops_per_sec": 4628000.00875038,
+        "ops_total": 14149029.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [28614] setting to a 3 secs run per stressor\nstress-ng: info:  [28614] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [28614] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [28614] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [28614]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [28614] cap             5401453      3.00      1.73      5.09   1799542.37      791181.26\nstress-ng: metrc: [28614] eventfd          767294      3.00      0.40      3.00    255711.36      225412.70\nstress-ng: metrc: [28614] get                6215      3.00      0.12      1.19      2071.13        4740.72\nstress-ng: metrc: [28614] prctl              5943      3.00      1.36      1.14      1978.35        2380.59\nstress-ng: metrc: [28614] set               64080      3.00      0.16      3.19     21357.76       19122.02\nstress-ng: metrc: [28614] dup                2761      3.00      0.71      0.64       920.21        2043.76\nstress-ng: metrc: [28614] kill              62686      3.01      0.10      4.29     20859.88       14270.52\nstress-ng: metrc: [28614] sigfd           6815709      3.01      1.44      5.41   2267701.78      996088.26\nstress-ng: metrc: [28614] signal                0      3.00      0.06      0.34         0.00           0.00\nstress-ng: metrc: [28614] pty               36018      3.01      0.15      4.14     11981.86        8409.56\nstress-ng: metrc: [28614] itimer              758      3.00      1.63      4.84       252.67         117.23\nstress-ng: metrc: [28614] timerfd          986112      3.01      0.20      4.95    328123.69      191669.17\nstress-ng: info:  [28614] skipped: 0\nstress-ng: info:  [28614] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [28614] failed: 0\nstress-ng: info:  [28614] metrics untrustworthy: 0\nstress-ng: info:  [28614] successful run completed in 3.05 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": true,
+    "enabled_passes": [
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "bulk_memory",
+      "prefetch"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 156, \"insns_before\": 156, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 156, \"insns_before\": 156, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 156, \"insns_before\": 156, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 156, \"insns_before\": 156, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 156, \"insns_before\": 156, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 2, \"insns_after\": 158, \"insns_before\": 156, \"pass\": \"prefetch\", \"sites_applied\": 1}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 657, \"program\": {\"final_insn_count\": 158, \"insn_delta\": 2, \"orig_insn_count\": 156, \"prog_id\": 657, \"prog_name\": \"cap_capable\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 6, \"total_sites_applied\": 1}}",
+    "per_program": {
+      "657": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 156, \"insns_before\": 156, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 156, \"insns_before\": 156, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 156, \"insns_before\": 156, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 156, \"insns_before\": 156, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 156, \"insns_before\": 156, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 2, \"insns_after\": 158, \"insns_before\": 156, \"pass\": \"prefetch\", \"sites_applied\": 1}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 657, \"program\": {\"final_insn_count\": 158, \"insn_delta\": 2, \"orig_insn_count\": 156, \"prog_id\": 657, \"prog_name\": \"cap_capable\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 6, \"total_sites_applied\": 1}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 1,
+            "sites_matched": 1,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 657,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 6,
+          "total_sites_applied": 1
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 1,
+      "not_applied": 0,
+      "requested": 1
+    }
+  },
+  "runner": "bpftrace",
+  "selected_workload": "stress_ng_os",
+  "status": "ok"
+}

@@ -1,0 +1,10 @@
+{
+  "app": "otelcol-ebpf-profiler/profiling",
+  "baseline": null,
+  "error": "native app did not attach BPF programs within 20s: Error: unknown flag: --samples-per-second\n2026/05/05 06:29:56 collector server run finished with error: unknown flag: --samples-per-second",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "otelcol-ebpf-profiler",
+  "selected_workload": "stress_ng_cpu",
+  "status": "error"
+}

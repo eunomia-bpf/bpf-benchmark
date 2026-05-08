@@ -1,0 +1,674 @@
+{
+  "app": "otelcol-ebpf-profiler/profiling",
+  "baseline": {
+    "bpf": {
+      "52": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 3721,
+        "bytes_xlated": 6232,
+        "id": 52,
+        "name": "perf_unwind_stop",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "53": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 22575,
+        "bytes_xlated": 37232,
+        "id": 53,
+        "name": "perf_unwind_native",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "54": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 18290,
+        "bytes_xlated": 28048,
+        "id": 54,
+        "name": "perf_unwind_hotspot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "55": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 17737,
+        "bytes_xlated": 29144,
+        "id": 55,
+        "name": "perf_unwind_perl",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "56": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 15178,
+        "bytes_xlated": 25032,
+        "id": 56,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "57": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 19909,
+        "bytes_xlated": 33264,
+        "id": 57,
+        "name": "perf_unwind_python",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "58": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 16540,
+        "bytes_xlated": 28000,
+        "id": 58,
+        "name": "perf_unwind_ruby",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "59": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 20050,
+        "bytes_xlated": 33712,
+        "id": 59,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "60": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 22565,
+        "bytes_xlated": 34248,
+        "id": 60,
+        "name": "perf_unwind_dotnet",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "61": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 1580,
+        "bytes_xlated": 2496,
+        "id": 61,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "62": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 696,
+        "bytes_xlated": 1088,
+        "id": 62,
+        "name": "perf_unwind_beam",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "63": {
+        "avg_ns_per_run": 1322.0,
+        "bytes_jited": 788,
+        "bytes_xlated": 1320,
+        "id": 63,
+        "name": "tracepoint__sched_process_free",
+        "run_cnt_delta": 3,
+        "run_time_ns_delta": 3966,
+        "type": "tracepoint"
+      },
+      "64": {
+        "avg_ns_per_run": 1010.8890954151177,
+        "bytes_jited": 3532,
+        "bytes_xlated": 5496,
+        "id": 64,
+        "name": "native_tracer_entry",
+        "run_cnt_delta": 1614,
+        "run_time_ns_delta": 1631575,
+        "type": "perf_event"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 5.018998345999989,
+        "ops_per_sec": 3052.60112552347,
+        "ops_total": 15321.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [14856] setting to a 5 secs run per stressor\nstress-ng: info:  [14856] dispatching hogs: 1 cpu\nstress-ng: info:  [14856] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [14856] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [14856]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [14856] cpu               15321      5.00      5.00      0.00      3063.60        3064.11\nstress-ng: info:  [14856] skipped: 0\nstress-ng: info:  [14856] passed: 1: cpu (1)\nstress-ng: info:  [14856] failed: 0\nstress-ng: info:  [14856] metrics untrustworthy: 0\nstress-ng: info:  [14856] successful run completed in 5.00 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "52": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 3721,
+        "bytes_xlated": 6232,
+        "id": 52,
+        "name": "perf_unwind_stop",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "53": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 22575,
+        "bytes_xlated": 37232,
+        "id": 53,
+        "name": "perf_unwind_native",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "54": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 18290,
+        "bytes_xlated": 28048,
+        "id": 54,
+        "name": "perf_unwind_hotspot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "55": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 17737,
+        "bytes_xlated": 29144,
+        "id": 55,
+        "name": "perf_unwind_perl",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "56": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 15178,
+        "bytes_xlated": 25032,
+        "id": 56,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "57": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 18325,
+        "bytes_xlated": 30096,
+        "id": 57,
+        "name": "perf_unwind_python",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "58": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 16540,
+        "bytes_xlated": 28000,
+        "id": 58,
+        "name": "perf_unwind_ruby",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "59": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 20050,
+        "bytes_xlated": 33712,
+        "id": 59,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "60": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 22565,
+        "bytes_xlated": 34248,
+        "id": 60,
+        "name": "perf_unwind_dotnet",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "61": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 1580,
+        "bytes_xlated": 2496,
+        "id": 61,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "62": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 696,
+        "bytes_xlated": 1088,
+        "id": 62,
+        "name": "perf_unwind_beam",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "63": {
+        "avg_ns_per_run": 4544.333333333333,
+        "bytes_jited": 788,
+        "bytes_xlated": 1320,
+        "id": 63,
+        "name": "tracepoint__sched_process_free",
+        "run_cnt_delta": 3,
+        "run_time_ns_delta": 13633,
+        "type": "tracepoint"
+      },
+      "64": {
+        "avg_ns_per_run": 935.1635687732341,
+        "bytes_jited": 3532,
+        "bytes_xlated": 5496,
+        "id": 64,
+        "name": "native_tracer_entry",
+        "run_cnt_delta": 1614,
+        "run_time_ns_delta": 1509354,
+        "type": "perf_event"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 5.018404107999999,
+        "ops_per_sec": 3044.9919279398146,
+        "ops_total": 15281.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [14896] setting to a 5 secs run per stressor\nstress-ng: info:  [14896] dispatching hogs: 1 cpu\nstress-ng: info:  [14896] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [14896] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [14896]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [14896] cpu               15281      5.00      5.00      0.00      3056.03        3056.05\nstress-ng: info:  [14896] skipped: 0\nstress-ng: info:  [14896] passed: 1: cpu (1)\nstress-ng: info:  [14896] failed: 0\nstress-ng: info:  [14896] metrics untrustworthy: 0\nstress-ng: info:  [14896] successful run completed in 5.00 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": true,
+    "enabled_passes": [
+      "wide_mem"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1634, \"insns_before\": 1634, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 52, \"program\": {\"final_insn_count\": 1634, \"insn_delta\": 0, \"orig_insn_count\": 1634, \"prog_id\": 52, \"prog_name\": \"perf_unwind_sto\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 53, \"program\": {\"final_insn_count\": 7014, \"insn_delta\": 0, \"orig_insn_count\": 7014, \"prog_id\": 53, \"prog_name\": \"perf_unwind_nat\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 54, \"program\": {\"final_insn_count\": 7589, \"insn_delta\": 0, \"orig_insn_count\": 7589, \"prog_id\": 54, \"prog_name\": \"perf_unwind_hot\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7396, \"insns_before\": 7396, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 55, \"program\": {\"final_insn_count\": 7396, \"insn_delta\": 0, \"orig_insn_count\": 7396, \"prog_id\": 55, \"prog_name\": \"perf_unwind_per\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 56, \"program\": {\"final_insn_count\": 6934, \"insn_delta\": 0, \"orig_insn_count\": 6934, \"prog_id\": 56, \"prog_name\": \"perf_unwind_php\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": true, \"passes\": [{\"changed\": true, \"insn_delta\": -396, \"insns_after\": 5473, \"insns_before\": 5869, \"pass\": \"wide_mem\", \"sites_applied\": 132}], \"passes_applied\": [\"wide_mem\"], \"prog_id\": 57, \"program\": {\"final_insn_count\": 5473, \"insn_delta\": -396, \"orig_insn_count\": 5869, \"prog_id\": 57, \"prog_name\": \"perf_unwind_pyt\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 1, \"total_sites_applied\": 132}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 58, \"program\": {\"final_insn_count\": 5178, \"insn_delta\": 0, \"orig_insn_count\": 5178, \"prog_id\": 58, \"prog_name\": \"perf_unwind_rub\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 59, \"program\": {\"final_insn_count\": 7860, \"insn_delta\": 0, \"orig_insn_count\": 7860, \"prog_id\": 59, \"prog_name\": \"perf_unwind_v8\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 60, \"program\": {\"final_insn_count\": 7584, \"insn_delta\": 0, \"orig_insn_count\": 7584, \"prog_id\": 60, \"prog_name\": \"perf_unwind_dot\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 679, \"insns_before\": 679, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 61, \"program\": {\"final_insn_count\": 679, \"insn_delta\": 0, \"orig_insn_count\": 679, \"prog_id\": 61, \"prog_name\": \"perf_go_labels\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 62, \"program\": {\"final_insn_count\": 242, \"insn_delta\": 0, \"orig_insn_count\": 242, \"prog_id\": 62, \"prog_name\": \"perf_unwind_bea\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 283, \"insns_before\": 283, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 63, \"program\": {\"final_insn_count\": 283, \"insn_delta\": 0, \"orig_insn_count\": 283, \"prog_id\": 63, \"prog_name\": \"tracepoint__sch\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 64, \"program\": {\"final_insn_count\": 1315, \"insn_delta\": 0, \"orig_insn_count\": 1315, \"prog_id\": 64, \"prog_name\": \"native_tracer_e\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "52": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1634, \"insns_before\": 1634, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 52, \"program\": {\"final_insn_count\": 1634, \"insn_delta\": 0, \"orig_insn_count\": 1634, \"prog_id\": 52, \"prog_name\": \"perf_unwind_sto\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 52,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "53": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 53, \"program\": {\"final_insn_count\": 7014, \"insn_delta\": 0, \"orig_insn_count\": 7014, \"prog_id\": 53, \"prog_name\": \"perf_unwind_nat\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 53,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "54": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 54, \"program\": {\"final_insn_count\": 7589, \"insn_delta\": 0, \"orig_insn_count\": 7589, \"prog_id\": 54, \"prog_name\": \"perf_unwind_hot\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 54,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "55": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7396, \"insns_before\": 7396, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 55, \"program\": {\"final_insn_count\": 7396, \"insn_delta\": 0, \"orig_insn_count\": 7396, \"prog_id\": 55, \"prog_name\": \"perf_unwind_per\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 55,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "56": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 56, \"program\": {\"final_insn_count\": 6934, \"insn_delta\": 0, \"orig_insn_count\": 6934, \"prog_id\": 56, \"prog_name\": \"perf_unwind_php\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 56,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "57": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": true, \"insn_delta\": -396, \"insns_after\": 5473, \"insns_before\": 5869, \"pass\": \"wide_mem\", \"sites_applied\": 132}], \"passes_applied\": [\"wide_mem\"], \"prog_id\": 57, \"program\": {\"final_insn_count\": 5473, \"insn_delta\": -396, \"orig_insn_count\": 5869, \"prog_id\": 57, \"prog_name\": \"perf_unwind_pyt\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 1, \"total_sites_applied\": 132}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 132,
+            "sites_matched": 132,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 57,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 1,
+          "total_sites_applied": 132
+        }
+      },
+      "58": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 58, \"program\": {\"final_insn_count\": 5178, \"insn_delta\": 0, \"orig_insn_count\": 5178, \"prog_id\": 58, \"prog_name\": \"perf_unwind_rub\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 58,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "59": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 59, \"program\": {\"final_insn_count\": 7860, \"insn_delta\": 0, \"orig_insn_count\": 7860, \"prog_id\": 59, \"prog_name\": \"perf_unwind_v8\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 59,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "60": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 60, \"program\": {\"final_insn_count\": 7584, \"insn_delta\": 0, \"orig_insn_count\": 7584, \"prog_id\": 60, \"prog_name\": \"perf_unwind_dot\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 60,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "61": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 679, \"insns_before\": 679, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 61, \"program\": {\"final_insn_count\": 679, \"insn_delta\": 0, \"orig_insn_count\": 679, \"prog_id\": 61, \"prog_name\": \"perf_go_labels\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 61,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "62": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 62, \"program\": {\"final_insn_count\": 242, \"insn_delta\": 0, \"orig_insn_count\": 242, \"prog_id\": 62, \"prog_name\": \"perf_unwind_bea\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 62,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "63": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 283, \"insns_before\": 283, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 63, \"program\": {\"final_insn_count\": 283, \"insn_delta\": 0, \"orig_insn_count\": 283, \"prog_id\": 63, \"prog_name\": \"tracepoint__sch\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 63,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "64": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 64, \"program\": {\"final_insn_count\": 1315, \"insn_delta\": 0, \"orig_insn_count\": 1315, \"prog_id\": 64, \"prog_name\": \"native_tracer_e\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 64,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 13,
+      "not_applied": 0,
+      "requested": 13
+    }
+  },
+  "runner": "otelcol-ebpf-profiler",
+  "selected_workload": "stress_ng_cpu",
+  "status": "ok"
+}

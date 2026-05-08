@@ -1,0 +1,10 @@
+{
+  "app": "calico/felix",
+  "baseline": null,
+  "error": "command failed (1): /usr/local/bin/calicoctl patch --allow-version-mismatch node virtme-ng --patch '{\"spec\":{\"bgp\":{\"ipv4Address\":\"198.18.0.1/30\"}}}'\nhit error: resource does not exist: Node(virtme-ng) with error: <nil>",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "calico",
+  "selected_workload": "network",
+  "status": "error"
+}

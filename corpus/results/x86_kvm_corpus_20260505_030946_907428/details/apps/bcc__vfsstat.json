@@ -1,0 +1,290 @@
+{
+  "app": "bcc/vfsstat",
+  "baseline": {
+    "bpf": {
+      "23": {
+        "avg_ns_per_run": 63.57917614316495,
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 23,
+        "name": "vfs_create",
+        "run_cnt_delta": 133664,
+        "run_time_ns_delta": 8498247,
+        "type": "tracing"
+      },
+      "24": {
+        "avg_ns_per_run": 76.35075653370014,
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 24,
+        "name": "kfunc__vmlinux__vfs_fsync_range",
+        "run_cnt_delta": 727,
+        "run_time_ns_delta": 55507,
+        "type": "tracing"
+      },
+      "25": {
+        "avg_ns_per_run": 46.86165617956817,
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 25,
+        "name": "vfs_open",
+        "run_cnt_delta": 1432236,
+        "run_time_ns_delta": 67116951,
+        "type": "tracing"
+      },
+      "26": {
+        "avg_ns_per_run": 45.472970236890056,
+        "bytes_jited": 87,
+        "bytes_xlated": 136,
+        "id": 26,
+        "name": "vfs_read",
+        "run_cnt_delta": 59268,
+        "run_time_ns_delta": 2695092,
+        "type": "tracing"
+      },
+      "27": {
+        "avg_ns_per_run": 55.6080213770197,
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 27,
+        "name": "vfs_write",
+        "run_cnt_delta": 80086,
+        "run_time_ns_delta": 4453424,
+        "type": "tracing"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.1147788639999874,
+        "ops_per_sec": 2560581.378227523,
+        "ops_total": 2854482.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [18415] setting to a 1 secs run per stressor\nstress-ng: info:  [18415] dispatching hogs: 1 access, 1 chdir, 1 chmod, 1 chown, 1 dentry, 1 dir, 1 dirmany, 1 fallocate, 1 file-ioctl, 1 filename, 1 flock, 1 fpunch, 1 fstat, 1 getdent, 1 hdd, 1 inotify, 1 open, 1 rename, 1 touch, 1 utime\nstress-ng: info:  [18415] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [18434] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [18420] dentry: 108220 dentries allocated\nstress-ng: metrc: [18415] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [18415]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [18415] access            10195      1.00      0.23      1.57     10181.59        5668.32\nstress-ng: metrc: [18415] chdir                50      1.07      0.11      0.79        46.71          55.17\nstress-ng: metrc: [18415] chmod               159      1.01      0.00      0.03       157.22        4933.60\nstress-ng: metrc: [18415] chown               174      1.00      0.01      0.00       173.82       32056.01\nstress-ng: metrc: [18415] dentry            14336      1.02      0.02      0.44     14013.33       31302.34\nstress-ng: metrc: [18415] dir                8192      1.09      0.08      0.89      7536.13        8506.70\nstress-ng: metrc: [18415] dirmany           10751      1.01      0.00      0.24     10634.95       44824.04\nstress-ng: metrc: [18415] fallocate             2      1.01      0.01      0.00         1.98         389.94\nstress-ng: metrc: [18415] file-ioctl        78126      1.00      0.06      0.74     78121.49       98270.09\nstress-ng: metrc: [18415] filename           3782      1.01      0.04      0.70      3745.51        5159.70\nstress-ng: metrc: [18415] flock           2355959      1.01      0.39      0.67   2332794.04     2238449.36\nstress-ng: metrc: [18415] fpunch             1502      1.01      0.02      0.21      1487.35        6501.04\nstress-ng: metrc: [18415] fstat              2912      1.00      0.14      0.70      2911.02        3460.50\nstress-ng: metrc: [18415] getdent          210914      1.00      0.08      0.92    210914.85      211983.88\nstress-ng: metrc: [18415] hdd               27765      1.01      0.39      0.26     27499.47       42546.44\nstress-ng: metrc: [18415] inotify               3      1.00      0.00      0.00         3.00        1014.20\nstress-ng: metrc: [18415] open              18432      1.01      0.03      0.22     18212.27       74666.10\nstress-ng: metrc: [18415] rename              516      1.01      0.00      0.02       511.38       23250.57\nstress-ng: metrc: [18415] touch             62256      1.01      0.07      1.43     61652.31       41433.87\nstress-ng: metrc: [18415] utime             48456      1.00      0.04      0.75     48454.58       61296.28\nstress-ng: info:  [18415] skipped: 0\nstress-ng: info:  [18415] passed: 20: access (1) chdir (1) chmod (1) chown (1) dentry (1) dir (1) dirmany (1) fallocate (1) file-ioctl (1) filename (1) flock (1) fpunch (1) fstat (1) getdent (1) hdd (1) inotify (1) open (1) rename (1) touch (1) utime (1)\nstress-ng: info:  [18415] failed: 0\nstress-ng: info:  [18415] metrics untrustworthy: 0\nstress-ng: info:  [18415] successful run completed in 1.10 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "23": {
+        "avg_ns_per_run": 72.49371923520734,
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 23,
+        "name": "vfs_create",
+        "run_cnt_delta": 136926,
+        "run_time_ns_delta": 9926275,
+        "type": "tracing"
+      },
+      "24": {
+        "avg_ns_per_run": 85.00521739130434,
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 24,
+        "name": "kfunc__vmlinux__vfs_fsync_range",
+        "run_cnt_delta": 575,
+        "run_time_ns_delta": 48878,
+        "type": "tracing"
+      },
+      "25": {
+        "avg_ns_per_run": 45.77515212737812,
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 25,
+        "name": "vfs_open",
+        "run_cnt_delta": 1330464,
+        "run_time_ns_delta": 60902192,
+        "type": "tracing"
+      },
+      "26": {
+        "avg_ns_per_run": 49.51791023419241,
+        "bytes_jited": 87,
+        "bytes_xlated": 136,
+        "id": 26,
+        "name": "vfs_read",
+        "run_cnt_delta": 62897,
+        "run_time_ns_delta": 3114528,
+        "type": "tracing"
+      },
+      "27": {
+        "avg_ns_per_run": 54.63615582967454,
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 27,
+        "name": "vfs_write",
+        "run_cnt_delta": 71745,
+        "run_time_ns_delta": 3919871,
+        "type": "tracing"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.1120440020000046,
+        "ops_per_sec": 2600076.970695255,
+        "ops_total": 2891400.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [8543] setting to a 1 secs run per stressor\nstress-ng: info:  [8543] dispatching hogs: 1 access, 1 chdir, 1 chmod, 1 chown, 1 dentry, 1 dir, 1 dirmany, 1 fallocate, 1 file-ioctl, 1 filename, 1 flock, 1 fpunch, 1 fstat, 1 getdent, 1 hdd, 1 inotify, 1 open, 1 rename, 1 touch, 1 utime\nstress-ng: info:  [8543] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [8560] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [8548] dentry: 74954 dentries allocated\nstress-ng: metrc: [8543] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8543]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8543] access            10632      1.00      0.25      1.68     10618.60        5518.37\nstress-ng: metrc: [8543] chdir                48      1.07      0.07      0.79        44.85          56.05\nstress-ng: metrc: [8543] chmod               117      1.00      0.00      0.02       116.90        4792.33\nstress-ng: metrc: [8543] chown               144      1.00      0.01      0.00       143.85       28213.17\nstress-ng: metrc: [8543] dentry            12288      1.03      0.04      0.37     11982.03       30071.29\nstress-ng: metrc: [8543] dir                8192      1.09      0.03      0.87      7520.96        9086.99\nstress-ng: metrc: [8543] dirmany            9923      1.01      0.01      0.21      9801.96       44594.75\nstress-ng: metrc: [8543] fallocate             1      1.01      0.00      0.00         0.99         219.68\nstress-ng: metrc: [8543] file-ioctl        78143      1.01      0.07      0.78     77277.61       92643.02\nstress-ng: metrc: [8543] filename           3938      1.01      0.01      0.76      3897.13        5115.44\nstress-ng: metrc: [8543] flock           2399209      1.01      0.51      0.54   2372728.46     2271937.34\nstress-ng: metrc: [8543] fpunch             1240      1.01      0.00      0.31      1226.49        3971.02\nstress-ng: metrc: [8543] fstat              2058      1.00      0.19      0.59      2057.53        2647.57\nstress-ng: metrc: [8543] getdent          199348      1.00      0.07      0.91    199345.39      204521.79\nstress-ng: metrc: [8543] hdd               27835      1.01      0.35      0.33     27527.79       40968.77\nstress-ng: metrc: [8543] inotify               2      1.02      0.00      0.00         1.97         740.47\nstress-ng: metrc: [8543] open              20480      1.01      0.03      0.23     20263.65       77671.96\nstress-ng: metrc: [8543] rename              413      1.00      0.00      0.01       412.95       33944.28\nstress-ng: metrc: [8543] touch             65926      1.01      0.04      1.56     65179.00       41032.06\nstress-ng: metrc: [8543] utime             51463      1.00      0.04      0.80     51460.29       61501.52\nstress-ng: info:  [8543] skipped: 0\nstress-ng: info:  [8543] passed: 20: access (1) chdir (1) chmod (1) chown (1) dentry (1) dir (1) dirmany (1) fallocate (1) file-ioctl (1) filename (1) flock (1) fpunch (1) fstat (1) getdent (1) hdd (1) inotify (1) open (1) rename (1) touch (1) utime (1)\nstress-ng: info:  [8543] failed: 0\nstress-ng: info:  [8543] metrics untrustworthy: 0\nstress-ng: info:  [8543] successful run completed in 1.10 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": false,
+    "enabled_passes": [
+      "wide_mem"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 12, \"insns_before\": 12, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 23, \"program\": {\"final_insn_count\": 12, \"insn_delta\": 0, \"orig_insn_count\": 12, \"prog_id\": 23, \"prog_name\": \"vfs_create\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 12, \"insns_before\": 12, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 24, \"program\": {\"final_insn_count\": 12, \"insn_delta\": 0, \"orig_insn_count\": 12, \"prog_id\": 24, \"prog_name\": \"vfs_fsync_range\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 12, \"insns_before\": 12, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 25, \"program\": {\"final_insn_count\": 12, \"insn_delta\": 0, \"orig_insn_count\": 12, \"prog_id\": 25, \"prog_name\": \"vfs_open\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 11, \"insns_before\": 11, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 26, \"program\": {\"final_insn_count\": 11, \"insn_delta\": 0, \"orig_insn_count\": 11, \"prog_id\": 26, \"prog_name\": \"vfs_read\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 12, \"insns_before\": 12, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 27, \"program\": {\"final_insn_count\": 12, \"insn_delta\": 0, \"orig_insn_count\": 12, \"prog_id\": 27, \"prog_name\": \"vfs_write\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "23": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 12, \"insns_before\": 12, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 23, \"program\": {\"final_insn_count\": 12, \"insn_delta\": 0, \"orig_insn_count\": 12, \"prog_id\": 23, \"prog_name\": \"vfs_create\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 23,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "24": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 12, \"insns_before\": 12, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 24, \"program\": {\"final_insn_count\": 12, \"insn_delta\": 0, \"orig_insn_count\": 12, \"prog_id\": 24, \"prog_name\": \"vfs_fsync_range\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 24,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "25": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 12, \"insns_before\": 12, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 25, \"program\": {\"final_insn_count\": 12, \"insn_delta\": 0, \"orig_insn_count\": 12, \"prog_id\": 25, \"prog_name\": \"vfs_open\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 25,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "26": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 11, \"insns_before\": 11, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 26, \"program\": {\"final_insn_count\": 11, \"insn_delta\": 0, \"orig_insn_count\": 11, \"prog_id\": 26, \"prog_name\": \"vfs_read\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 26,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "27": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 12, \"insns_before\": 12, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 27, \"program\": {\"final_insn_count\": 12, \"insn_delta\": 0, \"orig_insn_count\": 12, \"prog_id\": 27, \"prog_name\": \"vfs_write\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 27,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 5,
+      "not_applied": 0,
+      "requested": 5
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "stress_ng_filesystem",
+  "status": "ok"
+}

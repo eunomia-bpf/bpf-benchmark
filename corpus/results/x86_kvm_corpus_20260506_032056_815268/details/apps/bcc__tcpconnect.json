@@ -1,0 +1,451 @@
+{
+  "app": "bcc/tcpconnect",
+  "baseline": {
+    "bpf": {
+      "30": {
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 30,
+        "name": "trace_connect_entry",
+        "run_cnt_delta": 54228,
+        "run_time_ns_delta": 13308776,
+        "type": "kprobe"
+      },
+      "31": {
+        "bytes_jited": 480,
+        "bytes_xlated": 720,
+        "id": 31,
+        "name": "trace_connect_v4_return",
+        "run_cnt_delta": 54228,
+        "run_time_ns_delta": 98040460,
+        "type": "kprobe"
+      },
+      "32": {
+        "bytes_jited": 477,
+        "bytes_xlated": 712,
+        "id": 32,
+        "name": "trace_connect_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.004725864999955,
+        "ops_per_sec": 6018.851906145612,
+        "ops_total": 18085.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://127.0.0.1:41531/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     2.51ms   15.32ms 221.54ms   98.66%\n    Req/Sec     3.03k   680.28     4.33k    56.67%\n  18085 requests in 3.00s, 2.67MB read\n  Socket errors: connect 0, read 18085, write 0, timeout 0\nRequests/sec:   6027.33\nTransfer/sec:      0.89MB"
+      },
+      {
+        "duration_s": 3.0052042820000224,
+        "ops_per_sec": 5793.61612928777,
+        "ops_total": 17411.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://127.0.0.1:41817/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     2.54ms   15.27ms 220.91ms   98.66%\n    Req/Sec     2.92k     1.21k    5.29k    63.33%\n  17411 requests in 3.00s, 2.57MB read\n  Socket errors: connect 0, read 17410, write 0, timeout 0\nRequests/sec:   5802.63\nTransfer/sec:      0.86MB"
+      },
+      {
+        "duration_s": 3.1028927219999787,
+        "ops_per_sec": 6026.956674140579,
+        "ops_total": 18701.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://127.0.0.1:38279/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     2.61ms   16.16ms 231.87ms   98.64%\n    Req/Sec     3.03k     0.95k    4.46k    45.16%\n  18701 requests in 3.10s, 2.76MB read\n  Socket errors: connect 0, read 18700, write 0, timeout 0\nRequests/sec:   6032.54\nTransfer/sec:      0.89MB"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "30": {
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 30,
+        "name": "trace_connect_entry",
+        "run_cnt_delta": 53082,
+        "run_time_ns_delta": 13866966,
+        "type": "kprobe"
+      },
+      "31": {
+        "bytes_jited": 483,
+        "bytes_xlated": 736,
+        "id": 31,
+        "name": "trace_connect_v4_return",
+        "run_cnt_delta": 53082,
+        "run_time_ns_delta": 97520819,
+        "type": "kprobe"
+      },
+      "32": {
+        "bytes_jited": 477,
+        "bytes_xlated": 728,
+        "id": 32,
+        "name": "trace_connect_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.104023400000017,
+        "ops_per_sec": 5745.446377756013,
+        "ops_total": 17834.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://127.0.0.1:43209/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     3.15ms   17.76ms 221.55ms   98.14%\n    Req/Sec     2.94k     0.89k    5.71k    52.46%\n  17834 requests in 3.10s, 2.64MB read\n  Socket errors: connect 0, read 17833, write 0, timeout 0\nRequests/sec:   5753.10\nTransfer/sec:      0.85MB"
+      },
+      {
+        "duration_s": 3.008111776000021,
+        "ops_per_sec": 5804.305591069857,
+        "ops_total": 17460.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://127.0.0.1:34943/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     2.53ms   15.17ms 221.98ms   98.67%\n    Req/Sec     2.92k   582.90     4.04k    68.33%\n  17460 requests in 3.00s, 2.58MB read\n  Socket errors: connect 0, read 17458, write 0, timeout 0\nRequests/sec:   5817.77\nTransfer/sec:      0.86MB"
+      },
+      {
+        "duration_s": 3.1043142690000423,
+        "ops_per_sec": 5720.748114114267,
+        "ops_total": 17759.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://127.0.0.1:44211/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     2.45ms   14.80ms 221.03ms   98.72%\n    Req/Sec     2.92k   731.43     5.78k    62.30%\n  17759 requests in 3.10s, 2.63MB read\n  Socket errors: connect 0, read 17758, write 0, timeout 0\nRequests/sec:   5729.88\nTransfer/sec:    867.36KB"
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "30": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 15,
+              "insn_count_before": 15,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "rotate",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 15,
+              "insn_count_before": 15,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "cond_select",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 15,
+              "insn_count_before": 15,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "extract",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 15,
+              "insn_count_before": 15,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "endian_fusion",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 15,
+              "insn_count_before": 15,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "bulk_memory",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 15,
+              "insn_count_before": 15,
+              "insn_delta": 0,
+              "pass": "prefetch",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "prefetch",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 30,
+        "program": {
+          "final_insn_count": 15,
+          "orig_insn_count": 15,
+          "prog_id": 30,
+          "prog_name": "trace_connect_e",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "31": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 88,
+              "insn_count_before": 88,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "rotate",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 88,
+              "insn_count_before": 88,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "cond_select",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 88,
+              "insn_count_before": 88,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "extract",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 88,
+              "insn_count_before": 88,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "endian_fusion",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 88,
+              "insn_count_before": 88,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "bulk_memory",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 90,
+              "insn_count_before": 88,
+              "insn_delta": 2,
+              "pass": "prefetch",
+              "sites_applied": 1,
+              "sites_matched": 1,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "prefetch",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 31,
+        "program": {
+          "final_insn_count": 90,
+          "orig_insn_count": 88,
+          "prog_id": 31,
+          "prog_name": "trace_connect_v",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "32": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 87,
+              "insn_count_before": 87,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "rotate",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 87,
+              "insn_count_before": 87,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "cond_select",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 87,
+              "insn_count_before": 87,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "extract",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 87,
+              "insn_count_before": 87,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 1,
+              "sites_matched": 1,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "endian_fusion",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 87,
+              "insn_count_before": 87,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "bulk_memory",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 89,
+              "insn_count_before": 87,
+              "insn_delta": 2,
+              "pass": "prefetch",
+              "sites_applied": 1,
+              "sites_matched": 1,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "prefetch",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 32,
+        "program": {
+          "final_insn_count": 89,
+          "orig_insn_count": 87,
+          "prog_id": 32,
+          "prog_name": "trace_connect_v",
+          "prog_type": 2
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bcc",
+  "selected_workload": "tcp_connect",
+  "status": "ok"
+}

@@ -1,0 +1,238 @@
+{
+  "app": "bcc/runqlat",
+  "baseline": {
+    "bpf": {
+      "38": {
+        "bytes_jited": 662,
+        "bytes_xlated": 1168,
+        "id": 38,
+        "name": "sched_switch",
+        "run_cnt_delta": 38450607,
+        "run_time_ns_delta": 7162316973,
+        "type": "raw_tracepoint"
+      },
+      "39": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 39,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 8049612,
+        "run_time_ns_delta": 630391067,
+        "type": "raw_tracepoint"
+      },
+      "40": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 40,
+        "name": "raw_tracepoint__sched_wakeup_new",
+        "run_cnt_delta": 78,
+        "run_time_ns_delta": 25629,
+        "type": "raw_tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0215898110000126,
+        "ops_per_sec": 14002795.100105606,
+        "ops_total": 42310703.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [16116] setting to a 3 secs run per stressor\nstress-ng: info:  [16116] dispatching hogs: 4 futex, 4 sem, 4 sem-sysv, 4 switch, 4 yield\nstress-ng: info:  [16116] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [16116] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [16116]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [16116] futex           3361938      6.00      1.19     14.90    560248.35      208888.29\nstress-ng: metrc: [16116] sem             5268771      3.00      0.95      3.44   1755917.97     1201598.66\nstress-ng: metrc: [16116] sem-sysv         594568      3.00      0.29      1.14    198134.52      416279.32\nstress-ng: metrc: [16116] switch          3347202      3.00      1.10      7.39   1115562.16      394254.15\nstress-ng: metrc: [16116] yield          29738224      3.00      6.11     15.32   9908893.47     1387387.90\nstress-ng: info:  [16116] skipped: 0\nstress-ng: info:  [16116] passed: 20: futex (4) sem (4) sem-sysv (4) switch (4) yield (4)\nstress-ng: info:  [16116] failed: 0\nstress-ng: info:  [16116] metrics untrustworthy: 0\nstress-ng: info:  [16116] successful run completed in 3.01 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "38": {
+        "bytes_jited": 662,
+        "bytes_xlated": 1168,
+        "id": 38,
+        "name": "sched_switch",
+        "run_cnt_delta": 37526142,
+        "run_time_ns_delta": 7100595869,
+        "type": "raw_tracepoint"
+      },
+      "39": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 39,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 9807883,
+        "run_time_ns_delta": 709739894,
+        "type": "raw_tracepoint"
+      },
+      "40": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 40,
+        "name": "raw_tracepoint__sched_wakeup_new",
+        "run_cnt_delta": 78,
+        "run_time_ns_delta": 25076,
+        "type": "raw_tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.019292136000047,
+        "ops_per_sec": 11049686.64747964,
+        "ops_total": 33362232.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [16295] setting to a 3 secs run per stressor\nstress-ng: info:  [16295] dispatching hogs: 4 futex, 4 sem, 4 sem-sysv, 4 switch, 4 yield\nstress-ng: info:  [16295] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [16295] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [16295]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [16295] futex           3095948      6.00      0.65     14.62    515965.90      202737.30\nstress-ng: metrc: [16295] sem             5368282      3.00      1.50      4.17   1789247.10      947874.92\nstress-ng: metrc: [16295] sem-sysv        1296356      3.00      0.47      2.45    431959.83      443483.83\nstress-ng: metrc: [16295] switch          4356402      3.00      0.71      8.27   1452004.38      485279.16\nstress-ng: metrc: [16295] yield          19245244      3.00      5.43     13.07   6411824.57     1040643.13\nstress-ng: info:  [16295] skipped: 0\nstress-ng: info:  [16295] passed: 20: futex (4) sem (4) sem-sysv (4) switch (4) yield (4)\nstress-ng: info:  [16295] failed: 0\nstress-ng: info:  [16295] metrics untrustworthy: 0\nstress-ng: info:  [16295] successful run completed in 3.01 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "38": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "noop",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=60: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=60: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 60",
+                "site at PC=127: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=127: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 127"
+              ],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 2,
+              "sites_skipped": 2,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 2
+              }
+            },
+            "error": null,
+            "pass": "map_inline",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 38,
+        "program": {
+          "final_insn_count": 138,
+          "orig_insn_count": 138,
+          "prog_id": 38,
+          "prog_name": "sched_switch",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "39": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 31,
+              "insn_count_before": 31,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "noop",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 31,
+              "insn_count_before": 31,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "map_inline",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 39,
+        "program": {
+          "final_insn_count": 31,
+          "orig_insn_count": 31,
+          "prog_id": 39,
+          "prog_name": "sched_wakeup",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "40": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 31,
+              "insn_count_before": 31,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "noop",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 31,
+              "insn_count_before": 31,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "map_inline",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 40,
+        "program": {
+          "final_insn_count": 31,
+          "orig_insn_count": 31,
+          "prog_id": 40,
+          "prog_name": "sched_wakeup_ne",
+          "prog_type": 17
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bcc",
+  "selected_workload": "stress_ng_scheduler",
+  "status": "ok"
+}

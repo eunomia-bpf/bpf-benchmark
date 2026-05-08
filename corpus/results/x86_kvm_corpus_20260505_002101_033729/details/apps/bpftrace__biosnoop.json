@@ -1,0 +1,132 @@
+{
+  "app": "bpftrace/biosnoop",
+  "baseline": {
+    "bpf": {
+      "826": {
+        "avg_ns_per_run": 447.9566590198555,
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 826,
+        "name": "block_io_start",
+        "run_cnt_delta": 1350454,
+        "run_time_ns_delta": 604944862,
+        "type": "tracepoint"
+      },
+      "827": {
+        "avg_ns_per_run": 820.2217703627407,
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 827,
+        "name": "block_io_done",
+        "run_cnt_delta": 1350469,
+        "run_time_ns_delta": 1107684074,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 5.3423403890000145,
+        "ops_per_sec": 339872.0163429847,
+        "ops_total": 1815712.0,
+        "stderr": "",
+        "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.065640,\n        \"1000\" : 9.731695\n      },\n      \"latency_us\" : {\n        \"2\" : 37.702831,\n        \"4\" : 1.889186,\n        \"10\" : 8.641236,\n        \"20\" : 36.691493,\n        \"50\" : 2.677968,\n        \"100\" : 2.081464,\n        \"250\" : 0.475391,\n        \"500\" : 0.042213,\n        \"750\" : 0.010000,\n        \"1000\" : 0.010000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "826": {
+        "avg_ns_per_run": 437.153357065407,
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 826,
+        "name": "block_io_start",
+        "run_cnt_delta": 1381534,
+        "run_time_ns_delta": 603942226,
+        "type": "tracepoint"
+      },
+      "827": {
+        "avg_ns_per_run": 789.6577211521271,
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 827,
+        "name": "block_io_done",
+        "run_cnt_delta": 1381549,
+        "run_time_ns_delta": 1090950835,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 5.359064513999954,
+        "ops_per_sec": 344202.2381296558,
+        "ops_total": 1844602.0,
+        "stderr": "",
+        "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.073690,\n        \"1000\" : 9.624162\n      },\n      \"latency_us\" : {\n        \"2\" : 37.758886,\n        \"4\" : 1.879625,\n        \"10\" : 8.908659,\n        \"20\" : 36.983741,\n        \"50\" : 2.643749,\n        \"100\" : 1.761419,\n        \"250\" : 0.334737,\n        \"500\" : 0.028309,\n        \"750\" : 0.010000,\n        \"1000\" : 0.010000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.010000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": false,
+    "changed": false,
+    "enabled_passes": [
+      "map_inline"
+    ],
+    "error": "prog 826: prog 826 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT; prog 827: prog 827 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+    "exit_code": 1,
+    "output": "{\"changed\": false, \"error_message\": \"prog 826 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 826, \"program\": {\"final_insn_count\": 51, \"insn_delta\": 0, \"orig_insn_count\": 51, \"prog_id\": 826, \"prog_name\": \"block_io_start\", \"prog_type\": 5}, \"skipped_maps\": [{\"map_id\": 4235, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 4234, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 4233, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}\n{\"changed\": false, \"error_message\": \"prog 827 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 827, \"program\": {\"final_insn_count\": 181, \"insn_delta\": 0, \"orig_insn_count\": 181, \"prog_id\": 827, \"prog_name\": \"block_io_done\", \"prog_type\": 5}, \"skipped_maps\": [{\"map_id\": 4235, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 4236, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 4233, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 4234, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 4238, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "826": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 826 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 826 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 826, \"program\": {\"final_insn_count\": 51, \"insn_delta\": 0, \"orig_insn_count\": 51, \"prog_id\": 826, \"prog_name\": \"block_io_start\", \"prog_type\": 5}, \"skipped_maps\": [{\"map_id\": 4235, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 4234, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 4233, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 826,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      },
+      "827": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 827 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 827 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 827, \"program\": {\"final_insn_count\": 181, \"insn_delta\": 0, \"orig_insn_count\": 181, \"prog_id\": 827, \"prog_name\": \"block_io_done\", \"prog_type\": 5}, \"skipped_maps\": [{\"map_id\": 4235, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 4236, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 4233, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 4234, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 4238, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 827,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 0,
+      "not_applied": 2,
+      "requested": 2
+    }
+  },
+  "runner": "bpftrace",
+  "selected_workload": "fio_randrw",
+  "status": "ok"
+}

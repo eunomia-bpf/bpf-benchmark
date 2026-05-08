@@ -1,0 +1,10 @@
+{
+  "app": "bpftrace/biosnoop",
+  "baseline": null,
+  "error": "name 'script_spec' is not defined",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "bpftrace",
+  "selected_workload": "fio_randrw",
+  "status": "error"
+}

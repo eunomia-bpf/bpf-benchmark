@@ -1,0 +1,98 @@
+{
+  "app": "bpftrace/tcplife",
+  "baseline": {
+    "bpf": {
+      "699": {
+        "avg_ns_per_run": 464.2459472057732,
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 699,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 57923,
+        "run_time_ns_delta": 26890518,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.104024355999968,
+        "ops_per_sec": 5983.563645221058,
+        "ops_total": 6606.0,
+        "stderr": "",
+        "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.89ms  306.59us   4.65ms   79.49%\n    Req/Sec     3.02k   213.64     3.65k    90.91%\n  6606 requests in 1.10s, 0.98MB read\n  Socket errors: connect 0, read 6603, write 0, timeout 0\nRequests/sec:   6001.98\nTransfer/sec:      0.89MB"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "699": {
+        "avg_ns_per_run": 441.0649029738556,
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 699,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 57871,
+        "run_time_ns_delta": 25524867,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.102455657000064,
+        "ops_per_sec": 5998.427200233066,
+        "ops_total": 6613.0,
+        "stderr": "",
+        "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.89ms  302.70us   4.48ms   80.15%\n    Req/Sec     3.03k     2.00k    5.35k    40.91%\n  6613 requests in 1.10s, 0.98MB read\n  Socket errors: connect 0, read 6612, write 0, timeout 0\nRequests/sec:   6013.81\nTransfer/sec:      0.89MB"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": false,
+    "enabled_passes": [
+      "wide_mem"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 699, \"program\": {\"final_insn_count\": 401, \"insn_delta\": 0, \"orig_insn_count\": 401, \"prog_id\": 699, \"prog_name\": \"tcp_set_state\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "699": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 699, \"program\": {\"final_insn_count\": 401, \"insn_delta\": 0, \"orig_insn_count\": 401, \"prog_id\": 699, \"prog_name\": \"tcp_set_state\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 699,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 1,
+      "not_applied": 0,
+      "requested": 1
+    }
+  },
+  "runner": "bpftrace",
+  "selected_workload": "tcp_connect",
+  "status": "ok"
+}

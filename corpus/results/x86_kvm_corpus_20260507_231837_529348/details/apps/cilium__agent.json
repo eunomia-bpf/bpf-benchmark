@@ -1,0 +1,4800 @@
+{
+  "app": "cilium/agent",
+  "baseline": {
+    "bpf": {
+      "63": {
+        "bytes_jited": 167,
+        "bytes_xlated": 280,
+        "id": 63,
+        "name": "dump_bpf_map",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "64": {
+        "bytes_jited": 740,
+        "bytes_xlated": 520,
+        "id": 64,
+        "name": "dump_bpf_prog",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "159": {
+        "bytes_jited": 490,
+        "bytes_xlated": 848,
+        "id": 159,
+        "name": "cil_xdp_entry",
+        "run_cnt_delta": 1594399,
+        "run_time_ns_delta": 70057903,
+        "type": "xdp"
+      },
+      "160": {
+        "bytes_jited": 12622,
+        "bytes_xlated": 21224,
+        "id": 160,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "161": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 161,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "162": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 162,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "163": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 163,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "164": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 164,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "165": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 165,
+        "name": "cil_from_host",
+        "run_cnt_delta": 1570409,
+        "run_time_ns_delta": 287410161,
+        "type": "sched_cls"
+      },
+      "166": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 166,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "167": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 167,
+        "name": "cil_to_host",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 7443,
+        "type": "sched_cls"
+      },
+      "168": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 168,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "169": {
+        "bytes_jited": 8048,
+        "bytes_xlated": 13936,
+        "id": 169,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "170": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 170,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "171": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 171,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "172": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 172,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "173": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 173,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "174": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 174,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "175": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 175,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "176": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 176,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "177": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 177,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "178": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 178,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "179": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 179,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "180": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 180,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "181": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 181,
+        "name": "cil_to_host",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 1371,
+        "type": "sched_cls"
+      },
+      "182": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 182,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "183": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 183,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "184": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 184,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "185": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 185,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "186": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 186,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "187": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 187,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "188": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 188,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "189": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 189,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "190": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 190,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 1594399,
+        "run_time_ns_delta": 269811362,
+        "type": "sched_cls"
+      },
+      "191": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 191,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "192": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 192,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "193": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 193,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 1849282,
+        "run_time_ns_delta": 392226018,
+        "type": "sched_cls"
+      },
+      "194": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 194,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "196": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 196,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "197": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 197,
+        "name": "cil_from_container",
+        "run_cnt_delta": 3985547,
+        "run_time_ns_delta": 916763228,
+        "type": "sched_cls"
+      },
+      "198": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 198,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "199": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 199,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "200": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 200,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "201": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 201,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "202": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 202,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "203": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 203,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "204": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 204,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "205": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 205,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "206": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 206,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "207": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 207,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "208": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 208,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "209": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 209,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "210": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 210,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "211": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 211,
+        "name": "cil_from_container",
+        "run_cnt_delta": 2291,
+        "run_time_ns_delta": 10257028,
+        "type": "sched_cls"
+      },
+      "212": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 212,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "213": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 213,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "214": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 214,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "216": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 216,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "217": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 217,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "218": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 218,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "219": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 219,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "220": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 220,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d30s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 30.14666472700003,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 30s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   325.08ms  263.83ms   1.95s    85.94%\n    Req/Sec    36.50     16.42    90.00     60.12%\n  4262 requests in 30.07s, 648.90KB read\n  Socket errors: connect 0, read 0, write 0, timeout 37\nRequests/sec:    141.73\nTransfer/sec:     21.58KB",
+            "workload_name": "network_lossy_multi_wrk"
+          },
+          {
+            "command": [],
+            "components": [
+              {
+                "command": [
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": null,
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.0090525959999468,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    49.23ms   11.29ms  60.79ms   94.29%\n    Req/Sec    70.20     51.61   131.00     95.00%\n  140 requests in 1.00s, 22.13KB read\nRequests/sec:    139.36\nTransfer/sec:     22.03KB",
+                "workload_name": "cilium host-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.39:44591/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.39:44591/"
+                },
+                "duration_s": 1.0102781969999342,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.39:44591/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    49.50ms   16.89ms 208.52ms   94.93%\n    Req/Sec    69.20     36.01   140.00     85.00%\n  138 requests in 1.00s, 21.83KB read\nRequests/sec:    137.57\nTransfer/sec:     21.76KB",
+                "workload_name": "cilium endpoint-to-host"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.236:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.236:18080/"
+                },
+                "duration_s": 1.0089520289999427,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.236:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    47.68ms   10.53ms  60.35ms   91.78%\n    Req/Sec    73.15     54.78   171.00     95.00%\n  146 requests in 1.00s, 23.04KB read\nRequests/sec:    145.46\nTransfer/sec:     22.96KB",
+                "workload_name": "cilium endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepb",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepb",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.0070896459999403,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.20ms   10.85ms  59.93ms   86.67%\n    Req/Sec   120.30     28.52   181.00     80.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.61\nTransfer/sec:     18.91KB",
+                "workload_name": "cilium reverse-endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://198.18.0.2:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://198.18.0.2:18080/"
+                },
+                "duration_s": 1.0091288059999215,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.16ms   10.64ms  60.40ms   90.00%\n    Req/Sec    70.10     52.14   151.00     95.00%\n  140 requests in 1.00s, 22.13KB read\nRequests/sec:    139.54\nTransfer/sec:     22.06KB",
+                "workload_name": "cilium endpoint-to-external"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbenchns",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.0100579749999952,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    53.56ms   25.79ms 219.61ms   92.79%\n    Req/Sec   102.05     32.44   141.00     50.00%\n  204 requests in 1.00s, 32.36KB read\nRequests/sec:    203.36\nTransfer/sec:     32.26KB",
+                "workload_name": "cilium external-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.236",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "10.244.0.236",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0132676959999571,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "727306",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.177",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbenchns",
+                  "target_host": "10.244.0.177",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0112477600000602,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "526152",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "198.18.0.2",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "198.18.0.2",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0109302930000013,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "599762",
+                "workload_name": "udp_burst"
+              }
+            ],
+            "duration_s": 9.0900049979997,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "",
+            "workload_name": "cilium_endpoint_matrix"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 39.23666972499973,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      },
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d30s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 30.149117256000068,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 30s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   323.58ms  257.58ms   2.00s    86.29%\n    Req/Sec    36.32     16.65    90.00     75.04%\n  4213 requests in 30.09s, 640.94KB read\n  Socket errors: connect 0, read 0, write 0, timeout 46\nRequests/sec:    140.02\nTransfer/sec:     21.30KB",
+            "workload_name": "network_lossy_multi_wrk"
+          },
+          {
+            "command": [],
+            "components": [
+              {
+                "command": [
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": null,
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.011476734000098,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    49.55ms   16.35ms 204.35ms   94.96%\n    Req/Sec    69.60     34.14   120.00     85.00%\n  139 requests in 1.00s, 21.71KB read\nRequests/sec:    138.42\nTransfer/sec:     21.62KB",
+                "workload_name": "cilium host-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.39:41799/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.39:41799/"
+                },
+                "duration_s": 1.1075457049998931,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.39:41799/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.25ms   11.06ms  60.17ms   88.05%\n    Req/Sec   145.18     26.97   181.00     63.64%\n  159 requests in 1.10s, 24.74KB read\nRequests/sec:    144.54\nTransfer/sec:     22.49KB",
+                "workload_name": "cilium endpoint-to-host"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.236:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.236:18080/"
+                },
+                "duration_s": 1.008209727999997,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.236:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.03ms   10.82ms  60.27ms   90.21%\n    Req/Sec    71.65     31.91   120.00     90.00%\n  143 requests in 1.00s, 22.59KB read\nRequests/sec:    142.68\nTransfer/sec:     22.54KB",
+                "workload_name": "cilium endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepb",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepb",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.0100310550000131,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.97ms   11.35ms  60.21ms   95.00%\n    Req/Sec   120.60      0.52   121.00     60.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.64\nTransfer/sec:     18.92KB",
+                "workload_name": "cilium reverse-endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://198.18.0.2:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://198.18.0.2:18080/"
+                },
+                "duration_s": 1.0117969579999908,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.00ms   10.48ms  59.05ms   94.17%\n    Req/Sec    59.90      0.31    60.00     90.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.50\nTransfer/sec:     18.89KB",
+                "workload_name": "cilium endpoint-to-external"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbenchns",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.008107435999932,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    53.86ms   26.80ms 212.48ms   92.45%\n    Req/Sec   114.56     92.00   242.00     50.00%\n  207 requests in 1.00s, 31.87KB read\nRequests/sec:    206.10\nTransfer/sec:     31.73KB",
+                "workload_name": "cilium external-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.236",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "10.244.0.236",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0146021929999733,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "730851",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.177",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbenchns",
+                  "target_host": "10.244.0.177",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0153482069999882,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "516642",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "198.18.0.2",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "198.18.0.2",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.011457140999937,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "593404",
+                "workload_name": "udp_burst"
+              }
+            ],
+            "duration_s": 9.198575156999823,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "",
+            "workload_name": "cilium_endpoint_matrix"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 39.34769241299989,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      },
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d30s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 30.125407154999948,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 30s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   315.76ms  241.93ms   1.94s    86.47%\n    Req/Sec    37.34     16.43   101.00     62.45%\n  4380 requests in 30.07s, 666.63KB read\n  Socket errors: connect 0, read 0, write 0, timeout 38\nRequests/sec:    145.68\nTransfer/sec:     22.17KB",
+            "workload_name": "network_lossy_multi_wrk"
+          },
+          {
+            "command": [],
+            "components": [
+              {
+                "command": [
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": null,
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.1042475839999497,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    45.97ms   16.29ms  60.43ms   87.74%\n    Req/Sec    70.55     39.41   202.00     90.91%\n  155 requests in 1.10s, 26.02KB read\nRequests/sec:    140.88\nTransfer/sec:     23.65KB",
+                "workload_name": "cilium host-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.39:33457/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.39:33457/"
+                },
+                "duration_s": 1.0077029320000293,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.39:33457/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.45ms   11.18ms  60.31ms   87.14%\n    Req/Sec    70.05     33.56   130.00     80.00%\n  140 requests in 1.00s, 22.13KB read\nRequests/sec:    139.54\nTransfer/sec:     22.06KB",
+                "workload_name": "cilium endpoint-to-host"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.236:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.236:18080/"
+                },
+                "duration_s": 1.0086358289998998,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.236:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.35ms   11.06ms  60.40ms   86.88%\n    Req/Sec    80.15     63.15   180.00     90.00%\n  160 requests in 1.00s, 25.30KB read\nRequests/sec:    159.73\nTransfer/sec:     25.25KB",
+                "workload_name": "cilium endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepb",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepb",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.008739392999928,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    47.99ms   10.86ms  60.14ms   88.89%\n    Req/Sec    72.10     35.86   140.00     85.00%\n  144 requests in 1.00s, 22.20KB read\nRequests/sec:    143.41\nTransfer/sec:     22.11KB",
+                "workload_name": "cilium reverse-endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://198.18.0.2:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://198.18.0.2:18080/"
+                },
+                "duration_s": 1.0102988200000027,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    50.02ms   17.51ms 214.54ms   94.85%\n    Req/Sec    68.00     10.05    80.00     60.00%\n  136 requests in 1.00s, 21.53KB read\nRequests/sec:    135.56\nTransfer/sec:     21.46KB",
+                "workload_name": "cilium endpoint-to-external"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbenchns",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.0115596119999282,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.02ms   10.81ms  60.16ms   90.83%\n    Req/Sec   120.30     26.67   160.00     60.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.59\nTransfer/sec:     18.91KB",
+                "workload_name": "cilium external-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.236",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "10.244.0.236",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0117340369999965,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "716379",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.177",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbenchns",
+                  "target_host": "10.244.0.177",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0134014700000762,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "522381",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "198.18.0.2",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "198.18.0.2",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0115510189999668,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "610409",
+                "workload_name": "udp_burst"
+              }
+            ],
+            "duration_s": 9.187870695999777,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "",
+            "workload_name": "cilium_endpoint_matrix"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 39.313277850999725,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "63": {
+        "bytes_jited": 167,
+        "bytes_xlated": 280,
+        "id": 63,
+        "name": "dump_bpf_map",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "64": {
+        "bytes_jited": 740,
+        "bytes_xlated": 520,
+        "id": 64,
+        "name": "dump_bpf_prog",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "159": {
+        "bytes_jited": 490,
+        "bytes_xlated": 848,
+        "id": 159,
+        "name": "cil_xdp_entry",
+        "run_cnt_delta": 1634937,
+        "run_time_ns_delta": 74085869,
+        "type": "xdp"
+      },
+      "160": {
+        "bytes_jited": 12622,
+        "bytes_xlated": 21224,
+        "id": 160,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "161": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 161,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "162": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 162,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "163": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 163,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "164": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 164,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "165": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 165,
+        "name": "cil_from_host",
+        "run_cnt_delta": 1612208,
+        "run_time_ns_delta": 285048119,
+        "type": "sched_cls"
+      },
+      "166": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 166,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "167": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 167,
+        "name": "cil_to_host",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 573,
+        "type": "sched_cls"
+      },
+      "168": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 168,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "169": {
+        "bytes_jited": 8048,
+        "bytes_xlated": 13936,
+        "id": 169,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "170": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 170,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "171": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 171,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "172": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 172,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "173": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 173,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "174": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 174,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "175": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 175,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "176": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 176,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "177": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 177,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "178": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 178,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "179": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 179,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "180": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 180,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "181": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 181,
+        "name": "cil_to_host",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 634,
+        "type": "sched_cls"
+      },
+      "182": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 182,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "183": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 183,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "184": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 184,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "185": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 185,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "186": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 186,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "187": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 187,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "188": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 188,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "189": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 189,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "190": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 190,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 1634937,
+        "run_time_ns_delta": 274140614,
+        "type": "sched_cls"
+      },
+      "191": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 191,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "192": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 192,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "193": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 193,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 1894497,
+        "run_time_ns_delta": 403991877,
+        "type": "sched_cls"
+      },
+      "194": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 194,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "196": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 196,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "197": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 197,
+        "name": "cil_from_container",
+        "run_cnt_delta": 4116451,
+        "run_time_ns_delta": 923639010,
+        "type": "sched_cls"
+      },
+      "198": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 198,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "199": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 199,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "200": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 200,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "201": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 201,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "202": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 202,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "203": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 203,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "204": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 204,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "205": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 205,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "206": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 206,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "207": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 207,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "208": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 208,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "209": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 209,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "210": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 210,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "211": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 211,
+        "name": "cil_from_container",
+        "run_cnt_delta": 2223,
+        "run_time_ns_delta": 11187730,
+        "type": "sched_cls"
+      },
+      "212": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 212,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "213": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 213,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "214": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 214,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "216": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 216,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "217": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 217,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "218": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 218,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "219": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 219,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "220": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 220,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d30s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 30.154224781999915,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 30s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   329.16ms  272.11ms   1.99s    86.15%\n    Req/Sec    33.61     16.71   100.00     75.65%\n  3811 requests in 30.08s, 580.90KB read\n  Socket errors: connect 0, read 0, write 0, timeout 45\nRequests/sec:    126.70\nTransfer/sec:     19.31KB",
+            "workload_name": "network_lossy_multi_wrk"
+          },
+          {
+            "command": [],
+            "components": [
+              {
+                "command": [
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": null,
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.008620191000091,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.51ms   10.08ms  59.90ms   89.17%\n    Req/Sec   120.40      0.52   121.00     60.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.57\nTransfer/sec:     18.91KB",
+                "workload_name": "cilium host-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.39:43551/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.39:43551/"
+                },
+                "duration_s": 1.0105564950000598,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.39:43551/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.30ms   10.87ms  60.71ms   88.03%\n    Req/Sec    71.15     33.02   121.00     90.00%\n  142 requests in 1.00s, 22.17KB read\nRequests/sec:    141.45\nTransfer/sec:     22.08KB",
+                "workload_name": "cilium endpoint-to-host"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.236:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.236:18080/"
+                },
+                "duration_s": 1.0078608649999978,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.236:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.59ms   11.06ms  60.70ms   88.33%\n    Req/Sec   120.30      4.74   130.00     80.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.61\nTransfer/sec:     18.91KB",
+                "workload_name": "cilium endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepb",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepb",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.0085442949999788,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.62ms   11.16ms  60.51ms   85.83%\n    Req/Sec    60.00      3.24    70.00     90.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.86\nTransfer/sec:     18.95KB",
+                "workload_name": "cilium reverse-endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://198.18.0.2:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://198.18.0.2:18080/"
+                },
+                "duration_s": 1.010857943000019,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.07ms   10.92ms  60.04ms   88.33%\n    Req/Sec    60.15     41.84   120.00     90.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.55\nTransfer/sec:     18.90KB",
+                "workload_name": "cilium endpoint-to-external"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbenchns",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.012751420000086,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    49.10ms   11.74ms  60.28ms   94.96%\n    Req/Sec    69.65     52.32   161.00     95.00%\n  139 requests in 1.01s, 21.98KB read\nRequests/sec:    138.09\nTransfer/sec:     21.84KB",
+                "workload_name": "cilium external-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.236",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "10.244.0.236",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0119701769999665,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "773751",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.177",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbenchns",
+                  "target_host": "10.244.0.177",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0145929070000648,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "518520",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "198.18.0.2",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "198.18.0.2",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0114734380000527,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "644158",
+                "workload_name": "udp_burst"
+              }
+            ],
+            "duration_s": 9.097227731000316,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "",
+            "workload_name": "cilium_endpoint_matrix"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 39.25145251300023,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      },
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d30s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 30.156987964999985,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 30s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   330.42ms  267.43ms   1.93s    85.50%\n    Req/Sec    35.36     16.42    90.00     76.19%\n  4127 requests in 30.08s, 627.93KB read\n  Socket errors: connect 0, read 0, write 0, timeout 45\nRequests/sec:    137.19\nTransfer/sec:     20.87KB",
+            "workload_name": "network_lossy_multi_wrk"
+          },
+          {
+            "command": [],
+            "components": [
+              {
+                "command": [
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": null,
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.0055371380000224,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    49.10ms   16.59ms 218.93ms   94.97%\n    Req/Sec    79.70     19.28   101.00     15.00%\n  159 requests in 1.00s, 25.15KB read\nRequests/sec:    158.88\nTransfer/sec:     25.13KB",
+                "workload_name": "cilium host-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.39:45449/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.39:45449/"
+                },
+                "duration_s": 1.1068837439999015,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.39:45449/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    47.45ms   12.57ms  60.28ms   89.44%\n    Req/Sec    76.86     58.15   200.00     95.24%\n  161 requests in 1.10s, 25.85KB read\nRequests/sec:    146.32\nTransfer/sec:     23.50KB",
+                "workload_name": "cilium endpoint-to-host"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.236:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.236:18080/"
+                },
+                "duration_s": 1.0101071230000116,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.236:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.70ms   11.27ms  60.40ms   90.71%\n    Req/Sec   140.50      9.20   160.00     80.00%\n  140 requests in 1.00s, 22.13KB read\nRequests/sec:    139.56\nTransfer/sec:     22.07KB",
+                "workload_name": "cilium endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepb",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepb",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.0105572800000573,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.74ms   11.22ms  59.88ms   95.00%\n    Req/Sec   140.60      0.52   141.00     60.00%\n  140 requests in 1.00s, 22.13KB read\nRequests/sec:    139.60\nTransfer/sec:     22.07KB",
+                "workload_name": "cilium reverse-endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://198.18.0.2:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://198.18.0.2:18080/"
+                },
+                "duration_s": 1.009700047000024,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.09ms   10.86ms  60.33ms   90.83%\n    Req/Sec   120.40      9.20   140.00     80.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.60\nTransfer/sec:     18.91KB",
+                "workload_name": "cilium endpoint-to-external"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbenchns",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.006869054000049,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.23ms   10.89ms  60.15ms   88.57%\n    Req/Sec    70.15     52.16   150.00     95.00%\n  140 requests in 1.00s, 22.13KB read\nRequests/sec:    139.70\nTransfer/sec:     22.09KB",
+                "workload_name": "cilium external-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.236",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "10.244.0.236",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.014301678000038,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "746503",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.177",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbenchns",
+                  "target_host": "10.244.0.177",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0110768260000214,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "545487",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "198.18.0.2",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "198.18.0.2",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.010963175000029,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "608085",
+                "workload_name": "udp_burst"
+              }
+            ],
+            "duration_s": 9.185996065000154,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "",
+            "workload_name": "cilium_endpoint_matrix"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 39.34298403000014,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      },
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d30s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 30.13261736900006,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 30s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   331.66ms  265.51ms   1.98s    85.58%\n    Req/Sec    36.18     16.72   100.00     76.40%\n  4194 requests in 30.07s, 638.61KB read\n  Socket errors: connect 0, read 0, write 0, timeout 40\nRequests/sec:    139.46\nTransfer/sec:     21.24KB",
+            "workload_name": "network_lossy_multi_wrk"
+          },
+          {
+            "command": [],
+            "components": [
+              {
+                "command": [
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": null,
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.005263861000003,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    47.86ms   10.52ms  60.35ms   91.55%\n    Req/Sec    71.05     12.22   101.00     95.00%\n  142 requests in 1.00s, 22.44KB read\nRequests/sec:    141.82\nTransfer/sec:     22.41KB",
+                "workload_name": "cilium host-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.39:35935/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.39:35935/"
+                },
+                "duration_s": 1.0122704719999547,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.39:35935/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.64ms   11.20ms  60.36ms   90.83%\n    Req/Sec   120.00      4.55   130.00     80.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.47\nTransfer/sec:     18.89KB",
+                "workload_name": "cilium endpoint-to-host"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.236:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.236:18080/"
+                },
+                "duration_s": 1.0086805480000294,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.236:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    47.66ms   10.74ms  60.66ms   92.62%\n    Req/Sec   122.40     10.57   151.00     80.00%\n  122 requests in 1.00s, 19.28KB read\nRequests/sec:    121.56\nTransfer/sec:     19.21KB",
+                "workload_name": "cilium endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepb",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepb",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.009941327999968,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.18ms   11.18ms  60.43ms   88.57%\n    Req/Sec    70.00     12.57    80.00     90.00%\n  140 requests in 1.00s, 22.13KB read\nRequests/sec:    139.74\nTransfer/sec:     22.09KB",
+                "workload_name": "cilium reverse-endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://198.18.0.2:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://198.18.0.2:18080/"
+                },
+                "duration_s": 1.0069499220001035,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    49.77ms   17.65ms 215.41ms   94.85%\n    Req/Sec    68.25     33.77   111.00     85.00%\n  136 requests in 1.00s, 21.53KB read\nRequests/sec:    135.77\nTransfer/sec:     21.49KB",
+                "workload_name": "cilium endpoint-to-external"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbenchns",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.010252170000058,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    47.59ms   10.56ms  60.12ms   91.94%\n    Req/Sec   124.30     20.60   180.00     80.00%\n  124 requests in 1.00s, 19.58KB read\nRequests/sec:    123.53\nTransfer/sec:     19.50KB",
+                "workload_name": "cilium external-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.236",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "10.244.0.236",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0117089959999248,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "738044",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.177",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbenchns",
+                  "target_host": "10.244.0.177",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0114601930001754,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "543612",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "198.18.0.2",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "198.18.0.2",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0113376209999387,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "599135",
+                "workload_name": "udp_burst"
+              }
+            ],
+            "duration_s": 9.087865111000156,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "",
+            "workload_name": "cilium_endpoint_matrix"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 39.220482480000214,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "159": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 276,
+              "insn_count_before": 276,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 159,
+        "program": {
+          "final_insn_count": 276,
+          "orig_insn_count": 276,
+          "prog_id": 159,
+          "prog_name": "cil_xdp_entry",
+          "prog_type": 6
+        },
+        "status": "ok"
+      },
+      "160": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2617,
+              "insn_count_before": 2617,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 160,
+        "program": {
+          "final_insn_count": 2617,
+          "orig_insn_count": 2617,
+          "prog_id": 160,
+          "prog_name": "tail_handle_sna",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "161": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 96,
+              "insn_count_before": 96,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 161,
+        "program": {
+          "final_insn_count": 96,
+          "orig_insn_count": 96,
+          "prog_id": 161,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "162": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1281,
+              "insn_count_before": 1281,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 162,
+        "program": {
+          "final_insn_count": 1281,
+          "orig_insn_count": 1281,
+          "prog_id": 162,
+          "prog_name": "cil_to_netdev",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "163": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 163,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 163,
+          "prog_name": "cil_host_policy",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "164": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 227,
+              "insn_count_before": 227,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 164,
+        "program": {
+          "final_insn_count": 227,
+          "orig_insn_count": 227,
+          "prog_id": 164,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "165": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1194,
+              "insn_count_before": 1194,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 165,
+        "program": {
+          "final_insn_count": 1194,
+          "orig_insn_count": 1194,
+          "prog_id": 165,
+          "prog_name": "cil_from_host",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "166": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1837,
+              "insn_count_before": 1837,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 166,
+        "program": {
+          "final_insn_count": 1837,
+          "orig_insn_count": 1837,
+          "prog_id": 166,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "167": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 351,
+              "insn_count_before": 351,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 167,
+        "program": {
+          "final_insn_count": 351,
+          "orig_insn_count": 351,
+          "prog_id": 167,
+          "prog_name": "cil_to_host",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "168": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1113,
+              "insn_count_before": 1113,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 168,
+        "program": {
+          "final_insn_count": 1113,
+          "orig_insn_count": 1113,
+          "prog_id": 168,
+          "prog_name": "cil_from_netdev",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "169": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1720,
+              "insn_count_before": 1720,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 169,
+        "program": {
+          "final_insn_count": 1720,
+          "orig_insn_count": 1720,
+          "prog_id": 169,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "170": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1164,
+              "insn_count_before": 1164,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 170,
+        "program": {
+          "final_insn_count": 1164,
+          "orig_insn_count": 1164,
+          "prog_id": 170,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "171": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 96,
+              "insn_count_before": 96,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 171,
+        "program": {
+          "final_insn_count": 96,
+          "orig_insn_count": 96,
+          "prog_id": 171,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "172": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1837,
+              "insn_count_before": 1837,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 172,
+        "program": {
+          "final_insn_count": 1837,
+          "orig_insn_count": 1837,
+          "prog_id": 172,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "173": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 173,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 173,
+          "prog_name": "cil_host_policy",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "174": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 605,
+              "insn_count_before": 605,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 174,
+        "program": {
+          "final_insn_count": 605,
+          "orig_insn_count": 605,
+          "prog_id": 174,
+          "prog_name": "tail_no_service",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "175": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1194,
+              "insn_count_before": 1194,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 175,
+        "program": {
+          "final_insn_count": 1194,
+          "orig_insn_count": 1194,
+          "prog_id": 175,
+          "prog_name": "cil_from_host",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "176": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1164,
+              "insn_count_before": 1164,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 176,
+        "program": {
+          "final_insn_count": 1164,
+          "orig_insn_count": 1164,
+          "prog_id": 176,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "177": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 227,
+              "insn_count_before": 227,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 177,
+        "program": {
+          "final_insn_count": 227,
+          "orig_insn_count": 227,
+          "prog_id": 177,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "178": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1113,
+              "insn_count_before": 1113,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 178,
+        "program": {
+          "final_insn_count": 1113,
+          "orig_insn_count": 1113,
+          "prog_id": 178,
+          "prog_name": "cil_from_netdev",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "179": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2617,
+              "insn_count_before": 2617,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 179,
+        "program": {
+          "final_insn_count": 2617,
+          "orig_insn_count": 2617,
+          "prog_id": 179,
+          "prog_name": "tail_handle_sna",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "180": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1281,
+              "insn_count_before": 1281,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 180,
+        "program": {
+          "final_insn_count": 1281,
+          "orig_insn_count": 1281,
+          "prog_id": 180,
+          "prog_name": "cil_to_netdev",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "181": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 351,
+              "insn_count_before": 351,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 181,
+        "program": {
+          "final_insn_count": 351,
+          "orig_insn_count": 351,
+          "prog_id": 181,
+          "prog_name": "cil_to_host",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "182": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1720,
+              "insn_count_before": 1720,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 182,
+        "program": {
+          "final_insn_count": 1720,
+          "orig_insn_count": 1720,
+          "prog_id": 182,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "183": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1837,
+              "insn_count_before": 1837,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 183,
+        "program": {
+          "final_insn_count": 1837,
+          "orig_insn_count": 1837,
+          "prog_id": 183,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "184": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1720,
+              "insn_count_before": 1720,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log:\nprocessed 21815 insns (limit 1000000) max_states_per_insn 15 total_states 1532 peak_states 833 mark_read 0",
+            "status": "failed_rejit",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 184,
+        "program": {
+          "final_insn_count": 1720,
+          "orig_insn_count": 1720,
+          "prog_id": 184,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "185": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 605,
+              "insn_count_before": 605,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 185,
+        "program": {
+          "final_insn_count": 605,
+          "orig_insn_count": 605,
+          "prog_id": 185,
+          "prog_name": "tail_no_service",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "186": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2617,
+              "insn_count_before": 2617,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 186,
+        "program": {
+          "final_insn_count": 2617,
+          "orig_insn_count": 2617,
+          "prog_id": 186,
+          "prog_name": "tail_handle_sna",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "187": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 96,
+              "insn_count_before": 96,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 187,
+        "program": {
+          "final_insn_count": 96,
+          "orig_insn_count": 96,
+          "prog_id": 187,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "188": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 351,
+              "insn_count_before": 351,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 188,
+        "program": {
+          "final_insn_count": 351,
+          "orig_insn_count": 351,
+          "prog_id": 188,
+          "prog_name": "cil_to_host",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "189": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 227,
+              "insn_count_before": 227,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 189,
+        "program": {
+          "final_insn_count": 227,
+          "orig_insn_count": 227,
+          "prog_id": 189,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "190": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1113,
+              "insn_count_before": 1113,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 190,
+        "program": {
+          "final_insn_count": 1113,
+          "orig_insn_count": 1113,
+          "prog_id": 190,
+          "prog_name": "cil_from_netdev",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "191": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1194,
+              "insn_count_before": 1194,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 191,
+        "program": {
+          "final_insn_count": 1194,
+          "orig_insn_count": 1194,
+          "prog_id": 191,
+          "prog_name": "cil_from_host",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "192": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1164,
+              "insn_count_before": 1164,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 192,
+        "program": {
+          "final_insn_count": 1164,
+          "orig_insn_count": 1164,
+          "prog_id": 192,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "193": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1281,
+              "insn_count_before": 1281,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 193,
+        "program": {
+          "final_insn_count": 1281,
+          "orig_insn_count": 1281,
+          "prog_id": 193,
+          "prog_name": "cil_to_netdev",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "194": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 194,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 194,
+          "prog_name": "cil_host_policy",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "196": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1217,
+              "insn_count_before": 1217,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 196,
+        "program": {
+          "final_insn_count": 1217,
+          "orig_insn_count": 1217,
+          "prog_id": 196,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "197": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 380,
+              "insn_count_before": 380,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 197,
+        "program": {
+          "final_insn_count": 380,
+          "orig_insn_count": 380,
+          "prog_id": 197,
+          "prog_name": "cil_from_contai",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "198": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1146,
+              "insn_count_before": 1146,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 198,
+        "program": {
+          "final_insn_count": 1146,
+          "orig_insn_count": 1146,
+          "prog_id": 198,
+          "prog_name": "tail_ipv4_ct_eg",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "199": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1343,
+              "insn_count_before": 1343,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 199,
+        "program": {
+          "final_insn_count": 1343,
+          "orig_insn_count": 1343,
+          "prog_id": 199,
+          "prog_name": "tail_ipv4_to_en",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "200": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 197,
+              "insn_count_before": 197,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 200,
+        "program": {
+          "final_insn_count": 197,
+          "orig_insn_count": 197,
+          "prog_id": 200,
+          "prog_name": "tail_handle_arp",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "201": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 88,
+              "insn_count_before": 88,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 201,
+        "program": {
+          "final_insn_count": 88,
+          "orig_insn_count": 88,
+          "prog_id": 201,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "202": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1377,
+              "insn_count_before": 1377,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 202,
+        "program": {
+          "final_insn_count": 1377,
+          "orig_insn_count": 1377,
+          "prog_id": 202,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "203": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2446,
+              "insn_count_before": 2446,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 203,
+        "program": {
+          "final_insn_count": 2446,
+          "orig_insn_count": 2446,
+          "prog_id": 203,
+          "prog_name": "cil_lxc_policy",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "204": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 775,
+              "insn_count_before": 775,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 204,
+        "program": {
+          "final_insn_count": 775,
+          "orig_insn_count": 775,
+          "prog_id": 204,
+          "prog_name": "tail_nodeport_r",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "205": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 205,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 205,
+          "prog_name": "cil_lxc_policy_",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "206": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 601,
+              "insn_count_before": 601,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 206,
+        "program": {
+          "final_insn_count": 601,
+          "orig_insn_count": 601,
+          "prog_id": 206,
+          "prog_name": "tail_no_service",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "207": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1121,
+              "insn_count_before": 1121,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 207,
+        "program": {
+          "final_insn_count": 1121,
+          "orig_insn_count": 1121,
+          "prog_id": 207,
+          "prog_name": "tail_ipv4_ct_in",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "208": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2446,
+              "insn_count_before": 2446,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 208,
+        "program": {
+          "final_insn_count": 2446,
+          "orig_insn_count": 2446,
+          "prog_id": 208,
+          "prog_name": "cil_lxc_policy",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "209": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 775,
+              "insn_count_before": 775,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 209,
+        "program": {
+          "final_insn_count": 775,
+          "orig_insn_count": 775,
+          "prog_id": 209,
+          "prog_name": "tail_nodeport_r",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "210": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 197,
+              "insn_count_before": 197,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 210,
+        "program": {
+          "final_insn_count": 197,
+          "orig_insn_count": 197,
+          "prog_id": 210,
+          "prog_name": "tail_handle_arp",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "211": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 380,
+              "insn_count_before": 380,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 211,
+        "program": {
+          "final_insn_count": 380,
+          "orig_insn_count": 380,
+          "prog_id": 211,
+          "prog_name": "cil_from_contai",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "212": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1343,
+              "insn_count_before": 1343,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 212,
+        "program": {
+          "final_insn_count": 1343,
+          "orig_insn_count": 1343,
+          "prog_id": 212,
+          "prog_name": "tail_ipv4_to_en",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "213": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1121,
+              "insn_count_before": 1121,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 213,
+        "program": {
+          "final_insn_count": 1121,
+          "orig_insn_count": 1121,
+          "prog_id": 213,
+          "prog_name": "tail_ipv4_ct_in",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "214": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 601,
+              "insn_count_before": 601,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 214,
+        "program": {
+          "final_insn_count": 601,
+          "orig_insn_count": 601,
+          "prog_id": 214,
+          "prog_name": "tail_no_service",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "216": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1377,
+              "insn_count_before": 1377,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 216,
+        "program": {
+          "final_insn_count": 1377,
+          "orig_insn_count": 1377,
+          "prog_id": 216,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "217": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1217,
+              "insn_count_before": 1217,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 217,
+        "program": {
+          "final_insn_count": 1217,
+          "orig_insn_count": 1217,
+          "prog_id": 217,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "218": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 88,
+              "insn_count_before": 88,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log:\nprocessed 131 insns (limit 1000000) max_states_per_insn 1 total_states 4 peak_states 4 mark_read 0",
+            "status": "failed_rejit",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 218,
+        "program": {
+          "final_insn_count": 88,
+          "orig_insn_count": 88,
+          "prog_id": 218,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "219": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1146,
+              "insn_count_before": 1146,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 219,
+        "program": {
+          "final_insn_count": 1146,
+          "orig_insn_count": 1146,
+          "prog_id": 219,
+          "prog_name": "tail_ipv4_ct_eg",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "220": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 220,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 220,
+          "prog_name": "cil_lxc_policy_",
+          "prog_type": 3
+        },
+        "status": "ok"
+      },
+      "63": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 35,
+              "insn_count_before": 35,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 63,
+        "program": {
+          "final_insn_count": 35,
+          "orig_insn_count": 35,
+          "prog_id": 63,
+          "prog_name": "dump_bpf_map",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "64": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 65,
+              "insn_count_before": 65,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 13: Permission denied (os error 13)\nverifier log:\n0: R1=ctx() R10=fp0\n0: (79) r2 = *(u64 *)(r1 +0)\nfunc 'bpf_iter_bpf_prog' arg0 has btf_id 70231 type STRUCT 'bpf_iter_meta'\n1: R1=ctx() R2=trusted_ptr_bpf_iter_meta()\n1: (79) r6 = *(u64 *)(r2 +0)          ; R2=trusted_ptr_bpf_iter_meta() R6=trusted_ptr_seq_file()\n2: (79) r1 = *(u64 *)(r1 +8)          ; R1=ptr_or_null_bpf_prog(id=1)\n3: (15) if r1 == 0x0 goto pc+59       ; R1=ptr_bpf_prog()\n4: (79) r7 = *(u64 *)(r1 +0)\naccess beyond the end of member pages (mend:2) in struct bpf_prog with off 0 size 8\nprocessed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            "status": "failed_rejit",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- ${PASS_LOCAL_ARGS}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 64,
+        "program": {
+          "final_insn_count": 65,
+          "orig_insn_count": 65,
+          "prog_id": 64,
+          "prog_name": "dump_bpf_prog",
+          "prog_type": 26
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "cilium",
+  "selected_workload": "network_lossy_multi",
+  "status": "ok"
+}

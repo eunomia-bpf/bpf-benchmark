@@ -1,0 +1,156 @@
+{
+  "app": "bpftrace/tcplife",
+  "baseline": {
+    "bpf": {
+      "690": {
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 690,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 149005,
+        "run_time_ns_delta": 72827741,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.103362979999929,
+        "ops_per_sec": 5474.061561435649,
+        "ops_total": 16988.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     2.53ms   15.06ms 221.38ms   98.70%\n    Req/Sec     2.76k   750.08     4.02k    45.16%\n  16988 requests in 3.10s, 2.51MB read\n  Socket errors: connect 0, read 16988, write 0, timeout 0\nRequests/sec:   5480.64\nTransfer/sec:    829.59KB"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "690": {
+        "bytes_jited": 2023,
+        "bytes_xlated": 3416,
+        "id": 690,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 152077,
+        "run_time_ns_delta": 71727095,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.1070417150003777,
+        "ops_per_sec": 5591.170506701063,
+        "ops_total": 17372.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.74ms   10.76ms 221.69ms   99.33%\n    Req/Sec     2.82k     1.23k    5.12k    70.97%\n  17372 requests in 3.10s, 2.57MB read\n  Socket errors: connect 0, read 17372, write 0, timeout 0\nRequests/sec:   5603.89\nTransfer/sec:    848.29KB"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": true,
+    "enabled_passes": [
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "bulk_memory",
+      "prefetch",
+      "map_inline"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 4, \"insns_after\": 405, \"insns_before\": 401, \"pass\": \"prefetch\", \"sites_applied\": 2}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 405, \"insns_before\": 405, \"pass\": \"map_inline\", \"sites_applied\": 0}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 690, \"program\": {\"final_insn_count\": 405, \"insn_delta\": 4, \"orig_insn_count\": 401, \"prog_id\": 690, \"prog_name\": \"tcp_set_state\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 7, \"total_sites_applied\": 2}}",
+    "per_program": {
+      "690": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch",
+          "map_inline"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 4, \"insns_after\": 405, \"insns_before\": 401, \"pass\": \"prefetch\", \"sites_applied\": 2}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 405, \"insns_before\": 405, \"pass\": \"map_inline\", \"sites_applied\": 0}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 690, \"program\": {\"final_insn_count\": 405, \"insn_delta\": 4, \"orig_insn_count\": 401, \"prog_id\": 690, \"prog_name\": \"tcp_set_state\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 7, \"total_sites_applied\": 2}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 2,
+            "sites_matched": 2,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 690,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 7,
+          "total_sites_applied": 2
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 1,
+      "not_applied": 0,
+      "requested": 1
+    }
+  },
+  "runner": "bpftrace",
+  "selected_workload": "tcp_connect",
+  "status": "ok"
+}

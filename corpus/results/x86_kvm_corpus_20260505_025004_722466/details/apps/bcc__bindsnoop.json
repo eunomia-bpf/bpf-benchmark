@@ -1,0 +1,10 @@
+{
+  "app": "bcc/bindsnoop",
+  "baseline": null,
+  "error": "stress_ng_network workload failed: /usr/bin/stress-ng: option '--bind' is ambiguous; possibilities: '--bind-mount' '--bind-mount-ops' '--binderfs' '--binderfs-opts'",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "bcc",
+  "selected_workload": "stress_ng_network",
+  "status": "error"
+}

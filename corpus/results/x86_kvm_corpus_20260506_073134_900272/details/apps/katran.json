@@ -1,0 +1,456 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "417": {
+        "bytes_jited": 176,
+        "bytes_xlated": 136,
+        "id": 417,
+        "name": "xdp_root",
+        "run_cnt_delta": 103451,
+        "run_time_ns_delta": 35437243,
+        "type": "xdp"
+      },
+      "423": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 423,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "425": {
+        "bytes_jited": 541,
+        "bytes_xlated": 1000,
+        "id": 425,
+        "name": "healthcheck_encap",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.000853252000013,
+        "ops_per_sec": 5745.699156900967,
+        "ops_total": 17242.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "417": {
+        "bytes_jited": 176,
+        "bytes_xlated": 136,
+        "id": 417,
+        "name": "xdp_root",
+        "run_cnt_delta": 106632,
+        "run_time_ns_delta": 33499981,
+        "type": "xdp"
+      },
+      "423": {
+        "bytes_jited": 13637,
+        "bytes_xlated": 23896,
+        "id": 423,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "425": {
+        "bytes_jited": 544,
+        "bytes_xlated": 1016,
+        "id": 425,
+        "name": "healthcheck_encap",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0006139529999984,
+        "ops_per_sec": 5922.787895534394,
+        "ops_total": 17772.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "prog 423: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 7: Argument list too long (os error 7)\nverifier log:\nprocessed 71241 insns (limit 1000000) max_states_per_insn 21 total_states 4134 peak_states 1272 mark_read 0",
+    "per_program": {
+      "417": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "prefetch",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          }
+        ],
+        "prog_id": 417,
+        "program": {
+          "final_insn_count": 17,
+          "orig_insn_count": 17,
+          "prog_id": 417,
+          "prog_name": "xdp_root",
+          "prog_type": 6
+        },
+        "status": "ok"
+      },
+      "423": {
+        "error": "kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 7: Argument list too long (os error 7)\nverifier log:\nprocessed 71241 insns (limit 1000000) max_states_per_insn 21 total_states 4134 peak_states 1272 mark_read 0",
+        "error_message": "kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 7: Argument list too long (os error 7)\nverifier log:\nprocessed 71241 insns (limit 1000000) max_states_per_insn 21 total_states 4134 peak_states 1272 mark_read 0",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2549,
+              "insn_count_before": 2542,
+              "insn_delta": 7,
+              "pass": "cond_select",
+              "sites_applied": 7,
+              "sites_matched": 7,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2549,
+              "insn_count_before": 2549,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 6,
+              "sites_matched": 6,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2633,
+              "insn_count_before": 2549,
+              "insn_delta": 84,
+              "pass": "prefetch",
+              "sites_applied": 42,
+              "sites_matched": 42,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 7: Argument list too long (os error 7)\nverifier log:\nprocessed 71241 insns (limit 1000000) max_states_per_insn 21 total_states 4134 peak_states 1272 mark_read 0",
+            "status": "failed_rejit",
+            "step": {
+              "command": "timeout 600 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 423,
+        "program": {
+          "final_insn_count": 2549,
+          "orig_insn_count": 2542,
+          "prog_id": 423,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "error"
+      },
+      "425": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 103,
+              "insn_count_before": 103,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 103,
+              "insn_count_before": 103,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 103,
+              "insn_count_before": 103,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 105,
+              "insn_count_before": 103,
+              "insn_delta": 2,
+              "pass": "prefetch",
+              "sites_applied": 1,
+              "sites_matched": 1,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 105,
+              "insn_count_before": 105,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 105,
+              "insn_count_before": 105,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          }
+        ],
+        "prog_id": 425,
+        "program": {
+          "final_insn_count": 105,
+          "orig_insn_count": 103,
+          "prog_id": 425,
+          "prog_name": "healthcheck_enc",
+          "prog_type": 3
+        },
+        "status": "ok"
+      }
+    },
+    "status": "error"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}

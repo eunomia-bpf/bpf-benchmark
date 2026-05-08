@@ -1,0 +1,1782 @@
+{
+  "app": "otelcol-ebpf-profiler/profiling",
+  "baseline": {
+    "bpf": {
+      "178": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 3721,
+        "bytes_xlated": 6232,
+        "id": 178,
+        "name": "perf_unwind_stop",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "179": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 22575,
+        "bytes_xlated": 37232,
+        "id": 179,
+        "name": "perf_unwind_native",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "180": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 18290,
+        "bytes_xlated": 28048,
+        "id": 180,
+        "name": "perf_unwind_hotspot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "181": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 17737,
+        "bytes_xlated": 29144,
+        "id": 181,
+        "name": "perf_unwind_perl",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "182": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 15178,
+        "bytes_xlated": 25032,
+        "id": 182,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "183": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 19909,
+        "bytes_xlated": 33264,
+        "id": 183,
+        "name": "perf_unwind_python",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "184": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 16540,
+        "bytes_xlated": 28000,
+        "id": 184,
+        "name": "perf_unwind_ruby",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "185": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 20050,
+        "bytes_xlated": 33712,
+        "id": 185,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "186": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 22565,
+        "bytes_xlated": 34248,
+        "id": 186,
+        "name": "perf_unwind_dotnet",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "187": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 1580,
+        "bytes_xlated": 2496,
+        "id": 187,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "188": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 696,
+        "bytes_xlated": 1088,
+        "id": 188,
+        "name": "perf_unwind_beam",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "189": {
+        "avg_ns_per_run": 6903.0,
+        "bytes_jited": 788,
+        "bytes_xlated": 1320,
+        "id": 189,
+        "name": "tracepoint__sched_process_free",
+        "run_cnt_delta": 3,
+        "run_time_ns_delta": 20709,
+        "type": "tracepoint"
+      },
+      "190": {
+        "avg_ns_per_run": 1042.5155086848636,
+        "bytes_jited": 3532,
+        "bytes_xlated": 5496,
+        "id": 190,
+        "name": "native_tracer_entry",
+        "run_cnt_delta": 1612,
+        "run_time_ns_delta": 1680535,
+        "type": "perf_event"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 5.021506490999968,
+        "ops_per_sec": 2741.6075284726912,
+        "ops_total": 13767.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [19290] setting to a 5 secs run per stressor\nstress-ng: info:  [19290] dispatching hogs: 1 cpu\nstress-ng: info:  [19290] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [19290] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [19290]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [19290] cpu               13767      5.00      4.91      0.00      2752.90        2805.99\nstress-ng: info:  [19290] skipped: 0\nstress-ng: info:  [19290] passed: 1: cpu (1)\nstress-ng: info:  [19290] failed: 0\nstress-ng: info:  [19290] metrics untrustworthy: 0\nstress-ng: info:  [19290] successful run completed in 5.01 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "178": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 3721,
+        "bytes_xlated": 6232,
+        "id": 178,
+        "name": "perf_unwind_stop",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "179": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 22819,
+        "bytes_xlated": 38720,
+        "id": 179,
+        "name": "perf_unwind_native",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "180": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 18395,
+        "bytes_xlated": 28608,
+        "id": 180,
+        "name": "perf_unwind_hotspot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "181": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 17737,
+        "bytes_xlated": 29144,
+        "id": 181,
+        "name": "perf_unwind_perl",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "182": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 15261,
+        "bytes_xlated": 25464,
+        "id": 182,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "183": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 18452,
+        "bytes_xlated": 30736,
+        "id": 183,
+        "name": "perf_unwind_python",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "184": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 16671,
+        "bytes_xlated": 28656,
+        "id": 184,
+        "name": "perf_unwind_ruby",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "185": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 20089,
+        "bytes_xlated": 34480,
+        "id": 185,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "186": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 22698,
+        "bytes_xlated": 34952,
+        "id": 186,
+        "name": "perf_unwind_dotnet",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "187": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 1389,
+        "bytes_xlated": 2192,
+        "id": 187,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "188": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 707,
+        "bytes_xlated": 1136,
+        "id": 188,
+        "name": "perf_unwind_beam",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "189": {
+        "avg_ns_per_run": 2580.3333333333335,
+        "bytes_jited": 722,
+        "bytes_xlated": 1232,
+        "id": 189,
+        "name": "tracepoint__sched_process_free",
+        "run_cnt_delta": 3,
+        "run_time_ns_delta": 7741,
+        "type": "tracepoint"
+      },
+      "190": {
+        "avg_ns_per_run": 1600.7246287128712,
+        "bytes_jited": 3569,
+        "bytes_xlated": 5656,
+        "id": 190,
+        "name": "native_tracer_entry",
+        "run_cnt_delta": 1616,
+        "run_time_ns_delta": 2586771,
+        "type": "perf_event"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 5.0172980180000195,
+        "ops_per_sec": 2351.664174157086,
+        "ops_total": 11799.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [19451] setting to a 5 secs run per stressor\nstress-ng: info:  [19451] dispatching hogs: 1 cpu\nstress-ng: info:  [19451] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [19451] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [19451]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [19451] cpu               11799      5.00      5.00      0.00      2359.45        2359.44\nstress-ng: info:  [19451] skipped: 0\nstress-ng: info:  [19451] passed: 1: cpu (1)\nstress-ng: info:  [19451] failed: 0\nstress-ng: info:  [19451] metrics untrustworthy: 0\nstress-ng: info:  [19451] successful run completed in 5.00 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": true,
+    "enabled_passes": [
+      "wide_mem",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "bulk_memory",
+      "prefetch"
+    ],
+    "error": "prog 178: prog 178 pass rotate failed after 1 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r7 = r1\n      1: .......7.. (b7) r1 = 0\n      2: .1.....7.. (63) *(u32 *)(r10 -96) = r1\n      3: .......7.. (bf) r2 = r10\n      4: ..2....7.. (07) r2 += -96\n      5: ..2....7.. (18) r1 = 0xffff8ddfba591800\n      7: .12....7.. (85) call bpf_map_lookup_elem#1\n      8: 0......7.. (bf) r9 = r0\n      9: .......7.9 (18) r8 = 0xffffffff\n     11: .......789 (15) if r9 == 0x0 goto pc+1008\n     12: .......7.9 (61) r1 = *(u32 *)(r9 +0)\n     13: .1.....7.9 (63) *(u32 *)(r10 -100) = r1\n     14: .......7.9 (bf) r2 = r10\n     15: ..2....7.9 (07) r2 += -100\n     16: ..2....7.9 (18) r1 = 0xffff8ddf04659000\n     18: .12....7.9 (85) call bpf_map_lookup_elem#1\n     19: 0......7.9 (bf) r8 = r0\n     20: .......789 (15) if r8 == 0x0 goto pc+382\n     21: .......789 (18) r6 = 0xffff8ddf4011ad58\n     23: ......6789 (61) r1 = *(u32 *)(r6 +0)\n     24: .1....6789 (15) if r1 == 0x0 goto pc+25\n     25: ......6789 (18) r1 = 0xa64656c62616e\n     27: .1....6789 (7b) *(u64 *)(r10 -48) = r1\n     28: ......6789 (18) r1 = 0x65206e6f69746172\n     30: .1....6789 (7b) *(u64 *)(r10 -56) = r1\n     31: ......6789 (18) r1 = 0x6765746e69204d50\n     33: .1....6789 (7b) *(u64 *)(r10 -64) = r1\n     34: ......6789 (18) r1 = 0x4120687469772073\n     36: .1....6789 (7b) *(u64 *)(r10 -72) = r1\n     37: ......6789 (18) r1 = 0x7365636f72702061\n     39: .1....6789 (7b) *(u64 *)(r10 -80) = r1\n     40: ......6789 (18) r1 = 0x206e696874697720\n     42: .1....6789 (7b) *(u64 *)(r10 -88) = r1\n     43: ......6789 (18) r1 = 0x7369206563617254\n     45: .1....6789 (7b) *(u64 *)(r10 -96) = r1\n     46: ......6789 (bf) r1 = r10\n     47: .1....6789 (07) r1 += -96\n     48: .1....6789 (b7) r2 = 56\n     49: .12...6789 (85) call bpf_trace_printk#6\n     50: ......6789 (85) call bpf_get_current_task#35\n     51: 0.....6789 (18) r1 = 0xffff8ddf4011ad48\n     53: 01....6789 (79) r1 = *(u64 *)(r1 +0)\n     54: 01....6789 (0f) r0 += r1\n     55: 0.....6789 (bf) r1 = r10\n     56: 01....6789 (07) r1 += -8\n     57: 01....6789 (b7) r2 = 8\n     58: 012...6789 (bf) r3 = r0\n     59: .123..6789 (85) call bpf_probe_read_kernel#113\n     60: 0.....6789 (61) r1 = *(u32 *)(r6 +0)\n     61: 01.....789 (15) if r0 == 0x0 goto pc+66\n     62: .1.....7.9 (15) if r1 == 0x0 goto pc+17\n     63: .......7.9 (b7) r1 = 0\n     64: .1.....7.9 (73) *(u8 *)(r10 -68) = r1\n     65: .......7.9 (b7) r1 = 174421356\n     66: .1.....7.9 (63) *(u32 *)(r10 -72) = r1\n     67: .......7.9 (18) r1 = 0x6176206573616270\n     69: .1.....7.9 (7b) *(u64 *)(r10 -80) = r1\n     70: .......7.9 (18) r1 = 0x742064616572206f\n     72: .1.....7.9 (7b) *(u64 *)(r10 -88) = r1\n     73: .......7.9 (18) r1 = 0x742064656c696146\n     75: .1.....7.9 (7b) *(u64 *)(r10 -96) = r1\n     76: .......7.9 (bf) r1 = r10\n     77: .1.....7.9 (07) r1 += -96\n     78: .1.....7.9 (b7) r2 = 29\n     79: .12....7.9 (85) call bpf_trace_printk#6\n     80: .......7.9 (b7) r1 = 4\n     81: .1.....7.9 (63) *(u32 *)(r10 -144) = r1\n     82: .......7.9 (bf) r2 = r10\n     83: ..2....7.9 (07) r2 += -144\n     84: ..2....7.9 (18) r1 = 0xffff8ddf035de800\n     86: .12....7.9 (85) call bpf_map_lookup_elem#1\n     87: 0......7.9 (15) if r0 == 0x0 goto pc+111\n     88: 0......7.9 (79) r1 = *(u64 *)(r0 +0)\n     89: 01.....7.9 (07) r1 += 1\n     90: 01.....7.9 (7b) *(u64 *)(r0 +0) = r1\n     91: .......7.9 (b7) r1 = 86\n     92: .1.....7.9 (63) *(u32 *)(r10 -144) = r1\n     93: .......7.9 (bf) r2 = r10\n     94: ..2....7.9 (07) r2 += -144\n     95: ..2....7.9 (18) r1 = 0xffff8ddf035de800\n     97: .12....7.9 (85) call bpf_map_lookup_elem#1\n     98: 0......7.9 (15) if r0 == 0x0 goto pc+129\n     99: 0......7.9 (79) r1 = *(u64 *)(r0 +0)\n    100: 01.....7.9 (07) r1 += 1\n    101: 01.....7.9 (7b) *(u64 *)(r0 +0) = r1\n    102: .......7.9 (18) r1 = 0xffff8ddf4011ad58\n    104: .1.....7.9 (61) r1 = *(u32 *)(r1 +0)\n    105: .1.....7.9 (15) if r1 == 0x0 goto pc+297\n    106: .......7.9 (b7) r1 = 683631\n    107: .1.....7.9 (63) *(u32 *)(r10 -56) = r1\n    108: .......7.9 (18) r1 = 0x697461726765746e\n    110: .1.....7.9 (7b) *(u64 *)(r10 -64) = r1\n    111: .......7.9 (18) r1 \n... verifier log truncated ...; prog 181: prog 181 pass cond_select failed after 2 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r9 = r1\n      1: .........9 (b7) r1 = 0\n      2: .1.......9 (63) *(u32 *)(r10 -144) = r1\n      3: .........9 (bf) r2 = r10\n      4: ..2......9 (07) r2 += -144\n      5: ..2......9 (18) r1 = 0xffff8ddfba591800\n      7: .12......9 (85) call bpf_map_lookup_elem#1\n      8: 0........9 (bf) r7 = r0\n      9: .......7.9 (15) if r7 == 0x0 goto pc+1226\n     10: .......7.9 (61) r1 = *(u32 *)(r7 +0)\n     11: .1.....7.9 (63) *(u32 *)(r10 -148) = r1\n     12: .......7.9 (18) r6 = 0xffff8ddf4011ad58\n     14: ......67.9 (61) r1 = *(u32 *)(r6 +0)\n     15: .1....67.9 (15) if r1 == 0x0 goto pc+13\n     16: ......67.9 (b7) r1 = 0\n     17: .1....67.9 (73) *(u8 *)(r10 -130) = r1\n     18: ......67.9 (b7) r1 = 2601\n     19: .1....67.9 (6b) *(u16 *)(r10 -132) = r1\n     20: ......67.9 (b7) r1 = 678195813\n     21: .1....67.9 (63) *(u32 *)(r10 -136) = r1\n     22: ......67.9 (18) r1 = 0x705f646e69776e75\n     24: .1....67.9 (7b) *(u64 *)(r10 -144) = r1\n     25: ......67.9 (bf) r1 = r10\n     26: .1....67.9 (07) r1 += -144\n     27: .1....67.9 (b7) r2 = 15\n     28: .12...67.9 (85) call bpf_trace_printk#6\n     29: ......67.9 (bf) r2 = r10\n     30: ..2...67.9 (07) r2 += -148\n     31: ..2...67.9 (18) r1 = 0xffff8ddf065f8800\n     33: .12...67.9 (85) call bpf_map_lookup_elem#1\n     34: 0.....67.9 (bf) r8 = r0\n     35: ......6789 (61) r1 = *(u32 *)(r6 +0)\n     36: .1.....789 (55) if r8 != 0x0 goto pc+24\n     37: .1.......9 (b7) r6 = 1\n     38: .1....6..9 (15) if r1 == 0x0 goto pc+1163\n     39: ......6..9 (b7) r1 = 0\n     40: .1....6..9 (73) *(u8 *)(r10 -104) = r1\n     41: ......6..9 (18) r1 = 0xa6f666e69207373\n     43: .1....6..9 (7b) *(u64 *)(r10 -112) = r1\n     44: ......6..9 (18) r1 = 0x6572646461206f6e\n     46: .1....6..9 (7b) *(u64 *)(r10 -120) = r1\n     47: ......6..9 (18) r1 = 0x202c6b6361747320\n     49: .1....6..9 (7b) *(u64 *)(r10 -128) = r1\n     50: ......6..9 (18) r1 = 0x6c72655020646c69\n     52: .1....6..9 (7b) *(u64 *)(r10 -136) = r1\n     53: ......6..9 (18) r1 = 0x75622074276e6143\n     55: .1....6..9 (7b) *(u64 *)(r10 -144) = r1\n     56: ......6..9 (bf) r1 = r10\n     57: .1....6..9 (07) r1 += -144\n     58: .1....6..9 (b7) r2 = 41\n     59: .12...6..9 (85) call bpf_trace_printk#6\n     60: ......6..9 (05) goto pc+1141\n     61: .1.....789 (15) if r1 == 0x0 goto pc+18\n     62: .......789 (b7) r1 = 10\n     63: .1.....789 (6b) *(u16 *)(r10 -116) = r1\n     64: .......789 (b7) r1 = 2015721520\n     65: .1.....789 (63) *(u32 *)(r10 -120) = r1\n     66: .......789 (18) r1 = 0x20726f66206b6361\n     68: .1.....789 (7b) *(u64 *)(r10 -128) = r1\n     69: .......789 (18) r1 = 0x7473206c72655020\n     71: .1.....789 (7b) *(u64 *)(r10 -136) = r1\n     72: .......789 (18) r1 = 0x676e69646c697542\n     74: .1.....789 (7b) *(u64 *)(r10 -144) = r1\n     75: .......789 (61) r3 = *(u32 *)(r8 +8)\n     76: .......789 (bf) r1 = r10\n     77: .1.....789 (07) r1 += -144\n     78: .1.....789 (b7) r2 = 30\n     79: .12....789 (85) call bpf_trace_printk#6\n     80: .......789 (bf) r6 = r7\n     81: ......6789 (07) r6 += 3896\n     82: ......6789 (79) r1 = *(u64 *)(r7 +3896)\n     83: .1....6789 (15) if r1 == 0x0 goto pc+3\n     84: .1....6789 (7b) *(u64 *)(r10 -168) = r6\n     85: .1.....789 (7b) *(u64 *)(r10 -80) = r1\n     86: .......789 (05) goto pc+586\n     87: ......6789 (b7) r1 = 15\n     88: .1....6789 (63) *(u32 *)(r10 -8) = r1\n     89: ......6789 (bf) r2 = r10\n     90: ..2...6789 (07) r2 += -8\n     91: ..2...6789 (18) r1 = 0xffff8ddf035de800\n     93: .12...6789 (85) call bpf_map_lookup_elem#1\n     94: 0.....6789 (15) if r0 == 0x0 goto pc+69\n     95: 0.....6789 (79) r1 = *(u64 *)(r0 +0)\n     96: 01....6789 (07) r1 += 1\n     97: 01....6789 (7b) *(u64 *)(r0 +0) = r1\n     98: ......6789 (71) r1 = *(u8 *)(r8 +20)\n     99: .1....6789 (15) if r1 == 0x0 goto pc+93\n    100: ......6789 (85) call bpf_get_current_task#35\n    101: 0.....6789 (18) r1 = 0xffff8ddf4011ad48\n    103: 01....6789 (79) r1 = *(u64 *)(r1 +0)\n    104: 01....6789 (0f) r0 += r1\n    105: 0.....6789 (bf) r1 = r10\n    106: 01....6789 (07) r1 += -48\n    107: 01....6789 (b7) r2 \n... verifier log truncated ...",
+    "exit_code": 1,
+    "output": "{\"changed\": false, \"error_message\": \"prog 178 pass rotate failed after 1 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\\nverifier log summary:\\nfunc#0 @0\\nLive regs before insn:\\n      0: .1........ (bf) r7 = r1\\n      1: .......7.. (b7) r1 = 0\\n      2: .1.....7.. (63) *(u32 *)(r10 -96) = r1\\n      3: .......7.. (bf) r2 = r10\\n      4: ..2....7.. (07) r2 += -96\\n      5: ..2....7.. (18) r1 = 0xffff8ddfba591800\\n      7: .12....7.. (85) call bpf_map_lookup_elem#1\\n      8: 0......7.. (bf) r9 = r0\\n      9: .......7.9 (18) r8 = 0xffffffff\\n     11: .......789 (15) if r9 == 0x0 goto pc+1008\\n     12: .......7.9 (61) r1 = *(u32 *)(r9 +0)\\n     13: .1.....7.9 (63) *(u32 *)(r10 -100) = r1\\n     14: .......7.9 (bf) r2 = r10\\n     15: ..2....7.9 (07) r2 += -100\\n     16: ..2....7.9 (18) r1 = 0xffff8ddf04659000\\n     18: .12....7.9 (85) call bpf_map_lookup_elem#1\\n     19: 0......7.9 (bf) r8 = r0\\n     20: .......789 (15) if r8 == 0x0 goto pc+382\\n     21: .......789 (18) r6 = 0xffff8ddf4011ad58\\n     23: ......6789 (61) r1 = *(u32 *)(r6 +0)\\n     24: .1....6789 (15) if r1 == 0x0 goto pc+25\\n     25: ......6789 (18) r1 = 0xa64656c62616e\\n     27: .1....6789 (7b) *(u64 *)(r10 -48) = r1\\n     28: ......6789 (18) r1 = 0x65206e6f69746172\\n     30: .1....6789 (7b) *(u64 *)(r10 -56) = r1\\n     31: ......6789 (18) r1 = 0x6765746e69204d50\\n     33: .1....6789 (7b) *(u64 *)(r10 -64) = r1\\n     34: ......6789 (18) r1 = 0x4120687469772073\\n     36: .1....6789 (7b) *(u64 *)(r10 -72) = r1\\n     37: ......6789 (18) r1 = 0x7365636f72702061\\n     39: .1....6789 (7b) *(u64 *)(r10 -80) = r1\\n     40: ......6789 (18) r1 = 0x206e696874697720\\n     42: .1....6789 (7b) *(u64 *)(r10 -88) = r1\\n     43: ......6789 (18) r1 = 0x7369206563617254\\n     45: .1....6789 (7b) *(u64 *)(r10 -96) = r1\\n     46: ......6789 (bf) r1 = r10\\n     47: .1....6789 (07) r1 += -96\\n     48: .1....6789 (b7) r2 = 56\\n     49: .12...6789 (85) call bpf_trace_printk#6\\n     50: ......6789 (85) call bpf_get_current_task#35\\n     51: 0.....6789 (18) r1 = 0xffff8ddf4011ad48\\n     53: 01....6789 (79) r1 = *(u64 *)(r1 +0)\\n     54: 01....6789 (0f) r0 += r1\\n     55: 0.....6789 (bf) r1 = r10\\n     56: 01....6789 (07) r1 += -8\\n     57: 01....6789 (b7) r2 = 8\\n     58: 012...6789 (bf) r3 = r0\\n     59: .123..6789 (85) call bpf_probe_read_kernel#113\\n     60: 0.....6789 (61) r1 = *(u32 *)(r6 +0)\\n     61: 01.....789 (15) if r0 == 0x0 goto pc+66\\n     62: .1.....7.9 (15) if r1 == 0x0 goto pc+17\\n     63: .......7.9 (b7) r1 = 0\\n     64: .1.....7.9 (73) *(u8 *)(r10 -68) = r1\\n     65: .......7.9 (b7) r1 = 174421356\\n     66: .1.....7.9 (63) *(u32 *)(r10 -72) = r1\\n     67: .......7.9 (18) r1 = 0x6176206573616270\\n     69: .1.....7.9 (7b) *(u64 *)(r10 -80) = r1\\n     70: .......7.9 (18) r1 = 0x742064616572206f\\n     72: .1.....7.9 (7b) *(u64 *)(r10 -88) = r1\\n     73: .......7.9 (18) r1 = 0x742064656c696146\\n     75: .1.....7.9 (7b) *(u64 *)(r10 -96) = r1\\n     76: .......7.9 (bf) r1 = r10\\n     77: .1.....7.9 (07) r1 += -96\\n     78: .1.....7.9 (b7) r2 = 29\\n     79: .12....7.9 (85) call bpf_trace_printk#6\\n     80: .......7.9 (b7) r1 = 4\\n     81: .1.....7.9 (63) *(u32 *)(r10 -144) = r1\\n     82: .......7.9 (bf) r2 = r10\\n     83: ..2....7.9 (07) r2 += -144\\n     84: ..2....7.9 (18) r1 = 0xffff8ddf035de800\\n     86: .12....7.9 (85) call bpf_map_lookup_elem#1\\n     87: 0......7.9 (15) if r0 == 0x0 goto pc+111\\n     88: 0......7.9 (79) r1 = *(u64 *)(r0 +0)\\n     89: 01.....7.9 (07) r1 += 1\\n     90: 01.....7.9 (7b) *(u64 *)(r0 +0) = r1\\n     91: .......7.9 (b7) r1 = 86\\n     92: .1.....7.9 (63) *(u32 *)(r10 -144) = r1\\n     93: .......7.9 (bf) r2 = r10\\n     94: ..2....7.9 (07) r2 += -144\\n     95: ..2....7.9 (18) r1 = 0xffff8ddf035de800\\n     97: .12....7.9 (85) call bpf_map_lookup_elem#1\\n     98: 0......7.9 (15) if r0 == 0x0 goto pc+129\\n     99: 0......7.9 (79) r1 = *(u64 *)(r0 +0)\\n    100: 01.....7.9 (07) r1 += 1\\n    101: 01.....7.9 (7b) *(u64 *)(r0 +0) = r1\\n    102: .......7.9 (18) r1 = 0xffff8ddf4011ad58\\n    104: .1.....7.9 (61) r1 = *(u32 *)(r1 +0)\\n    105: .1.....7.9 (15) if r1 == 0x0 goto pc+297\\n    106: .......7.9 (b7) r1 = 683631\\n    107: .1.....7.9 (63) *(u32 *)(r10 -56) = r1\\n    108: .......7.9 (18) r1 = 0x697461726765746e\\n    110: .1.....7.9 (7b) *(u64 *)(r10 -64) = r1\\n    111: .......7.9 (18) r1 \\n... verifier log truncated ...\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1634, \"insns_before\": 1634, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 178, \"program\": {\"final_insn_count\": 1634, \"insn_delta\": 0, \"orig_insn_count\": 1634, \"prog_id\": 178, \"prog_name\": \"perf_unwind_sto\", \"prog_type\": 7}, \"status\": \"error\", \"summary\": {\"applied\": true, \"committed_passes_before_failure\": 1, \"failed_pass\": \"rotate\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"const_prop\", \"sites_applied\": 25}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 196, \"insns_after\": 7210, \"insns_before\": 7014, \"pass\": \"prefetch\", \"sites_applied\": 98}], \"passes_applied\": [\"const_prop\", \"prefetch\"], \"prog_id\": 179, \"program\": {\"final_insn_count\": 7210, \"insn_delta\": 196, \"orig_insn_count\": 7014, \"prog_id\": 179, \"prog_name\": \"perf_unwind_nat\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 2, \"passes_executed\": 12, \"total_sites_applied\": 123}}\n{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"const_prop\", \"sites_applied\": 9}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 70, \"insns_after\": 7659, \"insns_before\": 7589, \"pass\": \"prefetch\", \"sites_applied\": 35}], \"passes_applied\": [\"const_prop\", \"prefetch\"], \"prog_id\": 180, \"program\": {\"final_insn_count\": 7659, \"insn_delta\": 70, \"orig_insn_count\": 7589, \"prog_id\": 180, \"prog_name\": \"perf_unwind_hot\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 2, \"passes_executed\": 12, \"total_sites_applied\": 44}}\n{\"changed\": false, \"error_message\": \"prog 181 pass cond_select failed after 2 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\\nverifier log summary:\\nfunc#0 @0\\nLive regs before insn:\\n      0: .1........ (bf) r9 = r1\\n      1: .........9 (b7) r1 = 0\\n      2: .1.......9 (63) *(u32 *)(r10 -144) = r1\\n      3: .........9 (bf) r2 = r10\\n      4: ..2......9 (07) r2 += -144\\n      5: ..2......9 (18) r1 = 0xffff8ddfba591800\\n      7: .12......9 (85) call bpf_map_lookup_elem#1\\n      8: 0........9 (bf) r7 = r0\\n      9: .......7.9 (15) if r7 == 0x0 goto pc+1226\\n     10: .......7.9 (61) r1 = *(u32 *)(r7 +0)\\n     11: .1.....7.9 (63) *(u32 *)(r10 -148) = r1\\n     12: .......7.9 (18) r6 = 0xffff8ddf4011ad58\\n     14: ......67.9 (61) r1 = *(u32 *)(r6 +0)\\n     15: .1....67.9 (15) if r1 == 0x0 goto pc+13\\n     16: ......67.9 (b7) r1 = 0\\n     17: .1....67.9 (73) *(u8 *)(r10 -130) = r1\\n     18: ......67.9 (b7) r1 = 2601\\n     19: .1....67.9 (6b) *(u16 *)(r10 -132) = r1\\n     20: ......67.9 (b7) r1 = 678195813\\n     21: .1....67.9 (63) *(u32 *)(r10 -136) = r1\\n     22: ......67.9 (18) r1 = 0x705f646e69776e75\\n     24: .1....67.9 (7b) *(u64 *)(r10 -144) = r1\\n     25: ......67.9 (bf) r1 = r10\\n     26: .1....67.9 (07) r1 += -144\\n     27: .1....67.9 (b7) r2 = 15\\n     28: .12...67.9 (85) call bpf_trace_printk#6\\n     29: ......67.9 (bf) r2 = r10\\n     30: ..2...67.9 (07) r2 += -148\\n     31: ..2...67.9 (18) r1 = 0xffff8ddf065f8800\\n     33: .12...67.9 (85) call bpf_map_lookup_elem#1\\n     34: 0.....67.9 (bf) r8 = r0\\n     35: ......6789 (61) r1 = *(u32 *)(r6 +0)\\n     36: .1.....789 (55) if r8 != 0x0 goto pc+24\\n     37: .1.......9 (b7) r6 = 1\\n     38: .1....6..9 (15) if r1 == 0x0 goto pc+1163\\n     39: ......6..9 (b7) r1 = 0\\n     40: .1....6..9 (73) *(u8 *)(r10 -104) = r1\\n     41: ......6..9 (18) r1 = 0xa6f666e69207373\\n     43: .1....6..9 (7b) *(u64 *)(r10 -112) = r1\\n     44: ......6..9 (18) r1 = 0x6572646461206f6e\\n     46: .1....6..9 (7b) *(u64 *)(r10 -120) = r1\\n     47: ......6..9 (18) r1 = 0x202c6b6361747320\\n     49: .1....6..9 (7b) *(u64 *)(r10 -128) = r1\\n     50: ......6..9 (18) r1 = 0x6c72655020646c69\\n     52: .1....6..9 (7b) *(u64 *)(r10 -136) = r1\\n     53: ......6..9 (18) r1 = 0x75622074276e6143\\n     55: .1....6..9 (7b) *(u64 *)(r10 -144) = r1\\n     56: ......6..9 (bf) r1 = r10\\n     57: .1....6..9 (07) r1 += -144\\n     58: .1....6..9 (b7) r2 = 41\\n     59: .12...6..9 (85) call bpf_trace_printk#6\\n     60: ......6..9 (05) goto pc+1141\\n     61: .1.....789 (15) if r1 == 0x0 goto pc+18\\n     62: .......789 (b7) r1 = 10\\n     63: .1.....789 (6b) *(u16 *)(r10 -116) = r1\\n     64: .......789 (b7) r1 = 2015721520\\n     65: .1.....789 (63) *(u32 *)(r10 -120) = r1\\n     66: .......789 (18) r1 = 0x20726f66206b6361\\n     68: .1.....789 (7b) *(u64 *)(r10 -128) = r1\\n     69: .......789 (18) r1 = 0x7473206c72655020\\n     71: .1.....789 (7b) *(u64 *)(r10 -136) = r1\\n     72: .......789 (18) r1 = 0x676e69646c697542\\n     74: .1.....789 (7b) *(u64 *)(r10 -144) = r1\\n     75: .......789 (61) r3 = *(u32 *)(r8 +8)\\n     76: .......789 (bf) r1 = r10\\n     77: .1.....789 (07) r1 += -144\\n     78: .1.....789 (b7) r2 = 30\\n     79: .12....789 (85) call bpf_trace_printk#6\\n     80: .......789 (bf) r6 = r7\\n     81: ......6789 (07) r6 += 3896\\n     82: ......6789 (79) r1 = *(u64 *)(r7 +3896)\\n     83: .1....6789 (15) if r1 == 0x0 goto pc+3\\n     84: .1....6789 (7b) *(u64 *)(r10 -168) = r6\\n     85: .1.....789 (7b) *(u64 *)(r10 -80) = r1\\n     86: .......789 (05) goto pc+586\\n     87: ......6789 (b7) r1 = 15\\n     88: .1....6789 (63) *(u32 *)(r10 -8) = r1\\n     89: ......6789 (bf) r2 = r10\\n     90: ..2...6789 (07) r2 += -8\\n     91: ..2...6789 (18) r1 = 0xffff8ddf035de800\\n     93: .12...6789 (85) call bpf_map_lookup_elem#1\\n     94: 0.....6789 (15) if r0 == 0x0 goto pc+69\\n     95: 0.....6789 (79) r1 = *(u64 *)(r0 +0)\\n     96: 01....6789 (07) r1 += 1\\n     97: 01....6789 (7b) *(u64 *)(r0 +0) = r1\\n     98: ......6789 (71) r1 = *(u8 *)(r8 +20)\\n     99: .1....6789 (15) if r1 == 0x0 goto pc+93\\n    100: ......6789 (85) call bpf_get_current_task#35\\n    101: 0.....6789 (18) r1 = 0xffff8ddf4011ad48\\n    103: 01....6789 (79) r1 = *(u64 *)(r1 +0)\\n    104: 01....6789 (0f) r0 += r1\\n    105: 0.....6789 (bf) r1 = r10\\n    106: 01....6789 (07) r1 += -48\\n    107: 01....6789 (b7) r2 \\n... verifier log truncated ...\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7396, \"insns_before\": 7396, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7396, \"insns_before\": 7396, \"pass\": \"rotate\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 181, \"program\": {\"final_insn_count\": 7396, \"insn_delta\": 0, \"orig_insn_count\": 7396, \"prog_id\": 181, \"prog_name\": \"perf_unwind_per\", \"prog_type\": 7}, \"status\": \"error\", \"summary\": {\"applied\": true, \"committed_passes_before_failure\": 2, \"failed_pass\": \"cond_select\", \"passes_changed\": 0, \"passes_executed\": 2, \"total_sites_applied\": 0}}\n{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 54, \"insns_after\": 6988, \"insns_before\": 6934, \"pass\": \"prefetch\", \"sites_applied\": 27}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 182, \"program\": {\"final_insn_count\": 6988, \"insn_delta\": 54, \"orig_insn_count\": 6934, \"prog_id\": 182, \"prog_name\": \"perf_unwind_php\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 27}}\n{\"changed\": true, \"passes\": [{\"changed\": true, \"insn_delta\": -396, \"insns_after\": 5473, \"insns_before\": 5869, \"pass\": \"wide_mem\", \"sites_applied\": 132}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"const_prop\", \"sites_applied\": 1}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 80, \"insns_after\": 5553, \"insns_before\": 5473, \"pass\": \"prefetch\", \"sites_applied\": 40}], \"passes_applied\": [\"wide_mem\", \"const_prop\", \"prefetch\"], \"prog_id\": 183, \"program\": {\"final_insn_count\": 5553, \"insn_delta\": -316, \"orig_insn_count\": 5869, \"prog_id\": 183, \"prog_name\": \"perf_unwind_pyt\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 3, \"passes_executed\": 12, \"total_sites_applied\": 173}}\n{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 82, \"insns_after\": 5260, \"insns_before\": 5178, \"pass\": \"prefetch\", \"sites_applied\": 41}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 184, \"program\": {\"final_insn_count\": 5260, \"insn_delta\": 82, \"orig_insn_count\": 5178, \"prog_id\": 184, \"prog_name\": \"perf_unwind_rub\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 41}}\n{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"const_prop\", \"sites_applied\": 111}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 96, \"insns_after\": 7956, \"insns_before\": 7860, \"pass\": \"prefetch\", \"sites_applied\": 48}], \"passes_applied\": [\"const_prop\", \"prefetch\"], \"prog_id\": 185, \"program\": {\"final_insn_count\": 7956, \"insn_delta\": 96, \"orig_insn_count\": 7860, \"prog_id\": 185, \"prog_name\": \"perf_unwind_v8\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 2, \"passes_executed\": 12, \"total_sites_applied\": 159}}\n{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"const_prop\", \"sites_applied\": 1}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 88, \"insns_after\": 7672, \"insns_before\": 7584, \"pass\": \"prefetch\", \"sites_applied\": 44}], \"passes_applied\": [\"const_prop\", \"prefetch\"], \"prog_id\": 186, \"program\": {\"final_insn_count\": 7672, \"insn_delta\": 88, \"orig_insn_count\": 7584, \"prog_id\": 186, \"prog_name\": \"perf_unwind_dot\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 2, \"passes_executed\": 12, \"total_sites_applied\": 45}}\n{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 679, \"insns_before\": 679, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 679, \"insns_before\": 679, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 679, \"insns_before\": 679, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 679, \"insns_before\": 679, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 679, \"insns_before\": 679, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 679, \"insns_before\": 679, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": -353, \"insns_after\": 326, \"insns_before\": 679, \"pass\": \"const_prop\", \"sites_applied\": 15}, {\"changed\": true, \"insn_delta\": -44, \"insns_after\": 282, \"insns_before\": 326, \"pass\": \"dce\", \"sites_applied\": 44}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 282, \"insns_before\": 282, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 282, \"insns_before\": 282, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 282, \"insns_before\": 282, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 4, \"insns_after\": 286, \"insns_before\": 282, \"pass\": \"prefetch\", \"sites_applied\": 2}], \"passes_applied\": [\"const_prop\", \"dce\", \"prefetch\"], \"prog_id\": 187, \"program\": {\"final_insn_count\": 286, \"insn_delta\": -393, \"orig_insn_count\": 679, \"prog_id\": 187, \"prog_name\": \"perf_go_labels\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 3, \"passes_executed\": 12, \"total_sites_applied\": 61}}\n{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 6, \"insns_after\": 248, \"insns_before\": 242, \"pass\": \"prefetch\", \"sites_applied\": 3}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 188, \"program\": {\"final_insn_count\": 248, \"insn_delta\": 6, \"orig_insn_count\": 242, \"prog_id\": 188, \"prog_name\": \"perf_unwind_bea\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 3}}\n{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 283, \"insns_before\": 283, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 283, \"insns_before\": 283, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 283, \"insns_before\": 283, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 283, \"insns_before\": 283, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 283, \"insns_before\": 283, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 283, \"insns_before\": 283, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": -120, \"insns_after\": 163, \"insns_before\": 283, \"pass\": \"const_prop\", \"sites_applied\": 5}, {\"changed\": true, \"insn_delta\": -17, \"insns_after\": 146, \"insns_before\": 163, \"pass\": \"dce\", \"sites_applied\": 17}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 4, \"insns_after\": 150, \"insns_before\": 146, \"pass\": \"prefetch\", \"sites_applied\": 2}], \"passes_applied\": [\"const_prop\", \"dce\", \"prefetch\"], \"prog_id\": 189, \"program\": {\"final_insn_count\": 150, \"insn_delta\": -133, \"orig_insn_count\": 283, \"prog_id\": 189, \"prog_name\": \"tracepoint__sch\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 3, \"passes_executed\": 12, \"total_sites_applied\": 24}}\n{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 24, \"insns_after\": 1339, \"insns_before\": 1315, \"pass\": \"prefetch\", \"sites_applied\": 12}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 190, \"program\": {\"final_insn_count\": 1339, \"insn_delta\": 24, \"orig_insn_count\": 1315, \"prog_id\": 190, \"prog_name\": \"native_tracer_e\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 12}}",
+    "per_program": {
+      "178": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "prog 178 pass rotate failed after 1 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r7 = r1\n      1: .......7.. (b7) r1 = 0\n      2: .1.....7.. (63) *(u32 *)(r10 -96) = r1\n      3: .......7.. (bf) r2 = r10\n      4: ..2....7.. (07) r2 += -96\n      5: ..2....7.. (18) r1 = 0xffff8ddfba591800\n      7: .12....7.. (85) call bpf_map_lookup_elem#1\n      8: 0......7.. (bf) r9 = r0\n      9: .......7.9 (18) r8 = 0xffffffff\n     11: .......789 (15) if r9 == 0x0 goto pc+1008\n     12: .......7.9 (61) r1 = *(u32 *)(r9 +0)\n     13: .1.....7.9 (63) *(u32 *)(r10 -100) = r1\n     14: .......7.9 (bf) r2 = r10\n     15: ..2....7.9 (07) r2 += -100\n     16: ..2....7.9 (18) r1 = 0xffff8ddf04659000\n     18: .12....7.9 (85) call bpf_map_lookup_elem#1\n     19: 0......7.9 (bf) r8 = r0\n     20: .......789 (15) if r8 == 0x0 goto pc+382\n     21: .......789 (18) r6 = 0xffff8ddf4011ad58\n     23: ......6789 (61) r1 = *(u32 *)(r6 +0)\n     24: .1....6789 (15) if r1 == 0x0 goto pc+25\n     25: ......6789 (18) r1 = 0xa64656c62616e\n     27: .1....6789 (7b) *(u64 *)(r10 -48) = r1\n     28: ......6789 (18) r1 = 0x65206e6f69746172\n     30: .1....6789 (7b) *(u64 *)(r10 -56) = r1\n     31: ......6789 (18) r1 = 0x6765746e69204d50\n     33: .1....6789 (7b) *(u64 *)(r10 -64) = r1\n     34: ......6789 (18) r1 = 0x4120687469772073\n     36: .1....6789 (7b) *(u64 *)(r10 -72) = r1\n     37: ......6789 (18) r1 = 0x7365636f72702061\n     39: .1....6789 (7b) *(u64 *)(r10 -80) = r1\n     40: ......6789 (18) r1 = 0x206e696874697720\n     42: .1....6789 (7b) *(u64 *)(r10 -88) = r1\n     43: ......6789 (18) r1 = 0x7369206563617254\n     45: .1....6789 (7b) *(u64 *)(r10 -96) = r1\n     46: ......6789 (bf) r1 = r10\n     47: .1....6789 (07) r1 += -96\n     48: .1....6789 (b7) r2 = 56\n     49: .12...6789 (85) call bpf_trace_printk#6\n     50: ......6789 (85) call bpf_get_current_task#35\n     51: 0.....6789 (18) r1 = 0xffff8ddf4011ad48\n     53: 01....6789 (79) r1 = *(u64 *)(r1 +0)\n     54: 01....6789 (0f) r0 += r1\n     55: 0.....6789 (bf) r1 = r10\n     56: 01....6789 (07) r1 += -8\n     57: 01....6789 (b7) r2 = 8\n     58: 012...6789 (bf) r3 = r0\n     59: .123..6789 (85) call bpf_probe_read_kernel#113\n     60: 0.....6789 (61) r1 = *(u32 *)(r6 +0)\n     61: 01.....789 (15) if r0 == 0x0 goto pc+66\n     62: .1.....7.9 (15) if r1 == 0x0 goto pc+17\n     63: .......7.9 (b7) r1 = 0\n     64: .1.....7.9 (73) *(u8 *)(r10 -68) = r1\n     65: .......7.9 (b7) r1 = 174421356\n     66: .1.....7.9 (63) *(u32 *)(r10 -72) = r1\n     67: .......7.9 (18) r1 = 0x6176206573616270\n     69: .1.....7.9 (7b) *(u64 *)(r10 -80) = r1\n     70: .......7.9 (18) r1 = 0x742064616572206f\n     72: .1.....7.9 (7b) *(u64 *)(r10 -88) = r1\n     73: .......7.9 (18) r1 = 0x742064656c696146\n     75: .1.....7.9 (7b) *(u64 *)(r10 -96) = r1\n     76: .......7.9 (bf) r1 = r10\n     77: .1.....7.9 (07) r1 += -96\n     78: .1.....7.9 (b7) r2 = 29\n     79: .12....7.9 (85) call bpf_trace_printk#6\n     80: .......7.9 (b7) r1 = 4\n     81: .1.....7.9 (63) *(u32 *)(r10 -144) = r1\n     82: .......7.9 (bf) r2 = r10\n     83: ..2....7.9 (07) r2 += -144\n     84: ..2....7.9 (18) r1 = 0xffff8ddf035de800\n     86: .12....7.9 (85) call bpf_map_lookup_elem#1\n     87: 0......7.9 (15) if r0 == 0x0 goto pc+111\n     88: 0......7.9 (79) r1 = *(u64 *)(r0 +0)\n     89: 01.....7.9 (07) r1 += 1\n     90: 01.....7.9 (7b) *(u64 *)(r0 +0) = r1\n     91: .......7.9 (b7) r1 = 86\n     92: .1.....7.9 (63) *(u32 *)(r10 -144) = r1\n     93: .......7.9 (bf) r2 = r10\n     94: ..2....7.9 (07) r2 += -144\n     95: ..2....7.9 (18) r1 = 0xffff8ddf035de800\n     97: .12....7.9 (85) call bpf_map_lookup_elem#1\n     98: 0......7.9 (15) if r0 == 0x0 goto pc+129\n     99: 0......7.9 (79) r1 = *(u64 *)(r0 +0)\n    100: 01.....7.9 (07) r1 += 1\n    101: 01.....7.9 (7b) *(u64 *)(r0 +0) = r1\n    102: .......7.9 (18) r1 = 0xffff8ddf4011ad58\n    104: .1.....7.9 (61) r1 = *(u32 *)(r1 +0)\n    105: .1.....7.9 (15) if r1 == 0x0 goto pc+297\n    106: .......7.9 (b7) r1 = 683631\n    107: .1.....7.9 (63) *(u32 *)(r10 -56) = r1\n    108: .......7.9 (18) r1 = 0x697461726765746e\n    110: .1.....7.9 (7b) *(u64 *)(r10 -64) = r1\n    111: .......7.9 (18) r1 \n... verifier log truncated ...",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 178 pass rotate failed after 1 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\\nverifier log summary:\\nfunc#0 @0\\nLive regs before insn:\\n      0: .1........ (bf) r7 = r1\\n      1: .......7.. (b7) r1 = 0\\n      2: .1.....7.. (63) *(u32 *)(r10 -96) = r1\\n      3: .......7.. (bf) r2 = r10\\n      4: ..2....7.. (07) r2 += -96\\n      5: ..2....7.. (18) r1 = 0xffff8ddfba591800\\n      7: .12....7.. (85) call bpf_map_lookup_elem#1\\n      8: 0......7.. (bf) r9 = r0\\n      9: .......7.9 (18) r8 = 0xffffffff\\n     11: .......789 (15) if r9 == 0x0 goto pc+1008\\n     12: .......7.9 (61) r1 = *(u32 *)(r9 +0)\\n     13: .1.....7.9 (63) *(u32 *)(r10 -100) = r1\\n     14: .......7.9 (bf) r2 = r10\\n     15: ..2....7.9 (07) r2 += -100\\n     16: ..2....7.9 (18) r1 = 0xffff8ddf04659000\\n     18: .12....7.9 (85) call bpf_map_lookup_elem#1\\n     19: 0......7.9 (bf) r8 = r0\\n     20: .......789 (15) if r8 == 0x0 goto pc+382\\n     21: .......789 (18) r6 = 0xffff8ddf4011ad58\\n     23: ......6789 (61) r1 = *(u32 *)(r6 +0)\\n     24: .1....6789 (15) if r1 == 0x0 goto pc+25\\n     25: ......6789 (18) r1 = 0xa64656c62616e\\n     27: .1....6789 (7b) *(u64 *)(r10 -48) = r1\\n     28: ......6789 (18) r1 = 0x65206e6f69746172\\n     30: .1....6789 (7b) *(u64 *)(r10 -56) = r1\\n     31: ......6789 (18) r1 = 0x6765746e69204d50\\n     33: .1....6789 (7b) *(u64 *)(r10 -64) = r1\\n     34: ......6789 (18) r1 = 0x4120687469772073\\n     36: .1....6789 (7b) *(u64 *)(r10 -72) = r1\\n     37: ......6789 (18) r1 = 0x7365636f72702061\\n     39: .1....6789 (7b) *(u64 *)(r10 -80) = r1\\n     40: ......6789 (18) r1 = 0x206e696874697720\\n     42: .1....6789 (7b) *(u64 *)(r10 -88) = r1\\n     43: ......6789 (18) r1 = 0x7369206563617254\\n     45: .1....6789 (7b) *(u64 *)(r10 -96) = r1\\n     46: ......6789 (bf) r1 = r10\\n     47: .1....6789 (07) r1 += -96\\n     48: .1....6789 (b7) r2 = 56\\n     49: .12...6789 (85) call bpf_trace_printk#6\\n     50: ......6789 (85) call bpf_get_current_task#35\\n     51: 0.....6789 (18) r1 = 0xffff8ddf4011ad48\\n     53: 01....6789 (79) r1 = *(u64 *)(r1 +0)\\n     54: 01....6789 (0f) r0 += r1\\n     55: 0.....6789 (bf) r1 = r10\\n     56: 01....6789 (07) r1 += -8\\n     57: 01....6789 (b7) r2 = 8\\n     58: 012...6789 (bf) r3 = r0\\n     59: .123..6789 (85) call bpf_probe_read_kernel#113\\n     60: 0.....6789 (61) r1 = *(u32 *)(r6 +0)\\n     61: 01.....789 (15) if r0 == 0x0 goto pc+66\\n     62: .1.....7.9 (15) if r1 == 0x0 goto pc+17\\n     63: .......7.9 (b7) r1 = 0\\n     64: .1.....7.9 (73) *(u8 *)(r10 -68) = r1\\n     65: .......7.9 (b7) r1 = 174421356\\n     66: .1.....7.9 (63) *(u32 *)(r10 -72) = r1\\n     67: .......7.9 (18) r1 = 0x6176206573616270\\n     69: .1.....7.9 (7b) *(u64 *)(r10 -80) = r1\\n     70: .......7.9 (18) r1 = 0x742064616572206f\\n     72: .1.....7.9 (7b) *(u64 *)(r10 -88) = r1\\n     73: .......7.9 (18) r1 = 0x742064656c696146\\n     75: .1.....7.9 (7b) *(u64 *)(r10 -96) = r1\\n     76: .......7.9 (bf) r1 = r10\\n     77: .1.....7.9 (07) r1 += -96\\n     78: .1.....7.9 (b7) r2 = 29\\n     79: .12....7.9 (85) call bpf_trace_printk#6\\n     80: .......7.9 (b7) r1 = 4\\n     81: .1.....7.9 (63) *(u32 *)(r10 -144) = r1\\n     82: .......7.9 (bf) r2 = r10\\n     83: ..2....7.9 (07) r2 += -144\\n     84: ..2....7.9 (18) r1 = 0xffff8ddf035de800\\n     86: .12....7.9 (85) call bpf_map_lookup_elem#1\\n     87: 0......7.9 (15) if r0 == 0x0 goto pc+111\\n     88: 0......7.9 (79) r1 = *(u64 *)(r0 +0)\\n     89: 01.....7.9 (07) r1 += 1\\n     90: 01.....7.9 (7b) *(u64 *)(r0 +0) = r1\\n     91: .......7.9 (b7) r1 = 86\\n     92: .1.....7.9 (63) *(u32 *)(r10 -144) = r1\\n     93: .......7.9 (bf) r2 = r10\\n     94: ..2....7.9 (07) r2 += -144\\n     95: ..2....7.9 (18) r1 = 0xffff8ddf035de800\\n     97: .12....7.9 (85) call bpf_map_lookup_elem#1\\n     98: 0......7.9 (15) if r0 == 0x0 goto pc+129\\n     99: 0......7.9 (79) r1 = *(u64 *)(r0 +0)\\n    100: 01.....7.9 (07) r1 += 1\\n    101: 01.....7.9 (7b) *(u64 *)(r0 +0) = r1\\n    102: .......7.9 (18) r1 = 0xffff8ddf4011ad58\\n    104: .1.....7.9 (61) r1 = *(u32 *)(r1 +0)\\n    105: .1.....7.9 (15) if r1 == 0x0 goto pc+297\\n    106: .......7.9 (b7) r1 = 683631\\n    107: .1.....7.9 (63) *(u32 *)(r10 -56) = r1\\n    108: .......7.9 (18) r1 = 0x697461726765746e\\n    110: .1.....7.9 (7b) *(u64 *)(r10 -64) = r1\\n    111: .......7.9 (18) r1 \\n... verifier log truncated ...\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1634, \"insns_before\": 1634, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 178, \"program\": {\"final_insn_count\": 1634, \"insn_delta\": 0, \"orig_insn_count\": 1634, \"prog_id\": 178, \"prog_name\": \"perf_unwind_sto\", \"prog_type\": 7}, \"status\": \"error\", \"summary\": {\"applied\": true, \"committed_passes_before_failure\": 1, \"failed_pass\": \"rotate\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 178,
+        "summary": {
+          "applied": true,
+          "committed_passes_before_failure": 1,
+          "failed_pass": "rotate",
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "179": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"const_prop\", \"sites_applied\": 25}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7014, \"insns_before\": 7014, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 196, \"insns_after\": 7210, \"insns_before\": 7014, \"pass\": \"prefetch\", \"sites_applied\": 98}], \"passes_applied\": [\"const_prop\", \"prefetch\"], \"prog_id\": 179, \"program\": {\"final_insn_count\": 7210, \"insn_delta\": 196, \"orig_insn_count\": 7014, \"prog_id\": 179, \"prog_name\": \"perf_unwind_nat\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 2, \"passes_executed\": 12, \"total_sites_applied\": 123}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 25,
+            "sites_matched": 25,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 98,
+            "sites_matched": 98,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 179,
+        "summary": {
+          "applied": true,
+          "passes_changed": 2,
+          "passes_executed": 12,
+          "total_sites_applied": 123
+        }
+      },
+      "180": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"const_prop\", \"sites_applied\": 9}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7589, \"insns_before\": 7589, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 70, \"insns_after\": 7659, \"insns_before\": 7589, \"pass\": \"prefetch\", \"sites_applied\": 35}], \"passes_applied\": [\"const_prop\", \"prefetch\"], \"prog_id\": 180, \"program\": {\"final_insn_count\": 7659, \"insn_delta\": 70, \"orig_insn_count\": 7589, \"prog_id\": 180, \"prog_name\": \"perf_unwind_hot\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 2, \"passes_executed\": 12, \"total_sites_applied\": 44}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 9,
+            "sites_matched": 9,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 35,
+            "sites_matched": 35,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 180,
+        "summary": {
+          "applied": true,
+          "passes_changed": 2,
+          "passes_executed": 12,
+          "total_sites_applied": 44
+        }
+      },
+      "181": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "prog 181 pass cond_select failed after 2 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r9 = r1\n      1: .........9 (b7) r1 = 0\n      2: .1.......9 (63) *(u32 *)(r10 -144) = r1\n      3: .........9 (bf) r2 = r10\n      4: ..2......9 (07) r2 += -144\n      5: ..2......9 (18) r1 = 0xffff8ddfba591800\n      7: .12......9 (85) call bpf_map_lookup_elem#1\n      8: 0........9 (bf) r7 = r0\n      9: .......7.9 (15) if r7 == 0x0 goto pc+1226\n     10: .......7.9 (61) r1 = *(u32 *)(r7 +0)\n     11: .1.....7.9 (63) *(u32 *)(r10 -148) = r1\n     12: .......7.9 (18) r6 = 0xffff8ddf4011ad58\n     14: ......67.9 (61) r1 = *(u32 *)(r6 +0)\n     15: .1....67.9 (15) if r1 == 0x0 goto pc+13\n     16: ......67.9 (b7) r1 = 0\n     17: .1....67.9 (73) *(u8 *)(r10 -130) = r1\n     18: ......67.9 (b7) r1 = 2601\n     19: .1....67.9 (6b) *(u16 *)(r10 -132) = r1\n     20: ......67.9 (b7) r1 = 678195813\n     21: .1....67.9 (63) *(u32 *)(r10 -136) = r1\n     22: ......67.9 (18) r1 = 0x705f646e69776e75\n     24: .1....67.9 (7b) *(u64 *)(r10 -144) = r1\n     25: ......67.9 (bf) r1 = r10\n     26: .1....67.9 (07) r1 += -144\n     27: .1....67.9 (b7) r2 = 15\n     28: .12...67.9 (85) call bpf_trace_printk#6\n     29: ......67.9 (bf) r2 = r10\n     30: ..2...67.9 (07) r2 += -148\n     31: ..2...67.9 (18) r1 = 0xffff8ddf065f8800\n     33: .12...67.9 (85) call bpf_map_lookup_elem#1\n     34: 0.....67.9 (bf) r8 = r0\n     35: ......6789 (61) r1 = *(u32 *)(r6 +0)\n     36: .1.....789 (55) if r8 != 0x0 goto pc+24\n     37: .1.......9 (b7) r6 = 1\n     38: .1....6..9 (15) if r1 == 0x0 goto pc+1163\n     39: ......6..9 (b7) r1 = 0\n     40: .1....6..9 (73) *(u8 *)(r10 -104) = r1\n     41: ......6..9 (18) r1 = 0xa6f666e69207373\n     43: .1....6..9 (7b) *(u64 *)(r10 -112) = r1\n     44: ......6..9 (18) r1 = 0x6572646461206f6e\n     46: .1....6..9 (7b) *(u64 *)(r10 -120) = r1\n     47: ......6..9 (18) r1 = 0x202c6b6361747320\n     49: .1....6..9 (7b) *(u64 *)(r10 -128) = r1\n     50: ......6..9 (18) r1 = 0x6c72655020646c69\n     52: .1....6..9 (7b) *(u64 *)(r10 -136) = r1\n     53: ......6..9 (18) r1 = 0x75622074276e6143\n     55: .1....6..9 (7b) *(u64 *)(r10 -144) = r1\n     56: ......6..9 (bf) r1 = r10\n     57: .1....6..9 (07) r1 += -144\n     58: .1....6..9 (b7) r2 = 41\n     59: .12...6..9 (85) call bpf_trace_printk#6\n     60: ......6..9 (05) goto pc+1141\n     61: .1.....789 (15) if r1 == 0x0 goto pc+18\n     62: .......789 (b7) r1 = 10\n     63: .1.....789 (6b) *(u16 *)(r10 -116) = r1\n     64: .......789 (b7) r1 = 2015721520\n     65: .1.....789 (63) *(u32 *)(r10 -120) = r1\n     66: .......789 (18) r1 = 0x20726f66206b6361\n     68: .1.....789 (7b) *(u64 *)(r10 -128) = r1\n     69: .......789 (18) r1 = 0x7473206c72655020\n     71: .1.....789 (7b) *(u64 *)(r10 -136) = r1\n     72: .......789 (18) r1 = 0x676e69646c697542\n     74: .1.....789 (7b) *(u64 *)(r10 -144) = r1\n     75: .......789 (61) r3 = *(u32 *)(r8 +8)\n     76: .......789 (bf) r1 = r10\n     77: .1.....789 (07) r1 += -144\n     78: .1.....789 (b7) r2 = 30\n     79: .12....789 (85) call bpf_trace_printk#6\n     80: .......789 (bf) r6 = r7\n     81: ......6789 (07) r6 += 3896\n     82: ......6789 (79) r1 = *(u64 *)(r7 +3896)\n     83: .1....6789 (15) if r1 == 0x0 goto pc+3\n     84: .1....6789 (7b) *(u64 *)(r10 -168) = r6\n     85: .1.....789 (7b) *(u64 *)(r10 -80) = r1\n     86: .......789 (05) goto pc+586\n     87: ......6789 (b7) r1 = 15\n     88: .1....6789 (63) *(u32 *)(r10 -8) = r1\n     89: ......6789 (bf) r2 = r10\n     90: ..2...6789 (07) r2 += -8\n     91: ..2...6789 (18) r1 = 0xffff8ddf035de800\n     93: .12...6789 (85) call bpf_map_lookup_elem#1\n     94: 0.....6789 (15) if r0 == 0x0 goto pc+69\n     95: 0.....6789 (79) r1 = *(u64 *)(r0 +0)\n     96: 01....6789 (07) r1 += 1\n     97: 01....6789 (7b) *(u64 *)(r0 +0) = r1\n     98: ......6789 (71) r1 = *(u8 *)(r8 +20)\n     99: .1....6789 (15) if r1 == 0x0 goto pc+93\n    100: ......6789 (85) call bpf_get_current_task#35\n    101: 0.....6789 (18) r1 = 0xffff8ddf4011ad48\n    103: 01....6789 (79) r1 = *(u64 *)(r1 +0)\n    104: 01....6789 (0f) r0 += r1\n    105: 0.....6789 (bf) r1 = r10\n    106: 01....6789 (07) r1 += -48\n    107: 01....6789 (b7) r2 \n... verifier log truncated ...",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 181 pass cond_select failed after 2 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 11: Resource temporarily unavailable (os error 11)\\nverifier log summary:\\nfunc#0 @0\\nLive regs before insn:\\n      0: .1........ (bf) r9 = r1\\n      1: .........9 (b7) r1 = 0\\n      2: .1.......9 (63) *(u32 *)(r10 -144) = r1\\n      3: .........9 (bf) r2 = r10\\n      4: ..2......9 (07) r2 += -144\\n      5: ..2......9 (18) r1 = 0xffff8ddfba591800\\n      7: .12......9 (85) call bpf_map_lookup_elem#1\\n      8: 0........9 (bf) r7 = r0\\n      9: .......7.9 (15) if r7 == 0x0 goto pc+1226\\n     10: .......7.9 (61) r1 = *(u32 *)(r7 +0)\\n     11: .1.....7.9 (63) *(u32 *)(r10 -148) = r1\\n     12: .......7.9 (18) r6 = 0xffff8ddf4011ad58\\n     14: ......67.9 (61) r1 = *(u32 *)(r6 +0)\\n     15: .1....67.9 (15) if r1 == 0x0 goto pc+13\\n     16: ......67.9 (b7) r1 = 0\\n     17: .1....67.9 (73) *(u8 *)(r10 -130) = r1\\n     18: ......67.9 (b7) r1 = 2601\\n     19: .1....67.9 (6b) *(u16 *)(r10 -132) = r1\\n     20: ......67.9 (b7) r1 = 678195813\\n     21: .1....67.9 (63) *(u32 *)(r10 -136) = r1\\n     22: ......67.9 (18) r1 = 0x705f646e69776e75\\n     24: .1....67.9 (7b) *(u64 *)(r10 -144) = r1\\n     25: ......67.9 (bf) r1 = r10\\n     26: .1....67.9 (07) r1 += -144\\n     27: .1....67.9 (b7) r2 = 15\\n     28: .12...67.9 (85) call bpf_trace_printk#6\\n     29: ......67.9 (bf) r2 = r10\\n     30: ..2...67.9 (07) r2 += -148\\n     31: ..2...67.9 (18) r1 = 0xffff8ddf065f8800\\n     33: .12...67.9 (85) call bpf_map_lookup_elem#1\\n     34: 0.....67.9 (bf) r8 = r0\\n     35: ......6789 (61) r1 = *(u32 *)(r6 +0)\\n     36: .1.....789 (55) if r8 != 0x0 goto pc+24\\n     37: .1.......9 (b7) r6 = 1\\n     38: .1....6..9 (15) if r1 == 0x0 goto pc+1163\\n     39: ......6..9 (b7) r1 = 0\\n     40: .1....6..9 (73) *(u8 *)(r10 -104) = r1\\n     41: ......6..9 (18) r1 = 0xa6f666e69207373\\n     43: .1....6..9 (7b) *(u64 *)(r10 -112) = r1\\n     44: ......6..9 (18) r1 = 0x6572646461206f6e\\n     46: .1....6..9 (7b) *(u64 *)(r10 -120) = r1\\n     47: ......6..9 (18) r1 = 0x202c6b6361747320\\n     49: .1....6..9 (7b) *(u64 *)(r10 -128) = r1\\n     50: ......6..9 (18) r1 = 0x6c72655020646c69\\n     52: .1....6..9 (7b) *(u64 *)(r10 -136) = r1\\n     53: ......6..9 (18) r1 = 0x75622074276e6143\\n     55: .1....6..9 (7b) *(u64 *)(r10 -144) = r1\\n     56: ......6..9 (bf) r1 = r10\\n     57: .1....6..9 (07) r1 += -144\\n     58: .1....6..9 (b7) r2 = 41\\n     59: .12...6..9 (85) call bpf_trace_printk#6\\n     60: ......6..9 (05) goto pc+1141\\n     61: .1.....789 (15) if r1 == 0x0 goto pc+18\\n     62: .......789 (b7) r1 = 10\\n     63: .1.....789 (6b) *(u16 *)(r10 -116) = r1\\n     64: .......789 (b7) r1 = 2015721520\\n     65: .1.....789 (63) *(u32 *)(r10 -120) = r1\\n     66: .......789 (18) r1 = 0x20726f66206b6361\\n     68: .1.....789 (7b) *(u64 *)(r10 -128) = r1\\n     69: .......789 (18) r1 = 0x7473206c72655020\\n     71: .1.....789 (7b) *(u64 *)(r10 -136) = r1\\n     72: .......789 (18) r1 = 0x676e69646c697542\\n     74: .1.....789 (7b) *(u64 *)(r10 -144) = r1\\n     75: .......789 (61) r3 = *(u32 *)(r8 +8)\\n     76: .......789 (bf) r1 = r10\\n     77: .1.....789 (07) r1 += -144\\n     78: .1.....789 (b7) r2 = 30\\n     79: .12....789 (85) call bpf_trace_printk#6\\n     80: .......789 (bf) r6 = r7\\n     81: ......6789 (07) r6 += 3896\\n     82: ......6789 (79) r1 = *(u64 *)(r7 +3896)\\n     83: .1....6789 (15) if r1 == 0x0 goto pc+3\\n     84: .1....6789 (7b) *(u64 *)(r10 -168) = r6\\n     85: .1.....789 (7b) *(u64 *)(r10 -80) = r1\\n     86: .......789 (05) goto pc+586\\n     87: ......6789 (b7) r1 = 15\\n     88: .1....6789 (63) *(u32 *)(r10 -8) = r1\\n     89: ......6789 (bf) r2 = r10\\n     90: ..2...6789 (07) r2 += -8\\n     91: ..2...6789 (18) r1 = 0xffff8ddf035de800\\n     93: .12...6789 (85) call bpf_map_lookup_elem#1\\n     94: 0.....6789 (15) if r0 == 0x0 goto pc+69\\n     95: 0.....6789 (79) r1 = *(u64 *)(r0 +0)\\n     96: 01....6789 (07) r1 += 1\\n     97: 01....6789 (7b) *(u64 *)(r0 +0) = r1\\n     98: ......6789 (71) r1 = *(u8 *)(r8 +20)\\n     99: .1....6789 (15) if r1 == 0x0 goto pc+93\\n    100: ......6789 (85) call bpf_get_current_task#35\\n    101: 0.....6789 (18) r1 = 0xffff8ddf4011ad48\\n    103: 01....6789 (79) r1 = *(u64 *)(r1 +0)\\n    104: 01....6789 (0f) r0 += r1\\n    105: 0.....6789 (bf) r1 = r10\\n    106: 01....6789 (07) r1 += -48\\n    107: 01....6789 (b7) r2 \\n... verifier log truncated ...\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7396, \"insns_before\": 7396, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7396, \"insns_before\": 7396, \"pass\": \"rotate\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 181, \"program\": {\"final_insn_count\": 7396, \"insn_delta\": 0, \"orig_insn_count\": 7396, \"prog_id\": 181, \"prog_name\": \"perf_unwind_per\", \"prog_type\": 7}, \"status\": \"error\", \"summary\": {\"applied\": true, \"committed_passes_before_failure\": 2, \"failed_pass\": \"cond_select\", \"passes_changed\": 0, \"passes_executed\": 2, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 181,
+        "summary": {
+          "applied": true,
+          "committed_passes_before_failure": 2,
+          "failed_pass": "cond_select",
+          "passes_changed": 0,
+          "passes_executed": 2,
+          "total_sites_applied": 0
+        }
+      },
+      "182": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 6934, \"insns_before\": 6934, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 54, \"insns_after\": 6988, \"insns_before\": 6934, \"pass\": \"prefetch\", \"sites_applied\": 27}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 182, \"program\": {\"final_insn_count\": 6988, \"insn_delta\": 54, \"orig_insn_count\": 6934, \"prog_id\": 182, \"prog_name\": \"perf_unwind_php\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 27}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 27,
+            "sites_matched": 27,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 182,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 12,
+          "total_sites_applied": 27
+        }
+      },
+      "183": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": true, \"insn_delta\": -396, \"insns_after\": 5473, \"insns_before\": 5869, \"pass\": \"wide_mem\", \"sites_applied\": 132}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"const_prop\", \"sites_applied\": 1}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5473, \"insns_before\": 5473, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 80, \"insns_after\": 5553, \"insns_before\": 5473, \"pass\": \"prefetch\", \"sites_applied\": 40}], \"passes_applied\": [\"wide_mem\", \"const_prop\", \"prefetch\"], \"prog_id\": 183, \"program\": {\"final_insn_count\": 5553, \"insn_delta\": -316, \"orig_insn_count\": 5869, \"prog_id\": 183, \"prog_name\": \"perf_unwind_pyt\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 3, \"passes_executed\": 12, \"total_sites_applied\": 173}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 132,
+            "sites_matched": 132,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 1,
+            "sites_matched": 1,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 40,
+            "sites_matched": 40,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 183,
+        "summary": {
+          "applied": true,
+          "passes_changed": 3,
+          "passes_executed": 12,
+          "total_sites_applied": 173
+        }
+      },
+      "184": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 5178, \"insns_before\": 5178, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 82, \"insns_after\": 5260, \"insns_before\": 5178, \"pass\": \"prefetch\", \"sites_applied\": 41}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 184, \"program\": {\"final_insn_count\": 5260, \"insn_delta\": 82, \"orig_insn_count\": 5178, \"prog_id\": 184, \"prog_name\": \"perf_unwind_rub\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 41}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 41,
+            "sites_matched": 41,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 184,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 12,
+          "total_sites_applied": 41
+        }
+      },
+      "185": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"const_prop\", \"sites_applied\": 111}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7860, \"insns_before\": 7860, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 96, \"insns_after\": 7956, \"insns_before\": 7860, \"pass\": \"prefetch\", \"sites_applied\": 48}], \"passes_applied\": [\"const_prop\", \"prefetch\"], \"prog_id\": 185, \"program\": {\"final_insn_count\": 7956, \"insn_delta\": 96, \"orig_insn_count\": 7860, \"prog_id\": 185, \"prog_name\": \"perf_unwind_v8\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 2, \"passes_executed\": 12, \"total_sites_applied\": 159}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 111,
+            "sites_matched": 111,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 48,
+            "sites_matched": 48,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 185,
+        "summary": {
+          "applied": true,
+          "passes_changed": 2,
+          "passes_executed": 12,
+          "total_sites_applied": 159
+        }
+      },
+      "186": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"const_prop\", \"sites_applied\": 1}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 7584, \"insns_before\": 7584, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 88, \"insns_after\": 7672, \"insns_before\": 7584, \"pass\": \"prefetch\", \"sites_applied\": 44}], \"passes_applied\": [\"const_prop\", \"prefetch\"], \"prog_id\": 186, \"program\": {\"final_insn_count\": 7672, \"insn_delta\": 88, \"orig_insn_count\": 7584, \"prog_id\": 186, \"prog_name\": \"perf_unwind_dot\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 2, \"passes_executed\": 12, \"total_sites_applied\": 45}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 1,
+            "sites_matched": 1,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 44,
+            "sites_matched": 44,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 186,
+        "summary": {
+          "applied": true,
+          "passes_changed": 2,
+          "passes_executed": 12,
+          "total_sites_applied": 45
+        }
+      },
+      "187": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 679, \"insns_before\": 679, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 679, \"insns_before\": 679, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 679, \"insns_before\": 679, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 679, \"insns_before\": 679, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 679, \"insns_before\": 679, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 679, \"insns_before\": 679, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": -353, \"insns_after\": 326, \"insns_before\": 679, \"pass\": \"const_prop\", \"sites_applied\": 15}, {\"changed\": true, \"insn_delta\": -44, \"insns_after\": 282, \"insns_before\": 326, \"pass\": \"dce\", \"sites_applied\": 44}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 282, \"insns_before\": 282, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 282, \"insns_before\": 282, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 282, \"insns_before\": 282, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 4, \"insns_after\": 286, \"insns_before\": 282, \"pass\": \"prefetch\", \"sites_applied\": 2}], \"passes_applied\": [\"const_prop\", \"dce\", \"prefetch\"], \"prog_id\": 187, \"program\": {\"final_insn_count\": 286, \"insn_delta\": -393, \"orig_insn_count\": 679, \"prog_id\": 187, \"prog_name\": \"perf_go_labels\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 3, \"passes_executed\": 12, \"total_sites_applied\": 61}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 15,
+            "sites_matched": 15,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 44,
+            "sites_matched": 44,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 2,
+            "sites_matched": 2,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 187,
+        "summary": {
+          "applied": true,
+          "passes_changed": 3,
+          "passes_executed": 12,
+          "total_sites_applied": 61
+        }
+      },
+      "188": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 242, \"insns_before\": 242, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 6, \"insns_after\": 248, \"insns_before\": 242, \"pass\": \"prefetch\", \"sites_applied\": 3}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 188, \"program\": {\"final_insn_count\": 248, \"insn_delta\": 6, \"orig_insn_count\": 242, \"prog_id\": 188, \"prog_name\": \"perf_unwind_bea\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 3}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 3,
+            "sites_matched": 3,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 188,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 12,
+          "total_sites_applied": 3
+        }
+      },
+      "189": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 283, \"insns_before\": 283, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 283, \"insns_before\": 283, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 283, \"insns_before\": 283, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 283, \"insns_before\": 283, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 283, \"insns_before\": 283, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 283, \"insns_before\": 283, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": -120, \"insns_after\": 163, \"insns_before\": 283, \"pass\": \"const_prop\", \"sites_applied\": 5}, {\"changed\": true, \"insn_delta\": -17, \"insns_after\": 146, \"insns_before\": 163, \"pass\": \"dce\", \"sites_applied\": 17}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 146, \"insns_before\": 146, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 4, \"insns_after\": 150, \"insns_before\": 146, \"pass\": \"prefetch\", \"sites_applied\": 2}], \"passes_applied\": [\"const_prop\", \"dce\", \"prefetch\"], \"prog_id\": 189, \"program\": {\"final_insn_count\": 150, \"insn_delta\": -133, \"orig_insn_count\": 283, \"prog_id\": 189, \"prog_name\": \"tracepoint__sch\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 3, \"passes_executed\": 12, \"total_sites_applied\": 24}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 5,
+            "sites_matched": 5,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 17,
+            "sites_matched": 17,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 2,
+            "sites_matched": 2,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 189,
+        "summary": {
+          "applied": true,
+          "passes_changed": 3,
+          "passes_executed": 12,
+          "total_sites_applied": 24
+        }
+      },
+      "190": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "map_inline",
+          "const_prop",
+          "dce",
+          "bounds_check_merge",
+          "skb_load_bytes_spec",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"map_inline\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"const_prop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"dce\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"bounds_check_merge\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"skb_load_bytes_spec\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 1315, \"insns_before\": 1315, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 24, \"insns_after\": 1339, \"insns_before\": 1315, \"pass\": \"prefetch\", \"sites_applied\": 12}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 190, \"program\": {\"final_insn_count\": 1339, \"insn_delta\": 24, \"orig_insn_count\": 1315, \"prog_id\": 190, \"prog_name\": \"native_tracer_e\", \"prog_type\": 7}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 12, \"total_sites_applied\": 12}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "const_prop",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "dce",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bounds_check_merge",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "skb_load_bytes_spec",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 12,
+            "sites_matched": 12,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 190,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 12,
+          "total_sites_applied": 12
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 11,
+      "not_applied": 2,
+      "requested": 13
+    }
+  },
+  "runner": "otelcol-ebpf-profiler",
+  "selected_workload": "stress_ng_cpu",
+  "status": "ok"
+}

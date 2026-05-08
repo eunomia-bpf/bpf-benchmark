@@ -1,0 +1,110 @@
+{
+  "app": "bcc/tcplife",
+  "baseline": {
+    "bpf": {
+      "35": {
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 35,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 180770,
+        "run_time_ns_delta": 76514082,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.1019229869999947,
+        "ops_per_sec": 5994.6684936830225,
+        "ops_total": 18595.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://127.0.0.1:43211/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.91ms  294.08us   4.72ms   78.11%\n    Req/Sec     3.01k     1.03k    4.48k    53.23%\n  18595 requests in 3.10s, 2.75MB read\n  Socket errors: connect 0, read 18592, write 0, timeout 0\nRequests/sec:   5999.04\nTransfer/sec:      0.89MB"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "35": {
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 35,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 176407,
+        "run_time_ns_delta": 74624633,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.005611980999987,
+        "ops_per_sec": 6049.0176759114,
+        "ops_total": 18181.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://127.0.0.1:37011/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.70ms   10.85ms 220.62ms   99.31%\n    Req/Sec     3.04k     1.02k    4.59k    53.33%\n  18181 requests in 3.00s, 2.69MB read\n  Socket errors: connect 0, read 18181, write 0, timeout 0\nRequests/sec:   6057.54\nTransfer/sec:      0.90MB"
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "35": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 205,
+              "insn_count_before": 205,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "noop",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=57: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=57: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 57",
+                "site at PC=75: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=75: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 75"
+              ],
+              "insn_count_after": 205,
+              "insn_count_before": 205,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 2,
+              "sites_skipped": 2,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 2
+              }
+            },
+            "error": null,
+            "pass": "map_inline",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 35,
+        "program": {
+          "final_insn_count": 205,
+          "orig_insn_count": 205,
+          "prog_id": 35,
+          "prog_name": "sock__inet_sock",
+          "prog_type": 5
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bcc",
+  "selected_workload": "tcp_connect",
+  "status": "ok"
+}

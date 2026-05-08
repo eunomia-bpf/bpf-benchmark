@@ -1,0 +1,225 @@
+{
+  "app": "bcc/tcpconnect",
+  "baseline": {
+    "bpf": {
+      "30": {
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 30,
+        "name": "trace_connect_entry",
+        "run_cnt_delta": 6561,
+        "run_time_ns_delta": 9565160,
+        "type": "kprobe"
+      },
+      "31": {
+        "bytes_jited": 480,
+        "bytes_xlated": 720,
+        "id": 31,
+        "name": "trace_connect_v4_return",
+        "run_cnt_delta": 6561,
+        "run_time_ns_delta": 71112928,
+        "type": "kprobe"
+      },
+      "32": {
+        "bytes_jited": 477,
+        "bytes_xlated": 712,
+        "id": 32,
+        "name": "trace_connect_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.008101255000014,
+        "ops_per_sec": 2177.4532985260066,
+        "ops_total": 6550.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://127.0.0.1:35883/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     2.55ms    0.91ms  10.18ms   78.63%\n    Req/Sec     1.10k   292.73     1.90k    71.67%\n  6550 requests in 3.00s, 0.97MB read\n  Socket errors: connect 0, read 6550, write 0, timeout 0\nRequests/sec:   2180.14\nTransfer/sec:    330.09KB"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "30": {
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 30,
+        "name": "trace_connect_entry",
+        "run_cnt_delta": 11515,
+        "run_time_ns_delta": 12563298,
+        "type": "kprobe"
+      },
+      "31": {
+        "bytes_jited": 480,
+        "bytes_xlated": 720,
+        "id": 31,
+        "name": "trace_connect_v4_return",
+        "run_cnt_delta": 11515,
+        "run_time_ns_delta": 44987099,
+        "type": "kprobe"
+      },
+      "32": {
+        "bytes_jited": 477,
+        "bytes_xlated": 712,
+        "id": 32,
+        "name": "trace_connect_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.103236258999999,
+        "ops_per_sec": 3707.097700549265,
+        "ops_total": 11504.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://127.0.0.1:46543/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     2.22ms   10.78ms 221.92ms   99.33%\n    Req/Sec     1.90k   396.19     3.87k    80.33%\n  11504 requests in 3.10s, 1.70MB read\n  Socket errors: connect 0, read 11504, write 0, timeout 0\nRequests/sec:   3711.52\nTransfer/sec:    561.89KB"
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "30": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass rotate failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"rotate\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-14/pass-00-rotate.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-14/target.json\": error: target kinsn bpf_memcpy_bulk missing supported_encodings",
+            "pass": "rotate",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass cond_select failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"cond_select\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-14/pass-01-cond_select.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-14/target.json\": error: target kinsn bpf_rotate64 missing supported_encodings",
+            "pass": "cond_select",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass extract failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"extract\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-14/pass-02-extract.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-14/target.json\": error: target kinsn bpf_rotate64 missing supported_encodings",
+            "pass": "extract",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass endian_fusion failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"endian_fusion\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-14/pass-03-endian_fusion.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-14/target.json\": error: target kinsn bpf_endian_load64 missing supported_encodings",
+            "pass": "endian_fusion",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass bulk_memory failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"bulk_memory\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-14/pass-04-bulk_memory.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-14/target.json\": error: target kinsn bpf_endian_load64 missing supported_encodings",
+            "pass": "bulk_memory",
+            "status": "failed_bpfopt"
+          }
+        ],
+        "prog_id": 30,
+        "program": {
+          "final_insn_count": 15,
+          "orig_insn_count": 15,
+          "prog_id": 30,
+          "prog_name": "trace_connect_e",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "31": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass rotate failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"rotate\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-15/pass-00-rotate.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-15/target.json\": error: target kinsn bpf_endian_load64 missing supported_encodings",
+            "pass": "rotate",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass cond_select failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"cond_select\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-15/pass-01-cond_select.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-15/target.json\": error: target kinsn bpf_memset_bulk missing supported_encodings",
+            "pass": "cond_select",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass extract failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"extract\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-15/pass-02-extract.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-15/target.json\": error: target kinsn bpf_endian_load64 missing supported_encodings",
+            "pass": "extract",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass endian_fusion failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"endian_fusion\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-15/pass-03-endian_fusion.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-15/target.json\": error: target kinsn bpf_endian_load64 missing supported_encodings",
+            "pass": "endian_fusion",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass bulk_memory failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"bulk_memory\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-15/pass-04-bulk_memory.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-15/target.json\": error: target kinsn bpf_select64 missing supported_encodings",
+            "pass": "bulk_memory",
+            "status": "failed_bpfopt"
+          }
+        ],
+        "prog_id": 31,
+        "program": {
+          "final_insn_count": 88,
+          "orig_insn_count": 88,
+          "prog_id": 31,
+          "prog_name": "trace_connect_v",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "32": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass rotate failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"rotate\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-16/pass-00-rotate.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-16/target.json\": error: target kinsn bpf_extract64 missing supported_encodings",
+            "pass": "rotate",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass cond_select failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"cond_select\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-16/pass-01-cond_select.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-16/target.json\": error: target kinsn bpf_rotate64 missing supported_encodings",
+            "pass": "cond_select",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass extract failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"extract\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-16/pass-02-extract.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-16/target.json\": error: target kinsn bpf_prefetch missing supported_encodings",
+            "pass": "extract",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass endian_fusion failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"endian_fusion\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-16/pass-03-endian_fusion.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-16/target.json\": error: target kinsn bpf_memcpy_bulk missing supported_encodings",
+            "pass": "endian_fusion",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass bulk_memory failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"bulk_memory\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-16/pass-04-bulk_memory.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-16/target.json\": error: target kinsn bpf_memset_bulk missing supported_encodings",
+            "pass": "bulk_memory",
+            "status": "failed_bpfopt"
+          }
+        ],
+        "prog_id": 32,
+        "program": {
+          "final_insn_count": 87,
+          "orig_insn_count": 87,
+          "prog_id": 32,
+          "prog_name": "trace_connect_v",
+          "prog_type": 2
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bcc",
+  "selected_workload": "tcp_connect",
+  "status": "ok"
+}

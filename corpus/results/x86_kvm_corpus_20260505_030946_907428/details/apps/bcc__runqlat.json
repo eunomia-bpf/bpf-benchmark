@@ -1,0 +1,194 @@
+{
+  "app": "bcc/runqlat",
+  "baseline": {
+    "bpf": {
+      "47": {
+        "avg_ns_per_run": 194.89794140009224,
+        "bytes_jited": 662,
+        "bytes_xlated": 1168,
+        "id": 47,
+        "name": "sched_switch",
+        "run_cnt_delta": 13557564,
+        "run_time_ns_delta": 2642341314,
+        "type": "raw_tracepoint"
+      },
+      "48": {
+        "avg_ns_per_run": 74.3767991763069,
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 48,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 989689,
+        "run_time_ns_delta": 73609900,
+        "type": "raw_tracepoint"
+      },
+      "49": {
+        "avg_ns_per_run": 291.6666666666667,
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 49,
+        "name": "raw_tracepoint__sched_wakeup_new",
+        "run_cnt_delta": 45,
+        "run_time_ns_delta": 13125,
+        "type": "raw_tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.019292796000002,
+        "ops_per_sec": 24113333.37825332,
+        "ops_total": 24578547.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [8372] setting to a 1 secs run per stressor\nstress-ng: info:  [8372] dispatching hogs: 1 futex, 1 sem, 1 sem-sysv, 1 switch, 1 yield\nstress-ng: info:  [8372] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [8372] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8372]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8372] futex           1065396      2.00      0.26      2.45    532636.28      393182.93\nstress-ng: metrc: [8372] sem             1425977      1.00      0.14      0.77   1425936.54     1576490.89\nstress-ng: metrc: [8372] sem-sysv        2758583      1.01      0.23      0.78   2738966.91     2737784.05\nstress-ng: metrc: [8372] switch           354760      1.00      0.19      0.80    354679.33      355049.37\nstress-ng: metrc: [8372] yield          18973831      1.00      3.59      7.72  18897274.20     1677742.75\nstress-ng: info:  [8372] skipped: 0\nstress-ng: info:  [8372] passed: 5: futex (1) sem (1) sem-sysv (1) switch (1) yield (1)\nstress-ng: info:  [8372] failed: 0\nstress-ng: info:  [8372] metrics untrustworthy: 0\nstress-ng: info:  [8372] successful run completed in 1.01 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "47": {
+        "avg_ns_per_run": 193.6891710102477,
+        "bytes_jited": 662,
+        "bytes_xlated": 1168,
+        "id": 47,
+        "name": "sched_switch",
+        "run_cnt_delta": 14098582,
+        "run_time_ns_delta": 2730742660,
+        "type": "raw_tracepoint"
+      },
+      "48": {
+        "avg_ns_per_run": 76.18613151558097,
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 48,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 935661,
+        "run_time_ns_delta": 71284392,
+        "type": "raw_tracepoint"
+      },
+      "49": {
+        "avg_ns_per_run": 267.15555555555557,
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 49,
+        "name": "raw_tracepoint__sched_wakeup_new",
+        "run_cnt_delta": 45,
+        "run_time_ns_delta": 12022,
+        "type": "raw_tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0154750849999914,
+        "ops_per_sec": 22546425.154291395,
+        "ops_total": 22895333.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [8482] setting to a 1 secs run per stressor\nstress-ng: info:  [8482] dispatching hogs: 1 futex, 1 sem, 1 sem-sysv, 1 switch, 1 yield\nstress-ng: info:  [8482] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [8482] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8482]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8482] futex           1097874      2.00      0.30      2.59    548893.88      379819.91\nstress-ng: metrc: [8482] sem             1570143      1.00      0.11      0.89   1570099.20     1565744.82\nstress-ng: metrc: [8482] sem-sysv        2711265      1.00      0.23      0.77   2710566.40     2709834.21\nstress-ng: metrc: [8482] switch           380470      1.00      0.18      0.82    380388.29      380516.42\nstress-ng: metrc: [8482] yield          17135581      1.00      2.89      8.20  17072214.06     1545479.76\nstress-ng: info:  [8482] skipped: 0\nstress-ng: info:  [8482] passed: 5: futex (1) sem (1) sem-sysv (1) switch (1) yield (1)\nstress-ng: info:  [8482] failed: 0\nstress-ng: info:  [8482] metrics untrustworthy: 0\nstress-ng: info:  [8482] successful run completed in 1.01 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": false,
+    "enabled_passes": [
+      "wide_mem"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 138, \"insns_before\": 138, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 47, \"program\": {\"final_insn_count\": 138, \"insn_delta\": 0, \"orig_insn_count\": 138, \"prog_id\": 47, \"prog_name\": \"sched_switch\", \"prog_type\": 17}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 31, \"insns_before\": 31, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 48, \"program\": {\"final_insn_count\": 31, \"insn_delta\": 0, \"orig_insn_count\": 31, \"prog_id\": 48, \"prog_name\": \"sched_wakeup\", \"prog_type\": 17}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 31, \"insns_before\": 31, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 49, \"program\": {\"final_insn_count\": 31, \"insn_delta\": 0, \"orig_insn_count\": 31, \"prog_id\": 49, \"prog_name\": \"sched_wakeup_ne\", \"prog_type\": 17}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "47": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 138, \"insns_before\": 138, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 47, \"program\": {\"final_insn_count\": 138, \"insn_delta\": 0, \"orig_insn_count\": 138, \"prog_id\": 47, \"prog_name\": \"sched_switch\", \"prog_type\": 17}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 47,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "48": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 31, \"insns_before\": 31, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 48, \"program\": {\"final_insn_count\": 31, \"insn_delta\": 0, \"orig_insn_count\": 31, \"prog_id\": 48, \"prog_name\": \"sched_wakeup\", \"prog_type\": 17}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 48,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "49": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 31, \"insns_before\": 31, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 49, \"program\": {\"final_insn_count\": 31, \"insn_delta\": 0, \"orig_insn_count\": 31, \"prog_id\": 49, \"prog_name\": \"sched_wakeup_ne\", \"prog_type\": 17}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 49,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 3,
+      "not_applied": 0,
+      "requested": 3
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "stress_ng_scheduler",
+  "status": "ok"
+}

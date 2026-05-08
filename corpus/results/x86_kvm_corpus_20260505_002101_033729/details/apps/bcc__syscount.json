@@ -1,0 +1,132 @@
+{
+  "app": "bcc/syscount",
+  "baseline": {
+    "bpf": {
+      "35": {
+        "avg_ns_per_run": 59.576983652163506,
+        "bytes_jited": 72,
+        "bytes_xlated": 112,
+        "id": 35,
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "run_cnt_delta": 9360260,
+        "run_time_ns_delta": 557656057,
+        "type": "tracepoint"
+      },
+      "36": {
+        "avg_ns_per_run": 56.68692208475811,
+        "bytes_jited": 236,
+        "bytes_xlated": 400,
+        "id": 36,
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "run_cnt_delta": 9360261,
+        "run_time_ns_delta": 530604386,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0143961439999885,
+        "ops_per_sec": 617074.5065450555,
+        "ops_total": 625958.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [28039] setting to a 1 secs run per stressor\nstress-ng: info:  [28039] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [28039] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [28039] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [28039]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [28039] cap              458364      1.00      0.06      0.94    458363.89      458388.75\nstress-ng: metrc: [28039] eventfd          125878      1.00      0.07      0.77    125812.70      150624.02\nstress-ng: metrc: [28039] get                 895      1.00      0.03      0.15       894.69        4953.81\nstress-ng: metrc: [28039] prctl              2716      1.00      0.68      0.30      2715.22        2781.20\nstress-ng: metrc: [28039] set               38105      1.00      0.07      0.91     38104.52       38733.41\nstress-ng: info:  [28039] skipped: 0\nstress-ng: info:  [28039] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [28039] failed: 0\nstress-ng: info:  [28039] metrics untrustworthy: 0\nstress-ng: info:  [28039] successful run completed in 1.00 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "35": {
+        "avg_ns_per_run": 59.69163978543608,
+        "bytes_jited": 72,
+        "bytes_xlated": 112,
+        "id": 35,
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "run_cnt_delta": 9274439,
+        "run_time_ns_delta": 553606472,
+        "type": "tracepoint"
+      },
+      "36": {
+        "avg_ns_per_run": 57.79010193607377,
+        "bytes_jited": 236,
+        "bytes_xlated": 400,
+        "id": 36,
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "run_cnt_delta": 9274440,
+        "run_time_ns_delta": 535970833,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0146117830000208,
+        "ops_per_sec": 616011.9668154763,
+        "ops_total": 625013.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [841] setting to a 1 secs run per stressor\nstress-ng: info:  [841] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [841] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [841] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [841]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [841] cap              459029      1.00      0.08      0.92    459024.84      458930.33\nstress-ng: metrc: [841] eventfd          124906      1.00      0.05      0.79    124879.59      149640.71\nstress-ng: metrc: [841] get                 887      1.00      0.03      0.15       886.09        5077.39\nstress-ng: metrc: [841] prctl              2628      1.00      0.67      0.30      2627.04        2717.89\nstress-ng: metrc: [841] set               37563      1.00      0.06      0.92     37562.73       38323.22\nstress-ng: info:  [841] skipped: 0\nstress-ng: info:  [841] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [841] failed: 0\nstress-ng: info:  [841] metrics untrustworthy: 0\nstress-ng: info:  [841] successful run completed in 1.00 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": false,
+    "changed": false,
+    "enabled_passes": [
+      "map_inline"
+    ],
+    "error": "prog 35: prog 35 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT; prog 36: prog 36 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+    "exit_code": 1,
+    "output": "{\"changed\": false, \"error_message\": \"prog 35 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 35, \"program\": {\"final_insn_count\": 14, \"insn_delta\": 0, \"orig_insn_count\": 14, \"prog_id\": 35, \"prog_name\": \"raw_syscalls__s\", \"prog_type\": 5}, \"skipped_maps\": [{\"map_id\": 15, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}\n{\"changed\": false, \"error_message\": \"prog 36 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 36, \"program\": {\"final_insn_count\": 44, \"insn_delta\": 0, \"orig_insn_count\": 44, \"prog_id\": 36, \"prog_name\": \"raw_syscalls__s\", \"prog_type\": 5}, \"skipped_maps\": [{\"map_id\": 15, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 14, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "35": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 35 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 35 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 35, \"program\": {\"final_insn_count\": 14, \"insn_delta\": 0, \"orig_insn_count\": 14, \"prog_id\": 35, \"prog_name\": \"raw_syscalls__s\", \"prog_type\": 5}, \"skipped_maps\": [{\"map_id\": 15, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 35,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      },
+      "36": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 36 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 36 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 36, \"program\": {\"final_insn_count\": 44, \"insn_delta\": 0, \"orig_insn_count\": 44, \"prog_id\": 36, \"prog_name\": \"raw_syscalls__s\", \"prog_type\": 5}, \"skipped_maps\": [{\"map_id\": 15, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 14, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 36,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 0,
+      "not_applied": 2,
+      "requested": 2
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "stress_ng_os",
+  "status": "ok"
+}

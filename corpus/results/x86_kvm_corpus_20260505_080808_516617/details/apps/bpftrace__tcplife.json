@@ -1,0 +1,146 @@
+{
+  "app": "bpftrace/tcplife",
+  "baseline": {
+    "bpf": {
+      "690": {
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 690,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 152409,
+        "run_time_ns_delta": 73481025,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.106415577000007,
+        "ops_per_sec": 5596.160452166044,
+        "ops_total": 17384.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     4.17ms   21.80ms 231.37ms   97.48%\n    Req/Sec     2.82k   725.72     5.06k    69.35%\n  17384 requests in 3.10s, 2.57MB read\n  Socket errors: connect 0, read 17383, write 0, timeout 0\nRequests/sec:   5607.42\nTransfer/sec:    848.82KB"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "690": {
+        "bytes_jited": 2023,
+        "bytes_xlated": 3416,
+        "id": 690,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 150921,
+        "run_time_ns_delta": 72524950,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.1093233439996766,
+        "ops_per_sec": 5546.22279258255,
+        "ops_total": 17245.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     5.97ms   35.45ms 461.27ms   97.49%\n    Req/Sec     2.80k     1.21k    5.00k    66.13%\n  17245 requests in 3.10s, 2.55MB read\n  Socket errors: connect 0, read 17245, write 0, timeout 0\nRequests/sec:   5561.54\nTransfer/sec:    841.88KB"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": true,
+    "enabled_passes": [
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "bulk_memory",
+      "prefetch"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 4, \"insns_after\": 405, \"insns_before\": 401, \"pass\": \"prefetch\", \"sites_applied\": 2}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 690, \"program\": {\"final_insn_count\": 405, \"insn_delta\": 4, \"orig_insn_count\": 401, \"prog_id\": 690, \"prog_name\": \"tcp_set_state\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 6, \"total_sites_applied\": 2}}",
+    "per_program": {
+      "690": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 4, \"insns_after\": 405, \"insns_before\": 401, \"pass\": \"prefetch\", \"sites_applied\": 2}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 690, \"program\": {\"final_insn_count\": 405, \"insn_delta\": 4, \"orig_insn_count\": 401, \"prog_id\": 690, \"prog_name\": \"tcp_set_state\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 6, \"total_sites_applied\": 2}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 2,
+            "sites_matched": 2,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 690,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 6,
+          "total_sites_applied": 2
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 1,
+      "not_applied": 0,
+      "requested": 1
+    }
+  },
+  "runner": "bpftrace",
+  "selected_workload": "tcp_connect",
+  "status": "ok"
+}

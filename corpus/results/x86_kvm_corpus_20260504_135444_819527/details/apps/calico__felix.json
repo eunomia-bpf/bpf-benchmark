@@ -1,0 +1,10 @@
+{
+  "app": "calico/felix",
+  "baseline": null,
+  "error": "calicoctl binary not found; expected at corpus/build/calico/bin/calicoctl, /home/yunwei37/workspace/bpf-benchmark/runner/repos/calico/bin/calicoctl, /usr/bin/calicoctl, or BPFREJIT_REPO_ARTIFACT_ROOT/calico/bin/calicoctl",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "calico",
+  "selected_workload": "network",
+  "status": "error"
+}

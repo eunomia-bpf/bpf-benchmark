@@ -1,0 +1,171 @@
+{
+  "app": "bpftrace/runqlat",
+  "baseline": {
+    "bpf": {
+      "680": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 680,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 7164593,
+        "run_time_ns_delta": 894603444,
+        "type": "tracepoint"
+      },
+      "681": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 681,
+        "name": "tracepoint_sched_sched_wakeup_new",
+        "run_cnt_delta": 78,
+        "run_time_ns_delta": 30834,
+        "type": "tracepoint"
+      },
+      "682": {
+        "bytes_jited": 515,
+        "bytes_xlated": 896,
+        "id": 682,
+        "name": "sched_switch",
+        "run_cnt_delta": 22991719,
+        "run_time_ns_delta": 4221895217,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0693751009998778,
+        "ops_per_sec": 8317422.980229296,
+        "ops_total": 25529291.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [17076] setting to a 3 secs run per stressor\nstress-ng: info:  [17076] dispatching hogs: 4 futex, 4 sem, 4 sem-sysv, 4 switch, 4 yield\nstress-ng: info:  [17076] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [17076] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [17076]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [17076] futex           2514916      6.00      1.84     12.00    419130.25      181681.23\nstress-ng: metrc: [17076] sem             3217595      3.00      0.88      2.48   1072071.46      956142.94\nstress-ng: metrc: [17076] sem-sysv         899272      3.00      0.37      1.75    299521.57      423069.16\nstress-ng: metrc: [17076] switch          2865802      3.01      1.07      8.24    951289.04      307835.24\nstress-ng: metrc: [17076] yield          16031706      3.05      4.64      9.78   5259857.80     1111480.75\nstress-ng: info:  [17076] skipped: 0\nstress-ng: info:  [17076] passed: 20: futex (4) sem (4) sem-sysv (4) switch (4) yield (4)\nstress-ng: info:  [17076] failed: 0\nstress-ng: info:  [17076] metrics untrustworthy: 0\nstress-ng: info:  [17076] successful run completed in 3.05 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "680": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 680,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 6471541,
+        "run_time_ns_delta": 706242486,
+        "type": "tracepoint"
+      },
+      "681": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 681,
+        "name": "tracepoint_sched_sched_wakeup_new",
+        "run_cnt_delta": 78,
+        "run_time_ns_delta": 33460,
+        "type": "tracepoint"
+      },
+      "682": {
+        "bytes_jited": 515,
+        "bytes_xlated": 896,
+        "id": 682,
+        "name": "sched_switch",
+        "run_cnt_delta": 22445579,
+        "run_time_ns_delta": 4768631358,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.02770349299999,
+        "ops_per_sec": 6781571.262665273,
+        "ops_total": 20532587.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [17252] setting to a 3 secs run per stressor\nstress-ng: info:  [17252] dispatching hogs: 4 futex, 4 sem, 4 sem-sysv, 4 switch, 4 yield\nstress-ng: info:  [17252] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [17252] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [17252]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [17252] futex           1510382      6.00      1.60      9.47    251702.54      136505.18\nstress-ng: metrc: [17252] sem             3883930      3.00      0.77      2.34   1293153.11     1249923.17\nstress-ng: metrc: [17252] sem-sysv         950413      3.00      0.31      1.45    316320.35      539991.43\nstress-ng: metrc: [17252] switch          2941941      3.00      1.01      8.35    979655.17      314302.75\nstress-ng: metrc: [17252] yield          11245921      3.00      3.31      7.83   3743492.44     1008938.76\nstress-ng: info:  [17252] skipped: 0\nstress-ng: info:  [17252] passed: 20: futex (4) sem (4) sem-sysv (4) switch (4) yield (4)\nstress-ng: info:  [17252] failed: 0\nstress-ng: info:  [17252] metrics untrustworthy: 0\nstress-ng: info:  [17252] successful run completed in 3.01 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": false,
+    "changed": false,
+    "enabled_passes": [
+      "noop",
+      "map_inline"
+    ],
+    "error": "prog 680: prog 680 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\"); prog 681: prog 681 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\"); prog 682: prog 682 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\")",
+    "exit_code": 1,
+    "output": "{\"changed\": false, \"error_message\": \"prog 680 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 680, \"program\": {\"final_insn_count\": 17, \"insn_delta\": 0, \"orig_insn_count\": 17, \"prog_id\": 680, \"prog_name\": \"sched_wakeup\", \"prog_type\": 5}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"error_message\": \"prog 681 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 681, \"program\": {\"final_insn_count\": 17, \"insn_delta\": 0, \"orig_insn_count\": 17, \"prog_id\": 681, \"prog_name\": \"sched_wakeup_ne\", \"prog_type\": 5}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"error_message\": \"prog 682 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 106, \"insns_before\": 106, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 682, \"program\": {\"final_insn_count\": 106, \"insn_delta\": 0, \"orig_insn_count\": 106, \"prog_id\": 682, \"prog_name\": \"sched_switch\", \"prog_type\": 5}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "680": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "noop",
+          "map_inline"
+        ],
+        "error": "prog 680 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\")",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 680 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 680, \"program\": {\"final_insn_count\": 17, \"insn_delta\": 0, \"orig_insn_count\": 17, \"prog_id\": 680, \"prog_name\": \"sched_wakeup\", \"prog_type\": 5}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 680,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "681": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "noop",
+          "map_inline"
+        ],
+        "error": "prog 681 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\")",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 681 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 681, \"program\": {\"final_insn_count\": 17, \"insn_delta\": 0, \"orig_insn_count\": 17, \"prog_id\": 681, \"prog_name\": \"sched_wakeup_ne\", \"prog_type\": 5}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 681,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "682": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "noop",
+          "map_inline"
+        ],
+        "error": "prog 682 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\")",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 682 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 106, \"insns_before\": 106, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 682, \"program\": {\"final_insn_count\": 106, \"insn_delta\": 0, \"orig_insn_count\": 106, \"prog_id\": 682, \"prog_name\": \"sched_switch\", \"prog_type\": 5}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 682,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 0,
+      "not_applied": 3,
+      "requested": 3
+    }
+  },
+  "runner": "bpftrace",
+  "selected_workload": "stress_ng_scheduler",
+  "status": "ok"
+}

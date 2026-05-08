@@ -1,0 +1,167 @@
+{
+  "app": "bcc/tcplife",
+  "baseline": {
+    "bpf": {
+      "35": {
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 35,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 180314,
+        "run_time_ns_delta": 78708081,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.1039165319999995,
+        "ops_per_sec": 5964.722249818541,
+        "ops_total": 18514.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://127.0.0.1:40071/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.76ms   11.44ms 231.05ms   99.30%\n    Req/Sec     3.00k     1.41k    5.31k    56.45%\n  18514 requests in 3.10s, 2.74MB read\n  Socket errors: connect 0, read 18512, write 0, timeout 0\nRequests/sec:   5972.88\nTransfer/sec:      0.88MB"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "35": {
+        "bytes_jited": 1070,
+        "bytes_xlated": 1688,
+        "id": 35,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 187908,
+        "run_time_ns_delta": 80678715,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.1042724869999745,
+        "ops_per_sec": 6215.304900197751,
+        "ops_total": 19294.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://127.0.0.1:38039/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.57ms   10.00ms 211.09ms   99.36%\n    Req/Sec     3.18k   789.56     5.48k    60.66%\n  19294 requests in 3.10s, 2.85MB read\n  Socket errors: connect 0, read 19294, write 0, timeout 0\nRequests/sec:   6224.02\nTransfer/sec:      0.92MB"
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "35": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 205,
+              "insn_count_before": 205,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "rotate",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 205,
+              "insn_count_before": 205,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "cond_select",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 205,
+              "insn_count_before": 205,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "extract",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 205,
+              "insn_count_before": 205,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "endian_fusion",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 205,
+              "insn_count_before": 205,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "bulk_memory",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 207,
+              "insn_count_before": 205,
+              "insn_delta": 2,
+              "pass": "prefetch",
+              "sites_applied": 1,
+              "sites_matched": 1,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "prefetch",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 35,
+        "program": {
+          "final_insn_count": 207,
+          "orig_insn_count": 205,
+          "prog_id": 35,
+          "prog_name": "sock__inet_sock",
+          "prog_type": 5
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bcc",
+  "selected_workload": "tcp_connect",
+  "status": "ok"
+}

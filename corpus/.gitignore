@@ -4,5 +4,30 @@ results/*/details/*
 !results/*/details/result.json
 !results/*/details/result.md
 !results/*/details/progress.json
+!results/*/details/apps/
+!results/*/details/apps/*.json
+
+# Current oversized per-app result payloads. Git ignore is path-based, so
+# these need exact path ignores while smaller app JSON files stay trackable.
+results/aws_arm64_corpus_20260506_194818_115918/details/apps/katran.json
+results/aws_arm64_corpus_20260506_221220_160792/details/apps/katran.json
+results/x86_kvm_corpus_20260506_064719_038586/details/apps/tracee__monitor.json
+results/x86_kvm_corpus_20260506_223040_471337/details/apps/otelcol-ebpf-profiler__profiling.json
+results/x86_kvm_corpus_20260506_223933_808849/details/apps/tracee__monitor.json
+results/x86_kvm_corpus_20260506_231737_864379/details/apps/cilium__agent.json
+results/x86_kvm_corpus_20260506_233740_843089/details/apps/tetragon__observer.json
+results/x86_kvm_corpus_20260507_002840_650501/details/apps/tetragon__observer.json
+results/x86_kvm_corpus_20260507_012156_877431/details/apps/tetragon__observer.json
+results/x86_kvm_corpus_20260507_013928_648047/details/apps/tetragon__observer.json
+results/x86_kvm_corpus_20260507_020655_713061/details/apps/tetragon__observer.json
+results/x86_kvm_corpus_20260507_021534_990130/details/apps/tetragon__observer.json
+results/x86_kvm_corpus_20260507_072543_601953/details/apps/katran.json
+results/x86_kvm_corpus_20260507_081532_470100/details/apps/katran.json
+results/x86_kvm_corpus_20260507_190554_205137/details/apps/katran.json
+results/x86_kvm_corpus_20260507_200821_664435/details/apps/katran.json
+results/x86_kvm_corpus_20260507_224441_710356/details/apps/katran.json
+results/x86_kvm_corpus_20260508_000244_131324/details/apps/katran.json
+results/x86_kvm_corpus_20260508_003652_406350/details/apps/katran.json
+results/x86_kvm_corpus_20260508_012640_638309/details/apps/katran.json
 results/*/details/failures/
 results/*/details/workdirs/

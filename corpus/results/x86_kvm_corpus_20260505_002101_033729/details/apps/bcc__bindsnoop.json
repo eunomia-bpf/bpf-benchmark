@@ -1,0 +1,173 @@
+{
+  "app": "bcc/bindsnoop",
+  "baseline": {
+    "bpf": {
+      "13": {
+        "avg_ns_per_run": 2018.5,
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 13,
+        "name": "bindsnoop_entry",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 4037,
+        "type": "kprobe"
+      },
+      "14": {
+        "avg_ns_per_run": 5969.5,
+        "bytes_jited": 721,
+        "bytes_xlated": 1160,
+        "id": 14,
+        "name": "bindsnoop_v4_return",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 11939,
+        "type": "kprobe"
+      },
+      "15": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 742,
+        "bytes_xlated": 1184,
+        "id": 15,
+        "name": "bindsnoop_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0600503910000043,
+        "ops_per_sec": 31690368.010061763,
+        "ops_total": 33593387.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [21582] setting to a 1 secs run per stressor\nstress-ng: info:  [21582] dispatching hogs: 1 epoll, 1 netdev, 1 sctp, 1 sock, 1 sockdiag, 1 sockfd, 1 sockpair, 1 udp-flood\nstress-ng: info:  [21582] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [21582] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [21582]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [21582] epoll            203685      1.01      0.21      1.56    202413.61      115062.88\nstress-ng: metrc: [21582] netdev          2137567      1.00      0.22      0.78   2137558.34     2136699.50\nstress-ng: metrc: [21582] sctp               2065      1.00      0.01      0.19      2064.42       10516.08\nstress-ng: metrc: [21582] sock               5166      1.00      0.07      1.88      5164.05        2645.89\nstress-ng: metrc: [21582] sockdiag       29486865      1.00      0.06      0.94  29476723.89    29526193.89\nstress-ng: metrc: [21582] sockfd           580177      1.00      0.18      1.44    580064.43      359511.86\nstress-ng: metrc: [21582] sockpair         318189      1.04      0.14      1.31    305200.72      219742.72\nstress-ng: metrc: [21582] udp-flood        859673      1.00      0.07      0.91    859640.41      881045.40\nstress-ng: info:  [21582] skipped: 0\nstress-ng: info:  [21582] passed: 8: epoll (1) netdev (1) sctp (1) sock (1) sockdiag (1) sockfd (1) sockpair (1) udp-flood (1)\nstress-ng: info:  [21582] failed: 0\nstress-ng: info:  [21582] metrics untrustworthy: 0\nstress-ng: info:  [21582] successful run completed in 1.05 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "13": {
+        "avg_ns_per_run": 2978.5,
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 13,
+        "name": "bindsnoop_entry",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 5957,
+        "type": "kprobe"
+      },
+      "14": {
+        "avg_ns_per_run": 11535.5,
+        "bytes_jited": 721,
+        "bytes_xlated": 1160,
+        "id": 14,
+        "name": "bindsnoop_v4_return",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 23071,
+        "type": "kprobe"
+      },
+      "15": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 742,
+        "bytes_xlated": 1184,
+        "id": 15,
+        "name": "bindsnoop_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0510614410000017,
+        "ops_per_sec": 35102296.174900725,
+        "ops_total": 36894670.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [21631] setting to a 1 secs run per stressor\nstress-ng: info:  [21631] dispatching hogs: 1 epoll, 1 netdev, 1 sctp, 1 sock, 1 sockdiag, 1 sockfd, 1 sockpair, 1 udp-flood\nstress-ng: info:  [21631] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [21631] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [21631]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [21631] epoll            202100      1.01      0.13      1.62    200570.58      115743.46\nstress-ng: metrc: [21631] netdev          2147486      1.00      0.32      0.68   2147451.18     2147140.31\nstress-ng: metrc: [21631] sctp              16808      1.00      0.10      1.01     16801.75       15075.85\nstress-ng: metrc: [21631] sock               5228      1.00      0.05      1.91      5226.61        2670.37\nstress-ng: metrc: [21631] sockdiag       32580851      1.00      0.08      0.92  32577650.95    32654617.78\nstress-ng: metrc: [21631] sockfd           564526      1.00      0.21      1.47    564347.59      336088.60\nstress-ng: metrc: [21631] sockpair         328089      1.04      0.17      1.28    316088.09      226196.67\nstress-ng: metrc: [21631] udp-flood       1049582      1.00      0.15      0.81   1049588.51     1084131.09\nstress-ng: info:  [21631] skipped: 0\nstress-ng: info:  [21631] passed: 8: epoll (1) netdev (1) sctp (1) sock (1) sockdiag (1) sockfd (1) sockpair (1) udp-flood (1)\nstress-ng: info:  [21631] failed: 0\nstress-ng: info:  [21631] metrics untrustworthy: 0\nstress-ng: info:  [21631] successful run completed in 1.04 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": false,
+    "changed": false,
+    "enabled_passes": [
+      "map_inline"
+    ],
+    "error": "prog 13: prog 13 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT; prog 14: prog 14 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT; prog 15: prog 15 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+    "exit_code": 1,
+    "output": "{\"changed\": false, \"error_message\": \"prog 13 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 13, \"program\": {\"final_insn_count\": 15, \"insn_delta\": 0, \"orig_insn_count\": 15, \"prog_id\": 13, \"prog_name\": \"bindsnoop_entry\", \"prog_type\": 2}, \"skipped_maps\": [{\"map_id\": 8, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}\n{\"changed\": false, \"error_message\": \"prog 14 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 14, \"program\": {\"final_insn_count\": 143, \"insn_delta\": 0, \"orig_insn_count\": 143, \"prog_id\": 14, \"prog_name\": \"bindsnoop_v4_re\", \"prog_type\": 2}, \"skipped_maps\": [{\"map_id\": 8, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}\n{\"changed\": false, \"error_message\": \"prog 15 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 15, \"program\": {\"final_insn_count\": 146, \"insn_delta\": 0, \"orig_insn_count\": 146, \"prog_id\": 15, \"prog_name\": \"bindsnoop_v6_re\", \"prog_type\": 2}, \"skipped_maps\": [{\"map_id\": 8, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "13": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 13 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 13 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 13, \"program\": {\"final_insn_count\": 15, \"insn_delta\": 0, \"orig_insn_count\": 15, \"prog_id\": 13, \"prog_name\": \"bindsnoop_entry\", \"prog_type\": 2}, \"skipped_maps\": [{\"map_id\": 8, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 13,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      },
+      "14": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 14 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 14 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 14, \"program\": {\"final_insn_count\": 143, \"insn_delta\": 0, \"orig_insn_count\": 143, \"prog_id\": 14, \"prog_name\": \"bindsnoop_v4_re\", \"prog_type\": 2}, \"skipped_maps\": [{\"map_id\": 8, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 14,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      },
+      "15": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 15 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 15 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 15, \"program\": {\"final_insn_count\": 146, \"insn_delta\": 0, \"orig_insn_count\": 146, \"prog_id\": 15, \"prog_name\": \"bindsnoop_v6_re\", \"prog_type\": 2}, \"skipped_maps\": [{\"map_id\": 8, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 15,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 0,
+      "not_applied": 3,
+      "requested": 3
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "stress_ng_network",
+  "status": "ok"
+}

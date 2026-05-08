@@ -1,0 +1,715 @@
+{
+  "app": "otelcol-ebpf-profiler/profiling",
+  "baseline": {
+    "bpf": {
+      "6": {
+        "bytes_jited": 3721,
+        "bytes_xlated": 6232,
+        "id": 6,
+        "name": "perf_unwind_stop",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "7": {
+        "bytes_jited": 22575,
+        "bytes_xlated": 37232,
+        "id": 7,
+        "name": "perf_unwind_native",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "8": {
+        "bytes_jited": 18290,
+        "bytes_xlated": 28048,
+        "id": 8,
+        "name": "perf_unwind_hotspot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "9": {
+        "bytes_jited": 17737,
+        "bytes_xlated": 29144,
+        "id": 9,
+        "name": "perf_unwind_perl",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "10": {
+        "bytes_jited": 15178,
+        "bytes_xlated": 25032,
+        "id": 10,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "11": {
+        "bytes_jited": 19909,
+        "bytes_xlated": 33264,
+        "id": 11,
+        "name": "perf_unwind_python",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "12": {
+        "bytes_jited": 16540,
+        "bytes_xlated": 28000,
+        "id": 12,
+        "name": "perf_unwind_ruby",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "13": {
+        "bytes_jited": 20050,
+        "bytes_xlated": 33712,
+        "id": 13,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "14": {
+        "bytes_jited": 22565,
+        "bytes_xlated": 34248,
+        "id": 14,
+        "name": "perf_unwind_dotnet",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "15": {
+        "bytes_jited": 1580,
+        "bytes_xlated": 2496,
+        "id": 15,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "16": {
+        "bytes_jited": 696,
+        "bytes_xlated": 1088,
+        "id": 16,
+        "name": "perf_unwind_beam",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "17": {
+        "bytes_jited": 788,
+        "bytes_xlated": 1320,
+        "id": 17,
+        "name": "tracepoint__sched_process_free",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 1400,
+        "type": "tracepoint"
+      },
+      "18": {
+        "bytes_jited": 3532,
+        "bytes_xlated": 5496,
+        "id": 18,
+        "name": "native_tracer_entry",
+        "run_cnt_delta": 7920,
+        "run_time_ns_delta": 13008863,
+        "type": "perf_event"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "sleep",
+          "5"
+        ],
+        "config": {
+          "tool": "sleep"
+        },
+        "duration_s": 5.001052195000014,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "noop"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "6": {
+        "bytes_jited": 3721,
+        "bytes_xlated": 6232,
+        "id": 6,
+        "name": "perf_unwind_stop",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "7": {
+        "bytes_jited": 22575,
+        "bytes_xlated": 37232,
+        "id": 7,
+        "name": "perf_unwind_native",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "8": {
+        "bytes_jited": 18290,
+        "bytes_xlated": 28048,
+        "id": 8,
+        "name": "perf_unwind_hotspot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "9": {
+        "bytes_jited": 17737,
+        "bytes_xlated": 29144,
+        "id": 9,
+        "name": "perf_unwind_perl",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "10": {
+        "bytes_jited": 15178,
+        "bytes_xlated": 25032,
+        "id": 10,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "11": {
+        "bytes_jited": 19909,
+        "bytes_xlated": 33264,
+        "id": 11,
+        "name": "perf_unwind_python",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "12": {
+        "bytes_jited": 16540,
+        "bytes_xlated": 28000,
+        "id": 12,
+        "name": "perf_unwind_ruby",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "13": {
+        "bytes_jited": 20050,
+        "bytes_xlated": 33712,
+        "id": 13,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "14": {
+        "bytes_jited": 22565,
+        "bytes_xlated": 34248,
+        "id": 14,
+        "name": "perf_unwind_dotnet",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "15": {
+        "bytes_jited": 1580,
+        "bytes_xlated": 2496,
+        "id": 15,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "16": {
+        "bytes_jited": 696,
+        "bytes_xlated": 1088,
+        "id": 16,
+        "name": "perf_unwind_beam",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "17": {
+        "bytes_jited": 788,
+        "bytes_xlated": 1320,
+        "id": 17,
+        "name": "tracepoint__sched_process_free",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 1443,
+        "type": "tracepoint"
+      },
+      "18": {
+        "bytes_jited": 3532,
+        "bytes_xlated": 5496,
+        "id": 18,
+        "name": "native_tracer_entry",
+        "run_cnt_delta": 7926,
+        "run_time_ns_delta": 12888126,
+        "type": "perf_event"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "sleep",
+          "5"
+        ],
+        "config": {
+          "tool": "sleep"
+        },
+        "duration_s": 5.001103453000013,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "noop"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "10": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 6934,
+              "insn_count_before": 6934,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 10,
+        "program": {
+          "final_insn_count": 6934,
+          "orig_insn_count": 6934,
+          "prog_id": 10,
+          "prog_name": "perf_unwind_php",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "11": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 5869,
+              "insn_count_before": 5869,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 11,
+        "program": {
+          "final_insn_count": 5869,
+          "orig_insn_count": 5869,
+          "prog_id": 11,
+          "prog_name": "perf_unwind_pyt",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "12": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 5178,
+              "insn_count_before": 5178,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 12,
+        "program": {
+          "final_insn_count": 5178,
+          "orig_insn_count": 5178,
+          "prog_id": 12,
+          "prog_name": "perf_unwind_rub",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "13": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 7860,
+              "insn_count_before": 7860,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 13,
+        "program": {
+          "final_insn_count": 7860,
+          "orig_insn_count": 7860,
+          "prog_id": 13,
+          "prog_name": "perf_unwind_v8",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "14": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 7584,
+              "insn_count_before": 7584,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 14,
+        "program": {
+          "final_insn_count": 7584,
+          "orig_insn_count": 7584,
+          "prog_id": 14,
+          "prog_name": "perf_unwind_dot",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "15": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 679,
+              "insn_count_before": 679,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 15,
+        "program": {
+          "final_insn_count": 679,
+          "orig_insn_count": 679,
+          "prog_id": 15,
+          "prog_name": "perf_go_labels",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "16": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 242,
+              "insn_count_before": 242,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 16,
+        "program": {
+          "final_insn_count": 242,
+          "orig_insn_count": 242,
+          "prog_id": 16,
+          "prog_name": "perf_unwind_bea",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "17": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 283,
+              "insn_count_before": 283,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 17,
+        "program": {
+          "final_insn_count": 283,
+          "orig_insn_count": 283,
+          "prog_id": 17,
+          "prog_name": "tracepoint__sch",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "18": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1315,
+              "insn_count_before": 1315,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 18,
+        "program": {
+          "final_insn_count": 1315,
+          "orig_insn_count": 1315,
+          "prog_id": 18,
+          "prog_name": "native_tracer_e",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "6": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1634,
+              "insn_count_before": 1634,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 6,
+        "program": {
+          "final_insn_count": 1634,
+          "orig_insn_count": 1634,
+          "prog_id": 6,
+          "prog_name": "perf_unwind_sto",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "7": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 7014,
+              "insn_count_before": 7014,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 7,
+        "program": {
+          "final_insn_count": 7014,
+          "orig_insn_count": 7014,
+          "prog_id": 7,
+          "prog_name": "perf_unwind_nat",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "8": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 7589,
+              "insn_count_before": 7589,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 8,
+        "program": {
+          "final_insn_count": 7589,
+          "orig_insn_count": 7589,
+          "prog_id": 8,
+          "prog_name": "perf_unwind_hot",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "9": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 7396,
+              "insn_count_before": 7396,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 7396,
+          "orig_insn_count": 7396,
+          "prog_id": 9,
+          "prog_name": "perf_unwind_per",
+          "prog_type": 7
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "otelcol-ebpf-profiler",
+  "selected_workload": "noop",
+  "status": "ok"
+}

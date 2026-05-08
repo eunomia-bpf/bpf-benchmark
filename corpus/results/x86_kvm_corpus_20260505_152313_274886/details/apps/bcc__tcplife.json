@@ -1,0 +1,91 @@
+{
+  "app": "bcc/tcplife",
+  "baseline": {
+    "bpf": {
+      "35": {
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 35,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 180741,
+        "run_time_ns_delta": 78641312,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.1056777659999852,
+        "ops_per_sec": 5990.318829490596,
+        "ops_total": 18604.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://127.0.0.1:41473/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     2.46ms   15.14ms 231.72ms   98.70%\n    Req/Sec     3.07k     1.06k    5.89k    55.74%\n  18604 requests in 3.10s, 2.75MB read\n  Socket errors: connect 0, read 18601, write 0, timeout 0\nRequests/sec:   6001.17\nTransfer/sec:      0.89MB"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "35": {
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 35,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 182112,
+        "run_time_ns_delta": 80734580,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.104043957999977,
+        "ops_per_sec": 6027.620824047666,
+        "ops_total": 18710.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://127.0.0.1:44213/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.67ms   10.73ms 221.33ms   99.33%\n    Req/Sec     3.08k   607.94     6.61k    85.25%\n  18710 requests in 3.10s, 2.77MB read\n  Socket errors: connect 0, read 18709, write 0, timeout 0\nRequests/sec:   6035.56\nTransfer/sec:      0.89MB"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": false,
+    "changed": false,
+    "enabled_passes": [
+      "noop",
+      "map_inline"
+    ],
+    "error": "prog 35: prog 35 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\")",
+    "exit_code": 1,
+    "output": "{\"changed\": false, \"error_message\": \"prog 35 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 205, \"insns_before\": 205, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 35, \"program\": {\"final_insn_count\": 205, \"insn_delta\": 0, \"orig_insn_count\": 205, \"prog_id\": 35, \"prog_name\": \"sock__inet_sock\", \"prog_type\": 5}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "35": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "noop",
+          "map_inline"
+        ],
+        "error": "prog 35 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\")",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 35 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 205, \"insns_before\": 205, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 35, \"program\": {\"final_insn_count\": 205, \"insn_delta\": 0, \"orig_insn_count\": 205, \"prog_id\": 35, \"prog_name\": \"sock__inet_sock\", \"prog_type\": 5}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 35,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 0,
+      "not_applied": 1,
+      "requested": 1
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "tcp_connect",
+  "status": "ok"
+}

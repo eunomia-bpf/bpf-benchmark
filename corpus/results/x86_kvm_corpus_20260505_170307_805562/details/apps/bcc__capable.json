@@ -1,0 +1,31 @@
+{
+  "app": "bcc/capable",
+  "baseline": {
+    "bpf": {
+      "6": {
+        "bytes_jited": 203,
+        "bytes_xlated": 344,
+        "id": 6,
+        "name": "cap_capable",
+        "run_cnt_delta": 2612869,
+        "run_time_ns_delta": 327884831,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.045033164000003,
+        "ops_per_sec": 6839689.382115373,
+        "ops_total": 20827081.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [23811] setting to a 3 secs run per stressor\nstress-ng: info:  [23811] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [23811] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [23811] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [23811]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [23811] cap             5022220      3.00      1.69      4.10   1673378.24      866752.85\nstress-ng: metrc: [23811] eventfd         1901468      3.00      0.85      5.34    633610.56      307116.27\nstress-ng: metrc: [23811] get                6991      3.00      0.10      0.77      2328.69        7997.20\nstress-ng: metrc: [23811] prctl             10290      3.00      1.67      1.31      3429.21        3447.15\nstress-ng: metrc: [23811] set              133463      3.00      0.29      2.58     44482.13       46485.68\nstress-ng: metrc: [23811] dup                3851      3.00      0.67      0.57      1283.28        3105.12\nstress-ng: metrc: [23811] kill             437017      3.00      0.38      4.47    145585.71       90175.02\nstress-ng: metrc: [23811] sigfd          12168116      3.00      1.33      5.52   4050051.18     1775719.23\nstress-ng: metrc: [23811] signal                0      3.00      0.08      0.70         0.00           0.00\nstress-ng: metrc: [23811] pty                 279      3.01      0.23      4.14        92.67          63.98\nstress-ng: metrc: [23811] itimer              602      3.00      1.08      3.78       200.67         123.83\nstress-ng: metrc: [23811] timerfd         1142784      3.00      0.40      4.05    380730.46      256830.56\nstress-ng: info:  [23811] skipped: 0\nstress-ng: info:  [23811] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [23811] failed: 0\nstress-ng: info:  [23811] metrics untrustworthy: 0\nstress-ng: info:  [23811] successful run completed in 3.04 secs"
+      }
+    ]
+  },
+  "error": "daemon response field 'changed' must be a boolean",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "bcc",
+  "selected_workload": "stress_ng_os",
+  "status": "error"
+}

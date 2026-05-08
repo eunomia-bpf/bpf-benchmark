@@ -1,0 +1,173 @@
+{
+  "app": "bcc/opensnoop",
+  "baseline": {
+    "bpf": {
+      "30": {
+        "avg_ns_per_run": 445.8979297365119,
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 30,
+        "name": "__x64_sys_open",
+        "run_cnt_delta": 15940,
+        "run_time_ns_delta": 7107613,
+        "type": "tracing"
+      },
+      "31": {
+        "avg_ns_per_run": 391.27048964050624,
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 31,
+        "name": "kretfunc__vmlinux____x64_sys_openat",
+        "run_cnt_delta": 572277,
+        "run_time_ns_delta": 223915102,
+        "type": "tracing"
+      },
+      "32": {
+        "avg_ns_per_run": 459.27933151432467,
+        "bytes_jited": 590,
+        "bytes_xlated": 640,
+        "id": 32,
+        "name": "kretfunc__vmlinux____x64_sys_openat2",
+        "run_cnt_delta": 2932,
+        "run_time_ns_delta": 1346607,
+        "type": "tracing"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.1254744340000116,
+        "ops_per_sec": 2559342.8984100497,
+        "ops_total": 2880475.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [3160] setting to a 1 secs run per stressor\nstress-ng: info:  [3160] dispatching hogs: 1 access, 1 chdir, 1 chmod, 1 chown, 1 dentry, 1 dir, 1 dirmany, 1 fallocate, 1 file-ioctl, 1 filename, 1 flock, 1 fpunch, 1 fstat, 1 getdent, 1 hdd, 1 inotify, 1 open, 1 rename, 1 touch, 1 utime\nstress-ng: info:  [3160] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [3177] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [3165] dentry: 103578 dentries allocated\nstress-ng: metrc: [3160] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [3160]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [3160] access             9931      1.01      0.10      1.57      9796.04        5946.54\nstress-ng: metrc: [3160] chdir                35      1.09      0.03      0.69        32.23          48.46\nstress-ng: metrc: [3160] chmod               148      1.00      0.00      0.03       147.38        5213.65\nstress-ng: metrc: [3160] chown               203      1.00      0.01      0.00       202.13       35372.02\nstress-ng: metrc: [3160] dentry            10448      1.03      0.04      0.37     10123.99       25796.19\nstress-ng: metrc: [3160] dir                8192      1.10      0.06      0.91      7447.91        8412.27\nstress-ng: metrc: [3160] dirmany           10495      1.02      0.02      0.22     10272.56       43584.25\nstress-ng: metrc: [3160] fallocate             2      1.02      0.01      0.00         1.97         395.80\nstress-ng: metrc: [3160] file-ioctl        67901      1.00      0.11      0.67     67655.56       87489.34\nstress-ng: metrc: [3160] filename           3183      1.01      0.02      0.62      3142.58        4939.78\nstress-ng: metrc: [3160] flock           2417763      1.00      0.34      0.62   2408985.26     2531129.77\nstress-ng: metrc: [3160] fpunch             1429      1.02      0.00      0.31      1404.41        4666.98\nstress-ng: metrc: [3160] fstat              1877      1.00      0.13      0.39      1870.89        3559.51\nstress-ng: metrc: [3160] getdent          196421      1.00      0.08      0.89    196419.27      202800.50\nstress-ng: metrc: [3160] hdd               24953      1.01      0.42      0.31     24625.61       34149.59\nstress-ng: metrc: [3160] inotify               2      1.04      0.00      0.00         1.93         682.13\nstress-ng: metrc: [3160] open              17408      1.02      0.01      0.24     17111.87       70943.89\nstress-ng: metrc: [3160] rename              570      1.01      0.00      0.02       561.84       24585.92\nstress-ng: metrc: [3160] touch             61782      1.02      0.04      1.34     60855.71       44702.64\nstress-ng: metrc: [3160] utime             47732      1.01      0.04      0.74     47161.40       61135.85\nstress-ng: info:  [3160] skipped: 0\nstress-ng: info:  [3160] passed: 20: access (1) chdir (1) chmod (1) chown (1) dentry (1) dir (1) dirmany (1) fallocate (1) file-ioctl (1) filename (1) flock (1) fpunch (1) fstat (1) getdent (1) hdd (1) inotify (1) open (1) rename (1) touch (1) utime (1)\nstress-ng: info:  [3160] failed: 0\nstress-ng: info:  [3160] metrics untrustworthy: 0\nstress-ng: info:  [3160] successful run completed in 1.11 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "30": {
+        "avg_ns_per_run": 380.4719008264463,
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 30,
+        "name": "__x64_sys_open",
+        "run_cnt_delta": 15730,
+        "run_time_ns_delta": 5984823,
+        "type": "tracing"
+      },
+      "31": {
+        "avg_ns_per_run": 390.48859453051944,
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 31,
+        "name": "kretfunc__vmlinux____x64_sys_openat",
+        "run_cnt_delta": 575338,
+        "run_time_ns_delta": 224662927,
+        "type": "tracing"
+      },
+      "32": {
+        "avg_ns_per_run": 417.79843110504777,
+        "bytes_jited": 590,
+        "bytes_xlated": 640,
+        "id": 32,
+        "name": "kretfunc__vmlinux____x64_sys_openat2",
+        "run_cnt_delta": 2932,
+        "run_time_ns_delta": 1224985,
+        "type": "tracing"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.1154618740000046,
+        "ops_per_sec": 2481586.385443765,
+        "ops_total": 2768115.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [17777] setting to a 1 secs run per stressor\nstress-ng: info:  [17777] dispatching hogs: 1 access, 1 chdir, 1 chmod, 1 chown, 1 dentry, 1 dir, 1 dirmany, 1 fallocate, 1 file-ioctl, 1 filename, 1 flock, 1 fpunch, 1 fstat, 1 getdent, 1 hdd, 1 inotify, 1 open, 1 rename, 1 touch, 1 utime\nstress-ng: info:  [17777] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [17794] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [17782] dentry: 100892 dentries allocated\nstress-ng: metrc: [17777] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [17777]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [17777] access             9782      1.00      0.16      1.26      9771.10        6886.50\nstress-ng: metrc: [17777] chdir                38      1.07      0.12      0.68        35.40          47.75\nstress-ng: metrc: [17777] chmod               130      1.00      0.00      0.02       129.64        5180.93\nstress-ng: metrc: [17777] chown               149      1.01      0.00      0.01       147.37       21469.74\nstress-ng: metrc: [17777] dentry            12288      1.02      0.02      0.41     12041.88       28414.19\nstress-ng: metrc: [17777] dir                8192      1.10      0.06      0.86      7476.62        8847.34\nstress-ng: metrc: [17777] dirmany            9215      1.00      0.00      0.22      9186.13       42594.20\nstress-ng: metrc: [17777] fallocate             1      1.00      0.00      0.00         1.00         246.18\nstress-ng: metrc: [17777] file-ioctl        69178      1.00      0.06      0.67     69175.76       93612.31\nstress-ng: metrc: [17777] filename           3229      1.01      0.04      0.62      3194.66        4881.68\nstress-ng: metrc: [17777] flock           2306167      1.00      0.41      0.58   2301366.52     2330798.88\nstress-ng: metrc: [17777] fpunch              955      1.03      0.00      0.27       931.35        3599.73\nstress-ng: metrc: [17777] fstat              1879      1.00      0.09      0.50      1875.92        3191.98\nstress-ng: metrc: [17777] getdent          196679      1.00      0.08      0.91    196678.25      198776.29\nstress-ng: metrc: [17777] hdd               28672      1.02      0.33      0.28     27988.35       46748.16\nstress-ng: metrc: [17777] inotify               2      1.05      0.00      0.00         1.90         612.00\nstress-ng: metrc: [17777] open              17209      1.03      0.02      0.24     16737.72       66146.99\nstress-ng: metrc: [17777] rename              435      1.01      0.02      0.00       430.71       25582.22\nstress-ng: metrc: [17777] touch             57282      1.03      0.04      1.36     55822.33       41153.43\nstress-ng: metrc: [17777] utime             46633      1.00      0.03      0.74     46579.01       60184.12\nstress-ng: info:  [17777] skipped: 0\nstress-ng: info:  [17777] passed: 20: access (1) chdir (1) chmod (1) chown (1) dentry (1) dir (1) dirmany (1) fallocate (1) file-ioctl (1) filename (1) flock (1) fpunch (1) fstat (1) getdent (1) hdd (1) inotify (1) open (1) rename (1) touch (1) utime (1)\nstress-ng: info:  [17777] failed: 0\nstress-ng: info:  [17777] metrics untrustworthy: 0\nstress-ng: info:  [17777] successful run completed in 1.10 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": false,
+    "changed": false,
+    "enabled_passes": [
+      "map_inline"
+    ],
+    "error": "prog 30: prog 30 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT; prog 31: prog 31 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT; prog 32: prog 32 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+    "exit_code": 1,
+    "output": "{\"changed\": false, \"error_message\": \"prog 30 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 30, \"program\": {\"final_insn_count\": 75, \"insn_delta\": 0, \"orig_insn_count\": 75, \"prog_id\": 30, \"prog_name\": \"__x64_sys_open\", \"prog_type\": 26}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}\n{\"changed\": false, \"error_message\": \"prog 31 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 31, \"program\": {\"final_insn_count\": 75, \"insn_delta\": 0, \"orig_insn_count\": 75, \"prog_id\": 31, \"prog_name\": \"__x64_sys_opena\", \"prog_type\": 26}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}\n{\"changed\": false, \"error_message\": \"prog 32 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 32, \"program\": {\"final_insn_count\": 80, \"insn_delta\": 0, \"orig_insn_count\": 80, \"prog_id\": 32, \"prog_name\": \"__x64_sys_opena\", \"prog_type\": 26}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "30": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 30 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 30 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 30, \"program\": {\"final_insn_count\": 75, \"insn_delta\": 0, \"orig_insn_count\": 75, \"prog_id\": 30, \"prog_name\": \"__x64_sys_open\", \"prog_type\": 26}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 30,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      },
+      "31": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 31 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 31 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 31, \"program\": {\"final_insn_count\": 75, \"insn_delta\": 0, \"orig_insn_count\": 75, \"prog_id\": 31, \"prog_name\": \"__x64_sys_opena\", \"prog_type\": 26}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 31,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      },
+      "32": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 32 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 32 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 32, \"program\": {\"final_insn_count\": 80, \"insn_delta\": 0, \"orig_insn_count\": 80, \"prog_id\": 32, \"prog_name\": \"__x64_sys_opena\", \"prog_type\": 26}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 32,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 0,
+      "not_applied": 3,
+      "requested": 3
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "stress_ng_filesystem",
+  "status": "ok"
+}

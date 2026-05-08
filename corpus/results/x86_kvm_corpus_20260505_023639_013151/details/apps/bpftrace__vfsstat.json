@@ -1,0 +1,10 @@
+{
+  "app": "bpftrace/vfsstat",
+  "baseline": null,
+  "error": "name 'script_spec' is not defined",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "bpftrace",
+  "selected_workload": "stress_ng_filesystem",
+  "status": "error"
+}

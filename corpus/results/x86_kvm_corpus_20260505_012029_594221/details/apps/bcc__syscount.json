@@ -1,0 +1,552 @@
+{
+  "app": "bcc/syscount",
+  "baseline": {
+    "bpf": {
+      "35": {
+        "avg_ns_per_run": 84.18430790543287,
+        "bytes_jited": 72,
+        "bytes_xlated": 112,
+        "id": 35,
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "run_cnt_delta": 277983247,
+        "run_time_ns_delta": 23401827258,
+        "type": "tracepoint"
+      },
+      "36": {
+        "avg_ns_per_run": 35.44391925417873,
+        "bytes_jited": 236,
+        "bytes_xlated": 400,
+        "id": 36,
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "run_cnt_delta": 277983277,
+        "run_time_ns_delta": 9852816824,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0150594200000569,
+        "ops_per_sec": 605082.8039209425,
+        "ops_total": 614195.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [6189] setting to a 1 secs run per stressor\nstress-ng: info:  [6189] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [6189] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [6189] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [6189]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [6189] cap              441597      1.00      0.12      0.88    441588.58      441733.50\nstress-ng: metrc: [6189] eventfd          130293      1.00      0.06      0.77    130276.66      156671.46\nstress-ng: metrc: [6189] get                1007      1.00      0.02      0.14      1006.40        6184.78\nstress-ng: metrc: [6189] prctl              2668      1.00      0.62      0.34      2666.88        2778.17\nstress-ng: metrc: [6189] set               38630      1.00      0.10      0.88     38622.96       39507.86\nstress-ng: info:  [6189] skipped: 0\nstress-ng: info:  [6189] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [6189] failed: 0\nstress-ng: info:  [6189] metrics untrustworthy: 0\nstress-ng: info:  [6189] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.017208365999977,
+        "ops_per_sec": 605776.5749834719,
+        "ops_total": 616201.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [8865] setting to a 1 secs run per stressor\nstress-ng: info:  [8865] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [8865] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [8865] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8865]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8865] cap              444751      1.00      0.09      0.91    444754.08      444809.71\nstress-ng: metrc: [8865] eventfd          127924      1.00      0.03      0.80    127843.26      153739.10\nstress-ng: metrc: [8865] get                1008      1.00      0.01      0.16      1007.65        5956.67\nstress-ng: metrc: [8865] prctl              2751      1.00      0.65      0.32      2750.89        2823.77\nstress-ng: metrc: [8865] set               39767      1.00      0.06      0.92     39766.65       40450.16\nstress-ng: info:  [8865] skipped: 0\nstress-ng: info:  [8865] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [8865] failed: 0\nstress-ng: info:  [8865] metrics untrustworthy: 0\nstress-ng: info:  [8865] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0142494830000715,
+        "ops_per_sec": 612174.8252347457,
+        "ops_total": 620898.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [11624] setting to a 1 secs run per stressor\nstress-ng: info:  [11624] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [11624] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [11624] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [11624]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [11624] cap              446331      1.00      0.08      0.92    446330.36      446368.94\nstress-ng: metrc: [11624] eventfd          130537      1.00      0.05      0.78    130519.20      157648.81\nstress-ng: metrc: [11624] get                1004      1.00      0.01      0.15      1003.87        6218.34\nstress-ng: metrc: [11624] prctl              2770      1.00      0.67      0.30      2769.06        2832.37\nstress-ng: metrc: [11624] set               40256      1.00      0.13      0.85     40255.36       41058.07\nstress-ng: info:  [11624] skipped: 0\nstress-ng: info:  [11624] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [11624] failed: 0\nstress-ng: info:  [11624] metrics untrustworthy: 0\nstress-ng: info:  [11624] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.016864804000079,
+        "ops_per_sec": 609372.0596508638,
+        "ops_total": 619649.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [14404] setting to a 1 secs run per stressor\nstress-ng: info:  [14404] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [14404] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [14404] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [14404]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [14404] cap              443863      1.00      0.05      0.95    443860.25      443880.76\nstress-ng: metrc: [14404] eventfd          133445      1.00      0.06      0.76    133422.57      163005.57\nstress-ng: metrc: [14404] get                1013      1.00      0.02      0.14      1012.95        6159.18\nstress-ng: metrc: [14404] prctl              2715      1.00      0.64      0.32      2714.28        2804.51\nstress-ng: metrc: [14404] set               38613      1.00      0.06      0.92     38612.42       39579.94\nstress-ng: info:  [14404] skipped: 0\nstress-ng: info:  [14404] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [14404] failed: 0\nstress-ng: info:  [14404] metrics untrustworthy: 0\nstress-ng: info:  [14404] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0182136450000598,
+        "ops_per_sec": 575371.3897636537,
+        "ops_total": 585851.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [17126] setting to a 1 secs run per stressor\nstress-ng: info:  [17126] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [17126] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [17126] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [17126]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [17126] cap              418876      1.00      0.06      0.94    418870.71      418951.83\nstress-ng: metrc: [17126] eventfd          127192      1.00      0.01      0.82    127168.47      152270.86\nstress-ng: metrc: [17126] get                 980      1.00      0.03      0.14       979.13        5841.19\nstress-ng: metrc: [17126] prctl              2677      1.00      0.65      0.33      2676.50        2750.80\nstress-ng: metrc: [17126] set               36126      1.00      0.07      0.91     36125.20       36798.01\nstress-ng: info:  [17126] skipped: 0\nstress-ng: info:  [17126] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [17126] failed: 0\nstress-ng: info:  [17126] metrics untrustworthy: 0\nstress-ng: info:  [17126] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0146688589999258,
+        "ops_per_sec": 587672.5147431017,
+        "ops_total": 596293.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [19812] setting to a 1 secs run per stressor\nstress-ng: info:  [19812] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [19812] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [19812] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [19812]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [19812] cap              425115      1.00      0.05      0.95    425116.93      425126.48\nstress-ng: metrc: [19812] eventfd          130188      1.00      0.04      0.80    130146.45      155070.45\nstress-ng: metrc: [19812] get                 994      1.00      0.02      0.15       993.37        5980.17\nstress-ng: metrc: [19812] prctl              2494      1.00      0.66      0.30      2493.93        2609.85\nstress-ng: metrc: [19812] set               37502      1.00      0.04      0.94     37498.94       38397.98\nstress-ng: info:  [19812] skipped: 0\nstress-ng: info:  [19812] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [19812] failed: 0\nstress-ng: info:  [19812] metrics untrustworthy: 0\nstress-ng: info:  [19812] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0144866260000072,
+        "ops_per_sec": 592227.6199627257,
+        "ops_total": 600807.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [22314] setting to a 1 secs run per stressor\nstress-ng: info:  [22314] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [22314] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [22314] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [22314]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [22314] cap              426184      1.00      0.07      0.93    426175.46      426256.46\nstress-ng: metrc: [22314] eventfd          132891      1.00      0.03      0.80    132844.60      160843.12\nstress-ng: metrc: [22314] get                1003      1.00      0.02      0.15      1002.63        6110.12\nstress-ng: metrc: [22314] prctl              2682      1.00      0.64      0.33      2681.28        2766.78\nstress-ng: metrc: [22314] set               38047      1.00      0.03      0.94     38041.69       39067.32\nstress-ng: info:  [22314] skipped: 0\nstress-ng: info:  [22314] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [22314] failed: 0\nstress-ng: info:  [22314] metrics untrustworthy: 0\nstress-ng: info:  [22314] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0147616430000426,
+        "ops_per_sec": 598339.5255312922,
+        "ops_total": 607172.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [25011] setting to a 1 secs run per stressor\nstress-ng: info:  [25011] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [25011] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [25011] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [25011]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [25011] cap              431493      1.00      0.07      0.93    431490.53      431628.10\nstress-ng: metrc: [25011] eventfd          134576      1.00      0.06      0.78    134533.40      161303.31\nstress-ng: metrc: [25011] get                1001      1.00      0.00      0.16      1000.25        6167.25\nstress-ng: metrc: [25011] prctl              2676      1.00      0.62      0.34      2674.94        2774.24\nstress-ng: metrc: [25011] set               37426      1.00      0.02      0.96     37416.85       38304.20\nstress-ng: info:  [25011] skipped: 0\nstress-ng: info:  [25011] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [25011] failed: 0\nstress-ng: info:  [25011] metrics untrustworthy: 0\nstress-ng: info:  [25011] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0184830209999518,
+        "ops_per_sec": 606725.8729490683,
+        "ops_total": 617940.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [27697] setting to a 1 secs run per stressor\nstress-ng: info:  [27697] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [27697] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [27697] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [27697]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [27697] cap              445507      1.00      0.11      0.89    445507.32      445574.73\nstress-ng: metrc: [27697] eventfd          131443      1.00      0.03      0.78    131422.04      160373.79\nstress-ng: metrc: [27697] get                 977      1.00      0.05      0.12       975.59        5629.66\nstress-ng: metrc: [27697] prctl              2699      1.00      0.63      0.34      2696.90        2784.84\nstress-ng: metrc: [27697] set               37314      1.00      0.04      0.93     37306.45       38440.66\nstress-ng: info:  [27697] skipped: 0\nstress-ng: info:  [27697] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [27697] failed: 0\nstress-ng: info:  [27697] metrics untrustworthy: 0\nstress-ng: info:  [27697] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0148098889999346,
+        "ops_per_sec": 591410.2794085392,
+        "ops_total": 600169.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [30405] setting to a 1 secs run per stressor\nstress-ng: info:  [30405] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [30405] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [30405] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [30405]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [30405] cap              426661      1.00      0.10      0.90    426556.96      426664.84\nstress-ng: metrc: [30405] eventfd          131913      1.00      0.04      0.78    131824.49      160630.33\nstress-ng: metrc: [30405] get                1004      1.00      0.01      0.16      1003.25        6210.22\nstress-ng: metrc: [30405] prctl              2652      1.00      0.63      0.34      2651.45        2725.59\nstress-ng: metrc: [30405] set               37939      1.00      0.07      0.91     37937.87       38897.31\nstress-ng: info:  [30405] skipped: 0\nstress-ng: info:  [30405] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [30405] failed: 0\nstress-ng: info:  [30405] metrics untrustworthy: 0\nstress-ng: info:  [30405] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.016841870999997,
+        "ops_per_sec": 596392.6322227557,
+        "ops_total": 606437.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [605] setting to a 1 secs run per stressor\nstress-ng: info:  [605] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [605] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [605] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [605]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [605] cap              431499      1.00      0.03      0.97    431497.35      431738.18\nstress-ng: metrc: [605] eventfd          132646      1.00      0.10      0.72    132571.85      161182.57\nstress-ng: metrc: [605] get                1004      1.00      0.01      0.15      1003.17        6235.75\nstress-ng: metrc: [605] prctl              2653      1.00      0.63      0.33      2652.56        2758.93\nstress-ng: metrc: [605] set               38635      1.00      0.10      0.87     38634.04       39829.08\nstress-ng: info:  [605] skipped: 0\nstress-ng: info:  [605] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [605] failed: 0\nstress-ng: info:  [605] metrics untrustworthy: 0\nstress-ng: info:  [605] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0146226330000445,
+        "ops_per_sec": 584565.1188031146,
+        "ops_total": 593113.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [3355] setting to a 1 secs run per stressor\nstress-ng: info:  [3355] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [3355] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [3355] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [3355]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [3355] cap              423587      1.00      0.04      0.96    423587.00      423564.13\nstress-ng: metrc: [3355] eventfd          128489      1.00      0.04      0.80    128452.25      151860.48\nstress-ng: metrc: [3355] get                 998      1.00      0.01      0.16       997.39        6030.32\nstress-ng: metrc: [3355] prctl              2630      1.00      0.65      0.32      2629.36        2708.56\nstress-ng: metrc: [3355] set               37409      1.00      0.03      0.95     37408.13       38315.94\nstress-ng: info:  [3355] skipped: 0\nstress-ng: info:  [3355] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [3355] failed: 0\nstress-ng: info:  [3355] metrics untrustworthy: 0\nstress-ng: info:  [3355] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.014613612000062,
+        "ops_per_sec": 624965.9895159787,
+        "ops_total": 634099.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [5997] setting to a 1 secs run per stressor\nstress-ng: info:  [5997] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [5997] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [5997] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [5997]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [5997] cap              460408      1.00      0.06      0.94    460402.29      460768.78\nstress-ng: metrc: [5997] eventfd          129601      1.00      0.07      0.76    129573.17      156244.42\nstress-ng: metrc: [5997] get                 992      1.00      0.02      0.16       991.15        5755.46\nstress-ng: metrc: [5997] prctl              2664      1.00      0.65      0.33      2663.44        2737.53\nstress-ng: metrc: [5997] set               40434      1.00      0.05      0.93     40433.74       41280.79\nstress-ng: info:  [5997] skipped: 0\nstress-ng: info:  [5997] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [5997] failed: 0\nstress-ng: info:  [5997] metrics untrustworthy: 0\nstress-ng: info:  [5997] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0140418679999357,
+        "ops_per_sec": 624661.5844860167,
+        "ops_total": 633433.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [8669] setting to a 1 secs run per stressor\nstress-ng: info:  [8669] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [8669] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [8669] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8669]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8669] cap              460745      1.00      0.09      0.91    460701.06      460917.84\nstress-ng: metrc: [8669] eventfd          128046      1.00      0.07      0.76    128026.50      153905.51\nstress-ng: metrc: [8669] get                1018      1.00      0.04      0.13      1017.88        5852.69\nstress-ng: metrc: [8669] prctl              2580      1.00      0.66      0.30      2579.74        2664.70\nstress-ng: metrc: [8669] set               41044      1.00      0.06      0.91     41042.65       42405.60\nstress-ng: info:  [8669] skipped: 0\nstress-ng: info:  [8669] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [8669] failed: 0\nstress-ng: info:  [8669] metrics untrustworthy: 0\nstress-ng: info:  [8669] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0174163430000362,
+        "ops_per_sec": 617627.1929612375,
+        "ops_total": 628384.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [11257] setting to a 1 secs run per stressor\nstress-ng: info:  [11257] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [11257] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [11257] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [11257]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [11257] cap              454770      1.00      0.11      0.89    454757.21      454790.47\nstress-ng: metrc: [11257] eventfd          130121      1.00      0.05      0.79    130102.79      155523.05\nstress-ng: metrc: [11257] get                1001      1.00      0.03      0.14      1000.90        6038.96\nstress-ng: metrc: [11257] prctl              2625      1.00      0.63      0.33      2624.49        2718.55\nstress-ng: metrc: [11257] set               39867      1.00      0.04      0.94     39866.42       40876.86\nstress-ng: info:  [11257] skipped: 0\nstress-ng: info:  [11257] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [11257] failed: 0\nstress-ng: info:  [11257] metrics untrustworthy: 0\nstress-ng: info:  [11257] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.017076664000001,
+        "ops_per_sec": 595033.8075989907,
+        "ops_total": 605195.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [13891] setting to a 1 secs run per stressor\nstress-ng: info:  [13891] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [13891] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [13891] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [13891]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [13891] cap              431136      1.00      0.11      0.89    431136.00      431170.49\nstress-ng: metrc: [13891] eventfd          133215      1.00      0.04      0.79    133176.36      160936.47\nstress-ng: metrc: [13891] get                 974      1.00      0.01      0.16       973.68        5832.30\nstress-ng: metrc: [13891] prctl              2482      1.00      0.70      0.28      2481.26        2545.33\nstress-ng: metrc: [13891] set               37388      1.00      0.14      0.85     37383.51       37959.52\nstress-ng: info:  [13891] skipped: 0\nstress-ng: info:  [13891] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [13891] failed: 0\nstress-ng: info:  [13891] metrics untrustworthy: 0\nstress-ng: info:  [13891] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0175445979999722,
+        "ops_per_sec": 592418.2597842424,
+        "ops_total": 602812.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [16381] setting to a 1 secs run per stressor\nstress-ng: info:  [16381] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [16381] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [16381] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [16381]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [16381] cap              432899      1.00      0.11      0.89    432904.57      432900.30\nstress-ng: metrc: [16381] eventfd          128325      1.00      0.07      0.77    128290.83      153476.77\nstress-ng: metrc: [16381] get                 979      1.00      0.02      0.15       978.35        5583.82\nstress-ng: metrc: [16381] prctl              2553      1.00      0.63      0.32      2552.82        2676.80\nstress-ng: metrc: [16381] set               38056      1.00      0.09      0.90     38054.71       38608.53\nstress-ng: info:  [16381] skipped: 0\nstress-ng: info:  [16381] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [16381] failed: 0\nstress-ng: info:  [16381] metrics untrustworthy: 0\nstress-ng: info:  [16381] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0150580670000409,
+        "ops_per_sec": 600889.761708554,
+        "ops_total": 609938.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [18942] setting to a 1 secs run per stressor\nstress-ng: info:  [18942] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [18942] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [18942] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [18942]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [18942] cap              440635      1.00      0.06      0.94    440631.85      440632.36\nstress-ng: metrc: [18942] eventfd          128464      1.00      0.06      0.78    128439.81      154145.02\nstress-ng: metrc: [18942] get                 988      1.00      0.00      0.16       987.37        6180.33\nstress-ng: metrc: [18942] prctl              2708      1.00      0.65      0.32      2707.23        2778.09\nstress-ng: metrc: [18942] set               37143      1.00      0.10      0.88     37141.69       38088.20\nstress-ng: info:  [18942] skipped: 0\nstress-ng: info:  [18942] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [18942] failed: 0\nstress-ng: info:  [18942] metrics untrustworthy: 0\nstress-ng: info:  [18942] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0172048059999952,
+        "ops_per_sec": 588096.9068091513,
+        "ops_total": 598215.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [21659] setting to a 1 secs run per stressor\nstress-ng: info:  [21659] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [21659] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [21659] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [21659]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [21659] cap              427485      1.00      0.09      0.91    427478.58      427492.27\nstress-ng: metrc: [21659] eventfd          128524      1.00      0.06      0.77    128509.32      154908.66\nstress-ng: metrc: [21659] get                 969      1.00      0.02      0.15       968.90        5883.00\nstress-ng: metrc: [21659] prctl              2592      1.00      0.64      0.32      2591.88        2695.76\nstress-ng: metrc: [21659] set               38645      1.00      0.04      0.93     38643.18       39899.48\nstress-ng: info:  [21659] skipped: 0\nstress-ng: info:  [21659] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [21659] failed: 0\nstress-ng: info:  [21659] metrics untrustworthy: 0\nstress-ng: info:  [21659] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.016757005000045,
+        "ops_per_sec": 594433.0818748313,
+        "ops_total": 604394.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [24263] setting to a 1 secs run per stressor\nstress-ng: info:  [24263] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [24263] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [24263] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [24263]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [24263] cap              429125      1.00      0.07      0.93    429087.25      429304.88\nstress-ng: metrc: [24263] eventfd          133348      1.00      0.04      0.78    133311.23      161280.69\nstress-ng: metrc: [24263] get                1003      1.00      0.02      0.14      1002.60        6034.50\nstress-ng: metrc: [24263] prctl              2632      1.00      0.65      0.31      2631.76        2742.23\nstress-ng: metrc: [24263] set               38286      1.00      0.08      0.90     38280.54       39088.81\nstress-ng: info:  [24263] skipped: 0\nstress-ng: info:  [24263] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [24263] failed: 0\nstress-ng: info:  [24263] metrics untrustworthy: 0\nstress-ng: info:  [24263] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0146227179999414,
+        "ops_per_sec": 586338.1426868803,
+        "ops_total": 594912.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [26908] setting to a 1 secs run per stressor\nstress-ng: info:  [26908] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [26908] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [26908] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [26908]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [26908] cap              423546      1.00      0.07      0.93    423543.68      423574.80\nstress-ng: metrc: [26908] eventfd          128929      1.00      0.07      0.76    128860.89      154233.65\nstress-ng: metrc: [26908] get                 980      1.00      0.02      0.14       979.68        6169.81\nstress-ng: metrc: [26908] prctl              2640      1.00      0.65      0.32      2639.91        2713.39\nstress-ng: metrc: [26908] set               38817      1.00      0.09      0.88     38815.91       39922.41\nstress-ng: info:  [26908] skipped: 0\nstress-ng: info:  [26908] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [26908] failed: 0\nstress-ng: info:  [26908] metrics untrustworthy: 0\nstress-ng: info:  [26908] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0173225820000198,
+        "ops_per_sec": 581484.1923955134,
+        "ops_total": 591557.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [29556] setting to a 1 secs run per stressor\nstress-ng: info:  [29556] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [29556] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [29556] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [29556]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [29556] cap              423235      1.00      0.04      0.96    423233.18      423515.37\nstress-ng: metrc: [29556] eventfd          127319      1.00      0.02      0.81    127278.67      152421.80\nstress-ng: metrc: [29556] get                 995      1.00      0.03      0.14       994.17        5922.41\nstress-ng: metrc: [29556] prctl              2685      1.00      0.64      0.32      2684.65        2772.62\nstress-ng: metrc: [29556] set               37323      1.00      0.04      0.94     37322.24       38238.90\nstress-ng: info:  [29556] skipped: 0\nstress-ng: info:  [29556] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [29556] failed: 0\nstress-ng: info:  [29556] metrics untrustworthy: 0\nstress-ng: info:  [29556] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0177210860000514,
+        "ops_per_sec": 606327.2231346584,
+        "ops_total": 617072.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [32250] setting to a 1 secs run per stressor\nstress-ng: info:  [32250] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [32250] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [32250] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [32250]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [32250] cap              441174      1.00      0.09      0.91    441171.37      443044.09\nstress-ng: metrc: [32250] eventfd          134274      1.00      0.10      0.73    134242.57      162587.86\nstress-ng: metrc: [32250] get                 981      1.00      0.03      0.13       980.27        6181.24\nstress-ng: metrc: [32250] prctl              2672      1.00      0.63      0.33      2671.64        2761.83\nstress-ng: metrc: [32250] set               37971      1.00      0.09      0.88     37969.97       39109.56\nstress-ng: info:  [32250] skipped: 0\nstress-ng: info:  [32250] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [32250] failed: 0\nstress-ng: info:  [32250] metrics untrustworthy: 0\nstress-ng: info:  [32250] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.015251940999974,
+        "ops_per_sec": 579322.211805567,
+        "ops_total": 588158.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [2559] setting to a 1 secs run per stressor\nstress-ng: info:  [2559] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [2559] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [2559] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2559]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2559] cap              415801      1.00      0.10      0.90    415754.31      415880.85\nstress-ng: metrc: [2559] eventfd          131159      1.00      0.08      0.75    131111.99      157888.97\nstress-ng: metrc: [2559] get                 960      1.00      0.02      0.14       959.20        6080.14\nstress-ng: metrc: [2559] prctl              2603      1.00      0.64      0.32      2602.25        2713.08\nstress-ng: metrc: [2559] set               37635      1.00      0.07      0.91     37634.08       38605.82\nstress-ng: info:  [2559] skipped: 0\nstress-ng: info:  [2559] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [2559] failed: 0\nstress-ng: info:  [2559] metrics untrustworthy: 0\nstress-ng: info:  [2559] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0171894449999854,
+        "ops_per_sec": 616392.5540930175,
+        "ops_total": 626988.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [5173] setting to a 1 secs run per stressor\nstress-ng: info:  [5173] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [5173] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [5173] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [5173]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [5173] cap              453702      1.00      0.06      0.94    453700.16      453756.90\nstress-ng: metrc: [5173] eventfd          128725      1.00      0.02      0.81    128701.65      153826.39\nstress-ng: metrc: [5173] get                 974      1.00      0.05      0.11       973.16        5916.62\nstress-ng: metrc: [5173] prctl              2698      1.00      0.64      0.33      2696.79        2784.79\nstress-ng: metrc: [5173] set               40889      1.00      0.06      0.92     40888.12       41886.83\nstress-ng: info:  [5173] skipped: 0\nstress-ng: info:  [5173] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [5173] failed: 0\nstress-ng: info:  [5173] metrics untrustworthy: 0\nstress-ng: info:  [5173] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0185194919999958,
+        "ops_per_sec": 618683.2995828445,
+        "ops_total": 630141.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [7879] setting to a 1 secs run per stressor\nstress-ng: info:  [7879] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [7879] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [7879] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [7879]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [7879] cap              455061      1.00      0.05      0.95    455013.70      455144.29\nstress-ng: metrc: [7879] eventfd          131290      1.00      0.06      0.76    131253.11      159977.09\nstress-ng: metrc: [7879] get                 983      1.00      0.01      0.15       982.99        6057.17\nstress-ng: metrc: [7879] prctl              2704      1.00      0.62      0.35      2702.96        2788.39\nstress-ng: metrc: [7879] set               40103      1.00      0.05      0.92     40041.17       41209.52\nstress-ng: info:  [7879] skipped: 0\nstress-ng: info:  [7879] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [7879] failed: 0\nstress-ng: info:  [7879] metrics untrustworthy: 0\nstress-ng: info:  [7879] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0177183069999955,
+        "ops_per_sec": 609451.5503296363,
+        "ops_total": 620250.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [10592] setting to a 1 secs run per stressor\nstress-ng: info:  [10592] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [10592] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [10592] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [10592]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [10592] cap              445320      1.00      0.06      0.94    445313.52      445578.44\nstress-ng: metrc: [10592] eventfd          130101      1.00      0.05      0.78    130050.96      156672.50\nstress-ng: metrc: [10592] get                 977      1.00      0.02      0.15       976.82        5611.04\nstress-ng: metrc: [10592] prctl              2704      1.00      0.64      0.34      2702.75        2773.22\nstress-ng: metrc: [10592] set               41148      1.00      0.10      0.88     41148.03       42033.00\nstress-ng: info:  [10592] skipped: 0\nstress-ng: info:  [10592] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [10592] failed: 0\nstress-ng: info:  [10592] metrics untrustworthy: 0\nstress-ng: info:  [10592] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0175880819999747,
+        "ops_per_sec": 620292.2490595912,
+        "ops_total": 631202.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [13305] setting to a 1 secs run per stressor\nstress-ng: info:  [13305] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [13305] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [13305] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [13305]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [13305] cap              454942      1.00      0.07      0.93    454938.96      455087.17\nstress-ng: metrc: [13305] eventfd          131648      1.00      0.08      0.74    131611.82      159275.25\nstress-ng: metrc: [13305] get                 973      1.00      0.03      0.15       972.14        5621.65\nstress-ng: metrc: [13305] prctl              2555      1.00      0.63      0.33      2554.06        2652.15\nstress-ng: metrc: [13305] set               41084      1.00      0.07      0.91     41083.35       41819.78\nstress-ng: info:  [13305] skipped: 0\nstress-ng: info:  [13305] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [13305] failed: 0\nstress-ng: info:  [13305] metrics untrustworthy: 0\nstress-ng: info:  [13305] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0132407639999883,
+        "ops_per_sec": 596738.7233938873,
+        "ops_total": 604640.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [15868] setting to a 1 secs run per stressor\nstress-ng: info:  [15868] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [15868] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [15868] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [15868]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [15868] cap              439334      1.00      0.10      0.90    439284.25      439312.91\nstress-ng: metrc: [15868] eventfd          125617      1.00      0.04      0.80    125600.14      149547.25\nstress-ng: metrc: [15868] get                 979      1.00      0.01      0.15       978.96        6138.66\nstress-ng: metrc: [15868] prctl              2593      1.00      0.63      0.33      2592.15        2703.81\nstress-ng: metrc: [15868] set               36117      1.00      0.06      0.92     36107.88       37020.33\nstress-ng: info:  [15868] skipped: 0\nstress-ng: info:  [15868] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [15868] failed: 0\nstress-ng: info:  [15868] metrics untrustworthy: 0\nstress-ng: info:  [15868] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0138416270000334,
+        "ops_per_sec": 588932.2198840631,
+        "ops_total": 597084.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [18469] setting to a 1 secs run per stressor\nstress-ng: info:  [18469] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [18469] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [18469] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [18469]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [18469] cap              425805      1.00      0.06      0.94    425803.58      425811.81\nstress-ng: metrc: [18469] eventfd          130606      1.00      0.06      0.77    130558.62      156536.41\nstress-ng: metrc: [18469] get                 975      1.00      0.02      0.15       974.32        5960.57\nstress-ng: metrc: [18469] prctl              2551      1.00      0.68      0.29      2550.00        2618.93\nstress-ng: metrc: [18469] set               37147      1.00      0.07      0.92     37145.81       37588.70\nstress-ng: info:  [18469] skipped: 0\nstress-ng: info:  [18469] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [18469] failed: 0\nstress-ng: info:  [18469] metrics untrustworthy: 0\nstress-ng: info:  [18469] successful run completed in 1.00 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "35": {
+        "avg_ns_per_run": 87.0370710923679,
+        "bytes_jited": 72,
+        "bytes_xlated": 112,
+        "id": 35,
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "run_cnt_delta": 276705469,
+        "run_time_ns_delta": 24083633577,
+        "type": "tracepoint"
+      },
+      "36": {
+        "avg_ns_per_run": 33.48956461291879,
+        "bytes_jited": 236,
+        "bytes_xlated": 400,
+        "id": 36,
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "run_cnt_delta": 276705500,
+        "run_time_ns_delta": 9266746721,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0144979220000323,
+        "ops_per_sec": 573791.219653165,
+        "ops_total": 582110.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [23625] setting to a 1 secs run per stressor\nstress-ng: info:  [23625] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [23625] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [23625] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [23625]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [23625] cap              409308      1.00      0.06      0.94    409306.54      409364.49\nstress-ng: metrc: [23625] eventfd          131074      1.00      0.07      0.75    131050.47      158681.00\nstress-ng: metrc: [23625] get                 998      1.00      0.02      0.14       997.53        6182.40\nstress-ng: metrc: [23625] prctl              2679      1.00      0.64      0.33      2677.34        2748.36\nstress-ng: metrc: [23625] set               38051      1.00      0.09      0.89     38045.10       38972.78\nstress-ng: info:  [23625] skipped: 0\nstress-ng: info:  [23625] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [23625] failed: 0\nstress-ng: info:  [23625] metrics untrustworthy: 0\nstress-ng: info:  [23625] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.015570931999946,
+        "ops_per_sec": 596221.279007651,
+        "ops_total": 605505.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [26315] setting to a 1 secs run per stressor\nstress-ng: info:  [26315] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [26315] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [26315] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [26315]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [26315] cap              428732      1.00      0.16      0.84    428730.16      428804.47\nstress-ng: metrc: [26315] eventfd          136687      1.00      0.08      0.74    136595.42      166620.34\nstress-ng: metrc: [26315] get                 978      1.00      0.02      0.14       977.81        6010.95\nstress-ng: metrc: [26315] prctl              2651      1.00      0.63      0.34      2650.78        2727.44\nstress-ng: metrc: [26315] set               36457      1.00      0.08      0.91     36450.42       36935.65\nstress-ng: info:  [26315] skipped: 0\nstress-ng: info:  [26315] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [26315] failed: 0\nstress-ng: info:  [26315] metrics untrustworthy: 0\nstress-ng: info:  [26315] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0183997569999974,
+        "ops_per_sec": 584971.6635389982,
+        "ops_total": 595735.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [28977] setting to a 1 secs run per stressor\nstress-ng: info:  [28977] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [28977] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [28977] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [28977]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [28977] cap              423436      1.00      0.09      0.91    423439.84      423547.39\nstress-ng: metrc: [28977] eventfd          131687      1.00      0.08      0.74    131671.87      160432.30\nstress-ng: metrc: [28977] get                 950      1.00      0.02      0.16       948.64        5339.36\nstress-ng: metrc: [28977] prctl              2489      1.00      0.64      0.32      2488.76        2576.25\nstress-ng: metrc: [28977] set               37173      1.00      0.05      0.93     37143.63       37838.93\nstress-ng: info:  [28977] skipped: 0\nstress-ng: info:  [28977] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [28977] failed: 0\nstress-ng: info:  [28977] metrics untrustworthy: 0\nstress-ng: info:  [28977] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.01815994399999,
+        "ops_per_sec": 593536.4119961942,
+        "ops_total": 604315.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [31474] setting to a 1 secs run per stressor\nstress-ng: info:  [31474] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [31474] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [31474] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [31474]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [31474] cap              427545      1.00      0.08      0.92    427537.46      427691.27\nstress-ng: metrc: [31474] eventfd          134440      1.00      0.06      0.76    134418.91      163372.05\nstress-ng: metrc: [31474] get                 981      1.00      0.00      0.16       980.35        5929.86\nstress-ng: metrc: [31474] prctl              2655      1.00      0.62      0.35      2653.44        2754.27\nstress-ng: metrc: [31474] set               38694      1.00      0.06      0.93     38687.64       39261.96\nstress-ng: info:  [31474] skipped: 0\nstress-ng: info:  [31474] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [31474] failed: 0\nstress-ng: info:  [31474] metrics untrustworthy: 0\nstress-ng: info:  [31474] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0147801690000051,
+        "ops_per_sec": 608605.704828271,
+        "ops_total": 617601.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [1740] setting to a 1 secs run per stressor\nstress-ng: info:  [1740] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [1740] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [1740] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1740]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1740] cap              446396      1.00      0.08      0.92    446402.28      446418.77\nstress-ng: metrc: [1740] eventfd          131052      1.00      0.04      0.80    131030.16      156133.99\nstress-ng: metrc: [1740] get                 970      1.00      0.01      0.16       969.28        5859.58\nstress-ng: metrc: [1740] prctl              2584      1.00      0.62      0.34      2583.14        2668.88\nstress-ng: metrc: [1740] set               36599      1.00      0.07      0.92     36593.94       37043.82\nstress-ng: info:  [1740] skipped: 0\nstress-ng: info:  [1740] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [1740] failed: 0\nstress-ng: info:  [1740] metrics untrustworthy: 0\nstress-ng: info:  [1740] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0139128370000208,
+        "ops_per_sec": 617521.523696802,
+        "ops_total": 626113.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [4362] setting to a 1 secs run per stressor\nstress-ng: info:  [4362] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [4362] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [4362] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [4362]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [4362] cap              452734      1.00      0.10      0.90    452690.94      452769.32\nstress-ng: metrc: [4362] eventfd          130258      1.00      0.05      0.79    130220.53      155797.96\nstress-ng: metrc: [4362] get                 987      1.00      0.01      0.15       986.63        6123.28\nstress-ng: metrc: [4362] prctl              2641      1.00      0.62      0.35      2640.60        2717.66\nstress-ng: metrc: [4362] set               39493      1.00      0.10      0.88     39492.38       40466.54\nstress-ng: info:  [4362] skipped: 0\nstress-ng: info:  [4362] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [4362] failed: 0\nstress-ng: info:  [4362] metrics untrustworthy: 0\nstress-ng: info:  [4362] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.016788480999935,
+        "ops_per_sec": 619776.8875000073,
+        "ops_total": 630182.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [7011] setting to a 1 secs run per stressor\nstress-ng: info:  [7011] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [7011] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [7011] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [7011]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [7011] cap              457779      1.00      0.07      0.93    457777.14      457800.06\nstress-ng: metrc: [7011] eventfd          129715      1.00      0.05      0.78    129686.83      156367.72\nstress-ng: metrc: [7011] get                 961      1.00      0.01      0.15       960.78        6031.51\nstress-ng: metrc: [7011] prctl              2690      1.00      0.63      0.34      2689.84        2782.10\nstress-ng: metrc: [7011] set               39037      1.00      0.06      0.93     39036.89       39585.42\nstress-ng: info:  [7011] skipped: 0\nstress-ng: info:  [7011] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [7011] failed: 0\nstress-ng: info:  [7011] metrics untrustworthy: 0\nstress-ng: info:  [7011] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0168932190000533,
+        "ops_per_sec": 607882.9010265705,
+        "ops_total": 618152.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [9710] setting to a 1 secs run per stressor\nstress-ng: info:  [9710] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [9710] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [9710] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [9710]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [9710] cap              448867      1.00      0.05      0.95    448866.14      448997.21\nstress-ng: metrc: [9710] eventfd          125912      1.00      0.05      0.80    125870.89      147836.09\nstress-ng: metrc: [9710] get                 994      1.00      0.01      0.15       993.85        6162.24\nstress-ng: metrc: [9710] prctl              2686      1.00      0.63      0.33      2685.72        2785.65\nstress-ng: metrc: [9710] set               39693      1.00      0.11      0.88     39690.61       40257.00\nstress-ng: info:  [9710] skipped: 0\nstress-ng: info:  [9710] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [9710] failed: 0\nstress-ng: info:  [9710] metrics untrustworthy: 0\nstress-ng: info:  [9710] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0186617809999916,
+        "ops_per_sec": 604973.124048133,
+        "ops_total": 616263.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [12405] setting to a 1 secs run per stressor\nstress-ng: info:  [12405] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [12405] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [12405] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [12405]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [12405] cap              444450      1.00      0.04      0.96    444389.82      444472.22\nstress-ng: metrc: [12405] eventfd          129007      1.00      0.06      0.78    128960.33      153820.20\nstress-ng: metrc: [12405] get                 979      1.00      0.00      0.16       978.19        5985.02\nstress-ng: metrc: [12405] prctl              2610      1.00      0.64      0.33      2609.80        2705.62\nstress-ng: metrc: [12405] set               39217      1.00      0.06      0.92     39125.06       40178.06\nstress-ng: info:  [12405] skipped: 0\nstress-ng: info:  [12405] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [12405] failed: 0\nstress-ng: info:  [12405] metrics untrustworthy: 0\nstress-ng: info:  [12405] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0147830449999447,
+        "ops_per_sec": 593485.4774796054,
+        "ops_total": 602259.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [15023] setting to a 1 secs run per stressor\nstress-ng: info:  [15023] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [15023] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [15023] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [15023]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [15023] cap              427696      1.00      0.07      0.93    427693.04      427779.84\nstress-ng: metrc: [15023] eventfd          132694      1.00      0.07      0.75    132671.83      161426.06\nstress-ng: metrc: [15023] get                1000      1.00      0.02      0.15       999.83        6113.37\nstress-ng: metrc: [15023] prctl              2658      1.00      0.62      0.34      2657.59        2753.22\nstress-ng: metrc: [15023] set               38211      1.00      0.05      0.92     38210.26       39384.34\nstress-ng: info:  [15023] skipped: 0\nstress-ng: info:  [15023] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [15023] failed: 0\nstress-ng: info:  [15023] metrics untrustworthy: 0\nstress-ng: info:  [15023] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0150710660000186,
+        "ops_per_sec": 586738.229419682,
+        "ops_total": 595581.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [17688] setting to a 1 secs run per stressor\nstress-ng: info:  [17688] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [17688] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [17688] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [17688]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [17688] cap              420758      1.00      0.09      0.91    420755.09      420881.32\nstress-ng: metrc: [17688] eventfd          131770      1.00      0.05      0.77    131727.92      159701.85\nstress-ng: metrc: [17688] get                1001      1.00      0.03      0.14      1000.19        6036.92\nstress-ng: metrc: [17688] prctl              2625      1.00      0.64      0.33      2623.65        2717.79\nstress-ng: metrc: [17688] set               39427      1.00      0.11      0.87     39426.70       40209.31\nstress-ng: info:  [17688] skipped: 0\nstress-ng: info:  [17688] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [17688] failed: 0\nstress-ng: info:  [17688] metrics untrustworthy: 0\nstress-ng: info:  [17688] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0168388030000415,
+        "ops_per_sec": 582945.8890151891,
+        "ops_total": 592762.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [20322] setting to a 1 secs run per stressor\nstress-ng: info:  [20322] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [20322] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [20322] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [20322]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [20322] cap              420027      1.00      0.04      0.96    420013.78      420096.74\nstress-ng: metrc: [20322] eventfd          131689      1.00      0.07      0.77    131668.16      157935.51\nstress-ng: metrc: [20322] get                 960      1.00      0.03      0.14       959.80        5873.72\nstress-ng: metrc: [20322] prctl              2583      1.00      0.62      0.34      2582.97        2702.33\nstress-ng: metrc: [20322] set               37503      1.00      0.03      0.94     37502.05       38503.47\nstress-ng: info:  [20322] skipped: 0\nstress-ng: info:  [20322] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [20322] failed: 0\nstress-ng: info:  [20322] metrics untrustworthy: 0\nstress-ng: info:  [20322] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.014808304999974,
+        "ops_per_sec": 581065.4062394721,
+        "ops_total": 589670.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [22913] setting to a 1 secs run per stressor\nstress-ng: info:  [22913] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [22913] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [22913] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [22913]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [22913] cap              419519      1.00      0.14      0.86    419517.80      419653.71\nstress-ng: metrc: [22913] eventfd          130353      1.00      0.06      0.78    130315.69      156497.47\nstress-ng: metrc: [22913] get                 989      1.00      0.01      0.15       988.12        6166.91\nstress-ng: metrc: [22913] prctl              2685      1.00      0.64      0.33      2683.03        2781.79\nstress-ng: metrc: [22913] set               36124      1.00      0.04      0.94     36120.09       36862.58\nstress-ng: info:  [22913] skipped: 0\nstress-ng: info:  [22913] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [22913] failed: 0\nstress-ng: info:  [22913] metrics untrustworthy: 0\nstress-ng: info:  [22913] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0147820509999974,
+        "ops_per_sec": 606894.8493847587,
+        "ops_total": 615866.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [25613] setting to a 1 secs run per stressor\nstress-ng: info:  [25613] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [25613] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [25613] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [25613]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [25613] cap              446245      1.00      0.09      0.91    446245.85      446324.45\nstress-ng: metrc: [25613] eventfd          126971      1.00      0.08      0.76    126932.41      152205.26\nstress-ng: metrc: [25613] get                 996      1.00      0.03      0.13       995.96        6257.62\nstress-ng: metrc: [25613] prctl              2576      1.00      0.64      0.32      2575.23        2693.13\nstress-ng: metrc: [25613] set               39078      1.00      0.05      0.93     39070.64       40052.52\nstress-ng: info:  [25613] skipped: 0\nstress-ng: info:  [25613] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [25613] failed: 0\nstress-ng: info:  [25613] metrics untrustworthy: 0\nstress-ng: info:  [25613] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.01586467300001,
+        "ops_per_sec": 593775.9388941701,
+        "ops_total": 603196.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [28200] setting to a 1 secs run per stressor\nstress-ng: info:  [28200] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [28200] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [28200] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [28200]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [28200] cap              433107      1.00      0.11      0.89    433108.14      433133.42\nstress-ng: metrc: [28200] eventfd          129060      1.00      0.12      0.71    128997.87      155388.95\nstress-ng: metrc: [28200] get                 967      1.00      0.01      0.15       965.57        5970.17\nstress-ng: metrc: [28200] prctl              2575      1.00      0.66      0.31      2574.76        2652.25\nstress-ng: metrc: [28200] set               37487      1.00      0.05      0.93     37486.02       38482.50\nstress-ng: info:  [28200] skipped: 0\nstress-ng: info:  [28200] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [28200] failed: 0\nstress-ng: info:  [28200] metrics untrustworthy: 0\nstress-ng: info:  [28200] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0177610990000403,
+        "ops_per_sec": 587797.077907353,
+        "ops_total": 598237.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [30783] setting to a 1 secs run per stressor\nstress-ng: info:  [30783] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [30783] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [30783] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [30783]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [30783] cap              423464      1.00      0.10      0.90    423460.87      423511.43\nstress-ng: metrc: [30783] eventfd          133007      1.00      0.03      0.80    132987.47      160894.14\nstress-ng: metrc: [30783] get                 970      1.00      0.02      0.14       969.59        5978.58\nstress-ng: metrc: [30783] prctl              2629      1.00      0.67      0.31      2628.16        2693.97\nstress-ng: metrc: [30783] set               38167      1.00      0.06      0.91     38165.61       39386.69\nstress-ng: info:  [30783] skipped: 0\nstress-ng: info:  [30783] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [30783] failed: 0\nstress-ng: info:  [30783] metrics untrustworthy: 0\nstress-ng: info:  [30783] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0152101569999559,
+        "ops_per_sec": 590564.4224164574,
+        "ops_total": 599547.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [968] setting to a 1 secs run per stressor\nstress-ng: info:  [968] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [968] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [968] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [968]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [968] cap              427083      1.00      0.08      0.92    427078.21      427200.48\nstress-ng: metrc: [968] eventfd          128736      1.00      0.13      0.70    128674.64      154711.99\nstress-ng: metrc: [968] get                 998      1.00      0.03      0.14       997.76        6104.87\nstress-ng: metrc: [968] prctl              2724      1.00      0.66      0.32      2722.52        2784.27\nstress-ng: metrc: [968] set               40006      1.00      0.11      0.87     40005.03       41069.24\nstress-ng: info:  [968] skipped: 0\nstress-ng: info:  [968] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [968] failed: 0\nstress-ng: info:  [968] metrics untrustworthy: 0\nstress-ng: info:  [968] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0174068329999955,
+        "ops_per_sec": 612324.3719162272,
+        "ops_total": 622983.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [3784] setting to a 1 secs run per stressor\nstress-ng: info:  [3784] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [3784] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [3784] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [3784]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [3784] cap              445375      1.00      0.05      0.95    445369.69      445513.55\nstress-ng: metrc: [3784] eventfd          133139      1.00      0.06      0.77    133081.57      160832.02\nstress-ng: metrc: [3784] get                 981      1.00      0.02      0.15       980.68        5954.15\nstress-ng: metrc: [3784] prctl              2694      1.00      0.63      0.34      2693.40        2780.19\nstress-ng: metrc: [3784] set               40794      1.00      0.07      0.90     40792.91       41948.94\nstress-ng: info:  [3784] skipped: 0\nstress-ng: info:  [3784] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [3784] failed: 0\nstress-ng: info:  [3784] metrics untrustworthy: 0\nstress-ng: info:  [3784] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0191531320000422,
+        "ops_per_sec": 592592.988273302,
+        "ops_total": 603943.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [6487] setting to a 1 secs run per stressor\nstress-ng: info:  [6487] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [6487] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [6487] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [6487]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [6487] cap              432100      1.00      0.07      0.93    432060.96      432109.51\nstress-ng: metrc: [6487] eventfd          126319      1.00      0.12      0.72    126278.36      150520.43\nstress-ng: metrc: [6487] get                 968      1.00      0.06      0.10       968.01        6073.53\nstress-ng: metrc: [6487] prctl              2681      1.00      0.68      0.31      2680.33        2718.45\nstress-ng: metrc: [6487] set               41875      1.00      0.09      0.89     41871.43       42605.69\nstress-ng: info:  [6487] skipped: 0\nstress-ng: info:  [6487] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [6487] failed: 0\nstress-ng: info:  [6487] metrics untrustworthy: 0\nstress-ng: info:  [6487] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0178158169999278,
+        "ops_per_sec": 615666.4000831149,
+        "ops_total": 626635.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [9177] setting to a 1 secs run per stressor\nstress-ng: info:  [9177] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [9177] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [9177] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [9177]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [9177] cap              454490      1.00      0.10      0.90    454483.28      454560.91\nstress-ng: metrc: [9177] eventfd          127227      1.00      0.05      0.80    127172.39      150546.86\nstress-ng: metrc: [9177] get                1003      1.00      0.01      0.15      1002.28        6217.49\nstress-ng: metrc: [9177] prctl              2788      1.00      0.65      0.33      2787.81        2845.50\nstress-ng: metrc: [9177] set               41127      1.00      0.09      0.88     41125.94       42540.27\nstress-ng: info:  [9177] skipped: 0\nstress-ng: info:  [9177] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [9177] failed: 0\nstress-ng: info:  [9177] metrics untrustworthy: 0\nstress-ng: info:  [9177] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0137940599998956,
+        "ops_per_sec": 634270.8301132345,
+        "ops_total": 643020.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [11973] setting to a 1 secs run per stressor\nstress-ng: info:  [11973] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [11973] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [11973] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [11973]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [11973] cap              463886      1.00      0.05      0.95    463880.58      463802.98\nstress-ng: metrc: [11973] eventfd          135811      1.00      0.07      0.76    135766.78      164802.37\nstress-ng: metrc: [11973] get                 979      1.00      0.01      0.15       978.63        6126.94\nstress-ng: metrc: [11973] prctl              2707      1.00      0.64      0.33      2706.61        2801.36\nstress-ng: metrc: [11973] set               39637      1.00      0.08      0.90     39631.90       40651.42\nstress-ng: info:  [11973] skipped: 0\nstress-ng: info:  [11973] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [11973] failed: 0\nstress-ng: info:  [11973] metrics untrustworthy: 0\nstress-ng: info:  [11973] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.015131485999973,
+        "ops_per_sec": 587879.5094333385,
+        "ops_total": 596775.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [14689] setting to a 1 secs run per stressor\nstress-ng: info:  [14689] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [14689] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [14689] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [14689]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [14689] cap              422090      1.00      0.06      0.94    422089.09      422127.99\nstress-ng: metrc: [14689] eventfd          132540      1.00      0.06      0.76    132496.60      161483.49\nstress-ng: metrc: [14689] get                 986      1.00      0.02      0.14       985.62        6041.30\nstress-ng: metrc: [14689] prctl              2549      1.00      0.65      0.32      2547.56        2646.68\nstress-ng: metrc: [14689] set               38610      1.00      0.07      0.91     38609.58       39452.55\nstress-ng: info:  [14689] skipped: 0\nstress-ng: info:  [14689] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [14689] failed: 0\nstress-ng: info:  [14689] metrics untrustworthy: 0\nstress-ng: info:  [14689] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0175528639999811,
+        "ops_per_sec": 599545.2635274695,
+        "ops_total": 610069.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [17245] setting to a 1 secs run per stressor\nstress-ng: info:  [17245] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [17245] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [17245] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [17245]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [17245] cap              434624      1.00      0.12      0.88    434618.09      434712.68\nstress-ng: metrc: [17245] eventfd          133719      1.00      0.05      0.78    133677.12      161531.10\nstress-ng: metrc: [17245] get                 976      1.00      0.03      0.14       975.66        5769.11\nstress-ng: metrc: [17245] prctl              2604      1.00      0.64      0.33      2603.67        2701.49\nstress-ng: metrc: [17245] set               38146      1.00      0.13      0.85     38144.35       39011.11\nstress-ng: info:  [17245] skipped: 0\nstress-ng: info:  [17245] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [17245] failed: 0\nstress-ng: info:  [17245] metrics untrustworthy: 0\nstress-ng: info:  [17245] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0168165960000124,
+        "ops_per_sec": 589653.0429957623,
+        "ops_total": 599569.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [19858] setting to a 1 secs run per stressor\nstress-ng: info:  [19858] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [19858] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [19858] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [19858]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [19858] cap              425929      1.00      0.10      0.90    425923.72      426235.04\nstress-ng: metrc: [19858] eventfd          131156      1.00      0.04      0.79    131139.96      157844.51\nstress-ng: metrc: [19858] get                 955      1.00      0.02      0.16       954.47        5211.94\nstress-ng: metrc: [19858] prctl              2488      1.00      0.67      0.30      2487.34        2569.95\nstress-ng: metrc: [19858] set               39041      1.00      0.13      0.85     39035.24       39772.21\nstress-ng: info:  [19858] skipped: 0\nstress-ng: info:  [19858] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [19858] failed: 0\nstress-ng: info:  [19858] metrics untrustworthy: 0\nstress-ng: info:  [19858] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0159795600000052,
+        "ops_per_sec": 586177.1471071691,
+        "ops_total": 595544.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [22354] setting to a 1 secs run per stressor\nstress-ng: info:  [22354] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [22354] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [22354] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [22354]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [22354] cap              419464      1.00      0.02      0.98    419416.50      419653.26\nstress-ng: metrc: [22354] eventfd          135312      1.00      0.04      0.78    135287.39      165440.54\nstress-ng: metrc: [22354] get                 971      1.00      0.03      0.14       970.51        5899.26\nstress-ng: metrc: [22354] prctl              2649      1.00      0.64      0.33      2647.99        2742.10\nstress-ng: metrc: [22354] set               37148      1.00      0.03      0.95     37147.54       38063.97\nstress-ng: info:  [22354] skipped: 0\nstress-ng: info:  [22354] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [22354] failed: 0\nstress-ng: info:  [22354] metrics untrustworthy: 0\nstress-ng: info:  [22354] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0216159210000342,
+        "ops_per_sec": 598115.1893187651,
+        "ops_total": 611044.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [25018] setting to a 1 secs run per stressor\nstress-ng: info:  [25018] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [25018] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [25018] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [25018]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [25018] cap              438518      1.00      0.08      0.92    438522.29      438548.70\nstress-ng: metrc: [25018] eventfd          130998      1.00      0.01      0.81    130974.11      158437.09\nstress-ng: metrc: [25018] get                 998      1.00      0.03      0.14       997.19        5848.23\nstress-ng: metrc: [25018] prctl              2547      1.00      0.65      0.32      2546.25        2641.35\nstress-ng: metrc: [25018] set               37983      1.01      0.03      0.95     37793.96       38906.01\nstress-ng: info:  [25018] skipped: 0\nstress-ng: info:  [25018] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [25018] failed: 0\nstress-ng: info:  [25018] metrics untrustworthy: 0\nstress-ng: info:  [25018] successful run completed in 1.01 secs"
+      },
+      {
+        "duration_s": 1.0153656940000246,
+        "ops_per_sec": 582869.8009960396,
+        "ops_total": 591826.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [27575] setting to a 1 secs run per stressor\nstress-ng: info:  [27575] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [27575] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [27575] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [27575]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [27575] cap              418277      1.00      0.06      0.94    418272.71      418278.25\nstress-ng: metrc: [27575] eventfd          131564      1.00      0.08      0.75    131522.45      157690.85\nstress-ng: metrc: [27575] get                 983      1.00      0.01      0.15       982.99        6078.14\nstress-ng: metrc: [27575] prctl              2631      1.00      0.64      0.32      2630.57        2723.59\nstress-ng: metrc: [27575] set               38371      1.00      0.05      0.93     38368.61       39069.36\nstress-ng: info:  [27575] skipped: 0\nstress-ng: info:  [27575] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [27575] failed: 0\nstress-ng: info:  [27575] metrics untrustworthy: 0\nstress-ng: info:  [27575] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0145379660000344,
+        "ops_per_sec": 579927.0404041045,
+        "ops_total": 588358.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [30215] setting to a 1 secs run per stressor\nstress-ng: info:  [30215] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [30215] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [30215] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [30215]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [30215] cap              418889      1.00      0.04      0.96    418886.70      418961.90\nstress-ng: metrc: [30215] eventfd          127867      1.00      0.07      0.77    127845.33      153380.46\nstress-ng: metrc: [30215] get                 962      1.00      0.00      0.15       961.92        6170.50\nstress-ng: metrc: [30215] prctl              2586      1.00      0.64      0.33      2585.27        2677.14\nstress-ng: metrc: [30215] set               38054      1.00      0.07      0.91     38045.72       39067.69\nstress-ng: info:  [30215] skipped: 0\nstress-ng: info:  [30215] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [30215] failed: 0\nstress-ng: info:  [30215] metrics untrustworthy: 0\nstress-ng: info:  [30215] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.0184039739999662,
+        "ops_per_sec": 574789.587378436,
+        "ops_total": 585368.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [341] setting to a 1 secs run per stressor\nstress-ng: info:  [341] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [341] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [341] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [341]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [341] cap              410510      1.00      0.07      0.93    410508.92      410760.56\nstress-ng: metrc: [341] eventfd          134187      1.00      0.06      0.77    134164.61      161794.09\nstress-ng: metrc: [341] get                 953      1.00      0.01      0.15       951.68        5693.43\nstress-ng: metrc: [341] prctl              2541      1.00      0.65      0.32      2540.09        2629.83\nstress-ng: metrc: [341] set               37177      1.00      0.11      0.87     37171.58       38110.05\nstress-ng: info:  [341] skipped: 0\nstress-ng: info:  [341] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [341] failed: 0\nstress-ng: info:  [341] metrics untrustworthy: 0\nstress-ng: info:  [341] successful run completed in 1.00 secs"
+      },
+      {
+        "duration_s": 1.018275678000009,
+        "ops_per_sec": 589067.3939871857,
+        "ops_total": 599833.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [2987] setting to a 1 secs run per stressor\nstress-ng: info:  [2987] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [2987] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [2987] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2987]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2987] cap              426063      1.00      0.08      0.92    426059.14      426143.11\nstress-ng: metrc: [2987] eventfd          131499      1.00      0.07      0.76    131461.55      158200.38\nstress-ng: metrc: [2987] get                 966      1.00      0.00      0.16       965.31        6187.15\nstress-ng: metrc: [2987] prctl              2594      1.00      0.63      0.33      2593.55        2721.76\nstress-ng: metrc: [2987] set               38711      1.00      0.03      0.95     38710.32       39498.04\nstress-ng: info:  [2987] skipped: 0\nstress-ng: info:  [2987] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [2987] failed: 0\nstress-ng: info:  [2987] metrics untrustworthy: 0\nstress-ng: info:  [2987] successful run completed in 1.00 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": false,
+    "enabled_passes": [
+      "wide_mem"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 14, \"insns_before\": 14, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 35, \"program\": {\"final_insn_count\": 14, \"insn_delta\": 0, \"orig_insn_count\": 14, \"prog_id\": 35, \"prog_name\": \"raw_syscalls__s\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 44, \"insns_before\": 44, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 36, \"program\": {\"final_insn_count\": 44, \"insn_delta\": 0, \"orig_insn_count\": 44, \"prog_id\": 36, \"prog_name\": \"raw_syscalls__s\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "35": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 14, \"insns_before\": 14, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 35, \"program\": {\"final_insn_count\": 14, \"insn_delta\": 0, \"orig_insn_count\": 14, \"prog_id\": 35, \"prog_name\": \"raw_syscalls__s\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 35,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "36": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 44, \"insns_before\": 44, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 36, \"program\": {\"final_insn_count\": 44, \"insn_delta\": 0, \"orig_insn_count\": 44, \"prog_id\": 36, \"prog_name\": \"raw_syscalls__s\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 36,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 2,
+      "not_applied": 0,
+      "requested": 2
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "stress_ng_os",
+  "status": "ok"
+}

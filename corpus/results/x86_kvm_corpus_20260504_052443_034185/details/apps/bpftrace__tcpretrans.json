@@ -1,0 +1,148 @@
+{
+  "app": "bpftrace/tcpretrans",
+  "baseline": {
+    "bpf": {
+      "49": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 968,
+        "bytes_xlated": 1640,
+        "id": 49,
+        "name": "kprobe_tcp_retransmit_skb",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 0.9253965890000018,
+        "ops_per_sec": 5874.2382072903765,
+        "ops_total": 5436.0,
+        "stderr": "",
+        "stdout": "stress-ng: metrc: [12040]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [12040] sockdiag           1025      0.00      0.00      0.00   3646447.50     1836917.56\nstress-ng: info:  [12040] skipped: 0\nstress-ng: info:  [12040] passed: 1: sockdiag (1)\nstress-ng: info:  [12040] failed: 0\nstress-ng: info:  [12040] metrics untrustworthy: 0\nstress-ng: info:  [12040] successful run completed in 0.00 secs\nstress-ng: info:  [12042] setting to a 5 secs run per stressor\nstress-ng: info:  [12042] dispatching hogs: 1 sockfd\nstress-ng: info:  [12042] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [12042] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [12042]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [12042] sockfd              200      0.00      0.00      0.00    243996.74      164880.46\nstress-ng: info:  [12042] skipped: 0\nstress-ng: info:  [12042] passed: 1: sockfd (1)\nstress-ng: info:  [12042] failed: 0\nstress-ng: info:  [12042] metrics untrustworthy: 0\nstress-ng: info:  [12042] successful run completed in 0.00 secs\nstress-ng: info:  [12045] setting to a 5 secs run per stressor\nstress-ng: info:  [12045] dispatching hogs: 1 sockpair\nstress-ng: info:  [12045] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [12045] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [12045]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [12045] sockpair            500      0.01      0.01      0.00     47119.60       38708.68\nstress-ng: info:  [12045] skipped: 0\nstress-ng: info:  [12045] passed: 1: sockpair (1)\nstress-ng: info:  [12045] failed: 0\nstress-ng: info:  [12045] metrics untrustworthy: 0\nstress-ng: info:  [12045] successful run completed in 0.01 secs\nstress-ng: info:  [12049] setting to a 5 secs run per stressor\nstress-ng: info:  [12049] dispatching hogs: 1 udp-flood\nstress-ng: info:  [12049] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [12049] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [12049]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [12049] udp-flood          1000      0.00      0.00      0.00    977921.19      772797.53\nstress-ng: info:  [12049] skipped: 0\nstress-ng: info:  [12049] passed: 1: udp-flood (1)\nstress-ng: info:  [12049] failed: 0\nstress-ng: info:  [12049] metrics untrustworthy: 0\nstress-ng: info:  [12049] successful run completed in 0.00 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "49": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 971,
+        "bytes_xlated": 1656,
+        "id": 49,
+        "name": "kprobe_tcp_retransmit_skb",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 2.826250627999997,
+        "ops_per_sec": 1923.396299728308,
+        "ops_total": 5436.0,
+        "stderr": "",
+        "stdout": "stress-ng: metrc: [12109]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [12109] sockdiag           1025      0.00      0.00      0.00    784375.41      568496.95\nstress-ng: info:  [12109] skipped: 0\nstress-ng: info:  [12109] passed: 1: sockdiag (1)\nstress-ng: info:  [12109] failed: 0\nstress-ng: info:  [12109] metrics untrustworthy: 0\nstress-ng: info:  [12109] successful run completed in 0.00 secs\nstress-ng: info:  [12111] setting to a 5 secs run per stressor\nstress-ng: info:  [12111] dispatching hogs: 1 sockfd\nstress-ng: info:  [12111] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [12111] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [12111]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [12111] sockfd              200      0.00      0.00      0.00    114348.53       89445.44\nstress-ng: info:  [12111] skipped: 0\nstress-ng: info:  [12111] passed: 1: sockfd (1)\nstress-ng: info:  [12111] failed: 0\nstress-ng: info:  [12111] metrics untrustworthy: 0\nstress-ng: info:  [12111] successful run completed in 0.00 secs\nstress-ng: info:  [12114] setting to a 5 secs run per stressor\nstress-ng: info:  [12114] dispatching hogs: 1 sockpair\nstress-ng: info:  [12114] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [12114] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [12114]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [12114] sockpair            500      0.01      0.00      0.01     41090.82       32419.11\nstress-ng: info:  [12114] skipped: 0\nstress-ng: info:  [12114] passed: 1: sockpair (1)\nstress-ng: info:  [12114] failed: 0\nstress-ng: info:  [12114] metrics untrustworthy: 0\nstress-ng: info:  [12114] successful run completed in 0.01 secs\nstress-ng: info:  [12118] setting to a 5 secs run per stressor\nstress-ng: info:  [12118] dispatching hogs: 1 udp-flood\nstress-ng: info:  [12118] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [12118] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [12118]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [12118] udp-flood          1000      0.00      0.00      0.00    694651.21      537634.41\nstress-ng: info:  [12118] skipped: 0\nstress-ng: info:  [12118] passed: 1: udp-flood (1)\nstress-ng: info:  [12118] failed: 0\nstress-ng: info:  [12118] metrics untrustworthy: 0\nstress-ng: info:  [12118] successful run completed in 0.00 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": true,
+    "enabled_passes": [
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "bulk_memory",
+      "prefetch"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 2, \"insns_after\": 193, \"insns_before\": 191, \"pass\": \"prefetch\", \"sites_applied\": 1}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 49, \"program\": {\"final_insn_count\": 193, \"insn_delta\": 2, \"orig_insn_count\": 191, \"prog_id\": 49, \"prog_name\": \"tcp_retransmit_\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 6, \"total_sites_applied\": 1}}",
+    "per_program": {
+      "49": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 191, \"insns_before\": 191, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 2, \"insns_after\": 193, \"insns_before\": 191, \"pass\": \"prefetch\", \"sites_applied\": 1}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 49, \"program\": {\"final_insn_count\": 193, \"insn_delta\": 2, \"orig_insn_count\": 191, \"prog_id\": 49, \"prog_name\": \"tcp_retransmit_\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 6, \"total_sites_applied\": 1}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 1,
+            "sites_matched": 1,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 49,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 6,
+          "total_sites_applied": 1
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 1,
+      "not_applied": 0,
+      "requested": 1
+    }
+  },
+  "runner": "bpftrace",
+  "selected_workload": "stress_ng_network",
+  "status": "ok"
+}

@@ -1,0 +1,301 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "470": {
+        "bytes_jited": 176,
+        "bytes_xlated": 136,
+        "id": 470,
+        "name": "xdp_root",
+        "run_cnt_delta": 99438,
+        "run_time_ns_delta": 36393401,
+        "type": "xdp"
+      },
+      "476": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 476,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "478": {
+        "bytes_jited": 541,
+        "bytes_xlated": 1000,
+        "id": 478,
+        "name": "healthcheck_encap",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.000862737000034,
+        "ops_per_sec": 5522.745107817909,
+        "ops_total": 16573.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "470": {
+        "bytes_jited": 176,
+        "bytes_xlated": 136,
+        "id": 470,
+        "name": "xdp_root",
+        "run_cnt_delta": 97032,
+        "run_time_ns_delta": 36400661,
+        "type": "xdp"
+      },
+      "476": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 476,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "478": {
+        "bytes_jited": 544,
+        "bytes_xlated": 1016,
+        "id": 478,
+        "name": "healthcheck_encap",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0012969900003554,
+        "ops_per_sec": 5388.337126875966,
+        "ops_total": 16172.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": true,
+    "enabled_passes": [
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "bulk_memory",
+      "prefetch",
+      "map_inline"
+    ],
+    "error": "prog 476: prog 476 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 7: Argument list too long (os error 7)\nverifier log summary:\nfunc#0 @0\nfunc#1 @2406\nfunc#2 @2554\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r7 = 1\n      2: ......67.. (61) r8 = *(u32 *)(r6 +0)\n      3: ......678. (61) r9 = *(u32 *)(r6 +4)\n      4: ......6789 (bf) r1 = r8\n      5: .1....6789 (07) r1 += 14\n      6: .1....6789 (2d) if r1 > r9 goto pc+1581\n      7: ......6789 (b7) r1 = 528\n      8: .1....6789 (63) *(u32 *)(r10 -132) = r1\n      9: ......6789 (bf) r2 = r10\n     10: ..2...6789 (07) r2 += -132\n     11: ..2...6789 (18) r1 = 0xffff8d27a7d98000\n     13: .12...6789 (85) call bpf_map_lookup_elem#1\n     14: 0.....6789 (15) if r0 == 0x0 goto pc+1573\n     15: 0.....6.89 (05) goto pc+0\n     16: 0.....6.89 (05) goto pc+0\n     17: 0.....6.89 (1f) r9 -= r8\n     18: 0.....6.89 (79) r1 = *(u64 *)(r0 +8)\n     19: 01....6.89 (0f) r1 += r9\n     20: 01....6.89 (7b) *(u64 *)(r0 +8) = r1\n     21: 0.....6.89 (79) r1 = *(u64 *)(r0 +0)\n     22: 01....6.89 (07) r1 += 1\n     23: 01....6.89 (7b) *(u64 *)(r0 +0) = r1\n     24: ......6.89 (71) r2 = *(u8 *)(r8 +12)\n     25: ..2...6.89 (71) r1 = *(u8 *)(r8 +13)\n     26: .12...6..9 (67) r1 <<= 8\n     27: .12...6..9 (4f) r1 |= r2\n     28: .1....6..9 (b7) r8 = 1\n     29: .1....6.89 (15) if r1 == 0xdd86 goto pc+129\n     30: .1....6.89 (55) if r1 != 0x8 goto pc+1530\n     31: ......6.89 (61) r2 = *(u32 *)(r6 +4)\n     32: ..2...6.89 (61) r7 = *(u32 *)(r6 +0)\n     33: ..2...6789 (b7) r1 = 0\n     34: .12...6789 (7b) *(u64 *)(r10 -48) = r1\n     35: .12...6789 (7b) *(u64 *)(r10 -56) = r1\n     36: .12...6789 (7b) *(u64 *)(r10 -64) = r1\n     37: .12...6789 (7b) *(u64 *)(r10 -72) = r1\n     38: .12...6789 (7b) *(u64 *)(r10 -80) = r1\n     39: .12...6789 (7b) *(u64 *)(r10 -88) = r1\n     40: .12...6789 (63) *(u32 *)(r10 -96) = r1\n     41: .12...6789 (7b) *(u64 *)(r10 -104) = r1\n     42: .12...6789 (7b) *(u64 *)(r10 -112) = r1\n     43: .12...6789 (63) *(u32 *)(r10 -120) = r1\n     44: ..2...6789 (bf) r3 = r7\n     45: ..23..6789 (07) r3 += 34\n     46: ..23..6789 (7b) *(u64 *)(r10 -144) = r2\n     47: ..23..6789 (2d) if r3 > r2 goto pc+1510\n     48: ...3..6789 (05) goto pc+0\n     49: ...3..6789 (71) r1 = *(u8 *)(r7 +14)\n     50: .1.3..6789 (57) r1 &= 15\n     51: .1.3..6789 (55) if r1 != 0x5 goto pc+1506\n     52: ...3..6789 (05) goto pc+0\n     53: ...3..6789 (71) r1 = *(u8 *)(r7 +15)\n     54: .1.3..6789 (73) *(u8 *)(r10 -43) = r1\n     55: ...3..6789 (71) r1 = *(u8 *)(r7 +23)\n     56: .1.3..6789 (73) *(u8 *)(r10 -52) = r1\n     57: .1.3..6789 (69) r2 = *(u16 *)(r7 +20)\n     58: .123..6789 (bf) r4 = r2\n     59: .1234.6789 (57) r4 &= 65343\n     60: .1234.6789 (55) if r4 != 0x0 goto pc+1497\n     61: .123..6789 (05) goto pc+0\n     62: .123..6789 (69) r0 = *(u16 *)(r7 +16)\n     63: 0123..6789 (15) if r1 == 0x1 goto pc+259\n     64: 01.3..6789 (05) goto pc+0\n     65: 01.3..6789 (61) r2 = *(u32 *)(r7 +26)\n     66: 0123..6789 (63) *(u32 *)(r10 -88) = r2\n     67: 01.3..6789 (61) r2 = *(u32 *)(r7 +30)\n     68: 0123..6789 (63) *(u32 *)(r10 -72) = r2\n     69: 01.3..6789 (b7) r2 = 0\n     70: 0123..6789 (55) if r1 != 0x3a goto pc+640\n     71: 0..3..6789 (bf) r1 = r7\n     72: 01.3..6789 (07) r1 += 42\n     73: 01.3..6789 (79) r2 = *(u64 *)(r10 -144)\n     74: 0123..6789 (2d) if r1 > r2 goto pc+1483\n     75: 0..3..67.9 (05) goto pc+0\n     76: 0..3..67.9 (71) r1 = *(u8 *)(r3 +0)\n     77: 01....67.9 (15) if r1 == 0x1 goto pc+603\n     78: 01....67.9 (15) if r1 == 0x2 goto pc+582\n     79: .1.....7.9 (b7) r8 = 2\n     80: .1.....789 (55) if r1 != 0x80 goto pc+1477\n     81: .......7.9 (b7) r8 = 1\n     82: .......789 (bf) r1 = r7\n     83: .1.....789 (07) r1 += 62\n     84: .1.....789 (79) r2 = *(u64 *)(r10 -144)\n     85: .12....789 (2d) if r1 > r2 goto pc+1472\n     86: .......7.9 (b7) r1 = 129\n     87: .1.....7.9 (73) *(u8 *)(r7 +54) = r1\n     88: .......7.9 (b7) r1 = 64\n     89: .1.....7.9 (73) *(u8 *)(r7 +21) = r1\n     90: .......7.9 (69) r1 = *(u16 *)(r7 +56)\n     91: .1.....7.9 (07) r1 += -1\n     92: .1.....7.9 (6b) *(u16 *)(r7 +56) = r1\n     93: .......7.9 (61) r1 = *(u32 *)(r7 +34)\n     94: .1.....7.9 (67) r1 <<= 32\n     95: .1.....7.9 (61) r2 = *(u32 *)(r7 +30)\n... verifier log truncated ...",
+    "exit_code": 1,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"prefetch\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"map_inline\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 470, \"program\": {\"final_insn_count\": 17, \"insn_delta\": 0, \"orig_insn_count\": 17, \"prog_id\": 470, \"prog_name\": \"xdp_root\", \"prog_type\": 6}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 7, \"total_sites_applied\": 0}}\n{\"changed\": false, \"error_message\": \"prog 476 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 7: Argument list too long (os error 7)\\nverifier log summary:\\nfunc#0 @0\\nfunc#1 @2406\\nfunc#2 @2554\\nLive regs before insn:\\n      0: .1........ (bf) r6 = r1\\n      1: ......6... (b7) r7 = 1\\n      2: ......67.. (61) r8 = *(u32 *)(r6 +0)\\n      3: ......678. (61) r9 = *(u32 *)(r6 +4)\\n      4: ......6789 (bf) r1 = r8\\n      5: .1....6789 (07) r1 += 14\\n      6: .1....6789 (2d) if r1 > r9 goto pc+1581\\n      7: ......6789 (b7) r1 = 528\\n      8: .1....6789 (63) *(u32 *)(r10 -132) = r1\\n      9: ......6789 (bf) r2 = r10\\n     10: ..2...6789 (07) r2 += -132\\n     11: ..2...6789 (18) r1 = 0xffff8d27a7d98000\\n     13: .12...6789 (85) call bpf_map_lookup_elem#1\\n     14: 0.....6789 (15) if r0 == 0x0 goto pc+1573\\n     15: 0.....6.89 (05) goto pc+0\\n     16: 0.....6.89 (05) goto pc+0\\n     17: 0.....6.89 (1f) r9 -= r8\\n     18: 0.....6.89 (79) r1 = *(u64 *)(r0 +8)\\n     19: 01....6.89 (0f) r1 += r9\\n     20: 01....6.89 (7b) *(u64 *)(r0 +8) = r1\\n     21: 0.....6.89 (79) r1 = *(u64 *)(r0 +0)\\n     22: 01....6.89 (07) r1 += 1\\n     23: 01....6.89 (7b) *(u64 *)(r0 +0) = r1\\n     24: ......6.89 (71) r2 = *(u8 *)(r8 +12)\\n     25: ..2...6.89 (71) r1 = *(u8 *)(r8 +13)\\n     26: .12...6..9 (67) r1 <<= 8\\n     27: .12...6..9 (4f) r1 |= r2\\n     28: .1....6..9 (b7) r8 = 1\\n     29: .1....6.89 (15) if r1 == 0xdd86 goto pc+129\\n     30: .1....6.89 (55) if r1 != 0x8 goto pc+1530\\n     31: ......6.89 (61) r2 = *(u32 *)(r6 +4)\\n     32: ..2...6.89 (61) r7 = *(u32 *)(r6 +0)\\n     33: ..2...6789 (b7) r1 = 0\\n     34: .12...6789 (7b) *(u64 *)(r10 -48) = r1\\n     35: .12...6789 (7b) *(u64 *)(r10 -56) = r1\\n     36: .12...6789 (7b) *(u64 *)(r10 -64) = r1\\n     37: .12...6789 (7b) *(u64 *)(r10 -72) = r1\\n     38: .12...6789 (7b) *(u64 *)(r10 -80) = r1\\n     39: .12...6789 (7b) *(u64 *)(r10 -88) = r1\\n     40: .12...6789 (63) *(u32 *)(r10 -96) = r1\\n     41: .12...6789 (7b) *(u64 *)(r10 -104) = r1\\n     42: .12...6789 (7b) *(u64 *)(r10 -112) = r1\\n     43: .12...6789 (63) *(u32 *)(r10 -120) = r1\\n     44: ..2...6789 (bf) r3 = r7\\n     45: ..23..6789 (07) r3 += 34\\n     46: ..23..6789 (7b) *(u64 *)(r10 -144) = r2\\n     47: ..23..6789 (2d) if r3 > r2 goto pc+1510\\n     48: ...3..6789 (05) goto pc+0\\n     49: ...3..6789 (71) r1 = *(u8 *)(r7 +14)\\n     50: .1.3..6789 (57) r1 &= 15\\n     51: .1.3..6789 (55) if r1 != 0x5 goto pc+1506\\n     52: ...3..6789 (05) goto pc+0\\n     53: ...3..6789 (71) r1 = *(u8 *)(r7 +15)\\n     54: .1.3..6789 (73) *(u8 *)(r10 -43) = r1\\n     55: ...3..6789 (71) r1 = *(u8 *)(r7 +23)\\n     56: .1.3..6789 (73) *(u8 *)(r10 -52) = r1\\n     57: .1.3..6789 (69) r2 = *(u16 *)(r7 +20)\\n     58: .123..6789 (bf) r4 = r2\\n     59: .1234.6789 (57) r4 &= 65343\\n     60: .1234.6789 (55) if r4 != 0x0 goto pc+1497\\n     61: .123..6789 (05) goto pc+0\\n     62: .123..6789 (69) r0 = *(u16 *)(r7 +16)\\n     63: 0123..6789 (15) if r1 == 0x1 goto pc+259\\n     64: 01.3..6789 (05) goto pc+0\\n     65: 01.3..6789 (61) r2 = *(u32 *)(r7 +26)\\n     66: 0123..6789 (63) *(u32 *)(r10 -88) = r2\\n     67: 01.3..6789 (61) r2 = *(u32 *)(r7 +30)\\n     68: 0123..6789 (63) *(u32 *)(r10 -72) = r2\\n     69: 01.3..6789 (b7) r2 = 0\\n     70: 0123..6789 (55) if r1 != 0x3a goto pc+640\\n     71: 0..3..6789 (bf) r1 = r7\\n     72: 01.3..6789 (07) r1 += 42\\n     73: 01.3..6789 (79) r2 = *(u64 *)(r10 -144)\\n     74: 0123..6789 (2d) if r1 > r2 goto pc+1483\\n     75: 0..3..67.9 (05) goto pc+0\\n     76: 0..3..67.9 (71) r1 = *(u8 *)(r3 +0)\\n     77: 01....67.9 (15) if r1 == 0x1 goto pc+603\\n     78: 01....67.9 (15) if r1 == 0x2 goto pc+582\\n     79: .1.....7.9 (b7) r8 = 2\\n     80: .1.....789 (55) if r1 != 0x80 goto pc+1477\\n     81: .......7.9 (b7) r8 = 1\\n     82: .......789 (bf) r1 = r7\\n     83: .1.....789 (07) r1 += 62\\n     84: .1.....789 (79) r2 = *(u64 *)(r10 -144)\\n     85: .12....789 (2d) if r1 > r2 goto pc+1472\\n     86: .......7.9 (b7) r1 = 129\\n     87: .1.....7.9 (73) *(u8 *)(r7 +54) = r1\\n     88: .......7.9 (b7) r1 = 64\\n     89: .1.....7.9 (73) *(u8 *)(r7 +21) = r1\\n     90: .......7.9 (69) r1 = *(u16 *)(r7 +56)\\n     91: .1.....7.9 (07) r1 += -1\\n     92: .1.....7.9 (6b) *(u16 *)(r7 +56) = r1\\n     93: .......7.9 (61) r1 = *(u32 *)(r7 +34)\\n     94: .1.....7.9 (67) r1 <<= 32\\n     95: .1.....7.9 (61) r2 = *(u32 *)(r7 +30)\\n... verifier log truncated ...\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 2542, \"insns_before\": 2542, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 2542, \"insns_before\": 2542, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 2542, \"insns_before\": 2542, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 2542, \"insns_before\": 2542, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 2542, \"insns_before\": 2542, \"pass\": \"bulk_memory\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 476, \"program\": {\"final_insn_count\": 2542, \"insn_delta\": 0, \"orig_insn_count\": 2542, \"prog_id\": 476, \"prog_name\": \"balancer_ingres\", \"prog_type\": 6}, \"status\": \"error\", \"summary\": {\"applied\": true, \"committed_passes_before_failure\": 5, \"failed_pass\": \"prefetch\", \"passes_changed\": 0, \"passes_executed\": 5, \"total_sites_applied\": 0}}\n{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 2, \"insns_after\": 105, \"insns_before\": 103, \"pass\": \"prefetch\", \"sites_applied\": 1}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 105, \"insns_before\": 105, \"pass\": \"map_inline\", \"sites_applied\": 0}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 478, \"program\": {\"final_insn_count\": 105, \"insn_delta\": 2, \"orig_insn_count\": 103, \"prog_id\": 478, \"prog_name\": \"healthcheck_enc\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 7, \"total_sites_applied\": 1}}",
+    "per_program": {
+      "470": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch",
+          "map_inline"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"prefetch\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"map_inline\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 470, \"program\": {\"final_insn_count\": 17, \"insn_delta\": 0, \"orig_insn_count\": 17, \"prog_id\": 470, \"prog_name\": \"xdp_root\", \"prog_type\": 6}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 7, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 470,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 7,
+          "total_sites_applied": 0
+        }
+      },
+      "476": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch",
+          "map_inline"
+        ],
+        "error": "prog 476 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 7: Argument list too long (os error 7)\nverifier log summary:\nfunc#0 @0\nfunc#1 @2406\nfunc#2 @2554\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (b7) r7 = 1\n      2: ......67.. (61) r8 = *(u32 *)(r6 +0)\n      3: ......678. (61) r9 = *(u32 *)(r6 +4)\n      4: ......6789 (bf) r1 = r8\n      5: .1....6789 (07) r1 += 14\n      6: .1....6789 (2d) if r1 > r9 goto pc+1581\n      7: ......6789 (b7) r1 = 528\n      8: .1....6789 (63) *(u32 *)(r10 -132) = r1\n      9: ......6789 (bf) r2 = r10\n     10: ..2...6789 (07) r2 += -132\n     11: ..2...6789 (18) r1 = 0xffff8d27a7d98000\n     13: .12...6789 (85) call bpf_map_lookup_elem#1\n     14: 0.....6789 (15) if r0 == 0x0 goto pc+1573\n     15: 0.....6.89 (05) goto pc+0\n     16: 0.....6.89 (05) goto pc+0\n     17: 0.....6.89 (1f) r9 -= r8\n     18: 0.....6.89 (79) r1 = *(u64 *)(r0 +8)\n     19: 01....6.89 (0f) r1 += r9\n     20: 01....6.89 (7b) *(u64 *)(r0 +8) = r1\n     21: 0.....6.89 (79) r1 = *(u64 *)(r0 +0)\n     22: 01....6.89 (07) r1 += 1\n     23: 01....6.89 (7b) *(u64 *)(r0 +0) = r1\n     24: ......6.89 (71) r2 = *(u8 *)(r8 +12)\n     25: ..2...6.89 (71) r1 = *(u8 *)(r8 +13)\n     26: .12...6..9 (67) r1 <<= 8\n     27: .12...6..9 (4f) r1 |= r2\n     28: .1....6..9 (b7) r8 = 1\n     29: .1....6.89 (15) if r1 == 0xdd86 goto pc+129\n     30: .1....6.89 (55) if r1 != 0x8 goto pc+1530\n     31: ......6.89 (61) r2 = *(u32 *)(r6 +4)\n     32: ..2...6.89 (61) r7 = *(u32 *)(r6 +0)\n     33: ..2...6789 (b7) r1 = 0\n     34: .12...6789 (7b) *(u64 *)(r10 -48) = r1\n     35: .12...6789 (7b) *(u64 *)(r10 -56) = r1\n     36: .12...6789 (7b) *(u64 *)(r10 -64) = r1\n     37: .12...6789 (7b) *(u64 *)(r10 -72) = r1\n     38: .12...6789 (7b) *(u64 *)(r10 -80) = r1\n     39: .12...6789 (7b) *(u64 *)(r10 -88) = r1\n     40: .12...6789 (63) *(u32 *)(r10 -96) = r1\n     41: .12...6789 (7b) *(u64 *)(r10 -104) = r1\n     42: .12...6789 (7b) *(u64 *)(r10 -112) = r1\n     43: .12...6789 (63) *(u32 *)(r10 -120) = r1\n     44: ..2...6789 (bf) r3 = r7\n     45: ..23..6789 (07) r3 += 34\n     46: ..23..6789 (7b) *(u64 *)(r10 -144) = r2\n     47: ..23..6789 (2d) if r3 > r2 goto pc+1510\n     48: ...3..6789 (05) goto pc+0\n     49: ...3..6789 (71) r1 = *(u8 *)(r7 +14)\n     50: .1.3..6789 (57) r1 &= 15\n     51: .1.3..6789 (55) if r1 != 0x5 goto pc+1506\n     52: ...3..6789 (05) goto pc+0\n     53: ...3..6789 (71) r1 = *(u8 *)(r7 +15)\n     54: .1.3..6789 (73) *(u8 *)(r10 -43) = r1\n     55: ...3..6789 (71) r1 = *(u8 *)(r7 +23)\n     56: .1.3..6789 (73) *(u8 *)(r10 -52) = r1\n     57: .1.3..6789 (69) r2 = *(u16 *)(r7 +20)\n     58: .123..6789 (bf) r4 = r2\n     59: .1234.6789 (57) r4 &= 65343\n     60: .1234.6789 (55) if r4 != 0x0 goto pc+1497\n     61: .123..6789 (05) goto pc+0\n     62: .123..6789 (69) r0 = *(u16 *)(r7 +16)\n     63: 0123..6789 (15) if r1 == 0x1 goto pc+259\n     64: 01.3..6789 (05) goto pc+0\n     65: 01.3..6789 (61) r2 = *(u32 *)(r7 +26)\n     66: 0123..6789 (63) *(u32 *)(r10 -88) = r2\n     67: 01.3..6789 (61) r2 = *(u32 *)(r7 +30)\n     68: 0123..6789 (63) *(u32 *)(r10 -72) = r2\n     69: 01.3..6789 (b7) r2 = 0\n     70: 0123..6789 (55) if r1 != 0x3a goto pc+640\n     71: 0..3..6789 (bf) r1 = r7\n     72: 01.3..6789 (07) r1 += 42\n     73: 01.3..6789 (79) r2 = *(u64 *)(r10 -144)\n     74: 0123..6789 (2d) if r1 > r2 goto pc+1483\n     75: 0..3..67.9 (05) goto pc+0\n     76: 0..3..67.9 (71) r1 = *(u8 *)(r3 +0)\n     77: 01....67.9 (15) if r1 == 0x1 goto pc+603\n     78: 01....67.9 (15) if r1 == 0x2 goto pc+582\n     79: .1.....7.9 (b7) r8 = 2\n     80: .1.....789 (55) if r1 != 0x80 goto pc+1477\n     81: .......7.9 (b7) r8 = 1\n     82: .......789 (bf) r1 = r7\n     83: .1.....789 (07) r1 += 62\n     84: .1.....789 (79) r2 = *(u64 *)(r10 -144)\n     85: .12....789 (2d) if r1 > r2 goto pc+1472\n     86: .......7.9 (b7) r1 = 129\n     87: .1.....7.9 (73) *(u8 *)(r7 +54) = r1\n     88: .......7.9 (b7) r1 = 64\n     89: .1.....7.9 (73) *(u8 *)(r7 +21) = r1\n     90: .......7.9 (69) r1 = *(u16 *)(r7 +56)\n     91: .1.....7.9 (07) r1 += -1\n     92: .1.....7.9 (6b) *(u16 *)(r7 +56) = r1\n     93: .......7.9 (61) r1 = *(u32 *)(r7 +34)\n     94: .1.....7.9 (67) r1 <<= 32\n     95: .1.....7.9 (61) r2 = *(u32 *)(r7 +30)\n... verifier log truncated ...",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 476 pass prefetch failed after 5 committed passes: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 7: Argument list too long (os error 7)\\nverifier log summary:\\nfunc#0 @0\\nfunc#1 @2406\\nfunc#2 @2554\\nLive regs before insn:\\n      0: .1........ (bf) r6 = r1\\n      1: ......6... (b7) r7 = 1\\n      2: ......67.. (61) r8 = *(u32 *)(r6 +0)\\n      3: ......678. (61) r9 = *(u32 *)(r6 +4)\\n      4: ......6789 (bf) r1 = r8\\n      5: .1....6789 (07) r1 += 14\\n      6: .1....6789 (2d) if r1 > r9 goto pc+1581\\n      7: ......6789 (b7) r1 = 528\\n      8: .1....6789 (63) *(u32 *)(r10 -132) = r1\\n      9: ......6789 (bf) r2 = r10\\n     10: ..2...6789 (07) r2 += -132\\n     11: ..2...6789 (18) r1 = 0xffff8d27a7d98000\\n     13: .12...6789 (85) call bpf_map_lookup_elem#1\\n     14: 0.....6789 (15) if r0 == 0x0 goto pc+1573\\n     15: 0.....6.89 (05) goto pc+0\\n     16: 0.....6.89 (05) goto pc+0\\n     17: 0.....6.89 (1f) r9 -= r8\\n     18: 0.....6.89 (79) r1 = *(u64 *)(r0 +8)\\n     19: 01....6.89 (0f) r1 += r9\\n     20: 01....6.89 (7b) *(u64 *)(r0 +8) = r1\\n     21: 0.....6.89 (79) r1 = *(u64 *)(r0 +0)\\n     22: 01....6.89 (07) r1 += 1\\n     23: 01....6.89 (7b) *(u64 *)(r0 +0) = r1\\n     24: ......6.89 (71) r2 = *(u8 *)(r8 +12)\\n     25: ..2...6.89 (71) r1 = *(u8 *)(r8 +13)\\n     26: .12...6..9 (67) r1 <<= 8\\n     27: .12...6..9 (4f) r1 |= r2\\n     28: .1....6..9 (b7) r8 = 1\\n     29: .1....6.89 (15) if r1 == 0xdd86 goto pc+129\\n     30: .1....6.89 (55) if r1 != 0x8 goto pc+1530\\n     31: ......6.89 (61) r2 = *(u32 *)(r6 +4)\\n     32: ..2...6.89 (61) r7 = *(u32 *)(r6 +0)\\n     33: ..2...6789 (b7) r1 = 0\\n     34: .12...6789 (7b) *(u64 *)(r10 -48) = r1\\n     35: .12...6789 (7b) *(u64 *)(r10 -56) = r1\\n     36: .12...6789 (7b) *(u64 *)(r10 -64) = r1\\n     37: .12...6789 (7b) *(u64 *)(r10 -72) = r1\\n     38: .12...6789 (7b) *(u64 *)(r10 -80) = r1\\n     39: .12...6789 (7b) *(u64 *)(r10 -88) = r1\\n     40: .12...6789 (63) *(u32 *)(r10 -96) = r1\\n     41: .12...6789 (7b) *(u64 *)(r10 -104) = r1\\n     42: .12...6789 (7b) *(u64 *)(r10 -112) = r1\\n     43: .12...6789 (63) *(u32 *)(r10 -120) = r1\\n     44: ..2...6789 (bf) r3 = r7\\n     45: ..23..6789 (07) r3 += 34\\n     46: ..23..6789 (7b) *(u64 *)(r10 -144) = r2\\n     47: ..23..6789 (2d) if r3 > r2 goto pc+1510\\n     48: ...3..6789 (05) goto pc+0\\n     49: ...3..6789 (71) r1 = *(u8 *)(r7 +14)\\n     50: .1.3..6789 (57) r1 &= 15\\n     51: .1.3..6789 (55) if r1 != 0x5 goto pc+1506\\n     52: ...3..6789 (05) goto pc+0\\n     53: ...3..6789 (71) r1 = *(u8 *)(r7 +15)\\n     54: .1.3..6789 (73) *(u8 *)(r10 -43) = r1\\n     55: ...3..6789 (71) r1 = *(u8 *)(r7 +23)\\n     56: .1.3..6789 (73) *(u8 *)(r10 -52) = r1\\n     57: .1.3..6789 (69) r2 = *(u16 *)(r7 +20)\\n     58: .123..6789 (bf) r4 = r2\\n     59: .1234.6789 (57) r4 &= 65343\\n     60: .1234.6789 (55) if r4 != 0x0 goto pc+1497\\n     61: .123..6789 (05) goto pc+0\\n     62: .123..6789 (69) r0 = *(u16 *)(r7 +16)\\n     63: 0123..6789 (15) if r1 == 0x1 goto pc+259\\n     64: 01.3..6789 (05) goto pc+0\\n     65: 01.3..6789 (61) r2 = *(u32 *)(r7 +26)\\n     66: 0123..6789 (63) *(u32 *)(r10 -88) = r2\\n     67: 01.3..6789 (61) r2 = *(u32 *)(r7 +30)\\n     68: 0123..6789 (63) *(u32 *)(r10 -72) = r2\\n     69: 01.3..6789 (b7) r2 = 0\\n     70: 0123..6789 (55) if r1 != 0x3a goto pc+640\\n     71: 0..3..6789 (bf) r1 = r7\\n     72: 01.3..6789 (07) r1 += 42\\n     73: 01.3..6789 (79) r2 = *(u64 *)(r10 -144)\\n     74: 0123..6789 (2d) if r1 > r2 goto pc+1483\\n     75: 0..3..67.9 (05) goto pc+0\\n     76: 0..3..67.9 (71) r1 = *(u8 *)(r3 +0)\\n     77: 01....67.9 (15) if r1 == 0x1 goto pc+603\\n     78: 01....67.9 (15) if r1 == 0x2 goto pc+582\\n     79: .1.....7.9 (b7) r8 = 2\\n     80: .1.....789 (55) if r1 != 0x80 goto pc+1477\\n     81: .......7.9 (b7) r8 = 1\\n     82: .......789 (bf) r1 = r7\\n     83: .1.....789 (07) r1 += 62\\n     84: .1.....789 (79) r2 = *(u64 *)(r10 -144)\\n     85: .12....789 (2d) if r1 > r2 goto pc+1472\\n     86: .......7.9 (b7) r1 = 129\\n     87: .1.....7.9 (73) *(u8 *)(r7 +54) = r1\\n     88: .......7.9 (b7) r1 = 64\\n     89: .1.....7.9 (73) *(u8 *)(r7 +21) = r1\\n     90: .......7.9 (69) r1 = *(u16 *)(r7 +56)\\n     91: .1.....7.9 (07) r1 += -1\\n     92: .1.....7.9 (6b) *(u16 *)(r7 +56) = r1\\n     93: .......7.9 (61) r1 = *(u32 *)(r7 +34)\\n     94: .1.....7.9 (67) r1 <<= 32\\n     95: .1.....7.9 (61) r2 = *(u32 *)(r7 +30)\\n... verifier log truncated ...\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 2542, \"insns_before\": 2542, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 2542, \"insns_before\": 2542, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 2542, \"insns_before\": 2542, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 2542, \"insns_before\": 2542, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 2542, \"insns_before\": 2542, \"pass\": \"bulk_memory\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 476, \"program\": {\"final_insn_count\": 2542, \"insn_delta\": 0, \"orig_insn_count\": 2542, \"prog_id\": 476, \"prog_name\": \"balancer_ingres\", \"prog_type\": 6}, \"status\": \"error\", \"summary\": {\"applied\": true, \"committed_passes_before_failure\": 5, \"failed_pass\": \"prefetch\", \"passes_changed\": 0, \"passes_executed\": 5, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 476,
+        "summary": {
+          "applied": true,
+          "committed_passes_before_failure": 5,
+          "failed_pass": "prefetch",
+          "passes_changed": 0,
+          "passes_executed": 5,
+          "total_sites_applied": 0
+        }
+      },
+      "478": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "rotate",
+          "cond_select",
+          "extract",
+          "endian_fusion",
+          "bulk_memory",
+          "prefetch",
+          "map_inline"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"rotate\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"cond_select\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"extract\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"endian_fusion\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"bulk_memory\", \"sites_applied\": 0}, {\"changed\": true, \"insn_delta\": 2, \"insns_after\": 105, \"insns_before\": 103, \"pass\": \"prefetch\", \"sites_applied\": 1}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 105, \"insns_before\": 105, \"pass\": \"map_inline\", \"sites_applied\": 0}], \"passes_applied\": [\"prefetch\"], \"prog_id\": 478, \"program\": {\"final_insn_count\": 105, \"insn_delta\": 2, \"orig_insn_count\": 103, \"prog_id\": 478, \"prog_name\": \"healthcheck_enc\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 7, \"total_sites_applied\": 1}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "cond_select",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "extract",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "endian_fusion",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "bulk_memory",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "prefetch",
+            "sites_applied": 1,
+            "sites_matched": 1,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 478,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 7,
+          "total_sites_applied": 1
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 2,
+      "not_applied": 1,
+      "requested": 3
+    }
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}

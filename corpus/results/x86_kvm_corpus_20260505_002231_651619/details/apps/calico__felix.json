@@ -1,0 +1,10 @@
+{
+  "app": "calico/felix",
+  "baseline": null,
+  "error": "command failed (1): /usr/local/bin/calicoctl apply --allow-version-mismatch -f /var/tmp/calicorunner_ugv3jir0/ippool.yaml\nfailed to apply 'IPPool' resource: [error with field IPPool.Spec.CIDR = '198.18.0.0/30' (IPPool CIDR is not strictly masked)]",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "calico",
+  "selected_workload": "network",
+  "status": "error"
+}

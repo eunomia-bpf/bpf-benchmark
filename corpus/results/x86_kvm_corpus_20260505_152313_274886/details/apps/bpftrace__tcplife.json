@@ -1,0 +1,91 @@
+{
+  "app": "bpftrace/tcplife",
+  "baseline": {
+    "bpf": {
+      "690": {
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 690,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 172382,
+        "run_time_ns_delta": 86827712,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.1044491430000107,
+        "ops_per_sec": 6300.956820022847,
+        "ops_total": 19561.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     4.67ms   31.64ms 440.92ms   98.13%\n    Req/Sec     3.22k     1.00k    6.20k    39.34%\n  19561 requests in 3.10s, 2.89MB read\n  Socket errors: connect 0, read 19561, write 0, timeout 0\nRequests/sec:   6310.14\nTransfer/sec:      0.93MB"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "690": {
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 690,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 165411,
+        "run_time_ns_delta": 85021174,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0034878540000136,
+        "ops_per_sec": 6255.7269792108555,
+        "ops_total": 18789.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.66ms   10.90ms 221.37ms   99.31%\n    Req/Sec     3.15k   687.79     4.48k    60.00%\n  18789 requests in 3.00s, 2.78MB read\n  Socket errors: connect 0, read 18789, write 0, timeout 0\nRequests/sec:   6262.42\nTransfer/sec:      0.93MB"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": false,
+    "changed": false,
+    "enabled_passes": [
+      "noop",
+      "map_inline"
+    ],
+    "error": "prog 690: prog 690 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\")",
+    "exit_code": 1,
+    "output": "{\"changed\": false, \"error_message\": \"prog 690 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 690, \"program\": {\"final_insn_count\": 401, \"insn_delta\": 0, \"orig_insn_count\": 401, \"prog_id\": 690, \"prog_name\": \"tcp_set_state\", \"prog_type\": 2}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "690": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "noop",
+          "map_inline"
+        ],
+        "error": "prog 690 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\")",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 690 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 690, \"program\": {\"final_insn_count\": 401, \"insn_delta\": 0, \"orig_insn_count\": 401, \"prog_id\": 690, \"prog_name\": \"tcp_set_state\", \"prog_type\": 2}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 690,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 0,
+      "not_applied": 1,
+      "requested": 1
+    }
+  },
+  "runner": "bpftrace",
+  "selected_workload": "tcp_connect",
+  "status": "ok"
+}

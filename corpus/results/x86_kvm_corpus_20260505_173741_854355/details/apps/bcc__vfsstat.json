@@ -1,0 +1,384 @@
+{
+  "app": "bcc/vfsstat",
+  "baseline": {
+    "bpf": {
+      "14": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 14,
+        "name": "vfs_create",
+        "run_cnt_delta": 356086,
+        "run_time_ns_delta": 56235675,
+        "type": "tracing"
+      },
+      "15": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 15,
+        "name": "kfunc__vmlinux__vfs_fsync_range",
+        "run_cnt_delta": 790,
+        "run_time_ns_delta": 64266,
+        "type": "tracing"
+      },
+      "16": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 16,
+        "name": "vfs_open",
+        "run_cnt_delta": 3948413,
+        "run_time_ns_delta": 207945527,
+        "type": "tracing"
+      },
+      "17": {
+        "bytes_jited": 87,
+        "bytes_xlated": 136,
+        "id": 17,
+        "name": "vfs_read",
+        "run_cnt_delta": 121288,
+        "run_time_ns_delta": 5308599,
+        "type": "tracing"
+      },
+      "18": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 18,
+        "name": "vfs_write",
+        "run_cnt_delta": 118531,
+        "run_time_ns_delta": 6273026,
+        "type": "tracing"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.3088830000000087,
+        "ops_per_sec": 1891831.4730378753,
+        "ops_total": 6259849.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [9524] setting to a 3 secs run per stressor\nstress-ng: info:  [9524] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [9524] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [9598] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [9545] dentry: 380348 dentries allocated\nstress-ng: metrc: [9524] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [9524]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [9524] access            34397      3.07      0.38      3.03     11203.97       10063.40\nstress-ng: metrc: [9524] chdir               296      3.17      0.73      5.34        93.30          48.74\nstress-ng: metrc: [9524] chmod               151      3.03      0.03      0.02        49.82        2960.44\nstress-ng: metrc: [9524] chown               243      3.07      0.01      0.02        79.14        7706.95\nstress-ng: metrc: [9524] dentry            22229      3.08      0.06      0.71      7216.42       29046.47\nstress-ng: metrc: [9524] dir               32769      3.23      0.21      3.46     10152.61        8939.24\nstress-ng: metrc: [9524] dirmany           29501      3.03      0.00      0.68      9730.48       43486.53\nstress-ng: metrc: [9524] fallocate             0      3.08      0.02      0.00         0.00           0.00\nstress-ng: metrc: [9524] file-ioctl       156875      3.04      0.20      1.68     51556.51       83167.79\nstress-ng: metrc: [9524] filename           9728      3.04      0.07      1.96      3196.25        4774.34\nstress-ng: metrc: [9524] flock           4520536      3.03      0.66      1.03   1490992.89     2679352.17\nstress-ng: metrc: [9524] fpunch             1662      3.07      0.00      2.17       541.97         765.94\nstress-ng: metrc: [9524] fstat              6435      3.01      0.27      1.53      2140.73        3583.81\nstress-ng: metrc: [9524] getdent          863618      3.00      0.35      6.20    287749.76      131792.13\nstress-ng: metrc: [9524] hdd               48198      3.03      0.85      0.69     15895.99       31296.06\nstress-ng: metrc: [9524] inotify               8      3.05      0.02      0.00         2.63         436.56\nstress-ng: metrc: [9524] open              19456      3.07      0.04      0.25      6337.19       67222.71\nstress-ng: metrc: [9524] rename           130451      3.00      0.05      0.85     43463.05      144884.70\nstress-ng: metrc: [9524] touch            196298      3.07      0.14      4.86     63977.72       39250.75\nstress-ng: metrc: [9524] utime            147550      3.02      0.12      2.62     48935.33       53819.74\nstress-ng: metrc: [9524] link                 15      3.08      0.14      1.55         4.86           8.87\nstress-ng: metrc: [9524] symlink               6      3.13      0.06      1.42         1.92           4.05\nstress-ng: metrc: [9524] mknod                58      3.02      0.01      0.02        19.19        1811.59\nstress-ng: metrc: [9524] fcntl             39369      3.01      0.06      0.41     13077.36       84459.45\nstress-ng: info:  [9524] skipped: 0\nstress-ng: info:  [9524] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [9524] failed: 0\nstress-ng: info:  [9524] metrics untrustworthy: 0\nstress-ng: info:  [9524] successful run completed in 3.30 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "14": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 14,
+        "name": "vfs_create",
+        "run_cnt_delta": 297642,
+        "run_time_ns_delta": 22217408,
+        "type": "tracing"
+      },
+      "15": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 15,
+        "name": "kfunc__vmlinux__vfs_fsync_range",
+        "run_cnt_delta": 799,
+        "run_time_ns_delta": 64331,
+        "type": "tracing"
+      },
+      "16": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 16,
+        "name": "vfs_open",
+        "run_cnt_delta": 4195220,
+        "run_time_ns_delta": 212516249,
+        "type": "tracing"
+      },
+      "17": {
+        "bytes_jited": 87,
+        "bytes_xlated": 136,
+        "id": 17,
+        "name": "vfs_read",
+        "run_cnt_delta": 107837,
+        "run_time_ns_delta": 4594342,
+        "type": "tracing"
+      },
+      "18": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 18,
+        "name": "vfs_write",
+        "run_cnt_delta": 103873,
+        "run_time_ns_delta": 5726064,
+        "type": "tracing"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.313784611000017,
+        "ops_per_sec": 1689411.8529660741,
+        "ops_total": 5598347.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [9878] setting to a 3 secs run per stressor\nstress-ng: info:  [9878] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [9878] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [9951] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [9895] dentry: 324948 dentries allocated\nstress-ng: metrc: [9878] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [9878]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [9878] access            28322      3.04      0.34      2.71      9301.77        9285.28\nstress-ng: metrc: [9878] chdir               267      3.15      0.57      5.15        84.69          46.68\nstress-ng: metrc: [9878] chmod               212      3.03      0.00      0.15        70.06        1426.62\nstress-ng: metrc: [9878] chown               226      3.03      0.01      0.03        74.49        6518.04\nstress-ng: metrc: [9878] dentry            26566      3.09      0.05      0.78      8602.76       32032.70\nstress-ng: metrc: [9878] dir               32769      3.25      0.15      3.70     10072.21        8504.14\nstress-ng: metrc: [9878] dirmany           25464      3.03      0.00      0.61      8407.27       41794.48\nstress-ng: metrc: [9878] fallocate             0      3.07      0.01      0.01         0.00           0.00\nstress-ng: metrc: [9878] file-ioctl       188469      3.01      0.24      2.06     62713.04       82069.07\nstress-ng: metrc: [9878] filename           8429      3.03      0.09      1.64      2781.17        4872.47\nstress-ng: metrc: [9878] flock           3811519      3.01      0.61      0.93   1267829.72     2472873.46\nstress-ng: metrc: [9878] fpunch             1198      3.07      0.00      2.46       390.10         487.03\nstress-ng: metrc: [9878] fstat              7419      3.00      0.51      1.77      2469.40        3250.64\nstress-ng: metrc: [9878] getdent          978444      3.00      0.33      7.03    326021.72      132975.67\nstress-ng: metrc: [9878] hdd               48419      3.02      0.82      0.64     16024.44       33064.21\nstress-ng: metrc: [9878] inotify               8      3.06      0.01      0.00         2.62         533.69\nstress-ng: metrc: [9878] open              19456      3.08      0.05      0.23      6322.09       70524.18\nstress-ng: metrc: [9878] rename           102626      3.00      0.05      0.70     34174.39      136980.05\nstress-ng: metrc: [9878] touch            150412      3.07      0.14      4.05     48944.16       35870.95\nstress-ng: metrc: [9878] utime            123967      3.02      0.11      2.11     41047.81       55728.50\nstress-ng: metrc: [9878] link                 12      3.06      0.09      1.44         3.92           7.85\nstress-ng: metrc: [9878] symlink               5      3.10      0.06      1.38         1.61           3.47\nstress-ng: metrc: [9878] mknod               105      3.05      0.03      0.03        34.38        1811.19\nstress-ng: metrc: [9878] fcntl             44033      3.03      0.09      0.44     14510.08       82848.38\nstress-ng: info:  [9878] skipped: 0\nstress-ng: info:  [9878] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [9878] failed: 0\nstress-ng: info:  [9878] metrics untrustworthy: 0\nstress-ng: info:  [9878] successful run completed in 3.30 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "14": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "noop",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=6: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=6: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 6"
+              ],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 1
+              }
+            },
+            "error": null,
+            "pass": "map_inline",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 14,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 14,
+          "prog_name": "vfs_create",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "15": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "noop",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=6: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=6: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 6"
+              ],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 1
+              }
+            },
+            "error": null,
+            "pass": "map_inline",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 15,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 15,
+          "prog_name": "vfs_fsync_range",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "16": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "noop",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=6: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=6: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 6"
+              ],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 1
+              }
+            },
+            "error": null,
+            "pass": "map_inline",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 16,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 16,
+          "prog_name": "vfs_open",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "17": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 11,
+              "insn_count_before": 11,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "noop",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=6: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=6: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 6"
+              ],
+              "insn_count_after": 11,
+              "insn_count_before": 11,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 1
+              }
+            },
+            "error": null,
+            "pass": "map_inline",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 17,
+        "program": {
+          "final_insn_count": 11,
+          "orig_insn_count": 11,
+          "prog_id": 17,
+          "prog_name": "vfs_read",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "18": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "noop",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=6: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=6: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 6"
+              ],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 1
+              }
+            },
+            "error": null,
+            "pass": "map_inline",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 18,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 18,
+          "prog_name": "vfs_write",
+          "prog_type": 26
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bcc",
+  "selected_workload": "stress_ng_filesystem",
+  "status": "ok"
+}

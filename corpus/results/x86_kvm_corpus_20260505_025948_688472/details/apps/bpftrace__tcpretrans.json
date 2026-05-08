@@ -1,0 +1,10 @@
+{
+  "app": "bpftrace/tcpretrans",
+  "baseline": null,
+  "error": "failed to install netem qdisc on bpfbench0",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "bpftrace",
+  "selected_workload": "network_lossy_multi",
+  "status": "error"
+}

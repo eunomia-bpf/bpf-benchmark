@@ -1,0 +1,291 @@
+{
+  "app": "bpftrace/vfsstat",
+  "baseline": {
+    "bpf": {
+      "672": {
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 672,
+        "name": "1",
+        "run_cnt_delta": 9,
+        "run_time_ns_delta": 23639,
+        "type": "perf_event"
+      },
+      "673": {
+        "bytes_jited": 140,
+        "bytes_xlated": 224,
+        "id": 673,
+        "name": "vfs_create",
+        "run_cnt_delta": 14464302,
+        "run_time_ns_delta": 507537289,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 4.055978614000082,
+        "ops_per_sec": 1423910.8608869708,
+        "ops_total": 5775352.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [30442] setting to a 3 secs run per stressor\nstress-ng: info:  [30442] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [30442] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [30515] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [30459] dentry: 303834 dentries allocated\nstress-ng: metrc: [30442] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [30442]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [30442] access            32688      3.04      0.33      3.02     10760.85        9760.27\nstress-ng: metrc: [30442] chdir               333      3.17      0.85      5.99       104.89          48.68\nstress-ng: metrc: [30442] chmod               192      3.03      0.00      0.14        63.37        1324.87\nstress-ng: metrc: [30442] chown               284      3.08      0.01      0.00        92.29       19819.95\nstress-ng: metrc: [30442] dentry            39332      3.08      0.06      1.24     12753.79       30297.89\nstress-ng: metrc: [30442] dir               32769      3.20      0.25      3.58     10255.01        8562.98\nstress-ng: metrc: [30442] dirmany           23247      3.04      0.00      0.56      7645.94       41328.73\nstress-ng: metrc: [30442] fallocate             0      3.07      0.01      0.00         0.00           0.00\nstress-ng: metrc: [30442] file-ioctl       228666      3.01      0.34      2.28     75939.26       87391.78\nstress-ng: metrc: [30442] filename           6292      3.04      0.05      1.36      2069.14        4476.49\nstress-ng: metrc: [30442] flock           3861843      3.04      0.71      0.95   1272415.51     2331844.93\nstress-ng: metrc: [30442] fpunch             1138      3.06      0.00      2.14       371.72         531.12\nstress-ng: metrc: [30442] fstat              9563      3.00      0.57      2.19      3185.34        3467.64\nstress-ng: metrc: [30442] getdent         1112177      3.00      0.62      6.63    370305.13      153406.07\nstress-ng: metrc: [30442] hdd               41838      3.04      0.66      0.63     13780.25       32503.79\nstress-ng: metrc: [30442] inotify               8      3.33      0.02      0.00         2.40         385.93\nstress-ng: metrc: [30442] open              22528      3.08      0.00      0.36      7321.67       63359.21\nstress-ng: metrc: [30442] rename           120303      3.01      0.08      0.77     39952.31      142605.67\nstress-ng: metrc: [30442] touch            113572      3.09      0.06      3.16     36728.36       35231.63\nstress-ng: metrc: [30442] utime            101074      3.03      0.12      1.71     33308.84       55017.64\nstress-ng: metrc: [30442] link                  9      3.07      0.07      1.15         2.93           7.41\nstress-ng: metrc: [30442] symlink               4      3.15      0.06      1.11         1.27           3.43\nstress-ng: metrc: [30442] mknod               153      3.05      0.06      0.00        50.10        2483.48\nstress-ng: metrc: [30442] fcntl             27339      3.07      0.05      0.32      8893.53       73680.10\nstress-ng: info:  [30442] skipped: 0\nstress-ng: info:  [30442] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [30442] failed: 0\nstress-ng: info:  [30442] metrics untrustworthy: 0\nstress-ng: info:  [30442] successful run completed in 4.04 secs"
+      },
+      {
+        "duration_s": 3.291233973999965,
+        "ops_per_sec": 1426442.4945438562,
+        "ops_total": 4694756.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [6739] setting to a 3 secs run per stressor\nstress-ng: info:  [6739] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [6739] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [6849] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [6759] dentry: 232700 dentries allocated\nstress-ng: metrc: [6739] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [6739]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [6739] access            33731      3.07      0.51      3.11     10986.73        9302.75\nstress-ng: metrc: [6739] chdir               318      3.15      0.60      5.92       100.86          48.76\nstress-ng: metrc: [6739] chmod               172      3.07      0.01      0.05        55.95        2635.17\nstress-ng: metrc: [6739] chown               236      3.08      0.01      0.03        76.74        6938.93\nstress-ng: metrc: [6739] dentry            27654      3.10      0.10      0.81      8924.32       30338.20\nstress-ng: metrc: [6739] dir               32769      3.22      0.20      3.60     10174.94        8624.83\nstress-ng: metrc: [6739] dirmany           28412      3.07      0.03      0.67      9240.09       40848.37\nstress-ng: metrc: [6739] fallocate             0      3.08      0.02      0.00         0.00           0.00\nstress-ng: metrc: [6739] file-ioctl       196168      3.02      0.21      2.10     64996.69       84848.01\nstress-ng: metrc: [6739] filename          10363      3.05      0.09      2.13      3403.09        4654.04\nstress-ng: metrc: [6739] flock           2816941      3.01      0.47      0.74    936782.66     2321716.54\nstress-ng: metrc: [6739] fpunch             1101      3.06      0.01      1.93       359.37         567.30\nstress-ng: metrc: [6739] fstat              9733      3.00      0.30      1.92      3240.41        4370.13\nstress-ng: metrc: [6739] getdent         1019873      3.00      0.54      5.99    339681.14      156325.59\nstress-ng: metrc: [6739] hdd               41510      3.05      0.71      0.54     13623.84       33151.01\nstress-ng: metrc: [6739] inotify               8      3.05      0.02      0.00         2.62         429.41\nstress-ng: metrc: [6739] open              13312      3.08      0.01      0.18      4317.69       68232.38\nstress-ng: metrc: [6739] rename           144579      3.02      0.08      1.02     47885.28      132275.77\nstress-ng: metrc: [6739] touch            176688      3.09      0.16      4.29     57225.78       39663.51\nstress-ng: metrc: [6739] utime            120523      3.02      0.12      2.12     39973.33       53889.88\nstress-ng: metrc: [6739] link                 11      3.05      0.04      1.32         3.61           8.07\nstress-ng: metrc: [6739] symlink               6      3.08      0.09      1.22         1.95           4.56\nstress-ng: metrc: [6739] mknod                60      3.07      0.01      0.02        19.52        1851.34\nstress-ng: metrc: [6739] fcntl             20588      3.03      0.04      0.22      6800.87       76914.17\nstress-ng: info:  [6739] skipped: 0\nstress-ng: info:  [6739] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [6739] failed: 0\nstress-ng: info:  [6739] metrics untrustworthy: 0\nstress-ng: info:  [6739] successful run completed in 3.28 secs"
+      },
+      {
+        "duration_s": 3.2994629510000095,
+        "ops_per_sec": 1843093.8884029258,
+        "ops_total": 6081220.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [16252] setting to a 3 secs run per stressor\nstress-ng: info:  [16252] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [16252] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [16325] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [16269] dentry: 426828 dentries allocated\nstress-ng: metrc: [16252] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [16252]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [16252] access            29777      3.05      0.27      3.25      9777.72        8456.02\nstress-ng: metrc: [16252] chdir               337      3.17      0.72      6.26       106.34          48.28\nstress-ng: metrc: [16252] chmod               214      3.09      0.04      0.02        69.36        3860.17\nstress-ng: metrc: [16252] chown               178      3.07      0.01      0.01        57.97       11617.28\nstress-ng: metrc: [16252] dentry            25519      3.10      0.04      0.78      8236.49       31186.60\nstress-ng: metrc: [16252] dir               32771      3.24      0.18      3.50     10114.97        8895.05\nstress-ng: metrc: [16252] dirmany           25929      3.08      0.02      0.59      8427.18       42559.23\nstress-ng: metrc: [16252] fallocate             1      3.06      0.02      0.00         0.33          60.06\nstress-ng: metrc: [16252] file-ioctl       172317      3.03      0.18      1.83     56832.98       85692.25\nstress-ng: metrc: [16252] filename           9475      3.05      0.10      1.88      3105.84        4790.74\nstress-ng: metrc: [16252] flock           4244803      3.05      0.62      1.21   1392760.91     2317538.22\nstress-ng: metrc: [16252] fpunch             1526      3.07      0.02      2.42       497.56         626.94\nstress-ng: metrc: [16252] fstat              7618      3.00      0.36      1.52      2537.32        4052.45\nstress-ng: metrc: [16252] getdent         1027760      3.00      0.44      6.27    342217.28      153314.18\nstress-ng: metrc: [16252] hdd               46221      3.05      0.78      0.66     15165.35       32034.00\nstress-ng: metrc: [16252] inotify               9      3.07      0.01      0.02         2.93         326.21\nstress-ng: metrc: [16252] open              18432      3.10      0.04      0.27      5944.58       59004.11\nstress-ng: metrc: [16252] rename           117122      3.05      0.10      0.81     38389.58      128927.22\nstress-ng: metrc: [16252] touch            192525      3.10      0.15      4.35     62038.54       42811.67\nstress-ng: metrc: [16252] utime             96378      3.05      0.12      1.59     31625.12       56203.41\nstress-ng: metrc: [16252] link                 10      3.07      0.13      1.13         3.26           7.94\nstress-ng: metrc: [16252] symlink               7      3.12      0.12      1.48         2.24           4.39\nstress-ng: metrc: [16252] mknod               101      3.07      0.02      0.03        32.92        2260.72\nstress-ng: metrc: [16252] fcntl             32190      3.04      0.04      0.36     10577.15       79613.78\nstress-ng: info:  [16252] skipped: 0\nstress-ng: info:  [16252] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [16252] failed: 0\nstress-ng: info:  [16252] metrics untrustworthy: 0\nstress-ng: info:  [16252] successful run completed in 3.29 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "672": {
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 672,
+        "name": "1",
+        "run_cnt_delta": 10,
+        "run_time_ns_delta": 21533,
+        "type": "perf_event"
+      },
+      "673": {
+        "bytes_jited": 140,
+        "bytes_xlated": 224,
+        "id": 673,
+        "name": "vfs_create",
+        "run_cnt_delta": 14776858,
+        "run_time_ns_delta": 520768532,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.283669809999992,
+        "ops_per_sec": 1838503.6709887753,
+        "ops_total": 6037039.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [10562] setting to a 3 secs run per stressor\nstress-ng: info:  [10562] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [10562] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [10652] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [10579] dentry: 431473 dentries allocated\nstress-ng: metrc: [10562] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [10562]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [10562] access            37347      3.05      0.60      3.17     12237.40        9927.91\nstress-ng: metrc: [10562] chdir               271      3.20      0.68      5.04        84.65          47.37\nstress-ng: metrc: [10562] chmod               252      3.07      0.00      0.11        82.01        2276.34\nstress-ng: metrc: [10562] chown               277      3.03      0.01      0.04        91.55        5269.57\nstress-ng: metrc: [10562] dentry            24650      3.08      0.05      0.82      8005.82       28458.91\nstress-ng: metrc: [10562] dir               32769      3.24      0.22      3.58     10126.64        8611.65\nstress-ng: metrc: [10562] dirmany           26816      3.04      0.02      0.63      8814.86       41584.67\nstress-ng: metrc: [10562] fallocate             6      3.04      0.01      0.01         1.98         288.42\nstress-ng: metrc: [10562] file-ioctl       169615      3.02      0.20      1.84     56149.90       83133.89\nstress-ng: metrc: [10562] filename           7397      3.05      0.10      1.43      2428.59        4858.95\nstress-ng: metrc: [10562] flock           4225519      3.02      0.77      1.17   1397358.92     2181820.67\nstress-ng: metrc: [10562] fpunch             1304      3.06      0.00      2.02       426.55         646.63\nstress-ng: metrc: [10562] fstat             12624      3.00      0.66      2.87      4207.65        3573.62\nstress-ng: metrc: [10562] getdent         1102847      3.00      0.67      6.61    367598.21      151544.78\nstress-ng: metrc: [10562] hdd               44958      3.04      0.82      0.48     14808.66       34594.89\nstress-ng: metrc: [10562] inotify               8      3.08      0.02      0.01         2.60         300.11\nstress-ng: metrc: [10562] open              19341      3.06      0.05      0.22      6311.64       69511.43\nstress-ng: metrc: [10562] rename            79890      3.02      0.03      0.53     26412.57      143482.15\nstress-ng: metrc: [10562] touch            128465      3.08      0.08      3.71     41692.33       33898.56\nstress-ng: metrc: [10562] utime             97996      3.02      0.19      1.53     32478.86       56797.26\nstress-ng: metrc: [10562] link                 10      3.09      0.05      1.19         3.23           8.08\nstress-ng: metrc: [10562] symlink               4      3.11      0.02      1.07         1.28           3.64\nstress-ng: metrc: [10562] mknod               108      3.07      0.01      0.02        35.12        3981.57\nstress-ng: metrc: [10562] fcntl             24565      3.01      0.05      0.33      8173.41       64475.23\nstress-ng: info:  [10562] skipped: 0\nstress-ng: info:  [10562] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [10562] failed: 0\nstress-ng: info:  [10562] metrics untrustworthy: 0\nstress-ng: info:  [10562] successful run completed in 3.27 secs"
+      },
+      {
+        "duration_s": 3.287486887,
+        "ops_per_sec": 1932414.0957402396,
+        "ops_total": 6352786.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [31879] setting to a 3 secs run per stressor\nstress-ng: info:  [31879] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [31879] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [31953] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [31898] dentry: 250575 dentries allocated\nstress-ng: metrc: [31879] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [31879]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [31879] access            28477      3.05      0.37      2.44      9341.58       10144.67\nstress-ng: metrc: [31879] chdir               302      3.18      0.72      5.57        95.04          47.99\nstress-ng: metrc: [31879] chmod               213      3.06      0.00      0.09        69.72        2231.16\nstress-ng: metrc: [31879] chown               243      3.08      0.00      0.06        78.84        3858.12\nstress-ng: metrc: [31879] dentry            18432      3.12      0.04      0.58      5911.04       29910.72\nstress-ng: metrc: [31879] dir               31102      3.24      0.20      3.21      9599.41        9115.61\nstress-ng: metrc: [31879] dirmany           37767      3.03      0.04      0.85     12484.33       42361.72\nstress-ng: metrc: [31879] fallocate             1      3.06      0.00      0.03         0.33          36.68\nstress-ng: metrc: [31879] file-ioctl       198584      3.02      0.21      2.20     65758.47       82469.81\nstress-ng: metrc: [31879] filename          11178      3.04      0.12      2.23      3671.46        4767.95\nstress-ng: metrc: [31879] flock           4425597      3.05      0.83      1.13   1450215.77     2257546.46\nstress-ng: metrc: [31879] fpunch             1112      3.09      0.00      1.92       359.98         578.60\nstress-ng: metrc: [31879] fstat              7973      3.00      0.30      2.11      2656.90        3307.02\nstress-ng: metrc: [31879] getdent         1084879      3.00      0.51      6.56    361564.26      153330.43\nstress-ng: metrc: [31879] hdd               35328      3.07      0.55      0.51     11509.76       33247.82\nstress-ng: metrc: [31879] inotify               8      3.06      0.02      0.01         2.61         267.18\nstress-ng: metrc: [31879] open               9216      3.09      0.00      0.17      2980.52       54383.23\nstress-ng: metrc: [31879] rename           161712      3.02      0.14      1.25     53527.42      116090.85\nstress-ng: metrc: [31879] touch            175046      3.10      0.12      3.74     56433.83       45397.48\nstress-ng: metrc: [31879] utime             96395      3.05      0.09      1.73     31569.70       53077.29\nstress-ng: metrc: [31879] link                 13      3.06      0.15      1.47         4.24           8.03\nstress-ng: metrc: [31879] symlink               9      3.11      0.09      1.82         2.89           4.71\nstress-ng: metrc: [31879] mknod                40      3.07      0.02      0.01        13.01        1777.54\nstress-ng: metrc: [31879] fcntl             29159      3.09      0.05      0.43      9437.60       60407.24\nstress-ng: info:  [31879] skipped: 0\nstress-ng: info:  [31879] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [31879] failed: 0\nstress-ng: info:  [31879] metrics untrustworthy: 0\nstress-ng: info:  [31879] successful run completed in 3.28 secs"
+      },
+      {
+        "duration_s": 3.300640810999994,
+        "ops_per_sec": 1560491.824143542,
+        "ops_total": 5150623.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [1202] setting to a 3 secs run per stressor\nstress-ng: info:  [1202] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [1202] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [1285] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [1224] dentry: 272647 dentries allocated\nstress-ng: metrc: [1202] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1202]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1202] access            33799      3.03      0.47      2.89     11147.26       10054.69\nstress-ng: metrc: [1202] chdir               241      3.17      0.51      4.76        76.02          45.73\nstress-ng: metrc: [1202] chmod               230      3.06      0.05      0.02        75.06        3300.38\nstress-ng: metrc: [1202] chown               270      3.03      0.02      0.02        89.10        7641.37\nstress-ng: metrc: [1202] dentry            17136      3.07      0.03      0.56      5588.17       29082.91\nstress-ng: metrc: [1202] dir               32769      3.24      0.26      3.77     10099.66        8134.40\nstress-ng: metrc: [1202] dirmany           28032      3.03      0.03      0.65      9264.49       41360.38\nstress-ng: metrc: [1202] fallocate             0      3.04      0.01      0.00         0.00           0.00\nstress-ng: metrc: [1202] file-ioctl       187663      3.03      0.23      2.05     61978.29       82136.57\nstress-ng: metrc: [1202] filename           7612      3.04      0.10      1.55      2504.11        4614.11\nstress-ng: metrc: [1202] flock           3240033      3.03      0.41      0.97   1067717.46     2338796.48\nstress-ng: metrc: [1202] fpunch              961      3.06      0.00      2.40       314.08         399.94\nstress-ng: metrc: [1202] fstat             10222      3.00      0.53      2.26      3406.09        3663.77\nstress-ng: metrc: [1202] getdent         1126548      3.00      0.49      6.74    375299.86      155883.79\nstress-ng: metrc: [1202] hdd               58408      3.02      0.91      0.77     19315.71       34610.57\nstress-ng: metrc: [1202] inotify               8      3.04      0.03      0.00         2.63         274.87\nstress-ng: metrc: [1202] open              16384      3.05      0.01      0.25      5371.25       62823.29\nstress-ng: metrc: [1202] rename           123667      3.02      0.07      0.78     40912.34      144512.16\nstress-ng: metrc: [1202] touch            130496      3.07      0.09      3.87     42441.53       32940.45\nstress-ng: metrc: [1202] utime            110123      3.01      0.07      1.85     36537.07       57250.17\nstress-ng: metrc: [1202] link                 13      3.05      0.11      1.50         4.26           8.06\nstress-ng: metrc: [1202] symlink               4      3.11      0.04      1.11         1.29           3.49\nstress-ng: metrc: [1202] mknod                60      3.07      0.05      0.01        19.54         961.74\nstress-ng: metrc: [1202] fcntl             25944      3.05      0.01      0.36      8519.73       71297.45\nstress-ng: info:  [1202] skipped: 0\nstress-ng: info:  [1202] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [1202] failed: 0\nstress-ng: info:  [1202] metrics untrustworthy: 0\nstress-ng: info:  [1202] successful run completed in 3.29 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "672": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "rotate",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "cond_select",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "extract",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "endian_fusion",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "bulk_memory",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 672,
+        "program": {
+          "final_insn_count": 67,
+          "orig_insn_count": 67,
+          "prog_id": 672,
+          "prog_name": "1",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "673": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "rotate",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "cond_select",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "extract",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "endian_fusion",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "bulk_memory",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 673,
+        "program": {
+          "final_insn_count": 24,
+          "orig_insn_count": 24,
+          "prog_id": 673,
+          "prog_name": "vfs_create",
+          "prog_type": 2
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bpftrace",
+  "selected_workload": "stress_ng_filesystem",
+  "status": "ok"
+}

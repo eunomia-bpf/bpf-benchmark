@@ -1,0 +1,101 @@
+{
+  "app": "bpftrace/capable",
+  "baseline": {
+    "bpf": {
+      "681": {
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 681,
+        "name": "cap_capable",
+        "run_cnt_delta": 1205543,
+        "run_time_ns_delta": 206793217,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0587966599999845,
+        "ops_per_sec": 4466849.718607993,
+        "ops_total": 13663185.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [11704] setting to a 3 secs run per stressor\nstress-ng: info:  [11704] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [11704] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [11704] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [11704]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [11704] cap             5350202      3.00      1.49      4.61   1781398.93      877057.85\nstress-ng: metrc: [11704] eventfd         1074699      3.00      0.72      3.52    358139.37      253167.84\nstress-ng: metrc: [11704] get                5970      3.00      0.13      1.31      1989.14        4145.70\nstress-ng: metrc: [11704] prctl              6193      3.00      1.69      1.43      2062.01        1984.61\nstress-ng: metrc: [11704] set               43019      3.00      0.12      3.37     14337.07       12324.79\nstress-ng: metrc: [11704] dup                2973      3.00      0.89      0.84       990.95        1715.11\nstress-ng: metrc: [11704] kill              42608      3.00      0.05      5.02     14198.91        8399.30\nstress-ng: metrc: [11704] sigfd           6322970      3.01      1.75      6.28   2101171.01      787903.05\nstress-ng: metrc: [11704] signal                0      3.01      0.03      0.05         0.00           0.00\nstress-ng: metrc: [11704] pty                  96      3.01      0.14      5.60        31.88          16.74\nstress-ng: metrc: [11704] itimer              375      3.00      0.90      2.54       125.00         108.85\nstress-ng: metrc: [11704] timerfd          814080      3.00      0.28      3.55    270974.64      212611.87\nstress-ng: info:  [11704] skipped: 0\nstress-ng: info:  [11704] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [11704] failed: 0\nstress-ng: info:  [11704] metrics untrustworthy: 0\nstress-ng: info:  [11704] successful run completed in 3.05 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "681": {
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 681,
+        "name": "cap_capable",
+        "run_cnt_delta": 1164748,
+        "run_time_ns_delta": 213619372,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.063759900999969,
+        "ops_per_sec": 5194368.85207806,
+        "ops_total": 15914299.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [4457] setting to a 3 secs run per stressor\nstress-ng: info:  [4457] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [4457] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [4457] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [4457]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [4457] cap             6221314      3.00      1.83      5.44   2073642.38      855875.08\nstress-ng: metrc: [4457] eventfd         1426394      3.00      0.84      4.53    475344.08      265449.61\nstress-ng: metrc: [4457] get                4739      3.00      0.14      1.14      1579.30        3703.71\nstress-ng: metrc: [4457] prctl              6539      3.00      1.82      1.60      2178.99        1917.06\nstress-ng: metrc: [4457] set               35281      3.00      0.09      2.74     11757.76       12426.76\nstress-ng: metrc: [4457] dup                3206      3.00      1.00      0.94      1068.50        1658.60\nstress-ng: metrc: [4457] kill              40046      3.00      0.13      4.75     13342.14        8202.48\nstress-ng: metrc: [4457] sigfd           6749802      3.00      1.53      4.37   2247867.35     1144704.57\nstress-ng: metrc: [4457] signal                0      3.00      0.03      0.35         0.00           0.00\nstress-ng: metrc: [4457] pty                  70      3.01      0.11      3.67        23.29          18.52\nstress-ng: metrc: [4457] itimer              476      3.00      1.38      2.78       158.67         114.50\nstress-ng: metrc: [4457] timerfd         1426432      3.00      0.58      4.25    475210.54      294975.70\nstress-ng: info:  [4457] skipped: 0\nstress-ng: info:  [4457] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [4457] failed: 0\nstress-ng: info:  [4457] metrics untrustworthy: 0\nstress-ng: info:  [4457] successful run completed in 3.05 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "681": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass rotate failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"rotate\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-525/pass-00-rotate.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-525/target.json\": error: target kinsn bpf_memset_bulk missing supported_encodings",
+            "pass": "rotate",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass cond_select failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"cond_select\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-525/pass-01-cond_select.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-525/target.json\": error: target kinsn bpf_memcpy_bulk missing supported_encodings",
+            "pass": "cond_select",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass extract failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"extract\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-525/pass-02-extract.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-525/target.json\": error: target kinsn bpf_prefetch missing supported_encodings",
+            "pass": "extract",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass endian_fusion failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"endian_fusion\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-525/pass-03-endian_fusion.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-525/target.json\": error: target kinsn bpf_select64 missing supported_encodings",
+            "pass": "endian_fusion",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass bulk_memory failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"bulk_memory\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-525/pass-04-bulk_memory.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-525/target.json\": error: target kinsn bpf_memcpy_bulk missing supported_encodings",
+            "pass": "bulk_memory",
+            "status": "failed_bpfopt"
+          }
+        ],
+        "prog_id": 681,
+        "program": {
+          "final_insn_count": 156,
+          "orig_insn_count": 156,
+          "prog_id": 681,
+          "prog_name": "cap_capable",
+          "prog_type": 2
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bpftrace",
+  "selected_workload": "stress_ng_os",
+  "status": "ok"
+}

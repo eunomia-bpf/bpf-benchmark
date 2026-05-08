@@ -1,0 +1,321 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "531": {
+        "bytes_jited": 176,
+        "bytes_xlated": 136,
+        "id": 531,
+        "name": "xdp_root",
+        "run_cnt_delta": 327066,
+        "run_time_ns_delta": 108239433,
+        "type": "xdp"
+      },
+      "537": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 537,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "539": {
+        "bytes_jited": 541,
+        "bytes_xlated": 1000,
+        "id": 539,
+        "name": "healthcheck_encap",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 531,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.000680842999998,
+        "ops_per_sec": 6309.56805825151,
+        "ops_total": 18933.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 3.000580009000032,
+        "ops_per_sec": 5991.17502152225,
+        "ops_total": 17977.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 3.000615154000002,
+        "ops_per_sec": 5865.797210460928,
+        "ops_total": 17601.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "531": {
+        "bytes_jited": 176,
+        "bytes_xlated": 136,
+        "id": 531,
+        "name": "xdp_root",
+        "run_cnt_delta": 323274,
+        "run_time_ns_delta": 111102041,
+        "type": "xdp"
+      },
+      "537": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 537,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "539": {
+        "bytes_jited": 541,
+        "bytes_xlated": 1000,
+        "id": 539,
+        "name": "healthcheck_encap",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 621,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.001258241999949,
+        "ops_per_sec": 6103.440131760682,
+        "ops_total": 18318.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 3.000968026999999,
+        "ops_per_sec": 5912.092311671939,
+        "ops_total": 17742.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 3.0008896800000002,
+        "ops_per_sec": 5937.905721345944,
+        "ops_total": 17819.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "531": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 531,
+        "program": {
+          "final_insn_count": 17,
+          "orig_insn_count": 17,
+          "prog_id": 531,
+          "prog_name": "xdp_root",
+          "prog_type": 6
+        },
+        "status": "ok"
+      },
+      "537": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "maps_skipped_by_size=7",
+                "site at PC=512: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=512: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 512",
+                "site at PC=520: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=520: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 520",
+                "site at PC=562: skip reason: map-in-map chain is not inlineable",
+                "site at PC=762: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=762: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 762",
+                "site at PC=770: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=770: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 770",
+                "site at PC=814: skip reason: map-in-map chain is not inlineable",
+                "site at PC=863: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=863: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 863",
+                "site at PC=895: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=895: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 895",
+                "site at PC=1072: skip reason: map-in-map outer key unavailable: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1072",
+                "site at PC=1105: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1105: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1105",
+                "site at PC=1351: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1351: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1351",
+                "site at PC=1776: skip reason: map-in-map outer key unavailable: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1776",
+                "site at PC=1807: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1807: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1807",
+                "site at PC=2062: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=2062: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 2062"
+              ],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 14,
+              "sites_skipped": 14,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 10,
+                "map-in-map chain is not inlineable": 2,
+                "map-in-map outer key unavailable: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1072": 1,
+                "map-in-map outer key unavailable: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1776": 1
+              }
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 537,
+        "program": {
+          "final_insn_count": 2542,
+          "orig_insn_count": 2542,
+          "prog_id": 537,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "ok"
+      },
+      "539": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 103,
+              "insn_count_before": 103,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=17: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=17: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 17",
+                "site at PC=32: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=32: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 32",
+                "site at PC=56: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=56: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 56",
+                "site at PC=68: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=68: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 68"
+              ],
+              "insn_count_after": 103,
+              "insn_count_before": 103,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 4,
+              "sites_skipped": 4,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 4
+              }
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 539,
+        "program": {
+          "final_insn_count": 103,
+          "orig_insn_count": 103,
+          "prog_id": 539,
+          "prog_name": "healthcheck_enc",
+          "prog_type": 3
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}

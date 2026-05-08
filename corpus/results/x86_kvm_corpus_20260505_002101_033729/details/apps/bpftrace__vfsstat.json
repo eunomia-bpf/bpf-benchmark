@@ -1,0 +1,132 @@
+{
+  "app": "bpftrace/vfsstat",
+  "baseline": {
+    "bpf": {
+      "834": {
+        "avg_ns_per_run": 1371.0,
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 834,
+        "name": "1",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 1371,
+        "type": "perf_event"
+      },
+      "835": {
+        "avg_ns_per_run": 31.64129024083062,
+        "bytes_jited": 140,
+        "bytes_xlated": 224,
+        "id": 835,
+        "name": "vfs_create",
+        "run_cnt_delta": 1562592,
+        "run_time_ns_delta": 49442427,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.1304390270000226,
+        "ops_per_sec": 2347586.1471650577,
+        "ops_total": 2653803.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [23738] setting to a 1 secs run per stressor\nstress-ng: info:  [23738] dispatching hogs: 1 access, 1 chdir, 1 chmod, 1 chown, 1 dentry, 1 dir, 1 dirmany, 1 fallocate, 1 file-ioctl, 1 filename, 1 flock, 1 fpunch, 1 fstat, 1 getdent, 1 hdd, 1 inotify, 1 open, 1 rename, 1 touch, 1 utime\nstress-ng: info:  [23738] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [23756] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [23743] dentry: 73369 dentries allocated\nstress-ng: metrc: [23738] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [23738]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [23738] access            10905      1.00      0.19      1.65     10856.78        5922.06\nstress-ng: metrc: [23738] chdir                48      1.08      0.05      0.84        44.41          54.08\nstress-ng: metrc: [23738] chmod               146      1.01      0.00      0.03       144.15        4436.75\nstress-ng: metrc: [23738] chown               176      1.01      0.00      0.01       173.77       13108.89\nstress-ng: metrc: [23738] dentry            14336      1.05      0.05      0.45     13700.76       28787.38\nstress-ng: metrc: [23738] dir                8192      1.10      0.05      0.89      7441.79        8716.65\nstress-ng: metrc: [23738] dirmany            8865      1.00      0.00      0.21      8826.29       42784.54\nstress-ng: metrc: [23738] fallocate             2      1.01      0.01      0.00         1.98         232.34\nstress-ng: metrc: [23738] file-ioctl        77150      1.00      0.07      0.70     76847.51       99758.85\nstress-ng: metrc: [23738] filename           3545      1.01      0.06      0.63      3502.21        5112.59\nstress-ng: metrc: [23738] flock           2178422      1.00      0.39      0.56   2170764.84     2301304.77\nstress-ng: metrc: [23738] fpunch             1022      1.01      0.00      0.28      1009.55        3653.51\nstress-ng: metrc: [23738] fstat              2657      1.00      0.14      0.60      2656.91        3585.22\nstress-ng: metrc: [23738] getdent          192252      1.00      0.13      0.87    192248.10      193305.52\nstress-ng: metrc: [23738] hdd               28672      1.02      0.48      0.20     28155.39       42505.75\nstress-ng: metrc: [23738] inotify               2      1.03      0.00      0.00         1.95         784.31\nstress-ng: metrc: [23738] open              16330      1.03      0.02      0.22     15857.44       66409.38\nstress-ng: metrc: [23738] rename              525      1.01      0.00      0.02       519.05       26701.25\nstress-ng: metrc: [23738] touch             64418      1.03      0.06      1.71     62700.19       36481.08\nstress-ng: metrc: [23738] utime             46138      1.01      0.02      0.73     45603.44       61675.22\nstress-ng: info:  [23738] skipped: 0\nstress-ng: info:  [23738] passed: 20: access (1) chdir (1) chmod (1) chown (1) dentry (1) dir (1) dirmany (1) fallocate (1) file-ioctl (1) filename (1) flock (1) fpunch (1) fstat (1) getdent (1) hdd (1) inotify (1) open (1) rename (1) touch (1) utime (1)\nstress-ng: info:  [23738] failed: 0\nstress-ng: info:  [23738] metrics untrustworthy: 0\nstress-ng: info:  [23738] successful run completed in 1.12 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "834": {
+        "avg_ns_per_run": 1992.0,
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 834,
+        "name": "1",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 1992,
+        "type": "perf_event"
+      },
+      "835": {
+        "avg_ns_per_run": 31.46389237347477,
+        "bytes_jited": 140,
+        "bytes_xlated": 224,
+        "id": 835,
+        "name": "vfs_create",
+        "run_cnt_delta": 1678025,
+        "run_time_ns_delta": 52797198,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.1195860599999605,
+        "ops_per_sec": 2374041.70609278,
+        "ops_total": 2657944.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [13953] setting to a 1 secs run per stressor\nstress-ng: info:  [13953] dispatching hogs: 1 access, 1 chdir, 1 chmod, 1 chown, 1 dentry, 1 dir, 1 dirmany, 1 fallocate, 1 file-ioctl, 1 filename, 1 flock, 1 fpunch, 1 fstat, 1 getdent, 1 hdd, 1 inotify, 1 open, 1 rename, 1 touch, 1 utime\nstress-ng: info:  [13953] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [13970] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [13958] dentry: 75385 dentries allocated\nstress-ng: metrc: [13953] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [13953]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [13953] access            10564      1.00      0.23      1.41     10557.45        6454.25\nstress-ng: metrc: [13953] chdir                47      1.07      0.13      0.76        43.94          53.11\nstress-ng: metrc: [13953] chmod               143      1.01      0.02      0.02       141.47        3988.84\nstress-ng: metrc: [13953] chown               165      1.01      0.01      0.00       163.27       12193.32\nstress-ng: metrc: [13953] dentry            14336      1.02      0.02      0.42     14012.75       32354.02\nstress-ng: metrc: [13953] dir                8193      1.10      0.03      1.03      7468.59        7735.28\nstress-ng: metrc: [13953] dirmany           11103      1.00      0.00      0.25     11084.40       43966.01\nstress-ng: metrc: [13953] fallocate             2      1.01      0.01      0.00         1.98         170.26\nstress-ng: metrc: [13953] file-ioctl        79503      1.00      0.10      0.73     79354.41       95878.35\nstress-ng: metrc: [13953] filename           3934      1.01      0.02      0.76      3894.67        5050.69\nstress-ng: metrc: [13953] flock           2164347      1.00      0.36      0.67   2160560.37     2098046.63\nstress-ng: metrc: [13953] fpunch             1335      1.01      0.00      0.24      1320.54        5483.65\nstress-ng: metrc: [13953] fstat              1994      1.00      0.10      0.55      1993.49        3062.57\nstress-ng: metrc: [13953] getdent          198355      1.00      0.06      0.94    198349.18      199074.46\nstress-ng: metrc: [13953] hdd               26624      1.00      0.36      0.27     26591.34       42311.96\nstress-ng: metrc: [13953] inotify               2      1.01      0.00      0.00         1.98         671.14\nstress-ng: metrc: [13953] open              16431      1.01      0.04      0.20     16263.09       66763.91\nstress-ng: metrc: [13953] rename              471      1.01      0.00      0.01       466.14       33695.81\nstress-ng: metrc: [13953] touch             72688      1.01      0.06      1.74     71943.00       40375.58\nstress-ng: metrc: [13953] utime             47707      1.01      0.05      0.72     47231.02       61997.96\nstress-ng: info:  [13953] skipped: 0\nstress-ng: info:  [13953] passed: 20: access (1) chdir (1) chmod (1) chown (1) dentry (1) dir (1) dirmany (1) fallocate (1) file-ioctl (1) filename (1) flock (1) fpunch (1) fstat (1) getdent (1) hdd (1) inotify (1) open (1) rename (1) touch (1) utime (1)\nstress-ng: info:  [13953] failed: 0\nstress-ng: info:  [13953] metrics untrustworthy: 0\nstress-ng: info:  [13953] successful run completed in 1.11 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": false,
+    "changed": false,
+    "enabled_passes": [
+      "map_inline"
+    ],
+    "error": "prog 834: prog 834 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT; prog 835: prog 835 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+    "exit_code": 1,
+    "output": "{\"changed\": false, \"error_message\": \"prog 834 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 834, \"program\": {\"final_insn_count\": 67, \"insn_delta\": 0, \"orig_insn_count\": 67, \"prog_id\": 834, \"prog_name\": \"1\", \"prog_type\": 7}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}\n{\"changed\": false, \"error_message\": \"prog 835 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 835, \"program\": {\"final_insn_count\": 24, \"insn_delta\": 0, \"orig_insn_count\": 24, \"prog_id\": 835, \"prog_name\": \"vfs_create\", \"prog_type\": 2}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "834": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 834 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 834 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 834, \"program\": {\"final_insn_count\": 67, \"insn_delta\": 0, \"orig_insn_count\": 67, \"prog_id\": 834, \"prog_name\": \"1\", \"prog_type\": 7}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 834,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      },
+      "835": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 835 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 835 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 835, \"program\": {\"final_insn_count\": 24, \"insn_delta\": 0, \"orig_insn_count\": 24, \"prog_id\": 835, \"prog_name\": \"vfs_create\", \"prog_type\": 2}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 835,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 0,
+      "not_applied": 2,
+      "requested": 2
+    }
+  },
+  "runner": "bpftrace",
+  "selected_workload": "stress_ng_filesystem",
+  "status": "ok"
+}

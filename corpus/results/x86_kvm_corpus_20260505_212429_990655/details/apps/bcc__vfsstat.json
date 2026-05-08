@@ -1,0 +1,349 @@
+{
+  "app": "bcc/vfsstat",
+  "baseline": {
+    "bpf": {
+      "14": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 14,
+        "name": "vfs_create",
+        "run_cnt_delta": 262660,
+        "run_time_ns_delta": 17165390,
+        "type": "tracing"
+      },
+      "15": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 15,
+        "name": "kfunc__vmlinux__vfs_fsync_range",
+        "run_cnt_delta": 986,
+        "run_time_ns_delta": 85728,
+        "type": "tracing"
+      },
+      "16": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 16,
+        "name": "vfs_open",
+        "run_cnt_delta": 3880800,
+        "run_time_ns_delta": 310687728,
+        "type": "tracing"
+      },
+      "17": {
+        "bytes_jited": 87,
+        "bytes_xlated": 136,
+        "id": 17,
+        "name": "vfs_read",
+        "run_cnt_delta": 110077,
+        "run_time_ns_delta": 4793320,
+        "type": "tracing"
+      },
+      "18": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 18,
+        "name": "vfs_write",
+        "run_cnt_delta": 91902,
+        "run_time_ns_delta": 4952193,
+        "type": "tracing"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 4.078803778999998,
+        "ops_per_sec": 1051532.565033451,
+        "ops_total": 4288995.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [643] setting to a 3 secs run per stressor\nstress-ng: info:  [643] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [643] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [733] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [668] dentry: 414948 dentries allocated\nstress-ng: info:  [648] chdir: removing 8192 directories\nstress-ng: metrc: [643] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [643]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [643] access            31345      3.16      0.44      3.38      9909.60        8200.41\nstress-ng: metrc: [643] chdir               180      3.60      0.59      4.84        50.04          33.14\nstress-ng: metrc: [643] chmod               254      3.24      0.00      0.11        78.44        2259.75\nstress-ng: metrc: [643] chown               268      3.19      0.01      0.01        83.97       13606.13\nstress-ng: metrc: [643] dentry            24576      3.27      0.03      0.96      7513.64       24846.18\nstress-ng: metrc: [643] dir               32768      3.69      0.29      4.87      8885.56        6358.17\nstress-ng: metrc: [643] dirmany           32508      3.18      0.01      0.86     10211.10       37584.24\nstress-ng: metrc: [643] fallocate             1      3.15      0.00      0.02         0.32          44.21\nstress-ng: metrc: [643] file-ioctl       190951      3.12      0.26      2.27     61272.46       75411.69\nstress-ng: metrc: [643] filename           8916      3.15      0.12      1.94      2833.61        4339.77\nstress-ng: metrc: [643] flock           2741344      3.12      0.56      0.97    879908.84     1795151.80\nstress-ng: metrc: [643] fpunch             1099      3.18      0.00      2.14       345.73         514.36\nstress-ng: metrc: [643] fstat              8171      3.02      0.56      1.85      2708.51        3392.70\nstress-ng: metrc: [643] getdent          791739      3.01      0.44      6.77    263110.78      109749.59\nstress-ng: metrc: [643] hdd               39611      3.15      0.83      0.66     12585.09       26507.32\nstress-ng: metrc: [643] inotify               9      3.32      0.01      0.02         2.71         329.31\nstress-ng: metrc: [643] open              17506      3.26      0.01      0.29      5365.96       57827.68\nstress-ng: metrc: [643] rename           137078      3.20      0.06      0.99     42801.77      130675.68\nstress-ng: metrc: [643] touch            106416      3.23      0.08      3.33     32989.47       31155.49\nstress-ng: metrc: [643] utime             97382      3.11      0.12      1.79     31332.29       50932.43\nstress-ng: metrc: [643] link                 11      3.23      0.12      1.42         3.40           7.17\nstress-ng: metrc: [643] symlink               5      3.39      0.08      1.54         1.48           3.09\nstress-ng: metrc: [643] mknod                52      3.20      0.01      0.02        16.26        1580.84\nstress-ng: metrc: [643] fcntl             26805      3.17      0.09      0.28      8464.23       72655.47\nstress-ng: info:  [643] skipped: 0\nstress-ng: info:  [643] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [643] failed: 0\nstress-ng: info:  [643] metrics untrustworthy: 0\nstress-ng: info:  [643] successful run completed in 4.06 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "14": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 14,
+        "name": "vfs_create",
+        "run_cnt_delta": 262573,
+        "run_time_ns_delta": 17827332,
+        "type": "tracing"
+      },
+      "15": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 15,
+        "name": "kfunc__vmlinux__vfs_fsync_range",
+        "run_cnt_delta": 782,
+        "run_time_ns_delta": 65300,
+        "type": "tracing"
+      },
+      "16": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 16,
+        "name": "vfs_open",
+        "run_cnt_delta": 3883117,
+        "run_time_ns_delta": 215524321,
+        "type": "tracing"
+      },
+      "17": {
+        "bytes_jited": 87,
+        "bytes_xlated": 136,
+        "id": 17,
+        "name": "vfs_read",
+        "run_cnt_delta": 110549,
+        "run_time_ns_delta": 5010180,
+        "type": "tracing"
+      },
+      "18": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 18,
+        "name": "vfs_write",
+        "run_cnt_delta": 97615,
+        "run_time_ns_delta": 5109602,
+        "type": "tracing"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.2944581200000016,
+        "ops_per_sec": 1857600.7880774022,
+        "ops_total": 6119788.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [2973] setting to a 3 secs run per stressor\nstress-ng: info:  [2973] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [2973] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [3072] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [2994] dentry: 429381 dentries allocated\nstress-ng: metrc: [2973] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2973]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2973] access            25416      3.04      0.37      2.39      8352.03        9219.58\nstress-ng: metrc: [2973] chdir               255      3.18      0.69      5.45        80.29          41.53\nstress-ng: metrc: [2973] chmod               194      3.07      0.01      0.07        63.22        2261.65\nstress-ng: metrc: [2973] chown               190      3.09      0.00      0.07        61.42        2438.84\nstress-ng: metrc: [2973] dentry            21287      3.08      0.09      0.70      6916.19       27252.07\nstress-ng: metrc: [2973] dir               32768      3.24      0.24      3.49     10126.35        8798.96\nstress-ng: metrc: [2973] dirmany           23688      3.04      0.02      0.58      7780.41       39615.22\nstress-ng: metrc: [2973] fallocate             0      3.07      0.01      0.00         0.00           0.00\nstress-ng: metrc: [2973] file-ioctl       178950      3.01      0.30      2.06     59453.97       75993.04\nstress-ng: metrc: [2973] filename           8738      3.05      0.15      1.79      2864.23        4500.98\nstress-ng: metrc: [2973] flock           4509407      3.01      0.93      1.24   1499442.95     2080153.65\nstress-ng: metrc: [2973] fpunch             1248      3.02      0.01      1.82       412.77         683.42\nstress-ng: metrc: [2973] fstat             12048      3.00      0.70      2.61      4009.73        3641.81\nstress-ng: metrc: [2973] getdent          913144      3.00      0.38      7.08    304164.65      122415.55\nstress-ng: metrc: [2973] hdd               40538      3.04      0.73      0.57     13341.16       31112.62\nstress-ng: metrc: [2973] inotify               8      3.04      0.02      0.01         2.63         311.04\nstress-ng: metrc: [2973] open              18612      3.05      0.03      0.29      6105.35       59228.24\nstress-ng: metrc: [2973] rename            97573      3.03      0.07      0.73     32223.08      121507.41\nstress-ng: metrc: [2973] touch            119559      3.07      0.16      3.61     38928.67       31759.12\nstress-ng: metrc: [2973] utime             86782      3.00      0.10      1.45     28885.89       55796.91\nstress-ng: metrc: [2973] link                 12      3.08      0.14      1.32         3.90           8.21\nstress-ng: metrc: [2973] symlink               5      3.15      0.03      1.32         1.59           3.69\nstress-ng: metrc: [2973] mknod               153      3.01      0.02      0.02        50.77        3487.66\nstress-ng: metrc: [2973] fcntl             29213      3.02      0.06      0.40      9659.18       63716.37\nstress-ng: info:  [2973] skipped: 0\nstress-ng: info:  [2973] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [2973] failed: 0\nstress-ng: info:  [2973] metrics untrustworthy: 0\nstress-ng: info:  [2973] successful run completed in 3.28 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "14": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass rotate failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"rotate\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-4/pass-00-rotate.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-4/target.json\": error: target kinsn bpf_extract64 missing supported_encodings",
+            "pass": "rotate",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass cond_select failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"cond_select\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-4/pass-01-cond_select.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-4/target.json\": error: target kinsn bpf_select64 missing supported_encodings",
+            "pass": "cond_select",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass extract failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"extract\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-4/pass-02-extract.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-4/target.json\": error: target kinsn bpf_rotate64 missing supported_encodings",
+            "pass": "extract",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass endian_fusion failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"endian_fusion\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-4/pass-03-endian_fusion.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-4/target.json\": error: target kinsn bpf_prefetch missing supported_encodings",
+            "pass": "endian_fusion",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass bulk_memory failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"bulk_memory\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-4/pass-04-bulk_memory.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-4/target.json\": error: target kinsn bpf_select64 missing supported_encodings",
+            "pass": "bulk_memory",
+            "status": "failed_bpfopt"
+          }
+        ],
+        "prog_id": 14,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 14,
+          "prog_name": "vfs_create",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "15": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass rotate failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"rotate\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-6/pass-00-rotate.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-6/target.json\": error: target kinsn bpf_memcpy_bulk missing supported_encodings",
+            "pass": "rotate",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass cond_select failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"cond_select\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-6/pass-01-cond_select.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-6/target.json\": error: target kinsn bpf_extract64 missing supported_encodings",
+            "pass": "cond_select",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass extract failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"extract\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-6/pass-02-extract.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-6/target.json\": error: target kinsn bpf_rotate64 missing supported_encodings",
+            "pass": "extract",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass endian_fusion failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"endian_fusion\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-6/pass-03-endian_fusion.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-6/target.json\": error: target kinsn bpf_memcpy_bulk missing supported_encodings",
+            "pass": "endian_fusion",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass bulk_memory failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"bulk_memory\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-6/pass-04-bulk_memory.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-6/target.json\": error: target kinsn bpf_prefetch missing supported_encodings",
+            "pass": "bulk_memory",
+            "status": "failed_bpfopt"
+          }
+        ],
+        "prog_id": 15,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 15,
+          "prog_name": "vfs_fsync_range",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "16": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass rotate failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"rotate\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-5/pass-00-rotate.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-5/target.json\": error: target kinsn bpf_memcpy_bulk missing supported_encodings",
+            "pass": "rotate",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass cond_select failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"cond_select\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-5/pass-01-cond_select.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-5/target.json\": error: target kinsn bpf_memcpy_bulk missing supported_encodings",
+            "pass": "cond_select",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass extract failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"extract\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-5/pass-02-extract.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-5/target.json\": error: target kinsn bpf_rotate64 missing supported_encodings",
+            "pass": "extract",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass endian_fusion failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"endian_fusion\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-5/pass-03-endian_fusion.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-5/target.json\": error: target kinsn bpf_prefetch missing supported_encodings",
+            "pass": "endian_fusion",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass bulk_memory failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"bulk_memory\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-5/pass-04-bulk_memory.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-5/target.json\": error: target kinsn bpf_extract64 missing supported_encodings",
+            "pass": "bulk_memory",
+            "status": "failed_bpfopt"
+          }
+        ],
+        "prog_id": 16,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 16,
+          "prog_name": "vfs_open",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "17": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass rotate failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"rotate\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-7/pass-00-rotate.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-7/target.json\": error: target kinsn bpf_select64 missing supported_encodings",
+            "pass": "rotate",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass cond_select failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"cond_select\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-7/pass-01-cond_select.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-7/target.json\": error: target kinsn bpf_endian_load64 missing supported_encodings",
+            "pass": "cond_select",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass extract failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"extract\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-7/pass-02-extract.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-7/target.json\": error: target kinsn bpf_rotate64 missing supported_encodings",
+            "pass": "extract",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass endian_fusion failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"endian_fusion\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-7/pass-03-endian_fusion.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-7/target.json\": error: target kinsn bpf_extract64 missing supported_encodings",
+            "pass": "endian_fusion",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass bulk_memory failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"bulk_memory\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-7/pass-04-bulk_memory.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-7/target.json\": error: target kinsn bpf_memcpy_bulk missing supported_encodings",
+            "pass": "bulk_memory",
+            "status": "failed_bpfopt"
+          }
+        ],
+        "prog_id": 17,
+        "program": {
+          "final_insn_count": 11,
+          "orig_insn_count": 11,
+          "prog_id": 17,
+          "prog_name": "vfs_read",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "18": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass rotate failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"rotate\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-8/pass-00-rotate.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-8/target.json\": error: target kinsn bpf_memset_bulk missing supported_encodings",
+            "pass": "rotate",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass cond_select failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"cond_select\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-8/pass-01-cond_select.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-8/target.json\": error: target kinsn bpf_memcpy_bulk missing supported_encodings",
+            "pass": "cond_select",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass extract failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"extract\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-8/pass-02-extract.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-8/target.json\": error: target kinsn bpf_memset_bulk missing supported_encodings",
+            "pass": "extract",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass endian_fusion failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"endian_fusion\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-8/pass-03-endian_fusion.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-8/target.json\": error: target kinsn bpf_prefetch missing supported_encodings",
+            "pass": "endian_fusion",
+            "status": "failed_bpfopt"
+          },
+          {
+            "bpfopt_summary": null,
+            "error": "bpfopt pass bulk_memory failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"bulk_memory\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-8/pass-04-bulk_memory.report.json\" \"--prog-type\" \"tracing\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.cca4e0d7/bpfrejit-daemon-optimize-1862-8/target.json\": error: target kinsn bpf_rotate64 missing supported_encodings",
+            "pass": "bulk_memory",
+            "status": "failed_bpfopt"
+          }
+        ],
+        "prog_id": 18,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 18,
+          "prog_name": "vfs_write",
+          "prog_type": 26
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bcc",
+  "selected_workload": "stress_ng_filesystem",
+  "status": "ok"
+}

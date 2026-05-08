@@ -1,0 +1,173 @@
+{
+  "app": "bpftrace/runqlat",
+  "baseline": {
+    "bpf": {
+      "842": {
+        "avg_ns_per_run": 65.58925928159314,
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 842,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 878917,
+        "run_time_ns_delta": 57647515,
+        "type": "tracepoint"
+      },
+      "843": {
+        "avg_ns_per_run": 151.2433289986996,
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 843,
+        "name": "tracepoint_sched_sched_wakeup_new",
+        "run_cnt_delta": 19225,
+        "run_time_ns_delta": 2907653,
+        "type": "tracepoint"
+      },
+      "844": {
+        "avg_ns_per_run": 130.2495294137748,
+        "bytes_jited": 515,
+        "bytes_xlated": 896,
+        "id": 844,
+        "name": "sched_switch",
+        "run_cnt_delta": 12407928,
+        "run_time_ns_delta": 1616126783,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0196453209999845,
+        "ops_per_sec": 21452030.96557958,
+        "ops_total": 21873463.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [8692] setting to a 1 secs run per stressor\nstress-ng: info:  [8692] dispatching hogs: 1 clone, 1 fork, 1 futex, 1 sem, 1 sem-sysv, 1 switch, 1 vfork, 1 yield\nstress-ng: info:  [8692] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [8692] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8692]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8692] clone               661      1.01      0.21      0.84       656.38         631.69\nstress-ng: metrc: [8692] fork               2396      1.00      0.22      0.26      2395.66        5047.52\nstress-ng: metrc: [8692] futex            404302      2.00      0.22      1.15    202135.67      295661.48\nstress-ng: metrc: [8692] sem             1211824      1.00      0.15      0.58   1211183.80     1662079.74\nstress-ng: metrc: [8692] sem-sysv        4028385      1.00      0.09      0.85   4026859.44     4297539.93\nstress-ng: metrc: [8692] switch           457681      1.00      0.08      0.88    457580.63      474714.22\nstress-ng: metrc: [8692] vfork             15980      1.00      0.15      0.18     15979.89       47456.28\nstress-ng: metrc: [8692] yield          15752234      1.00      3.17      6.83  15693762.69     1575336.98\nstress-ng: info:  [8692] skipped: 0\nstress-ng: info:  [8692] passed: 8: clone (1) fork (1) futex (1) sem (1) sem-sysv (1) switch (1) vfork (1) yield (1)\nstress-ng: info:  [8692] failed: 0\nstress-ng: info:  [8692] metrics untrustworthy: 0\nstress-ng: info:  [8692] successful run completed in 1.01 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "842": {
+        "avg_ns_per_run": 92.9753368256532,
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 842,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 593111,
+        "run_time_ns_delta": 55144695,
+        "type": "tracepoint"
+      },
+      "843": {
+        "avg_ns_per_run": 135.75827778384877,
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 843,
+        "name": "tracepoint_sched_sched_wakeup_new",
+        "run_cnt_delta": 27453,
+        "run_time_ns_delta": 3726972,
+        "type": "tracepoint"
+      },
+      "844": {
+        "avg_ns_per_run": 139.0055919736062,
+        "bytes_jited": 515,
+        "bytes_xlated": 896,
+        "id": 844,
+        "name": "sched_switch",
+        "run_cnt_delta": 11897946,
+        "run_time_ns_delta": 1653881027,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0235547300000007,
+        "ops_per_sec": 20285828.780254852,
+        "ops_total": 20763656.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [24729] setting to a 1 secs run per stressor\nstress-ng: info:  [24729] dispatching hogs: 1 clone, 1 fork, 1 futex, 1 sem, 1 sem-sysv, 1 switch, 1 vfork, 1 yield\nstress-ng: info:  [24729] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [24729] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [24729]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [24729] clone               839      1.01      0.24      0.88       832.10         752.57\nstress-ng: metrc: [24729] fork               3248      1.00      0.30      0.35      3246.35        4990.14\nstress-ng: metrc: [24729] futex            310174      2.00      0.21      1.09    155071.07      239579.69\nstress-ng: metrc: [24729] sem             2165054      1.00      0.17      0.47   2164984.83     3402257.85\nstress-ng: metrc: [24729] sem-sysv        2628344      1.00      0.23      0.76   2627410.00     2640726.37\nstress-ng: metrc: [24729] switch           305835      1.00      0.13      0.75    305768.37      344734.88\nstress-ng: metrc: [24729] vfork             23136      1.00      0.22      0.23     23135.97       50862.21\nstress-ng: metrc: [24729] yield          15327026      1.01      3.16      6.51  15157651.34     1586443.86\nstress-ng: info:  [24729] skipped: 0\nstress-ng: info:  [24729] passed: 8: clone (1) fork (1) futex (1) sem (1) sem-sysv (1) switch (1) vfork (1) yield (1)\nstress-ng: info:  [24729] failed: 0\nstress-ng: info:  [24729] metrics untrustworthy: 0\nstress-ng: info:  [24729] successful run completed in 1.01 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": false,
+    "changed": false,
+    "enabled_passes": [
+      "map_inline"
+    ],
+    "error": "prog 842: prog 842 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT; prog 843: prog 843 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT; prog 844: prog 844 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+    "exit_code": 1,
+    "output": "{\"changed\": false, \"error_message\": \"prog 842 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 842, \"program\": {\"final_insn_count\": 17, \"insn_delta\": 0, \"orig_insn_count\": 17, \"prog_id\": 842, \"prog_name\": \"sched_wakeup\", \"prog_type\": 5}, \"skipped_maps\": [{\"map_id\": 4244, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}\n{\"changed\": false, \"error_message\": \"prog 843 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 843, \"program\": {\"final_insn_count\": 17, \"insn_delta\": 0, \"orig_insn_count\": 17, \"prog_id\": 843, \"prog_name\": \"sched_wakeup_ne\", \"prog_type\": 5}, \"skipped_maps\": [{\"map_id\": 4244, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}\n{\"changed\": false, \"error_message\": \"prog 844 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 844, \"program\": {\"final_insn_count\": 106, \"insn_delta\": 0, \"orig_insn_count\": 106, \"prog_id\": 844, \"prog_name\": \"sched_switch\", \"prog_type\": 5}, \"skipped_maps\": [{\"map_id\": 4244, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "842": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 842 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 842 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 842, \"program\": {\"final_insn_count\": 17, \"insn_delta\": 0, \"orig_insn_count\": 17, \"prog_id\": 842, \"prog_name\": \"sched_wakeup\", \"prog_type\": 5}, \"skipped_maps\": [{\"map_id\": 4244, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 842,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      },
+      "843": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 843 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 843 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 843, \"program\": {\"final_insn_count\": 17, \"insn_delta\": 0, \"orig_insn_count\": 17, \"prog_id\": 843, \"prog_name\": \"sched_wakeup_ne\", \"prog_type\": 5}, \"skipped_maps\": [{\"map_id\": 4244, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 843,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      },
+      "844": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 844 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 844 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 844, \"program\": {\"final_insn_count\": 106, \"insn_delta\": 0, \"orig_insn_count\": 106, \"prog_id\": 844, \"prog_name\": \"sched_switch\", \"prog_type\": 5}, \"skipped_maps\": [{\"map_id\": 4244, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 844,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 0,
+      "not_applied": 3,
+      "requested": 3
+    }
+  },
+  "runner": "bpftrace",
+  "selected_workload": "stress_ng_scheduler",
+  "status": "ok"
+}

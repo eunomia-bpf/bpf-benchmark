@@ -1,0 +1,10 @@
+{
+  "app": "bcc/syscount",
+  "baseline": null,
+  "error": "stress_ng_os workload failed: /usr/bin/stress-ng: unrecognized option '--ioctl'",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "bcc",
+  "selected_workload": "stress_ng_os",
+  "status": "error"
+}

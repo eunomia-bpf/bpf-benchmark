@@ -1,0 +1,10 @@
+{
+  "app": "cilium/agent",
+  "baseline": null,
+  "error": "network wrk load failed via /usr/bin/wrk -t2 -c10 -d1s http://198.18.0.2:18080/: unable to connect to 198.18.0.2:18080 Connection timed out",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "cilium",
+  "selected_workload": "network",
+  "status": "error"
+}

@@ -1,0 +1,173 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "632": {
+        "avg_ns_per_run": 324.36304295656345,
+        "bytes_jited": 176,
+        "bytes_xlated": 136,
+        "id": 632,
+        "name": "xdp_root",
+        "run_cnt_delta": 41670,
+        "run_time_ns_delta": 13516208,
+        "type": "xdp"
+      },
+      "638": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 638,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "640": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 541,
+        "bytes_xlated": 1000,
+        "id": 640,
+        "name": "healthcheck_encap",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0005523279999693,
+        "ops_per_sec": 6941.166199555545,
+        "ops_total": 6945.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "632": {
+        "avg_ns_per_run": 336.333457822926,
+        "bytes_jited": 176,
+        "bytes_xlated": 136,
+        "id": 632,
+        "name": "xdp_root",
+        "run_cnt_delta": 40164,
+        "run_time_ns_delta": 13508497,
+        "type": "xdp"
+      },
+      "638": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 638,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "640": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 541,
+        "bytes_xlated": 1000,
+        "id": 640,
+        "name": "healthcheck_encap",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0005292420000274,
+        "ops_per_sec": 6690.45912802998,
+        "ops_total": 6694.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": false,
+    "changed": false,
+    "enabled_passes": [
+      "map_inline"
+    ],
+    "error": "prog 632: prog 632 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT; prog 638: prog 638 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT; prog 640: prog 640 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+    "exit_code": 1,
+    "output": "{\"changed\": false, \"error_message\": \"prog 632 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 632, \"program\": {\"final_insn_count\": 17, \"insn_delta\": 0, \"orig_insn_count\": 17, \"prog_id\": 632, \"prog_name\": \"xdp_root\", \"prog_type\": 6}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}\n{\"changed\": false, \"error_message\": \"prog 638 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 638, \"program\": {\"final_insn_count\": 2542, \"insn_delta\": 0, \"orig_insn_count\": 2542, \"prog_id\": 638, \"prog_name\": \"balancer_ingres\", \"prog_type\": 6}, \"skipped_maps\": [{\"map_id\": 3966, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3968, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3969, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3976, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3981, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3972, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3967, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3973, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3971, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3975, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3974, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3979, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}\n{\"changed\": false, \"error_message\": \"prog 640 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 640, \"program\": {\"final_insn_count\": 103, \"insn_delta\": 0, \"orig_insn_count\": 103, \"prog_id\": 640, \"prog_name\": \"healthcheck_enc\", \"prog_type\": 3}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "632": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 632 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 632 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 632, \"program\": {\"final_insn_count\": 17, \"insn_delta\": 0, \"orig_insn_count\": 17, \"prog_id\": 632, \"prog_name\": \"xdp_root\", \"prog_type\": 6}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 632,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      },
+      "638": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 638 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 638 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 638, \"program\": {\"final_insn_count\": 2542, \"insn_delta\": 0, \"orig_insn_count\": 2542, \"prog_id\": 638, \"prog_name\": \"balancer_ingres\", \"prog_type\": 6}, \"skipped_maps\": [{\"map_id\": 3966, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3968, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3969, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3976, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3981, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3972, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3967, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3973, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3971, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3975, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3974, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3979, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 638,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      },
+      "640": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 640 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 640 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 640, \"program\": {\"final_insn_count\": 103, \"insn_delta\": 0, \"orig_insn_count\": 103, \"prog_id\": 640, \"prog_name\": \"healthcheck_enc\", \"prog_type\": 3}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 640,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 0,
+      "not_applied": 3,
+      "requested": 3
+    }
+  },
+  "runner": "katran",
+  "selected_workload": "network",
+  "status": "ok"
+}

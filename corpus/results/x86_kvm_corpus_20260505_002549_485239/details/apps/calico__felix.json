@@ -1,0 +1,10 @@
+{
+  "app": "calico/felix",
+  "baseline": null,
+  "error": "command failed (1): /usr/local/bin/calicoctl apply --allow-version-mismatch -f /var/tmp/calicorunner_dgkwi7tj/wep.yaml\nfailed to apply 'WorkloadEndpoint' resource: [error with field Name = 'virtme-ng-bpfbench-bpfbench-bpfbench1' (the WorkloadEndpoint name does not match the primary identifiers assigned in the Spec: expected name virtme--ng-bpfbench-bpfbench-bpfbench1)]",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "calico",
+  "selected_workload": "network",
+  "status": "error"
+}

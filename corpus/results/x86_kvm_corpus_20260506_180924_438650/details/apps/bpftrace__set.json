@@ -1,0 +1,2547 @@
+{
+  "app": "bpftrace/set",
+  "baseline": {
+    "bpf": {
+      "46": {
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 46,
+        "name": "cap_capable",
+        "run_cnt_delta": 6724927,
+        "run_time_ns_delta": 1030710182,
+        "type": "kprobe"
+      },
+      "52": {
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 52,
+        "name": "1",
+        "run_cnt_delta": 6,
+        "run_time_ns_delta": 8427,
+        "type": "perf_event"
+      },
+      "53": {
+        "bytes_jited": 140,
+        "bytes_xlated": 224,
+        "id": 53,
+        "name": "vfs_create",
+        "run_cnt_delta": 11744376,
+        "run_time_ns_delta": 386509658,
+        "type": "kprobe"
+      },
+      "61": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 61,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 2124577,
+        "run_time_ns_delta": 187002074,
+        "type": "tracepoint"
+      },
+      "62": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 62,
+        "name": "tracepoint_sched_sched_wakeup_new",
+        "run_cnt_delta": 51705,
+        "run_time_ns_delta": 10587644,
+        "type": "tracepoint"
+      },
+      "63": {
+        "bytes_jited": 515,
+        "bytes_xlated": 896,
+        "id": 63,
+        "name": "sched_switch",
+        "run_cnt_delta": 3414201,
+        "run_time_ns_delta": 434768560,
+        "type": "tracepoint"
+      },
+      "68": {
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 68,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 562015,
+        "run_time_ns_delta": 186785403,
+        "type": "kprobe"
+      },
+      "74": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 74,
+        "name": "block_io_start",
+        "run_cnt_delta": 95474,
+        "run_time_ns_delta": 63161427,
+        "type": "tracepoint"
+      },
+      "75": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 75,
+        "name": "block_io_done",
+        "run_cnt_delta": 93582,
+        "run_time_ns_delta": 81498940,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 6.112451421000003,
+        "ops_per_sec": 9833486.413241135,
+        "ops_total": 60106708.0,
+        "stderr": "",
+        "stdout": "stress-ng: metrc: [1694] sock               1561      5.01      0.06      0.75       311.79        1921.58\nstress-ng: metrc: [1694] sockdiag       35240361      5.02      0.14      4.25   7019519.85     8020365.01\nstress-ng: metrc: [1694] sockfd           440974      5.13      0.09      0.92     86008.89      437240.40\nstress-ng: metrc: [1694] sockpair           1508      5.06      0.03      0.11       298.16       10943.32\nstress-ng: metrc: [1694] sockmany          62670      5.04      0.04      1.56     12446.06       39232.31\nstress-ng: metrc: [1694] udp              710671      5.03      0.23      3.83    141161.20      175143.62\nstress-ng: metrc: [1694] udp-flood       1211018      5.01      0.12      1.45    241644.99      770534.34\nstress-ng: metrc: [1694] mmap               3501      5.01      0.10      3.21       698.42        1055.41\nstress-ng: metrc: [1694] mprotect        9205780      5.02      1.77     10.50   1832009.15      750221.09\nstress-ng: metrc: [1694] mremap             3587      5.03      0.04      2.16       713.80        1630.98\nstress-ng: metrc: [1694] madvise              99      5.11      0.19      1.73        19.37          51.67\nstress-ng: metrc: [1694] access            11874      5.14      0.05      0.90      2310.19       12613.08\nstress-ng: metrc: [1694] chdir                27      5.32      0.14      1.28         5.08          18.98\nstress-ng: metrc: [1694] chmod               135      5.23      0.00      0.10        25.82        1322.73\nstress-ng: metrc: [1694] chown                89      5.11      0.00      0.10        17.41         893.67\nstress-ng: metrc: [1694] dentry             8192      5.30      0.01      0.18      1546.90       42592.79\nstress-ng: metrc: [1694] dir               19298      5.30      0.18      1.57      3643.99       11017.00\nstress-ng: metrc: [1694] dirmany           16743      5.14      0.04      0.37      3260.43       40664.21\nstress-ng: metrc: [1694] fallocate             2      5.12      0.02      0.00         0.39         114.50\nstress-ng: metrc: [1694] file-ioctl       104512      5.13      0.16      0.91     20373.49       97331.38\nstress-ng: metrc: [1694] filename           3141      5.16      0.05      0.64       608.58        4549.49\nstress-ng: metrc: [1694] flock           2024123      5.11      0.44      0.34    396085.48     2584651.12\nstress-ng: metrc: [1694] fpunch              299      5.19      0.00      0.76        57.56         393.28\nstress-ng: metrc: [1694] fstat             10182      5.01      0.16      1.13      2033.44        7890.52\nstress-ng: metrc: [1694] getdent          180606      5.02      0.13      2.07     35957.08       81881.41\nstress-ng: metrc: [1694] hdd               15872      5.12      0.32      0.23      3099.04       29028.08\nstress-ng: metrc: [1694] inotify               7      5.11      0.02      0.00         1.37         458.12\nstress-ng: metrc: [1694] open               4096      5.24      0.03      0.06       782.38       42502.41\nstress-ng: metrc: [1694] rename            37722      5.10      0.02      0.28      7395.08      125083.31\nstress-ng: metrc: [1694] touch             52669      5.23      0.01      1.80     10077.15       28990.24\nstress-ng: metrc: [1694] utime             50624      5.09      0.03      0.75      9946.24       64761.58\nstress-ng: metrc: [1694] link                  4      5.12      0.01      0.49         0.78           7.97\nstress-ng: metrc: [1694] symlink               4      5.19      0.01      0.76         0.77           5.20\nstress-ng: metrc: [1694] mknod                11      5.19      0.00      0.00         2.12        3735.14\nstress-ng: metrc: [1694] fcntl             20111      5.06      0.07      0.16      3978.01       88552.97\nstress-ng: info:  [1694] skipped: 0\nstress-ng: info:  [1694] passed: 228: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [1694] failed: 0\nstress-ng: info:  [1694] metrics untrustworthy: 0\nstress-ng: info:  [1694] successful run completed in 6.10 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "46": {
+        "bytes_jited": 700,
+        "bytes_xlated": 1232,
+        "id": 46,
+        "name": "cap_capable",
+        "run_cnt_delta": 5631953,
+        "run_time_ns_delta": 852081171,
+        "type": "kprobe"
+      },
+      "52": {
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 52,
+        "name": "1",
+        "run_cnt_delta": 7,
+        "run_time_ns_delta": 10706,
+        "type": "perf_event"
+      },
+      "53": {
+        "bytes_jited": 143,
+        "bytes_xlated": 240,
+        "id": 53,
+        "name": "vfs_create",
+        "run_cnt_delta": 11025993,
+        "run_time_ns_delta": 383425092,
+        "type": "kprobe"
+      },
+      "61": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 61,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 1570460,
+        "run_time_ns_delta": 150313375,
+        "type": "tracepoint"
+      },
+      "62": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 62,
+        "name": "tracepoint_sched_sched_wakeup_new",
+        "run_cnt_delta": 38895,
+        "run_time_ns_delta": 8704804,
+        "type": "tracepoint"
+      },
+      "63": {
+        "bytes_jited": 596,
+        "bytes_xlated": 1024,
+        "id": 63,
+        "name": "sched_switch",
+        "run_cnt_delta": 2190015,
+        "run_time_ns_delta": 302306082,
+        "type": "tracepoint"
+      },
+      "68": {
+        "bytes_jited": 2016,
+        "bytes_xlated": 3416,
+        "id": 68,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 724453,
+        "run_time_ns_delta": 224561279,
+        "type": "kprobe"
+      },
+      "74": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 74,
+        "name": "block_io_start",
+        "run_cnt_delta": 100835,
+        "run_time_ns_delta": 74670846,
+        "type": "tracepoint"
+      },
+      "75": {
+        "bytes_jited": 890,
+        "bytes_xlated": 1528,
+        "id": 75,
+        "name": "block_io_done",
+        "run_cnt_delta": 97820,
+        "run_time_ns_delta": 84470079,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 6.3067287460000045,
+        "ops_per_sec": 11804878.091073673,
+        "ops_total": 74450164.0,
+        "stderr": "",
+        "stdout": "stress-ng: metrc: [27219] sock               5683      5.01      0.20      2.06      1133.28        2506.89\nstress-ng: metrc: [27219] sockdiag       49946209      5.02      0.10      5.19   9952975.04     9437431.41\nstress-ng: metrc: [27219] sockfd           828094      5.19      0.17      1.64    159671.32      457658.67\nstress-ng: metrc: [27219] sockpair            477      5.06      0.03      0.09        94.25        4098.68\nstress-ng: metrc: [27219] sockmany          80998      5.06      0.07      1.90     16014.20       41199.89\nstress-ng: metrc: [27219] udp              114274      5.01      0.09      1.41     22793.58       76054.89\nstress-ng: metrc: [27219] udp-flood        956885      5.03      0.06      0.97    190421.98      925682.11\nstress-ng: metrc: [27219] mmap               2526      5.02      0.12      2.49       503.07         966.65\nstress-ng: metrc: [27219] mprotect        9695164      5.04      2.16     11.24   1921907.10      723641.75\nstress-ng: metrc: [27219] mremap             3732      5.01      0.04      2.23       744.66        1646.12\nstress-ng: metrc: [27219] madvise              94      5.16      0.19      1.67        18.23          50.61\nstress-ng: metrc: [27219] access            11488      5.35      0.16      0.91      2149.17       10757.87\nstress-ng: metrc: [27219] chdir                15      5.44      0.05      1.07         2.76          13.42\nstress-ng: metrc: [27219] chmod               146      5.40      0.00      0.14        27.02        1057.13\nstress-ng: metrc: [27219] chown               132      5.38      0.00      0.05        24.53        2522.55\nstress-ng: metrc: [27219] dentry             8192      5.33      0.04      0.19      1535.86       35539.67\nstress-ng: metrc: [27219] dir               15594      5.38      0.07      1.50      2899.95        9958.59\nstress-ng: metrc: [27219] dirmany           11004      5.30      0.00      0.26      2075.06       41847.46\nstress-ng: metrc: [27219] fallocate             0      5.28      0.02      0.00         0.00           0.00\nstress-ng: metrc: [27219] file-ioctl        69528      5.15      0.11      0.68     13498.26       88212.57\nstress-ng: metrc: [27219] filename           2391      5.13      0.05      0.51       466.48        4242.90\nstress-ng: metrc: [27219] flock           3361686      5.22      0.69      1.01    643620.47     1973634.66\nstress-ng: metrc: [27219] fpunch              209      5.22      0.01      0.54        40.04         382.36\nstress-ng: metrc: [27219] fstat              7623      5.01      0.18      1.11      1522.57        5900.44\nstress-ng: metrc: [27219] getdent          309023      5.00      0.16      2.77     61772.12      105578.86\nstress-ng: metrc: [27219] hdd               16085      5.19      0.28      0.23      3098.76       31654.85\nstress-ng: metrc: [27219] inotify               9      5.36      0.01      0.01         1.68         412.31\nstress-ng: metrc: [27219] open               4096      5.18      0.01      0.08       791.41       44330.92\nstress-ng: metrc: [27219] rename            68125      5.18      0.05      0.45     13148.45      135699.06\nstress-ng: metrc: [27219] touch             82906      5.18      0.11      1.90     15991.24       41306.03\nstress-ng: metrc: [27219] utime             53594      5.14      0.06      0.80     10431.11       62582.62\nstress-ng: metrc: [27219] link                  8      5.14      0.04      0.87         1.56           8.77\nstress-ng: metrc: [27219] symlink               4      5.13      0.04      1.07         0.78           3.63\nstress-ng: metrc: [27219] mknod                 6      5.11      0.00      0.02         1.17         352.84\nstress-ng: metrc: [27219] fcntl             11297      5.11      0.01      0.15      2208.88       67130.96\nstress-ng: info:  [27219] skipped: 0\nstress-ng: info:  [27219] passed: 228: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [27219] failed: 0\nstress-ng: info:  [27219] metrics untrustworthy: 0\nstress-ng: info:  [27219] successful run completed in 6.29 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "prog 63: kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 13: Permission denied (os error 13)\nverifier log:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (79) r1 = *(u64 *)(r6 +32)\n      2: .1....6... (55) if r1 != 0x0 goto pc+14\n      3: ......6... (85) call bpf_ktime_get_boot_ns#125\n      4: 0.....6... (61) r1 = *(u32 *)(r6 +24)\n      5: 01....6... (67) r1 <<= 32\n      6: 01....6... (c7) r1 s>>= 32\n      7: 01....6... (7b) *(u64 *)(r10 -16) = r1\n      8: 0.....6... (7b) *(u64 *)(r10 -8) = r0\n      9: ......6... (18) r1 = 0xffff8f370a23e800\n     11: .1....6... (bf) r2 = r10\n     12: .12...6... (07) r2 += -16\n     13: .12...6... (bf) r3 = r10\n     14: .123..6... (07) r3 += -8\n     15: .123..6... (b7) r4 = 0\n     16: .1234.6... (85) call bpf_map_update_elem#2\n     17: ......6... (61) r1 = *(u32 *)(r6 +56)\n     18: .1....6... (55) if r1 != 0x0 goto pc+2\n     19: .......... (b7) r0 = 1\n     20: 0......... (95) exit\n     21: ......6... (61) r1 = *(u32 *)(r6 +56)\n     22: .1....6... (67) r1 <<= 32\n     23: .1....6... (c7) r1 s>>= 32\n     24: .1....6... (7b) *(u64 *)(r10 -8) = r1\n     25: ......6... (18) r1 = 0xffff8f370a23e800\n     27: .1....6... (bf) r2 = r10\n     28: .12...6... (07) r2 += -8\n     29: .12...6... (85) call bpf_map_lookup_elem#1\n     30: 0.....6... (55) if r0 != 0x0 goto pc+1\n     31: .......... (05) goto pc-13\n     32: 0.....6... (79) r7 = *(u64 *)(r0 +0)\n     33: ......67.. (15) if r7 == 0x0 goto pc-15\n     34: ......67.. (85) call bpf_ktime_get_boot_ns#125\n     35: 0.....67.. (1f) r0 -= r7\n     36: 0.....6... (b7) r5 = 1\n     37: 0....56... (b7) r1 = 1000\n     38: 01...56... (2d) if r1 > r0 goto pc+60\n     39: 0....56... (b7) r1 = 1\n     40: 01...56... (18) r3 = 0x3e7ffffffff\n     42: 01.3.56... (b7) r2 = 0\n     43: 0123.56... (bd) if r0 <= r3 goto pc+1\n     44: 01...56... (b7) r2 = 1\n     45: 012..56... (b7) r3 = 1\n     46: 0123.56... (b7) r4 = 0\n     47: 0123456... (15) if r2 == 0x0 goto pc+2\n     48: 01.3.56... (bf) r2 = r3\n     49: 01...56... (05) goto pc+1\n     50: 01..456... (bf) r2 = r4\n     51: 01...56... (b7) r2 = 32\n     52: 012..56... (37) r0 /= 1000\n     53: 012..56... (7f) r0 >>= r2\n     54: 012..56... (b7) r3 = 0\n     55: 0123.56... (b5) if r0 <= 0xffff goto pc+1\n     56: 012..56... (b7) r3 = 1\n     57: 0123.56... (b7) r4 = 1\n     58: 0123456... (b7) r7 = 0\n     59: 01234567.. (15) if r3 == 0x0 goto pc+2\n     60: 012.456... (bf) r3 = r4\n     61: 0123.56... (05) goto pc+1\n     62: 012..567.. (bf) r3 = r7\n     63: 0123.56... (67) r3 <<= 4\n     64: 0123.56... (7f) r0 >>= r3\n     65: 0123.56... (b7) r4 = 0\n     66: 0123456... (b5) if r0 <= 0xff goto pc+1\n     67: 0123.56... (b7) r4 = 1\n     68: 0123456... (b7) r7 = 1\n     69: 01234567.. (b7) r8 = 0\n     70: 012345678. (15) if r4 == 0x0 goto pc+2\n     71: 0123.567.. (bf) r4 = r7\n     72: 0123.56... (05) goto pc+1\n     73: 0123.56.8. (bf) r4 = r8\n     74: 0123.56... (b7) r4 = 8\n     75: 0123456... (7f) r0 >>= r4\n     76: 0123456... (b7) r7 = 0\n     77: 01234567.. (b5) if r0 <= 0xf goto pc+1\n     78: 0123456... (b7) r7 = 1\n     79: 01234567.. (b7) r8 = 1\n     80: 012345678. (b7) r9 = 0\n     81: 0123456789 (15) if r7 == 0x0 goto pc+2\n     82: 0123456.8. (bf) r7 = r8\n     83: 0123456... (05) goto pc+1\n     84: 0123456..9 (bf) r7 = r9\n     85: 0123456... (b7) r7 = 0\n     86: 01234567.. (7f) r0 >>= r7\n     87: 01234567.. (25) if r0 > 0x3 goto pc+1\n     88: 01234.67.. (b7) r5 = 0\n     89: 01234567.. (67) r5 <<= 1\n     90: 01234567.. (7f) r0 >>= r5\n     91: 01234.67.. (25) if r0 > 0x1 goto pc+1\n     92: ..234.67.. (b7) r1 = 0\n     93: .1234.67.. (4f) r2 |= r3\n     94: .12.4.67.. (4f) r2 |= r4\n     95: .12...67.. (4f) r2 |= r7\n     96: .1....6... (b7) r5 = 0\n     97: .1...56... (4f) r5 |= r1\n     98: .....56... (07) r5 += 2\n     99: .....56... (7b) *(u64 *)(r10 -16) = r5\n    100: ......6... (18) r1 = 0xffff8f3685be8800\n    102: .1....6... (b7) r2 = 48\n    103: .1....6... (b7) r2 = 52\n    104: .12...6... (85) call bpf_map_lookup_elem#1\n    105: 0.....6... (15) if r0 == 0x0 goto pc+4\n    106: 0.....6... (79) r1 = *(u64 *)(r0 +0)\n    107: 01....6... (07) r1 += 1\n    108: 01....6... (7b) *(u64 *)(r0 +0) = r1\n    109: ......6... (05) goto pc+10\n    110: ......6... (b7) r1 = 1\n    111: .1....6... (7b) *(u64 *)(r10 -8) = r1\n    112: ......6... (18) r1 = 0xffff8f3685be8800\n    114: .1....6... (bf) r2 = r10\n    115: .12...6... (07) r2 += -16\n    116: .12...6... (bf) r3 = r10\n    117: .123..6... (07) r3 += -8\n    118: .123..6... (b7) r4 = 1\n    119: .1234.6... (85) call bpf_map_update_elem#2\n    120: ......6... (61) r1 = *(u32 *)(r6 +56)\n    121: .1........ (67) r1 <<= 32\n    122: .1........ (c7) r1 s>>= 32\n    123: .1........ (7b) *(u64 *)(r10 -8) = r1\n    124: .......... (18) r1 = 0xffff8f370a23e800\n    126: .1........ (bf) r2 = r10\n    127: .12....... (07) r2 += -8\n    128: .12....... (85) call bpf_map_delete_elem#3\n    129: .......... (05) goto pc-111\n0: R1=ctx() R10=fp0\n0: (bf) r6 = r1                       ; R1=ctx() R6=ctx()\n1: (79) r1 = *(u64 *)(r6 +32)         ; R1=scalar() R6=ctx()\n2: (55) if r1 != 0x0 goto pc+14       ; R1=0\n3: (85) call bpf_ktime_get_boot_ns#125        ; R0=scalar()\n4: (61) r1 = *(u32 *)(r6 +24)         ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx()\n5: (67) r1 <<= 32                     ; R1=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n6: (c7) r1 s>>= 32                    ; R1=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n7: (7b) *(u64 *)(r10 -16) = r1        ; R1=scalar(id=1,smin=0xffffffff80000000,smax=0x7fffffff) R10=fp0 fp-16=scalar(id=1,smin=0xffffffff80000000,smax=0x7fffffff)\n8: (7b) *(u64 *)(r10 -8) = r0         ; R0=scalar(id=2) R10=fp0 fp-8=scalar(id=2)\n9: (18) r1 = 0xffff8f370a23e800       ; R1=map_ptr(map=AT_qtime,ks=8,vs=8)\n11: (bf) r2 = r10                     ; R2=fp0 R10=fp0\n12: (07) r2 += -16                    ; R2=fp-16\n13: (bf) r3 = r10                     ; R3=fp0 R10=fp0\n14: (07) r3 += -8                     ; R3=fp-8\n15: (b7) r4 = 0                       ; R4=0\n16: (85) call bpf_map_update_elem#2   ; R0=scalar()\n17: (61) r1 = *(u32 *)(r6 +56)        ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx()\n18: (55) if r1 != 0x0 goto pc+2       ; R1=0\n19: (b7) r0 = 1                       ; R0=1\n20: (95) exit\n(0) frame 0 insn 16 +live -8,-16 \n(0) frame 0 insn 8 +live -16 \n(0) frame 0 insn 8 +written -8 \n(0) frame 0 insn 7 +written -8,-16 \n(0) frame 0 insn 4 +written -8,-16 \n(0) live stack update done in 2 iterations\n\nfrom 18 to 21: R0=scalar() R1=scalar(smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx() R10=fp0 fp-8=scalar() fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n21: R0=scalar() R1=scalar(smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx() R10=fp0 fp-8=scalar() fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n21: (61) r1 = *(u32 *)(r6 +56)        ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx()\n22: (67) r1 <<= 32                    ; R1=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n23: (c7) r1 s>>= 32                   ; R1=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n24: (7b) *(u64 *)(r10 -8) = r1        ; R1=scalar(id=3,smin=0xffffffff80000000,smax=0x7fffffff) R10=fp0 fp-8=scalar(id=3,smin=0xffffffff80000000,smax=0x7fffffff)\n25: (18) r1 = 0xffff8f370a23e800      ; R1=map_ptr(map=AT_qtime,ks=8,vs=8)\n27: (bf) r2 = r10                     ; R2=fp0 R10=fp0\n28: (07) r2 += -8                     ; R2=fp-8\n29: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=4,map=AT_qtime,ks=8,vs=8)\n30: (55) if r0 != 0x0 goto pc+1       ; R0=0\n31: (05) goto pc-13\n19: (b7) r0 = 1                       ; R0=1\n20: (95) exit\n(0) frame 0 insn 29 +live -8 \n(0) frame 0 insn 24 +written -8 \n(0) frame 0 insn 21 +written -8 \n(0) live stack update done in 2 iterations\n\nfrom 30 to 32: R0=map_value(map=AT_qtime,ks=8,vs=8) R6=ctx() R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n32: R0=map_value(map=AT_qtime,ks=8,vs=8) R6=ctx() R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n32: (79) r7 = *(u64 *)(r0 +0)         ; R0=map_value(map=AT_qtime,ks=8,vs=8) R7=scalar()\n33: (15) if r7 == 0x0 goto pc-15      ; R7=scalar(umin=1)\n34: (85) call bpf_ktime_get_boot_ns#125       ; R0=scalar()\n35: (1f) r0 -= r7                     ; R0=scalar() R7=scalar(umin=1)\n36: (b7) r5 = 1                       ; R5=1\n37: (b7) r1 = 1000                    ; R1=1000\n38: (2d) if r1 > r0 goto pc+60        ; R0=scalar(umin=1000) R1=1000\n39: (b7) r1 = 1                       ; R1=1\n40: (18) r3 = 0x3e7ffffffff           ; R3=0x3e7ffffffff\n42: (b7) r2 = 0                       ; R2=0\n43: (bd) if r0 <= r3 goto pc+1        ; R0=scalar(umin=0x3e800000000) R3=0x3e7ffffffff\n44: (b7) r2 = 1                       ; R2=1\n45: (b7) r3 = 1                       ; R3=1\n46: (b7) r4 = 0                       ; R4=0\n47: (15) if r2 == 0x0 goto pc+2\nmark_precise: frame0: last_idx 47 first_idx 47 subseq_idx -1 \nmark_precise: frame0: parent state regs=r2 stack=:  R0=scalar(umin=0x3e800000000) R1=1 R2=P1 R3=1 R4=0 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 46 first_idx 38 subseq_idx 47 \nmark_precise: frame0: regs=r2 stack= before 46: (b7) r4 = 0\nmark_precise: frame0: regs=r2 stack= before 45: (b7) r3 = 1\nmark_precise: frame0: regs=r2 stack= before 44: (b7) r2 = 1\n47: R2=1\n48: (bf) r2 = r3                      ; R2=1 R3=1\n49: (05) goto pc+1\n51: (b7) r2 = 32                      ; R2=32\n52: (37) r0 /= 1000                   ; R0=scalar(smin=umin=0x100000000,smax=umax=0x4189374bc6a7ef,var_off=(0x0; 0x7fffffffffffff))\n53: (7f) r0 >>= r2                    ; R0=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=0x418937,var_off=(0x0; 0x7fffff)) R2=32\n54: (b7) r3 = 0                       ; R3=0\n55: (b5) if r0 <= 0xffff goto pc+1    ; R0=scalar(smin=umin=smin32=umin32=0x10000,smax=umax=smax32=umax32=0x418937,var_off=(0x0; 0x7fffff))\n56: (b7) r3 = 1                       ; R3=1\n57: (b7) r4 = 1                       ; R4=1\n58: (b7) r7 = 0                       ; R7=0\n59: (15) if r3 == 0x0 goto pc+2\nmark_precise: frame0: last_idx 59 first_idx 57 subseq_idx -1 \nmark_precise: frame0: regs=r3 stack= before 58: (b7) r7 = 0\nmark_precise: frame0: regs=r3 stack= before 57: (b7) r4 = 1\nmark_precise: frame0: parent state regs=r3 stack=:  R0=scalar(smin=umin=smin32=umin32=0x10000,smax=umax=smax32=umax32=0x418937,var_off=(0x0; 0x7fffff)) R1=1 R2=32 R3=P1 R4=0 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 56 first_idx 47 subseq_idx 57 \nmark_precise: frame0: regs=r3 stack= before 56: (b7) r3 = 1\n59: R3=1\n60: (bf) r3 = r4                      ; R3=1 R4=1\n61: (05) goto pc+1\n63: (67) r3 <<= 4                     ; R3=16\n64: (7f) r0 >>= r3                    ; R0=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f)) R3=16\n65: (b7) r4 = 0                       ; R4=0\n66: (b5) if r0 <= 0xff goto pc+1\nmark_precise: frame0: last_idx 66 first_idx 66 subseq_idx -1 \nmark_precise: frame0: parent state regs=r0 stack=:  R0=Pscalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f)) R1=1 R2=32 R3=16 R4=0 R5=1 R6=ctx() R7=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 65 first_idx 57 subseq_idx 66 \nmark_precise: frame0: regs=r0 stack= before 65: (b7) r4 = 0\nmark_precise: frame0: regs=r0 stack= before 64: (7f) r0 >>= r3\nmark_precise: frame0: regs=r0,r3 stack= before 63: (67) r3 <<= 4\nmark_precise: frame0: regs=r0,r3 stack= before 61: (05) goto pc+1\nmark_precise: frame0: regs=r0,r3 stack= before 60: (bf) r3 = r4\nmark_precise: frame0: regs=r0,r4 stack= before 59: (15) if r3 == 0x0 goto pc+2\nmark_precise: frame0: regs=r0,r4 stack= before 58: (b7) r7 = 0\nmark_precise: frame0: regs=r0,r4 stack= before 57: (b7) r4 = 1\nmark_precise: frame0: parent state regs=r0 stack=:  R0=Pscalar(smin=umin=smin32=umin32=0x10000,smax=umax=smax32=umax32=0x418937,var_off=(0x0; 0x7fffff)) R1=1 R2=32 R3=P1 R4=0 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 56 first_idx 47 subseq_idx 57 \nmark_precise: frame0: regs=r0 stack= before 56: (b7) r3 = 1\nmark_precise: frame0: regs=r0 stack= before 55: (b5) if r0 <= 0xffff goto pc+1\nmark_precise: frame0: regs=r0 stack= before 54: (b7) r3 = 0\nmark_precise: frame0: regs=r0 stack= before 53: (7f) r0 >>= r2\nmark_precise: frame0: regs=r0,r2 stack= before 52: (37) r0 /= 1000\nmark_precise: frame0: regs=r0,r2 stack= before 51: (b7) r2 = 32\nmark_precise: frame0: regs=r0 stack= before 49: (05) goto pc+1\nmark_precise: frame0: regs=r0 stack= before 48: (bf) r2 = r3\nmark_precise: frame0: regs=r0 stack= before 47: (15) if r2 == 0x0 goto pc+2\nmark_precise: frame0: parent state regs=r0 stack=:  R0=Pscalar(umin=0x3e800000000) R1=1 R2=P1 R3=1 R4=0 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 46 first_idx 38 subseq_idx 47 \nmark_precise: frame0: regs=r0 stack= before 46: (b7) r4 = 0\nmark_precise: frame0: regs=r0 stack= before 45: (b7) r3 = 1\nmark_precise: frame0: regs=r0 stack= before 44: (b7) r2 = 1\nmark_precise: frame0: regs=r0 stack= before 43: (bd) if r0 <= r3 goto pc+1\nmark_precise: frame0: regs=r0,r3 stack= before 42: (b7) r2 = 0\nmark_precise: frame0: regs=r0,r3 stack= before 40: (18) r3 = 0x3e7ffffffff\nmark_precise: frame0: regs=r0 stack= before 39: (b7) r1 = 1\nmark_precise: frame0: regs=r0 stack= before 38: (2d) if r1 > r0 goto pc+60\nmark_precise: frame0: parent state regs=r0,r1 stack=:  R0=Pscalar() R1=P1000 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 37 first_idx 30 subseq_idx 38 \nmark_precise: frame0: regs=r0,r1 stack= before 37: (b7) r1 = 1000\nmark_precise: frame0: regs=r0 stack= before 36: (b7) r5 = 1\nmark_precise: frame0: regs=r0 stack= before 35: (1f) r0 -= r7\nmark_precise: frame0: regs=r0,r7 stack= before 34: (85) call bpf_ktime_get_boot_ns#125\nmark_precise: frame0: regs=r7 stack= before 33: (15) if r7 == 0x0 goto pc-15\nmark_precise: frame0: regs=r7 stack= before 32: (79) r7 = *(u64 *)(r0 +0)\n66: R0=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f))\n68: (b7) r7 = 1                       ; R7=1\n69: (b7) r8 = 0                       ; R8=0\n70: (15) if r4 == 0x0 goto pc+2\nmark_precise: frame0: last_idx 70 first_idx 66 subseq_idx -1 \nmark_precise: frame0: regs=r4 stack= before 69: (b7) r8 = 0\nmark_precise: frame0: regs=r4 stack= before 68: (b7) r7 = 1\nmark_precise: frame0: regs=r4 stack= before 66: (b5) if r0 <= 0xff goto pc+1\nmark_precise: frame0: parent state regs=r4 stack=:  R0=Pscalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f)) R1=1 R2=32 R3=16 R4=P0 R5=1 R6=ctx() R7=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 65 first_idx 57 subseq_idx 66 \nmark_precise: frame0: regs=r4 stack= before 65: (b7) r4 = 0\n70: R4=0\n73: (bf) r4 = r8                      ; R4=0 R8=0\n74: (b7) r4 = 8                       ; R4=8\n75: (7f) r0 >>= r4                    ; R0=0 R4=8\n76: (b7) r7 = 0                       ; R7=0\n77: (b5) if r0 <= 0xf goto pc+1\nmark_precise: frame0: last_idx 77 first_idx 77 subseq_idx -1 \nmark_precise: frame0: parent state regs=r0 stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=1 R6=ctx() R7=0 R8=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 76 first_idx 66 subseq_idx 77 \nmark_precise: frame0: regs=r0 stack= before 76: (b7) r7 = 0\nmark_precise: frame0: regs=r0 stack= before 75: (7f) r0 >>= r4\nmark_precise: frame0: regs=r0,r4 stack= before 74: (b7) r4 = 8\nmark_precise: frame0: regs=r0 stack= before 73: (bf) r4 = r8\nmark_precise: frame0: regs=r0 stack= before 70: (15) if r4 == 0x0 goto pc+2\nmark_precise: frame0: regs=r0 stack= before 69: (b7) r8 = 0\nmark_precise: frame0: regs=r0 stack= before 68: (b7) r7 = 1\nmark_precise: frame0: regs=r0 stack= before 66: (b5) if r0 <= 0xff goto pc+1\nmark_precise: frame0: parent state regs= stack=:  R0=Pscalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f)) R1=1 R2=32 R3=16 R4=P0 R5=1 R6=ctx() R7=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n77: R0=0\n79: (b7) r8 = 1                       ; R8=1\n80: (b7) r9 = 0                       ; R9=0\n81: (15) if r7 == 0x0 goto pc+2\nmark_precise: frame0: last_idx 81 first_idx 77 subseq_idx -1 \nmark_precise: frame0: regs=r7 stack= before 80: (b7) r9 = 0\nmark_precise: frame0: regs=r7 stack= before 79: (b7) r8 = 1\nmark_precise: frame0: regs=r7 stack= before 77: (b5) if r0 <= 0xf goto pc+1\nmark_precise: frame0: parent state regs=r7 stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=1 R6=ctx() R7=P0 R8=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 76 first_idx 66 subseq_idx 77 \nmark_precise: frame0: regs=r7 stack= before 76: (b7) r7 = 0\n81: R7=0\n84: (bf) r7 = r9                      ; R7=0 R9=0\n85: (b7) r7 = 0                       ; R7=0\n86: (7f) r0 >>= r7                    ; R0=0 R7=0\n87: (25) if r0 > 0x3 goto pc+1\nmark_precise: frame0: last_idx 87 first_idx 77 subseq_idx -1 \nmark_precise: frame0: regs=r0 stack= before 86: (7f) r0 >>= r7\nmark_precise: frame0: regs=r0,r7 stack= before 85: (b7) r7 = 0\nmark_precise: frame0: regs=r0 stack= before 84: (bf) r7 = r9\nmark_precise: frame0: regs=r0 stack= before 81: (15) if r7 == 0x0 goto pc+2\nmark_precise: frame0: regs=r0 stack= before 80: (b7) r9 = 0\nmark_precise: frame0: regs=r0 stack= before 79: (b7) r8 = 1\nmark_precise: frame0: regs=r0 stack= before 77: (b5) if r0 <= 0xf goto pc+1\nmark_precise: frame0: parent state regs= stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=1 R6=ctx() R7=P0 R8=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n87: R0=0\n88: (b7) r5 = 0                       ; R5=0\n89: (67) r5 <<= 1                     ; R5=0\n90: (7f) r0 >>= r5                    ; R0=0 R5=0\n91: (25) if r0 > 0x1 goto pc+1\nmark_precise: frame0: last_idx 91 first_idx 89 subseq_idx -1 \nmark_precise: frame0: regs=r0 stack= before 90: (7f) r0 >>= r5\nmark_precise: frame0: regs=r0,r5 stack= before 89: (67) r5 <<= 1\nmark_precise: frame0: parent state regs=r0,r5 stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=P0 R6=ctx() R7=0 R8=1 R9=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 88 first_idx 77 subseq_idx 89 \nmark_precise: frame0: regs=r0,r5 stack= before 88: (b7) r5 = 0\nmark_precise: frame0: regs=r0 stack= before 87: (25) if r0 > 0x3 goto pc+1\nmark_precise: frame0: regs=r0 stack= before 86: (7f) r0 >>= r7\nmark_precise: frame0: regs=r0,r7 stack= before 85: (b7) r7 = 0\nmark_precise: frame0: regs=r0 stack= before 84: (bf) r7 = r9\nmark_precise: frame0: regs=r0 stack= before 81: (15) if r7 == 0x0 goto pc+2\nmark_precise: frame0: regs=r0 stack= before 80: (b7) r9 = 0\nmark_precise: frame0: regs=r0 stack= before 79: (b7) r8 = 1\nmark_precise: frame0: regs=r0 stack= before 77: (b5) if r0 <= 0xf goto pc+1\nmark_precise: frame0: parent state regs= stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=1 R6=ctx() R7=P0 R8=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n91: R0=0\n92: (b7) r1 = 0                       ; R1=0\n93: (4f) r2 |= r3                     ; R2=48 R3=16\n94: (4f) r2 |= r4                     ; R2=56 R4=8\n95: (4f) r2 |= r7                     ; R2=56 R7=0\n96: (b7) r5 = 0                       ; R5=0\n97: (4f) r5 |= r1                     ; R1=0 R5=0\n98: (07) r5 += 2                      ; R5=2\n99: (7b) *(u64 *)(r10 -16) = r5       ; R5=2 R10=fp0 fp-16=2\n100: (18) r1 = 0xffff8f3685be8800     ; R1=map_ptr(map=AT_usecs,ks=8,vs=8)\n102: (b7) r2 = 48                     ; R2=48\n103: (b7) r2 = 52                     ; R2=52\n104: (85) call bpf_map_lookup_elem#1\nR2 type=scalar expected=fp, pkt, pkt_meta, map_key, map_value, mem, ringbuf_mem, buf, trusted_ptr_\nprocessed 95 insns (limit 1000000) max_states_per_insn 0 total_states 8 peak_states 8 mark_read 0",
+    "per_program": {
+      "46": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 156,
+              "insn_delta": -18,
+              "pass": "wide_mem",
+              "sites_applied": 6,
+              "sites_matched": 6,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=19: skip reason: runtime_key_lookup_result_has_no_scalar_loads",
+                "site at PC=52: skip reason: runtime_key_location_unresolved",
+                "site at PC=132: skip reason: runtime_key_lookup_result_has_no_scalar_loads"
+              ],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 3,
+              "sites_skipped": 3,
+              "skip_reasons": {
+                "runtime_key_location_unresolved": 1,
+                "runtime_key_lookup_result_has_no_scalar_loads": 2
+              }
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "dce",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "bounds_check_merge",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass bounds_check_merge --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "skb_load_bytes_spec",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass skb_load_bytes_spec --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 140,
+              "insn_count_before": 138,
+              "insn_delta": 2,
+              "pass": "prefetch",
+              "sites_applied": 1,
+              "sites_matched": 1,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 46,
+        "program": {
+          "final_insn_count": 140,
+          "orig_insn_count": 156,
+          "prog_id": 46,
+          "prog_name": "cap_capable",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "52": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=17: skip reason: runtime_key_lookup_result_has_no_scalar_loads",
+                "site at PC=40: skip reason: runtime_key_lookup_result_has_no_scalar_loads",
+                "site at PC=61: skip reason: runtime_key_lookup_result_has_no_scalar_loads"
+              ],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 3,
+              "sites_skipped": 3,
+              "skip_reasons": {
+                "runtime_key_lookup_result_has_no_scalar_loads": 3
+              }
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "dce",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "bounds_check_merge",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass bounds_check_merge --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "skb_load_bytes_spec",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass skb_load_bytes_spec --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "prefetch",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 52,
+        "program": {
+          "final_insn_count": 67,
+          "orig_insn_count": 67,
+          "prog_id": 52,
+          "prog_name": "1",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "53": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=6: skip reason: map type 5 not inlineable",
+                "site at PC=6: map_type=5, skip reason: unsupported map type"
+              ],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "map type 5 not inlineable": 1
+              }
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "dce",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "bounds_check_merge",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass bounds_check_merge --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "skb_load_bytes_spec",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass skb_load_bytes_spec --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 26,
+              "insn_count_before": 24,
+              "insn_delta": 2,
+              "pass": "prefetch",
+              "sites_applied": 1,
+              "sites_matched": 1,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 53,
+        "program": {
+          "final_insn_count": 26,
+          "orig_insn_count": 24,
+          "prog_id": 53,
+          "prog_name": "vfs_create",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "61": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "dce",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "bounds_check_merge",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass bounds_check_merge --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "skb_load_bytes_spec",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass skb_load_bytes_spec --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "prefetch",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 61,
+        "program": {
+          "final_insn_count": 17,
+          "orig_insn_count": 17,
+          "prog_id": 61,
+          "prog_name": "sched_wakeup",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "62": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "dce",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "bounds_check_merge",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass bounds_check_merge --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "skb_load_bytes_spec",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass skb_load_bytes_spec --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "prefetch",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 62,
+        "program": {
+          "final_insn_count": 17,
+          "orig_insn_count": 17,
+          "prog_id": 62,
+          "prog_name": "sched_wakeup_ne",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "63": {
+        "error": "kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 13: Permission denied (os error 13)\nverifier log:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (79) r1 = *(u64 *)(r6 +32)\n      2: .1....6... (55) if r1 != 0x0 goto pc+14\n      3: ......6... (85) call bpf_ktime_get_boot_ns#125\n      4: 0.....6... (61) r1 = *(u32 *)(r6 +24)\n      5: 01....6... (67) r1 <<= 32\n      6: 01....6... (c7) r1 s>>= 32\n      7: 01....6... (7b) *(u64 *)(r10 -16) = r1\n      8: 0.....6... (7b) *(u64 *)(r10 -8) = r0\n      9: ......6... (18) r1 = 0xffff8f370a23e800\n     11: .1....6... (bf) r2 = r10\n     12: .12...6... (07) r2 += -16\n     13: .12...6... (bf) r3 = r10\n     14: .123..6... (07) r3 += -8\n     15: .123..6... (b7) r4 = 0\n     16: .1234.6... (85) call bpf_map_update_elem#2\n     17: ......6... (61) r1 = *(u32 *)(r6 +56)\n     18: .1....6... (55) if r1 != 0x0 goto pc+2\n     19: .......... (b7) r0 = 1\n     20: 0......... (95) exit\n     21: ......6... (61) r1 = *(u32 *)(r6 +56)\n     22: .1....6... (67) r1 <<= 32\n     23: .1....6... (c7) r1 s>>= 32\n     24: .1....6... (7b) *(u64 *)(r10 -8) = r1\n     25: ......6... (18) r1 = 0xffff8f370a23e800\n     27: .1....6... (bf) r2 = r10\n     28: .12...6... (07) r2 += -8\n     29: .12...6... (85) call bpf_map_lookup_elem#1\n     30: 0.....6... (55) if r0 != 0x0 goto pc+1\n     31: .......... (05) goto pc-13\n     32: 0.....6... (79) r7 = *(u64 *)(r0 +0)\n     33: ......67.. (15) if r7 == 0x0 goto pc-15\n     34: ......67.. (85) call bpf_ktime_get_boot_ns#125\n     35: 0.....67.. (1f) r0 -= r7\n     36: 0.....6... (b7) r5 = 1\n     37: 0....56... (b7) r1 = 1000\n     38: 01...56... (2d) if r1 > r0 goto pc+60\n     39: 0....56... (b7) r1 = 1\n     40: 01...56... (18) r3 = 0x3e7ffffffff\n     42: 01.3.56... (b7) r2 = 0\n     43: 0123.56... (bd) if r0 <= r3 goto pc+1\n     44: 01...56... (b7) r2 = 1\n     45: 012..56... (b7) r3 = 1\n     46: 0123.56... (b7) r4 = 0\n     47: 0123456... (15) if r2 == 0x0 goto pc+2\n     48: 01.3.56... (bf) r2 = r3\n     49: 01...56... (05) goto pc+1\n     50: 01..456... (bf) r2 = r4\n     51: 01...56... (b7) r2 = 32\n     52: 012..56... (37) r0 /= 1000\n     53: 012..56... (7f) r0 >>= r2\n     54: 012..56... (b7) r3 = 0\n     55: 0123.56... (b5) if r0 <= 0xffff goto pc+1\n     56: 012..56... (b7) r3 = 1\n     57: 0123.56... (b7) r4 = 1\n     58: 0123456... (b7) r7 = 0\n     59: 01234567.. (15) if r3 == 0x0 goto pc+2\n     60: 012.456... (bf) r3 = r4\n     61: 0123.56... (05) goto pc+1\n     62: 012..567.. (bf) r3 = r7\n     63: 0123.56... (67) r3 <<= 4\n     64: 0123.56... (7f) r0 >>= r3\n     65: 0123.56... (b7) r4 = 0\n     66: 0123456... (b5) if r0 <= 0xff goto pc+1\n     67: 0123.56... (b7) r4 = 1\n     68: 0123456... (b7) r7 = 1\n     69: 01234567.. (b7) r8 = 0\n     70: 012345678. (15) if r4 == 0x0 goto pc+2\n     71: 0123.567.. (bf) r4 = r7\n     72: 0123.56... (05) goto pc+1\n     73: 0123.56.8. (bf) r4 = r8\n     74: 0123.56... (b7) r4 = 8\n     75: 0123456... (7f) r0 >>= r4\n     76: 0123456... (b7) r7 = 0\n     77: 01234567.. (b5) if r0 <= 0xf goto pc+1\n     78: 0123456... (b7) r7 = 1\n     79: 01234567.. (b7) r8 = 1\n     80: 012345678. (b7) r9 = 0\n     81: 0123456789 (15) if r7 == 0x0 goto pc+2\n     82: 0123456.8. (bf) r7 = r8\n     83: 0123456... (05) goto pc+1\n     84: 0123456..9 (bf) r7 = r9\n     85: 0123456... (b7) r7 = 0\n     86: 01234567.. (7f) r0 >>= r7\n     87: 01234567.. (25) if r0 > 0x3 goto pc+1\n     88: 01234.67.. (b7) r5 = 0\n     89: 01234567.. (67) r5 <<= 1\n     90: 01234567.. (7f) r0 >>= r5\n     91: 01234.67.. (25) if r0 > 0x1 goto pc+1\n     92: ..234.67.. (b7) r1 = 0\n     93: .1234.67.. (4f) r2 |= r3\n     94: .12.4.67.. (4f) r2 |= r4\n     95: .12...67.. (4f) r2 |= r7\n     96: .1....6... (b7) r5 = 0\n     97: .1...56... (4f) r5 |= r1\n     98: .....56... (07) r5 += 2\n     99: .....56... (7b) *(u64 *)(r10 -16) = r5\n    100: ......6... (18) r1 = 0xffff8f3685be8800\n    102: .1....6... (b7) r2 = 48\n    103: .1....6... (b7) r2 = 52\n    104: .12...6... (85) call bpf_map_lookup_elem#1\n    105: 0.....6... (15) if r0 == 0x0 goto pc+4\n    106: 0.....6... (79) r1 = *(u64 *)(r0 +0)\n    107: 01....6... (07) r1 += 1\n    108: 01....6... (7b) *(u64 *)(r0 +0) = r1\n    109: ......6... (05) goto pc+10\n    110: ......6... (b7) r1 = 1\n    111: .1....6... (7b) *(u64 *)(r10 -8) = r1\n    112: ......6... (18) r1 = 0xffff8f3685be8800\n    114: .1....6... (bf) r2 = r10\n    115: .12...6... (07) r2 += -16\n    116: .12...6... (bf) r3 = r10\n    117: .123..6... (07) r3 += -8\n    118: .123..6... (b7) r4 = 1\n    119: .1234.6... (85) call bpf_map_update_elem#2\n    120: ......6... (61) r1 = *(u32 *)(r6 +56)\n    121: .1........ (67) r1 <<= 32\n    122: .1........ (c7) r1 s>>= 32\n    123: .1........ (7b) *(u64 *)(r10 -8) = r1\n    124: .......... (18) r1 = 0xffff8f370a23e800\n    126: .1........ (bf) r2 = r10\n    127: .12....... (07) r2 += -8\n    128: .12....... (85) call bpf_map_delete_elem#3\n    129: .......... (05) goto pc-111\n0: R1=ctx() R10=fp0\n0: (bf) r6 = r1                       ; R1=ctx() R6=ctx()\n1: (79) r1 = *(u64 *)(r6 +32)         ; R1=scalar() R6=ctx()\n2: (55) if r1 != 0x0 goto pc+14       ; R1=0\n3: (85) call bpf_ktime_get_boot_ns#125        ; R0=scalar()\n4: (61) r1 = *(u32 *)(r6 +24)         ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx()\n5: (67) r1 <<= 32                     ; R1=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n6: (c7) r1 s>>= 32                    ; R1=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n7: (7b) *(u64 *)(r10 -16) = r1        ; R1=scalar(id=1,smin=0xffffffff80000000,smax=0x7fffffff) R10=fp0 fp-16=scalar(id=1,smin=0xffffffff80000000,smax=0x7fffffff)\n8: (7b) *(u64 *)(r10 -8) = r0         ; R0=scalar(id=2) R10=fp0 fp-8=scalar(id=2)\n9: (18) r1 = 0xffff8f370a23e800       ; R1=map_ptr(map=AT_qtime,ks=8,vs=8)\n11: (bf) r2 = r10                     ; R2=fp0 R10=fp0\n12: (07) r2 += -16                    ; R2=fp-16\n13: (bf) r3 = r10                     ; R3=fp0 R10=fp0\n14: (07) r3 += -8                     ; R3=fp-8\n15: (b7) r4 = 0                       ; R4=0\n16: (85) call bpf_map_update_elem#2   ; R0=scalar()\n17: (61) r1 = *(u32 *)(r6 +56)        ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx()\n18: (55) if r1 != 0x0 goto pc+2       ; R1=0\n19: (b7) r0 = 1                       ; R0=1\n20: (95) exit\n(0) frame 0 insn 16 +live -8,-16 \n(0) frame 0 insn 8 +live -16 \n(0) frame 0 insn 8 +written -8 \n(0) frame 0 insn 7 +written -8,-16 \n(0) frame 0 insn 4 +written -8,-16 \n(0) live stack update done in 2 iterations\n\nfrom 18 to 21: R0=scalar() R1=scalar(smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx() R10=fp0 fp-8=scalar() fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n21: R0=scalar() R1=scalar(smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx() R10=fp0 fp-8=scalar() fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n21: (61) r1 = *(u32 *)(r6 +56)        ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx()\n22: (67) r1 <<= 32                    ; R1=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n23: (c7) r1 s>>= 32                   ; R1=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n24: (7b) *(u64 *)(r10 -8) = r1        ; R1=scalar(id=3,smin=0xffffffff80000000,smax=0x7fffffff) R10=fp0 fp-8=scalar(id=3,smin=0xffffffff80000000,smax=0x7fffffff)\n25: (18) r1 = 0xffff8f370a23e800      ; R1=map_ptr(map=AT_qtime,ks=8,vs=8)\n27: (bf) r2 = r10                     ; R2=fp0 R10=fp0\n28: (07) r2 += -8                     ; R2=fp-8\n29: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=4,map=AT_qtime,ks=8,vs=8)\n30: (55) if r0 != 0x0 goto pc+1       ; R0=0\n31: (05) goto pc-13\n19: (b7) r0 = 1                       ; R0=1\n20: (95) exit\n(0) frame 0 insn 29 +live -8 \n(0) frame 0 insn 24 +written -8 \n(0) frame 0 insn 21 +written -8 \n(0) live stack update done in 2 iterations\n\nfrom 30 to 32: R0=map_value(map=AT_qtime,ks=8,vs=8) R6=ctx() R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n32: R0=map_value(map=AT_qtime,ks=8,vs=8) R6=ctx() R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n32: (79) r7 = *(u64 *)(r0 +0)         ; R0=map_value(map=AT_qtime,ks=8,vs=8) R7=scalar()\n33: (15) if r7 == 0x0 goto pc-15      ; R7=scalar(umin=1)\n34: (85) call bpf_ktime_get_boot_ns#125       ; R0=scalar()\n35: (1f) r0 -= r7                     ; R0=scalar() R7=scalar(umin=1)\n36: (b7) r5 = 1                       ; R5=1\n37: (b7) r1 = 1000                    ; R1=1000\n38: (2d) if r1 > r0 goto pc+60        ; R0=scalar(umin=1000) R1=1000\n39: (b7) r1 = 1                       ; R1=1\n40: (18) r3 = 0x3e7ffffffff           ; R3=0x3e7ffffffff\n42: (b7) r2 = 0                       ; R2=0\n43: (bd) if r0 <= r3 goto pc+1        ; R0=scalar(umin=0x3e800000000) R3=0x3e7ffffffff\n44: (b7) r2 = 1                       ; R2=1\n45: (b7) r3 = 1                       ; R3=1\n46: (b7) r4 = 0                       ; R4=0\n47: (15) if r2 == 0x0 goto pc+2\nmark_precise: frame0: last_idx 47 first_idx 47 subseq_idx -1 \nmark_precise: frame0: parent state regs=r2 stack=:  R0=scalar(umin=0x3e800000000) R1=1 R2=P1 R3=1 R4=0 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 46 first_idx 38 subseq_idx 47 \nmark_precise: frame0: regs=r2 stack= before 46: (b7) r4 = 0\nmark_precise: frame0: regs=r2 stack= before 45: (b7) r3 = 1\nmark_precise: frame0: regs=r2 stack= before 44: (b7) r2 = 1\n47: R2=1\n48: (bf) r2 = r3                      ; R2=1 R3=1\n49: (05) goto pc+1\n51: (b7) r2 = 32                      ; R2=32\n52: (37) r0 /= 1000                   ; R0=scalar(smin=umin=0x100000000,smax=umax=0x4189374bc6a7ef,var_off=(0x0; 0x7fffffffffffff))\n53: (7f) r0 >>= r2                    ; R0=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=0x418937,var_off=(0x0; 0x7fffff)) R2=32\n54: (b7) r3 = 0                       ; R3=0\n55: (b5) if r0 <= 0xffff goto pc+1    ; R0=scalar(smin=umin=smin32=umin32=0x10000,smax=umax=smax32=umax32=0x418937,var_off=(0x0; 0x7fffff))\n56: (b7) r3 = 1                       ; R3=1\n57: (b7) r4 = 1                       ; R4=1\n58: (b7) r7 = 0                       ; R7=0\n59: (15) if r3 == 0x0 goto pc+2\nmark_precise: frame0: last_idx 59 first_idx 57 subseq_idx -1 \nmark_precise: frame0: regs=r3 stack= before 58: (b7) r7 = 0\nmark_precise: frame0: regs=r3 stack= before 57: (b7) r4 = 1\nmark_precise: frame0: parent state regs=r3 stack=:  R0=scalar(smin=umin=smin32=umin32=0x10000,smax=umax=smax32=umax32=0x418937,var_off=(0x0; 0x7fffff)) R1=1 R2=32 R3=P1 R4=0 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 56 first_idx 47 subseq_idx 57 \nmark_precise: frame0: regs=r3 stack= before 56: (b7) r3 = 1\n59: R3=1\n60: (bf) r3 = r4                      ; R3=1 R4=1\n61: (05) goto pc+1\n63: (67) r3 <<= 4                     ; R3=16\n64: (7f) r0 >>= r3                    ; R0=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f)) R3=16\n65: (b7) r4 = 0                       ; R4=0\n66: (b5) if r0 <= 0xff goto pc+1\nmark_precise: frame0: last_idx 66 first_idx 66 subseq_idx -1 \nmark_precise: frame0: parent state regs=r0 stack=:  R0=Pscalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f)) R1=1 R2=32 R3=16 R4=0 R5=1 R6=ctx() R7=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 65 first_idx 57 subseq_idx 66 \nmark_precise: frame0: regs=r0 stack= before 65: (b7) r4 = 0\nmark_precise: frame0: regs=r0 stack= before 64: (7f) r0 >>= r3\nmark_precise: frame0: regs=r0,r3 stack= before 63: (67) r3 <<= 4\nmark_precise: frame0: regs=r0,r3 stack= before 61: (05) goto pc+1\nmark_precise: frame0: regs=r0,r3 stack= before 60: (bf) r3 = r4\nmark_precise: frame0: regs=r0,r4 stack= before 59: (15) if r3 == 0x0 goto pc+2\nmark_precise: frame0: regs=r0,r4 stack= before 58: (b7) r7 = 0\nmark_precise: frame0: regs=r0,r4 stack= before 57: (b7) r4 = 1\nmark_precise: frame0: parent state regs=r0 stack=:  R0=Pscalar(smin=umin=smin32=umin32=0x10000,smax=umax=smax32=umax32=0x418937,var_off=(0x0; 0x7fffff)) R1=1 R2=32 R3=P1 R4=0 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 56 first_idx 47 subseq_idx 57 \nmark_precise: frame0: regs=r0 stack= before 56: (b7) r3 = 1\nmark_precise: frame0: regs=r0 stack= before 55: (b5) if r0 <= 0xffff goto pc+1\nmark_precise: frame0: regs=r0 stack= before 54: (b7) r3 = 0\nmark_precise: frame0: regs=r0 stack= before 53: (7f) r0 >>= r2\nmark_precise: frame0: regs=r0,r2 stack= before 52: (37) r0 /= 1000\nmark_precise: frame0: regs=r0,r2 stack= before 51: (b7) r2 = 32\nmark_precise: frame0: regs=r0 stack= before 49: (05) goto pc+1\nmark_precise: frame0: regs=r0 stack= before 48: (bf) r2 = r3\nmark_precise: frame0: regs=r0 stack= before 47: (15) if r2 == 0x0 goto pc+2\nmark_precise: frame0: parent state regs=r0 stack=:  R0=Pscalar(umin=0x3e800000000) R1=1 R2=P1 R3=1 R4=0 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 46 first_idx 38 subseq_idx 47 \nmark_precise: frame0: regs=r0 stack= before 46: (b7) r4 = 0\nmark_precise: frame0: regs=r0 stack= before 45: (b7) r3 = 1\nmark_precise: frame0: regs=r0 stack= before 44: (b7) r2 = 1\nmark_precise: frame0: regs=r0 stack= before 43: (bd) if r0 <= r3 goto pc+1\nmark_precise: frame0: regs=r0,r3 stack= before 42: (b7) r2 = 0\nmark_precise: frame0: regs=r0,r3 stack= before 40: (18) r3 = 0x3e7ffffffff\nmark_precise: frame0: regs=r0 stack= before 39: (b7) r1 = 1\nmark_precise: frame0: regs=r0 stack= before 38: (2d) if r1 > r0 goto pc+60\nmark_precise: frame0: parent state regs=r0,r1 stack=:  R0=Pscalar() R1=P1000 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 37 first_idx 30 subseq_idx 38 \nmark_precise: frame0: regs=r0,r1 stack= before 37: (b7) r1 = 1000\nmark_precise: frame0: regs=r0 stack= before 36: (b7) r5 = 1\nmark_precise: frame0: regs=r0 stack= before 35: (1f) r0 -= r7\nmark_precise: frame0: regs=r0,r7 stack= before 34: (85) call bpf_ktime_get_boot_ns#125\nmark_precise: frame0: regs=r7 stack= before 33: (15) if r7 == 0x0 goto pc-15\nmark_precise: frame0: regs=r7 stack= before 32: (79) r7 = *(u64 *)(r0 +0)\n66: R0=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f))\n68: (b7) r7 = 1                       ; R7=1\n69: (b7) r8 = 0                       ; R8=0\n70: (15) if r4 == 0x0 goto pc+2\nmark_precise: frame0: last_idx 70 first_idx 66 subseq_idx -1 \nmark_precise: frame0: regs=r4 stack= before 69: (b7) r8 = 0\nmark_precise: frame0: regs=r4 stack= before 68: (b7) r7 = 1\nmark_precise: frame0: regs=r4 stack= before 66: (b5) if r0 <= 0xff goto pc+1\nmark_precise: frame0: parent state regs=r4 stack=:  R0=Pscalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f)) R1=1 R2=32 R3=16 R4=P0 R5=1 R6=ctx() R7=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 65 first_idx 57 subseq_idx 66 \nmark_precise: frame0: regs=r4 stack= before 65: (b7) r4 = 0\n70: R4=0\n73: (bf) r4 = r8                      ; R4=0 R8=0\n74: (b7) r4 = 8                       ; R4=8\n75: (7f) r0 >>= r4                    ; R0=0 R4=8\n76: (b7) r7 = 0                       ; R7=0\n77: (b5) if r0 <= 0xf goto pc+1\nmark_precise: frame0: last_idx 77 first_idx 77 subseq_idx -1 \nmark_precise: frame0: parent state regs=r0 stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=1 R6=ctx() R7=0 R8=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 76 first_idx 66 subseq_idx 77 \nmark_precise: frame0: regs=r0 stack= before 76: (b7) r7 = 0\nmark_precise: frame0: regs=r0 stack= before 75: (7f) r0 >>= r4\nmark_precise: frame0: regs=r0,r4 stack= before 74: (b7) r4 = 8\nmark_precise: frame0: regs=r0 stack= before 73: (bf) r4 = r8\nmark_precise: frame0: regs=r0 stack= before 70: (15) if r4 == 0x0 goto pc+2\nmark_precise: frame0: regs=r0 stack= before 69: (b7) r8 = 0\nmark_precise: frame0: regs=r0 stack= before 68: (b7) r7 = 1\nmark_precise: frame0: regs=r0 stack= before 66: (b5) if r0 <= 0xff goto pc+1\nmark_precise: frame0: parent state regs= stack=:  R0=Pscalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f)) R1=1 R2=32 R3=16 R4=P0 R5=1 R6=ctx() R7=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n77: R0=0\n79: (b7) r8 = 1                       ; R8=1\n80: (b7) r9 = 0                       ; R9=0\n81: (15) if r7 == 0x0 goto pc+2\nmark_precise: frame0: last_idx 81 first_idx 77 subseq_idx -1 \nmark_precise: frame0: regs=r7 stack= before 80: (b7) r9 = 0\nmark_precise: frame0: regs=r7 stack= before 79: (b7) r8 = 1\nmark_precise: frame0: regs=r7 stack= before 77: (b5) if r0 <= 0xf goto pc+1\nmark_precise: frame0: parent state regs=r7 stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=1 R6=ctx() R7=P0 R8=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 76 first_idx 66 subseq_idx 77 \nmark_precise: frame0: regs=r7 stack= before 76: (b7) r7 = 0\n81: R7=0\n84: (bf) r7 = r9                      ; R7=0 R9=0\n85: (b7) r7 = 0                       ; R7=0\n86: (7f) r0 >>= r7                    ; R0=0 R7=0\n87: (25) if r0 > 0x3 goto pc+1\nmark_precise: frame0: last_idx 87 first_idx 77 subseq_idx -1 \nmark_precise: frame0: regs=r0 stack= before 86: (7f) r0 >>= r7\nmark_precise: frame0: regs=r0,r7 stack= before 85: (b7) r7 = 0\nmark_precise: frame0: regs=r0 stack= before 84: (bf) r7 = r9\nmark_precise: frame0: regs=r0 stack= before 81: (15) if r7 == 0x0 goto pc+2\nmark_precise: frame0: regs=r0 stack= before 80: (b7) r9 = 0\nmark_precise: frame0: regs=r0 stack= before 79: (b7) r8 = 1\nmark_precise: frame0: regs=r0 stack= before 77: (b5) if r0 <= 0xf goto pc+1\nmark_precise: frame0: parent state regs= stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=1 R6=ctx() R7=P0 R8=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n87: R0=0\n88: (b7) r5 = 0                       ; R5=0\n89: (67) r5 <<= 1                     ; R5=0\n90: (7f) r0 >>= r5                    ; R0=0 R5=0\n91: (25) if r0 > 0x1 goto pc+1\nmark_precise: frame0: last_idx 91 first_idx 89 subseq_idx -1 \nmark_precise: frame0: regs=r0 stack= before 90: (7f) r0 >>= r5\nmark_precise: frame0: regs=r0,r5 stack= before 89: (67) r5 <<= 1\nmark_precise: frame0: parent state regs=r0,r5 stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=P0 R6=ctx() R7=0 R8=1 R9=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 88 first_idx 77 subseq_idx 89 \nmark_precise: frame0: regs=r0,r5 stack= before 88: (b7) r5 = 0\nmark_precise: frame0: regs=r0 stack= before 87: (25) if r0 > 0x3 goto pc+1\nmark_precise: frame0: regs=r0 stack= before 86: (7f) r0 >>= r7\nmark_precise: frame0: regs=r0,r7 stack= before 85: (b7) r7 = 0\nmark_precise: frame0: regs=r0 stack= before 84: (bf) r7 = r9\nmark_precise: frame0: regs=r0 stack= before 81: (15) if r7 == 0x0 goto pc+2\nmark_precise: frame0: regs=r0 stack= before 80: (b7) r9 = 0\nmark_precise: frame0: regs=r0 stack= before 79: (b7) r8 = 1\nmark_precise: frame0: regs=r0 stack= before 77: (b5) if r0 <= 0xf goto pc+1\nmark_precise: frame0: parent state regs= stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=1 R6=ctx() R7=P0 R8=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n91: R0=0\n92: (b7) r1 = 0                       ; R1=0\n93: (4f) r2 |= r3                     ; R2=48 R3=16\n94: (4f) r2 |= r4                     ; R2=56 R4=8\n95: (4f) r2 |= r7                     ; R2=56 R7=0\n96: (b7) r5 = 0                       ; R5=0\n97: (4f) r5 |= r1                     ; R1=0 R5=0\n98: (07) r5 += 2                      ; R5=2\n99: (7b) *(u64 *)(r10 -16) = r5       ; R5=2 R10=fp0 fp-16=2\n100: (18) r1 = 0xffff8f3685be8800     ; R1=map_ptr(map=AT_usecs,ks=8,vs=8)\n102: (b7) r2 = 48                     ; R2=48\n103: (b7) r2 = 52                     ; R2=52\n104: (85) call bpf_map_lookup_elem#1\nR2 type=scalar expected=fp, pkt, pkt_meta, map_key, map_value, mem, ringbuf_mem, buf, trusted_ptr_\nprocessed 95 insns (limit 1000000) max_states_per_insn 0 total_states 8 peak_states 8 mark_read 0",
+        "error_message": "kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 13: Permission denied (os error 13)\nverifier log:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (79) r1 = *(u64 *)(r6 +32)\n      2: .1....6... (55) if r1 != 0x0 goto pc+14\n      3: ......6... (85) call bpf_ktime_get_boot_ns#125\n      4: 0.....6... (61) r1 = *(u32 *)(r6 +24)\n      5: 01....6... (67) r1 <<= 32\n      6: 01....6... (c7) r1 s>>= 32\n      7: 01....6... (7b) *(u64 *)(r10 -16) = r1\n      8: 0.....6... (7b) *(u64 *)(r10 -8) = r0\n      9: ......6... (18) r1 = 0xffff8f370a23e800\n     11: .1....6... (bf) r2 = r10\n     12: .12...6... (07) r2 += -16\n     13: .12...6... (bf) r3 = r10\n     14: .123..6... (07) r3 += -8\n     15: .123..6... (b7) r4 = 0\n     16: .1234.6... (85) call bpf_map_update_elem#2\n     17: ......6... (61) r1 = *(u32 *)(r6 +56)\n     18: .1....6... (55) if r1 != 0x0 goto pc+2\n     19: .......... (b7) r0 = 1\n     20: 0......... (95) exit\n     21: ......6... (61) r1 = *(u32 *)(r6 +56)\n     22: .1....6... (67) r1 <<= 32\n     23: .1....6... (c7) r1 s>>= 32\n     24: .1....6... (7b) *(u64 *)(r10 -8) = r1\n     25: ......6... (18) r1 = 0xffff8f370a23e800\n     27: .1....6... (bf) r2 = r10\n     28: .12...6... (07) r2 += -8\n     29: .12...6... (85) call bpf_map_lookup_elem#1\n     30: 0.....6... (55) if r0 != 0x0 goto pc+1\n     31: .......... (05) goto pc-13\n     32: 0.....6... (79) r7 = *(u64 *)(r0 +0)\n     33: ......67.. (15) if r7 == 0x0 goto pc-15\n     34: ......67.. (85) call bpf_ktime_get_boot_ns#125\n     35: 0.....67.. (1f) r0 -= r7\n     36: 0.....6... (b7) r5 = 1\n     37: 0....56... (b7) r1 = 1000\n     38: 01...56... (2d) if r1 > r0 goto pc+60\n     39: 0....56... (b7) r1 = 1\n     40: 01...56... (18) r3 = 0x3e7ffffffff\n     42: 01.3.56... (b7) r2 = 0\n     43: 0123.56... (bd) if r0 <= r3 goto pc+1\n     44: 01...56... (b7) r2 = 1\n     45: 012..56... (b7) r3 = 1\n     46: 0123.56... (b7) r4 = 0\n     47: 0123456... (15) if r2 == 0x0 goto pc+2\n     48: 01.3.56... (bf) r2 = r3\n     49: 01...56... (05) goto pc+1\n     50: 01..456... (bf) r2 = r4\n     51: 01...56... (b7) r2 = 32\n     52: 012..56... (37) r0 /= 1000\n     53: 012..56... (7f) r0 >>= r2\n     54: 012..56... (b7) r3 = 0\n     55: 0123.56... (b5) if r0 <= 0xffff goto pc+1\n     56: 012..56... (b7) r3 = 1\n     57: 0123.56... (b7) r4 = 1\n     58: 0123456... (b7) r7 = 0\n     59: 01234567.. (15) if r3 == 0x0 goto pc+2\n     60: 012.456... (bf) r3 = r4\n     61: 0123.56... (05) goto pc+1\n     62: 012..567.. (bf) r3 = r7\n     63: 0123.56... (67) r3 <<= 4\n     64: 0123.56... (7f) r0 >>= r3\n     65: 0123.56... (b7) r4 = 0\n     66: 0123456... (b5) if r0 <= 0xff goto pc+1\n     67: 0123.56... (b7) r4 = 1\n     68: 0123456... (b7) r7 = 1\n     69: 01234567.. (b7) r8 = 0\n     70: 012345678. (15) if r4 == 0x0 goto pc+2\n     71: 0123.567.. (bf) r4 = r7\n     72: 0123.56... (05) goto pc+1\n     73: 0123.56.8. (bf) r4 = r8\n     74: 0123.56... (b7) r4 = 8\n     75: 0123456... (7f) r0 >>= r4\n     76: 0123456... (b7) r7 = 0\n     77: 01234567.. (b5) if r0 <= 0xf goto pc+1\n     78: 0123456... (b7) r7 = 1\n     79: 01234567.. (b7) r8 = 1\n     80: 012345678. (b7) r9 = 0\n     81: 0123456789 (15) if r7 == 0x0 goto pc+2\n     82: 0123456.8. (bf) r7 = r8\n     83: 0123456... (05) goto pc+1\n     84: 0123456..9 (bf) r7 = r9\n     85: 0123456... (b7) r7 = 0\n     86: 01234567.. (7f) r0 >>= r7\n     87: 01234567.. (25) if r0 > 0x3 goto pc+1\n     88: 01234.67.. (b7) r5 = 0\n     89: 01234567.. (67) r5 <<= 1\n     90: 01234567.. (7f) r0 >>= r5\n     91: 01234.67.. (25) if r0 > 0x1 goto pc+1\n     92: ..234.67.. (b7) r1 = 0\n     93: .1234.67.. (4f) r2 |= r3\n     94: .12.4.67.. (4f) r2 |= r4\n     95: .12...67.. (4f) r2 |= r7\n     96: .1....6... (b7) r5 = 0\n     97: .1...56... (4f) r5 |= r1\n     98: .....56... (07) r5 += 2\n     99: .....56... (7b) *(u64 *)(r10 -16) = r5\n    100: ......6... (18) r1 = 0xffff8f3685be8800\n    102: .1....6... (b7) r2 = 48\n    103: .1....6... (b7) r2 = 52\n    104: .12...6... (85) call bpf_map_lookup_elem#1\n    105: 0.....6... (15) if r0 == 0x0 goto pc+4\n    106: 0.....6... (79) r1 = *(u64 *)(r0 +0)\n    107: 01....6... (07) r1 += 1\n    108: 01....6... (7b) *(u64 *)(r0 +0) = r1\n    109: ......6... (05) goto pc+10\n    110: ......6... (b7) r1 = 1\n    111: .1....6... (7b) *(u64 *)(r10 -8) = r1\n    112: ......6... (18) r1 = 0xffff8f3685be8800\n    114: .1....6... (bf) r2 = r10\n    115: .12...6... (07) r2 += -16\n    116: .12...6... (bf) r3 = r10\n    117: .123..6... (07) r3 += -8\n    118: .123..6... (b7) r4 = 1\n    119: .1234.6... (85) call bpf_map_update_elem#2\n    120: ......6... (61) r1 = *(u32 *)(r6 +56)\n    121: .1........ (67) r1 <<= 32\n    122: .1........ (c7) r1 s>>= 32\n    123: .1........ (7b) *(u64 *)(r10 -8) = r1\n    124: .......... (18) r1 = 0xffff8f370a23e800\n    126: .1........ (bf) r2 = r10\n    127: .12....... (07) r2 += -8\n    128: .12....... (85) call bpf_map_delete_elem#3\n    129: .......... (05) goto pc-111\n0: R1=ctx() R10=fp0\n0: (bf) r6 = r1                       ; R1=ctx() R6=ctx()\n1: (79) r1 = *(u64 *)(r6 +32)         ; R1=scalar() R6=ctx()\n2: (55) if r1 != 0x0 goto pc+14       ; R1=0\n3: (85) call bpf_ktime_get_boot_ns#125        ; R0=scalar()\n4: (61) r1 = *(u32 *)(r6 +24)         ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx()\n5: (67) r1 <<= 32                     ; R1=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n6: (c7) r1 s>>= 32                    ; R1=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n7: (7b) *(u64 *)(r10 -16) = r1        ; R1=scalar(id=1,smin=0xffffffff80000000,smax=0x7fffffff) R10=fp0 fp-16=scalar(id=1,smin=0xffffffff80000000,smax=0x7fffffff)\n8: (7b) *(u64 *)(r10 -8) = r0         ; R0=scalar(id=2) R10=fp0 fp-8=scalar(id=2)\n9: (18) r1 = 0xffff8f370a23e800       ; R1=map_ptr(map=AT_qtime,ks=8,vs=8)\n11: (bf) r2 = r10                     ; R2=fp0 R10=fp0\n12: (07) r2 += -16                    ; R2=fp-16\n13: (bf) r3 = r10                     ; R3=fp0 R10=fp0\n14: (07) r3 += -8                     ; R3=fp-8\n15: (b7) r4 = 0                       ; R4=0\n16: (85) call bpf_map_update_elem#2   ; R0=scalar()\n17: (61) r1 = *(u32 *)(r6 +56)        ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx()\n18: (55) if r1 != 0x0 goto pc+2       ; R1=0\n19: (b7) r0 = 1                       ; R0=1\n20: (95) exit\n(0) frame 0 insn 16 +live -8,-16 \n(0) frame 0 insn 8 +live -16 \n(0) frame 0 insn 8 +written -8 \n(0) frame 0 insn 7 +written -8,-16 \n(0) frame 0 insn 4 +written -8,-16 \n(0) live stack update done in 2 iterations\n\nfrom 18 to 21: R0=scalar() R1=scalar(smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx() R10=fp0 fp-8=scalar() fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n21: R0=scalar() R1=scalar(smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx() R10=fp0 fp-8=scalar() fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n21: (61) r1 = *(u32 *)(r6 +56)        ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx()\n22: (67) r1 <<= 32                    ; R1=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n23: (c7) r1 s>>= 32                   ; R1=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n24: (7b) *(u64 *)(r10 -8) = r1        ; R1=scalar(id=3,smin=0xffffffff80000000,smax=0x7fffffff) R10=fp0 fp-8=scalar(id=3,smin=0xffffffff80000000,smax=0x7fffffff)\n25: (18) r1 = 0xffff8f370a23e800      ; R1=map_ptr(map=AT_qtime,ks=8,vs=8)\n27: (bf) r2 = r10                     ; R2=fp0 R10=fp0\n28: (07) r2 += -8                     ; R2=fp-8\n29: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=4,map=AT_qtime,ks=8,vs=8)\n30: (55) if r0 != 0x0 goto pc+1       ; R0=0\n31: (05) goto pc-13\n19: (b7) r0 = 1                       ; R0=1\n20: (95) exit\n(0) frame 0 insn 29 +live -8 \n(0) frame 0 insn 24 +written -8 \n(0) frame 0 insn 21 +written -8 \n(0) live stack update done in 2 iterations\n\nfrom 30 to 32: R0=map_value(map=AT_qtime,ks=8,vs=8) R6=ctx() R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n32: R0=map_value(map=AT_qtime,ks=8,vs=8) R6=ctx() R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n32: (79) r7 = *(u64 *)(r0 +0)         ; R0=map_value(map=AT_qtime,ks=8,vs=8) R7=scalar()\n33: (15) if r7 == 0x0 goto pc-15      ; R7=scalar(umin=1)\n34: (85) call bpf_ktime_get_boot_ns#125       ; R0=scalar()\n35: (1f) r0 -= r7                     ; R0=scalar() R7=scalar(umin=1)\n36: (b7) r5 = 1                       ; R5=1\n37: (b7) r1 = 1000                    ; R1=1000\n38: (2d) if r1 > r0 goto pc+60        ; R0=scalar(umin=1000) R1=1000\n39: (b7) r1 = 1                       ; R1=1\n40: (18) r3 = 0x3e7ffffffff           ; R3=0x3e7ffffffff\n42: (b7) r2 = 0                       ; R2=0\n43: (bd) if r0 <= r3 goto pc+1        ; R0=scalar(umin=0x3e800000000) R3=0x3e7ffffffff\n44: (b7) r2 = 1                       ; R2=1\n45: (b7) r3 = 1                       ; R3=1\n46: (b7) r4 = 0                       ; R4=0\n47: (15) if r2 == 0x0 goto pc+2\nmark_precise: frame0: last_idx 47 first_idx 47 subseq_idx -1 \nmark_precise: frame0: parent state regs=r2 stack=:  R0=scalar(umin=0x3e800000000) R1=1 R2=P1 R3=1 R4=0 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 46 first_idx 38 subseq_idx 47 \nmark_precise: frame0: regs=r2 stack= before 46: (b7) r4 = 0\nmark_precise: frame0: regs=r2 stack= before 45: (b7) r3 = 1\nmark_precise: frame0: regs=r2 stack= before 44: (b7) r2 = 1\n47: R2=1\n48: (bf) r2 = r3                      ; R2=1 R3=1\n49: (05) goto pc+1\n51: (b7) r2 = 32                      ; R2=32\n52: (37) r0 /= 1000                   ; R0=scalar(smin=umin=0x100000000,smax=umax=0x4189374bc6a7ef,var_off=(0x0; 0x7fffffffffffff))\n53: (7f) r0 >>= r2                    ; R0=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=0x418937,var_off=(0x0; 0x7fffff)) R2=32\n54: (b7) r3 = 0                       ; R3=0\n55: (b5) if r0 <= 0xffff goto pc+1    ; R0=scalar(smin=umin=smin32=umin32=0x10000,smax=umax=smax32=umax32=0x418937,var_off=(0x0; 0x7fffff))\n56: (b7) r3 = 1                       ; R3=1\n57: (b7) r4 = 1                       ; R4=1\n58: (b7) r7 = 0                       ; R7=0\n59: (15) if r3 == 0x0 goto pc+2\nmark_precise: frame0: last_idx 59 first_idx 57 subseq_idx -1 \nmark_precise: frame0: regs=r3 stack= before 58: (b7) r7 = 0\nmark_precise: frame0: regs=r3 stack= before 57: (b7) r4 = 1\nmark_precise: frame0: parent state regs=r3 stack=:  R0=scalar(smin=umin=smin32=umin32=0x10000,smax=umax=smax32=umax32=0x418937,var_off=(0x0; 0x7fffff)) R1=1 R2=32 R3=P1 R4=0 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 56 first_idx 47 subseq_idx 57 \nmark_precise: frame0: regs=r3 stack= before 56: (b7) r3 = 1\n59: R3=1\n60: (bf) r3 = r4                      ; R3=1 R4=1\n61: (05) goto pc+1\n63: (67) r3 <<= 4                     ; R3=16\n64: (7f) r0 >>= r3                    ; R0=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f)) R3=16\n65: (b7) r4 = 0                       ; R4=0\n66: (b5) if r0 <= 0xff goto pc+1\nmark_precise: frame0: last_idx 66 first_idx 66 subseq_idx -1 \nmark_precise: frame0: parent state regs=r0 stack=:  R0=Pscalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f)) R1=1 R2=32 R3=16 R4=0 R5=1 R6=ctx() R7=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 65 first_idx 57 subseq_idx 66 \nmark_precise: frame0: regs=r0 stack= before 65: (b7) r4 = 0\nmark_precise: frame0: regs=r0 stack= before 64: (7f) r0 >>= r3\nmark_precise: frame0: regs=r0,r3 stack= before 63: (67) r3 <<= 4\nmark_precise: frame0: regs=r0,r3 stack= before 61: (05) goto pc+1\nmark_precise: frame0: regs=r0,r3 stack= before 60: (bf) r3 = r4\nmark_precise: frame0: regs=r0,r4 stack= before 59: (15) if r3 == 0x0 goto pc+2\nmark_precise: frame0: regs=r0,r4 stack= before 58: (b7) r7 = 0\nmark_precise: frame0: regs=r0,r4 stack= before 57: (b7) r4 = 1\nmark_precise: frame0: parent state regs=r0 stack=:  R0=Pscalar(smin=umin=smin32=umin32=0x10000,smax=umax=smax32=umax32=0x418937,var_off=(0x0; 0x7fffff)) R1=1 R2=32 R3=P1 R4=0 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 56 first_idx 47 subseq_idx 57 \nmark_precise: frame0: regs=r0 stack= before 56: (b7) r3 = 1\nmark_precise: frame0: regs=r0 stack= before 55: (b5) if r0 <= 0xffff goto pc+1\nmark_precise: frame0: regs=r0 stack= before 54: (b7) r3 = 0\nmark_precise: frame0: regs=r0 stack= before 53: (7f) r0 >>= r2\nmark_precise: frame0: regs=r0,r2 stack= before 52: (37) r0 /= 1000\nmark_precise: frame0: regs=r0,r2 stack= before 51: (b7) r2 = 32\nmark_precise: frame0: regs=r0 stack= before 49: (05) goto pc+1\nmark_precise: frame0: regs=r0 stack= before 48: (bf) r2 = r3\nmark_precise: frame0: regs=r0 stack= before 47: (15) if r2 == 0x0 goto pc+2\nmark_precise: frame0: parent state regs=r0 stack=:  R0=Pscalar(umin=0x3e800000000) R1=1 R2=P1 R3=1 R4=0 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 46 first_idx 38 subseq_idx 47 \nmark_precise: frame0: regs=r0 stack= before 46: (b7) r4 = 0\nmark_precise: frame0: regs=r0 stack= before 45: (b7) r3 = 1\nmark_precise: frame0: regs=r0 stack= before 44: (b7) r2 = 1\nmark_precise: frame0: regs=r0 stack= before 43: (bd) if r0 <= r3 goto pc+1\nmark_precise: frame0: regs=r0,r3 stack= before 42: (b7) r2 = 0\nmark_precise: frame0: regs=r0,r3 stack= before 40: (18) r3 = 0x3e7ffffffff\nmark_precise: frame0: regs=r0 stack= before 39: (b7) r1 = 1\nmark_precise: frame0: regs=r0 stack= before 38: (2d) if r1 > r0 goto pc+60\nmark_precise: frame0: parent state regs=r0,r1 stack=:  R0=Pscalar() R1=P1000 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 37 first_idx 30 subseq_idx 38 \nmark_precise: frame0: regs=r0,r1 stack= before 37: (b7) r1 = 1000\nmark_precise: frame0: regs=r0 stack= before 36: (b7) r5 = 1\nmark_precise: frame0: regs=r0 stack= before 35: (1f) r0 -= r7\nmark_precise: frame0: regs=r0,r7 stack= before 34: (85) call bpf_ktime_get_boot_ns#125\nmark_precise: frame0: regs=r7 stack= before 33: (15) if r7 == 0x0 goto pc-15\nmark_precise: frame0: regs=r7 stack= before 32: (79) r7 = *(u64 *)(r0 +0)\n66: R0=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f))\n68: (b7) r7 = 1                       ; R7=1\n69: (b7) r8 = 0                       ; R8=0\n70: (15) if r4 == 0x0 goto pc+2\nmark_precise: frame0: last_idx 70 first_idx 66 subseq_idx -1 \nmark_precise: frame0: regs=r4 stack= before 69: (b7) r8 = 0\nmark_precise: frame0: regs=r4 stack= before 68: (b7) r7 = 1\nmark_precise: frame0: regs=r4 stack= before 66: (b5) if r0 <= 0xff goto pc+1\nmark_precise: frame0: parent state regs=r4 stack=:  R0=Pscalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f)) R1=1 R2=32 R3=16 R4=P0 R5=1 R6=ctx() R7=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 65 first_idx 57 subseq_idx 66 \nmark_precise: frame0: regs=r4 stack= before 65: (b7) r4 = 0\n70: R4=0\n73: (bf) r4 = r8                      ; R4=0 R8=0\n74: (b7) r4 = 8                       ; R4=8\n75: (7f) r0 >>= r4                    ; R0=0 R4=8\n76: (b7) r7 = 0                       ; R7=0\n77: (b5) if r0 <= 0xf goto pc+1\nmark_precise: frame0: last_idx 77 first_idx 77 subseq_idx -1 \nmark_precise: frame0: parent state regs=r0 stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=1 R6=ctx() R7=0 R8=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 76 first_idx 66 subseq_idx 77 \nmark_precise: frame0: regs=r0 stack= before 76: (b7) r7 = 0\nmark_precise: frame0: regs=r0 stack= before 75: (7f) r0 >>= r4\nmark_precise: frame0: regs=r0,r4 stack= before 74: (b7) r4 = 8\nmark_precise: frame0: regs=r0 stack= before 73: (bf) r4 = r8\nmark_precise: frame0: regs=r0 stack= before 70: (15) if r4 == 0x0 goto pc+2\nmark_precise: frame0: regs=r0 stack= before 69: (b7) r8 = 0\nmark_precise: frame0: regs=r0 stack= before 68: (b7) r7 = 1\nmark_precise: frame0: regs=r0 stack= before 66: (b5) if r0 <= 0xff goto pc+1\nmark_precise: frame0: parent state regs= stack=:  R0=Pscalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f)) R1=1 R2=32 R3=16 R4=P0 R5=1 R6=ctx() R7=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n77: R0=0\n79: (b7) r8 = 1                       ; R8=1\n80: (b7) r9 = 0                       ; R9=0\n81: (15) if r7 == 0x0 goto pc+2\nmark_precise: frame0: last_idx 81 first_idx 77 subseq_idx -1 \nmark_precise: frame0: regs=r7 stack= before 80: (b7) r9 = 0\nmark_precise: frame0: regs=r7 stack= before 79: (b7) r8 = 1\nmark_precise: frame0: regs=r7 stack= before 77: (b5) if r0 <= 0xf goto pc+1\nmark_precise: frame0: parent state regs=r7 stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=1 R6=ctx() R7=P0 R8=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 76 first_idx 66 subseq_idx 77 \nmark_precise: frame0: regs=r7 stack= before 76: (b7) r7 = 0\n81: R7=0\n84: (bf) r7 = r9                      ; R7=0 R9=0\n85: (b7) r7 = 0                       ; R7=0\n86: (7f) r0 >>= r7                    ; R0=0 R7=0\n87: (25) if r0 > 0x3 goto pc+1\nmark_precise: frame0: last_idx 87 first_idx 77 subseq_idx -1 \nmark_precise: frame0: regs=r0 stack= before 86: (7f) r0 >>= r7\nmark_precise: frame0: regs=r0,r7 stack= before 85: (b7) r7 = 0\nmark_precise: frame0: regs=r0 stack= before 84: (bf) r7 = r9\nmark_precise: frame0: regs=r0 stack= before 81: (15) if r7 == 0x0 goto pc+2\nmark_precise: frame0: regs=r0 stack= before 80: (b7) r9 = 0\nmark_precise: frame0: regs=r0 stack= before 79: (b7) r8 = 1\nmark_precise: frame0: regs=r0 stack= before 77: (b5) if r0 <= 0xf goto pc+1\nmark_precise: frame0: parent state regs= stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=1 R6=ctx() R7=P0 R8=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n87: R0=0\n88: (b7) r5 = 0                       ; R5=0\n89: (67) r5 <<= 1                     ; R5=0\n90: (7f) r0 >>= r5                    ; R0=0 R5=0\n91: (25) if r0 > 0x1 goto pc+1\nmark_precise: frame0: last_idx 91 first_idx 89 subseq_idx -1 \nmark_precise: frame0: regs=r0 stack= before 90: (7f) r0 >>= r5\nmark_precise: frame0: regs=r0,r5 stack= before 89: (67) r5 <<= 1\nmark_precise: frame0: parent state regs=r0,r5 stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=P0 R6=ctx() R7=0 R8=1 R9=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 88 first_idx 77 subseq_idx 89 \nmark_precise: frame0: regs=r0,r5 stack= before 88: (b7) r5 = 0\nmark_precise: frame0: regs=r0 stack= before 87: (25) if r0 > 0x3 goto pc+1\nmark_precise: frame0: regs=r0 stack= before 86: (7f) r0 >>= r7\nmark_precise: frame0: regs=r0,r7 stack= before 85: (b7) r7 = 0\nmark_precise: frame0: regs=r0 stack= before 84: (bf) r7 = r9\nmark_precise: frame0: regs=r0 stack= before 81: (15) if r7 == 0x0 goto pc+2\nmark_precise: frame0: regs=r0 stack= before 80: (b7) r9 = 0\nmark_precise: frame0: regs=r0 stack= before 79: (b7) r8 = 1\nmark_precise: frame0: regs=r0 stack= before 77: (b5) if r0 <= 0xf goto pc+1\nmark_precise: frame0: parent state regs= stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=1 R6=ctx() R7=P0 R8=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n91: R0=0\n92: (b7) r1 = 0                       ; R1=0\n93: (4f) r2 |= r3                     ; R2=48 R3=16\n94: (4f) r2 |= r4                     ; R2=56 R4=8\n95: (4f) r2 |= r7                     ; R2=56 R7=0\n96: (b7) r5 = 0                       ; R5=0\n97: (4f) r5 |= r1                     ; R1=0 R5=0\n98: (07) r5 += 2                      ; R5=2\n99: (7b) *(u64 *)(r10 -16) = r5       ; R5=2 R10=fp0 fp-16=2\n100: (18) r1 = 0xffff8f3685be8800     ; R1=map_ptr(map=AT_usecs,ks=8,vs=8)\n102: (b7) r2 = 48                     ; R2=48\n103: (b7) r2 = 52                     ; R2=52\n104: (85) call bpf_map_lookup_elem#1\nR2 type=scalar expected=fp, pkt, pkt_meta, map_key, map_value, mem, ringbuf_mem, buf, trusted_ptr_\nprocessed 95 insns (limit 1000000) max_states_per_insn 0 total_states 8 peak_states 8 mark_read 0",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 106,
+              "insn_count_before": 106,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 106,
+              "insn_count_before": 106,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 122,
+              "insn_count_before": 106,
+              "insn_delta": 16,
+              "pass": "cond_select",
+              "sites_applied": 4,
+              "sites_matched": 4,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 122,
+              "insn_count_before": 122,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 122,
+              "insn_count_before": 122,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=29: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=29: verifier-guided key extraction failed: no verifier states available",
+                "site at PC=96: skip reason: map type 5 not inlineable",
+                "site at PC=96: map_type=5, skip reason: unsupported map type"
+              ],
+              "insn_count_after": 122,
+              "insn_count_before": 122,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 2,
+              "sites_skipped": 2,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 1,
+                "map type 5 not inlineable": 1
+              }
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 122,
+              "insn_count_before": 122,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 6,
+              "sites_matched": 6,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 13: Permission denied (os error 13)\nverifier log:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (79) r1 = *(u64 *)(r6 +32)\n      2: .1....6... (55) if r1 != 0x0 goto pc+14\n      3: ......6... (85) call bpf_ktime_get_boot_ns#125\n      4: 0.....6... (61) r1 = *(u32 *)(r6 +24)\n      5: 01....6... (67) r1 <<= 32\n      6: 01....6... (c7) r1 s>>= 32\n      7: 01....6... (7b) *(u64 *)(r10 -16) = r1\n      8: 0.....6... (7b) *(u64 *)(r10 -8) = r0\n      9: ......6... (18) r1 = 0xffff8f370a23e800\n     11: .1....6... (bf) r2 = r10\n     12: .12...6... (07) r2 += -16\n     13: .12...6... (bf) r3 = r10\n     14: .123..6... (07) r3 += -8\n     15: .123..6... (b7) r4 = 0\n     16: .1234.6... (85) call bpf_map_update_elem#2\n     17: ......6... (61) r1 = *(u32 *)(r6 +56)\n     18: .1....6... (55) if r1 != 0x0 goto pc+2\n     19: .......... (b7) r0 = 1\n     20: 0......... (95) exit\n     21: ......6... (61) r1 = *(u32 *)(r6 +56)\n     22: .1....6... (67) r1 <<= 32\n     23: .1....6... (c7) r1 s>>= 32\n     24: .1....6... (7b) *(u64 *)(r10 -8) = r1\n     25: ......6... (18) r1 = 0xffff8f370a23e800\n     27: .1....6... (bf) r2 = r10\n     28: .12...6... (07) r2 += -8\n     29: .12...6... (85) call bpf_map_lookup_elem#1\n     30: 0.....6... (55) if r0 != 0x0 goto pc+1\n     31: .......... (05) goto pc-13\n     32: 0.....6... (79) r7 = *(u64 *)(r0 +0)\n     33: ......67.. (15) if r7 == 0x0 goto pc-15\n     34: ......67.. (85) call bpf_ktime_get_boot_ns#125\n     35: 0.....67.. (1f) r0 -= r7\n     36: 0.....6... (b7) r5 = 1\n     37: 0....56... (b7) r1 = 1000\n     38: 01...56... (2d) if r1 > r0 goto pc+60\n     39: 0....56... (b7) r1 = 1\n     40: 01...56... (18) r3 = 0x3e7ffffffff\n     42: 01.3.56... (b7) r2 = 0\n     43: 0123.56... (bd) if r0 <= r3 goto pc+1\n     44: 01...56... (b7) r2 = 1\n     45: 012..56... (b7) r3 = 1\n     46: 0123.56... (b7) r4 = 0\n     47: 0123456... (15) if r2 == 0x0 goto pc+2\n     48: 01.3.56... (bf) r2 = r3\n     49: 01...56... (05) goto pc+1\n     50: 01..456... (bf) r2 = r4\n     51: 01...56... (b7) r2 = 32\n     52: 012..56... (37) r0 /= 1000\n     53: 012..56... (7f) r0 >>= r2\n     54: 012..56... (b7) r3 = 0\n     55: 0123.56... (b5) if r0 <= 0xffff goto pc+1\n     56: 012..56... (b7) r3 = 1\n     57: 0123.56... (b7) r4 = 1\n     58: 0123456... (b7) r7 = 0\n     59: 01234567.. (15) if r3 == 0x0 goto pc+2\n     60: 012.456... (bf) r3 = r4\n     61: 0123.56... (05) goto pc+1\n     62: 012..567.. (bf) r3 = r7\n     63: 0123.56... (67) r3 <<= 4\n     64: 0123.56... (7f) r0 >>= r3\n     65: 0123.56... (b7) r4 = 0\n     66: 0123456... (b5) if r0 <= 0xff goto pc+1\n     67: 0123.56... (b7) r4 = 1\n     68: 0123456... (b7) r7 = 1\n     69: 01234567.. (b7) r8 = 0\n     70: 012345678. (15) if r4 == 0x0 goto pc+2\n     71: 0123.567.. (bf) r4 = r7\n     72: 0123.56... (05) goto pc+1\n     73: 0123.56.8. (bf) r4 = r8\n     74: 0123.56... (b7) r4 = 8\n     75: 0123456... (7f) r0 >>= r4\n     76: 0123456... (b7) r7 = 0\n     77: 01234567.. (b5) if r0 <= 0xf goto pc+1\n     78: 0123456... (b7) r7 = 1\n     79: 01234567.. (b7) r8 = 1\n     80: 012345678. (b7) r9 = 0\n     81: 0123456789 (15) if r7 == 0x0 goto pc+2\n     82: 0123456.8. (bf) r7 = r8\n     83: 0123456... (05) goto pc+1\n     84: 0123456..9 (bf) r7 = r9\n     85: 0123456... (b7) r7 = 0\n     86: 01234567.. (7f) r0 >>= r7\n     87: 01234567.. (25) if r0 > 0x3 goto pc+1\n     88: 01234.67.. (b7) r5 = 0\n     89: 01234567.. (67) r5 <<= 1\n     90: 01234567.. (7f) r0 >>= r5\n     91: 01234.67.. (25) if r0 > 0x1 goto pc+1\n     92: ..234.67.. (b7) r1 = 0\n     93: .1234.67.. (4f) r2 |= r3\n     94: .12.4.67.. (4f) r2 |= r4\n     95: .12...67.. (4f) r2 |= r7\n     96: .1....6... (b7) r5 = 0\n     97: .1...56... (4f) r5 |= r1\n     98: .....56... (07) r5 += 2\n     99: .....56... (7b) *(u64 *)(r10 -16) = r5\n    100: ......6... (18) r1 = 0xffff8f3685be8800\n    102: .1....6... (b7) r2 = 48\n    103: .1....6... (b7) r2 = 52\n    104: .12...6... (85) call bpf_map_lookup_elem#1\n    105: 0.....6... (15) if r0 == 0x0 goto pc+4\n    106: 0.....6... (79) r1 = *(u64 *)(r0 +0)\n    107: 01....6... (07) r1 += 1\n    108: 01....6... (7b) *(u64 *)(r0 +0) = r1\n    109: ......6... (05) goto pc+10\n    110: ......6... (b7) r1 = 1\n    111: .1....6... (7b) *(u64 *)(r10 -8) = r1\n    112: ......6... (18) r1 = 0xffff8f3685be8800\n    114: .1....6... (bf) r2 = r10\n    115: .12...6... (07) r2 += -16\n    116: .12...6... (bf) r3 = r10\n    117: .123..6... (07) r3 += -8\n    118: .123..6... (b7) r4 = 1\n    119: .1234.6... (85) call bpf_map_update_elem#2\n    120: ......6... (61) r1 = *(u32 *)(r6 +56)\n    121: .1........ (67) r1 <<= 32\n    122: .1........ (c7) r1 s>>= 32\n    123: .1........ (7b) *(u64 *)(r10 -8) = r1\n    124: .......... (18) r1 = 0xffff8f370a23e800\n    126: .1........ (bf) r2 = r10\n    127: .12....... (07) r2 += -8\n    128: .12....... (85) call bpf_map_delete_elem#3\n    129: .......... (05) goto pc-111\n0: R1=ctx() R10=fp0\n0: (bf) r6 = r1                       ; R1=ctx() R6=ctx()\n1: (79) r1 = *(u64 *)(r6 +32)         ; R1=scalar() R6=ctx()\n2: (55) if r1 != 0x0 goto pc+14       ; R1=0\n3: (85) call bpf_ktime_get_boot_ns#125        ; R0=scalar()\n4: (61) r1 = *(u32 *)(r6 +24)         ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx()\n5: (67) r1 <<= 32                     ; R1=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n6: (c7) r1 s>>= 32                    ; R1=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n7: (7b) *(u64 *)(r10 -16) = r1        ; R1=scalar(id=1,smin=0xffffffff80000000,smax=0x7fffffff) R10=fp0 fp-16=scalar(id=1,smin=0xffffffff80000000,smax=0x7fffffff)\n8: (7b) *(u64 *)(r10 -8) = r0         ; R0=scalar(id=2) R10=fp0 fp-8=scalar(id=2)\n9: (18) r1 = 0xffff8f370a23e800       ; R1=map_ptr(map=AT_qtime,ks=8,vs=8)\n11: (bf) r2 = r10                     ; R2=fp0 R10=fp0\n12: (07) r2 += -16                    ; R2=fp-16\n13: (bf) r3 = r10                     ; R3=fp0 R10=fp0\n14: (07) r3 += -8                     ; R3=fp-8\n15: (b7) r4 = 0                       ; R4=0\n16: (85) call bpf_map_update_elem#2   ; R0=scalar()\n17: (61) r1 = *(u32 *)(r6 +56)        ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx()\n18: (55) if r1 != 0x0 goto pc+2       ; R1=0\n19: (b7) r0 = 1                       ; R0=1\n20: (95) exit\n(0) frame 0 insn 16 +live -8,-16 \n(0) frame 0 insn 8 +live -16 \n(0) frame 0 insn 8 +written -8 \n(0) frame 0 insn 7 +written -8,-16 \n(0) frame 0 insn 4 +written -8,-16 \n(0) live stack update done in 2 iterations\n\nfrom 18 to 21: R0=scalar() R1=scalar(smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx() R10=fp0 fp-8=scalar() fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n21: R0=scalar() R1=scalar(smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx() R10=fp0 fp-8=scalar() fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n21: (61) r1 = *(u32 *)(r6 +56)        ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=ctx()\n22: (67) r1 <<= 32                    ; R1=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n23: (c7) r1 s>>= 32                   ; R1=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n24: (7b) *(u64 *)(r10 -8) = r1        ; R1=scalar(id=3,smin=0xffffffff80000000,smax=0x7fffffff) R10=fp0 fp-8=scalar(id=3,smin=0xffffffff80000000,smax=0x7fffffff)\n25: (18) r1 = 0xffff8f370a23e800      ; R1=map_ptr(map=AT_qtime,ks=8,vs=8)\n27: (bf) r2 = r10                     ; R2=fp0 R10=fp0\n28: (07) r2 += -8                     ; R2=fp-8\n29: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=4,map=AT_qtime,ks=8,vs=8)\n30: (55) if r0 != 0x0 goto pc+1       ; R0=0\n31: (05) goto pc-13\n19: (b7) r0 = 1                       ; R0=1\n20: (95) exit\n(0) frame 0 insn 29 +live -8 \n(0) frame 0 insn 24 +written -8 \n(0) frame 0 insn 21 +written -8 \n(0) live stack update done in 2 iterations\n\nfrom 30 to 32: R0=map_value(map=AT_qtime,ks=8,vs=8) R6=ctx() R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n32: R0=map_value(map=AT_qtime,ks=8,vs=8) R6=ctx() R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n32: (79) r7 = *(u64 *)(r0 +0)         ; R0=map_value(map=AT_qtime,ks=8,vs=8) R7=scalar()\n33: (15) if r7 == 0x0 goto pc-15      ; R7=scalar(umin=1)\n34: (85) call bpf_ktime_get_boot_ns#125       ; R0=scalar()\n35: (1f) r0 -= r7                     ; R0=scalar() R7=scalar(umin=1)\n36: (b7) r5 = 1                       ; R5=1\n37: (b7) r1 = 1000                    ; R1=1000\n38: (2d) if r1 > r0 goto pc+60        ; R0=scalar(umin=1000) R1=1000\n39: (b7) r1 = 1                       ; R1=1\n40: (18) r3 = 0x3e7ffffffff           ; R3=0x3e7ffffffff\n42: (b7) r2 = 0                       ; R2=0\n43: (bd) if r0 <= r3 goto pc+1        ; R0=scalar(umin=0x3e800000000) R3=0x3e7ffffffff\n44: (b7) r2 = 1                       ; R2=1\n45: (b7) r3 = 1                       ; R3=1\n46: (b7) r4 = 0                       ; R4=0\n47: (15) if r2 == 0x0 goto pc+2\nmark_precise: frame0: last_idx 47 first_idx 47 subseq_idx -1 \nmark_precise: frame0: parent state regs=r2 stack=:  R0=scalar(umin=0x3e800000000) R1=1 R2=P1 R3=1 R4=0 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 46 first_idx 38 subseq_idx 47 \nmark_precise: frame0: regs=r2 stack= before 46: (b7) r4 = 0\nmark_precise: frame0: regs=r2 stack= before 45: (b7) r3 = 1\nmark_precise: frame0: regs=r2 stack= before 44: (b7) r2 = 1\n47: R2=1\n48: (bf) r2 = r3                      ; R2=1 R3=1\n49: (05) goto pc+1\n51: (b7) r2 = 32                      ; R2=32\n52: (37) r0 /= 1000                   ; R0=scalar(smin=umin=0x100000000,smax=umax=0x4189374bc6a7ef,var_off=(0x0; 0x7fffffffffffff))\n53: (7f) r0 >>= r2                    ; R0=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=0x418937,var_off=(0x0; 0x7fffff)) R2=32\n54: (b7) r3 = 0                       ; R3=0\n55: (b5) if r0 <= 0xffff goto pc+1    ; R0=scalar(smin=umin=smin32=umin32=0x10000,smax=umax=smax32=umax32=0x418937,var_off=(0x0; 0x7fffff))\n56: (b7) r3 = 1                       ; R3=1\n57: (b7) r4 = 1                       ; R4=1\n58: (b7) r7 = 0                       ; R7=0\n59: (15) if r3 == 0x0 goto pc+2\nmark_precise: frame0: last_idx 59 first_idx 57 subseq_idx -1 \nmark_precise: frame0: regs=r3 stack= before 58: (b7) r7 = 0\nmark_precise: frame0: regs=r3 stack= before 57: (b7) r4 = 1\nmark_precise: frame0: parent state regs=r3 stack=:  R0=scalar(smin=umin=smin32=umin32=0x10000,smax=umax=smax32=umax32=0x418937,var_off=(0x0; 0x7fffff)) R1=1 R2=32 R3=P1 R4=0 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 56 first_idx 47 subseq_idx 57 \nmark_precise: frame0: regs=r3 stack= before 56: (b7) r3 = 1\n59: R3=1\n60: (bf) r3 = r4                      ; R3=1 R4=1\n61: (05) goto pc+1\n63: (67) r3 <<= 4                     ; R3=16\n64: (7f) r0 >>= r3                    ; R0=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f)) R3=16\n65: (b7) r4 = 0                       ; R4=0\n66: (b5) if r0 <= 0xff goto pc+1\nmark_precise: frame0: last_idx 66 first_idx 66 subseq_idx -1 \nmark_precise: frame0: parent state regs=r0 stack=:  R0=Pscalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f)) R1=1 R2=32 R3=16 R4=0 R5=1 R6=ctx() R7=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 65 first_idx 57 subseq_idx 66 \nmark_precise: frame0: regs=r0 stack= before 65: (b7) r4 = 0\nmark_precise: frame0: regs=r0 stack= before 64: (7f) r0 >>= r3\nmark_precise: frame0: regs=r0,r3 stack= before 63: (67) r3 <<= 4\nmark_precise: frame0: regs=r0,r3 stack= before 61: (05) goto pc+1\nmark_precise: frame0: regs=r0,r3 stack= before 60: (bf) r3 = r4\nmark_precise: frame0: regs=r0,r4 stack= before 59: (15) if r3 == 0x0 goto pc+2\nmark_precise: frame0: regs=r0,r4 stack= before 58: (b7) r7 = 0\nmark_precise: frame0: regs=r0,r4 stack= before 57: (b7) r4 = 1\nmark_precise: frame0: parent state regs=r0 stack=:  R0=Pscalar(smin=umin=smin32=umin32=0x10000,smax=umax=smax32=umax32=0x418937,var_off=(0x0; 0x7fffff)) R1=1 R2=32 R3=P1 R4=0 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 56 first_idx 47 subseq_idx 57 \nmark_precise: frame0: regs=r0 stack= before 56: (b7) r3 = 1\nmark_precise: frame0: regs=r0 stack= before 55: (b5) if r0 <= 0xffff goto pc+1\nmark_precise: frame0: regs=r0 stack= before 54: (b7) r3 = 0\nmark_precise: frame0: regs=r0 stack= before 53: (7f) r0 >>= r2\nmark_precise: frame0: regs=r0,r2 stack= before 52: (37) r0 /= 1000\nmark_precise: frame0: regs=r0,r2 stack= before 51: (b7) r2 = 32\nmark_precise: frame0: regs=r0 stack= before 49: (05) goto pc+1\nmark_precise: frame0: regs=r0 stack= before 48: (bf) r2 = r3\nmark_precise: frame0: regs=r0 stack= before 47: (15) if r2 == 0x0 goto pc+2\nmark_precise: frame0: parent state regs=r0 stack=:  R0=Pscalar(umin=0x3e800000000) R1=1 R2=P1 R3=1 R4=0 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 46 first_idx 38 subseq_idx 47 \nmark_precise: frame0: regs=r0 stack= before 46: (b7) r4 = 0\nmark_precise: frame0: regs=r0 stack= before 45: (b7) r3 = 1\nmark_precise: frame0: regs=r0 stack= before 44: (b7) r2 = 1\nmark_precise: frame0: regs=r0 stack= before 43: (bd) if r0 <= r3 goto pc+1\nmark_precise: frame0: regs=r0,r3 stack= before 42: (b7) r2 = 0\nmark_precise: frame0: regs=r0,r3 stack= before 40: (18) r3 = 0x3e7ffffffff\nmark_precise: frame0: regs=r0 stack= before 39: (b7) r1 = 1\nmark_precise: frame0: regs=r0 stack= before 38: (2d) if r1 > r0 goto pc+60\nmark_precise: frame0: parent state regs=r0,r1 stack=:  R0=Pscalar() R1=P1000 R5=1 R6=ctx() R7=scalar(umin=1) R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 37 first_idx 30 subseq_idx 38 \nmark_precise: frame0: regs=r0,r1 stack= before 37: (b7) r1 = 1000\nmark_precise: frame0: regs=r0 stack= before 36: (b7) r5 = 1\nmark_precise: frame0: regs=r0 stack= before 35: (1f) r0 -= r7\nmark_precise: frame0: regs=r0,r7 stack= before 34: (85) call bpf_ktime_get_boot_ns#125\nmark_precise: frame0: regs=r7 stack= before 33: (15) if r7 == 0x0 goto pc-15\nmark_precise: frame0: regs=r7 stack= before 32: (79) r7 = *(u64 *)(r0 +0)\n66: R0=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f))\n68: (b7) r7 = 1                       ; R7=1\n69: (b7) r8 = 0                       ; R8=0\n70: (15) if r4 == 0x0 goto pc+2\nmark_precise: frame0: last_idx 70 first_idx 66 subseq_idx -1 \nmark_precise: frame0: regs=r4 stack= before 69: (b7) r8 = 0\nmark_precise: frame0: regs=r4 stack= before 68: (b7) r7 = 1\nmark_precise: frame0: regs=r4 stack= before 66: (b5) if r0 <= 0xff goto pc+1\nmark_precise: frame0: parent state regs=r4 stack=:  R0=Pscalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f)) R1=1 R2=32 R3=16 R4=P0 R5=1 R6=ctx() R7=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 65 first_idx 57 subseq_idx 66 \nmark_precise: frame0: regs=r4 stack= before 65: (b7) r4 = 0\n70: R4=0\n73: (bf) r4 = r8                      ; R4=0 R8=0\n74: (b7) r4 = 8                       ; R4=8\n75: (7f) r0 >>= r4                    ; R0=0 R4=8\n76: (b7) r7 = 0                       ; R7=0\n77: (b5) if r0 <= 0xf goto pc+1\nmark_precise: frame0: last_idx 77 first_idx 77 subseq_idx -1 \nmark_precise: frame0: parent state regs=r0 stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=1 R6=ctx() R7=0 R8=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 76 first_idx 66 subseq_idx 77 \nmark_precise: frame0: regs=r0 stack= before 76: (b7) r7 = 0\nmark_precise: frame0: regs=r0 stack= before 75: (7f) r0 >>= r4\nmark_precise: frame0: regs=r0,r4 stack= before 74: (b7) r4 = 8\nmark_precise: frame0: regs=r0 stack= before 73: (bf) r4 = r8\nmark_precise: frame0: regs=r0 stack= before 70: (15) if r4 == 0x0 goto pc+2\nmark_precise: frame0: regs=r0 stack= before 69: (b7) r8 = 0\nmark_precise: frame0: regs=r0 stack= before 68: (b7) r7 = 1\nmark_precise: frame0: regs=r0 stack= before 66: (b5) if r0 <= 0xff goto pc+1\nmark_precise: frame0: parent state regs= stack=:  R0=Pscalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=65,var_off=(0x0; 0x7f)) R1=1 R2=32 R3=16 R4=P0 R5=1 R6=ctx() R7=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n77: R0=0\n79: (b7) r8 = 1                       ; R8=1\n80: (b7) r9 = 0                       ; R9=0\n81: (15) if r7 == 0x0 goto pc+2\nmark_precise: frame0: last_idx 81 first_idx 77 subseq_idx -1 \nmark_precise: frame0: regs=r7 stack= before 80: (b7) r9 = 0\nmark_precise: frame0: regs=r7 stack= before 79: (b7) r8 = 1\nmark_precise: frame0: regs=r7 stack= before 77: (b5) if r0 <= 0xf goto pc+1\nmark_precise: frame0: parent state regs=r7 stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=1 R6=ctx() R7=P0 R8=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 76 first_idx 66 subseq_idx 77 \nmark_precise: frame0: regs=r7 stack= before 76: (b7) r7 = 0\n81: R7=0\n84: (bf) r7 = r9                      ; R7=0 R9=0\n85: (b7) r7 = 0                       ; R7=0\n86: (7f) r0 >>= r7                    ; R0=0 R7=0\n87: (25) if r0 > 0x3 goto pc+1\nmark_precise: frame0: last_idx 87 first_idx 77 subseq_idx -1 \nmark_precise: frame0: regs=r0 stack= before 86: (7f) r0 >>= r7\nmark_precise: frame0: regs=r0,r7 stack= before 85: (b7) r7 = 0\nmark_precise: frame0: regs=r0 stack= before 84: (bf) r7 = r9\nmark_precise: frame0: regs=r0 stack= before 81: (15) if r7 == 0x0 goto pc+2\nmark_precise: frame0: regs=r0 stack= before 80: (b7) r9 = 0\nmark_precise: frame0: regs=r0 stack= before 79: (b7) r8 = 1\nmark_precise: frame0: regs=r0 stack= before 77: (b5) if r0 <= 0xf goto pc+1\nmark_precise: frame0: parent state regs= stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=1 R6=ctx() R7=P0 R8=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n87: R0=0\n88: (b7) r5 = 0                       ; R5=0\n89: (67) r5 <<= 1                     ; R5=0\n90: (7f) r0 >>= r5                    ; R0=0 R5=0\n91: (25) if r0 > 0x1 goto pc+1\nmark_precise: frame0: last_idx 91 first_idx 89 subseq_idx -1 \nmark_precise: frame0: regs=r0 stack= before 90: (7f) r0 >>= r5\nmark_precise: frame0: regs=r0,r5 stack= before 89: (67) r5 <<= 1\nmark_precise: frame0: parent state regs=r0,r5 stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=P0 R6=ctx() R7=0 R8=1 R9=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\nmark_precise: frame0: last_idx 88 first_idx 77 subseq_idx 89 \nmark_precise: frame0: regs=r0,r5 stack= before 88: (b7) r5 = 0\nmark_precise: frame0: regs=r0 stack= before 87: (25) if r0 > 0x3 goto pc+1\nmark_precise: frame0: regs=r0 stack= before 86: (7f) r0 >>= r7\nmark_precise: frame0: regs=r0,r7 stack= before 85: (b7) r7 = 0\nmark_precise: frame0: regs=r0 stack= before 84: (bf) r7 = r9\nmark_precise: frame0: regs=r0 stack= before 81: (15) if r7 == 0x0 goto pc+2\nmark_precise: frame0: regs=r0 stack= before 80: (b7) r9 = 0\nmark_precise: frame0: regs=r0 stack= before 79: (b7) r8 = 1\nmark_precise: frame0: regs=r0 stack= before 77: (b5) if r0 <= 0xf goto pc+1\nmark_precise: frame0: parent state regs= stack=:  R0=P0 R1=1 R2=32 R3=16 R4=8 R5=1 R6=ctx() R7=P0 R8=0 R10=fp0 fp-8=scalar(smin=0xffffffff80000000,smax=0x7fffffff) fp-16=scalar(smin=0xffffffff80000000,smax=0x7fffffff)\n91: R0=0\n92: (b7) r1 = 0                       ; R1=0\n93: (4f) r2 |= r3                     ; R2=48 R3=16\n94: (4f) r2 |= r4                     ; R2=56 R4=8\n95: (4f) r2 |= r7                     ; R2=56 R7=0\n96: (b7) r5 = 0                       ; R5=0\n97: (4f) r5 |= r1                     ; R1=0 R5=0\n98: (07) r5 += 2                      ; R5=2\n99: (7b) *(u64 *)(r10 -16) = r5       ; R5=2 R10=fp0 fp-16=2\n100: (18) r1 = 0xffff8f3685be8800     ; R1=map_ptr(map=AT_usecs,ks=8,vs=8)\n102: (b7) r2 = 48                     ; R2=48\n103: (b7) r2 = 52                     ; R2=52\n104: (85) call bpf_map_lookup_elem#1\nR2 type=scalar expected=fp, pkt, pkt_meta, map_key, map_value, mem, ringbuf_mem, buf, trusted_ptr_\nprocessed 95 insns (limit 1000000) max_states_per_insn 0 total_states 8 peak_states 8 mark_read 0",
+            "status": "failed_rejit",
+            "step": {
+              "command": "timeout 600 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "const_prop"
+            }
+          }
+        ],
+        "prog_id": 63,
+        "program": {
+          "final_insn_count": 122,
+          "orig_insn_count": 106,
+          "prog_id": 63,
+          "prog_name": "sched_switch",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "68": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 8,
+              "sites_skipped": 8,
+              "skip_reasons": {
+                "wide load offset -103 is not naturally aligned for width 2": 1,
+                "wide load offset -91 is not naturally aligned for width 2": 1,
+                "wide load offset -95 is not naturally aligned for width 2": 1,
+                "wide load offset -99 is not naturally aligned for width 2": 1,
+                "wide load offset 1 is not naturally aligned for width 2": 1,
+                "wide load offset 13 is not naturally aligned for width 2": 1,
+                "wide load offset 5 is not naturally aligned for width 2": 1,
+                "wide load offset 9 is not naturally aligned for width 2": 1
+              }
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 1,
+              "sites_matched": 1,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=19: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=19: verifier-guided key extraction failed: no verifier states available",
+                "site at PC=75: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=75: verifier-guided key extraction failed: no verifier states available",
+                "site at PC=87: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=87: verifier-guided key extraction failed: no verifier states available",
+                "site at PC=114: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=114: verifier-guided key extraction failed: no verifier states available",
+                "site at PC=122: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=122: verifier-guided key extraction failed: no verifier states available",
+                "site at PC=337: skip reason: runtime_key_lookup_result_has_no_scalar_loads",
+                "site at PC=377: skip reason: runtime_key_lookup_result_has_no_scalar_loads"
+              ],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 7,
+              "sites_skipped": 7,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 5,
+                "runtime_key_lookup_result_has_no_scalar_loads": 2
+              }
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 2,
+              "sites_matched": 2,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "dce",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "bounds_check_merge",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass bounds_check_merge --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "skb_load_bytes_spec",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass skb_load_bytes_spec --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 405,
+              "insn_count_before": 401,
+              "insn_delta": 4,
+              "pass": "prefetch",
+              "sites_applied": 2,
+              "sites_matched": 2,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 68,
+        "program": {
+          "final_insn_count": 405,
+          "orig_insn_count": 401,
+          "prog_id": 68,
+          "prog_name": "tcp_set_state",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "74": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "dce",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "bounds_check_merge",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass bounds_check_merge --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "skb_load_bytes_spec",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass skb_load_bytes_spec --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "prefetch",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 74,
+        "program": {
+          "final_insn_count": 51,
+          "orig_insn_count": 51,
+          "prog_id": 74,
+          "prog_name": "block_io_start",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "75": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 169,
+              "insn_count_before": 181,
+              "insn_delta": -12,
+              "pass": "wide_mem",
+              "sites_applied": 4,
+              "sites_matched": 4,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 169,
+              "insn_count_before": 169,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 169,
+              "insn_count_before": 169,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 169,
+              "insn_count_before": 169,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 169,
+              "insn_count_before": 169,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=9: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=9: verifier-guided key extraction failed: no verifier states available",
+                "site at PC=50: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=50: verifier-guided key extraction failed: no verifier states available",
+                "site at PC=102: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=102: verifier-guided key extraction failed: no verifier states available",
+                "site at PC=116: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=116: verifier-guided key extraction failed: no verifier states available",
+                "site at PC=137: skip reason: runtime_key_lookup_result_has_no_scalar_loads",
+                "site at PC=31: inlined successfully, value=runtime-key entries=1 common_value=0x225f9f7a77",
+                "round 2: site at PC=9: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=9: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=68: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=68: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=120: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=120: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=134: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=134: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=155: skip reason: runtime_key_lookup_result_has_no_scalar_loads"
+              ],
+              "inlined_map_entries": [
+                {
+                  "key_hex": "0000000000000000",
+                  "map_id": 44,
+                  "value_hex": "777a9f5f22000000"
+                }
+              ],
+              "insn_count_after": 187,
+              "insn_count_before": 169,
+              "insn_delta": 18,
+              "pass": "map_inline",
+              "sites_applied": 1,
+              "sites_matched": 6,
+              "sites_skipped": 5,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 4,
+                "runtime_key_lookup_result_has_no_scalar_loads": 1
+              }
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 187,
+              "insn_count_before": 187,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 8,
+              "sites_matched": 8,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "removed 8 dead-def insns",
+                "removed 8 nop insns"
+              ],
+              "insn_count_after": 171,
+              "insn_count_before": 187,
+              "insn_delta": -16,
+              "pass": "dce",
+              "sites_applied": 16,
+              "sites_matched": 16,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 171,
+              "insn_count_before": 171,
+              "insn_delta": 0,
+              "pass": "bounds_check_merge",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass bounds_check_merge --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 171,
+              "insn_count_before": 171,
+              "insn_delta": 0,
+              "pass": "skb_load_bytes_spec",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass skb_load_bytes_spec --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 171,
+              "insn_count_before": 171,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 177,
+              "insn_count_before": 171,
+              "insn_delta": 6,
+              "pass": "prefetch",
+              "sites_applied": 3,
+              "sites_matched": 3,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 600 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 75,
+        "program": {
+          "final_insn_count": 177,
+          "orig_insn_count": 181,
+          "prog_id": 75,
+          "prog_name": "block_io_done",
+          "prog_type": 5
+        },
+        "status": "ok"
+      }
+    },
+    "status": "error"
+  },
+  "runner": "bpftrace_set",
+  "runner_details": {
+    "bpftrace_set": {
+      "tool_startup": [
+        {
+          "command": [
+            "/usr/bin/bpftrace",
+            "-q",
+            "/home/yunwei37/workspace/bpf-benchmark/runner/assets/bpftrace_scripts/capable.bt"
+          ],
+          "pid": 25187,
+          "prog_ids": [
+            46
+          ],
+          "status": "attached",
+          "tool": "capable"
+        },
+        {
+          "command": [
+            "/usr/bin/bpftrace",
+            "-q",
+            "/home/yunwei37/workspace/bpf-benchmark/runner/assets/bpftrace_scripts/biosnoop.bt"
+          ],
+          "pid": 25190,
+          "prog_ids": [
+            74,
+            75
+          ],
+          "status": "attached",
+          "tool": "biosnoop"
+        },
+        {
+          "command": [
+            "/usr/bin/bpftrace",
+            "-q",
+            "/home/yunwei37/workspace/bpf-benchmark/runner/assets/bpftrace_scripts/vfsstat.bt"
+          ],
+          "pid": 25193,
+          "prog_ids": [
+            52,
+            53
+          ],
+          "status": "attached",
+          "tool": "vfsstat"
+        },
+        {
+          "command": [
+            "/usr/bin/bpftrace",
+            "-q",
+            "/home/yunwei37/workspace/bpf-benchmark/runner/assets/bpftrace_scripts/runqlat.bt"
+          ],
+          "pid": 25198,
+          "prog_ids": [
+            61,
+            62,
+            63
+          ],
+          "status": "attached",
+          "tool": "runqlat"
+        },
+        {
+          "command": [
+            "/usr/bin/bpftrace",
+            "-q",
+            "/home/yunwei37/workspace/bpf-benchmark/runner/assets/bpftrace_scripts/tcplife.bt"
+          ],
+          "pid": 25201,
+          "prog_ids": [
+            68
+          ],
+          "status": "attached",
+          "tool": "tcplife"
+        }
+      ]
+    }
+  },
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "ok"
+}

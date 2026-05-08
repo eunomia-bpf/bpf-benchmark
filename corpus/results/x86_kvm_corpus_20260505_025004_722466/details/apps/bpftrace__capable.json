@@ -1,0 +1,98 @@
+{
+  "app": "bpftrace/capable",
+  "baseline": {
+    "bpf": {
+      "666": {
+        "avg_ns_per_run": 155.13150655637315,
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 666,
+        "name": "cap_capable",
+        "run_cnt_delta": 1234524,
+        "run_time_ns_delta": 191513568,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.01653127000003,
+        "ops_per_sec": 1473483.447292237,
+        "ops_total": 1497842.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [15065] setting to a 1 secs run per stressor\nstress-ng: info:  [15065] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [15065] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [15065] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [15065]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [15065] cap             1260786      1.00      0.24      0.76   1260792.01     1261204.72\nstress-ng: metrc: [15065] eventfd          143350      1.00      0.04      0.68    143324.13      200704.53\nstress-ng: metrc: [15065] get                 959      1.00      0.03      0.13       958.07        5777.28\nstress-ng: metrc: [15065] prctl              2984      1.00      0.59      0.38      2983.54        3055.97\nstress-ng: metrc: [15065] set               89763      1.00      0.14      0.83     89750.89       92564.46\nstress-ng: info:  [15065] skipped: 0\nstress-ng: info:  [15065] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [15065] failed: 0\nstress-ng: info:  [15065] metrics untrustworthy: 0\nstress-ng: info:  [15065] successful run completed in 1.00 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "666": {
+        "avg_ns_per_run": 194.70016117650133,
+        "bytes_jited": 697,
+        "bytes_xlated": 1216,
+        "id": 666,
+        "name": "cap_capable",
+        "run_cnt_delta": 1147810,
+        "run_time_ns_delta": 223478792,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0172290259999954,
+        "ops_per_sec": 1498654.6402383202,
+        "ops_total": 1524475.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [21258] setting to a 1 secs run per stressor\nstress-ng: info:  [21258] dispatching hogs: 1 cap, 1 eventfd, 1 get, 1 prctl, 1 set\nstress-ng: info:  [21258] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [21258] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [21258]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [21258] cap             1298694      1.00      0.29      0.71   1298698.03     1299001.86\nstress-ng: metrc: [21258] eventfd          143129      1.00      0.12      0.59    143060.92      201064.26\nstress-ng: metrc: [21258] get                 989      1.00      0.03      0.13       988.85        6319.65\nstress-ng: metrc: [21258] prctl              3485      1.00      0.57      0.41      3483.79        3534.34\nstress-ng: metrc: [21258] set               78178      1.00      0.12      0.85     78119.00       81072.36\nstress-ng: info:  [21258] skipped: 0\nstress-ng: info:  [21258] passed: 5: cap (1) eventfd (1) get (1) prctl (1) set (1)\nstress-ng: info:  [21258] failed: 0\nstress-ng: info:  [21258] metrics untrustworthy: 0\nstress-ng: info:  [21258] successful run completed in 1.00 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": true,
+    "enabled_passes": [
+      "wide_mem"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": true, \"passes\": [{\"changed\": true, \"insn_delta\": -18, \"insns_after\": 138, \"insns_before\": 156, \"pass\": \"wide_mem\", \"sites_applied\": 6}], \"passes_applied\": [\"wide_mem\"], \"prog_id\": 666, \"program\": {\"final_insn_count\": 138, \"insn_delta\": -18, \"orig_insn_count\": 156, \"prog_id\": 666, \"prog_name\": \"cap_capable\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 1, \"total_sites_applied\": 6}}",
+    "per_program": {
+      "666": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": true, \"insn_delta\": -18, \"insns_after\": 138, \"insns_before\": 156, \"pass\": \"wide_mem\", \"sites_applied\": 6}], \"passes_applied\": [\"wide_mem\"], \"prog_id\": 666, \"program\": {\"final_insn_count\": 138, \"insn_delta\": -18, \"orig_insn_count\": 156, \"prog_id\": 666, \"prog_name\": \"cap_capable\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 1, \"total_sites_applied\": 6}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 6,
+            "sites_matched": 6,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 666,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 1,
+          "total_sites_applied": 6
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 1,
+      "not_applied": 0,
+      "requested": 1
+    }
+  },
+  "runner": "bpftrace",
+  "selected_workload": "stress_ng_os",
+  "status": "ok"
+}

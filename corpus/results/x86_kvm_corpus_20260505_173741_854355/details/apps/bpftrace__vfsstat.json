@@ -1,0 +1,181 @@
+{
+  "app": "bpftrace/vfsstat",
+  "baseline": {
+    "bpf": {
+      "672": {
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 672,
+        "name": "1",
+        "run_cnt_delta": 3,
+        "run_time_ns_delta": 6610,
+        "type": "perf_event"
+      },
+      "673": {
+        "bytes_jited": 140,
+        "bytes_xlated": 224,
+        "id": 673,
+        "name": "vfs_create",
+        "run_cnt_delta": 4849149,
+        "run_time_ns_delta": 168874647,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.2896929140001703,
+        "ops_per_sec": 1665598.6267536813,
+        "ops_total": 5479308.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [18317] setting to a 3 secs run per stressor\nstress-ng: info:  [18317] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [18317] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [18390] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [18334] dentry: 427996 dentries allocated\nstress-ng: metrc: [18317] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [18317]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [18317] access            31531      3.05      0.41      3.11     10343.80        8957.11\nstress-ng: metrc: [18317] chdir               256      3.16      0.62      4.83        81.00          47.01\nstress-ng: metrc: [18317] chmod               260      3.08      0.00      0.15        84.34        1714.37\nstress-ng: metrc: [18317] chown               285      3.08      0.01      0.00        92.58       19948.20\nstress-ng: metrc: [18317] dentry            24504      3.09      0.09      0.75      7929.19       29235.54\nstress-ng: metrc: [18317] dir               32323      3.23      0.15      3.12      9997.28        9897.82\nstress-ng: metrc: [18317] dirmany           38410      3.06      0.04      0.89     12551.36       40963.37\nstress-ng: metrc: [18317] fallocate             2      3.07      0.01      0.00         0.65         108.72\nstress-ng: metrc: [18317] file-ioctl       216566      3.04      0.36      2.32     71323.38       80848.84\nstress-ng: metrc: [18317] filename           9173      3.04      0.16      1.77      3022.29        4759.04\nstress-ng: metrc: [18317] flock           3454542      3.03      0.68      0.73   1141423.16     2461038.13\nstress-ng: metrc: [18317] fpunch              673      3.07      0.00      1.76       219.37         381.21\nstress-ng: metrc: [18317] fstat             11406      3.00      0.65      2.30      3801.56        3862.98\nstress-ng: metrc: [18317] getdent         1147726      3.00      0.54      6.86    382508.70      155149.56\nstress-ng: metrc: [18317] hdd               38634      3.06      0.60      0.48     12629.58       35492.81\nstress-ng: metrc: [18317] inotify               8      3.04      0.01      0.01         2.63         415.95\nstress-ng: metrc: [18317] open              13312      3.10      0.04      0.16      4287.63       67218.06\nstress-ng: metrc: [18317] rename           136375      3.03      0.06      0.98     45079.94      131133.46\nstress-ng: metrc: [18317] touch            171764      3.11      0.15      4.34     55258.57       38273.12\nstress-ng: metrc: [18317] utime            124252      3.00      0.11      2.14     41402.66       55288.65\nstress-ng: metrc: [18317] link                  9      3.09      0.13      0.97         2.92           8.20\nstress-ng: metrc: [18317] symlink               5      3.11      0.09      1.29         1.61           3.64\nstress-ng: metrc: [18317] mknod                63      3.10      0.03      0.01        20.33        1541.44\nstress-ng: metrc: [18317] fcntl             27229      3.02      0.01      0.37      9026.65       71238.52\nstress-ng: info:  [18317] skipped: 0\nstress-ng: info:  [18317] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [18317] failed: 0\nstress-ng: info:  [18317] metrics untrustworthy: 0\nstress-ng: info:  [18317] successful run completed in 3.28 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "672": {
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 672,
+        "name": "1",
+        "run_cnt_delta": 4,
+        "run_time_ns_delta": 9455,
+        "type": "perf_event"
+      },
+      "673": {
+        "bytes_jited": 140,
+        "bytes_xlated": 224,
+        "id": 673,
+        "name": "vfs_create",
+        "run_cnt_delta": 4380834,
+        "run_time_ns_delta": 156628133,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 4.083100280000053,
+        "ops_per_sec": 1434826.8713106217,
+        "ops_total": 5858542.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [26554] setting to a 3 secs run per stressor\nstress-ng: info:  [26554] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [26554] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [26628] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [26576] dentry: 453143 dentries allocated\nstress-ng: metrc: [26554] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [26554]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [26554] access            31673      3.03      0.49      2.74     10458.50        9829.22\nstress-ng: metrc: [26554] chdir               253      3.20      0.62      4.90        79.08          45.82\nstress-ng: metrc: [26554] chmod               196      3.05      0.00      0.11        64.25        1721.56\nstress-ng: metrc: [26554] chown               177      3.04      0.00      0.04        58.17        4002.89\nstress-ng: metrc: [26554] dentry            22303      3.10      0.11      0.71      7201.89       27319.12\nstress-ng: metrc: [26554] dir               32768      3.24      0.13      3.14     10123.35        9998.15\nstress-ng: metrc: [26554] dirmany           23217      3.04      0.01      0.54      7629.94       41609.69\nstress-ng: metrc: [26554] fallocate             0      3.06      0.01      0.00         0.00           0.00\nstress-ng: metrc: [26554] file-ioctl       149497      3.01      0.14      1.58     49600.38       86827.56\nstress-ng: metrc: [26554] filename           6928      3.03      0.08      1.42      2290.24        4603.94\nstress-ng: metrc: [26554] flock           4016317      3.04      0.56      0.96   1323243.93     2634628.33\nstress-ng: metrc: [26554] fpunch              744      3.02      0.02      1.73       246.00         425.80\nstress-ng: metrc: [26554] fstat             11990      3.00      0.71      2.68      3995.05        3540.67\nstress-ng: metrc: [26554] getdent          989534      3.01      0.58      6.03    329293.84      149648.64\nstress-ng: metrc: [26554] hdd               35943      3.02      0.61      0.55     11891.00       30803.71\nstress-ng: metrc: [26554] inotify              10      3.30      0.01      0.00         3.03         543.66\nstress-ng: metrc: [26554] open              17707      3.04      0.05      0.24      5818.91       62226.33\nstress-ng: metrc: [26554] rename           137474      3.01      0.12      1.01     45744.93      122027.30\nstress-ng: metrc: [26554] touch            183993      3.06      0.15      4.58     60146.07       38955.84\nstress-ng: metrc: [26554] utime            142117      3.01      0.13      2.50     47223.11       54050.22\nstress-ng: metrc: [26554] link                 11      3.06      0.12      1.33         3.59           7.56\nstress-ng: metrc: [26554] symlink               7      3.14      0.08      1.75         2.23           3.81\nstress-ng: metrc: [26554] mknod                82      3.03      0.01      0.03        27.02        2373.23\nstress-ng: metrc: [26554] fcntl             55601      3.01      0.07      0.60     18454.51       82993.01\nstress-ng: info:  [26554] skipped: 0\nstress-ng: info:  [26554] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [26554] failed: 0\nstress-ng: info:  [26554] metrics untrustworthy: 0\nstress-ng: info:  [26554] successful run completed in 4.07 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "672": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "noop",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=17: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=17: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 17",
+                "site at PC=40: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=40: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 40",
+                "site at PC=61: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=61: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 61"
+              ],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 3,
+              "sites_skipped": 3,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 3
+              }
+            },
+            "error": null,
+            "pass": "map_inline",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 672,
+        "program": {
+          "final_insn_count": 67,
+          "orig_insn_count": 67,
+          "prog_id": 672,
+          "prog_name": "1",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "673": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "noop",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=6: skip reason: map type 5 not inlineable",
+                "site at PC=6: map_type=5, skip reason: unsupported map type"
+              ],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "map type 5 not inlineable": 1
+              }
+            },
+            "error": null,
+            "pass": "map_inline",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 673,
+        "program": {
+          "final_insn_count": 24,
+          "orig_insn_count": 24,
+          "prog_id": 673,
+          "prog_name": "vfs_create",
+          "prog_type": 2
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bpftrace",
+  "selected_workload": "stress_ng_filesystem",
+  "status": "ok"
+}

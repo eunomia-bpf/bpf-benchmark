@@ -1,0 +1,10 @@
+{
+  "app": "cilium/agent",
+  "baseline": null,
+  "error": "BPF stats missing requested program IDs: 142, 145, 153, 156, 164, 169, 170, 172, 183",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "cilium",
+  "selected_workload": "network_lossy_multi",
+  "status": "error"
+}

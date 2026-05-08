@@ -1,0 +1,504 @@
+{
+  "app": "bcc/tcplife",
+  "baseline": {
+    "bpf": {
+      "44": {
+        "avg_ns_per_run": 879.7162614980289,
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 44,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 91320,
+        "run_time_ns_delta": 80335689,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.000833465000028,
+        "ops_per_sec": 303.7468376419563,
+        "ops_total": 304.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0027383269999746,
+        "ops_per_sec": 294.1943995325188,
+        "ops_total": 295.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0003605969999398,
+        "ops_per_sec": 293.8940226971152,
+        "ops_total": 294.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0003195300000698,
+        "ops_per_sec": 297.90481047588787,
+        "ops_total": 298.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0008549619999485,
+        "ops_per_sec": 296.7462931956921,
+        "ops_total": 297.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0014629740001055,
+        "ops_per_sec": 292.5719748076968,
+        "ops_total": 293.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0001581550000083,
+        "ops_per_sec": 287.95445856260363,
+        "ops_total": 288.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0001923089998854,
+        "ops_per_sec": 309.94039567248416,
+        "ops_total": 310.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0000312109998504,
+        "ops_per_sec": 312.9902312619389,
+        "ops_total": 313.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0028974230001495,
+        "ops_per_sec": 300.13039528964384,
+        "ops_total": 301.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0008146659999966,
+        "ops_per_sec": 300.75498513927755,
+        "ops_total": 301.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.002469476999977,
+        "ops_per_sec": 303.251128313413,
+        "ops_total": 304.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.003250468000033,
+        "ops_per_sec": 302.018299183081,
+        "ops_total": 303.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0018045009999241,
+        "ops_per_sec": 304.4506185543911,
+        "ops_total": 305.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0005934769999385,
+        "ops_per_sec": 289.82799375177,
+        "ops_total": 290.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.001664288999791,
+        "ops_per_sec": 290.51649659046666,
+        "ops_total": 291.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0019710389999545,
+        "ops_per_sec": 290.4275559605403,
+        "ops_total": 291.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0021731429999363,
+        "ops_per_sec": 299.3494707930115,
+        "ops_total": 300.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0023866530000305,
+        "ops_per_sec": 305.27142304237236,
+        "ops_total": 306.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0023886149999726,
+        "ops_per_sec": 313.25176214217936,
+        "ops_total": 314.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0013382000001911,
+        "ops_per_sec": 304.5923944576785,
+        "ops_total": 305.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0022058189999825,
+        "ops_per_sec": 304.3287059581574,
+        "ops_total": 305.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0028390540001055,
+        "ops_per_sec": 312.1138918069769,
+        "ops_total": 313.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0027956889998677,
+        "ops_per_sec": 305.14690415670543,
+        "ops_total": 306.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000303152000015,
+        "ops_per_sec": 308.90635442084,
+        "ops_total": 309.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000439488999973,
+        "ops_per_sec": 316.8607431888452,
+        "ops_total": 317.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.001081984999928,
+        "ops_per_sec": 321.65197738527195,
+        "ops_total": 322.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0016819079999095,
+        "ops_per_sec": 313.4727676443452,
+        "ops_total": 314.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000422609999987,
+        "ops_per_sec": 313.8673565164667,
+        "ops_total": 314.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0030343509999966,
+        "ops_per_sec": 316.0410206130628,
+        "ops_total": 317.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "44": {
+        "avg_ns_per_run": 903.3451094091904,
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 44,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 91400,
+        "run_time_ns_delta": 82565743,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0001578830001563,
+        "ops_per_sec": 290.9540632995786,
+        "ops_total": 291.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.002551111999992,
+        "ops_per_sec": 314.19844457765913,
+        "ops_total": 315.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000691002000167,
+        "ops_per_sec": 314.7824846734731,
+        "ops_total": 315.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0006829940000443,
+        "ops_per_sec": 318.7822736197972,
+        "ops_total": 319.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0005092620001506,
+        "ops_per_sec": 302.84577215633453,
+        "ops_total": 303.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0030701620000855,
+        "ops_per_sec": 291.1062566328985,
+        "ops_total": 292.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0050249200000962,
+        "ops_per_sec": 293.52506005519916,
+        "ops_total": 295.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0023530910000318,
+        "ops_per_sec": 285.3285958490559,
+        "ops_total": 286.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0033818329998212,
+        "ops_per_sec": 293.0090921828085,
+        "ops_total": 294.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0006448799999816,
+        "ops_per_sec": 295.80923853825686,
+        "ops_total": 296.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0033020690000285,
+        "ops_per_sec": 306.98631002224244,
+        "ops_total": 308.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0020934040001066,
+        "ops_per_sec": 298.3753797864218,
+        "ops_total": 299.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0006965090001358,
+        "ops_per_sec": 303.7884086392458,
+        "ops_total": 304.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000197923000087,
+        "ops_per_sec": 295.94142638503985,
+        "ops_total": 296.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0003300979999494,
+        "ops_per_sec": 307.89836336606515,
+        "ops_total": 308.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.002678516999822,
+        "ops_per_sec": 310.1692065075482,
+        "ops_total": 311.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0024164509998172,
+        "ops_per_sec": 305.2623484927781,
+        "ops_total": 306.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0030405059999339,
+        "ops_per_sec": 291.1148635108254,
+        "ops_total": 292.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0024389940001583,
+        "ops_per_sec": 309.24575146759605,
+        "ops_total": 310.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0029080159999921,
+        "ops_per_sec": 287.16491981853125,
+        "ops_total": 288.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0014463969998815,
+        "ops_per_sec": 304.5594860730585,
+        "ops_total": 305.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0034233559999848,
+        "ops_per_sec": 314.92191018922705,
+        "ops_total": 316.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0006251140000586,
+        "ops_per_sec": 307.8075851691865,
+        "ops_total": 308.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.002302200000031,
+        "ops_per_sec": 311.28336344067725,
+        "ops_total": 312.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.001863080000021,
+        "ops_per_sec": 307.4272384605624,
+        "ops_total": 308.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0003235589999804,
+        "ops_per_sec": 314.8981118818238,
+        "ops_total": 315.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0029088270000557,
+        "ops_per_sec": 298.13278331030523,
+        "ops_total": 299.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0002948009998818,
+        "ops_per_sec": 313.90745976699037,
+        "ops_total": 314.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0025866149999274,
+        "ops_per_sec": 315.18473842783436,
+        "ops_total": 316.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.003124451000076,
+        "ops_per_sec": 306.0437812017571,
+        "ops_total": 307.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": false,
+    "enabled_passes": [
+      "wide_mem"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 205, \"insns_before\": 205, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 44, \"program\": {\"final_insn_count\": 205, \"insn_delta\": 0, \"orig_insn_count\": 205, \"prog_id\": 44, \"prog_name\": \"sock__inet_sock\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "44": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 205, \"insns_before\": 205, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 44, \"program\": {\"final_insn_count\": 205, \"insn_delta\": 0, \"orig_insn_count\": 205, \"prog_id\": 44, \"prog_name\": \"sock__inet_sock\", \"prog_type\": 5}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 44,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 1,
+      "not_applied": 0,
+      "requested": 1
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "tcp_connect",
+  "status": "ok"
+}

@@ -1,0 +1,1614 @@
+{
+  "app": "bpftrace/set",
+  "baseline": {
+    "bpf": {
+      "718": {
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 718,
+        "name": "1",
+        "run_cnt_delta": 19,
+        "run_time_ns_delta": 39580,
+        "type": "perf_event"
+      },
+      "719": {
+        "bytes_jited": 140,
+        "bytes_xlated": 224,
+        "id": 719,
+        "name": "vfs_create",
+        "run_cnt_delta": 31554552,
+        "run_time_ns_delta": 1092805386,
+        "type": "kprobe"
+      },
+      "725": {
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 725,
+        "name": "cap_capable",
+        "run_cnt_delta": 14900338,
+        "run_time_ns_delta": 2120433463,
+        "type": "kprobe"
+      },
+      "731": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 731,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 4574867,
+        "run_time_ns_delta": 433995841,
+        "type": "tracepoint"
+      },
+      "733": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 733,
+        "name": "tracepoint_sched_sched_wakeup_new",
+        "run_cnt_delta": 129182,
+        "run_time_ns_delta": 26691927,
+        "type": "tracepoint"
+      },
+      "734": {
+        "bytes_jited": 515,
+        "bytes_xlated": 896,
+        "id": 734,
+        "name": "sched_switch",
+        "run_cnt_delta": 6592795,
+        "run_time_ns_delta": 958002649,
+        "type": "tracepoint"
+      },
+      "740": {
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 740,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 1272865,
+        "run_time_ns_delta": 451491947,
+        "type": "kprobe"
+      },
+      "746": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 746,
+        "name": "block_io_start",
+        "run_cnt_delta": 229697,
+        "run_time_ns_delta": 162616471,
+        "type": "tracepoint"
+      },
+      "747": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 747,
+        "name": "block_io_done",
+        "run_cnt_delta": 221841,
+        "run_time_ns_delta": 207216348,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 6.309016928999995,
+        "ops_per_sec": 11564546.080805114,
+        "ops_total": 72960917.0,
+        "stderr": "",
+        "stdout": "stress-ng: metrc: [19860] sock               2699      5.02      0.05      1.22       537.46        2127.91\nstress-ng: metrc: [19860] sockdiag       49704231      5.03      0.06      4.18   9877382.38    11728380.38\nstress-ng: metrc: [19860] sockfd           418848      5.07      0.15      0.90     82596.42      399542.51\nstress-ng: metrc: [19860] sockpair            756      5.08      0.06      0.07       148.96        5777.48\nstress-ng: metrc: [19860] sockmany          53499      5.07      0.07      1.49     10543.21       34172.63\nstress-ng: metrc: [19860] udp              381796      5.04      0.18      3.48     75714.57      104453.18\nstress-ng: metrc: [19860] udp-flood        452057      5.04      0.05      0.68     89735.81      614974.09\nstress-ng: metrc: [19860] mmap               1480      5.02      0.05      1.48       294.67         963.17\nstress-ng: metrc: [19860] mprotect        9747603      5.04      2.04     10.85   1934434.05      756388.69\nstress-ng: metrc: [19860] mremap             4816      5.02      0.05      3.15       959.30        1505.15\nstress-ng: metrc: [19860] madvise              83      5.08      0.19      1.57        16.32          47.17\nstress-ng: metrc: [19860] access             9622      5.22      0.11      0.60      1843.70       13711.87\nstress-ng: metrc: [19860] chdir                14      5.34      0.08      0.98         2.62          13.22\nstress-ng: metrc: [19860] chmod               182      5.27      0.00      0.20        34.50         913.60\nstress-ng: metrc: [19860] chown               219      5.11      0.01      0.01        42.84       15852.33\nstress-ng: metrc: [19860] dentry             8192      5.33      0.02      0.18      1537.84       41478.90\nstress-ng: metrc: [19860] dir               21384      5.36      0.10      1.76      3986.91       11481.54\nstress-ng: metrc: [19860] dirmany           13220      5.16      0.02      0.29      2562.22       42778.46\nstress-ng: metrc: [19860] fallocate             1      5.15      0.02      0.01         0.19          39.78\nstress-ng: metrc: [19860] file-ioctl        62555      5.12      0.08      0.60     12212.85       92237.08\nstress-ng: metrc: [19860] filename           4016      5.07      0.03      0.81       792.51        4790.84\nstress-ng: metrc: [19860] flock           2852578      5.13      0.59      0.67    556157.93     2257811.70\nstress-ng: metrc: [19860] fpunch               36      5.21      0.02      0.26         6.92         130.22\nstress-ng: metrc: [19860] fstat              8299      5.01      0.21      1.17      1657.18        6019.50\nstress-ng: metrc: [19860] getdent          212744      5.02      0.11      2.17     42392.56       93325.23\nstress-ng: metrc: [19860] hdd               12671      5.11      0.19      0.17      2479.21       35620.01\nstress-ng: metrc: [19860] inotify               8      5.31      0.01      0.00         1.51         579.63\nstress-ng: metrc: [19860] open               4096      5.24      0.02      0.05       781.29       59025.28\nstress-ng: metrc: [19860] rename            48494      5.08      0.01      0.29      9550.13      158917.00\nstress-ng: metrc: [19860] touch             54605      5.23      0.07      1.69     10438.73       31114.39\nstress-ng: metrc: [19860] utime             39667      5.10      0.05      0.55      7776.87       66830.88\nstress-ng: metrc: [19860] link                  4      5.18      0.02      0.60         0.77           6.45\nstress-ng: metrc: [19860] symlink               4      5.21      0.04      0.88         0.77           4.37\nstress-ng: metrc: [19860] mknod                23      5.17      0.02      0.00         4.45        1116.40\nstress-ng: metrc: [19860] fcntl             20908      5.11      0.06      0.24      4087.77       70682.65\nstress-ng: info:  [19860] skipped: 0\nstress-ng: info:  [19860] passed: 228: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [19860] failed: 0\nstress-ng: info:  [19860] metrics untrustworthy: 0\nstress-ng: info:  [19860] successful run completed in 6.29 secs"
+      },
+      {
+        "duration_s": 5.481835014000012,
+        "ops_per_sec": 10741369.422760937,
+        "ops_total": 58882415.0,
+        "stderr": "",
+        "stdout": "stress-ng: metrc: [32135] sock               3311      5.03      0.05      1.39       658.24        2301.09\nstress-ng: metrc: [32135] sockdiag       34822497      5.02      0.12      2.29   6939429.01    14451891.35\nstress-ng: metrc: [32135] sockfd           607606      5.05      0.05      1.30    120290.15      449605.27\nstress-ng: metrc: [32135] sockpair            594      5.09      0.04      0.04       116.78        7152.58\nstress-ng: metrc: [32135] sockmany          36127      5.10      0.02      1.12      7083.45       31626.96\nstress-ng: metrc: [32135] udp               96579      5.09      0.08      1.30     18981.68       70406.25\nstress-ng: metrc: [32135] udp-flood        950344      5.04      0.11      1.79    188405.17      498336.68\nstress-ng: metrc: [32135] mmap               2517      5.06      0.09      2.40       497.81        1008.63\nstress-ng: metrc: [32135] mprotect       11471182      5.10      2.70     14.75   2250160.88      657460.87\nstress-ng: metrc: [32135] mremap             3486      5.04      0.02      2.20       691.45        1570.94\nstress-ng: metrc: [32135] madvise             103      5.18      0.10      1.98        19.89          49.61\nstress-ng: metrc: [32135] access            11317      5.27      0.07      0.77      2148.13       13488.79\nstress-ng: metrc: [32135] chdir                 4      5.29      0.02      0.73         0.76           5.29\nstress-ng: metrc: [32135] chmod               111      5.22      0.00      0.08        21.26        1334.82\nstress-ng: metrc: [32135] chown               101      5.22      0.00      0.05        19.35        2109.18\nstress-ng: metrc: [32135] dentry            10240      5.30      0.02      0.25      1933.81       37406.53\nstress-ng: metrc: [32135] dir               19079      5.35      0.13      1.46      3562.96       12051.94\nstress-ng: metrc: [32135] dirmany           18987      5.19      0.02      0.39      3655.53       46454.10\nstress-ng: metrc: [32135] fallocate             0      5.22      0.01      0.01         0.00           0.00\nstress-ng: metrc: [32135] file-ioctl        53982      5.24      0.03      0.52     10306.53       98356.53\nstress-ng: metrc: [32135] filename           2470      5.23      0.03      0.48       472.48        4835.32\nstress-ng: metrc: [32135] flock           2980571      5.21      0.64      0.71    571740.07     2209259.02\nstress-ng: metrc: [32135] fpunch               53      5.17      0.07      0.23        10.25         175.05\nstress-ng: metrc: [32135] fstat             10081      5.00      0.11      1.12      2014.89        8236.10\nstress-ng: metrc: [32135] getdent          150104      5.00      0.13      1.11     29993.42      121440.61\nstress-ng: metrc: [32135] hdd               18944      5.13      0.31      0.32      3692.66       29748.56\nstress-ng: metrc: [32135] inotify               9      5.14      0.01      0.02         1.75         301.50\nstress-ng: metrc: [32135] open               7168      5.15      0.00      0.15      1391.03       48429.49\nstress-ng: metrc: [32135] rename            39252      5.13      0.03      0.23      7650.90      152263.47\nstress-ng: metrc: [32135] touch             25144      5.17      0.01      1.12      4863.12       22304.17\nstress-ng: metrc: [32135] utime             38601      5.10      0.05      0.57      7562.24       62062.88\nstress-ng: metrc: [32135] link                  4      5.11      0.07      0.50         0.78           7.07\nstress-ng: metrc: [32135] symlink               4      5.16      0.02      0.55         0.78           7.02\nstress-ng: metrc: [32135] mknod                16      5.12      0.00      0.00         3.13        9179.58\nstress-ng: metrc: [32135] fcntl              7858      5.09      0.02      0.12      1544.28       55706.40\nstress-ng: info:  [32135] skipped: 0\nstress-ng: info:  [32135] passed: 228: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [32135] failed: 0\nstress-ng: info:  [32135] metrics untrustworthy: 0\nstress-ng: info:  [32135] successful run completed in 5.47 secs"
+      },
+      {
+        "duration_s": 6.348942444000045,
+        "ops_per_sec": 6193812.488749618,
+        "ops_total": 39324159.0,
+        "stderr": "",
+        "stdout": "stress-ng: metrc: [20787] sock               5656      5.03      0.12      2.05      1123.85        2609.65\nstress-ng: metrc: [20787] sockdiag       11395153      5.07      0.09      1.60   2246472.00     6733450.53\nstress-ng: metrc: [20787] sockfd           578682      5.25      0.17      1.19    110244.47      426420.47\nstress-ng: metrc: [20787] sockpair            333      5.16      0.05      0.05        64.49        3280.17\nstress-ng: metrc: [20787] sockmany          52618      5.13      0.03      1.61     10251.63       32219.57\nstress-ng: metrc: [20787] udp              548851      5.01      0.24      3.60    109472.95      143246.66\nstress-ng: metrc: [20787] udp-flood        993890      5.04      0.14      1.50    197156.97      606074.83\nstress-ng: metrc: [20787] mmap               1602      5.05      0.12      1.53       317.35         973.83\nstress-ng: metrc: [20787] mprotect       11386386      5.11      2.95     14.06   2230411.27      669308.27\nstress-ng: metrc: [20787] mremap             1277      5.11      0.00      0.86       249.83        1478.10\nstress-ng: metrc: [20787] madvise              87      5.25      0.15      1.57        16.58          50.70\nstress-ng: metrc: [20787] access            12304      5.35      0.10      0.81      2299.03       13479.17\nstress-ng: metrc: [20787] chdir                 4      5.50      0.00      0.94         0.73           4.24\nstress-ng: metrc: [20787] chmod               232      5.36      0.00      0.13        43.29        1845.18\nstress-ng: metrc: [20787] chown               255      5.27      0.00      0.10        48.36        2417.24\nstress-ng: metrc: [20787] dentry             8192      5.42      0.04      0.16      1512.46       41855.50\nstress-ng: metrc: [20787] dir               13907      5.45      0.09      1.56      2551.59        8441.69\nstress-ng: metrc: [20787] dirmany           15464      5.29      0.02      0.33      2921.04       44292.58\nstress-ng: metrc: [20787] fallocate             0      5.26      0.02      0.01         0.00           0.00\nstress-ng: metrc: [20787] file-ioctl        64577      5.16      0.05      0.61     12524.00       96834.80\nstress-ng: metrc: [20787] filename           3347      5.20      0.04      0.67       643.20        4734.52\nstress-ng: metrc: [20787] flock           5594659      5.25      0.75      1.37   1065105.45     2635558.90\nstress-ng: metrc: [20787] fpunch                0      5.34      0.06      0.22         0.00           0.00\nstress-ng: metrc: [20787] fstat              6982      5.00      0.19      1.17      1395.28        5114.21\nstress-ng: metrc: [20787] getdent          176606      5.01      0.09      1.46     35256.99      114355.54\nstress-ng: metrc: [20787] hdd               15360      5.26      0.19      0.19      2922.39       39821.63\nstress-ng: metrc: [20787] inotify              10      5.44      0.02      0.00         1.84         532.23\nstress-ng: metrc: [20787] open               4096      5.26      0.02      0.07       778.53       45505.55\nstress-ng: metrc: [20787] rename            35897      5.17      0.02      0.24      6939.59      140259.91\nstress-ng: metrc: [20787] touch             44343      5.23      0.04      1.41      8470.87       30528.03\nstress-ng: metrc: [20787] utime             31719      5.14      0.05      0.53      6174.93       55045.16\nstress-ng: metrc: [20787] link                  4      5.09      0.05      0.47         0.79           7.80\nstress-ng: metrc: [20787] symlink               4      5.26      0.02      0.65         0.76           5.96\nstress-ng: metrc: [20787] mknod                71      5.19      0.00      0.01        13.67        4630.54\nstress-ng: metrc: [20787] fcntl             11067      5.17      0.04      0.14      2141.34       63455.39\nstress-ng: info:  [20787] skipped: 0\nstress-ng: info:  [20787] passed: 228: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [20787] failed: 0\nstress-ng: info:  [20787] metrics untrustworthy: 0\nstress-ng: info:  [20787] successful run completed in 6.33 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "718": {
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 718,
+        "name": "1",
+        "run_cnt_delta": 18,
+        "run_time_ns_delta": 31897,
+        "type": "perf_event"
+      },
+      "719": {
+        "bytes_jited": 143,
+        "bytes_xlated": 240,
+        "id": 719,
+        "name": "vfs_create",
+        "run_cnt_delta": 31223500,
+        "run_time_ns_delta": 1095926590,
+        "type": "kprobe"
+      },
+      "725": {
+        "bytes_jited": 700,
+        "bytes_xlated": 1232,
+        "id": 725,
+        "name": "cap_capable",
+        "run_cnt_delta": 17479064,
+        "run_time_ns_delta": 2476209533,
+        "type": "kprobe"
+      },
+      "731": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 731,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 4235915,
+        "run_time_ns_delta": 400682868,
+        "type": "tracepoint"
+      },
+      "733": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 733,
+        "name": "tracepoint_sched_sched_wakeup_new",
+        "run_cnt_delta": 99984,
+        "run_time_ns_delta": 22555352,
+        "type": "tracepoint"
+      },
+      "734": {
+        "bytes_jited": 599,
+        "bytes_xlated": 1040,
+        "id": 734,
+        "name": "sched_switch",
+        "run_cnt_delta": 5737195,
+        "run_time_ns_delta": 850753050,
+        "type": "tracepoint"
+      },
+      "740": {
+        "bytes_jited": 2020,
+        "bytes_xlated": 3416,
+        "id": 740,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 1208464,
+        "run_time_ns_delta": 436633950,
+        "type": "kprobe"
+      },
+      "746": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 746,
+        "name": "block_io_start",
+        "run_cnt_delta": 279214,
+        "run_time_ns_delta": 214924027,
+        "type": "tracepoint"
+      },
+      "747": {
+        "bytes_jited": 895,
+        "bytes_xlated": 1544,
+        "id": 747,
+        "name": "block_io_done",
+        "run_cnt_delta": 275201,
+        "run_time_ns_delta": 208234830,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 6.36747573599996,
+        "ops_per_sec": 5883413.546155715,
+        "ops_total": 37462493.0,
+        "stderr": "",
+        "stdout": "stress-ng: metrc: [25926] sock               3581      5.02      0.04      1.41       713.91        2466.28\nstress-ng: metrc: [25926] sockdiag       12012998      5.02      0.05      1.24   2391819.17     9313368.99\nstress-ng: metrc: [25926] sockfd           510312      5.14      0.11      1.25     99357.68      375647.60\nstress-ng: metrc: [25926] sockpair          74246      5.08      0.08      0.67     14601.17       98595.94\nstress-ng: metrc: [25926] sockmany          42974      5.09      0.09      1.34      8436.68       30186.68\nstress-ng: metrc: [25926] udp              272149      5.02      0.07      2.46     54230.30      107705.34\nstress-ng: metrc: [25926] udp-flood       1628431      5.00      0.15      2.93    325373.00      527912.81\nstress-ng: metrc: [25926] mmap               1675      5.03      0.14      1.67       333.32         924.39\nstress-ng: metrc: [25926] mprotect        8974558      5.10      1.79     10.20   1761367.75      748325.46\nstress-ng: metrc: [25926] mremap             2474      5.03      0.04      1.62       491.73        1487.57\nstress-ng: metrc: [25926] madvise              92      5.11      0.17      1.70        17.99          49.19\nstress-ng: metrc: [25926] access            10596      5.15      0.14      0.67      2058.94       13016.45\nstress-ng: metrc: [25926] chdir                 4      5.14      0.06      0.44         0.78           8.08\nstress-ng: metrc: [25926] chmod               155      5.06      0.02      0.01        30.62        5196.81\nstress-ng: metrc: [25926] chown               311      5.09      0.01      0.04        61.12        7259.40\nstress-ng: metrc: [25926] dentry             8192      5.19      0.00      0.20      1579.76       40387.91\nstress-ng: metrc: [25926] dir               11373      5.22      0.13      1.13      2179.87        9009.62\nstress-ng: metrc: [25926] dirmany            7280      5.04      0.00      0.16      1443.92       45161.85\nstress-ng: metrc: [25926] fallocate             0      5.02      0.01      0.00         0.00           0.00\nstress-ng: metrc: [25926] file-ioctl        65176      5.02      0.05      0.70     12982.27       87635.25\nstress-ng: metrc: [25926] filename           2810      5.06      0.05      0.53       555.16        4868.58\nstress-ng: metrc: [25926] flock           5657228      5.07      0.97      1.27   1116437.20     2524625.15\nstress-ng: metrc: [25926] fpunch               34      5.07      0.03      0.25         6.71         119.08\nstress-ng: metrc: [25926] fstat              5974      5.01      0.13      1.13      1192.93        4723.59\nstress-ng: metrc: [25926] getdent          311114      5.00      0.21      2.85     62185.37      101593.25\nstress-ng: metrc: [25926] hdd               19737      5.04      0.34      0.23      3917.89       34322.77\nstress-ng: metrc: [25926] inotify              11      5.32      0.03      0.00         2.07         399.32\nstress-ng: metrc: [25926] open               4096      5.14      0.02      0.06       797.20       53867.09\nstress-ng: metrc: [25926] rename            46061      5.05      0.01      0.31      9126.87      143507.41\nstress-ng: metrc: [25926] touch             41036      5.14      0.03      1.80      7988.03       22432.82\nstress-ng: metrc: [25926] utime             44392      5.03      0.05      0.67      8827.66       61534.79\nstress-ng: metrc: [25926] link                  4      5.07      0.01      0.53         0.79           7.44\nstress-ng: metrc: [25926] symlink               4      5.18      0.03      0.71         0.77           5.43\nstress-ng: metrc: [25926] mknod                15      5.04      0.00      0.00         2.98        6374.84\nstress-ng: metrc: [25926] fcntl             19320      5.00      0.03      0.40      3863.97       44547.85\nstress-ng: info:  [25926] skipped: 0\nstress-ng: info:  [25926] passed: 228: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [25926] failed: 0\nstress-ng: info:  [25926] metrics untrustworthy: 0\nstress-ng: info:  [25926] successful run completed in 6.35 secs"
+      },
+      {
+        "duration_s": 5.707704375999924,
+        "ops_per_sec": 10706394.72095897,
+        "ops_total": 61108936.0,
+        "stderr": "",
+        "stdout": "stress-ng: metrc: [27244] sock               3485      5.01      0.01      1.37       695.45        2515.77\nstress-ng: metrc: [27244] sockdiag       37962972      5.05      0.05      4.49   7512306.58     8376574.79\nstress-ng: metrc: [27244] sockfd           359886      5.10      0.09      0.84     70612.98      386078.74\nstress-ng: metrc: [27244] sockpair            705      5.08      0.07      0.02       138.79        7886.70\nstress-ng: metrc: [27244] sockmany          28448      5.06      0.02      0.86      5618.19       32334.95\nstress-ng: metrc: [27244] udp               68020      5.02      0.07      1.11     13549.86       57773.37\nstress-ng: metrc: [27244] udp-flood        597322      5.00      0.12      1.30    119364.01      419352.85\nstress-ng: metrc: [27244] mmap               2859      5.02      0.10      2.60       569.27        1057.76\nstress-ng: metrc: [27244] mprotect        7924701      5.07      1.82      9.05   1561750.21      729268.08\nstress-ng: metrc: [27244] mremap             3260      5.01      0.02      2.19       650.79        1474.25\nstress-ng: metrc: [27244] madvise              91      5.27      0.28      1.59        17.26          48.66\nstress-ng: metrc: [27244] access            11207      5.24      0.11      0.77      2137.53       12712.10\nstress-ng: metrc: [27244] chdir                 7      5.45      0.03      1.05         1.28           6.44\nstress-ng: metrc: [27244] chmod               132      5.22      0.00      0.14        25.27         916.44\nstress-ng: metrc: [27244] chown               175      5.27      0.01      0.04        33.20        3429.36\nstress-ng: metrc: [27244] dentry             8192      5.42      0.02      0.23      1510.08       33008.83\nstress-ng: metrc: [27244] dir               20413      5.48      0.12      1.89      3726.62       10144.24\nstress-ng: metrc: [27244] dirmany           16636      5.32      0.00      0.39      3127.38       42738.71\nstress-ng: metrc: [27244] fallocate             0      5.22      0.02      0.00         0.00           0.00\nstress-ng: metrc: [27244] file-ioctl        80800      5.19      0.09      0.83     15583.19       88125.33\nstress-ng: metrc: [27244] filename           3937      5.23      0.04      0.78       752.85        4828.71\nstress-ng: metrc: [27244] flock           4703692      5.16      0.80      1.01    911365.92     2598686.10\nstress-ng: metrc: [27244] fpunch              273      5.15      0.00      0.82        53.03         330.80\nstress-ng: metrc: [27244] fstat              6492      5.00      0.14      1.20      1297.15        4820.53\nstress-ng: metrc: [27244] getdent          245774      5.01      0.10      1.67     49080.10      138577.43\nstress-ng: metrc: [27244] hdd               15035      5.17      0.24      0.20      2910.00       33853.84\nstress-ng: metrc: [27244] inotify              12      5.15      0.02      0.00         2.33         541.69\nstress-ng: metrc: [27244] open               4096      5.21      0.02      0.06       786.59       53076.25\nstress-ng: metrc: [27244] rename            34338      5.17      0.00      0.23      6636.07      149802.37\nstress-ng: metrc: [27244] touch             77171      5.20      0.05      1.89     14830.91       39636.38\nstress-ng: metrc: [27244] utime             49230      5.08      0.09      0.74      9700.40       59452.50\nstress-ng: metrc: [27244] link                  5      5.09      0.06      0.48         0.98           9.20\nstress-ng: metrc: [27244] symlink               4      5.16      0.09      1.00         0.77           3.66\nstress-ng: metrc: [27244] mknod                17      5.10      0.00      0.00         3.33        6393.38\nstress-ng: metrc: [27244] fcntl             24123      5.07      0.06      0.30      4758.02       66651.19\nstress-ng: info:  [27244] skipped: 0\nstress-ng: info:  [27244] passed: 228: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [27244] failed: 0\nstress-ng: info:  [27244] metrics untrustworthy: 0\nstress-ng: info:  [27244] successful run completed in 5.69 secs"
+      },
+      {
+        "duration_s": 6.13402586899997,
+        "ops_per_sec": 6113122.735511597,
+        "ops_total": 37498053.0,
+        "stderr": "",
+        "stdout": "stress-ng: metrc: [31369] sock               5734      5.01      0.08      2.25      1143.49        2466.49\nstress-ng: metrc: [31369] sockdiag       13540262      5.06      0.03      2.12   2677860.06     6270413.53\nstress-ng: metrc: [31369] sockfd           752164      5.05      0.19      1.54    148927.67      435833.21\nstress-ng: metrc: [31369] sockpair          51375      5.06      0.06      0.48     10160.20       94652.65\nstress-ng: metrc: [31369] sockmany          63721      5.05      0.01      1.90     12626.44       33283.76\nstress-ng: metrc: [31369] udp              155250      5.02      0.04      2.18     30901.78       69738.11\nstress-ng: metrc: [31369] udp-flood        781066      5.02      0.08      1.40    155499.96      526049.01\nstress-ng: metrc: [31369] mmap               3764      5.04      0.19      3.54       746.13        1010.31\nstress-ng: metrc: [31369] mprotect        9885095      5.11      2.34     12.80   1935885.75      652795.98\nstress-ng: metrc: [31369] mremap             6829      5.02      0.12      4.31      1361.30        1540.11\nstress-ng: metrc: [31369] madvise              81      5.24      0.16      1.47        15.46          49.70\nstress-ng: metrc: [31369] access             7676      5.34      0.11      0.55      1436.94       11539.65\nstress-ng: metrc: [31369] chdir                11      5.56      0.07      1.18         1.98           8.78\nstress-ng: metrc: [31369] chmod               137      5.29      0.01      0.09        25.89        1382.82\nstress-ng: metrc: [31369] chown                75      5.27      0.00      0.05        14.22        1424.23\nstress-ng: metrc: [31369] dentry             8192      5.40      0.01      0.17      1518.40       45402.40\nstress-ng: metrc: [31369] dir               16855      5.60      0.13      2.59      3012.19        6200.80\nstress-ng: metrc: [31369] dirmany           12726      5.39      0.00      0.30      2361.61       42514.10\nstress-ng: metrc: [31369] fallocate             1      5.36      0.01      0.00         0.19          85.60\nstress-ng: metrc: [31369] file-ioctl        54005      5.30      0.04      0.50     10196.49      100635.62\nstress-ng: metrc: [31369] filename           2563      5.29      0.04      0.47       484.21        5088.73\nstress-ng: metrc: [31369] flock           1857801      5.28      0.39      0.38    351746.82     2425761.53\nstress-ng: metrc: [31369] fpunch              444      5.32      0.01      0.74        83.53         586.83\nstress-ng: metrc: [31369] fstat              6327      5.02      0.04      1.14      1261.49        5352.47\nstress-ng: metrc: [31369] getdent          186274      5.01      0.10      1.45     37202.64      120201.75\nstress-ng: metrc: [31369] hdd               11796      5.23      0.16      0.20      2257.10       32973.58\nstress-ng: metrc: [31369] inotify              10      5.25      0.02      0.00         1.90         597.91\nstress-ng: metrc: [31369] open               4096      5.30      0.04      0.04       772.33       56304.73\nstress-ng: metrc: [31369] rename            26567      5.30      0.02      0.15      5014.80      150302.39\nstress-ng: metrc: [31369] touch             32747      5.28      0.04      0.89      6207.29       34912.85\nstress-ng: metrc: [31369] utime             22863      5.22      0.02      0.35      4382.45       60992.23\nstress-ng: metrc: [31369] link                  4      5.29      0.03      0.35         0.76          10.41\nstress-ng: metrc: [31369] symlink               4      5.26      0.06      0.47         0.76           7.63\nstress-ng: metrc: [31369] mknod                25      5.28      0.01      0.00         4.74        4645.11\nstress-ng: metrc: [31369] fcntl             26346      5.23      0.02      0.38      5041.54       65568.14\nstress-ng: info:  [31369] skipped: 0\nstress-ng: info:  [31369] passed: 228: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [31369] failed: 0\nstress-ng: info:  [31369] metrics untrustworthy: 0\nstress-ng: info:  [31369] successful run completed in 6.12 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "718": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "prefetch",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 718,
+        "program": {
+          "final_insn_count": 67,
+          "orig_insn_count": 67,
+          "prog_id": 718,
+          "prog_name": "1",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "719": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 26,
+              "insn_count_before": 24,
+              "insn_delta": 2,
+              "pass": "prefetch",
+              "sites_applied": 1,
+              "sites_matched": 1,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 719,
+        "program": {
+          "final_insn_count": 26,
+          "orig_insn_count": 24,
+          "prog_id": 719,
+          "prog_name": "vfs_create",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "725": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 156,
+              "insn_delta": -18,
+              "pass": "wide_mem",
+              "sites_applied": 6,
+              "sites_matched": 6,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 140,
+              "insn_count_before": 138,
+              "insn_delta": 2,
+              "pass": "prefetch",
+              "sites_applied": 1,
+              "sites_matched": 1,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 725,
+        "program": {
+          "final_insn_count": 140,
+          "orig_insn_count": 156,
+          "prog_id": 725,
+          "prog_name": "cap_capable",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "731": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "prefetch",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 731,
+        "program": {
+          "final_insn_count": 17,
+          "orig_insn_count": 17,
+          "prog_id": 731,
+          "prog_name": "sched_wakeup",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "733": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "prefetch",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 733,
+        "program": {
+          "final_insn_count": 17,
+          "orig_insn_count": 17,
+          "prog_id": 733,
+          "prog_name": "sched_wakeup_ne",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "734": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 106,
+              "insn_count_before": 106,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 106,
+              "insn_count_before": 106,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 122,
+              "insn_count_before": 106,
+              "insn_delta": 16,
+              "pass": "cond_select",
+              "sites_applied": 4,
+              "sites_matched": 4,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 122,
+              "insn_count_before": 122,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 122,
+              "insn_count_before": 122,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 122,
+              "insn_count_before": 122,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 124,
+              "insn_count_before": 122,
+              "insn_delta": 2,
+              "pass": "prefetch",
+              "sites_applied": 1,
+              "sites_matched": 1,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 734,
+        "program": {
+          "final_insn_count": 124,
+          "orig_insn_count": 106,
+          "prog_id": 734,
+          "prog_name": "sched_switch",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "740": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 8,
+              "sites_skipped": 8,
+              "skip_reasons": {
+                "wide load offset -103 is not naturally aligned for width 2": 1,
+                "wide load offset -91 is not naturally aligned for width 2": 1,
+                "wide load offset -95 is not naturally aligned for width 2": 1,
+                "wide load offset -99 is not naturally aligned for width 2": 1,
+                "wide load offset 1 is not naturally aligned for width 2": 1,
+                "wide load offset 13 is not naturally aligned for width 2": 1,
+                "wide load offset 5 is not naturally aligned for width 2": 1,
+                "wide load offset 9 is not naturally aligned for width 2": 1
+              }
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 1,
+              "sites_matched": 1,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 405,
+              "insn_count_before": 401,
+              "insn_delta": 4,
+              "pass": "prefetch",
+              "sites_applied": 2,
+              "sites_matched": 2,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 740,
+        "program": {
+          "final_insn_count": 405,
+          "orig_insn_count": 401,
+          "prog_id": 740,
+          "prog_name": "tcp_set_state",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "746": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "prefetch",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 746,
+        "program": {
+          "final_insn_count": 51,
+          "orig_insn_count": 51,
+          "prog_id": 746,
+          "prog_name": "block_io_start",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "747": {
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 169,
+              "insn_count_before": 181,
+              "insn_delta": -12,
+              "pass": "wide_mem",
+              "sites_applied": 4,
+              "sites_matched": 4,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 169,
+              "insn_count_before": 169,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 169,
+              "insn_count_before": 169,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 169,
+              "insn_count_before": 169,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 169,
+              "insn_count_before": 169,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 169,
+              "insn_count_before": 169,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 177,
+              "insn_count_before": 169,
+              "insn_delta": 8,
+              "pass": "prefetch",
+              "sites_applied": 4,
+              "sites_matched": 4,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 747,
+        "program": {
+          "final_insn_count": 177,
+          "orig_insn_count": 181,
+          "prog_id": 747,
+          "prog_name": "block_io_done",
+          "prog_type": 5
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bpftrace_set",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "ok"
+}

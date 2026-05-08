@@ -1,0 +1,423 @@
+{
+  "app": "bcc/opensnoop",
+  "baseline": {
+    "bpf": {
+      "21": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 21,
+        "name": "__x64_sys_open",
+        "run_cnt_delta": 17551,
+        "run_time_ns_delta": 4508570,
+        "type": "tracing"
+      },
+      "22": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 22,
+        "name": "kretfunc__vmlinux____x64_sys_openat",
+        "run_cnt_delta": 2190593,
+        "run_time_ns_delta": 497340118,
+        "type": "tracing"
+      },
+      "23": {
+        "bytes_jited": 590,
+        "bytes_xlated": 640,
+        "id": 23,
+        "name": "kretfunc__vmlinux____x64_sys_openat2",
+        "run_cnt_delta": 3236,
+        "run_time_ns_delta": 894024,
+        "type": "tracing"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.303243780999992,
+        "ops_per_sec": 1825173.4960278473,
+        "ops_total": 6028993.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [14093] setting to a 3 secs run per stressor\nstress-ng: info:  [14093] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [14093] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [14189] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [14110] dentry: 347937 dentries allocated\nstress-ng: metrc: [14093] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [14093]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [14093] access            30063      3.06      0.33      2.55      9832.99       10419.26\nstress-ng: metrc: [14093] chdir               242      3.19      0.54      4.76        75.76          45.67\nstress-ng: metrc: [14093] chmod               208      3.10      0.00      0.13        67.12        1578.21\nstress-ng: metrc: [14093] chown               253      3.10      0.01      0.01        81.59       12623.49\nstress-ng: metrc: [14093] dentry            24576      3.11      0.04      0.87      7900.24       27010.57\nstress-ng: metrc: [14093] dir               32768      3.25      0.13      3.61     10067.68        8760.46\nstress-ng: metrc: [14093] dirmany           27972      3.05      0.00      0.66      9168.96       42381.50\nstress-ng: metrc: [14093] fallocate             2      3.05      0.02      0.00         0.66         130.23\nstress-ng: metrc: [14093] file-ioctl       154365      3.04      0.19      1.51     50716.07       91014.04\nstress-ng: metrc: [14093] filename          10689      3.07      0.16      2.09      3487.09        4752.73\nstress-ng: metrc: [14093] flock           4305601      3.05      0.75      0.97   1413603.30     2499257.58\nstress-ng: metrc: [14093] fpunch             1356      3.07      0.03      2.18       442.08         613.81\nstress-ng: metrc: [14093] fstat              7325      3.01      0.43      1.84      2430.97        3217.17\nstress-ng: metrc: [14093] getdent          921825      3.00      0.33      6.88    307212.95      127884.80\nstress-ng: metrc: [14093] hdd               57682      3.05      0.89      0.81     18902.61       34070.34\nstress-ng: metrc: [14093] inotify               8      3.09      0.02      0.00         2.59         415.97\nstress-ng: metrc: [14093] open              19456      3.07      0.00      0.29      6330.77       67307.59\nstress-ng: metrc: [14093] rename           136362      3.02      0.06      0.89     45214.12      144156.39\nstress-ng: metrc: [14093] touch            139372      3.09      0.17      3.62     45121.84       36754.07\nstress-ng: metrc: [14093] utime            116845      3.03      0.16      1.90     38609.66       56710.80\nstress-ng: metrc: [14093] link                 10      3.09      0.10      1.11         3.24           8.26\nstress-ng: metrc: [14093] symlink               4      3.14      0.03      1.12         1.28           3.47\nstress-ng: metrc: [14093] mknod               164      3.07      0.02      0.02        53.38        4348.52\nstress-ng: metrc: [14093] fcntl             41845      3.02      0.06      0.40     13871.46       90496.61\nstress-ng: info:  [14093] skipped: 0\nstress-ng: info:  [14093] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [14093] failed: 0\nstress-ng: info:  [14093] metrics untrustworthy: 0\nstress-ng: info:  [14093] successful run completed in 3.29 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "21": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 21,
+        "name": "__x64_sys_open",
+        "run_cnt_delta": 12902,
+        "run_time_ns_delta": 3186134,
+        "type": "tracing"
+      },
+      "22": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 22,
+        "name": "kretfunc__vmlinux____x64_sys_openat",
+        "run_cnt_delta": 2186857,
+        "run_time_ns_delta": 476024867,
+        "type": "tracing"
+      },
+      "23": {
+        "bytes_jited": 590,
+        "bytes_xlated": 640,
+        "id": 23,
+        "name": "kretfunc__vmlinux____x64_sys_openat2",
+        "run_cnt_delta": 2212,
+        "run_time_ns_delta": 629301,
+        "type": "tracing"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.2764021890000095,
+        "ops_per_sec": 1747168.2869761332,
+        "ops_total": 5724426.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [18391] setting to a 3 secs run per stressor\nstress-ng: info:  [18391] dispatching hogs: 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [18391] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [18472] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [18408] dentry: 336178 dentries allocated\nstress-ng: metrc: [18391] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [18391]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [18391] access            27430      3.03      0.36      2.62      9066.23        9206.00\nstress-ng: metrc: [18391] chdir               331      3.16      0.77      6.00       104.63          48.92\nstress-ng: metrc: [18391] chmod               220      3.02      0.02      0.08        72.95        2293.89\nstress-ng: metrc: [18391] chown               314      3.04      0.02      0.02       103.26        8755.05\nstress-ng: metrc: [18391] dentry            26793      3.06      0.06      0.89      8764.85       28290.17\nstress-ng: metrc: [18391] dir               32768      3.22      0.21      3.25     10180.74        9454.16\nstress-ng: metrc: [18391] dirmany           36758      3.01      0.01      0.84     12200.46       43044.17\nstress-ng: metrc: [18391] fallocate             1      3.02      0.01      0.01         0.33          67.29\nstress-ng: metrc: [18391] file-ioctl       195689      3.01      0.29      1.94     65043.35       87771.96\nstress-ng: metrc: [18391] filename           8983      3.04      0.06      1.82      2958.77        4783.64\nstress-ng: metrc: [18391] flock           3966083      3.03      0.71      0.82   1309414.98     2577269.68\nstress-ng: metrc: [18391] fpunch             1120      3.05      0.02      1.70       366.95         654.17\nstress-ng: metrc: [18391] fstat              7372      3.01      0.27      1.87      2449.94        3438.31\nstress-ng: metrc: [18391] getdent          966035      3.01      0.51      6.97    321398.46      129291.87\nstress-ng: metrc: [18391] hdd               42387      3.03      0.68      0.53     14007.52       35142.05\nstress-ng: metrc: [18391] inotify               8      3.06      0.01      0.00         2.61         573.19\nstress-ng: metrc: [18391] open              14336      3.06      0.00      0.23      4681.35       62576.39\nstress-ng: metrc: [18391] rename           111495      3.05      0.05      0.78     36612.80      134110.93\nstress-ng: metrc: [18391] touch            154631      3.07      0.12      3.94     50314.67       38160.15\nstress-ng: metrc: [18391] utime             93432      3.00      0.16      1.52     31123.47       55564.41\nstress-ng: metrc: [18391] link                  9      3.08      0.07      0.99         2.93           8.49\nstress-ng: metrc: [18391] symlink               4      3.11      0.06      1.07         1.29           3.54\nstress-ng: metrc: [18391] mknod                80      3.06      0.02      0.01        26.16        3337.09\nstress-ng: metrc: [18391] fcntl             38147      3.01      0.06      0.46     12660.05       73519.38\nstress-ng: info:  [18391] skipped: 0\nstress-ng: info:  [18391] passed: 96: access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [18391] failed: 0\nstress-ng: info:  [18391] metrics untrustworthy: 0\nstress-ng: info:  [18391] successful run completed in 3.26 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "21": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "rotate",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "cond_select",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "extract",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "endian_fusion",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "bulk_memory",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "prefetch",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "prefetch",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 21,
+        "program": {
+          "final_insn_count": 75,
+          "orig_insn_count": 75,
+          "prog_id": 21,
+          "prog_name": "__x64_sys_open",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "22": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "rotate",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "cond_select",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "extract",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "endian_fusion",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "bulk_memory",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "prefetch",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "prefetch",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 22,
+        "program": {
+          "final_insn_count": 75,
+          "orig_insn_count": 75,
+          "prog_id": 22,
+          "prog_name": "__x64_sys_opena",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "23": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 80,
+              "insn_count_before": 80,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "rotate",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 80,
+              "insn_count_before": 80,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "cond_select",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 80,
+              "insn_count_before": 80,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "extract",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 80,
+              "insn_count_before": 80,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "endian_fusion",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 80,
+              "insn_count_before": 80,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "bulk_memory",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 80,
+              "insn_count_before": 80,
+              "insn_delta": 0,
+              "pass": "prefetch",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "prefetch",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 23,
+        "program": {
+          "final_insn_count": 80,
+          "orig_insn_count": 80,
+          "prog_id": 23,
+          "prog_name": "__x64_sys_opena",
+          "prog_type": 26
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bcc",
+  "selected_workload": "stress_ng_filesystem",
+  "status": "ok"
+}

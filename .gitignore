@@ -113,6 +113,8 @@ docs/reference/papers/*.pdf
 !**/results/*/details/result.json
 !**/results/*/details/result.md
 !**/results/*/details/progress.json
+!**/results/*/details/apps/
+!**/results/*/details/apps/*.json
 **/results/*/details/failures/
 **/results/*/details/workdirs/
 

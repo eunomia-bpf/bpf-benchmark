@@ -1,0 +1,182 @@
+{
+  "app": "bpftrace/biosnoop",
+  "baseline": {
+    "bpf": {
+      "664": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 664,
+        "name": "block_io_start",
+        "run_cnt_delta": 1394666,
+        "run_time_ns_delta": 557216230,
+        "type": "tracepoint"
+      },
+      "665": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 665,
+        "name": "block_io_done",
+        "run_cnt_delta": 1394681,
+        "run_time_ns_delta": 1082022870,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 5.365227311999888,
+        "ops_per_sec": 348760.99206736445,
+        "ops_total": 1871182.0,
+        "stderr": "",
+        "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.040991,\n        \"1000\" : 7.455361\n      },\n      \"latency_us\" : {\n        \"2\" : 39.970598,\n        \"4\" : 1.907889,\n        \"10\" : 10.022105,\n        \"20\" : 36.342175,\n        \"50\" : 2.331531,\n        \"100\" : 1.525453,\n        \"250\" : 0.373852,\n        \"500\" : 0.029616,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "664": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 664,
+        "name": "block_io_start",
+        "run_cnt_delta": 1374049,
+        "run_time_ns_delta": 534515741,
+        "type": "tracepoint"
+      },
+      "665": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 665,
+        "name": "block_io_done",
+        "run_cnt_delta": 1374064,
+        "run_time_ns_delta": 1096488407,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 5.371922311000162,
+        "ops_per_sec": 342149.5869804928,
+        "ops_total": 1838001.0,
+        "stderr": "",
+        "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.040327,\n        \"1000\" : 7.794172\n      },\n      \"latency_us\" : {\n        \"2\" : 39.711348,\n        \"4\" : 1.843476,\n        \"10\" : 8.954274,\n        \"20\" : 36.425920,\n        \"50\" : 2.662871,\n        \"100\" : 2.105708,\n        \"250\" : 0.428553,\n        \"500\" : 0.033133,\n        \"750\" : 0.000000,\n        \"1000\" : 0.010000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "664": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "noop",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "map_inline",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 664,
+        "program": {
+          "final_insn_count": 51,
+          "orig_insn_count": 51,
+          "prog_id": 664,
+          "prog_name": "block_io_start",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "665": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 181,
+              "insn_count_before": 181,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "noop",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=9: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=9: verifier-guided key extraction failed: verifier-guided constant-key extraction currently supports up to 8-byte keys (got 16)",
+                "site at PC=31: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=31: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 31",
+                "site at PC=50: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=50: verifier-guided key extraction failed: verifier-guided constant-key extraction currently supports up to 8-byte keys (got 16)",
+                "site at PC=114: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=114: verifier-guided key extraction failed: verifier-guided constant-key extraction currently supports up to 8-byte keys (got 16)",
+                "site at PC=128: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=128: verifier-guided key extraction failed: verifier-guided constant-key extraction currently supports up to 8-byte keys (got 16)",
+                "site at PC=149: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=149: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 149"
+              ],
+              "insn_count_after": 181,
+              "insn_count_before": 181,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 6,
+              "sites_skipped": 6,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 6
+              }
+            },
+            "error": null,
+            "pass": "map_inline",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 665,
+        "program": {
+          "final_insn_count": 181,
+          "orig_insn_count": 181,
+          "prog_id": 665,
+          "prog_name": "block_io_done",
+          "prog_type": 5
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bpftrace",
+  "selected_workload": "fio_randrw",
+  "status": "ok"
+}

@@ -1,0 +1,151 @@
+{
+  "app": "bpftrace/capable",
+  "baseline": {
+    "bpf": {
+      "681": {
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 681,
+        "name": "cap_capable",
+        "run_cnt_delta": 1911020,
+        "run_time_ns_delta": 312210707,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0475315300000148,
+        "ops_per_sec": 5164800.706754271,
+        "ops_total": 15739893.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [12151] setting to a 3 secs run per stressor\nstress-ng: info:  [12151] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [12151] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [12151] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [12151]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [12151] cap             4427965      3.00      1.20      3.38   1475918.78      965802.72\nstress-ng: metrc: [12151] eventfd         1435173      3.01      1.01      4.46    477483.46      262701.89\nstress-ng: metrc: [12151] get                5718      3.00      0.09      0.85      1904.01        6075.55\nstress-ng: metrc: [12151] prctl              8728      3.00      1.74      1.49      2906.28        2707.16\nstress-ng: metrc: [12151] set               82974      3.00      0.25      2.71     27640.41       27984.71\nstress-ng: metrc: [12151] dup                3790      3.00      0.79      0.78      1262.08        2423.39\nstress-ng: metrc: [12151] kill              79448      3.00      0.08      3.78     26478.37       20576.26\nstress-ng: metrc: [12151] sigfd           8400022      3.00      1.46      5.06   2798550.83     1286831.35\nstress-ng: metrc: [12151] signal                0      3.00      0.44      1.29         0.00           0.00\nstress-ng: metrc: [12151] pty                 106      3.01      0.15      3.69        35.24          27.55\nstress-ng: metrc: [12151] itimer              609      3.00      1.46      4.17       202.88         108.12\nstress-ng: metrc: [12151] timerfd         1295360      3.00      0.46      5.35    431466.13      222809.64\nstress-ng: info:  [12151] skipped: 0\nstress-ng: info:  [12151] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [12151] failed: 0\nstress-ng: info:  [12151] metrics untrustworthy: 0\nstress-ng: info:  [12151] successful run completed in 3.04 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "681": {
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 681,
+        "name": "cap_capable",
+        "run_cnt_delta": 1329750,
+        "run_time_ns_delta": 221139907,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0545370210002147,
+        "ops_per_sec": 5138591.836369462,
+        "ops_total": 15696019.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [15468] setting to a 3 secs run per stressor\nstress-ng: info:  [15468] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [15468] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [15468] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [15468]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [15468] cap             5061827      3.00      1.25      3.77   1687192.23     1007579.80\nstress-ng: metrc: [15468] eventfd         1296922      3.00      0.84      4.36    432214.18      249508.26\nstress-ng: metrc: [15468] get                7254      3.00      0.21      1.10      2416.91        5545.24\nstress-ng: metrc: [15468] prctl              7494      3.00      1.58      1.24      2495.55        2654.51\nstress-ng: metrc: [15468] set               41137      3.00      0.21      2.26     13708.54       16664.14\nstress-ng: metrc: [15468] dup                3471      3.00      0.75      0.70      1156.82        2399.12\nstress-ng: metrc: [15468] kill             118663      3.00      0.21      6.32     39502.79       18182.76\nstress-ng: metrc: [15468] sigfd           8162444      3.00      1.29      5.30   2717174.27     1236938.78\nstress-ng: metrc: [15468] signal                0      3.00      0.10      0.29         0.00           0.00\nstress-ng: metrc: [15468] pty                6898      3.01      0.12      3.73      2292.44        1793.50\nstress-ng: metrc: [15468] itimer              725      3.00      1.56      4.65       241.61         116.64\nstress-ng: metrc: [15468] timerfd          989184      3.00      0.31      4.02    329240.47      228247.07\nstress-ng: info:  [15468] skipped: 0\nstress-ng: info:  [15468] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [15468] failed: 0\nstress-ng: info:  [15468] metrics untrustworthy: 0\nstress-ng: info:  [15468] successful run completed in 3.04 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "681": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "rotate",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "cond_select",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "extract",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "endian_fusion",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "bulk_memory",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 681,
+        "program": {
+          "final_insn_count": 156,
+          "orig_insn_count": 156,
+          "prog_id": 681,
+          "prog_name": "cap_capable",
+          "prog_type": 2
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bpftrace",
+  "selected_workload": "stress_ng_os",
+  "status": "ok"
+}

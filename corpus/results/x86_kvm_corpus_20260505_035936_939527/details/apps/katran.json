@@ -1,0 +1,222 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "474": {
+        "avg_ns_per_run": 316.4512532552083,
+        "bytes_jited": 176,
+        "bytes_xlated": 136,
+        "id": 474,
+        "name": "xdp_root",
+        "run_cnt_delta": 36864,
+        "run_time_ns_delta": 11665659,
+        "type": "xdp"
+      },
+      "480": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 480,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "482": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 541,
+        "bytes_xlated": 1000,
+        "id": 482,
+        "name": "healthcheck_encap",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0006714410000086,
+        "ops_per_sec": 6139.877434555412,
+        "ops_total": 6144.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "474": {
+        "avg_ns_per_run": 317.3246570142617,
+        "bytes_jited": 176,
+        "bytes_xlated": 136,
+        "id": 474,
+        "name": "xdp_root",
+        "run_cnt_delta": 36882,
+        "run_time_ns_delta": 11703568,
+        "type": "xdp"
+      },
+      "480": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 13581,
+        "bytes_xlated": 23744,
+        "id": 480,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "482": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 541,
+        "bytes_xlated": 1000,
+        "id": 482,
+        "name": "healthcheck_encap",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0004054779999478,
+        "ops_per_sec": 6144.508536967768,
+        "ops_total": 6147.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": true,
+    "enabled_passes": [
+      "wide_mem",
+      "map_inline"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"map_inline\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 474, \"program\": {\"final_insn_count\": 17, \"insn_delta\": 0, \"orig_insn_count\": 17, \"prog_id\": 474, \"prog_name\": \"xdp_root\", \"prog_type\": 6}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 2, \"total_sites_applied\": 0}}\n{\"changed\": true, \"passes\": [{\"changed\": true, \"insn_delta\": -12, \"insns_after\": 2530, \"insns_before\": 2542, \"pass\": \"wide_mem\", \"sites_applied\": 4}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 2530, \"insns_before\": 2530, \"pass\": \"map_inline\", \"sites_applied\": 0}], \"passes_applied\": [\"wide_mem\"], \"prog_id\": 480, \"program\": {\"final_insn_count\": 2530, \"insn_delta\": -12, \"orig_insn_count\": 2542, \"prog_id\": 480, \"prog_name\": \"balancer_ingres\", \"prog_type\": 6}, \"skipped_maps\": [{\"map_id\": 3507, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3509, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3510, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3517, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3522, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3513, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3508, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3514, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3512, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3516, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3515, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3520, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 2, \"total_sites_applied\": 4}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"map_inline\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 482, \"program\": {\"final_insn_count\": 103, \"insn_delta\": 0, \"orig_insn_count\": 103, \"prog_id\": 482, \"prog_name\": \"healthcheck_enc\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 2, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "474": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "map_inline"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"map_inline\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 474, \"program\": {\"final_insn_count\": 17, \"insn_delta\": 0, \"orig_insn_count\": 17, \"prog_id\": 474, \"prog_name\": \"xdp_root\", \"prog_type\": 6}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 2, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 474,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 2,
+          "total_sites_applied": 0
+        }
+      },
+      "480": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem",
+          "map_inline"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": true, \"insn_delta\": -12, \"insns_after\": 2530, \"insns_before\": 2542, \"pass\": \"wide_mem\", \"sites_applied\": 4}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 2530, \"insns_before\": 2530, \"pass\": \"map_inline\", \"sites_applied\": 0}], \"passes_applied\": [\"wide_mem\"], \"prog_id\": 480, \"program\": {\"final_insn_count\": 2530, \"insn_delta\": -12, \"orig_insn_count\": 2542, \"prog_id\": 480, \"prog_name\": \"balancer_ingres\", \"prog_type\": 6}, \"skipped_maps\": [{\"map_id\": 3507, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3509, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3510, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3517, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3522, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3513, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3508, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3514, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3512, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3516, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3515, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3520, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 2, \"total_sites_applied\": 4}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 4,
+            "sites_matched": 4,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 480,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 2,
+          "total_sites_applied": 4
+        }
+      },
+      "482": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "map_inline"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"map_inline\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 482, \"program\": {\"final_insn_count\": 103, \"insn_delta\": 0, \"orig_insn_count\": 103, \"prog_id\": 482, \"prog_name\": \"healthcheck_enc\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 2, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 482,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 2,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 3,
+      "not_applied": 0,
+      "requested": 3
+    }
+  },
+  "runner": "katran",
+  "selected_workload": "network",
+  "status": "ok"
+}

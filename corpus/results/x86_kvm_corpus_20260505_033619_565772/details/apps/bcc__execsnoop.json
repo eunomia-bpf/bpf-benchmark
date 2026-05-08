@@ -1,0 +1,146 @@
+{
+  "app": "bcc/execsnoop",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "avg_ns_per_run": 1700.0,
+        "bytes_jited": 2677,
+        "bytes_xlated": 4144,
+        "id": 9,
+        "name": "syscall__execve",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 3400,
+        "type": "kprobe"
+      },
+      "10": {
+        "avg_ns_per_run": 128.5,
+        "bytes_jited": 492,
+        "bytes_xlated": 704,
+        "id": 10,
+        "name": "do_ret_sys_execve",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 257,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 5.033624048000007,
+        "ops_per_sec": 105473.90805059171,
+        "ops_total": 530916.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [17250] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [17250] setting to a 5 secs run per stressor\nstress-ng: info:  [17250] dispatching hogs: 4 clone, 4 fork, 4 vfork\nstress-ng: info:  [17250] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [17250] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [17250]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [17250] clone             11742      5.02      4.38     19.53      2339.78         491.18\nstress-ng: metrc: [17250] fork              72611      5.00      7.46      9.73     14522.08        4222.49\nstress-ng: metrc: [17250] vfork            446563      5.00      4.58      5.70     89284.14       43437.04\nstress-ng: info:  [17250] skipped: 4: exec (4)\nstress-ng: info:  [17250] passed: 12: clone (4) fork (4) vfork (4)\nstress-ng: info:  [17250] failed: 0\nstress-ng: info:  [17250] metrics untrustworthy: 0\nstress-ng: info:  [17250] successful run completed in 5.02 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "avg_ns_per_run": 970.0,
+        "bytes_jited": 2677,
+        "bytes_xlated": 4144,
+        "id": 9,
+        "name": "syscall__execve",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 1940,
+        "type": "kprobe"
+      },
+      "10": {
+        "avg_ns_per_run": 234.5,
+        "bytes_jited": 492,
+        "bytes_xlated": 704,
+        "id": 10,
+        "name": "do_ret_sys_execve",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 469,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 5.033058238999985,
+        "ops_per_sec": 103833.0921646229,
+        "ops_total": 522598.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [25340] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [25340] setting to a 5 secs run per stressor\nstress-ng: info:  [25340] dispatching hogs: 4 clone, 4 fork, 4 vfork\nstress-ng: info:  [25340] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [25340] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [25340]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [25340] clone             12065      5.02      4.56     19.46      2404.39         502.16\nstress-ng: metrc: [25340] fork              72039      5.00      7.57      9.60     14407.60        4195.97\nstress-ng: metrc: [25340] vfork            438494      5.00      4.58      5.53     87694.70       43358.29\nstress-ng: info:  [25340] skipped: 4: exec (4)\nstress-ng: info:  [25340] passed: 12: clone (4) fork (4) vfork (4)\nstress-ng: info:  [25340] failed: 0\nstress-ng: info:  [25340] metrics untrustworthy: 0\nstress-ng: info:  [25340] successful run completed in 5.02 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": false,
+    "enabled_passes": [
+      "wide_mem"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 516, \"insns_before\": 516, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 9, \"program\": {\"final_insn_count\": 516, \"insn_delta\": 0, \"orig_insn_count\": 516, \"prog_id\": 9, \"prog_name\": \"syscall__execve\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 86, \"insns_before\": 86, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 10, \"program\": {\"final_insn_count\": 86, \"insn_delta\": 0, \"orig_insn_count\": 86, \"prog_id\": 10, \"prog_name\": \"do_ret_sys_exec\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "9": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 516, \"insns_before\": 516, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 9, \"program\": {\"final_insn_count\": 516, \"insn_delta\": 0, \"orig_insn_count\": 516, \"prog_id\": 9, \"prog_name\": \"syscall__execve\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 9,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "10": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 86, \"insns_before\": 86, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 10, \"program\": {\"final_insn_count\": 86, \"insn_delta\": 0, \"orig_insn_count\": 86, \"prog_id\": 10, \"prog_name\": \"do_ret_sys_exec\", \"prog_type\": 2}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 10,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 2,
+      "not_applied": 0,
+      "requested": 2
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "stress_ng_process",
+  "status": "ok"
+}

@@ -1,0 +1,108 @@
+{
+  "app": "bpftrace/tcplife",
+  "baseline": {
+    "bpf": {
+      "694": {
+        "avg_ns_per_run": 439.60515954533,
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 694,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 58416,
+        "run_time_ns_delta": 25679975,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.1029197569998814,
+        "ops_per_sec": 6046.677428411246,
+        "ops_total": 6669.0,
+        "stderr": "",
+        "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.86ms  289.34us   3.54ms   76.54%\n    Req/Sec     3.20k     1.23k    6.10k    80.95%\n  6669 requests in 1.10s, 0.99MB read\n  Socket errors: connect 0, read 6667, write 0, timeout 0\nRequests/sec:   6063.40\nTransfer/sec:      0.90MB"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "694": {
+        "avg_ns_per_run": 442.2191174505612,
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 694,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 59872,
+        "run_time_ns_delta": 26476543,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.1022115630000826,
+        "ops_per_sec": 6202.076107234131,
+        "ops_total": 6836.0,
+        "stderr": "",
+        "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     0.86ms  273.74us   2.87ms   76.61%\n    Req/Sec     3.12k     2.09k    5.57k    54.55%\n  6836 requests in 1.10s, 1.01MB read\n  Socket errors: connect 0, read 6835, write 0, timeout 0\nRequests/sec:   6217.34\nTransfer/sec:      0.92MB"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": false,
+    "enabled_passes": [
+      "wide_mem",
+      "map_inline"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"map_inline\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 694, \"program\": {\"final_insn_count\": 401, \"insn_delta\": 0, \"orig_insn_count\": 401, \"prog_id\": 694, \"prog_name\": \"tcp_set_state\", \"prog_type\": 2}, \"skipped_maps\": [{\"map_id\": 3790, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3792, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3791, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3794, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 2, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "694": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem",
+          "map_inline"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"wide_mem\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 401, \"insns_before\": 401, \"pass\": \"map_inline\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 694, \"program\": {\"final_insn_count\": 401, \"insn_delta\": 0, \"orig_insn_count\": 401, \"prog_id\": 694, \"prog_name\": \"tcp_set_state\", \"prog_type\": 2}, \"skipped_maps\": [{\"map_id\": 3790, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3792, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3791, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 3794, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 2, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 694,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 2,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 1,
+      "not_applied": 0,
+      "requested": 1
+    }
+  },
+  "runner": "bpftrace",
+  "selected_workload": "tcp_connect",
+  "status": "ok"
+}

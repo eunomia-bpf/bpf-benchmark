@@ -1,0 +1,179 @@
+{
+  "app": "bpftrace/tcplife",
+  "baseline": {
+    "bpf": {
+      "690": {
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 690,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 490547,
+        "run_time_ns_delta": 223077039,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.103898713000035,
+        "ops_per_sec": 6091.0492732305165,
+        "ops_total": 18906.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.71ms   11.43ms 230.93ms   99.30%\n    Req/Sec     3.11k     1.69k    5.87k    45.90%\n  18906 requests in 3.10s, 2.79MB read\n  Socket errors: connect 0, read 18905, write 0, timeout 0\nRequests/sec:   6098.06\nTransfer/sec:      0.90MB"
+      },
+      {
+        "duration_s": 3.103256074000001,
+        "ops_per_sec": 6047.841219821937,
+        "ops_total": 18768.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.60ms   10.20ms 213.91ms   99.35%\n    Req/Sec     3.09k   396.03     5.95k    95.08%\n  18768 requests in 3.10s, 2.77MB read\n  Socket errors: connect 0, read 18767, write 0, timeout 0\nRequests/sec:   6053.98\nTransfer/sec:      0.89MB"
+      },
+      {
+        "duration_s": 3.104038134999996,
+        "ops_per_sec": 5921.641165661782,
+        "ops_total": 18381.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     6.14ms   34.41ms 441.29ms   97.09%\n    Req/Sec     2.98k   773.14     4.34k    51.61%\n  18381 requests in 3.10s, 2.72MB read\n  Socket errors: connect 0, read 18380, write 0, timeout 0\nRequests/sec:   5930.57\nTransfer/sec:      0.88MB"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "690": {
+        "bytes_jited": 2014,
+        "bytes_xlated": 3384,
+        "id": 690,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 485206,
+        "run_time_ns_delta": 222658454,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0050646400000005,
+        "ops_per_sec": 6059.104272712083,
+        "ops_total": 18208.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     2.42ms   14.80ms 221.47ms   98.69%\n    Req/Sec     3.05k     1.72k    5.57k    43.33%\n  18208 requests in 3.00s, 2.69MB read\n  Socket errors: connect 0, read 18207, write 0, timeout 0\nRequests/sec:   6069.02\nTransfer/sec:      0.90MB"
+      },
+      {
+        "duration_s": 3.103791043000001,
+        "ops_per_sec": 5967.218715245192,
+        "ops_total": 18521.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.68ms   10.70ms 220.93ms   99.33%\n    Req/Sec     3.00k   650.87     4.22k    61.29%\n  18521 requests in 3.10s, 2.74MB read\n  Socket errors: connect 0, read 18520, write 0, timeout 0\nRequests/sec:   5975.12\nTransfer/sec:      0.88MB"
+      },
+      {
+        "duration_s": 3.103490369000042,
+        "ops_per_sec": 6049.962386720636,
+        "ops_total": 18776.0,
+        "stderr": "",
+        "stdout": "Running 3s test @ http://198.18.0.2:18080/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.72ms   11.52ms 232.08ms   99.30%\n    Req/Sec     3.09k     1.13k    6.90k    77.05%\n  18776 requests in 3.10s, 2.78MB read\n  Socket errors: connect 0, read 18776, write 0, timeout 0\nRequests/sec:   6056.74\nTransfer/sec:      0.90MB"
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "690": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "rotate",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "cond_select",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "extract",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 1,
+              "sites_matched": 1,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "endian_fusion",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "bulk_memory",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 690,
+        "program": {
+          "final_insn_count": 401,
+          "orig_insn_count": 401,
+          "prog_id": 690,
+          "prog_name": "tcp_set_state",
+          "prog_type": 2
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bpftrace",
+  "selected_workload": "tcp_connect",
+  "status": "ok"
+}

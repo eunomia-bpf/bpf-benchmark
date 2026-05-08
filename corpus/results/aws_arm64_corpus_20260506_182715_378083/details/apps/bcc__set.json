@@ -1,0 +1,10 @@
+{
+  "app": "bcc/set",
+  "baseline": null,
+  "error": "bcc/set did not attach all BCC tools: BCC tools timed out before attachment: biosnoop, capable, runqlat, tcpconnect, tcplife",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "bcc_set",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "error"
+}

@@ -1,0 +1,131 @@
+{
+  "app": "bcc/syscount",
+  "baseline": {
+    "bpf": {
+      "26": {
+        "bytes_jited": 72,
+        "bytes_xlated": 112,
+        "id": 26,
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "run_cnt_delta": 87459992,
+        "run_time_ns_delta": 9395058283,
+        "type": "tracepoint"
+      },
+      "27": {
+        "bytes_jited": 236,
+        "bytes_xlated": 400,
+        "id": 27,
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "run_cnt_delta": 87460472,
+        "run_time_ns_delta": 2398402333,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.037477491000004,
+        "ops_per_sec": 2810856.7142629693,
+        "ops_total": 8537914.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [11544] setting to a 3 secs run per stressor\nstress-ng: info:  [11544] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [11544] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [11544] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [11544]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [11544] cap             2463524      3.00      0.62      6.05    820944.46      368891.25\nstress-ng: metrc: [11544] eventfd          894309      3.00      0.64      4.26    298082.76      182428.94\nstress-ng: metrc: [11544] get                6846      3.00      0.12      1.35      2281.35        4664.49\nstress-ng: metrc: [11544] prctl              8060      3.00      1.94      0.87      2684.93        2867.72\nstress-ng: metrc: [11544] set              110389      3.00      0.30      3.92     36793.91       26177.10\nstress-ng: metrc: [11544] dup                3765      3.00      0.61      0.55      1254.72        3265.19\nstress-ng: metrc: [11544] kill             293790      3.00      0.26      3.97     97924.14       69516.04\nstress-ng: metrc: [11544] sigfd           3885983      3.00      0.45      5.11   1294648.85      699833.63\nstress-ng: metrc: [11544] signal                0      3.00      0.17      1.17         0.00           0.00\nstress-ng: metrc: [11544] pty                 184      3.00      0.18      4.80        61.24          36.96\nstress-ng: metrc: [11544] itimer              664      3.00      0.45      4.61       221.33         131.32\nstress-ng: metrc: [11544] timerfd          870400      3.00      0.46      4.56    289749.30      173388.80\nstress-ng: info:  [11544] skipped: 0\nstress-ng: info:  [11544] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [11544] failed: 0\nstress-ng: info:  [11544] metrics untrustworthy: 0\nstress-ng: info:  [11544] successful run completed in 3.03 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "26": {
+        "bytes_jited": 72,
+        "bytes_xlated": 112,
+        "id": 26,
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "run_cnt_delta": 82628665,
+        "run_time_ns_delta": 8883763895,
+        "type": "tracepoint"
+      },
+      "27": {
+        "bytes_jited": 236,
+        "bytes_xlated": 400,
+        "id": 27,
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "run_cnt_delta": 82629061,
+        "run_time_ns_delta": 2281579581,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0582097129999966,
+        "ops_per_sec": 2610096.0199258933,
+        "ops_total": 7982221.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [13553] setting to a 3 secs run per stressor\nstress-ng: info:  [13553] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [13553] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [13553] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [13553]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [13553] cap             1997034      3.00      0.41      4.72    665615.41      389074.84\nstress-ng: metrc: [13553] eventfd          634371      3.00      0.33      3.30    211317.30      174512.86\nstress-ng: metrc: [13553] get                6734      3.00      0.13      0.94      2243.21        6333.43\nstress-ng: metrc: [13553] prctl              9341      3.00      2.28      1.10      3113.41        2756.01\nstress-ng: metrc: [13553] set               86460      3.00      0.17      3.17     28813.54       25915.22\nstress-ng: metrc: [13553] dup                4102      3.00      0.68      0.61      1367.07        3193.59\nstress-ng: metrc: [13553] kill             315292      3.00      0.25      4.41    105004.71       67650.60\nstress-ng: metrc: [13553] sigfd           4265670      3.00      0.72      6.95   1420132.91      555952.13\nstress-ng: metrc: [13553] signal                0      3.00      0.46      3.28         0.00           0.00\nstress-ng: metrc: [13553] pty                 211      3.01      0.26      5.52        70.14          36.52\nstress-ng: metrc: [13553] itimer              478      3.00      0.38      3.54       159.33         121.95\nstress-ng: metrc: [13553] timerfd          662528      3.00      0.42      3.50    220597.43      168987.16\nstress-ng: info:  [13553] skipped: 0\nstress-ng: info:  [13553] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [13553] failed: 0\nstress-ng: info:  [13553] metrics untrustworthy: 0\nstress-ng: info:  [13553] successful run completed in 3.05 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": false,
+    "changed": false,
+    "enabled_passes": [
+      "noop",
+      "map_inline"
+    ],
+    "error": "prog 26: prog 26 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\"); prog 27: prog 27 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\")",
+    "exit_code": 1,
+    "output": "{\"changed\": false, \"error_message\": \"prog 26 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 14, \"insns_before\": 14, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 26, \"program\": {\"final_insn_count\": 14, \"insn_delta\": 0, \"orig_insn_count\": 14, \"prog_id\": 26, \"prog_name\": \"raw_syscalls__s\", \"prog_type\": 5}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"error_message\": \"prog 27 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 44, \"insns_before\": 44, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 27, \"program\": {\"final_insn_count\": 44, \"insn_delta\": 0, \"orig_insn_count\": 44, \"prog_id\": 27, \"prog_name\": \"raw_syscalls__s\", \"prog_type\": 5}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "26": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "noop",
+          "map_inline"
+        ],
+        "error": "prog 26 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\")",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 26 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 14, \"insns_before\": 14, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 26, \"program\": {\"final_insn_count\": 14, \"insn_delta\": 0, \"orig_insn_count\": 14, \"prog_id\": 26, \"prog_name\": \"raw_syscalls__s\", \"prog_type\": 5}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 26,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "27": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "noop",
+          "map_inline"
+        ],
+        "error": "prog 27 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\"noop,map_inline,...\")",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 27 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT \\u2014 insert a `noop` pass before map_inline in the pass chain to bootstrap them (e.g. BPFREJIT_BENCH_PASSES=\\\"noop,map_inline,...\\\")\", \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 44, \"insns_before\": 44, \"pass\": \"noop\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 27, \"program\": {\"final_insn_count\": 44, \"insn_delta\": 0, \"orig_insn_count\": 44, \"prog_id\": 27, \"prog_name\": \"raw_syscalls__s\", \"prog_type\": 5}, \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 27,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 0,
+      "not_applied": 2,
+      "requested": 2
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "stress_ng_os",
+  "status": "ok"
+}

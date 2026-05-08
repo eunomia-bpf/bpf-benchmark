@@ -1,0 +1,10 @@
+{
+  "app": "tracee/monitor",
+  "baseline": null,
+  "error": "[Errno 30] Read-only file system: '/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.57d57086/tracee'",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "tracee",
+  "selected_workload": "stress_ng_os",
+  "status": "error"
+}

@@ -1,0 +1,195 @@
+{
+  "app": "bpftrace/capable",
+  "baseline": {
+    "bpf": {
+      "681": {
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 681,
+        "name": "cap_capable",
+        "run_cnt_delta": 3263248,
+        "run_time_ns_delta": 573071209,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0562542059999487,
+        "ops_per_sec": 4012980.9804178984,
+        "ops_total": 12264690.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [15145] setting to a 3 secs run per stressor\nstress-ng: info:  [15145] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [15145] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [15145] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [15145]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [15145] cap             3768976      3.00      1.05      3.13   1255368.71      901912.72\nstress-ng: metrc: [15145] eventfd         1080163      3.00      0.67      3.35    359956.28      268386.62\nstress-ng: metrc: [15145] get                4130      3.00      0.12      1.27      1376.05        2973.60\nstress-ng: metrc: [15145] prctl              5078      3.00      1.72      1.52      1691.28        1562.86\nstress-ng: metrc: [15145] set               28618      3.00      0.12      2.70      9532.55       10138.33\nstress-ng: metrc: [15145] dup                2759      3.00      1.14      1.02       918.54        1279.80\nstress-ng: metrc: [15145] kill              27009      3.00      0.04      5.05      8993.64        5309.71\nstress-ng: metrc: [15145] sigfd           5883959      3.01      1.43      5.65   1956119.16      830992.19\nstress-ng: metrc: [15145] signal                0      3.00      0.08      0.34         0.00           0.00\nstress-ng: metrc: [15145] pty                  91      3.01      0.15      6.10        30.27          14.56\nstress-ng: metrc: [15145] itimer              611      3.00      1.17      3.28       203.93         137.26\nstress-ng: metrc: [15145] timerfd         1463296      3.00      0.67      4.20    487432.53      300324.07\nstress-ng: info:  [15145] skipped: 0\nstress-ng: info:  [15145] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [15145] failed: 0\nstress-ng: info:  [15145] metrics untrustworthy: 0\nstress-ng: info:  [15145] successful run completed in 3.04 secs"
+      },
+      {
+        "duration_s": 3.0555230150000625,
+        "ops_per_sec": 5962680.9912932785,
+        "ops_total": 18219109.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [26711] setting to a 3 secs run per stressor\nstress-ng: info:  [26711] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [26711] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [26711] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [26711]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [26711] cap             5372657      3.00      1.30      4.92   1789909.05      864015.29\nstress-ng: metrc: [26711] eventfd          856584      3.00      0.83      3.08    285408.28      219044.94\nstress-ng: metrc: [26711] get                4835      3.00      0.11      1.54      1610.29        2932.03\nstress-ng: metrc: [26711] prctl              6023      3.00      2.01      1.75      2006.16        1601.10\nstress-ng: metrc: [26711] set               31650      3.00      0.12      2.70     10547.64       11227.57\nstress-ng: metrc: [26711] dup                3184      3.00      1.29      1.14      1061.25        1310.88\nstress-ng: metrc: [26711] kill              24692      3.00      0.01      4.79      8219.19        5142.54\nstress-ng: metrc: [26711] sigfd          10881715      3.01      1.15      5.97   3621106.47     1529265.93\nstress-ng: metrc: [26711] signal                0      3.00      0.26      1.16         0.00           0.00\nstress-ng: metrc: [26711] pty                  55      3.01      0.04      5.19        18.28          10.52\nstress-ng: metrc: [26711] itimer              402      3.00      0.86      2.47       133.97         120.75\nstress-ng: metrc: [26711] timerfd         1037312      3.00      0.42      3.14    345467.64      290672.36\nstress-ng: info:  [26711] skipped: 0\nstress-ng: info:  [26711] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [26711] failed: 0\nstress-ng: info:  [26711] metrics untrustworthy: 0\nstress-ng: info:  [26711] successful run completed in 3.04 secs"
+      },
+      {
+        "duration_s": 3.0409230059999572,
+        "ops_per_sec": 5832885.267072839,
+        "ops_total": 17737355.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [7291] setting to a 3 secs run per stressor\nstress-ng: info:  [7291] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [7291] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [7291] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [7291]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [7291] cap             4668989      3.00      1.41      4.46   1555847.66      795911.95\nstress-ng: metrc: [7291] eventfd         1065592      3.00      0.57      3.32    355100.20      274090.13\nstress-ng: metrc: [7291] get                4564      3.00      0.12      1.35      1519.68        3123.47\nstress-ng: metrc: [7291] prctl              6577      3.00      2.07      1.91      2191.97        1649.89\nstress-ng: metrc: [7291] set               41375      3.00      0.10      3.14     13779.99       12761.23\nstress-ng: metrc: [7291] dup                3373      3.00      1.26      1.13      1124.07        1410.97\nstress-ng: metrc: [7291] kill              22676      3.00      0.03      3.94      7552.47        5713.67\nstress-ng: metrc: [7291] sigfd          10492102      3.00      1.09      4.36   3494692.55     1926118.33\nstress-ng: metrc: [7291] signal                0      3.00      0.20      1.49         0.00           0.00\nstress-ng: metrc: [7291] pty                  70      3.00      0.09      5.15        23.30          13.36\nstress-ng: metrc: [7291] itimer              485      3.00      1.07      2.96       161.61         120.28\nstress-ng: metrc: [7291] timerfd         1431552      3.00      0.52      4.18    476964.56      304598.82\nstress-ng: info:  [7291] skipped: 0\nstress-ng: info:  [7291] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [7291] failed: 0\nstress-ng: info:  [7291] metrics untrustworthy: 0\nstress-ng: info:  [7291] successful run completed in 3.03 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "681": {
+        "bytes_jited": 772,
+        "bytes_xlated": 1376,
+        "id": 681,
+        "name": "cap_capable",
+        "run_cnt_delta": 3538463,
+        "run_time_ns_delta": 612395607,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.0524187549999624,
+        "ops_per_sec": 5596228.555475578,
+        "ops_total": 17082033.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [32338] setting to a 3 secs run per stressor\nstress-ng: info:  [32338] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [32338] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [32338] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [32338]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [32338] cap             5097886      3.00      1.15      4.32   1698470.12      932279.31\nstress-ng: metrc: [32338] eventfd         1186552      3.00      1.01      3.64    395288.99      255128.47\nstress-ng: metrc: [32338] get                4137      3.00      0.12      1.24      1378.33        3053.01\nstress-ng: metrc: [32338] prctl              5244      3.00      1.76      1.55      1747.69        1581.95\nstress-ng: metrc: [32338] set               31084      3.00      0.13      2.89     10360.13       10308.70\nstress-ng: metrc: [32338] dup                2743      3.00      1.14      0.95       914.29        1309.76\nstress-ng: metrc: [32338] kill              25603      3.00      0.10      5.02      8530.38        5006.04\nstress-ng: metrc: [32338] sigfd           9341736      3.00      1.21      5.00   3112418.67     1503965.53\nstress-ng: metrc: [32338] signal                0      3.00      0.09      0.25         0.00           0.00\nstress-ng: metrc: [32338] pty                  68      3.01      0.13      5.21        22.60          12.73\nstress-ng: metrc: [32338] itimer              484      3.00      1.22      3.10       161.33         112.09\nstress-ng: metrc: [32338] timerfd         1386496      3.00      0.50      4.70    461780.18      266586.12\nstress-ng: info:  [32338] skipped: 0\nstress-ng: info:  [32338] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [32338] failed: 0\nstress-ng: info:  [32338] metrics untrustworthy: 0\nstress-ng: info:  [32338] successful run completed in 3.04 secs"
+      },
+      {
+        "duration_s": 3.0473662870000453,
+        "ops_per_sec": 6105426.538112687,
+        "ops_total": 18605471.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [11345] setting to a 3 secs run per stressor\nstress-ng: info:  [11345] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [11345] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [11345] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [11345]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [11345] cap             6173131      3.00      1.74      5.74   2057475.12      825479.68\nstress-ng: metrc: [11345] eventfd          907907      3.01      0.56      2.86    302093.11      265657.24\nstress-ng: metrc: [11345] get                4784      3.00      0.09      1.36      1594.05        3283.67\nstress-ng: metrc: [11345] prctl              4748      3.00      1.52      1.25      1580.17        1716.14\nstress-ng: metrc: [11345] set               50475      3.00      0.12      3.20     16817.03       15198.24\nstress-ng: metrc: [11345] dup                2360      3.00      0.91      0.78       786.50        1389.31\nstress-ng: metrc: [11345] kill              20982      3.00      0.06      3.82      6991.46        5411.27\nstress-ng: metrc: [11345] sigfd           9929977      3.00      1.27      5.84   3305164.97     1395980.97\nstress-ng: metrc: [11345] signal                0      3.00      0.03      0.31         0.00           0.00\nstress-ng: metrc: [11345] pty                  69      3.00      0.11      4.55        22.97          14.82\nstress-ng: metrc: [11345] itimer              638      3.00      1.12      3.54       212.67         136.95\nstress-ng: metrc: [11345] timerfd         1510400      3.00      0.69      4.50    502905.29      290964.46\nstress-ng: info:  [11345] skipped: 0\nstress-ng: info:  [11345] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [11345] failed: 0\nstress-ng: info:  [11345] metrics untrustworthy: 0\nstress-ng: info:  [11345] successful run completed in 3.04 secs"
+      },
+      {
+        "duration_s": 3.037528509000026,
+        "ops_per_sec": 6261511.931047306,
+        "ops_total": 19019521.0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [21622] setting to a 3 secs run per stressor\nstress-ng: info:  [21622] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd\nstress-ng: info:  [21622] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [21622] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [21622]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [21622] cap             5113833      3.00      1.38      4.55   1704180.25      862659.13\nstress-ng: metrc: [21622] eventfd         1464375      3.00      0.56      3.95    487617.40      324788.38\nstress-ng: metrc: [21622] get                4136      3.00      0.07      1.30      1378.03        3023.40\nstress-ng: metrc: [21622] prctl              6961      3.00      1.95      1.69      2318.94        1914.38\nstress-ng: metrc: [21622] set               56275      3.00      0.18      2.93     18755.46       18118.47\nstress-ng: metrc: [21622] dup                3325      3.00      1.20      1.04      1108.03        1489.47\nstress-ng: metrc: [21622] kill              20379      3.01      0.10      3.61      6780.88        5501.04\nstress-ng: metrc: [21622] sigfd          11082937      3.00      1.09      4.45   3690931.64     1998940.73\nstress-ng: metrc: [21622] signal                0      3.00      0.17      0.93         0.00           0.00\nstress-ng: metrc: [21622] pty                  94      3.01      0.18      5.01        31.27          18.11\nstress-ng: metrc: [21622] itimer              518      3.00      1.32      3.37       172.49         110.54\nstress-ng: metrc: [21622] timerfd         1266688      3.00      0.44      4.45    421823.86      258775.09\nstress-ng: info:  [21622] skipped: 0\nstress-ng: info:  [21622] passed: 48: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4)\nstress-ng: info:  [21622] failed: 0\nstress-ng: info:  [21622] metrics untrustworthy: 0\nstress-ng: info:  [21622] successful run completed in 3.03 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "error": "",
+    "per_program": {
+      "681": {
+        "error": "",
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "rotate",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "cond_select",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "extract",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "endian_fusion",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "bulk_memory",
+            "status": "ok"
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 158,
+              "insn_count_before": 156,
+              "insn_delta": 2,
+              "pass": "prefetch",
+              "sites_applied": 1,
+              "sites_matched": 1,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "pass": "prefetch",
+            "status": "ok"
+          }
+        ],
+        "prog_id": 681,
+        "program": {
+          "final_insn_count": 158,
+          "orig_insn_count": 156,
+          "prog_id": 681,
+          "prog_name": "cap_capable",
+          "prog_type": 2
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bpftrace",
+  "selected_workload": "stress_ng_os",
+  "status": "ok"
+}

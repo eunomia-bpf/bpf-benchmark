@@ -1,0 +1,290 @@
+{
+  "app": "bcc/vfsstat",
+  "baseline": {
+    "bpf": {
+      "23": {
+        "avg_ns_per_run": 31.583316083626578,
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 23,
+        "name": "vfs_create",
+        "run_cnt_delta": 4831,
+        "run_time_ns_delta": 152579,
+        "type": "tracing"
+      },
+      "24": {
+        "avg_ns_per_run": 30.73186119873817,
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 24,
+        "name": "kfunc__vmlinux__vfs_fsync_range",
+        "run_cnt_delta": 317,
+        "run_time_ns_delta": 9742,
+        "type": "tracing"
+      },
+      "25": {
+        "avg_ns_per_run": 26.94261214675763,
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 25,
+        "name": "vfs_open",
+        "run_cnt_delta": 69039,
+        "run_time_ns_delta": 1860091,
+        "type": "tracing"
+      },
+      "26": {
+        "avg_ns_per_run": 23.303529647703723,
+        "bytes_jited": 87,
+        "bytes_xlated": 136,
+        "id": 26,
+        "name": "vfs_read",
+        "run_cnt_delta": 29918,
+        "run_time_ns_delta": 697195,
+        "type": "tracing"
+      },
+      "27": {
+        "avg_ns_per_run": 25.196189279731993,
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 27,
+        "name": "vfs_write",
+        "run_cnt_delta": 4776,
+        "run_time_ns_delta": 120337,
+        "type": "tracing"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.197290228999975,
+        "ops_per_sec": 2623.471564739225,
+        "ops_total": 8388.0,
+        "stderr": "",
+        "stdout": "stress-ng: metrc: [10173]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [10173] open                100      0.01      0.01      0.00     15357.00       18825.30\nstress-ng: info:  [10173] skipped: 0\nstress-ng: info:  [10173] passed: 1: open (1)\nstress-ng: info:  [10173] failed: 0\nstress-ng: info:  [10173] metrics untrustworthy: 0\nstress-ng: info:  [10173] successful run completed in 0.01 secs\nstress-ng: info:  [10175] setting to a 1 secs run per stressor\nstress-ng: info:  [10175] dispatching hogs: 1 rename\nstress-ng: info:  [10175] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [10175] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [10175]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [10175] rename              100      0.01      0.00      0.00     18943.61       29171.53\nstress-ng: info:  [10175] skipped: 0\nstress-ng: info:  [10175] passed: 1: rename (1)\nstress-ng: info:  [10175] failed: 0\nstress-ng: info:  [10175] metrics untrustworthy: 0\nstress-ng: info:  [10175] successful run completed in 0.01 secs\nstress-ng: info:  [10177] setting to a 1 secs run per stressor\nstress-ng: info:  [10177] dispatching hogs: 1 touch\nstress-ng: info:  [10177] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [10177] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [10177]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [10177] touch               200      0.01      0.01      0.00     32989.65       13242.40\nstress-ng: info:  [10177] skipped: 0\nstress-ng: info:  [10177] passed: 1: touch (1)\nstress-ng: info:  [10177] failed: 0\nstress-ng: info:  [10177] metrics untrustworthy: 0\nstress-ng: info:  [10177] successful run completed in 0.01 secs\nstress-ng: info:  [10183] setting to a 1 secs run per stressor\nstress-ng: info:  [10183] dispatching hogs: 1 utime\nstress-ng: info:  [10183] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [10183] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [10183]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [10183] utime               200      0.00      0.00      0.00     60716.62       56769.80\nstress-ng: info:  [10183] skipped: 0\nstress-ng: info:  [10183] passed: 1: utime (1)\nstress-ng: info:  [10183] failed: 0\nstress-ng: info:  [10183] metrics untrustworthy: 0\nstress-ng: info:  [10183] successful run completed in 0.01 secs"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "23": {
+        "avg_ns_per_run": 34.097889072847686,
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 23,
+        "name": "vfs_create",
+        "run_cnt_delta": 4832,
+        "run_time_ns_delta": 164761,
+        "type": "tracing"
+      },
+      "24": {
+        "avg_ns_per_run": 26.318611987381704,
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 24,
+        "name": "kfunc__vmlinux__vfs_fsync_range",
+        "run_cnt_delta": 317,
+        "run_time_ns_delta": 8343,
+        "type": "tracing"
+      },
+      "25": {
+        "avg_ns_per_run": 25.697521763099527,
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 25,
+        "name": "vfs_open",
+        "run_cnt_delta": 77999,
+        "run_time_ns_delta": 2004381,
+        "type": "tracing"
+      },
+      "26": {
+        "avg_ns_per_run": 23.87305249080575,
+        "bytes_jited": 87,
+        "bytes_xlated": 136,
+        "id": 26,
+        "name": "vfs_read",
+        "run_cnt_delta": 29910,
+        "run_time_ns_delta": 714043,
+        "type": "tracing"
+      },
+      "27": {
+        "avg_ns_per_run": 24.808671858556092,
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 27,
+        "name": "vfs_write",
+        "run_cnt_delta": 4751,
+        "run_time_ns_delta": 117866,
+        "type": "tracing"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 3.1842571349999957,
+        "ops_per_sec": 2634.20937580784,
+        "ops_total": 8388.0,
+        "stderr": "",
+        "stdout": "stress-ng: metrc: [11908]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [11908] open                100      0.01      0.00      0.00     14543.86       24467.82\nstress-ng: info:  [11908] skipped: 0\nstress-ng: info:  [11908] passed: 1: open (1)\nstress-ng: info:  [11908] failed: 0\nstress-ng: info:  [11908] metrics untrustworthy: 0\nstress-ng: info:  [11908] successful run completed in 0.01 secs\nstress-ng: info:  [11910] setting to a 1 secs run per stressor\nstress-ng: info:  [11910] dispatching hogs: 1 rename\nstress-ng: info:  [11910] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [11910] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [11910]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [11910] rename              100      0.01      0.00      0.00     18258.33       28074.12\nstress-ng: info:  [11910] skipped: 0\nstress-ng: info:  [11910] passed: 1: rename (1)\nstress-ng: info:  [11910] failed: 0\nstress-ng: info:  [11910] metrics untrustworthy: 0\nstress-ng: info:  [11910] successful run completed in 0.01 secs\nstress-ng: info:  [11912] setting to a 1 secs run per stressor\nstress-ng: info:  [11912] dispatching hogs: 1 touch\nstress-ng: info:  [11912] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [11912] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [11912]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [11912] touch               200      0.01      0.01      0.02     28941.20        7611.51\nstress-ng: info:  [11912] skipped: 0\nstress-ng: info:  [11912] passed: 1: touch (1)\nstress-ng: info:  [11912] failed: 0\nstress-ng: info:  [11912] metrics untrustworthy: 0\nstress-ng: info:  [11912] successful run completed in 0.01 secs\nstress-ng: info:  [11918] setting to a 1 secs run per stressor\nstress-ng: info:  [11918] dispatching hogs: 1 utime\nstress-ng: info:  [11918] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [11918] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [11918]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [11918] utime               200      0.00      0.00      0.00     87009.73       79239.30\nstress-ng: info:  [11918] skipped: 0\nstress-ng: info:  [11918] passed: 1: utime (1)\nstress-ng: info:  [11918] failed: 0\nstress-ng: info:  [11918] metrics untrustworthy: 0\nstress-ng: info:  [11918] successful run completed in 0.00 secs"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": false,
+    "enabled_passes": [
+      "rotate"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 12, \"insns_before\": 12, \"pass\": \"rotate\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 23, \"program\": {\"final_insn_count\": 12, \"insn_delta\": 0, \"orig_insn_count\": 12, \"prog_id\": 23, \"prog_name\": \"vfs_create\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 12, \"insns_before\": 12, \"pass\": \"rotate\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 24, \"program\": {\"final_insn_count\": 12, \"insn_delta\": 0, \"orig_insn_count\": 12, \"prog_id\": 24, \"prog_name\": \"vfs_fsync_range\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 12, \"insns_before\": 12, \"pass\": \"rotate\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 25, \"program\": {\"final_insn_count\": 12, \"insn_delta\": 0, \"orig_insn_count\": 12, \"prog_id\": 25, \"prog_name\": \"vfs_open\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 11, \"insns_before\": 11, \"pass\": \"rotate\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 26, \"program\": {\"final_insn_count\": 11, \"insn_delta\": 0, \"orig_insn_count\": 11, \"prog_id\": 26, \"prog_name\": \"vfs_read\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 12, \"insns_before\": 12, \"pass\": \"rotate\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 27, \"program\": {\"final_insn_count\": 12, \"insn_delta\": 0, \"orig_insn_count\": 12, \"prog_id\": 27, \"prog_name\": \"vfs_write\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "23": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "rotate"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 12, \"insns_before\": 12, \"pass\": \"rotate\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 23, \"program\": {\"final_insn_count\": 12, \"insn_delta\": 0, \"orig_insn_count\": 12, \"prog_id\": 23, \"prog_name\": \"vfs_create\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 23,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "24": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "rotate"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 12, \"insns_before\": 12, \"pass\": \"rotate\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 24, \"program\": {\"final_insn_count\": 12, \"insn_delta\": 0, \"orig_insn_count\": 12, \"prog_id\": 24, \"prog_name\": \"vfs_fsync_range\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 24,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "25": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "rotate"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 12, \"insns_before\": 12, \"pass\": \"rotate\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 25, \"program\": {\"final_insn_count\": 12, \"insn_delta\": 0, \"orig_insn_count\": 12, \"prog_id\": 25, \"prog_name\": \"vfs_open\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 25,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "26": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "rotate"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 11, \"insns_before\": 11, \"pass\": \"rotate\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 26, \"program\": {\"final_insn_count\": 11, \"insn_delta\": 0, \"orig_insn_count\": 11, \"prog_id\": 26, \"prog_name\": \"vfs_read\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 26,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "27": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "rotate"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 12, \"insns_before\": 12, \"pass\": \"rotate\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 27, \"program\": {\"final_insn_count\": 12, \"insn_delta\": 0, \"orig_insn_count\": 12, \"prog_id\": 27, \"prog_name\": \"vfs_write\", \"prog_type\": 26}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "rotate",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 27,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 5,
+      "not_applied": 0,
+      "requested": 5
+    }
+  },
+  "runner": "bcc",
+  "selected_workload": "stress_ng_filesystem",
+  "status": "ok"
+}

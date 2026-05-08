@@ -1,0 +1,600 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "479": {
+        "avg_ns_per_run": 341.1376447544887,
+        "bytes_jited": 176,
+        "bytes_xlated": 136,
+        "id": 479,
+        "name": "xdp_root",
+        "run_cnt_delta": 1065511,
+        "run_time_ns_delta": 363485913,
+        "type": "xdp"
+      },
+      "485": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 485,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "487": {
+        "avg_ns_per_run": 393.5,
+        "bytes_jited": 541,
+        "bytes_xlated": 1000,
+        "id": 487,
+        "name": "healthcheck_encap",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 787,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0010691519999,
+        "ops_per_sec": 5974.612231384189,
+        "ops_total": 5981.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0003571739998733,
+        "ops_per_sec": 5921.884856698944,
+        "ops_total": 5924.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0008216180001455,
+        "ops_per_sec": 5799.235243936504,
+        "ops_total": 5804.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000596263000034,
+        "ops_per_sec": 5530.702246885977,
+        "ops_total": 5534.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0006031850000454,
+        "ops_per_sec": 5666.582002734423,
+        "ops_total": 5670.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000507018999997,
+        "ops_per_sec": 6250.830710064233,
+        "ops_total": 6254.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0008634149999125,
+        "ops_per_sec": 6165.676462457706,
+        "ops_total": 6171.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0007303529998808,
+        "ops_per_sec": 6173.4911722026445,
+        "ops_total": 6178.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0015095649998784,
+        "ops_per_sec": 6031.89446323534,
+        "ops_total": 6041.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0005114509999657,
+        "ops_per_sec": 5933.965067632397,
+        "ops_total": 5937.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0006045850000191,
+        "ops_per_sec": 6103.3100303052115,
+        "ops_total": 6107.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000593581999965,
+        "ops_per_sec": 5762.579436573082,
+        "ops_total": 5766.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0005624990001252,
+        "ops_per_sec": 6019.613973158958,
+        "ops_total": 6023.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0006228969998574,
+        "ops_per_sec": 6034.241289204539,
+        "ops_total": 6038.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0007298230000288,
+        "ops_per_sec": 6046.587061690701,
+        "ops_total": 6051.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0004026420001537,
+        "ops_per_sec": 5959.600414568961,
+        "ops_total": 5962.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0006308700001227,
+        "ops_per_sec": 5503.527989296716,
+        "ops_total": 5507.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000473288999956,
+        "ops_per_sec": 5761.2732527437365,
+        "ops_total": 5764.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000909250999939,
+        "ops_per_sec": 5962.578519518912,
+        "ops_total": 5968.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000749487999883,
+        "ops_per_sec": 6322.261540843016,
+        "ops_total": 6327.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0005650109999351,
+        "ops_per_sec": 6270.457122751024,
+        "ops_total": 6274.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0005431089998638,
+        "ops_per_sec": 6025.727373232872,
+        "ops_total": 6029.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0005469239999911,
+        "ops_per_sec": 5643.913208412452,
+        "ops_total": 5647.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0005326739999418,
+        "ops_per_sec": 5667.980813988219,
+        "ops_total": 5671.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0003518579999309,
+        "ops_per_sec": 6068.864621432452,
+        "ops_total": 6071.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0005061089998435,
+        "ops_per_sec": 5744.092862906146,
+        "ops_total": 5747.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0004703469999185,
+        "ops_per_sec": 5499.413367421322,
+        "ops_total": 5502.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0006335040000067,
+        "ops_per_sec": 5817.314707863271,
+        "ops_total": 5821.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0004514580000432,
+        "ops_per_sec": 5721.417020514506,
+        "ops_total": 5724.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000801546000048,
+        "ops_per_sec": 6087.120892596731,
+        "ops_total": 6092.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "479": {
+        "avg_ns_per_run": 341.7752477753616,
+        "bytes_jited": 176,
+        "bytes_xlated": 136,
+        "id": 479,
+        "name": "xdp_root",
+        "run_cnt_delta": 1062757,
+        "run_time_ns_delta": 363224037,
+        "type": "xdp"
+      },
+      "485": {
+        "avg_ns_per_run": null,
+        "bytes_jited": 13581,
+        "bytes_xlated": 23744,
+        "id": 485,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "487": {
+        "avg_ns_per_run": 805.0,
+        "bytes_jited": 541,
+        "bytes_xlated": 1000,
+        "id": 487,
+        "name": "healthcheck_encap",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 805,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0011091349999788,
+        "ops_per_sec": 5822.542014862469,
+        "ops_total": 5829.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0003611640001964,
+        "ops_per_sec": 6324.715740363105,
+        "ops_total": 6327.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0008847270000842,
+        "ops_per_sec": 6269.453245437995,
+        "ops_total": 6275.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0003992530000687,
+        "ops_per_sec": 6008.601048005368,
+        "ops_total": 6011.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0007103950001692,
+        "ops_per_sec": 6215.584479862377,
+        "ops_total": 6220.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0005843080000432,
+        "ops_per_sec": 6065.455905590455,
+        "ops_total": 6069.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0006620189999467,
+        "ops_per_sec": 5855.123796799478,
+        "ops_total": 5859.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0008561560000544,
+        "ops_per_sec": 5524.270362782981,
+        "ops_total": 5529.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0005711650001103,
+        "ops_per_sec": 5689.750213818496,
+        "ops_total": 5693.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000765316999832,
+        "ops_per_sec": 5932.459787673673,
+        "ops_total": 5937.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000522667000041,
+        "ops_per_sec": 6153.783620376235,
+        "ops_total": 6157.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0003940969997984,
+        "ops_per_sec": 5936.660379955438,
+        "ops_total": 5939.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0004417959999046,
+        "ops_per_sec": 5876.403828294836,
+        "ops_total": 5879.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0011783810000452,
+        "ops_per_sec": 6240.646141159253,
+        "ops_total": 6248.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000726898000039,
+        "ops_per_sec": 5780.797949531856,
+        "ops_total": 5785.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0006033899999238,
+        "ops_per_sec": 5724.545866270188,
+        "ops_total": 5728.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0004719399998976,
+        "ops_per_sec": 5896.217339189547,
+        "ops_total": 5899.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0004097109999748,
+        "ops_per_sec": 5724.654546061423,
+        "ops_total": 5727.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0004355099999884,
+        "ops_per_sec": 5881.438574686406,
+        "ops_total": 5884.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000965608999877,
+        "ops_per_sec": 5732.464680513019,
+        "ops_total": 5738.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0014968039999985,
+        "ops_per_sec": 5721.436131512616,
+        "ops_total": 5730.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.00091560199985,
+        "ops_per_sec": 5632.842558088973,
+        "ops_total": 5638.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0007750100000976,
+        "ops_per_sec": 5635.632328588471,
+        "ops_total": 5640.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0007787509998707,
+        "ops_per_sec": 6070.272769011644,
+        "ops_total": 6075.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0006083289999879,
+        "ops_per_sec": 6012.34251768863,
+        "ops_total": 6016.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.001031894999869,
+        "ops_per_sec": 5756.060350105781,
+        "ops_total": 5762.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0005410080000274,
+        "ops_per_sec": 5986.761114342888,
+        "ops_total": 5990.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0004970610000328,
+        "ops_per_sec": 5962.036504173004,
+        "ops_total": 5965.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.000423397999839,
+        "ops_per_sec": 5867.515705586231,
+        "ops_total": 5870.0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "duration_s": 1.0006443869999657,
+        "ops_per_sec": 5703.324851609042,
+        "ops_total": 5707.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": true,
+    "enabled_passes": [
+      "wide_mem"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 479, \"program\": {\"final_insn_count\": 17, \"insn_delta\": 0, \"orig_insn_count\": 17, \"prog_id\": 479, \"prog_name\": \"xdp_root\", \"prog_type\": 6}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}\n{\"changed\": true, \"passes\": [{\"changed\": true, \"insn_delta\": -12, \"insns_after\": 2530, \"insns_before\": 2542, \"pass\": \"wide_mem\", \"sites_applied\": 4}], \"passes_applied\": [\"wide_mem\"], \"prog_id\": 485, \"program\": {\"final_insn_count\": 2530, \"insn_delta\": -12, \"orig_insn_count\": 2542, \"prog_id\": 485, \"prog_name\": \"balancer_ingres\", \"prog_type\": 6}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 1, \"total_sites_applied\": 4}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 487, \"program\": {\"final_insn_count\": 103, \"insn_delta\": 0, \"orig_insn_count\": 103, \"prog_id\": 487, \"prog_name\": \"healthcheck_enc\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "479": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 17, \"insns_before\": 17, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 479, \"program\": {\"final_insn_count\": 17, \"insn_delta\": 0, \"orig_insn_count\": 17, \"prog_id\": 479, \"prog_name\": \"xdp_root\", \"prog_type\": 6}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 479,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      },
+      "485": {
+        "applied": true,
+        "changed": true,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": true, \"passes\": [{\"changed\": true, \"insn_delta\": -12, \"insns_after\": 2530, \"insns_before\": 2542, \"pass\": \"wide_mem\", \"sites_applied\": 4}], \"passes_applied\": [\"wide_mem\"], \"prog_id\": 485, \"program\": {\"final_insn_count\": 2530, \"insn_delta\": -12, \"orig_insn_count\": 2542, \"prog_id\": 485, \"prog_name\": \"balancer_ingres\", \"prog_type\": 6}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 1, \"passes_executed\": 1, \"total_sites_applied\": 4}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 4,
+            "sites_matched": 4,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 485,
+        "summary": {
+          "applied": true,
+          "passes_changed": 1,
+          "passes_executed": 1,
+          "total_sites_applied": 4
+        }
+      },
+      "487": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "wide_mem"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 103, \"insns_before\": 103, \"pass\": \"wide_mem\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 487, \"program\": {\"final_insn_count\": 103, \"insn_delta\": 0, \"orig_insn_count\": 103, \"prog_id\": 487, \"prog_name\": \"healthcheck_enc\", \"prog_type\": 3}, \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 1, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "wide_mem",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 487,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 1,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 3,
+      "not_applied": 0,
+      "requested": 3
+    }
+  },
+  "runner": "katran",
+  "selected_workload": "network",
+  "status": "ok"
+}

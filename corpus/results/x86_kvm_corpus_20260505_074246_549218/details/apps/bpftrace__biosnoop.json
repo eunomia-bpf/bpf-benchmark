@@ -1,0 +1,161 @@
+{
+  "app": "bpftrace/biosnoop",
+  "baseline": {
+    "bpf": {
+      "186": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 186,
+        "name": "block_io_start",
+        "run_cnt_delta": 1405352,
+        "run_time_ns_delta": 552861376,
+        "type": "tracepoint"
+      },
+      "187": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 187,
+        "name": "block_io_done",
+        "run_cnt_delta": 1405367,
+        "run_time_ns_delta": 1088486250,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 5.361821879000047,
+        "ops_per_sec": 351423.4606300288,
+        "ops_total": 1884270.0,
+        "stderr": "",
+        "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.166218,\n        \"1000\" : 13.999001\n      },\n      \"latency_us\" : {\n        \"2\" : 33.596707,\n        \"4\" : 1.637214,\n        \"10\" : 9.963684,\n        \"20\" : 36.342183,\n        \"50\" : 2.301872,\n        \"100\" : 1.562533,\n        \"250\" : 0.394954,\n        \"500\" : 0.035207,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "186": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 186,
+        "name": "block_io_start",
+        "run_cnt_delta": 1434957,
+        "run_time_ns_delta": 575406901,
+        "type": "tracepoint"
+      },
+      "187": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 187,
+        "name": "block_io_done",
+        "run_cnt_delta": 1434972,
+        "run_time_ns_delta": 1082292355,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 5.3483143039999845,
+        "ops_per_sec": 358795.8543432689,
+        "ops_total": 1918953.0,
+        "stderr": "",
+        "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.216646,\n        \"1000\" : 13.295603\n      },\n      \"latency_us\" : {\n        \"2\" : 34.091488,\n        \"4\" : 1.752385,\n        \"10\" : 11.046417,\n        \"20\" : 34.762108,\n        \"50\" : 2.663884,\n        \"100\" : 1.825087,\n        \"250\" : 0.320477,\n        \"500\" : 0.025697,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "changed": false,
+    "enabled_passes": [
+      "noop",
+      "map_inline"
+    ],
+    "error": "",
+    "exit_code": 0,
+    "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 51, \"insns_before\": 51, \"pass\": \"noop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 51, \"insns_before\": 51, \"pass\": \"map_inline\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 186, \"program\": {\"final_insn_count\": 51, \"insn_delta\": 0, \"orig_insn_count\": 51, \"prog_id\": 186, \"prog_name\": \"block_io_start\", \"prog_type\": 5}, \"skipped_maps\": [{\"map_id\": 248, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 247, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 246, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 2, \"total_sites_applied\": 0}}\n{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 181, \"insns_before\": 181, \"pass\": \"noop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 181, \"insns_before\": 181, \"pass\": \"map_inline\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 187, \"program\": {\"final_insn_count\": 181, \"insn_delta\": 0, \"orig_insn_count\": 181, \"prog_id\": 187, \"prog_name\": \"block_io_done\", \"prog_type\": 5}, \"skipped_maps\": [{\"map_id\": 248, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 249, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 246, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 247, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 251, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 2, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "186": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "noop",
+          "map_inline"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 51, \"insns_before\": 51, \"pass\": \"noop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 51, \"insns_before\": 51, \"pass\": \"map_inline\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 186, \"program\": {\"final_insn_count\": 51, \"insn_delta\": 0, \"orig_insn_count\": 51, \"prog_id\": 186, \"prog_name\": \"block_io_start\", \"prog_type\": 5}, \"skipped_maps\": [{\"map_id\": 248, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 247, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 246, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 2, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "noop",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 186,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 2,
+          "total_sites_applied": 0
+        }
+      },
+      "187": {
+        "applied": true,
+        "changed": false,
+        "enabled_passes": [
+          "noop",
+          "map_inline"
+        ],
+        "error": "",
+        "exit_code": 0,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"passes\": [{\"changed\": false, \"insn_delta\": 0, \"insns_after\": 181, \"insns_before\": 181, \"pass\": \"noop\", \"sites_applied\": 0}, {\"changed\": false, \"insn_delta\": 0, \"insns_after\": 181, \"insns_before\": 181, \"pass\": \"map_inline\", \"sites_applied\": 0}], \"passes_applied\": [], \"prog_id\": 187, \"program\": {\"final_insn_count\": 181, \"insn_delta\": 0, \"orig_insn_count\": 181, \"prog_id\": 187, \"prog_name\": \"block_io_done\", \"prog_type\": 5}, \"skipped_maps\": [{\"map_id\": 248, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 249, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 246, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 247, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 251, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"ok\", \"summary\": {\"applied\": true, \"passes_changed\": 0, \"passes_executed\": 2, \"total_sites_applied\": 0}}",
+        "passes": [
+          {
+            "action": "kept",
+            "pass_name": "noop",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          },
+          {
+            "action": "kept",
+            "pass_name": "map_inline",
+            "sites_applied": 0,
+            "sites_matched": 0,
+            "sites_skipped": 0,
+            "skip_reasons": {}
+          }
+        ],
+        "prog_id": 187,
+        "summary": {
+          "applied": true,
+          "passes_changed": 0,
+          "passes_executed": 2,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 2,
+      "not_applied": 0,
+      "requested": 2
+    }
+  },
+  "runner": "bpftrace",
+  "selected_workload": "fio_randrw",
+  "status": "ok"
+}

@@ -1,0 +1,91 @@
+{
+  "app": "bpftrace/tcplife",
+  "baseline": {
+    "bpf": {
+      "852": {
+        "avg_ns_per_run": 820.3932664756447,
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 852,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 2792,
+        "run_time_ns_delta": 2290538,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0002109440000027,
+        "ops_per_sec": 309.93462115127505,
+        "ops_total": 310.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "852": {
+        "avg_ns_per_run": 915.8705374656728,
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 852,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 2549,
+        "run_time_ns_delta": 2334554,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "duration_s": 1.0007044550000046,
+        "ops_per_sec": 282.8007795768219,
+        "ops_total": 283.0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": false,
+    "changed": false,
+    "enabled_passes": [
+      "map_inline"
+    ],
+    "error": "prog 852: prog 852 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+    "exit_code": 1,
+    "output": "{\"changed\": false, \"error_message\": \"prog 852 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 852, \"program\": {\"final_insn_count\": 401, \"insn_delta\": 0, \"orig_insn_count\": 401, \"prog_id\": 852, \"prog_name\": \"tcp_set_state\", \"prog_type\": 2}, \"skipped_maps\": [{\"map_id\": 4249, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 4251, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 4250, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 4253, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+    "per_program": {
+      "852": {
+        "applied": false,
+        "changed": false,
+        "enabled_passes": [
+          "map_inline"
+        ],
+        "error": "prog 852 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT",
+        "exit_code": 1,
+        "inlined_map_entries": [],
+        "output": "{\"changed\": false, \"error_message\": \"prog 852 pass map_inline failed after 0 committed passes: pass map_inline requires verifier states from a previous per-pass ReJIT\", \"passes\": [], \"passes_applied\": [], \"prog_id\": 852, \"program\": {\"final_insn_count\": 401, \"insn_delta\": 0, \"orig_insn_count\": 401, \"prog_id\": 852, \"prog_name\": \"tcp_set_state\", \"prog_type\": 2}, \"skipped_maps\": [{\"map_id\": 4249, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 4251, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 4250, \"reason\": \"mutated by kernel-side BPF program\"}, {\"map_id\": 4253, \"reason\": \"mutated by kernel-side BPF program\"}], \"status\": \"error\", \"summary\": {\"applied\": false, \"committed_passes_before_failure\": 0, \"failed_pass\": \"map_inline\", \"passes_changed\": 0, \"passes_executed\": 0, \"total_sites_applied\": 0}}",
+        "passes": [],
+        "prog_id": 852,
+        "summary": {
+          "applied": false,
+          "committed_passes_before_failure": 0,
+          "failed_pass": "map_inline",
+          "passes_changed": 0,
+          "passes_executed": 0,
+          "total_sites_applied": 0
+        }
+      }
+    },
+    "program_counts": {
+      "applied": 0,
+      "not_applied": 1,
+      "requested": 1
+    }
+  },
+  "runner": "bpftrace",
+  "selected_workload": "tcp_connect",
+  "status": "ok"
+}

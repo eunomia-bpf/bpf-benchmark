@@ -1,0 +1,10 @@
+{
+  "app": "bpftrace/vfsstat",
+  "baseline": null,
+  "error": "stress_ng_filesystem workload failed: /usr/bin/stress-ng: unrecognized option '--hardlink'",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "bpftrace",
+  "selected_workload": "stress_ng_filesystem",
+  "status": "error"
+}
