@@ -1,0 +1,455 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 5900181,
+        "run_time_ns_delta": 900918225,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.101812534999993,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   249.69us  159.85us   4.65ms   82.03%\n    Req/Sec     8.30k   405.26     9.90k    73.09%\n  Latency Distribution\n     50%  209.00us\n     75%  311.00us\n     90%  451.00us\n     99%  812.00us\n  994360 requests in 30.10s, 154.57MB read\nRequests/sec:  33035.72\nTransfer/sec:      5.14MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.10291195399998,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   257.27us  167.65us   4.14ms   81.81%\n    Req/Sec     8.07k   526.77     9.88k    74.34%\n  Latency Distribution\n     50%  215.00us\n     75%  326.00us\n     90%  468.00us\n     99%  842.00us\n  966379 requests in 30.10s, 150.22MB read\nRequests/sec:  32105.98\nTransfer/sec:      4.99MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.102812176000015,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   250.65us  159.78us   3.85ms   80.40%\n    Req/Sec     8.26k   467.56     9.70k    72.01%\n  Latency Distribution\n     50%  210.00us\n     75%  317.00us\n     90%  454.00us\n     99%  811.00us\n  989285 requests in 30.10s, 153.78MB read\nRequests/sec:  32866.76\nTransfer/sec:      5.11MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13567,
+        "bytes_xlated": 23800,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 5367032,
+        "run_time_ns_delta": 1009874432,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.101939921999985,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   291.62us  199.07us   6.93ms   80.81%\n    Req/Sec     7.09k     1.16k   11.32k    63.42%\n  Latency Distribution\n     50%  253.00us\n     75%  376.00us\n     90%  517.00us\n     99%    0.92ms\n  848935 requests in 30.10s, 131.97MB read\nRequests/sec:  28204.43\nTransfer/sec:      4.38MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.101837707000016,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   264.93us  164.98us   5.06ms   75.59%\n    Req/Sec     7.76k     0.92k   11.28k    64.45%\n  Latency Distribution\n     50%  229.00us\n     75%  342.00us\n     90%  473.00us\n     99%  809.00us\n  929623 requests in 30.10s, 144.51MB read\nRequests/sec:  30884.81\nTransfer/sec:      4.80MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.103061216000015,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   273.28us  177.44us   4.59ms   77.84%\n    Req/Sec     7.56k     1.08k   11.28k    63.09%\n  Latency Distribution\n     50%  236.00us\n     75%  353.00us\n     90%  492.00us\n     99%    0.87ms\n  904890 requests in 30.10s, 140.66MB read\nRequests/sec:  30062.90\nTransfer/sec:      4.67MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "passes": [
+          {
+            "bpfopt_ms": 6,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2530,
+              "insn_count_before": 2542,
+              "insn_delta": -12,
+              "pass": "wide_mem",
+              "sites_applied": 4,
+              "sites_matched": 4,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 85,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 7,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2530,
+              "insn_count_before": 2530,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 85,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 6,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2537,
+              "insn_count_before": 2530,
+              "insn_delta": 7,
+              "pass": "cond_select",
+              "sites_applied": 7,
+              "sites_matched": 7,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 86,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2537,
+              "insn_count_before": 2537,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 86,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2537,
+              "insn_count_before": 2537,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 6,
+              "sites_matched": 6,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 87,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_ms": 5,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2537,
+              "insn_count_before": 2537,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 451,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 330,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "maps_skipped_by_size=7",
+                "site at PC=502: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=502: verifier-guided key extraction failed: verifier log did not expose constant stack bytes covering fp0 width 20 at call pc 502",
+                "site at PC=510: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=510: verifier-guided key extraction failed: verifier log did not expose constant stack bytes covering fp0 width 20 at call pc 510",
+                "site at PC=552: skip reason: map-in-map chain is not inlineable",
+                "site at PC=753: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=753: verifier-guided key extraction failed: verifier log did not expose r2 stack pointer at call pc 753",
+                "site at PC=761: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=761: verifier-guided key extraction failed: verifier log did not expose r2 stack pointer at call pc 761",
+                "site at PC=805: skip reason: map-in-map chain is not inlineable",
+                "site at PC=854: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=854: verifier-guided key extraction failed: verifier log did not expose r2 stack pointer at call pc 854",
+                "site at PC=887: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=887: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 887",
+                "site at PC=1011: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "site at PC=1065: skip reason: map-in-map outer key unavailable: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1065",
+                "site at PC=1345: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1345: verifier-guided key extraction failed: verifier log did not expose constant stack bytes covering fp-88 width 4 at call pc 1345",
+                "site at PC=1567: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "site at PC=1720: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "site at PC=1770: skip reason: map-in-map outer key unavailable: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1770",
+                "site at PC=2057: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=2057: verifier-guided key extraction failed: verifier log did not expose r2 stack pointer at call pc 2057",
+                "site at PC=1098: inlined successfully, value=0x02000000000b0000",
+                "site at PC=1801: inlined successfully, value=0x02000000000b0000",
+                "round 2: site at PC=502: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=502: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=510: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=510: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=552: skip reason: map-in-map chain is not inlineable",
+                "round 2: site at PC=753: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=753: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=761: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=761: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=805: skip reason: map-in-map chain is not inlineable",
+                "round 2: site at PC=854: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=854: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=887: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=887: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1011: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "round 2: site at PC=1065: skip reason: map-in-map outer key unavailable: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1098: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1098: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1345: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1345: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1567: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "round 2: site at PC=1720: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "round 2: site at PC=1770: skip reason: map-in-map outer key unavailable: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1801: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1801: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=2057: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=2057: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "inline_hints_consumed=1"
+              ],
+              "inlined_map_entries": [
+                {
+                  "key_hex": "00000000",
+                  "map_id": 4,
+                  "value_hex": "02000000000b0000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 4,
+                  "value_hex": "02000000000b0000"
+                }
+              ],
+              "insn_count_after": 2537,
+              "insn_count_before": 2537,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 2,
+              "sites_matched": 19,
+              "sites_skipped": 17,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 10,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6": 3,
+                "map-in-map chain is not inlineable": 2,
+                "map-in-map outer key unavailable: verifier-guided key extraction is unavailable after a prior map_inline rewrite": 2
+              }
+            },
+            "error": null,
+            "rejit_syscall_ms": 455,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --inline-hint=ctl_array:!00000000",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_ms": 254,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "const_prop_alu_materialized=116"
+              ],
+              "insn_count_after": 2601,
+              "insn_count_before": 2537,
+              "insn_delta": 64,
+              "pass": "const_prop",
+              "sites_applied": 116,
+              "sites_matched": 116,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 13: Permission denied (os error 13)\nverifier log:\n0: R1=ctx() R10=fp0\n0: (bf) r6 = r1                       ; R1=ctx() R6=ctx()\n1: (b7) r7 = 1                        ; R7=1\n2: (61) r8 = *(u32 *)(r6 +0)          ; R6=ctx() R8=pkt(r=0)\n3: (61) r9 = *(u32 *)(r6 +4)          ; R6=ctx() R9=pkt_end()\n4: (bf) r1 = r8                       ; R1=pkt(r=0) R8=pkt(r=0)\n5: (07) r1 += 14                      ; R1=pkt(off=14,r=0)\n6: (2d) if r1 > r9 goto pc+1559       ; R1=pkt(off=14,r=14) R9=pkt_end()\n7: (b7) r1 = 528                      ; R1=528\n8: (63) *(u32 *)(r10 -132) = r1       ; R1=528 R10=fp0 fp-136=mmmm????\n9: (bf) r2 = r10                      ; R2=fp0 R10=fp0\n10: (07) r2 += -132                   ; R2=fp-132\n11: (18) r1 = 0xffff88857bcc0000      ; R1=map_ptr(map=stats,ks=4,vs=16)\n13: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=1,map=stats,ks=4,vs=16)\n14: (15) if r0 == 0x0 goto pc+1551    ; R0=map_value(map=stats,ks=4,vs=16)\n15: (1f) r9 -= r8                     ; R8=pkt(r=14) R9=scalar()\n16: (79) r1 = *(u64 *)(r0 +8)         ; R0=map_value(map=stats,ks=4,vs=16) R1=scalar()\n17: (0f) r1 += r9                     ; R1=scalar() R9=scalar()\n18: (7b) *(u64 *)(r0 +8) = r1         ; R0=map_value(map=stats,ks=4,vs=16) R1=scalar()\n19: (79) r1 = *(u64 *)(r0 +0)         ; R0=map_value(map=stats,ks=4,vs=16) R1=scalar()\n20: (07) r1 += 1                      ; R1=scalar()\n21: (7b) *(u64 *)(r0 +0) = r1         ; R0=map_value(map=stats,ks=4,vs=16) R1=scalar()\n22: (71) r2 = *(u8 *)(r8 +12)         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R8=pkt(r=14)\n23: (71) r1 = *(u8 *)(r8 +13)         ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R8=pkt(r=14)\n24: (67) r1 <<= 8                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff00,var_off=(0x0; 0xff00))\n25: (4f) r1 |= r2                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n26: (b7) r8 = 1                       ; R8=1\n27: (15) if r1 == 0xdd86 goto pc+118          ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n28: (55) if r1 != 0x8 goto pc+1511    ; R1=8\n29: (61) r2 = *(u32 *)(r6 +4)         ; R2=pkt_end() R6=ctx()\n30: (61) r7 = *(u32 *)(r6 +0)         ; R6=ctx() R7=pkt(r=0)\n31: (b7) r1 = 0                       ; R1=0\n32: (7b) *(u64 *)(r10 -48) = r1       ; R1=0 R10=fp0 fp-48=0\n33: (7b) *(u64 *)(r10 -56) = r1       ; R1=0 R10=fp0 fp-56=0\n34: (7b) *(u64 *)(r10 -64) = r1       ; R1=0 R10=fp0 fp-64=0\n35: (7b) *(u64 *)(r10 -72) = r1       ; R1=0 R10=fp0 fp-72=0\n36: (7b) *(u64 *)(r10 -80) = r1       ; R1=0 R10=fp0 fp-80=0\n37: (7b) *(u64 *)(r10 -88) = r1       ; R1=0 R10=fp0 fp-88=0\n38: (63) *(u32 *)(r10 -96) = r1       ; R1=0 R10=fp0 fp-96=????0\n39: (7b) *(u64 *)(r10 -104) = r1      ; R1=0 R10=fp0 fp-104=0\n40: (7b) *(u64 *)(r10 -112) = r1      ; R1=0 R10=fp0 fp-112=0\n41: (63) *(u32 *)(r10 -120) = r1      ; R1=0 R10=fp0 fp-120=????0\n42: (bf) r3 = r7                      ; R3=pkt(r=0) R7=pkt(r=0)\n43: (07) r3 += 34                     ; R3=pkt(off=34,r=0)\n44: (7b) *(u64 *)(r10 -144) = r2      ; R2=pkt_end() R10=fp0 fp-144=pkt_end()\n45: (2d) if r3 > r2 goto pc+1491      ; R2=pkt_end() R3=pkt(off=34,r=34)\n46: (71) r1 = *(u8 *)(r7 +14)         ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=pkt(r=34)\n47: (57) r1 &= 15                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=15,var_off=(0x0; 0xf))\n48: (55) if r1 != 0x5 goto pc+1488    ; R1=5\n49: (71) r1 = *(u8 *)(r7 +15)         ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=pkt(r=34)\n50: (73) *(u8 *)(r10 -43) = r1        ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-48=mmmmmmmm\n51: (71) r1 = *(u8 *)(r7 +23)         ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=pkt(r=34)\n52: (73) *(u8 *)(r10 -52) = r1        ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-56=mmmmmmmm\n53: (69) r2 = *(u16 *)(r7 +20)        ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R7=pkt(r=34)\n54: (bf) r4 = r2                      ; R2=scalar(id=2,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R4=scalar(id=2,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n55: (57) r4 &= 65343                  ; R4=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff3f,var_off=(0x0; 0xff3f))\n56: (55) if r4 != 0x0 goto pc+1480    ; R4=0\n57: (69) r0 = *(u16 *)(r7 +16)        ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R7=pkt(r=34)\n58: (15) if r1 == 0x1 goto pc+245     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n59: (61) r2 = *(u32 *)(r7 +26)        ; R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=34)\n60: (63) *(u32 *)(r10 -88) = r2       ; R2=scalar(id=3,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-88=mmmmscalar(id=3,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n61: (61) r2 = *(u32 *)(r7 +30)        ; R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=34)\n62: (63) *(u32 *)(r10 -72) = r2       ; R2=scalar(id=4,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-72=mmmmscalar(id=4,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n63: (b7) r2 = 0                       ; R2=0\n64: (55) if r1 != 0x3a goto pc+625    ; R1=58\n65: (bf) r1 = r7                      ; R1=pkt(r=34) R7=pkt(r=34)\n66: (07) r1 += 42                     ; R1=pkt(off=42,r=34)\n67: (79) r2 = *(u64 *)(r10 -144)      ; R2=pkt_end() R10=fp0 fp-144=pkt_end()\n68: (2d) if r1 > r2 goto pc+1468      ; R1=pkt(off=42,r=42) R2=pkt_end()\n69: (71) r1 = *(u8 *)(r3 +0)          ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R3=pkt(off=34,r=42)\n70: (15) if r1 == 0x1 goto pc+589     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n71: (15) if r1 == 0x2 goto pc+569 641: R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R1=2 R2=pkt_end() R3=pkt(off=34,r=42) R4=0 R6=ctx() R7=pkt(r=42) R8=1 R9=scalar() R10=fp0 fp-48=mmmmmmmm fp-56=mmmmmmmm fp-64=0 fp-72=mmmmscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-80=0 fp-88=mmmmscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\n641: (bf) r8 = r0                     ; R0=scalar(id=10,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R8=scalar(id=10,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n642: (b7) r1 = 524                    ; R1=524\n643: (63) *(u32 *)(r10 -32) = r1      ; R1=524 R10=fp0 fp-32=????524\n644: (bf) r2 = r10                    ; R2=fp0 R10=fp0\n645: (07) r2 += -32                   ; R2=fp-32\n646: (18) r1 = 0xffff88857bcc0000     ; R1=map_ptr(map=stats,ks=4,vs=16)\n648: (85) call bpf_map_lookup_elem#1          ; R0=map_value(map=stats,ks=4,vs=16)\n649: (15) if r0 == 0x0 goto pc+886    ; R0=map_value(map=stats,ks=4,vs=16)\n650: (79) r1 = *(u64 *)(r0 +0)        ; R0=map_value(map=stats,ks=4,vs=16) R1=scalar()\n651: (07) r1 += 1                     ; R1=scalar()\n652: (7b) *(u64 *)(r0 +0) = r1        ; R0=map_value(map=stats,ks=4,vs=16) R1=scalar()\n653: (61) r1 = *(u32 *)(r7 +38)       ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=42)\n654: (d7) r1 = bswap32 r1             ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n655: (25) if r1 > 0x4ff goto pc+3     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1279,var_off=(0x0; 0x7ff))\n656: (79) r1 = *(u64 *)(r0 +8)        ; R0=map_value(map=stats,ks=4,vs=16) R1=scalar()\n657: (07) r1 += 1                     ; R1=scalar()\n658: (7b) *(u64 *)(r0 +8) = r1        ; R0=map_value(map=stats,ks=4,vs=16) R1=scalar()\n659: (bf) r0 = r8                     ; R0=scalar(id=11,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R8=scalar(id=11,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n660: (bf) r1 = r7                     ; R1=pkt(r=42) R7=pkt(r=42)\n661: (07) r1 += 82                    ; R1=pkt(off=82,r=42)\n662: (b7) r8 = 1                      ; R8=1\n663: (79) r2 = *(u64 *)(r10 -144)     ; R2=pkt_end() R10=fp0 fp-144=pkt_end()\n664: (2d) if r1 > r2 goto pc+872      ; R1=pkt(off=82,r=82) R2=pkt_end()\n665: (bf) r3 = r10                    ; R3=fp0 R10=fp0\n666: (07) r3 += -72                   ; R3=fp-72\n667: (71) r1 = *(u8 *)(r7 +48)        ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=pkt(r=82)\n668: (73) *(u8 *)(r10 -52) = r1       ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-56=mmmmmmmm\n669: (71) r2 = *(u8 *)(r10 -44)       ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-48=mmmmmmmm\n670: (47) r2 |= 1                     ; R2=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=255,var_off=(0x1; 0xfe))\n671: (73) *(u8 *)(r10 -44) = r2       ; R2=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=255,var_off=(0x1; 0xfe)) R10=fp0 fp-48=mmmmmmmm\n672: (61) r4 = *(u32 *)(r7 +78)       ; R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=82)\n673: (67) r4 <<= 32                   ; R4=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n674: (61) r5 = *(u32 *)(r7 +74)       ; R5=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=82)\n675: (4f) r4 |= r5                    ; R4=scalar() R5=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n676: (7b) *(u64 *)(r10 -80) = r4      ; R4=scalar(id=12) R10=fp0 fp-80=scalar(id=12)\n677: (61) r4 = *(u32 *)(r7 +70)       ; R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=82)\n678: (67) r4 <<= 32                   ; R4=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n679: (61) r5 = *(u32 *)(r7 +66)       ; R5=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=82)\n680: (4f) r4 |= r5                    ; R4=scalar() R5=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n681: (7b) *(u64 *)(r10 -88) = r4      ; R4=scalar(id=13) R10=fp0 fp-88=scalar(id=13)\n682: (61) r4 = *(u32 *)(r7 +58)       ; R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=82)\n683: (63) *(u32 *)(r3 +8) = r4        ; R3=fp-72 R4=scalar(id=14,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=mmmmscalar(id=14,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n684: (61) r4 = *(u32 *)(r7 +62)       ; R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=82)\n685: (63) *(u32 *)(r3 +12) = r4       ; R3=fp-72 R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-64=mmmmmmmm\n686: (61) r4 = *(u32 *)(r7 +50)       ; R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=82)\n687: (63) *(u32 *)(r3 +0) = r4        ; R3=fp-72 R4=scalar(id=15,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-72=mmmmscalar(id=15,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n688: (61) r4 = *(u32 *)(r7 +54)       ; R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=82)\n689: (63) *(u32 *)(r3 +4) = r4        ; R3=fp-72 R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-72=mmmmmmmm\n690: (15) if r1 == 0x11 goto pc+33    ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n691: (b7) r8 = 2                      ; R8=2\n692: (55) if r1 != 0x6 goto pc+844    ; R1=6\n693: (bf) r3 = r2                     ; R2=scalar(id=16,smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=255,var_off=(0x1; 0xfe)) R3=scalar(id=16,smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=255,var_off=(0x1; 0xfe))\n694: (57) r3 &= 1                     ; R3=1\n695: (b7) r5 = 34                     ; R5=34\n696: (7b) *(u64 *)(r10 -160) = r3     ; R3=1 R10=fp0 fp-160=1\n697: (15) if r3 == 0x0 goto pc+1      ; R3=1\n698: (b7) r5 = 62                     ; R5=62\n699: (bf) r4 = r7                     ; R4=pkt(r=82) R7=pkt(r=82)\n700: (0f) r4 += r5                    ; R4=pkt(off=62,r=82) R5=62\n701: (bf) r5 = r4                     ; R4=pkt(off=62,r=82) R5=pkt(off=62,r=82)\n702: (b7) r5 = 62                     ; R5=62\n703: (b7) r8 = 1                      ; R8=1\n704: (79) r3 = *(u64 *)(r10 -144)     ; R3=pkt_end() R10=fp0 fp-144=pkt_end()\n705: (2d) if r5 > r3 goto pc+831      ; R3=pkt_end() R5=62\n706: (7b) *(u64 *)(r10 -152) = r0     ; R0=scalar(id=17,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-152=scalar(id=17,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n707: (69) r5 = *(u16 *)(r4 +12)       ; R4=pkt(off=62,r=82) R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n708: (bf) r0 = r5                     ; R0=scalar(id=18,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R5=scalar(id=18,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n709: (57) r0 &= 512                   ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=512,var_off=(0x0; 0x200))\n710: (15) if r0 == 0x0 goto pc+3      ; R0=512\n711: (b7) r2 = 2                      ; R2=2\n712: (73) *(u8 *)(r10 -44) = r2       ; R2=2 R10=fp0 fp-48=mmmmmmmm\n713: (69) r5 = *(u16 *)(r4 +12)       ; R4=pkt(off=62,r=82) R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n714: (57) r5 &= 1024                  ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=1024,var_off=(0x0; 0x400))\n715: (15) if r5 == 0x0 goto pc+2      ; R5=1024\n716: (47) r2 |= 4                     ; R2=6\n717: (73) *(u8 *)(r10 -44) = r2       ; R2=6 R10=fp0 fp-48=mmmmmmmm\n718: (79) r2 = *(u64 *)(r10 -160)     ; R2=1 R10=fp0 fp-160=1\n719: (55) if r2 != 0x0 goto pc+23     ; R2=1\n743: (69) r2 = *(u16 *)(r4 +2)        ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R4=pkt(off=62,r=82)\n744: (6b) *(u16 *)(r10 -56) = r2      ; R2=scalar(id=19,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-56=mmmmmmscalar(id=19,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n745: (69) r2 = *(u16 *)(r4 +0)        ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R4=pkt(off=62,r=82)\n746: (05) goto pc+3\n750: (6b) *(u16 *)(r10 -54) = r2      ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-56=mmmmmmmm\n751: (73) *(u8 *)(r10 -94) = r1       ; R1=6 R10=fp0 fp-96=????mmmm\n752: (6b) *(u16 *)(r10 -96) = r2      ; R2=scalar(id=20,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-96=????mmscalar(id=20,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n753: (61) r1 = *(u32 *)(r10 -72)      ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-72=mmmmmmmm\n754: (63) *(u32 *)(r10 -112) = r1     ; R1=scalar(id=21,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-112=mmmmscalar(id=21,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n755: (bf) r2 = r10                    ; R2=fp0 R10=fp0\n756: (07) r2 += -112                  ; R2=fp-112\n757: (18) r1 = 0xffff888186ddc000     ; R1=map_ptr(map=vip_map,ks=20,vs=8)\n759: (85) call bpf_map_lookup_elem#1          ; R0=map_value_or_null(id=22,map=vip_map,ks=20,vs=8)\n760: (55) if r0 != 0x0 goto pc+16     ; R0=0\n761: (b7) r1 = 0                      ; R1=0\n762: (6b) *(u16 *)(r10 -96) = r1      ; R1=0 R10=fp0 fp-96=????mm0\n763: (bf) r2 = r10                    ; R2=fp0 R10=fp0\n764: (07) r2 += -112                  ; R2=fp-112\n765: (18) r1 = 0xffff888186ddc000     ; R1=map_ptr(map=vip_map,ks=20,vs=8)\n767: (85) call bpf_map_lookup_elem#1          ; R0=map_value_or_null(id=23,map=vip_map,ks=20,vs=8)\n768: (b7) r8 = 2                      ; R8=2\n769: (79) r1 = *(u64 *)(r10 -152)     ; R1=scalar(id=24,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-152=scalar(id=24,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n770: (15) if r0 == 0x0 goto pc+766    ; R0=map_value(map=vip_map,ks=20,vs=8)\n771: (7b) *(u64 *)(r10 -152) = r1     ; R1=scalar(id=24,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-152=scalar(id=24,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n772: (61) r1 = *(u32 *)(r0 +0)        ; R0=map_value(map=vip_map,ks=20,vs=8) R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n773: (57) r1 &= 136                   ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=136,var_off=(0x0; 0x88))\n774: (55) if r1 != 0x0 goto pc+2      ; R1=0\n775: (b7) r1 = 0                      ; R1=0\n776: (6b) *(u16 *)(r10 -54) = r1      ; R1=0 R10=fp0 fp-56=mmmm00mm\n777: (79) r1 = *(u64 *)(r10 -144)     ; R1=pkt_end() R10=fp0 fp-144=pkt_end()\n778: (1f) r1 -= r7                    ; R1=scalar() R7=pkt(r=82)\n779: (b7) r8 = 1                      ; R8=1\n780: (79) r2 = *(u64 *)(r10 -152)     ; R2=scalar(id=25,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-152=scalar(id=25,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n781: (65) if r1 s> 0x5ea goto pc+755          ; R1=scalar(smax=1514)\n782: (7b) *(u64 *)(r10 -160) = r0     ; R0=map_value(map=vip_map,ks=20,vs=8) R10=fp0 fp-160=map_value(map=vip_map,ks=20,vs=8)\n783: (7b) *(u64 *)(r10 -152) = r2     ; R2=scalar(id=25,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-152=scalar(id=25,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n784: (b7) r1 = 512                    ; R1=512\n785: (63) *(u32 *)(r10 -124) = r1     ; R1=512 R10=fp0 fp-128=mmmm????\n786: (bf) r2 = r10                    ; R2=fp0 R10=fp0\n787: (07) r2 += -124                  ; R2=fp-124\n788: (18) r1 = 0xffff88857bcc0000     ; R1=map_ptr(map=stats,ks=4,vs=16)\n790: (85) call bpf_map_lookup_elem#1          ; R0=map_value_or_null(id=26,map=stats,ks=4,vs=16)\n791: (15) if r0 == 0x0 goto pc+745    ; R0=map_value(map=stats,ks=4,vs=16)\n792: (79) r1 = *(u64 *)(r0 +0)        ; R0=map_value(map=stats,ks=4,vs=16) R1=scalar()\n793: (07) r1 += 1                     ; R1=scalar()\n794: (7b) *(u64 *)(r10 -176) = r0     ; R0=map_value(map=stats,ks=4,vs=16) R10=fp0 fp-176=map_value(map=stats,ks=4,vs=16)\n795: (7b) *(u64 *)(r0 +0) = r1        ; R0=map_value(map=stats,ks=4,vs=16) R1=scalar()\n796: (79) r8 = *(u64 *)(r10 -160)     ; R8=map_value(map=vip_map,ks=20,vs=8) R10=fp0 fp-160=map_value(map=vip_map,ks=20,vs=8)\n797: (61) r1 = *(u32 *)(r8 +0)        ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R8=map_value(map=vip_map,ks=20,vs=8)\n798: (57) r1 &= 1                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))\n799: (15) if r1 == 0x0 goto pc+2      ; R1=1\n800: (b7) r1 = 0                      ; R1=0\n801: (6b) *(u16 *)(r10 -56) = r1      ; R1=0 R10=fp0 fp-56=mmmm000\n802: (61) r1 = *(u32 *)(r8 +4)        ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R8=map_value(map=vip_map,ks=20,vs=8)\n803: (7b) *(u64 *)(r10 -184) = r1     ; R1=scalar(id=27,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-184=scalar(id=27,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n804: (63) *(u32 *)(r10 -116) = r1     ; R1=scalar(id=27,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-120=mmmmmmmm\n805: (85) call bpf_get_smp_processor_id#8     ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=15,var_off=(0x0; 0xf))\n806: (63) *(u32 *)(r10 -128) = r0     ; R0=scalar(id=28,smin=smin32=0,smax=umax=smax32=umax32=15,var_off=(0x0; 0xf)) R10=fp0 fp-128=mmmmscalar(id=28,smin=smin32=0,smax=umax=smax32=umax32=15,var_off=(0x0; 0xf))\n807: (bf) r2 = r10                    ; R2=fp0 R10=fp0\n808: (07) r2 += -128                  ; R2=fp-128\n809: (18) r1 = 0xffff8881089fa000     ; R1=map_ptr(map=lru_mapping,ks=4,vs=4)\n811: (85) call bpf_map_lookup_elem#1          ; R0=map_value_or_null(id=29,map=lru_mapping,ks=4,vs=4)\n812: (7b) *(u64 *)(r10 -168) = r0     ; R0=map_value_or_null(id=29,map=lru_mapping,ks=4,vs=4) R10=fp0 fp-168=map_value_or_null(id=29,map=lru_mapping,ks=4,vs=4)\n813: (55) if r0 != 0x0 goto pc+15     ; R0=0\n814: (b7) r1 = 515                    ; R1=515\n815: (63) *(u32 *)(r10 -32) = r1      ; R1=515 R10=fp0 fp-32=????515\n816: (bf) r2 = r10                    ; R2=fp0 R10=fp0\n817: (07) r2 += -32                   ; R2=fp-32\n818: (18) r1 = 0xffff88857bcc0000     ; R1=map_ptr(map=stats,ks=4,vs=16)\n820: (85) call bpf_map_lookup_elem#1          ; R0=map_value(map=stats,ks=4,vs=16)\n821: (15) if r0 == 0x0 goto pc+714    ; R0=map_value(map=stats,ks=4,vs=16)\n822: (79) r1 = *(u64 *)(r0 +0)        ; R0=map_value(map=stats,ks=4,vs=16) R1=scalar()\n823: (07) r1 += 1                     ; R1=scalar()\n824: (7b) *(u64 *)(r0 +0) = r1        ; R0=map_value(map=stats,ks=4,vs=16) R1=scalar()\n825: (18) r1 = 0xffff888121462c00     ; R1=map_ptr(map=fallback_cache,ks=40,vs=16)\n827: (7b) *(u64 *)(r10 -168) = r1     ; R1=map_ptr(map=fallback_cache,ks=40,vs=16) R10=fp0 fp-168=map_ptr(map=fallback_cache,ks=40,vs=16)\n828: (79) r8 = *(u64 *)(r10 -160)     ; R8=map_value(map=vip_map,ks=20,vs=8) R10=fp0 fp-160=map_value(map=vip_map,ks=20,vs=8)\n829: (61) r1 = *(u32 *)(r8 +0)        ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R8=map_value(map=vip_map,ks=20,vs=8)\n830: (57) r1 &= 4                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=4,var_off=(0x0; 0x4))\n831: (15) if r1 == 0x0 goto pc+888    ; R1=4\n832: (71) r1 = *(u8 *)(r10 -44)       ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-48=mmmmmmmm\n833: (57) r1 &= 1                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))\n834: (15) if r1 == 0x0 goto pc+54 889: R0=map_value(map=stats,ks=4,vs=16) R1=0 R6=ctx() R7=pkt(r=82) R8=map_value(map=vip_map,ks=20,vs=8) R9=scalar() R10=fp0 fp-32=????515 fp-48=mmmmmmmm fp-56=mmmm000 fp-64=mmmmmmmm fp-72=mmmmmmmm fp-80=scalar() fp-88=scalar() fp-96=????mm0 fp-104=0 fp-112=mmmmscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-120=mmmmmmmm fp-128=mmmmscalar(smin=smin32=0,smax=umax=smax32=umax32=15,var_off=(0x0; 0xf)) fp-136=mmmm???? fp-144=pkt_end() fp-152=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-160=map_value(map=vip_map,ks=20,vs=8) fp-168=map_ptr(map=fallback_cache,ks=40,vs=16) fp-176=map_value(map=stats,ks=4,vs=16) fp-184=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n889: (b7) r1 = 0                      ; R1=0\n890: (63) *(u32 *)(r10 -8) = r1       ; R1=0 R10=fp0 fp-8=????0\n891: (bf) r2 = r10                    ; R2=fp0 R10=fp0\n892: (07) r2 += -8                    ; R2=fp-8\n893: (18) r1 = 0xffff8881075df400     ; R1=map_ptr(map=quic_stats_map,ks=4,vs=104)\n895: (85) call bpf_map_lookup_elem#1          ; R0=map_value(map=quic_stats_map,ks=4,vs=104)\n896: (bf) r8 = r0                     ; R0=map_value(map=quic_stats_map,ks=4,vs=104) R8=map_value(map=quic_stats_map,ks=4,vs=104)\n897: (15) if r8 == 0x0 goto pc+638    ; R8=map_value(map=quic_stats_map,ks=4,vs=104)\n898: (71) r2 = *(u8 *)(r10 -44)       ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-48=mmmmmmmm\n899: (57) r2 &= 1                     ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))\n900: (b7) r1 = 62                     ; R1=62\n901: (b7) r0 = 34                     ; R0=34\n902: (15) if r2 == 0x0 goto pc+2      ; R2=1\n903: (bf) r1 = r1                     ; R1=62\n904: (05) goto pc+1\n906: (0f) r7 += r1                    ; R1=62 R7=pkt(off=62,r=82)\n907: (bf) r1 = r7                     ; R1=pkt(off=62,r=82) R7=pkt(off=62,r=82)\n908: (07) r1 += 9                     ; R1=pkt(off=71,r=82)\n909: (79) r2 = *(u64 *)(r10 -144)     ; R2=pkt_end() R10=fp0 fp-144=pkt_end()\n910: (2d) if r1 > r2 goto pc+805      ; R1=pkt(off=71,r=82) R2=pkt_end()\n911: (71) r2 = *(u8 *)(r7 +8)         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=pkt(off=62,r=82)\n912: (67) r2 <<= 56                   ; R2=scalar(smax=0x7f00000000000000,umax=0xff00000000000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xff00000000000000))\n913: (c7) r2 s>>= 56                  ; R2=scalar(smin=smin32=-128,smax=smax32=127)\n914: (65) if r2 s> 0xffffffff goto pc+31 946: R0=34 R1=pkt(off=71,r=82) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=127,var_off=(0x0; 0x7f)) R6=ctx() R7=pkt(off=62,r=82) R8=map_value(map=quic_stats_map,ks=4,vs=104) R9=scalar() R10=fp0 fp-8=????0 fp-32=????515 fp-48=mmmmmmmm fp-56=mmmm000 fp-64=mmmmmmmm fp-72=mmmmmmmm fp-80=scalar() fp-88=scalar() fp-96=????mm0 fp-104=0 fp-112=mmmmscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-120=mmmmmmmm fp-128=mmmmscalar(smin=smin32=0,smax=umax=smax32=umax32=15,var_off=(0x0; 0xf)) fp-136=mmmm???? fp-144=pkt_end() fp-152=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-160=map_value(map=vip_map,ks=20,vs=8) fp-168=map_ptr(map=fallback_cache,ks=40,vs=16) fp-176=map_value(map=stats,ks=4,vs=16) fp-184=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n946: (bf) r2 = r7                     ; R2=pkt(off=62,r=82) R7=pkt(off=62,r=82)\n947: (07) r2 += 17                    ; R2=pkt(off=79,r=82)\n948: (b7) r7 = 62                     ; R7=62\n949: (79) r1 = *(u64 *)(r10 -144)     ; R1=pkt_end() R10=fp0 fp-144=pkt_end()\n950: (2d) if r2 > r1 goto pc+765      ; R1=pkt_end() R2=pkt(off=79,r=82)\n951: (71) r2 = *(u8 *)(r7 +0)\nR7 invalid mem access 'scalar'\nprocessed 1776 insns (limit 1000000) max_states_per_insn 2 total_states 112 peak_states 112 mark_read 0",
+            "rejit_syscall_ms": 3,
+            "status": "failed_rejit",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 2537,
+          "orig_insn_count": 2542,
+          "prog_id": 9,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}
