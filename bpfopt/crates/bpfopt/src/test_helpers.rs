@@ -1,32 +1,14 @@
 // SPDX-License-Identifier: MIT
-//! Shared test helper functions for pass unit tests.
-//!
-//! This module is `#[cfg(test)]` only. Import with:
-//! `use crate::test_helpers::*;`
 
+use std::collections::HashMap;
+
+use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
 use crate::insn::*;
 use crate::pass::{
     BpfProgram, RegState, ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind,
     VerifierValueWidth,
 };
-use std::collections::HashMap;
 
-use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
-
-// BPF instruction constructors
-
-/// Return a BPF EXIT instruction.
-pub fn exit_insn() -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
-}
-
-/// Return a BPF helper-call instruction (src_reg = 0).
-pub fn call_helper(imm: i32) -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, imm)
-}
-
-/// Return a BPF_PSEUDO_CALL instruction whose offset encodes
-/// `target_pc - (call_pc + 1)`.
 pub fn pseudo_call_to(call_pc: usize, target_pc: usize) -> BpfInsn {
     let imm = target_pc as i64 - (call_pc as i64 + 1);
     BpfInsn::new(
@@ -34,33 +16,6 @@ pub fn pseudo_call_to(call_pc: usize, target_pc: usize) -> BpfInsn {
         BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
         0,
         imm as i32,
-    )
-}
-
-pub fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_JEQ | BPF_K,
-        BpfInsn::make_regs(dst, 0),
-        off,
-        imm,
-    )
-}
-
-pub fn jne_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_JNE | BPF_K,
-        BpfInsn::make_regs(dst, 0),
-        off,
-        imm,
-    )
-}
-
-pub fn jgt_reg(dst: u8, src: u8, off: i16) -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_JGT | BPF_X,
-        BpfInsn::make_regs(dst, src),
-        off,
-        0,
     )
 }
 
@@ -76,69 +31,41 @@ pub fn ld_imm64(dst: u8, src: u8, imm: i64) -> [BpfInsn; 2] {
     ]
 }
 
-pub fn mov32_reg(dst: u8, src: u8) -> BpfInsn {
-    BpfInsn::new(
-        BPF_ALU | BPF_MOV | BPF_X,
-        BpfInsn::make_regs(dst, src),
-        0,
-        0,
-    )
-}
-
 pub fn add64_imm(dst: u8, imm: i32) -> BpfInsn {
-    BpfInsn::new(
-        BPF_ALU64 | BPF_ADD | BPF_K,
-        BpfInsn::make_regs(dst, 0),
-        0,
-        imm,
-    )
+    BpfInsn::alu64_imm(BPF_ADD, dst, imm)
 }
-
-pub fn st_mem(size: u8, dst: u8, off: i16, imm: i32) -> BpfInsn {
-    BpfInsn::new(
-        BPF_ST | size | BPF_MEM,
-        BpfInsn::make_regs(dst, 0),
-        off,
-        imm,
-    )
+pub fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
+    BpfInsn::jump_imm(BPF_JEQ, dst, imm, off)
 }
-
+pub fn jne_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
+    BpfInsn::jump_imm(BPF_JNE, dst, imm, off)
+}
+pub fn jgt_reg(dst: u8, src: u8, off: i16) -> BpfInsn {
+    BpfInsn::jump_reg(BPF_JGT, dst, src, off)
+}
 pub fn scalar_reg(value: u64) -> RegState {
-    RegState {
-        reg_type: "scalar".to_string(),
-        value_width: VerifierValueWidth::Bits64,
-        precise: true,
-        exact_value: Some(value),
-        tnum: Some(Tnum { value, mask: 0 }),
-        range: ScalarRange {
-            smin: Some(value as i64),
-            smax: Some(value as i64),
-            umin: Some(value),
-            umax: Some(value),
-            smin32: Some(value as u32 as i32),
-            smax32: Some(value as u32 as i32),
-            umin32: Some(value as u32),
-            umax32: Some(value as u32),
-        },
-        offset: None,
-        id: None,
-    }
+    let mut reg = RegState::new("scalar", VerifierValueWidth::Bits64);
+    reg.precise = true;
+    reg.exact_value = Some(value);
+    reg.tnum = Some(Tnum { value, mask: 0 });
+    reg.range = ScalarRange {
+        smin: Some(value as i64),
+        smax: Some(value as i64),
+        umin: Some(value),
+        umax: Some(value),
+        smin32: Some(value as u32 as i32),
+        smax32: Some(value as u32 as i32),
+        umin32: Some(value as u32),
+        umax32: Some(value as u32),
+    };
+    reg
 }
 
 pub fn fp_reg(offset: i32) -> RegState {
-    RegState {
-        reg_type: "fp".to_string(),
-        value_width: VerifierValueWidth::Bits64,
-        precise: false,
-        exact_value: None,
-        tnum: None,
-        range: ScalarRange::default(),
-        offset: Some(offset),
-        id: None,
-    }
+    let mut reg = RegState::new("fp", VerifierValueWidth::Bits64);
+    reg.offset = Some(offset);
+    reg
 }
-
-// Verifier state constructors
 
 pub fn verifier_delta_state(pc: usize, regs: HashMap<u8, RegState>) -> VerifierInsn {
     verifier_delta_state_with_stack(pc, regs, HashMap::new())
@@ -188,8 +115,6 @@ pub fn stack_snapshot_from_key(stack_off: i16, key: &[u8]) -> HashMap<i16, Stack
         .collect()
 }
 
-// Map fixtures
-
 pub fn install_map(
     map_id: u32,
     map_type: u32,
@@ -212,13 +137,9 @@ pub fn install_array_map(map_id: u32, value: Vec<u8>) {
     install_map(map_id, libbpf_sys::BPF_MAP_TYPE_ARRAY, 8, values);
 }
 
-// Program fixtures
-
 pub fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
     BpfProgram::new(insns)
 }
-
-// Sidecar/kinsn helpers
 
 pub fn sidecar_payload(insn: &BpfInsn) -> u64 {
     (u64::from(insn.dst_reg()) & 0xf)

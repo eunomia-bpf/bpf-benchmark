@@ -3,7 +3,7 @@ use crate::insn::*;
 
 use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
 use crate::pass::{BpfProgram, PassContext, PassManager, PipelineResult};
-use crate::test_helpers::*;
+use crate::test_helpers::{add64_imm, jgt_reg};
 
 const BPF_PROG_TYPE_SOCKET_FILTER: u32 = libbpf_sys::BPF_PROG_TYPE_SOCKET_FILTER;
 const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
@@ -33,7 +33,7 @@ fn load_packet_root_with_offsets(data_off: i16, data_end_off: i16) -> Vec<BpfIns
 fn guard(cursor_reg: u8, root_reg: u8, data_end_reg: u8, window_end: i32) -> Vec<BpfInsn> {
     vec![
         BpfInsn::mov64_reg(cursor_reg, root_reg),
-        BpfInsn::alu64_imm(BPF_ADD, cursor_reg, window_end),
+        add64_imm(cursor_reg, window_end),
         jgt_reg(cursor_reg, data_end_reg, 0),
     ]
 }
@@ -57,10 +57,10 @@ fn compare_pcs(insns: &[BpfInsn]) -> Vec<usize> {
 
 fn shared_error_program(mut body: Vec<BpfInsn>) -> Vec<BpfInsn> {
     body.push(BpfInsn::mov64_imm(0, 1));
-    body.push(exit_insn());
+    body.push(BpfInsn::exit());
     let error_pc = body.len();
     body.push(BpfInsn::mov64_imm(0, 0));
-    body.push(exit_insn());
+    body.push(BpfInsn::exit());
 
     for pc in compare_pcs(&body) {
         if body[pc].off == 0 {
@@ -133,7 +133,7 @@ fn make_mixed_cmp_kind_program() -> Vec<BpfInsn> {
     insns.extend(guard(4, 2, 3, 14));
     insns.push(BpfInsn::ldx_mem(BPF_H, 6, 2, 12));
     insns.push(BpfInsn::mov64_reg(5, 2));
-    insns.push(BpfInsn::alu64_imm(BPF_ADD, 5, 34));
+    insns.push(add64_imm(5, 34));
     insns.push(jge_reg(5, 3, 0));
     insns.push(BpfInsn::ldx_mem(BPF_W, 7, 2, 30));
     shared_error_program(insns)
@@ -154,7 +154,7 @@ fn make_interleaved_checks_program() -> Vec<BpfInsn> {
     insns.extend(guard(4, 2, 3, 14));
     insns.push(BpfInsn::ldx_mem(BPF_H, 6, 2, 12));
     insns.push(BpfInsn::mov64_imm(8, 1));
-    insns.push(BpfInsn::alu64_imm(BPF_ADD, 8, 2));
+    insns.push(add64_imm(8, 2));
     insns.extend(guard(5, 2, 3, 34));
     insns.push(BpfInsn::ldx_mem(BPF_W, 7, 2, 30));
     shared_error_program(insns)
@@ -167,15 +167,15 @@ fn make_different_error_targets_program() -> Vec<BpfInsn> {
     insns.extend(guard(5, 2, 3, 34));
     insns.push(BpfInsn::ldx_mem(BPF_W, 7, 2, 30));
     insns.push(BpfInsn::mov64_imm(0, 1));
-    insns.push(exit_insn());
+    insns.push(BpfInsn::exit());
 
     let err_a_pc = insns.len();
     insns.push(BpfInsn::mov64_imm(0, 0));
-    insns.push(exit_insn());
+    insns.push(BpfInsn::exit());
 
     let err_b_pc = insns.len();
     insns.push(BpfInsn::mov64_imm(0, 2));
-    insns.push(exit_insn());
+    insns.push(BpfInsn::exit());
 
     insns[4].off = (err_a_pc as isize - 4 - 1) as i16;
     insns[8].off = (err_b_pc as isize - 8 - 1) as i16;
@@ -187,10 +187,10 @@ fn make_no_bounds_check_program() -> Vec<BpfInsn> {
         BpfInsn::ldx_mem(BPF_W, 2, 1, 0),
         BpfInsn::ldx_mem(BPF_W, 3, 1, 4),
         BpfInsn::mov64_imm(4, 42),
-        BpfInsn::alu64_imm(BPF_ADD, 4, 8),
+        add64_imm(4, 8),
         BpfInsn::ldx_mem(BPF_W, 5, 2, 0),
         BpfInsn::mov64_imm(0, 1),
-        exit_insn(),
+        BpfInsn::exit(),
     ]
 }
 
@@ -201,7 +201,7 @@ fn run_bounds_check_merge_pass(program: &mut BpfProgram, prog_type: u32) -> Pipe
     pm.register_analysis(LivenessAnalysis);
     pm.add_pass(BoundsCheckMergePass);
 
-    let mut ctx = PassContext::test_default();
+    let mut ctx = PassContext::baseline();
     ctx.prog_type = prog_type;
     pm.run(program, &ctx).unwrap()
 }
@@ -228,7 +228,7 @@ fn test_two_adjacent_checks_merged() {
     assert_eq!(result.pass_results[0].sites_applied, 1);
     assert_eq!(program.insns.len(), 11);
     assert_eq!(compare_pcs(&program.insns), vec![4]);
-    assert_eq!(program.insns[3], BpfInsn::alu64_imm(BPF_ADD, 4, 34));
+    assert_eq!(program.insns[3], add64_imm(4, 34));
 }
 
 #[test]
@@ -239,7 +239,7 @@ fn test_three_ladder_checks_merged() {
     assert_eq!(result.pass_results[0].sites_applied, 1);
     assert_eq!(program.insns.len(), 12);
     assert_eq!(compare_pcs(&program.insns), vec![4]);
-    assert_eq!(program.insns[3], BpfInsn::alu64_imm(BPF_ADD, 4, 54));
+    assert_eq!(program.insns[3], add64_imm(4, 54));
 }
 
 #[test]
@@ -306,7 +306,7 @@ fn test_interleaved_instructions_handled() {
     assert_eq!(result.pass_results[0].sites_applied, 1);
     assert_eq!(program.insns.len(), 13);
     assert_eq!(compare_pcs(&program.insns), vec![4]);
-    assert_eq!(program.insns[3], BpfInsn::alu64_imm(BPF_ADD, 4, 34));
+    assert_eq!(program.insns[3], add64_imm(4, 34));
 }
 
 #[test]
@@ -376,7 +376,7 @@ fn test_merge_preserves_largest_check() {
     let mut program = BpfProgram::new(make_three_ladder_checks_program());
 
     let _result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-    assert_eq!(program.insns[3], BpfInsn::alu64_imm(BPF_ADD, 4, 54));
+    assert_eq!(program.insns[3], add64_imm(4, 54));
     assert_eq!(program.insns[4].code, BPF_JMP | BPF_JGT | BPF_X);
     assert_eq!(compare_pcs(&program.insns), vec![4]);
 }

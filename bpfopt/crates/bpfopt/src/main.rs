@@ -837,7 +837,7 @@ fn write_btf_info_outputs(common: &CommonArgs, program: &BpfProgram) -> Result<(
 }
 
 fn build_pass_context(common: &CommonArgs) -> Result<PassContext> {
-    let mut ctx = PassContext::test_default();
+    let mut ctx = PassContext::baseline();
     ctx.platform = detect_platform();
 
     if let Some(platform) = common.platform.as_deref() {

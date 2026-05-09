@@ -10,7 +10,7 @@ use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::fixup_all_branches;
+use super::rewrite::{BtfRemapPolicy, RewritePlan};
 
 // ═══════════════════════════════════════════════════════════════════
 // Pattern matching (absorbed from matcher.rs)
@@ -655,62 +655,16 @@ impl BpfPass for WideMemPass {
             });
         }
 
-        // Apply rewrite: build new instruction stream with address map.
-        let orig_insns = &program.insns;
-        let orig_len = orig_insns.len();
-        let mut new_insns: Vec<BpfInsn> = Vec::with_capacity(orig_len);
-        let mut addr_map: Vec<usize> = vec![0; orig_len + 1];
-        let mut applied = 0usize;
-
-        let mut old_pc = 0usize;
-        let mut site_idx = 0usize;
-
-        while old_pc < orig_len {
-            let new_pc = new_insns.len();
-
-            if site_idx < safe_sites.len() && old_pc == safe_sites[site_idx].start_pc {
-                let site = &safe_sites[site_idx];
-                let replacement = emit_wide_mem(site)?;
-
-                for j in 0..site.old_len {
-                    addr_map[old_pc + j] = new_pc;
-                }
-
-                new_insns.extend_from_slice(&replacement);
-
-                old_pc += site.old_len;
-                site_idx += 1;
-                applied += 1;
-            } else {
-                addr_map[old_pc] = new_pc;
-                new_insns.push(orig_insns[old_pc]);
-
-                if orig_insns[old_pc].is_ldimm64() && old_pc + 1 < orig_len {
-                    old_pc += 1;
-                    addr_map[old_pc] = new_insns.len();
-                    new_insns.push(orig_insns[old_pc]);
-                }
-
-                old_pc += 1;
-            }
+        let mut plan = RewritePlan::new();
+        for site in &safe_sites {
+            plan.replace_range(site.start_pc, site.old_len, emit_wide_mem(site)?);
         }
 
-        addr_map[orig_len] = new_insns.len();
-
-        // Fix up branch offsets.
-        fixup_all_branches(&mut new_insns, orig_insns, &addr_map);
-
-        program.insns = new_insns;
-        super::utils::remap_btf_metadata(program, &addr_map)?;
-        program.remap_annotations(&addr_map);
-
-        Ok(PassResult {
-            pass_name: self.name().into(),
-            sites_applied: applied,
-            sites_skipped: skipped,
-            diagnostics: vec![],
-            ..Default::default()
-        })
+        let mut result = plan.commit(program, BtfRemapPolicy::Remap)?;
+        result.pass_name = self.name().into();
+        result.sites_applied = safe_sites.len();
+        result.sites_skipped = skipped;
+        Ok(result)
     }
 }
 

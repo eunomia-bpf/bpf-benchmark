@@ -7,7 +7,7 @@ use crate::test_helpers::*;
 
 #[test]
 fn liveness_simple_def_use() {
-    let insns = vec![BpfInsn::mov64_imm(0, 42), exit_insn()];
+    let insns = vec![BpfInsn::mov64_imm(0, 42), BpfInsn::exit()];
     let prog = make_program(insns);
     let liveness = LivenessAnalysis.run(&prog);
     assert!(liveness.live_out[0].contains(&0));
@@ -19,7 +19,7 @@ fn liveness_register_killed() {
     let insns = vec![
         BpfInsn::mov64_imm(1, 10),
         BpfInsn::mov64_reg(0, 1),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let prog = make_program(insns);
     let liveness = LivenessAnalysis.run(&prog);
@@ -34,7 +34,7 @@ fn liveness_branch_merges() {
         jeq_imm(1, 0, 1),
         BpfInsn::mov64_imm(2, 5),
         BpfInsn::mov64_reg(0, 2),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let prog = make_program(insns);
     let liveness = LivenessAnalysis.run(&prog);
@@ -80,7 +80,7 @@ fn liveness_call_clobbers_caller_saved() {
         BpfInsn::mov64_imm(1, 1),  // r1 = 1 (arg)
         BpfInsn::call_kfunc(99),   // call; clobbers r0-r5
         BpfInsn::mov64_reg(0, 6),  // r0 = r6 (use callee-saved)
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let prog = make_program(insns);
     let liveness = LivenessAnalysis.run(&prog);
@@ -92,7 +92,7 @@ fn liveness_call_clobbers_caller_saved() {
 
 #[test]
 fn use_def_exit() {
-    let (uses, defs) = insn_use_def(&exit_insn());
+    let (uses, defs) = insn_use_def(&BpfInsn::exit());
     assert!(uses.contains(&0));
     assert!(defs.is_empty());
 }

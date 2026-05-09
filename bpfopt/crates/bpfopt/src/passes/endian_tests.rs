@@ -14,7 +14,7 @@ fn endian_to_be(dst: u8, size: i32) -> BpfInsn {
 }
 
 fn ctx_with_endian_kfuncs(btf_id16: i32, btf_id32: i32, btf_id64: i32) -> PassContext {
-    let mut ctx = PassContext::test_default();
+    let mut ctx = PassContext::baseline();
     ctx.kinsn_registry.endian_load16_btf_id = btf_id16;
     ctx.kinsn_registry.endian_load32_btf_id = btf_id32;
     ctx.kinsn_registry.endian_load64_btf_id = btf_id64;
@@ -33,7 +33,7 @@ fn test_scan_endian_fusion_basic_32bit() {
     let insns = vec![
         BpfInsn::ldx_mem(BPF_W, 2, 1, 4), // LDX_MEM(W) r2, [r1+4]
         endian_to_be(2, 32),              // ENDIAN_TO_BE r2, 32
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_endian_fusion_sites(&insns);
     assert_eq!(sites.len(), 1);
@@ -50,7 +50,7 @@ fn test_scan_endian_fusion_16bit() {
     let insns = vec![
         BpfInsn::ldx_mem(BPF_H, 3, 6, 10),
         endian_to_be(3, 16),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_endian_fusion_sites(&insns);
     assert_eq!(sites.len(), 1);
@@ -64,7 +64,7 @@ fn test_scan_endian_fusion_64bit() {
     let insns = vec![
         BpfInsn::ldx_mem(BPF_DW, 0, 7, 0),
         endian_to_be(0, 64),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_endian_fusion_sites(&insns);
     assert_eq!(sites.len(), 1);
@@ -78,7 +78,7 @@ fn test_scan_endian_fusion_no_match_different_regs() {
     let insns = vec![
         BpfInsn::ldx_mem(BPF_W, 2, 1, 0),
         endian_to_be(3, 32), // different dst
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_endian_fusion_sites(&insns);
     assert!(sites.is_empty());
@@ -89,7 +89,7 @@ fn test_scan_endian_fusion_no_match_size_mismatch() {
     let insns = vec![
         BpfInsn::ldx_mem(BPF_H, 2, 1, 0), // 16-bit load
         endian_to_be(2, 32),              // 32-bit swap -- mismatch
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_endian_fusion_sites(&insns);
     assert!(sites.is_empty());
@@ -101,7 +101,7 @@ fn test_scan_endian_fusion_no_match_byte_load() {
     let insns = vec![
         BpfInsn::ldx_mem(BPF_B, 2, 1, 0),
         endian_to_be(2, 16),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_endian_fusion_sites(&insns);
     assert!(sites.is_empty());
@@ -114,7 +114,7 @@ fn test_scan_endian_fusion_multiple_sites() {
         endian_to_be(2, 32),
         BpfInsn::ldx_mem(BPF_H, 3, 1, 4),
         endian_to_be(3, 16),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_endian_fusion_sites(&insns);
     assert_eq!(sites.len(), 2);
@@ -129,7 +129,7 @@ fn test_scan_endian_fusion_zero_offset() {
     let insns = vec![
         BpfInsn::ldx_mem(BPF_W, 2, 1, 0),
         endian_to_be(2, 32),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_endian_fusion_sites(&insns);
     assert_eq!(sites.len(), 1);
@@ -143,10 +143,10 @@ fn test_endian_fusion_pass_skip_when_kfunc_unavailable() {
     let mut prog = make_program(vec![
         BpfInsn::ldx_mem(BPF_W, 2, 1, 0),
         endian_to_be(2, 32),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
-    let mut ctx = PassContext::test_default(); // all btf_ids = -1
+    let mut ctx = PassContext::baseline(); // all btf_ids = -1
     ctx.platform.has_movbe = true; // platform has MOVBE, but kfunc is missing
 
     let pass = EndianFusionPass;
@@ -162,7 +162,7 @@ fn test_endian_fusion_pass_emit_kfunc_call_32bit() {
     let mut prog = make_program(vec![
         BpfInsn::ldx_mem(BPF_W, 2, 6, 8),
         endian_to_be(2, 32),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_endian32_kfunc(8888);
@@ -207,7 +207,7 @@ fn test_endian_fusion_narrowing_cases() {
         BpfInsn::ldx_mem(BPF_DW, 2, 6, 8),
         BpfInsn::mov64_imm(3, 7),
         endian_to_be(2, 32),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let result = EndianFusionPass
@@ -222,7 +222,7 @@ fn test_endian_fusion_narrowing_cases() {
         BpfInsn::ldx_mem(BPF_DW, 2, 6, 8),
         BpfInsn::mov64_reg(3, 2),
         endian_to_be(2, 32),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let result = EndianFusionPass
@@ -241,7 +241,7 @@ fn test_endian_fusion_pass_zero_offset() {
     let mut prog = make_program(vec![
         BpfInsn::ldx_mem(BPF_W, 2, 6, 0),
         endian_to_be(2, 32),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_endian32_kfunc(8888);
@@ -262,7 +262,7 @@ fn test_endian_fusion_pass_nonzero_offset() {
     let mut prog = make_program(vec![
         BpfInsn::ldx_mem(BPF_W, 2, 6, 12),
         endian_to_be(2, 32),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_endian32_kfunc(8888);
@@ -281,7 +281,7 @@ fn test_endian_fusion_encodes_stack_offset_directly_on_x86() {
     let mut prog = make_program(vec![
         BpfInsn::ldx_mem(BPF_DW, 4, BPF_REG_10, -88),
         endian_to_be(4, 64),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_endian_kfuncs(-1, -1, 3333);
@@ -305,7 +305,7 @@ fn test_endian_fusion_pass_packed_keeps_live_regs() {
         BpfInsn::ldx_mem(BPF_W, 2, 6, 0),
         endian_to_be(2, 32),
         BpfInsn::mov64_reg(0, 3), // uses r3 after site
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_endian32_kfunc(8888);
@@ -331,7 +331,7 @@ fn test_endian_fusion_pass_packed_no_callee_saved_dependency() {
         BpfInsn::alu64_reg(BPF_OR, 0, 7),
         BpfInsn::alu64_reg(BPF_OR, 0, 8),
         BpfInsn::alu64_reg(BPF_OR, 0, 9),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_endian32_kfunc(8888);
@@ -348,7 +348,7 @@ fn test_endian_fusion_pass_interior_branch_target() {
         jeq_imm(5, 0, 1),                 // if r5 == 0, jump to pc=2
         BpfInsn::ldx_mem(BPF_W, 2, 1, 0), // pc=1
         endian_to_be(2, 32),              // pc=2 -- branch target
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_endian32_kfunc(8888);
@@ -369,7 +369,7 @@ fn test_endian_fusion_pass_branch_fixup() {
         jeq_imm(5, 0, 2),                 // if r5==0, skip 2 insns to exit
         BpfInsn::ldx_mem(BPF_W, 2, 6, 4), // pc=1: site start
         endian_to_be(2, 32),              // pc=2: site end
-        exit_insn(),                      // pc=3: branch target
+        BpfInsn::exit(),                  // pc=3: branch target
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_endian32_kfunc(8888);
@@ -388,7 +388,7 @@ fn test_endian_fusion_pass_uses_static_call_offset() {
     let mut prog = make_program(vec![
         BpfInsn::ldx_mem(BPF_W, 2, 6, 0),
         endian_to_be(2, 32),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let mut ctx = ctx_with_endian32_kfunc(8888);
@@ -413,7 +413,7 @@ fn test_endian_fusion_pass_uses_per_size_call_offsets() {
         endian_to_be(3, 32),
         BpfInsn::ldx_mem(BPF_DW, 4, 6, 8),
         endian_to_be(4, 64),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let mut ctx = ctx_with_endian_kfuncs(111, 222, 333);
@@ -446,7 +446,7 @@ fn test_endian_fusion_pass_specific_size_unavailable() {
     let mut prog = make_program(vec![
         BpfInsn::ldx_mem(BPF_H, 2, 1, 0),
         endian_to_be(2, 16),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_endian32_kfunc(8888); // only 32-bit available
@@ -466,7 +466,7 @@ fn test_endian_fusion_pass_dst_is_r0() {
     let mut prog = make_program(vec![
         BpfInsn::ldx_mem(BPF_W, 0, 6, 0),
         endian_to_be(0, 32),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_endian32_kfunc(8888);
@@ -491,7 +491,7 @@ fn test_endian_fusion_pass_two_consecutive_sites() {
         endian_to_be(7, 32),
         BpfInsn::ldx_mem(BPF_W, 8, 6, 4),
         endian_to_be(8, 32),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_endian32_kfunc(8888);
@@ -519,7 +519,7 @@ fn test_endian_fusion_pass_all_three_sizes() {
         endian_to_be(8, 32),
         BpfInsn::ldx_mem(BPF_DW, 9, 6, 6),
         endian_to_be(9, 64),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_endian_kfuncs(1111, 2222, 3333);

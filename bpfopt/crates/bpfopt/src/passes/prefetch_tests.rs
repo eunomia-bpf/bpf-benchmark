@@ -20,7 +20,7 @@ fn filler(dst: u8, count: usize) -> Vec<BpfInsn> {
 }
 
 fn ctx_with_prefetch_kfunc(btf_id: i32) -> PassContext {
-    let mut ctx = PassContext::test_default();
+    let mut ctx = PassContext::baseline();
     ctx.kinsn_registry.prefetch_btf_id = btf_id;
     ctx
 }
@@ -53,7 +53,7 @@ fn lookup_value_program() -> (BpfProgram, usize, usize) {
         map_lookup_call(),
         jeq_imm(BPF_REG_0, 0, 1),
         BpfInsn::ldx_mem(BPF_DW, BPF_REG_1, BPF_REG_0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     (BpfProgram::new(insns), 0, 2)
 }
@@ -64,7 +64,7 @@ fn lookup_value_alias_program() -> (BpfProgram, usize, usize) {
         BpfInsn::mov64_reg(BPF_REG_6, BPF_REG_0),
         jeq_imm(BPF_REG_6, 0, 1),
         BpfInsn::ldx_mem(BPF_DW, BPF_REG_1, BPF_REG_6, 8),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     (BpfProgram::new(insns), 0, 3)
 }
@@ -74,7 +74,7 @@ fn packet_program_with_filler(filler_count: usize) -> (BpfProgram, usize) {
     insns.extend(filler(BPF_REG_3, filler_count));
     let load_pc = insns.len();
     insns.push(BpfInsn::ldx_mem(BPF_B, BPF_REG_0, BPF_REG_6, 0));
-    insns.push(exit_insn());
+    insns.push(BpfInsn::exit());
     (BpfProgram::new(insns), load_pc)
 }
 
@@ -161,7 +161,7 @@ fn prefetch_pass_inserts_only_at_instruction_boundaries() {
     insns.extend_from_slice(&wide);
     insns.extend(filler(BPF_REG_4, 8));
     insns.push(BpfInsn::ldx_mem(BPF_B, BPF_REG_0, BPF_REG_6, 0));
-    insns.push(exit_insn());
+    insns.push(BpfInsn::exit());
     let mut program = BpfProgram::new(insns);
     let mut ctx = ctx_with_prefetch_kfunc(7777);
     ctx.prog_type = BPF_PROG_TYPE_XDP;

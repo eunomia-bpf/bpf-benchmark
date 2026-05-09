@@ -13,14 +13,14 @@ fn alu32_reg(op: u8, dst: u8, src: u8) -> BpfInsn {
 }
 
 fn ctx_with_rotate_kfunc(btf_id: i32) -> PassContext {
-    let mut ctx = PassContext::test_default();
+    let mut ctx = PassContext::baseline();
     ctx.kinsn_registry.rotate64_btf_id = btf_id;
     ctx.platform.has_rorx = true;
     ctx
 }
 
 fn ctx_with_rotate32_kfunc(btf_id: i32) -> PassContext {
-    let mut ctx = PassContext::test_default();
+    let mut ctx = PassContext::baseline();
     ctx.kinsn_registry.rotate32_btf_id = btf_id;
     ctx.platform.has_rorx = true;
     ctx
@@ -62,7 +62,7 @@ fn test_rotate_pass_pattern_b_match() {
 #[test]
 fn test_rotate32_pass_pattern_a_match() {
     let insns = vec![
-        mov32_reg(3, 2),
+        BpfInsn::mov32_reg(3, 2),
         alu32_imm(BPF_RSH, 2, 24),
         alu32_imm(BPF_LSH, 3, 8),
         alu32_reg(BPF_OR, 2, 3),
@@ -80,7 +80,7 @@ fn test_rotate32_pass_pattern_a_match() {
 #[test]
 fn test_rotate32_pass_pattern_b_match() {
     let insns = vec![
-        mov32_reg(3, 2),
+        BpfInsn::mov32_reg(3, 2),
         alu32_imm(BPF_LSH, 2, 7),
         alu32_imm(BPF_RSH, 3, 25),
         alu32_reg(BPF_OR, 2, 3),
@@ -97,9 +97,9 @@ fn test_rotate32_pass_cilium_split_copy_shape() {
     // From Cilium bpf_xdp.bpf.o LBB6_177:
     // w1 = w6; w1 >>= 0x1c; w2 = w6; w2 <<= 0x4; w2 |= w1
     let insns = vec![
-        mov32_reg(1, 6),
+        BpfInsn::mov32_reg(1, 6),
         alu32_imm(BPF_RSH, 1, 28),
-        mov32_reg(2, 6),
+        BpfInsn::mov32_reg(2, 6),
         alu32_imm(BPF_LSH, 2, 4),
         alu32_reg(BPF_OR, 2, 1),
     ];
@@ -118,7 +118,7 @@ fn test_rotate32_pass_cilium_split_copy_shape() {
 #[test]
 fn test_rotate32_pass_no_match_wrong_sum() {
     let insns = vec![
-        mov32_reg(3, 2),
+        BpfInsn::mov32_reg(3, 2),
         alu32_imm(BPF_RSH, 2, 20),
         alu32_imm(BPF_LSH, 3, 8),
         alu32_reg(BPF_OR, 2, 3),
@@ -232,7 +232,7 @@ fn test_rotate_pass_emit_kfunc_call() {
         BpfInsn::alu64_imm(BPF_RSH, 2, 56),
         BpfInsn::alu64_imm(BPF_LSH, 3, 8),
         BpfInsn::alu64_reg(BPF_OR, 2, 3),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_rotate_kfunc(9999);
@@ -256,11 +256,11 @@ fn test_rotate_pass_emit_kfunc_call() {
 #[test]
 fn test_rotate32_pass_emit_kfunc_call() {
     let mut prog = make_program(vec![
-        mov32_reg(3, 2),
+        BpfInsn::mov32_reg(3, 2),
         alu32_imm(BPF_RSH, 2, 24),
         alu32_imm(BPF_LSH, 3, 8),
         alu32_reg(BPF_OR, 2, 3),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_rotate32_kfunc(8888);
@@ -283,10 +283,10 @@ fn test_rotate_pass_skip_when_kfunc_unavailable() {
         BpfInsn::alu64_imm(BPF_RSH, 2, 56),
         BpfInsn::alu64_imm(BPF_LSH, 3, 8),
         BpfInsn::alu64_reg(BPF_OR, 2, 3),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
+    let ctx = PassContext::baseline();
 
     let pass = RotatePass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
@@ -304,7 +304,7 @@ fn test_rotate_pass_packed_keeps_live_regs() {
         BpfInsn::alu64_imm(BPF_LSH, 4, 8),
         BpfInsn::alu64_reg(BPF_OR, 2, 4),
         BpfInsn::mov64_reg(0, 3), // r3 is live after site
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_rotate_kfunc(9999);
@@ -333,7 +333,7 @@ fn test_rotate_pass_packed_no_callee_saved_dependency() {
         BpfInsn::alu64_reg(BPF_OR, 0, 7),
         BpfInsn::alu64_reg(BPF_OR, 0, 8),
         BpfInsn::alu64_reg(BPF_OR, 0, 9),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_rotate_kfunc(9999);
@@ -352,7 +352,7 @@ fn test_rotate_pass_tmp_live_out_conflict() {
         BpfInsn::alu64_imm(BPF_LSH, 6, 8),
         BpfInsn::alu64_reg(BPF_OR, 2, 6),
         BpfInsn::mov64_reg(0, 6), // r6 is used after site
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_rotate_kfunc(9999);
@@ -369,12 +369,12 @@ fn test_rotate_pass_tmp_live_out_conflict() {
 fn test_rotate_pass_applies_site_inside_multi_subprog_program() {
     let mut prog = make_program(vec![
         pseudo_call_to(0, 2),
-        exit_insn(),
+        BpfInsn::exit(),
         BpfInsn::mov64_reg(3, 2),
         BpfInsn::alu64_imm(BPF_RSH, 2, 56),
         BpfInsn::alu64_imm(BPF_LSH, 3, 8),
         BpfInsn::alu64_reg(BPF_OR, 2, 3),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_rotate_kfunc(1234);

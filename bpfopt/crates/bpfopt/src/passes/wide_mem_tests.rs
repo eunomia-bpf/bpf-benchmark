@@ -44,7 +44,7 @@ fn build_wide_mem_3(dst: u8, tmp: u8, base: u8, off: i16) -> Vec<BpfInsn> {
 }
 
 fn with_exit(mut insns: Vec<BpfInsn>) -> Vec<BpfInsn> {
-    insns.push(exit_insn());
+    insns.push(BpfInsn::exit());
     insns
 }
 
@@ -274,7 +274,7 @@ fn test_wide_mem_pass_transform_matrix() {
     ] {
         let mut cache = AnalysisCache::new();
         let result = WideMemPass
-            .run(&mut prog, &mut cache, &PassContext::test_default())
+            .run(&mut prog, &mut cache, &PassContext::baseline())
             .unwrap();
         assert_eq!(result.sites_applied, expected_applied, "{label}");
         assert_eq!(prog.insns.len(), expected_len, "{label}");
@@ -292,10 +292,10 @@ fn test_wide_mem_pass_skips_misaligned_halfword_site() {
         BpfInsn::alu64_imm(BPF_LSH, 1, 8),
         BpfInsn::ldx_mem(BPF_B, 2, 10, -95),
         BpfInsn::alu64_reg(BPF_OR, 1, 2),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
+    let ctx = PassContext::baseline();
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
@@ -315,10 +315,10 @@ fn test_wide_mem_pass_skips_site_with_interior_branch_target() {
         BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
         BpfInsn::alu64_imm(BPF_LSH, 1, 8),
         BpfInsn::alu64_reg(BPF_OR, 0, 1),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
+    let ctx = PassContext::baseline();
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
@@ -337,10 +337,10 @@ fn test_wide_mem_pass_skips_site_with_live_scratch_reg() {
         BpfInsn::alu64_imm(BPF_LSH, 1, 8),
         BpfInsn::alu64_reg(BPF_OR, 0, 1),
         BpfInsn::mov64_reg(2, 1),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
+    let ctx = PassContext::baseline();
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
@@ -363,12 +363,12 @@ fn test_wide_mem_branch_fixup_table() {
     for (label, insns, branch_pc, expected_len, expected_off, is_conditional) in {
         let mut forward = vec![BpfInsn::ja(10)];
         forward.extend(wide_mem_4_insns(0, 6, 0));
-        forward.push(exit_insn());
+        forward.push(BpfInsn::exit());
 
         let mut backward = vec![BpfInsn::mov64_imm(0, 0)];
         backward.extend(wide_mem_4_insns(0, 6, 0));
         backward.push(BpfInsn::ja(-12));
-        backward.push(exit_insn());
+        backward.push(BpfInsn::exit());
 
         let mut conditional = vec![BpfInsn::new(
             BPF_JMP | BPF_JEQ | BPF_K,
@@ -377,7 +377,7 @@ fn test_wide_mem_branch_fixup_table() {
             0,
         )];
         conditional.extend(wide_mem_4_insns(0, 6, 0));
-        conditional.push(exit_insn());
+        conditional.push(BpfInsn::exit());
 
         [
             ("forward ja", forward, 0, 3, 1, false),
@@ -388,7 +388,7 @@ fn test_wide_mem_branch_fixup_table() {
         let mut prog = make_program(insns);
         let mut cache = AnalysisCache::new();
         let _result = WideMemPass
-            .run(&mut prog, &mut cache, &PassContext::test_default())
+            .run(&mut prog, &mut cache, &PassContext::baseline())
             .unwrap();
         assert_eq!(prog.insns.len(), expected_len, "{label}");
         let branch = &prog.insns[branch_pc];
@@ -414,10 +414,10 @@ fn test_wide_mem_skips_byte_ladder_with_pseudo_func_boundary_inside() {
         BpfInsn::ldx_mem(BPF_B, 8, 10, -7),
         BpfInsn::alu64_imm(BPF_LSH, 8, 8),
         BpfInsn::alu64_reg(BPF_OR, 6, 8),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
+    let ctx = PassContext::baseline();
 
     let pass = WideMemPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
@@ -451,7 +451,7 @@ fn test_wide_mem_unsupported_and_mixed_width_table() {
         let mut prog = make_program(insns);
         let mut cache = AnalysisCache::new();
         let result = WideMemPass
-            .run(&mut prog, &mut cache, &PassContext::test_default())
+            .run(&mut prog, &mut cache, &PassContext::baseline())
             .unwrap();
         assert_eq!(result.sites_applied, expected_applied, "{label}");
         assert!(result
@@ -500,7 +500,7 @@ fn test_wide_mem_packet_pointer_gate_matrix() {
         ),
     ] {
         let mut cache = AnalysisCache::new();
-        let mut ctx = PassContext::test_default();
+        let mut ctx = PassContext::baseline();
         ctx.prog_type = prog_type;
         let result = WideMemPass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert_eq!(result.sites_applied, expected_applied, "{label}");
@@ -526,12 +526,12 @@ fn test_wide_mem_mixed_sites_xdp_some_skipped() {
         BpfInsn::ldx_mem(BPF_B, 3, 6, 1),
         BpfInsn::alu64_imm(BPF_LSH, 3, 8),
         BpfInsn::alu64_reg(BPF_OR, 2, 3),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
 
     let mut prog = make_program(insns);
     let mut cache = AnalysisCache::new();
-    let mut ctx = PassContext::test_default();
+    let mut ctx = PassContext::baseline();
     ctx.prog_type = 6; // XDP
 
     let pass = WideMemPass;
@@ -587,7 +587,7 @@ fn test_wide_mem_verifier_state_pointer_type_gate_matrix() {
 
         let mut cache = AnalysisCache::new();
         let result = WideMemPass
-            .run(&mut prog, &mut cache, &PassContext::test_default())
+            .run(&mut prog, &mut cache, &PassContext::baseline())
             .unwrap();
         assert_eq!(result.sites_applied, expected_applied, "{label}");
         if expect_btf_skip {

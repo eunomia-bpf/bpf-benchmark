@@ -465,7 +465,7 @@ fn condition_prefix(
             "no dead register available for cond_select compare predicate".to_string()
         })?;
         return Ok((
-            vec![mov32_reg(pred, site.cond_reg)],
+            vec![BpfInsn::mov32_reg(pred, site.cond_reg)],
             pred,
             site.jcc_op == BPF_JEQ,
         ));
@@ -576,22 +576,13 @@ fn materialize_value(
         .ok_or_else(|| "no dead register available to materialize immediate operand".to_string())?;
     match value {
         CondSelectValue::Imm(imm) => prefix.push(BpfInsn::mov64_imm(reg, imm)),
-        CondSelectValue::Reg32(src) => prefix.push(mov32_reg(reg, src)),
+        CondSelectValue::Reg32(src) => prefix.push(BpfInsn::mov32_reg(reg, src)),
         CondSelectValue::Imm32(imm) => prefix.push(BpfInsn::mov32_imm(reg, imm)),
         CondSelectValue::Reg(_) => unreachable!(),
     }
     allocated.push(reg);
     imm_regs.push((value, reg));
     Ok(reg)
-}
-
-fn mov32_reg(dst: u8, src: u8) -> BpfInsn {
-    BpfInsn::new(
-        BPF_ALU | BPF_MOV | BPF_X,
-        BpfInsn::make_regs(dst, src),
-        0,
-        0,
-    )
 }
 
 fn choose_temp_reg(

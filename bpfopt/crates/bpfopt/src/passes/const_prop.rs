@@ -7,7 +7,8 @@ use crate::analysis::CFGAnalysis;
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{emit_ldimm64, fixup_all_branches, insn_width};
+use super::rewrite::{BtfRemapPolicy, RewritePlan};
+use super::utils::{emit_ldimm64, insn_width};
 
 const REG_COUNT: usize = 11;
 pub(super) const VERIFIER_POST_STATE_NOT_SCALAR_EXACT: &str =
@@ -409,54 +410,23 @@ impl BpfPass for ConstPropPass {
             });
         }
 
-        let mut alu_materialized = 0usize;
-        for &pc in rewrite_plan.replacements.keys() {
-            let insn = &program.insns[pc];
-            if matches!(insn.class(), BPF_ALU | BPF_ALU64) {
-                alu_materialized += 1;
-            }
+        let alu_materialized = rewrite_plan
+            .replacements
+            .keys()
+            .filter(|&&pc| matches!(program.insns[pc].class(), BPF_ALU | BPF_ALU64))
+            .count();
+
+        let mut plan = RewritePlan::new();
+        for (&pc, replacement) in &rewrite_plan.replacements {
+            plan.replace_range(pc, insn_width(&program.insns[pc]), replacement.clone());
         }
 
-        let sites_applied = rewrite_plan.replacements.len();
-        let orig_len = program.insns.len();
-        let mut new_insns = Vec::with_capacity(orig_len + sites_applied);
-        let mut addr_map = vec![0usize; orig_len + 1];
-        let mut pc = 0usize;
-
-        while pc < orig_len {
-            addr_map[pc] = new_insns.len();
-            let width = insn_width(&program.insns[pc]);
-
-            if let Some(replacement) = rewrite_plan.replacements.get(&pc) {
-                new_insns.extend_from_slice(replacement);
-                pc += width;
-                continue;
-            }
-
-            let insn = program.insns[pc];
-            new_insns.push(insn);
-            if width == 2 && pc + 1 < orig_len {
-                pc += 1;
-                addr_map[pc] = new_insns.len();
-                new_insns.push(program.insns[pc]);
-            }
-            pc += 1;
-        }
-        addr_map[orig_len] = new_insns.len();
-
-        fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
-
-        program.insns = new_insns;
-        super::utils::remap_btf_metadata(program, &addr_map)?;
-        program.remap_annotations(&addr_map);
-
-        Ok(PassResult {
-            pass_name: self.name().into(),
-            sites_applied,
-            sites_skipped: rewrite_plan.sites_skipped,
-            diagnostics: vec![format!("const_prop_alu_materialized={alu_materialized}")],
-            ..Default::default()
-        })
+        let mut result = plan.commit(program, BtfRemapPolicy::Remap)?;
+        result.pass_name = self.name().into();
+        result.sites_applied = rewrite_plan.replacements.len();
+        result.sites_skipped = rewrite_plan.sites_skipped;
+        result.diagnostics = vec![format!("const_prop_alu_materialized={alu_materialized}")];
+        Ok(result)
     }
 }
 

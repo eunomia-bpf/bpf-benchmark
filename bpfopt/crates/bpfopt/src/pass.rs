@@ -729,21 +729,7 @@ pub struct PlatformCapabilities {
     pub arch: Arch,
 }
 
-impl PlatformCapabilities {
-    /// Deterministic platform capability set for tests.
-    pub fn test_default() -> Self {
-        Self {
-            #[cfg(target_arch = "aarch64")]
-            arch: Arch::Aarch64,
-            #[cfg(not(target_arch = "aarch64"))]
-            arch: Arch::X86_64,
-            ..Default::default()
-        }
-    }
-}
-
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-
 pub enum Arch {
     #[default]
     X86_64,
@@ -988,7 +974,7 @@ impl Default for PassContext {
 impl PassContext {
     /// Create a minimal PassContext suitable for testing.
     /// All kinsn targets unavailable (btf_id = -1), no special CPU features.
-    pub fn test_default() -> Self {
+    pub fn baseline() -> Self {
         Self {
             kinsn_registry: KinsnRegistry {
                 rotate64_btf_id: -1,

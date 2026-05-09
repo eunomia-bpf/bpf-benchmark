@@ -365,7 +365,7 @@ fn try_run_map_inline_pass(program: &mut BpfProgram) -> anyhow::Result<PipelineR
     pm.register_analysis(BranchTargetAnalysis);
     pm.register_analysis(MapInfoAnalysis);
     pm.add_pass(MapInlinePass);
-    pm.run(program, &PassContext::test_default())
+    pm.run(program, &PassContext::baseline())
 }
 
 fn try_run_map_inline_pass_without_synthetic_verifier_states(
@@ -376,7 +376,7 @@ fn try_run_map_inline_pass_without_synthetic_verifier_states(
     pm.register_analysis(BranchTargetAnalysis);
     pm.register_analysis(MapInfoAnalysis);
     pm.add_pass(MapInlinePass);
-    pm.run(program, &PassContext::test_default())
+    pm.run(program, &PassContext::baseline())
 }
 
 fn run_map_inline_const_prop_dce(program: &mut BpfProgram) -> PipelineResult {
@@ -389,7 +389,7 @@ fn run_map_inline_const_prop_dce(program: &mut BpfProgram) -> PipelineResult {
     pm.add_pass(MapInlinePass);
     pm.add_pass(ConstPropPass);
     pm.add_pass(DcePass);
-    pm.run(program, &PassContext::test_default()).unwrap()
+    pm.run(program, &PassContext::baseline()).unwrap()
 }
 
 fn install_synthetic_verifier_states_for_map_inline_tests(program: &mut BpfProgram) {
@@ -485,9 +485,9 @@ fn map_inline_consumes_hint_when_verifier_state_unavailable() {
         map[1],
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![301]);
     program.map_inline_hints.push(pc_inline_hint(
@@ -516,9 +516,9 @@ fn map_inline_rejects_hint_with_wrong_key_size() {
         map[1],
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![302]);
     program
@@ -542,9 +542,9 @@ fn map_inline_rejects_hint_pointing_at_non_lookup_call() {
         map[1],
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![303]);
     program.map_inline_hints.push(pc_inline_hint(
@@ -566,10 +566,10 @@ fn find_map_lookup_sites_matches_helper_one_with_map_arg() {
     let insns = vec![
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, 7),
+        BpfInsn::st_mem(BPF_W, 10, -4, 7),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
     ];
 
     let sites = find_map_lookup_sites(&insns);
@@ -588,7 +588,7 @@ fn find_map_lookup_sites_ignores_calls_without_map_load() {
         BpfInsn::mov64_imm(1, 0),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
     ];
 
     assert!(find_map_lookup_sites(&insns).is_empty());
@@ -600,18 +600,18 @@ fn find_map_in_map_chains_detects_r0_to_r1_alias() {
     let insns = vec![
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         jeq_imm(0, 0, 7),
         BpfInsn::mov64_reg(1, 0),
-        st_mem(BPF_W, 10, -8, 2),
+        BpfInsn::st_mem(BPF_W, 10, -8, 2),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -8),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let outer_sites = find_map_lookup_sites(&insns);
 
@@ -629,19 +629,19 @@ fn find_map_in_map_chains_detects_stack_spilled_r0_to_r1_alias() {
     let insns = vec![
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         jeq_imm(0, 0, 8),
         BpfInsn::stx_mem(BPF_DW, 10, 0, -16),
         BpfInsn::ldx_mem(BPF_DW, 1, 10, -16),
-        st_mem(BPF_W, 10, -8, 2),
+        BpfInsn::st_mem(BPF_W, 10, -8, 2),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -8),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let outer_sites = find_map_lookup_sites(&insns);
 
@@ -660,16 +660,16 @@ fn find_map_in_map_chains_ignores_absent_alias() {
     let insns = vec![
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         inner[0],
         inner[1],
-        st_mem(BPF_W, 10, -8, 2),
+        BpfInsn::st_mem(BPF_W, 10, -8, 2),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -8),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
     ];
     let outer_sites = find_map_lookup_sites(&insns);
 
@@ -698,7 +698,7 @@ fn map_inline_constantizes_snapshot_pseudo_map_value_sources() {
             map_value[0],
             map_value[1],
             BpfInsn::ldx_mem(BPF_W, 2, 1, 0),
-            exit_insn(),
+            BpfInsn::exit(),
         ]);
         program.set_map_ids(vec![map_id]);
 
@@ -734,7 +734,7 @@ fn map_inline_pseudo_map_value_feeds_const_prop_and_dce_without_branch_cleanup()
         jeq_imm(2, 1, 1),
         BpfInsn::mov64_imm(0, 0),
         BpfInsn::mov64_imm(0, 1),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![903]);
 
@@ -748,7 +748,7 @@ fn map_inline_pseudo_map_value_feeds_const_prop_and_dce_without_branch_cleanup()
             BpfInsn::mov32_imm(2, 1),
             jeq_imm(2, 1, 0),
             BpfInsn::mov64_imm(0, 1),
-            exit_insn(),
+            BpfInsn::exit(),
         ]
     );
 }
@@ -759,10 +759,10 @@ fn extract_constant_key_from_direct_stack_store() {
     let insns = vec![
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, 7),
+        BpfInsn::st_mem(BPF_W, 10, -4, 7),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
     ];
 
     let key = extract_constant_key(&insns, 5).unwrap();
@@ -783,7 +783,7 @@ fn extract_constant_key_from_stx_stack_store() {
         BpfInsn::stx_mem(BPF_W, 10, 3, -4),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
     ];
 
     let key = extract_constant_key(&insns, 6).unwrap();
@@ -796,13 +796,13 @@ fn extract_constant_key_from_stx_stack_store() {
 fn extract_constant_key_from_r2_copy_chain() {
     let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let insns = vec![
-        st_mem(BPF_W, 10, -4, 7),
+        BpfInsn::st_mem(BPF_W, 10, -4, 7),
         BpfInsn::mov64_reg(6, 10),
         add64_imm(6, -4),
         BpfInsn::mov64_reg(2, 6),
         map[0],
         map[1],
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
     ];
 
     let key = extract_constant_key(&insns, 6).unwrap();
@@ -826,7 +826,7 @@ fn verifier_guided_key_extraction_matrix() {
                 add64_imm(2, -4),
                 wide_zero_map[0],
                 wide_zero_map[1],
-                call_helper(HELPER_MAP_LOOKUP_ELEM),
+                BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
             ],
             6,
             -4,
@@ -840,12 +840,12 @@ fn verifier_guided_key_extraction_matrix() {
             vec![
                 BpfInsn::mov64_reg(6, 10),
                 add64_imm(6, -8),
-                st_mem(BPF_W, 6, 4, 7),
+                BpfInsn::st_mem(BPF_W, 6, 4, 7),
                 BpfInsn::mov64_reg(2, 10),
                 add64_imm(2, -4),
                 fp_alias_map[0],
                 fp_alias_map[1],
-                call_helper(HELPER_MAP_LOOKUP_ELEM),
+                BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
             ],
             7,
             -4,
@@ -882,12 +882,12 @@ fn extract_constant_key_from_fp_alias_store_base() {
     let insns = vec![
         BpfInsn::mov64_reg(6, 10),
         add64_imm(6, -8),
-        st_mem(BPF_W, 6, 4, 7),
+        BpfInsn::st_mem(BPF_W, 6, 4, 7),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
         map[0],
         map[1],
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
     ];
 
     let key = extract_constant_key(&insns, 7).unwrap();
@@ -907,7 +907,7 @@ fn extract_constant_key_from_ldimm64_stack_store() {
         add64_imm(2, -8),
         map[0],
         map[1],
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
     ];
 
     let key = try_extract_constant_key_sized(&insns, 7, 8).unwrap();
@@ -920,7 +920,7 @@ fn extract_constant_key_from_ldimm64_stack_store() {
 #[test]
 fn classify_r0_uses_collects_fixed_loads_until_redefinition() {
     let insns = vec![
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 3, 0, 0),
         BpfInsn::ldx_mem(BPF_B, 4, 0, 7),
         BpfInsn::mov64_imm(0, 1),
@@ -951,7 +951,7 @@ fn classify_r0_uses_collects_fixed_loads_until_redefinition() {
 #[test]
 fn classify_r0_uses_tracks_alias_copies_and_guarded_loads() {
     let insns = vec![
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::mov64_reg(6, 0),
         jeq_imm(6, 0, 1),
         BpfInsn::ldx_mem(BPF_W, 3, 6, 0),
@@ -968,7 +968,7 @@ fn classify_r0_uses_tracks_alias_copies_and_guarded_loads() {
 #[test]
 fn classify_r0_uses_tracks_alias_offset_loads() {
     let insns = vec![
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::mov64_reg(6, 0),
         add64_imm(6, 4),
         BpfInsn::ldx_mem(BPF_W, 3, 6, 0),
@@ -991,7 +991,7 @@ fn classify_r0_uses_tracks_alias_offset_loads() {
 #[test]
 fn classify_r0_uses_does_not_treat_non_zero_alias_offset_as_null_check() {
     let insns = vec![
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::mov64_reg(6, 0),
         add64_imm(6, 4),
         jeq_imm(6, 0, 1),
@@ -1015,10 +1015,10 @@ fn classify_r0_uses_does_not_treat_non_zero_alias_offset_as_null_check() {
 #[test]
 fn classify_r0_uses_can_follow_callee_saved_alias_across_helper_when_enabled() {
     let insns = vec![
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::mov64_reg(9, 0),
         jeq_imm(9, 0, 2),
-        call_helper(2),
+        BpfInsn::helper_call(2),
         BpfInsn::ldx_mem(BPF_W, 3, 9, 4),
     ];
 
@@ -1043,9 +1043,9 @@ fn classify_r0_uses_can_follow_callee_saved_alias_across_helper_when_enabled() {
 #[test]
 fn classify_r0_uses_tracks_stack_spill_and_reload_across_helper() {
     let insns = vec![
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::stx_mem(BPF_DW, 10, 0, -16),
-        call_helper(2),
+        BpfInsn::helper_call(2),
         BpfInsn::ldx_mem(BPF_DW, 6, 10, -16),
         BpfInsn::ldx_mem(BPF_W, 3, 6, 4),
     ];
@@ -1068,10 +1068,10 @@ fn classify_r0_uses_tracks_stack_spill_and_reload_across_helper() {
 #[test]
 fn classify_r0_uses_allows_helper_argument_loaded_from_lookup_value() {
     let insns = vec![
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 4),
         BpfInsn::mov64_reg(1, 6),
-        call_helper(2),
+        BpfInsn::helper_call(2),
     ];
 
     let uses = classify_r0_uses(&insns, 0);
@@ -1091,10 +1091,10 @@ fn classify_r0_uses_allows_helper_argument_loaded_from_lookup_value() {
 #[test]
 fn classify_r0_uses_marks_pointer_escape_after_null_check_as_other() {
     let insns = vec![
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         jeq_imm(0, 0, 2),
         BpfInsn::mov64_reg(1, 0),
-        call_helper(2),
+        BpfInsn::helper_call(2),
         BpfInsn::ldx_mem(BPF_W, 3, 0, 0),
     ];
 
@@ -1107,7 +1107,7 @@ fn classify_r0_uses_marks_pointer_escape_after_null_check_as_other() {
 #[test]
 fn classify_r0_uses_marks_store_back_as_other_use() {
     let insns = vec![
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 1, 0, 0),
         add64_imm(1, 1),
         BpfInsn::stx_mem(BPF_W, 0, 1, 0),
@@ -1141,20 +1141,20 @@ fn map_inline_pass_lookup_rewrite_matrix() {
             BpfProgram::new(vec![
                 canonical_map[0],
                 canonical_map[1],
-                st_mem(BPF_W, 10, -4, 1),
+                BpfInsn::st_mem(BPF_W, 10, -4, 1),
                 BpfInsn::mov64_reg(2, 10),
                 add64_imm(2, -4),
-                call_helper(HELPER_MAP_LOOKUP_ELEM),
+                BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
                 BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
                 BpfInsn::ldx_mem(BPF_B, 7, 0, 4),
                 BpfInsn::mov64_imm(0, 0),
-                exit_insn(),
+                BpfInsn::exit(),
             ]),
             vec![
                 BpfInsn::mov32_imm(6, 7),
                 BpfInsn::mov32_imm(7, 0xaa),
                 BpfInsn::mov64_imm(0, 0),
-                exit_insn(),
+                BpfInsn::exit(),
             ],
         ),
         (
@@ -1166,24 +1166,24 @@ fn map_inline_pass_lookup_rewrite_matrix() {
             BpfProgram::new(vec![
                 BpfInsn::mov64_reg(6, 10),
                 add64_imm(6, -8),
-                st_mem(BPF_W, 6, 4, 7),
+                BpfInsn::st_mem(BPF_W, 6, 4, 7),
                 fp_alias_map[0],
                 fp_alias_map[1],
                 BpfInsn::mov64_reg(2, 10),
                 add64_imm(2, -4),
-                call_helper(HELPER_MAP_LOOKUP_ELEM),
+                BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
                 BpfInsn::mov64_reg(6, 0),
                 add64_imm(6, 4),
                 BpfInsn::ldx_mem(BPF_W, 7, 6, 0),
                 BpfInsn::mov64_imm(0, 0),
-                exit_insn(),
+                BpfInsn::exit(),
             ]),
             vec![
                 BpfInsn::mov64_reg(6, 10),
                 add64_imm(6, -8),
                 BpfInsn::mov32_imm(7, 42),
                 BpfInsn::mov64_imm(0, 0),
-                exit_insn(),
+                BpfInsn::exit(),
             ],
         ),
     ] {
@@ -1220,14 +1220,14 @@ fn map_inline_pass_struct_value_wide_constant_emission_matrix() {
             BpfProgram::new(vec![
                 struct_map[0],
                 struct_map[1],
-                st_mem(BPF_W, 10, -4, 1),
+                BpfInsn::st_mem(BPF_W, 10, -4, 1),
                 BpfInsn::mov64_reg(2, 10),
                 add64_imm(2, -4),
-                call_helper(HELPER_MAP_LOOKUP_ELEM),
+                BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
                 BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
                 BpfInsn::ldx_mem(BPF_DW, 7, 0, 8),
                 BpfInsn::mov64_imm(0, 0),
-                exit_insn(),
+                BpfInsn::exit(),
             ]),
             5,
             Some(BpfInsn::mov32_imm(6, 0x1234_5678i32)),
@@ -1243,13 +1243,13 @@ fn map_inline_pass_struct_value_wide_constant_emission_matrix() {
             BpfProgram::new(vec![
                 wide_map[0],
                 wide_map[1],
-                st_mem(BPF_W, 10, -4, 1),
+                BpfInsn::st_mem(BPF_W, 10, -4, 1),
                 BpfInsn::mov64_reg(2, 10),
                 add64_imm(2, -4),
-                call_helper(HELPER_MAP_LOOKUP_ELEM),
+                BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
                 BpfInsn::ldx_mem(BPF_DW, 6, 0, 0),
                 BpfInsn::mov64_imm(0, 0),
-                exit_insn(),
+                BpfInsn::exit(),
             ]),
             4,
             None,
@@ -1289,12 +1289,12 @@ fn map_inline_pass_rewrites_u32_max_with_mov32_imm() {
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![111]);
 
@@ -1304,12 +1304,12 @@ fn map_inline_pass_rewrites_u32_max_with_mov32_imm() {
         vec![
             map[0],
             map[1],
-            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::st_mem(BPF_W, 10, -4, 1),
             BpfInsn::mov64_reg(2, 10),
             add64_imm(2, -4),
-            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
             BpfInsn::mov32_imm(6, -1),
-            exit_insn(),
+            BpfInsn::exit(),
         ]
     );
 }
@@ -1327,16 +1327,16 @@ fn map_inline_pass_removes_null_check_and_dead_cold_block() {
         let mut program = BpfProgram::new(vec![
             map[0],
             map[1],
-            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::st_mem(BPF_W, 10, -4, 1),
             BpfInsn::mov64_reg(2, 10),
             add64_imm(2, -4),
-            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
             jeq_imm(0, 0, 3),
             BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
             BpfInsn::mov64_imm(0, 0),
             ja(1),
             BpfInsn::mov64_imm(0, 1),
-            exit_insn(),
+            BpfInsn::exit(),
         ]);
         program.set_map_ids(vec![map_id]);
 
@@ -1347,7 +1347,7 @@ fn map_inline_pass_removes_null_check_and_dead_cold_block() {
             vec![
                 BpfInsn::mov32_imm(6, 7),
                 BpfInsn::mov64_imm(0, 0),
-                exit_insn()
+                BpfInsn::exit()
             ],
             "{label}"
         );
@@ -1362,10 +1362,10 @@ fn map_inline_pass_keeps_null_check_when_non_null_window_has_side_effects() {
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         jeq_imm(0, 0, 5),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::stx_mem(BPF_W, 10, 6, -8),
@@ -1373,7 +1373,7 @@ fn map_inline_pass_keeps_null_check_when_non_null_window_has_side_effects() {
         BpfInsn::mov64_imm(0, 0),
         ja(1),
         BpfInsn::mov64_imm(0, 1),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![1602]);
 
@@ -1381,7 +1381,7 @@ fn map_inline_pass_keeps_null_check_when_non_null_window_has_side_effects() {
     assert!(program
         .insns
         .iter()
-        .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
+        .any(|insn| insn.is_call() && insn.imm == libbpf_sys::BPF_FUNC_map_lookup_elem as i32));
     assert!(program.insns.contains(&jeq_imm(0, 0, 5)));
     assert!(program.insns.contains(&BpfInsn::mov32_imm(6, 7)));
 }
@@ -1397,10 +1397,10 @@ fn map_inline_pass_skips_non_constant_key() {
         BpfInsn::stx_mem(BPF_W, 10, 3, -4),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let mut program = BpfProgram::new(original.clone());
     program.set_map_ids(vec![104]);
@@ -1428,11 +1428,11 @@ fn map_inline_soft_map_name_hint_emits_key_check_scalar_fold_without_fallback() 
         BpfInsn::stx_mem(BPF_W, 10, 3, -4),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         jeq_imm(0, 0, 2),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![map_id]);
     program.map_metadata.insert(
@@ -1460,7 +1460,7 @@ fn map_inline_soft_map_name_hint_emits_key_check_scalar_fold_without_fallback() 
     assert!(!program
         .insns
         .iter()
-        .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
+        .any(|insn| insn.is_call() && insn.imm == libbpf_sys::BPF_FUNC_map_lookup_elem as i32));
     assert!(!program.insns.contains(&BpfInsn::mov64_reg(0, 10)));
     assert!(!program.insns.contains(&map[0]));
     assert!(program.insns.contains(&BpfInsn::ldx_mem(BPF_W, 3, 2, 0)));
@@ -1511,23 +1511,23 @@ fn map_inline_soft_hint_requires_immediate_null_check_when_hard_fold_coexists() 
     let mut program = BpfProgram::new(vec![
         hard_map[0],
         hard_map[1],
-        st_mem(BPF_W, 10, -4, 0),
+        BpfInsn::st_mem(BPF_W, 10, -4, 0),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         soft_map[0],
         soft_map[1],
-        st_mem(BPF_W, 10, -8, 1),
+        BpfInsn::st_mem(BPF_W, 10, -8, 1),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -8),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::mov64_imm(8, 2),
         BpfInsn::mov64_imm(1, 7),
         jeq_imm(0, 0, 2),
         BpfInsn::ldx_mem(BPF_W, 7, 0, 0),
         BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![hard_map_id, soft_map_id]);
     install_named_map_metadata(
@@ -1566,7 +1566,7 @@ fn map_inline_soft_hint_requires_immediate_null_check_when_hard_fold_coexists() 
     assert!(program
         .insns
         .iter()
-        .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
+        .any(|insn| insn.is_call() && insn.imm == libbpf_sys::BPF_FUNC_map_lookup_elem as i32));
     assert!(result.pass_results[0]
         .diagnostics
         .iter()
@@ -1598,13 +1598,13 @@ fn map_inline_lpm_trie_enumerated_empty_hard_hint_folds_lookup_to_null() {
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, 0),
+        BpfInsn::st_mem(BPF_W, 10, -4, 0),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         jeq_imm(0, 0, 1),
         BpfInsn::mov64_imm(0, 1),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![map_id]);
     install_named_map_metadata(
@@ -1636,8 +1636,11 @@ fn map_inline_lpm_trie_enumerated_empty_hard_hint_folds_lookup_to_null() {
     assert!(!program
         .insns
         .iter()
-        .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
-    assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 0), exit_insn()]);
+        .any(|insn| insn.is_call() && insn.imm == libbpf_sys::BPF_FUNC_map_lookup_elem as i32));
+    assert_eq!(
+        program.insns,
+        vec![BpfInsn::mov64_imm(0, 0), BpfInsn::exit()]
+    );
     assert!(result.pass_results[0]
         .diagnostics
         .iter()
@@ -1660,17 +1663,17 @@ fn map_inline_skips_kernel_mutable_map() {
         add64_imm(2, -4),
         BpfInsn::mov64_reg(3, 10),
         add64_imm(3, -8),
-        call_helper(HELPER_MAP_UPDATE_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_update_elem as i32),
         map[0],
         map[1],
         BpfInsn::stx_mem(BPF_W, 10, 3, -4),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         jeq_imm(0, 0, 2),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let mut program = BpfProgram::new(original.clone());
     program.set_map_ids(vec![map_id]);
@@ -1706,10 +1709,10 @@ fn map_inline_does_not_abort_on_runtime_map_pointer_writer() {
     let original = vec![
         dynamic_map[0],
         dynamic_map[1],
-        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::stx_mem(BPF_DW, 10, 0, -8),
         BpfInsn::ldx_mem(BPF_DW, 1, 10, -8),
         BpfInsn::mov64_reg(2, 10),
@@ -1717,17 +1720,17 @@ fn map_inline_does_not_abort_on_runtime_map_pointer_writer() {
         BpfInsn::mov64_reg(3, 10),
         add64_imm(3, -16),
         BpfInsn::mov64_imm(4, 0),
-        call_helper(HELPER_MAP_UPDATE_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_update_elem as i32),
         inline_map[0],
         inline_map[1],
-        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         jeq_imm(0, 0, 2),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let mut program = BpfProgram::new(original);
     program.set_map_ids(vec![dynamic_map_id, inline_map_id]);
@@ -1758,11 +1761,11 @@ fn map_inline_pass_skips_pseudo_map_value_lookup_key_without_verifier_state() {
         map[1],
         key[0],
         key[1],
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         jeq_imm(0, 0, 2),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![9402, 9401]);
 
@@ -1821,13 +1824,13 @@ fn map_inline_pass_uses_stack_snapshot_key_size_matrix() {
                 BpfInsn::stx_mem(BPF_DW, 10, 4, -8),
                 BpfInsn::mov64_reg(2, 10),
                 add64_imm(2, -16),
-                call_helper(HELPER_MAP_LOOKUP_ELEM),
+                BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
                 jeq_imm(0, 0, 3),
                 BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
                 BpfInsn::mov64_imm(0, 0),
                 ja(1),
                 BpfInsn::mov64_imm(0, 1),
-                exit_insn(),
+                BpfInsn::exit(),
             ]),
             vec![],
         ),
@@ -1844,9 +1847,9 @@ fn map_inline_pass_uses_stack_snapshot_key_size_matrix() {
                 map256[1],
                 BpfInsn::mov64_reg(2, 10),
                 add64_imm(2, -256),
-                call_helper(HELPER_MAP_LOOKUP_ELEM),
+                BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
                 BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
-                exit_insn(),
+                BpfInsn::exit(),
             ]),
             vec![verifier_delta_state_with_stack(
                 4,
@@ -1868,16 +1871,16 @@ fn map_inline_pass_uses_stack_snapshot_key_size_matrix() {
                 BpfInsn::mov64_imm(3, 0),
                 BpfInsn::stx_mem(BPF_DW, 10, 3, -20),
                 BpfInsn::stx_mem(BPF_DW, 10, 3, -12),
-                st_mem(BPF_W, 10, -4, 1),
+                BpfInsn::st_mem(BPF_W, 10, -4, 1),
                 BpfInsn::mov64_reg(2, 10),
                 add64_imm(2, -20),
-                call_helper(HELPER_MAP_LOOKUP_ELEM),
+                BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
                 jeq_imm(0, 0, 3),
                 BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
                 BpfInsn::mov64_imm(0, 0),
                 ja(1),
                 BpfInsn::mov64_imm(0, 1),
-                exit_insn(),
+                BpfInsn::exit(),
             ]),
             vec![],
         ),
@@ -1896,14 +1899,14 @@ fn map_inline_pass_uses_stack_snapshot_key_size_matrix() {
                 add64_imm(2, -4),
                 map_zero[0],
                 map_zero[1],
-                call_helper(HELPER_MAP_LOOKUP_ELEM),
+                BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
                 jeq_imm(0, 0, 2),
                 BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
                 BpfInsn::mov64_imm(0, 0),
-                exit_insn(),
-                exit_insn(),
+                BpfInsn::exit(),
+                BpfInsn::exit(),
                 BpfInsn::mov64_imm(0, 1),
-                exit_insn(),
+                BpfInsn::exit(),
             ]),
             vec![verifier_delta_state_with_stack(
                 6,
@@ -1945,9 +1948,9 @@ fn map_inline_pass_uses_full_state_stack_snapshot_for_key() {
         map[1],
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![9323]);
     program.set_verifier_states(vec![
@@ -1980,9 +1983,9 @@ fn map_inline_pass_reports_unavailable_when_call_stack_snapshot_is_absent() {
         map[1],
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let mut program = BpfProgram::new(original.clone());
     program.set_map_ids(vec![9321]);
@@ -2011,9 +2014,9 @@ fn map_inline_pass_requires_explicit_precise_stack_scalar() {
         map[1],
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let mut stack = HashMap::new();
     stack.insert(
@@ -2060,21 +2063,21 @@ fn map_inline_pass_rewrites_map_in_map_chain_loads() {
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         jeq_imm(0, 0, 8),
         BpfInsn::mov64_reg(1, 0),
-        st_mem(BPF_W, 10, -8, 2),
+        BpfInsn::st_mem(BPF_W, 10, -8, 2),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -8),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
         BpfInsn::mov64_imm(0, 1),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![outer_map_id]);
     program
@@ -2099,7 +2102,7 @@ fn map_inline_pass_rewrites_map_in_map_chain_loads() {
     assert!(!program
         .insns
         .iter()
-        .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
+        .any(|insn| insn.is_call() && insn.imm == libbpf_sys::BPF_FUNC_map_lookup_elem as i32));
     assert_eq!(
         result.pass_results[0].map_inline_records[0].map_id,
         inner_map_id
@@ -2115,21 +2118,21 @@ fn map_in_map_route_program(outer_map_id: u32, outer_key: u32, inner_key: u32) -
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, outer_key as i32),
+        BpfInsn::st_mem(BPF_W, 10, -4, outer_key as i32),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         jeq_imm(0, 0, 8),
         BpfInsn::mov64_reg(1, 0),
-        st_mem(BPF_W, 10, -8, inner_key as i32),
+        BpfInsn::st_mem(BPF_W, 10, -8, inner_key as i32),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -8),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
         BpfInsn::mov64_imm(0, 1),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![outer_map_id]);
     program
@@ -2189,7 +2192,7 @@ fn map_inline_outer_only_array_of_maps_hard_hint_replaces_outer_lookup_only() {
         program
             .insns
             .iter()
-            .filter(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM)
+            .filter(|insn| insn.is_call() && insn.imm == libbpf_sys::BPF_FUNC_map_lookup_elem as i32)
             .count(),
         1
     );
@@ -2256,7 +2259,7 @@ fn map_inline_outer_only_hash_of_maps_hard_hint_uses_outer_overlay() {
         program
             .insns
             .iter()
-            .filter(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM)
+            .filter(|insn| insn.is_call() && insn.imm == libbpf_sys::BPF_FUNC_map_lookup_elem as i32)
             .count(),
         1
     );
@@ -2319,7 +2322,7 @@ fn map_inline_route_a_array_of_maps_hard_hints_fold_outer_and_inner() {
     assert!(!program
         .insns
         .iter()
-        .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
+        .any(|insn| insn.is_call() && insn.imm == libbpf_sys::BPF_FUNC_map_lookup_elem as i32));
     assert!(result.pass_results[0]
         .diagnostics
         .iter()
@@ -2391,7 +2394,7 @@ fn map_inline_route_a_hash_of_maps_uses_outer_overlay_and_inner_hard_hint() {
     assert!(!program
         .insns
         .iter()
-        .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
+        .any(|insn| insn.is_call() && insn.imm == libbpf_sys::BPF_FUNC_map_lookup_elem as i32));
 }
 
 #[test]
@@ -2413,10 +2416,10 @@ fn map_inline_hash_hard_hint_without_inner_hint_uses_normal_fold() {
         map[1],
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         jeq_imm(0, 0, 1),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![hash_map_id]);
     install_named_map_metadata(
@@ -2633,18 +2636,18 @@ fn map_inline_pass_skips_missing_outer_map_in_map_entry() {
     let original = vec![
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         jeq_imm(0, 0, 7),
         BpfInsn::mov64_reg(1, 0),
-        st_mem(BPF_W, 10, -8, 2),
+        BpfInsn::st_mem(BPF_W, 10, -8, 2),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -8),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let mut program = BpfProgram::new(original.clone());
     program.set_map_ids(vec![outer_map_id]);
@@ -2665,15 +2668,15 @@ fn map_inline_pass_keeps_hash_lookup_and_rewrites_jne_guarded_load() {
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         jne_imm(0, 0, 1),
         ja(3),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![122]);
 
@@ -2683,15 +2686,15 @@ fn map_inline_pass_keeps_hash_lookup_and_rewrites_jne_guarded_load() {
         vec![
             map[0],
             map[1],
-            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::st_mem(BPF_W, 10, -4, 1),
             BpfInsn::mov64_reg(2, 10),
             add64_imm(2, -4),
-            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
             jne_imm(0, 0, 1),
             ja(3),
             BpfInsn::mov32_imm(6, 7),
             BpfInsn::mov64_imm(0, 0),
-            exit_insn(),
+            BpfInsn::exit(),
         ]
     );
 }
@@ -2706,16 +2709,16 @@ fn map_inline_pass_keeps_lookup_and_rewrites_load_when_setup_has_branch_target()
         jne_imm(3, 0, 2),
         BpfInsn::mov64_imm(4, 0),
         BpfInsn::mov64_imm(4, 0),
-        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
         map[0],
         map[1],
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         jeq_imm(0, 0, 1),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![123]);
 
@@ -2727,16 +2730,16 @@ fn map_inline_pass_keeps_lookup_and_rewrites_load_when_setup_has_branch_target()
             jne_imm(3, 0, 2),
             BpfInsn::mov64_imm(4, 0),
             BpfInsn::mov64_imm(4, 0),
-            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::st_mem(BPF_W, 10, -4, 1),
             BpfInsn::mov64_reg(2, 10),
             add64_imm(2, -4),
             map[0],
             map[1],
-            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
             jeq_imm(0, 0, 1),
             BpfInsn::mov32_imm(6, 7),
             BpfInsn::mov64_imm(0, 0),
-            exit_insn(),
+            BpfInsn::exit(),
         ]
     );
     assert!(
@@ -2757,18 +2760,18 @@ fn map_inline_pass_removes_hash_lookup_before_helper_using_loaded_scalar() {
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         jeq_imm(0, 0, 5),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 4),
         BpfInsn::mov64_reg(1, 6),
-        call_helper(HELPER_KTIME_GET_NS),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_ktime_get_ns as i32),
         BpfInsn::mov64_imm(0, 0),
         ja(1),
         BpfInsn::mov64_imm(0, 1),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![1061]);
 
@@ -2778,9 +2781,9 @@ fn map_inline_pass_removes_hash_lookup_before_helper_using_loaded_scalar() {
         vec![
             BpfInsn::mov32_imm(6, 7),
             BpfInsn::mov64_reg(1, 6),
-            call_helper(HELPER_KTIME_GET_NS),
+            BpfInsn::helper_call(libbpf_sys::BPF_FUNC_ktime_get_ns as i32),
             BpfInsn::mov64_imm(0, 0),
-            exit_insn(),
+            BpfInsn::exit(),
         ]
     );
 }
@@ -2795,10 +2798,10 @@ fn map_inline_pass_does_not_use_non_verifier_fixpoint_fallback() {
     let mut program = BpfProgram::new(vec![
         map0[0],
         map0[1],
-        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::stx_mem(BPF_DW, 10, 6, -16),
         BpfInsn::ldx_mem(BPF_DW, 7, 10, -16),
@@ -2807,10 +2810,10 @@ fn map_inline_pass_does_not_use_non_verifier_fixpoint_fallback() {
         map1[1],
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -8),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 8, 0, 0),
         BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![9203, 9204]);
 
@@ -2819,7 +2822,7 @@ fn map_inline_pass_does_not_use_non_verifier_fixpoint_fallback() {
         program
             .insns
             .iter()
-            .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM),
+            .any(|insn| insn.is_call() && insn.imm == libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         "expected later lookup helper to remain without refreshed verifier state, got: {:?}",
         program.insns
     );
@@ -2843,17 +2846,17 @@ fn map_inline_pass_rewrites_lookup_inside_subprog() {
     let mut program = BpfProgram::new(vec![
         BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 1), 0, 2),
         BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
         BpfInsn::mov64_imm(9, 0),
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![109]);
 
@@ -2864,11 +2867,11 @@ fn map_inline_pass_rewrites_lookup_inside_subprog() {
         vec![
             BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 1), 0, 2),
             BpfInsn::mov64_imm(0, 0),
-            exit_insn(),
+            BpfInsn::exit(),
             BpfInsn::mov64_imm(9, 0),
             BpfInsn::mov32_imm(6, 7),
             BpfInsn::mov64_imm(0, 0),
-            exit_insn(),
+            BpfInsn::exit(),
         ]
     );
 }
@@ -2881,15 +2884,15 @@ fn map_inline_pass_inlines_mutable_array_across_readonly_helper_call() {
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::mov64_reg(9, 0),
-        call_helper(HELPER_KTIME_GET_NS),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_ktime_get_ns as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 9, 0),
         BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![411]);
 
@@ -2897,10 +2900,10 @@ fn map_inline_pass_inlines_mutable_array_across_readonly_helper_call() {
     assert_eq!(
         program.insns,
         vec![
-            call_helper(HELPER_KTIME_GET_NS),
+            BpfInsn::helper_call(libbpf_sys::BPF_FUNC_ktime_get_ns as i32),
             BpfInsn::mov32_imm(6, 7),
             BpfInsn::mov64_imm(0, 0),
-            exit_insn(),
+            BpfInsn::exit(),
         ]
     );
 }
@@ -2911,13 +2914,13 @@ fn map_inline_pass_skips_size_skipped_array_map() {
     let original = vec![
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, 2),
+        BpfInsn::st_mem(BPF_W, 10, -4, 2),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let mut program = BpfProgram::new(original.clone());
     program.set_map_ids(vec![312]);
@@ -2957,13 +2960,13 @@ fn map_inline_pass_uses_overlay_for_size_skipped_array_map() {
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, 2),
+        BpfInsn::st_mem(BPF_W, 10, -4, 2),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![313]);
     program.map_metadata.insert(
@@ -3007,13 +3010,13 @@ fn map_inline_pass_inlines_uniform_percpu_array_maps() {
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_map_ids(vec![112]);
 
@@ -3021,7 +3024,7 @@ fn map_inline_pass_inlines_uniform_percpu_array_maps() {
     assert!(!program
         .insns
         .iter()
-        .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
+        .any(|insn| insn.is_call() && insn.imm == libbpf_sys::BPF_FUNC_map_lookup_elem as i32));
     assert!(program
         .insns
         .iter()
@@ -3038,13 +3041,13 @@ fn map_inline_pass_snapshot_missing_error_matrix() {
         let mut program = BpfProgram::new(vec![
             map[0],
             map[1],
-            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::st_mem(BPF_W, 10, -4, 1),
             BpfInsn::mov64_reg(2, 10),
             add64_imm(2, -4),
-            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
             BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
             BpfInsn::mov64_imm(0, 0),
-            exit_insn(),
+            BpfInsn::exit(),
         ]);
         program.set_map_ids(vec![map_id]);
 
@@ -3075,13 +3078,13 @@ fn map_inline_pass_skips_mixed_percpu_array_maps() {
     let original = vec![
         map[0],
         map[1],
-        st_mem(BPF_W, 10, -4, 1),
+        BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
         add64_imm(2, -4),
-        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let mut program = BpfProgram::new(original.clone());
     program.set_map_ids(vec![212]);
@@ -3111,14 +3114,14 @@ fn map_inline_pass_skips_percpu_hash_family_maps() {
         let original = vec![
             map[0],
             map[1],
-            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::st_mem(BPF_W, 10, -4, 1),
             BpfInsn::mov64_reg(2, 10),
             add64_imm(2, -4),
-            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
             jeq_imm(0, 0, 2),
             BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
             BpfInsn::mov64_imm(0, 0),
-            exit_insn(),
+            BpfInsn::exit(),
         ];
         let mut program = BpfProgram::new(original.clone());
         program.set_map_ids(vec![map_id]);

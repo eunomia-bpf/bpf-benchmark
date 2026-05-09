@@ -5,7 +5,7 @@ use crate::pass::{AnalysisCache, PassContext};
 use crate::test_helpers::*;
 
 fn ctx_with_extract_kfunc(btf_id: i32) -> PassContext {
-    let mut ctx = PassContext::test_default();
+    let mut ctx = PassContext::baseline();
     ctx.kinsn_registry.extract64_btf_id = btf_id;
     ctx.platform.has_bmi1 = true;
     ctx
@@ -47,7 +47,7 @@ fn test_scan_extract_basic() {
     let insns = vec![
         BpfInsn::alu64_imm(BPF_RSH, 2, 8),    // RSH r2, 8
         BpfInsn::alu64_imm(BPF_AND, 2, 0xff), // AND r2, 0xff
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_extract_sites(&insns);
     assert_eq!(sites.len(), 1);
@@ -63,7 +63,7 @@ fn test_scan_extract_16bit_mask() {
     let insns = vec![
         BpfInsn::alu64_imm(BPF_RSH, 3, 16),     // RSH r3, 16
         BpfInsn::alu64_imm(BPF_AND, 3, 0xffff), // AND r3, 0xffff
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_extract_sites(&insns);
     assert_eq!(sites.len(), 1);
@@ -76,7 +76,7 @@ fn test_scan_extract_sign_extended_all_ones_is_64bit_mask() {
     let insns = vec![
         BpfInsn::alu64_imm(BPF_RSH, 3, 0),
         BpfInsn::alu64_imm(BPF_AND, 3, -1),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_extract_sites(&insns);
     assert_eq!(sites.len(), 1);
@@ -88,7 +88,7 @@ fn test_scan_extract_no_match_non_contiguous_mask() {
     let insns = vec![
         BpfInsn::alu64_imm(BPF_RSH, 2, 8),
         BpfInsn::alu64_imm(BPF_AND, 2, 0x5), // 0b101 - not contiguous
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_extract_sites(&insns);
     assert!(sites.is_empty());
@@ -99,7 +99,7 @@ fn test_scan_extract_no_match_different_regs() {
     let insns = vec![
         BpfInsn::alu64_imm(BPF_RSH, 2, 8),
         BpfInsn::alu64_imm(BPF_AND, 3, 0xff), // different dst reg
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_extract_sites(&insns);
     assert!(sites.is_empty());
@@ -112,7 +112,7 @@ fn test_scan_extract_multiple_sites() {
         BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
         BpfInsn::alu64_imm(BPF_RSH, 3, 16),
         BpfInsn::alu64_imm(BPF_AND, 3, 0xf),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_extract_sites(&insns);
     assert_eq!(sites.len(), 2);
@@ -127,7 +127,7 @@ fn test_scan_extract_zero_mask() {
     let insns = vec![
         BpfInsn::alu64_imm(BPF_RSH, 2, 8),
         BpfInsn::alu64_imm(BPF_AND, 2, 0), // mask = 0
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_extract_sites(&insns);
     assert!(sites.is_empty());
@@ -140,10 +140,10 @@ fn test_extract_pass_skip_when_kfunc_unavailable() {
     let mut prog = make_program(vec![
         BpfInsn::alu64_imm(BPF_RSH, 2, 8),
         BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
-    let mut ctx = PassContext::test_default(); // extract64_btf_id = -1
+    let mut ctx = PassContext::baseline(); // extract64_btf_id = -1
     ctx.platform.has_bmi1 = true; // platform has BMI1, but kfunc is missing
 
     let pass = ExtractPass;
@@ -159,7 +159,7 @@ fn test_extract_pass_emit_kfunc_call() {
     let mut prog = make_program(vec![
         BpfInsn::alu64_imm(BPF_RSH, 2, 8),
         BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_extract_kfunc(7777);
@@ -191,9 +191,9 @@ fn test_extract_pass_applies_site_inside_multi_subprog_program() {
         BpfInsn::alu64_imm(BPF_RSH, 2, 8),
         BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
         pseudo_call_to(2, 4),
-        exit_insn(),
+        BpfInsn::exit(),
         BpfInsn::mov64_imm(0, 1),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_extract_kfunc(7777);
@@ -215,7 +215,7 @@ fn test_extract_pass_caller_saved_with_save_restore() {
         BpfInsn::alu64_imm(BPF_RSH, 2, 8),
         BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
         BpfInsn::mov64_reg(0, 3), // uses r3 after site
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_extract_kfunc(7777);
@@ -241,7 +241,7 @@ fn test_extract_pass_packed_no_callee_saved_dependency() {
         BpfInsn::alu64_reg(BPF_OR, 0, 7),
         BpfInsn::alu64_reg(BPF_OR, 0, 8),
         BpfInsn::alu64_reg(BPF_OR, 0, 9),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_extract_kfunc(7777);
@@ -258,7 +258,7 @@ fn test_extract_pass_interior_branch_target() {
         jeq_imm(5, 0, 1),                     // if r5 == 0, jump to pc=2 (the AND)
         BpfInsn::alu64_imm(BPF_RSH, 2, 8),    // pc=1
         BpfInsn::alu64_imm(BPF_AND, 2, 0xff), // pc=2 -- branch target
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_extract_kfunc(7777);
@@ -279,7 +279,7 @@ fn test_extract_pass_branch_fixup() {
         jeq_imm(5, 0, 2),                     // if r5==0, skip 2 insns to exit
         BpfInsn::alu64_imm(BPF_RSH, 2, 8),    // pc=1: site start
         BpfInsn::alu64_imm(BPF_AND, 2, 0xff), // pc=2: site end
-        exit_insn(),                          // pc=3: branch target
+        BpfInsn::exit(),                      // pc=3: branch target
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_extract_kfunc(7777);
@@ -299,7 +299,7 @@ fn test_extract_pass_uses_static_call_offset() {
     let mut prog = make_program(vec![
         BpfInsn::alu64_imm(BPF_RSH, 2, 8),
         BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let mut ctx = ctx_with_extract_kfunc(7777);
@@ -322,7 +322,7 @@ fn test_scan_extract_width_1() {
     let insns = vec![
         BpfInsn::alu64_imm(BPF_RSH, 4, 3),   // RSH r4, 3
         BpfInsn::alu64_imm(BPF_AND, 4, 0x1), // AND r4, 1 (width=1)
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_extract_sites(&insns);
     assert_eq!(sites.len(), 1);
@@ -335,7 +335,7 @@ fn test_extract_pass_width_1() {
     let mut prog = make_program(vec![
         BpfInsn::alu64_imm(BPF_RSH, 4, 3),
         BpfInsn::alu64_imm(BPF_AND, 4, 0x1),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_extract_kfunc(7777);
@@ -360,7 +360,7 @@ fn test_scan_extract_sign_extended_all_ones_shifted_is_not_width_32() {
     let insns = vec![
         BpfInsn::alu64_imm(BPF_RSH, 2, 16),
         BpfInsn::alu64_imm(BPF_AND, 2, -1),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_extract_sites(&insns);
     assert!(sites.is_empty());
@@ -371,7 +371,7 @@ fn test_extract_pass_sign_extended_all_ones_shifted_no_match() {
     let mut prog = make_program(vec![
         BpfInsn::alu64_imm(BPF_RSH, 2, 16),
         BpfInsn::alu64_imm(BPF_AND, 2, -1),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_extract_kfunc(7777);
@@ -386,7 +386,7 @@ fn test_scan_extract_sign_extended_all_ones_shift_too_large() {
     let insns = vec![
         BpfInsn::alu64_imm(BPF_RSH, 2, 33),
         BpfInsn::alu64_imm(BPF_AND, 2, -1),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_extract_sites(&insns);
     assert!(sites.is_empty());
@@ -399,7 +399,7 @@ fn test_scan_extract_shift_0() {
     let insns = vec![
         BpfInsn::alu64_imm(BPF_RSH, 5, 0),    // RSH r5, 0 (no-op shift)
         BpfInsn::alu64_imm(BPF_AND, 5, 0xff), // AND r5, 0xff
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_extract_sites(&insns);
     assert_eq!(sites.len(), 1);
@@ -412,7 +412,7 @@ fn test_extract_pass_shift_0() {
     let mut prog = make_program(vec![
         BpfInsn::alu64_imm(BPF_RSH, 5, 0),
         BpfInsn::alu64_imm(BPF_AND, 5, 0xff),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_extract_kfunc(7777);
@@ -431,7 +431,7 @@ fn test_extract_pass_two_consecutive_sites() {
         BpfInsn::alu64_imm(BPF_AND, 6, 0xff),
         BpfInsn::alu64_imm(BPF_RSH, 7, 16),
         BpfInsn::alu64_imm(BPF_AND, 7, 0xf),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_extract_kfunc(7777);
@@ -457,7 +457,7 @@ fn test_scan_extract_non_power_of_two_minus_one_masks() {
     let insns_a = vec![
         BpfInsn::alu64_imm(BPF_RSH, 2, 4),
         BpfInsn::alu64_imm(BPF_AND, 2, 0x6),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     assert!(scan_extract_sites(&insns_a).is_empty());
 
@@ -465,7 +465,7 @@ fn test_scan_extract_non_power_of_two_minus_one_masks() {
     let insns_b = vec![
         BpfInsn::alu64_imm(BPF_RSH, 2, 4),
         BpfInsn::alu64_imm(BPF_AND, 2, 0x10),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     assert!(scan_extract_sites(&insns_b).is_empty());
 
@@ -473,7 +473,7 @@ fn test_scan_extract_non_power_of_two_minus_one_masks() {
     let insns_c = vec![
         BpfInsn::alu64_imm(BPF_RSH, 2, 4),
         BpfInsn::alu64_imm(BPF_AND, 2, 0xfe_u32 as i32),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     assert!(scan_extract_sites(&insns_c).is_empty());
 
@@ -481,7 +481,7 @@ fn test_scan_extract_non_power_of_two_minus_one_masks() {
     let insns_d = vec![
         BpfInsn::alu64_imm(BPF_RSH, 2, 4),
         BpfInsn::alu64_imm(BPF_AND, 2, 0x80),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     assert!(scan_extract_sites(&insns_d).is_empty());
 }
@@ -493,7 +493,7 @@ fn test_extract_pass_dst_is_r0() {
     let mut prog = make_program(vec![
         BpfInsn::alu64_imm(BPF_RSH, 0, 4),
         BpfInsn::alu64_imm(BPF_AND, 0, 0xf),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_extract_kfunc(7777);

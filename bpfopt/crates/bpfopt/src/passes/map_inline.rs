@@ -22,12 +22,6 @@ const BPF_PSEUDO_MAP_FD: u8 = crate::insn::BPF_PSEUDO_MAP_FD;
 const BPF_PSEUDO_MAP_VALUE: u8 = crate::insn::BPF_PSEUDO_MAP_VALUE;
 const BPF_PSEUDO_MAP_IDX: u8 = crate::insn::BPF_PSEUDO_MAP_IDX;
 const BPF_PSEUDO_MAP_IDX_VALUE: u8 = crate::insn::BPF_PSEUDO_MAP_IDX_VALUE;
-const HELPER_MAP_LOOKUP_ELEM: i32 = 1;
-const HELPER_MAP_UPDATE_ELEM: i32 = 2;
-const HELPER_MAP_DELETE_ELEM: i32 = 3;
-const HELPER_KTIME_GET_NS: i32 = 5;
-const HELPER_MAP_PUSH_ELEM: i32 = 87;
-const HELPER_MAP_POP_ELEM: i32 = 88;
 const R2_SETUP_LOOKBACK_LIMIT: usize = 8;
 const REG_RESOLUTION_LIMIT: usize = 64;
 const CONST_STACK_VALUE_LOOKBACK_LIMIT: usize = 256;
@@ -965,33 +959,33 @@ fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Res
 
 /// A `bpf_map_lookup_elem()` helper call and its map argument load.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct MapLookupSite {
-    pub call_pc: usize,
-    pub map_load_pc: usize,
+struct MapLookupSite {
+    call_pc: usize,
+    map_load_pc: usize,
 }
 
 /// A two-level map-in-map lookup chain: outer lookup result flows into the
 /// inner lookup's map argument.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct MapInMapChain {
-    pub outer_site: MapLookupSite,
-    pub inner_call_pc: usize,
-    pub outer_alias_copy_pcs: Vec<usize>,
-    pub outer_null_check_pc: Option<usize>,
+struct MapInMapChain {
+    outer_site: MapLookupSite,
+    inner_call_pc: usize,
+    outer_alias_copy_pcs: Vec<usize>,
+    outer_null_check_pc: Option<usize>,
 }
 
 /// Constant key materialized on the stack for a map lookup.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct ConstantKey {
-    pub stack_off: i16,
-    pub width: usize,
-    pub value: u64,
-    pub bytes: Vec<u8>,
-    pub store_pc: usize,
-    pub source_imm_pc: Option<usize>,
-    pub materialization_pcs: Vec<usize>,
-    pub r2_mov_pc: Option<usize>,
-    pub r2_add_pc: Option<usize>,
+struct ConstantKey {
+    stack_off: i16,
+    width: usize,
+    value: u64,
+    bytes: Vec<u8>,
+    store_pc: usize,
+    source_imm_pc: Option<usize>,
+    materialization_pcs: Vec<usize>,
+    r2_mov_pc: Option<usize>,
+    r2_add_pc: Option<usize>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -1007,20 +1001,20 @@ enum KeyExtractionError {
 
 /// A fixed-offset scalar load from the map value pointer returned in `r0`.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct FixedLoadUse {
-    pub pc: usize,
-    pub dst_reg: u8,
-    pub size: u8,
-    pub offset: i16,
+struct FixedLoadUse {
+    pc: usize,
+    dst_reg: u8,
+    size: u8,
+    offset: i16,
 }
 
 /// Classification of all uses that consume the lookup result in `r0`.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct R0UseClassification {
-    pub fixed_loads: Vec<FixedLoadUse>,
-    pub other_uses: Vec<usize>,
-    pub alias_copy_pcs: Vec<usize>,
-    pub null_check_pc: Option<usize>,
+struct R0UseClassification {
+    fixed_loads: Vec<FixedLoadUse>,
+    other_uses: Vec<usize>,
+    alias_copy_pcs: Vec<usize>,
+    null_check_pc: Option<usize>,
 }
 
 impl R0UseClassification {
@@ -1076,13 +1070,16 @@ struct MapRefKey {
 }
 
 /// Find all `bpf_map_lookup_elem()` call sites in the instruction stream.
-pub fn find_map_lookup_sites(insns: &[BpfInsn]) -> Vec<MapLookupSite> {
+fn find_map_lookup_sites(insns: &[BpfInsn]) -> Vec<MapLookupSite> {
     let mut sites = Vec::new();
     let mut pc = 0usize;
 
     while pc < insns.len() {
         let insn = &insns[pc];
-        if insn.is_call() && insn.src_reg() == 0 && insn.imm == HELPER_MAP_LOOKUP_ELEM {
+        if insn.is_call()
+            && insn.src_reg() == 0
+            && insn.imm == libbpf_sys::BPF_FUNC_map_lookup_elem as i32
+        {
             if let Some(map_load_pc) = find_map_load_for_call(insns, pc) {
                 sites.push(MapLookupSite {
                     call_pc: pc,
@@ -1098,10 +1095,7 @@ pub fn find_map_lookup_sites(insns: &[BpfInsn]) -> Vec<MapLookupSite> {
 }
 
 /// Find outer-to-inner map-in-map lookup chains among direct outer lookup sites.
-pub fn find_map_in_map_chains(
-    insns: &[BpfInsn],
-    outer_sites: &[MapLookupSite],
-) -> Vec<MapInMapChain> {
+fn find_map_in_map_chains(insns: &[BpfInsn], outer_sites: &[MapLookupSite]) -> Vec<MapInMapChain> {
     outer_sites
         .iter()
         .filter_map(|outer_site| find_map_in_map_chain_for_outer(insns, outer_site))
@@ -1132,7 +1126,10 @@ fn find_map_in_map_chain_for_outer(
             continue;
         }
 
-        if insn.is_call() && insn.src_reg() == 0 && insn.imm == HELPER_MAP_LOOKUP_ELEM {
+        if insn.is_call()
+            && insn.src_reg() == 0
+            && insn.imm == libbpf_sys::BPF_FUNC_map_lookup_elem as i32
+        {
             if alias_regs.get(&1).copied() == Some(0) {
                 return Some(MapInMapChain {
                     outer_site: outer_site.clone(),
@@ -1193,7 +1190,7 @@ fn find_map_in_map_chain_for_outer(
 
 /// Recover a stack-materialized constant key for a lookup helper call.
 #[cfg(test)]
-pub fn extract_constant_key(insns: &[BpfInsn], call_pc: usize) -> Option<ConstantKey> {
+fn extract_constant_key(insns: &[BpfInsn], call_pc: usize) -> Option<ConstantKey> {
     let Ok(key) = try_extract_constant_key(insns, call_pc) else {
         return None;
     };
@@ -1201,7 +1198,7 @@ pub fn extract_constant_key(insns: &[BpfInsn], call_pc: usize) -> Option<Constan
 }
 
 #[cfg(test)]
-pub fn try_extract_constant_key(insns: &[BpfInsn], call_pc: usize) -> Result<ConstantKey, String> {
+fn try_extract_constant_key(insns: &[BpfInsn], call_pc: usize) -> Result<ConstantKey, String> {
     let bounds = subprog_bounds(insns, call_pc);
     let stack_off = resolve_stack_pointer_to_stack(insns, call_pc, 2, bounds)?;
     let mut last_err = None;
@@ -1671,7 +1668,7 @@ fn verifier_known_scalar_value(reg: &crate::pass::RegState) -> Option<u64> {
 
 /// Classify all uses of the lookup result until its value-pointer aliases die out.
 #[cfg(test)]
-pub fn classify_r0_uses(insns: &[BpfInsn], call_pc: usize) -> R0UseClassification {
+fn classify_r0_uses(insns: &[BpfInsn], call_pc: usize) -> R0UseClassification {
     classify_r0_uses_with_options(insns, call_pc, false, false)
 }
 
@@ -1750,7 +1747,7 @@ impl ResolvedInlineHints {
 }
 
 fn is_map_lookup_elem_call(insn: &BpfInsn) -> bool {
-    insn.is_call() && insn.src_reg() == 0 && insn.imm == HELPER_MAP_LOOKUP_ELEM
+    insn.is_call() && insn.src_reg() == 0 && insn.imm == libbpf_sys::BPF_FUNC_map_lookup_elem as i32
 }
 
 fn collect_kernel_mutable_maps(
@@ -1826,22 +1823,23 @@ fn collect_kernel_mutable_maps(
 fn is_map_writer_helper_call(insn: &BpfInsn) -> bool {
     insn.is_call()
         && insn.src_reg() == 0
-        && matches!(
-            insn.imm,
-            HELPER_MAP_UPDATE_ELEM
-                | HELPER_MAP_DELETE_ELEM
-                | HELPER_MAP_PUSH_ELEM
-                | HELPER_MAP_POP_ELEM
-        )
+        && (insn.imm == libbpf_sys::BPF_FUNC_map_update_elem as i32
+            || insn.imm == libbpf_sys::BPF_FUNC_map_delete_elem as i32
+            || insn.imm == libbpf_sys::BPF_FUNC_map_push_elem as i32
+            || insn.imm == libbpf_sys::BPF_FUNC_map_pop_elem as i32)
 }
 
 fn map_writer_helper_name(helper_id: i32) -> &'static str {
-    match helper_id {
-        HELPER_MAP_UPDATE_ELEM => "BPF_FUNC_map_update_elem",
-        HELPER_MAP_DELETE_ELEM => "BPF_FUNC_map_delete_elem",
-        HELPER_MAP_PUSH_ELEM => "BPF_FUNC_map_push_elem",
-        HELPER_MAP_POP_ELEM => "BPF_FUNC_map_pop_elem",
-        _ => "BPF_FUNC_<non-writer>",
+    if helper_id == libbpf_sys::BPF_FUNC_map_update_elem as i32 {
+        "BPF_FUNC_map_update_elem"
+    } else if helper_id == libbpf_sys::BPF_FUNC_map_delete_elem as i32 {
+        "BPF_FUNC_map_delete_elem"
+    } else if helper_id == libbpf_sys::BPF_FUNC_map_push_elem as i32 {
+        "BPF_FUNC_map_push_elem"
+    } else if helper_id == libbpf_sys::BPF_FUNC_map_pop_elem as i32 {
+        "BPF_FUNC_map_pop_elem"
+    } else {
+        "BPF_FUNC_<non-writer>"
     }
 }
 
@@ -5206,7 +5204,7 @@ fn surviving_alias_regs_after_helper_call(alias_regs: &HashMap<u8, i16>) -> Hash
 }
 
 fn helper_call_is_readonly_for_lookup_value(insn: &BpfInsn) -> bool {
-    insn.is_call() && insn.src_reg() == 0 && insn.imm == HELPER_KTIME_GET_NS
+    insn.is_call() && insn.src_reg() == 0 && insn.imm == libbpf_sys::BPF_FUNC_ktime_get_ns as i32
 }
 
 fn advance_to_non_null_path(pc: usize, insn: &BpfInsn, insn_count: usize) -> Option<usize> {

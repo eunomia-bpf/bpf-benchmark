@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT
 //! Bounds-check merge optimization pass.
 
-use std::collections::{BTreeMap, HashSet};
+use std::collections::HashSet;
 
 use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{
-    compose_addr_maps, eliminate_nops, eliminate_unreachable_blocks, fixup_all_branches, insn_width,
-};
+use super::rewrite::{BtfRemapPolicy, RewritePlan};
+use super::utils::{eliminate_nops, eliminate_unreachable_blocks, insn_width};
 
 /// BPF_PROG_TYPE_SCHED_CLS (TC classifier).
 const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
@@ -169,76 +168,38 @@ impl BpfPass for BoundsCheckMergePass {
             });
         }
 
-        let mut replacements = BTreeMap::new();
+        let mut plan = RewritePlan::new();
         let mut skip_pcs = HashSet::new();
         for rewrite in &rewrites {
             let mut widened = program.insns[rewrite.dominant_add_pc];
             widened.imm = rewrite.merged_end;
-            replacements.insert(rewrite.dominant_add_pc, vec![widened]);
+            plan.replace_range(
+                rewrite.dominant_add_pc,
+                insn_width(&program.insns[rewrite.dominant_add_pc]),
+                vec![widened],
+            );
             skip_pcs.extend(rewrite.skip_pcs.iter().copied());
         }
-
-        let orig_len = program.insns.len();
-        let mut new_insns = Vec::with_capacity(orig_len);
-        let mut addr_map = vec![0usize; orig_len + 1];
-        let mut pc = 0usize;
-
-        while pc < orig_len {
-            addr_map[pc] = new_insns.len();
-
-            if let Some(replacement) = replacements.get(&pc) {
-                new_insns.extend_from_slice(replacement);
-                let width = insn_width(&program.insns[pc]);
-                for j in 1..width {
-                    addr_map[pc + j] = new_insns.len();
-                }
-                pc += width;
-                continue;
-            }
-
-            if skip_pcs.contains(&pc) {
-                let width = insn_width(&program.insns[pc]);
-                for j in 0..width {
-                    addr_map[pc + j] = new_insns.len();
-                }
-                pc += width;
-                continue;
-            }
-
-            let insn = program.insns[pc];
-            new_insns.push(insn);
-            if insn.is_ldimm64() && pc + 1 < orig_len {
-                pc += 1;
-                addr_map[pc] = new_insns.len();
-                new_insns.push(program.insns[pc]);
-            }
-            pc += 1;
-        }
-        addr_map[orig_len] = new_insns.len();
-
-        fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
-
-        let mut final_insns = new_insns;
-        let mut final_addr_map = addr_map;
-        if let Some((cleaned_insns, cleanup_map)) = eliminate_unreachable_blocks(&final_insns) {
-            final_addr_map = compose_addr_maps(&final_addr_map, &cleanup_map);
-            final_insns = cleaned_insns;
-        }
-        while let Some((cleaned_insns, cleanup_map)) = eliminate_nops(&final_insns) {
-            final_addr_map = compose_addr_maps(&final_addr_map, &cleanup_map);
-            final_insns = cleaned_insns;
+        for pc in skip_pcs {
+            plan.delete_range(pc, insn_width(&program.insns[pc]));
         }
 
-        program.insns = final_insns;
-        program.remap_annotations(&final_addr_map);
+        let mut result = plan.commit(program, BtfRemapPolicy::NoRemap)?;
 
-        Ok(PassResult {
-            pass_name: self.name().into(),
-            sites_applied: rewrites.len(),
-            sites_skipped: scan.skips,
-            diagnostics: vec![],
-            ..Default::default()
-        })
+        if let Some((cleaned_insns, cleanup_map)) = eliminate_unreachable_blocks(&program.insns) {
+            program.insns = cleaned_insns;
+            program.remap_annotations(&cleanup_map);
+        }
+        while let Some((cleaned_insns, cleanup_map)) = eliminate_nops(&program.insns) {
+            program.insns = cleaned_insns;
+            program.remap_annotations(&cleanup_map);
+        }
+
+        result.pass_name = self.name().into();
+        result.sites_applied = rewrites.len();
+        result.sites_skipped = scan.skips;
+        result.insns_after = program.insns.len();
+        Ok(result)
     }
 }
 

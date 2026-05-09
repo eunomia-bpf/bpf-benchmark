@@ -12,7 +12,7 @@ fn run_const_prop_then_dce(program: &mut BpfProgram) -> PipelineResult {
     pm.register_analysis(CFGAnalysis);
     pm.add_pass(ConstPropPass);
     pm.add_pass(DcePass);
-    pm.run(program, &PassContext::test_default()).unwrap()
+    pm.run(program, &PassContext::baseline()).unwrap()
 }
 
 #[test]
@@ -24,7 +24,7 @@ fn dce_removes_dead_defs_exposed_by_const_prop_without_branch_cleanup() {
         jeq_imm(1, 20, 1),
         BpfInsn::mov64_imm(0, 0),
         BpfInsn::mov64_imm(0, 1),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     program.set_verifier_states(vec![
         verifier_delta_state(1, HashMap::from([(1, scalar_reg(20u64 << 32))])),
@@ -44,7 +44,7 @@ fn dce_removes_dead_defs_exposed_by_const_prop_without_branch_cleanup() {
             BpfInsn::mov64_imm(1, 20),
             jeq_imm(1, 20, 0),
             BpfInsn::mov64_imm(0, 1),
-            exit_insn(),
+            BpfInsn::exit(),
         ]
     );
 }

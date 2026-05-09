@@ -35,6 +35,7 @@ mod noop;
 mod prefetch;
 #[cfg(test)]
 mod prefetch_tests;
+pub mod rewrite;
 mod rotate;
 #[cfg(test)]
 mod rotate_tests;

@@ -307,6 +307,11 @@ impl BpfInsn {
         Self::new(BPF_ALU64 | BPF_MOV | BPF_X, Self::make_regs(dst, src), 0, 0)
     }
 
+    /// `mov32 dst, src` (register)
+    pub fn mov32_reg(dst: u8, src: u8) -> Self {
+        Self::new(BPF_ALU | BPF_MOV | BPF_X, Self::make_regs(dst, src), 0, 0)
+    }
+
     /// `mov64 dst, imm`
     pub fn mov64_imm(dst: u8, imm: i32) -> Self {
         Self::new(BPF_ALU64 | BPF_MOV | BPF_K, Self::make_regs(dst, 0), 0, imm)
@@ -351,9 +356,29 @@ impl BpfInsn {
         )
     }
 
+    /// `call helper_id` (src_reg = 0).
+    pub fn helper_call(id: i32) -> Self {
+        Self::new(BPF_JMP | BPF_CALL, Self::make_regs(0, 0), 0, id)
+    }
+
     /// `ja +off` (unconditional jump, NOP when off=0)
     pub fn ja(off: i16) -> Self {
         Self::new(BPF_JMP | BPF_JA, 0, off, 0)
+    }
+
+    /// `j<op> dst, imm, +off`
+    pub fn jump_imm(op: u8, dst: u8, imm: i32, off: i16) -> Self {
+        Self::new(BPF_JMP | op | BPF_K, Self::make_regs(dst, 0), off, imm)
+    }
+
+    /// `j<op> dst, src, +off`
+    pub fn jump_reg(op: u8, dst: u8, src: u8, off: i16) -> Self {
+        Self::new(BPF_JMP | op | BPF_X, Self::make_regs(dst, src), off, 0)
+    }
+
+    /// `exit`
+    pub fn exit() -> Self {
+        Self::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
     }
 
     /// `ldx_mem size, dst, [src + off]`
@@ -381,6 +406,11 @@ impl BpfInsn {
         Self::new(BPF_STX | size | BPF_MEM, Self::make_regs(dst, src), off, 0)
     }
 
+    /// `st_mem size, [dst + off], imm`
+    pub fn st_mem(size: u8, dst: u8, off: i16, imm: i32) -> Self {
+        Self::new(BPF_ST | size | BPF_MEM, Self::make_regs(dst, 0), off, imm)
+    }
+
     /// `alu64 op, dst, imm`  (e.g., LSH64_IMM, OR64_IMM)
     pub fn alu64_imm(op: u8, dst: u8, imm: i32) -> Self {
         Self::new(BPF_ALU64 | op | BPF_K, Self::make_regs(dst, 0), 0, imm)
@@ -397,7 +427,6 @@ impl BpfInsn {
     }
 
     #[inline]
-    #[cfg(test)]
     pub fn is_kinsn_sidecar(&self) -> bool {
         self.code == (BPF_ALU64 | BPF_MOV | BPF_K) && self.src_reg() == BPF_PSEUDO_KINSN_SIDECAR
     }

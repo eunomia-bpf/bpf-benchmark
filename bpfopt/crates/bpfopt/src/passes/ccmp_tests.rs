@@ -9,7 +9,7 @@ fn jmp_zero(op: u8, class: u8, reg: u8, off: i16) -> BpfInsn {
 }
 
 fn ccmp_ctx(arch: Arch) -> PassContext {
-    let mut ctx = PassContext::test_default();
+    let mut ctx = PassContext::baseline();
     ctx.platform.arch = arch;
     ctx.kinsn_registry.ccmp64_btf_id = 77;
     ctx
@@ -91,7 +91,7 @@ fn scan_ccmp_chain_detects_three_term_nez_guard() {
         jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_2, 2),
         jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_3, 1),
         BpfInsn::mov64_imm(BPF_REG_0, 1),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
 
     let sites = scan_ccmp_sites(&insns);
@@ -111,7 +111,7 @@ fn scan_ccmp_chain_rejects_mixed_fail_polarity_boundary() {
         jmp_zero(BPF_JNE, BPF_JMP, BPF_REG_2, 2),
         jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_3, 1),
         BpfInsn::mov64_imm(BPF_REG_0, 1),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
 
     assert!(scan_ccmp_sites(&insns).is_empty());
@@ -123,7 +123,7 @@ fn ccmp_pass_arch_gate_skips_x86_64() {
         jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_1, 2),
         jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_2, 1),
         BpfInsn::mov64_imm(BPF_REG_0, 1),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let pass = CcmpPass;
     let result = pass
@@ -144,7 +144,7 @@ fn ccmp_pass_emits_kinsn_and_final_branch_on_aarch64() {
         jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_3, 1),
         BpfInsn::mov64_imm(BPF_REG_0, 1),
         BpfInsn::mov64_imm(BPF_REG_0, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let pass = CcmpPass;
     let result = pass
@@ -176,7 +176,7 @@ fn ccmp_pass_skips_overlong_chain_without_partial_rewrite() {
         jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_4, 2),
         jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_5, 1),
         BpfInsn::mov64_imm(BPF_REG_0, 1),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let pass = CcmpPass;
     let result = pass
@@ -195,14 +195,14 @@ fn ccmp_pass_skips_site_crossing_subprog_boundary() {
     let mut program = BpfProgram::new(vec![
         jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_1, 3),
         jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_2, 2),
-        exit_insn(),
+        BpfInsn::exit(),
         BpfInsn::new(
             BPF_JMP | BPF_CALL,
             BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
             0,
             -2,
         ),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let pass = CcmpPass;
     let result = pass

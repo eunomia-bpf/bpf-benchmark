@@ -1,6 +1,5 @@
 use super::*;
 use crate::insn::*;
-use crate::test_helpers::exit_insn;
 
 // ── Test helpers ────────────────────────────────────────────────
 
@@ -23,7 +22,7 @@ fn branch_profile(taken_count: u64, not_taken_count: u64, branch_misses: u64) ->
 }
 
 fn ctx_for_pass_manager(pm: &PassManager) -> PassContext {
-    let mut ctx = PassContext::test_default();
+    let mut ctx = PassContext::baseline();
     ctx.policy.enabled_passes = pm.pass_names().into_iter().map(str::to_string).collect();
     ctx
 }
@@ -151,7 +150,7 @@ fn test_prepend_nop_pass_shifts_annotations_forward() {
     let mut pm = PassManager::new();
     pm.add_pass(PrependNopPass);
 
-    let mut program = make_program(vec![BpfInsn::mov64_imm(0, 1), exit_insn()]);
+    let mut program = make_program(vec![BpfInsn::mov64_imm(0, 1), BpfInsn::exit()]);
     program.annotations[1].branch_profile = Some(branch_profile(7, 3, 1));
 
     let ctx = ctx_for_pass_manager(&pm);
@@ -361,7 +360,7 @@ fn sync_annotations_resizes_both_directions() {
     let cases: [(&str, BpfProgram, fn(&mut BpfProgram), usize); 2] = [
         (
             "grow",
-            make_program(vec![exit_insn()]),
+            make_program(vec![BpfInsn::exit()]),
             |prog: &mut BpfProgram| {
                 prog.insns.push(BpfInsn::nop());
                 prog.insns.push(BpfInsn::nop());
@@ -370,7 +369,7 @@ fn sync_annotations_resizes_both_directions() {
         ),
         (
             "shrink",
-            make_program(vec![BpfInsn::nop(), BpfInsn::nop(), exit_insn()]),
+            make_program(vec![BpfInsn::nop(), BpfInsn::nop(), BpfInsn::exit()]),
             |prog: &mut BpfProgram| {
                 prog.insns.truncate(1);
             },
@@ -390,7 +389,7 @@ fn sync_annotations_resizes_both_directions() {
 #[test]
 fn test_analysis_cache_basic() {
     let mut cache = AnalysisCache::new();
-    let prog = make_program(vec![BpfInsn::nop(), exit_insn()]);
+    let prog = make_program(vec![BpfInsn::nop(), BpfInsn::exit()]);
     let analysis = InsnCountAnalysis;
 
     assert!(!cache.is_cached::<usize>());
@@ -407,7 +406,7 @@ fn test_analysis_cache_targeted_invalidation_for_known_types() {
     };
 
     let mut cache = AnalysisCache::new();
-    let prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
+    let prog = make_program(vec![BpfInsn::mov64_imm(0, 42), BpfInsn::exit()]);
 
     // Populate all three analyses.
     cache.get(&BranchTargetAnalysis, &prog);
@@ -439,7 +438,7 @@ fn test_pass_manager_multiple_passes_sequential() {
     pm.add_pass(RewriteMovImmPass { new_imm: 99 });
     pm.add_pass(AppendNopPass);
 
-    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
+    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), BpfInsn::exit()]);
     let ctx = ctx_for_pass_manager(&pm);
 
     let result = pm.run(&mut prog, &ctx).unwrap();
@@ -471,7 +470,7 @@ fn test_pass_manager_analysis_cache_invalidation() {
     // Third pass: report count again (should see 3 insns after invalidation)
     pm.add_pass(CountReportingPass);
 
-    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
+    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), BpfInsn::exit()]);
     let ctx = ctx_for_pass_manager(&pm);
 
     let result = pm.run(&mut prog, &ctx).unwrap();
@@ -489,7 +488,7 @@ fn test_pass_manager_rejects_unregistered_required_analysis() {
     let mut pm = PassManager::new();
     pm.add_pass(MissingAnalysisPass);
 
-    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
+    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), BpfInsn::exit()]);
     let ctx = ctx_for_pass_manager(&pm);
 
     let err = pm.run(&mut prog, &ctx).unwrap_err();
@@ -506,7 +505,7 @@ fn test_pass_manager_invalidates_verifier_states_after_transform() {
     pm.add_pass(AppendNopPass);
     pm.add_pass(VerifierStateCountPass);
 
-    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
+    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), BpfInsn::exit()]);
     prog.set_verifier_states(vec![VerifierInsn {
         pc: 0,
         frame: 0,
@@ -533,8 +532,8 @@ fn test_pass_manager_enabled_pass_policy() {
     pm.add_pass(NoOpPass);
     pm.add_pass(AppendNopPass);
 
-    let mut prog = make_program(vec![exit_insn()]);
-    let mut ctx = PassContext::test_default();
+    let mut prog = make_program(vec![BpfInsn::exit()]);
+    let mut ctx = PassContext::baseline();
     // Only enable append_nop — noop should be skipped.
     ctx.policy.enabled_passes = vec!["append_nop".into()];
 
@@ -550,13 +549,13 @@ fn test_pass_manager_enabled_pass_policy() {
 
 #[test]
 fn test_remap_annotations_deleted_instruction() {
-    let mut prog = make_program(vec![BpfInsn::nop(), BpfInsn::nop(), exit_insn()]);
+    let mut prog = make_program(vec![BpfInsn::nop(), BpfInsn::nop(), BpfInsn::exit()]);
     prog.annotations[0].branch_profile = Some(branch_profile(10, 5, 1));
 
     // Simulate a transform that removes instruction 0.
     // addr_map: old_pc 0->0 (maps to first new insn), 1->0, 2->1, sentinel 3->2
     // After rewrite, the program has 2 instructions.
-    prog.insns = vec![BpfInsn::nop(), exit_insn()];
+    prog.insns = vec![BpfInsn::nop(), BpfInsn::exit()];
     // Both old pcs 0 and 1 map to new pc 0 — the annotation from old pc 0
     // ends up at new pc 0.
     let addr_map = vec![0, 0, 1, 2];
@@ -570,7 +569,7 @@ fn test_remap_annotations_deleted_instruction() {
 
 #[test]
 fn test_profiling_data_injection() {
-    let mut prog = make_program(vec![BpfInsn::nop(), BpfInsn::nop(), exit_insn()]);
+    let mut prog = make_program(vec![BpfInsn::nop(), BpfInsn::nop(), BpfInsn::exit()]);
     assert!(prog.annotations[1].branch_profile.is_none());
 
     let mut pdata = ProfilingData::default();
@@ -589,7 +588,7 @@ fn test_invalid_policy_pass_name_is_rejected() {
     let mut pm = PassManager::new();
     pm.add_pass(AppendNopPass);
 
-    let mut prog = make_program(vec![exit_insn()]);
+    let mut prog = make_program(vec![BpfInsn::exit()]);
     let mut ctx = ctx_for_pass_manager(&pm);
     ctx.policy.enabled_passes = vec!["bulk_mem".into()];
 
@@ -606,7 +605,7 @@ fn test_pass_result_insns_before_after_filled_by_pass_manager() {
     let mut pm = PassManager::new();
     pm.add_pass(AppendNopPass);
 
-    let mut prog = make_program(vec![exit_insn()]);
+    let mut prog = make_program(vec![BpfInsn::exit()]);
     let ctx = ctx_for_pass_manager(&pm);
     let result = pm.run(&mut prog, &ctx).unwrap();
 

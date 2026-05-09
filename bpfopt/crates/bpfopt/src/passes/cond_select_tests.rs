@@ -32,7 +32,7 @@ fn jle_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
 }
 
 fn ctx_with_select_kfunc(btf_id: i32) -> PassContext {
-    let mut ctx = PassContext::test_default();
+    let mut ctx = PassContext::baseline();
     ctx.kinsn_registry.select64_btf_id = btf_id;
     ctx
 }
@@ -43,12 +43,12 @@ fn pattern_a(cond_reg: u8, false_mov: BpfInsn, true_mov: BpfInsn) -> Vec<BpfInsn
         false_mov,
         BpfInsn::ja(1),
         true_mov,
-        exit_insn(),
+        BpfInsn::exit(),
     ]
 }
 
 fn pattern_c(true_mov: BpfInsn, false_mov: BpfInsn) -> Vec<BpfInsn> {
-    vec![true_mov, jne_imm(1, 0, 1), false_mov, exit_insn()]
+    vec![true_mov, jne_imm(1, 0, 1), false_mov, BpfInsn::exit()]
 }
 
 // ── Detection tests (unchanged) ──────────────────────────────────
@@ -93,7 +93,7 @@ fn test_cond_select_pattern_b_removed() {
         jne_imm(1, 0, 1),
         BpfInsn::mov64_imm(0, 0),
         BpfInsn::mov64_imm(0, 1),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = pass.analyze(&insns);
     assert!(sites.is_empty(), "Pattern B should not be matched");
@@ -140,7 +140,7 @@ fn test_cond_select_short_pattern_c_no_match_cond_clobbered() {
         BpfInsn::mov64_imm(1, 42), // clobbers cond_reg r1
         jne_imm(1, 0, 1),
         BpfInsn::mov64_imm(1, 0),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = pass.analyze(&insns);
     assert!(
@@ -167,7 +167,7 @@ fn test_cond_select_no_match_analyzer_matrix() {
             vec![
                 BpfInsn::mov64_imm(0, 42),
                 BpfInsn::mov64_imm(1, 10),
-                exit_insn(),
+                BpfInsn::exit(),
             ],
         ),
     ] {
@@ -188,7 +188,7 @@ fn test_cond_select_analyze_multiple_sites() {
         BpfInsn::mov64_imm(2, 10),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(2, 20),
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = pass.analyze(&insns);
     assert_eq!(sites.len(), 2);
@@ -210,7 +210,7 @@ fn test_cond_select_capability_matrix() {
         .run(
             &mut no_branchless,
             &mut AnalysisCache::new(),
-            &PassContext::test_default(),
+            &PassContext::baseline(),
         )
         .unwrap();
     assert_eq!(result.sites_applied, 0);
@@ -220,7 +220,7 @@ fn test_cond_select_capability_matrix() {
         .any(|s| s.reason.contains("branchless select")));
 
     let mut missing_kfunc = make_program(original.clone());
-    let mut missing_ctx = PassContext::test_default();
+    let mut missing_ctx = PassContext::baseline();
     missing_ctx.platform.has_cmov = true;
     let result = pass
         .run(&mut missing_kfunc, &mut AnalysisCache::new(), &missing_ctx)
@@ -270,8 +270,12 @@ fn test_cond_select_value_materialization_matrix() {
         ),
         (
             "reg32 true imm false",
-            make_program(pattern_a(1, BpfInsn::mov32_imm(0, 0), mov32_reg(0, 6))),
-            vec![mov32_reg(0, 6), BpfInsn::mov32_imm(2, 0)],
+            make_program(pattern_a(
+                1,
+                BpfInsn::mov32_imm(0, 0),
+                BpfInsn::mov32_reg(0, 6),
+            )),
+            vec![BpfInsn::mov32_reg(0, 6), BpfInsn::mov32_imm(2, 0)],
             2,
             (0u8, 0, 2, 1),
         ),
@@ -316,7 +320,7 @@ fn test_cond_select_emit_jeq_swaps_args() {
         BpfInsn::mov64_reg(0, 6),
         BpfInsn::ja(1),
         BpfInsn::mov64_reg(0, 7),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_select_kfunc(5555);
@@ -342,7 +346,7 @@ fn test_cond_select_emit_non_zero_compare_imm() {
         BpfInsn::mov64_reg(0, 6),
         BpfInsn::ja(1),
         BpfInsn::mov64_reg(0, 7),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_select_kfunc(5555);
@@ -363,7 +367,7 @@ fn test_cond_select_emit_jmp32_zero_compare_predicate() {
         BpfInsn::mov64_reg(0, 6),
         BpfInsn::ja(1),
         BpfInsn::mov64_reg(0, 7),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_select_kfunc(5555);
@@ -371,7 +375,7 @@ fn test_cond_select_emit_jmp32_zero_compare_predicate() {
     let pass = CondSelectPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
     assert_eq!(result.sites_applied, 1);
-    assert_eq!(prog.insns[0], mov32_reg(0, 1));
+    assert_eq!(prog.insns[0], BpfInsn::mov32_reg(0, 1));
     assert!(prog.insns[1].is_kinsn_sidecar());
     assert_eq!(payload_regs(sidecar_payload(&prog.insns[1])), (0, 7, 6, 0));
 }
@@ -383,7 +387,7 @@ fn test_cond_select_emit_jgt_predicate_prefix() {
         BpfInsn::mov64_reg(0, 6),
         BpfInsn::ja(1),
         BpfInsn::mov64_reg(0, 7),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
     let ctx = ctx_with_select_kfunc(5555);
@@ -437,7 +441,7 @@ fn test_cond_select_alias_all_overlap_combinations() {
                     BpfInsn::mov64_reg(0, false_src),
                     BpfInsn::ja(1),
                     BpfInsn::mov64_reg(0, true_src),
-                    exit_insn(),
+                    BpfInsn::exit(),
                 ]);
                 let mut cache = AnalysisCache::new();
                 let ctx = ctx_with_select_kfunc(5555);

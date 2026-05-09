@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT
 //! skb_load_bytes specialization pass.
 
-use std::collections::BTreeMap;
-
 use crate::analysis::{BranchTargetAnalysis, BranchTargetResult};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{fixup_all_branches, insn_width};
+use super::rewrite::{BtfRemapPolicy, RewritePlan};
+use super::utils::insn_width;
 
 const BPF_FUNC_SKB_LOAD_BYTES: i32 = libbpf_sys::BPF_FUNC_skb_load_bytes as i32;
 
@@ -79,20 +78,16 @@ impl BpfPass for SkbLoadBytesSpecPass {
             });
         }
 
-        let old_insns = program.insns.clone();
-        let (mut new_insns, addr_map) = rewrite_sites(&old_insns, &scan.sites, layout);
-        fixup_all_branches(&mut new_insns, &old_insns, &addr_map);
+        let mut plan = RewritePlan::new();
+        for site in &scan.sites {
+            plan.replace_range(site.call_pc, 1, emit_replacement(*site, layout));
+        }
 
-        program.insns = new_insns;
-        program.remap_annotations(&addr_map);
-
-        Ok(PassResult {
-            pass_name: self.name().into(),
-            sites_applied: scan.sites.len(),
-            sites_skipped: scan.skips,
-            diagnostics: vec![],
-            ..Default::default()
-        })
+        let mut result = plan.commit(program, BtfRemapPolicy::NoRemap)?;
+        result.pass_name = self.name().into();
+        result.sites_applied = scan.sites.len();
+        result.sites_skipped = scan.skips;
+        Ok(result)
     }
 }
 
@@ -181,44 +176,6 @@ fn classify_site(
     })
 }
 
-fn rewrite_sites(
-    old_insns: &[BpfInsn],
-    sites: &[RewriteSite],
-    layout: PacketCtxLayout,
-) -> (Vec<BpfInsn>, Vec<usize>) {
-    let mut replacements: BTreeMap<usize, Vec<BpfInsn>> = BTreeMap::new();
-    for site in sites {
-        replacements.insert(site.call_pc, emit_replacement(*site, layout));
-    }
-
-    let orig_len = old_insns.len();
-    let mut new_insns = Vec::with_capacity(orig_len);
-    let mut addr_map = vec![0usize; orig_len + 1];
-    let mut pc = 0usize;
-
-    while pc < orig_len {
-        addr_map[pc] = new_insns.len();
-
-        if let Some(replacement) = replacements.get(&pc) {
-            new_insns.extend_from_slice(replacement);
-            pc += 1;
-            continue;
-        }
-
-        let insn = old_insns[pc];
-        new_insns.push(insn);
-        if insn.is_ldimm64() && pc + 1 < orig_len {
-            pc += 1;
-            addr_map[pc] = new_insns.len();
-            new_insns.push(old_insns[pc]);
-        }
-        pc += 1;
-    }
-    addr_map[orig_len] = new_insns.len();
-
-    (new_insns, addr_map)
-}
-
 fn emit_replacement(site: RewriteSite, layout: PacketCtxLayout) -> Vec<BpfInsn> {
     let copy_insns = emit_copy_insns(site.len);
     let slow_off = (3 + copy_insns.len()) as i16;
@@ -228,7 +185,7 @@ fn emit_replacement(site: RewriteSite, layout: PacketCtxLayout) -> Vec<BpfInsn> 
         BpfInsn::ldx_mem(BPF_W, 0, 1, layout.data_end_off),
         BpfInsn::mov64_reg(2, 5),
         BpfInsn::alu64_imm(BPF_ADD, 2, site.offset + site.len),
-        jgt_reg(2, 0, slow_off),
+        BpfInsn::jump_reg(BPF_JGT, 2, 0, slow_off),
         BpfInsn::alu64_imm(BPF_ADD, 5, site.offset),
     ];
 
@@ -386,13 +343,4 @@ fn extract_fp_stack_off(value: RegValue) -> Option<i32> {
         RegValue::FpPlusConst(off) => Some(off),
         _ => None,
     }
-}
-
-fn jgt_reg(dst: u8, src: u8, off: i16) -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_JGT | BPF_X,
-        BpfInsn::make_regs(dst, src),
-        off,
-        0,
-    )
 }

@@ -256,7 +256,7 @@ fn collect_kinsn_proof_regions(
     let mut pc = 0usize;
     while pc < insns.len() {
         if pc + 1 < insns.len()
-            && is_kinsn_sidecar_insn(&insns[pc])
+            && insns[pc].is_kinsn_sidecar()
             && insns[pc + 1].is_call()
             && insns[pc + 1].src_reg() == BPF_PSEUDO_KINSN_CALL
         {
@@ -273,7 +273,7 @@ fn collect_kinsn_proof_regions(
             continue;
         }
 
-        if is_kinsn_sidecar_insn(&insns[pc]) {
+        if insns[pc].is_kinsn_sidecar() {
             anyhow::bail!("kinsn sidecar at pc {pc} is not followed by a kinsn call");
         }
         if insns[pc].is_call() && insns[pc].src_reg() == BPF_PSEUDO_KINSN_CALL {
@@ -625,10 +625,6 @@ fn kinsn_candidate_subprog_starts(insns: &[BpfInsn]) -> anyhow::Result<Vec<usize
     Ok(starts)
 }
 
-fn is_kinsn_sidecar_insn(insn: &BpfInsn) -> bool {
-    insn.code == (BPF_ALU64 | BPF_MOV | BPF_K) && insn.src_reg() == BPF_PSEUDO_KINSN_SIDECAR
-}
-
 fn rewrite_func_info_to_subprog_layout(
     records: Option<&mut BtfInfoRecords>,
     subprog_starts: &[usize],
@@ -793,7 +789,7 @@ pub fn eliminate_unreachable_blocks(insns: &[BpfInsn]) -> Option<(Vec<BpfInsn>, 
 /// pseudo-call that targets them. This prevents orphaned subprogs (whose only
 /// call site was in a dead block) from surviving and triggering verifier
 /// "unreachable insn" errors.
-pub fn eliminate_unreachable_blocks_with_cfg(
+fn eliminate_unreachable_blocks_with_cfg(
     insns: &[BpfInsn],
     cfg: &CFGResult,
 ) -> Option<(Vec<BpfInsn>, Vec<usize>)> {
@@ -1140,7 +1136,7 @@ pub fn resolve_kinsn_call_off_for_target(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_helpers::{call_helper, exit_insn, pseudo_call_to};
+    use crate::test_helpers::pseudo_call_to;
 
     fn pseudo_func_ref(dst: u8, imm: i32) -> [BpfInsn; 2] {
         [
@@ -1171,12 +1167,12 @@ mod tests {
         // Old: [0] JA +1  [1] nop  [2] exit
         // New (insert at 1): [0] JA +1  [1] new_insn  [2] nop  [3] exit
         // addr_map: 0->0, 1->2, 2->3, sentinel 3->4
-        let old_insns = vec![BpfInsn::ja(1), BpfInsn::nop(), exit_insn()];
+        let old_insns = vec![BpfInsn::ja(1), BpfInsn::nop(), BpfInsn::exit()];
         let mut new_insns = vec![
             BpfInsn::ja(1), // will be fixed
             BpfInsn::nop(), // inserted
             BpfInsn::nop(),
-            exit_insn(),
+            BpfInsn::exit(),
         ];
         let addr_map = vec![0, 2, 3, 4];
         fixup_all_branches(&mut new_insns, &old_insns, &addr_map);
@@ -1190,8 +1186,13 @@ mod tests {
         // points at the next surviving insn, which happens to be a helper call.
         // Branch fixup must not treat that helper call like a jump and scribble
         // a non-zero off field into its reserved bits.
-        let old_insns = vec![BpfInsn::ja(1), BpfInsn::nop(), call_helper(5), exit_insn()];
-        let mut new_insns = vec![call_helper(5), exit_insn()];
+        let old_insns = vec![
+            BpfInsn::ja(1),
+            BpfInsn::nop(),
+            BpfInsn::helper_call(5),
+            BpfInsn::exit(),
+        ];
+        let mut new_insns = vec![BpfInsn::helper_call(5), BpfInsn::exit()];
         let addr_map = vec![0, 0, 0, 1, 2];
 
         fixup_all_branches(&mut new_insns, &old_insns, &addr_map);
@@ -1210,9 +1211,9 @@ mod tests {
             BpfInsn::nop(),
             BpfInsn::ja(1),
             BpfInsn::nop(),
-            exit_insn(),
+            BpfInsn::exit(),
         ];
-        let mut new_insns = vec![BpfInsn::ja(1), BpfInsn::nop(), exit_insn()];
+        let mut new_insns = vec![BpfInsn::ja(1), BpfInsn::nop(), BpfInsn::exit()];
         let addr_map = vec![0, 0, 0, 1, 2, 3];
 
         fixup_all_branches(&mut new_insns, &old_insns, &addr_map);
@@ -1228,18 +1229,18 @@ mod tests {
             callback[0],
             callback[1],
             BpfInsn::mov64_imm(0, 0),
-            exit_insn(),
+            BpfInsn::exit(),
             BpfInsn::mov64_reg(0, 1),
-            exit_insn(),
+            BpfInsn::exit(),
         ];
         let mut new_insns = vec![
             callback[0],
             callback[1],
             BpfInsn::mov64_imm(0, 0),
-            exit_insn(),
+            BpfInsn::exit(),
             BpfInsn::nop(),
             BpfInsn::mov64_reg(0, 1),
-            exit_insn(),
+            BpfInsn::exit(),
         ];
         let addr_map = vec![0, 1, 2, 3, 5, 6, 7];
 
@@ -1252,7 +1253,7 @@ mod tests {
 
     #[test]
     fn test_eliminate_nops_preserves_helper_call_reserved_fields() {
-        let insns = vec![BpfInsn::ja(0), call_helper(5), exit_insn()];
+        let insns = vec![BpfInsn::ja(0), BpfInsn::helper_call(5), BpfInsn::exit()];
         let (new_insns, _addr_map) = eliminate_nops(&insns).expect("nop should be removed");
 
         assert_eq!(new_insns.len(), 2);
@@ -1266,13 +1267,13 @@ mod tests {
     #[test]
     fn test_eliminate_marked_insns_deletes_ldimm64_when_second_slot_is_marked() {
         let map_value = pseudo_map_value(1, 9);
-        let insns = vec![BpfInsn::ja(2), map_value[0], map_value[1], exit_insn()];
+        let insns = vec![BpfInsn::ja(2), map_value[0], map_value[1], BpfInsn::exit()];
         let deleted = vec![false, false, true, false];
 
         let (new_insns, addr_map) =
             eliminate_marked_insns(&insns, &deleted).expect("LD_IMM64 pair should be deleted");
 
-        assert_eq!(new_insns, vec![BpfInsn::ja(0), exit_insn()]);
+        assert_eq!(new_insns, vec![BpfInsn::ja(0), BpfInsn::exit()]);
         assert_eq!(addr_map[1], 1);
         assert_eq!(addr_map[2], 1);
         assert!(
@@ -1289,9 +1290,9 @@ mod tests {
             BpfInsn::alu64_imm(BPF_RSH, 2, 8),
             BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
             pseudo_call_to(2, 4),
-            exit_insn(),
+            BpfInsn::exit(),
             BpfInsn::mov64_imm(0, 1),
-            exit_insn(),
+            BpfInsn::exit(),
         ];
 
         let skip = kinsn_replacement_subprog_skip_reason(&insns, 0, 2, 2).unwrap();
@@ -1305,11 +1306,11 @@ mod tests {
         let insns = vec![
             BpfInsn::alu64_imm(BPF_RSH, 2, 8),
             BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
-            exit_insn(),
+            BpfInsn::exit(),
             BpfInsn::mov64_imm(0, 0),
             func_ref[0],
             func_ref[1],
-            exit_insn(),
+            BpfInsn::exit(),
         ];
 
         let skip = kinsn_replacement_subprog_skip_reason(&insns, 0, 2, 2).unwrap();
@@ -1325,13 +1326,13 @@ mod tests {
             BpfInsn::mov64_imm(1, 1),
             BpfInsn::mov64_imm(1, 2),
             BpfInsn::mov64_imm(0, 7),
-            exit_insn(),
+            BpfInsn::exit(),
         ];
 
         let (new_insns, _addr_map) =
             eliminate_dead_register_defs(&insns).expect("dead defs should be removed");
 
-        assert_eq!(new_insns, vec![BpfInsn::mov64_imm(0, 7), exit_insn(),]);
+        assert_eq!(new_insns, vec![BpfInsn::mov64_imm(0, 7), BpfInsn::exit(),]);
     }
 
     #[test]
@@ -1386,9 +1387,9 @@ mod tests {
                 0,
                 1,
             ),
-            exit_insn(),
+            BpfInsn::exit(),
             BpfInsn::mov64_imm(0, 1),
-            exit_insn(),
+            BpfInsn::exit(),
         ]);
         program.func_info = Some(BtfInfoRecords {
             rec_size: 8,
@@ -1427,9 +1428,9 @@ mod tests {
                 0,
                 1,
             ),
-            exit_insn(),
+            BpfInsn::exit(),
             BpfInsn::mov64_imm(0, 1),
-            exit_insn(),
+            BpfInsn::exit(),
         ]);
         program.func_info = Some(BtfInfoRecords {
             rec_size: 8,
@@ -1455,7 +1456,7 @@ mod tests {
 
     #[test]
     fn remap_btf_metadata_rejects_out_of_range_func_info() {
-        let mut program = BpfProgram::new(vec![BpfInsn::mov64_imm(0, 0), exit_insn()]);
+        let mut program = BpfProgram::new(vec![BpfInsn::mov64_imm(0, 0), BpfInsn::exit()]);
         program.func_info = Some(BtfInfoRecords {
             rec_size: 8,
             bytes: func_btf_record(2, 10),

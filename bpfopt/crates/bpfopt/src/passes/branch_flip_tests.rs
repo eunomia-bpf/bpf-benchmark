@@ -29,7 +29,7 @@ fn test_scan_finds_diamond() {
         BpfInsn::mov64_imm(0, 10), // pc=1: then body
         BpfInsn::ja(1),            // pc=2: JA +1 -> skip else
         BpfInsn::mov64_imm(0, 20), // pc=3: else body
-        exit_insn(),               // pc=4
+        BpfInsn::exit(),           // pc=4
     ];
     let sites = scan_branch_flip_sites(&insns);
     assert_eq!(sites.len(), 1);
@@ -48,7 +48,7 @@ fn test_scan_asymmetric_diamond() {
         BpfInsn::mov64_imm(1, 2),  // then[1]
         BpfInsn::ja(1),            // JA +1
         BpfInsn::mov64_imm(0, 10), // else[0]
-        exit_insn(),
+        BpfInsn::exit(),
     ];
     let sites = scan_branch_flip_sites(&insns);
     assert_eq!(sites.len(), 1);
@@ -63,12 +63,12 @@ fn test_branch_flip_missing_per_site_profile_errors() {
         BpfInsn::mov64_imm(0, 10),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(0, 20),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     // Provide PMU data so the pass proceeds past the PMU check.
     prog.branch_miss_rate = Some(0.02);
     let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
+    let ctx = PassContext::baseline();
 
     let pass = BranchFlipPass {
         min_bias: 0.7,
@@ -85,13 +85,13 @@ fn test_branch_flip_with_biased_pgo() {
         BpfInsn::mov64_imm(0, 10), // then
         BpfInsn::ja(1),            // skip else
         BpfInsn::mov64_imm(0, 20), // else
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     prog.annotations[0].branch_profile = Some(branch_profile(80, 20, 2));
     prog.branch_miss_rate = Some(0.02);
 
     let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
+    let ctx = PassContext::baseline();
 
     let pass = BranchFlipPass {
         min_bias: 0.7,
@@ -120,13 +120,13 @@ fn test_branch_flip_asymmetric_with_pgo() {
         BpfInsn::mov64_imm(0, 10), // else[0]
         BpfInsn::mov64_imm(1, 20), // else[1]
         BpfInsn::mov64_imm(2, 30), // else[2]
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     prog.annotations[0].branch_profile = Some(branch_profile(90, 10, 1));
     prog.branch_miss_rate = Some(0.02);
 
     let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
+    let ctx = PassContext::baseline();
 
     let pass = BranchFlipPass {
         min_bias: 0.7,
@@ -161,13 +161,13 @@ fn test_branch_flip_skips_jset() {
         BpfInsn::mov64_imm(0, 10),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(0, 20),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     prog.annotations[0].branch_profile = Some(branch_profile(90, 10, 1));
     prog.branch_miss_rate = Some(0.02);
 
     let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
+    let ctx = PassContext::baseline();
 
     let pass = BranchFlipPass {
         min_bias: 0.7,
@@ -187,13 +187,13 @@ fn test_branch_flip_insufficient_bias() {
         BpfInsn::mov64_imm(0, 10),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(0, 20),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     prog.annotations[0].branch_profile = Some(branch_profile(60, 40, 2));
     prog.branch_miss_rate = Some(0.02);
 
     let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
+    let ctx = PassContext::baseline();
 
     let pass = BranchFlipPass {
         min_bias: 0.7,
@@ -232,14 +232,14 @@ fn test_branch_flip_skips_high_miss_rate() {
         BpfInsn::mov64_imm(0, 10),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(0, 20),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     prog.annotations[0].branch_profile = Some(branch_profile(80, 20, 2));
     // Simulate high branch miss rate (10% > 5% threshold).
     prog.branch_miss_rate = Some(0.10);
 
     let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
+    let ctx = PassContext::baseline();
 
     let pass = BranchFlipPass {
         min_bias: 0.7,
@@ -260,14 +260,14 @@ fn test_branch_flip_allows_low_miss_rate() {
         BpfInsn::mov64_imm(0, 10),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(0, 20),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     prog.annotations[0].branch_profile = Some(branch_profile(80, 20, 2));
     // Low branch miss rate (2% < 5% threshold) — should allow flip.
     prog.branch_miss_rate = Some(0.02);
 
     let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
+    let ctx = PassContext::baseline();
 
     let pass = BranchFlipPass {
         min_bias: 0.7,
@@ -285,14 +285,14 @@ fn test_branch_flip_missing_program_pmu_data_errors() {
         BpfInsn::mov64_imm(0, 10),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(0, 20),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     prog.annotations[0].branch_profile = Some(branch_profile(80, 20, 2));
     // No PMU data.
     assert!(prog.branch_miss_rate.is_none());
 
     let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
+    let ctx = PassContext::baseline();
 
     let pass = BranchFlipPass {
         min_bias: 0.7,
@@ -311,13 +311,13 @@ fn test_branch_flip_skips_high_site_miss_rate() {
         BpfInsn::mov64_imm(0, 10),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(0, 20),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     prog.annotations[0].branch_profile = Some(branch_profile(90, 10, 10));
     prog.branch_miss_rate = Some(0.02);
 
     let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
+    let ctx = PassContext::baseline();
 
     let pass = BranchFlipPass {
         min_bias: 0.7,
@@ -343,7 +343,7 @@ fn test_profiler_to_pass_pipeline_integration() {
         BpfInsn::mov64_imm(0, 10), // PC 1
         BpfInsn::ja(1),            // PC 2
         BpfInsn::mov64_imm(0, 20), // PC 3
-        exit_insn(),               // PC 4
+        BpfInsn::exit(),           // PC 4
     ];
     let mut prog = BpfProgram::new(insns);
 
@@ -364,7 +364,7 @@ fn test_profiler_to_pass_pipeline_integration() {
         min_bias: 0.7,
         max_branch_miss_rate: 0.05,
     });
-    let mut ctx = PassContext::test_default();
+    let mut ctx = PassContext::baseline();
     ctx.policy.enabled_passes = vec!["branch_flip".to_string()];
 
     let _result = pm.run(&mut prog, &ctx).unwrap();
@@ -388,7 +388,7 @@ fn test_profiler_to_pass_pipeline_integration() {
         BpfInsn::mov64_imm(0, 10),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(0, 20),
-        exit_insn(),
+        BpfInsn::exit(),
     ]);
     prog2.inject_profiling(&profiling_low_miss);
 
@@ -424,7 +424,7 @@ fn test_branch_flip_multiple_sites_correctness() {
         BpfInsn::mov64_imm(0, 100), // pc=7: then
         BpfInsn::ja(1),             // pc=8: JA +1
         BpfInsn::mov64_imm(0, 200), // pc=9: else
-        exit_insn(),                // pc=10
+        BpfInsn::exit(),            // pc=10
     ]);
     // Inject biased PGO data for both diamonds.
     prog.annotations[0].branch_profile = Some(branch_profile(80, 20, 2));
@@ -434,7 +434,7 @@ fn test_branch_flip_multiple_sites_correctness() {
     let orig_len = prog.insns.len();
 
     let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
+    let ctx = PassContext::baseline();
 
     let pass = BranchFlipPass {
         min_bias: 0.7,
@@ -462,13 +462,13 @@ fn test_branch_flip_verifies_output_layout() {
         BpfInsn::mov64_imm(2, 2),  // pc=2: then[1]
         BpfInsn::ja(1),            // pc=3: JA +1
         BpfInsn::mov64_imm(0, 99), // pc=4: else[0]
-        exit_insn(),               // pc=5
+        BpfInsn::exit(),           // pc=5
     ]);
     prog.annotations[0].branch_profile = Some(branch_profile(90, 10, 1));
     prog.branch_miss_rate = Some(0.02);
 
     let mut cache = AnalysisCache::new();
-    let ctx = PassContext::test_default();
+    let ctx = PassContext::baseline();
 
     let pass = BranchFlipPass {
         min_bias: 0.7,
