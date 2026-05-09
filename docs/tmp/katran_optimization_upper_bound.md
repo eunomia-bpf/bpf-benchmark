@@ -482,11 +482,15 @@ benchmark 上界路线的决定性杠杆是固定 VIP、uniform `ch_rings`、dep
 | 2 | `vip_map[VIP+port+TCP]` ×N hard fold | **DONE** (#243, applied=4 含 port=0 fallback) | +4 | workload-specialized |
 | 3a | bpfopt map-level kernel-write 静态过滤 + map_name hint 接口 + hard/soft fold 2D 矩阵 | **DONE** (#244,但软 fold broken,见 #249) | 0 (correctness) | bug fix |
 | 3b | bpfopt compressed overlay reader (uniform/sparse/enumerated) + size-skip per-site diagnostic | **DONE** (#245,310+ 测试通过) | 0 (enabler) | enabler |
-| 3c | 写 `runner/config/passes/map_inline/overlays/katran/{ch_rings,reals}.json` + yaml 内嵌 jq 注入 overlays.json + `--inline-hint=ch_rings:!00000000` + `--inline-hint=reals:!01000000` | **IN PROGRESS** (#246) | +8 期望 (ch_rings 2 + reals 6) | workload-specialized |
-| 4 | map-in-map Route A bpfopt 支持(双 hint 链) | **DONE** (#247) | 0 katran (inner LRU 拒) | future-paper enabler (cilium/tracee 真用) |
+| 3c | 写 `runner/config/passes/map_inline/overlays/katran/{ch_rings,reals}.json` + yaml 内嵌 jq 注入 overlays.json + `--inline-hint=ch_rings:!00000000` + `--inline-hint=reals:!01000000` | **DONE** (#246, applied=11) | +8 (ch_rings 2 + reals 3 实际,offset 多发出 5 个 fold) | workload-specialized |
+| 3d | server_id_map uniform overlay + hint | **DONE** (#246 增量) | +2 (PC 534, 886) | workload-specialized |
+| 4 | map-in-map Mode A (outer+inner 双硬 hint) | **DONE** (#247, katran 0 applied 因 inner LRU 拒) | 0 katran (inner LRU 拒) | future-paper enabler (cilium/tracee 真用) |
+| 4b | map-in-map Mode B outer-only fold + LPM_TRIE NULL fold | **DONE** (#254, 323 测试过) | +N (lru_mapping/global_lru_maps outer + lpm_v4/v6 NULL) | workload-specialized |
 | 5 | 调研 14 skipped 站点 map 归属 | **DONE** (#248,§19) | — | discovery |
-| const_prop EACCES | Path C verifier post-state guard 修复 #244 触发的 const_prop bug(默认 13-pass 退化 1.23) | **DONE** (#250 调研 + #251 Path C 实施) | — | bug fix |
-| 软 fold 重设计 | else=NULL + hit 整段 fold scalar(verifier-clean) | **PENDING** (#249) | 解锁多 VIP / dynamic key 安全 fold | enabler |
+| const_prop EACCES | Path C verifier post-state guard 修复 #244 触发的 const_prop bug(默认 13-pass 退化 1.23) | **DONE** (#250 调研 + #251 Path C + #252 二级 InsnDeltaState guard) | — | bug fix |
+| 软 fold 重设计 | else=NULL + hit 整段 fold scalar (verifier-clean) | **DONE** (#249 实施 + #253 unreachable insn 修复) | 解锁多 VIP / dynamic key 安全 fold | enabler |
+| const_prop 单跑无价值 audit | 70 fold 中 57 用 LD_IMM64 反而胀 bytecode → 必须跟 dce 配套报数据 | **DONE** (#255) | — | paper integrity |
+| pass 架构 audit | 重复造轮子 / 抽象缺口 / LLVM 对比 / 渐进改进路径 | **IN PROGRESS** (#256) | — | engineering 重构准备 |
 
 ### 各 Map 现状 (inline 适用性)
 
@@ -516,7 +520,7 @@ benchmark 上界路线的决定性杠杆是固定 VIP、uniform `ch_rings`、dep
 
 | Phase 3 (+ ch_rings uniform + reals sparse overlay,3-pass) | x86_kvm_corpus_20260509_022133_477580 / 031932_134386 | **11/78** | 0.9454 / **0.7458** | 第 1 次:**+5.8%** (baseline 156 ns)。第 2 次 (#252 const_prop 二级 guard 后):**+25.4%** (baseline 250 ns,VM 噪声放大)。Applied 11 = ctl_array×2 + vip_map×4 + ch_rings×2 + reals×3。const_prop 70/126 (#251+#252 拒 56 unsafe ptr-arith fold);pipeline 全 ok |
 | **map_inline only (无 const_prop, 隔离测试)** | x86_kvm_corpus_20260509_031956_984494 | 11/78 | **1.0670** | **map_inline 单独跑慢 6.3%**。原因:hard fold 替换 lookup 后留下死指令 (lookup setup / null check / unused offset loads),没有 const_prop+dce 配套清理 → 字节码反而更大、JIT 输出更长。**关键论点 for paper: map_inline 不是独立优化,必须跟 const_prop+dce pipeline 配套** |
-| Phase 4 (+ map-in-map) | TBD | TBD | TBD | §19 修正:vip_to_down_rea outer 2 site 但 benchmark map 空,lru_mapping inner 是 LRU 不可 value-inline → katran 预期 **0 applied**;此 phase 是 cilium/tetragon paper enabler |
+| Phase 4 (+ server_id_map + lpm_src_v4/v6 NULL fold + lru_mapping/global_lru_maps outer-only) | TBD (bddhjo4m4 跑中) | 期望 **+8 sites** | TBD | #254 落地 outer-only mode B + LPM enumerated empty NULL fold。新增 hint:server_id_map (uniform 0) + lpm_src_v4/v6 (NULL fold) + lru_mapping/global_lru_maps (outer-only mode B,inner LRU 仍动态)。vip_to_down_rea 不 hint(benchmark 空 outer entry)。Mode B outer fold 用 `BPF_LD_IMM64_RAW + BPF_PSEUDO_MAP_FD` 保 verifier-typed map_ptr |
 
 > **核心实验观察 (paper-grade)**: map_inline 单独跑会让 katran 慢 6.3%(死指令未清理);跟 const_prop 配套跑 +25.4%。在 paper 里 map_inline 不能作为独立 pass 报数据,必须跟 const_prop+dce 一起报。这跟 hard fold 的语义一致 — fold 把 lookup 替换成 scalar load,后续传播+清理需要 const_prop+dce。
 
@@ -526,7 +530,9 @@ benchmark 上界路线的决定性杠杆是固定 VIP、uniform `ch_rings`、dep
 
 > **软 fold broken (#249 待修)**: #244 实现的 `<anchor>:<hex>` 软 fold 产出 verifier 拒绝的 bytecode (R8 invalid mem access scalar) — hit 路径返回 const_blob_ptr,跟 fallback lookup 路径的 map_value_or_null 类型不能 merge。新设计 (#249): hit 路径整段 fold scalar (复用 hard fold 机制),else 路径直接跳到现有 null handler (相当于 map miss),**不再 fallback lookup**。katran.yaml 当前所有 hint 都用 hard fold (`!`)。
 
-> **Hint 接口已落地** (#244 + #245 + #247): `--inline-hint=<anchor>:[!]<hex_key>`,anchor 是 PC (纯数字) 或 map_name (字母开头),`!` = hard fold(替换为 const)/ 不带 = soft fold(if-guard,目前 broken),map-in-map outer 用 `<outer_map>:!<outer_key>` + 配套 inner hint `<inner_map>:!<inner_key>`。compressed overlay (`uniform/sparse/enumerated`) 解决 daemon size-skipped 大 map (ch_rings 33M-entry 等)。kernel-write filter 静态扫 update/delete/push/pop 调用 + LRU 类型,override hint 也拒。
+> **Hint 接口已落地** (#244 + #245 + #247 + #254): `--inline-hint=<anchor>:[!]<hex_key>`,anchor 是 PC (纯数字) 或 map_name (字母开头),`!` = hard fold(替换为 const)/ 不带 = soft fold(else=NULL,#249/#253 落地)。Map-in-map 两个 mode:**Mode A 全链 fold** = outer + inner 双硬 hint(inner 必须静态);**Mode B outer-only** (#254) = 只给 outer 硬 hint,outer 折成 const map_ptr,inner lookup 保留(inner LRU 也允许)。Compressed overlay (`uniform/sparse/enumerated`) 解决 daemon size-skipped 大 map (ch_rings 33M-entry 等);**enumerated 空 entries** + hard hint = NULL fold(#254 LPM_TRIE 用),lookup 折成 r0=0,后续 dce 删 dead non-NULL path。kernel-write filter 静态扫 update/delete/push/pop 调用 + LRU 类型,override hint 也拒。
+
+> **const_prop 单独跑无价值** (#255 audit): const_prop 70 个 fold 中 57 个用 LD_IMM64 替换单 ALU,**字节码反而胀 +57 insns**,JIT 也 +379 字节。它只是给 dce 创造 dead def,**必须跟 dce 配套报数据**。3-pass (无 dce) 看到的 0.74-0.98 ratio 都是 VM 噪声,不是 const_prop 真实贡献;真贡献体现在默认 13-pass 含 const_prop+dce 后的 jited 1968 字节 shrink。详见 `docs/tmp/const_prop_perf_audit_2026-05-08.md`。
 
 ## 18. Hint 接口最终设计 (已实施: #244 + #247)
 

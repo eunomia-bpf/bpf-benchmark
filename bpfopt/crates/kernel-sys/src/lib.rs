@@ -906,6 +906,25 @@ pub fn map_get_next_key(
     Err(anyhow!("BPF_MAP_GET_NEXT_KEY: {}", os_error(errno)))
 }
 
+/// Look up one element from an open BPF map.
+pub fn map_lookup_elem(fd: BorrowedFd<'_>, key: &[u8], value: &mut [u8]) -> Result<bool> {
+    let ret = unsafe {
+        bpf_map_lookup_elem(
+            fd.as_raw_fd(),
+            key.as_ptr() as *const libc::c_void,
+            value.as_mut_ptr() as *mut libc::c_void,
+        )
+    };
+    if ret == 0 {
+        return Ok(true);
+    }
+    let errno = errno_from_libbpf_ret(ret);
+    if errno == libc::ENOENT {
+        return Ok(false);
+    }
+    Err(anyhow!("BPF_MAP_LOOKUP_ELEM: {}", os_error(errno)))
+}
+
 /// Enable kernel BPF runtime stats and return the owning fd.
 pub fn enable_stats(stats_type: bpf_stats_type) -> Result<OwnedFd> {
     let fd = unsafe { bpf_enable_stats(stats_type) };

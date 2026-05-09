@@ -31,23 +31,23 @@ use super::utils::{
 pub struct CondSelectPass;
 
 /// A detected cond-select site.
-pub struct CondSelectSite {
-    pub start_pc: usize,
-    pub old_len: usize,
-    pub cond_reg: u8,
-    pub dst_reg: u8,
-    pub true_val: CondSelectValue,
-    pub false_val: CondSelectValue,
+pub(super) struct CondSelectSite {
+    pub(super) start_pc: usize,
+    pub(super) old_len: usize,
+    pub(super) cond_reg: u8,
+    pub(super) dst_reg: u8,
+    pub(super) true_val: CondSelectValue,
+    pub(super) false_val: CondSelectValue,
     /// The JCC opcode (BPF_JNE, BPF_JEQ, etc.).
-    pub jcc_op: u8,
+    pub(super) jcc_op: u8,
     /// The JCC immediate (for BPF_K source).
-    pub jcc_imm: i32,
+    pub(super) jcc_imm: i32,
     /// The JCC source kind (BPF_K or BPF_X).
-    pub jcc_src: u8,
+    pub(super) jcc_src: u8,
     /// The full JCC instruction code (BPF_JMP/BPF_JMP32 + op + source).
-    pub jcc_code: u8,
+    pub(super) jcc_code: u8,
     /// The JCC source register for BPF_X conditions.
-    pub jcc_src_reg: u8,
+    pub(super) jcc_src_reg: u8,
 }
 
 /// A cond_select site that has passed safety checks, ready for transformation.
@@ -64,7 +64,7 @@ struct CondSelectLowering {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum CondSelectValue {
+pub(super) enum CondSelectValue {
     Reg(u8),
     Reg32(u8),
     Imm(i32),
@@ -76,7 +76,7 @@ impl CondSelectPass {
     ///
     /// This is the pure detection phase. Each returned `CondSelectSite`
     /// describes a JCC+MOV pattern that could be lowered to a select kfunc.
-    pub fn analyze(&self, insns: &[BpfInsn]) -> Vec<CondSelectSite> {
+    pub(super) fn analyze(&self, insns: &[BpfInsn]) -> Vec<CondSelectSite> {
         scan_cond_select_sites(insns)
     }
 }
@@ -618,7 +618,3 @@ fn value_source_regs(site: &CondSelectSite) -> Vec<u8> {
         })
         .collect()
 }
-
-#[cfg(test)]
-#[path = "cond_select_tests.rs"]
-mod tests;

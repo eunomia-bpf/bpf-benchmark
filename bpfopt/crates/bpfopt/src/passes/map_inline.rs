@@ -305,6 +305,13 @@ struct BpftoolMapEntryJson {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(untagged)]
+enum InnerMapIdJson {
+    Number(u32),
+    String(String),
+}
+
+#[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct BpftoolMapDumpSkipMarker {
     skipped: bool,
@@ -363,6 +370,7 @@ fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
     let mut compressed_values = HashMap::new();
     let mut inner_map_ids = HashMap::new();
     let mut maps_skipped_by_size = HashSet::new();
+    let mut empty_lpm_trie_maps = HashSet::new();
 
     for &map_id in map_ids.iter().filter(|&&map_id| map_id != 0) {
         let show = read_bpftool_map_show(path, map_id)?;
@@ -378,6 +386,11 @@ fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
         if needs_bpftool_map_dump(map_type) {
             match read_bpftool_map_dump(path, show.id, &map_metadata)? {
                 BpftoolMapDumpSnapshot::Entries(entries) => {
+                    if entries.is_empty()
+                        && map_metadata.map_type == kernel_sys::BPF_MAP_TYPE_LPM_TRIE
+                    {
+                        empty_lpm_trie_maps.insert(show.id);
+                    }
                     for entry in entries {
                         let key = decode_bpftool_hex_bytes(&entry.key)
                             .with_context(|| format!("invalid key bytes for map {}", show.id))?;
@@ -402,10 +415,17 @@ fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
                     maps_skipped_by_size.insert(show.id);
                 }
             }
+            read_inner_map_ids_supplement(
+                path,
+                show.id,
+                map_metadata.key_size as usize,
+                &mut inner_map_ids,
+            )?;
         }
         metadata.insert(show.id, map_metadata);
     }
     read_optional_compressed_overlay_file(path, &metadata, &values, &mut compressed_values)?;
+    synthesize_empty_lpm_trie_overlays(&empty_lpm_trie_maps, &metadata, &mut compressed_values)?;
 
     Ok(MapSnapshot {
         metadata,
@@ -498,6 +518,80 @@ fn read_bpftool_map_dump(
     }
 }
 
+fn read_inner_map_ids_supplement(
+    path: &Path,
+    map_id: u32,
+    key_size: usize,
+    inner_map_ids: &mut HashMap<(u32, Vec<u8>), u32>,
+) -> Result<()> {
+    let supplement_path = bpftool_map_inner_map_ids_path(path, map_id);
+    let data = match fs::read(&supplement_path) {
+        Ok(data) => data,
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+        Err(err) => {
+            return Err(err)
+                .with_context(|| format!("failed to read {}", supplement_path.display()))
+        }
+    };
+    let supplement: HashMap<String, HashMap<String, InnerMapIdJson>> =
+        serde_json::from_slice(&data).with_context(|| {
+            format!(
+                "failed to parse inner_map_id supplement from {}",
+                supplement_path.display()
+            )
+        })?;
+    let expected_map_id = map_id.to_string();
+    for present_map_id in supplement.keys() {
+        if present_map_id != &expected_map_id {
+            bail!(
+                "{} contains inner_map_id table for map {}, expected only {}",
+                supplement_path.display(),
+                present_map_id,
+                expected_map_id
+            );
+        }
+    }
+    let entries = supplement.get(&expected_map_id).ok_or_else(|| {
+        anyhow::anyhow!(
+            "{} does not contain inner_map_id table for map {}",
+            supplement_path.display(),
+            map_id
+        )
+    })?;
+    for (key_hex, inner_map_id_json) in entries {
+        let key = decode_inner_map_id_key_hex(map_id, key_hex, key_size)?;
+        let inner_map_id = decode_inner_map_id_json(map_id, key_hex, inner_map_id_json)?;
+        inner_map_ids.insert((map_id, key), inner_map_id);
+    }
+    Ok(())
+}
+
+fn decode_inner_map_id_key_hex(map_id: u32, hex: &str, key_size: usize) -> Result<Vec<u8>> {
+    let expected = expected_hex_digits(key_size, "key_size")?;
+    if hex.len() != expected {
+        bail!(
+            "map {map_id} inner_map_id supplement key has {} hex digit(s), expected {}",
+            hex.len(),
+            expected
+        );
+    }
+    parse_inline_hint_hex(hex)
+        .with_context(|| format!("map {map_id} inner_map_id supplement key has invalid hex"))
+}
+
+fn decode_inner_map_id_json(map_id: u32, key_hex: &str, value: &InnerMapIdJson) -> Result<u32> {
+    let inner_map_id = match value {
+        InnerMapIdJson::Number(number) => *number,
+        InnerMapIdJson::String(text) => text.parse::<u32>().with_context(|| {
+            format!("map {map_id} inner_map_id supplement entry {key_hex:?} is not a u32 id")
+        })?,
+    };
+    if inner_map_id == 0 {
+        bail!("map {map_id} inner_map_id supplement entry {key_hex:?} has id 0; omit NULL entries");
+    }
+    Ok(inner_map_id)
+}
+
 fn read_optional_compressed_overlay_file(
     path: &Path,
     metadata: &HashMap<u32, MapMetadata>,
@@ -543,6 +637,31 @@ fn read_optional_compressed_overlay_file(
         }
     }
 
+    Ok(())
+}
+
+fn synthesize_empty_lpm_trie_overlays(
+    empty_lpm_trie_maps: &HashSet<u32>,
+    metadata: &HashMap<u32, MapMetadata>,
+    compressed_values: &mut HashMap<u32, CompressedMapValues>,
+) -> Result<()> {
+    for map_id in empty_lpm_trie_maps {
+        if compressed_values.contains_key(map_id) {
+            continue;
+        }
+        let map_metadata = metadata.get(map_id).ok_or_else(|| {
+            anyhow::anyhow!("empty LPM_TRIE map {} missing map_values metadata", map_id)
+        })?;
+        compressed_values.insert(
+            *map_id,
+            CompressedMapValues {
+                value_size: map_metadata.value_size as usize,
+                kind: CompressedMapValuesKind::Enumerated {
+                    entries: HashMap::new(),
+                },
+            },
+        );
+    }
     Ok(())
 }
 
@@ -694,6 +813,10 @@ fn bpftool_map_show_path(path: &Path, map_id: u32) -> PathBuf {
 
 fn bpftool_map_dump_path(path: &Path, map_id: u32) -> PathBuf {
     path.join(format!("map-{map_id}.dump.json"))
+}
+
+fn bpftool_map_inner_map_ids_path(path: &Path, map_id: u32) -> PathBuf {
+    path.join(format!("map-{map_id}.inner_map_ids.json"))
 }
 
 fn decode_bpftool_entry_value(
@@ -1820,19 +1943,19 @@ fn resolve_map_in_map_route_a_hints(
 
     let routes = resolve_hinted_map_in_map_routes(program, map_info, sites, resolved)?;
     if routes.is_empty() {
-        if let Some((anchor, info)) = first_resolved_non_map_in_map_hint(map_info, sites, resolved)?
-        {
+        let has_map_in_map_outer_hint =
+            has_resolved_map_in_map_outer_hint(map_info, sites, resolved)?;
+        let has_known_inner_hint = deferred_inner_hints.iter().try_fold(false, |found, hint| {
+            deferred_hint_targets_known_map_in_map_inner(program, sites, hint)
+                .map(|matches| found || matches)
+        })?;
+        if has_map_in_map_outer_hint || has_known_inner_hint {
             bail!(
-                "inline hint anchor {} cannot be used as map-in-map outer: map_id={} map_type={} is not ARRAY_OF_MAPS/HASH_OF_MAPS",
-                format_hint_anchor(&anchor),
-                info.map_id,
-                info.map_type
+                "inner inline hint anchor {} has no matching map-in-map outer hint",
+                format_hint_anchor(&deferred_inner_hints[0].anchor)
             );
         }
-        bail!(
-            "inner inline hint anchor {} has no matching map-in-map outer hint",
-            format_hint_anchor(&deferred_inner_hints[0].anchor)
-        );
+        return Ok(());
     }
 
     let mut matched = vec![false; deferred_inner_hints.len()];
@@ -1854,7 +1977,7 @@ fn resolve_map_in_map_route_a_hints(
     }
 
     for (idx, hint) in deferred_inner_hints.iter().enumerate() {
-        if !matched[idx] {
+        if !matched[idx] && deferred_hint_targets_known_map_in_map_inner(program, sites, hint)? {
             bail!(
                 "inner inline hint anchor {} has no matching map-in-map outer hint",
                 format_hint_anchor(&hint.anchor)
@@ -1910,6 +2033,47 @@ fn resolve_hinted_map_in_map_routes(
     Ok(routes)
 }
 
+fn has_resolved_map_in_map_outer_hint(
+    map_info: &MapInfoResult,
+    sites: &[MapLookupSite],
+    resolved: &ResolvedInlineHints,
+) -> anyhow::Result<bool> {
+    for site in sites {
+        if resolved.for_call(site.call_pc).is_empty() {
+            continue;
+        }
+        if lookup_site_map_info(map_info, site)?.is_map_in_map() {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+fn deferred_hint_targets_known_map_in_map_inner(
+    program: &BpfProgram,
+    sites: &[MapLookupSite],
+    hint: &MapInlineHint,
+) -> anyhow::Result<bool> {
+    match &hint.anchor {
+        MapInlineHintAnchor::Pc(call_pc) => Ok(find_map_in_map_chains(&program.insns, sites)
+            .iter()
+            .any(|chain| chain.inner_call_pc == *call_pc)),
+        MapInlineHintAnchor::MapName(name) => {
+            let map_ids = metadata_map_ids_for_name(program, name)?;
+            Ok(map_ids
+                .iter()
+                .any(|map_id| map_id_is_known_inner_map(program, *map_id)))
+        }
+    }
+}
+
+fn map_id_is_known_inner_map(program: &BpfProgram, map_id: u32) -> bool {
+    program
+        .map_inner_map_ids
+        .values()
+        .any(|inner_map_id| *inner_map_id == map_id)
+}
+
 fn map_route_a_error(
     hint: &ResolvedInlineHint,
     outer_info: &MapInfo,
@@ -1925,27 +2089,6 @@ fn map_route_a_error(
         ),
         SiteRewriteError::MissingSnapshot(err) | SiteRewriteError::Error(err) => err,
     }
-}
-
-fn first_resolved_non_map_in_map_hint(
-    map_info: &MapInfoResult,
-    sites: &[MapLookupSite],
-    resolved: &ResolvedInlineHints,
-) -> anyhow::Result<Option<(MapInlineHintAnchor, MapInfo)>> {
-    for site in sites {
-        if resolved.for_call(site.call_pc).is_empty() {
-            continue;
-        }
-        let info = lookup_site_map_info(map_info, site)?;
-        if info.is_map_in_map() {
-            continue;
-        }
-        return Ok(Some((
-            resolved.for_call(site.call_pc)[0].anchor.clone(),
-            info.clone(),
-        )));
-    }
-    Ok(None)
 }
 
 fn inner_hint_matches_route(

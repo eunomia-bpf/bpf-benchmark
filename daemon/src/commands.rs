@@ -5,10 +5,10 @@
 //! pass orchestration, per-pass verifier acceptance, short-lived fd_array
 //! construction, and per-pass `BPF_PROG_REJIT`.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs;
 use std::io::Write;
-use std::os::fd::{AsFd, AsRawFd, OwnedFd};
+use std::os::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, OwnedFd};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
@@ -60,6 +60,11 @@ struct MapSnapshotSkipMarker {
     reason: &'static str,
     size_bytes: u64,
     limit_bytes: u64,
+}
+
+#[derive(Debug, Deserialize)]
+struct BpftoolMapDumpKeyJson {
+    key: Vec<String>,
 }
 
 /// Variables daemon substitutes inside step templates.
@@ -257,6 +262,10 @@ fn bpftool_map_dump_path(output_dir: &Path, map_id: u32) -> PathBuf {
     output_dir.join(format!("map-{map_id}.dump.json"))
 }
 
+fn bpftool_map_inner_map_ids_path(output_dir: &Path, map_id: u32) -> PathBuf {
+    output_dir.join(format!("map-{map_id}.inner_map_ids.json"))
+}
+
 fn base64_bytes(bytes: &[u8]) -> String {
     const TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let mut out = String::with_capacity(((bytes.len() + 2) / 3) * 4);
@@ -376,7 +385,10 @@ pub(crate) fn try_execute_plan(
     let kinsn_probes = kinsn_probes.to_vec();
 
     try_apply_programs_with(&prog_ids, default_worker_count(), |prog_id| {
-        let steps = plans_by_id.get(&prog_id).cloned().unwrap_or_default();
+        let steps = plans_by_id
+            .get(&prog_id)
+            .cloned()
+            .ok_or_else(|| anyhow!("missing execution plan for prog_id {prog_id}"))?;
         execute_one(prog_id, &steps, &kinsn_probes)
     })
 }
@@ -883,6 +895,10 @@ fn write_bpftool_map_snapshots(
         let dump_size = fs::metadata(&dump_path)
             .with_context(|| format!("stat {}", dump_path.display()))?
             .len();
+        if needs_inner_map_id_supplement(map.map_type) && dump_size <= MAP_SNAPSHOT_MAX_BYTES {
+            write_inner_map_ids_supplement(map, &dump_path, output_dir)
+                .with_context(|| format!("write inner_map_id supplement for map {}", map.map_id))?;
+        }
         if dump_size > MAP_SNAPSHOT_MAX_BYTES {
             write_map_snapshot_skip_marker(&dump_path, dump_size)?;
             log_bpftool_map_snapshot_decision(
@@ -919,6 +935,116 @@ fn write_map_snapshot_skip_marker(path: &Path, size_bytes: u64) -> Result<()> {
     Ok(())
 }
 
+fn write_inner_map_ids_supplement(
+    map: &bpf::MapInfo,
+    dump_path: &Path,
+    output_dir: &Path,
+) -> Result<()> {
+    let keys = read_bpftool_map_dump_keys(dump_path, map.map_id, map.key_size as usize)?;
+    let outer_fd = kernel_sys::map_get_fd_by_id(map.map_id)
+        .with_context(|| format!("open map-in-map outer map id {}", map.map_id))?;
+    let mut entries = BTreeMap::new();
+    for key in keys {
+        let Some(inner_map_id) =
+            lookup_inner_map_id_for_outer_key(outer_fd.as_fd(), map.map_id, &key).with_context(
+                || {
+                    format!(
+                        "lookup inner map id for outer map {} key {}",
+                        map.map_id,
+                        hex_bytes(&key)
+                    )
+                },
+            )?
+        else {
+            continue;
+        };
+        entries.insert(hex_bytes(&key), inner_map_id.to_string());
+    }
+    write_inner_map_ids_supplement_entries(output_dir, map.map_id, entries)
+}
+
+fn read_bpftool_map_dump_keys(path: &Path, map_id: u32, key_size: usize) -> Result<Vec<Vec<u8>>> {
+    let data = fs::read(path).with_context(|| format!("read {}", path.display()))?;
+    let entries: Vec<BpftoolMapDumpKeyJson> = serde_json::from_slice(&data)
+        .with_context(|| format!("parse bpftool map dump keys from {}", path.display()))?;
+    let mut keys = Vec::with_capacity(entries.len());
+    for entry in entries {
+        let key = decode_bpftool_hex_bytes(&entry.key)
+            .with_context(|| format!("invalid dump key for map {map_id}"))?;
+        if key.len() != key_size {
+            bail!(
+                "bpftool map dump key for map {} has {} byte(s), expected {}",
+                map_id,
+                key.len(),
+                key_size
+            );
+        }
+        keys.push(key);
+    }
+    Ok(keys)
+}
+
+fn lookup_inner_map_id_for_outer_key(
+    outer_fd: BorrowedFd<'_>,
+    outer_map_id: u32,
+    key: &[u8],
+) -> Result<Option<u32>> {
+    let mut inner_fd_bytes = [0u8; std::mem::size_of::<libc::c_int>()];
+    if !kernel_sys::map_lookup_elem(outer_fd, key, &mut inner_fd_bytes)
+        .with_context(|| format!("BPF_MAP_LOOKUP_ELEM on outer map {outer_map_id}"))?
+    {
+        return Ok(None);
+    }
+    let inner_raw_fd = libc::c_int::from_ne_bytes(inner_fd_bytes);
+    if inner_raw_fd < 0 {
+        bail!(
+            "BPF_MAP_LOOKUP_ELEM on outer map {} returned negative inner fd {}",
+            outer_map_id,
+            inner_raw_fd
+        );
+    }
+    let inner_fd = unsafe { OwnedFd::from_raw_fd(inner_raw_fd) };
+    let inner_info = kernel_sys::map_obj_get_info_by_fd(inner_fd.as_fd())
+        .with_context(|| format!("BPF_OBJ_GET_INFO_BY_FD for inner fd from map {outer_map_id}"))?;
+    Ok(Some(inner_info.id))
+}
+
+fn write_inner_map_ids_supplement_entries(
+    output_dir: &Path,
+    map_id: u32,
+    entries: BTreeMap<String, String>,
+) -> Result<()> {
+    let mut root = BTreeMap::new();
+    root.insert(map_id.to_string(), entries);
+    let path = bpftool_map_inner_map_ids_path(output_dir, map_id);
+    let mut file = fs::File::create(&path).with_context(|| format!("create {}", path.display()))?;
+    serde_json::to_writer_pretty(&mut file, &root)
+        .with_context(|| format!("write {}", path.display()))?;
+    writeln!(file).with_context(|| format!("write newline {}", path.display()))?;
+    Ok(())
+}
+
+fn decode_bpftool_hex_bytes(input: &[String]) -> Result<Vec<u8>> {
+    input
+        .iter()
+        .map(|byte| {
+            let byte = byte.trim();
+            let hex = byte.strip_prefix("0x").unwrap_or(byte);
+            u8::from_str_radix(hex, 16).with_context(|| format!("invalid bpftool byte {byte:?}"))
+        })
+        .collect()
+}
+
+fn hex_bytes(bytes: &[u8]) -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    let mut out = String::with_capacity(bytes.len() * 2);
+    for byte in bytes {
+        out.push(HEX[(byte >> 4) as usize] as char);
+        out.push(HEX[(byte & 0x0f) as usize] as char);
+    }
+    out
+}
+
 fn run_bpftool_map_json(args: &[&str], output: &Path) -> Result<()> {
     let command = format!("bpftool {}", args.join(" "));
     let file = fs::File::create(output).with_context(|| format!("create {}", output.display()))?;
@@ -932,7 +1058,24 @@ fn run_bpftool_map_json(args: &[&str], output: &Path) -> Result<()> {
         .with_context(|| format!("wait {command}"))?;
     if !status.status.success() {
         let stderr = String::from_utf8_lossy(&status.stderr).trim().to_string();
-        let _ = fs::remove_file(output);
+        let cleanup_error = match fs::remove_file(output) {
+            Ok(()) => None,
+            Err(err) if err.kind() == std::io::ErrorKind::NotFound => None,
+            Err(err) => Some(err),
+        };
+        if let Some(cleanup_error) = cleanup_error {
+            bail!(
+                "{command} failed with status {}: {}; additionally failed to remove {}: {}",
+                status.status,
+                if stderr.is_empty() {
+                    "<no stderr>".to_string()
+                } else {
+                    stderr
+                },
+                output.display(),
+                cleanup_error
+            );
+        }
         bail!(
             "{command} failed with status {}: {}",
             status.status,
@@ -966,8 +1109,16 @@ fn needs_bpftool_map_dump(map_type: u32) -> bool {
             | kernel_sys::BPF_MAP_TYPE_ARRAY
             | kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY
             | kernel_sys::BPF_MAP_TYPE_LRU_HASH
+            | kernel_sys::BPF_MAP_TYPE_LPM_TRIE
             | kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS
             | kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS
+    )
+}
+
+fn needs_inner_map_id_supplement(map_type: u32) -> bool {
+    matches!(
+        map_type,
+        kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS | kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS
     )
 }
 
@@ -1409,6 +1560,35 @@ mod tests {
             .contains("missing program 9"));
     }
 
+    #[test]
+    fn inner_map_id_supplement_schema_uses_hex_keys_under_outer_map_id() {
+        let dir = temp_test_dir("inner-map-ids");
+        fs::create_dir(&dir).unwrap();
+        let dump_path = dir.join("map-42.dump.json");
+        fs::write(
+            &dump_path,
+            r#"[{"key":["0x01","0x00","0x00","0x00"],"value":["0x00","0x00","0x00","0x00"]}]"#,
+        )
+        .unwrap();
+
+        let keys = read_bpftool_map_dump_keys(&dump_path, 42, 4).unwrap();
+        assert_eq!(keys, vec![1u32.to_le_bytes().to_vec()]);
+        write_inner_map_ids_supplement_entries(
+            &dir,
+            42,
+            BTreeMap::from([(hex_bytes(&keys[0]), "9001".to_string())]),
+        )
+        .unwrap();
+
+        let supplement = fs::read_to_string(bpftool_map_inner_map_ids_path(&dir, 42)).unwrap();
+        remove_dir(&dir);
+        assert!(supplement.contains(r#""42""#), "json={supplement}");
+        assert!(
+            supplement.contains(r#""01000000": "9001""#),
+            "json={supplement}"
+        );
+    }
+
     fn successful_batch_result(prog_id: u32) -> OptimizeOneResult {
         OptimizeOneResult {
             status: "ok".to_string(),
@@ -1432,5 +1612,21 @@ mod tests {
 
     fn fake_owned_fd() -> Result<OwnedFd> {
         Ok(std::fs::File::open("/dev/null")?.into())
+    }
+
+    fn temp_test_dir(name: &str) -> PathBuf {
+        let id = NEXT_WORKDIR_ID.fetch_add(1, Ordering::Relaxed);
+        std::env::temp_dir().join(format!(
+            "bpfrejit-daemon-test-{}-{id}-{name}",
+            std::process::id()
+        ))
+    }
+
+    fn remove_dir(path: &Path) {
+        match fs::remove_dir_all(path) {
+            Ok(()) => {}
+            Err(err) if err.kind() == std::io::ErrorKind::NotFound => {}
+            Err(err) => panic!("remove {}: {err}", path.display()),
+        }
     }
 }

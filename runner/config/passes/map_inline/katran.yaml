@@ -17,7 +17,7 @@
 #   phase 2: vip_map[VIP+port+TCP]  benchmark single VIP (soft guarded)
 #   phase 3: ch_rings  uniform overlay all entries → real_id 1
 #            reals[1]  sparse overlay, REAL_IP 10.200.0.2 → real_definition
-#   phase 4: lpm_src_v4/v6 empty enumerated overlays → lookup miss/NULL
+#   phase 4: lpm_src_v4/v6 empty daemon dumps → lookup miss/NULL
 #            lru_mapping/global_lru_maps outer lookup → const inner map_ptr
 #
 # Phase 3 needs runtime overlay injection because daemon size-skipped
@@ -46,18 +46,16 @@ programs:
     # under runner/config/passes/map_inline/overlays/katran/.
     command: |
       OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/map_inline/overlays/katran;
-      CH=; RE=; SI=; L4=; L6=;
+      CH=; RE=; SI=;
       for f in ${MAP_VALUES}/map-*.show.json; do
         n=$(jq -r .name "$f"); i=$(jq -r .id "$f");
-        case "$n" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; lpm_src_v4) L4=$i ;; lpm_src_v6) L6=$i ;; esac;
+        case "$n" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; esac;
       done;
-      jq -n --arg c "$CH" --arg r "$RE" --arg s "$SI" --arg l4 "$L4" --arg l6 "$L6"
+      jq -n --arg c "$CH" --arg r "$RE" --arg s "$SI"
         --slurpfile co "$OVERLAY_DIR/ch_rings.json"
         --slurpfile ro "$OVERLAY_DIR/reals.json"
         --slurpfile so "$OVERLAY_DIR/server_id_map.json"
-        --slurpfile l4o "$OVERLAY_DIR/lpm_src_v4.json"
-        --slurpfile l6o "$OVERLAY_DIR/lpm_src_v6.json"
-        '($c | if . == "" then {} else {(.): $co[0]} end) + ($r | if . == "" then {} else {(.): $ro[0]} end) + ($s | if . == "" then {} else {(.): $so[0]} end) + ($l4 | if . == "" then {} else {(.): $l4o[0]} end) + ($l6 | if . == "" then {} else {(.): $l6o[0]} end)'
+        '($c | if . == "" then {} else {(.): $co[0]} end) + ($r | if . == "" then {} else {(.): $ro[0]} end) + ($s | if . == "" then {} else {(.): $so[0]} end)'
         > ${MAP_VALUES}/overlays.json &&
       timeout 6000 bpfopt --pass map_inline
         --input ${INPUT} --output ${OUTPUT} --report ${REPORT}

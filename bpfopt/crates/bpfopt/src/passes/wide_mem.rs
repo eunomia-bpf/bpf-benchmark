@@ -18,26 +18,26 @@ use super::utils::fixup_all_branches;
 
 /// A named binding captured from a matched pattern.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Binding {
-    pub name: &'static str,
-    pub value: i64,
+pub(super) struct Binding {
+    pub(super) name: &'static str,
+    pub(super) value: i64,
 }
 
 /// A single rewrite site found by the daemon.
 #[derive(Clone, Debug)]
 
-pub struct RewriteSite {
+pub(super) struct RewriteSite {
     /// Index of the first instruction in the matched pattern.
-    pub start_pc: usize,
+    pub(super) start_pc: usize,
     /// Number of original instructions consumed by this pattern.
-    pub old_len: usize,
+    pub(super) old_len: usize,
     /// Captured bindings (register numbers, offsets, widths, etc.).
-    pub bindings: Vec<Binding>,
+    pub(super) bindings: Vec<Binding>,
 }
 
 impl RewriteSite {
     /// Get a binding value by name, or None.
-    pub fn get_binding(&self, name: &str) -> Option<i64> {
+    pub(super) fn get_binding(&self, name: &str) -> Option<i64> {
         self.bindings
             .iter()
             .find(|b| b.name == name)
@@ -54,7 +54,7 @@ impl RewriteSite {
 ///
 /// **Variant B -- high-byte-first (clang reorder):**
 ///   Total: 3*W - 2 insns (for W>=2).
-fn scan_wide_mem(insns: &[BpfInsn]) -> Vec<RewriteSite> {
+pub(super) fn scan_wide_mem(insns: &[BpfInsn]) -> Vec<RewriteSite> {
     let mut sites = Vec::new();
     let n = insns.len();
     if n < 4 {
@@ -290,7 +290,7 @@ fn match_wide_mem_high_first(
 // ═══════════════════════════════════════════════════════════════════
 
 /// Emit replacement instructions for a single WIDE_MEM rewrite site.
-fn emit_wide_mem(site: &RewriteSite) -> anyhow::Result<Vec<BpfInsn>> {
+pub(super) fn emit_wide_mem(site: &RewriteSite) -> anyhow::Result<Vec<BpfInsn>> {
     let dst = site
         .get_binding("dst_reg")
         .ok_or_else(|| anyhow::anyhow!("missing dst_reg binding"))? as u8;
@@ -717,7 +717,3 @@ impl BpfPass for WideMemPass {
 // ═══════════════════════════════════════════════════════════════════
 // Tests
 // ═══════════════════════════════════════════════════════════════════
-
-#[cfg(test)]
-#[path = "wide_mem_tests.rs"]
-mod tests;

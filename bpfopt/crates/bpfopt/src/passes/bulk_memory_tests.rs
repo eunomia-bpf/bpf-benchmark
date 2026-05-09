@@ -1,4 +1,7 @@
-use super::*;
+use super::bulk_memory::*;
+use super::utils::*;
+use crate::analysis::*;
+use crate::insn::*;
 
 use crate::pass::{BpfProgram, PassContext, PassManager, PipelineResult};
 use crate::passes::test_helpers::{exit_insn, pseudo_call_to};

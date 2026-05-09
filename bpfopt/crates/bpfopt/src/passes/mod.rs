@@ -7,21 +7,47 @@ use anyhow::Result;
 pub mod test_helpers;
 
 mod bounds_check_merge;
+#[cfg(test)]
+mod bounds_check_merge_tests;
 mod branch_flip;
+#[cfg(test)]
+mod branch_flip_tests;
 mod bulk_memory;
+#[cfg(test)]
+mod bulk_memory_tests;
 mod ccmp;
+#[cfg(test)]
+mod ccmp_tests;
 mod cond_select;
+#[cfg(test)]
+mod cond_select_tests;
 mod const_prop;
+#[cfg(test)]
+mod const_prop_tests;
 mod dce;
+#[cfg(test)]
+mod dce_tests;
 mod endian;
+#[cfg(test)]
+mod endian_tests;
 mod extract;
+#[cfg(test)]
+mod extract_tests;
 pub mod map_inline;
 mod noop;
 mod prefetch;
+#[cfg(test)]
+mod prefetch_tests;
 mod rotate;
+#[cfg(test)]
+mod rotate_tests;
 mod skb_load_bytes;
+#[cfg(test)]
+mod skb_load_bytes_tests;
 mod utils;
 mod wide_mem;
+#[cfg(test)]
+mod wide_mem_tests;
 
 pub use bounds_check_merge::BoundsCheckMergePass;
 pub use branch_flip::BranchFlipPass;

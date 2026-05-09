@@ -1,0 +1,238 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 5978602,
+        "run_time_ns_delta": 896401087,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.10236787399998,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   247.44us  156.20us   6.74ms   81.40%\n    Req/Sec     8.36k   402.75     9.91k    68.44%\n  Latency Distribution\n     50%  207.00us\n     75%  306.00us\n     90%  443.00us\n     99%  788.00us\n  1001034 requests in 30.10s, 155.61MB read\nRequests/sec:  33257.37\nTransfer/sec:      5.17MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.103999579999993,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   249.60us  158.11us   3.58ms   80.70%\n    Req/Sec     8.30k   427.14    10.23k    70.51%\n  Latency Distribution\n     50%  208.00us\n     75%  311.00us\n     90%  451.00us\n     99%  809.00us\n  994171 requests in 30.10s, 154.54MB read\nRequests/sec:  33029.15\nTransfer/sec:      5.13MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.10382605800001,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   249.93us  160.74us   3.33ms   81.66%\n    Req/Sec     8.30k   496.40    10.08k    70.27%\n  Latency Distribution\n     50%  207.00us\n     75%  314.00us\n     90%  453.00us\n     99%  817.00us\n  994029 requests in 30.10s, 154.52MB read\nRequests/sec:  33024.74\nTransfer/sec:      5.13MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 5939243,
+        "run_time_ns_delta": 883238629,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.10240317099999,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   250.16us  158.12us   3.79ms   79.62%\n    Req/Sec     8.27k   469.98    11.71k    72.15%\n  Latency Distribution\n     50%  209.00us\n     75%  312.00us\n     90%  451.00us\n     99%  808.00us\n  990400 requests in 30.10s, 153.96MB read\nRequests/sec:  32904.38\nTransfer/sec:      5.11MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.102674227000023,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   251.20us  158.73us   2.71ms   79.76%\n    Req/Sec     8.24k   462.06     9.96k    66.86%\n  Latency Distribution\n     50%  210.00us\n     75%  314.00us\n     90%  453.00us\n     99%  810.00us\n  986990 requests in 30.10s, 153.43MB read\nRequests/sec:  32790.75\nTransfer/sec:      5.10MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.102790375999973,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   250.17us  159.66us   3.54ms   81.08%\n    Req/Sec     8.28k   466.87     9.81k    69.35%\n  Latency Distribution\n     50%  208.00us\n     75%  312.00us\n     90%  452.00us\n     99%  814.00us\n  992166 requests in 30.10s, 154.23MB read\nRequests/sec:  32962.45\nTransfer/sec:      5.12MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 432,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 278,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/map_inline/overlays/katran; CH=; RE=; SI=; L4=; L6=; for f in /var/tmp/bpfrejit-runtime/razi/bpfrejit-daemon-plan-1851-0/map-values/map-*.show.json; do n=$(jq -r .name \"$f\"); i=$(jq -r .id \"$f\"); case \"$n\" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; lpm_src_v4) L4=$i ;; lpm_src_v6) L6=$i ;; esac; done; jq -n --arg c \"$CH\" --arg r \"$RE\" --arg s \"$SI\" --arg l4 \"$L4\" --arg l6 \"$L6\" --slurpfile co \"$OVERLAY_DIR/ch_rings.json\" --slurpfile ro \"$OVERLAY_DIR/reals.json\" --slurpfile so \"$OVERLAY_DIR/server_id_map.json\" --slurpfile l4o \"$OVERLAY_DIR/lpm_src_v4.json\" --slurpfile l6o \"$OVERLAY_DIR/lpm_src_v6.json\" '($c | if . == \"\" then {} else {(.): $co[0]} end) + ($r | if . == \"\" then {} else {(.): $ro[0]} end) + ($s | if . == \"\" then {} else {(.): $so[0]} end) + ($l4 | if . == \"\" then {} else {(.): $l4o[0]} end) + ($l6 | if . == \"\" then {} else {(.): $l6o[0]} end)' > /var/tmp/bpfrejit-runtime/razi/bpfrejit-daemon-plan-1851-0/map-values/overlays.json && timeout 6000 bpfopt --pass map_inline --input /var/tmp/bpfrejit-runtime/razi/bpfrejit-daemon-plan-1851-0/output_step0.bin --output /var/tmp/bpfrejit-runtime/razi/bpfrejit-daemon-plan-1851-0/output_step1.bin --report /var/tmp/bpfrejit-runtime/razi/bpfrejit-daemon-plan-1851-0/report_step1.json --prog-type xdp --verifier-states /var/tmp/bpfrejit-runtime/razi/bpfrejit-daemon-plan-1851-0/verifier_log_step0.log -- --map-values /var/tmp/bpfrejit-runtime/razi/bpfrejit-daemon-plan-1851-0/map-values --map-ids 3,5,7,6,13,18,9,20,4,10,8,12,11,16 --inline-hint=ctl_array:!00000000 --inline-hint=vip_map:!0a6401010000000000000000000000001f900600 --inline-hint=ch_rings:!00000000 --inline-hint=reals:!01000000 --inline-hint=server_id_map:!00000000 --inline-hint=lpm_src_v4:!00000000 --inline-hint=lpm_src_v6:!00000000 # lru_mapping/global_lru_maps Mode B outer-only blocked: daemon # ARRAY_OF_MAPS dump does not yet emit inner_map_id table, so # bpfopt fails fast \"no live inner map for key 0x00000000\". # Re-enable after daemon overlay or BPF_OBJ_GET_INFO map-in-map # extension lands.\nsubprocess output:\nerror: inline hint anchor vip_map cannot be used as map-in-map outer: map_id=5 map_type=1 is not ARRAY_OF_MAPS/HASH_OF_MAPS",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/map_inline/overlays/katran; CH=; RE=; SI=; L4=; L6=; for f in ${MAP_VALUES}/map-*.show.json; do n=$(jq -r .name \"$f\"); i=$(jq -r .id \"$f\"); case \"$n\" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; lpm_src_v4) L4=$i ;; lpm_src_v6) L6=$i ;; esac; done; jq -n --arg c \"$CH\" --arg r \"$RE\" --arg s \"$SI\" --arg l4 \"$L4\" --arg l6 \"$L6\" --slurpfile co \"$OVERLAY_DIR/ch_rings.json\" --slurpfile ro \"$OVERLAY_DIR/reals.json\" --slurpfile so \"$OVERLAY_DIR/server_id_map.json\" --slurpfile l4o \"$OVERLAY_DIR/lpm_src_v4.json\" --slurpfile l6o \"$OVERLAY_DIR/lpm_src_v6.json\" '($c | if . == \"\" then {} else {(.): $co[0]} end) + ($r | if . == \"\" then {} else {(.): $ro[0]} end) + ($s | if . == \"\" then {} else {(.): $so[0]} end) + ($l4 | if . == \"\" then {} else {(.): $l4o[0]} end) + ($l6 | if . == \"\" then {} else {(.): $l6o[0]} end)' > ${MAP_VALUES}/overlays.json && timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --inline-hint=ctl_array:!00000000 --inline-hint=vip_map:!0a6401010000000000000000000000001f900600 --inline-hint=ch_rings:!00000000 --inline-hint=reals:!01000000 --inline-hint=server_id_map:!00000000 --inline-hint=lpm_src_v4:!00000000 --inline-hint=lpm_src_v6:!00000000 # lru_mapping/global_lru_maps Mode B outer-only blocked: daemon # ARRAY_OF_MAPS dump does not yet emit inner_map_id table, so # bpfopt fails fast \"no live inner map for key 0x00000000\". # Re-enable after daemon overlay or BPF_OBJ_GET_INFO map-in-map # extension lands.",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 2542,
+          "orig_insn_count": 2542,
+          "prog_id": 9,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}

@@ -1,4 +1,6 @@
-use super::*;
+use super::wide_mem::*;
+use crate::insn::*;
+use crate::pass::*;
 use crate::pass::{AnalysisCache, PassContext};
 use crate::passes::test_helpers::exit_insn;
 

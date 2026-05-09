@@ -1,4 +1,6 @@
-use super::*;
+use super::cond_select::*;
+use crate::insn::*;
+use crate::pass::*;
 use crate::pass::{AnalysisCache, Arch, PassContext};
 use crate::passes::test_helpers::exit_insn;
 

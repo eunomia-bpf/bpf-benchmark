@@ -835,7 +835,3 @@ fn combine_ldimm64(lo: &BpfInsn, hi: &BpfInsn) -> i64 {
     let high = hi.imm as u32 as u64;
     i64::from_le_bytes((low | (high << 32)).to_le_bytes())
 }
-
-#[cfg(test)]
-#[path = "bulk_memory_tests.rs"]
-mod tests;
