@@ -15,3 +15,5 @@ pub mod insn;
 pub mod mock_maps;
 pub mod pass;
 pub mod passes;
+#[cfg(test)]
+pub mod test_helpers;

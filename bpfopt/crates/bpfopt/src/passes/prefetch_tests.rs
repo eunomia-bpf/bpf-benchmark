@@ -2,10 +2,7 @@ use super::prefetch::*;
 use crate::insn::*;
 use crate::pass::*;
 use crate::pass::{AnalysisCache, PassContext};
-
-fn exit_insn() -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
-}
+use crate::test_helpers::*;
 
 fn map_lookup_call() -> BpfInsn {
     BpfInsn::new(
@@ -13,27 +10,6 @@ fn map_lookup_call() -> BpfInsn {
         BpfInsn::make_regs(0, 0),
         0,
         HELPER_MAP_LOOKUP_ELEM,
-    )
-}
-
-fn ld_imm64(dst: u8, src: u8, imm: i32) -> [BpfInsn; 2] {
-    [
-        BpfInsn::new(
-            BPF_LD | BPF_DW | BPF_IMM,
-            BpfInsn::make_regs(dst, src),
-            0,
-            imm,
-        ),
-        BpfInsn::new(0, 0, 0, 0),
-    ]
-}
-
-fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_JEQ | BPF_K,
-        BpfInsn::make_regs(dst, 0),
-        off,
-        imm,
     )
 }
 
@@ -56,12 +32,6 @@ fn cold_prefetch_profile(execution_count: u64) -> PrefetchProfile {
         cache_misses: 0,
         miss_rate: 0.0,
     }
-}
-
-fn sidecar_payload(insn: &BpfInsn) -> u64 {
-    (u64::from(insn.dst_reg()) & 0xf)
-        | (u64::from(insn.off as u16) << 4)
-        | (u64::from(insn.imm as u32) << 20)
 }
 
 fn decode_prefetch_payload(payload: u64) -> anyhow::Result<u8> {

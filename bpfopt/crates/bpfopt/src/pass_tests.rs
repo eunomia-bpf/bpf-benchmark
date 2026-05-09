@@ -1,6 +1,6 @@
 use super::*;
 use crate::insn::*;
-use crate::passes::test_helpers::exit_insn;
+use crate::test_helpers::exit_insn;
 
 // ── Test helpers ────────────────────────────────────────────────
 

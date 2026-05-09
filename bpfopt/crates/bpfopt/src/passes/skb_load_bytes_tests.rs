@@ -3,6 +3,7 @@ use crate::insn::*;
 
 use crate::analysis::BranchTargetAnalysis;
 use crate::pass::{BpfProgram, PassContext, PassManager};
+use crate::test_helpers::*;
 
 const BPF_FUNC_SKB_LOAD_BYTES: i32 = kernel_sys::BPF_FUNC_skb_load_bytes as i32;
 const BPF_FUNC_DUMMY_HELPER: i32 = kernel_sys::BPF_FUNC_map_lookup_elem as i32;
@@ -14,39 +15,8 @@ const BPF_PROG_TYPE_SCHED_ACT: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_ACT;
 const SKB_DATA_OFF: i16 = 76;
 const SKB_DATA_END_OFF: i16 = 80;
 
-fn exit_insn() -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
-}
-
 fn helper_call(helper_id: i32) -> BpfInsn {
     BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, helper_id)
-}
-
-fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_JEQ | BPF_K,
-        BpfInsn::make_regs(dst, 0),
-        off,
-        imm,
-    )
-}
-
-fn jne_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_JNE | BPF_K,
-        BpfInsn::make_regs(dst, 0),
-        off,
-        imm,
-    )
-}
-
-fn jgt_reg(dst: u8, src: u8, off: i16) -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_JGT | BPF_X,
-        BpfInsn::make_regs(dst, src),
-        off,
-        0,
-    )
 }
 
 fn make_skb_load_bytes_setup(offset: i32, stack_off: i32, len: i32) -> Vec<BpfInsn> {

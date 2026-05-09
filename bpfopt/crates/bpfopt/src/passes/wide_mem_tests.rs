@@ -2,36 +2,11 @@ use super::wide_mem::*;
 use crate::insn::*;
 use crate::pass::*;
 use crate::pass::{AnalysisCache, PassContext};
-use crate::passes::test_helpers::exit_insn;
-
-fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
-    BpfProgram::new(insns)
-}
-
-fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_JEQ | BPF_K,
-        BpfInsn::make_regs(dst, 0),
-        off,
-        imm,
-    )
-}
-
-fn ld_imm64(dst: u8, src: u8, imm: i32) -> [BpfInsn; 2] {
-    [
-        BpfInsn::new(
-            BPF_LD | BPF_DW | BPF_IMM,
-            BpfInsn::make_regs(dst, src),
-            0,
-            imm,
-        ),
-        BpfInsn::new(0, 0, 0, 0),
-    ]
-}
+use crate::test_helpers::*;
 
 fn pseudo_func_ref(dst: u8, pc: usize, target_pc: usize) -> [BpfInsn; 2] {
     let imm = target_pc as i64 - (pc as i64 + 1);
-    ld_imm64(dst, BPF_PSEUDO_FUNC, imm as i32)
+    ld_imm64(dst, BPF_PSEUDO_FUNC, imm)
 }
 
 // ── Pattern matching tests (from matcher.rs) ──────────────────

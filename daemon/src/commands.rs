@@ -62,11 +62,6 @@ struct MapSnapshotSkipMarker {
     limit_bytes: u64,
 }
 
-#[derive(Debug, Deserialize)]
-struct BpftoolMapDumpKeyJson {
-    key: Vec<String>,
-}
-
 /// Variables daemon substitutes inside step templates.
 ///
 /// Steps are bash command strings sent by runner. Daemon prepares per-prog
@@ -896,7 +891,7 @@ fn write_bpftool_map_snapshots(
             .with_context(|| format!("stat {}", dump_path.display()))?
             .len();
         if needs_inner_map_id_supplement(map.map_type) && dump_size <= MAP_SNAPSHOT_MAX_BYTES {
-            write_inner_map_ids_supplement(map, &dump_path, output_dir)
+            write_inner_map_ids_supplement(map, output_dir)
                 .with_context(|| format!("write inner_map_id supplement for map {}", map.map_id))?;
         }
         if dump_size > MAP_SNAPSHOT_MAX_BYTES {
@@ -935,53 +930,110 @@ fn write_map_snapshot_skip_marker(path: &Path, size_bytes: u64) -> Result<()> {
     Ok(())
 }
 
-fn write_inner_map_ids_supplement(
-    map: &bpf::MapInfo,
-    dump_path: &Path,
-    output_dir: &Path,
-) -> Result<()> {
-    let keys = read_bpftool_map_dump_keys(dump_path, map.map_id, map.key_size as usize)?;
+fn write_inner_map_ids_supplement(map: &bpf::MapInfo, output_dir: &Path) -> Result<()> {
     let outer_fd = kernel_sys::map_get_fd_by_id(map.map_id)
         .with_context(|| format!("open map-in-map outer map id {}", map.map_id))?;
-    let mut entries = BTreeMap::new();
-    for key in keys {
-        let Some(inner_map_id) =
-            lookup_inner_map_id_for_outer_key(outer_fd.as_fd(), map.map_id, &key).with_context(
-                || {
-                    format!(
-                        "lookup inner map id for outer map {} key {}",
-                        map.map_id,
-                        hex_bytes(&key)
-                    )
-                },
-            )?
-        else {
-            continue;
-        };
-        entries.insert(hex_bytes(&key), inner_map_id.to_string());
-    }
+    let entries = collect_inner_map_id_supplement_entries(
+        map,
+        |key| lookup_inner_map_id_for_outer_key(outer_fd.as_fd(), map.map_id, key),
+        |previous_key, key| kernel_sys::map_get_next_key(outer_fd.as_fd(), previous_key, key),
+    )?;
     write_inner_map_ids_supplement_entries(output_dir, map.map_id, entries)
 }
 
-fn read_bpftool_map_dump_keys(path: &Path, map_id: u32, key_size: usize) -> Result<Vec<Vec<u8>>> {
-    let data = fs::read(path).with_context(|| format!("read {}", path.display()))?;
-    let entries: Vec<BpftoolMapDumpKeyJson> = serde_json::from_slice(&data)
-        .with_context(|| format!("parse bpftool map dump keys from {}", path.display()))?;
-    let mut keys = Vec::with_capacity(entries.len());
-    for entry in entries {
-        let key = decode_bpftool_hex_bytes(&entry.key)
-            .with_context(|| format!("invalid dump key for map {map_id}"))?;
-        if key.len() != key_size {
-            bail!(
-                "bpftool map dump key for map {} has {} byte(s), expected {}",
-                map_id,
-                key.len(),
-                key_size
-            );
+fn collect_inner_map_id_supplement_entries<L, N>(
+    map: &bpf::MapInfo,
+    mut lookup_inner_map_id: L,
+    mut get_next_hash_key: N,
+) -> Result<BTreeMap<String, String>>
+where
+    L: FnMut(&[u8]) -> Result<Option<u32>>,
+    N: FnMut(Option<&[u8]>, &mut [u8]) -> Result<bool>,
+{
+    let mut entries = BTreeMap::new();
+    match map.map_type {
+        kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS => {
+            if map.key_size != std::mem::size_of::<u32>() as u32 {
+                bail!(
+                    "ARRAY_OF_MAPS outer map {} has {}-byte keys, expected 4",
+                    map.map_id,
+                    map.key_size
+                );
+            }
+            for i in 0..map.max_entries {
+                let key = i.to_le_bytes();
+                insert_inner_map_id_supplement_entry(
+                    map.map_id,
+                    &key,
+                    &mut lookup_inner_map_id,
+                    &mut entries,
+                )?;
+            }
         }
-        keys.push(key);
+        kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS => {
+            let key_size = usize::try_from(map.key_size).with_context(|| {
+                format!("HASH_OF_MAPS outer map {} key size overflow", map.map_id)
+            })?;
+            if key_size == 0 {
+                bail!("HASH_OF_MAPS outer map {} has zero-byte keys", map.map_id);
+            }
+            let mut previous_key: Option<Vec<u8>> = None;
+            loop {
+                let mut key = vec![0u8; key_size];
+                if !get_next_hash_key(previous_key.as_deref(), &mut key)
+                    .with_context(|| format!("BPF_MAP_GET_NEXT_KEY on outer map {}", map.map_id))?
+                {
+                    break;
+                }
+                insert_inner_map_id_supplement_entry(
+                    map.map_id,
+                    &key,
+                    &mut lookup_inner_map_id,
+                    &mut entries,
+                )?;
+                previous_key = Some(key);
+            }
+        }
+        other => bail!(
+            "inner_map_id supplement requested for unsupported map type {} on map {}",
+            other,
+            map.map_id
+        ),
     }
-    Ok(keys)
+    Ok(entries)
+}
+
+fn insert_inner_map_id_supplement_entry<L>(
+    outer_map_id: u32,
+    key: &[u8],
+    lookup_inner_map_id: &mut L,
+    entries: &mut BTreeMap<String, String>,
+) -> Result<()>
+where
+    L: FnMut(&[u8]) -> Result<Option<u32>>,
+{
+    let Some(inner_map_id) = lookup_inner_map_id(key).with_context(|| {
+        format!(
+            "lookup inner map id for outer map {} key {}",
+            outer_map_id,
+            hex_bytes(key)
+        )
+    })?
+    else {
+        return Ok(());
+    };
+    entries.insert(hex_bytes(key), inner_map_id.to_string());
+    Ok(())
+}
+
+fn hex_bytes(bytes: &[u8]) -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    let mut out = String::with_capacity(bytes.len() * 2);
+    for byte in bytes {
+        out.push(HEX[(byte >> 4) as usize] as char);
+        out.push(HEX[(byte & 0x0f) as usize] as char);
+    }
+    out
 }
 
 fn lookup_inner_map_id_for_outer_key(
@@ -1022,27 +1074,6 @@ fn write_inner_map_ids_supplement_entries(
         .with_context(|| format!("write {}", path.display()))?;
     writeln!(file).with_context(|| format!("write newline {}", path.display()))?;
     Ok(())
-}
-
-fn decode_bpftool_hex_bytes(input: &[String]) -> Result<Vec<u8>> {
-    input
-        .iter()
-        .map(|byte| {
-            let byte = byte.trim();
-            let hex = byte.strip_prefix("0x").unwrap_or(byte);
-            u8::from_str_radix(hex, 16).with_context(|| format!("invalid bpftool byte {byte:?}"))
-        })
-        .collect()
-}
-
-fn hex_bytes(bytes: &[u8]) -> String {
-    const HEX: &[u8; 16] = b"0123456789abcdef";
-    let mut out = String::with_capacity(bytes.len() * 2);
-    for byte in bytes {
-        out.push(HEX[(byte >> 4) as usize] as char);
-        out.push(HEX[(byte & 0x0f) as usize] as char);
-    }
-    out
 }
 
 fn run_bpftool_map_json(args: &[&str], output: &Path) -> Result<()> {
@@ -1561,30 +1592,54 @@ mod tests {
     }
 
     #[test]
-    fn inner_map_id_supplement_schema_uses_hex_keys_under_outer_map_id() {
+    fn array_of_maps_supplement_iterates_all_slots_without_bpftool_keys() {
         let dir = temp_test_dir("inner-map-ids");
         fs::create_dir(&dir).unwrap();
-        let dump_path = dir.join("map-42.dump.json");
-        fs::write(
-            &dump_path,
-            r#"[{"key":["0x01","0x00","0x00","0x00"],"value":["0x00","0x00","0x00","0x00"]}]"#,
-        )
-        .unwrap();
+        let map = bpf::MapInfo {
+            map_id: 42,
+            name: "outer".to_string(),
+            map_type: kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS,
+            key_size: 4,
+            value_size: 4,
+            max_entries: 4,
+        };
 
-        let keys = read_bpftool_map_dump_keys(&dump_path, 42, 4).unwrap();
-        assert_eq!(keys, vec![1u32.to_le_bytes().to_vec()]);
-        write_inner_map_ids_supplement_entries(
-            &dir,
-            42,
-            BTreeMap::from([(hex_bytes(&keys[0]), "9001".to_string())]),
+        let mut looked_up = Vec::new();
+        let entries = collect_inner_map_id_supplement_entries(
+            &map,
+            |key| {
+                looked_up.push(key.to_vec());
+                let key: [u8; 4] = key.try_into().unwrap();
+                Ok(Some(9000 + u32::from_le_bytes(key)))
+            },
+            |_previous_key, _key| bail!("HASH_OF_MAPS key iterator must not run for ARRAY_OF_MAPS"),
         )
         .unwrap();
+        write_inner_map_ids_supplement_entries(&dir, map.map_id, entries).unwrap();
 
         let supplement = fs::read_to_string(bpftool_map_inner_map_ids_path(&dir, 42)).unwrap();
         remove_dir(&dir);
+        assert_eq!(
+            looked_up,
+            (0..map.max_entries)
+                .map(|i| i.to_le_bytes().to_vec())
+                .collect::<Vec<_>>()
+        );
         assert!(supplement.contains(r#""42""#), "json={supplement}");
         assert!(
+            supplement.contains(r#""00000000": "9000""#),
+            "json={supplement}"
+        );
+        assert!(
             supplement.contains(r#""01000000": "9001""#),
+            "json={supplement}"
+        );
+        assert!(
+            supplement.contains(r#""02000000": "9002""#),
+            "json={supplement}"
+        );
+        assert!(
+            supplement.contains(r#""03000000": "9003""#),
             "json={supplement}"
         );
     }

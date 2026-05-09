@@ -2,20 +2,7 @@ use super::rotate::*;
 use crate::insn::*;
 use crate::pass::*;
 use crate::pass::{AnalysisCache, PassContext};
-use crate::passes::test_helpers::{exit_insn, pseudo_call_to};
-
-fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
-    BpfProgram::new(insns)
-}
-
-fn mov32_reg(dst: u8, src: u8) -> BpfInsn {
-    BpfInsn::new(
-        BPF_ALU | BPF_MOV | BPF_X,
-        BpfInsn::make_regs(dst, src),
-        0,
-        0,
-    )
-}
+use crate::test_helpers::*;
 
 fn alu32_imm(op: u8, dst: u8, imm: i32) -> BpfInsn {
     BpfInsn::new(BPF_ALU | op | BPF_K, BpfInsn::make_regs(dst, 0), 0, imm)

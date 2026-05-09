@@ -4,20 +4,8 @@ use crate::pass::*;
 use crate::analysis::CFGAnalysis;
 use crate::insn::*;
 use crate::passes::ConstPropPass;
+use crate::test_helpers::*;
 use std::collections::HashMap;
-
-fn exit_insn() -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
-}
-
-fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_JEQ | BPF_K,
-        BpfInsn::make_regs(dst, 0),
-        off,
-        imm,
-    )
-}
 
 fn run_const_prop_then_dce(program: &mut BpfProgram) -> PipelineResult {
     let mut pm = PassManager::new();
@@ -25,40 +13,6 @@ fn run_const_prop_then_dce(program: &mut BpfProgram) -> PipelineResult {
     pm.add_pass(ConstPropPass);
     pm.add_pass(DcePass);
     pm.run(program, &PassContext::test_default()).unwrap()
-}
-
-fn scalar_reg(value: u64) -> RegState {
-    RegState {
-        reg_type: "scalar".to_string(),
-        value_width: VerifierValueWidth::Bits64,
-        precise: true,
-        exact_value: Some(value),
-        tnum: Some(Tnum { value, mask: 0 }),
-        range: ScalarRange {
-            smin: Some(value as i64),
-            smax: Some(value as i64),
-            umin: Some(value),
-            umax: Some(value),
-            smin32: Some(value as u32 as i32),
-            smax32: Some(value as u32 as i32),
-            umin32: Some(value as u32),
-            umax32: Some(value as u32),
-        },
-        offset: None,
-        id: None,
-    }
-}
-
-fn verifier_delta_state(pc: usize, regs: HashMap<u8, RegState>) -> VerifierInsn {
-    VerifierInsn {
-        pc,
-        frame: 0,
-        from_pc: None,
-        kind: VerifierInsnKind::InsnDeltaState,
-        speculative: false,
-        regs,
-        stack: HashMap::new(),
-    }
 }
 
 #[test]

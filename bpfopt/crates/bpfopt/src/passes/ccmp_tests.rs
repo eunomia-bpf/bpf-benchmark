@@ -2,19 +2,10 @@ use super::ccmp::*;
 use crate::insn::*;
 use crate::pass::*;
 use crate::pass::{AnalysisCache, PassContext};
-
-fn exit_insn() -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
-}
+use crate::test_helpers::*;
 
 fn jmp_zero(op: u8, class: u8, reg: u8, off: i16) -> BpfInsn {
     BpfInsn::new(class | op | BPF_K, BpfInsn::make_regs(reg, 0), off, 0)
-}
-
-fn sidecar_payload(insn: &BpfInsn) -> u64 {
-    (u64::from(insn.dst_reg()) & 0xf)
-        | (u64::from(insn.off as u16) << 4)
-        | (u64::from(insn.imm as u32) << 20)
 }
 
 fn ccmp_ctx(arch: Arch) -> PassContext {

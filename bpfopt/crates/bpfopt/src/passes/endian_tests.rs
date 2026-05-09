@@ -2,14 +2,7 @@ use super::endian::*;
 use crate::insn::*;
 use crate::pass::*;
 use crate::pass::{AnalysisCache, PassContext};
-
-fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
-    BpfProgram::new(insns)
-}
-
-fn exit_insn() -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
-}
+use crate::test_helpers::*;
 
 fn endian_to_be(dst: u8, size: i32) -> BpfInsn {
     BpfInsn::new(
@@ -17,19 +10,6 @@ fn endian_to_be(dst: u8, size: i32) -> BpfInsn {
         BpfInsn::make_regs(dst, 0),
         0,
         size,
-    )
-}
-
-fn sidecar_payload(insn: &BpfInsn) -> u64 {
-    (insn.dst_reg() as u64) | (((insn.off as u16) as u64) << 4) | (((insn.imm as u32) as u64) << 20)
-}
-
-fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_JEQ | BPF_K,
-        BpfInsn::make_regs(dst, 0),
-        off,
-        imm,
     )
 }
 

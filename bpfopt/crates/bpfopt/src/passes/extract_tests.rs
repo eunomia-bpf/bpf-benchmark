@@ -2,26 +2,13 @@ use super::extract::*;
 use crate::insn::*;
 use crate::pass::*;
 use crate::pass::{AnalysisCache, PassContext};
-use crate::passes::test_helpers::{exit_insn, pseudo_call_to};
-
-fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
-    BpfProgram::new(insns)
-}
+use crate::test_helpers::*;
 
 fn ctx_with_extract_kfunc(btf_id: i32) -> PassContext {
     let mut ctx = PassContext::test_default();
     ctx.kinsn_registry.extract64_btf_id = btf_id;
     ctx.platform.has_bmi1 = true;
     ctx
-}
-
-fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_JEQ | BPF_K,
-        BpfInsn::make_regs(dst, 0),
-        off,
-        imm,
-    )
 }
 
 // ── contiguous_mask_len tests ──────────────────────────────────

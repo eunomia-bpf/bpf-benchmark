@@ -2,33 +2,11 @@ use super::cond_select::*;
 use crate::insn::*;
 use crate::pass::*;
 use crate::pass::{AnalysisCache, Arch, PassContext};
-use crate::passes::test_helpers::exit_insn;
-
-fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
-    BpfProgram::new(insns)
-}
-
-fn jne_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_JNE | BPF_K,
-        BpfInsn::make_regs(dst, 0),
-        off,
-        imm,
-    )
-}
+use crate::test_helpers::*;
 
 fn jne32_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
     BpfInsn::new(
         BPF_JMP32 | BPF_JNE | BPF_K,
-        BpfInsn::make_regs(dst, 0),
-        off,
-        imm,
-    )
-}
-
-fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_JEQ | BPF_K,
         BpfInsn::make_regs(dst, 0),
         off,
         imm,
@@ -50,15 +28,6 @@ fn jle_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
         BpfInsn::make_regs(dst, 0),
         off,
         imm,
-    )
-}
-
-fn mov32_reg(dst: u8, src: u8) -> BpfInsn {
-    BpfInsn::new(
-        BPF_ALU | BPF_MOV | BPF_X,
-        BpfInsn::make_regs(dst, src),
-        0,
-        0,
     )
 }
 
@@ -430,14 +399,6 @@ fn test_cond_select_emit_jgt_predicate_prefix() {
 }
 
 // ── Issue 1: Parallel-copy alias safety tests ─────────────────
-
-/// Decode the packed sidecar payload and map its logical (a, b, cond)
-/// operands back to the provided initial register values.
-fn sidecar_payload(sidecar: &BpfInsn) -> u64 {
-    (sidecar.dst_reg() as u64)
-        | ((sidecar.off as u16 as u64) << 4)
-        | ((sidecar.imm as u32 as u64) << 20)
-}
 
 fn payload_regs(payload: u64) -> (u8, u8, u8, u8) {
     (

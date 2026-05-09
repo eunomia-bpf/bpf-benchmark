@@ -3,9 +3,6 @@
 
 use anyhow::Result;
 
-#[cfg(test)]
-pub mod test_helpers;
-
 mod bounds_check_merge;
 #[cfg(test)]
 mod bounds_check_merge_tests;

@@ -2,8 +2,14 @@
 //! Concrete analysis implementations for the pass framework.
 
 mod branch_target;
+#[cfg(test)]
+mod branch_target_tests;
 mod cfg;
+#[cfg(test)]
+mod cfg_tests;
 mod liveness;
+#[cfg(test)]
+mod liveness_tests;
 
 pub use branch_target::BranchTargetAnalysis;
 pub use cfg::CFGAnalysis;

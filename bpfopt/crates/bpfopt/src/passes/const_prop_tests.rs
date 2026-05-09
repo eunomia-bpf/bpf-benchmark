@@ -2,40 +2,8 @@ use super::const_prop::*;
 use crate::analysis::*;
 use crate::insn::*;
 use crate::pass::*;
+use crate::test_helpers::*;
 use std::collections::HashMap;
-
-fn exit_insn() -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
-}
-
-fn ld_imm64(dst: u8, src: u8, imm_lo: i32, imm_hi: i32) -> [BpfInsn; 2] {
-    [
-        BpfInsn::new(
-            BPF_LD | BPF_DW | BPF_IMM,
-            BpfInsn::make_regs(dst, src),
-            0,
-            imm_lo,
-        ),
-        BpfInsn::new(0, 0, 0, imm_hi),
-    ]
-}
-
-fn add64_imm(dst: u8, imm: i32) -> BpfInsn {
-    BpfInsn::new(
-        BPF_ALU64 | BPF_ADD | BPF_K,
-        BpfInsn::make_regs(dst, 0),
-        0,
-        imm,
-    )
-}
-
-fn call_helper(imm: i32) -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, imm)
-}
-
-fn scalar_reg(value: u64) -> RegState {
-    scalar_reg_with_width(value, VerifierValueWidth::Bits64)
-}
 
 fn scalar_reg_with_width(value: u64, value_width: VerifierValueWidth) -> RegState {
     RegState {
@@ -61,10 +29,6 @@ fn scalar_reg_with_width(value: u64, value_width: VerifierValueWidth) -> RegStat
 
 fn pkt_reg() -> RegState {
     RegState::new("pkt", VerifierValueWidth::Bits64)
-}
-
-fn verifier_delta_state(pc: usize, regs: HashMap<u8, RegState>) -> VerifierInsn {
-    verifier_delta_state_in_frame(pc, 0, regs)
 }
 
 fn verifier_delta_state_in_frame(
@@ -161,7 +125,7 @@ fn const_prop_folds_alu32_chain_to_mov32_imm() {
 
 #[test]
 fn const_prop_tracks_ldimm64_constants() {
-    let wide = ld_imm64(1, 0, 0, 1);
+    let wide = ld_imm64(1, 0, 1_i64 << 32);
     let mut program = BpfProgram::new(vec![wide[0], wide[1], add64_imm(1, 1), exit_insn()]);
     program.set_verifier_states(vec![verifier_delta_state(
         2,
@@ -179,7 +143,7 @@ fn const_prop_tracks_ldimm64_constants() {
 
 #[test]
 fn const_prop_does_not_fold_typed_ldimm64_map_value() {
-    let typed = ld_imm64(1, 2, 0x11, 0x1a8);
+    let typed = ld_imm64(1, 2, (0x1a8_i64 << 32) | 0x11);
     let original = vec![typed[0], typed[1], add64_imm(1, 16), exit_insn()];
     let mut program = BpfProgram::new(original.clone());
 

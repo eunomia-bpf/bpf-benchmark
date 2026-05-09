@@ -1140,7 +1140,7 @@ pub fn resolve_kinsn_call_off_for_target(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::passes::test_helpers::{call_helper, exit_insn, pseudo_call_to};
+    use crate::test_helpers::{call_helper, exit_insn, pseudo_call_to};
 
     fn pseudo_func_ref(dst: u8, imm: i32) -> [BpfInsn; 2] {
         [

@@ -2,10 +2,7 @@ use super::branch_flip::*;
 use crate::insn::*;
 use crate::pass::*;
 use crate::pass::{AnalysisCache, BranchProfile, PassContext};
-
-fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
-    BpfProgram::new(insns)
-}
+use crate::test_helpers::*;
 
 fn branch_profile(taken_count: u64, not_taken_count: u64, branch_misses: u64) -> BranchProfile {
     let branch_count = taken_count + not_taken_count;
@@ -18,28 +15,6 @@ fn branch_profile(taken_count: u64, not_taken_count: u64, branch_misses: u64) ->
         taken_count,
         not_taken_count,
     }
-}
-
-fn exit_insn() -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
-}
-
-fn jne_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_JNE | BPF_K,
-        BpfInsn::make_regs(dst, 0),
-        off,
-        imm,
-    )
-}
-
-fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_JEQ | BPF_K,
-        BpfInsn::make_regs(dst, 0),
-        off,
-        imm,
-    )
 }
 
 // ── True diamond: Jcc +N ; [then N-1] ; JA +M ; [else M] ──

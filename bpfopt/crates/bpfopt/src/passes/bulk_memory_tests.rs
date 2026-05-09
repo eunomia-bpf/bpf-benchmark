@@ -4,31 +4,9 @@ use crate::analysis::*;
 use crate::insn::*;
 
 use crate::pass::{BpfProgram, PassContext, PassManager, PipelineResult};
-use crate::passes::test_helpers::{exit_insn, pseudo_call_to};
+use crate::test_helpers::*;
 const MEMCPY_BTF_ID: i32 = 4101;
 const MEMSET_BTF_ID: i32 = 4102;
-
-fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
-    BpfProgram::new(insns)
-}
-
-fn st_mem(size: u8, dst: u8, off: i16, imm: i32) -> BpfInsn {
-    BpfInsn::new(
-        BPF_ST | size | BPF_MEM,
-        BpfInsn::make_regs(dst, 0),
-        off,
-        imm,
-    )
-}
-
-fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_JEQ | BPF_K,
-        BpfInsn::make_regs(dst, 0),
-        off,
-        imm,
-    )
-}
 
 fn width_bytes(size: u8) -> i16 {
     match size {
