@@ -68,10 +68,24 @@ programs:
         --inline-hint=ch_rings:!00000000
         --inline-hint=reals:!01000000
         --inline-hint=server_id_map:!00000000
-        --inline-hint=lpm_src_v4:!00000000
-        --inline-hint=lpm_src_v6:!00000000
-        --inline-hint=lru_mapping:!00000000
-        --inline-hint=global_lru_maps:!00000000
+        # lpm_src_v4/v6 hints commented: katran is built without
+        # -DLPM_SRC_LOOKUP, so these maps are guarded out of the program
+        # by `#ifdef LPM_SRC_LOOKUP` in balancer_maps.h. bpfopt fail-fasts
+        # on hint anchor not in metadata (correct: catches typos and
+        # mis-applied hints early). Uncomment if a future build turns on
+        # source-IP routing.
+        # --inline-hint=lpm_src_v4:!00000000
+        # --inline-hint=lpm_src_v6:!00000000
+        # lru_mapping/global_lru_maps outer-only hints commented: katran
+        # benchmark uses F_LRU_BYPASS + no `-forwarding_cores`, so the outer
+        # ARRAY_OF_MAPS stays empty (every slot ENOENT). #265 root-caused this:
+        # `attachLrus()` iterates empty forwardingCores_ → zero update_elem.
+        # bpfopt fail-fasts when hinted outer key has no live inner map
+        # (correct: hint claims something kernel snapshot disproves).
+        # Uncomment only if benchmark configures forwarding cores OR an
+        # alternative test deploys populated map-in-map.
+        # --inline-hint=lru_mapping:!00000000
+        # --inline-hint=global_lru_maps:!00000000
   default:
     command: |
       timeout 6000 bpfopt --pass map_inline

@@ -8,7 +8,7 @@
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs;
 use std::io::Write;
-use std::os::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, OwnedFd};
+use std::os::fd::{AsFd, AsRawFd, BorrowedFd, OwnedFd};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
@@ -1041,24 +1041,17 @@ fn lookup_inner_map_id_for_outer_key(
     outer_map_id: u32,
     key: &[u8],
 ) -> Result<Option<u32>> {
-    let mut inner_fd_bytes = [0u8; std::mem::size_of::<libc::c_int>()];
-    if !kernel_sys::map_lookup_elem(outer_fd, key, &mut inner_fd_bytes)
+    let mut value_bytes = [0u8; 4];
+    if !kernel_sys::map_lookup_elem(outer_fd, key, &mut value_bytes)
         .with_context(|| format!("BPF_MAP_LOOKUP_ELEM on outer map {outer_map_id}"))?
     {
         return Ok(None);
     }
-    let inner_raw_fd = libc::c_int::from_ne_bytes(inner_fd_bytes);
-    if inner_raw_fd < 0 {
-        bail!(
-            "BPF_MAP_LOOKUP_ELEM on outer map {} returned negative inner fd {}",
-            outer_map_id,
-            inner_raw_fd
-        );
+    let inner_map_id = u32::from_ne_bytes(value_bytes);
+    if inner_map_id == 0 {
+        return Ok(None);
     }
-    let inner_fd = unsafe { OwnedFd::from_raw_fd(inner_raw_fd) };
-    let inner_info = kernel_sys::map_obj_get_info_by_fd(inner_fd.as_fd())
-        .with_context(|| format!("BPF_OBJ_GET_INFO_BY_FD for inner fd from map {outer_map_id}"))?;
-    Ok(Some(inner_info.id))
+    Ok(Some(inner_map_id))
 }
 
 fn write_inner_map_ids_supplement_entries(
@@ -1610,7 +1603,8 @@ mod tests {
             |key| {
                 looked_up.push(key.to_vec());
                 let key: [u8; 4] = key.try_into().unwrap();
-                Ok(Some(9000 + u32::from_le_bytes(key)))
+                let inner_map_id = 9000 + u32::from_le_bytes(key);
+                Ok(Some(inner_map_id))
             },
             |_previous_key, _key| bail!("HASH_OF_MAPS key iterator must not run for ARRAY_OF_MAPS"),
         )

@@ -1,4 +1,5 @@
 {
+  "completed_at": "2026-05-09T05:11:14.220380+00:00",
   "config": {
     "enabled_passes": [
       "noop",
@@ -6,8 +7,8 @@
     ]
   },
   "details_dir": "details",
-  "generated_at": "2026-05-09T05:06:20.874835+00:00",
-  "last_updated_at": "2026-05-09T05:06:20.874832+00:00",
+  "generated_at": "2026-05-09T05:11:14.220384+00:00",
+  "last_updated_at": "2026-05-09T05:11:14.220380+00:00",
   "launcher_boot_id": "c466dacb-7f66-4a3e-8c7c-0899682e77a4",
   "launcher_pid": 1828,
   "launcher_start_ticks": 11860,
@@ -15,7 +16,7 @@
   "run_type": "x86_kvm_corpus",
   "samples": 3,
   "started_at": "2026-05-09T05:06:20.871404+00:00",
-  "status": "running",
+  "status": "completed",
   "suite": "corpus",
   "workload_seconds": 30.0
 }
