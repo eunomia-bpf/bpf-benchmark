@@ -1,0 +1,501 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 6033429,
+        "run_time_ns_delta": 912577173,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.103438134000015,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   248.16us  157.28us   4.35ms   80.83%\n    Req/Sec     8.34k   394.55     9.45k    67.77%\n  Latency Distribution\n     50%  208.00us\n     75%  310.00us\n     90%  447.00us\n     99%  804.00us\n  999397 requests in 30.10s, 155.36MB read\nRequests/sec:  33202.85\nTransfer/sec:      5.16MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.102851283999996,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   244.33us  152.79us   3.71ms   79.75%\n    Req/Sec     8.47k   427.85     9.92k    67.19%\n  Latency Distribution\n     50%  205.00us\n     75%  303.00us\n     90%  439.00us\n     99%  784.00us\n  1014080 requests in 30.10s, 157.64MB read\nRequests/sec:  33690.58\nTransfer/sec:      5.24MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.102542917999983,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   247.79us  159.12us   3.64ms   82.42%\n    Req/Sec     8.37k   461.78    10.17k    68.85%\n  Latency Distribution\n     50%  206.00us\n     75%  308.00us\n     90%  447.00us\n     99%  815.00us\n  1003171 requests in 30.10s, 155.94MB read\nRequests/sec:  33328.06\nTransfer/sec:      5.18MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 12993,
+        "bytes_xlated": 22464,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 5862692,
+        "run_time_ns_delta": 866161466,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.103190138000002,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   252.61us  162.61us   3.74ms   81.68%\n    Req/Sec     8.21k   475.97    12.07k    73.90%\n  Latency Distribution\n     50%  210.00us\n     75%  316.00us\n     90%  458.00us\n     99%  828.00us\n  982969 requests in 30.10s, 152.80MB read\nRequests/sec:  32656.69\nTransfer/sec:      5.08MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.10246583999998,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   255.47us  164.51us   4.31ms   82.42%\n    Req/Sec     8.12k   418.32     9.86k    73.42%\n  Latency Distribution\n     50%  213.00us\n     75%  320.00us\n     90%  463.00us\n     99%  836.00us\n  972729 requests in 30.10s, 151.21MB read\nRequests/sec:  32317.22\nTransfer/sec:      5.02MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.102826553,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   254.86us  166.72us   6.80ms   83.56%\n    Req/Sec     8.14k   446.95    10.13k    70.85%\n  Latency Distribution\n     50%  212.00us\n     75%  318.00us\n     90%  460.00us\n     99%  832.00us\n  975581 requests in 30.10s, 151.65MB read\nRequests/sec:  32411.36\nTransfer/sec:      5.04MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "passes": [
+          {
+            "bpfopt_ms": 7,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 440,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 400,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "maps_skipped_by_size=5",
+                "site at PC=13: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=365: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=464: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=541: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=562: skip reason: map-in-map chain is not inlineable",
+                "site at PC=570: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=592: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=616: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=654: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=793: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=814: skip reason: map-in-map chain is not inlineable",
+                "site at PC=823: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=844: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=863: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=863: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 863",
+                "site at PC=895: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=895: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 895",
+                "site at PC=1001: skip reason: map snapshot skipped by size and no overlay provided (map_name=server_id_stats, map_id=18)",
+                "site at PC=1018: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "site at PC=1056: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=1072: skip reason: map-in-map outer key unavailable: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1072",
+                "site at PC=1086: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=1113: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=1128: skip reason: map snapshot skipped by size and no overlay provided (map_name=reals_stats, map_id=10)",
+                "site at PC=1221: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=1245: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=1303: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=1311: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                "site at PC=1320: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=1351: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1351: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1351",
+                "site at PC=1381: skip reason: map snapshot skipped by size and no overlay provided (map_name=lru_miss_stats, map_id=11)",
+                "site at PC=1495: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=1514: skip reason: map snapshot skipped by size and no overlay provided (map_name=server_id_map, map_id=16)",
+                "site at PC=1524: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                "site at PC=1550: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=1573: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "site at PC=1593: skip reason: map snapshot skipped by size and no overlay provided (map_name=server_id_stats, map_id=18)",
+                "site at PC=1634: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=1670: skip reason: map snapshot skipped by size and no overlay provided (map_name=server_id_stats, map_id=18)",
+                "site at PC=1692: skip reason: map snapshot skipped by size and no overlay provided (map_name=server_id_map, map_id=16)",
+                "site at PC=1702: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                "site at PC=1726: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "site at PC=1760: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=1776: skip reason: map-in-map outer key unavailable: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1776",
+                "site at PC=1789: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=1815: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=1829: skip reason: map snapshot skipped by size and no overlay provided (map_name=reals_stats, map_id=10)",
+                "site at PC=1927: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=1948: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=2006: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=2027: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=2062: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=2062: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 2062",
+                "site at PC=2079: skip reason: map snapshot skipped by size and no overlay provided (map_name=lru_miss_stats, map_id=11)",
+                "site at PC=2202: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=2214: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=2223: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=2263: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "site at PC=2298: skip reason: map snapshot skipped by size and no overlay provided (map_name=server_id_stats, map_id=18)",
+                "site at PC=512: inlined successfully, value=0x2",
+                "site at PC=520: inlined successfully, value=0x2",
+                "site at PC=762: inlined successfully, value=0x2",
+                "site at PC=770: inlined successfully, value=0x2",
+                "site at PC=1041: inlined successfully, value=0x0",
+                "site at PC=1105: inlined successfully, value=0x02000000000b0000",
+                "site at PC=1292: inlined successfully, value=0x1",
+                "site at PC=1746: inlined successfully, value=0x0",
+                "site at PC=1807: inlined successfully, value=0x02000000000b0000",
+                "site at PC=1995: inlined successfully, value=0x1",
+                "site at PC=2018: inlined successfully, value=0x200c80a",
+                "round 2: site at PC=13: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=365: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=464: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=512: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=512: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=520: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=520: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=541: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=562: skip reason: map-in-map chain is not inlineable",
+                "round 2: site at PC=570: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=592: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=616: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=654: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=762: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=762: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=770: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=770: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=793: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=814: skip reason: map-in-map chain is not inlineable",
+                "round 2: site at PC=823: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=844: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=863: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=863: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=895: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=895: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1001: skip reason: map snapshot skipped by size and no overlay provided (map_name=server_id_stats, map_id=18)",
+                "round 2: site at PC=1018: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "round 2: site at PC=1041: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1041: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1056: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=1072: skip reason: map-in-map outer key unavailable: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1086: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=1105: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1105: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1113: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=1128: skip reason: map snapshot skipped by size and no overlay provided (map_name=reals_stats, map_id=10)",
+                "round 2: site at PC=1221: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=1245: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=1292: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1292: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1303: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=1311: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1311: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1320: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=1351: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1351: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1381: skip reason: map snapshot skipped by size and no overlay provided (map_name=lru_miss_stats, map_id=11)",
+                "round 2: site at PC=1495: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=1514: skip reason: map snapshot skipped by size and no overlay provided (map_name=server_id_map, map_id=16)",
+                "round 2: site at PC=1524: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1524: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1550: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=1573: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "round 2: site at PC=1593: skip reason: map snapshot skipped by size and no overlay provided (map_name=server_id_stats, map_id=18)",
+                "round 2: site at PC=1634: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=1670: skip reason: map snapshot skipped by size and no overlay provided (map_name=server_id_stats, map_id=18)",
+                "round 2: site at PC=1692: skip reason: map snapshot skipped by size and no overlay provided (map_name=server_id_map, map_id=16)",
+                "round 2: site at PC=1702: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1702: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1726: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "round 2: site at PC=1746: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1746: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1760: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=1776: skip reason: map-in-map outer key unavailable: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1789: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=1807: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1807: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1815: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=1829: skip reason: map snapshot skipped by size and no overlay provided (map_name=reals_stats, map_id=10)",
+                "round 2: site at PC=1927: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=1948: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=1995: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1995: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=2006: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=2018: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=2018: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=2027: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=2062: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=2062: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=2079: skip reason: map snapshot skipped by size and no overlay provided (map_name=lru_miss_stats, map_id=11)",
+                "round 2: site at PC=2202: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=2214: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=2223: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=2263: skip reason: map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)",
+                "round 2: site at PC=2298: skip reason: map snapshot skipped by size and no overlay provided (map_name=server_id_stats, map_id=18)",
+                "inline_hints_consumed=4"
+              ],
+              "inlined_map_entries": [
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 5,
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 5,
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 5,
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 5,
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "01000000",
+                  "map_id": 9,
+                  "value_hex": "0ac8000200000000000000000000000000000000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 4,
+                  "value_hex": "02000000000b0000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 8,
+                  "value_hex": "01000000"
+                },
+                {
+                  "key_hex": "01000000",
+                  "map_id": 9,
+                  "value_hex": "0ac8000200000000000000000000000000000000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 4,
+                  "value_hex": "02000000000b0000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 8,
+                  "value_hex": "01000000"
+                },
+                {
+                  "key_hex": "01000000",
+                  "map_id": 9,
+                  "value_hex": "0ac8000200000000000000000000000000000000"
+                }
+              ],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 11,
+              "sites_matched": 78,
+              "sites_skipped": 67,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 18,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6": 3,
+                "map snapshot skipped by size and no overlay provided (map_name=lru_miss_stats, map_id=11)": 2,
+                "map snapshot skipped by size and no overlay provided (map_name=reals_stats, map_id=10)": 2,
+                "map snapshot skipped by size and no overlay provided (map_name=server_id_map, map_id=16)": 2,
+                "map snapshot skipped by size and no overlay provided (map_name=server_id_stats, map_id=18)": 4,
+                "map snapshot skipped by size and no overlay provided (map_name=stats, map_id=3)": 32,
+                "map-in-map chain is not inlineable": 2,
+                "map-in-map outer key unavailable: verifier-guided key extraction is unavailable after a prior map_inline rewrite": 2
+              }
+            },
+            "error": null,
+            "rejit_syscall_ms": 112,
+            "status": "ok",
+            "step": {
+              "command": "OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/map_inline/overlays/katran; CH=; RE=; for f in ${MAP_VALUES}/map-*.show.json; do n=$(jq -r .name \"$f\"); i=$(jq -r .id \"$f\"); case \"$n\" in ch_rings) CH=$i ;; reals) RE=$i ;; esac; done; jq -n --arg c \"$CH\" --arg r \"$RE\" --slurpfile co \"$OVERLAY_DIR/ch_rings.json\" --slurpfile ro \"$OVERLAY_DIR/reals.json\" '($c | if . == \"\" then {} else {(.): $co[0]} end) + ($r | if . == \"\" then {} else {(.): $ro[0]} end)' > ${MAP_VALUES}/overlays.json && timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --inline-hint=ctl_array:!00000000 --inline-hint=vip_map:!0a6401010000000000000000000000001f900600 --inline-hint=ch_rings:!00000000 --inline-hint=reals:!01000000",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_ms": 134,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "const_prop_alu_materialized=70"
+              ],
+              "insn_count_after": 2599,
+              "insn_count_before": 2542,
+              "insn_delta": 57,
+              "pass": "const_prop",
+              "sites_applied": 70,
+              "sites_matched": 129,
+              "sites_skipped": 59,
+              "skip_reasons": {
+                "verifier post-state is not scalar-exact": 59
+              }
+            },
+            "error": null,
+            "rejit_syscall_ms": 44,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 2599,
+          "orig_insn_count": 2542,
+          "prog_id": 9,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}

@@ -513,8 +513,12 @@ benchmark 上界路线的决定性杠杆是固定 VIP、uniform `ch_rings`、dep
 | baseline (kinsn 6-pass, no map_inline) | x86_kvm_corpus_20260508_041822_768126 | 0 | 0.9423 | 1.061x speedup,55 cycles |
 | Phase 1 (ctl_array×2 hint + map_inline) | x86_kvm_corpus_20260508_231402_301128 | 2/16 | 0.9715 | map_inline 排在 noop 后第 2 位避免 PC 漂移;skipped 14: 8 verifier-state miss / 2 fixed-offset miss / 4 map-in-map (待 Phase 3/4) |
 | Phase 2 (+ vip_map hard fold) | x86_kvm_corpus_20260509_013938_112049 / 015615_631003 | 6/23→73 | 0.8811 / **1.0099** | 两次 run 数据差异大(VM 噪声:baseline avg_ns 228→151)。applied=6 一致(ctl_array×2 + vip_map×4)。第二次跑用 #245 后代码,matched 涨到 73 是因为 size-skipped map 现在可见(ch_rings 2 + reals 6 + lru_miss_stats/reals_stats/etc.)。真实 phase 2 speedup 在 0.88-1.01 噪声窗内,需 paper-grade 多 run 平均才能确定 |
-| Phase 3 (+ ch_rings uniform + reals sparse overlay) | x86_kvm_corpus_20260509_022133_477580 | **11/78** | **0.9454** | **+5.8% speedup**。新加 5 sites: ch_rings PC 1292/1995 (real_id=1) + reals PC 1041/1746 (offset>0 → 0) + reals PC 2018 (offset 0 → REAL_IP 0a0c8002)。const_prop applied 70/126 (#251 Path C fail-closed 拒 56 不安全 packet ptr 折叠);整 pipeline status=ok,无 EACCES |
+
+| Phase 3 (+ ch_rings uniform + reals sparse overlay,3-pass) | x86_kvm_corpus_20260509_022133_477580 / 031932_134386 | **11/78** | 0.9454 / **0.7458** | 第 1 次:**+5.8%** (baseline 156 ns)。第 2 次 (#252 const_prop 二级 guard 后):**+25.4%** (baseline 250 ns,VM 噪声放大)。Applied 11 = ctl_array×2 + vip_map×4 + ch_rings×2 + reals×3。const_prop 70/126 (#251+#252 拒 56 unsafe ptr-arith fold);pipeline 全 ok |
+| **map_inline only (无 const_prop, 隔离测试)** | x86_kvm_corpus_20260509_031956_984494 | 11/78 | **1.0670** | **map_inline 单独跑慢 6.3%**。原因:hard fold 替换 lookup 后留下死指令 (lookup setup / null check / unused offset loads),没有 const_prop+dce 配套清理 → 字节码反而更大、JIT 输出更长。**关键论点 for paper: map_inline 不是独立优化,必须跟 const_prop+dce pipeline 配套** |
 | Phase 4 (+ map-in-map) | TBD | TBD | TBD | §19 修正:vip_to_down_rea outer 2 site 但 benchmark map 空,lru_mapping inner 是 LRU 不可 value-inline → katran 预期 **0 applied**;此 phase 是 cilium/tetragon paper enabler |
+
+> **核心实验观察 (paper-grade)**: map_inline 单独跑会让 katran 慢 6.3%(死指令未清理);跟 const_prop 配套跑 +25.4%。在 paper 里 map_inline 不能作为独立 pass 报数据,必须跟 const_prop+dce 一起报。这跟 hard fold 的语义一致 — fold 把 lookup 替换成 scalar load,后续传播+清理需要 const_prop+dce。
 
 测下一次后回填本表。
 

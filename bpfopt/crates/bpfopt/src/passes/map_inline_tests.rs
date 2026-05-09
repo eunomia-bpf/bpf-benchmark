@@ -8,7 +8,7 @@ use crate::analysis::{BranchTargetAnalysis, CFGAnalysis};
 use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
 use crate::mock_maps::use_mock_maps;
 use crate::pass::{
-    CompressedMapValues, CompressedMapValuesKind, MapInlineHint, MapInlineHintAnchor,
+    Analysis, CompressedMapValues, CompressedMapValuesKind, MapInlineHint, MapInlineHintAnchor,
     MapInlineHintMode, MapInlineRecord, MapMetadata, PassContext, PassManager, RegState,
     ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
@@ -20,6 +20,7 @@ const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
 const BPF_MAP_TYPE_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_HASH;
 const BPF_MAP_TYPE_LRU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_HASH;
 const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
+const BPF_MAP_TYPE_LPM_TRIE: u32 = kernel_sys::BPF_MAP_TYPE_LPM_TRIE;
 const BPF_MAP_TYPE_ARRAY_OF_MAPS: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS;
 const BPF_MAP_TYPE_HASH_OF_MAPS: u32 = kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS;
 static NEXT_TEMP_DIR: AtomicUsize = AtomicUsize::new(0);
@@ -547,6 +548,29 @@ fn has_non_constant_key_skip(result: &PipelineResult) -> bool {
         skip.reason
             .contains("lookup key is not available from verifier-guided state")
     })
+}
+
+fn cfg_unreachable_pcs(insns: &[BpfInsn]) -> Vec<usize> {
+    let cfg = CFGAnalysis.run(&BpfProgram::new(insns.to_vec()));
+    if cfg.blocks.is_empty() || insns.is_empty() {
+        return Vec::new();
+    }
+
+    let mut reachable_blocks = vec![false; cfg.blocks.len()];
+    let mut worklist = vec![cfg.insn_to_block[0]];
+    while let Some(block_idx) = worklist.pop() {
+        if reachable_blocks[block_idx] {
+            continue;
+        }
+        reachable_blocks[block_idx] = true;
+        for &succ in &cfg.blocks[block_idx].succs {
+            worklist.push(succ);
+        }
+    }
+
+    (0..insns.len())
+        .filter(|&pc| !reachable_blocks[cfg.insn_to_block[pc]])
+        .collect()
 }
 
 #[test]
@@ -1558,6 +1582,167 @@ fn map_inline_soft_map_name_hint_emits_key_check_scalar_fold_without_fallback() 
 }
 
 #[test]
+fn map_inline_soft_hint_requires_immediate_null_check_when_hard_fold_coexists() {
+    let hard_map_id = 9611;
+    let soft_map_id = 9612;
+
+    let mut hard_values = HashMap::new();
+    hard_values.insert(0u32.to_le_bytes().to_vec(), 42u32.to_le_bytes().to_vec());
+    install_map(
+        hard_map_id,
+        kernel_sys::BPF_MAP_TYPE_ARRAY,
+        8,
+        hard_values.clone(),
+    );
+
+    let mut soft_values = HashMap::new();
+    soft_values.insert(1u32.to_le_bytes().to_vec(), 7u32.to_le_bytes().to_vec());
+    install_map(
+        soft_map_id,
+        kernel_sys::BPF_MAP_TYPE_HASH,
+        8,
+        soft_values.clone(),
+    );
+
+    let hard_map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let soft_map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 43);
+    let mut program = BpfProgram::new(vec![
+        hard_map[0],
+        hard_map[1],
+        st_mem(BPF_W, 10, -4, 0),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+        soft_map[0],
+        soft_map[1],
+        st_mem(BPF_W, 10, -8, 1),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -8),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        BpfInsn::mov64_imm(8, 2),
+        BpfInsn::mov64_imm(1, 7),
+        jeq_imm(0, 0, 2),
+        BpfInsn::ldx_mem(BPF_W, 7, 0, 0),
+        BpfInsn::mov64_imm(0, 0),
+        exit_insn(),
+    ]);
+    program.set_map_ids(vec![hard_map_id, soft_map_id]);
+    install_named_map_metadata(
+        &mut program,
+        hard_map_id,
+        kernel_sys::BPF_MAP_TYPE_ARRAY,
+        4,
+        8,
+        "hard_map",
+    );
+    install_named_map_metadata(
+        &mut program,
+        soft_map_id,
+        kernel_sys::BPF_MAP_TYPE_HASH,
+        4,
+        8,
+        "soft_map",
+    );
+    install_snapshot_values(&mut program, hard_map_id, &hard_values);
+    install_snapshot_values(&mut program, soft_map_id, &soft_values);
+    program.map_inline_hints.push(map_name_inline_hint(
+        "hard_map",
+        MapInlineHintMode::Hard,
+        0u32.to_le_bytes().to_vec(),
+    ));
+    program.map_inline_hints.push(map_name_inline_hint(
+        "soft_map",
+        MapInlineHintMode::Soft,
+        1u32.to_le_bytes().to_vec(),
+    ));
+
+    let result = run_map_inline_pass(&mut program);
+
+    assert_eq!(result.pass_results[0].sites_applied, 1);
+    assert!(program.insns.contains(&BpfInsn::mov32_imm(6, 42)));
+    assert!(program
+        .insns
+        .iter()
+        .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
+    assert!(result.pass_results[0]
+        .diagnostics
+        .iter()
+        .any(|diag| diag.contains("soft fold not applicable: missing null handler")));
+    let unreachable = cfg_unreachable_pcs(&program.insns);
+    assert!(
+        unreachable.is_empty(),
+        "map_inline emitted CFG-unreachable instruction(s): {unreachable:?}"
+    );
+}
+
+#[test]
+fn map_inline_lpm_trie_enumerated_empty_hard_hint_folds_lookup_to_null() {
+    let map_id = 9621;
+    install_mock_map(
+        map_id,
+        MockMapState {
+            info: BpfMapInfo {
+                map_type: BPF_MAP_TYPE_LPM_TRIE,
+                key_size: 4,
+                value_size: 4,
+                max_entries: 8,
+            },
+            values: HashMap::new(),
+        },
+    );
+
+    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let mut program = BpfProgram::new(vec![
+        map[0],
+        map[1],
+        st_mem(BPF_W, 10, -4, 0),
+        BpfInsn::mov64_reg(2, 10),
+        add64_imm(2, -4),
+        call_helper(HELPER_MAP_LOOKUP_ELEM),
+        jeq_imm(0, 0, 1),
+        BpfInsn::mov64_imm(0, 1),
+        exit_insn(),
+    ]);
+    program.set_map_ids(vec![map_id]);
+    install_named_map_metadata(
+        &mut program,
+        map_id,
+        BPF_MAP_TYPE_LPM_TRIE,
+        4,
+        8,
+        "lpm_src_v4",
+    );
+    program.map_value_overlays.insert(
+        map_id,
+        CompressedMapValues {
+            value_size: 4,
+            kind: CompressedMapValuesKind::Enumerated {
+                entries: HashMap::new(),
+            },
+        },
+    );
+    program.map_inline_hints.push(map_name_inline_hint(
+        "lpm_src_v4",
+        MapInlineHintMode::Hard,
+        0u32.to_le_bytes().to_vec(),
+    ));
+
+    let result = run_map_inline_const_prop_dce(&mut program);
+
+    assert_eq!(result.pass_results[0].sites_applied, 1);
+    assert!(!program
+        .insns
+        .iter()
+        .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
+    assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 0), exit_insn()]);
+    assert!(result.pass_results[0]
+        .diagnostics
+        .iter()
+        .any(|diag| diag.contains("NULL map_id=9621 key=0x00000000")));
+}
+
+#[test]
 fn map_inline_skips_kernel_mutable_map() {
     let map_id = 9603;
     let mut values = HashMap::new();
@@ -2046,6 +2231,134 @@ fn map_in_map_route_program(outer_map_id: u32, outer_key: u32, inner_key: u32) -
     ]);
     program.set_map_ids(vec![outer_map_id]);
     program
+}
+
+fn has_map_ptr_load_to_r0(insns: &[BpfInsn], map_id: u32) -> bool {
+    insns.windows(2).any(|window| {
+        window[0].is_ldimm64()
+            && window[0].dst_reg() == 0
+            && window[0].src_reg() == BPF_PSEUDO_MAP_FD
+            && window[0].imm == 0
+            && window[1].imm == map_id as i32
+    })
+}
+
+#[test]
+fn map_inline_outer_only_array_of_maps_hard_hint_replaces_outer_lookup_only() {
+    let outer_map_id = 9571;
+    let inner_map_id = 9572;
+    install_mock_map(
+        outer_map_id,
+        MockMapState {
+            info: BpfMapInfo {
+                map_type: BPF_MAP_TYPE_ARRAY_OF_MAPS,
+                key_size: 4,
+                value_size: 4,
+                max_entries: 8,
+            },
+            values: HashMap::new(),
+        },
+    );
+    install_map(inner_map_id, BPF_MAP_TYPE_LRU_HASH, 8, HashMap::new());
+
+    let mut program = map_in_map_route_program(outer_map_id, 0, 1);
+    install_named_map_metadata(
+        &mut program,
+        outer_map_id,
+        BPF_MAP_TYPE_ARRAY_OF_MAPS,
+        4,
+        8,
+        "outer_array_only",
+    );
+    program
+        .map_inner_map_ids
+        .insert((outer_map_id, 0u32.to_le_bytes().to_vec()), inner_map_id);
+    program.map_inline_hints.push(map_name_inline_hint(
+        "outer_array_only",
+        MapInlineHintMode::Hard,
+        0u32.to_le_bytes().to_vec(),
+    ));
+
+    let result = try_run_map_inline_pass_without_synthetic_verifier_states(&mut program).unwrap();
+
+    assert_eq!(result.pass_results[0].sites_applied, 1);
+    assert!(has_map_ptr_load_to_r0(&program.insns, inner_map_id));
+    assert_eq!(
+        program
+            .insns
+            .iter()
+            .filter(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM)
+            .count(),
+        1
+    );
+    assert!(
+        program.insns.iter().any(|insn| is_direct_r0_null_jeq(insn)),
+        "outer NULL check must stay in bytecode for verifier-visible control flow"
+    );
+    assert!(result.pass_results[0]
+        .diagnostics
+        .iter()
+        .any(|diag| diag == "inline_hints_consumed=1"));
+}
+
+#[test]
+fn map_inline_outer_only_hash_of_maps_hard_hint_uses_outer_overlay() {
+    let outer_map_id = 9573;
+    let inner_map_id = 9574;
+    install_mock_map(
+        outer_map_id,
+        MockMapState {
+            info: BpfMapInfo {
+                map_type: BPF_MAP_TYPE_HASH_OF_MAPS,
+                key_size: 4,
+                value_size: 4,
+                max_entries: 8,
+            },
+            values: HashMap::new(),
+        },
+    );
+    install_map(inner_map_id, BPF_MAP_TYPE_LRU_HASH, 8, HashMap::new());
+
+    let mut program = map_in_map_route_program(outer_map_id, 3, 1);
+    install_named_map_metadata(
+        &mut program,
+        outer_map_id,
+        BPF_MAP_TYPE_HASH_OF_MAPS,
+        4,
+        8,
+        "outer_hash_only",
+    );
+    program.map_value_overlays.insert(
+        outer_map_id,
+        CompressedMapValues {
+            value_size: 4,
+            kind: CompressedMapValuesKind::Enumerated {
+                entries: HashMap::from([(
+                    3u32.to_le_bytes().to_vec(),
+                    inner_map_id.to_le_bytes().to_vec(),
+                )]),
+            },
+        },
+    );
+    program.map_inline_hints.push(map_name_inline_hint(
+        "outer_hash_only",
+        MapInlineHintMode::Hard,
+        3u32.to_le_bytes().to_vec(),
+    ));
+
+    let result = try_run_map_inline_pass_without_synthetic_verifier_states(&mut program).unwrap();
+
+    assert_eq!(result.pass_results[0].sites_applied, 1);
+    assert!(has_map_ptr_load_to_r0(&program.insns, inner_map_id));
+    assert_eq!(
+        program
+            .insns
+            .iter()
+            .filter(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM)
+            .count(),
+        1
+    );
+    assert!(!program.insns.contains(&BpfInsn::mov32_imm(6, 0)));
 }
 
 #[test]
