@@ -11,14 +11,250 @@
 //!
 //! Used to turn raw verifier logs into structured verifier-state JSON.
 
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
-use crate::{
-    RegState, ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
-};
+use serde::{Deserialize, Serialize};
+
+#[allow(clippy::enum_variant_names)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum VerifierInsnKind {
+    EdgeFullState,
+    PcFullState,
+    BranchDeltaState,
+    InsnDeltaState,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum VerifierValueWidth {
+    Unknown,
+    Bits32,
+    Bits64,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct Tnum {
+    pub value: u64,
+    pub mask: u64,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct ScalarRange {
+    pub smin: Option<i64>,
+    pub smax: Option<i64>,
+    pub umin: Option<u64>,
+    pub umax: Option<u64>,
+    pub smin32: Option<i32>,
+    pub smax32: Option<i32>,
+    pub umin32: Option<u32>,
+    pub umax32: Option<u32>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct VerifierInsn {
+    pub pc: usize,
+    pub frame: usize,
+    pub from_pc: Option<usize>,
+    pub kind: VerifierInsnKind,
+    pub speculative: bool,
+    pub regs: HashMap<u8, RegState>,
+    pub stack: HashMap<i16, StackState>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct RegState {
+    pub reg_type: String,
+    pub value_width: VerifierValueWidth,
+    pub precise: bool,
+    pub exact_value: Option<u64>,
+    pub tnum: Option<Tnum>,
+    pub range: ScalarRange,
+    pub offset: Option<i32>,
+    pub id: Option<u32>,
+}
+
+impl RegState {
+    pub fn new(reg_type: impl Into<String>, value_width: VerifierValueWidth) -> Self {
+        Self {
+            reg_type: reg_type.into(),
+            value_width,
+            precise: false,
+            exact_value: None,
+            tnum: None,
+            range: ScalarRange::default(),
+            offset: None,
+            id: None,
+        }
+    }
+
+    pub fn exact_u64(&self) -> Option<u64> {
+        if self.reg_type != "scalar" {
+            return None;
+        }
+
+        match self.value_width {
+            VerifierValueWidth::Bits32 => None,
+            VerifierValueWidth::Bits64 | VerifierValueWidth::Unknown => self.exact_value,
+        }
+    }
+
+    pub fn exact_u32(&self) -> Option<u32> {
+        if self.reg_type != "scalar" {
+            return None;
+        }
+
+        self.exact_value.map(|value| value as u32)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct StackState {
+    pub slot_types: Option<String>,
+    pub value: Option<RegState>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+pub struct VerifierStatesJson {
+    #[serde(default)]
+    pub insns: Vec<VerifierInsnJson>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+pub struct VerifierInsnJson {
+    pub pc: usize,
+    #[serde(default, skip_serializing_if = "is_zero_usize")]
+    pub frame: usize,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kind: Option<String>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub stack: BTreeMap<String, VerifierStackJson>,
+    #[serde(default)]
+    pub regs: BTreeMap<String, VerifierRegJson>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+pub struct VerifierStackJson {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub slot_types: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<VerifierRegJson>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+pub struct VerifierRegJson {
+    #[serde(rename = "type", default = "default_reg_type")]
+    pub reg_type: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub precise: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offset: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub const_val: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub min: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tnum: Option<String>,
+}
+
+fn default_reg_type() -> String {
+    "scalar".to_string()
+}
+
+fn is_zero_usize(value: &usize) -> bool {
+    *value == 0
+}
 
 pub fn parse_verifier_log(log: &str) -> Vec<VerifierInsn> {
     log.lines().filter_map(parse_state_line).collect()
+}
+
+pub fn verifier_states_from_log(log: &str) -> VerifierStatesJson {
+    let parsed = parse_verifier_log(log);
+    convert_verifier_states(&parsed)
+}
+
+fn convert_verifier_states(states: &[VerifierInsn]) -> VerifierStatesJson {
+    let insns = states
+        .iter()
+        .filter(|state| state.kind != VerifierInsnKind::BranchDeltaState)
+        .filter_map(convert_verifier_state)
+        .collect();
+    VerifierStatesJson { insns }
+}
+
+fn convert_verifier_state(state: &VerifierInsn) -> Option<VerifierInsnJson> {
+    let regs = state
+        .regs
+        .iter()
+        .filter_map(|(&regno, reg)| convert_reg_state(reg).map(|reg| (format!("r{regno}"), reg)))
+        .collect::<BTreeMap<_, _>>();
+    let stack = state
+        .stack
+        .iter()
+        .filter_map(|(&off, state)| {
+            convert_stack_state(state).map(|state| (format!("fp{off}"), state))
+        })
+        .collect::<BTreeMap<_, _>>();
+    (!regs.is_empty() || !stack.is_empty()).then_some(VerifierInsnJson {
+        pc: state.pc,
+        frame: state.frame,
+        kind: verifier_insn_kind_json(state.kind),
+        stack,
+        regs,
+    })
+}
+
+fn verifier_insn_kind_json(kind: VerifierInsnKind) -> Option<String> {
+    match kind {
+        VerifierInsnKind::InsnDeltaState => None,
+        VerifierInsnKind::EdgeFullState => Some("edge_full_state".to_string()),
+        VerifierInsnKind::PcFullState => Some("pc_full_state".to_string()),
+        VerifierInsnKind::BranchDeltaState => Some("branch_delta_state".to_string()),
+    }
+}
+
+fn convert_stack_state(state: &StackState) -> Option<VerifierStackJson> {
+    let value = state.value.as_ref().and_then(convert_reg_state);
+    (state.slot_types.is_some() || value.is_some()).then_some(VerifierStackJson {
+        slot_types: state.slot_types.clone(),
+        value,
+    })
+}
+
+fn convert_reg_state(reg: &RegState) -> Option<VerifierRegJson> {
+    let const_val = reg
+        .exact_u64()
+        .or_else(|| reg.exact_u32().map(u64::from))
+        .map(|value| value as i64);
+    let (min, max) = if let (Some(min), Some(max)) = (reg.range.umin, reg.range.umax) {
+        if min <= i64::MAX as u64 && max <= i64::MAX as u64 {
+            (Some(min as i64), Some(max as i64))
+        } else {
+            (reg.range.smin, reg.range.smax)
+        }
+    } else {
+        (reg.range.smin, reg.range.smax)
+    };
+    let tnum = reg
+        .tnum
+        .map(|tnum| format!("0x{:x}/0x{:x}", tnum.value, tnum.mask));
+
+    (reg.precise
+        || reg.offset.is_some()
+        || const_val.is_some()
+        || min.is_some()
+        || max.is_some()
+        || tnum.is_some())
+    .then_some(VerifierRegJson {
+        reg_type: reg.reg_type.clone(),
+        precise: Some(reg.precise),
+        offset: reg.offset,
+        const_val,
+        min,
+        max,
+        tnum,
+    })
 }
 
 /// Extract the PC of the verifier failure from a REJIT error message.

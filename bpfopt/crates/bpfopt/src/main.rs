@@ -9,15 +9,22 @@ use std::process::ExitCode;
 
 use anyhow::{anyhow, bail, Context, Result};
 use bpfopt::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
-use bpfopt::insn::BpfInsn;
+use bpfopt::insn::{
+    BpfInsn, BPF_DW, BPF_IMM, BPF_LD, BPF_PSEUDO_MAP_FD, BPF_PSEUDO_MAP_IDX,
+    BPF_PSEUDO_MAP_IDX_VALUE, BPF_PSEUDO_MAP_VALUE,
+};
 use bpfopt::pass::{
     Arch, BpfProgram, BtfInfoRecords, KinsnRegistry, PassContext, PassManager, PassResult,
     PlatformCapabilities, RegState, ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind,
     VerifierValueWidth,
 };
 use bpfopt::passes::{MapInfoAnalysis, PASS_REGISTRY};
+#[cfg(test)]
+use bpfopt::verifier_log::VerifierInsnJson;
+use bpfopt::verifier_log::{
+    verifier_states_from_log, VerifierRegJson, VerifierStackJson, VerifierStatesJson,
+};
 use clap::{Args, Parser, Subcommand};
-use kernel_sys::{VerifierRegJson, VerifierStackJson, VerifierStatesJson};
 use serde::{Deserialize, Serialize};
 
 const PASS_ALIASES: &[(&str, &str)] = &[
@@ -113,6 +120,12 @@ struct CommonArgs {
     /// Output bytecode or JSON file. Defaults to stdout.
     #[arg(long, global = true, value_name = "FILE")]
     output: Option<PathBuf>,
+    /// Canonicalize map references from loader FD form to stable map-index form.
+    #[arg(long, global = true)]
+    canonicalize_map_refs: bool,
+    /// Program map IDs in kernel used_maps order, comma-separated.
+    #[arg(long, global = true, value_name = "IDS", value_delimiter = ',')]
+    map_ids: Vec<u32>,
     /// Pass report JSON output file.
     #[arg(long, global = true, value_name = "FILE")]
     report: Option<PathBuf>,
@@ -128,6 +141,9 @@ struct CommonArgs {
     /// Target platform JSON file.
     #[arg(long, global = true, value_name = "FILE")]
     target: Option<PathBuf>,
+    /// Output target platform JSON file after canonicalization-time rewrites.
+    #[arg(long, global = true, value_name = "FILE")]
+    target_output: Option<PathBuf>,
     /// Verifier states JSON file.
     #[arg(long, global = true, value_name = "FILE")]
     verifier_states: Option<PathBuf>,
@@ -193,18 +209,21 @@ struct ListPassEntry {
     kinsns_used: &'static [bpfopt::passes::KinsnRef],
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 struct TargetJson {
+    #[serde(skip_serializing_if = "Option::is_none")]
     arch: Option<String>,
     #[serde(default)]
     features: Vec<String>,
     #[serde(default)]
-    kinsns: HashMap<String, KinsnJson>,
+    kinsns: BTreeMap<String, KinsnJson>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 struct KinsnJson {
     btf_func_id: i32,
+    #[serde(default)]
+    btf_id: u32,
     call_offset: i16,
 }
 
@@ -220,6 +239,19 @@ fn main() -> ExitCode {
 
 fn run_main() -> Result<()> {
     let cli = Cli::parse();
+
+    if cli.common.canonicalize_map_refs {
+        if cli.pass.is_some() || cli.command.is_some() {
+            bail!("--canonicalize-map-refs cannot be combined with --pass or subcommands");
+        }
+        if !cli.pass_args.is_empty() {
+            bail!("pass-local args require --pass <name>");
+        }
+        return run_canonicalize_map_refs(&cli.common);
+    }
+    if cli.common.target_output.is_some() {
+        bail!("--target-output requires --canonicalize-map-refs");
+    }
 
     match cli.command {
         Some(Command::ListPasses(args)) => {
@@ -239,6 +271,27 @@ fn run_main() -> Result<()> {
             run_single_pass(&cli.common, canonicalize_pass_name(pass)?, &cli.pass_args)
         }
     }
+}
+
+fn run_canonicalize_map_refs(common: &CommonArgs) -> Result<()> {
+    if common.report.is_some() {
+        bail!("--canonicalize-map-refs does not produce --report");
+    }
+    match (common.target.as_deref(), common.target_output.as_deref()) {
+        (Some(_), Some(_)) | (None, None) => {}
+        (Some(_), None) => bail!("--canonicalize-map-refs --target requires --target-output"),
+        (None, Some(_)) => bail!("--target-output requires --target"),
+    }
+    let mut insns = read_bytecode(common.input.as_deref())?;
+    canonicalize_map_refs_to_idx(&mut insns, None, &common.map_ids)?;
+    if let (Some(target), Some(target_output)) =
+        (common.target.as_deref(), common.target_output.as_deref())
+    {
+        let mut target_json = read_target(target)?;
+        shift_target_module_call_offsets_for_map_prefix(&mut target_json, common.map_ids.len())?;
+        write_json(Some(target_output), &target_json)?;
+    }
+    write_bytecode(common.output.as_deref(), &insns)
 }
 
 fn list_passes(common: &CommonArgs, args: &ListPassesArgs) -> Result<()> {
@@ -473,6 +526,233 @@ fn parse_bytecode(bytes: &[u8]) -> Result<Vec<BpfInsn>> {
         .collect())
 }
 
+fn canonicalize_map_refs_to_idx(
+    insns: &mut [BpfInsn],
+    original_loader_fd_array: Option<&[i32]>,
+    map_ids: &[u32],
+) -> Result<()> {
+    let fd_to_map_index = collect_fd_form_map_refs(insns)?;
+    if fd_to_map_index.is_empty() && !contains_idx_form_map_ref(insns)? {
+        return Ok(());
+    }
+
+    if fd_to_map_index.len() > map_ids.len() {
+        bail!(
+            "canonicalize_map_refs_to_idx: bytecode references {} unique loader map fds but prog_info has {} map ids",
+            fd_to_map_index.len(),
+            map_ids.len()
+        );
+    }
+
+    let mut i = 0;
+    while i < insns.len() {
+        if is_ldimm64(&insns[i]) {
+            let src_reg = insns[i].src_reg();
+            if is_map_pseudo(src_reg) && i + 1 >= insns.len() {
+                bail!("canonicalize_map_refs_to_idx: truncated LD_IMM64 map reference at pc {i}");
+            }
+            if src_reg == map_fd_pseudo() || src_reg == map_value_pseudo() {
+                let old_fd = insns[i].imm;
+                let Some(&map_index) = fd_to_map_index.get(&old_fd) else {
+                    bail!(
+                        "canonicalize_map_refs_to_idx: loader map fd {} was not present in first-seen bindings",
+                        old_fd
+                    );
+                };
+                insns[i].imm = i32::try_from(map_index).with_context(|| {
+                    format!("canonicalize_map_refs_to_idx: map index {map_index} exceeds i32")
+                })?;
+                insns[i].set_src_reg(if src_reg == map_fd_pseudo() {
+                    map_idx_pseudo()
+                } else {
+                    map_idx_value_pseudo()
+                });
+            } else if src_reg == map_idx_pseudo() || src_reg == map_idx_value_pseudo() {
+                let map_index = canonical_idx_map_index(
+                    insns[i].imm,
+                    original_loader_fd_array,
+                    &fd_to_map_index,
+                    map_ids.len(),
+                )?;
+                insns[i].imm = i32::try_from(map_index).with_context(|| {
+                    format!("canonicalize_map_refs_to_idx: map index {map_index} exceeds i32")
+                })?;
+            }
+            i += 2;
+            continue;
+        }
+        i += 1;
+    }
+
+    Ok(())
+}
+
+fn collect_fd_form_map_refs(insns: &[BpfInsn]) -> Result<HashMap<i32, usize>> {
+    let mut fd_to_map_index = HashMap::new();
+    let mut i = 0;
+    while i < insns.len() {
+        if is_ldimm64(&insns[i]) {
+            let src_reg = insns[i].src_reg();
+            if src_reg == map_fd_pseudo() || src_reg == map_value_pseudo() {
+                if i + 1 >= insns.len() {
+                    bail!(
+                        "canonicalize_map_refs_to_idx: truncated LD_IMM64 map reference at pc {i}"
+                    );
+                }
+                let old_fd = insns[i].imm;
+                let next_index = fd_to_map_index.len();
+                if let std::collections::hash_map::Entry::Vacant(e) = fd_to_map_index.entry(old_fd)
+                {
+                    e.insert(next_index);
+                }
+            }
+            i += 2;
+            continue;
+        }
+        i += 1;
+    }
+    Ok(fd_to_map_index)
+}
+
+fn contains_idx_form_map_ref(insns: &[BpfInsn]) -> Result<bool> {
+    let mut i = 0;
+    while i < insns.len() {
+        if is_ldimm64(&insns[i]) {
+            let src_reg = insns[i].src_reg();
+            if src_reg == map_idx_pseudo() || src_reg == map_idx_value_pseudo() {
+                if i + 1 >= insns.len() {
+                    bail!(
+                        "canonicalize_map_refs_to_idx: truncated LD_IMM64 map reference at pc {i}"
+                    );
+                }
+                return Ok(true);
+            }
+            i += 2;
+            continue;
+        }
+        i += 1;
+    }
+    Ok(false)
+}
+
+fn canonical_idx_map_index(
+    old_index: i32,
+    original_loader_fd_array: Option<&[i32]>,
+    fd_to_map_index: &HashMap<i32, usize>,
+    map_count: usize,
+) -> Result<usize> {
+    let old_index = usize::try_from(old_index).with_context(|| {
+        format!("canonicalize_map_refs_to_idx: negative map fd_array index {old_index}")
+    })?;
+    let Some(loader_fd_array) = original_loader_fd_array else {
+        if old_index >= map_count {
+            bail!(
+                "canonicalize_map_refs_to_idx: map index {} out of range for {} map ids",
+                old_index,
+                map_count
+            );
+        }
+        return Ok(old_index);
+    };
+    let Some(&loader_fd) = loader_fd_array.get(old_index) else {
+        bail!(
+            "canonicalize_map_refs_to_idx: loader fd_array index {} out of range for {} fds",
+            old_index,
+            loader_fd_array.len()
+        );
+    };
+    if let Some(&map_index) = fd_to_map_index.get(&loader_fd) {
+        return Ok(map_index);
+    }
+    if loader_fd_array.len() != map_count {
+        bail!(
+            "canonicalize_map_refs_to_idx: cannot map loader fd_array index {} without fd-form binding; loader fd_array has {} entries but prog_info has {} map ids",
+            old_index,
+            loader_fd_array.len(),
+            map_count
+        );
+    }
+    if old_index >= map_count {
+        bail!(
+            "canonicalize_map_refs_to_idx: map index {} out of range for {} map ids",
+            old_index,
+            map_count
+        );
+    }
+    Ok(old_index)
+}
+
+fn is_ldimm64(insn: &BpfInsn) -> bool {
+    insn.code == (BPF_LD | BPF_DW | BPF_IMM)
+}
+
+fn is_map_pseudo(src_reg: u8) -> bool {
+    matches!(
+        src_reg,
+        value
+            if value == map_fd_pseudo()
+                || value == map_value_pseudo()
+                || value == map_idx_pseudo()
+                || value == map_idx_value_pseudo()
+    )
+}
+
+fn map_fd_pseudo() -> u8 {
+    BPF_PSEUDO_MAP_FD
+}
+
+fn map_value_pseudo() -> u8 {
+    BPF_PSEUDO_MAP_VALUE
+}
+
+fn map_idx_pseudo() -> u8 {
+    BPF_PSEUDO_MAP_IDX
+}
+
+fn map_idx_value_pseudo() -> u8 {
+    BPF_PSEUDO_MAP_IDX_VALUE
+}
+
+fn shift_target_module_call_offsets_for_map_prefix(
+    target: &mut TargetJson,
+    map_count: usize,
+) -> Result<()> {
+    let module_base = module_fd_array_base(map_count)?;
+    for (name, kinsn) in &mut target.kinsns {
+        if kinsn.call_offset == 0 {
+            continue;
+        }
+        if kinsn.call_offset < 0 {
+            bail!(
+                "target kinsn {name} has negative call_offset {}",
+                kinsn.call_offset
+            );
+        }
+        if kinsn.btf_id == 0 {
+            bail!(
+                "target kinsn {name} has call_offset {} but no BTF object id",
+                kinsn.call_offset
+            );
+        }
+        let shifted = module_base
+            .checked_add(i32::from(kinsn.call_offset) - 1)
+            .with_context(|| format!("target kinsn {name} call_offset overflow"))?;
+        if shifted > i32::from(i16::MAX) {
+            bail!(
+                "target kinsn {name} shifted call_offset {shifted} exceeds BPF instruction off field"
+            );
+        }
+        kinsn.call_offset =
+            i16::try_from(shifted).context("shifted call_offset exceeds i16 range")?;
+    }
+    Ok(())
+}
+
+fn module_fd_array_base(map_count: usize) -> Result<i32> {
+    let map_count = i32::try_from(map_count).context("map count exceeds i32")?;
+    Ok(map_count.max(1))
+}
+
 fn write_bytecode(output: Option<&Path>, insns: &[BpfInsn]) -> Result<()> {
     let mut out = open_binary_output(output)?;
     for insn in insns {
@@ -621,38 +901,38 @@ fn parse_prog_type(input: &str) -> Result<u32> {
     }
     let normalized = normalized.replace('-', "_");
     let value = match normalized.as_str() {
-        "socket_filter" => kernel_sys::BPF_PROG_TYPE_SOCKET_FILTER,
-        "kprobe" => kernel_sys::BPF_PROG_TYPE_KPROBE,
-        "sched_cls" => kernel_sys::BPF_PROG_TYPE_SCHED_CLS,
-        "sched_act" => kernel_sys::BPF_PROG_TYPE_SCHED_ACT,
-        "tracepoint" => kernel_sys::BPF_PROG_TYPE_TRACEPOINT,
-        "xdp" => kernel_sys::BPF_PROG_TYPE_XDP,
-        "perf_event" => kernel_sys::BPF_PROG_TYPE_PERF_EVENT,
-        "cgroup_skb" => kernel_sys::BPF_PROG_TYPE_CGROUP_SKB,
-        "cgroup_sock" => kernel_sys::BPF_PROG_TYPE_CGROUP_SOCK,
-        "lwt_in" => kernel_sys::BPF_PROG_TYPE_LWT_IN,
-        "lwt_out" => kernel_sys::BPF_PROG_TYPE_LWT_OUT,
-        "lwt_xmit" => kernel_sys::BPF_PROG_TYPE_LWT_XMIT,
-        "sock_ops" => kernel_sys::BPF_PROG_TYPE_SOCK_OPS,
-        "sk_skb" => kernel_sys::BPF_PROG_TYPE_SK_SKB,
-        "cgroup_device" => kernel_sys::BPF_PROG_TYPE_CGROUP_DEVICE,
-        "sk_msg" => kernel_sys::BPF_PROG_TYPE_SK_MSG,
-        "raw_tracepoint" => kernel_sys::BPF_PROG_TYPE_RAW_TRACEPOINT,
-        "cgroup_sock_addr" => kernel_sys::BPF_PROG_TYPE_CGROUP_SOCK_ADDR,
-        "lwt_seg6local" => kernel_sys::BPF_PROG_TYPE_LWT_SEG6LOCAL,
-        "lirc_mode2" => kernel_sys::BPF_PROG_TYPE_LIRC_MODE2,
-        "sk_reuseport" => kernel_sys::BPF_PROG_TYPE_SK_REUSEPORT,
-        "flow_dissector" => kernel_sys::BPF_PROG_TYPE_FLOW_DISSECTOR,
-        "cgroup_sysctl" => kernel_sys::BPF_PROG_TYPE_CGROUP_SYSCTL,
-        "raw_tracepoint_writable" => kernel_sys::BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE,
-        "cgroup_sockopt" => kernel_sys::BPF_PROG_TYPE_CGROUP_SOCKOPT,
-        "tracing" => kernel_sys::BPF_PROG_TYPE_TRACING,
-        "struct_ops" => kernel_sys::BPF_PROG_TYPE_STRUCT_OPS,
-        "ext" => kernel_sys::BPF_PROG_TYPE_EXT,
-        "lsm" => kernel_sys::BPF_PROG_TYPE_LSM,
-        "sk_lookup" => kernel_sys::BPF_PROG_TYPE_SK_LOOKUP,
-        "syscall" => kernel_sys::BPF_PROG_TYPE_SYSCALL,
-        "netfilter" => kernel_sys::BPF_PROG_TYPE_NETFILTER,
+        "socket_filter" => libbpf_sys::BPF_PROG_TYPE_SOCKET_FILTER,
+        "kprobe" => libbpf_sys::BPF_PROG_TYPE_KPROBE,
+        "sched_cls" => libbpf_sys::BPF_PROG_TYPE_SCHED_CLS,
+        "sched_act" => libbpf_sys::BPF_PROG_TYPE_SCHED_ACT,
+        "tracepoint" => libbpf_sys::BPF_PROG_TYPE_TRACEPOINT,
+        "xdp" => libbpf_sys::BPF_PROG_TYPE_XDP,
+        "perf_event" => libbpf_sys::BPF_PROG_TYPE_PERF_EVENT,
+        "cgroup_skb" => libbpf_sys::BPF_PROG_TYPE_CGROUP_SKB,
+        "cgroup_sock" => libbpf_sys::BPF_PROG_TYPE_CGROUP_SOCK,
+        "lwt_in" => libbpf_sys::BPF_PROG_TYPE_LWT_IN,
+        "lwt_out" => libbpf_sys::BPF_PROG_TYPE_LWT_OUT,
+        "lwt_xmit" => libbpf_sys::BPF_PROG_TYPE_LWT_XMIT,
+        "sock_ops" => libbpf_sys::BPF_PROG_TYPE_SOCK_OPS,
+        "sk_skb" => libbpf_sys::BPF_PROG_TYPE_SK_SKB,
+        "cgroup_device" => libbpf_sys::BPF_PROG_TYPE_CGROUP_DEVICE,
+        "sk_msg" => libbpf_sys::BPF_PROG_TYPE_SK_MSG,
+        "raw_tracepoint" => libbpf_sys::BPF_PROG_TYPE_RAW_TRACEPOINT,
+        "cgroup_sock_addr" => libbpf_sys::BPF_PROG_TYPE_CGROUP_SOCK_ADDR,
+        "lwt_seg6local" => libbpf_sys::BPF_PROG_TYPE_LWT_SEG6LOCAL,
+        "lirc_mode2" => libbpf_sys::BPF_PROG_TYPE_LIRC_MODE2,
+        "sk_reuseport" => libbpf_sys::BPF_PROG_TYPE_SK_REUSEPORT,
+        "flow_dissector" => libbpf_sys::BPF_PROG_TYPE_FLOW_DISSECTOR,
+        "cgroup_sysctl" => libbpf_sys::BPF_PROG_TYPE_CGROUP_SYSCTL,
+        "raw_tracepoint_writable" => libbpf_sys::BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE,
+        "cgroup_sockopt" => libbpf_sys::BPF_PROG_TYPE_CGROUP_SOCKOPT,
+        "tracing" => libbpf_sys::BPF_PROG_TYPE_TRACING,
+        "struct_ops" => libbpf_sys::BPF_PROG_TYPE_STRUCT_OPS,
+        "ext" => libbpf_sys::BPF_PROG_TYPE_EXT,
+        "lsm" => libbpf_sys::BPF_PROG_TYPE_LSM,
+        "sk_lookup" => libbpf_sys::BPF_PROG_TYPE_SK_LOOKUP,
+        "syscall" => libbpf_sys::BPF_PROG_TYPE_SYSCALL,
+        "netfilter" => libbpf_sys::BPF_PROG_TYPE_NETFILTER,
         _ => bail!("unknown prog type '{input}'"),
     };
     Ok(value)
@@ -767,7 +1047,7 @@ fn read_verifier_states(path: &Path) -> Result<Vec<VerifierInsn>> {
             )
         })?
     } else {
-        kernel_sys::verifier_states_from_log(&input)
+        verifier_states_from_log(&input)
     };
     if states.insns.is_empty() {
         bail!(
@@ -979,6 +1259,54 @@ mod tests {
         assert_eq!(encoded, raw);
     }
 
+    fn make_ld_imm64(dst: u8, src: u8, imm: i32) -> [BpfInsn; 2] {
+        [
+            BpfInsn::new(
+                BPF_LD | BPF_DW | BPF_IMM,
+                BpfInsn::make_regs(dst, src),
+                0,
+                imm,
+            ),
+            BpfInsn::new(0, 0, 0, 0),
+        ]
+    }
+
+    fn pseudo_pairs(insns: &[BpfInsn]) -> Vec<(u8, i32, i32)> {
+        insns
+            .chunks_exact(2)
+            .map(|pair| (pair[0].src_reg(), pair[0].imm, pair[1].imm))
+            .collect()
+    }
+
+    #[test]
+    fn canonicalize_map_refs_rewrites_fd_pseudos_in_first_seen_order() {
+        let mut insns = Vec::new();
+        insns.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 489));
+        insns.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_VALUE, 466));
+        insns.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 489));
+
+        canonicalize_map_refs_to_idx(&mut insns, None, &[101, 102]).unwrap();
+
+        assert_eq!(
+            pseudo_pairs(&insns),
+            vec![
+                (BPF_PSEUDO_MAP_IDX, 0, 0),
+                (BPF_PSEUDO_MAP_IDX_VALUE, 1, 0),
+                (BPF_PSEUDO_MAP_IDX, 0, 0),
+            ]
+        );
+    }
+
+    #[test]
+    fn canonicalize_map_refs_checks_idx_range_without_fd_array() {
+        let mut insns = Vec::new();
+        insns.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_IDX, 2));
+
+        let err = canonicalize_map_refs_to_idx(&mut insns, None, &[42]).unwrap_err();
+
+        assert!(err.to_string().contains("out of range"), "err={err:#}");
+    }
+
     #[test]
     fn canonical_pass_names_accept_v3_cli_names() {
         assert_eq!(canonicalize_pass_name("wide-mem").unwrap(), "wide_mem");
@@ -996,11 +1324,12 @@ mod tests {
         let target = TargetJson {
             arch: Some("x86_64".to_string()),
             features: vec!["cmov".to_string(), "movbe".to_string()],
-            kinsns: HashMap::from([
+            kinsns: BTreeMap::from([
                 (
                     "rotate32".to_string(),
                     KinsnJson {
                         btf_func_id: 10,
+                        btf_id: 110,
                         call_offset: 1,
                     },
                 ),
@@ -1008,6 +1337,7 @@ mod tests {
                     "bpf_bulk_memcpy".to_string(),
                     KinsnJson {
                         btf_func_id: 11,
+                        btf_id: 111,
                         call_offset: 2,
                     },
                 ),
@@ -1015,6 +1345,7 @@ mod tests {
                     "bpf_endian_load64".to_string(),
                     KinsnJson {
                         btf_func_id: 12,
+                        btf_id: 0,
                         call_offset: 0,
                     },
                 ),
@@ -1022,6 +1353,7 @@ mod tests {
                     "bpf_ccmp64".to_string(),
                     KinsnJson {
                         btf_func_id: 13,
+                        btf_id: 0,
                         call_offset: 0,
                     },
                 ),
@@ -1029,6 +1361,7 @@ mod tests {
                     "bpf_prefetch".to_string(),
                     KinsnJson {
                         btf_func_id: 14,
+                        btf_id: 114,
                         call_offset: 7,
                     },
                 ),
@@ -1062,6 +1395,46 @@ mod tests {
     }
 
     #[test]
+    fn target_call_offsets_shift_after_map_prefix() {
+        let mut target = TargetJson {
+            arch: Some("x86_64".to_string()),
+            features: Vec::new(),
+            kinsns: BTreeMap::from([
+                (
+                    "bpf_rotate64".to_string(),
+                    KinsnJson {
+                        btf_func_id: 1,
+                        btf_id: 100,
+                        call_offset: 1,
+                    },
+                ),
+                (
+                    "bpf_extract64".to_string(),
+                    KinsnJson {
+                        btf_func_id: 2,
+                        btf_id: 200,
+                        call_offset: 2,
+                    },
+                ),
+                (
+                    "bpf_select64".to_string(),
+                    KinsnJson {
+                        btf_func_id: 3,
+                        btf_id: 0,
+                        call_offset: 0,
+                    },
+                ),
+            ]),
+        };
+
+        shift_target_module_call_offsets_for_map_prefix(&mut target, 5).unwrap();
+
+        assert_eq!(target.kinsns["bpf_rotate64"].call_offset, 5);
+        assert_eq!(target.kinsns["bpf_extract64"].call_offset, 6);
+        assert_eq!(target.kinsns["bpf_select64"].call_offset, 0);
+    }
+
+    #[test]
     fn pass_report_serializes_inlined_map_entries_as_hex() {
         let result = PassResult {
             pass_name: "map_inline".to_string(),
@@ -1085,7 +1458,7 @@ mod tests {
 
     #[test]
     fn verifier_states_json_builds_const_prop_delta_states() {
-        let state = kernel_sys::VerifierInsnJson {
+        let state = VerifierInsnJson {
             pc: 5,
             frame: 0,
             kind: None,

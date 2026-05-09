@@ -16,13 +16,13 @@ use crate::passes::MapInfoAnalysis;
 use crate::passes::{ConstPropPass, DcePass};
 use crate::test_helpers::*;
 
-const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
-const BPF_MAP_TYPE_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_HASH;
-const BPF_MAP_TYPE_LRU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_HASH;
-const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
-const BPF_MAP_TYPE_LPM_TRIE: u32 = kernel_sys::BPF_MAP_TYPE_LPM_TRIE;
-const BPF_MAP_TYPE_ARRAY_OF_MAPS: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS;
-const BPF_MAP_TYPE_HASH_OF_MAPS: u32 = kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS;
+const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
+const BPF_MAP_TYPE_PERCPU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_PERCPU_HASH;
+const BPF_MAP_TYPE_LRU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_LRU_HASH;
+const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
+const BPF_MAP_TYPE_LPM_TRIE: u32 = libbpf_sys::BPF_MAP_TYPE_LPM_TRIE;
+const BPF_MAP_TYPE_ARRAY_OF_MAPS: u32 = libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS;
+const BPF_MAP_TYPE_HASH_OF_MAPS: u32 = libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS;
 static NEXT_TEMP_DIR: AtomicUsize = AtomicUsize::new(0);
 
 fn ld_imm64_parts(dst: u8, src: u8, imm_lo: i32, imm_hi: i32) -> [BpfInsn; 2] {
@@ -210,7 +210,7 @@ fn write_map_show(dir: &Path, map_id: u32, map_type: &str, value_size: u32) {
 
 fn compressed_overlay_metadata(value_size: u32) -> MapMetadata {
     MapMetadata {
-        map_type: kernel_sys::BPF_MAP_TYPE_ARRAY,
+        map_type: libbpf_sys::BPF_MAP_TYPE_ARRAY,
         key_size: 4,
         value_size,
         max_entries: 8,
@@ -1438,7 +1438,7 @@ fn map_inline_soft_map_name_hint_emits_key_check_scalar_fold_without_fallback() 
     program.map_metadata.insert(
         map_id,
         MapMetadata {
-            map_type: kernel_sys::BPF_MAP_TYPE_HASH,
+            map_type: libbpf_sys::BPF_MAP_TYPE_HASH,
             key_size: 4,
             value_size: 4,
             max_entries: 8,
@@ -1492,7 +1492,7 @@ fn map_inline_soft_hint_requires_immediate_null_check_when_hard_fold_coexists() 
     hard_values.insert(0u32.to_le_bytes().to_vec(), 42u32.to_le_bytes().to_vec());
     install_map(
         hard_map_id,
-        kernel_sys::BPF_MAP_TYPE_ARRAY,
+        libbpf_sys::BPF_MAP_TYPE_ARRAY,
         8,
         hard_values.clone(),
     );
@@ -1501,7 +1501,7 @@ fn map_inline_soft_hint_requires_immediate_null_check_when_hard_fold_coexists() 
     soft_values.insert(1u32.to_le_bytes().to_vec(), 7u32.to_le_bytes().to_vec());
     install_map(
         soft_map_id,
-        kernel_sys::BPF_MAP_TYPE_HASH,
+        libbpf_sys::BPF_MAP_TYPE_HASH,
         8,
         soft_values.clone(),
     );
@@ -1533,7 +1533,7 @@ fn map_inline_soft_hint_requires_immediate_null_check_when_hard_fold_coexists() 
     install_named_map_metadata(
         &mut program,
         hard_map_id,
-        kernel_sys::BPF_MAP_TYPE_ARRAY,
+        libbpf_sys::BPF_MAP_TYPE_ARRAY,
         4,
         8,
         "hard_map",
@@ -1541,7 +1541,7 @@ fn map_inline_soft_hint_requires_immediate_null_check_when_hard_fold_coexists() 
     install_named_map_metadata(
         &mut program,
         soft_map_id,
-        kernel_sys::BPF_MAP_TYPE_HASH,
+        libbpf_sys::BPF_MAP_TYPE_HASH,
         4,
         8,
         "soft_map",
@@ -1693,7 +1693,7 @@ fn map_inline_does_not_abort_on_runtime_map_pointer_writer() {
     let inline_map_id = 9703;
     install_map(
         dynamic_map_id,
-        kernel_sys::BPF_MAP_TYPE_PROG_ARRAY,
+        libbpf_sys::BPF_MAP_TYPE_PROG_ARRAY,
         1,
         HashMap::new(),
     );
@@ -2293,7 +2293,7 @@ fn map_inline_route_a_array_of_maps_hard_hints_fold_outer_and_inner() {
     install_named_map_metadata(
         &mut program,
         inner_map_id,
-        kernel_sys::BPF_MAP_TYPE_ARRAY,
+        libbpf_sys::BPF_MAP_TYPE_ARRAY,
         4,
         8,
         "inner_array",
@@ -2356,7 +2356,7 @@ fn map_inline_route_a_hash_of_maps_uses_outer_overlay_and_inner_hard_hint() {
     install_named_map_metadata(
         &mut program,
         inner_map_id,
-        kernel_sys::BPF_MAP_TYPE_ARRAY,
+        libbpf_sys::BPF_MAP_TYPE_ARRAY,
         4,
         8,
         "inner_array_overlay",
@@ -2402,7 +2402,7 @@ fn map_inline_hash_hard_hint_without_inner_hint_uses_normal_fold() {
     values.insert(1u32.to_le_bytes().to_vec(), 7u32.to_le_bytes().to_vec());
     install_map(
         hash_map_id,
-        kernel_sys::BPF_MAP_TYPE_HASH,
+        libbpf_sys::BPF_MAP_TYPE_HASH,
         8,
         values.clone(),
     );
@@ -2422,7 +2422,7 @@ fn map_inline_hash_hard_hint_without_inner_hint_uses_normal_fold() {
     install_named_map_metadata(
         &mut program,
         hash_map_id,
-        kernel_sys::BPF_MAP_TYPE_HASH,
+        libbpf_sys::BPF_MAP_TYPE_HASH,
         4,
         8,
         "vip_map",
@@ -2487,7 +2487,7 @@ fn map_inline_route_a_rejects_missing_outer_entry_for_hint() {
     install_named_map_metadata(
         &mut program,
         inner_map_id,
-        kernel_sys::BPF_MAP_TYPE_ARRAY,
+        libbpf_sys::BPF_MAP_TYPE_ARRAY,
         4,
         8,
         "inner_after_missing",
@@ -2592,7 +2592,7 @@ fn map_inline_route_a_rejects_orphan_inner_hint() {
     install_named_map_metadata(
         &mut program,
         inner_map_id,
-        kernel_sys::BPF_MAP_TYPE_ARRAY,
+        libbpf_sys::BPF_MAP_TYPE_ARRAY,
         4,
         8,
         "orphan_inner",
@@ -2924,7 +2924,7 @@ fn map_inline_pass_skips_size_skipped_array_map() {
     program.map_metadata.insert(
         312,
         MapMetadata {
-            map_type: kernel_sys::BPF_MAP_TYPE_ARRAY,
+            map_type: libbpf_sys::BPF_MAP_TYPE_ARRAY,
             key_size: 4,
             value_size: 8,
             max_entries: 8,
@@ -2969,7 +2969,7 @@ fn map_inline_pass_uses_overlay_for_size_skipped_array_map() {
     program.map_metadata.insert(
         313,
         MapMetadata {
-            map_type: kernel_sys::BPF_MAP_TYPE_ARRAY,
+            map_type: libbpf_sys::BPF_MAP_TYPE_ARRAY,
             key_size: 4,
             value_size: 8,
             max_entries: 8,

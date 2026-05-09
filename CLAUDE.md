@@ -62,7 +62,7 @@ Report `wins/losses/ties` counts as supplemental.
 **Optimizations of tail-called programs are measured at the caller, NOT the tail target.** The caller's `run_time_ns` already includes the time spent in every tail-called descendant (the tail call jumps inline; control does not return). So when `map_inline`/`kinsn`/etc. apply to a tail target like `perf_unwind_python` or `cil_lxc_policy`, the runtime savings show up in the directly-attached caller's `run_time_ns_delta` (e.g. `native_tracer_entry`, `cil_xdp_entry`, `cil_from_netdev`, `generic_kprobe_event`). The right way to filter the qualified-and-affected population is **"caller's `applied>0` OR any tail-call descendant has `applied>0`"** — never restrict to "this program self-applied". The corpus framework's `run_cnt_delta` filter on the caller still gates statistical confidence, but program selection must follow the call tree. Do not kernel-patch the tail-call prologue: the time accounting at the caller is correct.
 
 ### BranchFlip Requires Real Per-Site PGO
-`branch_flip` is the Paper B profile-guided branch-layout pass. It is production code but remains outside the runner benchmark default policy until Paper B benchmark results decide policy. It must consume real `bpfprof --per-site` data: every candidate site needs `branch_count`, `branch_misses`, `miss_rate`, `taken`, and `not_taken`. Placeholder PMU fields, heuristic fallback, missing-site success, and optional per-site profile fields are forbidden; missing program/site PMU data must exit 1.
+`branch_flip` is the Paper B profile-guided branch-layout pass. It is production code but remains outside the runner benchmark default policy until Paper B benchmark results decide policy. It must consume real per-site PMU profile data from the external profiling toolchain (now archived under `bpfperf`): every candidate site needs `branch_count`, `branch_misses`, `miss_rate`, `taken`, and `not_taken`. Placeholder PMU fields, heuristic fallback, missing-site success, and optional per-site profile fields are forbidden; missing program/site PMU data must exit 1.
 
 ### No Redundant Informational Fields
 Do not add `workload_miss`, `limitations`, or similar informational-only fields to result payloads. If something fails, it should surface as an error, not as a metadata annotation.
@@ -87,25 +87,24 @@ Before adding a test, be able to answer: what specific bug would this failure id
 `docs/tmp/bpfopt_design_v3.md` is the authoritative design document for bpfopt-suite. Keep implementation and documentation aligned with that design:
 - The daemon must not maintain `PassManager`, do profiling internally, transform bytecode in-process, or maintain a default pass list. It owns the runner-provided per-pass orchestration loop, but every bytecode transform is a separate `bpfopt --pass <name>` CLI invocation followed immediately by `BPF_PROG_REJIT(log_level=2)`.
 - The daemon watches for new BPF programs, detects map invalidation, preserves the runner socket + JSON protocol, and owns in-process live discovery, map-value side-input preparation, minimal fd-array construction from `prog_info.used_maps`, and per-pass `BPF_PROG_REJIT`.
-- `bpfopt` is a pure bytecode CLI tool with zero kernel dependency.
-- `bpfprof` remains a standalone CLI for PMU profiling.
+- `bpfopt` is a pure bytecode CLI tool with zero kernel syscall dependency. It may use `libbpf-sys` for UAPI types, constants, and `struct bpf_insn`.
 - Bytecode transforms remain `bpfopt` CLI invocations. The daemon does not accept candidates through `BPF_PROG_LOAD` dry-runs; the kernel re-verifies each pass candidate during `BPF_PROG_REJIT`.
 - Benchmark runner Python stays on the existing daemon socket boundary during the v3 migration.
-- stdin/stdout carry raw binary bytecode (`struct bpf_insn[]`) for `bpfopt`; side-inputs and side-outputs use files only at the `bpfopt`/`bpfprof` CLI boundary.
+- stdin/stdout carry raw binary bytecode (`struct bpf_insn[]`) for `bpfopt`; side-inputs and side-outputs use files only at the `bpfopt` CLI boundary.
 
 #### Daemon Owns Kernel Calls; Runner Stays Untouched
 - v3 §8 option B: runner Python (`runner/libs/`, `corpus/`, `micro/`) is the stable boundary; do not refactor it for v3 migration.
-- The daemon retains the socket + JSON protocol. It invokes `bpfopt --pass <name>` as an external pure-bytecode CLI and `bpfprof` as an external profiling CLI, while live discovery comes from the daemon-owned `bpfget` library and every ReJIT call goes through `kernel-sys` directly.
+- The daemon retains the socket + JSON protocol. It invokes `bpfopt --canonicalize-map-refs` once for snapshot initialization and `bpfopt --pass <name>` as external pure-bytecode CLI calls. Live discovery, BTF probing, map helpers, `BPF_PROG_GET_ORIGINAL`, and every `BPF_PROG_REJIT` call go through daemon-owned `src/syscall.rs` using `libbpf-sys` plus fork-only syscall wrappers.
 - Daemon internal `PassManager`, pass code, profiler, thin dry-run module, LoadAttr rebuilds, BTF metadata replay, and pseudo-map fd rewriting are removed. Verifier states for `map_inline` / `const_prop` come only from the previous successful per-pass `BPF_PROG_REJIT(log_level=2)` verifier log.
 - Main `BPF_PROG_REJIT` is a synchronous syscall with no daemon-side timeout; a kernel verifier hang can block the daemon. This limitation is accepted and documented rather than hidden behind a fallback.
 - The only allowed runner Python changes during v3 migration are bug fixes (for example, micro driver baseline regression) and stale test data updates.
 
 ### No CLI Cross-Dependencies
-The remaining standalone CLI binary crates (`bpfopt`, `bpfprof`, `bpfrejit-daemon`) must not depend on each other:
+The remaining standalone CLI binary crates (`bpfopt`, `bpfrejit-daemon`) must not depend on each other:
 - Runtime composition happens through stdin/stdout pipelines and bash orchestration.
 - Compile-time dependencies between CLI binary crates are forbidden; do not add path-dependencies from one CLI crate to another.
-- `bpfget` is a daemon-owned library crate, not a standalone CLI crate. `bpfverify` and `bpfrejit` crates have been removed; per-pass ReJIT orchestration lives inside `bpfrejit-daemon` and calls `kernel-sys`.
-- Shared syscall/data access belongs in `kernel-sys`; `bpfrejit-daemon` must not depend on `bpfopt`'s lib portion.
+- `bpfget`, `bpfverify`, `bpfrejit`, `bpfprof`, and `kernel-sys` crates have been removed. Per-pass ReJIT orchestration lives inside `bpfrejit-daemon` and calls daemon-owned `src/syscall.rs`.
+- `bpfrejit-daemon` must not depend on `bpfopt`'s lib portion; runtime composition stays at the CLI bytecode boundary.
 
 ### Use libbpf-rs/libbpf-sys, Don't Re-Wrap
 Use `libbpf-rs`/`libbpf-sys` instead of custom wrappers whenever upstream libbpf exposes the needed API or type:
@@ -115,12 +114,10 @@ Use `libbpf-rs`/`libbpf-sys` instead of custom wrappers whenever upstream libbpf
 - The only required custom wrappers are project-fork syscalls not supported upstream: `BPF_PROG_REJIT` and `BPF_PROG_GET_ORIGINAL`.
 - The v3 §11 "direct libbpf linking, future fork+exec" limit was an early conservative constraint and is superseded; implementation code may link `libbpf-rs` directly.
 
-### kernel-sys is the Only Syscall Boundary
-`kernel-sys` is the only bpfopt-suite crate that may directly call BPF syscalls:
-- `bpfopt` (lib and bin) may depend on `kernel-sys` for pure data APIs such as the `bpf_insn` type, opcode constants, and program type enums.
-- `bpfopt` must not call `libc::syscall(SYS_bpf, ...)` or otherwise invoke BPF syscalls directly.
-- `bpfprof`, `bpfrejit-daemon`, and daemon-owned `bpfget` must also call BPF syscalls only through `kernel-sys`.
-- Inside `kernel-sys`, standard BPF commands should go through `libbpf-rs`/`libbpf-sys`; project-fork commands (`BPF_PROG_REJIT`, `BPF_PROG_GET_ORIGINAL`) are wrapped with `libc::syscall` because upstream libbpf does not support them.
+### Daemon Syscall Boundary
+`kernel-sys` has been removed. `bpfopt` must remain a pure bytecode tool and must not call `libc::syscall(SYS_bpf, ...)` or otherwise invoke BPF syscalls directly. It may depend on `libbpf-sys` for UAPI data such as `struct bpf_insn`, opcode constants, map types, helper IDs, and program type enums.
+
+`bpfrejit-daemon` owns BPF kernel interaction in `daemon/src/syscall.rs`: standard BPF commands go through `libbpf-sys`, and fork-only commands (`BPF_PROG_REJIT`, `BPF_PROG_GET_ORIGINAL` via fork-extended `bpf_prog_info`) use local wrappers. The daemon imports `libbpf_sys::bpf_insn` directly and does not carry map-reference bytecode parsing; snapshot map-reference canonicalization is the first `bpfopt --canonicalize-map-refs --map-ids ...` CLI step.
 
 ### Default Config Must Work
 `make corpus`, `make test`, `PLATFORM=aws ARCH=x86 make test`, `PLATFORM=aws ARCH=arm64 make test` must work with zero manual environment variables beyond `PLATFORM`/`ARCH`. Defaults live in `runner/targets/*.env` files and are overridable via env vars.

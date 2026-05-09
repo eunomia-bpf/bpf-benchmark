@@ -6,9 +6,9 @@ use crate::insn::*;
 use crate::pass::{BpfProgram, PassContext, PipelineResult};
 use crate::test_helpers::*;
 
-const BPF_MAP_TYPE_HASH: u32 = kernel_sys::BPF_MAP_TYPE_HASH;
-const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY;
-const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
+const BPF_MAP_TYPE_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_HASH;
+const BPF_MAP_TYPE_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_ARRAY;
+const BPF_PSEUDO_MAP_FD: u8 = libbpf_sys::BPF_PSEUDO_MAP_FD as u8;
 const HELPER_MAP_LOOKUP_ELEM: i32 = 1;
 
 fn install_single_lookup_verifier_states(program: &mut BpfProgram) {

@@ -6,88 +6,88 @@ use std::hash::{Hash, Hasher};
 use std::ops::{Deref, DerefMut};
 
 // ── Instruction classes ──────────────────────────────────────────────
-pub const BPF_LD: u8 = kernel_sys::BPF_LD as u8;
-pub const BPF_LDX: u8 = kernel_sys::BPF_LDX as u8;
-pub const BPF_ST: u8 = kernel_sys::BPF_ST as u8;
-pub const BPF_STX: u8 = kernel_sys::BPF_STX as u8;
-pub const BPF_ALU: u8 = kernel_sys::BPF_ALU as u8;
-pub const BPF_JMP: u8 = kernel_sys::BPF_JMP as u8;
-pub const BPF_JMP32: u8 = kernel_sys::BPF_JMP32 as u8;
-pub const BPF_ALU64: u8 = kernel_sys::BPF_ALU64 as u8;
+pub const BPF_LD: u8 = libbpf_sys::BPF_LD as u8;
+pub const BPF_LDX: u8 = libbpf_sys::BPF_LDX as u8;
+pub const BPF_ST: u8 = libbpf_sys::BPF_ST as u8;
+pub const BPF_STX: u8 = libbpf_sys::BPF_STX as u8;
+pub const BPF_ALU: u8 = libbpf_sys::BPF_ALU as u8;
+pub const BPF_JMP: u8 = libbpf_sys::BPF_JMP as u8;
+pub const BPF_JMP32: u8 = libbpf_sys::BPF_JMP32 as u8;
+pub const BPF_ALU64: u8 = libbpf_sys::BPF_ALU64 as u8;
 
 // ── Size modifiers ───────────────────────────────────────────────────
-pub const BPF_W: u8 = kernel_sys::BPF_W as u8; // 32-bit
-pub const BPF_H: u8 = kernel_sys::BPF_H as u8; // 16-bit
-pub const BPF_B: u8 = kernel_sys::BPF_B as u8; //  8-bit
-pub const BPF_DW: u8 = kernel_sys::BPF_DW as u8; // 64-bit
+pub const BPF_W: u8 = libbpf_sys::BPF_W as u8; // 32-bit
+pub const BPF_H: u8 = libbpf_sys::BPF_H as u8; // 16-bit
+pub const BPF_B: u8 = libbpf_sys::BPF_B as u8; //  8-bit
+pub const BPF_DW: u8 = libbpf_sys::BPF_DW as u8; // 64-bit
 
 // ── Mode modifiers ───────────────────────────────────────────────────
-pub const BPF_IMM: u8 = kernel_sys::BPF_IMM as u8;
-pub const BPF_MEM: u8 = kernel_sys::BPF_MEM as u8;
+pub const BPF_IMM: u8 = libbpf_sys::BPF_IMM as u8;
+pub const BPF_MEM: u8 = libbpf_sys::BPF_MEM as u8;
 
 // ── ALU/JMP operations ──────────────────────────────────────────────
-pub const BPF_ADD: u8 = kernel_sys::BPF_ADD as u8;
-pub const BPF_SUB: u8 = kernel_sys::BPF_SUB as u8;
-pub const BPF_MUL: u8 = kernel_sys::BPF_MUL as u8;
-pub const BPF_DIV: u8 = kernel_sys::BPF_DIV as u8;
-pub const BPF_OR: u8 = kernel_sys::BPF_OR as u8;
-pub const BPF_AND: u8 = kernel_sys::BPF_AND as u8;
-pub const BPF_LSH: u8 = kernel_sys::BPF_LSH as u8;
-pub const BPF_RSH: u8 = kernel_sys::BPF_RSH as u8;
-pub const BPF_NEG: u8 = kernel_sys::BPF_NEG as u8;
-pub const BPF_MOD: u8 = kernel_sys::BPF_MOD as u8;
-pub const BPF_XOR: u8 = kernel_sys::BPF_XOR as u8;
-pub const BPF_MOV: u8 = kernel_sys::BPF_MOV as u8;
-pub const BPF_ARSH: u8 = kernel_sys::BPF_ARSH as u8;
-pub const BPF_END: u8 = kernel_sys::BPF_END as u8;
-pub const BPF_TO_BE: u8 = kernel_sys::BPF_TO_BE as u8;
+pub const BPF_ADD: u8 = libbpf_sys::BPF_ADD as u8;
+pub const BPF_SUB: u8 = libbpf_sys::BPF_SUB as u8;
+pub const BPF_MUL: u8 = libbpf_sys::BPF_MUL as u8;
+pub const BPF_DIV: u8 = libbpf_sys::BPF_DIV as u8;
+pub const BPF_OR: u8 = libbpf_sys::BPF_OR as u8;
+pub const BPF_AND: u8 = libbpf_sys::BPF_AND as u8;
+pub const BPF_LSH: u8 = libbpf_sys::BPF_LSH as u8;
+pub const BPF_RSH: u8 = libbpf_sys::BPF_RSH as u8;
+pub const BPF_NEG: u8 = libbpf_sys::BPF_NEG as u8;
+pub const BPF_MOD: u8 = libbpf_sys::BPF_MOD as u8;
+pub const BPF_XOR: u8 = libbpf_sys::BPF_XOR as u8;
+pub const BPF_MOV: u8 = libbpf_sys::BPF_MOV as u8;
+pub const BPF_ARSH: u8 = libbpf_sys::BPF_ARSH as u8;
+pub const BPF_END: u8 = libbpf_sys::BPF_END as u8;
+pub const BPF_TO_BE: u8 = libbpf_sys::BPF_TO_BE as u8;
 
 // ── Source modifiers ────────────────────────────────────────────────
-pub const BPF_K: u8 = kernel_sys::BPF_K as u8;
-pub const BPF_X: u8 = kernel_sys::BPF_X as u8;
+pub const BPF_K: u8 = libbpf_sys::BPF_K as u8;
+pub const BPF_X: u8 = libbpf_sys::BPF_X as u8;
 
 // ── JMP opcodes ─────────────────────────────────────────────────────
-pub const BPF_JA: u8 = kernel_sys::BPF_JA as u8;
-pub const BPF_JEQ: u8 = kernel_sys::BPF_JEQ as u8;
-pub const BPF_JGT: u8 = kernel_sys::BPF_JGT as u8;
-pub const BPF_JGE: u8 = kernel_sys::BPF_JGE as u8;
-pub const BPF_JSET: u8 = kernel_sys::BPF_JSET as u8;
-pub const BPF_JNE: u8 = kernel_sys::BPF_JNE as u8;
-pub const BPF_JLT: u8 = kernel_sys::BPF_JLT as u8;
-pub const BPF_JLE: u8 = kernel_sys::BPF_JLE as u8;
-pub const BPF_JSGT: u8 = kernel_sys::BPF_JSGT as u8;
-pub const BPF_JSGE: u8 = kernel_sys::BPF_JSGE as u8;
-pub const BPF_JSLT: u8 = kernel_sys::BPF_JSLT as u8;
-pub const BPF_JSLE: u8 = kernel_sys::BPF_JSLE as u8;
+pub const BPF_JA: u8 = libbpf_sys::BPF_JA as u8;
+pub const BPF_JEQ: u8 = libbpf_sys::BPF_JEQ as u8;
+pub const BPF_JGT: u8 = libbpf_sys::BPF_JGT as u8;
+pub const BPF_JGE: u8 = libbpf_sys::BPF_JGE as u8;
+pub const BPF_JSET: u8 = libbpf_sys::BPF_JSET as u8;
+pub const BPF_JNE: u8 = libbpf_sys::BPF_JNE as u8;
+pub const BPF_JLT: u8 = libbpf_sys::BPF_JLT as u8;
+pub const BPF_JLE: u8 = libbpf_sys::BPF_JLE as u8;
+pub const BPF_JSGT: u8 = libbpf_sys::BPF_JSGT as u8;
+pub const BPF_JSGE: u8 = libbpf_sys::BPF_JSGE as u8;
+pub const BPF_JSLT: u8 = libbpf_sys::BPF_JSLT as u8;
+pub const BPF_JSLE: u8 = libbpf_sys::BPF_JSLE as u8;
 
-pub const BPF_CALL: u8 = kernel_sys::BPF_CALL as u8;
-pub const BPF_EXIT: u8 = kernel_sys::BPF_EXIT as u8;
+pub const BPF_CALL: u8 = libbpf_sys::BPF_CALL as u8;
+pub const BPF_EXIT: u8 = libbpf_sys::BPF_EXIT as u8;
 
 // ── Pseudo source-register tags ────────────────────────────────────
-pub const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
-pub const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
-pub const BPF_PSEUDO_MAP_IDX: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX as u8;
-pub const BPF_PSEUDO_MAP_IDX_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX_VALUE as u8;
-pub const BPF_PSEUDO_CALL: u8 = kernel_sys::BPF_PSEUDO_CALL as u8;
+pub const BPF_PSEUDO_MAP_FD: u8 = libbpf_sys::BPF_PSEUDO_MAP_FD as u8;
+pub const BPF_PSEUDO_MAP_VALUE: u8 = libbpf_sys::BPF_PSEUDO_MAP_VALUE as u8;
+pub const BPF_PSEUDO_MAP_IDX: u8 = 5;
+pub const BPF_PSEUDO_MAP_IDX_VALUE: u8 = 6;
+pub const BPF_PSEUDO_CALL: u8 = libbpf_sys::BPF_PSEUDO_CALL as u8;
 #[cfg(test)]
-pub const BPF_PSEUDO_KFUNC_CALL: u8 = kernel_sys::BPF_PSEUDO_KFUNC_CALL as u8;
+pub const BPF_PSEUDO_KFUNC_CALL: u8 = libbpf_sys::BPF_PSEUDO_KFUNC_CALL as u8;
 pub const BPF_PSEUDO_KINSN_SIDECAR: u8 = 3;
 /// LD_IMM64 local-function reference used for helper callbacks.
-pub const BPF_PSEUDO_FUNC: u8 = kernel_sys::BPF_PSEUDO_FUNC as u8;
+pub const BPF_PSEUDO_FUNC: u8 = libbpf_sys::BPF_PSEUDO_FUNC as u8;
 pub const BPF_PSEUDO_KINSN_CALL: u8 = 4;
 
 // ── Registers ───────────────────────────────────────────────────────
-pub const BPF_REG_0: u8 = kernel_sys::BPF_REG_0 as u8;
-pub const BPF_REG_1: u8 = kernel_sys::BPF_REG_1 as u8;
-pub const BPF_REG_2: u8 = kernel_sys::BPF_REG_2 as u8;
-pub const BPF_REG_3: u8 = kernel_sys::BPF_REG_3 as u8;
-pub const BPF_REG_4: u8 = kernel_sys::BPF_REG_4 as u8;
-pub const BPF_REG_5: u8 = kernel_sys::BPF_REG_5 as u8;
-pub const BPF_REG_6: u8 = kernel_sys::BPF_REG_6 as u8;
-pub const BPF_REG_7: u8 = kernel_sys::BPF_REG_7 as u8;
-pub const BPF_REG_8: u8 = kernel_sys::BPF_REG_8 as u8;
-pub const BPF_REG_9: u8 = kernel_sys::BPF_REG_9 as u8;
-pub const BPF_REG_10: u8 = kernel_sys::BPF_REG_10 as u8;
+pub const BPF_REG_0: u8 = libbpf_sys::BPF_REG_0 as u8;
+pub const BPF_REG_1: u8 = libbpf_sys::BPF_REG_1 as u8;
+pub const BPF_REG_2: u8 = libbpf_sys::BPF_REG_2 as u8;
+pub const BPF_REG_3: u8 = libbpf_sys::BPF_REG_3 as u8;
+pub const BPF_REG_4: u8 = libbpf_sys::BPF_REG_4 as u8;
+pub const BPF_REG_5: u8 = libbpf_sys::BPF_REG_5 as u8;
+pub const BPF_REG_6: u8 = libbpf_sys::BPF_REG_6 as u8;
+pub const BPF_REG_7: u8 = libbpf_sys::BPF_REG_7 as u8;
+pub const BPF_REG_8: u8 = libbpf_sys::BPF_REG_8 as u8;
+pub const BPF_REG_9: u8 = libbpf_sys::BPF_REG_9 as u8;
+pub const BPF_REG_10: u8 = libbpf_sys::BPF_REG_10 as u8;
 
 // ── Helper macros (as functions) ────────────────────────────────────
 #[inline]
@@ -120,14 +120,14 @@ pub const fn bpf_src(code: u8) -> u8 {
 /// A single BPF instruction, ABI-compatible with `struct bpf_insn` in the kernel.
 #[repr(transparent)]
 #[derive(Clone, Copy)]
-pub struct BpfInsn(kernel_sys::bpf_insn);
+pub struct BpfInsn(libbpf_sys::bpf_insn);
 
 // Ensure the transparent wrapper keeps the kernel ABI object size.
 const _: () =
-    assert!(std::mem::size_of::<BpfInsn>() == std::mem::size_of::<kernel_sys::bpf_insn>());
+    assert!(std::mem::size_of::<BpfInsn>() == std::mem::size_of::<libbpf_sys::bpf_insn>());
 
 impl Deref for BpfInsn {
-    type Target = kernel_sys::bpf_insn;
+    type Target = libbpf_sys::bpf_insn;
 
     #[inline]
     fn deref(&self) -> &Self::Target {
@@ -168,7 +168,7 @@ impl BpfInsn {
 
     #[inline]
     fn new_raw(code: u8, regs: u8, off: i16, imm: i32) -> Self {
-        let mut inner = kernel_sys::bpf_insn {
+        let mut inner = libbpf_sys::bpf_insn {
             code,
             _bitfield_align_1: [],
             _bitfield_1: Default::default(),
@@ -181,7 +181,7 @@ impl BpfInsn {
     }
 
     #[inline]
-    pub fn as_kernel(&self) -> &kernel_sys::bpf_insn {
+    pub fn as_kernel(&self) -> &libbpf_sys::bpf_insn {
         &self.0
     }
 
@@ -197,7 +197,7 @@ impl BpfInsn {
 
     #[inline]
     pub fn dst_reg(&self) -> u8 {
-        kernel_sys::bpf_insn::dst_reg(&self.0)
+        libbpf_sys::bpf_insn::dst_reg(&self.0)
     }
 
     #[inline]
@@ -207,7 +207,7 @@ impl BpfInsn {
 
     #[inline]
     pub fn src_reg(&self) -> u8 {
-        kernel_sys::bpf_insn::src_reg(&self.0)
+        libbpf_sys::bpf_insn::src_reg(&self.0)
     }
 
     #[inline]
@@ -429,14 +429,14 @@ mod tests {
 
     #[test]
     fn bpf_insn_abi_offsets_and_raw_bytes_match_uapi() {
-        assert_eq!(std::mem::offset_of!(kernel_sys::bpf_insn, code), 0);
-        assert_eq!(std::mem::offset_of!(kernel_sys::bpf_insn, off), 2);
-        assert_eq!(std::mem::offset_of!(kernel_sys::bpf_insn, imm), 4);
+        assert_eq!(std::mem::offset_of!(libbpf_sys::bpf_insn, code), 0);
+        assert_eq!(std::mem::offset_of!(libbpf_sys::bpf_insn, off), 2);
+        assert_eq!(std::mem::offset_of!(libbpf_sys::bpf_insn, imm), 4);
 
         let insn = BpfInsn::new(0xbf, BpfInsn::make_regs(3, 5), -2, 0x1234_5678);
         assert_eq!(
             &insn as *const BpfInsn as usize,
-            insn.as_kernel() as *const kernel_sys::bpf_insn as usize
+            insn.as_kernel() as *const libbpf_sys::bpf_insn as usize
         );
         assert_eq!(
             insn.raw_bytes(),

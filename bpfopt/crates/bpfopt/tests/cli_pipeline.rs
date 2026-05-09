@@ -275,6 +275,23 @@ fn wide_mem_accepts_stdin_and_writes_instruction_aligned_stdout() {
 }
 
 #[test]
+fn canonicalize_map_refs_cli_rewrites_loader_fd_to_idx() {
+    let output = run_bpfopt(
+        &["--canonicalize-map-refs", "--map-ids", "101"],
+        &map_lookup_program_bytes(),
+    );
+
+    assert!(
+        output.status.success(),
+        "stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let insns = decode_insns(&output.stdout);
+    assert_eq!(insns[0].src_reg(), BPF_PSEUDO_MAP_IDX);
+    assert_eq!(insns[0].imm, 0);
+}
+
+#[test]
 fn dce_deletes_unreachable_pseudo_map_idx_without_rebinding_live_idx() {
     let output = run_bpfopt(
         &["--pass", "dce"],

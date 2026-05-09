@@ -19,7 +19,7 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::bpf;
+use crate::{bpf, syscall};
 
 static NEXT_WORKDIR_ID: AtomicU64 = AtomicU64::new(0);
 const REJIT_VERBOSE_LOG_BUF_SIZE: usize = 16 * 1024 * 1024;
@@ -191,23 +191,23 @@ pub(crate) struct PassDetail {
     pub bpfopt_ms: Option<u64>,
     /// Wall-clock duration of the BPF_PROG_REJIT syscall (kernel verify+JIT+
     /// install). None for steps that did not reach the kernel call (bpfopt
-    /// failure / no produced bytecode / `bpfprof`-style steps).
+    /// failure / no produced bytecode / utility steps).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rejit_syscall_ms: Option<u64>,
 }
 
 fn rejit_program(
     prog_id: u32,
-    insns: &[kernel_sys::bpf_insn],
+    insns: &[libbpf_sys::bpf_insn],
     fd_array: &RejitFdArray,
     verifier_log_path: &Path,
     log_level: u32,
     log_buf_size: usize,
 ) -> Result<()> {
-    let prog_fd = kernel_sys::prog_get_fd_by_id(prog_id)
+    let prog_fd = syscall::prog_get_fd_by_id(prog_id)
         .with_context(|| format!("open BPF program id {prog_id} for BPF_PROG_REJIT"))?;
     let mut log_buf = vec![0u8; log_buf_size];
-    if let Err(err) = kernel_sys::prog_rejit(
+    if let Err(err) = syscall::prog_rejit(
         prog_fd.as_fd(),
         insns,
         fd_array.as_slice(),
@@ -445,6 +445,64 @@ fn skipped_program_result(prog_id: u32) -> OptimizeOneResult {
     }
 }
 
+fn canonicalize_snapshot_map_refs(
+    prog_id: u32,
+    workdir: &Path,
+    snapshot_bytes: &[u8],
+    map_ids: &[u32],
+    target_input: Option<&Path>,
+    target_output: Option<&Path>,
+) -> Result<Vec<u8>> {
+    let input_path = workdir.join("canonicalize_input.bin");
+    let output_path = workdir.join("canonicalize_output.bin");
+    fs::write(&input_path, snapshot_bytes)
+        .with_context(|| format!("write {}", input_path.display()))?;
+
+    let mut command = Command::new("bpfopt");
+    command
+        .arg("--canonicalize-map-refs")
+        .arg("--input")
+        .arg(&input_path)
+        .arg("--output")
+        .arg(&output_path);
+    if !map_ids.is_empty() {
+        command.arg("--map-ids").arg(join_u32_csv(map_ids));
+    }
+    match (target_input, target_output) {
+        (Some(input), Some(output)) => {
+            command.arg("--target").arg(input);
+            command.arg("--target-output").arg(output);
+        }
+        (None, None) => {}
+        (Some(_), None) => bail!("target input path requires target output path"),
+        (None, Some(_)) => bail!("target output path requires target input path"),
+    }
+
+    let output = command
+        .output()
+        .with_context(|| format!("spawn bpfopt canonicalize-map-refs for prog {prog_id}"))?;
+    if !output.status.success() {
+        let code = output
+            .status
+            .code()
+            .map(|code| code.to_string())
+            .unwrap_or_else(|| "signal".to_string());
+        let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+        let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        let details = if stderr.is_empty() { stdout } else { stderr };
+        bail!(
+            "bpfopt --canonicalize-map-refs failed for prog {prog_id} (exit {code}): {}",
+            if details.is_empty() {
+                "<no subprocess output>".to_string()
+            } else {
+                details.lines().take(40).collect::<Vec<_>>().join("\n")
+            }
+        );
+    }
+
+    fs::read(&output_path).with_context(|| format!("read {}", output_path.display()))
+}
+
 fn run_program_steps(
     prog_id: u32,
     steps: &[StepSpec],
@@ -452,28 +510,49 @@ fn run_program_steps(
     referenced: &HashSet<String>,
     workdir: &WorkDir,
 ) -> Result<OptimizeOneResult> {
-    let mut snapshot = bpf::snapshot_program(prog_id)
+    let snapshot = bpf::snapshot_program(prog_id)
         .with_context(|| format!("snapshot live BPF program {prog_id}"))?;
-    bpf::canonicalize_map_refs_to_idx(&mut snapshot.insns, None, &snapshot.info.map_ids)
-        .with_context(|| format!("canonicalize map references for prog {prog_id}"))?;
     let prog_info = snapshot.info.clone();
-    let orig_bytes = bpf::encode_insns(&snapshot.insns);
+    let snapshot_bytes = bpf::encode_insns(&snapshot.insns);
+    let target_path = workdir.path().join("target.json");
+    let target_probe_path = workdir.path().join("target_probe.json");
+    let map_values_path = workdir.path().join("map-values");
+
+    let target_paths = if referenced.contains(VAR_TARGET) {
+        let probed = bpf::probe_target_json(kinsn_probes)
+            .with_context(|| format!("probe target kinsns for prog {prog_id}"))?;
+        write_json_file(&target_probe_path, &probed)
+            .with_context(|| format!("write {}", target_probe_path.display()))?;
+        (
+            Some(target_probe_path.as_path()),
+            Some(target_path.as_path()),
+        )
+    } else {
+        (None, None)
+    };
+
+    let orig_bytes = canonicalize_snapshot_map_refs(
+        prog_id,
+        workdir.path(),
+        &snapshot_bytes,
+        &snapshot.info.map_ids,
+        target_paths.0,
+        target_paths.1,
+    )
+    .with_context(|| format!("canonicalize map references for prog {prog_id}"))?;
     let orig_insn_count = insn_count_from_bytes(&orig_bytes, "snapshot")?;
 
     let initial_input_path = workdir.path().join("input_step0.bin");
     fs::write(&initial_input_path, &orig_bytes)
         .with_context(|| format!("write {}", initial_input_path.display()))?;
 
-    let target_path = workdir.path().join("target.json");
-    let map_values_path = workdir.path().join("map-values");
     let mut probed_kinsns: HashMap<String, TargetKinsnJson> = HashMap::new();
 
     if referenced.contains(VAR_TARGET) {
-        let mut probed = bpf::probe_target_json(kinsn_probes)
-            .with_context(|| format!("probe target kinsns for prog {prog_id}"))?;
-        shift_target_module_call_offsets_for_map_prefix(&mut probed, snapshot.info.map_ids.len())
-            .with_context(|| format!("shift target module call_offsets for prog {prog_id}"))?;
-        for (name, kinsn) in &probed.kinsns {
+        let target: bpf::TargetJson =
+            read_json_file(&target_path, "target.json after canonicalize-map-refs")
+                .with_context(|| format!("read {}", target_path.display()))?;
+        for (name, kinsn) in &target.kinsns {
             probed_kinsns.insert(
                 name.clone(),
                 TargetKinsnJson {
@@ -483,7 +562,6 @@ fn run_program_steps(
                 },
             );
         }
-        write_json_file(&target_path, &probed)?;
     }
 
     if referenced.contains(VAR_MAP_VALUES) {
@@ -566,8 +644,7 @@ fn run_program_steps(
 
         // Surface a corrupt or unreadable step report as a step failure
         // rather than silently degrading to null. Steps that legitimately
-        // produce no report (e.g., `bpfprof profile > prof.json`) leave
-        // ${REPORT} absent — that path stays Null.
+        // produce no report leave ${REPORT} absent — that path stays Null.
         let bpfopt_summary = if report_path.exists() {
             match read_json_file::<Value>(&report_path, "step report") {
                 Ok(value) => value,
@@ -624,8 +701,7 @@ fn run_program_steps(
         }
 
         // Step succeeded. If it produced a non-empty bytecode at $OUTPUT,
-        // ReJIT and chain. Otherwise (e.g., bpfprof / `test` / pipeline),
-        // move on with input/states unchanged.
+        // ReJIT and chain. Otherwise, move on with input/states unchanged.
         let produced_bytecode = match fs::metadata(&output_path) {
             Ok(meta) => meta.len() > 0,
             Err(err) if err.kind() == std::io::ErrorKind::NotFound => false,
@@ -931,12 +1007,12 @@ fn write_map_snapshot_skip_marker(path: &Path, size_bytes: u64) -> Result<()> {
 }
 
 fn write_inner_map_ids_supplement(map: &bpf::MapInfo, output_dir: &Path) -> Result<()> {
-    let outer_fd = kernel_sys::map_get_fd_by_id(map.map_id)
+    let outer_fd = syscall::map_get_fd_by_id(map.map_id)
         .with_context(|| format!("open map-in-map outer map id {}", map.map_id))?;
     let entries = collect_inner_map_id_supplement_entries(
         map,
         |key| lookup_inner_map_id_for_outer_key(outer_fd.as_fd(), map.map_id, key),
-        |previous_key, key| kernel_sys::map_get_next_key(outer_fd.as_fd(), previous_key, key),
+        |previous_key, key| syscall::map_get_next_key(outer_fd.as_fd(), previous_key, key),
     )?;
     write_inner_map_ids_supplement_entries(output_dir, map.map_id, entries)
 }
@@ -952,7 +1028,7 @@ where
 {
     let mut entries = BTreeMap::new();
     match map.map_type {
-        kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS => {
+        libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS => {
             if map.key_size != std::mem::size_of::<u32>() as u32 {
                 bail!(
                     "ARRAY_OF_MAPS outer map {} has {}-byte keys, expected 4",
@@ -970,7 +1046,7 @@ where
                 )?;
             }
         }
-        kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS => {
+        libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS => {
             let key_size = usize::try_from(map.key_size).with_context(|| {
                 format!("HASH_OF_MAPS outer map {} key size overflow", map.map_id)
             })?;
@@ -1042,7 +1118,7 @@ fn lookup_inner_map_id_for_outer_key(
     key: &[u8],
 ) -> Result<Option<u32>> {
     let mut value_bytes = [0u8; 4];
-    if !kernel_sys::map_lookup_elem(outer_fd, key, &mut value_bytes)
+    if !syscall::map_lookup_elem(outer_fd, key, &mut value_bytes)
         .with_context(|| format!("BPF_MAP_LOOKUP_ELEM on outer map {outer_map_id}"))?
     {
         return Ok(None);
@@ -1129,49 +1205,21 @@ fn log_bpftool_map_snapshot_decision(
 fn needs_bpftool_map_dump(map_type: u32) -> bool {
     matches!(
         map_type,
-        kernel_sys::BPF_MAP_TYPE_HASH
-            | kernel_sys::BPF_MAP_TYPE_ARRAY
-            | kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY
-            | kernel_sys::BPF_MAP_TYPE_LRU_HASH
-            | kernel_sys::BPF_MAP_TYPE_LPM_TRIE
-            | kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS
-            | kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS
+        libbpf_sys::BPF_MAP_TYPE_HASH
+            | libbpf_sys::BPF_MAP_TYPE_ARRAY
+            | libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY
+            | libbpf_sys::BPF_MAP_TYPE_LRU_HASH
+            | libbpf_sys::BPF_MAP_TYPE_LPM_TRIE
+            | libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS
+            | libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS
     )
 }
 
 fn needs_inner_map_id_supplement(map_type: u32) -> bool {
     matches!(
         map_type,
-        kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS | kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS
+        libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS | libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS
     )
-}
-
-fn shift_target_module_call_offsets_for_map_prefix(
-    target: &mut bpf::TargetJson,
-    map_count: usize,
-) -> Result<()> {
-    let module_base = module_fd_array_base(map_count)?;
-    for (name, kinsn) in &mut target.kinsns {
-        if kinsn.call_offset == 0 {
-            continue;
-        }
-        if kinsn.btf_id == 0 {
-            bail!(
-                "target kinsn {name} has call_offset {} but no BTF object id",
-                kinsn.call_offset
-            );
-        }
-        let shifted = module_base
-            .checked_add(kinsn.call_offset - 1)
-            .with_context(|| format!("target kinsn {name} call_offset overflow"))?;
-        if shifted > i16::MAX as u32 {
-            bail!(
-                "target kinsn {name} shifted call_offset {shifted} exceeds BPF instruction off field"
-            );
-        }
-        kinsn.call_offset = shifted;
-    }
-    Ok(())
 }
 
 #[derive(Debug)]
@@ -1206,7 +1254,7 @@ where
     build_rejit_fd_array_with_openers(
         map_ids,
         kinsns,
-        &mut |btf_id| kernel_sys::btf_get_fd_by_id(btf_id),
+        &mut |btf_id| syscall::btf_get_fd_by_id(btf_id),
         open_map_fd,
     )
 }
@@ -1323,12 +1371,12 @@ fn insn_count_from_bytes(bytes: &[u8], label: &str) -> Result<usize> {
     Ok(bytes.len() / 8)
 }
 
-fn decode_insns(bytes: &[u8], label: &str) -> Result<Vec<kernel_sys::bpf_insn>> {
+fn decode_insns(bytes: &[u8], label: &str) -> Result<Vec<libbpf_sys::bpf_insn>> {
     insn_count_from_bytes(bytes, label)?;
     Ok(bytes
         .chunks_exact(8)
         .map(|chunk| {
-            let mut insn = kernel_sys::bpf_insn {
+            let mut insn = libbpf_sys::bpf_insn {
                 code: chunk[0],
                 _bitfield_align_1: [],
                 _bitfield_1: Default::default(),
@@ -1515,46 +1563,6 @@ mod tests {
     }
 
     #[test]
-    fn target_call_offsets_shift_after_map_prefix() {
-        let mut target = bpf::TargetJson {
-            arch: "x86_64".to_string(),
-            features: Vec::new(),
-            kinsns: BTreeMap::from([
-                (
-                    "bpf_rotate64".to_string(),
-                    bpf::TargetKinsnJson {
-                        btf_func_id: 1,
-                        btf_id: 100,
-                        call_offset: 1,
-                    },
-                ),
-                (
-                    "bpf_extract64".to_string(),
-                    bpf::TargetKinsnJson {
-                        btf_func_id: 2,
-                        btf_id: 200,
-                        call_offset: 2,
-                    },
-                ),
-                (
-                    "bpf_select64".to_string(),
-                    bpf::TargetKinsnJson {
-                        btf_func_id: 3,
-                        btf_id: 0,
-                        call_offset: 0,
-                    },
-                ),
-            ]),
-        };
-
-        shift_target_module_call_offsets_for_map_prefix(&mut target, 5).unwrap();
-
-        assert_eq!(target.kinsns["bpf_rotate64"].call_offset, 5);
-        assert_eq!(target.kinsns["bpf_extract64"].call_offset, 6);
-        assert_eq!(target.kinsns["bpf_select64"].call_offset, 0);
-    }
-
-    #[test]
     fn try_apply_programs_converts_failures_to_program_results() {
         let prog_ids = [7, 8, 9];
 
@@ -1591,7 +1599,7 @@ mod tests {
         let map = bpf::MapInfo {
             map_id: 42,
             name: "outer".to_string(),
-            map_type: kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS,
+            map_type: libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS,
             key_size: 4,
             value_size: 4,
             max_entries: 4,
@@ -1645,7 +1653,7 @@ mod tests {
             program: ProgramInfo {
                 prog_id,
                 prog_name: "mock_prog".to_string(),
-                prog_type: kernel_sys::BPF_PROG_TYPE_XDP,
+                prog_type: libbpf_sys::BPF_PROG_TYPE_XDP,
                 orig_insn_count: 1,
                 final_insn_count: 2,
             },

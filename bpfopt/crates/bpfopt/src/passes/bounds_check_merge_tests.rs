@@ -5,10 +5,10 @@ use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
 use crate::pass::{BpfProgram, PassContext, PassManager, PipelineResult};
 use crate::test_helpers::*;
 
-const BPF_PROG_TYPE_SOCKET_FILTER: u32 = kernel_sys::BPF_PROG_TYPE_SOCKET_FILTER;
-const BPF_PROG_TYPE_SCHED_CLS: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_CLS;
-const BPF_PROG_TYPE_SCHED_ACT: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_ACT;
-const BPF_PROG_TYPE_XDP: u32 = kernel_sys::BPF_PROG_TYPE_XDP;
+const BPF_PROG_TYPE_SOCKET_FILTER: u32 = libbpf_sys::BPF_PROG_TYPE_SOCKET_FILTER;
+const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
+const BPF_PROG_TYPE_SCHED_ACT: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_ACT;
+const BPF_PROG_TYPE_XDP: u32 = libbpf_sys::BPF_PROG_TYPE_XDP;
 
 fn jge_reg(dst: u8, src: u8, off: i16) -> BpfInsn {
     BpfInsn::new(

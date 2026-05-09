@@ -16,7 +16,7 @@ use crate::insn::BpfInsn;
 // MapInlineHint et al. live in passes/map_inline.rs (pass-local metadata) and are
 // re-exported here so existing `use crate::pass::*` consumers keep working.
 pub use crate::passes::map_inline::{MapInlineHint, MapInlineHintAnchor, MapInlineHintMode};
-pub use kernel_sys::{
+pub use crate::verifier_log::{
     RegState, ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
 
@@ -430,8 +430,8 @@ impl BpfProgram {
     }
 }
 
-const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
-const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
+const BPF_PSEUDO_MAP_FD: u8 = libbpf_sys::BPF_PSEUDO_MAP_FD as u8;
+const BPF_PSEUDO_MAP_VALUE: u8 = libbpf_sys::BPF_PSEUDO_MAP_VALUE as u8;
 
 pub fn build_map_fd_bindings(insns: &[BpfInsn], map_ids: &[u32]) -> HashMap<i32, u32> {
     let mut old_fd_to_map_id = HashMap::new();

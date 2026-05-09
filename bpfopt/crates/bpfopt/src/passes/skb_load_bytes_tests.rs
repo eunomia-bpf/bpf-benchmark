@@ -5,12 +5,12 @@ use crate::analysis::BranchTargetAnalysis;
 use crate::pass::{BpfProgram, PassContext, PassManager};
 use crate::test_helpers::*;
 
-const BPF_FUNC_SKB_LOAD_BYTES: i32 = kernel_sys::BPF_FUNC_skb_load_bytes as i32;
-const BPF_FUNC_DUMMY_HELPER: i32 = kernel_sys::BPF_FUNC_map_lookup_elem as i32;
+const BPF_FUNC_SKB_LOAD_BYTES: i32 = libbpf_sys::BPF_FUNC_skb_load_bytes as i32;
+const BPF_FUNC_DUMMY_HELPER: i32 = libbpf_sys::BPF_FUNC_map_lookup_elem as i32;
 
-const BPF_PROG_TYPE_SOCKET_FILTER: u32 = kernel_sys::BPF_PROG_TYPE_SOCKET_FILTER;
-const BPF_PROG_TYPE_SCHED_CLS: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_CLS;
-const BPF_PROG_TYPE_SCHED_ACT: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_ACT;
+const BPF_PROG_TYPE_SOCKET_FILTER: u32 = libbpf_sys::BPF_PROG_TYPE_SOCKET_FILTER;
+const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
+const BPF_PROG_TYPE_SCHED_ACT: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_ACT;
 
 const SKB_DATA_OFF: i16 = 76;
 const SKB_DATA_END_OFF: i16 = 80;

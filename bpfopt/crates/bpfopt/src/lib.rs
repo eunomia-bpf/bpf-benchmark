@@ -17,3 +17,4 @@ pub mod pass;
 pub mod passes;
 #[cfg(test)]
 pub mod test_helpers;
+pub mod verifier_log;

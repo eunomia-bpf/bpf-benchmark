@@ -264,7 +264,7 @@ fn snapshot_provider_lookup_compressed_overlays() {
         program.map_metadata.insert(
             map_id,
             MapMetadata {
-                map_type: kernel_sys::BPF_MAP_TYPE_ARRAY,
+                map_type: libbpf_sys::BPF_MAP_TYPE_ARRAY,
                 key_size: 4,
                 value_size: 4,
                 max_entries: 8,

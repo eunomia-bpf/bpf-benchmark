@@ -9,10 +9,10 @@ use crate::pass::*;
 
 use super::utils::{fixup_all_branches, insn_width};
 
-const BPF_FUNC_SKB_LOAD_BYTES: i32 = kernel_sys::BPF_FUNC_skb_load_bytes as i32;
+const BPF_FUNC_SKB_LOAD_BYTES: i32 = libbpf_sys::BPF_FUNC_skb_load_bytes as i32;
 
-const BPF_PROG_TYPE_SCHED_CLS: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_CLS;
-const BPF_PROG_TYPE_SCHED_ACT: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_ACT;
+const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
+const BPF_PROG_TYPE_SCHED_ACT: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_ACT;
 
 const SKB_DATA_OFF: i16 = 76;
 const SKB_DATA_END_OFF: i16 = 80;

@@ -6,18 +6,18 @@ use std::collections::HashMap;
 use crate::insn::BpfInsn;
 use crate::pass::{Analysis, BpfProgram};
 
-const BPF_MAP_TYPE_HASH: u32 = kernel_sys::BPF_MAP_TYPE_HASH;
-const BPF_MAP_TYPE_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY;
-const BPF_MAP_TYPE_ARRAY_OF_MAPS: u32 = kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS;
+const BPF_MAP_TYPE_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_HASH;
+const BPF_MAP_TYPE_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_ARRAY;
+const BPF_MAP_TYPE_ARRAY_OF_MAPS: u32 = libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS;
 #[cfg(test)]
-const BPF_MAP_TYPE_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_HASH;
-const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
-const BPF_MAP_TYPE_HASH_OF_MAPS: u32 = kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS;
-const BPF_MAP_TYPE_LRU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_HASH;
+const BPF_MAP_TYPE_PERCPU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_PERCPU_HASH;
+const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
+const BPF_MAP_TYPE_HASH_OF_MAPS: u32 = libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS;
+const BPF_MAP_TYPE_LRU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_LRU_HASH;
 #[cfg(test)]
-const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
-const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
-const BPF_PSEUDO_MAP_IDX: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX as u8;
+const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
+const BPF_PSEUDO_MAP_FD: u8 = crate::insn::BPF_PSEUDO_MAP_FD;
+const BPF_PSEUDO_MAP_IDX: u8 = crate::insn::BPF_PSEUDO_MAP_IDX;
 
 /// Runtime metadata for a live kernel map referenced by the program.
 ///
@@ -462,11 +462,11 @@ mod tests {
 
     #[test]
     fn unsupported_map_types_reject_direct_value_access() {
-        const BPF_MAP_TYPE_PROG_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PROG_ARRAY;
-        const BPF_MAP_TYPE_PERF_EVENT_ARRAY: u32 = kernel_sys::BPF_MAP_TYPE_PERF_EVENT_ARRAY;
-        const BPF_MAP_TYPE_STACK_TRACE: u32 = kernel_sys::BPF_MAP_TYPE_STACK_TRACE;
-        const BPF_MAP_TYPE_CGROUP_STORAGE: u32 = kernel_sys::BPF_MAP_TYPE_CGROUP_STORAGE;
-        const BPF_MAP_TYPE_RINGBUF: u32 = kernel_sys::BPF_MAP_TYPE_RINGBUF;
+        const BPF_MAP_TYPE_PROG_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_PROG_ARRAY;
+        const BPF_MAP_TYPE_PERF_EVENT_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_PERF_EVENT_ARRAY;
+        const BPF_MAP_TYPE_STACK_TRACE: u32 = libbpf_sys::BPF_MAP_TYPE_STACK_TRACE;
+        const BPF_MAP_TYPE_CGROUP_STORAGE: u32 = libbpf_sys::BPF_MAP_TYPE_CGROUP_STORAGE;
+        const BPF_MAP_TYPE_RINGBUF: u32 = libbpf_sys::BPF_MAP_TYPE_RINGBUF;
 
         for map_type in [
             BPF_MAP_TYPE_PROG_ARRAY,

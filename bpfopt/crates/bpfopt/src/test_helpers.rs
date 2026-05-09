@@ -209,7 +209,7 @@ pub fn install_map(
 pub fn install_array_map(map_id: u32, value: Vec<u8>) {
     let mut values = HashMap::new();
     values.insert(1u32.to_le_bytes().to_vec(), value);
-    install_map(map_id, kernel_sys::BPF_MAP_TYPE_ARRAY, 8, values);
+    install_map(map_id, libbpf_sys::BPF_MAP_TYPE_ARRAY, 8, values);
 }
 
 // Program fixtures

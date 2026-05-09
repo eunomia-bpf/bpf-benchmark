@@ -18,10 +18,10 @@ use crate::pass::*;
 mod map_info;
 pub use map_info::{MapInfo, MapInfoAnalysis, MapInfoResult, MapReference};
 
-const BPF_PSEUDO_MAP_FD: u8 = kernel_sys::BPF_PSEUDO_MAP_FD as u8;
-const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
-const BPF_PSEUDO_MAP_IDX: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX as u8;
-const BPF_PSEUDO_MAP_IDX_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX_VALUE as u8;
+const BPF_PSEUDO_MAP_FD: u8 = crate::insn::BPF_PSEUDO_MAP_FD;
+const BPF_PSEUDO_MAP_VALUE: u8 = crate::insn::BPF_PSEUDO_MAP_VALUE;
+const BPF_PSEUDO_MAP_IDX: u8 = crate::insn::BPF_PSEUDO_MAP_IDX;
+const BPF_PSEUDO_MAP_IDX_VALUE: u8 = crate::insn::BPF_PSEUDO_MAP_IDX_VALUE;
 const HELPER_MAP_LOOKUP_ELEM: i32 = 1;
 const HELPER_MAP_UPDATE_ELEM: i32 = 2;
 const HELPER_MAP_DELETE_ELEM: i32 = 3;
@@ -387,7 +387,7 @@ fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
             match read_bpftool_map_dump(path, show.id, &map_metadata)? {
                 BpftoolMapDumpSnapshot::Entries(entries) => {
                     if entries.is_empty()
-                        && map_metadata.map_type == kernel_sys::BPF_MAP_TYPE_LPM_TRIE
+                        && map_metadata.map_type == libbpf_sys::BPF_MAP_TYPE_LPM_TRIE
                     {
                         empty_lpm_trie_maps.insert(show.id);
                     }
@@ -872,13 +872,13 @@ fn decode_bpftool_hex_bytes(input: &[String]) -> Result<Vec<u8>> {
 fn needs_bpftool_map_dump(map_type: u32) -> bool {
     matches!(
         map_type,
-        kernel_sys::BPF_MAP_TYPE_HASH
-            | kernel_sys::BPF_MAP_TYPE_ARRAY
-            | kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY
-            | kernel_sys::BPF_MAP_TYPE_LRU_HASH
-            | kernel_sys::BPF_MAP_TYPE_LPM_TRIE
-            | kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS
-            | kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS
+        libbpf_sys::BPF_MAP_TYPE_HASH
+            | libbpf_sys::BPF_MAP_TYPE_ARRAY
+            | libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY
+            | libbpf_sys::BPF_MAP_TYPE_LRU_HASH
+            | libbpf_sys::BPF_MAP_TYPE_LPM_TRIE
+            | libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS
+            | libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS
     )
 }
 
@@ -893,44 +893,44 @@ fn parse_map_type(map_type: &MapTypeJson) -> Result<u32> {
                 .replace(['-', ' '], "_")
                 .to_ascii_lowercase();
             match normalized.as_str() {
-                "hash" => Ok(kernel_sys::BPF_MAP_TYPE_HASH),
-                "array" => Ok(kernel_sys::BPF_MAP_TYPE_ARRAY),
-                "prog_array" => Ok(kernel_sys::BPF_MAP_TYPE_PROG_ARRAY),
-                "perf_event_array" => Ok(kernel_sys::BPF_MAP_TYPE_PERF_EVENT_ARRAY),
-                "percpu_hash" | "per_cpu_hash" => Ok(kernel_sys::BPF_MAP_TYPE_PERCPU_HASH),
-                "percpu_array" | "per_cpu_array" => Ok(kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY),
-                "stack_trace" => Ok(kernel_sys::BPF_MAP_TYPE_STACK_TRACE),
-                "cgroup_array" => Ok(kernel_sys::BPF_MAP_TYPE_CGROUP_ARRAY),
-                "lru_hash" => Ok(kernel_sys::BPF_MAP_TYPE_LRU_HASH),
+                "hash" => Ok(libbpf_sys::BPF_MAP_TYPE_HASH),
+                "array" => Ok(libbpf_sys::BPF_MAP_TYPE_ARRAY),
+                "prog_array" => Ok(libbpf_sys::BPF_MAP_TYPE_PROG_ARRAY),
+                "perf_event_array" => Ok(libbpf_sys::BPF_MAP_TYPE_PERF_EVENT_ARRAY),
+                "percpu_hash" | "per_cpu_hash" => Ok(libbpf_sys::BPF_MAP_TYPE_PERCPU_HASH),
+                "percpu_array" | "per_cpu_array" => Ok(libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY),
+                "stack_trace" => Ok(libbpf_sys::BPF_MAP_TYPE_STACK_TRACE),
+                "cgroup_array" => Ok(libbpf_sys::BPF_MAP_TYPE_CGROUP_ARRAY),
+                "lru_hash" => Ok(libbpf_sys::BPF_MAP_TYPE_LRU_HASH),
                 "lru_percpu_hash" | "lru_per_cpu_hash" => {
-                    Ok(kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH)
+                    Ok(libbpf_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH)
                 }
-                "lpm_trie" => Ok(kernel_sys::BPF_MAP_TYPE_LPM_TRIE),
-                "array_of_maps" => Ok(kernel_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS),
-                "hash_of_maps" => Ok(kernel_sys::BPF_MAP_TYPE_HASH_OF_MAPS),
-                "devmap" => Ok(kernel_sys::BPF_MAP_TYPE_DEVMAP),
-                "devmap_hash" => Ok(kernel_sys::BPF_MAP_TYPE_DEVMAP_HASH),
-                "sockmap" => Ok(kernel_sys::BPF_MAP_TYPE_SOCKMAP),
-                "cpumap" => Ok(kernel_sys::BPF_MAP_TYPE_CPUMAP),
-                "xskmap" => Ok(kernel_sys::BPF_MAP_TYPE_XSKMAP),
-                "sockhash" => Ok(kernel_sys::BPF_MAP_TYPE_SOCKHASH),
-                "cgroup_storage" => Ok(kernel_sys::BPF_MAP_TYPE_CGROUP_STORAGE),
-                "reuseport_sockarray" => Ok(kernel_sys::BPF_MAP_TYPE_REUSEPORT_SOCKARRAY),
+                "lpm_trie" => Ok(libbpf_sys::BPF_MAP_TYPE_LPM_TRIE),
+                "array_of_maps" => Ok(libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS),
+                "hash_of_maps" => Ok(libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS),
+                "devmap" => Ok(libbpf_sys::BPF_MAP_TYPE_DEVMAP),
+                "devmap_hash" => Ok(libbpf_sys::BPF_MAP_TYPE_DEVMAP_HASH),
+                "sockmap" => Ok(libbpf_sys::BPF_MAP_TYPE_SOCKMAP),
+                "cpumap" => Ok(libbpf_sys::BPF_MAP_TYPE_CPUMAP),
+                "xskmap" => Ok(libbpf_sys::BPF_MAP_TYPE_XSKMAP),
+                "sockhash" => Ok(libbpf_sys::BPF_MAP_TYPE_SOCKHASH),
+                "cgroup_storage" => Ok(libbpf_sys::BPF_MAP_TYPE_CGROUP_STORAGE),
+                "reuseport_sockarray" => Ok(libbpf_sys::BPF_MAP_TYPE_REUSEPORT_SOCKARRAY),
                 "percpu_cgroup_storage" | "per_cpu_cgroup_storage" => {
-                    Ok(kernel_sys::BPF_MAP_TYPE_PERCPU_CGROUP_STORAGE)
+                    Ok(libbpf_sys::BPF_MAP_TYPE_PERCPU_CGROUP_STORAGE)
                 }
-                "queue" => Ok(kernel_sys::BPF_MAP_TYPE_QUEUE),
-                "stack" => Ok(kernel_sys::BPF_MAP_TYPE_STACK),
-                "sk_storage" => Ok(kernel_sys::BPF_MAP_TYPE_SK_STORAGE),
-                "struct_ops" => Ok(kernel_sys::BPF_MAP_TYPE_STRUCT_OPS),
-                "ringbuf" => Ok(kernel_sys::BPF_MAP_TYPE_RINGBUF),
-                "inode_storage" => Ok(kernel_sys::BPF_MAP_TYPE_INODE_STORAGE),
-                "task_storage" => Ok(kernel_sys::BPF_MAP_TYPE_TASK_STORAGE),
-                "bloom_filter" => Ok(kernel_sys::BPF_MAP_TYPE_BLOOM_FILTER),
-                "user_ringbuf" => Ok(kernel_sys::BPF_MAP_TYPE_USER_RINGBUF),
-                "cgrp_storage" => Ok(kernel_sys::BPF_MAP_TYPE_CGRP_STORAGE),
-                "arena" => Ok(kernel_sys::BPF_MAP_TYPE_ARENA),
-                "insn_array" => Ok(kernel_sys::BPF_MAP_TYPE_INSN_ARRAY),
+                "queue" => Ok(libbpf_sys::BPF_MAP_TYPE_QUEUE),
+                "stack" => Ok(libbpf_sys::BPF_MAP_TYPE_STACK),
+                "sk_storage" => Ok(libbpf_sys::BPF_MAP_TYPE_SK_STORAGE),
+                "struct_ops" => Ok(libbpf_sys::BPF_MAP_TYPE_STRUCT_OPS),
+                "ringbuf" => Ok(libbpf_sys::BPF_MAP_TYPE_RINGBUF),
+                "inode_storage" => Ok(libbpf_sys::BPF_MAP_TYPE_INODE_STORAGE),
+                "task_storage" => Ok(libbpf_sys::BPF_MAP_TYPE_TASK_STORAGE),
+                "bloom_filter" => Ok(libbpf_sys::BPF_MAP_TYPE_BLOOM_FILTER),
+                "user_ringbuf" => Ok(libbpf_sys::BPF_MAP_TYPE_USER_RINGBUF),
+                "cgrp_storage" => Ok(libbpf_sys::BPF_MAP_TYPE_CGRP_STORAGE),
+                "arena" => Ok(libbpf_sys::BPF_MAP_TYPE_ARENA),
+                "insn_array" => Ok(libbpf_sys::BPF_MAP_TYPE_INSN_ARRAY),
                 _ => bail!("unsupported map_type: {name}"),
             }
         }
@@ -1848,7 +1848,7 @@ fn map_writer_helper_name(helper_id: i32) -> &'static str {
 fn lru_lookup_mutates_map(map_type: u32) -> bool {
     matches!(
         map_type,
-        kernel_sys::BPF_MAP_TYPE_LRU_HASH | kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH
+        libbpf_sys::BPF_MAP_TYPE_LRU_HASH | libbpf_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH
     )
 }
 
@@ -4128,7 +4128,7 @@ fn encode_key_bytes(bytes: &[u8], key_size: usize) -> Vec<u8> {
 }
 
 fn prepare_inline_value(info: &MapInfo, raw_value: &[u8]) -> Result<Vec<u8>, String> {
-    if info.map_type != kernel_sys::BPF_MAP_TYPE_PERCPU_ARRAY {
+    if info.map_type != libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY {
         return Ok(raw_value.to_vec());
     }
 
@@ -4330,10 +4330,10 @@ fn missing_snapshot_anyhow(err: anyhow::Error) -> SiteRewriteError {
 fn is_hash_like_map_type(map_type: u32) -> bool {
     matches!(
         map_type,
-        kernel_sys::BPF_MAP_TYPE_HASH
-            | kernel_sys::BPF_MAP_TYPE_PERCPU_HASH
-            | kernel_sys::BPF_MAP_TYPE_LRU_HASH
-            | kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH
+        libbpf_sys::BPF_MAP_TYPE_HASH
+            | libbpf_sys::BPF_MAP_TYPE_PERCPU_HASH
+            | libbpf_sys::BPF_MAP_TYPE_LRU_HASH
+            | libbpf_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH
     )
 }
 

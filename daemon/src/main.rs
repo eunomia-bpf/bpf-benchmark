@@ -7,6 +7,7 @@
 mod bpf;
 mod commands;
 mod server;
+mod syscall;
 
 use anyhow::Result;
 use clap::Parser;

@@ -12,19 +12,19 @@ use super::utils::{
 };
 
 /// BPF_PROG_TYPE_SCHED_CLS (TC classifier).
-const BPF_PROG_TYPE_SCHED_CLS: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_CLS;
+const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
 /// BPF_PROG_TYPE_SCHED_ACT (TC action).
-const BPF_PROG_TYPE_SCHED_ACT: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_ACT;
+const BPF_PROG_TYPE_SCHED_ACT: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_ACT;
 /// BPF_PROG_TYPE_XDP.
-const BPF_PROG_TYPE_XDP: u32 = kernel_sys::BPF_PROG_TYPE_XDP;
+const BPF_PROG_TYPE_XDP: u32 = libbpf_sys::BPF_PROG_TYPE_XDP;
 /// BPF_PROG_TYPE_SK_SKB.
-const BPF_PROG_TYPE_SK_SKB: u32 = kernel_sys::BPF_PROG_TYPE_SK_SKB;
+const BPF_PROG_TYPE_SK_SKB: u32 = libbpf_sys::BPF_PROG_TYPE_SK_SKB;
 /// BPF_PROG_TYPE_LWT_IN.
-const BPF_PROG_TYPE_LWT_IN: u32 = kernel_sys::BPF_PROG_TYPE_LWT_IN;
+const BPF_PROG_TYPE_LWT_IN: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_IN;
 /// BPF_PROG_TYPE_LWT_OUT.
-const BPF_PROG_TYPE_LWT_OUT: u32 = kernel_sys::BPF_PROG_TYPE_LWT_OUT;
+const BPF_PROG_TYPE_LWT_OUT: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_OUT;
 /// BPF_PROG_TYPE_LWT_XMIT.
-const BPF_PROG_TYPE_LWT_XMIT: u32 = kernel_sys::BPF_PROG_TYPE_LWT_XMIT;
+const BPF_PROG_TYPE_LWT_XMIT: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_XMIT;
 
 pub(super) const XDP_DATA_OFF: i16 = 0;
 pub(super) const XDP_DATA_END_OFF: i16 = 4;

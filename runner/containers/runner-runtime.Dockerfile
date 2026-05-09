@@ -396,16 +396,15 @@ RUN set -eux; \
 FROM runner-runtime-runtime-base AS runner-runtime-bpfopt-artifacts
 
 # BPFOPT_HOST_BIN_DIR is the host-relative directory containing pre-built bpfopt
-# + bpfprof CLIs (x86_64 from bpfopt/target/release/, arm64 from
+# CLI (x86_64 from bpfopt/target/release/, arm64 from
 # bpfopt/target/aarch64-unknown-linux-gnu/release/).
 ARG BPFOPT_HOST_BIN_DIR=bpfopt/target/release
 
 COPY ${BPFOPT_HOST_BIN_DIR}/bpfopt /tmp/bpfopt
-COPY ${BPFOPT_HOST_BIN_DIR}/bpfprof /tmp/bpfprof
 RUN set -eux; \
     install -d /artifacts/rust/usr-local-bin; \
-    install -m 0755 /tmp/bpfopt /tmp/bpfprof /artifacts/rust/usr-local-bin/; \
-    rm /tmp/bpfopt /tmp/bpfprof
+    install -m 0755 /tmp/bpfopt /artifacts/rust/usr-local-bin/; \
+    rm /tmp/bpfopt
 
 FROM runner-runtime-runtime-base AS runner-runtime
 
@@ -436,7 +435,6 @@ RUN set -eux; \
     test -x /usr/local/bin/bpftool; \
     test -x /usr/local/bin/bpfrejit-daemon; \
     test -x /usr/local/bin/bpfopt; \
-    test -x /usr/local/bin/bpfprof; \
     test -x /usr/local/bin/cilium-agent; \
     test -x /usr/local/bin/calico-node; \
     test -x /usr/local/bin/calicoctl; \

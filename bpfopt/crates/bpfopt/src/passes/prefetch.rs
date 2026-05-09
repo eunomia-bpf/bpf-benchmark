@@ -17,20 +17,20 @@ use super::utils::{
     resolve_kinsn_call_off_for_target,
 };
 
-pub(super) const HELPER_MAP_LOOKUP_ELEM: i32 = kernel_sys::BPF_FUNC_map_lookup_elem as i32;
-const HELPER_XDP_ADJUST_HEAD: i32 = kernel_sys::BPF_FUNC_xdp_adjust_head as i32;
+pub(super) const HELPER_MAP_LOOKUP_ELEM: i32 = libbpf_sys::BPF_FUNC_map_lookup_elem as i32;
+const HELPER_XDP_ADJUST_HEAD: i32 = libbpf_sys::BPF_FUNC_xdp_adjust_head as i32;
 const PREFETCH_TARGET_NAME: &str = "bpf_prefetch";
 const TARGET_PREFETCH_DISTANCE: usize = 8;
 const MAX_PREFETCH_DISTANCE: usize = 16;
 const MAP_VALUE_LOOKAHEAD: usize = 64;
 
-const BPF_PROG_TYPE_SCHED_CLS: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_CLS;
-const BPF_PROG_TYPE_SCHED_ACT: u32 = kernel_sys::BPF_PROG_TYPE_SCHED_ACT;
-pub(super) const BPF_PROG_TYPE_XDP: u32 = kernel_sys::BPF_PROG_TYPE_XDP;
-const BPF_PROG_TYPE_SK_SKB: u32 = kernel_sys::BPF_PROG_TYPE_SK_SKB;
-const BPF_PROG_TYPE_LWT_IN: u32 = kernel_sys::BPF_PROG_TYPE_LWT_IN;
-const BPF_PROG_TYPE_LWT_OUT: u32 = kernel_sys::BPF_PROG_TYPE_LWT_OUT;
-const BPF_PROG_TYPE_LWT_XMIT: u32 = kernel_sys::BPF_PROG_TYPE_LWT_XMIT;
+const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
+const BPF_PROG_TYPE_SCHED_ACT: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_ACT;
+pub(super) const BPF_PROG_TYPE_XDP: u32 = libbpf_sys::BPF_PROG_TYPE_XDP;
+const BPF_PROG_TYPE_SK_SKB: u32 = libbpf_sys::BPF_PROG_TYPE_SK_SKB;
+const BPF_PROG_TYPE_LWT_IN: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_IN;
+const BPF_PROG_TYPE_LWT_OUT: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_OUT;
+const BPF_PROG_TYPE_LWT_XMIT: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_XMIT;
 
 pub(super) const XDP_DATA_OFF: i16 = 0;
 const XDP_DATA_END_OFF: i16 = 4;
