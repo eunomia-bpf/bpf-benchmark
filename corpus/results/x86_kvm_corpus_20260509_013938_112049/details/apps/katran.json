@@ -1,0 +1,261 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 1720003,
+        "run_time_ns_delta": 392239703,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.10301503299999,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   285.98us  191.42us   9.54ms   80.28%\n    Req/Sec     7.18k     1.34k   11.44k    65.59%\n  Latency Distribution\n     50%  251.00us\n     75%  371.00us\n     90%  505.00us\n     99%    0.85ms\n  859978 requests in 30.10s, 133.68MB read\nRequests/sec:  28570.61\nTransfer/sec:      4.44MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 14116,
+        "bytes_xlated": 24376,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 1769502,
+        "run_time_ns_delta": 355546185,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.10251520899999,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   281.05us  189.62us   4.97ms   80.83%\n    Req/Sec     7.38k     1.12k   10.80k    61.38%\n  Latency Distribution\n     50%  241.00us\n     75%  363.00us\n     90%  507.00us\n     99%    0.92ms\n  884729 requests in 30.10s, 137.53MB read\nRequests/sec:  29393.06\nTransfer/sec:      4.57MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 505,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 387,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "maps_skipped_by_size=7",
+                "site at PC=562: skip reason: map-in-map chain is not inlineable",
+                "site at PC=814: skip reason: map-in-map chain is not inlineable",
+                "site at PC=863: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=863: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 863",
+                "site at PC=895: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=895: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 895",
+                "site at PC=1018: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "site at PC=1072: skip reason: map-in-map outer key unavailable: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1072",
+                "site at PC=1351: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1351: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1351",
+                "site at PC=1573: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "site at PC=1726: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "site at PC=1776: skip reason: map-in-map outer key unavailable: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1776",
+                "site at PC=2062: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=2062: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 2062",
+                "site at PC=512: inlined successfully, value=0x2",
+                "site at PC=520: inlined successfully, value=0x2",
+                "site at PC=762: inlined successfully, value=0x2",
+                "site at PC=770: inlined successfully, value=0x2",
+                "site at PC=1105: inlined successfully, value=0x02000000000b0000",
+                "site at PC=1807: inlined successfully, value=0x02000000000b0000",
+                "round 2: site at PC=512: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=512: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=520: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=520: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=562: skip reason: map-in-map chain is not inlineable",
+                "round 2: site at PC=762: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=762: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=770: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=770: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=814: skip reason: map-in-map chain is not inlineable",
+                "round 2: site at PC=863: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=863: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=895: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=895: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1018: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "round 2: site at PC=1072: skip reason: map-in-map outer key unavailable: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1105: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1105: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1351: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1351: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1573: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "round 2: site at PC=1726: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "round 2: site at PC=1776: skip reason: map-in-map outer key unavailable: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1807: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1807: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=2062: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=2062: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "inline_hints_consumed=2"
+              ],
+              "inlined_map_entries": [
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 5,
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 5,
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 5,
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 5,
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 4,
+                  "value_hex": "02000000000b0000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 4,
+                  "value_hex": "02000000000b0000"
+                }
+              ],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 6,
+              "sites_matched": 23,
+              "sites_skipped": 17,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 10,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6": 3,
+                "map-in-map chain is not inlineable": 2,
+                "map-in-map outer key unavailable: verifier-guided key extraction is unavailable after a prior map_inline rewrite": 2
+              }
+            },
+            "error": null,
+            "rejit_syscall_ms": 138,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --inline-hint=ctl_array:!00000000 --inline-hint=vip_map:!0a6401010000000000000000000000001f900600",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_ms": 170,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "const_prop_alu_materialized=126"
+              ],
+              "insn_count_after": 2629,
+              "insn_count_before": 2542,
+              "insn_delta": 87,
+              "pass": "const_prop",
+              "sites_applied": 126,
+              "sites_matched": 126,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 45,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 2629,
+          "orig_insn_count": 2542,
+          "prog_id": 9,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}

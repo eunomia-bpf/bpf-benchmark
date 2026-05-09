@@ -1,0 +1,321 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 5827787,
+        "run_time_ns_delta": 897408029,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.102357712000014,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   260.23us  181.14us  10.06ms   84.67%\n    Req/Sec     8.01k   522.94     9.49k    71.26%\n  Latency Distribution\n     50%  216.00us\n     75%  330.00us\n     90%  473.00us\n     99%    0.86ms\n  959492 requests in 30.10s, 149.15MB read\nRequests/sec:  31876.84\nTransfer/sec:      4.96MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.103056263000013,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   253.41us  160.22us   3.95ms   79.79%\n    Req/Sec     8.16k   422.04    11.99k    71.65%\n  Latency Distribution\n     50%  212.00us\n     75%  318.00us\n     90%  458.00us\n     99%  816.00us\n  976987 requests in 30.10s, 151.87MB read\nRequests/sec:  32457.94\nTransfer/sec:      5.05MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.105810399999996,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   254.35us  167.39us   8.25ms   84.40%\n    Req/Sec     8.16k   403.30     9.39k    72.01%\n  Latency Distribution\n     50%  212.00us\n     75%  319.00us\n     90%  460.00us\n     99%  827.00us\n  977347 requests in 30.10s, 151.93MB read\nRequests/sec:  32470.66\nTransfer/sec:      5.05MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13607,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 5919723,
+        "run_time_ns_delta": 893887582,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.102015542999993,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   251.01us  157.65us   3.91ms   79.53%\n    Req/Sec     8.24k   383.05     9.62k    69.60%\n  Latency Distribution\n     50%  210.00us\n     75%  313.00us\n     90%  452.00us\n     99%  805.00us\n  986885 requests in 30.10s, 153.41MB read\nRequests/sec:  32787.04\nTransfer/sec:      5.10MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.103800369,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   253.18us  161.10us   3.16ms   80.62%\n    Req/Sec     8.18k   415.63     9.60k    70.85%\n  Latency Distribution\n     50%  212.00us\n     75%  316.00us\n     90%  457.00us\n     99%  822.00us\n  980511 requests in 30.10s, 152.42MB read\nRequests/sec:  32574.96\nTransfer/sec:      5.06MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.105114325000045,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   249.67us  156.73us   3.32ms   80.26%\n    Req/Sec     8.28k   370.05     9.68k    68.02%\n  Latency Distribution\n     50%  210.00us\n     75%  311.00us\n     90%  449.00us\n     99%  802.00us\n  992399 requests in 30.10s, 154.27MB read\nRequests/sec:  32970.43\nTransfer/sec:      5.13MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "passes": [
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 442,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 331,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "maps_skipped_by_size=7",
+                "site at PC=512: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=512: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 512",
+                "site at PC=520: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=520: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 520",
+                "site at PC=562: skip reason: map-in-map chain is not inlineable",
+                "site at PC=762: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=762: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 762",
+                "site at PC=770: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=770: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 770",
+                "site at PC=814: skip reason: map-in-map chain is not inlineable",
+                "site at PC=863: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=863: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 863",
+                "site at PC=895: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=895: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 895",
+                "site at PC=1018: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "site at PC=1072: skip reason: map-in-map outer key unavailable: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1072",
+                "site at PC=1351: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1351: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1351",
+                "site at PC=1573: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "site at PC=1726: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "site at PC=1776: skip reason: map-in-map outer key unavailable: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 1776",
+                "site at PC=2062: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=2062: verifier-guided key extraction failed: verifier log has no state snapshot at call pc 2062",
+                "site at PC=1105: inlined successfully, value=0x02000000000b0000",
+                "site at PC=1807: inlined successfully, value=0x02000000000b0000",
+                "round 2: site at PC=512: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=512: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=520: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=520: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=562: skip reason: map-in-map chain is not inlineable",
+                "round 2: site at PC=762: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=762: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=770: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=770: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=814: skip reason: map-in-map chain is not inlineable",
+                "round 2: site at PC=863: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=863: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=895: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=895: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1018: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "round 2: site at PC=1072: skip reason: map-in-map outer key unavailable: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1105: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1105: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1351: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1351: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1573: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "round 2: site at PC=1726: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "round 2: site at PC=1776: skip reason: map-in-map outer key unavailable: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=1807: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=1807: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "round 2: site at PC=2062: skip reason: lookup key is not available from verifier-guided state",
+                "round 2: site at PC=2062: verifier-guided key extraction is unavailable after a prior map_inline rewrite",
+                "inline_hints_consumed=1"
+              ],
+              "inlined_map_entries": [
+                {
+                  "key_hex": "00000000",
+                  "map_id": 4,
+                  "value_hex": "02000000000b0000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 4,
+                  "value_hex": "02000000000b0000"
+                }
+              ],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 2,
+              "sites_matched": 19,
+              "sites_skipped": 17,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 10,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6": 3,
+                "map-in-map chain is not inlineable": 2,
+                "map-in-map outer key unavailable: verifier-guided key extraction is unavailable after a prior map_inline rewrite": 2
+              }
+            },
+            "error": null,
+            "rejit_syscall_ms": 85,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --inline-hint=ctl_array:!00000000",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 2542,
+          "orig_insn_count": 2542,
+          "prog_id": 9,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}

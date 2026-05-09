@@ -13,6 +13,9 @@ use std::fmt;
 use std::sync::Arc;
 
 use crate::insn::BpfInsn;
+// MapInlineHint et al. live in passes/map_inline.rs (pass-local metadata) and are
+// re-exported here so existing `use crate::pass::*` consumers keep working.
+pub use crate::passes::map_inline::{MapInlineHint, MapInlineHintAnchor, MapInlineHintMode};
 pub use kernel_sys::{
     RegState, ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
@@ -108,14 +111,16 @@ pub struct BpfProgram {
     /// Pre-loaded map value snapshot: (map_id, key_bytes) -> value_bytes.
     /// Used by offline snapshot callers and unit tests.
     pub map_values: HashMap<(u32, Vec<u8>), Vec<u8>>,
+    /// Compressed map value overlays: map_id -> lookup model.
+    /// These are operator-provided side inputs for maps whose full live
+    /// snapshot is intentionally omitted by size.
+    pub map_value_overlays: HashMap<u32, CompressedMapValues>,
     /// Map-in-map outer entries: (outer_map_id, outer_key_bytes) -> inner map id.
     pub map_inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
-    /// Per-map BPF-side mutability from bpftool `map show` flags.
-    pub map_bpf_writable: HashMap<u32, bool>,
     /// Map IDs whose bpftool dump snapshot was intentionally omitted by size.
     pub map_snapshots_skipped_by_size: HashSet<u32>,
-    /// Explicit map_inline key hints: call_pc -> key bytes.
-    pub map_inline_hints: HashMap<usize, Vec<u8>>,
+    /// Explicit map_inline key hints supplied through the pass-local CLI.
+    pub map_inline_hints: Vec<MapInlineHint>,
     /// Pre-loaded map metadata: map_id -> MapMetadata.
     /// Used by offline snapshot callers and unit tests.
     pub map_metadata: HashMap<u32, MapMetadata>,
@@ -126,7 +131,8 @@ pub struct BpfProgram {
 
 /// Pre-loaded map metadata used by snapshot/offline map providers.
 ///
-/// The pass unconditionally treats every map present here as inlinable.
+/// The pass resolves layout/type information from this metadata. Mutability
+/// is derived from bytecode-level writer helpers and map type rules.
 #[derive(Clone, Debug)]
 pub struct MapMetadata {
     pub map_type: u32,
@@ -135,6 +141,36 @@ pub struct MapMetadata {
     pub max_entries: u32,
     pub map_id: u32,
     pub name: String,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CompressedMapValues {
+    pub value_size: usize,
+    pub kind: CompressedMapValuesKind,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum CompressedMapValuesKind {
+    Uniform(Vec<u8>),
+    Sparse {
+        default: Vec<u8>,
+        entries: HashMap<Vec<u8>, Vec<u8>>,
+    },
+    Enumerated {
+        entries: HashMap<Vec<u8>, Vec<u8>>,
+    },
+}
+
+impl CompressedMapValues {
+    pub fn lookup(&self, key: &[u8]) -> Option<Vec<u8>> {
+        match &self.kind {
+            CompressedMapValuesKind::Uniform(value) => Some(value.clone()),
+            CompressedMapValuesKind::Sparse { default, entries } => {
+                entries.get(key).cloned().or_else(|| Some(default.clone()))
+            }
+            CompressedMapValuesKind::Enumerated { entries } => entries.get(key).cloned(),
+        }
+    }
 }
 
 /// Provider for resolving map metadata and values.
@@ -218,6 +254,9 @@ impl MapProvider for SnapshotMapProvider {
         program: &BpfProgram,
         info: &crate::passes::MapInfo,
     ) -> std::result::Result<usize, String> {
+        if let Some(overlay) = program.map_value_overlays.get(&info.map_id) {
+            return Ok(overlay.value_size);
+        }
         if let Some(value_size) = program
             .map_values
             .iter()
@@ -236,6 +275,26 @@ impl MapProvider for SnapshotMapProvider {
         key: &[u8],
         value_size: usize,
     ) -> std::result::Result<Vec<u8>, MapLookupError> {
+        if let Some(overlay) = program.map_value_overlays.get(&map_id) {
+            return match overlay.lookup(key) {
+                Some(value) => {
+                    if value.len() != value_size {
+                        Err(MapLookupError::Failed(format!(
+                            "compressed map {} returned value size {}, expected {}",
+                            map_id,
+                            value.len(),
+                            value_size
+                        )))
+                    } else {
+                        Ok(value)
+                    }
+                }
+                None => Err(MapLookupError::MissingKey {
+                    map_id,
+                    key: key.to_vec(),
+                }),
+            };
+        }
         if program.map_snapshots_skipped_by_size.contains(&map_id) {
             return Err(MapLookupError::SkippedBySize { map_id });
         }
@@ -288,26 +347,13 @@ impl BpfProgram {
             func_info: None,
             line_info: None,
             map_values: HashMap::new(),
+            map_value_overlays: HashMap::new(),
             map_inner_map_ids: HashMap::new(),
-            map_bpf_writable: HashMap::new(),
             map_snapshots_skipped_by_size: HashSet::new(),
-            map_inline_hints: HashMap::new(),
+            map_inline_hints: Vec::new(),
             map_metadata: HashMap::new(),
             map_provider: Arc::new(SnapshotMapProvider),
         }
-    }
-
-    pub fn bpf_writable_map(&self, map_id: u32) -> std::result::Result<bool, String> {
-        if let Some(writable) = self.map_bpf_writable.get(&map_id).copied() {
-            return Ok(writable);
-        }
-        if self.map_metadata.contains_key(&map_id) {
-            return Err(format!(
-                "map_values snapshot missing bpftool flags for map {}",
-                map_id
-            ));
-        }
-        Ok(true)
     }
 
     /// Install a map provider for specialized test execution.

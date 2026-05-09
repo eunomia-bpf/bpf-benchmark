@@ -10,6 +10,7 @@ use crate::pass::*;
 use super::utils::{emit_ldimm64, fixup_all_branches, insn_width};
 
 const REG_COUNT: usize = 11;
+const VERIFIER_POST_STATE_NOT_SCALAR_EXACT: &str = "verifier post-state is not scalar-exact";
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 struct RegConstFact {
@@ -31,6 +32,7 @@ type RegConstState = [RegConstFact; REG_COUNT];
 #[derive(Default)]
 struct VerifierExactConstOracle {
     facts: BTreeMap<(usize, usize, u8), RegConstFact>,
+    scalar_post_states: BTreeMap<(usize, usize, u8), VerifierScalarExactPostState>,
     frames_by_pc: BTreeMap<usize, BTreeSet<usize>>,
 }
 
@@ -39,6 +41,13 @@ struct OracleExactAccumulator {
     saw_observation: bool,
     exact64: Consensus<u64>,
     exact32: Consensus<u32>,
+    scalar_post_state: Consensus<VerifierScalarExactPostState>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct VerifierScalarExactPostState {
+    value: u64,
+    width: VerifierValueWidth,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -82,6 +91,7 @@ impl OracleExactAccumulator {
         if reg.reg_type != "scalar" {
             self.exact64.invalidate();
             self.exact32.invalidate();
+            self.scalar_post_state.invalidate();
             return;
         }
 
@@ -103,6 +113,11 @@ impl OracleExactAccumulator {
                 self.exact32.invalidate();
             }
         }
+
+        match scalar_exact_post_state(reg) {
+            Some(state) => self.scalar_post_state.observe(state),
+            None => self.scalar_post_state.invalidate(),
+        }
     }
 
     fn into_fact(self) -> Option<RegConstFact> {
@@ -115,6 +130,14 @@ impl OracleExactAccumulator {
             exact32: self.exact32.into_option(),
         };
         (fact.exact64.is_some() || fact.exact32.is_some()).then_some(fact)
+    }
+
+    fn into_scalar_post_state(self) -> Option<VerifierScalarExactPostState> {
+        if !self.saw_observation {
+            return None;
+        }
+
+        self.scalar_post_state.into_option()
     }
 }
 
@@ -144,21 +167,26 @@ impl VerifierExactConstOracle {
             }
         }
 
-        let facts = accumulators
-            .into_iter()
-            .filter_map(|(key, acc)| {
-                let (pc, frame, _) = key;
-                let visits = visit_counts.get(&(pc, frame)).copied().unwrap_or(0);
-                let observations = observed_counts.get(&key).copied().unwrap_or(0);
-                (observations == visits)
-                    .then_some(acc)
-                    .and_then(OracleExactAccumulator::into_fact)
-                    .map(|fact| (key, fact))
-            })
-            .collect();
+        let mut facts = BTreeMap::new();
+        let mut scalar_post_states = BTreeMap::new();
+        for (key, acc) in accumulators {
+            let (pc, frame, _) = key;
+            let visits = visit_counts.get(&(pc, frame)).copied().unwrap_or(0);
+            let observations = observed_counts.get(&key).copied().unwrap_or(0);
+            if observations != visits {
+                continue;
+            }
+            if let Some(fact) = acc.into_fact() {
+                facts.insert(key, fact);
+            }
+            if let Some(state) = acc.into_scalar_post_state() {
+                scalar_post_states.insert(key, state);
+            }
+        }
 
         Self {
             facts,
+            scalar_post_states,
             frames_by_pc,
         }
     }
@@ -205,6 +233,41 @@ impl VerifierExactConstOracle {
         }
     }
 
+    fn post_state_proves_scalar_exact(
+        &self,
+        pc: usize,
+        frame: usize,
+        dst: u8,
+        value: i64,
+        width: VerifierValueWidth,
+    ) -> bool {
+        self.scalar_post_states
+            .get(&(pc, frame, dst))
+            .is_some_and(|state| state.matches(value, width))
+    }
+
+    fn post_state_proves_scalar_exact_in_context(
+        &self,
+        pc: usize,
+        frame: Option<usize>,
+        dst: u8,
+        value: i64,
+        width: VerifierValueWidth,
+    ) -> bool {
+        match frame {
+            Some(frame) => self.post_state_proves_scalar_exact(pc, frame, dst, value, width),
+            None => self
+                .frames_by_pc
+                .get(&pc)
+                .filter(|frames| !frames.is_empty())
+                .is_some_and(|frames| {
+                    frames.iter().all(|&frame| {
+                        self.post_state_proves_scalar_exact(pc, frame, dst, value, width)
+                    })
+                }),
+        }
+    }
+
     fn apply_post_state(&self, pc: usize, frame: Option<usize>, state: &mut RegConstState) {
         for reg in 0..REG_COUNT {
             if let Some(fact) = self.fact(pc, frame, reg as u8) {
@@ -214,11 +277,56 @@ impl VerifierExactConstOracle {
     }
 }
 
+impl VerifierScalarExactPostState {
+    fn matches(self, value: i64, width: VerifierValueWidth) -> bool {
+        let expected = match width {
+            VerifierValueWidth::Bits32 => value as u32 as u64,
+            VerifierValueWidth::Bits64 => value as u64,
+            VerifierValueWidth::Unknown => return false,
+        };
+
+        self.value == expected && verifier_width_matches(self.width, width)
+    }
+}
+
+fn scalar_exact_post_state(reg: &crate::pass::RegState) -> Option<VerifierScalarExactPostState> {
+    if reg.reg_type != "scalar" {
+        return None;
+    }
+
+    let (value, width) = match reg.value_width {
+        VerifierValueWidth::Bits32 => (u64::from(reg.exact_u32()?), VerifierValueWidth::Bits32),
+        VerifierValueWidth::Bits64 => (reg.exact_u64()?, VerifierValueWidth::Bits64),
+        VerifierValueWidth::Unknown => {
+            let value = reg.exact_u64().or_else(|| reg.exact_u32().map(u64::from))?;
+            (value, VerifierValueWidth::Unknown)
+        }
+    };
+
+    Some(VerifierScalarExactPostState { value, width })
+}
+
+fn verifier_width_matches(observed: VerifierValueWidth, required: VerifierValueWidth) -> bool {
+    observed == required || observed == VerifierValueWidth::Unknown
+}
+
 fn observe_optional<T: Copy + Eq>(consensus: &mut Consensus<T>, value: Option<T>) {
     match value {
         Some(value) => consensus.observe(value),
         None => consensus.invalidate(),
     }
+}
+
+#[derive(Default)]
+struct ConstPropRewritePlan {
+    replacements: BTreeMap<usize, Vec<BpfInsn>>,
+    sites_skipped: Vec<SkipReason>,
+}
+
+enum AluFoldDecision {
+    Replace(Vec<BpfInsn>),
+    Skip(SkipReason),
+    None,
 }
 
 /// Fold exact register constants into MOV32/MOV64/LD_IMM64.
@@ -246,7 +354,7 @@ impl BpfPass for ConstPropPass {
 
         let oracle = VerifierExactConstOracle::from_states(program.verifier_states.as_ref());
         let block_in = solve_block_entry_states(program, &cfg, &oracle);
-        let mut replacements = BTreeMap::new();
+        let mut rewrite_plan = ConstPropRewritePlan::default();
 
         for (block_idx, block) in cfg.blocks.iter().enumerate() {
             simulate_block(
@@ -255,24 +363,34 @@ impl BpfPass for ConstPropPass {
                 block.end,
                 block_in[block_idx],
                 &oracle,
-                Some(&mut replacements),
+                Some(&mut rewrite_plan),
             );
         }
 
-        if replacements.is_empty() {
-            return Ok(PassResult::unchanged(self.name()));
+        if rewrite_plan.replacements.is_empty() {
+            if rewrite_plan.sites_skipped.is_empty() {
+                return Ok(PassResult::unchanged(self.name()));
+            }
+
+            return Ok(PassResult {
+                pass_name: self.name().into(),
+                sites_skipped: rewrite_plan.sites_skipped,
+                diagnostics: vec!["const_prop_alu_materialized=0".to_string()],
+                ..Default::default()
+            });
         }
 
         let mut alu_materialized = 0usize;
-        for &pc in replacements.keys() {
+        for &pc in rewrite_plan.replacements.keys() {
             let insn = &program.insns[pc];
             if matches!(insn.class(), BPF_ALU | BPF_ALU64) {
                 alu_materialized += 1;
             }
         }
 
+        let sites_applied = rewrite_plan.replacements.len();
         let orig_len = program.insns.len();
-        let mut new_insns = Vec::with_capacity(orig_len + replacements.len());
+        let mut new_insns = Vec::with_capacity(orig_len + sites_applied);
         let mut addr_map = vec![0usize; orig_len + 1];
         let mut pc = 0usize;
 
@@ -280,7 +398,7 @@ impl BpfPass for ConstPropPass {
             addr_map[pc] = new_insns.len();
             let width = insn_width(&program.insns[pc]);
 
-            if let Some(replacement) = replacements.get(&pc) {
+            if let Some(replacement) = rewrite_plan.replacements.get(&pc) {
                 new_insns.extend_from_slice(replacement);
                 pc += width;
                 continue;
@@ -305,8 +423,8 @@ impl BpfPass for ConstPropPass {
 
         Ok(PassResult {
             pass_name: self.name().into(),
-            sites_applied: replacements.len(),
-            sites_skipped: vec![],
+            sites_applied,
+            sites_skipped: rewrite_plan.sites_skipped,
             diagnostics: vec![format!("const_prop_alu_materialized={alu_materialized}")],
             ..Default::default()
         })
@@ -365,13 +483,22 @@ fn simulate_block(
     end: usize,
     mut state: RegConstState,
     oracle: &VerifierExactConstOracle,
-    mut replacements: Option<&mut BTreeMap<usize, Vec<BpfInsn>>>,
+    mut rewrite_plan: Option<&mut ConstPropRewritePlan>,
 ) -> RegConstState {
+    let collect_rewrites = rewrite_plan.is_some();
     let mut pc = start;
     while pc < end {
-        let (next_state, replacement) = analyze_instruction(insns, pc, None, &state, oracle);
-        if let (Some(map), Some(replacement)) = (replacements.as_deref_mut(), replacement) {
-            map.insert(pc, replacement);
+        let (next_state, decision) =
+            analyze_instruction(insns, pc, None, &state, oracle, collect_rewrites);
+        if let Some(plan) = rewrite_plan.as_mut() {
+            let plan = &mut **plan;
+            match decision {
+                AluFoldDecision::Replace(replacement) => {
+                    plan.replacements.insert(pc, replacement);
+                }
+                AluFoldDecision::Skip(skip) => plan.sites_skipped.push(skip),
+                AluFoldDecision::None => {}
+            }
         }
         state = next_state;
         pc += insn_width(&insns[pc]);
@@ -385,10 +512,11 @@ fn analyze_instruction(
     frame: Option<usize>,
     state: &RegConstState,
     oracle: &VerifierExactConstOracle,
-) -> (RegConstState, Option<Vec<BpfInsn>>) {
+    collect_rewrites: bool,
+) -> (RegConstState, AluFoldDecision) {
     let insn = &insns[pc];
     let mut next = *state;
-    let replacement = match insn.class() {
+    let decision = match insn.class() {
         BPF_LD => {
             if insn.is_ldimm64() {
                 if insn.src_reg() == 0 {
@@ -404,20 +532,24 @@ fn analyze_instruction(
             } else {
                 set_reg_unknown(&mut next, insn.dst_reg());
             }
-            None
+            AluFoldDecision::None
         }
         BPF_LDX => {
             set_reg_unknown(&mut next, insn.dst_reg());
-            None
+            AluFoldDecision::None
         }
         BPF_ALU | BPF_ALU64 => {
-            let replacement = fold_alu_instruction(insns, pc, frame, state, oracle);
+            let decision = if collect_rewrites {
+                fold_alu_instruction(insns, pc, frame, state, oracle)
+            } else {
+                AluFoldDecision::None
+            };
             let result = evaluate_alu_result(insn, state);
             match result {
                 Some(value) => set_reg_exact64(&mut next, insn.dst_reg(), value),
                 None => set_reg_unknown(&mut next, insn.dst_reg()),
             }
-            replacement
+            decision
         }
         BPF_JMP | BPF_JMP32 => {
             if insn.is_call() {
@@ -425,15 +557,15 @@ fn analyze_instruction(
                     set_reg_unknown(&mut next, reg as u8);
                 }
             }
-            None
+            AluFoldDecision::None
         }
-        _ => None,
+        _ => AluFoldDecision::None,
     };
 
     if can_apply_oracle_post_state(insn) {
         oracle.apply_post_state(pc, frame, &mut next);
     }
-    (next, replacement)
+    (next, decision)
 }
 
 fn can_apply_oracle_post_state(insn: &BpfInsn) -> bool {
@@ -446,23 +578,46 @@ fn fold_alu_instruction(
     frame: Option<usize>,
     state: &RegConstState,
     oracle: &VerifierExactConstOracle,
-) -> Option<Vec<BpfInsn>> {
+) -> AluFoldDecision {
     let insn = &insns[pc];
+    if bpf_op(insn.code) == BPF_MOV && bpf_src(insn.code) == BPF_K {
+        return AluFoldDecision::None;
+    }
+
+    let is_32 = insn.class() == BPF_ALU;
     let result = evaluate_alu_result(insn, state).or_else(|| {
         oracle_materializes_alu_result(insn)
-            .then(|| {
-                oracle.exact_for_instruction(pc, frame, insn.dst_reg(), insn.class() == BPF_ALU)
-            })
+            .then(|| oracle.exact_for_instruction(pc, frame, insn.dst_reg(), is_32))
             .flatten()
-    })?;
-
-    let op = bpf_op(insn.code);
-    let candidate = match op {
-        BPF_MOV if bpf_src(insn.code) == BPF_K => return None,
-        _ => emit_constant_load(insn.dst_reg(), result, insn.class() == BPF_ALU),
+    });
+    let Some(result) = result else {
+        return AluFoldDecision::None;
     };
 
-    replacement_if_changed(insns, pc, &candidate)
+    let candidate = emit_constant_load(insn.dst_reg(), result, is_32);
+    if replacement_if_changed(insns, pc, &candidate).is_none() {
+        return AluFoldDecision::None;
+    }
+
+    let width = if is_32 {
+        VerifierValueWidth::Bits32
+    } else {
+        VerifierValueWidth::Bits64
+    };
+    if !oracle.post_state_proves_scalar_exact_in_context(
+        pc,
+        frame,
+        insn.dst_reg(),
+        result as i64,
+        width,
+    ) {
+        return AluFoldDecision::Skip(SkipReason {
+            pc,
+            reason: VERIFIER_POST_STATE_NOT_SCALAR_EXACT.to_string(),
+        });
+    }
+
+    AluFoldDecision::Replace(candidate)
 }
 
 fn oracle_materializes_alu_result(insn: &BpfInsn) -> bool {
@@ -713,9 +868,13 @@ mod tests {
     }
 
     fn scalar_reg(value: u64) -> RegState {
+        scalar_reg_with_width(value, VerifierValueWidth::Bits64)
+    }
+
+    fn scalar_reg_with_width(value: u64, value_width: VerifierValueWidth) -> RegState {
         RegState {
             reg_type: "scalar".to_string(),
-            value_width: VerifierValueWidth::Bits64,
+            value_width,
             precise: true,
             exact_value: Some(value),
             tnum: Some(Tnum { value, mask: 0 }),
@@ -732,6 +891,10 @@ mod tests {
             offset: None,
             id: None,
         }
+    }
+
+    fn pkt_reg() -> RegState {
+        RegState::new("pkt", VerifierValueWidth::Bits64)
     }
 
     fn verifier_delta_state(pc: usize, regs: HashMap<u8, RegState>) -> VerifierInsn {
@@ -788,6 +951,10 @@ mod tests {
             BpfInsn::alu64_reg(BPF_ADD, 1, 2),
             exit_insn(),
         ]);
+        program.set_verifier_states(vec![verifier_delta_state(
+            2,
+            HashMap::from([(1, scalar_reg(12))]),
+        )]);
 
         let result = run_const_prop_pass(&mut program);
         let pass = &result.pass_results[0];
@@ -810,6 +977,10 @@ mod tests {
             BpfInsn::new(BPF_ALU | BPF_ADD | BPF_K, BpfInsn::make_regs(1, 0), 0, 1),
             exit_insn(),
         ]);
+        program.set_verifier_states(vec![verifier_delta_state(
+            1,
+            HashMap::from([(1, scalar_reg_with_width(0, VerifierValueWidth::Bits32))]),
+        )]);
 
         let _result = run_const_prop_pass(&mut program);
         assert_eq!(
@@ -826,6 +997,10 @@ mod tests {
     fn const_prop_tracks_ldimm64_constants() {
         let wide = ld_imm64(1, 0, 0, 1);
         let mut program = BpfProgram::new(vec![wide[0], wide[1], add64_imm(1, 1), exit_insn()]);
+        program.set_verifier_states(vec![verifier_delta_state(
+            2,
+            HashMap::from([(1, scalar_reg(0x1_0000_0001))]),
+        )]);
 
         let _result = run_const_prop_pass(&mut program);
         assert_eq!(program.insns.len(), 5);
@@ -893,6 +1068,60 @@ mod tests {
         let result = run_const_prop_pass(&mut program);
         assert_eq!(result.pass_results[0].sites_applied, 0);
         assert_eq!(program.insns, original);
+    }
+
+    #[test]
+    fn const_prop_post_state_guard_rejects_packet_pointer_copy_materialization() {
+        // Bug caught: local numeric state must not turn a provenance-carrying packet
+        // pointer copy into a scalar immediate before a later packet memory access.
+        let original = vec![
+            BpfInsn::mov64_imm(1, 62),
+            BpfInsn::mov64_reg(7, 1),
+            BpfInsn::ldx_mem(BPF_B, 2, 7, 0),
+            exit_insn(),
+        ];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_verifier_states(vec![verifier_delta_state(
+            1,
+            HashMap::from([(7, pkt_reg())]),
+        )]);
+
+        let result = run_const_prop_pass(&mut program);
+        let pass = &result.pass_results[0];
+        assert_eq!(pass.sites_applied, 0);
+        assert_eq!(pass.sites_skipped.len(), 1);
+        assert_eq!(pass.sites_skipped[0].pc, 1);
+        assert_eq!(
+            pass.sites_skipped[0].reason,
+            VERIFIER_POST_STATE_NOT_SCALAR_EXACT
+        );
+        assert_eq!(program.insns, original);
+    }
+
+    #[test]
+    fn const_prop_post_state_guard_allows_scalar_exact_register_copy() {
+        // Bug caught: the verifier guard should preserve useful scalar MOV X
+        // materialization when the post-state proves the destination is scalar exact.
+        let mut program = BpfProgram::new(vec![
+            BpfInsn::mov64_imm(1, 62),
+            BpfInsn::mov64_reg(7, 1),
+            exit_insn(),
+        ]);
+        program.set_verifier_states(vec![verifier_delta_state(
+            1,
+            HashMap::from([(7, scalar_reg(62))]),
+        )]);
+
+        let result = run_const_prop_pass(&mut program);
+        assert_eq!(result.pass_results[0].sites_applied, 1);
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(1, 62),
+                BpfInsn::mov64_imm(7, 62),
+                exit_insn(),
+            ]
+        );
     }
 
     #[test]

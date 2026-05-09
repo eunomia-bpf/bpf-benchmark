@@ -258,6 +258,105 @@ impl BpfPass for VerifierStateCountPass {
 // ── BpfProgram tests ────────────────────────────────────────────
 
 #[test]
+fn snapshot_provider_lookup_compressed_overlays() {
+    let mut program = make_program(vec![]);
+    for map_id in 1..=3 {
+        program.map_metadata.insert(
+            map_id,
+            MapMetadata {
+                map_type: kernel_sys::BPF_MAP_TYPE_ARRAY,
+                key_size: 4,
+                value_size: 4,
+                max_entries: 8,
+                map_id,
+                name: format!("map_{map_id}"),
+            },
+        );
+    }
+
+    program.map_value_overlays.insert(
+        1,
+        CompressedMapValues {
+            value_size: 4,
+            kind: CompressedMapValuesKind::Uniform(vec![1, 0, 0, 0]),
+        },
+    );
+    program.map_value_overlays.insert(
+        2,
+        CompressedMapValues {
+            value_size: 4,
+            kind: CompressedMapValuesKind::Sparse {
+                default: vec![0, 0, 0, 0],
+                entries: HashMap::from([(vec![1, 0, 0, 0], vec![7, 0, 0, 0])]),
+            },
+        },
+    );
+    program.map_value_overlays.insert(
+        3,
+        CompressedMapValues {
+            value_size: 4,
+            kind: CompressedMapValuesKind::Enumerated {
+                entries: HashMap::from([(vec![2, 0, 0, 0], vec![9, 0, 0, 0])]),
+            },
+        },
+    );
+
+    let provider = SnapshotMapProvider;
+    let uniform_info = provider
+        .map_info(&program, 1)
+        .unwrap()
+        .expect("uniform metadata should exist");
+    assert_eq!(
+        provider
+            .lookup_elem(&program, 1, &[99, 0, 0, 0], 4)
+            .unwrap(),
+        vec![1, 0, 0, 0]
+    );
+
+    let sparse_info = provider
+        .map_info(&program, 2)
+        .unwrap()
+        .expect("sparse metadata should exist");
+    assert_eq!(
+        provider.lookup_value_size(&program, &sparse_info).unwrap(),
+        4
+    );
+    assert_eq!(
+        provider.lookup_elem(&program, 2, &[1, 0, 0, 0], 4).unwrap(),
+        vec![7, 0, 0, 0]
+    );
+    assert_eq!(
+        provider.lookup_elem(&program, 2, &[3, 0, 0, 0], 4).unwrap(),
+        vec![0, 0, 0, 0]
+    );
+
+    let enumerated_info = provider
+        .map_info(&program, 3)
+        .unwrap()
+        .expect("enumerated metadata should exist");
+    assert_eq!(
+        provider
+            .lookup_elem(
+                &program,
+                3,
+                &[2, 0, 0, 0],
+                enumerated_info.value_size as usize
+            )
+            .unwrap(),
+        vec![9, 0, 0, 0]
+    );
+    assert!(matches!(
+        provider.lookup_elem(&program, 3, &[4, 0, 0, 0], 4),
+        Err(MapLookupError::MissingKey { map_id: 3, .. })
+    ));
+
+    assert_eq!(
+        provider.lookup_value_size(&program, &uniform_info).unwrap(),
+        4
+    );
+}
+
+#[test]
 fn sync_annotations_resizes_both_directions() {
     let cases: [(&str, BpfProgram, fn(&mut BpfProgram), usize); 2] = [
         (

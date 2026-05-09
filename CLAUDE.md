@@ -123,15 +123,20 @@ Use `libbpf-rs`/`libbpf-sys` instead of custom wrappers whenever upstream libbpf
 - Inside `kernel-sys`, standard BPF commands should go through `libbpf-rs`/`libbpf-sys`; project-fork commands (`BPF_PROG_REJIT`, `BPF_PROG_GET_ORIGINAL`) are wrapped with `libc::syscall` because upstream libbpf does not support them.
 
 ### Default Config Must Work
-`make vm-corpus`, `make vm-test`, `make aws-x86-test`, `make aws-arm64-test` must work with zero manual environment variables. Defaults live in `runner/targets/*.env` files and are overridable via env vars.
+`make corpus`, `make test`, `PLATFORM=aws ARCH=x86 make test`, `PLATFORM=aws ARCH=arm64 make test` must work with zero manual environment variables beyond `PLATFORM`/`ARCH`. Defaults live in `runner/targets/*.env` files and are overridable via env vars.
 
 ### Make Is the Only Benchmark Entrypoint
 **Every benchmark run must be invoked via `make <target>`. Never call `python -m runner.libs.run_target_suite`, `cargo run`, `docker run`, or any component binary directly.** Targets handle build dependencies, runtime image assembly, KVM/AWS dispatch, and artifact paths consistently; bypassing them silently changes the contract.
 
-Targets (orthogonal — mode goes in the target name, not in env vars):
-- VM x86: `vm-{selftest,negative-test,test,micro,corpus,all}`
-- AWS:    `aws-{arm64,x86}-{selftest,negative-test,test,micro,corpus,terminate}`
-- AWS arch dispatch: `aws-corpus` (chooses arm64/x86 by `RUN_TARGET_ARCH`)
+Targets (suite name only — platform/arch are env vars, NOT in the target name):
+- Suites: `selftest`, `negative-test`, `test`, `micro`, `corpus`, `all`, `terminate`
+- Platform: `PLATFORM=kvm` (default, x86 only) or `PLATFORM=aws`
+- Arch (AWS only): `ARCH=x86` (default) or `ARCH=arm64`
+
+Examples:
+- `make corpus` — VM x86 corpus (PLATFORM=kvm default)
+- `PLATFORM=aws ARCH=arm64 make test` — AWS arm64 fuzz test
+- `PLATFORM=aws ARCH=x86 make corpus` — AWS x86 corpus
 
 Override knobs (env vars passed to `make`):
 
@@ -140,13 +145,13 @@ Override knobs (env vars passed to `make`):
 | `SAMPLES` | corpus / micro | per-program sample count (default 3 for both) | `SAMPLES=3 make corpus` |
 | `WORKLOAD_DURATION` | corpus | seconds per workload sample, single global knob (default 30, applies to every app — no per-app override) | `WORKLOAD_DURATION=10 make corpus` |
 | `TIMEOUT` | all VM | suite timeout in seconds (default 7200) | `TIMEOUT=3600 make test` |
-| `BPFREJIT_CORPUS_APPS` | corpus | comma-separated subset of the 7 supported apps. Names match `corpus/config/macro_apps.yaml` (e.g. `bcc/set`, `tetragon/observer`, `katran`) | `BPFREJIT_CORPUS_APPS="cilium/agent,tracee/monitor" make vm-corpus` |
-| `BPFREJIT_BENCH_PASSES` | corpus / micro | comma-separated bpfopt pass list overriding `corpus/config/benchmark_config.yaml`. Set to `default` to use yaml policy explicitly | `BPFREJIT_BENCH_PASSES="noop,map_inline" make vm-corpus` |
-| `KEEP_WORKDIRS` | corpus | `1` = retain failure workdir tarballs at `details/failure-artifacts/<prog_id>.tar.gz`. To capture artifacts from a successful pass, edit the relevant `runner/config/passes/<pass>/<app>.yaml` and append `&& false` to that step's `command:` — that converts it into a controlled failure and the failure-tar pipeline writes the workdir | `KEEP_WORKDIRS=1 make vm-corpus` |
-| `BENCH` | micro | subset of micro benchmarks | `make vm-micro BENCH="simple bitcount"` |
-| `WARMUPS` / `INNER_REPEAT` | micro | micro-only knobs (same name on VM and AWS) | `make vm-micro SAMPLES=1 WARMUPS=0 INNER_REPEAT=10` |
-| `FUZZ_ROUNDS` | test | fuzz iteration count | `FUZZ_ROUNDS=5000 make vm-test` |
-| `AWS_<ARM64\|X86>_{REGION,PROFILE,SUBNET_ID,SECURITY_GROUP_ID,KEY_NAME,KEY_PATH}` | aws-* | AWS deploy params | `AWS_ARM64_REGION=us-east-1 make aws-arm64-test` |
+| `BPFREJIT_CORPUS_APPS` | corpus | comma-separated subset of the 7 supported apps. Names match `corpus/config/macro_apps.yaml` (e.g. `bcc/set`, `tetragon/observer`, `katran`) | `BPFREJIT_CORPUS_APPS="cilium/agent,tracee/monitor" make corpus` |
+| `BPFREJIT_BENCH_PASSES` | corpus / micro | comma-separated bpfopt pass list overriding `corpus/config/benchmark_config.yaml`. Set to `default` to use yaml policy explicitly | `BPFREJIT_BENCH_PASSES="noop,map_inline" make corpus` |
+| `KEEP_WORKDIRS` | corpus | `1` = retain failure workdir tarballs at `details/failure-artifacts/<prog_id>.tar.gz`. To capture artifacts from a successful pass, edit the relevant `runner/config/passes/<pass>/<app>.yaml` and append `&& false` to that step's `command:` — that converts it into a controlled failure and the failure-tar pipeline writes the workdir | `KEEP_WORKDIRS=1 make corpus` |
+| `BENCH` | micro | subset of micro benchmarks | `make micro BENCH="simple bitcount"` |
+| `WARMUPS` / `INNER_REPEAT` | micro | micro-only knobs (same name on VM and AWS) | `make micro SAMPLES=1 WARMUPS=0 INNER_REPEAT=10` |
+| `FUZZ_ROUNDS` | test | fuzz iteration count | `FUZZ_ROUNDS=5000 make test` |
+| `AWS_<ARM64\|X86>_{REGION,PROFILE,SUBNET_ID,SECURITY_GROUP_ID,KEY_NAME,KEY_PATH}` | PLATFORM=aws | AWS deploy params | `AWS_ARM64_REGION=us-east-1 PLATFORM=aws ARCH=arm64 make test` |
 
 Pass list reference (current `corpus/config/benchmark_config.yaml`):
 - **kinsn-class** (replace bytecode with a kfunc call lowered by an in-kernel kinsn module): `rotate`, `cond_select`, `ccmp` (arm64-only), `extract`, `endian_fusion`, `bulk_memory`, `prefetch`. Kinsn modules `bpf_barrier` and `bpf_ldp` exist as kernel modules but have no bpfopt pass consuming them yet.

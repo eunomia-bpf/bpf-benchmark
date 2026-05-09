@@ -23,12 +23,37 @@ const BPF_PSEUDO_MAP_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_VALUE as u8;
 const BPF_PSEUDO_MAP_IDX: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX as u8;
 const BPF_PSEUDO_MAP_IDX_VALUE: u8 = kernel_sys::BPF_PSEUDO_MAP_IDX_VALUE as u8;
 const HELPER_MAP_LOOKUP_ELEM: i32 = 1;
+const HELPER_MAP_UPDATE_ELEM: i32 = 2;
+const HELPER_MAP_DELETE_ELEM: i32 = 3;
 const HELPER_KTIME_GET_NS: i32 = 5;
+const HELPER_MAP_PUSH_ELEM: i32 = 87;
+const HELPER_MAP_POP_ELEM: i32 = 88;
 const R2_SETUP_LOOKBACK_LIMIT: usize = 8;
 const REG_RESOLUTION_LIMIT: usize = 64;
 const CONST_STACK_VALUE_LOOKBACK_LIMIT: usize = 256;
 const MAP_INLINE_FIXED_POINT_MAX_ITERS: usize = 8;
 const VALUE_PREVIEW_BYTES: usize = 32;
+
+// ── Hint-related types (pass-local; pass.rs re-exports for BpfProgram field).
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub enum MapInlineHintAnchor {
+    Pc(usize),
+    MapName(String),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MapInlineHintMode {
+    Soft,
+    Hard,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MapInlineHint {
+    pub anchor: MapInlineHintAnchor,
+    pub mode: MapInlineHintMode,
+    pub key: Vec<u8>,
+}
 
 /// Dynamic map inlining optimization pass.
 pub struct MapInlinePass;
@@ -37,7 +62,7 @@ pub struct MapInlinePass;
 struct MapInlineCliPass {
     map_ids: Vec<u32>,
     snapshot: MapSnapshot,
-    inline_hints: HashMap<usize, Vec<u8>>,
+    inline_hints: Vec<MapInlineHint>,
 }
 
 impl MapInlinePass {
@@ -71,8 +96,8 @@ impl BpfPass for MapInlineCliPass {
         program.set_map_ids(self.map_ids.clone());
         program.map_metadata = self.snapshot.metadata.clone();
         program.map_values = self.snapshot.values.clone();
+        program.map_value_overlays = self.snapshot.compressed_values.clone();
         program.map_inner_map_ids = self.snapshot.inner_map_ids.clone();
-        program.map_bpf_writable = self.snapshot.bpf_writable.clone();
         program.map_snapshots_skipped_by_size = self.snapshot.maps_skipped_by_size.clone();
         program.map_inline_hints = self.inline_hints.clone();
         MapInlinePass.run(program, analyses, ctx)
@@ -82,28 +107,24 @@ impl BpfPass for MapInlineCliPass {
 struct MapInlineCliArgs {
     map_values: PathBuf,
     map_ids: String,
-    /// Operator-supplied per-call-site key hints. Each entry pre-fills
-    /// `BpfProgram.map_inline_hints` so the verifier-guided key extraction
-    /// can be bypassed for sites where the verifier never observed the key
-    /// (e.g. katran's `ctl_array[0]` lookups). Pass-local on purpose:
+    /// Operator-supplied key hints. Each entry pre-fills
+    /// `BpfProgram.map_inline_hints` so the pass can either hard-specialize a
+    /// lookup or emit a guarded soft fold. Pass-local on purpose:
     /// `--inline-hint` is a map_inline tuning knob, NOT framework-global —
     /// adding it to `bpfopt::main::CommonArgs` would pollute every other
     /// pass's CLI surface.
-    inline_hints: HashMap<usize, Vec<u8>>,
+    inline_hints: Vec<MapInlineHint>,
 }
 
 impl MapInlineCliArgs {
     fn parse(args: &[String]) -> Result<Self> {
         let mut map_values = None;
         let mut map_ids = None;
-        let mut inline_hints: HashMap<usize, Vec<u8>> = HashMap::new();
+        let mut inline_hints = Vec::new();
         let mut iter = args.iter();
         while let Some(arg) = iter.next() {
             if let Some(value) = arg.strip_prefix("--inline-hint=") {
-                let (call_pc, key_bytes) = parse_inline_hint(value)?;
-                if inline_hints.insert(call_pc, key_bytes).is_some() {
-                    bail!("duplicate --inline-hint for call pc {call_pc}");
-                }
+                inline_hints.push(parse_inline_hint(value)?);
                 continue;
             }
             match arg.as_str() {
@@ -120,17 +141,15 @@ impl MapInlineCliArgs {
                     map_ids = Some(value.clone());
                 }
                 "--inline-hint" => {
-                    let value = iter
-                        .next()
-                        .ok_or_else(|| anyhow::anyhow!("--inline-hint requires <call_pc>:<hex>"))?;
-                    let (call_pc, key_bytes) = parse_inline_hint(value)?;
-                    if inline_hints.insert(call_pc, key_bytes).is_some() {
-                        bail!("duplicate --inline-hint for call pc {call_pc}");
-                    }
+                    let value = iter.next().ok_or_else(|| {
+                        anyhow::anyhow!("--inline-hint requires <anchor>:[!]<hex_key_bytes>")
+                    })?;
+                    inline_hints.push(parse_inline_hint(value)?);
                 }
                 other => bail!("map_inline unknown pass-local arg: {other}"),
             }
         }
+        validate_inline_hint_anchor_modes(&inline_hints)?;
         Ok(Self {
             map_values: map_values
                 .ok_or_else(|| anyhow::anyhow!("map_inline requires --map-values"))?,
@@ -140,18 +159,51 @@ impl MapInlineCliArgs {
     }
 }
 
-/// Parse one `--inline-hint <call_pc>:<hex_key_bytes>` value (pass-local form).
-/// `call_pc` is decimal; `hex_key_bytes` is even-length hex with no leading 0x.
-fn parse_inline_hint(input: &str) -> Result<(usize, Vec<u8>)> {
-    let (pc_str, hex_str) = input
-        .split_once(':')
-        .ok_or_else(|| anyhow::anyhow!("invalid --inline-hint '{input}': expected <call_pc>:<hex_key_bytes>"))?;
-    let call_pc = pc_str
-        .parse::<usize>()
-        .with_context(|| format!("invalid --inline-hint call_pc in '{input}'"))?;
+/// Parse one `--inline-hint <anchor>:[!]<hex_key_bytes>` value.
+///
+/// A decimal anchor selects one call PC. A name anchor selects every lookup
+/// site that uses the named map. Bare hex is a soft fold; `!` requests a hard
+/// fold.
+fn parse_inline_hint(input: &str) -> Result<MapInlineHint> {
+    let (anchor_str, key_str) = input.split_once(':').ok_or_else(|| {
+        anyhow::anyhow!("invalid --inline-hint '{input}': expected <anchor>:[!]<hex_key_bytes>")
+    })?;
+    let anchor = parse_inline_hint_anchor(anchor_str)
+        .with_context(|| format!("invalid --inline-hint anchor in '{input}'"))?;
+    let (mode, hex_str) = if let Some(hex) = key_str.strip_prefix('!') {
+        (MapInlineHintMode::Hard, hex)
+    } else {
+        (MapInlineHintMode::Soft, key_str)
+    };
     let key_bytes = parse_inline_hint_hex(hex_str)
         .with_context(|| format!("invalid --inline-hint key bytes in '{input}'"))?;
-    Ok((call_pc, key_bytes))
+    Ok(MapInlineHint {
+        anchor,
+        mode,
+        key: key_bytes,
+    })
+}
+
+fn parse_inline_hint_anchor(input: &str) -> Result<MapInlineHintAnchor> {
+    if input.is_empty() {
+        bail!("anchor is empty");
+    }
+    if input.bytes().all(|byte| byte.is_ascii_digit()) {
+        let pc = input
+            .parse::<usize>()
+            .with_context(|| format!("invalid call_pc anchor {input:?}"))?;
+        return Ok(MapInlineHintAnchor::Pc(pc));
+    }
+
+    let mut bytes = input.bytes();
+    let first = bytes.next().expect("non-empty anchor checked above");
+    if !(first.is_ascii_alphabetic() || first == b'_') {
+        bail!("map-name anchor must start with a letter or underscore");
+    }
+    if !bytes.all(|byte| byte.is_ascii_alphanumeric() || byte == b'_') {
+        bail!("map-name anchor must contain only ASCII letters, digits, and underscores");
+    }
+    Ok(MapInlineHintAnchor::MapName(input.to_string()))
 }
 
 fn parse_inline_hint_hex(input: &str) -> Result<Vec<u8>> {
@@ -180,12 +232,46 @@ fn hex_nibble(byte: u8) -> Option<u8> {
     }
 }
 
+fn validate_inline_hint_anchor_modes(hints: &[MapInlineHint]) -> Result<()> {
+    let mut anchors: HashMap<MapInlineHintAnchor, (MapInlineHintMode, usize)> = HashMap::new();
+    for hint in hints {
+        match anchors.get_mut(&hint.anchor) {
+            Some((mode, count)) => {
+                if *mode != hint.mode {
+                    bail!(
+                        "inline hint anchor {} mixes soft and hard folds",
+                        format_hint_anchor(&hint.anchor)
+                    );
+                }
+                if hint.mode == MapInlineHintMode::Hard {
+                    bail!(
+                        "inline hint anchor {} has multiple hard folds",
+                        format_hint_anchor(&hint.anchor)
+                    );
+                }
+                *count += 1;
+            }
+            None => {
+                anchors.insert(hint.anchor.clone(), (hint.mode, 1));
+            }
+        }
+    }
+    Ok(())
+}
+
+fn format_hint_anchor(anchor: &MapInlineHintAnchor) -> String {
+    match anchor {
+        MapInlineHintAnchor::Pc(pc) => pc.to_string(),
+        MapInlineHintAnchor::MapName(name) => name.clone(),
+    }
+}
+
 #[derive(Clone)]
 struct MapSnapshot {
     metadata: HashMap<u32, MapMetadata>,
     values: HashMap<(u32, Vec<u8>), Vec<u8>>,
+    compressed_values: HashMap<u32, CompressedMapValues>,
     inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
-    bpf_writable: HashMap<u32, bool>,
     maps_skipped_by_size: HashSet<u32>,
 }
 
@@ -202,7 +288,6 @@ struct BpftoolMapShowJson {
     name: String,
     #[serde(rename = "type")]
     map_type: MapTypeJson,
-    flags: BpftoolNumberJson,
     bytes_key: u32,
     bytes_value: u32,
     max_entries: u32,
@@ -230,6 +315,7 @@ struct BpftoolMapDumpSkipMarker {
 
 enum BpftoolMapDumpSnapshot {
     Entries(Vec<BpftoolMapEntryJson>),
+    Compressed(CompressedMapValues),
     SkippedBySize,
 }
 
@@ -246,10 +332,16 @@ enum BpftoolMapValueJson {
 }
 
 #[derive(Debug, Deserialize)]
-#[serde(untagged)]
-enum BpftoolNumberJson {
-    Number(u64),
-    String(String),
+#[serde(deny_unknown_fields)]
+struct CompressedMapValuesJson {
+    compression: String,
+    value_size: usize,
+    #[serde(default)]
+    value_hex: Option<String>,
+    #[serde(default)]
+    default_hex: Option<String>,
+    #[serde(default)]
+    entries: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -268,14 +360,13 @@ fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
     }
     let mut metadata = HashMap::new();
     let mut values = HashMap::new();
+    let mut compressed_values = HashMap::new();
     let mut inner_map_ids = HashMap::new();
-    let mut bpf_writable = HashMap::new();
     let mut maps_skipped_by_size = HashSet::new();
 
     for &map_id in map_ids.iter().filter(|&&map_id| map_id != 0) {
         let show = read_bpftool_map_show(path, map_id)?;
         let map_type = parse_map_type(&show.map_type)?;
-        let flags = parse_bpftool_number(&show.flags)?;
         let map_metadata = MapMetadata {
             map_type,
             key_size: show.bytes_key,
@@ -284,9 +375,8 @@ fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
             map_id: show.id,
             name: show.name,
         };
-        bpf_writable.insert(show.id, flags & bpf_f_rdonly_prog() == 0);
         if needs_bpftool_map_dump(map_type) {
-            match read_bpftool_map_dump(path, show.id)? {
+            match read_bpftool_map_dump(path, show.id, &map_metadata)? {
                 BpftoolMapDumpSnapshot::Entries(entries) => {
                     for entry in entries {
                         let key = decode_bpftool_hex_bytes(&entry.key)
@@ -299,6 +389,15 @@ fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
                         }
                     }
                 }
+                BpftoolMapDumpSnapshot::Compressed(compressed) => {
+                    if values.keys().any(|(map_id, _)| *map_id == show.id) {
+                        bail!(
+                            "map {} has both raw entries and compression overlay",
+                            show.id
+                        );
+                    }
+                    compressed_values.insert(show.id, compressed);
+                }
                 BpftoolMapDumpSnapshot::SkippedBySize => {
                     maps_skipped_by_size.insert(show.id);
                 }
@@ -306,12 +405,13 @@ fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
         }
         metadata.insert(show.id, map_metadata);
     }
+    read_optional_compressed_overlay_file(path, &metadata, &values, &mut compressed_values)?;
 
     Ok(MapSnapshot {
         metadata,
         values,
+        compressed_values,
         inner_map_ids,
-        bpf_writable,
         maps_skipped_by_size,
     })
 }
@@ -330,7 +430,11 @@ fn read_bpftool_map_show(path: &Path, map_id: u32) -> Result<BpftoolMapShowJson>
     Ok(show)
 }
 
-fn read_bpftool_map_dump(path: &Path, map_id: u32) -> Result<BpftoolMapDumpSnapshot> {
+fn read_bpftool_map_dump(
+    path: &Path,
+    map_id: u32,
+    metadata: &MapMetadata,
+) -> Result<BpftoolMapDumpSnapshot> {
     let dump_path = bpftool_map_dump_path(path, map_id);
     let data =
         fs::read(&dump_path).with_context(|| format!("failed to read {}", dump_path.display()))?;
@@ -353,8 +457,24 @@ fn read_bpftool_map_dump(path: &Path, map_id: u32) -> Result<BpftoolMapDumpSnaps
             Ok(BpftoolMapDumpSnapshot::Entries(entries))
         }
         b'{' => {
+            let value: serde_json::Value = serde_json::from_slice(&data).with_context(|| {
+                format!(
+                    "failed to parse bpftool map dump object from {}",
+                    dump_path.display()
+                )
+            })?;
+            if value.get("compression").is_some() {
+                let compressed = parse_compressed_map_values_json(map_id, metadata, value)
+                    .with_context(|| {
+                        format!(
+                            "failed to parse compressed map overlay {}",
+                            dump_path.display()
+                        )
+                    })?;
+                return Ok(BpftoolMapDumpSnapshot::Compressed(compressed));
+            }
             let marker: BpftoolMapDumpSkipMarker =
-                serde_json::from_slice(&data).with_context(|| {
+                serde_json::from_value(value).with_context(|| {
                     format!(
                         "failed to parse bpftool map dump skip marker from {}",
                         dump_path.display()
@@ -378,19 +498,202 @@ fn read_bpftool_map_dump(path: &Path, map_id: u32) -> Result<BpftoolMapDumpSnaps
     }
 }
 
+fn read_optional_compressed_overlay_file(
+    path: &Path,
+    metadata: &HashMap<u32, MapMetadata>,
+    raw_values: &HashMap<(u32, Vec<u8>), Vec<u8>>,
+    compressed_values: &mut HashMap<u32, CompressedMapValues>,
+) -> Result<()> {
+    let overlay_path = path.join("overlays.json");
+    let data = match fs::read(&overlay_path) {
+        Ok(data) => data,
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+        Err(err) => {
+            return Err(err).with_context(|| format!("failed to read {}", overlay_path.display()))
+        }
+    };
+    let overlays: HashMap<String, serde_json::Value> =
+        serde_json::from_slice(&data).with_context(|| {
+            format!(
+                "failed to parse compressed map overlays from {}",
+                overlay_path.display()
+            )
+        })?;
+
+    for (map_id_text, overlay) in overlays {
+        let map_id = map_id_text
+            .parse::<u32>()
+            .with_context(|| format!("invalid compressed overlay map id {map_id_text:?}"))?;
+        let map_metadata = metadata.get(&map_id).ok_or_else(|| {
+            anyhow::anyhow!(
+                "compressed overlay references map {} not present in --map-ids metadata",
+                map_id
+            )
+        })?;
+        if raw_values
+            .keys()
+            .any(|(raw_map_id, _)| *raw_map_id == map_id)
+        {
+            bail!("map {map_id} has both raw entries and compression overlay");
+        }
+        let compressed = parse_compressed_map_values_json(map_id, map_metadata, overlay)
+            .with_context(|| format!("invalid compressed overlay for map {map_id}"))?;
+        if compressed_values.insert(map_id, compressed).is_some() {
+            bail!("map {map_id} has duplicate compression overlays");
+        }
+    }
+
+    Ok(())
+}
+
+fn parse_compressed_map_values_json(
+    map_id: u32,
+    metadata: &MapMetadata,
+    value: serde_json::Value,
+) -> Result<CompressedMapValues> {
+    let overlay: CompressedMapValuesJson = serde_json::from_value(value)
+        .with_context(|| format!("invalid compressed map overlay schema for map {map_id}"))?;
+    if overlay.value_size != metadata.value_size as usize {
+        bail!(
+            "map {map_id} compressed overlay value_size {} does not match map bytes_value {}",
+            overlay.value_size,
+            metadata.value_size
+        );
+    }
+
+    let kind = match overlay.compression.as_str() {
+        "uniform" => {
+            if let Some(entries) = overlay.entries {
+                if entries.is_array() {
+                    bail!("map {map_id} has both raw entries and compression overlay");
+                }
+                bail!("map {map_id} uniform compression must not include entries");
+            }
+            if overlay.default_hex.is_some() {
+                bail!("map {map_id} uniform compression must not include default_hex");
+            }
+            let value_hex = overlay.value_hex.ok_or_else(|| {
+                anyhow::anyhow!("map {map_id} uniform compression requires value_hex")
+            })?;
+            let value =
+                decode_compressed_value_hex(map_id, "value_hex", &value_hex, overlay.value_size)?;
+            CompressedMapValuesKind::Uniform(value)
+        }
+        "sparse" => {
+            if overlay.value_hex.is_some() {
+                bail!("map {map_id} sparse compression must not include value_hex");
+            }
+            let default_hex = overlay.default_hex.ok_or_else(|| {
+                anyhow::anyhow!("map {map_id} sparse compression requires default_hex")
+            })?;
+            let default = decode_compressed_value_hex(
+                map_id,
+                "default_hex",
+                &default_hex,
+                overlay.value_size,
+            )?;
+            let entries = overlay.entries.ok_or_else(|| {
+                anyhow::anyhow!("map {map_id} sparse compression requires entries")
+            })?;
+            let entries = decode_compressed_entries(
+                map_id,
+                metadata.key_size as usize,
+                overlay.value_size,
+                entries,
+            )?;
+            CompressedMapValuesKind::Sparse { default, entries }
+        }
+        "enumerated" => {
+            if overlay.value_hex.is_some() {
+                bail!("map {map_id} enumerated compression must not include value_hex");
+            }
+            if overlay.default_hex.is_some() {
+                bail!("map {map_id} enumerated compression must not include default_hex");
+            }
+            let entries = overlay.entries.ok_or_else(|| {
+                anyhow::anyhow!("map {map_id} enumerated compression requires entries")
+            })?;
+            let entries = decode_compressed_entries(
+                map_id,
+                metadata.key_size as usize,
+                overlay.value_size,
+                entries,
+            )?;
+            CompressedMapValuesKind::Enumerated { entries }
+        }
+        other => bail!("map {map_id} unsupported compression {other:?}"),
+    };
+
+    Ok(CompressedMapValues {
+        value_size: overlay.value_size,
+        kind,
+    })
+}
+
+fn decode_compressed_entries(
+    map_id: u32,
+    key_size: usize,
+    value_size: usize,
+    entries: serde_json::Value,
+) -> Result<HashMap<Vec<u8>, Vec<u8>>> {
+    let object = entries
+        .as_object()
+        .ok_or_else(|| anyhow::anyhow!("map {map_id} compressed entries must be a JSON object"))?;
+    let mut decoded = HashMap::new();
+    for (key_hex, value_json) in object {
+        let value_hex = value_json.as_str().ok_or_else(|| {
+            anyhow::anyhow!("map {map_id} compressed entry {key_hex:?} value must be a hex string")
+        })?;
+        let key = decode_compressed_key_hex(map_id, key_hex, key_size)?;
+        let value = decode_compressed_value_hex(map_id, "entries value", value_hex, value_size)?;
+        decoded.insert(key, value);
+    }
+    Ok(decoded)
+}
+
+fn decode_compressed_key_hex(map_id: u32, hex: &str, key_size: usize) -> Result<Vec<u8>> {
+    let expected = expected_hex_digits(key_size, "key_size")?;
+    if hex.len() != expected {
+        bail!(
+            "map {map_id} compressed entry key has {} hex digit(s), expected {}",
+            hex.len(),
+            expected
+        );
+    }
+    parse_inline_hint_hex(hex)
+        .with_context(|| format!("map {map_id} compressed entry key has invalid hex"))
+}
+
+fn decode_compressed_value_hex(
+    map_id: u32,
+    field: &str,
+    hex: &str,
+    value_size: usize,
+) -> Result<Vec<u8>> {
+    let expected = expected_hex_digits(value_size, "value_size")?;
+    if hex.len() != expected {
+        bail!(
+            "map {map_id} compressed {field} has {} hex digit(s), expected {}",
+            hex.len(),
+            expected
+        );
+    }
+    parse_inline_hint_hex(hex)
+        .with_context(|| format!("map {map_id} compressed {field} has invalid hex"))
+}
+
+fn expected_hex_digits(byte_len: usize, label: &str) -> Result<usize> {
+    byte_len
+        .checked_mul(2)
+        .ok_or_else(|| anyhow::anyhow!("{label} {byte_len} overflows hex length"))
+}
+
 fn bpftool_map_show_path(path: &Path, map_id: u32) -> PathBuf {
     path.join(format!("map-{map_id}.show.json"))
 }
 
 fn bpftool_map_dump_path(path: &Path, map_id: u32) -> PathBuf {
     path.join(format!("map-{map_id}.dump.json"))
-}
-
-fn parse_bpftool_number(value: &BpftoolNumberJson) -> Result<u64> {
-    match value {
-        BpftoolNumberJson::Number(number) => Ok(*number),
-        BpftoolNumberJson::String(text) => parse_u64_auto_radix(text),
-    }
 }
 
 fn decode_bpftool_entry_value(
@@ -441,10 +744,6 @@ fn decode_bpftool_hex_bytes(input: &[String]) -> Result<Vec<u8>> {
             u8::from_str_radix(hex, 16).with_context(|| format!("invalid bpftool byte {byte:?}"))
         })
         .collect()
-}
-
-fn bpf_f_rdonly_prog() -> u64 {
-    1 << 7
 }
 
 fn needs_bpftool_map_dump(map_type: u32) -> bool {
@@ -534,15 +833,6 @@ fn parse_u32_csv(value: &str, flag: &str) -> Result<Vec<u32>> {
         .collect()
 }
 
-fn parse_u64_auto_radix(input: &str) -> Result<u64> {
-    let input = input.trim();
-    if let Some(hex) = input.strip_prefix("0x") {
-        Ok(u64::from_str_radix(hex, 16)?)
-    } else {
-        Ok(input.parse::<u64>()?)
-    }
-}
-
 fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Result<T> {
     let data = fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
     serde_json::from_slice(&data)
@@ -583,13 +873,12 @@ pub struct ConstantKey {
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct ExtractedConstantKey {
     key: ConstantKey,
-    used_inline_hint: bool,
+    used_inline_hint: Option<MapInlineHintAnchor>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum KeyExtractionError {
     Unavailable(String),
-    Fatal(String),
 }
 
 /// A fixed-offset scalar load from the map value pointer returned in `r0`.
@@ -635,12 +924,6 @@ struct ConstantStackBytes {
 #[derive(Clone, Debug)]
 struct SnapshotMapValue {
     map_id: u32,
-    key: Vec<u8>,
-    value: Vec<u8>,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-struct RuntimeMapEntry {
     key: Vec<u8>,
     value: Vec<u8>,
 }
@@ -954,22 +1237,23 @@ fn try_extract_constant_key_for_occurrence(
 
     let removable_setup = find_r2_stack_pointer_setup_simple(insns, call_pc, bounds)
         .filter(|(_, _, off)| *off == key_off);
+    let (store_pc, source_imm_pc, materialization_pcs) = match materialization {
+        Some(stack_bytes) => (
+            stack_bytes.latest_store_pc,
+            stack_bytes.latest_source_imm_pc,
+            stack_bytes.materialization_pcs,
+        ),
+        None => (call_pc, None, Vec::new()),
+    };
 
     Ok(ConstantKey {
         stack_off: key_off,
         width: key_width,
         value: constant_key_value(&bytes),
         bytes,
-        store_pc: materialization
-            .as_ref()
-            .map(|stack_bytes| stack_bytes.latest_store_pc)
-            .unwrap_or(call_pc),
-        source_imm_pc: materialization
-            .as_ref()
-            .and_then(|stack_bytes| stack_bytes.latest_source_imm_pc),
-        materialization_pcs: materialization
-            .map(|stack_bytes| stack_bytes.materialization_pcs)
-            .unwrap_or_default(),
+        store_pc,
+        source_imm_pc,
+        materialization_pcs,
         r2_mov_pc: removable_setup.map(|(mov_pc, _, _)| mov_pc),
         r2_add_pc: removable_setup.map(|(_, add_pc, _)| add_pc),
     })
@@ -1008,7 +1292,10 @@ fn constant_stack_bytes_for_range(
     key_width: usize,
 ) -> Option<Vec<u8>> {
     let start = i32::from(stack_off);
-    let width = i32::try_from(key_width).ok()?;
+    let width = match i32::try_from(key_width) {
+        Ok(width) => width,
+        Err(_) => return None,
+    };
     let end = start.checked_add(width)?;
     if start >= 0 || end > 0 {
         return None;
@@ -1027,8 +1314,14 @@ fn constant_stack_byte(stack: &HashMap<i16, StackState>, absolute_off: i32) -> O
     }
     let slot_index = ((-absolute_off - 1) / 8) + 1;
     let slot_start_i32 = -slot_index * 8;
-    let slot_start = i16::try_from(slot_start_i32).ok()?;
-    let byte_index = usize::try_from(absolute_off - slot_start_i32).ok()?;
+    let slot_start = match i16::try_from(slot_start_i32) {
+        Ok(slot_start) => slot_start,
+        Err(_) => return None,
+    };
+    let byte_index = match usize::try_from(absolute_off - slot_start_i32) {
+        Ok(byte_index) => byte_index,
+        Err(_) => return None,
+    };
     if byte_index >= 8 {
         return None;
     }
@@ -1061,16 +1354,21 @@ fn materialization_for_snapshot_key(
     key_width: usize,
     snapshot_bytes: &[u8],
 ) -> Option<ConstantStackBytes> {
-    let key_width = u8::try_from(key_width).ok()?;
-    let stack_bytes = find_constant_stack_bytes_with_limit(
+    let key_width = match u8::try_from(key_width) {
+        Ok(key_width) => key_width,
+        Err(_) => return None,
+    };
+    let stack_bytes = match find_constant_stack_bytes_with_limit(
         insns,
         call_pc,
         bounds,
         stack_off,
         key_width,
         Some(CONST_STACK_VALUE_LOOKBACK_LIMIT),
-    )
-    .ok()?;
+    ) {
+        Ok(stack_bytes) => stack_bytes,
+        Err(_) => return None,
+    };
     (stack_bytes.bytes == snapshot_bytes).then_some(stack_bytes)
 }
 
@@ -1261,6 +1559,14 @@ struct SiteRewrite {
     map_inline_records: Vec<MapInlineRecord>,
     skipped_pcs: HashSet<usize>,
     replacements: BTreeMap<usize, Vec<BpfInsn>>,
+    branch_patches: Vec<ReplacementBranchPatch>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct ReplacementBranchPatch {
+    replacement_pc: usize,
+    replacement_insn_idx: usize,
+    target_old_pc: usize,
 }
 
 #[derive(Debug)]
@@ -1278,20 +1584,587 @@ impl From<anyhow::Error> for SiteRewriteError {
     }
 }
 
-fn validate_inline_hint_targets(program: &BpfProgram) -> anyhow::Result<()> {
-    for &call_pc in program.map_inline_hints.keys() {
-        let Some(insn) = program.insns.get(call_pc) else {
-            bail!("inline hint at pc {call_pc} does not point to a map_lookup_elem helper call");
-        };
-        if !is_map_lookup_elem_call(insn) {
-            bail!("inline hint at pc {call_pc} does not point to a map_lookup_elem helper call");
-        }
+#[derive(Clone, Debug)]
+struct KernelMutableMaps {
+    ids: HashSet<u32>,
+    reasons: HashMap<u32, String>,
+}
+
+#[derive(Clone, Debug, Default)]
+struct ResolvedInlineHints {
+    by_call_pc: HashMap<usize, Vec<ResolvedInlineHint>>,
+}
+
+#[derive(Clone, Debug)]
+struct HintedMapInMapRoute {
+    inner_call_pc: usize,
+    inner_info: MapInfo,
+}
+
+#[derive(Clone, Debug)]
+struct ResolvedInlineHint {
+    anchor: MapInlineHintAnchor,
+    mode: MapInlineHintMode,
+    key: Vec<u8>,
+    inline_value: Vec<u8>,
+    map_id: u32,
+}
+
+impl ResolvedInlineHints {
+    fn for_call(&self, call_pc: usize) -> &[ResolvedInlineHint] {
+        self.by_call_pc
+            .get(&call_pc)
+            .map(Vec::as_slice)
+            .unwrap_or(&[])
     }
-    Ok(())
 }
 
 fn is_map_lookup_elem_call(insn: &BpfInsn) -> bool {
     insn.is_call() && insn.src_reg() == 0 && insn.imm == HELPER_MAP_LOOKUP_ELEM
+}
+
+fn collect_kernel_mutable_maps(
+    program: &BpfProgram,
+    map_info: &MapInfoResult,
+) -> anyhow::Result<KernelMutableMaps> {
+    let mut ids = HashSet::new();
+    let mut reasons = HashMap::new();
+
+    for metadata in program.map_metadata.values() {
+        if lru_lookup_mutates_map(metadata.map_type) {
+            ids.insert(metadata.map_id);
+            reasons.insert(
+                metadata.map_id,
+                format!(
+                    "map kernel-mutable: LRU map lookup mutates access order on map_id={}",
+                    metadata.map_id
+                ),
+            );
+        }
+    }
+    for info in &map_info.unique_maps {
+        if ids.contains(&info.map_id) || !lru_lookup_mutates_map(info.map_type) {
+            continue;
+        }
+        ids.insert(info.map_id);
+        reasons.insert(
+            info.map_id,
+            format!(
+                "map kernel-mutable: LRU map lookup mutates access order on map_id={}",
+                info.map_id
+            ),
+        );
+    }
+
+    let mut pc = 0usize;
+    while pc < program.insns.len() {
+        let insn = &program.insns[pc];
+        if is_map_writer_helper_call(insn) {
+            let Some(map_load_pc) = find_direct_map_load_for_reg_before_pc(&program.insns, pc, 1)
+            else {
+                // A writer can target a runtime inner-map pointer produced by
+                // map-in-map lookup. That does not identify a direct outer map
+                // as kernel-mutable.
+                pc += insn_width(insn);
+                continue;
+            };
+            let helper_name = map_writer_helper_name(insn.imm);
+            let map_ref = map_info.reference_at_pc(map_load_pc).ok_or_else(|| {
+                anyhow::anyhow!(
+                    "map_inline cannot resolve map reference at pc {map_load_pc} for {helper_name} helper at pc {pc}"
+                )
+            })?;
+            let map_id = map_ref.map_id.ok_or_else(|| {
+                anyhow::anyhow!(
+                    "map_inline cannot resolve map_id at pc {map_load_pc} for {helper_name} helper at pc {pc}"
+                )
+            })?;
+            ids.insert(map_id);
+            reasons.insert(
+                map_id,
+                format!(
+                    "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id={map_id}"
+                ),
+            );
+        }
+        pc += insn_width(insn);
+    }
+
+    Ok(KernelMutableMaps { ids, reasons })
+}
+
+fn is_map_writer_helper_call(insn: &BpfInsn) -> bool {
+    insn.is_call()
+        && insn.src_reg() == 0
+        && matches!(
+            insn.imm,
+            HELPER_MAP_UPDATE_ELEM
+                | HELPER_MAP_DELETE_ELEM
+                | HELPER_MAP_PUSH_ELEM
+                | HELPER_MAP_POP_ELEM
+        )
+}
+
+fn map_writer_helper_name(helper_id: i32) -> &'static str {
+    match helper_id {
+        HELPER_MAP_UPDATE_ELEM => "BPF_FUNC_map_update_elem",
+        HELPER_MAP_DELETE_ELEM => "BPF_FUNC_map_delete_elem",
+        HELPER_MAP_PUSH_ELEM => "BPF_FUNC_map_push_elem",
+        HELPER_MAP_POP_ELEM => "BPF_FUNC_map_pop_elem",
+        _ => "BPF_FUNC_<non-writer>",
+    }
+}
+
+fn lru_lookup_mutates_map(map_type: u32) -> bool {
+    matches!(
+        map_type,
+        kernel_sys::BPF_MAP_TYPE_LRU_HASH | kernel_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH
+    )
+}
+
+fn kernel_mutable_reason_for_map(
+    kernel_mutable_maps: &KernelMutableMaps,
+    info: &MapInfo,
+) -> Option<String> {
+    if let Some(reason) = kernel_mutable_maps.reasons.get(&info.map_id) {
+        return Some(reason.clone());
+    }
+    if kernel_mutable_maps.ids.contains(&info.map_id) {
+        return Some(format!(
+            "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id={}",
+            info.map_id
+        ));
+    }
+    lru_lookup_mutates_map(info.map_type).then(|| {
+        format!(
+            "map kernel-mutable: LRU map lookup mutates access order on map_id={}",
+            info.map_id
+        )
+    })
+}
+
+fn resolve_inline_hints(
+    program: &BpfProgram,
+    map_info: &MapInfoResult,
+    kernel_mutable_maps: &KernelMutableMaps,
+) -> anyhow::Result<ResolvedInlineHints> {
+    if program.map_inline_hints.is_empty() {
+        return Ok(ResolvedInlineHints::default());
+    }
+
+    let sites = find_map_lookup_sites(&program.insns);
+    let mut sites_by_pc = HashMap::new();
+    for site in &sites {
+        sites_by_pc.insert(site.call_pc, site);
+    }
+
+    let mut resolved = ResolvedInlineHints::default();
+    let mut deferred_inner_hints = Vec::new();
+    for hint in &program.map_inline_hints {
+        let resolved_direct = match &hint.anchor {
+            MapInlineHintAnchor::Pc(call_pc) => resolve_pc_inline_hint(
+                program,
+                map_info,
+                kernel_mutable_maps,
+                &sites_by_pc,
+                hint,
+                *call_pc,
+                &mut resolved,
+            )?,
+            MapInlineHintAnchor::MapName(name) => resolve_map_name_inline_hint(
+                program,
+                map_info,
+                kernel_mutable_maps,
+                &sites,
+                hint,
+                name,
+                &mut resolved,
+            )?,
+        };
+        if !resolved_direct {
+            deferred_inner_hints.push(hint.clone());
+        }
+    }
+
+    resolve_map_in_map_route_a_hints(
+        program,
+        map_info,
+        kernel_mutable_maps,
+        &sites,
+        &deferred_inner_hints,
+        &mut resolved,
+    )?;
+
+    validate_resolved_site_hint_modes(&resolved)?;
+    Ok(resolved)
+}
+
+fn resolve_map_in_map_route_a_hints(
+    program: &BpfProgram,
+    map_info: &MapInfoResult,
+    kernel_mutable_maps: &KernelMutableMaps,
+    sites: &[MapLookupSite],
+    deferred_inner_hints: &[MapInlineHint],
+    resolved: &mut ResolvedInlineHints,
+) -> anyhow::Result<()> {
+    let routes = resolve_hinted_map_in_map_routes(program, map_info, sites, resolved)?;
+    if deferred_inner_hints.is_empty() {
+        return Ok(());
+    }
+    if routes.is_empty() {
+        if let Some((anchor, info)) = first_resolved_non_map_in_map_hint(map_info, sites, resolved)?
+        {
+            bail!(
+                "inline hint anchor {} cannot be used as map-in-map outer: map_id={} map_type={} is not ARRAY_OF_MAPS/HASH_OF_MAPS",
+                format_hint_anchor(&anchor),
+                info.map_id,
+                info.map_type
+            );
+        }
+        bail!(
+            "inner inline hint anchor {} has no matching map-in-map outer hint",
+            format_hint_anchor(&deferred_inner_hints[0].anchor)
+        );
+    }
+
+    let mut matched = vec![false; deferred_inner_hints.len()];
+    for route in &routes {
+        for (idx, hint) in deferred_inner_hints.iter().enumerate() {
+            if !inner_hint_matches_route(program, hint, route)? {
+                continue;
+            }
+            validate_and_insert_site_hint(
+                program,
+                kernel_mutable_maps,
+                hint,
+                route.inner_call_pc,
+                &route.inner_info,
+                resolved,
+            )?;
+            matched[idx] = true;
+        }
+    }
+
+    for (idx, hint) in deferred_inner_hints.iter().enumerate() {
+        if !matched[idx] {
+            bail!(
+                "inner inline hint anchor {} has no matching map-in-map outer hint",
+                format_hint_anchor(&hint.anchor)
+            );
+        }
+    }
+
+    Ok(())
+}
+
+fn resolve_hinted_map_in_map_routes(
+    program: &BpfProgram,
+    map_info: &MapInfoResult,
+    sites: &[MapLookupSite],
+    resolved: &ResolvedInlineHints,
+) -> anyhow::Result<Vec<HintedMapInMapRoute>> {
+    let mut routes = Vec::new();
+    for outer_site in sites {
+        let outer_info = lookup_site_map_info(map_info, outer_site)?;
+        if !outer_info.is_map_in_map() || resolved.for_call(outer_site.call_pc).is_empty() {
+            continue;
+        }
+        for outer_hint in resolved.for_call(outer_site.call_pc) {
+            let encoded_outer_key = encode_key_bytes(&outer_hint.key, outer_info.key_size as usize);
+            let inner_map_id =
+                resolve_inner_map_id_for_outer_key(program, outer_info, &encoded_outer_key)
+                    .map_err(|err| map_route_a_error(outer_hint, outer_info, err))?;
+            let inner_info = program
+                .map_provider
+                .map_info(program, inner_map_id)
+                .map_err(anyhow::Error::msg)?
+                .ok_or_else(|| {
+                    anyhow::anyhow!(
+                        "map_values snapshot has no metadata for inner map {} from outer map {} key {}",
+                        inner_map_id,
+                        outer_info.map_id,
+                        format_bytes_preview(&encoded_outer_key)
+                    )
+                })?;
+            let Some(chain) =
+                find_map_in_map_chains(&program.insns, std::slice::from_ref(outer_site))
+                    .into_iter()
+                    .next()
+            else {
+                continue;
+            };
+            routes.push(HintedMapInMapRoute {
+                inner_call_pc: chain.inner_call_pc,
+                inner_info,
+            });
+        }
+    }
+    Ok(routes)
+}
+
+fn map_route_a_error(
+    hint: &ResolvedInlineHint,
+    outer_info: &MapInfo,
+    err: SiteRewriteError,
+) -> anyhow::Error {
+    match err {
+        SiteRewriteError::Veto(reason) => anyhow::anyhow!(
+            "inline hint anchor {} key {} for map-in-map outer map_id={}: {}",
+            format_hint_anchor(&hint.anchor),
+            format_bytes_preview(&hint.key),
+            outer_info.map_id,
+            reason
+        ),
+        SiteRewriteError::MissingSnapshot(err) | SiteRewriteError::Error(err) => err,
+    }
+}
+
+fn first_resolved_non_map_in_map_hint(
+    map_info: &MapInfoResult,
+    sites: &[MapLookupSite],
+    resolved: &ResolvedInlineHints,
+) -> anyhow::Result<Option<(MapInlineHintAnchor, MapInfo)>> {
+    for site in sites {
+        if resolved.for_call(site.call_pc).is_empty() {
+            continue;
+        }
+        let info = lookup_site_map_info(map_info, site)?;
+        if info.is_map_in_map() {
+            continue;
+        }
+        return Ok(Some((
+            resolved.for_call(site.call_pc)[0].anchor.clone(),
+            info.clone(),
+        )));
+    }
+    Ok(None)
+}
+
+fn inner_hint_matches_route(
+    program: &BpfProgram,
+    hint: &MapInlineHint,
+    route: &HintedMapInMapRoute,
+) -> anyhow::Result<bool> {
+    match &hint.anchor {
+        MapInlineHintAnchor::Pc(call_pc) => Ok(*call_pc == route.inner_call_pc),
+        MapInlineHintAnchor::MapName(name) => {
+            let map_ids = metadata_map_ids_for_name(program, name)?;
+            Ok(map_ids.contains(&route.inner_info.map_id))
+        }
+    }
+}
+
+fn metadata_map_ids_for_name(program: &BpfProgram, name: &str) -> anyhow::Result<HashSet<u32>> {
+    let matched = program
+        .map_metadata
+        .values()
+        .filter(|metadata| metadata.name == name)
+        .map(|metadata| metadata.map_id)
+        .collect::<HashSet<_>>();
+    if matched.is_empty() {
+        bail!("inline hint map_name anchor {name:?} is not present in map_values metadata");
+    }
+    Ok(matched)
+}
+
+fn resolve_pc_inline_hint(
+    program: &BpfProgram,
+    map_info: &MapInfoResult,
+    kernel_mutable_maps: &KernelMutableMaps,
+    sites_by_pc: &HashMap<usize, &MapLookupSite>,
+    hint: &MapInlineHint,
+    call_pc: usize,
+    resolved: &mut ResolvedInlineHints,
+) -> anyhow::Result<bool> {
+    let Some(insn) = program.insns.get(call_pc) else {
+        bail!("inline hint at pc {call_pc} does not point to a map_lookup_elem helper call");
+    };
+    if !is_map_lookup_elem_call(insn) {
+        bail!("inline hint at pc {call_pc} does not point to a map_lookup_elem helper call");
+    }
+    let Some(site) = sites_by_pc.get(&call_pc) else {
+        return Ok(false);
+    };
+    let info = lookup_site_map_info(map_info, site)?;
+    validate_and_insert_site_hint(program, kernel_mutable_maps, hint, call_pc, info, resolved)?;
+    Ok(true)
+}
+
+fn resolve_map_name_inline_hint(
+    program: &BpfProgram,
+    map_info: &MapInfoResult,
+    kernel_mutable_maps: &KernelMutableMaps,
+    sites: &[MapLookupSite],
+    hint: &MapInlineHint,
+    name: &str,
+    resolved: &mut ResolvedInlineHints,
+) -> anyhow::Result<bool> {
+    let map_ids = direct_map_ids_for_name(program, map_info, name)?;
+    if map_ids.is_empty() {
+        return Ok(false);
+    }
+    let mut matched_sites = 0usize;
+    for site in sites {
+        let info = lookup_site_map_info(map_info, site)?;
+        if !map_ids.contains(&info.map_id) {
+            continue;
+        }
+        matched_sites += 1;
+        validate_and_insert_site_hint(
+            program,
+            kernel_mutable_maps,
+            hint,
+            site.call_pc,
+            info,
+            resolved,
+        )?;
+    }
+    if matched_sites == 0 {
+        bail!(
+            "inline hint map_name anchor {name:?} is present in used_maps but matches no map_lookup_elem site"
+        );
+    }
+    Ok(true)
+}
+
+fn lookup_site_map_info<'a>(
+    map_info: &'a MapInfoResult,
+    site: &MapLookupSite,
+) -> anyhow::Result<&'a MapInfo> {
+    let map_ref = map_info.reference_at_pc(site.map_load_pc).ok_or_else(|| {
+        anyhow::anyhow!(
+            "map reference metadata unavailable for lookup pc {}",
+            site.call_pc
+        )
+    })?;
+    map_ref
+        .info
+        .as_ref()
+        .ok_or_else(|| anyhow::anyhow!("map info unavailable for lookup pc {}", site.call_pc))
+}
+
+fn direct_map_ids_for_name(
+    program: &BpfProgram,
+    map_info: &MapInfoResult,
+    name: &str,
+) -> anyhow::Result<HashSet<u32>> {
+    let mut matched = HashSet::new();
+    for info in &map_info.unique_maps {
+        let metadata = program.map_metadata.get(&info.map_id).ok_or_else(|| {
+            anyhow::anyhow!(
+                "map_values snapshot has no metadata for used map {} while resolving inline hint map_name anchor {name:?}",
+                info.map_id
+            )
+        })?;
+        if metadata.name == name {
+            matched.insert(info.map_id);
+        }
+    }
+    Ok(matched)
+}
+
+fn validate_and_insert_site_hint(
+    program: &BpfProgram,
+    kernel_mutable_maps: &KernelMutableMaps,
+    hint: &MapInlineHint,
+    call_pc: usize,
+    info: &MapInfo,
+    resolved: &mut ResolvedInlineHints,
+) -> anyhow::Result<()> {
+    if let Some(reason) = kernel_mutable_reason_for_map(kernel_mutable_maps, info) {
+        bail!(
+            "inline hint anchor {} targets kernel-mutable map_id={}: {}",
+            format_hint_anchor(&hint.anchor),
+            info.map_id,
+            reason
+        );
+    }
+    if hint.key.len() != info.key_size as usize {
+        bail!(
+            "inline hint anchor {} has {} key byte(s) for map_id={}, expected {}",
+            format_hint_anchor(&hint.anchor),
+            hint.key.len(),
+            info.map_id,
+            info.key_size
+        );
+    }
+    if info.is_map_in_map() {
+        if hint.mode != MapInlineHintMode::Hard {
+            bail!(
+                "map-in-map outer inline hint anchor {} must use hard fold",
+                format_hint_anchor(&hint.anchor)
+            );
+        }
+        resolved
+            .by_call_pc
+            .entry(call_pc)
+            .or_default()
+            .push(ResolvedInlineHint {
+                anchor: hint.anchor.clone(),
+                mode: hint.mode,
+                key: hint.key.clone(),
+                inline_value: Vec::new(),
+                map_id: info.map_id,
+            });
+        return Ok(());
+    }
+    let inline_value = read_hint_inline_value(program, info, &hint.key).with_context(|| {
+        format!(
+            "inline hint anchor {} key {} for map_id={}",
+            format_hint_anchor(&hint.anchor),
+            format_bytes_preview(&hint.key),
+            info.map_id
+        )
+    })?;
+
+    resolved
+        .by_call_pc
+        .entry(call_pc)
+        .or_default()
+        .push(ResolvedInlineHint {
+            anchor: hint.anchor.clone(),
+            mode: hint.mode,
+            key: hint.key.clone(),
+            inline_value,
+            map_id: info.map_id,
+        });
+    Ok(())
+}
+
+fn read_hint_inline_value(
+    program: &BpfProgram,
+    info: &MapInfo,
+    key: &[u8],
+) -> anyhow::Result<Vec<u8>> {
+    let value_size = program
+        .map_provider
+        .lookup_value_size(program, info)
+        .map_err(anyhow::Error::msg)?;
+    let value = program
+        .map_provider
+        .lookup_elem(program, info.map_id, key, value_size)
+        .map_err(|err| anyhow::anyhow!("hint key is not present in map dump: {err}"))?;
+    prepare_inline_value(info, &value).map_err(anyhow::Error::msg)
+}
+
+fn validate_resolved_site_hint_modes(resolved: &ResolvedInlineHints) -> anyhow::Result<()> {
+    for (call_pc, hints) in &resolved.by_call_pc {
+        let hard_count = hints
+            .iter()
+            .filter(|hint| hint.mode == MapInlineHintMode::Hard)
+            .count();
+        let soft_count = hints
+            .iter()
+            .filter(|hint| hint.mode == MapInlineHintMode::Soft)
+            .count();
+        if hard_count > 1 {
+            bail!("lookup pc {call_pc} has multiple hard inline hints");
+        }
+        if hard_count > 0 && soft_count > 0 {
+            bail!("lookup pc {call_pc} mixes soft and hard inline hints");
+        }
+    }
+    Ok(())
 }
 
 impl BpfPass for MapInlinePass {
@@ -1309,18 +2182,34 @@ impl BpfPass for MapInlinePass {
         analyses: &mut AnalysisCache,
         _ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        validate_inline_hint_targets(program)?;
+        let initial_map_info = analyses
+            .get(&MapInfoAnalysis, program)
+            .map_err(anyhow::Error::msg)?;
+        let initial_kernel_mutable_maps = collect_kernel_mutable_maps(program, &initial_map_info)?;
+        let initial_inline_hints =
+            resolve_inline_hints(program, &initial_map_info, &initial_kernel_mutable_maps)?;
         let mut total_applied = 0usize;
         let mut final_skipped = Vec::new();
         let mut diagnostics = Vec::new();
         let mut map_inline_records = Vec::new();
         let mut hit_iteration_cap = false;
-        let mut inline_hints_consumed = HashSet::new();
+        let mut inline_hints_consumed = HashSet::<MapInlineHintAnchor>::new();
 
         for iter in 0..MAP_INLINE_FIXED_POINT_MAX_ITERS {
             let before_round = program.insns.clone();
-            let round =
-                run_map_inline_round(program, analyses, iter == 0, &mut inline_hints_consumed)?;
+            let empty_hints = ResolvedInlineHints::default();
+            let round_inline_hints = if iter == 0 {
+                &initial_inline_hints
+            } else {
+                &empty_hints
+            };
+            let round = run_map_inline_round(
+                program,
+                analyses,
+                iter == 0,
+                round_inline_hints,
+                &mut inline_hints_consumed,
+            )?;
             let round_modified = program.insns != before_round;
 
             final_skipped = round.sites_skipped;
@@ -1377,12 +2266,14 @@ fn run_map_inline_round(
     program: &mut BpfProgram,
     analyses: &mut AnalysisCache,
     use_verifier_guided_keys: bool,
-    inline_hints_consumed: &mut HashSet<usize>,
+    inline_hints: &ResolvedInlineHints,
+    inline_hints_consumed: &mut HashSet<MapInlineHintAnchor>,
 ) -> anyhow::Result<PassResult> {
     let bt = analyses.get(&BranchTargetAnalysis, program);
     let map_info = analyses
         .get(&MapInfoAnalysis, program)
         .map_err(anyhow::Error::msg)?;
+    let kernel_mutable_maps = collect_kernel_mutable_maps(program, &map_info)?;
     let mut skipped = Vec::new();
     let mut rewrites = Vec::new();
     let mut diagnostics = Vec::new();
@@ -1390,7 +2281,7 @@ fn run_map_inline_round(
         record_maps_skipped_by_size_counter(program, &mut diagnostics);
     }
     let (direct_replacements, direct_sites_applied, direct_diagnostics, direct_records) =
-        build_direct_map_value_load_rewrites(program)?;
+        build_direct_map_value_load_rewrites(program, &kernel_mutable_maps)?;
     diagnostics.extend(direct_diagnostics);
     let sites = find_map_lookup_sites(&program.insns);
 
@@ -1432,11 +2323,17 @@ fn run_map_inline_round(
             info.value_size,
             info.max_entries,
         ));
+        if let Some(reason) = kernel_mutable_reason_for_map(&kernel_mutable_maps, info) {
+            record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
+            continue;
+        }
         if map_snapshot_skipped_by_size(program, info.map_id) {
             log_map_inline_debug(&format!(
                 "site pc={} skip: map {} snapshot skipped by size",
                 site.call_pc, info.map_id
             ));
+            let reason = map_snapshot_skipped_by_size_site_reason(program, info.map_id);
+            record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
             continue;
         }
         if info.is_map_in_map() {
@@ -1445,6 +2342,8 @@ fn run_map_inline_round(
                 &site,
                 info,
                 use_verifier_guided_keys,
+                inline_hints,
+                &kernel_mutable_maps,
                 inline_hints_consumed,
             ) {
                 Ok(Some(mut rewrite)) => {
@@ -1519,43 +2418,56 @@ fn run_map_inline_round(
             continue;
         }
 
+        let site_inline_hints = inline_hints.for_call(site.call_pc);
+        if site_inline_hints
+            .iter()
+            .any(|hint| hint.mode == MapInlineHintMode::Soft)
+        {
+            match build_soft_hint_site_rewrite(program, &site, info, site_inline_hints) {
+                Ok(Some(mut rewrite)) => {
+                    for hint in site_inline_hints {
+                        inline_hints_consumed.insert(hint.anchor.clone());
+                    }
+                    if rewrite
+                        .skipped_pcs
+                        .iter()
+                        .any(|&pc| pc < bt.is_target.len() && bt.is_target[pc])
+                    {
+                        record_diagnostic(
+                            &mut diagnostics,
+                            format!(
+                                "site at PC={}: keeping soft hint lookup fallback because removal would cross a branch target",
+                                site.call_pc
+                            ),
+                        );
+                        rewrite.skipped_pcs.clear();
+                        rewrite.removed_null_check = false;
+                    }
+                    rewrites.push(rewrite);
+                }
+                Ok(None) => {
+                    let reason = "soft inline hint emitted no replacement bytecode".to_string();
+                    record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
+                }
+                Err(SiteRewriteError::Veto(reason)) => {
+                    record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
+                }
+                Err(SiteRewriteError::MissingSnapshot(err) | SiteRewriteError::Error(err)) => {
+                    return Err(err);
+                }
+            }
+            continue;
+        }
+
         let extracted_key = match extract_site_constant_key(
             program,
             site.call_pc,
             info,
             use_verifier_guided_keys,
+            site_inline_hints,
         ) {
             Ok(extracted_key) => extracted_key,
             Err(KeyExtractionError::Unavailable(detail)) => {
-                let bpf_writable = program
-                    .bpf_writable_map(info.map_id)
-                    .map_err(anyhow::Error::msg)?;
-                if !bpf_writable {
-                    match build_runtime_key_site_rewrite(program, &site, info) {
-                        Ok(Some(rewrite)) => {
-                            log_map_inline_debug(&format!(
-                                "site at PC={}: runtime-key rewrite prepared with {} replacement block(s)",
-                                site.call_pc,
-                                rewrite.replacements.len()
-                            ));
-                            rewrites.push(rewrite);
-                        }
-                        Ok(None) => {
-                            let reason =
-                                "runtime-key inline emitted no replacement bytecode".to_string();
-                            record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
-                        }
-                        Err(SiteRewriteError::Veto(reason)) => {
-                            record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
-                        }
-                        Err(
-                            SiteRewriteError::MissingSnapshot(err) | SiteRewriteError::Error(err),
-                        ) => {
-                            return Err(err);
-                        }
-                    }
-                    continue;
-                }
                 record_skip(
                     &mut skipped,
                     &mut diagnostics,
@@ -1565,10 +2477,9 @@ fn run_map_inline_round(
                 );
                 continue;
             }
-            Err(KeyExtractionError::Fatal(detail)) => return Err(anyhow::anyhow!(detail)),
         };
-        if extracted_key.used_inline_hint {
-            inline_hints_consumed.insert(site.call_pc);
+        if let Some(anchor) = extracted_key.used_inline_hint {
+            inline_hints_consumed.insert(anchor);
         }
         let key = extracted_key.key;
         if key.width < info.key_size as usize {
@@ -1690,6 +2601,7 @@ fn run_map_inline_round(
     let mut map_inline_records = direct_records;
     let mut applied = direct_sites_applied;
     let mut removed_any_null_check = false;
+    let mut replacement_branch_patches = Vec::new();
 
     for rewrite in rewrites {
         let conflict = rewrite
@@ -1725,6 +2637,7 @@ fn run_map_inline_round(
         map_inline_records.extend(rewrite.map_inline_records);
         skip_pcs.extend(rewrite.skipped_pcs);
         replacements.extend(rewrite.replacements);
+        replacement_branch_patches.extend(rewrite.branch_patches);
         applied += 1;
     }
 
@@ -1741,12 +2654,14 @@ fn run_map_inline_round(
     let orig_len = program.insns.len();
     let mut new_insns = Vec::with_capacity(orig_len);
     let mut addr_map = vec![0usize; orig_len + 1];
+    let mut replacement_new_pcs = HashMap::new();
     let mut pc = 0usize;
 
     while pc < orig_len {
         addr_map[pc] = new_insns.len();
 
         if let Some(replacement) = replacements.get(&pc) {
+            replacement_new_pcs.insert(pc, new_insns.len());
             new_insns.extend_from_slice(replacement);
             pc += 1;
             continue;
@@ -1772,18 +2687,30 @@ fn run_map_inline_round(
 
     let mut final_insns = new_insns;
     let mut final_addr_map = addr_map;
+    let mut intermediate_to_final = (0..=final_insns.len()).collect::<Vec<_>>();
     if removed_any_null_check {
         if let Some((cleaned_insns, cleanup_map)) =
             super::utils::eliminate_unreachable_blocks(&final_insns)
         {
             final_addr_map = super::utils::compose_addr_maps(&final_addr_map, &cleanup_map);
+            intermediate_to_final =
+                super::utils::compose_addr_maps(&intermediate_to_final, &cleanup_map);
             final_insns = cleaned_insns;
         }
         if let Some((cleaned_insns, cleanup_map)) = super::utils::eliminate_nops(&final_insns) {
             final_addr_map = super::utils::compose_addr_maps(&final_addr_map, &cleanup_map);
+            intermediate_to_final =
+                super::utils::compose_addr_maps(&intermediate_to_final, &cleanup_map);
             final_insns = cleaned_insns;
         }
     }
+    patch_replacement_branch_targets(
+        &mut final_insns,
+        &replacement_branch_patches,
+        &replacement_new_pcs,
+        &intermediate_to_final,
+        &final_addr_map,
+    )?;
 
     program.insns = final_insns;
     super::utils::remap_btf_metadata(program, &final_addr_map)?;
@@ -1810,25 +2737,40 @@ fn extract_site_constant_key(
     call_pc: usize,
     info: &MapInfo,
     use_verifier_guided_keys: bool,
+    site_inline_hints: &[ResolvedInlineHint],
 ) -> std::result::Result<ExtractedConstantKey, KeyExtractionError> {
-    if let Some(hint_bytes) = program.map_inline_hints.get(&call_pc) {
-        if hint_bytes.len() != info.key_size as usize {
-            return Err(KeyExtractionError::Fatal(format!(
-                "inline hint at pc {call_pc} has {} byte(s), expected {}",
-                hint_bytes.len(),
-                info.key_size
-            )));
-        }
+    if let Some(hint) = site_inline_hints
+        .iter()
+        .find(|hint| hint.mode == MapInlineHintMode::Hard)
+    {
         let bounds = subprog_bounds(&program.insns, call_pc);
         let r2_setup = find_r2_stack_pointer_setup_simple(&program.insns, call_pc, bounds);
+        let materialization = r2_setup.and_then(|(_, _, stack_off)| {
+            materialization_for_snapshot_key(
+                &program.insns,
+                call_pc,
+                bounds,
+                stack_off,
+                hint.key.len(),
+                &hint.key,
+            )
+        });
+        let (store_pc, source_imm_pc, materialization_pcs) = match materialization {
+            Some(stack_bytes) => (
+                stack_bytes.latest_store_pc,
+                stack_bytes.latest_source_imm_pc,
+                stack_bytes.materialization_pcs,
+            ),
+            None => (call_pc, None, Vec::new()),
+        };
         let key = ConstantKey {
             stack_off: r2_setup.map(|(_, _, off)| off).unwrap_or(0),
-            width: hint_bytes.len(),
-            value: constant_key_value(hint_bytes),
-            bytes: hint_bytes.clone(),
-            store_pc: call_pc,
-            source_imm_pc: None,
-            materialization_pcs: Vec::new(),
+            width: hint.key.len(),
+            value: constant_key_value(&hint.key),
+            bytes: hint.key.clone(),
+            store_pc,
+            source_imm_pc,
+            materialization_pcs,
             r2_mov_pc: r2_setup.map(|(mov_pc, _, _)| mov_pc),
             r2_add_pc: r2_setup.map(|(_, add_pc, _)| add_pc),
         };
@@ -1843,7 +2785,7 @@ fn extract_site_constant_key(
         ));
         return Ok(ExtractedConstantKey {
             key,
-            used_inline_hint: true,
+            used_inline_hint: Some(hint.anchor.clone()),
         });
     }
 
@@ -1868,7 +2810,7 @@ fn extract_site_constant_key(
                 ));
                 Ok(ExtractedConstantKey {
                     key,
-                    used_inline_hint: false,
+                    used_inline_hint: None,
                 })
             }
             Err(verifier_err) => {
@@ -2023,23 +2965,37 @@ fn build_site_rewrite(
         }],
         skipped_pcs,
         replacements,
+        branch_patches: Vec::new(),
     }))
 }
 
-fn build_runtime_key_site_rewrite(
+fn build_soft_hint_site_rewrite(
     program: &BpfProgram,
     site: &MapLookupSite,
     info: &MapInfo,
+    hints: &[ResolvedInlineHint],
 ) -> SiteRewriteResult<Option<SiteRewrite>> {
-    let uses = classify_r0_uses_with_options(&program.insns, site.call_pc, false, false);
-    if uses.null_check_pc.is_none() {
+    if hints.is_empty() {
+        return Ok(None);
+    }
+    if hints
+        .iter()
+        .any(|hint| hint.mode != MapInlineHintMode::Soft)
+    {
         return Err(site_level_inline_veto(
-            "runtime_key_requires_immediate_null_check",
+            "soft hint rewrite received a non-soft hint",
         ));
     }
-    if uses.fixed_loads.is_empty() {
+    if info.is_map_in_map() {
         return Err(site_level_inline_veto(
-            "runtime_key_lookup_result_has_no_scalar_loads",
+            "soft inline hints are not supported for map-in-map outer lookups",
+        ));
+    }
+
+    let uses = classify_r0_uses_with_options(&program.insns, site.call_pc, false, false);
+    if info.requires_entry_presence_check() && uses.null_check_pc.is_none() {
+        return Err(site_level_inline_veto(
+            "soft inline hint requires an immediate null check for hash-like maps",
         ));
     }
     if !uses.other_uses.is_empty() {
@@ -2047,176 +3003,363 @@ fn build_runtime_key_site_rewrite(
             program, &uses,
         )));
     }
-    if !runtime_key_pointer_survives_until_loads(&program.insns, site.call_pc, &uses) {
-        return Err(site_level_inline_veto("runtime_key_location_unresolved"));
+
+    let mut replacement = Vec::new();
+    let mut branch_patches = Vec::new();
+    let mut records = Vec::new();
+    let mut matched_end_jump_indices = Vec::new();
+    let mut after_old_pc: Option<usize> = None;
+
+    for hint in hints {
+        let matched_path =
+            build_soft_matched_path(program, site.call_pc, &hint.inline_value, &uses)?;
+        match after_old_pc {
+            Some(pc) if pc != matched_path.after_old_pc => {
+                return Err(site_level_inline_veto(
+                    "soft inline hint chain produced inconsistent matched-path targets",
+                ));
+            }
+            Some(_) => {}
+            None => after_old_pc = Some(matched_path.after_old_pc),
+        }
+
+        let compare_start = replacement.len();
+        let mismatch_jumps = emit_key_compare_to_hint(&hint.key, &mut replacement)?;
+        replacement.extend(matched_path.insns);
+        matched_end_jump_indices.push(replacement.len());
+        replacement.push(BpfInsn::ja(0));
+
+        let next_hint_or_fallback = replacement.len();
+        for jump_pc in mismatch_jumps {
+            patch_relative_jump(&mut replacement, jump_pc, next_hint_or_fallback)?;
+        }
+        if compare_start == next_hint_or_fallback {
+            return Err(site_level_inline_veto(
+                "soft inline hint emitted an empty key comparison",
+            ));
+        }
+        records.push(MapInlineRecord {
+            map_id: hint.map_id,
+            key: hint.key.clone(),
+            value: hint.inline_value.clone(),
+        });
     }
 
-    let entries =
-        collect_runtime_snapshot_entries(program, info).map_err(site_level_inline_veto)?;
-    if entries.is_empty() {
-        return Err(site_level_inline_veto(
-            "runtime_key_snapshot_has_no_concrete_entries",
-        ));
+    replacement.push(program.insns[site.call_pc]);
+    let after_old_pc = after_old_pc
+        .ok_or_else(|| site_level_inline_veto("soft inline hint use window is empty"))?;
+    for jump_idx in matched_end_jump_indices {
+        branch_patches.push(ReplacementBranchPatch {
+            replacement_pc: site.call_pc,
+            replacement_insn_idx: jump_idx,
+            target_old_pc: after_old_pc,
+        });
     }
 
-    let mut replacements = BTreeMap::new();
-    replacements.insert(site.call_pc, emit_runtime_membership_chain(&entries, 0)?);
-
-    let all_values_equal = entries
-        .windows(2)
-        .all(|pair| pair[0].value == pair[1].value);
-    for load in &uses.fixed_loads {
-        let replacement = if all_values_equal {
-            let scalar = read_scalar_from_value(&entries[0].value, load.offset, load.size)
-                .ok_or_else(|| {
-                    site_level_inline_veto(format!(
-                        "runtime_value_load_out_of_bounds pc={} offset={} size={}",
-                        load.pc, load.offset, load.size
-                    ))
-                })?;
-            emit_constant_load(load.dst_reg, scalar, load.size)
-        } else {
-            emit_runtime_value_chain(&entries, load)?
-        };
-        replacements.insert(load.pc, replacement);
-    }
-
-    if replacements.is_empty() {
+    if replacement.is_empty() {
         return Ok(None);
     }
 
-    let diagnostic_value = if all_values_equal {
-        format!(
-            "runtime-key entries={} common_value={}",
-            entries.len(),
-            format_inlined_value_diagnostic(&entries[0].value, &uses.fixed_loads)
-        )
-    } else {
-        format!("runtime-key entries={} value-chain", entries.len())
-    };
-
-    let map_inline_records = entries
-        .iter()
-        .map(|entry| MapInlineRecord {
-            map_id: info.map_id,
-            key: entry.key.clone(),
-            value: entry.value.clone(),
-        })
-        .collect();
-
+    let mut replacements = BTreeMap::new();
+    replacements.insert(site.call_pc, replacement);
     Ok(Some(SiteRewrite {
         call_pc: site.call_pc,
-        diagnostic_value,
+        diagnostic_value: format!(
+            "soft-fold hints={} keys={}",
+            hints.len(),
+            hints
+                .iter()
+                .map(|hint| format_bytes_preview(&hint.key))
+                .collect::<Vec<_>>()
+                .join(",")
+        ),
         removed_null_check: false,
-        map_inline_records,
+        map_inline_records: records,
         skipped_pcs: HashSet::new(),
         replacements,
+        branch_patches,
     }))
 }
 
-fn collect_runtime_snapshot_entries(
+struct SoftMatchedPath {
+    after_old_pc: usize,
+    insns: Vec<BpfInsn>,
+}
+
+fn build_soft_matched_path(
     program: &BpfProgram,
-    info: &MapInfo,
-) -> Result<Vec<RuntimeMapEntry>, String> {
-    if map_snapshot_skipped_by_size(program, info.map_id) {
-        return Ok(Vec::new());
-    }
-    let key_size = info.key_size as usize;
-    let mut entries = Vec::new();
-    for ((map_id, key), value) in &program.map_values {
-        if *map_id != info.map_id {
-            continue;
-        }
-        if key.len() != key_size {
-            return Err(format!(
-                "runtime_snapshot_key_size_mismatch map={} key_len={} expected={}",
-                info.map_id,
-                key.len(),
-                key_size
+    call_pc: usize,
+    inline_value: &[u8],
+    uses: &R0UseClassification,
+) -> SiteRewriteResult<SoftMatchedPath> {
+    let after_old_pc = soft_fold_non_null_old_pc(program, call_pc, uses)
+        .ok_or_else(|| site_level_inline_veto("soft inline hint use window is empty"))?;
+    let mut insns = Vec::new();
+    let scratch_off = find_soft_value_stack_slot(&program.insns, call_pc, inline_value.len())?;
+    emit_stack_const_blob(&mut insns, scratch_off, inline_value)?;
+    insns.push(BpfInsn::mov64_reg(0, 10));
+    insns.push(BpfInsn::alu64_imm(BPF_ADD, 0, i32::from(scratch_off)));
+
+    let mut pc = call_pc + insn_width(&program.insns[call_pc]);
+    let mut steps = 0usize;
+
+    while pc < after_old_pc {
+        steps += 1;
+        if steps > program.insns.len() {
+            return Err(site_level_inline_veto(
+                "soft inline hint matched path does not converge",
             ));
         }
-        let value = prepare_inline_value(info, value)?;
-        entries.push(RuntimeMapEntry {
-            key: key.clone(),
-            value,
-        });
+
+        let insn = &program.insns[pc];
+        if Some(pc) == uses.null_check_pc {
+            pc = after_old_pc;
+            break;
+        }
+
+        if insn.is_call() {
+            return Err(site_level_inline_veto(format!(
+                "soft inline hint matched path contains helper call at pc {pc}"
+            )));
+        }
+        if insn.is_jmp_class() {
+            return Err(site_level_inline_veto(format!(
+                "soft inline hint matched path contains unsupported branch at pc {pc}"
+            )));
+        }
+
+        if insn.is_ldimm64() {
+            let Some(hi_pc) = pc.checked_add(1) else {
+                return Err(site_level_inline_veto(
+                    "soft inline hint ldimm64 pc overflow".to_string(),
+                ));
+            };
+            if hi_pc >= after_old_pc || hi_pc >= program.insns.len() {
+                return Err(site_level_inline_veto(format!(
+                    "soft inline hint matched path cuts through ldimm64 at pc {pc}"
+                )));
+            }
+            insns.push(program.insns[pc]);
+            insns.push(program.insns[hi_pc]);
+            pc += 2;
+            continue;
+        }
+
+        insns.push(program.insns[pc]);
+        pc += insn_width(insn);
     }
-    entries.sort_by(|left, right| left.key.cmp(&right.key));
-    Ok(entries)
+
+    if pc != after_old_pc {
+        return Err(site_level_inline_veto(format!(
+            "soft inline hint matched path ended at pc {pc}, expected {after_old_pc}"
+        )));
+    }
+
+    Ok(SoftMatchedPath {
+        after_old_pc,
+        insns,
+    })
 }
 
-fn emit_runtime_membership_chain(
-    entries: &[RuntimeMapEntry],
-    result_reg: u8,
-) -> SiteRewriteResult<Vec<BpfInsn>> {
-    let scratch_reg = 3;
-    let mut insns = vec![BpfInsn::mov64_imm(result_reg, 0)];
-    for entry in entries {
-        emit_key_match_then(entry, scratch_reg, &mut insns, || {
-            vec![BpfInsn::mov64_imm(result_reg, 1)]
-        })?;
+fn soft_fold_non_null_old_pc(
+    program: &BpfProgram,
+    call_pc: usize,
+    uses: &R0UseClassification,
+) -> Option<usize> {
+    match uses.null_check_pc {
+        Some(null_check_pc) => advance_to_non_null_path(
+            null_check_pc,
+            &program.insns[null_check_pc],
+            program.insns.len(),
+        ),
+        None => Some(call_pc + insn_width(&program.insns[call_pc])),
     }
-    Ok(insns)
 }
 
-fn emit_runtime_value_chain(
-    entries: &[RuntimeMapEntry],
-    load: &FixedLoadUse,
-) -> SiteRewriteResult<Vec<BpfInsn>> {
-    let mut insns = Vec::new();
-    let mut end_jump_pcs = Vec::new();
-    for entry in entries {
-        let scalar =
-            read_scalar_from_value(&entry.value, load.offset, load.size).ok_or_else(|| {
-                site_level_inline_veto(format!(
-                    "runtime_value_load_out_of_bounds pc={} offset={} size={}",
-                    load.pc, load.offset, load.size
-                ))
-            })?;
-        emit_key_match_then(entry, load.dst_reg, &mut insns, || {
-            let mut matched = emit_constant_load(load.dst_reg, scalar, load.size);
-            matched.push(BpfInsn::ja(0));
-            matched
+fn emit_stack_const_blob(
+    out: &mut Vec<BpfInsn>,
+    stack_off: i16,
+    value: &[u8],
+) -> SiteRewriteResult<()> {
+    let mut offset = 0usize;
+    while offset < value.len() {
+        let remaining = value.len() - offset;
+        let width = if remaining >= 8 {
+            8usize
+        } else if remaining >= 4 {
+            4usize
+        } else if remaining >= 2 {
+            2usize
+        } else {
+            1usize
+        };
+        let Some(off) = i32::from(stack_off).checked_add(offset as i32) else {
+            return Err(site_level_inline_veto(
+                "soft inline hint stack const offset overflow",
+            ));
+        };
+        let off = i16::try_from(off).map_err(|_| {
+            site_level_inline_veto(format!("soft inline hint stack offset {off} exceeds i16"))
         })?;
-        end_jump_pcs.push(insns.len() - 1);
-    }
-    insns.extend(emit_constant_load(load.dst_reg, 0, load.size));
-    let end_pc = insns.len();
-    for jump_pc in end_jump_pcs {
-        patch_relative_jump(&mut insns, jump_pc, end_pc)?;
-    }
-    Ok(insns)
-}
-
-fn emit_key_match_then<F>(
-    entry: &RuntimeMapEntry,
-    scratch_reg: u8,
-    insns: &mut Vec<BpfInsn>,
-    emit_matched: F,
-) -> SiteRewriteResult<()>
-where
-    F: FnOnce() -> Vec<BpfInsn>,
-{
-    let mut mismatch_jump_pcs = Vec::new();
-    for (offset, byte) in entry.key.iter().copied().enumerate() {
-        let off = i16::try_from(offset).map_err(|_| {
-            site_level_inline_veto(format!("runtime_key_offset_exceeds_i16 offset={offset}"))
-        })?;
-        insns.push(BpfInsn::ldx_mem(BPF_B, scratch_reg, 2, off));
-        mismatch_jump_pcs.push(insns.len());
-        insns.push(BpfInsn::new(
-            BPF_JMP | BPF_JNE | BPF_K,
-            BpfInsn::make_regs(scratch_reg, 0),
-            0,
-            i32::from(byte),
-        ));
-    }
-    insns.extend(emit_matched());
-    let next_entry_pc = insns.len();
-    for jump_pc in mismatch_jump_pcs {
-        patch_relative_jump(insns, jump_pc, next_entry_pc)?;
+        let bpf_width = match width {
+            8 => BPF_DW,
+            4 => BPF_W,
+            2 => BPF_H,
+            1 => BPF_B,
+            _ => unreachable!("width is selected from 8/4/2/1"),
+        };
+        let scalar = constant_key_value(&value[offset..offset + width]);
+        if width == 8 {
+            out.extend(emit_ldimm64(3, scalar));
+        } else {
+            out.push(BpfInsn::mov32_imm(3, scalar as u32 as i32));
+        }
+        out.push(BpfInsn::stx_mem(bpf_width, 10, 3, off));
+        offset += width;
     }
     Ok(())
+}
+
+fn find_soft_value_stack_slot(
+    insns: &[BpfInsn],
+    call_pc: usize,
+    value_size: usize,
+) -> SiteRewriteResult<i16> {
+    if value_size == 0 {
+        return Err(site_level_inline_veto(
+            "soft inline hint value blob is empty",
+        ));
+    }
+    let size = round_up_8(value_size);
+    if size > 512 {
+        return Err(site_level_inline_veto(format!(
+            "soft inline hint value blob size {value_size} exceeds BPF stack"
+        )));
+    }
+    let bounds = subprog_bounds(insns, call_pc);
+    let mut used = [false; 512];
+    for pc in bounds.0..bounds.1 {
+        let Some((start, width)) = stack_access_range(insns, pc, bounds) else {
+            continue;
+        };
+        let start_i32 = i32::from(start);
+        let end = start_i32 + i32::from(width);
+        if start_i32 < -512 || end > 0 {
+            return Err(site_level_inline_veto(format!(
+                "stack access at pc {pc} is outside the BPF stack window"
+            )));
+        }
+        for off in start_i32..end {
+            let index = usize::try_from(off + 512).map_err(|_| {
+                site_level_inline_veto(format!("invalid stack offset {off} at pc {pc}"))
+            })?;
+            used[index] = true;
+        }
+    }
+
+    let size_i32 = i32::try_from(size).map_err(|_| {
+        site_level_inline_veto(format!("soft inline hint value size {size} exceeds i32"))
+    })?;
+    let max_start = -size_i32;
+    let mut start = -512i32;
+    while start <= max_start {
+        let end = start + size_i32;
+        let mut overlaps = false;
+        for off in start..end {
+            let index = usize::try_from(off + 512).map_err(|_| {
+                site_level_inline_veto(format!("invalid candidate stack offset {off}"))
+            })?;
+            if used[index] {
+                overlaps = true;
+                break;
+            }
+        }
+        if !overlaps {
+            return i16::try_from(start).map_err(|_| {
+                site_level_inline_veto(format!("soft inline hint stack offset {start} exceeds i16"))
+            });
+        }
+        start += 8;
+    }
+
+    Err(site_level_inline_veto(format!(
+        "no unused BPF stack slot for soft inline hint value size {value_size}"
+    )))
+}
+
+fn stack_access_range(insns: &[BpfInsn], pc: usize, bounds: (usize, usize)) -> Option<(i16, u8)> {
+    let insn = insns.get(pc)?;
+    if bpf_mode(insn.code) != BPF_MEM {
+        return None;
+    }
+    let width = size_in_bytes(bpf_size(insn.code))?;
+    let base_reg = match insn.class() {
+        BPF_LDX => insn.src_reg(),
+        BPF_ST | BPF_STX => insn.dst_reg(),
+        _ => return None,
+    };
+    let base_stack_off = match resolve_stack_pointer_to_stack_inner(
+        insns,
+        pc,
+        base_reg,
+        bounds,
+        REG_RESOLUTION_LIMIT,
+    ) {
+        Ok(base_stack_off) => base_stack_off,
+        Err(_) => return None,
+    };
+    let stack_off = i32::from(base_stack_off) + i32::from(insn.off);
+    let stack_off = match i16::try_from(stack_off) {
+        Ok(stack_off) => stack_off,
+        Err(_) => return None,
+    };
+    Some((stack_off, width))
+}
+
+fn emit_key_compare_to_hint(key: &[u8], insns: &mut Vec<BpfInsn>) -> SiteRewriteResult<Vec<usize>> {
+    let key_reg = 2;
+    let scratch_reg = 3;
+    let const_reg = 4;
+    let mut mismatch_jumps = Vec::new();
+    let mut offset = 0usize;
+    while offset < key.len() {
+        let remaining = key.len() - offset;
+        let width = if remaining >= 8 {
+            8usize
+        } else if remaining >= 4 {
+            4usize
+        } else if remaining >= 2 {
+            2usize
+        } else {
+            1usize
+        };
+        let off = i16::try_from(offset).map_err(|_| {
+            site_level_inline_veto(format!("soft inline hint key offset {offset} exceeds i16"))
+        })?;
+        let bpf_width = match width {
+            8 => BPF_DW,
+            4 => BPF_W,
+            2 => BPF_H,
+            1 => BPF_B,
+            _ => unreachable!("width is selected from 8/4/2/1"),
+        };
+        insns.push(BpfInsn::ldx_mem(bpf_width, scratch_reg, key_reg, off));
+        let value = constant_key_value(&key[offset..offset + width]);
+        if width == 8 {
+            insns.extend(emit_ldimm64(const_reg, value));
+        } else {
+            insns.push(BpfInsn::mov32_imm(const_reg, value as u32 as i32));
+        }
+        mismatch_jumps.push(insns.len());
+        insns.push(BpfInsn::new(
+            BPF_JMP | BPF_JNE | BPF_X,
+            BpfInsn::make_regs(scratch_reg, const_reg),
+            0,
+            0,
+        ));
+        offset += width;
+    }
+    Ok(mismatch_jumps)
 }
 
 fn patch_relative_jump(
@@ -2226,37 +3369,55 @@ fn patch_relative_jump(
 ) -> SiteRewriteResult<()> {
     let offset = target_pc as isize - jump_pc as isize - 1;
     let offset = i16::try_from(offset).map_err(|_| {
-        site_level_inline_veto(format!(
-            "runtime_key_chain_branch_offset_overflow offset={offset}"
-        ))
+        site_level_inline_veto(format!("map_inline_branch_offset_overflow offset={offset}"))
     })?;
     insns[jump_pc].off = offset;
     Ok(())
 }
 
-fn runtime_key_pointer_survives_until_loads(
-    insns: &[BpfInsn],
-    call_pc: usize,
-    uses: &R0UseClassification,
-) -> bool {
-    let Some(max_load_pc) = uses.fixed_loads.iter().map(|load| load.pc).max() else {
-        return false;
-    };
-    let fixed_load_pcs = uses
-        .fixed_loads
-        .iter()
-        .map(|load| load.pc)
-        .collect::<HashSet<_>>();
-    let mut pc = call_pc + 1;
-    while pc < insns.len() && pc <= max_load_pc {
-        let insn = &insns[pc];
-        let width = insn_width(insn);
-        if !fixed_load_pcs.contains(&pc) && insn_defines_reg(insn, 2) {
-            return false;
+fn patch_replacement_branch_targets(
+    insns: &mut [BpfInsn],
+    patches: &[ReplacementBranchPatch],
+    replacement_new_pcs: &HashMap<usize, usize>,
+    intermediate_to_final: &[usize],
+    final_addr_map: &[usize],
+) -> anyhow::Result<()> {
+    for patch in patches {
+        let replacement_base = replacement_new_pcs
+            .get(&patch.replacement_pc)
+            .copied()
+            .ok_or_else(|| {
+                anyhow::anyhow!(
+                    "missing replacement base for branch patch at old pc {}",
+                    patch.replacement_pc
+                )
+            })?;
+        let intermediate_branch_pc = replacement_base + patch.replacement_insn_idx;
+        let branch_pc = *intermediate_to_final
+            .get(intermediate_branch_pc)
+            .ok_or_else(|| {
+                anyhow::anyhow!(
+                    "replacement branch pc {} is out of final address map range",
+                    intermediate_branch_pc
+                )
+            })?;
+        let target_pc = *final_addr_map.get(patch.target_old_pc).ok_or_else(|| {
+            anyhow::anyhow!(
+                "replacement branch target old pc {} is out of address map range",
+                patch.target_old_pc
+            )
+        })?;
+        let Some(insn) = insns.get_mut(branch_pc) else {
+            bail!("replacement branch pc {branch_pc} is out of bounds");
+        };
+        if !insn.is_ja() {
+            bail!("replacement branch pc {branch_pc} is not a JA instruction");
         }
-        pc += width;
+        let offset = target_pc as isize - branch_pc as isize - 1;
+        insn.off = i16::try_from(offset)
+            .with_context(|| format!("replacement branch offset {offset} does not fit in i16"))?;
     }
-    true
+    Ok(())
 }
 
 fn runtime_pointer_escape_reason(program: &BpfProgram, uses: &R0UseClassification) -> String {
@@ -2270,12 +3431,70 @@ fn runtime_pointer_escape_reason(program: &BpfProgram, uses: &R0UseClassificatio
     "lookup_result_pointer_escapes".to_string()
 }
 
+fn resolve_inner_map_id_for_outer_key(
+    program: &BpfProgram,
+    outer_info: &MapInfo,
+    encoded_outer_key: &[u8],
+) -> SiteRewriteResult<u32> {
+    if let Some(inner_map_id) = program
+        .map_inner_map_ids
+        .get(&(outer_info.map_id, encoded_outer_key.to_vec()))
+        .copied()
+    {
+        return Ok(inner_map_id);
+    }
+
+    let value_size = program
+        .map_provider
+        .lookup_value_size(program, outer_info)
+        .map_err(anyhow::Error::msg)?;
+    let value = match program.map_provider.lookup_elem(
+        program,
+        outer_info.map_id,
+        encoded_outer_key,
+        value_size,
+    ) {
+        Ok(value) => value,
+        Err(MapLookupError::MissingKey { .. }) => {
+            return Err(site_level_inline_veto(format!(
+                "map-in-map outer map {} has no live inner map for key {}",
+                outer_info.map_id,
+                format_bytes_preview(encoded_outer_key)
+            )));
+        }
+        Err(MapLookupError::SkippedBySize { map_id }) => {
+            return Err(site_level_inline_veto(map_snapshot_skipped_by_size_reason(
+                map_id,
+            )));
+        }
+        Err(err) => return Err(missing_snapshot_error(err)),
+    };
+    let bytes = value.get(..4).ok_or_else(|| {
+        site_level_inline_veto(format!(
+            "map-in-map outer map {} value for key {} is too small to hold inner map id",
+            outer_info.map_id,
+            format_bytes_preview(encoded_outer_key)
+        ))
+    })?;
+    let inner_map_id = u32::from_le_bytes(bytes.try_into().expect("slice length checked"));
+    if inner_map_id == 0 {
+        return Err(site_level_inline_veto(format!(
+            "map-in-map outer map {} has no live inner map for key {}",
+            outer_info.map_id,
+            format_bytes_preview(encoded_outer_key)
+        )));
+    }
+    Ok(inner_map_id)
+}
+
 fn build_map_in_map_chain_rewrite(
     program: &BpfProgram,
     outer_site: &MapLookupSite,
     outer_info: &MapInfo,
     use_verifier_guided_keys: bool,
-    inline_hints_consumed: &mut HashSet<usize>,
+    inline_hints: &ResolvedInlineHints,
+    kernel_mutable_maps: &KernelMutableMaps,
+    inline_hints_consumed: &mut HashSet<MapInlineHintAnchor>,
 ) -> SiteRewriteResult<Option<SiteRewrite>> {
     let Some(chain) = find_map_in_map_chains(&program.insns, std::slice::from_ref(outer_site))
         .into_iter()
@@ -2288,15 +3507,15 @@ fn build_map_in_map_chain_rewrite(
         outer_site.call_pc,
         outer_info,
         use_verifier_guided_keys,
+        inline_hints.for_call(outer_site.call_pc),
     )
     .map_err(|err| match err {
         KeyExtractionError::Unavailable(err) => {
             site_level_inline_veto(format!("map-in-map outer key unavailable: {err}"))
         }
-        KeyExtractionError::Fatal(err) => SiteRewriteError::Error(anyhow::anyhow!(err)),
     })?;
-    if extracted_outer_key.used_inline_hint {
-        inline_hints_consumed.insert(outer_site.call_pc);
+    if let Some(anchor) = extracted_outer_key.used_inline_hint {
+        inline_hints_consumed.insert(anchor);
     }
     let outer_key = extracted_outer_key.key;
     if outer_key.width < outer_info.key_size as usize {
@@ -2306,17 +3525,7 @@ fn build_map_in_map_chain_rewrite(
         )));
     }
     let encoded_outer_key = encode_key_bytes(&outer_key.bytes, outer_info.key_size as usize);
-    let inner_map_id = program
-        .map_inner_map_ids
-        .get(&(outer_info.map_id, encoded_outer_key.clone()))
-        .copied()
-        .ok_or_else(|| {
-            site_level_inline_veto(format!(
-                "map-in-map outer map {} has no live inner map for key {}",
-                outer_info.map_id,
-                format_bytes_preview(&encoded_outer_key)
-            ))
-        })?;
+    let inner_map_id = resolve_inner_map_id_for_outer_key(program, outer_info, &encoded_outer_key)?;
     let inner_info = program
         .map_provider
         .map_info(program, inner_map_id)
@@ -2338,6 +3547,9 @@ fn build_map_in_map_chain_rewrite(
             inner_info.map_type
         )));
     }
+    if let Some(reason) = kernel_mutable_reason_for_map(kernel_mutable_maps, &inner_info) {
+        return Err(site_level_inline_veto(reason));
+    }
     if !inner_info.supports_direct_value_inline() {
         return Err(site_level_inline_veto(format!(
             "inner map type {} not inlineable",
@@ -2350,15 +3562,15 @@ fn build_map_in_map_chain_rewrite(
         chain.inner_call_pc,
         &inner_info,
         use_verifier_guided_keys,
+        inline_hints.for_call(chain.inner_call_pc),
     )
     .map_err(|err| match err {
         KeyExtractionError::Unavailable(err) => {
             site_level_inline_veto(format!("map-in-map inner key unavailable: {err}"))
         }
-        KeyExtractionError::Fatal(err) => SiteRewriteError::Error(anyhow::anyhow!(err)),
     })?;
-    if extracted_inner_key.used_inline_hint {
-        inline_hints_consumed.insert(chain.inner_call_pc);
+    if let Some(anchor) = extracted_inner_key.used_inline_hint {
+        inline_hints_consumed.insert(anchor);
     }
     let inner_key = extracted_inner_key.key;
     if inner_key.width < inner_info.key_size as usize {
@@ -2520,6 +3732,7 @@ fn build_map_in_map_chain_rewrite(
         }],
         skipped_pcs,
         replacements,
+        branch_patches: Vec::new(),
     }))
 }
 
@@ -2540,6 +3753,7 @@ fn site_can_attempt_lookup_pattern_removal(
 
 fn build_direct_map_value_load_rewrites(
     program: &BpfProgram,
+    kernel_mutable_maps: &KernelMutableMaps,
 ) -> anyhow::Result<DirectMapValueLoadRewrites> {
     let mut replacements = BTreeMap::new();
     let mut sites_applied = 0usize;
@@ -2590,7 +3804,12 @@ fn build_direct_map_value_load_rewrites(
             continue;
         }
 
-        let map_value = match resolve_snapshot_map_value(program, map_ref, &mut map_cache)? {
+        let map_value = match resolve_snapshot_map_value(
+            program,
+            map_ref,
+            kernel_mutable_maps,
+            &mut map_cache,
+        )? {
             Some(map_value) => map_value,
             None => {
                 pc += insn_width(insn);
@@ -2646,6 +3865,7 @@ fn build_direct_map_value_load_rewrites(
 fn resolve_snapshot_map_value(
     program: &BpfProgram,
     map_ref: MapRefKey,
+    kernel_mutable_maps: &KernelMutableMaps,
     cache: &mut HashMap<MapRefKey, Option<SnapshotMapValue>>,
 ) -> anyhow::Result<Option<SnapshotMapValue>> {
     if let Some(cached) = cache.get(&map_ref) {
@@ -2666,6 +3886,9 @@ fn resolve_snapshot_map_value(
         else {
             return Ok(None);
         };
+        if kernel_mutable_reason_for_map(kernel_mutable_maps, &info).is_some() {
+            return Ok(None);
+        }
 
         let key = vec![0u8; info.key_size as usize];
         let value_size = program
@@ -2791,19 +4014,110 @@ fn emit_constant_load(dst_reg: u8, value: u64, size: u8) -> Vec<BpfInsn> {
 }
 
 fn find_map_load_for_call(insns: &[BpfInsn], call_pc: usize) -> Option<usize> {
-    let (subprog_start, _) = subprog_bounds(insns, call_pc);
-    let mut cursor = call_pc;
-    while let Some(pc) = prev_real_pc_bounded(insns, cursor, subprog_start) {
-        let insn = &insns[pc];
-        if insn_defines_reg(insn, 1) {
-            return (insn.is_ldimm64()
-                && insn.dst_reg() == 1
-                && is_pseudo_map_fd_src(insn.src_reg()))
-            .then_some(pc);
+    find_direct_map_load_for_reg_before_pc(insns, call_pc, 1)
+}
+
+fn find_direct_map_load_for_reg_before_pc(insns: &[BpfInsn], pc: usize, reg: u8) -> Option<usize> {
+    let (subprog_start, _) = subprog_bounds(insns, pc);
+    find_direct_map_load_for_reg_before_pc_inner(
+        insns,
+        pc,
+        reg,
+        subprog_start,
+        REG_RESOLUTION_LIMIT,
+    )
+}
+
+fn find_direct_map_load_for_reg_before_pc_inner(
+    insns: &[BpfInsn],
+    pc: usize,
+    reg: u8,
+    subprog_start: usize,
+    budget: usize,
+) -> Option<usize> {
+    if budget == 0 {
+        return None;
+    }
+    let mut cursor = pc;
+    while let Some(prev_pc) = prev_real_pc_bounded(insns, cursor, subprog_start) {
+        let insn = &insns[prev_pc];
+        if insn_defines_reg(insn, reg) {
+            if insn.is_ldimm64() && insn.dst_reg() == reg && is_pseudo_map_fd_src(insn.src_reg()) {
+                return Some(prev_pc);
+            }
+            if is_mov64_reg(insn) && insn.dst_reg() == reg {
+                return find_direct_map_load_for_reg_before_pc_inner(
+                    insns,
+                    prev_pc,
+                    insn.src_reg(),
+                    subprog_start,
+                    budget - 1,
+                );
+            }
+            if is_stack_dw_load_to_reg(insn, reg) {
+                return find_direct_map_load_for_stack_slot_before_pc(
+                    insns,
+                    prev_pc,
+                    insn.off,
+                    subprog_start,
+                    budget - 1,
+                );
+            }
+            return None;
         }
-        cursor = pc;
+        cursor = prev_pc;
     }
     None
+}
+
+fn find_direct_map_load_for_stack_slot_before_pc(
+    insns: &[BpfInsn],
+    pc: usize,
+    stack_off: i16,
+    subprog_start: usize,
+    budget: usize,
+) -> Option<usize> {
+    if budget == 0 {
+        return None;
+    }
+    let mut cursor = pc;
+    while let Some(prev_pc) = prev_real_pc_bounded(insns, cursor, subprog_start) {
+        let insn = &insns[prev_pc];
+        if is_stack_dw_store(insn, stack_off) {
+            if insn.class() != BPF_STX {
+                return None;
+            }
+            return find_direct_map_load_for_reg_before_pc_inner(
+                insns,
+                prev_pc,
+                insn.src_reg(),
+                subprog_start,
+                budget - 1,
+            );
+        }
+        cursor = prev_pc;
+    }
+    None
+}
+
+fn is_mov64_reg(insn: &BpfInsn) -> bool {
+    insn.code == (BPF_ALU64 | BPF_MOV | BPF_X)
+}
+
+fn is_stack_dw_load_to_reg(insn: &BpfInsn, reg: u8) -> bool {
+    insn.class() == BPF_LDX
+        && bpf_mode(insn.code) == BPF_MEM
+        && bpf_size(insn.code) == BPF_DW
+        && insn.dst_reg() == reg
+        && insn.src_reg() == 10
+}
+
+fn is_stack_dw_store(insn: &BpfInsn, stack_off: i16) -> bool {
+    bpf_mode(insn.code) == BPF_MEM
+        && bpf_size(insn.code) == BPF_DW
+        && matches!(insn.class(), BPF_ST | BPF_STX)
+        && insn.dst_reg() == 10
+        && insn.off == stack_off
 }
 
 fn site_level_inline_veto(reason: impl Into<String>) -> SiteRewriteError {
@@ -3414,7 +4728,11 @@ fn record_diagnostic(diagnostics: &mut Vec<String>, message: String) {
 }
 
 fn record_maps_skipped_by_size_counter(program: &BpfProgram, diagnostics: &mut Vec<String>) {
-    let count = program.map_snapshots_skipped_by_size.len();
+    let count = program
+        .map_snapshots_skipped_by_size
+        .iter()
+        .filter(|map_id| !program.map_value_overlays.contains_key(map_id))
+        .count();
     if count > 0 {
         record_diagnostic(diagnostics, format!("maps_skipped_by_size={count}"));
     }
@@ -3422,10 +4740,27 @@ fn record_maps_skipped_by_size_counter(program: &BpfProgram, diagnostics: &mut V
 
 fn map_snapshot_skipped_by_size(program: &BpfProgram, map_id: u32) -> bool {
     program.map_snapshots_skipped_by_size.contains(&map_id)
+        && !program.map_value_overlays.contains_key(&map_id)
 }
 
 fn map_snapshot_skipped_by_size_reason(map_id: u32) -> String {
-    format!("map {map_id} snapshot skipped by size")
+    format!("map {map_id} snapshot skipped by size and no overlay provided")
+}
+
+fn map_snapshot_skipped_by_size_site_reason(program: &BpfProgram, map_id: u32) -> String {
+    format!(
+        "map snapshot skipped by size and no overlay provided (map_name={}, map_id={})",
+        map_name_for_id(program, map_id),
+        map_id
+    )
+}
+
+fn map_name_for_id(program: &BpfProgram, map_id: u32) -> String {
+    match program.map_metadata.get(&map_id) {
+        Some(metadata) if !metadata.name.is_empty() => metadata.name.clone(),
+        Some(_) => "<unnamed>".to_string(),
+        None => "<unknown>".to_string(),
+    }
 }
 
 fn record_skip(

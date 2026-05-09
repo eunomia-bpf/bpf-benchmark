@@ -4,8 +4,8 @@ use std::collections::{BTreeSet, HashMap};
 use crate::bpf::{install_mock_map, use_mock_maps, BpfMapInfo, MockMapState};
 use crate::insn::*;
 use crate::pass::{
-    BpfProgram, PassContext, PassManager, PipelineResult, RegState, ScalarRange, StackState,
-    VerifierInsn, VerifierInsnKind, VerifierValueWidth,
+    BpfProgram, PassContext, PipelineResult, RegState, ScalarRange, StackState, Tnum, VerifierInsn,
+    VerifierInsnKind, VerifierValueWidth,
 };
 use crate::passes::test_helpers::{call_helper, exit_insn};
 
@@ -79,12 +79,50 @@ fn fp_reg(offset: i32) -> RegState {
     }
 }
 
+fn scalar_reg(value: u64) -> RegState {
+    RegState {
+        reg_type: "scalar".to_string(),
+        value_width: VerifierValueWidth::Bits64,
+        precise: true,
+        exact_value: Some(value),
+        tnum: Some(Tnum { value, mask: 0 }),
+        range: ScalarRange {
+            smin: Some(value as i64),
+            smax: Some(value as i64),
+            umin: Some(value),
+            umax: Some(value),
+            smin32: Some(value as u32 as i32),
+            smax32: Some(value as u32 as i32),
+            umin32: Some(value as u32),
+            umax32: Some(value as u32),
+        },
+        offset: None,
+        id: None,
+    }
+}
+
 fn install_single_lookup_verifier_states(program: &mut BpfProgram) {
     program.set_verifier_states(vec![verifier_delta_state_with_stack(
         5,
         HashMap::from([(2, fp_reg(-4))]),
         stack_snapshot_from_key(-4, &1u32.to_le_bytes()),
     )]);
+}
+
+fn install_const_prop_scalar_verifier_state(
+    program: &mut BpfProgram,
+    pc: usize,
+    reg: u8,
+    value: u64,
+) {
+    program.set_verifier_states(vec![verifier_delta_state(
+        pc,
+        HashMap::from([(reg, scalar_reg(value))]),
+    )]);
+}
+
+fn verifier_delta_state(pc: usize, regs: HashMap<u8, RegState>) -> VerifierInsn {
+    verifier_delta_state_with_stack(pc, regs, HashMap::new())
 }
 
 fn verifier_delta_state_with_stack(
@@ -151,15 +189,6 @@ fn run_pipeline_with_passes(program: &mut BpfProgram, pass_names: &[&str]) -> Pi
     let mut ctx = PassContext::test_default();
     ctx.policy.enabled_passes = pass_names;
     pm.run(program, &ctx).unwrap()
-}
-
-fn default_test_pipeline() -> PassManager {
-    let pass_names = PASS_REGISTRY
-        .iter()
-        .filter(|entry| entry.name != "branch_flip" && entry.name != "prefetch")
-        .map(|entry| entry.name.to_string())
-        .collect::<Vec<_>>();
-    build_custom_pipeline(&pass_names).unwrap()
 }
 
 #[test]
@@ -290,10 +319,12 @@ fn cascade_const_prop_folds_non_zero_map_inline_output() {
     program.set_map_ids(vec![302]);
     install_single_lookup_verifier_states(&mut program);
 
-    let result = run_pipeline_with_passes(&mut program, &["map_inline", "const_prop"]);
-    assert_eq!(result.pass_results[0].pass_name, "map_inline");
-    assert_eq!(result.pass_results[1].pass_name, "const_prop");
-    assert_eq!(result.pass_results[1].sites_applied, 1);
+    let map_inline_result = run_pipeline_with_passes(&mut program, &["map_inline"]);
+    install_const_prop_scalar_verifier_state(&mut program, 2, 1, 52);
+    let const_prop_result = run_pipeline_with_passes(&mut program, &["const_prop"]);
+    assert_eq!(map_inline_result.pass_results[0].pass_name, "map_inline");
+    assert_eq!(const_prop_result.pass_results[0].pass_name, "const_prop");
+    assert_eq!(const_prop_result.pass_results[0].sites_applied, 1);
     assert_eq!(
         program.insns,
         vec![
@@ -369,17 +400,17 @@ fn cascade_full_pipeline_materializes_alu_and_leaves_branch_cleanup_to_kernel() 
         install_single_lookup_verifier_states(&mut program);
         let original_len = program.insns.len();
 
-        let result = if label == "array full pipeline" {
-            let pm = default_test_pipeline();
-            use_mock_maps(&mut program);
-            pm.run(&mut program, &PassContext::test_default()).unwrap()
-        } else {
-            run_pipeline_with_passes(&mut program, &["map_inline", "const_prop", "dce"])
-        };
+        let result = run_pipeline_with_passes(&mut program, &["map_inline"]);
+        let const_prop_pc = if map_type == BPF_MAP_TYPE_HASH { 2 } else { 3 };
+        install_const_prop_scalar_verifier_state(&mut program, const_prop_pc, 1, 52);
+        let const_prop_result = run_pipeline_with_passes(&mut program, &["const_prop", "dce"]);
+        let mut pass_results = result.pass_results;
+        pass_results.extend(const_prop_result.pass_results);
+        let pipeline_result = PipelineResult { pass_results };
 
         assert!(program.insns.len() < original_len, "{label}");
         assert_eq!(
-            result
+            pipeline_result
                 .pass_results
                 .iter()
                 .find(|pr| pr.pass_name == "map_inline")
@@ -388,7 +419,7 @@ fn cascade_full_pipeline_materializes_alu_and_leaves_branch_cleanup_to_kernel() 
             "{label}"
         );
         assert_eq!(
-            result
+            pipeline_result
                 .pass_results
                 .iter()
                 .find(|pr| pr.pass_name == "const_prop")
@@ -396,7 +427,7 @@ fn cascade_full_pipeline_materializes_alu_and_leaves_branch_cleanup_to_kernel() 
             Some(1),
             "{label}"
         );
-        assert!(result
+        assert!(pipeline_result
             .pass_results
             .iter()
             .find(|pr| pr.pass_name == "dce")

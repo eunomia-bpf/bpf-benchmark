@@ -1,25 +1,69 @@
-# map_inline overrides for katran. balancer_ingress has 4 const-key map-lookup
-# sites whose verifier-guided keys cannot be reconstructed; operator supplies
-# them via --inline-hint flags (Route A, see docs/tmp/katran_force_inline_recipe_20260506.md).
-# Other katran progs (e.g. xdp_root) get the plain default command.
+# map_inline overrides for katran/balancer_ingress.
 #
-# `--inline-hint=<call_pc>:<hex_key_bytes>` is map_inline pass-local — placed
-# AFTER `--` so MapInlineCliArgs parses it. It is intentionally NOT a global
-# bpfopt flag because only map_inline consumes it.
+# Phased Route A rollout — see docs/tmp/katran_optimization_upper_bound.md
+# §17 for the full plan. Each phase is gated on (a) actually inlining and
+# (b) being semantically safe (BPF kernel data path does not write the map).
+#
+# Current phase: 3 (ctl_array + vip_map + ch_rings + reals hard fold).
+# Phase 4 (map-in-map vip_to_down_rea outer) gated on task #247.
+# Soft fold gated on task #249.
+#
+# `--inline-hint=<anchor>:[!]<hex_key_bytes>` is map_inline pass-local —
+# placed AFTER `--` so MapInlineCliArgs parses it. A map-name anchor covers
+# all lookup sites for that map; `!` selects hard fold.
+#
+# Hinted now
+#   phase 1: ctl_array[0]   router MAC, key=0x00000000  (loader-only writes)
+#   phase 2: vip_map[VIP+port+TCP]  benchmark single VIP (operator-担保)
+#   phase 3: ch_rings  uniform overlay all entries → real_id 1
+#            reals[1]  sparse overlay, REAL_IP 10.200.0.2 → real_definition
+#
+# Phase 3 needs runtime overlay injection because daemon size-skipped
+# ch_rings/reals (33M-entry array). _inject_katran.sh resolves map_id by name
+# from MAP_VALUES/map-*.show.json and writes overlays.json keyed by current
+# run's map_ids (overlay templates are static; map_ids change per run).
+#
+# Not yet hinted
+#   phase 4: map-in-map (vip_to_down_rea outer; lru_mapping inner is LRU
+#            mutable so unsafe). #247 codex.
+#
+# Excluded (BPF kernel writes the map → snapshot value would be stale)
+#   stats / reals_stats / lru_miss_stats / vip_miss_stats / quic_stats_map
+#   fallback_cache / lru_mapping inner / global_lru_maps / fallback_glru
+#   stable_rt_stats / decap_vip_stats / tpr_stats_map / server_id_stats
+#   flow_debug_map
+#
+# Other katran progs (e.g. xdp_root) get the plain default command via the
+# `programs.default` fallback below.
 log_level: 2
 programs:
   balancer_ingress:
+    # Phase 3 overlay injection inlined: scan ${MAP_VALUES}/map-*.show.json
+    # to resolve ch_rings/reals map_id by name (per-run id changes), then
+    # build overlays.json keyed by current run's id from the static templates
+    # under runner/config/passes/map_inline/overlays/katran/.
     command: |
+      OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/map_inline/overlays/katran;
+      CH=; RE=;
+      for f in ${MAP_VALUES}/map-*.show.json; do
+        n=$(jq -r .name "$f"); i=$(jq -r .id "$f");
+        case "$n" in ch_rings) CH=$i ;; reals) RE=$i ;; esac;
+      done;
+      jq -n --arg c "$CH" --arg r "$RE"
+        --slurpfile co "$OVERLAY_DIR/ch_rings.json"
+        --slurpfile ro "$OVERLAY_DIR/reals.json"
+        '($c | if . == "" then {} else {(.): $co[0]} end) + ($r | if . == "" then {} else {(.): $ro[0]} end)'
+        > ${MAP_VALUES}/overlays.json &&
       timeout 6000 bpfopt --pass map_inline
         --input ${INPUT} --output ${OUTPUT} --report ${REPORT}
         --prog-type ${PROG_TYPE}
         --verifier-states ${VERIFIER_STATES}
         --
         --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}
-        --inline-hint=1105:00000000
-        --inline-hint=1807:00000000
-        --inline-hint=863:00000000
-        --inline-hint=895:00000000
+        --inline-hint=ctl_array:!00000000
+        --inline-hint=vip_map:!0a6401010000000000000000000000001f900600
+        --inline-hint=ch_rings:!00000000
+        --inline-hint=reals:!01000000
   default:
     command: |
       timeout 6000 bpfopt --pass map_inline

@@ -15,7 +15,7 @@ mod const_prop;
 mod dce;
 mod endian;
 mod extract;
-mod map_inline;
+pub mod map_inline;
 mod noop;
 mod prefetch;
 mod rotate;

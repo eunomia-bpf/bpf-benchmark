@@ -463,3 +463,198 @@ native 编译显示的新增指令机会集中在 rotate、setcc/cmov、constant
 生产安全路线先做 `ctl_array[0]` Route A、budgeted prefetch、`%65537` 验证、jhash rotate canonicalization、bounds merge。
 
 benchmark 上界路线的决定性杠杆是固定 VIP、uniform `ch_rings`、dependent `reals[1]`、required config null-elide。这能把 Katran 从当前约 `1.06x` 推向 `1.8x-2.5x` 的 ReJIT-only 区间，但仍不会追平完全手写/native x86 fast path。
+
+## 17. Map_inline Route A 分阶段 roadmap (live tracking)
+
+### 算法判据 (replaces §10's vague "可 inline" 列)
+
+**正确判据**: BPF kernel 数据通路是否调用 `bpf_map_update_elem` / `_delete_elem` / `_push/_pop_elem` 写这个 map (LRU 类型本身 lookup 即改 LRU 顺序也算)。
+- 写 → snapshot 值 stale,**不能 inline**
+- 不写 → 可以 inline (key 是源码 const 还是 packet-derived 都不影响,只是 paper 标签 production-safe vs workload-specialized 的区别)
+
+**当前 pass 缺陷** (待修): `BPF_F_RDONLY_PROG` flag-based guard (`map_inline.rs:271,287,1530-1533`) 不够,因为 katran loader 不设这位;Route A hint 路径完全 bypass guard。需要加静态分析扫 BPF bytecode 找 writer helper。
+
+### 分阶段 inline 计划
+
+| Phase | 内容 | 状态 | 期望新增 site | 预估 cycles/pkt | paper 标签 |
+|---:|---|---|---:|---:|---|
+| 1 | `ctl_array[0]` × 2 (PC 1105, 1807) | **DONE** (smoke 验证 inline) | 2 | 20-40 | production-safe |
+| 2 | `vip_map[VIP+port+TCP]` × 2 (PC 512, 762) | TODO | 2 | 30-80 | workload-specialized |
+| 3a | bpfopt 加 map-level kernel-write static filter (correctness) | TODO | 0 (堵 stats 误 inline) | — | bug fix |
+| 3b | bpfopt 加 `map-by-name-<name>.json` 压缩 form 解析 (uniform / sparse) | TODO | 0 (基础) | — | enabler |
+| 3c | 写 `runner/config/maps/katran/balancer_ingress/map-by-name-ch_rings.json` (uniform real_id=1) + `map-by-name-reals.json` (sparse default 0, exception `01000000`→real_definition) + yaml 加 shell `cp` 注入 + `--inline-hint=<ch_rings_pc>:<key>` + `--inline-hint=<reals_pc>:<key>` | TODO | 1-2 + 1-3 | 50-150 | workload-specialized |
+| 4 | map-in-map Route A 支持 (vip_to_down_rea outer + populated benchmark) | TODO | 0 katran (空) | — | future-paper enabler (cilium/tracee) |
+| 5 | `find_map_lookup_sites` 找全 70 个 BPF helper call site (不只 14)。可能 ch_rings/reals 的 lookup 没命中 pattern matcher | TODO | 视 grep 而定 | — | discovery |
+
+### 各 Map 现状 (inline 适用性)
+
+| Map | 类型 | size | BPF 写? | 当前 dump? | 解锁路径 |
+|---|---|---:|---|---|---|
+| ctl_array | ARRAY | 128B | NO | ✓ | **Phase 1 ✅** |
+| vip_map | HASH | 4KB | NO | ✓ | Phase 2 |
+| ch_rings | ARRAY | 256KB | NO | ❌ SkippedBySize | Phase 3 (overlay uniform) |
+| reals | ARRAY | 128KB | NO | ❌ SkippedBySize | Phase 3 (overlay sparse) |
+| stats / reals_stats / lru_miss_stats / vip_miss_stats / quic_stats_map / stable_rt_stats / decap_vip_stats / tpr_stats_map / server_id_stats | (PER)CPU/ARRAY | small | **YES** (RMW) | ✓ | **不 inline** (kernel 写) |
+| fallback_cache | LRU_HASH | varies | YES (LRU + update) | varies | 不 inline |
+| lru_mapping (outer) | ARRAY_OF_MAPS | small | NO outer | ✓ | Phase 4 (但 inner LRU 仍不可 inline → 整 chain 阻塞) |
+| lru_mapping (inner) | LRU_HASH | varies | YES | varies | 不 inline |
+| vip_to_down_reals_map | HASH_OF_MAPS | empty | NO | ✓ outer | Phase 4 (benchmark 空,inline 0 site) |
+| global_lru_maps / fallback_glru | HASH_OF_MAPS / LRU_HASH | varies | YES (inner LRU) | varies | 不 inline |
+| flow_debug_map | HASH | varies | YES (debug_helpers update) | varies | 不 inline |
+| server_id_map | HASH | varies | NO | ✓ | 可 inline 但 benchmark 不必命中 |
+| lpm_src_v4 / lpm_src_v6 | LPM_TRIE | varies | NO | varies | LPM_TRIE fold 复杂,paper 不优先 |
+
+### Phase 数据表 (随每次 SAMPLES=3 测试更新)
+
+| Phase | result_dir | sites_applied (map_inline) | per-prog geomean | 备注 |
+|---:|---|---:|---:|---|
+| baseline (kinsn 6-pass, no map_inline) | x86_kvm_corpus_20260508_041822_768126 | 0 | 0.9423 | 1.061x speedup,55 cycles |
+| Phase 1 (ctl_array×2 hint + map_inline) | x86_kvm_corpus_20260508_231402_301128 | 2/16 | 0.9715 | map_inline 排在 noop 后第 2 位避免 PC 漂移;skipped 14: 8 verifier-state miss / 2 fixed-offset miss / 4 map-in-map (待 Phase 3/4) |
+| Phase 2 (+ vip_map hard fold) | x86_kvm_corpus_20260509_013938_112049 / 015615_631003 | 6/23→73 | 0.8811 / **1.0099** | 两次 run 数据差异大(VM 噪声:baseline avg_ns 228→151)。applied=6 一致(ctl_array×2 + vip_map×4)。第二次跑用 #245 后代码,matched 涨到 73 是因为 size-skipped map 现在可见(ch_rings 2 + reals 6 + lru_miss_stats/reals_stats/etc.)。真实 phase 2 speedup 在 0.88-1.01 噪声窗内,需 paper-grade 多 run 平均才能确定 |
+| Phase 3 (+ ch_rings + reals overlay) | TBD | TBD | TBD | §19 修正:ch_rings/reals **不在 14 skipped 里**,被 daemon `maps_skipped_by_size` 拦下;Phase 3 实际工作是给 bpfopt 加 compressed overlay 入口让它们进候选;静态上界 9 (ch_rings 2 + reals 7),保守预期 **+2-4 sites** |
+| Phase 4 (+ map-in-map) | TBD | TBD | TBD | §19 修正:vip_to_down_rea outer 2 site 但 benchmark map 空,lru_mapping inner 是 LRU 不可 value-inline → katran 预期 **0 applied**;此 phase 是 cilium/tetragon paper enabler |
+
+测下一次后回填本表。
+
+> **2026-05-08 #244 retrospective**: 用新 map_name 硬 fold 接口 (`ctl_array:!00000000`) 跑默认 13-pass 顺序,balancer_ingress ratio = **1.2323** (post 23% 慢于 baseline) — 不是 map_inline 退化,是 **const_prop 在 map_inline 硬 fold 后 BPF_PROG_REJIT 失败 (EACCES)**,导致后续 dce/bounds_check_merge/skb_load_bytes_spec/bulk_memory/prefetch 全跳过。task #250 调研中。临时 workaround: 跑 `BPFREJIT_BENCH_PASSES="noop,map_inline"` 隔离测 map_inline 自身正确性。result_dir: x86_kvm_corpus_20260509_011252_944576。
+
+> **软 fold broken**: #244 实现的 `<anchor>:<hex>` 软 fold 产出 verifier 拒绝的 bytecode (R8 invalid mem access scalar) — hit 路径返回 const_blob_ptr,跟 fallback lookup 路径的 map_value_or_null 类型不能 merge。task #249 重设计:hit 路径整段 fold scalar,else 路径走现有 null handler (不调 lookup)。katran.yaml 当前只留 ctl_array 硬 fold。
+
+> Phase 1 解读 (2026-05-08): ratio 0.9715 比 kinsn-only 6-pass 基线 0.9423 略**高** (即略慢),不是 map_inline 起反作用,而是 13-pass 流水线在同一 SAMPLES=3 VM 噪声窗内的整体落点;applied=2 已经验证 hint-by-PC 路径正确,真正的速度跳预计要等 Phase 3 (ch_rings/reals overlay) 解锁更多站点后才显现。
+
+> Hint 格式风险:目前用 `<call_pc>:<hex_key>` 锚定站点,PC 跨任何 bytecode-改写 pass 都会漂移,跨 LLVM rebuild 也会变,无语义可读性。后续要换成 `<map_name>:<hex_key>`,由 map_inline pass 自己扫所有 `bpf_map_lookup_elem(&<map>, ...)` 站点逐站套用 hint key — 见 §18 设计草案。
+
+## 18. Hint 锚点设计草案: PC → map name + key
+
+**问题**:`--inline-hint=<call_pc>:<hex_key>` 把 hint 绑死在原始 bytecode PC 上,有三类失稳来源:
+
+1. **跨 pass 漂移**:任何前置 pass(BR2 family、kinsn family、wide_mem)改 bytecode 都会让所有 PC 错位 — Phase 1 已经被迫把 map_inline 排到第 2 位规避。pass 顺序就此被 hint 格式绑架。
+2. **跨 rebuild 漂移**:换 clang/llvm 版本、源码加一行、内联策略变 → 1105/1807 立即失效。hint 实际上跟某次 `balancer.bpf.o` 的具体编译产物耦合。
+3. **无语义**:1105 这数字不告诉读者它对应 ctl_array;必须 disassemble 才能验证 hint 没贴错位置。
+
+**目标格式**:
+
+```yaml
+--inline-hint=ctl_array:00000000
+# 或
+--inline-hint=map_id=42:00000000
+```
+
+map_inline pass 内部:
+1. 扫 bytecode 找出所有 `BPF_CALL helper=map_lookup_elem` 站点
+2. 对每个站点解析 `R1` 加载的 map (BTF/relo 给出 map_id 或 map name)
+3. 凡是 map 命中 hint 的,按 hint key 在 dump 中查 value,fold 成立即数序列
+
+**优势**:
+
+| 维度 | PC | map_name+key |
+|---|---|---|
+| 跨 pass 顺序稳定 | ✗ (被前置 pass 改插值) | ✓ |
+| 跨 rebuild 稳定 | ✗ (PC 跟编译产物绑定) | ✓ (BTF map name 是强契约) |
+| 多站点同 map | 每个站点写一条 | 一条覆盖全部 |
+| 可读性 | 0 | 高 (一眼知道是哪张表) |
+| 代码改动 | 现状 | 中 (~80-150 行,加一段站点扫描+map id 解析) |
+
+**多 key 同 map 的歧义处理**:
+
+- (a) **源码 key 是常量**(katran ctl_array 就是这种,`mac_addr_pos=0`):pass 在每个站点解析 `R2` 指向的 stack/data slot 是不是 const-store,匹配 hint key 的站点才 inline,其他站点跳过 — 自动多键安全。
+- (b) **源码 key 是动态变量**(vip_map / reals / ch_rings):pass 一律按 hint key specialize,这就是 Route A "operator 担保 deployment 不变" 的语义,所有站点 fold 到同一 key。
+
+**兼容路径**:第一阶段同时支持两种 hint 格式 — 数字开头走 `<pc>:<hex>` 旧路径,字符串开头走 `<map_name>:<hex>` 新路径。katran phase 1 现成的 1105/1807 不必立刻改,跑完 phase 2/3 数据后再统一切换。
+
+**实施时机**:
+
+- Phase 3a (kernel-write filter) 改 bpfopt,顺手把 hint 解析模块也升级 — 一次 codex 任务做完两件相关的事
+- 或者独立切一刀,在 Phase 2 (vip_map) 之前先做 — 因为 vip_map 多 VIP 场景下 PC 数量翻倍,继续用 PC 会维护爆炸
+
+## 19. 14-skipped-site map 归属调研 (Phase 5 闭环)
+
+数据源:
+
+- Phase 1 result: `corpus/results/x86_kvm_corpus_20260508_231402_301128/details/apps/katran.json`
+- Bytecode / map fd snapshot: `corpus/results/x86_kvm_corpus_20260430_193236_794969/details/workdirs/553/{prog.bin,map_fds.json,target.json}`
+- 源码: `runner/repos/katran/katran/lib/bpf/balancer.bpf.c` 和 include headers
+
+方法:解析 `prog.bin` 的 raw `struct bpf_insn[]`,在每个 skipped call PC 前找最近的 `BPF_LD_IMM64` pseudo-map-fd load,取 `imm` 作为 old fd,再用 `map_fds.json` 转为 map id/name。源码行号用 `corpus/build/katran/balancer.bpf.o` 的 xdp section BTF line info 对齐,再按 map name + 邻近控制流 grep 到实际 `bpf_map_lookup_elem()` 表达式所在源码行。
+
+### 19.1 14 行归属表
+
+| PC | map_name | map_id | skip reason | 源码行号 | 适用 hint 模式 / Phase |
+|---:|---|---:|---|---|---|
+| 512 | `vip_map` | 3948 | lookup key is not available from verifier-guided state | `balancer.bpf.c:787` | Phase 2, `vip_map:<VIP,8080,TCP>`;主路径 fixed VIP/port hint |
+| 520 | `vip_map` | 3948 | lookup key is not available from verifier-guided state | `balancer.bpf.c:790` | 当前 Phase 不计预期;这是 port-zero fallback,runner 未预填该 entry |
+| 562 | `lru_mapping` | 3950 | map-in-map chain is not inlineable | `balancer.bpf.c:839` | Phase 4 map-in-map enabler only;inner LRU 仍不可 value-inline |
+| 762 | `vip_map` | 3948 | lookup key is not available from verifier-guided state | `balancer.bpf.c:787` | Phase 2,第二个编译拷贝的 fixed VIP/port hint |
+| 770 | `vip_map` | 3948 | lookup key is not available from verifier-guided state | `balancer.bpf.c:790` | 当前 Phase 不计预期;同 PC 520 |
+| 814 | `lru_mapping` | 3950 | map-in-map chain is not inlineable | `balancer.bpf.c:839` | Phase 4 map-in-map enabler only;inner LRU 仍不可 value-inline |
+| 863 | `quic_stats_map` | 3957 | lookup key is not available from verifier-guided state | `balancer.bpf.c:876` | 不应进默认 hint;per-cpu stats/RMW map,Phase 3a filter 应提前排除 |
+| 895 | `quic_stats_map` | 3957 | lookup key is not available from verifier-guided state | `balancer.bpf.c:876` | 不应进默认 hint;同上 |
+| 1072 | `vip_to_down_rea` | 3965 | map-in-map outer key unavailable after prior rewrite | `balancer.bpf.c:662` | Phase 4 only;当前 benchmark outer map 为空,预期 0 site |
+| 1105 | `ctl_array` | 3947 | lookup result is not consumed by fixed-offset scalar loads | `balancer.bpf.c:1033` | Phase 1 已解决;round 2 重新扫描已 rewrite site 的统计性 skip,应改成 `ctl_array:00000000` hint |
+| 1351 | `vip_miss_stats` | 3956 | lookup key is not available from verifier-guided state | `balancer.bpf.c:588` | 不进 Phase 3/4;diagnostic path,低价值且应由 mutability/writer filter 保护 |
+| 1776 | `vip_to_down_rea` | 3965 | map-in-map outer key unavailable after prior rewrite | `balancer.bpf.c:662` | Phase 4 only;当前 benchmark outer map 为空,预期 0 site |
+| 1807 | `ctl_array` | 3947 | lookup result is not consumed by fixed-offset scalar loads | `balancer.bpf.c:1033` | Phase 1 已解决;round 2 统计性 skip |
+| 2062 | `vip_miss_stats` | 3956 | lookup key is not available from verifier-guided state | `balancer.bpf.c:588` | 不进 Phase 3/4;diagnostic path |
+
+归属计数:
+
+| map | count in 14 skipped PCs |
+|---|---:|
+| `vip_map` | 4 |
+| `lru_mapping` | 2 |
+| `quic_stats_map` | 2 |
+| `vip_to_down_rea` | 2 |
+| `ctl_array` | 2 |
+| `vip_miss_stats` | 2 |
+| `ch_rings` | 0 |
+| `reals` | 0 |
+
+### 19.2 skip reason 根因
+
+`lookup key is not available from verifier-guided state` 的 8 个站点不是同一类业务机会。4 个 `vip_map` 是 Phase 2 的 fixed traffic key specialization 目标;2 个 `quic_stats_map` 和 2 个 `vip_miss_stats` 是 stats/diagnostic path,默认不该为了 map_inline 追它们。当前 bpfopt 的根因是 key extraction 过度依赖前一轮 `noop` 的 verifier log snapshot;这些 call PC 没有 state snapshot,而 map 又没有 `BPF_F_RDONLY_PROG` 这类只读标志时,pass 不能走 runtime-key rewrite,于是落到 verifier-state miss。Phase 3a 的 map-level kernel-write/static writer filter 应该先把 stats 类 map 从候选集中拿掉;Phase 2/§18 的 map-name+key hint 应该只显式覆盖 `vip_map`。
+
+`lookup result is not consumed by fixed-offset scalar loads` 的 2 个站点是 `ctl_array[0]` 的 round-2 artifact。PC 1105/1807 在 round 1 已经成功 inline,然后 fixed-point 第二轮重新扫描修改后的 bytecode,原来的 R0 use pattern 已经不存在,所以被计入 skip reason。这不是未解锁机会,但 bpfopt reporting 可以改进:已经 applied 的 PC 不应该再次贡献最终 `sites_skipped`。
+
+`map-in-map chain is not inlineable` 的 2 个站点是 `lru_mapping`。这个 outer map 返回 per-cpu inner LRU map pointer,后续 `bpf_map_lookup_elem(lru_map,&pckt->flow)` 仍是 LRU map lookup,lookup 本身改变 LRU 状态,不能当作普通 frozen value inline。Phase 4 即使支持 map-in-map outer rewrite,这里也不能算作 `ch_rings/reals` 那种 value specialization。
+
+`map-in-map outer key unavailable after prior rewrite` 的 2 个站点是 `vip_to_down_reals_map` outer lookup。它需要从 VIP struct 提取 outer key,并且还需要 populated outer/inner snapshot。当前 benchmark 的 down-real map 为空,所以 Phase 4 在 Katran 当前配置上预期仍是 0 applied site;它更像 Cilium/Tracee map-in-map 论文扩展的 enabler。
+
+### 19.3 ch_rings / reals 验证结论
+
+`ch_rings` 和 `reals` **不在这 14 个 skipped PC 里**,也**不在 Phase 1 的 matched-site accounting 里**。注意这里有 fixed-point 计数噪声:`ctl_array[0]` at PC 1105/1807 在 round 1 已 applied,round 2 又以 fixed-offset reason 计入 skipped。所以这张 14 行表不是 14 个从未 applied 的 unique miss,但它覆盖了 diagnostics 里的 14 个 skipped PC。
+
+全程序 bytecode 里确实存在 `ch_rings`/`reals` lookup,但它们被挡在 16-site 列表之前:
+
+| map | bytecode lookup PCs | map_id | 主要源码 |
+|---|---|---:|---|
+| `ch_rings` | 1292, 1995 | 3951 | `balancer.bpf.c:146` |
+| `reals` | 1041, 1311, 1524, 1702, 1726, 1746, 2018 | 3952 | `balancer.bpf.c:159`, `balancer.bpf.c:198`, `balancer.bpf.c:540`, `balancer.bpf.c:898`, `pckt_parsing.h:334` |
+
+直接原因是 map snapshot size gate。`map_inline` 对 `map_snapshots_skipped_by_size` 只记录总数 `maps_skipped_by_size=7`;逐站逻辑在发现 map snapshot skipped by size 后直接 `continue`,没有把这些 PCs 写入 `sites_skipped` diagnostics。因此 Phase 3 不是在修复当前 14 个 skip reason,而是在让 `ch_rings`/`reals` 这类 size-skipped map 通过 compressed overlay/hint 进入候选集合。
+
+### 19.4 Phase 3 / Phase 4 预期修正
+
+Phase 2 (`vip_map`) 的实际 hot-path 候选是 2 个静态站点:PC 512/762 是 fixed VIP+port 主 lookup。PC 520/770 是 port=0 fallback lookup,当前 runner 未预填该 entry,所以不应算进 Phase 2 预期;只有额外构造 wildcard/port-zero VIP snapshot 时才可能到 4。
+
+Phase 3 (`ch_rings` + `reals`) 的实际工作是:
+
+1. 提供 `ch_rings` uniform overlay,让 33M-entry array 不再因 size gate 消失。
+2. 提供 `reals` sparse overlay,至少包含 real id 1 的 `real_definition`。
+3. 把 hint 锚点从 PC 改为 map name + key / compressed map overlay,否则这些 PC 不稳定且没法表达 uniform ring。
+4. 让 pass 在没有 exact verifier key 的情况下利用 uniform/sparse snapshot 做合法 rewrite,尤其是 `ch_rings` uniform real_id=1 后再带出 dependent `reals[1]`。
+
+Phase 3 静态候选上界是 `ch_rings` 2 个 site + `reals` 7 个 site。现实 hot-path 预期应更保守:先按 `ch_rings` 2 个 site + `get_packet_dst` dependent `reals` 2 个 site 估计;其余 `reals` 来自 server-id/TCP-opt/QUIC/LRU 旁路,是否值得 inline 取决于 workload 是否触发。如果第一版只有 overlay+map-name hint,但没有 dependent propagation,保守预期就是 `ch_rings` 2、`reals` 0。
+
+Phase 4 当前 Katran 配置预期 applied 仍是 0:
+
+- `vip_to_down_rea` 有 2 个 outer skipped site,但 benchmark map 为空;只有构造 populated down-real map 后才有意义。
+- `lru_mapping` 有 2 个 outer skipped site,但 inner LRU lookup 不能 value-inline;最多是 outer-map pointer rewrite enabler,不能算当前 map_inline speed site。
+
+### 19.5 bpfopt 可改进点
+
+1. **reporting**:对 size-skipped map 记录 per-site diagnostics,至少包含 PC/map_id/map_name/reason。现在只写 `maps_skipped_by_size=7`,导致 `ch_rings/reals` 从 16-site 表面结果里消失。
+2. **fixed-point accounting**:已经成功 applied 的 PC 不应在下一轮被计入最终 `sites_skipped`。PC 1105/1807 的 round-2 fixed-offset skip 应该从最终 skip count 里剥离,或标成 `already_rewritten`.
+3. **map writer filter**:用 BPF bytecode 静态扫描 `bpf_map_update_elem/delete_elem/push/pop` 和 LRU map 类型,替代 `BPF_F_RDONLY_PROG` flag guard。这样 `quic_stats_map`、`vip_miss_stats` 这类 stats/diagnostic map 不会伪装成 verifier-state miss。
+4. **verifier-state coverage**:当前 `noop` log 的 state snapshot 不覆盖这些 call PC。可改进 verifier log parser 的 PC 对齐/邻近 state 回退,或在 pass 内做 stack key store 的局部常量传播。对 `vip_map` 这类 traffic-specialized map,更直接的路径仍是 explicit hint,不应假装从 verifier 自动证明 deployment invariant。
+5. **hint redesign**:实现 §18 的 `map_name:key` / compressed overlay 语义。Phase 3 的 `ch_rings` uniform 和 `reals` sparse 都不是稳定 PC hint 能自然表达的东西。
+6. **map-in-map support**:Phase 4 要先区分 `vip_to_down_reals_map` 这种可作为 benchmark/future-paper enabler 的 outer map,和 `lru_mapping` 这种 inner LRU 不可 value-inline 的 map。二者不能混成同一个 "map-in-map unlock count"。

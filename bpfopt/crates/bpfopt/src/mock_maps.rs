@@ -54,6 +54,9 @@ impl MapProvider for MockMapProvider {
         program: &BpfProgram,
         info: &crate::passes::MapInfo,
     ) -> std::result::Result<usize, String> {
+        if let Some(overlay) = program.map_value_overlays.get(&info.map_id) {
+            return Ok(overlay.value_size);
+        }
         if let Some(value_size) = program
             .map_values
             .iter()
@@ -72,6 +75,26 @@ impl MapProvider for MockMapProvider {
         key: &[u8],
         value_size: usize,
     ) -> std::result::Result<Vec<u8>, MapLookupError> {
+        if let Some(overlay) = program.map_value_overlays.get(&map_id) {
+            return match overlay.lookup(key) {
+                Some(value) => {
+                    if value.len() != value_size {
+                        Err(MapLookupError::Failed(format!(
+                            "compressed map {} returned value size {}, expected {}",
+                            map_id,
+                            value.len(),
+                            value_size
+                        )))
+                    } else {
+                        Ok(value)
+                    }
+                }
+                None => Err(MapLookupError::MissingKey {
+                    map_id,
+                    key: key.to_vec(),
+                }),
+            };
+        }
         if program.map_snapshots_skipped_by_size.contains(&map_id) {
             return Err(MapLookupError::SkippedBySize { map_id });
         }
