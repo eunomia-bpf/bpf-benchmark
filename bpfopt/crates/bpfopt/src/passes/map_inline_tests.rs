@@ -1489,7 +1489,7 @@ fn map_inline_pass_skips_non_constant_key() {
 }
 
 #[test]
-fn map_inline_soft_map_name_hint_emits_guarded_fallback() {
+fn map_inline_soft_map_name_hint_emits_key_check_scalar_fold_without_fallback() {
     let map_id = 9601;
     let mut values = HashMap::new();
     values.insert(1u32.to_le_bytes().to_vec(), 7u32.to_le_bytes().to_vec());
@@ -1531,11 +1531,26 @@ fn map_inline_soft_map_name_hint_emits_guarded_fallback() {
 
     assert_eq!(result.pass_results[0].sites_applied, 1);
     assert_eq!(result.pass_results[0].map_inline_records.len(), 1);
-    assert!(program.insns.contains(&BpfInsn::mov64_reg(0, 10)));
-    assert!(program
+    assert!(!program
         .insns
         .iter()
         .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM));
+    assert!(!program.insns.contains(&BpfInsn::mov64_reg(0, 10)));
+    assert!(!program.insns.contains(&map[0]));
+    assert!(program.insns.contains(&BpfInsn::ldx_mem(BPF_W, 3, 2, 0)));
+    assert!(program.insns.contains(&BpfInsn::mov32_imm(4, 1)));
+    assert!(program.insns.iter().any(|insn| {
+        insn.class() == BPF_JMP
+            && bpf_op(insn.code) == BPF_JNE
+            && bpf_src(insn.code) == BPF_X
+            && insn.dst_reg() == 3
+            && insn.src_reg() == 4
+    }));
+    assert!(program.insns.contains(&BpfInsn::mov32_imm(6, 7)));
+    assert!(program
+        .insns
+        .windows(2)
+        .any(|window| window[0] == BpfInsn::mov64_imm(0, 0) && window[1].is_ja()));
     assert!(result.pass_results[0]
         .diagnostics
         .iter()

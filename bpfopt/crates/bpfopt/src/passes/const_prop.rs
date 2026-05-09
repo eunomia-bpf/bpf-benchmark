@@ -11,6 +11,8 @@ use super::utils::{emit_ldimm64, fixup_all_branches, insn_width};
 
 const REG_COUNT: usize = 11;
 const VERIFIER_POST_STATE_NOT_SCALAR_EXACT: &str = "verifier post-state is not scalar-exact";
+const VERIFIER_INSN_POST_STATE_NOT_SCALAR_EXACT: &str =
+    "verifier instruction post-state is not scalar-exact";
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 struct RegConstFact {
@@ -33,7 +35,9 @@ type RegConstState = [RegConstFact; REG_COUNT];
 struct VerifierExactConstOracle {
     facts: BTreeMap<(usize, usize, u8), RegConstFact>,
     scalar_post_states: BTreeMap<(usize, usize, u8), VerifierScalarExactPostState>,
+    insn_scalar_post_states: BTreeMap<(usize, usize, u8), VerifierScalarExactPostState>,
     frames_by_pc: BTreeMap<usize, BTreeSet<usize>>,
+    insn_frames_by_pc: BTreeMap<usize, BTreeSet<usize>>,
 }
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -148,6 +152,11 @@ impl VerifierExactConstOracle {
         let mut observed_counts: BTreeMap<(usize, usize, u8), usize> = BTreeMap::new();
         let mut accumulators: BTreeMap<(usize, usize, u8), OracleExactAccumulator> =
             BTreeMap::new();
+        let mut insn_frames_by_pc: BTreeMap<usize, BTreeSet<usize>> = BTreeMap::new();
+        let mut insn_visit_counts: BTreeMap<(usize, usize), usize> = BTreeMap::new();
+        let mut insn_observed_counts: BTreeMap<(usize, usize, u8), usize> = BTreeMap::new();
+        let mut insn_accumulators: BTreeMap<(usize, usize, u8), OracleExactAccumulator> =
+            BTreeMap::new();
 
         for state in states {
             if state.kind == VerifierInsnKind::BranchDeltaState {
@@ -164,6 +173,21 @@ impl VerifierExactConstOracle {
                 let key = (state.pc, state.frame, regno);
                 *observed_counts.entry(key).or_default() += 1;
                 accumulators.entry(key).or_default().observe(reg_state);
+            }
+
+            if state.kind == VerifierInsnKind::InsnDeltaState {
+                insn_frames_by_pc
+                    .entry(state.pc)
+                    .or_default()
+                    .insert(state.frame);
+                *insn_visit_counts
+                    .entry((state.pc, state.frame))
+                    .or_default() += 1;
+                for (&regno, reg_state) in &state.regs {
+                    let key = (state.pc, state.frame, regno);
+                    *insn_observed_counts.entry(key).or_default() += 1;
+                    insn_accumulators.entry(key).or_default().observe(reg_state);
+                }
             }
         }
 
@@ -183,11 +207,25 @@ impl VerifierExactConstOracle {
                 scalar_post_states.insert(key, state);
             }
         }
+        let mut insn_scalar_post_states = BTreeMap::new();
+        for (key, acc) in insn_accumulators {
+            let (pc, frame, _) = key;
+            let visits = insn_visit_counts.get(&(pc, frame)).copied().unwrap_or(0);
+            let observations = insn_observed_counts.get(&key).copied().unwrap_or(0);
+            if observations != visits {
+                continue;
+            }
+            if let Some(state) = acc.into_scalar_post_state() {
+                insn_scalar_post_states.insert(key, state);
+            }
+        }
 
         Self {
             facts,
             scalar_post_states,
+            insn_scalar_post_states,
             frames_by_pc,
+            insn_frames_by_pc,
         }
     }
 
@@ -263,6 +301,41 @@ impl VerifierExactConstOracle {
                 .is_some_and(|frames| {
                     frames.iter().all(|&frame| {
                         self.post_state_proves_scalar_exact(pc, frame, dst, value, width)
+                    })
+                }),
+        }
+    }
+
+    fn insn_post_state_proves_scalar_exact(
+        &self,
+        pc: usize,
+        frame: usize,
+        dst: u8,
+        value: i64,
+        width: VerifierValueWidth,
+    ) -> bool {
+        self.insn_scalar_post_states
+            .get(&(pc, frame, dst))
+            .is_some_and(|state| state.matches(value, width))
+    }
+
+    fn insn_post_state_proves_scalar_exact_in_context(
+        &self,
+        pc: usize,
+        frame: Option<usize>,
+        dst: u8,
+        value: i64,
+        width: VerifierValueWidth,
+    ) -> bool {
+        match frame {
+            Some(frame) => self.insn_post_state_proves_scalar_exact(pc, frame, dst, value, width),
+            None => self
+                .insn_frames_by_pc
+                .get(&pc)
+                .filter(|frames| !frames.is_empty())
+                .is_some_and(|frames| {
+                    frames.iter().all(|&frame| {
+                        self.insn_post_state_proves_scalar_exact(pc, frame, dst, value, width)
                     })
                 }),
         }
@@ -614,6 +687,18 @@ fn fold_alu_instruction(
         return AluFoldDecision::Skip(SkipReason {
             pc,
             reason: VERIFIER_POST_STATE_NOT_SCALAR_EXACT.to_string(),
+        });
+    }
+    if !oracle.insn_post_state_proves_scalar_exact_in_context(
+        pc,
+        frame,
+        insn.dst_reg(),
+        result as i64,
+        width,
+    ) {
+        return AluFoldDecision::Skip(SkipReason {
+            pc,
+            reason: VERIFIER_INSN_POST_STATE_NOT_SCALAR_EXACT.to_string(),
         });
     }
 
@@ -1122,6 +1207,38 @@ mod tests {
                 exit_insn(),
             ]
         );
+    }
+
+    #[test]
+    fn const_prop_rejects_edge_state_only_pointer_arithmetic_materialization() {
+        // Bug caught: edge/full states describe control-flow entry state, not the
+        // instruction post-state. They must not prove an ALU replacement that
+        // would turn packet pointer arithmetic into a scalar immediate.
+        let original = vec![
+            BpfInsn::mov64_imm(7, 0),
+            BpfInsn::mov64_reg(3, 7),
+            add64_imm(3, 34),
+            BpfInsn::ldx_mem(BPF_H, 2, 3, 2),
+            exit_insn(),
+        ];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_verifier_states(vec![
+            verifier_delta_state(1, HashMap::from([(3, pkt_reg())])),
+            verifier_state_in_frame(
+                2,
+                0,
+                VerifierInsnKind::EdgeFullState,
+                HashMap::from([(3, scalar_reg(34))]),
+            ),
+        ]);
+
+        let result = run_const_prop_pass(&mut program);
+        let pass = &result.pass_results[0];
+        assert_eq!(pass.sites_applied, 0);
+        assert!(pass.sites_skipped.iter().any(|skip| {
+            skip.pc == 2 && skip.reason == VERIFIER_INSN_POST_STATE_NOT_SCALAR_EXACT
+        }));
+        assert_eq!(program.insns, original);
     }
 
     #[test]

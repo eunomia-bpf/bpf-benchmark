@@ -2424,7 +2424,7 @@ fn run_map_inline_round(
             .any(|hint| hint.mode == MapInlineHintMode::Soft)
         {
             match build_soft_hint_site_rewrite(program, &site, info, site_inline_hints) {
-                Ok(Some(mut rewrite)) => {
+                Ok(Some(rewrite)) => {
                     for hint in site_inline_hints {
                         inline_hints_consumed.insert(hint.anchor.clone());
                     }
@@ -2433,15 +2433,18 @@ fn run_map_inline_round(
                         .iter()
                         .any(|&pc| pc < bt.is_target.len() && bt.is_target[pc])
                     {
-                        record_diagnostic(
-                            &mut diagnostics,
-                            format!(
-                                "site at PC={}: keeping soft hint lookup fallback because removal would cross a branch target",
-                                site.call_pc
-                            ),
-                        );
-                        rewrite.skipped_pcs.clear();
-                        rewrite.removed_null_check = false;
+                        let reason = "soft fold removal would cross a branch target".to_string();
+                        record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
+                        continue;
+                    }
+                    if rewrite
+                        .replacements
+                        .keys()
+                        .any(|pc| rewrite.skipped_pcs.contains(pc))
+                    {
+                        let reason = "internal rewrite overlap".to_string();
+                        record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
+                        continue;
                     }
                     rewrites.push(rewrite);
                 }
@@ -2992,48 +2995,64 @@ fn build_soft_hint_site_rewrite(
         ));
     }
 
-    let uses = classify_r0_uses_with_options(&program.insns, site.call_pc, false, false);
-    if info.requires_entry_presence_check() && uses.null_check_pc.is_none() {
+    let null_handler = find_soft_fold_null_handler(&program.insns, site.call_pc)
+        .ok_or_else(|| site_level_inline_veto("soft fold not applicable: missing null handler"))?;
+
+    let uses = classify_r0_uses_with_options(
+        &program.insns,
+        site.call_pc,
+        info.has_removable_lookup_pattern(),
+        info.has_removable_lookup_pattern(),
+    );
+    if uses.null_check_pc != Some(null_handler.null_check_pc) {
         return Err(site_level_inline_veto(
-            "soft inline hint requires an immediate null check for hash-like maps",
+            "soft fold not applicable: nearest null check is not the lookup null handler",
+        ));
+    }
+    if uses.fixed_loads.is_empty() {
+        return Err(site_level_inline_veto(
+            "soft fold not applicable: lookup result has no scalar load use",
         ));
     }
     if !uses.other_uses.is_empty() {
-        return Err(site_level_inline_veto(runtime_pointer_escape_reason(
-            program, &uses,
-        )));
+        return Err(site_level_inline_veto(
+            "soft fold not applicable: lookup result has non-scalar use",
+        ));
     }
 
     let mut replacement = Vec::new();
     let mut branch_patches = Vec::new();
     let mut records = Vec::new();
-    let mut matched_end_jump_indices = Vec::new();
-    let mut after_old_pc: Option<usize> = None;
 
     for hint in hints {
-        let matched_path =
-            build_soft_matched_path(program, site.call_pc, &hint.inline_value, &uses)?;
-        match after_old_pc {
-            Some(pc) if pc != matched_path.after_old_pc => {
-                return Err(site_level_inline_veto(
-                    "soft inline hint chain produced inconsistent matched-path targets",
-                ));
-            }
-            Some(_) => {}
-            None => after_old_pc = Some(matched_path.after_old_pc),
-        }
-
         let compare_start = replacement.len();
         let mismatch_jumps = emit_key_compare_to_hint(&hint.key, &mut replacement)?;
-        replacement.extend(matched_path.insns);
-        matched_end_jump_indices.push(replacement.len());
+
+        for load in &uses.fixed_loads {
+            let scalar =
+                read_scalar_from_value(&hint.inline_value, load.offset, load.size).ok_or_else(
+                    || {
+                        site_level_inline_veto(format!(
+                            "soft fold map value read out of bounds for load pc {} (offset {}, size {})",
+                            load.pc, load.offset, load.size
+                        ))
+                    },
+                )?;
+            replacement.extend(emit_constant_load(load.dst_reg, scalar, load.size));
+        }
+
+        branch_patches.push(ReplacementBranchPatch {
+            replacement_pc: site.call_pc,
+            replacement_insn_idx: replacement.len(),
+            target_old_pc: null_handler.non_null_pc,
+        });
         replacement.push(BpfInsn::ja(0));
 
-        let next_hint_or_fallback = replacement.len();
+        let next_hint_or_miss = replacement.len();
         for jump_pc in mismatch_jumps {
-            patch_relative_jump(&mut replacement, jump_pc, next_hint_or_fallback)?;
+            patch_relative_jump(&mut replacement, jump_pc, next_hint_or_miss)?;
         }
-        if compare_start == next_hint_or_fallback {
+        if compare_start == next_hint_or_miss {
             return Err(site_level_inline_veto(
                 "soft inline hint emitted an empty key comparison",
             ));
@@ -3045,20 +3064,31 @@ fn build_soft_hint_site_rewrite(
         });
     }
 
-    replacement.push(program.insns[site.call_pc]);
-    let after_old_pc = after_old_pc
-        .ok_or_else(|| site_level_inline_veto("soft inline hint use window is empty"))?;
-    for jump_idx in matched_end_jump_indices {
-        branch_patches.push(ReplacementBranchPatch {
-            replacement_pc: site.call_pc,
-            replacement_insn_idx: jump_idx,
-            target_old_pc: after_old_pc,
-        });
-    }
+    replacement.push(BpfInsn::mov64_imm(0, 0));
+    branch_patches.push(ReplacementBranchPatch {
+        replacement_pc: site.call_pc,
+        replacement_insn_idx: replacement.len(),
+        target_old_pc: null_handler.null_handler_pc,
+    });
+    replacement.push(BpfInsn::ja(0));
 
     if replacement.is_empty() {
         return Ok(None);
     }
+
+    let mut skipped_pcs = HashSet::new();
+    skipped_pcs.insert(site.map_load_pc);
+    if program
+        .insns
+        .get(site.map_load_pc)
+        .is_some_and(BpfInsn::is_ldimm64)
+        && site.map_load_pc + 1 < program.insns.len()
+    {
+        skipped_pcs.insert(site.map_load_pc + 1);
+    }
+    skipped_pcs.insert(null_handler.null_check_pc);
+    skipped_pcs.extend(uses.alias_copy_pcs.iter().copied());
+    skipped_pcs.extend(uses.fixed_loads.iter().map(|load| load.pc));
 
     let mut replacements = BTreeMap::new();
     replacements.insert(site.call_pc, replacement);
@@ -3075,245 +3105,51 @@ fn build_soft_hint_site_rewrite(
         ),
         removed_null_check: false,
         map_inline_records: records,
-        skipped_pcs: HashSet::new(),
+        skipped_pcs,
         replacements,
         branch_patches,
     }))
 }
 
-struct SoftMatchedPath {
-    after_old_pc: usize,
-    insns: Vec<BpfInsn>,
+#[derive(Clone, Copy, Debug)]
+struct SoftNullHandler {
+    null_check_pc: usize,
+    non_null_pc: usize,
+    null_handler_pc: usize,
 }
 
-fn build_soft_matched_path(
-    program: &BpfProgram,
-    call_pc: usize,
-    inline_value: &[u8],
-    uses: &R0UseClassification,
-) -> SiteRewriteResult<SoftMatchedPath> {
-    let after_old_pc = soft_fold_non_null_old_pc(program, call_pc, uses)
-        .ok_or_else(|| site_level_inline_veto("soft inline hint use window is empty"))?;
-    let mut insns = Vec::new();
-    let scratch_off = find_soft_value_stack_slot(&program.insns, call_pc, inline_value.len())?;
-    emit_stack_const_blob(&mut insns, scratch_off, inline_value)?;
-    insns.push(BpfInsn::mov64_reg(0, 10));
-    insns.push(BpfInsn::alu64_imm(BPF_ADD, 0, i32::from(scratch_off)));
-
-    let mut pc = call_pc + insn_width(&program.insns[call_pc]);
-    let mut steps = 0usize;
-
-    while pc < after_old_pc {
-        steps += 1;
-        if steps > program.insns.len() {
-            return Err(site_level_inline_veto(
-                "soft inline hint matched path does not converge",
-            ));
-        }
-
-        let insn = &program.insns[pc];
-        if Some(pc) == uses.null_check_pc {
-            pc = after_old_pc;
-            break;
-        }
-
-        if insn.is_call() {
-            return Err(site_level_inline_veto(format!(
-                "soft inline hint matched path contains helper call at pc {pc}"
-            )));
-        }
-        if insn.is_jmp_class() {
-            return Err(site_level_inline_veto(format!(
-                "soft inline hint matched path contains unsupported branch at pc {pc}"
-            )));
-        }
-
-        if insn.is_ldimm64() {
-            let Some(hi_pc) = pc.checked_add(1) else {
-                return Err(site_level_inline_veto(
-                    "soft inline hint ldimm64 pc overflow".to_string(),
-                ));
-            };
-            if hi_pc >= after_old_pc || hi_pc >= program.insns.len() {
-                return Err(site_level_inline_veto(format!(
-                    "soft inline hint matched path cuts through ldimm64 at pc {pc}"
-                )));
-            }
-            insns.push(program.insns[pc]);
-            insns.push(program.insns[hi_pc]);
-            pc += 2;
-            continue;
-        }
-
-        insns.push(program.insns[pc]);
-        pc += insn_width(insn);
-    }
-
-    if pc != after_old_pc {
-        return Err(site_level_inline_veto(format!(
-            "soft inline hint matched path ended at pc {pc}, expected {after_old_pc}"
-        )));
-    }
-
-    Ok(SoftMatchedPath {
-        after_old_pc,
-        insns,
-    })
-}
-
-fn soft_fold_non_null_old_pc(
-    program: &BpfProgram,
-    call_pc: usize,
-    uses: &R0UseClassification,
-) -> Option<usize> {
-    match uses.null_check_pc {
-        Some(null_check_pc) => advance_to_non_null_path(
-            null_check_pc,
-            &program.insns[null_check_pc],
-            program.insns.len(),
-        ),
-        None => Some(call_pc + insn_width(&program.insns[call_pc])),
-    }
-}
-
-fn emit_stack_const_blob(
-    out: &mut Vec<BpfInsn>,
-    stack_off: i16,
-    value: &[u8],
-) -> SiteRewriteResult<()> {
-    let mut offset = 0usize;
-    while offset < value.len() {
-        let remaining = value.len() - offset;
-        let width = if remaining >= 8 {
-            8usize
-        } else if remaining >= 4 {
-            4usize
-        } else if remaining >= 2 {
-            2usize
-        } else {
-            1usize
-        };
-        let Some(off) = i32::from(stack_off).checked_add(offset as i32) else {
-            return Err(site_level_inline_veto(
-                "soft inline hint stack const offset overflow",
-            ));
-        };
-        let off = i16::try_from(off).map_err(|_| {
-            site_level_inline_veto(format!("soft inline hint stack offset {off} exceeds i16"))
-        })?;
-        let bpf_width = match width {
-            8 => BPF_DW,
-            4 => BPF_W,
-            2 => BPF_H,
-            1 => BPF_B,
-            _ => unreachable!("width is selected from 8/4/2/1"),
-        };
-        let scalar = constant_key_value(&value[offset..offset + width]);
-        if width == 8 {
-            out.extend(emit_ldimm64(3, scalar));
-        } else {
-            out.push(BpfInsn::mov32_imm(3, scalar as u32 as i32));
-        }
-        out.push(BpfInsn::stx_mem(bpf_width, 10, 3, off));
-        offset += width;
-    }
-    Ok(())
-}
-
-fn find_soft_value_stack_slot(
-    insns: &[BpfInsn],
-    call_pc: usize,
-    value_size: usize,
-) -> SiteRewriteResult<i16> {
-    if value_size == 0 {
-        return Err(site_level_inline_veto(
-            "soft inline hint value blob is empty",
-        ));
-    }
-    let size = round_up_8(value_size);
-    if size > 512 {
-        return Err(site_level_inline_veto(format!(
-            "soft inline hint value blob size {value_size} exceeds BPF stack"
-        )));
-    }
-    let bounds = subprog_bounds(insns, call_pc);
-    let mut used = [false; 512];
-    for pc in bounds.0..bounds.1 {
-        let Some((start, width)) = stack_access_range(insns, pc, bounds) else {
-            continue;
-        };
-        let start_i32 = i32::from(start);
-        let end = start_i32 + i32::from(width);
-        if start_i32 < -512 || end > 0 {
-            return Err(site_level_inline_veto(format!(
-                "stack access at pc {pc} is outside the BPF stack window"
-            )));
-        }
-        for off in start_i32..end {
-            let index = usize::try_from(off + 512).map_err(|_| {
-                site_level_inline_veto(format!("invalid stack offset {off} at pc {pc}"))
-            })?;
-            used[index] = true;
-        }
-    }
-
-    let size_i32 = i32::try_from(size).map_err(|_| {
-        site_level_inline_veto(format!("soft inline hint value size {size} exceeds i32"))
-    })?;
-    let max_start = -size_i32;
-    let mut start = -512i32;
-    while start <= max_start {
-        let end = start + size_i32;
-        let mut overlaps = false;
-        for off in start..end {
-            let index = usize::try_from(off + 512).map_err(|_| {
-                site_level_inline_veto(format!("invalid candidate stack offset {off}"))
-            })?;
-            if used[index] {
-                overlaps = true;
-                break;
-            }
-        }
-        if !overlaps {
-            return i16::try_from(start).map_err(|_| {
-                site_level_inline_veto(format!("soft inline hint stack offset {start} exceeds i16"))
+fn find_soft_fold_null_handler(insns: &[BpfInsn], call_pc: usize) -> Option<SoftNullHandler> {
+    let (_, end_pc) = subprog_bounds(insns, call_pc);
+    let mut pc = call_pc + insn_width(insns.get(call_pc)?);
+    while pc < end_pc {
+        let insn = insns.get(pc)?;
+        if is_direct_r0_null_jeq(insn) {
+            let null_handler_pc = jump_target_pc(pc, insn, insns.len())?;
+            return Some(SoftNullHandler {
+                null_check_pc: pc,
+                non_null_pc: pc + insn_width(insn),
+                null_handler_pc,
             });
         }
-        start += 8;
+        if insn.is_call() || starts_next_lookup_setup(insn) {
+            break;
+        }
+        if insn.is_jmp_class() && !insn.is_ja() {
+            break;
+        }
+        pc += insn_width(insn);
     }
-
-    Err(site_level_inline_veto(format!(
-        "no unused BPF stack slot for soft inline hint value size {value_size}"
-    )))
+    None
 }
 
-fn stack_access_range(insns: &[BpfInsn], pc: usize, bounds: (usize, usize)) -> Option<(i16, u8)> {
-    let insn = insns.get(pc)?;
-    if bpf_mode(insn.code) != BPF_MEM {
-        return None;
-    }
-    let width = size_in_bytes(bpf_size(insn.code))?;
-    let base_reg = match insn.class() {
-        BPF_LDX => insn.src_reg(),
-        BPF_ST | BPF_STX => insn.dst_reg(),
-        _ => return None,
-    };
-    let base_stack_off = match resolve_stack_pointer_to_stack_inner(
-        insns,
-        pc,
-        base_reg,
-        bounds,
-        REG_RESOLUTION_LIMIT,
-    ) {
-        Ok(base_stack_off) => base_stack_off,
-        Err(_) => return None,
-    };
-    let stack_off = i32::from(base_stack_off) + i32::from(insn.off);
-    let stack_off = match i16::try_from(stack_off) {
-        Ok(stack_off) => stack_off,
-        Err(_) => return None,
-    };
-    Some((stack_off, width))
+fn is_direct_r0_null_jeq(insn: &BpfInsn) -> bool {
+    insn.class() == BPF_JMP
+        && bpf_op(insn.code) == BPF_JEQ
+        && bpf_src(insn.code) == BPF_K
+        && insn.dst_reg() == 0
+        && insn.src_reg() == 0
+        && insn.imm == 0
+        && insn.off >= 0
 }
 
 fn emit_key_compare_to_hint(key: &[u8], insns: &mut Vec<BpfInsn>) -> SiteRewriteResult<Vec<usize>> {
@@ -3418,17 +3254,6 @@ fn patch_replacement_branch_targets(
             .with_context(|| format!("replacement branch offset {offset} does not fit in i16"))?;
     }
     Ok(())
-}
-
-fn runtime_pointer_escape_reason(program: &BpfProgram, uses: &R0UseClassification) -> String {
-    if uses
-        .other_uses
-        .iter()
-        .any(|&pc| program.insns.get(pc).is_some_and(BpfInsn::is_call))
-    {
-        return "pointer_escapes_to_helper".to_string();
-    }
-    "lookup_result_pointer_escapes".to_string()
 }
 
 fn resolve_inner_map_id_for_outer_key(

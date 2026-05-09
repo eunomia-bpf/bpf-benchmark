@@ -4,9 +4,9 @@
 # §17 for the full plan. Each phase is gated on (a) actually inlining and
 # (b) being semantically safe (BPF kernel data path does not write the map).
 #
-# Current phase: 3 (ctl_array + vip_map + ch_rings + reals hard fold).
+# Current phase: 3 (ctl_array + ch_rings + reals hard fold, vip_map soft fold).
 # Phase 4 (map-in-map vip_to_down_rea outer) gated on task #247.
-# Soft fold gated on task #249.
+# Soft fold uses an else=NULL guard that jumps to the existing null handler.
 #
 # `--inline-hint=<anchor>:[!]<hex_key_bytes>` is map_inline pass-local —
 # placed AFTER `--` so MapInlineCliArgs parses it. A map-name anchor covers
@@ -14,7 +14,7 @@
 #
 # Hinted now
 #   phase 1: ctl_array[0]   router MAC, key=0x00000000  (loader-only writes)
-#   phase 2: vip_map[VIP+port+TCP]  benchmark single VIP (operator-担保)
+#   phase 2: vip_map[VIP+port+TCP]  benchmark single VIP (soft guarded)
 #   phase 3: ch_rings  uniform overlay all entries → real_id 1
 #            reals[1]  sparse overlay, REAL_IP 10.200.0.2 → real_definition
 #

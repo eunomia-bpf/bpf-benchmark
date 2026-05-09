@@ -472,19 +472,21 @@ benchmark 上界路线的决定性杠杆是固定 VIP、uniform `ch_rings`、dep
 - 写 → snapshot 值 stale,**不能 inline**
 - 不写 → 可以 inline (key 是源码 const 还是 packet-derived 都不影响,只是 paper 标签 production-safe vs workload-specialized 的区别)
 
-**当前 pass 缺陷** (待修): `BPF_F_RDONLY_PROG` flag-based guard (`map_inline.rs:271,287,1530-1533`) 不够,因为 katran loader 不设这位;Route A hint 路径完全 bypass guard。需要加静态分析扫 BPF bytecode 找 writer helper。
+**实施状态** (2026-05-08): 旧 `BPF_F_RDONLY_PROG` flag guard 已被 **#244 kernel-write static filter** 替换 — bpfopt 扫 BPF bytecode 找 `bpf_map_update_elem` / `_delete_elem` / `_push_elem` / `_pop_elem` 调用,加 LRU 类型规则,任何写入 map 的 lookup 站点都拒绝 inline,无论有无 hint。LRU/HASH_OF_MAPS 等也按规则拒。
 
 ### 分阶段 inline 计划
 
-| Phase | 内容 | 状态 | 期望新增 site | 预估 cycles/pkt | paper 标签 |
-|---:|---|---|---:|---:|---|
-| 1 | `ctl_array[0]` × 2 (PC 1105, 1807) | **DONE** (smoke 验证 inline) | 2 | 20-40 | production-safe |
-| 2 | `vip_map[VIP+port+TCP]` × 2 (PC 512, 762) | TODO | 2 | 30-80 | workload-specialized |
-| 3a | bpfopt 加 map-level kernel-write static filter (correctness) | TODO | 0 (堵 stats 误 inline) | — | bug fix |
-| 3b | bpfopt 加 `map-by-name-<name>.json` 压缩 form 解析 (uniform / sparse) | TODO | 0 (基础) | — | enabler |
-| 3c | 写 `runner/config/maps/katran/balancer_ingress/map-by-name-ch_rings.json` (uniform real_id=1) + `map-by-name-reals.json` (sparse default 0, exception `01000000`→real_definition) + yaml 加 shell `cp` 注入 + `--inline-hint=<ch_rings_pc>:<key>` + `--inline-hint=<reals_pc>:<key>` | TODO | 1-2 + 1-3 | 50-150 | workload-specialized |
-| 4 | map-in-map Route A 支持 (vip_to_down_rea outer + populated benchmark) | TODO | 0 katran (空) | — | future-paper enabler (cilium/tracee) |
-| 5 | `find_map_lookup_sites` 找全 70 个 BPF helper call site (不只 14)。可能 ch_rings/reals 的 lookup 没命中 pattern matcher | TODO | 视 grep 而定 | — | discovery |
+| Phase | 内容 | 状态 | 期望新增 site | paper 标签 |
+|---:|---|---|---:|---|
+| 1 | `ctl_array[0]` ×2 hard fold | **DONE** (#242, ratio 0.9715) | 2 | production-safe |
+| 2 | `vip_map[VIP+port+TCP]` ×N hard fold | **DONE** (#243, applied=4 含 port=0 fallback) | +4 | workload-specialized |
+| 3a | bpfopt map-level kernel-write 静态过滤 + map_name hint 接口 + hard/soft fold 2D 矩阵 | **DONE** (#244,但软 fold broken,见 #249) | 0 (correctness) | bug fix |
+| 3b | bpfopt compressed overlay reader (uniform/sparse/enumerated) + size-skip per-site diagnostic | **DONE** (#245,310+ 测试通过) | 0 (enabler) | enabler |
+| 3c | 写 `runner/config/passes/map_inline/overlays/katran/{ch_rings,reals}.json` + yaml 内嵌 jq 注入 overlays.json + `--inline-hint=ch_rings:!00000000` + `--inline-hint=reals:!01000000` | **IN PROGRESS** (#246) | +8 期望 (ch_rings 2 + reals 6) | workload-specialized |
+| 4 | map-in-map Route A bpfopt 支持(双 hint 链) | **DONE** (#247) | 0 katran (inner LRU 拒) | future-paper enabler (cilium/tracee 真用) |
+| 5 | 调研 14 skipped 站点 map 归属 | **DONE** (#248,§19) | — | discovery |
+| const_prop EACCES | Path C verifier post-state guard 修复 #244 触发的 const_prop bug(默认 13-pass 退化 1.23) | **DONE** (#250 调研 + #251 Path C 实施) | — | bug fix |
+| 软 fold 重设计 | else=NULL + hit 整段 fold scalar(verifier-clean) | **PENDING** (#249) | 解锁多 VIP / dynamic key 安全 fold | enabler |
 
 ### 各 Map 现状 (inline 适用性)
 
@@ -511,61 +513,71 @@ benchmark 上界路线的决定性杠杆是固定 VIP、uniform `ch_rings`、dep
 | baseline (kinsn 6-pass, no map_inline) | x86_kvm_corpus_20260508_041822_768126 | 0 | 0.9423 | 1.061x speedup,55 cycles |
 | Phase 1 (ctl_array×2 hint + map_inline) | x86_kvm_corpus_20260508_231402_301128 | 2/16 | 0.9715 | map_inline 排在 noop 后第 2 位避免 PC 漂移;skipped 14: 8 verifier-state miss / 2 fixed-offset miss / 4 map-in-map (待 Phase 3/4) |
 | Phase 2 (+ vip_map hard fold) | x86_kvm_corpus_20260509_013938_112049 / 015615_631003 | 6/23→73 | 0.8811 / **1.0099** | 两次 run 数据差异大(VM 噪声:baseline avg_ns 228→151)。applied=6 一致(ctl_array×2 + vip_map×4)。第二次跑用 #245 后代码,matched 涨到 73 是因为 size-skipped map 现在可见(ch_rings 2 + reals 6 + lru_miss_stats/reals_stats/etc.)。真实 phase 2 speedup 在 0.88-1.01 噪声窗内,需 paper-grade 多 run 平均才能确定 |
-| Phase 3 (+ ch_rings + reals overlay) | TBD | TBD | TBD | §19 修正:ch_rings/reals **不在 14 skipped 里**,被 daemon `maps_skipped_by_size` 拦下;Phase 3 实际工作是给 bpfopt 加 compressed overlay 入口让它们进候选;静态上界 9 (ch_rings 2 + reals 7),保守预期 **+2-4 sites** |
+| Phase 3 (+ ch_rings uniform + reals sparse overlay) | x86_kvm_corpus_20260509_022133_477580 | **11/78** | **0.9454** | **+5.8% speedup**。新加 5 sites: ch_rings PC 1292/1995 (real_id=1) + reals PC 1041/1746 (offset>0 → 0) + reals PC 2018 (offset 0 → REAL_IP 0a0c8002)。const_prop applied 70/126 (#251 Path C fail-closed 拒 56 不安全 packet ptr 折叠);整 pipeline status=ok,无 EACCES |
 | Phase 4 (+ map-in-map) | TBD | TBD | TBD | §19 修正:vip_to_down_rea outer 2 site 但 benchmark map 空,lru_mapping inner 是 LRU 不可 value-inline → katran 预期 **0 applied**;此 phase 是 cilium/tetragon paper enabler |
 
 测下一次后回填本表。
 
-> **2026-05-08 #244 retrospective**: 用新 map_name 硬 fold 接口 (`ctl_array:!00000000`) 跑默认 13-pass 顺序,balancer_ingress ratio = **1.2323** (post 23% 慢于 baseline) — 不是 map_inline 退化,是 **const_prop 在 map_inline 硬 fold 后 BPF_PROG_REJIT 失败 (EACCES)**,导致后续 dce/bounds_check_merge/skb_load_bytes_spec/bulk_memory/prefetch 全跳过。task #250 调研中。临时 workaround: 跑 `BPFREJIT_BENCH_PASSES="noop,map_inline"` 隔离测 map_inline 自身正确性。result_dir: x86_kvm_corpus_20260509_011252_944576。
+> **2026-05-08 const_prop EACCES 修复**: #244 引入 hard fold 后,默认 13-pass 在 map_inline → const_prop 触发 EACCES (verifier 拒绝 bytecode),后续 pass 全跳过 → ratio 退化到 1.2323。**根因**: const_prop 把 packet pointer 复制 (`r7 = r1`) 误折成 scalar 立即数 (`r7 = 62`),丢失 verifier 类型 provenance — 跟 map_inline 输出无关,只是被 hard fold 触发到这条路径。**修复** (#251 Path C): const_prop 在生成 scalar replacement 前查 verifier post-state,确认目的寄存器是 scalar exact 才替换;不命中走 fail-closed,记 diagnostic。详见 `docs/tmp/const_prop_after_map_inline_eacces_2026-05-08.md` (调研) + `const_prop_pathc_fix_2026-05-08.md` (实施)。
 
-> **软 fold broken**: #244 实现的 `<anchor>:<hex>` 软 fold 产出 verifier 拒绝的 bytecode (R8 invalid mem access scalar) — hit 路径返回 const_blob_ptr,跟 fallback lookup 路径的 map_value_or_null 类型不能 merge。task #249 重设计:hit 路径整段 fold scalar,else 路径走现有 null handler (不调 lookup)。katran.yaml 当前只留 ctl_array 硬 fold。
+> **软 fold broken (#249 待修)**: #244 实现的 `<anchor>:<hex>` 软 fold 产出 verifier 拒绝的 bytecode (R8 invalid mem access scalar) — hit 路径返回 const_blob_ptr,跟 fallback lookup 路径的 map_value_or_null 类型不能 merge。新设计 (#249): hit 路径整段 fold scalar (复用 hard fold 机制),else 路径直接跳到现有 null handler (相当于 map miss),**不再 fallback lookup**。katran.yaml 当前所有 hint 都用 hard fold (`!`)。
 
-> Phase 1 解读 (2026-05-08): ratio 0.9715 比 kinsn-only 6-pass 基线 0.9423 略**高** (即略慢),不是 map_inline 起反作用,而是 13-pass 流水线在同一 SAMPLES=3 VM 噪声窗内的整体落点;applied=2 已经验证 hint-by-PC 路径正确,真正的速度跳预计要等 Phase 3 (ch_rings/reals overlay) 解锁更多站点后才显现。
+> **Hint 接口已落地** (#244 + #245 + #247): `--inline-hint=<anchor>:[!]<hex_key>`,anchor 是 PC (纯数字) 或 map_name (字母开头),`!` = hard fold(替换为 const)/ 不带 = soft fold(if-guard,目前 broken),map-in-map outer 用 `<outer_map>:!<outer_key>` + 配套 inner hint `<inner_map>:!<inner_key>`。compressed overlay (`uniform/sparse/enumerated`) 解决 daemon size-skipped 大 map (ch_rings 33M-entry 等)。kernel-write filter 静态扫 update/delete/push/pop 调用 + LRU 类型,override hint 也拒。
 
-> Hint 格式风险:目前用 `<call_pc>:<hex_key>` 锚定站点,PC 跨任何 bytecode-改写 pass 都会漂移,跨 LLVM rebuild 也会变,无语义可读性。后续要换成 `<map_name>:<hex_key>`,由 map_inline pass 自己扫所有 `bpf_map_lookup_elem(&<map>, ...)` 站点逐站套用 hint key — 见 §18 设计草案。
+## 18. Hint 接口最终设计 (已实施: #244 + #247)
 
-## 18. Hint 锚点设计草案: PC → map name + key
+### 语法
 
-**问题**:`--inline-hint=<call_pc>:<hex_key>` 把 hint 绑死在原始 bytecode PC 上,有三类失稳来源:
-
-1. **跨 pass 漂移**:任何前置 pass(BR2 family、kinsn family、wide_mem)改 bytecode 都会让所有 PC 错位 — Phase 1 已经被迫把 map_inline 排到第 2 位规避。pass 顺序就此被 hint 格式绑架。
-2. **跨 rebuild 漂移**:换 clang/llvm 版本、源码加一行、内联策略变 → 1105/1807 立即失效。hint 实际上跟某次 `balancer.bpf.o` 的具体编译产物耦合。
-3. **无语义**:1105 这数字不告诉读者它对应 ctl_array;必须 disassemble 才能验证 hint 没贴错位置。
-
-**目标格式**:
-
-```yaml
---inline-hint=ctl_array:00000000
-# 或
---inline-hint=map_id=42:00000000
+```
+--inline-hint=<anchor>:[!]<hex_key>
 ```
 
-map_inline pass 内部:
-1. 扫 bytecode 找出所有 `BPF_CALL helper=map_lookup_elem` 站点
-2. 对每个站点解析 `R1` 加载的 map (BTF/relo 给出 map_id 或 map name)
-3. 凡是 map 命中 hint 的,按 hint key 在 dump 中查 value,fold 成立即数序列
+| 维度 | 取值 |
+|---|---|
+| **Anchor** | 纯数字 → PC 锚点 (只命中那一站) /  字母开头 → map_name 锚点 (覆盖该 map 所有 lookup 站点) |
+| **Mode** | 裸 hex → soft fold (if-guard,**目前 broken,#249 待重设计**) / `!` + hex → hard fold (lookup 整段删除替换为 const) |
 
-**优势**:
+4 个组合都支持: `<pc>:<hex>` / `<pc>:!<hex>` / `<map>:<hex>` / `<map>:!<hex>`。同 anchor 多条 soft 串成 PIC 链;同 anchor 多条 hard 报错;混用报错。
 
-| 维度 | PC | map_name+key |
-|---|---|---|
-| 跨 pass 顺序稳定 | ✗ (被前置 pass 改插值) | ✓ |
-| 跨 rebuild 稳定 | ✗ (PC 跟编译产物绑定) | ✓ (BTF map name 是强契约) |
-| 多站点同 map | 每个站点写一条 | 一条覆盖全部 |
-| 可读性 | 0 | 高 (一眼知道是哪张表) |
-| 代码改动 | 现状 | 中 (~80-150 行,加一段站点扫描+map id 解析) |
+### map-in-map (Route A 双 hint 链, #247)
 
-**多 key 同 map 的歧义处理**:
+```yaml
+--inline-hint=<outer_map>:!<outer_key>     # outer (ARRAY_OF_MAPS / HASH_OF_MAPS)
+--inline-hint=<inner_map>:!<inner_key>     # 跟 outer fold 出的 inner_map_id 关联
+```
 
-- (a) **源码 key 是常量**(katran ctl_array 就是这种,`mac_addr_pos=0`):pass 在每个站点解析 `R2` 指向的 stack/data slot 是不是 const-store,匹配 hint key 的站点才 inline,其他站点跳过 — 自动多键安全。
-- (b) **源码 key 是动态变量**(vip_map / reals / ch_rings):pass 一律按 hint key specialize,这就是 Route A "operator 担保 deployment 不变" 的语义,所有站点 fold 到同一 key。
+outer hard fold 出 inner_map_id (从 raw entries 或 compressed overlay),inner 当普通 map fold。inner 命中 kernel-write filter (LRU/HASH 等) 直接拒绝。katran 上 inner = lru_mapping LRU → 0 applied,但代码路径是 cilium/tetragon paper enabler。
 
-**兼容路径**:第一阶段同时支持两种 hint 格式 — 数字开头走 `<pc>:<hex>` 旧路径,字符串开头走 `<map_name>:<hex>` 新路径。katran phase 1 现成的 1105/1807 不必立刻改,跑完 phase 2/3 数据后再统一切换。
+### Compressed overlay (#245)
 
-**实施时机**:
+`MAP_VALUES/overlays.json` 按 map_id 提供三种 form 给 daemon size-skipped 大 map:
 
-- Phase 3a (kernel-write filter) 改 bpfopt,顺手把 hint 解析模块也升级 — 一次 codex 任务做完两件相关的事
-- 或者独立切一刀,在 Phase 2 (vip_map) 之前先做 — 因为 vip_map 多 VIP 场景下 PC 数量翻倍,继续用 PC 会维护爆炸
+```json
+{
+  "<map_id>": {
+    "compression": "uniform" | "sparse" | "enumerated",
+    "value_size": <bytes>,
+    ...
+  }
+}
+```
+
+- `uniform`: 所有 key 返回 `value_hex`
+- `sparse`: 命中 `entries[<key>]` 返该 value,否则返 `default_hex`
+- `enumerated`: 仅列出 key 存在 (其他视为 entry-not-exist)
+
+### Kernel-write filter (#244)
+
+bpfopt 静态扫 bytecode 找 `bpf_map_update_elem` / `_delete_elem` / `_push_elem` / `_pop_elem`,标记 kernel-mutable map_id。LRU 类型 (LRU_HASH / LRU_PERCPU_HASH) 自动加。命中的 map 拒绝 inline,operator hint 也不能 override (fail-fast exit 1)。
+
+### 设计选择回顾
+
+| 选择 | 理由 |
+|---|---|
+| `:` = soft, `:!` = hard | 软是更安全默认,operator 显式 opt-in 硬 fold (paper-grade max speedup) |
+| 同时保留 PC 和 map_name | map_name 是稳定主路径(跨 pass / rebuild 不变),PC 是稀有"多 const key 同 map 不同站点"的 escape hatch |
+| 不做 Mode A 自动检测 (源码 const key) | katran 等 7 app 的实际形态都能用 Mode B (hint key) 表达,Mode A 没增量价值 |
+| Soft fold else 路径走原 lookup (#244 实现) | broken,verifier 拒绝 merge — 重设计为 else 走 NULL handler (#249) |
 
 ## 19. 14-skipped-site map 归属调研 (Phase 5 闭环)
 
