@@ -1,7 +1,7 @@
 use super::bounds_check_merge::*;
 use crate::insn::*;
 
-use crate::pass::{BpfProgram, PassContext, PassManager, PipelineResult};
+use crate::pass::{BpfProgram, BtfInfoRecords, PassContext, PassManager, PipelineResult};
 
 const BPF_PROG_TYPE_SOCKET_FILTER: u32 = libbpf_sys::BPF_PROG_TYPE_SOCKET_FILTER;
 const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
@@ -41,6 +41,23 @@ fn compare_pcs(insns: &[BpfInsn]) -> Vec<usize> {
             ))
             .then_some(pc)
         })
+        .collect()
+}
+
+fn btf_records(offsets: &[u32]) -> BtfInfoRecords {
+    let mut bytes = Vec::new();
+    for (idx, offset) in offsets.iter().enumerate() {
+        bytes.extend_from_slice(&offset.to_le_bytes());
+        bytes.extend_from_slice(&(idx as u32).to_le_bytes());
+    }
+    BtfInfoRecords { rec_size: 8, bytes }
+}
+
+fn btf_offsets(records: &BtfInfoRecords) -> Vec<u32> {
+    records
+        .bytes
+        .chunks(records.rec_size as usize)
+        .map(|record| u32::from_le_bytes(record[..4].try_into().expect("btf record insn_off")))
         .collect()
 }
 
@@ -376,4 +393,24 @@ fn test_branch_fixup_after_merge() {
     assert_eq!(program.insns.len(), 11);
     assert_eq!(compare_pcs(&program.insns), vec![4]);
     assert_eq!(program.insns[4].off, 4);
+}
+
+#[test]
+fn test_merge_remaps_btf_metadata() {
+    let mut program = BpfProgram::new(make_two_adjacent_checks_program());
+    program.func_info = Some(btf_records(&[0, 12]));
+    program.line_info = Some(btf_records(&[5, 9, 12]));
+
+    let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
+
+    assert_eq!(result.pass_results[0].sites_applied, 1);
+    assert_eq!(program.insns.len(), 11);
+    assert_eq!(
+        btf_offsets(program.func_info.as_ref().expect("func_info")),
+        vec![0, 9]
+    );
+    assert_eq!(
+        btf_offsets(program.line_info.as_ref().expect("line_info")),
+        vec![5, 6, 9]
+    );
 }

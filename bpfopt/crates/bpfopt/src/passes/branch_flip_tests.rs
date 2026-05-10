@@ -64,6 +64,33 @@ fn test_branch_flip_rejects_oversized_manual_branch_delta() {
 }
 
 #[test]
+fn test_branch_flip_pass_rejects_oversized_else_delta() {
+    let mut insns = vec![
+        BpfInsn::jne_imm(1, 0, 2),
+        BpfInsn::mov64_imm(0, 10),
+        BpfInsn::ja(i16::MAX),
+    ];
+    for _ in 0..i16::MAX as usize {
+        insns.push(BpfInsn::mov64_imm(0, 20));
+    }
+    insns.push(BpfInsn::exit());
+    let mut prog = make_program(insns);
+    prog.annotations[0].branch_profile = Some(branch_profile(90, 10, 1));
+    prog.branch_miss_rate = Some(0.02);
+
+    let mut cache = AnalysisCache::new();
+    let ctx = PassContext::baseline();
+    let pass = BranchFlipPass {
+        min_bias: 0.7,
+        max_branch_miss_rate: 0.05,
+    };
+
+    let err = pass.run(&mut prog, &mut cache, &ctx).unwrap_err();
+
+    assert!(err.to_string().contains("exceeds i16"));
+}
+
+#[test]
 fn test_branch_flip_missing_per_site_profile_errors() {
     let mut prog = make_program(vec![
         BpfInsn::jne_imm(1, 0, 2),

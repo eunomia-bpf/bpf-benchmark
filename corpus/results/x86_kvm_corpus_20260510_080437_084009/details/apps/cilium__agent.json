@@ -1,0 +1,3342 @@
+{
+  "app": "cilium/agent",
+  "baseline": {
+    "bpf": {
+      "63": {
+        "bytes_jited": 167,
+        "bytes_xlated": 280,
+        "id": 63,
+        "name": "dump_bpf_map",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "64": {
+        "bytes_jited": 740,
+        "bytes_xlated": 520,
+        "id": 64,
+        "name": "dump_bpf_prog",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "159": {
+        "bytes_jited": 490,
+        "bytes_xlated": 848,
+        "id": 159,
+        "name": "cil_xdp_entry",
+        "run_cnt_delta": 512021,
+        "run_time_ns_delta": 18135853,
+        "type": "xdp"
+      },
+      "160": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 160,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "161": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 161,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "162": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 162,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "164": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 164,
+        "name": "cil_from_host",
+        "run_cnt_delta": 509961,
+        "run_time_ns_delta": 96629174,
+        "type": "sched_cls"
+      },
+      "166": {
+        "bytes_jited": 12622,
+        "bytes_xlated": 21224,
+        "id": 166,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "167": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 167,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "168": {
+        "bytes_jited": 8048,
+        "bytes_xlated": 13936,
+        "id": 168,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "169": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 169,
+        "name": "cil_to_host",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 1267,
+        "type": "sched_cls"
+      },
+      "170": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 170,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "173": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 173,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "174": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 174,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "175": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 175,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "176": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 176,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "177": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 177,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "178": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 178,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "181": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 181,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "182": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 182,
+        "name": "cil_to_host",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 584,
+        "type": "sched_cls"
+      },
+      "183": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 183,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "184": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 184,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "185": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 185,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "186": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 186,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "190": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 190,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "191": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 191,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "192": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 192,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 512021,
+        "run_time_ns_delta": 58830610,
+        "type": "sched_cls"
+      },
+      "193": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 193,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 622184,
+        "run_time_ns_delta": 98705295,
+        "type": "sched_cls"
+      },
+      "194": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 194,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "195": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 195,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "196": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 196,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "197": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 197,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "198": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 198,
+        "name": "cil_from_container",
+        "run_cnt_delta": 1361992,
+        "run_time_ns_delta": 301660845,
+        "type": "sched_cls"
+      },
+      "199": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 199,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "200": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 200,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "201": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 201,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "202": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 202,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "203": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 203,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "205": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 205,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "206": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 206,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "207": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 207,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "208": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 208,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "210": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 210,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "211": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 211,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "212": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 212,
+        "name": "cil_from_container",
+        "run_cnt_delta": 727,
+        "run_time_ns_delta": 3520209,
+        "type": "sched_cls"
+      },
+      "213": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 213,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "214": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 214,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "215": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 215,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "216": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 216,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "217": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 217,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "218": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 218,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "219": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 219,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "220": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 220,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d10s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 10.091365148000023,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 10s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   344.47ms  300.78ms   2.00s    86.50%\n    Req/Sec    33.33     16.25    90.00     63.74%\n  1251 requests in 10.02s, 193.00KB read\n  Socket errors: connect 0, read 0, write 0, timeout 18\nRequests/sec:    124.89\nTransfer/sec:     19.27KB",
+            "workload_name": "network_lossy_multi_wrk"
+          },
+          {
+            "command": [],
+            "components": [
+              {
+                "command": [
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.237:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": null,
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.237:18080/"
+                },
+                "duration_s": 1.007490491999988,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.237:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.16ms   10.62ms  60.07ms   90.00%\n    Req/Sec   120.20      0.92   121.00     90.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.47\nTransfer/sec:     18.89KB",
+                "workload_name": "cilium host-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.66:34933/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.66:34933/"
+                },
+                "duration_s": 1.0134499690000212,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.66:34933/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.30ms   10.87ms  60.15ms   87.50%\n    Req/Sec   120.20      0.42   121.00     80.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.58\nTransfer/sec:     18.91KB",
+                "workload_name": "cilium endpoint-to-host"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.152:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.152:18080/"
+                },
+                "duration_s": 1.006651885999986,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.152:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.91ms   11.59ms  60.37ms   95.00%\n    Req/Sec   120.30      8.45   141.00     70.00%\n  120 requests in 1.00s, 18.84KB read\nRequests/sec:    119.63\nTransfer/sec:     18.78KB",
+                "workload_name": "cilium endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepb",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.237:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepb",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.237:18080/"
+                },
+                "duration_s": 1.0113921850000338,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.237:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    49.59ms   17.39ms 212.00ms   94.85%\n    Req/Sec    68.10     31.33   130.00     55.00%\n  136 requests in 1.00s, 21.53KB read\nRequests/sec:    135.65\nTransfer/sec:     21.47KB",
+                "workload_name": "cilium reverse-endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://198.18.0.2:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://198.18.0.2:18080/"
+                },
+                "duration_s": 1.1103977410000425,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.08ms   11.62ms  60.08ms   87.91%\n    Req/Sec   165.91     18.39   202.00     72.73%\n  182 requests in 1.10s, 28.90KB read\nRequests/sec:    165.42\nTransfer/sec:     26.26KB",
+                "workload_name": "cilium endpoint-to-external"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.237:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbenchns",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.237:18080/"
+                },
+                "duration_s": 1.0110833580000076,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.237:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    50.15ms   16.04ms 212.34ms   94.47%\n    Req/Sec   108.20     13.65   121.00     90.00%\n  216 requests in 1.00s, 34.04KB read\nRequests/sec:    215.17\nTransfer/sec:     33.91KB",
+                "workload_name": "cilium external-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.152",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "10.244.0.152",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0116066340000316,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "742877",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.237",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbenchns",
+                  "target_host": "10.244.0.237",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0151664510000273,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "508136",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "198.18.0.2",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "198.18.0.2",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.010079404999999,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "616586",
+                "workload_name": "udp_burst"
+              }
+            ],
+            "duration_s": 9.197318121000137,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "",
+            "workload_name": "cilium_endpoint_matrix"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 19.28868326900016,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "63": {
+        "bytes_jited": 167,
+        "bytes_xlated": 280,
+        "id": 63,
+        "name": "dump_bpf_map",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "64": {
+        "bytes_jited": 740,
+        "bytes_xlated": 520,
+        "id": 64,
+        "name": "dump_bpf_prog",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "159": {
+        "bytes_jited": 490,
+        "bytes_xlated": 848,
+        "id": 159,
+        "name": "cil_xdp_entry",
+        "run_cnt_delta": 534535,
+        "run_time_ns_delta": 17959406,
+        "type": "xdp"
+      },
+      "160": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 160,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "161": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 161,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "162": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 162,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "164": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 164,
+        "name": "cil_from_host",
+        "run_cnt_delta": 532459,
+        "run_time_ns_delta": 95455621,
+        "type": "sched_cls"
+      },
+      "166": {
+        "bytes_jited": 12622,
+        "bytes_xlated": 21224,
+        "id": 166,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "167": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 167,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "168": {
+        "bytes_jited": 8048,
+        "bytes_xlated": 13936,
+        "id": 168,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "169": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 169,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "170": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 170,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "173": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 173,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "174": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 174,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "175": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 175,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "176": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 176,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "177": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 177,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "178": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 178,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "181": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 181,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "182": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 182,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "183": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 183,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "184": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 184,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "185": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 185,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "186": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 186,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "190": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 190,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "191": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 191,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "192": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 192,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 534535,
+        "run_time_ns_delta": 59567621,
+        "type": "sched_cls"
+      },
+      "193": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 193,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 609082,
+        "run_time_ns_delta": 96269172,
+        "type": "sched_cls"
+      },
+      "194": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 194,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "195": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 195,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "196": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 196,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "197": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 197,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "198": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 198,
+        "name": "cil_from_container",
+        "run_cnt_delta": 1353219,
+        "run_time_ns_delta": 297365293,
+        "type": "sched_cls"
+      },
+      "199": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 199,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "200": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 200,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "201": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 201,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "202": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 202,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "203": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 203,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "205": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 205,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "206": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 206,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "207": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 207,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "208": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 208,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "210": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 210,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "211": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 211,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "212": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 212,
+        "name": "cil_from_container",
+        "run_cnt_delta": 844,
+        "run_time_ns_delta": 3452761,
+        "type": "sched_cls"
+      },
+      "213": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 213,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "214": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 214,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "215": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 215,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "216": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 216,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "217": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 217,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "218": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 218,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "219": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 219,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "220": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 220,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d10s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 10.099470986999961,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 10s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   307.38ms  252.77ms   1.93s    87.50%\n    Req/Sec    34.72     17.12    90.00     73.98%\n  1307 requests in 10.03s, 202.15KB read\n  Socket errors: connect 0, read 0, write 0, timeout 25\nRequests/sec:    130.37\nTransfer/sec:     20.16KB",
+            "workload_name": "network_lossy_multi_wrk"
+          },
+          {
+            "command": [],
+            "components": [
+              {
+                "command": [
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.237:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": null,
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.237:18080/"
+                },
+                "duration_s": 1.006731029999969,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.237:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    47.95ms   10.10ms  60.16ms   91.55%\n    Req/Sec    71.15     32.25   120.00     95.00%\n  142 requests in 1.00s, 22.44KB read\nRequests/sec:    141.54\nTransfer/sec:     22.36KB",
+                "workload_name": "cilium host-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.66:35283/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.66:35283/"
+                },
+                "duration_s": 1.0089874399999985,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.66:35283/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.21ms   10.97ms  60.06ms   88.81%\n    Req/Sec    71.70     52.54   150.00     95.00%\n  143 requests in 1.00s, 22.59KB read\nRequests/sec:    142.69\nTransfer/sec:     22.54KB",
+                "workload_name": "cilium endpoint-to-host"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.152:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.152:18080/"
+                },
+                "duration_s": 1.007802661000028,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.152:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.65ms   11.36ms  60.16ms   90.00%\n    Req/Sec   120.50     28.52   181.00     80.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.64\nTransfer/sec:     18.92KB",
+                "workload_name": "cilium endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepb",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.237:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepb",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.237:18080/"
+                },
+                "duration_s": 1.1076420329999905,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.237:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    46.87ms   12.34ms  59.93ms   91.67%\n    Req/Sec    74.43     53.94   160.00     47.62%\n  156 requests in 1.10s, 25.10KB read\nRequests/sec:    141.74\nTransfer/sec:     22.80KB",
+                "workload_name": "cilium reverse-endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://198.18.0.2:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://198.18.0.2:18080/"
+                },
+                "duration_s": 1.0112716309999996,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.58ms   10.75ms  60.10ms   85.71%\n    Req/Sec    70.00     51.30   120.00    100.00%\n  140 requests in 1.01s, 22.13KB read\nRequests/sec:    139.09\nTransfer/sec:     21.99KB",
+                "workload_name": "cilium endpoint-to-external"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.237:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbenchns",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.237:18080/"
+                },
+                "duration_s": 1.007954060999964,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.237:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    51.85ms   21.82ms 205.38ms   94.68%\n    Req/Sec    94.10     31.94   121.00     90.00%\n  188 requests in 1.00s, 29.80KB read\nRequests/sec:    187.29\nTransfer/sec:     29.69KB",
+                "workload_name": "cilium external-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.152",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "10.244.0.152",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0146337570000128,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "747221",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.237",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbenchns",
+                  "target_host": "10.244.0.237",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0104332149999777,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "530697",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "198.18.0.2",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "198.18.0.2",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0107058559999587,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "603476",
+                "workload_name": "udp_burst"
+              }
+            ],
+            "duration_s": 9.186161683999899,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "",
+            "workload_name": "cilium_endpoint_matrix"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 19.28563267099986,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "159": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 276,
+              "insn_count_before": 276,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-52/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-52/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-52/report_step0.json --prog-type xdp && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 159,
+        "program": {
+          "final_insn_count": 276,
+          "orig_insn_count": 276,
+          "prog_id": 159,
+          "prog_name": "cil_xdp_entry",
+          "prog_type": 6
+        },
+        "status": "error"
+      },
+      "160": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 96,
+              "insn_count_before": 96,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-44/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-44/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-44/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 160,
+        "program": {
+          "final_insn_count": 96,
+          "orig_insn_count": 96,
+          "prog_id": 160,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "161": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-46/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-46/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-46/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 161,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 161,
+          "prog_name": "cil_host_policy",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "162": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1164,
+              "insn_count_before": 1164,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-47/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-47/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-47/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 162,
+        "program": {
+          "final_insn_count": 1164,
+          "orig_insn_count": 1164,
+          "prog_id": 162,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "164": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1194,
+              "insn_count_before": 1194,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-42/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-42/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-42/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 164,
+        "program": {
+          "final_insn_count": 1194,
+          "orig_insn_count": 1194,
+          "prog_id": 164,
+          "prog_name": "cil_from_host",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "166": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2617,
+              "insn_count_before": 2617,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-51/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-51/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-51/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 166,
+        "program": {
+          "final_insn_count": 2617,
+          "orig_insn_count": 2617,
+          "prog_id": 166,
+          "prog_name": "tail_handle_sna",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "167": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 227,
+              "insn_count_before": 227,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-67/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-67/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-67/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 167,
+        "program": {
+          "final_insn_count": 227,
+          "orig_insn_count": 227,
+          "prog_id": 167,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "168": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1720,
+              "insn_count_before": 1720,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-65/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-65/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-65/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 168,
+        "program": {
+          "final_insn_count": 1720,
+          "orig_insn_count": 1720,
+          "prog_id": 168,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "169": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 351,
+              "insn_count_before": 351,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-78/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-78/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-78/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 169,
+        "program": {
+          "final_insn_count": 351,
+          "orig_insn_count": 351,
+          "prog_id": 169,
+          "prog_name": "cil_to_host",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "170": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1837,
+              "insn_count_before": 1837,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-70/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-70/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-70/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 170,
+        "program": {
+          "final_insn_count": 1837,
+          "orig_insn_count": 1837,
+          "prog_id": 170,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "173": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 96,
+              "insn_count_before": 96,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-71/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-71/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-71/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 173,
+        "program": {
+          "final_insn_count": 96,
+          "orig_insn_count": 96,
+          "prog_id": 173,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "174": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1837,
+              "insn_count_before": 1837,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-36/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-36/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-36/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 174,
+        "program": {
+          "final_insn_count": 1837,
+          "orig_insn_count": 1837,
+          "prog_id": 174,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "175": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2617,
+              "insn_count_before": 2617,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-41/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-41/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-41/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 175,
+        "program": {
+          "final_insn_count": 2617,
+          "orig_insn_count": 2617,
+          "prog_id": 175,
+          "prog_name": "tail_handle_sna",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "176": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1164,
+              "insn_count_before": 1164,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-40/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-40/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-40/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 176,
+        "program": {
+          "final_insn_count": 1164,
+          "orig_insn_count": 1164,
+          "prog_id": 176,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "177": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1720,
+              "insn_count_before": 1720,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-37/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-37/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-37/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 177,
+        "program": {
+          "final_insn_count": 1720,
+          "orig_insn_count": 1720,
+          "prog_id": 177,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "178": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 605,
+              "insn_count_before": 605,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-39/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-39/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-39/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 178,
+        "program": {
+          "final_insn_count": 605,
+          "orig_insn_count": 605,
+          "prog_id": 178,
+          "prog_name": "tail_no_service",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "181": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 227,
+              "insn_count_before": 227,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-55/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-55/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-55/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 181,
+        "program": {
+          "final_insn_count": 227,
+          "orig_insn_count": 227,
+          "prog_id": 181,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "182": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 351,
+              "insn_count_before": 351,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-35/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-35/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-35/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 182,
+        "program": {
+          "final_insn_count": 351,
+          "orig_insn_count": 351,
+          "prog_id": 182,
+          "prog_name": "cil_to_host",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "183": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1164,
+              "insn_count_before": 1164,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-53/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-53/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-53/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 183,
+        "program": {
+          "final_insn_count": 1164,
+          "orig_insn_count": 1164,
+          "prog_id": 183,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "184": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 96,
+              "insn_count_before": 96,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-64/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-64/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-64/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 184,
+        "program": {
+          "final_insn_count": 96,
+          "orig_insn_count": 96,
+          "prog_id": 184,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "185": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2617,
+              "insn_count_before": 2617,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-45/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-45/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-45/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 185,
+        "program": {
+          "final_insn_count": 2617,
+          "orig_insn_count": 2617,
+          "prog_id": 185,
+          "prog_name": "tail_handle_sna",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "186": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1720,
+              "insn_count_before": 1720,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-61/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-61/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-61/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 186,
+        "program": {
+          "final_insn_count": 1720,
+          "orig_insn_count": 1720,
+          "prog_id": 186,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "190": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1837,
+              "insn_count_before": 1837,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-75/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-75/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-75/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 190,
+        "program": {
+          "final_insn_count": 1837,
+          "orig_insn_count": 1837,
+          "prog_id": 190,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "191": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 605,
+              "insn_count_before": 605,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-81/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-81/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-81/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 191,
+        "program": {
+          "final_insn_count": 605,
+          "orig_insn_count": 605,
+          "prog_id": 191,
+          "prog_name": "tail_no_service",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "192": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1113,
+              "insn_count_before": 1113,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-34/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-34/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-34/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 192,
+        "program": {
+          "final_insn_count": 1113,
+          "orig_insn_count": 1113,
+          "prog_id": 192,
+          "prog_name": "cil_from_netdev",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "193": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1281,
+              "insn_count_before": 1281,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-56/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-56/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-56/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 193,
+        "program": {
+          "final_insn_count": 1281,
+          "orig_insn_count": 1281,
+          "prog_id": 193,
+          "prog_name": "cil_to_netdev",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "194": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 227,
+              "insn_count_before": 227,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-68/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-68/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-68/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 194,
+        "program": {
+          "final_insn_count": 227,
+          "orig_insn_count": 227,
+          "prog_id": 194,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "195": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1217,
+              "insn_count_before": 1217,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-54/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-54/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-54/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 195,
+        "program": {
+          "final_insn_count": 1217,
+          "orig_insn_count": 1217,
+          "prog_id": 195,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "196": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1146,
+              "insn_count_before": 1146,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-59/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-59/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-59/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 196,
+        "program": {
+          "final_insn_count": 1146,
+          "orig_insn_count": 1146,
+          "prog_id": 196,
+          "prog_name": "tail_ipv4_ct_eg",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "197": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 197,
+              "insn_count_before": 197,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-72/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-72/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-72/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 197,
+        "program": {
+          "final_insn_count": 197,
+          "orig_insn_count": 197,
+          "prog_id": 197,
+          "prog_name": "tail_handle_arp",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "198": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 380,
+              "insn_count_before": 380,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-49/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-49/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-49/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 198,
+        "program": {
+          "final_insn_count": 380,
+          "orig_insn_count": 380,
+          "prog_id": 198,
+          "prog_name": "cil_from_contai",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "199": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1377,
+              "insn_count_before": 1377,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-62/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-62/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-62/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 199,
+        "program": {
+          "final_insn_count": 1377,
+          "orig_insn_count": 1377,
+          "prog_id": 199,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "200": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1343,
+              "insn_count_before": 1343,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-63/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-63/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-63/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 200,
+        "program": {
+          "final_insn_count": 1343,
+          "orig_insn_count": 1343,
+          "prog_id": 200,
+          "prog_name": "tail_ipv4_to_en",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "201": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 775,
+              "insn_count_before": 775,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-57/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-57/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-57/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 201,
+        "program": {
+          "final_insn_count": 775,
+          "orig_insn_count": 775,
+          "prog_id": 201,
+          "prog_name": "tail_nodeport_r",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "202": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2446,
+              "insn_count_before": 2446,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-69/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-69/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-69/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 202,
+        "program": {
+          "final_insn_count": 2446,
+          "orig_insn_count": 2446,
+          "prog_id": 202,
+          "prog_name": "cil_lxc_policy",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "203": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1121,
+              "insn_count_before": 1121,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-58/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-58/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-58/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 203,
+        "program": {
+          "final_insn_count": 1121,
+          "orig_insn_count": 1121,
+          "prog_id": 203,
+          "prog_name": "tail_ipv4_ct_in",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "205": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-60/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-60/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-60/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 205,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 205,
+          "prog_name": "cil_lxc_policy_",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "206": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 88,
+              "insn_count_before": 88,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-48/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-48/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-48/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 206,
+        "program": {
+          "final_insn_count": 88,
+          "orig_insn_count": 88,
+          "prog_id": 206,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "207": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 601,
+              "insn_count_before": 601,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-50/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-50/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-50/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 207,
+        "program": {
+          "final_insn_count": 601,
+          "orig_insn_count": 601,
+          "prog_id": 207,
+          "prog_name": "tail_no_service",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "208": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1146,
+              "insn_count_before": 1146,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-66/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-66/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-66/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 208,
+        "program": {
+          "final_insn_count": 1146,
+          "orig_insn_count": 1146,
+          "prog_id": 208,
+          "prog_name": "tail_ipv4_ct_eg",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "210": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 88,
+              "insn_count_before": 88,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-74/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-74/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-74/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 210,
+        "program": {
+          "final_insn_count": 88,
+          "orig_insn_count": 88,
+          "prog_id": 210,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "211": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2446,
+              "insn_count_before": 2446,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-84/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-84/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-84/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 211,
+        "program": {
+          "final_insn_count": 2446,
+          "orig_insn_count": 2446,
+          "prog_id": 211,
+          "prog_name": "cil_lxc_policy",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "212": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 380,
+              "insn_count_before": 380,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-83/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-83/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-83/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 212,
+        "program": {
+          "final_insn_count": 380,
+          "orig_insn_count": 380,
+          "prog_id": 212,
+          "prog_name": "cil_from_contai",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "213": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1217,
+              "insn_count_before": 1217,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-86/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-86/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-86/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 213,
+        "program": {
+          "final_insn_count": 1217,
+          "orig_insn_count": 1217,
+          "prog_id": 213,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "214": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1121,
+              "insn_count_before": 1121,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-73/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-73/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-73/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 214,
+        "program": {
+          "final_insn_count": 1121,
+          "orig_insn_count": 1121,
+          "prog_id": 214,
+          "prog_name": "tail_ipv4_ct_in",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "215": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 197,
+              "insn_count_before": 197,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-80/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-80/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-80/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 215,
+        "program": {
+          "final_insn_count": 197,
+          "orig_insn_count": 197,
+          "prog_id": 215,
+          "prog_name": "tail_handle_arp",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "216": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 775,
+              "insn_count_before": 775,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-85/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-85/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-85/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 216,
+        "program": {
+          "final_insn_count": 775,
+          "orig_insn_count": 775,
+          "prog_id": 216,
+          "prog_name": "tail_nodeport_r",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "217": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-76/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-76/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-76/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 217,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 217,
+          "prog_name": "cil_lxc_policy_",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "218": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1377,
+              "insn_count_before": 1377,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-79/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-79/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-79/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 218,
+        "program": {
+          "final_insn_count": 1377,
+          "orig_insn_count": 1377,
+          "prog_id": 218,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "219": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 601,
+              "insn_count_before": 601,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-77/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-77/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-77/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 219,
+        "program": {
+          "final_insn_count": 601,
+          "orig_insn_count": 601,
+          "prog_id": 219,
+          "prog_name": "tail_no_service",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "220": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1343,
+              "insn_count_before": 1343,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-82/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-82/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-82/report_step0.json --prog-type sched_cls && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 220,
+        "program": {
+          "final_insn_count": 1343,
+          "orig_insn_count": 1343,
+          "prog_id": 220,
+          "prog_name": "tail_ipv4_to_en",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "63": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 35,
+              "insn_count_before": 35,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-38/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-38/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-38/report_step0.json --prog-type tracing && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 63,
+        "program": {
+          "final_insn_count": 35,
+          "orig_insn_count": 35,
+          "prog_id": 63,
+          "prog_name": "dump_bpf_map",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "64": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 65,
+              "insn_count_before": 65,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-43/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-43/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-43/report_step0.json --prog-type tracing && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 64,
+        "program": {
+          "final_insn_count": 65,
+          "orig_insn_count": 65,
+          "prog_id": 64,
+          "prog_name": "dump_bpf_prog",
+          "prog_type": 26
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "cilium",
+  "selected_workload": "network_lossy_multi",
+  "status": "ok"
+}

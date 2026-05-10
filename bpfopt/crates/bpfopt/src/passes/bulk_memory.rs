@@ -21,11 +21,13 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
         canonical_name: MEMCPY_TARGET,
         aliases: &["bulk_memcpy", "bpf_memcpy_bulk", "memcpy_bulk"],
         decode_proof: decode_memcpy_bulk_proof,
+        register_uses: memcpy_bulk_register_uses,
     },
     KinsnDescriptor {
         canonical_name: MEMSET_TARGET,
         aliases: &["bulk_memset", "bpf_memset_bulk", "memset_bulk"],
         decode_proof: decode_memset_bulk_proof,
+        register_uses: memset_bulk_register_uses,
     },
 ];
 
@@ -99,6 +101,20 @@ fn memset_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
         anyhow::bail!("memset bulk zero-fill payload has non-zero fill immediate");
     }
     Ok(len)
+}
+
+fn memcpy_bulk_register_uses(payload: u64) -> RegSet {
+    [kinsn_payload_reg(payload, 0), kinsn_payload_reg(payload, 4)]
+        .into_iter()
+        .collect()
+}
+
+fn memset_bulk_register_uses(payload: u64) -> RegSet {
+    let mut uses: RegSet = [kinsn_payload_reg(payload, 0)].into_iter().collect();
+    if (BpfInsn::unpack_u4(payload, 34) & 0x1) != 0 {
+        uses.insert(kinsn_payload_reg(payload, 4));
+    }
+    uses
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

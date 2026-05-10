@@ -40,7 +40,10 @@ pub fn collect_map_bindings(
 
     while pc < insns.len() {
         let insn = insns[pc];
-        if let Some(kind) = insn.map_pseudo() {
+        if insn.is_map_pseudo() {
+            let kind = insn
+                .map_pseudo_kind()
+                .expect("invariant: map pseudo instruction has a pseudo kind");
             let value_offset = insns.get(pc + 1).map_or(0, |next| next.imm as u32);
             let (map_idx, map_id) =
                 resolve_map_ref(kind, insn.imm, map_ids, fd_bindings, &mut fd_order);

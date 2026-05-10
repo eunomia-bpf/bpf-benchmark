@@ -34,6 +34,7 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     canonical_name: PREFETCH_TARGET_NAME,
     aliases: &["prefetch"],
     decode_proof: decode_prefetch_proof,
+    register_uses: prefetch_register_uses,
 }];
 
 fn decode_prefetch_proof(payload: &[u8]) -> ProofRegion {
@@ -49,6 +50,10 @@ fn prefetch_proof_len(payload: u64) -> anyhow::Result<usize> {
         anyhow::bail!("prefetch payload has non-zero reserved bits");
     }
     Ok(1)
+}
+
+fn prefetch_register_uses(payload: u64) -> RegSet {
+    [kinsn_payload_reg(payload, 0)].into_iter().collect()
 }
 
 /// Packet/map-value prefetch pass.

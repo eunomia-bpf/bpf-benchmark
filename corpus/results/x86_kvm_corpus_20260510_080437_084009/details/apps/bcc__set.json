@@ -1,0 +1,1588 @@
+{
+  "app": "bcc/set",
+  "baseline": {
+    "bpf": {
+      "6": {
+        "bytes_jited": 72,
+        "bytes_xlated": 112,
+        "id": 6,
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "run_cnt_delta": 147571645,
+        "run_time_ns_delta": 23996705039,
+        "type": "tracepoint"
+      },
+      "7": {
+        "bytes_jited": 236,
+        "bytes_xlated": 400,
+        "id": 7,
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "run_cnt_delta": 147571930,
+        "run_time_ns_delta": 4111372768,
+        "type": "tracepoint"
+      },
+      "10": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 10,
+        "name": "vfs_create",
+        "run_cnt_delta": 321065,
+        "run_time_ns_delta": 21346660,
+        "type": "tracing"
+      },
+      "11": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 11,
+        "name": "kfunc__vmlinux__vfs_fsync_range",
+        "run_cnt_delta": 25552,
+        "run_time_ns_delta": 1351121,
+        "type": "tracing"
+      },
+      "12": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 12,
+        "name": "vfs_open",
+        "run_cnt_delta": 3679944,
+        "run_time_ns_delta": 183145114,
+        "type": "tracing"
+      },
+      "13": {
+        "bytes_jited": 87,
+        "bytes_xlated": 136,
+        "id": 13,
+        "name": "vfs_read",
+        "run_cnt_delta": 4562645,
+        "run_time_ns_delta": 455994973,
+        "type": "tracing"
+      },
+      "14": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 14,
+        "name": "vfs_write",
+        "run_cnt_delta": 1447057,
+        "run_time_ns_delta": 61634484,
+        "type": "tracing"
+      },
+      "19": {
+        "bytes_jited": 203,
+        "bytes_xlated": 344,
+        "id": 19,
+        "name": "cap_capable",
+        "run_cnt_delta": 8995855,
+        "run_time_ns_delta": 437745881,
+        "type": "kprobe"
+      },
+      "22": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 22,
+        "name": "__x64_sys_open",
+        "run_cnt_delta": 5576,
+        "run_time_ns_delta": 943800,
+        "type": "tracing"
+      },
+      "23": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 23,
+        "name": "kretfunc__vmlinux____x64_sys_openat",
+        "run_cnt_delta": 2433034,
+        "run_time_ns_delta": 504383615,
+        "type": "tracing"
+      },
+      "24": {
+        "bytes_jited": 590,
+        "bytes_xlated": 640,
+        "id": 24,
+        "name": "kretfunc__vmlinux____x64_sys_openat2",
+        "run_cnt_delta": 1010,
+        "run_time_ns_delta": 203026,
+        "type": "tracing"
+      },
+      "27": {
+        "bytes_jited": 662,
+        "bytes_xlated": 1168,
+        "id": 27,
+        "name": "sched_switch",
+        "run_cnt_delta": 4557393,
+        "run_time_ns_delta": 720176411,
+        "type": "raw_tracepoint"
+      },
+      "28": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 28,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 2938317,
+        "run_time_ns_delta": 279565879,
+        "type": "raw_tracepoint"
+      },
+      "29": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 29,
+        "name": "raw_tracepoint__sched_wakeup_new",
+        "run_cnt_delta": 146168,
+        "run_time_ns_delta": 36266440,
+        "type": "raw_tracepoint"
+      },
+      "32": {
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 32,
+        "name": "trace_connect_entry",
+        "run_cnt_delta": 30973,
+        "run_time_ns_delta": 4243180,
+        "type": "kprobe"
+      },
+      "33": {
+        "bytes_jited": 480,
+        "bytes_xlated": 720,
+        "id": 33,
+        "name": "trace_connect_v4_return",
+        "run_cnt_delta": 30973,
+        "run_time_ns_delta": 30387285,
+        "type": "kprobe"
+      },
+      "34": {
+        "bytes_jited": 477,
+        "bytes_xlated": 712,
+        "id": 34,
+        "name": "trace_connect_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "37": {
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 37,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 433369,
+        "run_time_ns_delta": 114479501,
+        "type": "tracepoint"
+      },
+      "38": {
+        "bytes_jited": 267,
+        "bytes_xlated": 448,
+        "id": 38,
+        "name": "trace_pid_start_tp",
+        "run_cnt_delta": 124446,
+        "run_time_ns_delta": 47387784,
+        "type": "tracepoint"
+      },
+      "39": {
+        "bytes_jited": 335,
+        "bytes_xlated": 616,
+        "id": 39,
+        "name": "trace_req_start",
+        "run_cnt_delta": 125498,
+        "run_time_ns_delta": 47688141,
+        "type": "kprobe"
+      },
+      "40": {
+        "bytes_jited": 550,
+        "bytes_xlated": 856,
+        "id": 40,
+        "name": "trace_req_completion_tp",
+        "run_cnt_delta": 126675,
+        "run_time_ns_delta": 23417863,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "4",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "21928",
+          "--sctp-port",
+          "22028",
+          "--sock-port",
+          "22128",
+          "--sockfd-port",
+          "22228",
+          "--timeout",
+          "10s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/v9m5hoj"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 11.078564597000025,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [25081] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [25081] setting to a 10 secs run per stressor\nstress-ng: info:  [25081] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 4 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [25081] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [25217] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: info:  [26699] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [26106] dentry: 493030 dentries allocated\nstress-ng: metrc: [25081] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [25081]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [25081] cap              995124     10.07      0.30      4.12     98789.44      225336.84\nstress-ng: metrc: [25081] eventfd          409086     10.02      0.27      2.99     40830.83      125601.20\nstress-ng: metrc: [25081] get                6256     10.03      0.24      2.61       623.74        2199.18\nstress-ng: metrc: [25081] prctl              7400     10.01      2.24      1.31       739.52        2089.62\nstress-ng: metrc: [25081] set               44691     10.06      0.16      2.22      4441.50       18796.64\nstress-ng: metrc: [25081] dup                1447     10.00      0.42      0.41       144.70        1759.56\nstress-ng: metrc: [25081] kill              17864     10.04      0.04      2.03      1778.54        8650.70\nstress-ng: metrc: [25081] sigfd           2199999     10.09      0.39      5.66    218061.95      363756.93\nstress-ng: metrc: [25081] signal                0     10.03      0.08      0.52         0.00           0.00\nstress-ng: metrc: [25081] pty                 149     10.01      0.25      5.24        14.88          27.14\nstress-ng: metrc: [25081] itimer              412     10.06      0.20      3.09        40.96         125.21\nstress-ng: metrc: [25081] timerfd          271360     10.12      0.15      1.52     26808.62      162180.16\nstress-ng: metrc: [25081] fork               9556     10.00      1.25      1.59       955.32        3359.89\nstress-ng: metrc: [25081] vfork             88867     10.01      0.97      1.36      8879.28       38066.29\nstress-ng: metrc: [25081] clone              2613     10.11      0.95      4.17       258.45         510.23\nstress-ng: metrc: [25081] ptrace           187982     10.01      0.08      1.04     18772.04      166788.22\nstress-ng: metrc: [25081] futex           1139616     20.21      0.74      7.27     56386.57      142211.02\nstress-ng: metrc: [25081] sem                1413     10.04      0.01      0.00       140.78      116267.59\nstress-ng: metrc: [25081] aio               11330     10.28      0.01      0.06      1102.47      157960.04\nstress-ng: metrc: [25081] aiol              11449     10.39      0.19      0.53      1101.66       15967.86\nstress-ng: metrc: [25081] hdd               52048     10.14      0.63      0.72      5134.41       38738.18\nstress-ng: metrc: [25081] io                   49     10.37      0.02      0.00         4.73        1855.78\nstress-ng: metrc: [25081] iomix              5438     11.01      0.25      3.10       493.84        1621.85\nstress-ng: metrc: [25081] io-uring          20188     10.37      0.00      1.10      1947.30       18209.98\nstress-ng: metrc: [25081] sync-file           120     10.12      0.11      0.40        11.86         233.68\nstress-ng: metrc: [25081] epoll               508     10.26      0.05      0.33        49.50        1342.12\nstress-ng: metrc: [25081] netdev          1481408     10.03      0.27      2.96    147756.81      458887.88\nstress-ng: metrc: [25081] sctp             141296     10.01      0.04      1.33     14117.60      102957.13\nstress-ng: metrc: [25081] sock               1748     10.09      0.06      1.24       173.32        1343.45\nstress-ng: metrc: [25081] sockdiag       89492035     10.05      0.23      8.42   8901545.69    10345538.80\nstress-ng: metrc: [25081] sockfd           244636     10.12      0.08      1.29     24180.90      178800.82\nstress-ng: metrc: [25081] sockpair            760     10.15      0.07      0.05        74.90        6563.89\nstress-ng: metrc: [25081] sockmany          30972     10.14      0.04      1.16      3055.94       25769.41\nstress-ng: metrc: [25081] udp              409468     10.03      0.18      4.35     40814.88       90418.35\nstress-ng: metrc: [25081] udp-flood       2524259     10.06      0.37      3.92    250987.83      588717.01\nstress-ng: metrc: [25081] mmap               3047     10.11      0.15      3.53       301.47         828.18\nstress-ng: metrc: [25081] mprotect        7183502     10.13      1.90     18.29    709326.07      355918.31\nstress-ng: metrc: [25081] mremap             8526     10.03      0.06      5.75       850.26        1467.47\nstress-ng: metrc: [25081] madvise             153     10.03      0.39      4.39        15.25          31.99\nstress-ng: metrc: [25081] access            12220     10.18      0.11      1.70      1200.82        6727.78\nstress-ng: metrc: [25081] chdir                73     10.43      0.23      3.14         7.00          21.63\nstress-ng: metrc: [25081] chmod               340     10.21      0.00      0.33        33.29        1020.41\nstress-ng: metrc: [25081] chown               432     10.21      0.00      0.17        42.31        2524.54\nstress-ng: metrc: [25081] dentry             8728     10.19      0.00      0.34       856.49       25934.90\nstress-ng: metrc: [25081] dir               32768     10.49      0.08      3.60      3124.24        8899.57\nstress-ng: metrc: [25081] dirmany           25841     10.14      0.01      0.63      2548.43       40385.33\nstress-ng: metrc: [25081] fallocate             6     10.21      0.03      0.01         0.59         160.55\nstress-ng: metrc: [25081] file-ioctl        83180     10.10      0.09      1.75      8237.25       45203.52\nstress-ng: metrc: [25081] filename           7603     10.09      0.16      1.68       753.20        4128.12\nstress-ng: metrc: [25081] flock           1958833     10.09      0.36      2.27    194074.61      744791.81\nstress-ng: metrc: [25081] fpunch              529     10.10      0.01      1.10        52.40         477.78\nstress-ng: metrc: [25081] fstat              8061     10.00      0.22      1.91       805.85        3781.18\nstress-ng: metrc: [25081] getdent          266293     10.01      0.12      2.26     26614.16      111621.05\nstress-ng: metrc: [25081] hdd               40743     10.08      0.52      0.62      4040.91       35844.02\nstress-ng: metrc: [25081] inotify              23     10.08      0.04      0.01         2.28         470.82\nstress-ng: metrc: [25081] open               6144     10.16      0.02      0.11       604.64       49221.30\nstress-ng: metrc: [25081] rename            92508     10.11      0.09      0.69      9150.64      119309.28\nstress-ng: metrc: [25081] touch            205200     10.13      0.16      5.21     20262.81       38230.69\nstress-ng: metrc: [25081] utime             71003     10.06      0.10      1.75      7057.17       38424.51\nstress-ng: metrc: [25081] link                 11     10.13      0.09      1.38         1.09           7.47\nstress-ng: metrc: [25081] symlink               5     10.19      0.03      1.30         0.49           3.77\nstress-ng: metrc: [25081] mknod                16     10.23      0.01      0.00         1.56        1106.50\nstress-ng: metrc: [25081] fcntl             18921     10.05      0.07      0.67      1882.65       25456.39\nstress-ng: info:  [25081] skipped: 4: exec (4)\nstress-ng: info:  [25081] passed: 252: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [25081] failed: 0\nstress-ng: info:  [25081] metrics untrustworthy: 0\nstress-ng: info:  [25081] successful run completed in 11.06 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "6": {
+        "bytes_jited": 72,
+        "bytes_xlated": 112,
+        "id": 6,
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "run_cnt_delta": 152616464,
+        "run_time_ns_delta": 24643377075,
+        "type": "tracepoint"
+      },
+      "7": {
+        "bytes_jited": 236,
+        "bytes_xlated": 400,
+        "id": 7,
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "run_cnt_delta": 152616734,
+        "run_time_ns_delta": 4233538643,
+        "type": "tracepoint"
+      },
+      "10": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 10,
+        "name": "vfs_create",
+        "run_cnt_delta": 349389,
+        "run_time_ns_delta": 62506120,
+        "type": "tracing"
+      },
+      "11": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 11,
+        "name": "kfunc__vmlinux__vfs_fsync_range",
+        "run_cnt_delta": 24212,
+        "run_time_ns_delta": 1327092,
+        "type": "tracing"
+      },
+      "12": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 12,
+        "name": "vfs_open",
+        "run_cnt_delta": 3683315,
+        "run_time_ns_delta": 240776403,
+        "type": "tracing"
+      },
+      "13": {
+        "bytes_jited": 87,
+        "bytes_xlated": 136,
+        "id": 13,
+        "name": "vfs_read",
+        "run_cnt_delta": 5151660,
+        "run_time_ns_delta": 189419022,
+        "type": "tracing"
+      },
+      "14": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 14,
+        "name": "vfs_write",
+        "run_cnt_delta": 1708939,
+        "run_time_ns_delta": 71206253,
+        "type": "tracing"
+      },
+      "19": {
+        "bytes_jited": 203,
+        "bytes_xlated": 344,
+        "id": 19,
+        "name": "cap_capable",
+        "run_cnt_delta": 8581787,
+        "run_time_ns_delta": 506161990,
+        "type": "kprobe"
+      },
+      "22": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 22,
+        "name": "__x64_sys_open",
+        "run_cnt_delta": 8476,
+        "run_time_ns_delta": 1313773,
+        "type": "tracing"
+      },
+      "23": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 23,
+        "name": "kretfunc__vmlinux____x64_sys_openat",
+        "run_cnt_delta": 2483760,
+        "run_time_ns_delta": 452805314,
+        "type": "tracing"
+      },
+      "24": {
+        "bytes_jited": 590,
+        "bytes_xlated": 640,
+        "id": 24,
+        "name": "kretfunc__vmlinux____x64_sys_openat2",
+        "run_cnt_delta": 1520,
+        "run_time_ns_delta": 276727,
+        "type": "tracing"
+      },
+      "27": {
+        "bytes_jited": 662,
+        "bytes_xlated": 1168,
+        "id": 27,
+        "name": "sched_switch",
+        "run_cnt_delta": 4680549,
+        "run_time_ns_delta": 701590683,
+        "type": "raw_tracepoint"
+      },
+      "28": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 28,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 3515775,
+        "run_time_ns_delta": 322322352,
+        "type": "raw_tracepoint"
+      },
+      "29": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 29,
+        "name": "raw_tracepoint__sched_wakeup_new",
+        "run_cnt_delta": 128984,
+        "run_time_ns_delta": 32198163,
+        "type": "raw_tracepoint"
+      },
+      "32": {
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 32,
+        "name": "trace_connect_entry",
+        "run_cnt_delta": 48066,
+        "run_time_ns_delta": 5177932,
+        "type": "kprobe"
+      },
+      "33": {
+        "bytes_jited": 480,
+        "bytes_xlated": 720,
+        "id": 33,
+        "name": "trace_connect_v4_return",
+        "run_cnt_delta": 48066,
+        "run_time_ns_delta": 40153393,
+        "type": "kprobe"
+      },
+      "34": {
+        "bytes_jited": 477,
+        "bytes_xlated": 712,
+        "id": 34,
+        "name": "trace_connect_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "37": {
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 37,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 592360,
+        "run_time_ns_delta": 162896979,
+        "type": "tracepoint"
+      },
+      "38": {
+        "bytes_jited": 267,
+        "bytes_xlated": 448,
+        "id": 38,
+        "name": "trace_pid_start_tp",
+        "run_cnt_delta": 121108,
+        "run_time_ns_delta": 47577297,
+        "type": "tracepoint"
+      },
+      "39": {
+        "bytes_jited": 335,
+        "bytes_xlated": 616,
+        "id": 39,
+        "name": "trace_req_start",
+        "run_cnt_delta": 122300,
+        "run_time_ns_delta": 45148119,
+        "type": "kprobe"
+      },
+      "40": {
+        "bytes_jited": 550,
+        "bytes_xlated": 856,
+        "id": 40,
+        "name": "trace_req_completion_tp",
+        "run_cnt_delta": 123433,
+        "run_time_ns_delta": 23247807,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "4",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "21928",
+          "--sctp-port",
+          "22028",
+          "--sock-port",
+          "22128",
+          "--sockfd-port",
+          "22228",
+          "--timeout",
+          "10s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/v9m5hoj"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 11.212425423000013,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [15021] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [15021] setting to a 10 secs run per stressor\nstress-ng: info:  [15021] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 4 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [15021] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [15150] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: info:  [16892] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [16361] dentry: 500712 dentries allocated\nstress-ng: metrc: [15021] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [15021]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [15021] cap              657298     10.12      0.26      2.81     64920.38      214255.87\nstress-ng: metrc: [15021] eventfd          497747     10.01      0.37      3.84     49729.81      118297.49\nstress-ng: metrc: [15021] get                4883     10.02      0.17      2.33       487.24        1951.36\nstress-ng: metrc: [15021] prctl              7185     10.01      2.31      1.33       717.43        1973.90\nstress-ng: metrc: [15021] set               60966     10.07      0.20      3.20      6055.75       17967.99\nstress-ng: metrc: [15021] dup                1338     10.21      0.42      0.44       130.99        1557.21\nstress-ng: metrc: [15021] kill              18222     10.05      0.02      3.53      1813.04        5125.78\nstress-ng: metrc: [15021] sigfd           2237774     10.09      0.39      4.78    221726.71      432752.33\nstress-ng: metrc: [15021] signal                0     10.03      0.09      0.56         0.00           0.00\nstress-ng: metrc: [15021] pty                 277     10.05      0.22      5.06        27.57          52.46\nstress-ng: metrc: [15021] itimer              595     10.06      0.33      5.10        59.13         109.74\nstress-ng: metrc: [15021] timerfd          425984     10.23      0.07      2.61     41632.81      159203.27\nstress-ng: metrc: [15021] fork               9542     10.01      1.30      1.78       953.02        3101.78\nstress-ng: metrc: [15021] vfork             77421     10.01      0.90      1.47      7733.56       32691.10\nstress-ng: metrc: [15021] clone              2159     10.09      0.89      4.31       214.08         414.58\nstress-ng: metrc: [15021] ptrace           458802     10.01      0.17      2.29     45820.45      186165.62\nstress-ng: metrc: [15021] futex           1202190     20.11      0.76      7.51     59768.67      145442.62\nstress-ng: metrc: [15021] sem                1814     10.08      0.01      0.00       179.93      121516.61\nstress-ng: metrc: [15021] aio                9961     10.23      0.02      0.05       973.46      151588.01\nstress-ng: metrc: [15021] aiol              10802     10.32      0.04      0.63      1046.65       15990.03\nstress-ng: metrc: [15021] hdd               44544     10.26      0.71      0.54      4340.55       35758.95\nstress-ng: metrc: [15021] io                   21     10.27      0.01      0.07         2.05         274.68\nstress-ng: metrc: [15021] iomix              7158     10.68      0.25      3.13       670.26        2116.30\nstress-ng: metrc: [15021] io-uring          19708     10.35      0.01      0.86      1904.98       22532.47\nstress-ng: metrc: [15021] sync-file           108     10.24      0.02      0.46        10.55         224.23\nstress-ng: metrc: [15021] epoll              5005     10.21      0.04      0.36       490.05       12508.75\nstress-ng: metrc: [15021] netdev          1811471     10.02      0.31      3.72    180870.25      449511.92\nstress-ng: metrc: [15021] sctp             128085     10.00      0.11      1.16     12802.48      101333.07\nstress-ng: metrc: [15021] sock               3250     10.05      0.03      2.35       323.27        1366.66\nstress-ng: metrc: [15021] sockdiag       36656007     10.05      0.13      3.79   3646263.84     9361094.92\nstress-ng: metrc: [15021] sockfd           296099     10.12      0.02      1.48     29253.01      197969.09\nstress-ng: metrc: [15021] sockpair            559     10.13      0.02      0.13        55.17        3822.35\nstress-ng: metrc: [15021] sockmany          48066     10.09      0.03      1.68      4765.76       28121.39\nstress-ng: metrc: [15021] udp              170236     10.07      0.13      2.99     16913.47       54577.88\nstress-ng: metrc: [15021] udp-flood       2294118     10.01      0.92      3.87    229085.62      479337.92\nstress-ng: metrc: [15021] mmap               2963     10.04      0.11      3.35       294.99         856.37\nstress-ng: metrc: [15021] mprotect        7074821     10.13      1.73     18.36    698654.54      352244.35\nstress-ng: metrc: [15021] mremap             4470     10.02      0.07      2.96       446.28        1477.86\nstress-ng: metrc: [15021] madvise             151     10.15      0.31      4.44        14.88          31.81\nstress-ng: metrc: [15021] access            13857     10.21      0.18      1.87      1357.49        6785.78\nstress-ng: metrc: [15021] chdir               112     10.44      0.32      4.33        10.73          24.09\nstress-ng: metrc: [15021] chmod               284     10.13      0.01      0.16        28.04        1610.35\nstress-ng: metrc: [15021] chown               421     10.16      0.00      0.08        41.46        4948.28\nstress-ng: metrc: [15021] dentry            18432     10.21      0.03      0.59      1804.65       29526.77\nstress-ng: metrc: [15021] dir               32768     10.48      0.15      3.33      3125.89        9417.86\nstress-ng: metrc: [15021] dirmany           36608     10.15      0.00      0.86      3608.47       42446.22\nstress-ng: metrc: [15021] fallocate             6     10.10      0.01      0.02         0.59         200.48\nstress-ng: metrc: [15021] file-ioctl        62033     10.11      0.08      1.27      6138.28       45991.80\nstress-ng: metrc: [15021] filename           7400     10.12      0.08      1.50       731.04        4690.35\nstress-ng: metrc: [15021] flock           1882855     10.10      0.40      1.90    186470.88      818688.85\nstress-ng: metrc: [15021] fpunch              918     10.11      0.00      1.61        90.85         568.96\nstress-ng: metrc: [15021] fstat              7001     10.00      0.09      2.08       699.90        3220.80\nstress-ng: metrc: [15021] getdent          252811     10.00      0.14      2.27     25275.97      104921.64\nstress-ng: metrc: [15021] hdd               30888     10.09      0.50      0.40      3059.84       34500.94\nstress-ng: metrc: [15021] inotify              20     10.36      0.03      0.02         1.93         438.35\nstress-ng: metrc: [15021] open               9216     10.11      0.03      0.12       911.52       60083.32\nstress-ng: metrc: [15021] rename            90077     10.11      0.07      0.63      8906.79      129206.75\nstress-ng: metrc: [15021] touch            213935     10.11      0.21      4.71     21156.01       43554.04\nstress-ng: metrc: [15021] utime             52752     10.05      0.10      1.21      5248.27       40281.99\nstress-ng: metrc: [15021] link                  8     10.11      0.08      1.06         0.79           7.04\nstress-ng: metrc: [15021] symlink               5     10.18      0.07      1.43         0.49           3.34\nstress-ng: metrc: [15021] mknod                55     10.11      0.02      0.00         5.44        3548.85\nstress-ng: metrc: [15021] fcntl             11718     10.08      0.02      0.40      1162.50       27856.56\nstress-ng: info:  [15021] skipped: 4: exec (4)\nstress-ng: info:  [15021] passed: 252: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [15021] failed: 0\nstress-ng: info:  [15021] metrics untrustworthy: 0\nstress-ng: info:  [15021] successful run completed in 11.19 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "10": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-3/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-3/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-3/report_step0.json --prog-type tracing && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 10,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 10,
+          "prog_name": "vfs_create",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "11": {
+        "passes": [
+          {
+            "bpfopt_ms": 77,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-14/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-14/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-14/report_step0.json --prog-type tracing && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 11,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 11,
+          "prog_name": "vfs_fsync_range",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "12": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-18/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-18/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-18/report_step0.json --prog-type tracing && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 12,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 12,
+          "prog_name": "vfs_open",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "13": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 11,
+              "insn_count_before": 11,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-0/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-0/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-0/report_step0.json --prog-type tracing && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 13,
+        "program": {
+          "final_insn_count": 11,
+          "orig_insn_count": 11,
+          "prog_id": 13,
+          "prog_name": "vfs_read",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "14": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-16/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-16/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-16/report_step0.json --prog-type tracing && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 14,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 14,
+          "prog_name": "vfs_write",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "19": {
+        "passes": [
+          {
+            "bpfopt_ms": 78,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 43,
+              "insn_count_before": 43,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-11/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-11/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-11/report_step0.json --prog-type kprobe && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 19,
+        "program": {
+          "final_insn_count": 43,
+          "orig_insn_count": 43,
+          "prog_id": 19,
+          "prog_name": "cap_capable",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "22": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-17/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-17/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-17/report_step0.json --prog-type tracing && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 22,
+        "program": {
+          "final_insn_count": 75,
+          "orig_insn_count": 75,
+          "prog_id": 22,
+          "prog_name": "__x64_sys_open",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "23": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-20/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-20/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-20/report_step0.json --prog-type tracing && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 23,
+        "program": {
+          "final_insn_count": 75,
+          "orig_insn_count": 75,
+          "prog_id": 23,
+          "prog_name": "__x64_sys_opena",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "24": {
+        "passes": [
+          {
+            "bpfopt_ms": 77,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 80,
+              "insn_count_before": 80,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-4/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-4/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-4/report_step0.json --prog-type tracing && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 24,
+        "program": {
+          "final_insn_count": 80,
+          "orig_insn_count": 80,
+          "prog_id": 24,
+          "prog_name": "__x64_sys_opena",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "27": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-19/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-19/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-19/report_step0.json --prog-type raw_tracepoint && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 27,
+        "program": {
+          "final_insn_count": 138,
+          "orig_insn_count": 138,
+          "prog_id": 27,
+          "prog_name": "sched_switch",
+          "prog_type": 17
+        },
+        "status": "error"
+      },
+      "28": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 31,
+              "insn_count_before": 31,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-5/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-5/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-5/report_step0.json --prog-type raw_tracepoint && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 28,
+        "program": {
+          "final_insn_count": 31,
+          "orig_insn_count": 31,
+          "prog_id": 28,
+          "prog_name": "sched_wakeup",
+          "prog_type": 17
+        },
+        "status": "error"
+      },
+      "29": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 31,
+              "insn_count_before": 31,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-6/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-6/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-6/report_step0.json --prog-type raw_tracepoint && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 29,
+        "program": {
+          "final_insn_count": 31,
+          "orig_insn_count": 31,
+          "prog_id": 29,
+          "prog_name": "sched_wakeup_ne",
+          "prog_type": 17
+        },
+        "status": "error"
+      },
+      "32": {
+        "passes": [
+          {
+            "bpfopt_ms": 77,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 15,
+              "insn_count_before": 15,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-7/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-7/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-7/report_step0.json --prog-type kprobe && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 32,
+        "program": {
+          "final_insn_count": 15,
+          "orig_insn_count": 15,
+          "prog_id": 32,
+          "prog_name": "trace_connect_e",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "33": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 88,
+              "insn_count_before": 88,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-2/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-2/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-2/report_step0.json --prog-type kprobe && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 33,
+        "program": {
+          "final_insn_count": 88,
+          "orig_insn_count": 88,
+          "prog_id": 33,
+          "prog_name": "trace_connect_v",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "34": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 87,
+              "insn_count_before": 87,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-12/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-12/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-12/report_step0.json --prog-type kprobe && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 34,
+        "program": {
+          "final_insn_count": 87,
+          "orig_insn_count": 87,
+          "prog_id": 34,
+          "prog_name": "trace_connect_v",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "37": {
+        "passes": [
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 205,
+              "insn_count_before": 205,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-15/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-15/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-15/report_step0.json --prog-type tracepoint && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 37,
+        "program": {
+          "final_insn_count": 205,
+          "orig_insn_count": 205,
+          "prog_id": 37,
+          "prog_name": "sock__inet_sock",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "38": {
+        "passes": [
+          {
+            "bpfopt_ms": 79,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 56,
+              "insn_count_before": 56,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-8/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-8/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-8/report_step0.json --prog-type tracepoint && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 38,
+        "program": {
+          "final_insn_count": 56,
+          "orig_insn_count": 56,
+          "prog_id": 38,
+          "prog_name": "trace_pid_start",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "39": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 77,
+              "insn_count_before": 77,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-9/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-9/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-9/report_step0.json --prog-type kprobe && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 39,
+        "program": {
+          "final_insn_count": 77,
+          "orig_insn_count": 77,
+          "prog_id": 39,
+          "prog_name": "trace_req_start",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "40": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 103,
+              "insn_count_before": 103,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-10/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-10/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-10/report_step0.json --prog-type tracepoint && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 40,
+        "program": {
+          "final_insn_count": 103,
+          "orig_insn_count": 103,
+          "prog_id": 40,
+          "prog_name": "trace_req_compl",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "6": {
+        "passes": [
+          {
+            "bpfopt_ms": 78,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 14,
+              "insn_count_before": 14,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-1/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-1/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-1/report_step0.json --prog-type tracepoint && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 6,
+        "program": {
+          "final_insn_count": 14,
+          "orig_insn_count": 14,
+          "prog_id": 6,
+          "prog_name": "raw_syscalls__s",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "7": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 44,
+              "insn_count_before": 44,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-13/input_step0.bin --output /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-13/output_step0.bin --report /var/tmp/bpfrejit-runtime/v9m5hoj/bpfrejit-daemon-plan-1857-13/report_step0.json --prog-type tracepoint && false\nsubprocess output:\n<no subprocess output>",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} && false",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 7,
+        "program": {
+          "final_insn_count": 44,
+          "orig_insn_count": 44,
+          "prog_id": 7,
+          "prog_name": "raw_syscalls__s",
+          "prog_type": 5
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bcc_set",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "ok"
+}

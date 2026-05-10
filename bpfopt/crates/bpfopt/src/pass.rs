@@ -23,11 +23,14 @@ pub use crate::verifier_log::{
 use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
 
+pub type RegSet = HashSet<u8>;
+
 #[derive(Clone, Copy, Debug)]
 pub struct KinsnDescriptor {
     pub canonical_name: &'static str,
     pub aliases: &'static [&'static str],
     pub decode_proof: fn(&[u8]) -> ProofRegion,
+    pub register_uses: fn(payload: u64) -> RegSet,
 }
 
 impl KinsnDescriptor {

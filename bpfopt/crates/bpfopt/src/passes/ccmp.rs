@@ -10,6 +10,7 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     canonical_name: "bpf_ccmp64",
     aliases: &["ccmp64"],
     decode_proof: decode_ccmp_proof,
+    register_uses: ccmp_register_uses,
 }];
 
 const MIN_CCMP_TERMS: usize = 2;
@@ -54,6 +55,13 @@ fn ccmp_proof_len(payload: u64) -> anyhow::Result<usize> {
     }
 
     Ok(count + 2)
+}
+
+fn ccmp_register_uses(payload: u64) -> RegSet {
+    let count = usize::from(BpfInsn::unpack_u4(payload, 4) & 0x3) + 2;
+    std::iter::once(kinsn_payload_reg(payload, 0))
+        .chain((0..count).map(|idx| kinsn_payload_reg(payload, (8 + idx * 4) as u8)))
+        .collect()
 }
 
 /// CCMP pass: folds same-target zero-test short-circuit AND chains into an

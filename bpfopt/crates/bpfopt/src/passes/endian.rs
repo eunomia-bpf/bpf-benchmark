@@ -11,16 +11,19 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
         canonical_name: "bpf_endian_load16",
         aliases: &["endian_load16"],
         decode_proof: decode_endian_proof,
+        register_uses: endian_register_uses,
     },
     KinsnDescriptor {
         canonical_name: "bpf_endian_load32",
         aliases: &["endian_load32"],
         decode_proof: decode_endian_proof,
+        register_uses: endian_register_uses,
     },
     KinsnDescriptor {
         canonical_name: "bpf_endian_load64",
         aliases: &["endian_load64"],
         decode_proof: decode_endian_proof,
+        register_uses: endian_register_uses,
     },
 ];
 
@@ -54,6 +57,12 @@ fn endian_proof_len(payload: u64) -> anyhow::Result<usize> {
     validate_bpf_reg("endian dst", kinsn_payload_reg(payload, 0))?;
     validate_bpf_reg("endian base", kinsn_payload_reg(payload, 4))?;
     Ok(2)
+}
+
+fn endian_register_uses(payload: u64) -> RegSet {
+    [kinsn_payload_reg(payload, 0), kinsn_payload_reg(payload, 4)]
+        .into_iter()
+        .collect()
 }
 
 /// An endian fusion site: a LDX_MEM followed by a byte-swap

@@ -11,11 +11,13 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
         canonical_name: "bpf_rotate64",
         aliases: &["rotate64"],
         decode_proof: decode_rotate64_proof,
+        register_uses: rotate_register_uses,
     },
     KinsnDescriptor {
         canonical_name: "bpf_rotate32",
         aliases: &["rotate32"],
         decode_proof: decode_rotate32_proof,
+        register_uses: rotate_register_uses,
     },
 ];
 
@@ -53,6 +55,12 @@ fn rotate_proof_len(payload: u64, shift_mask: u8) -> anyhow::Result<usize> {
     } else {
         Ok(5)
     }
+}
+
+fn rotate_register_uses(payload: u64) -> RegSet {
+    [kinsn_payload_reg(payload, 0), kinsn_payload_reg(payload, 4)]
+        .into_iter()
+        .collect()
 }
 
 /// ROTATE optimization pass: replaces shift+OR rotate patterns with

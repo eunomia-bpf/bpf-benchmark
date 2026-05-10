@@ -1083,10 +1083,7 @@ fn hex_bytes(bytes: &[u8]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use bpfopt::insn::{
-        BPF_DW, BPF_IMM, BPF_LD, BPF_PSEUDO_MAP_FD, BPF_PSEUDO_MAP_IDX, BPF_PSEUDO_MAP_IDX_VALUE,
-        BPF_PSEUDO_MAP_VALUE,
-    };
+    use bpfopt::insn::{MapPseudo, BPF_DW, BPF_IMM, BPF_LD};
 
     fn minimal_program_bytes() -> Vec<u8> {
         vec![
@@ -1161,18 +1158,18 @@ mod tests {
     #[test]
     fn canonicalize_map_refs_rewrites_fd_pseudos_in_first_seen_order() {
         let mut insns = Vec::new();
-        insns.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 489));
-        insns.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_VALUE, 466));
-        insns.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 489));
+        insns.extend(make_ld_imm64(1, MapPseudo::Fd.src_reg(), 489));
+        insns.extend(make_ld_imm64(1, MapPseudo::FdValue.src_reg(), 466));
+        insns.extend(make_ld_imm64(1, MapPseudo::Fd.src_reg(), 489));
 
         canonicalize_map_refs_to_idx(&mut insns, None, &[101, 102]).unwrap();
 
         assert_eq!(
             pseudo_pairs(&insns),
             vec![
-                (BPF_PSEUDO_MAP_IDX, 0, 0),
-                (BPF_PSEUDO_MAP_IDX_VALUE, 1, 0),
-                (BPF_PSEUDO_MAP_IDX, 0, 0),
+                (MapPseudo::Idx.src_reg(), 0, 0),
+                (MapPseudo::IdxValue.src_reg(), 1, 0),
+                (MapPseudo::Idx.src_reg(), 0, 0),
             ]
         );
     }
@@ -1180,7 +1177,7 @@ mod tests {
     #[test]
     fn canonicalize_map_refs_checks_idx_range_without_fd_array() {
         let mut insns = Vec::new();
-        insns.extend(make_ld_imm64(1, BPF_PSEUDO_MAP_IDX, 2));
+        insns.extend(make_ld_imm64(1, MapPseudo::Idx.src_reg(), 2));
 
         let err = canonicalize_map_refs_to_idx(&mut insns, None, &[42]).unwrap_err();
 

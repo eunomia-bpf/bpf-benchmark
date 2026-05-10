@@ -25,9 +25,10 @@ impl BpfPass for DcePass {
         &self,
         program: &mut BpfProgram,
         _analyses: &mut AnalysisCache,
-        _ctx: &PassContext,
+        ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        let Some((final_insns, final_addr_map)) = eliminate_dead_register_defs(&program.insns)?
+        let Some((final_insns, final_addr_map)) =
+            eliminate_dead_register_defs_with_kinsn_registry(&program.insns, &ctx.kinsn_registry)?
         else {
             return Ok(PassResult::unchanged());
         };
@@ -168,8 +169,23 @@ pub fn eliminate_nops(insns: &[BpfInsn]) -> anyhow::Result<Option<(Vec<BpfInsn>,
     eliminate_marked_insns(insns, &deleted)
 }
 
+#[cfg(test)]
 pub fn eliminate_dead_register_defs(
     insns: &[BpfInsn],
+) -> anyhow::Result<Option<(Vec<BpfInsn>, Vec<usize>)>> {
+    eliminate_dead_register_defs_impl(insns, None)
+}
+
+pub fn eliminate_dead_register_defs_with_kinsn_registry(
+    insns: &[BpfInsn],
+    kinsn_registry: &KinsnRegistry,
+) -> anyhow::Result<Option<(Vec<BpfInsn>, Vec<usize>)>> {
+    eliminate_dead_register_defs_impl(insns, Some(kinsn_registry))
+}
+
+fn eliminate_dead_register_defs_impl(
+    insns: &[BpfInsn],
+    kinsn_registry: Option<&KinsnRegistry>,
 ) -> anyhow::Result<Option<(Vec<BpfInsn>, Vec<usize>)>> {
     if insns.is_empty() {
         return Ok(None);
@@ -178,7 +194,8 @@ pub fn eliminate_dead_register_defs(
     let mut final_insns = insns.to_vec();
     let mut final_addr_map: Option<Vec<usize>> = None;
 
-    while let Some((cleaned_insns, cleanup_map)) = eliminate_dead_register_defs_once(&final_insns)?
+    while let Some((cleaned_insns, cleanup_map)) =
+        eliminate_dead_register_defs_once(&final_insns, kinsn_registry)?
     {
         final_addr_map = Some(match final_addr_map.take() {
             Some(existing) => compose_addr_maps(&existing, &cleanup_map),
@@ -192,8 +209,13 @@ pub fn eliminate_dead_register_defs(
 
 fn eliminate_dead_register_defs_once(
     insns: &[BpfInsn],
+    kinsn_registry: Option<&KinsnRegistry>,
 ) -> anyhow::Result<Option<(Vec<BpfInsn>, Vec<usize>)>> {
-    let liveness = LivenessAnalysis::run(&BpfProgram::new(insns.to_vec()));
+    let program = BpfProgram::new(insns.to_vec());
+    let liveness = match kinsn_registry {
+        Some(registry) => LivenessAnalysis::run_with_kinsn_registry(&program, registry)?,
+        None => LivenessAnalysis::run(&program),
+    };
     let mut deleted = vec![false; insns.len()];
     let mut pc = 0usize;
 

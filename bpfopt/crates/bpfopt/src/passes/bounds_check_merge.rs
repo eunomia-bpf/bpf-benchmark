@@ -8,7 +8,9 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::dce::{eliminate_nops, eliminate_unreachable_blocks};
-use crate::rewrite::{BtfRemapPolicy, RewritePlan};
+use crate::rewrite::{
+    commit_rewrite_output, compose_addr_maps, BtfRemapPolicy, RewriteOutput, RewritePlan,
+};
 
 /// BPF_PROG_TYPE_SCHED_CLS (TC classifier).
 const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
@@ -174,19 +176,29 @@ impl BpfPass for BoundsCheckMergePass {
             plan.delete_range(pc, insn_width(&program.insns[pc]))?;
         }
 
-        let mut result = plan.commit(program, BtfRemapPolicy::NoRemap)?;
+        let output = plan.build(&program.insns)?;
+        let mut final_insns = output.insns;
+        let mut final_addr_map = output.addr_map;
 
-        if let Some((cleaned_insns, cleanup_map)) = eliminate_unreachable_blocks(&program.insns)? {
-            program.insns = cleaned_insns;
-            program.remap_annotations(&cleanup_map);
+        if let Some((cleaned_insns, cleanup_map)) = eliminate_unreachable_blocks(&final_insns)? {
+            final_addr_map = compose_addr_maps(&final_addr_map, &cleanup_map);
+            final_insns = cleaned_insns;
         }
-        while let Some((cleaned_insns, cleanup_map)) = eliminate_nops(&program.insns)? {
-            program.insns = cleaned_insns;
-            program.remap_annotations(&cleanup_map);
+        while let Some((cleaned_insns, cleanup_map)) = eliminate_nops(&final_insns)? {
+            final_addr_map = compose_addr_maps(&final_addr_map, &cleanup_map);
+            final_insns = cleaned_insns;
         }
-        result.sites_applied = rewrites.len();
+
+        let mut result = commit_rewrite_output(
+            program,
+            RewriteOutput {
+                insns: final_insns,
+                addr_map: final_addr_map,
+                sites_applied: rewrites.len(),
+            },
+            BtfRemapPolicy::Remap,
+        )?;
         result.sites_skipped = scan.skips;
-        result.insns_after = program.insns.len();
         Ok(result)
     }
 }

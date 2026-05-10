@@ -12,6 +12,7 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     canonical_name: "bpf_select64",
     aliases: &["select64"],
     decode_proof: decode_select_proof,
+    register_uses: cond_select_register_uses,
 }];
 
 fn decode_select_proof(payload: &[u8]) -> ProofRegion {
@@ -27,6 +28,17 @@ fn select_proof_len(payload: u64) -> anyhow::Result<usize> {
         anyhow::bail!("select condition mode is not KINSN_SELECT_COND_NEZ");
     }
     Ok(4)
+}
+
+fn cond_select_register_uses(payload: u64) -> RegSet {
+    [
+        kinsn_payload_reg(payload, 0),
+        kinsn_payload_reg(payload, 4),
+        kinsn_payload_reg(payload, 8),
+        kinsn_payload_reg(payload, 12),
+    ]
+    .into_iter()
+    .collect()
 }
 
 /// COND_SELECT pass: replaces branch+mov diamond patterns with

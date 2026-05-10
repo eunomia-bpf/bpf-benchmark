@@ -10,7 +10,7 @@ use std::sync::OnceLock;
 use anyhow::{bail, Context, Result};
 use serde::Deserialize;
 
-use crate::analysis::{iter_sites, subprog_bounds, BranchTargetAnalysis};
+use crate::analysis::{insn_use_def_set, iter_sites, subprog_bounds, BranchTargetAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 use crate::rewrite::{commit_rewrite_output, BtfRemapPolicy, RewriteOutput};
@@ -4153,7 +4153,7 @@ fn find_direct_map_load_for_reg_before_pc_inner(
     let mut cursor = pc;
     while let Some(prev_pc) = prev_real_pc_bounded(insns, cursor, subprog_start) {
         let insn = &insns[prev_pc];
-        if insn_defines_reg(insn, reg) {
+        if insn_use_def_set(insn).defs.contains(&reg) {
             if insn.dst_reg() == reg
                 && matches!(insn.map_pseudo(), Some(MapPseudo::Fd | MapPseudo::Idx))
             {
@@ -4288,9 +4288,10 @@ fn lookup_pattern_removal_is_safe(
         if !lookup_pattern_gap_insn_is_safe(insn) {
             return false;
         }
+        let use_def = insn_use_def_set(insn);
         if [1u8, 2]
             .into_iter()
-            .any(|reg| insn_uses_reg(insn, reg) || insn_defines_reg(insn, reg))
+            .any(|reg| use_def.uses.contains(&reg) || use_def.defs.contains(&reg))
         {
             return false;
         }
@@ -4352,7 +4353,7 @@ fn find_prev_reg_def_within(
     while scanned < limit {
         let pc = prev_real_pc_bounded(insns, cursor, lower_bound)?;
         scanned += 1;
-        if insn_defines_reg(&insns[pc], reg) {
+        if insn_use_def_set(&insns[pc]).defs.contains(&reg) {
             return Some((pc, scanned));
         }
         cursor = pc;
@@ -4532,7 +4533,7 @@ fn find_prev_reg_def(
 ) -> Option<usize> {
     let mut cursor = start_pc;
     while let Some(pc) = prev_real_pc_bounded(insns, cursor, lower_bound) {
-        if insn_defines_reg(&insns[pc], reg) {
+        if insn_use_def_set(&insns[pc]).defs.contains(&reg) {
             return Some(pc);
         }
         cursor = pc;
@@ -5239,7 +5240,7 @@ fn null_check_removal_window_is_trivial(
 
         if insn_pcs.clone().all(|slot| skipped_pcs.contains(&slot)) {
             for reg in 1..=5 {
-                if insn_defines_reg(insn, reg) {
+                if insn_use_def_set(insn).defs.contains(&reg) {
                     killed_arg_regs.insert(reg);
                     safe_scalar_regs.remove(&reg);
                 }
@@ -5338,49 +5339,16 @@ fn mark_safe_scalar_reg(
 }
 
 fn insn_uses_any_alias(insn: &BpfInsn, alias_regs: &HashMap<u8, i16>) -> bool {
+    let use_def = insn_use_def_set(insn);
     alias_regs
         .keys()
         .copied()
-        .any(|reg| insn_uses_reg(insn, reg))
+        .any(|reg| use_def.uses.contains(&reg))
 }
 
 fn kill_defined_alias_regs(alias_regs: &mut HashMap<u8, i16>, insn: &BpfInsn) {
-    alias_regs.retain(|&reg, _| !insn_defines_reg(insn, reg));
-}
-
-fn insn_uses_reg(insn: &BpfInsn, reg: u8) -> bool {
-    match insn.class() {
-        BPF_ALU64 | BPF_ALU => {
-            if bpf_op(insn.code) == BPF_MOV {
-                bpf_src(insn.code) == BPF_X && insn.src_reg() == reg
-            } else {
-                insn.dst_reg() == reg || (bpf_src(insn.code) == BPF_X && insn.src_reg() == reg)
-            }
-        }
-        BPF_LDX => insn.src_reg() == reg,
-        BPF_ST => insn.dst_reg() == reg,
-        BPF_STX => insn.dst_reg() == reg || insn.src_reg() == reg,
-        BPF_JMP | BPF_JMP32 => {
-            if insn.is_call() {
-                (1..=5).contains(&reg)
-            } else if insn.is_exit() {
-                reg == 0
-            } else if insn.is_ja() {
-                false
-            } else {
-                insn.dst_reg() == reg || (bpf_src(insn.code) == BPF_X && insn.src_reg() == reg)
-            }
-        }
-        _ => false,
-    }
-}
-
-fn insn_defines_reg(insn: &BpfInsn, reg: u8) -> bool {
-    match insn.class() {
-        BPF_ALU64 | BPF_ALU | BPF_LDX | BPF_LD => insn.dst_reg() == reg,
-        BPF_JMP | BPF_JMP32 => insn.is_call() && reg <= 5,
-        _ => false,
-    }
+    let use_def = insn_use_def_set(insn);
+    alias_regs.retain(|reg, _| !use_def.defs.contains(reg));
 }
 
 #[cfg(test)]

@@ -10,6 +10,7 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     canonical_name: "bpf_extract64",
     aliases: &["extract64"],
     decode_proof: decode_extract_proof,
+    register_uses: extract_register_uses,
 }];
 
 fn decode_extract_proof(payload: &[u8]) -> ProofRegion {
@@ -24,6 +25,10 @@ fn extract_proof_len(payload: u64) -> anyhow::Result<usize> {
         anyhow::bail!("extract payload has invalid range start={start} bit_len={bit_len}");
     }
     Ok(usize::from(start != 0) + 1)
+}
+
+fn extract_register_uses(payload: u64) -> RegSet {
+    [kinsn_payload_reg(payload, 0)].into_iter().collect()
 }
 
 /// EXTRACT optimization pass: replaces RSH+AND bitfield extraction patterns

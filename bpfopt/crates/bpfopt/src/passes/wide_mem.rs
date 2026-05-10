@@ -4,7 +4,7 @@
 //! Self-contained: pattern matching (was matcher.rs), emission (was emit.rs),
 //! and the BpfPass implementation are all here.
 
-use anyhow::bail;
+use anyhow::{bail, Context};
 
 use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
@@ -42,6 +42,11 @@ impl RewriteSite {
             .iter()
             .find(|b| b.name == name)
             .map(|b| b.value)
+    }
+
+    fn required_binding(&self, name: &str) -> anyhow::Result<i64> {
+        self.get_binding(name)
+            .ok_or_else(|| anyhow::anyhow!("wide_mem site missing required {name} binding"))
     }
 }
 
@@ -291,18 +296,13 @@ fn match_wide_mem_high_first(
 
 /// Emit replacement instructions for a single WIDE_MEM rewrite site.
 pub(super) fn emit_wide_mem(site: &RewriteSite) -> anyhow::Result<Vec<BpfInsn>> {
-    let dst = site
-        .get_binding("dst_reg")
-        .ok_or_else(|| anyhow::anyhow!("missing dst_reg binding"))? as u8;
-    let base = site
-        .get_binding("base_reg")
-        .ok_or_else(|| anyhow::anyhow!("missing base_reg binding"))? as u8;
-    let off = site
-        .get_binding("base_off")
-        .ok_or_else(|| anyhow::anyhow!("missing base_off binding"))? as i16;
-    let width = site
-        .get_binding("width")
-        .ok_or_else(|| anyhow::anyhow!("missing width binding"))?;
+    let dst = u8::try_from(site.required_binding("dst_reg")?)
+        .context("wide_mem dst_reg binding does not fit u8")?;
+    let base = u8::try_from(site.required_binding("base_reg")?)
+        .context("wide_mem base_reg binding does not fit u8")?;
+    let off = i16::try_from(site.required_binding("base_off")?)
+        .context("wide_mem base_off binding does not fit i16")?;
+    let width = site.required_binding("width")?;
 
     let size = match width {
         2 => BPF_H,
@@ -314,17 +314,17 @@ pub(super) fn emit_wide_mem(site: &RewriteSite) -> anyhow::Result<Vec<BpfInsn>> 
     Ok(vec![BpfInsn::ldx_mem(size, dst, base, off)])
 }
 
-fn wide_load_alignment_skip_reason(site: &RewriteSite) -> Option<String> {
-    let width = site.get_binding("width").unwrap_or(0);
-    let base_off = site.get_binding("base_off").unwrap_or(0);
+fn wide_load_alignment_skip_reason(site: &RewriteSite) -> anyhow::Result<Option<String>> {
+    let width = site.required_binding("width")?;
+    let base_off = site.required_binding("base_off")?;
 
     if matches!(width, 2 | 4 | 8) && base_off.rem_euclid(width) != 0 {
-        return Some(format!(
+        return Ok(Some(format!(
             "wide load offset {base_off} is not naturally aligned for width {width}"
-        ));
+        )));
     }
 
-    None
+    Ok(None)
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -516,7 +516,8 @@ impl BpfPass for WideMemPass {
                 continue;
             }
 
-            let dst_reg = site.get_binding("dst_reg").unwrap_or(-1) as u8;
+            let dst_reg = u8::try_from(site.required_binding("dst_reg")?)
+                .context("wide_mem dst_reg binding does not fit u8")?;
             let mut scratch_regs = std::collections::HashSet::new();
             let site_end = site.start_pc + site.old_len;
             for pc in site.start_pc..site_end {
@@ -550,7 +551,7 @@ impl BpfPass for WideMemPass {
             }
 
             // Skip unsupported widths (only 2, 4, 8 can be emitted as a single wide load).
-            let width = site.get_binding("width").unwrap_or(0);
+            let width = site.required_binding("width")?;
             if width != 2 && width != 4 && width != 8 {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
@@ -559,7 +560,7 @@ impl BpfPass for WideMemPass {
                 continue;
             }
 
-            if let Some(reason) = wide_load_alignment_skip_reason(site) {
+            if let Some(reason) = wide_load_alignment_skip_reason(site)? {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
                     reason,
@@ -586,9 +587,11 @@ impl BpfPass for WideMemPass {
             // (stack) and registers derived from map lookups or other sources
             // are safe for wide loads.
             if is_packet_unsafe_prog_type(ctx.prog_type) {
-                let base_reg = site.get_binding("base_reg").unwrap_or(-1);
+                let base_reg = site.required_binding("base_reg")?;
+                let base_reg_i32 = i32::try_from(base_reg)
+                    .context("wide_mem base_reg binding does not fit i32")?;
                 if base_reg != 10
-                    && is_likely_packet_ptr(base_reg as i32, site.start_pc, &program.insns)
+                    && is_likely_packet_ptr(base_reg_i32, site.start_pc, &program.insns)
                 {
                     skipped.push(SkipReason {
                         pc: site.start_pc,
@@ -618,14 +621,13 @@ impl BpfPass for WideMemPass {
             // When no states are available, fall through to allow the merge (the
             // verifier itself will reject if needed).
             {
-                let base_reg = site.get_binding("base_reg").unwrap_or(-1);
-                if base_reg >= 0
-                    && base_reg_is_btf_ptr_from_states(
-                        base_reg as u8,
-                        site.start_pc,
-                        program.verifier_states.as_ref(),
-                    )
-                {
+                let base_reg = u8::try_from(site.required_binding("base_reg")?)
+                    .context("wide_mem base_reg binding does not fit u8")?;
+                if base_reg_is_btf_ptr_from_states(
+                    base_reg,
+                    site.start_pc,
+                    program.verifier_states.as_ref(),
+                ) {
                     skipped.push(SkipReason {
                         pc: site.start_pc,
                         reason: format!(

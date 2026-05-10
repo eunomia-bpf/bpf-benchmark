@@ -25,21 +25,23 @@ fn cfg_records_subprog_end_boundaries() {
 
 #[test]
 fn cfg_subprog_bounds_maps_pc_to_range() {
-    let callback = BpfInsn::ld_imm64(2, BPF_PSEUDO_FUNC, 4);
+    let callback = BpfInsn::ld_imm64(2, BPF_PSEUDO_FUNC, 3);
     let program = BpfProgram::new(vec![
         callback[0],
         callback[1],
         BpfInsn::mov64_imm(0, 0),
         BpfInsn::exit(),
         BpfInsn::mov64_reg(0, 1),
+        BpfInsn::add64_imm(0, 7),
         BpfInsn::exit(),
     ]);
 
     let cfg = CFGAnalysis::run(&program);
 
-    assert_eq!(cfg.subprog_bounds(1), Some(0..5));
-    assert_eq!(cfg.subprog_bounds(5), Some(5..6));
-    assert_eq!(cfg.subprog_bounds(6), None);
+    assert_eq!(cfg.subprog_bounds(1), Some(0..4));
+    assert_eq!(cfg.subprog_bounds(4), Some(4..7));
+    assert_eq!(cfg.subprog_bounds(5), Some(4..7));
+    assert_eq!(cfg.subprog_bounds(7), None);
 }
 
 #[test]

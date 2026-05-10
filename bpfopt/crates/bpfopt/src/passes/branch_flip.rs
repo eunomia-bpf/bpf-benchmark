@@ -476,7 +476,7 @@ fn branch_flip_site_at(insns: &[BpfInsn], pc: usize) -> Option<BranchFlipSite> {
     if !jcc.is_cond_jmp() || jcc.off <= 1 {
         return None;
     }
-    let off = usize::try_from(jcc.off).ok()?;
+    let off = usize::try_from(jcc.off).expect("invariant: jcc.off > 1 fits usize");
     // The Jcc target is pc + 1 + off = pc + N + 1 (else_start).
     // JA is at pc + off (the last instruction of the then block + JA).
     let ja_pc = pc + off;
@@ -508,7 +508,8 @@ fn branch_delta(delta: usize) -> Result<i64> {
 
 fn positive_branch_delta(insn: &BpfInsn) -> Option<usize> {
     let delta = insn.branch_target_offset()?.delta()?;
-    (delta > 0).then(|| usize::try_from(delta).ok()).flatten()
+    (delta > 0)
+        .then(|| usize::try_from(delta).expect("invariant: positive BPF branch delta fits usize"))
 }
 
 fn has_straddling_ldimm64(insns: &[BpfInsn], range_start: usize, range_end: usize) -> bool {

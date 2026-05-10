@@ -46,3 +46,44 @@ fn dce_removes_dead_defs_exposed_by_const_prop_without_branch_cleanup() {
         ]
     );
 }
+
+#[test]
+fn dce_preserves_kinsn_implicit_register_uses() {
+    let btf_id = 0x1234;
+    let payload = BpfInsn::pack_u4(BPF_REG_6, 0)
+        | BpfInsn::pack_u4(BPF_REG_6, 4)
+        | BpfInsn::pack_u4(BPF_REG_0, 8)
+        | BpfInsn::pack_u4(BPF_REG_1, 12);
+    assert_eq!(payload, 0x1066);
+
+    let mut ctx = PassContext::baseline();
+    ctx.kinsn_registry = KinsnRegistry::default();
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_select64", btf_id, 0)
+        .expect("test kinsn target should register");
+
+    let mut program = BpfProgram::new(vec![
+        BpfInsn::mov64_imm(BPF_REG_6, 0),
+        BpfInsn::mov64_imm(BPF_REG_0, 1),
+        BpfInsn::mov64_imm(BPF_REG_1, 7),
+        BpfInsn::kinsn_sidecar(payload),
+        BpfInsn::call_kinsn_with_off(btf_id, 0),
+        BpfInsn::mov64_imm(BPF_REG_0, 0),
+        BpfInsn::exit(),
+    ]);
+
+    DcePass
+        .run(&mut program, &mut AnalysisCache::new(), &ctx)
+        .expect("DCE should preserve kinsn operand materialization");
+
+    assert_eq!(
+        &program.insns[..5],
+        &[
+            BpfInsn::mov64_imm(BPF_REG_6, 0),
+            BpfInsn::mov64_imm(BPF_REG_0, 1),
+            BpfInsn::mov64_imm(BPF_REG_1, 7),
+            BpfInsn::kinsn_sidecar(payload),
+            BpfInsn::call_kinsn_with_off(btf_id, 0),
+        ]
+    );
+}

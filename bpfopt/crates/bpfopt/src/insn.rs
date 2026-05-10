@@ -420,6 +420,16 @@ impl BpfInsn {
             .flatten()
     }
 
+    #[inline]
+    pub fn is_map_pseudo(&self) -> bool {
+        self.map_pseudo().is_some()
+    }
+
+    #[inline]
+    pub fn map_pseudo_kind(&self) -> Option<MapPseudo> {
+        self.map_pseudo()
+    }
+
     /// True for LDX_MEM of any size.
     #[inline]
     pub fn is_ldx_mem(&self) -> bool {
@@ -500,6 +510,11 @@ impl BpfInsn {
             off,
             btf_id,
         )
+    }
+
+    #[inline]
+    pub fn is_call_kinsn(&self) -> bool {
+        self.is_call() && self.src_reg() == BPF_PSEUDO_KINSN_CALL
     }
 
     /// `call helper_id` (src_reg = 0).
