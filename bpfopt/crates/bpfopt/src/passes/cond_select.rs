@@ -374,12 +374,8 @@ fn try_match_cond_select(insns: &[BpfInsn], pc: usize) -> Option<CondSelectSite>
     None
 }
 
-fn is_mov64(insn: &BpfInsn) -> bool {
-    bpf_class(insn.code) == BPF_ALU64 && bpf_op(insn.code) == BPF_MOV
-}
-
 fn is_select_mov(insn: &BpfInsn) -> bool {
-    is_mov64(insn) || (bpf_class(insn.code) == BPF_ALU && bpf_op(insn.code) == BPF_MOV)
+    insn.is_mov64_reg() || insn.is_mov64_imm() || insn.is_mov32_reg() || insn.is_mov32_imm()
 }
 
 fn extract_mov_value(insn: &BpfInsn) -> CondSelectValue {

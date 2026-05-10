@@ -7,7 +7,7 @@ use crate::test_helpers::*;
 
 fn pseudo_func_ref(dst: u8, pc: usize, target_pc: usize) -> [BpfInsn; 2] {
     let imm = target_pc as i64 - (pc as i64 + 1);
-    ld_imm64(dst, BPF_PSEUDO_FUNC, imm)
+    BpfInsn::ld_imm64(dst, BPF_PSEUDO_FUNC, imm)
 }
 
 #[test]
@@ -28,7 +28,7 @@ fn branch_target_simple_ja() {
 
 #[test]
 fn branch_target_cond_jmp() {
-    let insns = vec![jeq_imm(1, 0, 1), BpfInsn::nop(), BpfInsn::exit()];
+    let insns = vec![BpfInsn::jeq_imm(1, 0, 1), BpfInsn::nop(), BpfInsn::exit()];
     let prog = make_program(insns);
     let result = BranchTargetAnalysis.run(&prog);
     assert!(result.is_target[2]);

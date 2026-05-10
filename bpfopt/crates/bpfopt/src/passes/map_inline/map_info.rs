@@ -162,7 +162,10 @@ where
     let mut pc = 0usize;
     while pc < insns.len() {
         let insn = &insns[pc];
-        if insn.is_ldimm64() && pc + 1 < insns.len() && is_map_reference_src(insn.src_reg()) {
+        if insn.is_ldimm64()
+            && pc + 1 < insns.len()
+            && (insn.src_reg() == BPF_PSEUDO_MAP_FD || insn.src_reg() == BPF_PSEUDO_MAP_IDX)
+        {
             let map_index = if insn.src_reg() == BPF_PSEUDO_MAP_IDX {
                 usize::try_from(insn.imm)
                     .map_err(|_| format!("negative pseudo-map index {} at pc {}", insn.imm, pc))?
@@ -232,10 +235,6 @@ where
         references,
         unique_maps,
     })
-}
-
-fn is_map_reference_src(src_reg: u8) -> bool {
-    src_reg == BPF_PSEUDO_MAP_FD || src_reg == BPF_PSEUDO_MAP_IDX
 }
 
 #[cfg(test)]

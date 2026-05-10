@@ -162,7 +162,7 @@ fn ccmp_pass_emits_kinsn_and_final_branch_on_aarch64() {
     assert_eq!(program.insns[2].dst_reg(), BPF_REG_0);
     assert_eq!(program.insns[2].off, 1);
 
-    let decoded = decode_ccmp_payload(sidecar_payload(&program.insns[0])).unwrap();
+    let decoded = decode_ccmp_payload(BpfInsn::sidecar_payload(&program.insns[0])).unwrap();
     assert_eq!(decoded.regs, vec![BPF_REG_1, BPF_REG_2, BPF_REG_3]);
     assert_eq!(decoded.fail_mode, CcmpFailMode::EqZero);
 }

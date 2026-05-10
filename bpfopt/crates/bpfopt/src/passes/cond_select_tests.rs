@@ -39,7 +39,7 @@ fn ctx_with_select_kfunc(btf_id: i32) -> PassContext {
 
 fn pattern_a(cond_reg: u8, false_mov: BpfInsn, true_mov: BpfInsn) -> Vec<BpfInsn> {
     vec![
-        jne_imm(cond_reg, 0, 2),
+        BpfInsn::jne_imm(cond_reg, 0, 2),
         false_mov,
         BpfInsn::ja(1),
         true_mov,
@@ -48,7 +48,12 @@ fn pattern_a(cond_reg: u8, false_mov: BpfInsn, true_mov: BpfInsn) -> Vec<BpfInsn
 }
 
 fn pattern_c(true_mov: BpfInsn, false_mov: BpfInsn) -> Vec<BpfInsn> {
-    vec![true_mov, jne_imm(1, 0, 1), false_mov, BpfInsn::exit()]
+    vec![
+        true_mov,
+        BpfInsn::jne_imm(1, 0, 1),
+        false_mov,
+        BpfInsn::exit(),
+    ]
 }
 
 // ── Detection tests (unchanged) ──────────────────────────────────
@@ -90,7 +95,7 @@ fn test_cond_select_pattern_b_removed() {
     // both paths always reach MOV true. It should NOT be detected.
     let pass = CondSelectPass;
     let insns = vec![
-        jne_imm(1, 0, 1),
+        BpfInsn::jne_imm(1, 0, 1),
         BpfInsn::mov64_imm(0, 0),
         BpfInsn::mov64_imm(0, 1),
         BpfInsn::exit(),
@@ -138,7 +143,7 @@ fn test_cond_select_short_pattern_c_no_match_cond_clobbered() {
     let pass = CondSelectPass;
     let insns = vec![
         BpfInsn::mov64_imm(1, 42), // clobbers cond_reg r1
-        jne_imm(1, 0, 1),
+        BpfInsn::jne_imm(1, 0, 1),
         BpfInsn::mov64_imm(1, 0),
         BpfInsn::exit(),
     ];
@@ -156,7 +161,7 @@ fn test_cond_select_no_match_analyzer_matrix() {
         (
             "different destination registers",
             vec![
-                jne_imm(1, 0, 2),
+                BpfInsn::jne_imm(1, 0, 2),
                 BpfInsn::mov64_imm(0, 0),
                 BpfInsn::ja(1),
                 BpfInsn::mov64_imm(2, 1),
@@ -180,11 +185,11 @@ fn test_cond_select_analyze_multiple_sites() {
     // Two Pattern A sites (4-insn diamond).
     let pass = CondSelectPass;
     let insns = vec![
-        jne_imm(1, 0, 2),
+        BpfInsn::jne_imm(1, 0, 2),
         BpfInsn::mov64_imm(0, 0),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(0, 1),
-        jne_imm(3, 0, 2),
+        BpfInsn::jne_imm(3, 0, 2),
         BpfInsn::mov64_imm(2, 10),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(2, 20),
@@ -305,7 +310,7 @@ fn test_cond_select_value_materialization_matrix() {
         );
         assert!(prog.insns[sidecar_index].is_kinsn_sidecar(), "{label}");
         assert_eq!(
-            payload_regs(sidecar_payload(&prog.insns[sidecar_index])),
+            payload_regs(BpfInsn::sidecar_payload(&prog.insns[sidecar_index])),
             expected_regs,
             "{label}"
         );
@@ -316,7 +321,7 @@ fn test_cond_select_value_materialization_matrix() {
 fn test_cond_select_emit_jeq_swaps_args() {
     // JEQ with register values swaps a/b so cond==0 selects the original true path.
     let mut prog = make_program(vec![
-        jeq_imm(1, 0, 2),
+        BpfInsn::jeq_imm(1, 0, 2),
         BpfInsn::mov64_reg(0, 6),
         BpfInsn::ja(1),
         BpfInsn::mov64_reg(0, 7),
@@ -342,7 +347,7 @@ fn test_cond_select_emit_jeq_swaps_args() {
 #[test]
 fn test_cond_select_emit_non_zero_compare_imm() {
     let mut prog = make_program(vec![
-        jeq_imm(1, 5, 2),
+        BpfInsn::jeq_imm(1, 5, 2),
         BpfInsn::mov64_reg(0, 6),
         BpfInsn::ja(1),
         BpfInsn::mov64_reg(0, 7),
@@ -357,7 +362,10 @@ fn test_cond_select_emit_non_zero_compare_imm() {
     assert_eq!(prog.insns[0], BpfInsn::mov64_reg(0, 1));
     assert_eq!(prog.insns[1], BpfInsn::alu64_imm(BPF_XOR, 0, 5));
     assert!(prog.insns[2].is_kinsn_sidecar());
-    assert_eq!(payload_regs(sidecar_payload(&prog.insns[2])), (0, 6, 7, 0));
+    assert_eq!(
+        payload_regs(BpfInsn::sidecar_payload(&prog.insns[2])),
+        (0, 6, 7, 0)
+    );
 }
 
 #[test]
@@ -377,7 +385,10 @@ fn test_cond_select_emit_jmp32_zero_compare_predicate() {
     assert_eq!(result.sites_applied, 1);
     assert_eq!(prog.insns[0], BpfInsn::mov32_reg(0, 1));
     assert!(prog.insns[1].is_kinsn_sidecar());
-    assert_eq!(payload_regs(sidecar_payload(&prog.insns[1])), (0, 7, 6, 0));
+    assert_eq!(
+        payload_regs(BpfInsn::sidecar_payload(&prog.insns[1])),
+        (0, 7, 6, 0)
+    );
 }
 
 #[test]
@@ -399,7 +410,10 @@ fn test_cond_select_emit_jgt_predicate_prefix() {
     assert_eq!(prog.insns[1], jle_imm(1, 0, 1));
     assert_eq!(prog.insns[2], BpfInsn::mov64_imm(0, 1));
     assert!(prog.insns[3].is_kinsn_sidecar());
-    assert_eq!(payload_regs(sidecar_payload(&prog.insns[3])), (0, 7, 6, 0));
+    assert_eq!(
+        payload_regs(BpfInsn::sidecar_payload(&prog.insns[3])),
+        (0, 7, 6, 0)
+    );
 }
 
 // ── Issue 1: Parallel-copy alias safety tests ─────────────────
@@ -415,7 +429,7 @@ fn payload_regs(payload: u64) -> (u8, u8, u8, u8) {
 
 fn simulate_param_setup(insns: &[BpfInsn], initial_regs: &[u64; 11]) -> [u64; 11] {
     let sidecar = insns.iter().find(|insn| insn.is_kinsn_sidecar()).unwrap();
-    let payload = sidecar_payload(sidecar);
+    let payload = BpfInsn::sidecar_payload(sidecar);
     let a_reg = ((payload >> 4) & 0xf) as usize;
     let b_reg = ((payload >> 8) & 0xf) as usize;
     let cond_reg = ((payload >> 12) & 0xf) as usize;
@@ -437,7 +451,7 @@ fn test_cond_select_alias_all_overlap_combinations() {
             for &false_src in &regs {
                 // Build: JNE cond_reg, 0, +2 ; MOV r0, false_src ; JA +1 ; MOV r0, true_src
                 let mut prog = make_program(vec![
-                    jne_imm(cond_reg, 0, 2),
+                    BpfInsn::jne_imm(cond_reg, 0, 2),
                     BpfInsn::mov64_reg(0, false_src),
                     BpfInsn::ja(1),
                     BpfInsn::mov64_reg(0, true_src),

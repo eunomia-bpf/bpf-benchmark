@@ -1289,7 +1289,7 @@ mod tests {
         let insns = vec![
             BpfInsn::alu64_imm(BPF_RSH, 2, 8),
             BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
-            pseudo_call_to(2, 4),
+            BpfInsn::pseudo_call_to(2, 4),
             BpfInsn::exit(),
             BpfInsn::mov64_imm(0, 1),
             BpfInsn::exit(),

@@ -190,7 +190,7 @@ fn test_extract_pass_applies_site_inside_multi_subprog_program() {
     let mut prog = make_program(vec![
         BpfInsn::alu64_imm(BPF_RSH, 2, 8),
         BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
-        pseudo_call_to(2, 4),
+        BpfInsn::pseudo_call_to(2, 4),
         BpfInsn::exit(),
         BpfInsn::mov64_imm(0, 1),
         BpfInsn::exit(),
@@ -255,7 +255,7 @@ fn test_extract_pass_packed_no_callee_saved_dependency() {
 fn test_extract_pass_interior_branch_target() {
     // A branch targets the AND instruction inside the site.
     let mut prog = make_program(vec![
-        jeq_imm(5, 0, 1),                     // if r5 == 0, jump to pc=2 (the AND)
+        BpfInsn::jeq_imm(5, 0, 1),            // if r5 == 0, jump to pc=2 (the AND)
         BpfInsn::alu64_imm(BPF_RSH, 2, 8),    // pc=1
         BpfInsn::alu64_imm(BPF_AND, 2, 0xff), // pc=2 -- branch target
         BpfInsn::exit(),
@@ -276,7 +276,7 @@ fn test_extract_pass_branch_fixup() {
     // Branch over a 2-insn extract site. After rewrite the site becomes
     // longer (kfunc call sequence), so branch offsets must be adjusted.
     let mut prog = make_program(vec![
-        jeq_imm(5, 0, 2),                     // if r5==0, skip 2 insns to exit
+        BpfInsn::jeq_imm(5, 0, 2),            // if r5==0, skip 2 insns to exit
         BpfInsn::alu64_imm(BPF_RSH, 2, 8),    // pc=1: site start
         BpfInsn::alu64_imm(BPF_AND, 2, 0xff), // pc=2: site end
         BpfInsn::exit(),                      // pc=3: branch target

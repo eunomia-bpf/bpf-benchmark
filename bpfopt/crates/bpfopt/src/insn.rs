@@ -300,6 +300,26 @@ impl BpfInsn {
         bpf_class(self.code) == BPF_LDX && bpf_mode(self.code) == BPF_MEM
     }
 
+    #[inline]
+    pub fn is_mov64_reg(&self) -> bool {
+        self.code == (BPF_ALU64 | BPF_MOV | BPF_X)
+    }
+
+    #[inline]
+    pub fn is_mov64_imm(&self) -> bool {
+        self.code == (BPF_ALU64 | BPF_MOV | BPF_K)
+    }
+
+    #[inline]
+    pub fn is_mov32_reg(&self) -> bool {
+        self.code == (BPF_ALU | BPF_MOV | BPF_X)
+    }
+
+    #[inline]
+    pub fn is_mov32_imm(&self) -> bool {
+        self.code == (BPF_ALU | BPF_MOV | BPF_K)
+    }
+
     // ── Constructors ────────────────────────────────────────────────
 
     /// `mov64 dst, src` (register)
@@ -361,6 +381,17 @@ impl BpfInsn {
         Self::new(BPF_JMP | BPF_CALL, Self::make_regs(0, 0), 0, id)
     }
 
+    /// `call pc-relative subprogram` (src_reg = BPF_PSEUDO_CALL).
+    pub fn pseudo_call_to(call_pc: usize, target_pc: usize) -> Self {
+        let imm = target_pc as i64 - (call_pc as i64 + 1);
+        Self::new(
+            BPF_JMP | BPF_CALL,
+            Self::make_regs(0, BPF_PSEUDO_CALL),
+            0,
+            imm as i32,
+        )
+    }
+
     /// `ja +off` (unconditional jump, NOP when off=0)
     pub fn ja(off: i16) -> Self {
         Self::new(BPF_JMP | BPF_JA, 0, off, 0)
@@ -371,14 +402,38 @@ impl BpfInsn {
         Self::new(BPF_JMP | op | BPF_K, Self::make_regs(dst, 0), off, imm)
     }
 
+    pub fn jeq_imm(dst: u8, imm: i32, off: i16) -> Self {
+        Self::jump_imm(BPF_JEQ, dst, imm, off)
+    }
+
+    pub fn jne_imm(dst: u8, imm: i32, off: i16) -> Self {
+        Self::jump_imm(BPF_JNE, dst, imm, off)
+    }
+
     /// `j<op> dst, src, +off`
     pub fn jump_reg(op: u8, dst: u8, src: u8, off: i16) -> Self {
         Self::new(BPF_JMP | op | BPF_X, Self::make_regs(dst, src), off, 0)
     }
 
+    pub fn jgt_reg(dst: u8, src: u8, off: i16) -> Self {
+        Self::jump_reg(BPF_JGT, dst, src, off)
+    }
+
     /// `exit`
     pub fn exit() -> Self {
         Self::new(BPF_JMP | BPF_EXIT, 0, 0, 0)
+    }
+
+    pub fn ld_imm64(dst: u8, src: u8, imm: i64) -> [Self; 2] {
+        [
+            Self::new(
+                BPF_LD | BPF_DW | BPF_IMM,
+                Self::make_regs(dst, src),
+                0,
+                imm as i32,
+            ),
+            Self::new(0, 0, 0, (imm >> 32) as i32),
+        ]
     }
 
     /// `ldx_mem size, dst, [src + off]`
@@ -401,6 +456,12 @@ impl BpfInsn {
         )
     }
 
+    pub fn sidecar_payload(&self) -> u64 {
+        (u64::from(self.dst_reg()) & 0xf)
+            | (u64::from(self.off as u16) << 4)
+            | (u64::from(self.imm as u32) << 20)
+    }
+
     /// `stx_mem size, [dst + off], src`
     pub fn stx_mem(size: u8, dst: u8, src: u8, off: i16) -> Self {
         Self::new(BPF_STX | size | BPF_MEM, Self::make_regs(dst, src), off, 0)
@@ -414,6 +475,10 @@ impl BpfInsn {
     /// `alu64 op, dst, imm`  (e.g., LSH64_IMM, OR64_IMM)
     pub fn alu64_imm(op: u8, dst: u8, imm: i32) -> Self {
         Self::new(BPF_ALU64 | op | BPF_K, Self::make_regs(dst, 0), 0, imm)
+    }
+
+    pub fn add64_imm(dst: u8, imm: i32) -> Self {
+        Self::alu64_imm(BPF_ADD, dst, imm)
     }
 
     /// `alu64 op, dst, src` (e.g., OR64_REG)

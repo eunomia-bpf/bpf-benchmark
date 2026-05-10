@@ -271,7 +271,7 @@ fn make_memcpy_preserves_surrounding_program() -> Vec<BpfInsn> {
 }
 
 fn make_branch_fixup_program() -> Vec<BpfInsn> {
-    let mut insns = vec![jeq_imm(0, 0, 17)];
+    let mut insns = vec![BpfInsn::jeq_imm(0, 0, 17)];
     insns.extend(make_memcpy_run(BPF_DW, 3, 6, 0, 10, -64, 8));
     insns.push(BpfInsn::mov64_imm(0, 1));
     insns.push(BpfInsn::exit());
@@ -359,7 +359,7 @@ fn test_memcpy_pattern_8_pairs() {
 
 #[test]
 fn test_memcpy_pattern_inside_multi_subprog_program() {
-    let mut insns = vec![pseudo_call_to(0, 2), BpfInsn::exit()];
+    let mut insns = vec![BpfInsn::pseudo_call_to(0, 2), BpfInsn::exit()];
     insns.extend(make_memcpy_run(BPF_DW, 3, 6, 0, 10, -64, 8));
     insns.push(BpfInsn::exit());
     let mut program = make_program(insns);
@@ -516,7 +516,7 @@ fn test_branch_fixup_after_replacement() {
     let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
     assert_eq!(result.pass_results[0].sites_applied, 1);
     assert_eq!(bulk_call_count(&program.insns, MEMCPY_BTF_ID), 1);
-    assert_eq!(program.insns[0], jeq_imm(0, 0, 3));
+    assert_eq!(program.insns[0], BpfInsn::jeq_imm(0, 0, 3));
 }
 
 #[test]

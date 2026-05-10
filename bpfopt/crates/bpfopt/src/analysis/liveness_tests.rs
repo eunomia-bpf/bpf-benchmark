@@ -31,7 +31,7 @@ fn liveness_register_killed() {
 #[test]
 fn liveness_branch_merges() {
     let insns = vec![
-        jeq_imm(1, 0, 1),
+        BpfInsn::jeq_imm(1, 0, 1),
         BpfInsn::mov64_imm(2, 5),
         BpfInsn::mov64_reg(0, 2),
         BpfInsn::exit(),

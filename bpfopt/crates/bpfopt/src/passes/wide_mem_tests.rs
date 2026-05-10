@@ -6,7 +6,7 @@ use crate::test_helpers::*;
 
 fn pseudo_func_ref(dst: u8, pc: usize, target_pc: usize) -> [BpfInsn; 2] {
     let imm = target_pc as i64 - (pc as i64 + 1);
-    ld_imm64(dst, BPF_PSEUDO_FUNC, imm)
+    BpfInsn::ld_imm64(dst, BPF_PSEUDO_FUNC, imm)
 }
 
 // ── Pattern matching tests (from matcher.rs) ──────────────────
@@ -310,7 +310,7 @@ fn test_wide_mem_pass_skips_misaligned_halfword_site() {
 #[test]
 fn test_wide_mem_pass_skips_site_with_interior_branch_target() {
     let mut prog = make_program(vec![
-        jeq_imm(5, 0, 2),
+        BpfInsn::jeq_imm(5, 0, 2),
         BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
         BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
         BpfInsn::alu64_imm(BPF_LSH, 1, 8),
@@ -403,7 +403,7 @@ fn test_wide_mem_branch_fixup_table() {
 
 #[test]
 fn test_wide_mem_skips_byte_ladder_with_pseudo_func_boundary_inside() {
-    let map_ref = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map_ref = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let callback = pseudo_func_ref(2, 2, 5);
     let mut prog = make_program(vec![
         map_ref[0],

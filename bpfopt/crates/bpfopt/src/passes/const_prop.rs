@@ -568,7 +568,7 @@ fn analyze_instruction(
 }
 
 fn can_apply_oracle_facts(insn: &BpfInsn) -> bool {
-    !insn.is_call() && !is_reg_to_reg_mov(insn)
+    !insn.is_call() && !(insn.is_mov64_reg() || insn.is_mov32_reg())
 }
 
 fn fold_alu_instruction(
@@ -620,13 +620,7 @@ fn fold_alu_instruction(
 }
 
 fn oracle_materializes_alu_result(insn: &BpfInsn) -> bool {
-    !is_reg_to_reg_mov(insn)
-}
-
-fn is_reg_to_reg_mov(insn: &BpfInsn) -> bool {
-    matches!(insn.class(), BPF_ALU | BPF_ALU64)
-        && bpf_op(insn.code) == BPF_MOV
-        && bpf_src(insn.code) == BPF_X
+    !(insn.is_mov64_reg() || insn.is_mov32_reg())
 }
 
 fn evaluate_alu_result(insn: &BpfInsn, state: &RegConstState) -> Option<u64> {

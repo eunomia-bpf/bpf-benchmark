@@ -125,8 +125,13 @@ fn const_prop_folds_alu32_chain_to_mov32_imm() {
 
 #[test]
 fn const_prop_tracks_ldimm64_constants() {
-    let wide = ld_imm64(1, 0, 1_i64 << 32);
-    let mut program = BpfProgram::new(vec![wide[0], wide[1], add64_imm(1, 1), BpfInsn::exit()]);
+    let wide = BpfInsn::ld_imm64(1, 0, 1_i64 << 32);
+    let mut program = BpfProgram::new(vec![
+        wide[0],
+        wide[1],
+        BpfInsn::add64_imm(1, 1),
+        BpfInsn::exit(),
+    ]);
     program.set_verifier_states(vec![verifier_delta_state(
         2,
         HashMap::from([(1, scalar_reg(0x1_0000_0001))]),
@@ -143,8 +148,13 @@ fn const_prop_tracks_ldimm64_constants() {
 
 #[test]
 fn const_prop_does_not_fold_typed_ldimm64_map_value() {
-    let typed = ld_imm64(1, 2, (0x1a8_i64 << 32) | 0x11);
-    let original = vec![typed[0], typed[1], add64_imm(1, 16), BpfInsn::exit()];
+    let typed = BpfInsn::ld_imm64(1, 2, (0x1a8_i64 << 32) | 0x11);
+    let original = vec![
+        typed[0],
+        typed[1],
+        BpfInsn::add64_imm(1, 16),
+        BpfInsn::exit(),
+    ];
     let mut program = BpfProgram::new(original.clone());
 
     let _result = run_const_prop_pass(&mut program);
@@ -155,7 +165,7 @@ fn const_prop_does_not_fold_typed_ldimm64_map_value() {
 fn const_prop_uses_verifier_exact_constants_for_alu_after_helper_calls() {
     let mut program = BpfProgram::new(vec![
         BpfInsn::helper_call(7),
-        add64_imm(0, 1),
+        BpfInsn::add64_imm(0, 1),
         BpfInsn::exit(),
     ]);
     program.set_verifier_states(vec![verifier_delta_state(
@@ -178,7 +188,11 @@ fn const_prop_uses_verifier_exact_constants_for_alu_after_helper_calls() {
 fn const_prop_does_not_seed_caller_saved_regs_from_call_post_state() {
     // Bug caught: a call-pc verifier post-state for R0-R5 must not repopulate
     // caller-saved regs after call handling cleared them in the abstract model.
-    let original = vec![BpfInsn::helper_call(7), add64_imm(0, 1), BpfInsn::exit()];
+    let original = vec![
+        BpfInsn::helper_call(7),
+        BpfInsn::add64_imm(0, 1),
+        BpfInsn::exit(),
+    ];
     let mut program = BpfProgram::new(original.clone());
     program.set_verifier_states(vec![verifier_delta_state(
         0,
@@ -194,7 +208,11 @@ fn const_prop_does_not_seed_caller_saved_regs_from_call_post_state() {
 fn const_prop_does_not_use_oracle_for_register_mov_provenance() {
     // Bug caught: a verifier pre-state exact value for MOV X's destination
     // must not replace a register copy that may transfer pointer provenance.
-    let original = vec![BpfInsn::mov64_reg(2, 3), add64_imm(2, 1), BpfInsn::exit()];
+    let original = vec![
+        BpfInsn::mov64_reg(2, 3),
+        BpfInsn::add64_imm(2, 1),
+        BpfInsn::exit(),
+    ];
     let mut program = BpfProgram::new(original.clone());
     program.set_verifier_states(vec![verifier_state_in_frame(
         0,
@@ -270,7 +288,7 @@ fn const_prop_rejects_edge_state_only_pointer_arithmetic_materialization() {
     let original = vec![
         BpfInsn::mov64_imm(7, 0),
         BpfInsn::mov64_reg(3, 7),
-        add64_imm(3, 34),
+        BpfInsn::add64_imm(3, 34),
         BpfInsn::ldx_mem(BPF_H, 2, 3, 2),
         BpfInsn::exit(),
     ];
@@ -303,7 +321,7 @@ fn const_prop_rejects_replacement_when_observation_missing_at_some_visit() {
         BpfInsn::helper_call(7),
         BpfInsn::new(BPF_JMP | BPF_JEQ | BPF_K, BpfInsn::make_regs(0, 0), 1, 0),
         BpfInsn::nop(),
-        add64_imm(3, 1),
+        BpfInsn::add64_imm(3, 1),
         BpfInsn::exit(),
     ];
     let mut program = BpfProgram::new(original.clone());
@@ -321,7 +339,11 @@ fn const_prop_rejects_replacement_when_observation_missing_at_some_visit() {
 fn const_prop_rejects_replacement_when_full_state_visit_omits_reg() {
     // Bug caught: full verifier snapshots are visits too; ignoring a full-state
     // omission would let one delta-state exact value masquerade as global proof.
-    let original = vec![BpfInsn::helper_call(7), add64_imm(3, 1), BpfInsn::exit()];
+    let original = vec![
+        BpfInsn::helper_call(7),
+        BpfInsn::add64_imm(3, 1),
+        BpfInsn::exit(),
+    ];
     let mut program = BpfProgram::new(original.clone());
     program.set_verifier_states(vec![
         verifier_delta_state(1, HashMap::from([(3, scalar_reg(42))])),
@@ -337,7 +359,11 @@ fn const_prop_rejects_replacement_when_full_state_visit_omits_reg() {
 fn const_prop_rejects_replacement_across_disagreeing_frames() {
     // Bug caught: context-insensitive simulation must not apply a verifier fact
     // from one call frame when the same pc has a different exact value elsewhere.
-    let original = vec![BpfInsn::helper_call(7), add64_imm(3, 1), BpfInsn::exit()];
+    let original = vec![
+        BpfInsn::helper_call(7),
+        BpfInsn::add64_imm(3, 1),
+        BpfInsn::exit(),
+    ];
     let mut program = BpfProgram::new(original.clone());
     program.set_verifier_states(vec![
         verifier_delta_state_in_frame(1, 0, HashMap::from([(3, scalar_reg(42))])),
@@ -355,7 +381,7 @@ fn const_prop_accepts_when_every_visit_agrees() {
     // every verifier visit to a pc/frame observes the same exact register value.
     let mut program = BpfProgram::new(vec![
         BpfInsn::helper_call(7),
-        add64_imm(3, 1),
+        BpfInsn::add64_imm(3, 1),
         BpfInsn::exit(),
     ]);
     program.set_verifier_states(vec![

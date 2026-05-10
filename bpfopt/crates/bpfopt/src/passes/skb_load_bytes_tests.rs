@@ -3,7 +3,6 @@ use crate::insn::*;
 
 use crate::analysis::BranchTargetAnalysis;
 use crate::pass::{BpfProgram, PassContext, PassManager};
-use crate::test_helpers::{add64_imm, jeq_imm, jgt_reg, jne_imm};
 
 const BPF_FUNC_SKB_LOAD_BYTES: i32 = libbpf_sys::BPF_FUNC_skb_load_bytes as i32;
 const BPF_FUNC_DUMMY_HELPER: i32 = libbpf_sys::BPF_FUNC_map_lookup_elem as i32;
@@ -15,23 +14,19 @@ const BPF_PROG_TYPE_SCHED_ACT: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_ACT;
 const SKB_DATA_OFF: i16 = 76;
 const SKB_DATA_END_OFF: i16 = 80;
 
-fn helper_call(helper_id: i32) -> BpfInsn {
-    BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, helper_id)
-}
-
 fn make_skb_load_bytes_setup(offset: i32, stack_off: i32, len: i32) -> Vec<BpfInsn> {
     vec![
         BpfInsn::mov64_imm(2, offset),
         BpfInsn::mov64_reg(3, 10),
-        add64_imm(3, stack_off),
+        BpfInsn::add64_imm(3, stack_off),
         BpfInsn::mov64_imm(4, len),
     ]
 }
 
 fn make_skb_load_bytes_program(offset: i32, stack_off: i32, len: i32) -> Vec<BpfInsn> {
     let mut insns = make_skb_load_bytes_setup(offset, stack_off, len);
-    insns.push(helper_call(BPF_FUNC_SKB_LOAD_BYTES));
-    insns.push(jne_imm(0, 0, 2));
+    insns.push(BpfInsn::helper_call(BPF_FUNC_SKB_LOAD_BYTES));
+    insns.push(BpfInsn::jne_imm(0, 0, 2));
     insns.push(BpfInsn::mov64_imm(0, 1));
     insns.push(BpfInsn::exit());
     insns.push(BpfInsn::mov64_imm(0, 0));
@@ -41,8 +36,8 @@ fn make_skb_load_bytes_program(offset: i32, stack_off: i32, len: i32) -> Vec<Bpf
 
 fn make_non_skb_helper_program() -> Vec<BpfInsn> {
     let mut insns = make_skb_load_bytes_setup(14, -8, 1);
-    insns.push(helper_call(BPF_FUNC_DUMMY_HELPER));
-    insns.push(jne_imm(0, 0, 2));
+    insns.push(BpfInsn::helper_call(BPF_FUNC_DUMMY_HELPER));
+    insns.push(BpfInsn::jne_imm(0, 0, 2));
     insns.push(BpfInsn::mov64_imm(0, 1));
     insns.push(BpfInsn::exit());
     insns.push(BpfInsn::mov64_imm(0, 0));
@@ -54,7 +49,7 @@ fn make_no_helper_calls_program() -> Vec<BpfInsn> {
     vec![
         BpfInsn::mov64_imm(0, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -8),
+        BpfInsn::add64_imm(2, -8),
         BpfInsn::exit(),
     ]
 }
@@ -63,10 +58,10 @@ fn make_variable_offset_program() -> Vec<BpfInsn> {
     vec![
         BpfInsn::mov64_reg(2, 6),
         BpfInsn::mov64_reg(3, 10),
-        add64_imm(3, -8),
+        BpfInsn::add64_imm(3, -8),
         BpfInsn::mov64_imm(4, 1),
-        helper_call(BPF_FUNC_SKB_LOAD_BYTES),
-        jne_imm(0, 0, 2),
+        BpfInsn::helper_call(BPF_FUNC_SKB_LOAD_BYTES),
+        BpfInsn::jne_imm(0, 0, 2),
         BpfInsn::mov64_imm(0, 1),
         BpfInsn::exit(),
         BpfInsn::mov64_imm(0, 0),
@@ -78,10 +73,10 @@ fn make_variable_len_program() -> Vec<BpfInsn> {
     vec![
         BpfInsn::mov64_imm(2, 14),
         BpfInsn::mov64_reg(3, 10),
-        add64_imm(3, -8),
+        BpfInsn::add64_imm(3, -8),
         BpfInsn::mov64_reg(4, 7),
-        helper_call(BPF_FUNC_SKB_LOAD_BYTES),
-        jne_imm(0, 0, 2),
+        BpfInsn::helper_call(BPF_FUNC_SKB_LOAD_BYTES),
+        BpfInsn::jne_imm(0, 0, 2),
         BpfInsn::mov64_imm(0, 1),
         BpfInsn::exit(),
         BpfInsn::mov64_imm(0, 0),
@@ -92,12 +87,12 @@ fn make_variable_len_program() -> Vec<BpfInsn> {
 fn make_two_call_program() -> Vec<BpfInsn> {
     let mut insns = vec![BpfInsn::mov64_reg(6, 1)];
     insns.extend(make_skb_load_bytes_setup(14, -8, 1));
-    insns.push(helper_call(BPF_FUNC_SKB_LOAD_BYTES));
-    insns.push(jne_imm(0, 0, 9));
+    insns.push(BpfInsn::helper_call(BPF_FUNC_SKB_LOAD_BYTES));
+    insns.push(BpfInsn::jne_imm(0, 0, 9));
     insns.push(BpfInsn::mov64_reg(1, 6));
     insns.extend(make_skb_load_bytes_setup(18, -16, 1));
-    insns.push(helper_call(BPF_FUNC_SKB_LOAD_BYTES));
-    insns.push(jne_imm(0, 0, 2));
+    insns.push(BpfInsn::helper_call(BPF_FUNC_SKB_LOAD_BYTES));
+    insns.push(BpfInsn::jne_imm(0, 0, 2));
     insns.push(BpfInsn::mov64_imm(0, 1));
     insns.push(BpfInsn::exit());
     insns.push(BpfInsn::mov64_imm(0, 0));
@@ -108,13 +103,13 @@ fn make_two_call_program() -> Vec<BpfInsn> {
 fn make_prior_helper_without_ctx_reload_program() -> Vec<BpfInsn> {
     vec![
         BpfInsn::mov64_reg(6, 1),
-        helper_call(BPF_FUNC_DUMMY_HELPER),
+        BpfInsn::helper_call(BPF_FUNC_DUMMY_HELPER),
         BpfInsn::mov64_imm(2, 14),
         BpfInsn::mov64_reg(3, 10),
-        add64_imm(3, -8),
+        BpfInsn::add64_imm(3, -8),
         BpfInsn::mov64_imm(4, 1),
-        helper_call(BPF_FUNC_SKB_LOAD_BYTES),
-        jne_imm(0, 0, 2),
+        BpfInsn::helper_call(BPF_FUNC_SKB_LOAD_BYTES),
+        BpfInsn::jne_imm(0, 0, 2),
         BpfInsn::mov64_imm(0, 1),
         BpfInsn::exit(),
         BpfInsn::mov64_imm(0, 0),
@@ -125,14 +120,14 @@ fn make_prior_helper_without_ctx_reload_program() -> Vec<BpfInsn> {
 fn make_prior_helper_with_ctx_reload_program() -> Vec<BpfInsn> {
     vec![
         BpfInsn::mov64_reg(6, 1),
-        helper_call(BPF_FUNC_DUMMY_HELPER),
+        BpfInsn::helper_call(BPF_FUNC_DUMMY_HELPER),
         BpfInsn::mov64_reg(1, 6),
         BpfInsn::mov64_imm(2, 14),
         BpfInsn::mov64_reg(3, 10),
-        add64_imm(3, -8),
+        BpfInsn::add64_imm(3, -8),
         BpfInsn::mov64_imm(4, 1),
-        helper_call(BPF_FUNC_SKB_LOAD_BYTES),
-        jne_imm(0, 0, 2),
+        BpfInsn::helper_call(BPF_FUNC_SKB_LOAD_BYTES),
+        BpfInsn::jne_imm(0, 0, 2),
         BpfInsn::mov64_imm(0, 1),
         BpfInsn::exit(),
         BpfInsn::mov64_imm(0, 0),
@@ -141,7 +136,7 @@ fn make_prior_helper_with_ctx_reload_program() -> Vec<BpfInsn> {
 }
 
 fn make_branch_around_program() -> Vec<BpfInsn> {
-    let mut insns = vec![jeq_imm(0, 0, 6)];
+    let mut insns = vec![BpfInsn::jeq_imm(0, 0, 6)];
     insns.extend(make_skb_load_bytes_program(14, -8, 1));
     insns
 }
@@ -151,9 +146,9 @@ fn expected_call_replacement(offset: i32, len: i32) -> Vec<BpfInsn> {
         BpfInsn::ldx_mem(BPF_W, 5, 1, SKB_DATA_OFF),
         BpfInsn::ldx_mem(BPF_W, 0, 1, SKB_DATA_END_OFF),
         BpfInsn::mov64_reg(2, 5),
-        add64_imm(2, offset + len),
-        jgt_reg(2, 0, (3 + 2 * len) as i16),
-        add64_imm(5, offset),
+        BpfInsn::add64_imm(2, offset + len),
+        BpfInsn::jgt_reg(2, 0, (3 + 2 * len) as i16),
+        BpfInsn::add64_imm(5, offset),
     ];
 
     for i in 0..len {
@@ -165,14 +160,14 @@ fn expected_call_replacement(offset: i32, len: i32) -> Vec<BpfInsn> {
     insns.push(BpfInsn::ja(3));
     insns.push(BpfInsn::mov64_imm(2, offset));
     insns.push(BpfInsn::mov64_imm(4, len));
-    insns.push(helper_call(BPF_FUNC_SKB_LOAD_BYTES));
+    insns.push(BpfInsn::helper_call(BPF_FUNC_SKB_LOAD_BYTES));
     insns
 }
 
 fn expected_rewritten_program(offset: i32, stack_off: i32, len: i32) -> Vec<BpfInsn> {
     let mut insns = make_skb_load_bytes_setup(offset, stack_off, len);
     insns.extend(expected_call_replacement(offset, len));
-    insns.push(jne_imm(0, 0, 2));
+    insns.push(BpfInsn::jne_imm(0, 0, 2));
     insns.push(BpfInsn::mov64_imm(0, 1));
     insns.push(BpfInsn::exit());
     insns.push(BpfInsn::mov64_imm(0, 0));
@@ -332,8 +327,8 @@ fn test_error_check_preserved() {
     let mut program = BpfProgram::new(make_skb_load_bytes_program(14, -8, 1));
 
     let _result = run_skb_load_bytes_pass(&mut program, BPF_PROG_TYPE_SCHED_CLS);
-    assert_eq!(program.insns[8], jgt_reg(2, 0, 5));
-    assert_eq!(program.insns[17], jne_imm(0, 0, 2));
+    assert_eq!(program.insns[8], BpfInsn::jgt_reg(2, 0, 5));
+    assert_eq!(program.insns[17], BpfInsn::jne_imm(0, 0, 2));
 }
 
 #[test]
@@ -354,5 +349,5 @@ fn test_branch_fixup_correct() {
     let mut program = BpfProgram::new(make_branch_around_program());
 
     let _result = run_skb_load_bytes_pass(&mut program, BPF_PROG_TYPE_SCHED_CLS);
-    assert_eq!(program.insns[0], jeq_imm(0, 0, 18));
+    assert_eq!(program.insns[0], BpfInsn::jeq_imm(0, 0, 18));
 }

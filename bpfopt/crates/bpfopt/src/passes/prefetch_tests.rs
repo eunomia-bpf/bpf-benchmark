@@ -51,7 +51,7 @@ fn decode_prefetch_payload(payload: u64) -> anyhow::Result<u8> {
 fn lookup_value_program() -> (BpfProgram, usize, usize) {
     let insns = vec![
         map_lookup_call(),
-        jeq_imm(BPF_REG_0, 0, 1),
+        BpfInsn::jeq_imm(BPF_REG_0, 0, 1),
         BpfInsn::ldx_mem(BPF_DW, BPF_REG_1, BPF_REG_0, 0),
         BpfInsn::exit(),
     ];
@@ -62,7 +62,7 @@ fn lookup_value_alias_program() -> (BpfProgram, usize, usize) {
     let insns = vec![
         map_lookup_call(),
         BpfInsn::mov64_reg(BPF_REG_6, BPF_REG_0),
-        jeq_imm(BPF_REG_6, 0, 1),
+        BpfInsn::jeq_imm(BPF_REG_6, 0, 1),
         BpfInsn::ldx_mem(BPF_DW, BPF_REG_1, BPF_REG_6, 8),
         BpfInsn::exit(),
     ];
@@ -102,7 +102,7 @@ fn prefetch_pass_emits_map_value_prefetch_without_profile() {
     assert_eq!(result.sites_applied, 1);
     assert!(program.insns[2].is_kinsn_sidecar());
     assert_eq!(
-        decode_prefetch_payload(sidecar_payload(&program.insns[2])).unwrap(),
+        decode_prefetch_payload(BpfInsn::sidecar_payload(&program.insns[2])).unwrap(),
         BPF_REG_0
     );
     assert!(program.insns[3].is_call());
@@ -120,7 +120,7 @@ fn prefetch_pass_uses_alias_register_for_map_value_deref() {
     assert_eq!(result.sites_applied, 1);
     assert!(program.insns[3].is_kinsn_sidecar());
     assert_eq!(
-        decode_prefetch_payload(sidecar_payload(&program.insns[3])).unwrap(),
+        decode_prefetch_payload(BpfInsn::sidecar_payload(&program.insns[3])).unwrap(),
         BPF_REG_6
     );
 }
@@ -149,14 +149,14 @@ fn prefetch_pass_emits_packet_prefetch_without_profile() {
     assert_eq!(result.sites_applied, 1);
     assert!(program.insns[1].is_kinsn_sidecar());
     assert_eq!(
-        decode_prefetch_payload(sidecar_payload(&program.insns[1])).unwrap(),
+        decode_prefetch_payload(BpfInsn::sidecar_payload(&program.insns[1])).unwrap(),
         BPF_REG_6
     );
 }
 
 #[test]
 fn prefetch_pass_inserts_only_at_instruction_boundaries() {
-    let wide = ld_imm64(BPF_REG_3, 0, 123);
+    let wide = BpfInsn::ld_imm64(BPF_REG_3, 0, 123);
     let mut insns = vec![BpfInsn::ldx_mem(BPF_W, BPF_REG_6, BPF_REG_1, XDP_DATA_OFF)];
     insns.extend_from_slice(&wide);
     insns.extend(filler(BPF_REG_4, 8));

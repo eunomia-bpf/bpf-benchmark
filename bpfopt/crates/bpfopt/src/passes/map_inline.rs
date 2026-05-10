@@ -4230,10 +4230,13 @@ fn find_direct_map_load_for_reg_before_pc_inner(
     while let Some(prev_pc) = prev_real_pc_bounded(insns, cursor, subprog_start) {
         let insn = &insns[prev_pc];
         if insn_defines_reg(insn, reg) {
-            if insn.is_ldimm64() && insn.dst_reg() == reg && is_pseudo_map_fd_src(insn.src_reg()) {
+            if insn.is_ldimm64()
+                && insn.dst_reg() == reg
+                && (insn.src_reg() == BPF_PSEUDO_MAP_FD || insn.src_reg() == BPF_PSEUDO_MAP_IDX)
+            {
                 return Some(prev_pc);
             }
-            if is_mov64_reg(insn) && insn.dst_reg() == reg {
+            if insn.is_mov64_reg() && insn.dst_reg() == reg {
                 return find_direct_map_load_for_reg_before_pc_inner(
                     insns,
                     prev_pc,
@@ -4286,10 +4289,6 @@ fn find_direct_map_load_for_stack_slot_before_pc(
         cursor = prev_pc;
     }
     None
-}
-
-fn is_mov64_reg(insn: &BpfInsn) -> bool {
-    insn.code == (BPF_ALU64 | BPF_MOV | BPF_X)
 }
 
 fn is_stack_dw_load_to_reg(insn: &BpfInsn, reg: u8) -> bool {
@@ -4663,7 +4662,7 @@ fn resolve_key_pointer_origin_inner(
     let insn = &insns[pc];
 
     if insn.is_ldimm64() && insn.dst_reg() == reg {
-        if is_pseudo_map_value_src(insn.src_reg()) {
+        if insn.src_reg() == BPF_PSEUDO_MAP_VALUE || insn.src_reg() == BPF_PSEUDO_MAP_IDX_VALUE {
             let value_off = insns
                 .get(pc + 1)
                 .ok_or_else(|| format!("pseudo-map-value load at pc {} is truncated", pc))?
@@ -5232,19 +5231,12 @@ fn ends_current_use_region(insn: &BpfInsn, alias_regs: &HashMap<u8, i16>) -> boo
 }
 
 fn starts_next_lookup_setup(insn: &BpfInsn) -> bool {
-    insn.is_ldimm64() && is_pseudo_map_fd_src(insn.src_reg())
-}
-
-fn is_pseudo_map_fd_src(src_reg: u8) -> bool {
-    src_reg == BPF_PSEUDO_MAP_FD || src_reg == BPF_PSEUDO_MAP_IDX
-}
-
-fn is_pseudo_map_value_src(src_reg: u8) -> bool {
-    src_reg == BPF_PSEUDO_MAP_VALUE || src_reg == BPF_PSEUDO_MAP_IDX_VALUE
+    insn.is_ldimm64()
+        && (insn.src_reg() == BPF_PSEUDO_MAP_FD || insn.src_reg() == BPF_PSEUDO_MAP_IDX)
 }
 
 fn alias_copy(insn: &BpfInsn, alias_regs: &HashMap<u8, i16>) -> Option<(u8, i16)> {
-    (insn.code == (BPF_ALU64 | BPF_MOV | BPF_X))
+    insn.is_mov64_reg()
         .then(|| {
             alias_regs
                 .get(&insn.src_reg())

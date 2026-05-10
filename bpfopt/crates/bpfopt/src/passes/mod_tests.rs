@@ -73,7 +73,7 @@ fn test_cfg_analysis_with_callback_subprog_refs() {
     use crate::analysis::CFGAnalysis;
     use crate::pass::Analysis;
 
-    let callback = ld_imm64(2, BPF_PSEUDO_FUNC, 4);
+    let callback = BpfInsn::ld_imm64(2, BPF_PSEUDO_FUNC, 4);
     let prog = make_program(vec![
         callback[0],
         callback[1],
@@ -97,7 +97,7 @@ fn test_liveness_across_branch() {
 
     let prog = make_program(vec![
         BpfInsn::mov64_imm(1, 10),
-        jeq_imm(1, 0, 1),
+        BpfInsn::jeq_imm(1, 0, 1),
         BpfInsn::mov64_imm(0, 1),
         BpfInsn::mov64_imm(0, 2),
         BpfInsn::exit(),
@@ -154,13 +154,13 @@ fn test_build_custom_pipeline_rejects_unknown_pass_name() {
 fn cascade_const_prop_folds_non_zero_map_inline_output() {
     install_array_map(302, 42u32.to_le_bytes().to_vec());
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = make_program(vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 0, 0, 0),
         BpfInsn::mov64_imm(1, 10),
@@ -190,8 +190,8 @@ fn cascade_const_prop_folds_non_zero_map_inline_output() {
 #[test]
 fn cascade_full_pipeline_materializes_alu_and_leaves_branch_cleanup_to_kernel() {
     for (label, map_id, map_type, mut program, expected) in {
-        let array_map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-        let hash_map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let array_map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let hash_map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
         [
             (
                 "array full pipeline",
@@ -202,10 +202,10 @@ fn cascade_full_pipeline_materializes_alu_and_leaves_branch_cleanup_to_kernel() 
                     array_map[1],
                     BpfInsn::st_mem(BPF_W, 10, -4, 1),
                     BpfInsn::mov64_reg(2, 10),
-                    add64_imm(2, -4),
+                    BpfInsn::add64_imm(2, -4),
                     BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
                     BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
-                    jeq_imm(6, 0, 4),
+                    BpfInsn::jeq_imm(6, 0, 4),
                     BpfInsn::mov64_imm(1, 10),
                     BpfInsn::alu64_reg(BPF_ADD, 1, 6),
                     BpfInsn::mov64_imm(0, 1),
@@ -215,7 +215,7 @@ fn cascade_full_pipeline_materializes_alu_and_leaves_branch_cleanup_to_kernel() 
                 ]),
                 vec![
                     BpfInsn::mov32_imm(6, 42),
-                    jeq_imm(6, 0, 2),
+                    BpfInsn::jeq_imm(6, 0, 2),
                     BpfInsn::mov64_imm(0, 1),
                     BpfInsn::exit(),
                     BpfInsn::mov64_imm(0, 0),
@@ -231,9 +231,9 @@ fn cascade_full_pipeline_materializes_alu_and_leaves_branch_cleanup_to_kernel() 
                     hash_map[1],
                     BpfInsn::st_mem(BPF_W, 10, -4, 1),
                     BpfInsn::mov64_reg(2, 10),
-                    add64_imm(2, -4),
+                    BpfInsn::add64_imm(2, -4),
                     BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-                    jeq_imm(0, 0, 5),
+                    BpfInsn::jeq_imm(0, 0, 5),
                     BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
                     BpfInsn::mov64_imm(1, 10),
                     BpfInsn::alu64_reg(BPF_ADD, 1, 6),

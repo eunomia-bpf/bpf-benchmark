@@ -271,7 +271,10 @@ fn test_endian_fusion_pass_nonzero_offset() {
     let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
     assert_eq!(prog.insns.len(), 3);
     assert!(prog.insns[0].is_kinsn_sidecar());
-    assert_eq!(sidecar_payload(&prog.insns[0]), endian_payload(2, 6, 12));
+    assert_eq!(
+        BpfInsn::sidecar_payload(&prog.insns[0]),
+        endian_payload(2, 6, 12)
+    );
     assert!(prog.insns[1].is_call());
     assert!(prog.insns[2].is_exit());
 }
@@ -291,7 +294,7 @@ fn test_endian_fusion_encodes_stack_offset_directly_on_x86() {
     assert_eq!(prog.insns.len(), 3);
     assert!(prog.insns[0].is_kinsn_sidecar());
     assert_eq!(
-        sidecar_payload(&prog.insns[0]),
+        BpfInsn::sidecar_payload(&prog.insns[0]),
         endian_payload(4, BPF_REG_10, -88)
     );
     assert!(prog.insns[1].is_call());
@@ -345,7 +348,7 @@ fn test_endian_fusion_pass_packed_no_callee_saved_dependency() {
 fn test_endian_fusion_pass_interior_branch_target() {
     // A branch targets the ENDIAN_TO_BE instruction inside the site.
     let mut prog = make_program(vec![
-        jeq_imm(5, 0, 1),                 // if r5 == 0, jump to pc=2
+        BpfInsn::jeq_imm(5, 0, 1),        // if r5 == 0, jump to pc=2
         BpfInsn::ldx_mem(BPF_W, 2, 1, 0), // pc=1
         endian_to_be(2, 32),              // pc=2 -- branch target
         BpfInsn::exit(),
@@ -366,7 +369,7 @@ fn test_endian_fusion_pass_branch_fixup() {
     // Branch over a 2-insn site. After rewrite the site becomes
     // longer (kfunc call sequence), so branch offsets must be adjusted.
     let mut prog = make_program(vec![
-        jeq_imm(5, 0, 2),                 // if r5==0, skip 2 insns to exit
+        BpfInsn::jeq_imm(5, 0, 2),        // if r5==0, skip 2 insns to exit
         BpfInsn::ldx_mem(BPF_W, 2, 6, 4), // pc=1: site start
         endian_to_be(2, 32),              // pc=2: site end
         BpfInsn::exit(),                  // pc=3: branch target

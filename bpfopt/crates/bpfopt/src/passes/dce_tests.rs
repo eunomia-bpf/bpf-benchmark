@@ -21,7 +21,7 @@ fn dce_removes_dead_defs_exposed_by_const_prop_without_branch_cleanup() {
         BpfInsn::mov32_imm(1, 20),
         BpfInsn::alu64_imm(BPF_LSH, 1, 32),
         BpfInsn::alu64_imm(BPF_RSH, 1, 32),
-        jeq_imm(1, 20, 1),
+        BpfInsn::jeq_imm(1, 20, 1),
         BpfInsn::mov64_imm(0, 0),
         BpfInsn::mov64_imm(0, 1),
         BpfInsn::exit(),
@@ -42,7 +42,7 @@ fn dce_removes_dead_defs_exposed_by_const_prop_without_branch_cleanup() {
         program.insns,
         vec![
             BpfInsn::mov64_imm(1, 20),
-            jeq_imm(1, 20, 0),
+            BpfInsn::jeq_imm(1, 20, 0),
             BpfInsn::mov64_imm(0, 1),
             BpfInsn::exit(),
         ]

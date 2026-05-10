@@ -3,46 +3,12 @@
 use std::collections::HashMap;
 
 use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
-use crate::insn::*;
+use crate::insn::BpfInsn;
 use crate::pass::{
     BpfProgram, RegState, ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind,
     VerifierValueWidth,
 };
 
-pub fn pseudo_call_to(call_pc: usize, target_pc: usize) -> BpfInsn {
-    let imm = target_pc as i64 - (call_pc as i64 + 1);
-    BpfInsn::new(
-        BPF_JMP | BPF_CALL,
-        BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
-        0,
-        imm as i32,
-    )
-}
-
-pub fn ld_imm64(dst: u8, src: u8, imm: i64) -> [BpfInsn; 2] {
-    [
-        BpfInsn::new(
-            BPF_LD | BPF_DW | BPF_IMM,
-            BpfInsn::make_regs(dst, src),
-            0,
-            imm as i32,
-        ),
-        BpfInsn::new(0, 0, 0, (imm >> 32) as i32),
-    ]
-}
-
-pub fn add64_imm(dst: u8, imm: i32) -> BpfInsn {
-    BpfInsn::alu64_imm(BPF_ADD, dst, imm)
-}
-pub fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn::jump_imm(BPF_JEQ, dst, imm, off)
-}
-pub fn jne_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
-    BpfInsn::jump_imm(BPF_JNE, dst, imm, off)
-}
-pub fn jgt_reg(dst: u8, src: u8, off: i16) -> BpfInsn {
-    BpfInsn::jump_reg(BPF_JGT, dst, src, off)
-}
 pub fn scalar_reg(value: u64) -> RegState {
     let mut reg = RegState::new("scalar", VerifierValueWidth::Bits64);
     reg.precise = true;
@@ -139,10 +105,4 @@ pub fn install_array_map(map_id: u32, value: Vec<u8>) {
 
 pub fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
     BpfProgram::new(insns)
-}
-
-pub fn sidecar_payload(insn: &BpfInsn) -> u64 {
-    (u64::from(insn.dst_reg()) & 0xf)
-        | (u64::from(insn.off as u16) << 4)
-        | (u64::from(insn.imm as u32) << 20)
 }

@@ -368,7 +368,7 @@ fn test_rotate_pass_tmp_live_out_conflict() {
 #[test]
 fn test_rotate_pass_applies_site_inside_multi_subprog_program() {
     let mut prog = make_program(vec![
-        pseudo_call_to(0, 2),
+        BpfInsn::pseudo_call_to(0, 2),
         BpfInsn::exit(),
         BpfInsn::mov64_reg(3, 2),
         BpfInsn::alu64_imm(BPF_RSH, 2, 56),

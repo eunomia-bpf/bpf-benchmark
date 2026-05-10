@@ -59,10 +59,6 @@ fn verifier_full_state_with_stack(
     }
 }
 
-fn ja(off: i16) -> BpfInsn {
-    BpfInsn::ja(off)
-}
-
 fn install_map_with_key_size(
     map_id: u32,
     map_type: u32,
@@ -478,13 +474,13 @@ fn cfg_unreachable_pcs(insns: &[BpfInsn]) -> Vec<usize> {
 #[test]
 fn map_inline_consumes_hint_when_verifier_state_unavailable() {
     // Bug caught: an explicit operator hint was ignored when verifier stack state was absent.
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     install_array_map_entry(301, 8, 0, vec![42, 0, 0, 0]);
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::exit(),
@@ -509,13 +505,13 @@ fn map_inline_consumes_hint_when_verifier_state_unavailable() {
 #[test]
 fn map_inline_rejects_hint_with_wrong_key_size() {
     // Bug caught: stale or malformed hint bytes were downgraded to a normal key-extraction skip.
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     install_array_map_entry(302, 8, 0, vec![42, 0, 0, 0]);
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::exit(),
@@ -535,13 +531,13 @@ fn map_inline_rejects_hint_with_wrong_key_size() {
 #[test]
 fn map_inline_rejects_hint_pointing_at_non_lookup_call() {
     // Bug caught: a typo in call_pc could silently leave an operator hint unused.
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     install_array_map_entry(303, 8, 0, vec![42, 0, 0, 0]);
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::exit(),
@@ -562,13 +558,13 @@ fn map_inline_rejects_hint_pointing_at_non_lookup_call() {
 
 #[test]
 fn find_map_lookup_sites_matches_helper_one_with_map_arg() {
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let insns = vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 7),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
     ];
 
@@ -587,7 +583,7 @@ fn find_map_lookup_sites_ignores_calls_without_map_load() {
     let insns = vec![
         BpfInsn::mov64_imm(1, 0),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
     ];
 
@@ -596,19 +592,19 @@ fn find_map_lookup_sites_ignores_calls_without_map_load() {
 
 #[test]
 fn find_map_in_map_chains_detects_r0_to_r1_alias() {
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let insns = vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-        jeq_imm(0, 0, 7),
+        BpfInsn::jeq_imm(0, 0, 7),
         BpfInsn::mov64_reg(1, 0),
         BpfInsn::st_mem(BPF_W, 10, -8, 2),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -8),
+        BpfInsn::add64_imm(2, -8),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::exit(),
@@ -625,20 +621,20 @@ fn find_map_in_map_chains_detects_r0_to_r1_alias() {
 
 #[test]
 fn find_map_in_map_chains_detects_stack_spilled_r0_to_r1_alias() {
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let insns = vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-        jeq_imm(0, 0, 8),
+        BpfInsn::jeq_imm(0, 0, 8),
         BpfInsn::stx_mem(BPF_DW, 10, 0, -16),
         BpfInsn::ldx_mem(BPF_DW, 1, 10, -16),
         BpfInsn::st_mem(BPF_W, 10, -8, 2),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -8),
+        BpfInsn::add64_imm(2, -8),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::exit(),
@@ -655,20 +651,20 @@ fn find_map_in_map_chains_detects_stack_spilled_r0_to_r1_alias() {
 
 #[test]
 fn find_map_in_map_chains_ignores_absent_alias() {
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-    let inner = ld_imm64(1, BPF_PSEUDO_MAP_FD, 43);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let inner = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 43);
     let insns = vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         inner[0],
         inner[1],
         BpfInsn::st_mem(BPF_W, 10, -8, 2),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -8),
+        BpfInsn::add64_imm(2, -8),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
     ];
     let outer_sites = find_map_lookup_sites(&insns);
@@ -731,7 +727,7 @@ fn map_inline_pseudo_map_value_feeds_const_prop_and_dce_without_branch_cleanup()
         map_value[0],
         map_value[1],
         BpfInsn::ldx_mem(BPF_W, 2, 1, 0),
-        jeq_imm(2, 1, 1),
+        BpfInsn::jeq_imm(2, 1, 1),
         BpfInsn::mov64_imm(0, 0),
         BpfInsn::mov64_imm(0, 1),
         BpfInsn::exit(),
@@ -746,7 +742,7 @@ fn map_inline_pseudo_map_value_feeds_const_prop_and_dce_without_branch_cleanup()
         program.insns,
         vec![
             BpfInsn::mov32_imm(2, 1),
-            jeq_imm(2, 1, 0),
+            BpfInsn::jeq_imm(2, 1, 0),
             BpfInsn::mov64_imm(0, 1),
             BpfInsn::exit(),
         ]
@@ -755,13 +751,13 @@ fn map_inline_pseudo_map_value_feeds_const_prop_and_dce_without_branch_cleanup()
 
 #[test]
 fn extract_constant_key_from_direct_stack_store() {
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let insns = vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 7),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
     ];
 
@@ -775,14 +771,14 @@ fn extract_constant_key_from_direct_stack_store() {
 
 #[test]
 fn extract_constant_key_from_stx_stack_store() {
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let insns = vec![
         map[0],
         map[1],
         BpfInsn::mov64_imm(3, 9),
         BpfInsn::stx_mem(BPF_W, 10, 3, -4),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
     ];
 
@@ -794,11 +790,11 @@ fn extract_constant_key_from_stx_stack_store() {
 
 #[test]
 fn extract_constant_key_from_r2_copy_chain() {
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let insns = vec![
         BpfInsn::st_mem(BPF_W, 10, -4, 7),
         BpfInsn::mov64_reg(6, 10),
-        add64_imm(6, -4),
+        BpfInsn::add64_imm(6, -4),
         BpfInsn::mov64_reg(2, 6),
         map[0],
         map[1],
@@ -814,8 +810,8 @@ fn extract_constant_key_from_r2_copy_chain() {
 
 #[test]
 fn verifier_guided_key_extraction_matrix() {
-    let wide_zero_map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-    let fp_alias_map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let wide_zero_map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let fp_alias_map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     for (label, insns, call_pc, stack_off, key_bytes, value, store_pc, check_plain) in [
         (
             "wide zero subrange",
@@ -823,7 +819,7 @@ fn verifier_guided_key_extraction_matrix() {
                 BpfInsn::mov64_imm(3, 0),
                 BpfInsn::stx_mem(BPF_DW, 10, 3, -8),
                 BpfInsn::mov64_reg(2, 10),
-                add64_imm(2, -4),
+                BpfInsn::add64_imm(2, -4),
                 wide_zero_map[0],
                 wide_zero_map[1],
                 BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
@@ -839,10 +835,10 @@ fn verifier_guided_key_extraction_matrix() {
             "fp alias store base",
             vec![
                 BpfInsn::mov64_reg(6, 10),
-                add64_imm(6, -8),
+                BpfInsn::add64_imm(6, -8),
                 BpfInsn::st_mem(BPF_W, 6, 4, 7),
                 BpfInsn::mov64_reg(2, 10),
-                add64_imm(2, -4),
+                BpfInsn::add64_imm(2, -4),
                 fp_alias_map[0],
                 fp_alias_map[1],
                 BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
@@ -878,13 +874,13 @@ fn verifier_guided_key_extraction_matrix() {
 
 #[test]
 fn extract_constant_key_from_fp_alias_store_base() {
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let insns = vec![
         BpfInsn::mov64_reg(6, 10),
-        add64_imm(6, -8),
+        BpfInsn::add64_imm(6, -8),
         BpfInsn::st_mem(BPF_W, 6, 4, 7),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         map[0],
         map[1],
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
@@ -897,14 +893,14 @@ fn extract_constant_key_from_fp_alias_store_base() {
 
 #[test]
 fn extract_constant_key_from_ldimm64_stack_store() {
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let key_imm = emit_ldimm64(3, 0x1_0000_0001);
     let insns = vec![
         key_imm[0],
         key_imm[1],
         BpfInsn::stx_mem(BPF_DW, 10, 3, -8),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -8),
+        BpfInsn::add64_imm(2, -8),
         map[0],
         map[1],
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
@@ -953,7 +949,7 @@ fn classify_r0_uses_tracks_alias_copies_and_guarded_loads() {
     let insns = vec![
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::mov64_reg(6, 0),
-        jeq_imm(6, 0, 1),
+        BpfInsn::jeq_imm(6, 0, 1),
         BpfInsn::ldx_mem(BPF_W, 3, 6, 0),
     ];
 
@@ -970,7 +966,7 @@ fn classify_r0_uses_tracks_alias_offset_loads() {
     let insns = vec![
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::mov64_reg(6, 0),
-        add64_imm(6, 4),
+        BpfInsn::add64_imm(6, 4),
         BpfInsn::ldx_mem(BPF_W, 3, 6, 0),
     ];
 
@@ -993,8 +989,8 @@ fn classify_r0_uses_does_not_treat_non_zero_alias_offset_as_null_check() {
     let insns = vec![
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::mov64_reg(6, 0),
-        add64_imm(6, 4),
-        jeq_imm(6, 0, 1),
+        BpfInsn::add64_imm(6, 4),
+        BpfInsn::jeq_imm(6, 0, 1),
         BpfInsn::ldx_mem(BPF_W, 3, 6, 0),
     ];
 
@@ -1017,7 +1013,7 @@ fn classify_r0_uses_can_follow_callee_saved_alias_across_helper_when_enabled() {
     let insns = vec![
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::mov64_reg(9, 0),
-        jeq_imm(9, 0, 2),
+        BpfInsn::jeq_imm(9, 0, 2),
         BpfInsn::helper_call(2),
         BpfInsn::ldx_mem(BPF_W, 3, 9, 4),
     ];
@@ -1092,7 +1088,7 @@ fn classify_r0_uses_allows_helper_argument_loaded_from_lookup_value() {
 fn classify_r0_uses_marks_pointer_escape_after_null_check_as_other() {
     let insns = vec![
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-        jeq_imm(0, 0, 2),
+        BpfInsn::jeq_imm(0, 0, 2),
         BpfInsn::mov64_reg(1, 0),
         BpfInsn::helper_call(2),
         BpfInsn::ldx_mem(BPF_W, 3, 0, 0),
@@ -1109,7 +1105,7 @@ fn classify_r0_uses_marks_store_back_as_other_use() {
     let insns = vec![
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 1, 0, 0),
-        add64_imm(1, 1),
+        BpfInsn::add64_imm(1, 1),
         BpfInsn::stx_mem(BPF_W, 0, 1, 0),
     ];
 
@@ -1129,8 +1125,8 @@ fn classify_r0_uses_marks_store_back_as_other_use() {
 
 #[test]
 fn map_inline_pass_lookup_rewrite_matrix() {
-    let canonical_map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-    let fp_alias_map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let canonical_map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let fp_alias_map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     for (label, map_id, max_entries, key, value, mut program, expected) in [
         (
             "canonical scalar loads",
@@ -1143,7 +1139,7 @@ fn map_inline_pass_lookup_rewrite_matrix() {
                 canonical_map[1],
                 BpfInsn::st_mem(BPF_W, 10, -4, 1),
                 BpfInsn::mov64_reg(2, 10),
-                add64_imm(2, -4),
+                BpfInsn::add64_imm(2, -4),
                 BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
                 BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
                 BpfInsn::ldx_mem(BPF_B, 7, 0, 4),
@@ -1165,22 +1161,22 @@ fn map_inline_pass_lookup_rewrite_matrix() {
             vec![0, 0, 0, 0, 42, 0, 0, 0],
             BpfProgram::new(vec![
                 BpfInsn::mov64_reg(6, 10),
-                add64_imm(6, -8),
+                BpfInsn::add64_imm(6, -8),
                 BpfInsn::st_mem(BPF_W, 6, 4, 7),
                 fp_alias_map[0],
                 fp_alias_map[1],
                 BpfInsn::mov64_reg(2, 10),
-                add64_imm(2, -4),
+                BpfInsn::add64_imm(2, -4),
                 BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
                 BpfInsn::mov64_reg(6, 0),
-                add64_imm(6, 4),
+                BpfInsn::add64_imm(6, 4),
                 BpfInsn::ldx_mem(BPF_W, 7, 6, 0),
                 BpfInsn::mov64_imm(0, 0),
                 BpfInsn::exit(),
             ]),
             vec![
                 BpfInsn::mov64_reg(6, 10),
-                add64_imm(6, -8),
+                BpfInsn::add64_imm(6, -8),
                 BpfInsn::mov32_imm(7, 42),
                 BpfInsn::mov64_imm(0, 0),
                 BpfInsn::exit(),
@@ -1199,8 +1195,8 @@ fn map_inline_pass_struct_value_wide_constant_emission_matrix() {
     let mut struct_value = vec![0u8; 16];
     struct_value[0..4].copy_from_slice(&0x1234_5678u32.to_le_bytes());
     struct_value[8..16].copy_from_slice(&0x0123_4567_89ab_cdefu64.to_le_bytes());
-    let struct_map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-    let wide_map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let struct_map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let wide_map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     for (
         label,
         map_id,
@@ -1222,7 +1218,7 @@ fn map_inline_pass_struct_value_wide_constant_emission_matrix() {
                 struct_map[1],
                 BpfInsn::st_mem(BPF_W, 10, -4, 1),
                 BpfInsn::mov64_reg(2, 10),
-                add64_imm(2, -4),
+                BpfInsn::add64_imm(2, -4),
                 BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
                 BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
                 BpfInsn::ldx_mem(BPF_DW, 7, 0, 8),
@@ -1245,7 +1241,7 @@ fn map_inline_pass_struct_value_wide_constant_emission_matrix() {
                 wide_map[1],
                 BpfInsn::st_mem(BPF_W, 10, -4, 1),
                 BpfInsn::mov64_reg(2, 10),
-                add64_imm(2, -4),
+                BpfInsn::add64_imm(2, -4),
                 BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
                 BpfInsn::ldx_mem(BPF_DW, 6, 0, 0),
                 BpfInsn::mov64_imm(0, 0),
@@ -1285,13 +1281,13 @@ fn map_inline_pass_struct_value_wide_constant_emission_matrix() {
 fn map_inline_pass_rewrites_u32_max_with_mov32_imm() {
     install_array_map(111, 0xffff_ffffu32.to_le_bytes().to_vec());
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::exit(),
@@ -1306,7 +1302,7 @@ fn map_inline_pass_rewrites_u32_max_with_mov32_imm() {
             map[1],
             BpfInsn::st_mem(BPF_W, 10, -4, 1),
             BpfInsn::mov64_reg(2, 10),
-            add64_imm(2, -4),
+            BpfInsn::add64_imm(2, -4),
             BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
             BpfInsn::mov32_imm(6, -1),
             BpfInsn::exit(),
@@ -1323,18 +1319,18 @@ fn map_inline_pass_removes_null_check_and_dead_cold_block() {
             install_array_map(map_id, vec![7, 0, 0, 0, 0xaa, 0, 0, 0]);
         }
 
-        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
         let mut program = BpfProgram::new(vec![
             map[0],
             map[1],
             BpfInsn::st_mem(BPF_W, 10, -4, 1),
             BpfInsn::mov64_reg(2, 10),
-            add64_imm(2, -4),
+            BpfInsn::add64_imm(2, -4),
             BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-            jeq_imm(0, 0, 3),
+            BpfInsn::jeq_imm(0, 0, 3),
             BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
             BpfInsn::mov64_imm(0, 0),
-            ja(1),
+            BpfInsn::ja(1),
             BpfInsn::mov64_imm(0, 1),
             BpfInsn::exit(),
         ]);
@@ -1358,20 +1354,20 @@ fn map_inline_pass_removes_null_check_and_dead_cold_block() {
 fn map_inline_pass_keeps_null_check_when_non_null_window_has_side_effects() {
     install_array_map(1602, vec![7, 0, 0, 0]);
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-        jeq_imm(0, 0, 5),
+        BpfInsn::jeq_imm(0, 0, 5),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::stx_mem(BPF_W, 10, 6, -8),
-        jeq_imm(6, 0, 1),
+        BpfInsn::jeq_imm(6, 0, 1),
         BpfInsn::mov64_imm(0, 0),
-        ja(1),
+        BpfInsn::ja(1),
         BpfInsn::mov64_imm(0, 1),
         BpfInsn::exit(),
     ]);
@@ -1382,7 +1378,7 @@ fn map_inline_pass_keeps_null_check_when_non_null_window_has_side_effects() {
         .insns
         .iter()
         .any(|insn| insn.is_call() && insn.imm == libbpf_sys::BPF_FUNC_map_lookup_elem as i32));
-    assert!(program.insns.contains(&jeq_imm(0, 0, 5)));
+    assert!(program.insns.contains(&BpfInsn::jeq_imm(0, 0, 5)));
     assert!(program.insns.contains(&BpfInsn::mov32_imm(6, 7)));
 }
 
@@ -1390,13 +1386,13 @@ fn map_inline_pass_keeps_null_check_when_non_null_window_has_side_effects() {
 fn map_inline_pass_skips_non_constant_key() {
     install_array_map(104, vec![7, 0, 0, 0]);
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let original = vec![
         map[0],
         map[1],
         BpfInsn::stx_mem(BPF_W, 10, 3, -4),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
@@ -1421,15 +1417,15 @@ fn map_inline_soft_map_name_hint_emits_key_check_scalar_fold_without_fallback() 
     values.insert(1u32.to_le_bytes().to_vec(), 7u32.to_le_bytes().to_vec());
     install_map(map_id, 1, 8, values.clone());
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
         BpfInsn::stx_mem(BPF_W, 10, 3, -4),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-        jeq_imm(0, 0, 2),
+        BpfInsn::jeq_imm(0, 0, 2),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
         BpfInsn::exit(),
@@ -1506,25 +1502,25 @@ fn map_inline_soft_hint_requires_immediate_null_check_when_hard_fold_coexists() 
         soft_values.clone(),
     );
 
-    let hard_map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-    let soft_map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 43);
+    let hard_map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let soft_map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 43);
     let mut program = BpfProgram::new(vec![
         hard_map[0],
         hard_map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 0),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         soft_map[0],
         soft_map[1],
         BpfInsn::st_mem(BPF_W, 10, -8, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -8),
+        BpfInsn::add64_imm(2, -8),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::mov64_imm(8, 2),
         BpfInsn::mov64_imm(1, 7),
-        jeq_imm(0, 0, 2),
+        BpfInsn::jeq_imm(0, 0, 2),
         BpfInsn::ldx_mem(BPF_W, 7, 0, 0),
         BpfInsn::mov64_imm(0, 0),
         BpfInsn::exit(),
@@ -1594,15 +1590,15 @@ fn map_inline_lpm_trie_enumerated_empty_hard_hint_folds_lookup_to_null() {
         },
     );
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 0),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-        jeq_imm(0, 0, 1),
+        BpfInsn::jeq_imm(0, 0, 1),
         BpfInsn::mov64_imm(0, 1),
         BpfInsn::exit(),
     ]);
@@ -1654,23 +1650,23 @@ fn map_inline_skips_kernel_mutable_map() {
     values.insert(1u32.to_le_bytes().to_vec(), 7u32.to_le_bytes().to_vec());
     install_map(map_id, 1, 8, values.clone());
 
-    let map_update = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map_update = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let original = vec![
         map_update[0],
         map_update[1],
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::mov64_reg(3, 10),
-        add64_imm(3, -8),
+        BpfInsn::add64_imm(3, -8),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_update_elem as i32),
         map[0],
         map[1],
         BpfInsn::stx_mem(BPF_W, 10, 3, -4),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-        jeq_imm(0, 0, 2),
+        BpfInsn::jeq_imm(0, 0, 2),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
         BpfInsn::exit(),
@@ -1704,30 +1700,30 @@ fn map_inline_does_not_abort_on_runtime_map_pointer_writer() {
     values.insert(1u32.to_le_bytes().to_vec(), 7u32.to_le_bytes().to_vec());
     install_map(inline_map_id, 1, 8, values.clone());
 
-    let dynamic_map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 41);
-    let inline_map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let dynamic_map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 41);
+    let inline_map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let original = vec![
         dynamic_map[0],
         dynamic_map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::stx_mem(BPF_DW, 10, 0, -8),
         BpfInsn::ldx_mem(BPF_DW, 1, 10, -8),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::mov64_reg(3, 10),
-        add64_imm(3, -16),
+        BpfInsn::add64_imm(3, -16),
         BpfInsn::mov64_imm(4, 0),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_update_elem as i32),
         inline_map[0],
         inline_map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-        jeq_imm(0, 0, 2),
+        BpfInsn::jeq_imm(0, 0, 2),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
         BpfInsn::exit(),
@@ -1754,7 +1750,7 @@ fn map_inline_pass_skips_pseudo_map_value_lookup_key_without_verifier_state() {
     values.insert(key_bytes.clone(), 42u32.to_le_bytes().to_vec());
     install_map_with_key_size(9402, 1, 20, 16, values);
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let key = ld_imm64_parts(2, BPF_PSEUDO_MAP_VALUE, 43, 0);
     let mut program = BpfProgram::new(vec![
         map[0],
@@ -1762,7 +1758,7 @@ fn map_inline_pass_skips_pseudo_map_value_lookup_key_without_verifier_state() {
         key[0],
         key[1],
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-        jeq_imm(0, 0, 2),
+        BpfInsn::jeq_imm(0, 0, 2),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
         BpfInsn::exit(),
@@ -1787,12 +1783,12 @@ fn map_inline_pass_uses_stack_snapshot_key_size_matrix() {
     let mut key20 = vec![0u8; 20];
     key20[16..20].copy_from_slice(&1u32.to_le_bytes());
 
-    let map16 = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map16 = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let key_lo = emit_ldimm64(3, lo);
     let key_hi = emit_ldimm64(4, hi);
-    let map256 = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-    let map20 = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-    let map_zero = ld_imm64(1, BPF_PSEUDO_MAP_FD, 123);
+    let map256 = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map20 = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map_zero = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 123);
 
     for (
         label,
@@ -1823,12 +1819,12 @@ fn map_inline_pass_uses_stack_snapshot_key_size_matrix() {
                 key_hi[1],
                 BpfInsn::stx_mem(BPF_DW, 10, 4, -8),
                 BpfInsn::mov64_reg(2, 10),
-                add64_imm(2, -16),
+                BpfInsn::add64_imm(2, -16),
                 BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-                jeq_imm(0, 0, 3),
+                BpfInsn::jeq_imm(0, 0, 3),
                 BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
                 BpfInsn::mov64_imm(0, 0),
-                ja(1),
+                BpfInsn::ja(1),
                 BpfInsn::mov64_imm(0, 1),
                 BpfInsn::exit(),
             ]),
@@ -1846,7 +1842,7 @@ fn map_inline_pass_uses_stack_snapshot_key_size_matrix() {
                 map256[0],
                 map256[1],
                 BpfInsn::mov64_reg(2, 10),
-                add64_imm(2, -256),
+                BpfInsn::add64_imm(2, -256),
                 BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
                 BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
                 BpfInsn::exit(),
@@ -1873,12 +1869,12 @@ fn map_inline_pass_uses_stack_snapshot_key_size_matrix() {
                 BpfInsn::stx_mem(BPF_DW, 10, 3, -12),
                 BpfInsn::st_mem(BPF_W, 10, -4, 1),
                 BpfInsn::mov64_reg(2, 10),
-                add64_imm(2, -20),
+                BpfInsn::add64_imm(2, -20),
                 BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-                jeq_imm(0, 0, 3),
+                BpfInsn::jeq_imm(0, 0, 3),
                 BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
                 BpfInsn::mov64_imm(0, 0),
-                ja(1),
+                BpfInsn::ja(1),
                 BpfInsn::mov64_imm(0, 1),
                 BpfInsn::exit(),
             ]),
@@ -1896,11 +1892,11 @@ fn map_inline_pass_uses_stack_snapshot_key_size_matrix() {
                 BpfInsn::mov64_imm(3, 0),
                 BpfInsn::stx_mem(BPF_DW, 10, 3, -8),
                 BpfInsn::mov64_reg(2, 10),
-                add64_imm(2, -4),
+                BpfInsn::add64_imm(2, -4),
                 map_zero[0],
                 map_zero[1],
                 BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-                jeq_imm(0, 0, 2),
+                BpfInsn::jeq_imm(0, 0, 2),
                 BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
                 BpfInsn::mov64_imm(0, 0),
                 BpfInsn::exit(),
@@ -1942,12 +1938,12 @@ fn map_inline_pass_uses_full_state_stack_snapshot_for_key() {
     values.insert(1u32.to_le_bytes().to_vec(), 42u32.to_le_bytes().to_vec());
     install_map(9323, 2, 8, values);
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::exit(),
@@ -1977,12 +1973,12 @@ fn map_inline_pass_reports_unavailable_when_call_stack_snapshot_is_absent() {
     values.insert(1u32.to_le_bytes().to_vec(), 7u32.to_le_bytes().to_vec());
     install_map(9321, 2, 8, values);
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let original = vec![
         map[0],
         map[1],
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::exit(),
@@ -2008,12 +2004,12 @@ fn map_inline_pass_requires_explicit_precise_stack_scalar() {
     values.insert(1u32.to_le_bytes().to_vec(), 7u32.to_le_bytes().to_vec());
     install_map(9322, 2, 8, values);
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let original = vec![
         map[0],
         map[1],
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::exit(),
@@ -2059,19 +2055,19 @@ fn map_inline_pass_rewrites_map_in_map_chain_loads() {
     );
     install_array_map_entry(inner_map_id, 8, 2, 77u32.to_le_bytes().to_vec());
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-        jeq_imm(0, 0, 8),
+        BpfInsn::jeq_imm(0, 0, 8),
         BpfInsn::mov64_reg(1, 0),
         BpfInsn::st_mem(BPF_W, 10, -8, 2),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -8),
+        BpfInsn::add64_imm(2, -8),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
@@ -2114,19 +2110,19 @@ fn map_inline_pass_rewrites_map_in_map_chain_loads() {
 }
 
 fn map_in_map_route_program(outer_map_id: u32, outer_key: u32, inner_key: u32) -> BpfProgram {
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, outer_key as i32),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-        jeq_imm(0, 0, 8),
+        BpfInsn::jeq_imm(0, 0, 8),
         BpfInsn::mov64_reg(1, 0),
         BpfInsn::st_mem(BPF_W, 10, -8, inner_key as i32),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -8),
+        BpfInsn::add64_imm(2, -8),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
@@ -2410,14 +2406,14 @@ fn map_inline_hash_hard_hint_without_inner_hint_uses_normal_fold() {
         values.clone(),
     );
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-        jeq_imm(0, 0, 1),
+        BpfInsn::jeq_imm(0, 0, 1),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::exit(),
     ]);
@@ -2632,19 +2628,19 @@ fn map_inline_pass_skips_missing_outer_map_in_map_entry() {
         },
     );
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let original = vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-        jeq_imm(0, 0, 7),
+        BpfInsn::jeq_imm(0, 0, 7),
         BpfInsn::mov64_reg(1, 0),
         BpfInsn::st_mem(BPF_W, 10, -8, 2),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -8),
+        BpfInsn::add64_imm(2, -8),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::exit(),
@@ -2664,16 +2660,16 @@ fn map_inline_pass_skips_missing_outer_map_in_map_entry() {
 fn map_inline_pass_keeps_hash_lookup_and_rewrites_jne_guarded_load() {
     install_hash_map(122, vec![7, 0, 0, 0]);
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-        jne_imm(0, 0, 1),
-        ja(3),
+        BpfInsn::jne_imm(0, 0, 1),
+        BpfInsn::ja(3),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
         BpfInsn::exit(),
@@ -2688,10 +2684,10 @@ fn map_inline_pass_keeps_hash_lookup_and_rewrites_jne_guarded_load() {
             map[1],
             BpfInsn::st_mem(BPF_W, 10, -4, 1),
             BpfInsn::mov64_reg(2, 10),
-            add64_imm(2, -4),
+            BpfInsn::add64_imm(2, -4),
             BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-            jne_imm(0, 0, 1),
-            ja(3),
+            BpfInsn::jne_imm(0, 0, 1),
+            BpfInsn::ja(3),
             BpfInsn::mov32_imm(6, 7),
             BpfInsn::mov64_imm(0, 0),
             BpfInsn::exit(),
@@ -2703,19 +2699,19 @@ fn map_inline_pass_keeps_hash_lookup_and_rewrites_jne_guarded_load() {
 fn map_inline_pass_keeps_lookup_and_rewrites_load_when_setup_has_branch_target() {
     install_hash_map(123, vec![7, 0, 0, 0]);
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
         BpfInsn::mov64_imm(3, 1),
-        jne_imm(3, 0, 2),
+        BpfInsn::jne_imm(3, 0, 2),
         BpfInsn::mov64_imm(4, 0),
         BpfInsn::mov64_imm(4, 0),
         BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         map[0],
         map[1],
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-        jeq_imm(0, 0, 1),
+        BpfInsn::jeq_imm(0, 0, 1),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
         BpfInsn::exit(),
@@ -2727,16 +2723,16 @@ fn map_inline_pass_keeps_lookup_and_rewrites_load_when_setup_has_branch_target()
         program.insns,
         vec![
             BpfInsn::mov64_imm(3, 1),
-            jne_imm(3, 0, 2),
+            BpfInsn::jne_imm(3, 0, 2),
             BpfInsn::mov64_imm(4, 0),
             BpfInsn::mov64_imm(4, 0),
             BpfInsn::st_mem(BPF_W, 10, -4, 1),
             BpfInsn::mov64_reg(2, 10),
-            add64_imm(2, -4),
+            BpfInsn::add64_imm(2, -4),
             map[0],
             map[1],
             BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-            jeq_imm(0, 0, 1),
+            BpfInsn::jeq_imm(0, 0, 1),
             BpfInsn::mov32_imm(6, 7),
             BpfInsn::mov64_imm(0, 0),
             BpfInsn::exit(),
@@ -2756,20 +2752,20 @@ fn map_inline_pass_keeps_lookup_and_rewrites_load_when_setup_has_branch_target()
 fn map_inline_pass_removes_hash_lookup_before_helper_using_loaded_scalar() {
     install_hash_map(1061, vec![0, 0, 0, 0, 7, 0, 0, 0]);
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-        jeq_imm(0, 0, 5),
+        BpfInsn::jeq_imm(0, 0, 5),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 4),
         BpfInsn::mov64_reg(1, 6),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_ktime_get_ns as i32),
         BpfInsn::mov64_imm(0, 0),
-        ja(1),
+        BpfInsn::ja(1),
         BpfInsn::mov64_imm(0, 1),
         BpfInsn::exit(),
     ]);
@@ -2793,14 +2789,14 @@ fn map_inline_pass_does_not_use_non_verifier_fixpoint_fallback() {
     install_array_map(9203, 2u32.to_le_bytes().to_vec());
     install_array_map_entry(9204, 8, 2, 11u32.to_le_bytes().to_vec());
 
-    let map0 = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-    let map1 = ld_imm64(1, BPF_PSEUDO_MAP_FD, 43);
+    let map0 = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map1 = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 43);
     let mut program = BpfProgram::new(vec![
         map0[0],
         map0[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::stx_mem(BPF_DW, 10, 6, -16),
@@ -2809,7 +2805,7 @@ fn map_inline_pass_does_not_use_non_verifier_fixpoint_fallback() {
         map1[0],
         map1[1],
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -8),
+        BpfInsn::add64_imm(2, -8),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 8, 0, 0),
         BpfInsn::mov64_imm(0, 0),
@@ -2842,7 +2838,7 @@ fn map_inline_pass_does_not_use_non_verifier_fixpoint_fallback() {
 fn map_inline_pass_rewrites_lookup_inside_subprog() {
     install_array_map(109, vec![7, 0, 0, 0]);
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
         BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 1), 0, 2),
         BpfInsn::mov64_imm(0, 0),
@@ -2852,7 +2848,7 @@ fn map_inline_pass_rewrites_lookup_inside_subprog() {
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
@@ -2880,13 +2876,13 @@ fn map_inline_pass_rewrites_lookup_inside_subprog() {
 fn map_inline_pass_inlines_mutable_array_across_readonly_helper_call() {
     install_array_map(411, vec![7, 0, 0, 0]);
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::mov64_reg(9, 0),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_ktime_get_ns as i32),
@@ -2910,13 +2906,13 @@ fn map_inline_pass_inlines_mutable_array_across_readonly_helper_call() {
 
 #[test]
 fn map_inline_pass_skips_size_skipped_array_map() {
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let original = vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 2),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
@@ -2956,13 +2952,13 @@ fn map_inline_pass_skips_size_skipped_array_map() {
 
 #[test]
 fn map_inline_pass_uses_overlay_for_size_skipped_array_map() {
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 2),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
@@ -3006,13 +3002,13 @@ fn map_inline_pass_inlines_uniform_percpu_array_maps() {
     values.insert(1u32.to_le_bytes().to_vec(), blob.clone());
     install_percpu_array_map(112, 4, 8, values);
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let mut program = BpfProgram::new(vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
@@ -3037,13 +3033,13 @@ fn map_inline_pass_snapshot_missing_error_matrix() {
     for (label, map_id, key_hex) in [("percpu array default", 916, "01000000")] {
         install_percpu_array_map(map_id, 4, 8, HashMap::new());
 
-        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
         let mut program = BpfProgram::new(vec![
             map[0],
             map[1],
             BpfInsn::st_mem(BPF_W, 10, -4, 1),
             BpfInsn::mov64_reg(2, 10),
-            add64_imm(2, -4),
+            BpfInsn::add64_imm(2, -4),
             BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
             BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
             BpfInsn::mov64_imm(0, 0),
@@ -3074,13 +3070,13 @@ fn map_inline_pass_skips_mixed_percpu_array_maps() {
     values.insert(1u32.to_le_bytes().to_vec(), blob);
     install_percpu_array_map(212, 4, 8, values);
 
-    let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+    let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
     let original = vec![
         map[0],
         map[1],
         BpfInsn::st_mem(BPF_W, 10, -4, 1),
         BpfInsn::mov64_reg(2, 10),
-        add64_imm(2, -4),
+        BpfInsn::add64_imm(2, -4),
         BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
         BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
         BpfInsn::mov64_imm(0, 0),
@@ -3110,15 +3106,15 @@ fn map_inline_pass_skips_percpu_hash_family_maps() {
         values.insert(1u32.to_le_bytes().to_vec(), vec![7, 0, 0, 0]);
         install_map(map_id, map_type, 8, values);
 
-        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let map = BpfInsn::ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
         let original = vec![
             map[0],
             map[1],
             BpfInsn::st_mem(BPF_W, 10, -4, 1),
             BpfInsn::mov64_reg(2, 10),
-            add64_imm(2, -4),
+            BpfInsn::add64_imm(2, -4),
             BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
-            jeq_imm(0, 0, 2),
+            BpfInsn::jeq_imm(0, 0, 2),
             BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
             BpfInsn::mov64_imm(0, 0),
             BpfInsn::exit(),

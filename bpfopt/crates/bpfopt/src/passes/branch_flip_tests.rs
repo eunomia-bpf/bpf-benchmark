@@ -25,7 +25,7 @@ fn branch_profile(taken_count: u64, not_taken_count: u64, branch_misses: u64) ->
 fn test_scan_finds_diamond() {
     // JNE r1, 0, +2 ; mov r0, 10 ; JA +1 ; mov r0, 20 ; exit
     let insns = vec![
-        jne_imm(1, 0, 2),          // pc=0: Jcc +2 -> target pc=3 (else_start)
+        BpfInsn::jne_imm(1, 0, 2), // pc=0: Jcc +2 -> target pc=3 (else_start)
         BpfInsn::mov64_imm(0, 10), // pc=1: then body
         BpfInsn::ja(1),            // pc=2: JA +1 -> skip else
         BpfInsn::mov64_imm(0, 20), // pc=3: else body
@@ -43,7 +43,7 @@ fn test_scan_finds_diamond() {
 fn test_scan_asymmetric_diamond() {
     // JEQ r1, 0, +3 ; mov1 ; mov2 ; JA +1 ; mov3 ; exit
     let insns = vec![
-        jeq_imm(1, 0, 3),          // Jcc +3 -> target pc=4 (else_start)
+        BpfInsn::jeq_imm(1, 0, 3), // Jcc +3 -> target pc=4 (else_start)
         BpfInsn::mov64_imm(0, 1),  // then[0]
         BpfInsn::mov64_imm(1, 2),  // then[1]
         BpfInsn::ja(1),            // JA +1
@@ -59,7 +59,7 @@ fn test_scan_asymmetric_diamond() {
 #[test]
 fn test_branch_flip_missing_per_site_profile_errors() {
     let mut prog = make_program(vec![
-        jne_imm(1, 0, 2),
+        BpfInsn::jne_imm(1, 0, 2),
         BpfInsn::mov64_imm(0, 10),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(0, 20),
@@ -81,7 +81,7 @@ fn test_branch_flip_missing_per_site_profile_errors() {
 #[test]
 fn test_branch_flip_with_biased_pgo() {
     let mut prog = make_program(vec![
-        jne_imm(1, 0, 2),          // Jcc +2 -> else at pc=3
+        BpfInsn::jne_imm(1, 0, 2), // Jcc +2 -> else at pc=3
         BpfInsn::mov64_imm(0, 10), // then
         BpfInsn::ja(1),            // skip else
         BpfInsn::mov64_imm(0, 20), // else
@@ -113,7 +113,7 @@ fn test_branch_flip_with_biased_pgo() {
 fn test_branch_flip_asymmetric_with_pgo() {
     // then=2 insns, else=3 insns
     let mut prog = make_program(vec![
-        jeq_imm(1, 0, 3),          // Jcc +3 -> else at pc=4
+        BpfInsn::jeq_imm(1, 0, 3), // Jcc +3 -> else at pc=4
         BpfInsn::mov64_imm(0, 1),  // then[0]
         BpfInsn::mov64_imm(1, 2),  // then[1]
         BpfInsn::ja(3),            // JA +3 -> skip else
@@ -183,7 +183,7 @@ fn test_branch_flip_skips_jset() {
 #[test]
 fn test_branch_flip_insufficient_bias() {
     let mut prog = make_program(vec![
-        jne_imm(1, 0, 2),
+        BpfInsn::jne_imm(1, 0, 2),
         BpfInsn::mov64_imm(0, 10),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(0, 20),
@@ -228,7 +228,7 @@ fn test_branch_flip_skips_high_miss_rate() {
     // With high branch miss rate from PMU, the pass should skip all sites
     // even if per-PC PGO data says to flip.
     let mut prog = make_program(vec![
-        jne_imm(1, 0, 2),
+        BpfInsn::jne_imm(1, 0, 2),
         BpfInsn::mov64_imm(0, 10),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(0, 20),
@@ -256,7 +256,7 @@ fn test_branch_flip_skips_high_miss_rate() {
 fn test_branch_flip_allows_low_miss_rate() {
     // With low branch miss rate from PMU, the pass should proceed normally.
     let mut prog = make_program(vec![
-        jne_imm(1, 0, 2),
+        BpfInsn::jne_imm(1, 0, 2),
         BpfInsn::mov64_imm(0, 10),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(0, 20),
@@ -281,7 +281,7 @@ fn test_branch_flip_allows_low_miss_rate() {
 fn test_branch_flip_missing_program_pmu_data_errors() {
     // Without program-level PMU data, branch_flip fails fast.
     let mut prog = make_program(vec![
-        jne_imm(1, 0, 2),
+        BpfInsn::jne_imm(1, 0, 2),
         BpfInsn::mov64_imm(0, 10),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(0, 20),
@@ -307,7 +307,7 @@ fn test_branch_flip_missing_program_pmu_data_errors() {
 #[test]
 fn test_branch_flip_skips_high_site_miss_rate() {
     let mut prog = make_program(vec![
-        jne_imm(1, 0, 2),
+        BpfInsn::jne_imm(1, 0, 2),
         BpfInsn::mov64_imm(0, 10),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(0, 20),
@@ -339,7 +339,7 @@ fn test_branch_flip_skips_high_site_miss_rate() {
 fn test_profiler_to_pass_pipeline_integration() {
     // Build a program with a biased branch
     let insns = vec![
-        jne_imm(1, 0, 2),          // PC 0: biased branch
+        BpfInsn::jne_imm(1, 0, 2), // PC 0: biased branch
         BpfInsn::mov64_imm(0, 10), // PC 1
         BpfInsn::ja(1),            // PC 2
         BpfInsn::mov64_imm(0, 20), // PC 3
@@ -384,7 +384,7 @@ fn test_profiler_to_pass_pipeline_integration() {
     };
 
     let mut prog2 = BpfProgram::new(vec![
-        jne_imm(1, 0, 2),
+        BpfInsn::jne_imm(1, 0, 2),
         BpfInsn::mov64_imm(0, 10),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(0, 20),
@@ -413,14 +413,14 @@ fn test_branch_flip_multiple_sites_correctness() {
     // Build a program with two consecutive diamonds.
     let mut prog = make_program(vec![
         // Diamond 1: JNE r1, 0, +3 ; mov1 ; mov2 ; JA +2 ; mov3 ; mov4
-        jne_imm(1, 0, 3),          // pc=0: Jcc +3 -> else at pc=4
+        BpfInsn::jne_imm(1, 0, 3), // pc=0: Jcc +3 -> else at pc=4
         BpfInsn::mov64_imm(0, 1),  // pc=1: then[0]
         BpfInsn::mov64_imm(2, 2),  // pc=2: then[1]
         BpfInsn::ja(2),            // pc=3: JA +2
         BpfInsn::mov64_imm(0, 10), // pc=4: else[0]
         BpfInsn::mov64_imm(2, 20), // pc=5: else[1]
         // Diamond 2: JEQ r3, 0, +2 ; mov5 ; JA +1 ; mov6
-        jeq_imm(3, 0, 2),           // pc=6: Jcc +2 -> else at pc=9
+        BpfInsn::jeq_imm(3, 0, 2),  // pc=6: Jcc +2 -> else at pc=9
         BpfInsn::mov64_imm(0, 100), // pc=7: then
         BpfInsn::ja(1),             // pc=8: JA +1
         BpfInsn::mov64_imm(0, 200), // pc=9: else
@@ -457,7 +457,7 @@ fn test_branch_flip_verifies_output_layout() {
     // Diamond: JNE r1, 0, +3 ; mov A ; mov B ; JA +1 ; mov C
     // then_len=2, else_len=1
     let mut prog = make_program(vec![
-        jne_imm(1, 0, 3),          // pc=0: Jcc +3 -> else at pc=4
+        BpfInsn::jne_imm(1, 0, 3), // pc=0: Jcc +3 -> else at pc=4
         BpfInsn::mov64_imm(0, 1),  // pc=1: then[0]
         BpfInsn::mov64_imm(2, 2),  // pc=2: then[1]
         BpfInsn::ja(1),            // pc=3: JA +1
