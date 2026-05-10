@@ -13,11 +13,10 @@ use bpfopt::insn::{
     BpfInsn, BPF_DW, BPF_IMM, BPF_LD, BPF_PSEUDO_MAP_FD, BPF_PSEUDO_MAP_IDX,
     BPF_PSEUDO_MAP_IDX_VALUE, BPF_PSEUDO_MAP_VALUE,
 };
-use bpfopt::kinsn::target_spec_by_name;
 use bpfopt::pass::{
-    Arch, BpfProgram, BtfInfoRecords, KinsnRegistry, PassContext, PassManager, PassResult,
-    PlatformCapabilities, RegState, ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind,
-    VerifierValueWidth,
+    Arch, BpfProgram, BtfInfoRecords, KinsnDescriptor, KinsnRegistry, PassContext, PassManager,
+    PassResult, PlatformCapabilities, RegState, ScalarRange, StackState, Tnum, VerifierInsn,
+    VerifierInsnKind, VerifierValueWidth,
 };
 use bpfopt::passes::{MapInfoAnalysis, PASS_REGISTRY};
 #[cfg(test)]
@@ -178,7 +177,8 @@ struct ListPassEntry {
     needs_verifier_states: bool,
     produces_verifier_states: bool,
     needs_map_values: bool,
-    kinsns_used: &'static [bpfopt::passes::KinsnRef],
+    #[serde(rename = "kinsns_used")]
+    kinsn_targets: &'static [KinsnDescriptor],
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -278,7 +278,7 @@ fn list_passes(common: &CommonArgs, args: &ListPassesArgs) -> Result<()> {
                 needs_verifier_states: entry.metadata.needs_verifier_states(),
                 produces_verifier_states: entry.metadata.produces_verifier_states(),
                 needs_map_values: entry.metadata.needs_map_values(),
-                kinsns_used: entry.metadata.kinsns_used,
+                kinsn_targets: entry.metadata.kinsn_targets,
             })
             .collect::<Vec<_>>();
         write_json(common.output.as_deref(), &entries)
@@ -396,9 +396,9 @@ fn validate_required_kinsns(ctx: &PassContext, pass_names: &[&str]) -> Result<()
         }
         let target_names = entry
             .metadata
-            .kinsns_used
+            .kinsn_targets
             .iter()
-            .map(|kinsn| kinsn.canonical_name());
+            .map(|kinsn| kinsn.canonical_name);
         let label = cli_name_for_pass(pass_name);
         if pass_name == "endian_fusion" {
             require_any_kinsn(ctx, target_names, label)?;
@@ -941,8 +941,8 @@ fn apply_kinsn_list(registry: &mut KinsnRegistry, kinsns: &[String]) -> Result<(
 }
 
 fn canonicalize_kinsn_name(input: &str) -> Result<&'static str> {
-    target_spec_by_name(input)
-        .map(|spec| spec.canonical_name)
+    KinsnRegistry::unavailable()
+        .canonical_name_for_target_name(input)
         .ok_or_else(|| anyhow!("unknown kinsn name: {input}"))
 }
 

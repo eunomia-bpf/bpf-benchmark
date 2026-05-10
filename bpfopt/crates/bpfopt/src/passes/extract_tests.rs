@@ -7,7 +7,8 @@ use crate::test_helpers::*;
 fn ctx_with_extract_kfunc(btf_id: i32) -> PassContext {
     let mut ctx = PassContext::baseline();
     ctx.kinsn_registry
-        .set_btf_id_for_slot(KinsnSlot::Extract64, btf_id);
+        .set_btf_id_for_target_name("bpf_extract64", btf_id)
+        .unwrap();
     ctx.platform.has_bmi1 = true;
     ctx
 }
@@ -305,7 +306,8 @@ fn test_extract_pass_uses_static_call_offset() {
     let mut cache = AnalysisCache::new();
     let mut ctx = ctx_with_extract_kfunc(7777);
     ctx.kinsn_registry
-        .set_call_off_for_slot(KinsnSlot::Extract64, 42);
+        .set_call_off_for_target_name("bpf_extract64", 42)
+        .unwrap();
 
     let pass = ExtractPass;
     let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();

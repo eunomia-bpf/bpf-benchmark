@@ -65,11 +65,9 @@ pub use wide_mem::WideMemPass;
 
 #[cfg(test)]
 use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
-use crate::kinsn::target_spec_by_name;
-use crate::pass::BpfPass;
+use crate::pass::{BpfPass, KinsnDescriptor};
 #[cfg(test)]
 use crate::pass::PassManager;
-use serde::{Serialize, Serializer};
 
 // ── Pass registry ───────────────────────────────────────────────────
 
@@ -87,25 +85,10 @@ pub struct PassRegistryEntry {
 }
 
 #[derive(Clone, Copy, Debug)]
-#[rustfmt::skip] pub struct PassMetadata { flags: u8, pub kinsns_used: &'static [KinsnRef] }
-
-#[derive(Clone, Copy, Debug)]
-#[rustfmt::skip] pub struct KinsnRef { canonical_name: &'static str }
-
-#[rustfmt::skip] impl KinsnRef {
-    const fn new(canonical_name: &'static str) -> Self { Self { canonical_name } }
-    pub fn canonical_name(self) -> &'static str { self.canonical_name }
-    fn target_spec(self) -> &'static crate::kinsn::TargetSpec { target_spec_by_name(self.canonical_name).expect("known kinsn target") }
-    pub fn probe_aliases(self) -> &'static [&'static str] { self.target_spec().probe_aliases }
-}
-
-#[rustfmt::skip]
-impl Serialize for KinsnRef {
-    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error> where S: Serializer { self.target_spec().serialize(serializer) }
-}
+#[rustfmt::skip] pub struct PassMetadata { flags: u8, pub kinsn_targets: &'static [KinsnDescriptor] }
 
 #[rustfmt::skip] impl PassMetadata {
-    const fn new(flags: u8, kinsns_used: &'static [KinsnRef]) -> Self { Self { flags, kinsns_used } }
+    const fn new(flags: u8, kinsn_targets: &'static [KinsnDescriptor]) -> Self { Self { flags, kinsn_targets } }
     pub fn needs_target(self) -> bool { self.flags & NEEDS_TARGET != 0 }
     pub fn needs_verifier_states(self) -> bool { self.flags & NEEDS_VERIFIER_STATES != 0 }
     pub fn produces_verifier_states(self) -> bool { self.flags & PRODUCES_VERIFIER_STATES != 0 }
@@ -121,13 +104,13 @@ const META_NONE: PassMetadata = PassMetadata::new(0, &[]);
 const META_PRODUCES_STATES: PassMetadata = PassMetadata::new(PRODUCES_VERIFIER_STATES, &[]);
 #[rustfmt::skip] const META_NEEDS_AND_PRODUCES_STATES: PassMetadata = PassMetadata::new(NEEDS_VERIFIER_STATES | PRODUCES_VERIFIER_STATES, &[]);
 #[rustfmt::skip] const META_MAP_INLINE: PassMetadata = PassMetadata::new(NEEDS_VERIFIER_STATES | PRODUCES_VERIFIER_STATES | NEEDS_MAP_VALUES, &[]);
-#[rustfmt::skip] const META_ROTATE: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_rotate64"), KinsnRef::new("bpf_rotate32")]);
-#[rustfmt::skip] const META_SELECT: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_select64")]);
-#[rustfmt::skip] const META_CCMP: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_ccmp64")]);
-#[rustfmt::skip] const META_EXTRACT: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_extract64")]);
-#[rustfmt::skip] const META_ENDIAN: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_endian_load16"), KinsnRef::new("bpf_endian_load32"), KinsnRef::new("bpf_endian_load64")]);
-#[rustfmt::skip] const META_BULK_MEMORY: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_bulk_memcpy"), KinsnRef::new("bpf_bulk_memset")]);
-#[rustfmt::skip] const META_PREFETCH: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_prefetch")]);
+#[rustfmt::skip] const META_ROTATE: PassMetadata = PassMetadata::new(NEEDS_TARGET, rotate::KINSN_TARGETS);
+#[rustfmt::skip] const META_SELECT: PassMetadata = PassMetadata::new(NEEDS_TARGET, cond_select::KINSN_TARGETS);
+#[rustfmt::skip] const META_CCMP: PassMetadata = PassMetadata::new(NEEDS_TARGET, ccmp::KINSN_TARGETS);
+#[rustfmt::skip] const META_EXTRACT: PassMetadata = PassMetadata::new(NEEDS_TARGET, extract::KINSN_TARGETS);
+#[rustfmt::skip] const META_ENDIAN: PassMetadata = PassMetadata::new(NEEDS_TARGET, endian::KINSN_TARGETS);
+#[rustfmt::skip] const META_BULK_MEMORY: PassMetadata = PassMetadata::new(NEEDS_TARGET, bulk_memory::KINSN_TARGETS);
+#[rustfmt::skip] const META_PREFETCH: PassMetadata = PassMetadata::new(NEEDS_TARGET, prefetch::KINSN_TARGETS);
 
 fn reject_pass_args(pass_name: &str, args: &[String]) -> Result<()> {
     if !args.is_empty() {

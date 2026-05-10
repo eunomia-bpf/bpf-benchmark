@@ -13,6 +13,27 @@ use super::utils::{
     resolve_kinsn_call_off_for_pass,
 };
 
+pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
+    canonical_name: "bpf_select64",
+    aliases: &["select64"],
+    decode_proof: decode_select_proof,
+}];
+
+fn decode_select_proof(payload: &[u8]) -> ProofRegion {
+    ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(select_proof_len))
+}
+
+fn select_proof_len(payload: u64) -> anyhow::Result<usize> {
+    validate_bpf_reg("select dst", kinsn_payload_reg(payload, 0))?;
+    validate_bpf_reg("select true", kinsn_payload_reg(payload, 4))?;
+    validate_bpf_reg("select false", kinsn_payload_reg(payload, 8))?;
+    validate_bpf_reg("select cond", kinsn_payload_reg(payload, 12))?;
+    if kinsn_payload_reg(payload, 16) != 0 {
+        anyhow::bail!("select condition mode is not KINSN_SELECT_COND_NEZ");
+    }
+    Ok(4)
+}
+
 /// COND_SELECT pass: replaces branch+mov diamond patterns with
 /// bpf_select64() kfunc calls (lowered to branchless select by the JIT).
 ///
@@ -110,7 +131,7 @@ impl BpfPass for CondSelectPass {
         }
 
         // Check if bpf_select64 kfunc is available.
-        if ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::Select64) < 0 {
+        if ctx.kinsn_registry.btf_id_for_target_name("bpf_select64") < 0 {
             // Report detected sites without emitting when the target kfunc is absent.
             let sites = self.analyze(&program.insns);
             let diagnostics: Vec<String> = sites
@@ -144,7 +165,7 @@ impl BpfPass for CondSelectPass {
         let liveness = analyses.get(&liveness_analysis, program);
 
         let sites = self.analyze(&program.insns);
-        let btf_id = ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::Select64);
+        let btf_id = ctx.kinsn_registry.btf_id_for_target_name("bpf_select64");
         let mut safe_sites: Vec<SafeCondSelectSite> = Vec::new();
         let mut skipped = Vec::new();
 

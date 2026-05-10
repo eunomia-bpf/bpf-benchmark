@@ -11,7 +11,6 @@ pub mod bpf {
     pub use crate::mock_maps::{install_mock_map, use_mock_maps, BpfMapInfo, MockMapState};
 }
 pub mod insn;
-pub mod kinsn;
 #[cfg(test)]
 pub mod mock_maps;
 pub mod pass;

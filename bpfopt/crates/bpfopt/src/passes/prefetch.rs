@@ -32,10 +32,31 @@ const BPF_PROG_TYPE_LWT_IN: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_IN;
 const BPF_PROG_TYPE_LWT_OUT: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_OUT;
 const BPF_PROG_TYPE_LWT_XMIT: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_XMIT;
 
+pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
+    canonical_name: PREFETCH_TARGET_NAME,
+    aliases: &["prefetch"],
+    decode_proof: decode_prefetch_proof,
+}];
+
 pub(super) const XDP_DATA_OFF: i16 = 0;
 const XDP_DATA_END_OFF: i16 = 4;
 const SKB_DATA_OFF: i16 = 76;
 const SKB_DATA_END_OFF: i16 = 80;
+
+fn decode_prefetch_proof(payload: &[u8]) -> ProofRegion {
+    ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(prefetch_proof_len))
+}
+
+fn prefetch_proof_len(payload: u64) -> anyhow::Result<usize> {
+    validate_bpf_reg("prefetch ptr", kinsn_payload_reg(payload, 0))?;
+    if ((payload >> 4) & 0xf) != 0 {
+        anyhow::bail!("prefetch payload has unsupported hint kind");
+    }
+    if payload >> 8 != 0 {
+        anyhow::bail!("prefetch payload has non-zero reserved bits");
+    }
+    Ok(1)
+}
 
 /// Packet/map-value prefetch pass.
 ///
@@ -220,7 +241,11 @@ impl BpfPass for PrefetchPass {
         analyses: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        if ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::Prefetch) < 0 {
+        if ctx
+            .kinsn_registry
+            .btf_id_for_target_name(PREFETCH_TARGET_NAME)
+            < 0
+        {
             return Ok(PassResult::skipped(
                 self.name(),
                 SkipReason {
@@ -292,7 +317,9 @@ impl BpfPass for PrefetchPass {
             });
         }
 
-        let btf_id = ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::Prefetch);
+        let btf_id = ctx
+            .kinsn_registry
+            .btf_id_for_target_name(PREFETCH_TARGET_NAME);
         let kfunc_off = resolve_kinsn_call_off_for_target(ctx, PREFETCH_TARGET_NAME)?;
         let mut plan = RewritePlan::new();
         for candidate in &candidates {

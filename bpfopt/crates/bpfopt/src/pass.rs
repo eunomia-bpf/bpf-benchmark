@@ -13,14 +13,119 @@ use std::fmt;
 use std::sync::Arc;
 
 use crate::insn::BpfInsn;
-pub use crate::kinsn::KinsnSlot;
-use crate::kinsn::{primary_target_name_for_pass, target_spec_by_name};
 // MapInlineHint et al. live in passes/map_inline.rs (pass-local metadata) and are
 // re-exported here so existing `use crate::pass::*` consumers keep working.
 pub use crate::passes::map_inline::{MapInlineHint, MapInlineHintAnchor, MapInlineHintMode};
 pub use crate::verifier_log::{
     RegState, ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
+use serde::ser::SerializeStruct;
+use serde::{Serialize, Serializer};
+
+#[derive(Clone, Copy, Debug)]
+pub struct KinsnDescriptor {
+    pub canonical_name: &'static str,
+    pub aliases: &'static [&'static str],
+    pub decode_proof: fn(&[u8]) -> ProofRegion,
+}
+
+impl KinsnDescriptor {
+    pub fn probe_aliases(self) -> Vec<&'static str> {
+        let bpf_aliases = self
+            .aliases
+            .iter()
+            .copied()
+            .filter(|alias| alias.starts_with("bpf_"))
+            .collect::<Vec<_>>();
+        if bpf_aliases.is_empty() {
+            vec![self.canonical_name]
+        } else {
+            bpf_aliases
+        }
+    }
+}
+
+impl Serialize for KinsnDescriptor {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("KinsnDescriptor", 2)?;
+        state.serialize_field("json_name", self.canonical_name)?;
+        state.serialize_field("probe_aliases", &self.probe_aliases())?;
+        state.end()
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ProofRegion {
+    state: ProofRegionState,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum ProofRegionState {
+    Valid { proof_len: usize },
+    Invalid { error: String },
+}
+
+impl ProofRegion {
+    pub fn valid(proof_len: usize) -> Self {
+        Self {
+            state: ProofRegionState::Valid { proof_len },
+        }
+    }
+
+    pub fn invalid(error: impl Into<String>) -> Self {
+        Self {
+            state: ProofRegionState::Invalid {
+                error: error.into(),
+            },
+        }
+    }
+
+    pub fn from_result(result: anyhow::Result<usize>) -> Self {
+        match result {
+            Ok(proof_len) => Self::valid(proof_len),
+            Err(err) => Self::invalid(err.to_string()),
+        }
+    }
+
+    pub fn proof_len(&self) -> anyhow::Result<usize> {
+        match &self.state {
+            ProofRegionState::Valid { proof_len } => Ok(*proof_len),
+            ProofRegionState::Invalid { error } => anyhow::bail!("{error}"),
+        }
+    }
+}
+
+pub(crate) fn decode_packed_kinsn_payload(payload: &[u8]) -> anyhow::Result<u64> {
+    let bytes: [u8; 8] = payload.try_into().map_err(|_| {
+        anyhow::anyhow!(
+            "kinsn proof payload has length {}, expected 8 bytes",
+            payload.len()
+        )
+    })?;
+    Ok(u64::from_le_bytes(bytes))
+}
+
+pub(crate) fn kinsn_payload_reg(payload: u64, shift: u8) -> u8 {
+    ((payload >> shift) & 0xf) as u8
+}
+
+pub(crate) fn kinsn_payload_u8(payload: u64, shift: u8) -> u8 {
+    ((payload >> shift) & 0xff) as u8
+}
+
+pub(crate) fn kinsn_payload_s16(payload: u64, shift: u8) -> i16 {
+    ((payload >> shift) & 0xffff) as u16 as i16
+}
+
+pub(crate) fn validate_bpf_reg(label: &str, reg: u8) -> anyhow::Result<()> {
+    if reg > 10 {
+        anyhow::bail!("{label} register {reg} is outside BPF_REG_0..BPF_REG_10");
+    }
+    Ok(())
+}
 
 // ── Per-instruction annotation — populated by analysis passes, read by transform passes.
 #[derive(Clone, Debug, Default)]
@@ -662,24 +767,60 @@ pub struct PassContext {
 /// BTF ID = -1 means the target is not available.
 #[derive(Clone, Debug)]
 pub struct KinsnRegistry {
-    btf_ids: [i32; KinsnSlot::COUNT],
-    call_offsets: [i16; KinsnSlot::COUNT],
+    by_name: HashMap<&'static str, RegistryEntry>,
+    by_btf_id: HashMap<i32, &'static KinsnDescriptor>,
 }
 
-#[rustfmt::skip]
-impl Default for KinsnRegistry { fn default() -> Self { Self::unavailable() } }
+#[derive(Clone, Copy, Debug)]
+struct RegistryEntry {
+    btf_id: i32,
+    call_off: i16,
+    descriptor: &'static KinsnDescriptor,
+}
+
+impl Default for KinsnRegistry {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl KinsnRegistry {
-    #[rustfmt::skip]
-    pub fn unavailable() -> Self { Self { btf_ids: [-1; KinsnSlot::COUNT], call_offsets: [0; KinsnSlot::COUNT] } }
+    pub fn new() -> Self {
+        let mut registry = Self {
+            by_name: HashMap::new(),
+            by_btf_id: HashMap::new(),
+        };
+        for pass in crate::passes::PASS_REGISTRY {
+            for descriptor in pass.metadata.kinsn_targets {
+                registry.register_descriptor(descriptor);
+            }
+        }
+        registry
+    }
 
-    #[rustfmt::skip]
-    pub fn target_name_for_pass(pass_name: &str) -> Option<&'static str> { primary_target_name_for_pass(pass_name) }
+    pub fn unavailable() -> Self {
+        Self::new()
+    }
 
-    fn slot_for_target_name(target_name: &str) -> anyhow::Result<KinsnSlot> {
-        target_spec_by_name(target_name)
-            .map(|spec| spec.registry_slot)
-            .ok_or_else(|| anyhow::anyhow!("unknown kinsn target: {target_name}"))
+    pub fn target_name_for_pass(pass_name: &str) -> Option<&'static str> {
+        crate::passes::PASS_REGISTRY
+            .iter()
+            .find(|entry| entry.name == pass_name)
+            .and_then(|entry| entry.metadata.kinsn_targets.first())
+            .map(|descriptor| descriptor.canonical_name)
+    }
+
+    pub fn canonical_name_for_target_name(&self, target_name: &str) -> Option<&'static str> {
+        self.by_name
+            .get(target_name)
+            .map(|entry| entry.descriptor.canonical_name)
+    }
+
+    pub fn lookup_by_btf_id(&self, btf_id: i32) -> anyhow::Result<&'static KinsnDescriptor> {
+        self.by_btf_id
+            .get(&btf_id)
+            .copied()
+            .ok_or_else(|| anyhow::anyhow!("kinsn call btf_id {btf_id} is not present in the kinsn registry"))
     }
 
     pub fn set_btf_id_for_target_name(
@@ -687,44 +828,111 @@ impl KinsnRegistry {
         target_name: &str,
         btf_id: i32,
     ) -> anyhow::Result<()> {
-        self.set_btf_id_for_slot(Self::slot_for_target_name(target_name)?, btf_id);
-        Ok(())
+        let descriptor = self.descriptor_for_target_name(target_name)?;
+        self.set_btf_id_for_descriptor(descriptor, btf_id)
     }
-
-    #[rustfmt::skip]
-    pub fn set_btf_id_for_slot(&mut self, slot: KinsnSlot, btf_id: i32) { self.btf_ids[slot.index()] = btf_id; }
 
     pub fn set_call_off_for_target_name(
         &mut self,
         target_name: &str,
         call_off: i16,
     ) -> anyhow::Result<()> {
-        self.set_call_off_for_slot(Self::slot_for_target_name(target_name)?, call_off);
+        let descriptor = self.descriptor_for_target_name(target_name)?;
+        for entry in self.entries_for_descriptor_mut(descriptor) {
+            entry.call_off = call_off;
+        }
         Ok(())
     }
 
-    #[rustfmt::skip]
-    pub fn set_call_off_for_slot(&mut self, slot: KinsnSlot, call_off: i16) { self.call_offsets[slot.index()] = call_off; }
-
-    #[rustfmt::skip]
-    pub fn btf_id_for_slot(&self, slot: KinsnSlot) -> i32 { self.btf_ids[slot.index()] }
-
-    #[rustfmt::skip]
-    pub fn call_off_for_slot(&self, slot: KinsnSlot) -> i16 { self.call_offsets[slot.index()] }
-
     pub fn btf_id_for_target_name(&self, target_name: &str) -> i32 {
-        target_spec_by_name(target_name)
-            .map(|spec| self.btf_id_for_slot(spec.registry_slot))
+        self.by_name
+            .get(target_name)
+            .map(|entry| entry.btf_id)
             .unwrap_or(-1)
     }
 
     pub fn call_off_for_target_name(&self, target_name: &str) -> anyhow::Result<i16> {
-        Ok(self.call_off_for_slot(Self::slot_for_target_name(target_name)?))
+        self.by_name
+            .get(target_name)
+            .map(|entry| entry.call_off)
+            .ok_or_else(|| anyhow::anyhow!("unknown kinsn target: {target_name}"))
     }
 
     /// Whether the kinsn for the named target is registered (btf_id ≥ 0).
     pub fn kinsn_registered_for_target_name(&self, target_name: &str) -> bool {
         self.btf_id_for_target_name(target_name) >= 0
+    }
+
+    fn register_descriptor(&mut self, descriptor: &'static KinsnDescriptor) {
+        self.register_descriptor_name(descriptor.canonical_name, descriptor);
+        for alias in descriptor.aliases {
+            self.register_descriptor_name(alias, descriptor);
+        }
+    }
+
+    fn register_descriptor_name(
+        &mut self,
+        name: &'static str,
+        descriptor: &'static KinsnDescriptor,
+    ) {
+        let previous = self.by_name.insert(
+            name,
+            RegistryEntry {
+                btf_id: -1,
+                call_off: 0,
+                descriptor,
+            },
+        );
+        assert!(previous.is_none(), "duplicate kinsn target name {name}");
+    }
+
+    fn descriptor_for_target_name(
+        &self,
+        target_name: &str,
+    ) -> anyhow::Result<&'static KinsnDescriptor> {
+        self.by_name
+            .get(target_name)
+            .map(|entry| entry.descriptor)
+            .ok_or_else(|| anyhow::anyhow!("unknown kinsn target: {target_name}"))
+    }
+
+    fn set_btf_id_for_descriptor(
+        &mut self,
+        descriptor: &'static KinsnDescriptor,
+        btf_id: i32,
+    ) -> anyhow::Result<()> {
+        if let Some(old_btf_id) = self
+            .by_name
+            .get(descriptor.canonical_name)
+            .map(|entry| entry.btf_id)
+            .filter(|btf_id| *btf_id >= 0)
+        {
+            self.by_btf_id.remove(&old_btf_id);
+        }
+        if btf_id >= 0 {
+            if let Some(existing) = self.by_btf_id.get(&btf_id) {
+                if existing.canonical_name != descriptor.canonical_name {
+                    anyhow::bail!(
+                        "kinsn btf_id {btf_id} is already registered for {}",
+                        existing.canonical_name
+                    );
+                }
+            }
+            self.by_btf_id.insert(btf_id, descriptor);
+        }
+        for entry in self.entries_for_descriptor_mut(descriptor) {
+            entry.btf_id = btf_id;
+        }
+        Ok(())
+    }
+
+    fn entries_for_descriptor_mut(
+        &mut self,
+        descriptor: &'static KinsnDescriptor,
+    ) -> impl Iterator<Item = &mut RegistryEntry> {
+        self.by_name
+            .values_mut()
+            .filter(move |entry| entry.descriptor.canonical_name == descriptor.canonical_name)
     }
 }
 

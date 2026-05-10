@@ -44,7 +44,7 @@ fn run_pipeline_with_passes(program: &mut BpfProgram, pass_names: &[&str]) -> Pi
 
 #[test]
 #[rustfmt::skip] fn pass_registry_declares_all_emitted_kinsn_probe_names() {
-    let declared = PASS_REGISTRY.iter().flat_map(|entry| entry.metadata.kinsns_used).flat_map(|kinsn| kinsn.probe_aliases().iter().copied()).collect::<BTreeSet<_>>();
+    let declared = PASS_REGISTRY.iter().flat_map(|entry| entry.metadata.kinsn_targets).flat_map(|kinsn| kinsn.probe_aliases()).collect::<BTreeSet<_>>();
     assert_eq!(declared, BTreeSet::from(["bpf_rotate64", "bpf_rotate32", "bpf_select64", "bpf_ccmp64", "bpf_extract64", "bpf_endian_load16", "bpf_endian_load32", "bpf_endian_load64", "bpf_memcpy_bulk", "bpf_memset_bulk", "bpf_prefetch"]));
 }
 

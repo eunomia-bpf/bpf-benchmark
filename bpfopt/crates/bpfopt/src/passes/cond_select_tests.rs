@@ -34,7 +34,8 @@ fn jle_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
 fn ctx_with_select_kfunc(btf_id: i32) -> PassContext {
     let mut ctx = PassContext::baseline();
     ctx.kinsn_registry
-        .set_btf_id_for_slot(KinsnSlot::Select64, btf_id);
+        .set_btf_id_for_target_name("bpf_select64", btf_id)
+        .unwrap();
     ctx
 }
 

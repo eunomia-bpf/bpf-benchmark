@@ -11,6 +11,55 @@ use super::utils::{
     resolve_kinsn_call_off_for_target,
 };
 
+pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
+    KinsnDescriptor {
+        canonical_name: "bpf_rotate64",
+        aliases: &["rotate64"],
+        decode_proof: decode_rotate64_proof,
+    },
+    KinsnDescriptor {
+        canonical_name: "bpf_rotate32",
+        aliases: &["rotate32"],
+        decode_proof: decode_rotate32_proof,
+    },
+];
+
+fn decode_rotate64_proof(payload: &[u8]) -> ProofRegion {
+    decode_rotate_proof(payload, 63)
+}
+
+fn decode_rotate32_proof(payload: &[u8]) -> ProofRegion {
+    decode_rotate_proof(payload, 31)
+}
+
+fn decode_rotate_proof(payload: &[u8], shift_mask: u8) -> ProofRegion {
+    ProofRegion::from_result(
+        decode_packed_kinsn_payload(payload)
+            .and_then(|payload| rotate_proof_len(payload, shift_mask)),
+    )
+}
+
+fn rotate_proof_len(payload: u64, shift_mask: u8) -> anyhow::Result<usize> {
+    let dst_reg = kinsn_payload_reg(payload, 0);
+    let src_reg = kinsn_payload_reg(payload, 4);
+    let shift = kinsn_payload_u8(payload, 8) & shift_mask;
+    let tmp_reg = kinsn_payload_reg(payload, 16);
+
+    validate_bpf_reg("rotate dst", dst_reg)?;
+    validate_bpf_reg("rotate src", src_reg)?;
+    validate_bpf_reg("rotate tmp", tmp_reg)?;
+    if tmp_reg == dst_reg || tmp_reg == src_reg {
+        anyhow::bail!("rotate tmp register aliases an operand");
+    }
+    if shift == 0 {
+        Ok(1)
+    } else if dst_reg == src_reg {
+        Ok(4)
+    } else {
+        Ok(5)
+    }
+}
+
 /// ROTATE optimization pass: replaces shift+OR rotate patterns with
 /// bpf_rotate64()/bpf_rotate32() kfunc calls. JIT inlines each kfunc as a
 /// native rotate.
@@ -32,8 +81,8 @@ impl BpfPass for RotatePass {
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         // Prerequisite: check if at least one rotate kfunc is available.
-        if ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::Rotate64) < 0
-            && ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::Rotate32) < 0
+        if ctx.kinsn_registry.btf_id_for_target_name("bpf_rotate64") < 0
+            && ctx.kinsn_registry.btf_id_for_target_name("bpf_rotate32") < 0
         {
             return Ok(PassResult::skipped(
                 self.name(),

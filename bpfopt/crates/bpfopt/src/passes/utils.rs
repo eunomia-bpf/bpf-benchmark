@@ -8,7 +8,6 @@ use std::collections::HashSet;
 
 use crate::analysis::{CFGAnalysis, CFGResult, LivenessAnalysis};
 use crate::insn::*;
-use crate::kinsn::{ProofLayout, TargetSpec, KINSN_TARGETS};
 use crate::pass::{Analysis, BpfProgram, BtfInfoRecords, KinsnRegistry, PassContext};
 
 // ── Branch fixup ───────────────────────────────────────────────────
@@ -261,10 +260,9 @@ fn collect_kinsn_proof_regions(
             && insns[pc + 1].is_call()
             && insns[pc + 1].src_reg() == BPF_PSEUDO_KINSN_CALL
         {
-            let payload = kinsn_sidecar_payload(&insns[pc]);
+            let payload = kinsn_sidecar_payload(&insns[pc]).to_le_bytes();
             let btf_id = insns[pc + 1].imm;
-            let call_off = insns[pc + 1].off;
-            let proof_len = kinsn_proof_len(registry, btf_id, call_off, payload)?;
+            let proof_len = kinsn_proof_len(registry, btf_id, &payload)?;
             regions.push(KinsnProofRegion {
                 sidecar_pc: pc,
                 call_pc: pc + 1,
@@ -290,226 +288,22 @@ fn collect_kinsn_proof_regions(
 fn kinsn_proof_len(
     registry: &KinsnRegistry,
     btf_id: i32,
-    call_off: i16,
-    payload: u64,
+    payload: &[u8],
 ) -> anyhow::Result<usize> {
-    for spec in KINSN_TARGETS {
-        if kinsn_call_matches(registry, btf_id, call_off, spec) {
-            return proof_len_for_layout(spec.proof_layout, payload);
-        }
-    }
-
-    anyhow::bail!("kinsn call btf_id {btf_id} is not present in the kinsn registry")
-}
-
-fn kinsn_call_matches(
-    registry: &KinsnRegistry,
-    actual_btf_id: i32,
-    actual_call_off: i16,
-    target: &TargetSpec,
-) -> bool {
-    let expected_btf_id = registry.btf_id_for_slot(target.registry_slot);
-    if expected_btf_id <= 0 || actual_btf_id != expected_btf_id {
-        return false;
-    }
-    actual_call_off == registry.call_off_for_slot(target.registry_slot)
-}
-
-fn proof_len_for_layout(layout: ProofLayout, payload: u64) -> anyhow::Result<usize> {
-    match layout {
-        ProofLayout::Rotate { shift_mask } => rotate_proof_len(payload, shift_mask),
-        ProofLayout::Select => select_proof_len(payload),
-        ProofLayout::Ccmp => ccmp_proof_len(payload),
-        ProofLayout::Extract => extract_proof_len(payload),
-        ProofLayout::BulkMemcpy => memcpy_bulk_proof_len(payload),
-        ProofLayout::BulkMemset => memset_bulk_proof_len(payload),
-        ProofLayout::Endian => endian_proof_len(payload),
-        ProofLayout::Prefetch => prefetch_proof_len(payload),
-    }
+    let desc = registry.lookup_by_btf_id(btf_id)?;
+    let proof = (desc.decode_proof)(payload);
+    proof.proof_len().map_err(|err| {
+        anyhow::anyhow!(
+            "failed to decode proof region for {}: {err}",
+            desc.canonical_name
+        )
+    })
 }
 
 fn kinsn_sidecar_payload(insn: &BpfInsn) -> u64 {
     (u64::from(insn.dst_reg()) & 0xf)
         | (u64::from(insn.off as u16) << 4)
         | (u64::from(insn.imm as u32) << 20)
-}
-
-fn payload_reg(payload: u64, shift: u8) -> u8 {
-    ((payload >> shift) & 0xf) as u8
-}
-
-fn payload_u8(payload: u64, shift: u8) -> u8 {
-    ((payload >> shift) & 0xff) as u8
-}
-
-fn payload_s16(payload: u64, shift: u8) -> i16 {
-    ((payload >> shift) & 0xffff) as u16 as i16
-}
-
-fn validate_bpf_reg(label: &str, reg: u8) -> anyhow::Result<()> {
-    if reg > BPF_REG_10 {
-        anyhow::bail!("{label} register {reg} is outside BPF_REG_0..BPF_REG_10");
-    }
-    Ok(())
-}
-
-fn rotate_proof_len(payload: u64, shift_mask: u8) -> anyhow::Result<usize> {
-    let dst_reg = payload_reg(payload, 0);
-    let src_reg = payload_reg(payload, 4);
-    let shift = payload_u8(payload, 8) & shift_mask;
-    let tmp_reg = payload_reg(payload, 16);
-
-    validate_bpf_reg("rotate dst", dst_reg)?;
-    validate_bpf_reg("rotate src", src_reg)?;
-    validate_bpf_reg("rotate tmp", tmp_reg)?;
-    if tmp_reg == dst_reg || tmp_reg == src_reg {
-        anyhow::bail!("rotate tmp register aliases an operand");
-    }
-    if shift == 0 {
-        Ok(1)
-    } else if dst_reg == src_reg {
-        Ok(4)
-    } else {
-        Ok(5)
-    }
-}
-
-fn select_proof_len(payload: u64) -> anyhow::Result<usize> {
-    validate_bpf_reg("select dst", payload_reg(payload, 0))?;
-    validate_bpf_reg("select true", payload_reg(payload, 4))?;
-    validate_bpf_reg("select false", payload_reg(payload, 8))?;
-    validate_bpf_reg("select cond", payload_reg(payload, 12))?;
-    if payload_reg(payload, 16) != 0 {
-        anyhow::bail!("select condition mode is not KINSN_SELECT_COND_NEZ");
-    }
-    Ok(4)
-}
-
-fn ccmp_proof_len(payload: u64) -> anyhow::Result<usize> {
-    let dst_reg = payload_reg(payload, 0);
-    let count_bits = ((payload >> 4) & 0x3) as u8;
-    let count = usize::from(count_bits) + 2;
-    let mode = (payload >> 6) & 0x1;
-
-    if payload >> 24 != 0 {
-        anyhow::bail!("ccmp payload has non-zero reserved bits");
-    }
-    if count_bits > 2 {
-        anyhow::bail!("ccmp count {} exceeds maximum 4", count);
-    }
-    if dst_reg > BPF_REG_9 {
-        anyhow::bail!("ccmp dst register {dst_reg} is outside BPF_REG_0..BPF_REG_9");
-    }
-    if mode > 1 {
-        anyhow::bail!("ccmp mode {mode} is invalid");
-    }
-
-    for idx in 0..4 {
-        let reg = payload_reg(payload, (8 + idx * 4) as u8);
-        if idx >= count {
-            if reg != 0 {
-                anyhow::bail!("ccmp unused register slot {idx} is non-zero");
-            }
-            continue;
-        }
-        validate_bpf_reg("ccmp compare", reg)?;
-        if reg == dst_reg {
-            anyhow::bail!("ccmp dst register aliases compare operand r{reg}");
-        }
-    }
-
-    Ok(count + 2)
-}
-
-fn extract_proof_len(payload: u64) -> anyhow::Result<usize> {
-    validate_bpf_reg("extract dst", payload_reg(payload, 0))?;
-    let start = payload_u8(payload, 8);
-    let bit_len = payload_u8(payload, 16);
-    if start >= 64 || bit_len == 0 || bit_len > 32 || u16::from(start) + u16::from(bit_len) > 64 {
-        anyhow::bail!("extract payload has invalid range start={start} bit_len={bit_len}");
-    }
-    Ok(usize::from(start != 0) + 1)
-}
-
-fn bulk_offset_range_valid(offset: i16, len: usize) -> bool {
-    let end = i32::from(offset) + len as i32 - 1;
-    end >= i32::from(i16::MIN) && end <= i32::from(i16::MAX)
-}
-
-fn memcpy_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
-    let dst_base = payload_reg(payload, 0);
-    let src_base = payload_reg(payload, 4);
-    let dst_off = payload_s16(payload, 8);
-    let src_off = payload_s16(payload, 24);
-    let len = usize::from(payload_u8(payload, 40)) + 1;
-    let tmp_reg = payload_reg(payload, 48);
-
-    if payload >> 52 != 0 {
-        anyhow::bail!("memcpy bulk payload has non-zero reserved bits");
-    }
-    if len == 0 || len > 128 {
-        anyhow::bail!("memcpy bulk length {len} is outside 1..128");
-    }
-    validate_bpf_reg("memcpy bulk dst", dst_base)?;
-    validate_bpf_reg("memcpy bulk src", src_base)?;
-    validate_bpf_reg("memcpy bulk tmp", tmp_reg)?;
-    if tmp_reg == BPF_REG_10 || tmp_reg == dst_base || tmp_reg == src_base {
-        anyhow::bail!("memcpy bulk tmp register aliases an invalid operand");
-    }
-    if !bulk_offset_range_valid(dst_off, len) || !bulk_offset_range_valid(src_off, len) {
-        anyhow::bail!("memcpy bulk offset range is outside s16");
-    }
-    Ok(len * 2)
-}
-
-fn memset_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
-    let dst_base = payload_reg(payload, 0);
-    let val_reg = payload_reg(payload, 4);
-    let dst_off = payload_s16(payload, 8);
-    let len = usize::from(payload_u8(payload, 24)) + 1;
-    let width_class = (payload >> 32) & 0x3;
-    let value_from_reg = ((payload >> 34) & 0x1) != 0;
-    let zero_fill = ((payload >> 35) & 0x1) != 0;
-    let fill_imm8 = payload_u8(payload, 36);
-    let width_bytes = 1usize << width_class;
-
-    if payload >> 44 != 0 {
-        anyhow::bail!("memset bulk payload has non-zero reserved bits");
-    }
-    if len == 0 || len > 128 {
-        anyhow::bail!("memset bulk length {len} is outside 1..128");
-    }
-    validate_bpf_reg("memset bulk dst", dst_base)?;
-    if value_from_reg {
-        validate_bpf_reg("memset bulk value", val_reg)?;
-    }
-    if len % width_bytes != 0 {
-        anyhow::bail!("memset bulk length {len} is not a multiple of width {width_bytes}");
-    }
-    if !bulk_offset_range_valid(dst_off, len) {
-        anyhow::bail!("memset bulk offset range is outside s16");
-    }
-    if zero_fill && fill_imm8 != 0 {
-        anyhow::bail!("memset bulk zero-fill payload has non-zero fill immediate");
-    }
-    Ok(len)
-}
-
-fn endian_proof_len(payload: u64) -> anyhow::Result<usize> {
-    validate_bpf_reg("endian dst", payload_reg(payload, 0))?;
-    validate_bpf_reg("endian base", payload_reg(payload, 4))?;
-    Ok(2)
-}
-
-fn prefetch_proof_len(payload: u64) -> anyhow::Result<usize> {
-    validate_bpf_reg("prefetch ptr", payload_reg(payload, 0))?;
-    if ((payload >> 4) & 0xf) != 0 {
-        anyhow::bail!("prefetch payload has unsupported hint kind");
-    }
-    if payload >> 8 != 0 {
-        anyhow::bail!("prefetch payload has non-zero reserved bits");
-    }
-    Ok(1)
 }
 
 fn kinsn_candidate_subprog_starts(insns: &[BpfInsn]) -> anyhow::Result<Vec<usize>> {
@@ -1325,7 +1119,9 @@ mod tests {
         });
 
         let mut registry = KinsnRegistry::default();
-        registry.set_btf_id_for_slot(KinsnSlot::BulkMemcpy, memcpy_btf_id);
+        registry
+            .set_btf_id_for_target_name("bpf_bulk_memcpy", memcpy_btf_id)
+            .unwrap();
 
         remap_kinsn_btf_metadata(&mut program, &registry).unwrap();
 
@@ -1338,36 +1134,21 @@ mod tests {
     }
 
     #[test]
-    fn remap_kinsn_btf_metadata_disambiguates_duplicate_btf_ids_by_call_offset() {
+    fn kinsn_registry_rejects_duplicate_btf_ids() {
         let shared_btf_id = 2000;
-        let extract_payload = 2 | (16 << 8) | (12 << 16);
-        let mut program = BpfProgram::new(vec![
-            BpfInsn::kinsn_sidecar(extract_payload),
-            BpfInsn::call_kinsn_with_off(shared_btf_id, 5),
-            BpfInsn::new(
-                BPF_JMP | BPF_CALL,
-                BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
-                0,
-                1,
-            ),
-            BpfInsn::exit(),
-            BpfInsn::mov64_imm(0, 1),
-            BpfInsn::exit(),
-        ]);
-        program.func_info = Some(BtfInfoRecords {
-            rec_size: 8,
-            bytes: [func_btf_record(0, 10), func_btf_record(999, 11)].concat(),
-        });
-
         let mut registry = KinsnRegistry::default();
-        registry.set_btf_id_for_slot(KinsnSlot::Rotate64, shared_btf_id);
-        registry.set_btf_id_for_slot(KinsnSlot::Extract64, shared_btf_id);
-        registry.set_call_off_for_slot(KinsnSlot::Rotate64, 3);
-        registry.set_call_off_for_slot(KinsnSlot::Extract64, 5);
+        registry
+            .set_btf_id_for_target_name("bpf_rotate64", shared_btf_id)
+            .unwrap();
 
-        remap_kinsn_btf_metadata(&mut program, &registry).unwrap();
+        let err = registry
+            .set_btf_id_for_target_name("bpf_extract64", shared_btf_id)
+            .unwrap_err();
 
-        assert_eq!(btf_offsets(program.func_info.as_ref().unwrap()), vec![0, 4]);
+        assert!(
+            err.to_string().contains("already registered"),
+            "err={err}"
+        );
     }
 
     #[test]

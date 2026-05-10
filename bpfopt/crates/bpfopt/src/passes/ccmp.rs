@@ -11,9 +11,55 @@ use super::utils::{
     resolve_kinsn_call_off_for_pass,
 };
 
+pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
+    canonical_name: "bpf_ccmp64",
+    aliases: &["ccmp64"],
+    decode_proof: decode_ccmp_proof,
+}];
+
 const MIN_CCMP_TERMS: usize = 2;
 const MAX_CCMP_TERMS: usize = 4;
 const CCMP_REPLACEMENT_LEN: usize = 3;
+
+fn decode_ccmp_proof(payload: &[u8]) -> ProofRegion {
+    ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(ccmp_proof_len))
+}
+
+fn ccmp_proof_len(payload: u64) -> anyhow::Result<usize> {
+    let dst_reg = kinsn_payload_reg(payload, 0);
+    let count_bits = ((payload >> 4) & 0x3) as u8;
+    let count = usize::from(count_bits) + 2;
+    let mode = (payload >> 6) & 0x1;
+
+    if payload >> 24 != 0 {
+        anyhow::bail!("ccmp payload has non-zero reserved bits");
+    }
+    if count_bits > 2 {
+        anyhow::bail!("ccmp count {} exceeds maximum 4", count);
+    }
+    if dst_reg > BPF_REG_9 {
+        anyhow::bail!("ccmp dst register {dst_reg} is outside BPF_REG_0..BPF_REG_9");
+    }
+    if mode > 1 {
+        anyhow::bail!("ccmp mode {mode} is invalid");
+    }
+
+    for idx in 0..4 {
+        let reg = kinsn_payload_reg(payload, (8 + idx * 4) as u8);
+        if idx >= count {
+            if reg != 0 {
+                anyhow::bail!("ccmp unused register slot {idx} is non-zero");
+            }
+            continue;
+        }
+        validate_bpf_reg("ccmp compare", reg)?;
+        if reg == dst_reg {
+            anyhow::bail!("ccmp dst register aliases compare operand r{reg}");
+        }
+    }
+
+    Ok(count + 2)
+}
 
 /// CCMP pass: folds same-target zero-test short-circuit AND chains into an
 /// ARM64-only conditional-compare kinsn plus one final branch.
@@ -121,7 +167,7 @@ impl BpfPass for CcmpPass {
             ));
         }
 
-        if ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::Ccmp64) < 0 {
+        if ctx.kinsn_registry.btf_id_for_target_name("bpf_ccmp64") < 0 {
             return Ok(PassResult::skipped(
                 self.name(),
                 SkipReason {
@@ -212,7 +258,7 @@ impl BpfPass for CcmpPass {
             });
         }
 
-        let btf_id = ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::Ccmp64);
+        let btf_id = ctx.kinsn_registry.btf_id_for_target_name("bpf_ccmp64");
         let kfunc_off = resolve_kinsn_call_off_for_pass(ctx, self.name())?;
         let mut plan = RewritePlan::new();
         for safe_site in &safe_sites {

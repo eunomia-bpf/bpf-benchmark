@@ -11,6 +11,24 @@ use super::utils::{
     resolve_kinsn_call_off_for_target,
 };
 
+pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
+    KinsnDescriptor {
+        canonical_name: "bpf_endian_load16",
+        aliases: &["endian_load16"],
+        decode_proof: decode_endian_proof,
+    },
+    KinsnDescriptor {
+        canonical_name: "bpf_endian_load32",
+        aliases: &["endian_load32"],
+        decode_proof: decode_endian_proof,
+    },
+    KinsnDescriptor {
+        canonical_name: "bpf_endian_load64",
+        aliases: &["endian_load64"],
+        decode_proof: decode_endian_proof,
+    },
+];
+
 /// ENDIAN_FUSION optimization pass: replaces LDX_MEM + ENDIAN_TO_BE patterns
 /// with bpf_endian_loadXX() kfunc calls (lowered to MOVBE on x86 or
 /// LDR+REV on ARM64 by the JIT).
@@ -32,6 +50,16 @@ pub struct EndianFusionPass;
 
 const BPF_TO_LE: u8 = 0x00;
 const MAX_NARROW_SCAN: usize = 32;
+
+fn decode_endian_proof(payload: &[u8]) -> ProofRegion {
+    ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(endian_proof_len))
+}
+
+fn endian_proof_len(payload: u64) -> anyhow::Result<usize> {
+    validate_bpf_reg("endian dst", kinsn_payload_reg(payload, 0))?;
+    validate_bpf_reg("endian base", kinsn_payload_reg(payload, 4))?;
+    Ok(2)
+}
 
 /// An endian fusion site: a LDX_MEM followed by a byte-swap
 /// on the same destination register, with matching or safely narrowed sizes.
@@ -229,13 +257,9 @@ fn writes_reg(insn: &BpfInsn, reg: u8) -> bool {
 
 /// Select the appropriate BTF ID for a given load size.
 fn btf_id_for_size(ctx: &PassContext, size: u8) -> i32 {
-    let slot = match size {
-        BPF_H => KinsnSlot::EndianLoad16,
-        BPF_W => KinsnSlot::EndianLoad32,
-        BPF_DW => KinsnSlot::EndianLoad64,
-        _ => return -1,
-    };
-    ctx.kinsn_registry.btf_id_for_slot(slot)
+    kfunc_name_for_size(size)
+        .map(|name| ctx.kinsn_registry.btf_id_for_target_name(name))
+        .unwrap_or(-1)
 }
 
 fn kfunc_name_for_size(size: u8) -> Option<&'static str> {
@@ -249,13 +273,9 @@ fn kfunc_name_for_size(size: u8) -> Option<&'static str> {
 
 /// Check if any of the three endian_load kfuncs are available.
 fn any_endian_kfunc_available(ctx: &PassContext) -> bool {
-    [
-        KinsnSlot::EndianLoad16,
-        KinsnSlot::EndianLoad32,
-        KinsnSlot::EndianLoad64,
-    ]
-    .iter()
-    .any(|&slot| ctx.kinsn_registry.btf_id_for_slot(slot) >= 0)
+    KINSN_TARGETS
+        .iter()
+        .any(|target| ctx.kinsn_registry.btf_id_for_target_name(target.canonical_name) >= 0)
 }
 
 pub(super) fn endian_payload(dst_reg: u8, base_reg: u8, offset: i16) -> u64 {

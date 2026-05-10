@@ -19,6 +19,91 @@ const MIN_BULK_BYTES: usize = 32;
 const CHUNK_MAX_BYTES: usize = 128;
 const STACK_PTR_REG: u8 = 10;
 
+pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
+    KinsnDescriptor {
+        canonical_name: MEMCPY_TARGET,
+        aliases: &["bulk_memcpy", "bpf_memcpy_bulk", "memcpy_bulk"],
+        decode_proof: decode_memcpy_bulk_proof,
+    },
+    KinsnDescriptor {
+        canonical_name: MEMSET_TARGET,
+        aliases: &["bulk_memset", "bpf_memset_bulk", "memset_bulk"],
+        decode_proof: decode_memset_bulk_proof,
+    },
+];
+
+fn decode_memcpy_bulk_proof(payload: &[u8]) -> ProofRegion {
+    ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(memcpy_bulk_proof_len))
+}
+
+fn decode_memset_bulk_proof(payload: &[u8]) -> ProofRegion {
+    ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(memset_bulk_proof_len))
+}
+
+fn bulk_offset_range_valid(offset: i16, len: usize) -> bool {
+    let end = i32::from(offset) + len as i32 - 1;
+    end >= i32::from(i16::MIN) && end <= i32::from(i16::MAX)
+}
+
+fn memcpy_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
+    let dst_base = kinsn_payload_reg(payload, 0);
+    let src_base = kinsn_payload_reg(payload, 4);
+    let dst_off = kinsn_payload_s16(payload, 8);
+    let src_off = kinsn_payload_s16(payload, 24);
+    let len = usize::from(kinsn_payload_u8(payload, 40)) + 1;
+    let tmp_reg = kinsn_payload_reg(payload, 48);
+
+    if payload >> 52 != 0 {
+        anyhow::bail!("memcpy bulk payload has non-zero reserved bits");
+    }
+    if len == 0 || len > 128 {
+        anyhow::bail!("memcpy bulk length {len} is outside 1..128");
+    }
+    validate_bpf_reg("memcpy bulk dst", dst_base)?;
+    validate_bpf_reg("memcpy bulk src", src_base)?;
+    validate_bpf_reg("memcpy bulk tmp", tmp_reg)?;
+    if tmp_reg == BPF_REG_10 || tmp_reg == dst_base || tmp_reg == src_base {
+        anyhow::bail!("memcpy bulk tmp register aliases an invalid operand");
+    }
+    if !bulk_offset_range_valid(dst_off, len) || !bulk_offset_range_valid(src_off, len) {
+        anyhow::bail!("memcpy bulk offset range is outside s16");
+    }
+    Ok(len * 2)
+}
+
+fn memset_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
+    let dst_base = kinsn_payload_reg(payload, 0);
+    let val_reg = kinsn_payload_reg(payload, 4);
+    let dst_off = kinsn_payload_s16(payload, 8);
+    let len = usize::from(kinsn_payload_u8(payload, 24)) + 1;
+    let width_class = (payload >> 32) & 0x3;
+    let value_from_reg = ((payload >> 34) & 0x1) != 0;
+    let zero_fill = ((payload >> 35) & 0x1) != 0;
+    let fill_imm8 = kinsn_payload_u8(payload, 36);
+    let width_bytes = 1usize << width_class;
+
+    if payload >> 44 != 0 {
+        anyhow::bail!("memset bulk payload has non-zero reserved bits");
+    }
+    if len == 0 || len > 128 {
+        anyhow::bail!("memset bulk length {len} is outside 1..128");
+    }
+    validate_bpf_reg("memset bulk dst", dst_base)?;
+    if value_from_reg {
+        validate_bpf_reg("memset bulk value", val_reg)?;
+    }
+    if len % width_bytes != 0 {
+        anyhow::bail!("memset bulk length {len} is not a multiple of width {width_bytes}");
+    }
+    if !bulk_offset_range_valid(dst_off, len) {
+        anyhow::bail!("memset bulk offset range is outside s16");
+    }
+    if zero_fill && fill_imm8 != 0 {
+        anyhow::bail!("memset bulk zero-fill payload has non-zero fill immediate");
+    }
+    Ok(len)
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum RegValue {
     Unknown,
@@ -126,8 +211,8 @@ impl BpfPass for BulkMemoryPass {
         let scan = scan_sites(&program.insns, &bt, &liveness);
         let mut skipped = scan.skips;
 
-        let memcpy_btf_id = ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::BulkMemcpy);
-        let memset_btf_id = ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::BulkMemset);
+        let memcpy_btf_id = ctx.kinsn_registry.btf_id_for_target_name(MEMCPY_TARGET);
+        let memset_btf_id = ctx.kinsn_registry.btf_id_for_target_name(MEMSET_TARGET);
 
         let mut safe_sites = Vec::new();
         for site in scan.sites {

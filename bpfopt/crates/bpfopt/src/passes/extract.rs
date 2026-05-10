@@ -11,6 +11,26 @@ use super::utils::{
     resolve_kinsn_call_off_for_pass,
 };
 
+pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
+    canonical_name: "bpf_extract64",
+    aliases: &["extract64"],
+    decode_proof: decode_extract_proof,
+}];
+
+fn decode_extract_proof(payload: &[u8]) -> ProofRegion {
+    ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(extract_proof_len))
+}
+
+fn extract_proof_len(payload: u64) -> anyhow::Result<usize> {
+    validate_bpf_reg("extract dst", kinsn_payload_reg(payload, 0))?;
+    let start = kinsn_payload_u8(payload, 8);
+    let bit_len = kinsn_payload_u8(payload, 16);
+    if start >= 64 || bit_len == 0 || bit_len > 32 || u16::from(start) + u16::from(bit_len) > 64 {
+        anyhow::bail!("extract payload has invalid range start={start} bit_len={bit_len}");
+    }
+    Ok(usize::from(start != 0) + 1)
+}
+
 /// EXTRACT optimization pass: replaces RSH+AND bitfield extraction patterns
 /// with bpf_extract64() kfunc calls.
 ///
@@ -113,7 +133,7 @@ impl BpfPass for ExtractPass {
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         // Check if bpf_extract64 kfunc is available.
-        if ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::Extract64) < 0 {
+        if ctx.kinsn_registry.btf_id_for_target_name("bpf_extract64") < 0 {
             return Ok(PassResult::skipped(
                 self.name(),
                 SkipReason {
@@ -127,7 +147,7 @@ impl BpfPass for ExtractPass {
         let bt = analyses.get(&bt_analysis, program);
 
         let sites = scan_extract_sites(&program.insns);
-        let btf_id = ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::Extract64);
+        let btf_id = ctx.kinsn_registry.btf_id_for_target_name("bpf_extract64");
         let mut safe_sites: Vec<SafeExtractSite> = Vec::new();
         let mut skipped = Vec::new();
 
