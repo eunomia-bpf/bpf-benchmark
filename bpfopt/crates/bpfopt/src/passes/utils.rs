@@ -8,6 +8,7 @@ use std::collections::HashSet;
 
 use crate::analysis::{CFGAnalysis, CFGResult, LivenessAnalysis};
 use crate::insn::*;
+use crate::kinsn::{ProofLayout, TargetSpec, KINSN_TARGETS};
 use crate::pass::{Analysis, BpfProgram, BtfInfoRecords, KinsnRegistry, PassContext};
 
 // ── Branch fixup ───────────────────────────────────────────────────
@@ -292,98 +293,10 @@ fn kinsn_proof_len(
     call_off: i16,
     payload: u64,
 ) -> anyhow::Result<usize> {
-    if kinsn_call_matches(
-        registry,
-        btf_id,
-        call_off,
-        "bpf_rotate64",
-        registry.rotate64_btf_id,
-    ) {
-        return rotate_proof_len(payload, 63);
-    }
-    if kinsn_call_matches(
-        registry,
-        btf_id,
-        call_off,
-        "bpf_rotate32",
-        registry.rotate32_btf_id,
-    ) {
-        return rotate_proof_len(payload, 31);
-    }
-    if kinsn_call_matches(
-        registry,
-        btf_id,
-        call_off,
-        "bpf_select64",
-        registry.select64_btf_id,
-    ) {
-        return select_proof_len(payload);
-    }
-    if kinsn_call_matches(
-        registry,
-        btf_id,
-        call_off,
-        "bpf_ccmp64",
-        registry.ccmp64_btf_id,
-    ) {
-        return ccmp_proof_len(payload);
-    }
-    if kinsn_call_matches(
-        registry,
-        btf_id,
-        call_off,
-        "bpf_extract64",
-        registry.extract64_btf_id,
-    ) {
-        return extract_proof_len(payload);
-    }
-    if kinsn_call_matches(
-        registry,
-        btf_id,
-        call_off,
-        "bpf_memcpy_bulk",
-        registry.memcpy_bulk_btf_id,
-    ) {
-        return memcpy_bulk_proof_len(payload);
-    }
-    if kinsn_call_matches(
-        registry,
-        btf_id,
-        call_off,
-        "bpf_memset_bulk",
-        registry.memset_bulk_btf_id,
-    ) {
-        return memset_bulk_proof_len(payload);
-    }
-    if kinsn_call_matches(
-        registry,
-        btf_id,
-        call_off,
-        "bpf_endian_load16",
-        registry.endian_load16_btf_id,
-    ) || kinsn_call_matches(
-        registry,
-        btf_id,
-        call_off,
-        "bpf_endian_load32",
-        registry.endian_load32_btf_id,
-    ) || kinsn_call_matches(
-        registry,
-        btf_id,
-        call_off,
-        "bpf_endian_load64",
-        registry.endian_load64_btf_id,
-    ) {
-        return endian_proof_len(payload);
-    }
-    if kinsn_call_matches(
-        registry,
-        btf_id,
-        call_off,
-        "bpf_prefetch",
-        registry.prefetch_btf_id,
-    ) {
-        return prefetch_proof_len(payload);
+    for spec in KINSN_TARGETS {
+        if kinsn_call_matches(registry, btf_id, call_off, spec) {
+            return proof_len_for_layout(spec.proof_layout, payload);
+        }
     }
 
     anyhow::bail!("kinsn call btf_id {btf_id} is not present in the kinsn registry")
@@ -393,16 +306,26 @@ fn kinsn_call_matches(
     registry: &KinsnRegistry,
     actual_btf_id: i32,
     actual_call_off: i16,
-    target_name: &str,
-    expected_btf_id: i32,
+    target: &TargetSpec,
 ) -> bool {
+    let expected_btf_id = registry.btf_id_for_slot(target.registry_slot);
     if expected_btf_id <= 0 || actual_btf_id != expected_btf_id {
         return false;
     }
-    registry
-        .target_call_offsets
-        .get(target_name)
-        .is_none_or(|&expected_off| actual_call_off == expected_off)
+    actual_call_off == registry.call_off_for_slot(target.registry_slot)
+}
+
+fn proof_len_for_layout(layout: ProofLayout, payload: u64) -> anyhow::Result<usize> {
+    match layout {
+        ProofLayout::Rotate { shift_mask } => rotate_proof_len(payload, shift_mask),
+        ProofLayout::Select => select_proof_len(payload),
+        ProofLayout::Ccmp => ccmp_proof_len(payload),
+        ProofLayout::Extract => extract_proof_len(payload),
+        ProofLayout::BulkMemcpy => memcpy_bulk_proof_len(payload),
+        ProofLayout::BulkMemset => memset_bulk_proof_len(payload),
+        ProofLayout::Endian => endian_proof_len(payload),
+        ProofLayout::Prefetch => prefetch_proof_len(payload),
+    }
 }
 
 fn kinsn_sidecar_payload(insn: &BpfInsn) -> u64 {
@@ -1120,23 +1043,24 @@ pub fn emit_packed_kinsn_call_with_off(
 }
 
 pub fn resolve_kinsn_call_off_for_pass(ctx: &PassContext, pass_name: &str) -> anyhow::Result<i16> {
-    Ok(KinsnRegistry::target_name_for_pass(pass_name)
-        .map(|target_name| ctx.kinsn_registry.call_off_for_target_name(target_name))
-        .unwrap_or(0))
+    if let Some(target_name) = KinsnRegistry::target_name_for_pass(pass_name) {
+        ctx.kinsn_registry.call_off_for_target_name(target_name)
+    } else {
+        Ok(0)
+    }
 }
 
 pub fn resolve_kinsn_call_off_for_target(
     ctx: &PassContext,
     target_name: &str,
 ) -> anyhow::Result<i16> {
-    Ok(ctx.kinsn_registry.call_off_for_target_name(target_name))
+    ctx.kinsn_registry.call_off_for_target_name(target_name)
 }
 // ── Tests ──────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_helpers::pseudo_call_to;
 
     fn pseudo_func_ref(dst: u8, imm: i32) -> [BpfInsn; 2] {
         [
@@ -1400,10 +1324,8 @@ mod tests {
             bytes: [btf_record(0, 100), btf_record(999, 104)].concat(),
         });
 
-        let registry = KinsnRegistry {
-            memcpy_bulk_btf_id: memcpy_btf_id,
-            ..KinsnRegistry::default()
-        };
+        let mut registry = KinsnRegistry::default();
+        registry.set_btf_id_for_slot(KinsnSlot::BulkMemcpy, memcpy_btf_id);
 
         remap_kinsn_btf_metadata(&mut program, &registry).unwrap();
 
@@ -1437,17 +1359,11 @@ mod tests {
             bytes: [func_btf_record(0, 10), func_btf_record(999, 11)].concat(),
         });
 
-        let mut registry = KinsnRegistry {
-            rotate64_btf_id: shared_btf_id,
-            extract64_btf_id: shared_btf_id,
-            ..KinsnRegistry::default()
-        };
-        registry
-            .target_call_offsets
-            .insert("bpf_rotate64".to_string(), 3);
-        registry
-            .target_call_offsets
-            .insert("bpf_extract64".to_string(), 5);
+        let mut registry = KinsnRegistry::default();
+        registry.set_btf_id_for_slot(KinsnSlot::Rotate64, shared_btf_id);
+        registry.set_btf_id_for_slot(KinsnSlot::Extract64, shared_btf_id);
+        registry.set_call_off_for_slot(KinsnSlot::Rotate64, 3);
+        registry.set_call_off_for_slot(KinsnSlot::Extract64, 5);
 
         remap_kinsn_btf_metadata(&mut program, &registry).unwrap();
 

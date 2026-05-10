@@ -4,9 +4,12 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::insn::*;
-use crate::pass::{BpfProgram, PassResult};
+use crate::pass::{BpfProgram, KinsnRegistry, PassResult};
 
-use super::utils::{fixup_all_branches, insn_width, map_replacement_range, remap_btf_metadata};
+use super::utils::{
+    fixup_all_branches, insn_width, map_replacement_range, remap_btf_metadata,
+    remap_kinsn_btf_metadata,
+};
 
 #[derive(Clone, Debug, Default)]
 pub struct RewritePlan {
@@ -19,9 +22,10 @@ pub struct RewritePlan {
 type ReplacementSlot = (usize, Vec<BpfInsn>);
 type BranchPatch = (usize, usize, usize);
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum BtfRemapPolicy {
+#[derive(Clone, Copy, Debug)]
+pub enum BtfRemapPolicy<'a> {
     Remap,
+    RemapKinsn(&'a KinsnRegistry),
     NoRemap,
 }
 
@@ -30,27 +34,31 @@ impl RewritePlan {
         Self::default()
     }
 
-    pub fn replace_range(&mut self, start_pc: usize, old_len: usize, new_insns: Vec<BpfInsn>) {
-        assert!(
-            self.replacements
-                .insert(start_pc, (old_len, new_insns))
-                .is_none(),
-            "duplicate rewrite replacement at old pc {start_pc}"
-        );
+    pub fn replace_range(
+        &mut self,
+        start_pc: usize,
+        old_len: usize,
+        new_insns: Vec<BpfInsn>,
+    ) -> anyhow::Result<()> {
+        if self.replacements.contains_key(&start_pc) {
+            anyhow::bail!("duplicate rewrite replacement at old pc {start_pc}");
+        }
+        self.replacements.insert(start_pc, (old_len, new_insns));
+        Ok(())
     }
 
     pub fn insert_before(&mut self, pc: usize, new_insns: Vec<BpfInsn>) {
         self.insertions.entry(pc).or_default().extend(new_insns);
     }
 
-    pub fn delete_range(&mut self, start_pc: usize, len: usize) {
+    pub fn delete_range(&mut self, start_pc: usize, len: usize) -> anyhow::Result<()> {
         let end = start_pc
             .checked_add(len)
-            .expect("rewrite deletion range overflow");
-        assert!(
-            self.deletions.insert((start_pc, end)),
-            "duplicate rewrite deletion range {start_pc}..{end}"
-        );
+            .ok_or_else(|| anyhow::anyhow!("rewrite deletion range {start_pc} overflows"))?;
+        if !self.deletions.insert((start_pc, end)) {
+            anyhow::bail!("duplicate rewrite deletion range {start_pc}..{end}");
+        }
+        Ok(())
     }
 
     pub fn add_internal_branch(
@@ -66,7 +74,7 @@ impl RewritePlan {
     pub fn commit(
         self,
         program: &mut BpfProgram,
-        btf_policy: BtfRemapPolicy,
+        btf_policy: BtfRemapPolicy<'_>,
     ) -> anyhow::Result<PassResult> {
         let old_insns = program.insns.clone();
         let old_len = old_insns.len();
@@ -125,8 +133,12 @@ impl RewritePlan {
         )?;
 
         program.insns = new_insns;
-        if btf_policy == BtfRemapPolicy::Remap {
-            remap_btf_metadata(program, &addr_map)?;
+        match btf_policy {
+            BtfRemapPolicy::Remap => remap_btf_metadata(program, &addr_map)?,
+            BtfRemapPolicy::RemapKinsn(registry) => {
+                remap_kinsn_btf_metadata(program, registry)?;
+            }
+            BtfRemapPolicy::NoRemap => {}
         }
         program.remap_annotations(&addr_map);
 

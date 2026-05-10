@@ -7,9 +7,10 @@ use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
+use super::rewrite::{BtfRemapPolicy, RewritePlan};
 use super::utils::{
-    emit_packed_kinsn_call_with_off, fixup_all_branches, kinsn_replacement_subprog_skip_reason,
-    map_replacement_range, remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_pass,
+    emit_packed_kinsn_call_with_off, kinsn_replacement_subprog_skip_reason,
+    resolve_kinsn_call_off_for_pass,
 };
 
 /// COND_SELECT pass: replaces branch+mov diamond patterns with
@@ -109,7 +110,7 @@ impl BpfPass for CondSelectPass {
         }
 
         // Check if bpf_select64 kfunc is available.
-        if ctx.kinsn_registry.select64_btf_id < 0 {
+        if ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::Select64) < 0 {
             // Report detected sites without emitting when the target kfunc is absent.
             let sites = self.analyze(&program.insns);
             let diagnostics: Vec<String> = sites
@@ -143,7 +144,7 @@ impl BpfPass for CondSelectPass {
         let liveness = analyses.get(&liveness_analysis, program);
 
         let sites = self.analyze(&program.insns);
-        let btf_id = ctx.kinsn_registry.select64_btf_id;
+        let btf_id = ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::Select64);
         let mut safe_sites: Vec<SafeCondSelectSite> = Vec::new();
         let mut skipped = Vec::new();
 
@@ -211,60 +212,26 @@ impl BpfPass for CondSelectPass {
 
         let kfunc_off = resolve_kinsn_call_off_for_pass(ctx, self.name())?;
 
-        // Build replacement instruction stream.
-        let orig_len = program.insns.len();
-        let mut new_insns = Vec::with_capacity(orig_len);
-        let mut addr_map = vec![0usize; orig_len + 1];
-        let mut pc = 0;
-        let mut site_idx = 0;
-        let mut applied = 0;
-
-        while pc < orig_len {
-            let new_pc = new_insns.len();
-            addr_map[pc] = new_pc;
-
-            if site_idx < safe_sites.len() && pc == safe_sites[site_idx].site.start_pc {
-                let safe_site = &safe_sites[site_idx];
-                let site = &safe_site.site;
-                new_insns.extend_from_slice(&safe_site.lowering.prefix);
-                let payload = (site.dst_reg as u64)
-                    | ((safe_site.lowering.a_reg as u64) << 4)
-                    | ((safe_site.lowering.b_reg as u64) << 8)
-                    | ((safe_site.lowering.cond_reg as u64) << 12);
-                let replacement = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
-                new_insns.extend_from_slice(&replacement);
-                let replacement_len = safe_site.lowering.prefix.len() + replacement.len();
-                map_replacement_range(&mut addr_map, pc, site.old_len, new_pc, replacement_len);
-
-                pc += site.old_len;
-                site_idx += 1;
-                applied += 1;
-            } else {
-                new_insns.push(program.insns[pc]);
-                if program.insns[pc].is_ldimm64() && pc + 1 < orig_len {
-                    pc += 1;
-                    addr_map[pc] = new_insns.len();
-                    new_insns.push(program.insns[pc]);
-                }
-                pc += 1;
-            }
+        let mut plan = RewritePlan::new();
+        for safe_site in &safe_sites {
+            let site = &safe_site.site;
+            let payload = (site.dst_reg as u64)
+                | ((safe_site.lowering.a_reg as u64) << 4)
+                | ((safe_site.lowering.b_reg as u64) << 8)
+                | ((safe_site.lowering.cond_reg as u64) << 12);
+            let kinsn_call = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
+            let mut replacement =
+                Vec::with_capacity(safe_site.lowering.prefix.len() + kinsn_call.len());
+            replacement.extend_from_slice(&safe_site.lowering.prefix);
+            replacement.extend_from_slice(&kinsn_call);
+            plan.replace_range(site.start_pc, site.old_len, replacement)?;
         }
-        addr_map[orig_len] = new_insns.len();
 
-        // Branch fixup.
-        fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
-
-        program.insns = new_insns;
-        remap_kinsn_btf_metadata(program, &ctx.kinsn_registry)?;
-        program.remap_annotations(&addr_map);
-
-        Ok(PassResult {
-            pass_name: self.name().into(),
-            sites_applied: applied,
-            sites_skipped: skipped,
-            diagnostics: vec![],
-            ..Default::default()
-        })
+        let mut result = plan.commit(program, BtfRemapPolicy::RemapKinsn(&ctx.kinsn_registry))?;
+        result.pass_name = self.name().into();
+        result.sites_applied = safe_sites.len();
+        result.sites_skipped = skipped;
+        Ok(result)
     }
 }
 

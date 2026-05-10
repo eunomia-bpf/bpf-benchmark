@@ -33,7 +33,8 @@ fn jle_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
 
 fn ctx_with_select_kfunc(btf_id: i32) -> PassContext {
     let mut ctx = PassContext::baseline();
-    ctx.kinsn_registry.select64_btf_id = btf_id;
+    ctx.kinsn_registry
+        .set_btf_id_for_slot(KinsnSlot::Select64, btf_id);
     ctx
 }
 
@@ -310,7 +311,7 @@ fn test_cond_select_value_materialization_matrix() {
         );
         assert!(prog.insns[sidecar_index].is_kinsn_sidecar(), "{label}");
         assert_eq!(
-            payload_regs(BpfInsn::sidecar_payload(&prog.insns[sidecar_index])),
+            payload_regs(prog.insns[sidecar_index].sidecar_payload()),
             expected_regs,
             "{label}"
         );
@@ -362,10 +363,7 @@ fn test_cond_select_emit_non_zero_compare_imm() {
     assert_eq!(prog.insns[0], BpfInsn::mov64_reg(0, 1));
     assert_eq!(prog.insns[1], BpfInsn::alu64_imm(BPF_XOR, 0, 5));
     assert!(prog.insns[2].is_kinsn_sidecar());
-    assert_eq!(
-        payload_regs(BpfInsn::sidecar_payload(&prog.insns[2])),
-        (0, 6, 7, 0)
-    );
+    assert_eq!(payload_regs(prog.insns[2].sidecar_payload()), (0, 6, 7, 0));
 }
 
 #[test]
@@ -385,10 +383,7 @@ fn test_cond_select_emit_jmp32_zero_compare_predicate() {
     assert_eq!(result.sites_applied, 1);
     assert_eq!(prog.insns[0], BpfInsn::mov32_reg(0, 1));
     assert!(prog.insns[1].is_kinsn_sidecar());
-    assert_eq!(
-        payload_regs(BpfInsn::sidecar_payload(&prog.insns[1])),
-        (0, 7, 6, 0)
-    );
+    assert_eq!(payload_regs(prog.insns[1].sidecar_payload()), (0, 7, 6, 0));
 }
 
 #[test]
@@ -410,10 +405,7 @@ fn test_cond_select_emit_jgt_predicate_prefix() {
     assert_eq!(prog.insns[1], jle_imm(1, 0, 1));
     assert_eq!(prog.insns[2], BpfInsn::mov64_imm(0, 1));
     assert!(prog.insns[3].is_kinsn_sidecar());
-    assert_eq!(
-        payload_regs(BpfInsn::sidecar_payload(&prog.insns[3])),
-        (0, 7, 6, 0)
-    );
+    assert_eq!(payload_regs(prog.insns[3].sidecar_payload()), (0, 7, 6, 0));
 }
 
 // ── Issue 1: Parallel-copy alias safety tests ─────────────────
@@ -429,7 +421,7 @@ fn payload_regs(payload: u64) -> (u8, u8, u8, u8) {
 
 fn simulate_param_setup(insns: &[BpfInsn], initial_regs: &[u64; 11]) -> [u64; 11] {
     let sidecar = insns.iter().find(|insn| insn.is_kinsn_sidecar()).unwrap();
-    let payload = BpfInsn::sidecar_payload(sidecar);
+    let payload = sidecar.sidecar_payload();
     let a_reg = ((payload >> 4) & 0xf) as usize;
     let b_reg = ((payload >> 8) & 0xf) as usize;
     let cond_reg = ((payload >> 12) & 0xf) as usize;

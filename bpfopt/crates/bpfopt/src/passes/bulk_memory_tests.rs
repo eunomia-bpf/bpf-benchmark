@@ -307,8 +307,10 @@ fn make_non_stack_base_memcpy_program() -> Vec<BpfInsn> {
 
 fn ctx_with_bulk_kfuncs() -> PassContext {
     let mut ctx = PassContext::baseline();
-    ctx.kinsn_registry.memcpy_bulk_btf_id = MEMCPY_BTF_ID;
-    ctx.kinsn_registry.memset_bulk_btf_id = MEMSET_BTF_ID;
+    ctx.kinsn_registry
+        .set_btf_id_for_slot(KinsnSlot::BulkMemcpy, MEMCPY_BTF_ID);
+    ctx.kinsn_registry
+        .set_btf_id_for_slot(KinsnSlot::BulkMemset, MEMSET_BTF_ID);
     ctx
 }
 

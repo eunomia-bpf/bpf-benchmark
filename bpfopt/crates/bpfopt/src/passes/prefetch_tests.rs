@@ -2,16 +2,6 @@ use super::prefetch::*;
 use crate::insn::*;
 use crate::pass::*;
 use crate::pass::{AnalysisCache, PassContext};
-use crate::test_helpers::*;
-
-fn map_lookup_call() -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_CALL,
-        BpfInsn::make_regs(0, 0),
-        0,
-        HELPER_MAP_LOOKUP_ELEM,
-    )
-}
 
 fn filler(dst: u8, count: usize) -> Vec<BpfInsn> {
     (0..count)
@@ -21,7 +11,8 @@ fn filler(dst: u8, count: usize) -> Vec<BpfInsn> {
 
 fn ctx_with_prefetch_kfunc(btf_id: i32) -> PassContext {
     let mut ctx = PassContext::baseline();
-    ctx.kinsn_registry.prefetch_btf_id = btf_id;
+    ctx.kinsn_registry
+        .set_btf_id_for_slot(KinsnSlot::Prefetch, btf_id);
     ctx
 }
 
@@ -50,7 +41,7 @@ fn decode_prefetch_payload(payload: u64) -> anyhow::Result<u8> {
 
 fn lookup_value_program() -> (BpfProgram, usize, usize) {
     let insns = vec![
-        map_lookup_call(),
+        BpfInsn::helper_call(HELPER_MAP_LOOKUP_ELEM),
         BpfInsn::jeq_imm(BPF_REG_0, 0, 1),
         BpfInsn::ldx_mem(BPF_DW, BPF_REG_1, BPF_REG_0, 0),
         BpfInsn::exit(),
@@ -60,7 +51,7 @@ fn lookup_value_program() -> (BpfProgram, usize, usize) {
 
 fn lookup_value_alias_program() -> (BpfProgram, usize, usize) {
     let insns = vec![
-        map_lookup_call(),
+        BpfInsn::helper_call(HELPER_MAP_LOOKUP_ELEM),
         BpfInsn::mov64_reg(BPF_REG_6, BPF_REG_0),
         BpfInsn::jeq_imm(BPF_REG_6, 0, 1),
         BpfInsn::ldx_mem(BPF_DW, BPF_REG_1, BPF_REG_6, 8),
@@ -102,7 +93,7 @@ fn prefetch_pass_emits_map_value_prefetch_without_profile() {
     assert_eq!(result.sites_applied, 1);
     assert!(program.insns[2].is_kinsn_sidecar());
     assert_eq!(
-        decode_prefetch_payload(BpfInsn::sidecar_payload(&program.insns[2])).unwrap(),
+        decode_prefetch_payload(program.insns[2].sidecar_payload()).unwrap(),
         BPF_REG_0
     );
     assert!(program.insns[3].is_call());
@@ -120,7 +111,7 @@ fn prefetch_pass_uses_alias_register_for_map_value_deref() {
     assert_eq!(result.sites_applied, 1);
     assert!(program.insns[3].is_kinsn_sidecar());
     assert_eq!(
-        decode_prefetch_payload(BpfInsn::sidecar_payload(&program.insns[3])).unwrap(),
+        decode_prefetch_payload(program.insns[3].sidecar_payload()).unwrap(),
         BPF_REG_6
     );
 }
@@ -149,7 +140,7 @@ fn prefetch_pass_emits_packet_prefetch_without_profile() {
     assert_eq!(result.sites_applied, 1);
     assert!(program.insns[1].is_kinsn_sidecar());
     assert_eq!(
-        decode_prefetch_payload(BpfInsn::sidecar_payload(&program.insns[1])).unwrap(),
+        decode_prefetch_payload(program.insns[1].sidecar_payload()).unwrap(),
         BPF_REG_6
     );
 }

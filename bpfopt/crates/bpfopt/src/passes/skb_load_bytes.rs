@@ -80,7 +80,7 @@ impl BpfPass for SkbLoadBytesSpecPass {
 
         let mut plan = RewritePlan::new();
         for site in &scan.sites {
-            plan.replace_range(site.call_pc, 1, emit_replacement(*site, layout));
+            plan.replace_range(site.call_pc, 1, emit_replacement(*site, layout))?;
         }
 
         let mut result = plan.commit(program, BtfRemapPolicy::NoRemap)?;

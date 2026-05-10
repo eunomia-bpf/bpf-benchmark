@@ -7,14 +7,14 @@ use crate::analysis::{BranchTargetAnalysis, BranchTargetResult, LivenessAnalysis
 use crate::insn::*;
 use crate::pass::*;
 
+use super::rewrite::{BtfRemapPolicy, RewritePlan};
 use super::utils::{
-    emit_packed_kinsn_call_with_off, fixup_all_branches, insn_width,
-    kinsn_replacement_subprog_skip_reason, map_replacement_range, remap_kinsn_btf_metadata,
+    emit_packed_kinsn_call_with_off, insn_width, kinsn_replacement_subprog_skip_reason,
     resolve_kinsn_call_off_for_target,
 };
 
-const MEMCPY_TARGET: &str = "bpf_memcpy_bulk";
-const MEMSET_TARGET: &str = "bpf_memset_bulk";
+const MEMCPY_TARGET: &str = "bpf_bulk_memcpy";
+const MEMSET_TARGET: &str = "bpf_bulk_memset";
 const MIN_BULK_BYTES: usize = 32;
 const CHUNK_MAX_BYTES: usize = 128;
 const STACK_PTR_REG: u8 = 10;
@@ -126,8 +126,8 @@ impl BpfPass for BulkMemoryPass {
         let scan = scan_sites(&program.insns, &bt, &liveness);
         let mut skipped = scan.skips;
 
-        let memcpy_btf_id = ctx.kinsn_registry.btf_id_for_target_name(MEMCPY_TARGET);
-        let memset_btf_id = ctx.kinsn_registry.btf_id_for_target_name(MEMSET_TARGET);
+        let memcpy_btf_id = ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::BulkMemcpy);
+        let memset_btf_id = ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::BulkMemset);
 
         let mut safe_sites = Vec::new();
         for site in scan.sites {
@@ -207,57 +207,20 @@ impl BpfPass for BulkMemoryPass {
             0
         };
 
-        let orig_len = program.insns.len();
-        let mut new_insns = Vec::with_capacity(orig_len);
-        let mut addr_map = vec![0usize; orig_len + 1];
-        let mut pc = 0usize;
-        let mut site_idx = 0usize;
-
-        while pc < orig_len {
-            let new_pc = new_insns.len();
-            addr_map[pc] = new_pc;
-
-            if site_idx < safe_sites.len() && pc == safe_sites[site_idx].start_pc {
-                let site = &safe_sites[site_idx];
-                let replacement = emit_site_replacement(
-                    site,
-                    memcpy_btf_id,
-                    memcpy_off,
-                    memset_btf_id,
-                    memset_off,
-                );
-                new_insns.extend_from_slice(&replacement);
-                map_replacement_range(&mut addr_map, pc, site.old_len, new_pc, replacement.len());
-                pc += site.old_len;
-                site_idx += 1;
-                continue;
-            }
-
-            let insn = program.insns[pc];
-            new_insns.push(insn);
-            if insn.is_ldimm64() && pc + 1 < orig_len {
-                pc += 1;
-                addr_map[pc] = new_insns.len();
-                new_insns.push(program.insns[pc]);
-            }
-            pc += 1;
+        let mut plan = RewritePlan::new();
+        for site in &safe_sites {
+            plan.replace_range(
+                site.start_pc,
+                site.old_len,
+                emit_site_replacement(site, memcpy_btf_id, memcpy_off, memset_btf_id, memset_off),
+            )?;
         }
-        addr_map[orig_len] = new_insns.len();
 
-        fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
-
-        let applied = safe_sites.len();
-        program.insns = new_insns;
-        remap_kinsn_btf_metadata(program, &ctx.kinsn_registry)?;
-        program.remap_annotations(&addr_map);
-
-        Ok(PassResult {
-            pass_name: self.name().into(),
-            sites_applied: applied,
-            sites_skipped: skipped,
-            diagnostics: vec![],
-            ..Default::default()
-        })
+        let mut result = plan.commit(program, BtfRemapPolicy::RemapKinsn(&ctx.kinsn_registry))?;
+        result.pass_name = self.name().into();
+        result.sites_applied = safe_sites.len();
+        result.sites_skipped = skipped;
+        Ok(result)
     }
 }
 

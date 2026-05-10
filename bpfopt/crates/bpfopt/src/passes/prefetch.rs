@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 //! PREFETCH optimization pass.
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -12,9 +12,9 @@ use crate::analysis::{BranchTargetAnalysis, BranchTargetResult, CFGAnalysis, CFG
 use crate::insn::*;
 use crate::pass::*;
 
+use super::rewrite::{BtfRemapPolicy, RewritePlan};
 use super::utils::{
-    emit_packed_kinsn_call_with_off, fixup_all_branches, insn_width, remap_kinsn_btf_metadata,
-    resolve_kinsn_call_off_for_target,
+    emit_packed_kinsn_call_with_off, insn_width, resolve_kinsn_call_off_for_target,
 };
 
 pub(super) const HELPER_MAP_LOOKUP_ELEM: i32 = libbpf_sys::BPF_FUNC_map_lookup_elem as i32;
@@ -220,7 +220,7 @@ impl BpfPass for PrefetchPass {
         analyses: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        if ctx.kinsn_registry.prefetch_btf_id < 0 {
+        if ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::Prefetch) < 0 {
             return Ok(PassResult::skipped(
                 self.name(),
                 SkipReason {
@@ -292,50 +292,22 @@ impl BpfPass for PrefetchPass {
             });
         }
 
-        let btf_id = ctx.kinsn_registry.prefetch_btf_id;
+        let btf_id = ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::Prefetch);
         let kfunc_off = resolve_kinsn_call_off_for_target(ctx, PREFETCH_TARGET_NAME)?;
-        let insertions = group_candidates_by_insert_pc(&candidates);
-
-        let orig_len = program.insns.len();
-        let mut new_insns = Vec::with_capacity(orig_len + candidates.len() * 2);
-        let mut addr_map = vec![0usize; orig_len + 1];
-        let mut pc = 0usize;
-
-        while pc < orig_len {
-            let new_pc = new_insns.len();
-            if let Some(prefetches) = insertions.get(&pc) {
-                addr_map[pc] = new_pc;
-                for candidate in prefetches {
-                    let payload = prefetch_payload(candidate.ptr_reg)?;
-                    let replacement = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
-                    new_insns.extend_from_slice(&replacement);
-                }
-            } else {
-                addr_map[pc] = new_pc;
-            }
-
-            new_insns.push(program.insns[pc]);
-            if program.insns[pc].is_ldimm64() && pc + 1 < orig_len {
-                pc += 1;
-                addr_map[pc] = new_insns.len();
-                new_insns.push(program.insns[pc]);
-            }
-            pc += 1;
+        let mut plan = RewritePlan::new();
+        for candidate in &candidates {
+            let payload = prefetch_payload(candidate.ptr_reg)?;
+            plan.insert_before(
+                candidate.insert_pc,
+                emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
+            );
         }
-        addr_map[orig_len] = new_insns.len();
 
-        fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
-
-        program.insns = new_insns;
-        remap_kinsn_btf_metadata(program, &ctx.kinsn_registry)?;
-        program.remap_annotations(&addr_map);
-
-        Ok(PassResult {
-            pass_name: self.name().into(),
-            sites_applied: candidates.len(),
-            sites_skipped: skipped,
-            ..Default::default()
-        })
+        let mut result = plan.commit(program, BtfRemapPolicy::RemapKinsn(&ctx.kinsn_registry))?;
+        result.pass_name = self.name().into();
+        result.sites_applied = candidates.len();
+        result.sites_skipped = skipped;
+        Ok(result)
     }
 }
 
@@ -822,17 +794,4 @@ fn dedup_candidates(mut candidates: Vec<PrefetchCandidate>) -> Vec<PrefetchCandi
     }
     kept.sort_by_key(|candidate| candidate.insert_pc);
     kept
-}
-
-fn group_candidates_by_insert_pc(
-    candidates: &[PrefetchCandidate],
-) -> BTreeMap<usize, Vec<PrefetchCandidate>> {
-    let mut grouped = BTreeMap::<usize, Vec<PrefetchCandidate>>::new();
-    for candidate in candidates {
-        grouped
-            .entry(candidate.insert_pc)
-            .or_default()
-            .push(candidate.clone());
-    }
-    grouped
 }

@@ -4,24 +4,18 @@ use crate::pass::*;
 use crate::pass::{AnalysisCache, PassContext};
 use crate::test_helpers::*;
 
-fn alu32_imm(op: u8, dst: u8, imm: i32) -> BpfInsn {
-    BpfInsn::new(BPF_ALU | op | BPF_K, BpfInsn::make_regs(dst, 0), 0, imm)
-}
-
-fn alu32_reg(op: u8, dst: u8, src: u8) -> BpfInsn {
-    BpfInsn::new(BPF_ALU | op | BPF_X, BpfInsn::make_regs(dst, src), 0, 0)
-}
-
 fn ctx_with_rotate_kfunc(btf_id: i32) -> PassContext {
     let mut ctx = PassContext::baseline();
-    ctx.kinsn_registry.rotate64_btf_id = btf_id;
+    ctx.kinsn_registry
+        .set_btf_id_for_slot(KinsnSlot::Rotate64, btf_id);
     ctx.platform.has_rorx = true;
     ctx
 }
 
 fn ctx_with_rotate32_kfunc(btf_id: i32) -> PassContext {
     let mut ctx = PassContext::baseline();
-    ctx.kinsn_registry.rotate32_btf_id = btf_id;
+    ctx.kinsn_registry
+        .set_btf_id_for_slot(KinsnSlot::Rotate32, btf_id);
     ctx.platform.has_rorx = true;
     ctx
 }
@@ -63,9 +57,9 @@ fn test_rotate_pass_pattern_b_match() {
 fn test_rotate32_pass_pattern_a_match() {
     let insns = vec![
         BpfInsn::mov32_reg(3, 2),
-        alu32_imm(BPF_RSH, 2, 24),
-        alu32_imm(BPF_LSH, 3, 8),
-        alu32_reg(BPF_OR, 2, 3),
+        BpfInsn::alu32_imm(BPF_RSH, 2, 24),
+        BpfInsn::alu32_imm(BPF_LSH, 3, 8),
+        BpfInsn::alu32_reg(BPF_OR, 2, 3),
     ];
 
     let sites = scan_rotate_sites(&insns);
@@ -81,9 +75,9 @@ fn test_rotate32_pass_pattern_a_match() {
 fn test_rotate32_pass_pattern_b_match() {
     let insns = vec![
         BpfInsn::mov32_reg(3, 2),
-        alu32_imm(BPF_LSH, 2, 7),
-        alu32_imm(BPF_RSH, 3, 25),
-        alu32_reg(BPF_OR, 2, 3),
+        BpfInsn::alu32_imm(BPF_LSH, 2, 7),
+        BpfInsn::alu32_imm(BPF_RSH, 3, 25),
+        BpfInsn::alu32_reg(BPF_OR, 2, 3),
     ];
 
     let sites = scan_rotate_sites(&insns);
@@ -98,10 +92,10 @@ fn test_rotate32_pass_cilium_split_copy_shape() {
     // w1 = w6; w1 >>= 0x1c; w2 = w6; w2 <<= 0x4; w2 |= w1
     let insns = vec![
         BpfInsn::mov32_reg(1, 6),
-        alu32_imm(BPF_RSH, 1, 28),
+        BpfInsn::alu32_imm(BPF_RSH, 1, 28),
         BpfInsn::mov32_reg(2, 6),
-        alu32_imm(BPF_LSH, 2, 4),
-        alu32_reg(BPF_OR, 2, 1),
+        BpfInsn::alu32_imm(BPF_LSH, 2, 4),
+        BpfInsn::alu32_reg(BPF_OR, 2, 1),
     ];
 
     let sites = scan_rotate_sites(&insns);
@@ -119,9 +113,9 @@ fn test_rotate32_pass_cilium_split_copy_shape() {
 fn test_rotate32_pass_no_match_wrong_sum() {
     let insns = vec![
         BpfInsn::mov32_reg(3, 2),
-        alu32_imm(BPF_RSH, 2, 20),
-        alu32_imm(BPF_LSH, 3, 8),
-        alu32_reg(BPF_OR, 2, 3),
+        BpfInsn::alu32_imm(BPF_RSH, 2, 20),
+        BpfInsn::alu32_imm(BPF_LSH, 3, 8),
+        BpfInsn::alu32_reg(BPF_OR, 2, 3),
     ];
 
     assert!(scan_rotate_sites(&insns).is_empty());
@@ -257,9 +251,9 @@ fn test_rotate_pass_emit_kfunc_call() {
 fn test_rotate32_pass_emit_kfunc_call() {
     let mut prog = make_program(vec![
         BpfInsn::mov32_reg(3, 2),
-        alu32_imm(BPF_RSH, 2, 24),
-        alu32_imm(BPF_LSH, 3, 8),
-        alu32_reg(BPF_OR, 2, 3),
+        BpfInsn::alu32_imm(BPF_RSH, 2, 24),
+        BpfInsn::alu32_imm(BPF_LSH, 3, 8),
+        BpfInsn::alu32_reg(BPF_OR, 2, 3),
         BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();

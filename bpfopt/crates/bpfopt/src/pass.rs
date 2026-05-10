@@ -13,6 +13,8 @@ use std::fmt;
 use std::sync::Arc;
 
 use crate::insn::BpfInsn;
+pub use crate::kinsn::KinsnSlot;
+use crate::kinsn::{primary_target_name_for_pass, target_spec_by_name};
 // MapInlineHint et al. live in passes/map_inline.rs (pass-local metadata) and are
 // re-exported here so existing `use crate::pass::*` consumers keep working.
 pub use crate::passes::map_inline::{MapInlineHint, MapInlineHintAnchor, MapInlineHintMode};
@@ -656,60 +658,68 @@ pub struct PassContext {
     pub prog_type: u32,
 }
 
-/// Available kinsn targets and static metadata.
+/// Available kinsn targets resolved at runtime.
 /// BTF ID = -1 means the target is not available.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct KinsnRegistry {
-    pub rotate64_btf_id: i32,
-    pub rotate32_btf_id: i32,
-    pub select64_btf_id: i32,
-    pub ccmp64_btf_id: i32,
-    pub extract64_btf_id: i32,
-    pub memcpy_bulk_btf_id: i32,
-    pub memset_bulk_btf_id: i32,
-    pub endian_load16_btf_id: i32,
-    pub endian_load32_btf_id: i32,
-    pub endian_load64_btf_id: i32,
-    pub prefetch_btf_id: i32,
-    /// Per-target static call offsets used by offline callers.
-    pub target_call_offsets: HashMap<String, i16>,
+    btf_ids: [i32; KinsnSlot::COUNT],
+    call_offsets: [i16; KinsnSlot::COUNT],
 }
 
+#[rustfmt::skip]
+impl Default for KinsnRegistry { fn default() -> Self { Self::unavailable() } }
+
 impl KinsnRegistry {
-    pub fn target_name_for_pass(pass_name: &str) -> Option<&'static str> {
-        match pass_name {
-            "rotate" => Some("bpf_rotate64"),
-            "cond_select" => Some("bpf_select64"),
-            "ccmp" => Some("bpf_ccmp64"),
-            "extract" => Some("bpf_extract64"),
-            "endian_fusion" => Some("bpf_endian_load32"),
-            "prefetch" => Some("bpf_prefetch"),
-            _ => None,
-        }
+    #[rustfmt::skip]
+    pub fn unavailable() -> Self { Self { btf_ids: [-1; KinsnSlot::COUNT], call_offsets: [0; KinsnSlot::COUNT] } }
+
+    #[rustfmt::skip]
+    pub fn target_name_for_pass(pass_name: &str) -> Option<&'static str> { primary_target_name_for_pass(pass_name) }
+
+    fn slot_for_target_name(target_name: &str) -> anyhow::Result<KinsnSlot> {
+        target_spec_by_name(target_name)
+            .map(|spec| spec.registry_slot)
+            .ok_or_else(|| anyhow::anyhow!("unknown kinsn target: {target_name}"))
     }
+
+    pub fn set_btf_id_for_target_name(
+        &mut self,
+        target_name: &str,
+        btf_id: i32,
+    ) -> anyhow::Result<()> {
+        self.set_btf_id_for_slot(Self::slot_for_target_name(target_name)?, btf_id);
+        Ok(())
+    }
+
+    #[rustfmt::skip]
+    pub fn set_btf_id_for_slot(&mut self, slot: KinsnSlot, btf_id: i32) { self.btf_ids[slot.index()] = btf_id; }
+
+    pub fn set_call_off_for_target_name(
+        &mut self,
+        target_name: &str,
+        call_off: i16,
+    ) -> anyhow::Result<()> {
+        self.set_call_off_for_slot(Self::slot_for_target_name(target_name)?, call_off);
+        Ok(())
+    }
+
+    #[rustfmt::skip]
+    pub fn set_call_off_for_slot(&mut self, slot: KinsnSlot, call_off: i16) { self.call_offsets[slot.index()] = call_off; }
+
+    #[rustfmt::skip]
+    pub fn btf_id_for_slot(&self, slot: KinsnSlot) -> i32 { self.btf_ids[slot.index()] }
+
+    #[rustfmt::skip]
+    pub fn call_off_for_slot(&self, slot: KinsnSlot) -> i16 { self.call_offsets[slot.index()] }
 
     pub fn btf_id_for_target_name(&self, target_name: &str) -> i32 {
-        match target_name {
-            "bpf_rotate64" => self.rotate64_btf_id,
-            "bpf_rotate32" => self.rotate32_btf_id,
-            "bpf_select64" => self.select64_btf_id,
-            "bpf_ccmp64" => self.ccmp64_btf_id,
-            "bpf_extract64" => self.extract64_btf_id,
-            "bpf_memcpy_bulk" => self.memcpy_bulk_btf_id,
-            "bpf_memset_bulk" => self.memset_bulk_btf_id,
-            "bpf_endian_load16" => self.endian_load16_btf_id,
-            "bpf_endian_load32" => self.endian_load32_btf_id,
-            "bpf_endian_load64" => self.endian_load64_btf_id,
-            "bpf_prefetch" => self.prefetch_btf_id,
-            _ => -1,
-        }
+        target_spec_by_name(target_name)
+            .map(|spec| self.btf_id_for_slot(spec.registry_slot))
+            .unwrap_or(-1)
     }
 
-    pub fn call_off_for_target_name(&self, target_name: &str) -> i16 {
-        self.target_call_offsets
-            .get(target_name)
-            .copied()
-            .unwrap_or(0)
+    pub fn call_off_for_target_name(&self, target_name: &str) -> anyhow::Result<i16> {
+        Ok(self.call_off_for_slot(Self::slot_for_target_name(target_name)?))
     }
 
     /// Whether the kinsn for the named target is registered (btf_id ≥ 0).
@@ -976,20 +986,7 @@ impl PassContext {
     /// All kinsn targets unavailable (btf_id = -1), no special CPU features.
     pub fn baseline() -> Self {
         Self {
-            kinsn_registry: KinsnRegistry {
-                rotate64_btf_id: -1,
-                rotate32_btf_id: -1,
-                select64_btf_id: -1,
-                ccmp64_btf_id: -1,
-                extract64_btf_id: -1,
-                memcpy_bulk_btf_id: -1,
-                memset_bulk_btf_id: -1,
-                endian_load16_btf_id: -1,
-                endian_load32_btf_id: -1,
-                endian_load64_btf_id: -1,
-                prefetch_btf_id: -1,
-                target_call_offsets: HashMap::new(),
-            },
+            kinsn_registry: KinsnRegistry::unavailable(),
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig::default(),
             prog_type: 0,

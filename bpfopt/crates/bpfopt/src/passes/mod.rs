@@ -65,10 +65,11 @@ pub use wide_mem::WideMemPass;
 
 #[cfg(test)]
 use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
+use crate::kinsn::target_spec_by_name;
 use crate::pass::BpfPass;
 #[cfg(test)]
 use crate::pass::PassManager;
-use serde::Serialize;
+use serde::{Serialize, Serializer};
 
 // ── Pass registry ───────────────────────────────────────────────────
 
@@ -88,10 +89,20 @@ pub struct PassRegistryEntry {
 #[derive(Clone, Copy, Debug)]
 #[rustfmt::skip] pub struct PassMetadata { flags: u8, pub kinsns_used: &'static [KinsnRef] }
 
-#[derive(Clone, Copy, Debug, Serialize)]
-#[rustfmt::skip] pub struct KinsnRef { pub json_name: &'static str, pub probe_aliases: &'static [&'static str] }
+#[derive(Clone, Copy, Debug)]
+#[rustfmt::skip] pub struct KinsnRef { canonical_name: &'static str }
 
-#[rustfmt::skip] impl KinsnRef { const fn new(json_name: &'static str, probe_aliases: &'static [&'static str]) -> Self { Self { json_name, probe_aliases } } }
+#[rustfmt::skip] impl KinsnRef {
+    const fn new(canonical_name: &'static str) -> Self { Self { canonical_name } }
+    pub fn canonical_name(self) -> &'static str { self.canonical_name }
+    fn target_spec(self) -> &'static crate::kinsn::TargetSpec { target_spec_by_name(self.canonical_name).expect("known kinsn target") }
+    pub fn probe_aliases(self) -> &'static [&'static str] { self.target_spec().probe_aliases }
+}
+
+#[rustfmt::skip]
+impl Serialize for KinsnRef {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error> where S: Serializer { self.target_spec().serialize(serializer) }
+}
 
 #[rustfmt::skip] impl PassMetadata {
     const fn new(flags: u8, kinsns_used: &'static [KinsnRef]) -> Self { Self { flags, kinsns_used } }
@@ -110,13 +121,13 @@ const META_NONE: PassMetadata = PassMetadata::new(0, &[]);
 const META_PRODUCES_STATES: PassMetadata = PassMetadata::new(PRODUCES_VERIFIER_STATES, &[]);
 #[rustfmt::skip] const META_NEEDS_AND_PRODUCES_STATES: PassMetadata = PassMetadata::new(NEEDS_VERIFIER_STATES | PRODUCES_VERIFIER_STATES, &[]);
 #[rustfmt::skip] const META_MAP_INLINE: PassMetadata = PassMetadata::new(NEEDS_VERIFIER_STATES | PRODUCES_VERIFIER_STATES | NEEDS_MAP_VALUES, &[]);
-#[rustfmt::skip] const META_ROTATE: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_rotate64", &["bpf_rotate64"]), KinsnRef::new("bpf_rotate32", &["bpf_rotate32"])]);
-#[rustfmt::skip] const META_SELECT: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_select64", &["bpf_select64"])]);
-#[rustfmt::skip] const META_CCMP: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_ccmp64", &["bpf_ccmp64"])]);
-#[rustfmt::skip] const META_EXTRACT: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_extract64", &["bpf_extract64"])]);
-#[rustfmt::skip] const META_ENDIAN: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_endian_load16", &["bpf_endian_load16"]), KinsnRef::new("bpf_endian_load32", &["bpf_endian_load32"]), KinsnRef::new("bpf_endian_load64", &["bpf_endian_load64"])]);
-#[rustfmt::skip] const META_BULK_MEMORY: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_bulk_memcpy", &["bpf_memcpy_bulk"]), KinsnRef::new("bpf_bulk_memset", &["bpf_memset_bulk"])]);
-#[rustfmt::skip] const META_PREFETCH: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_prefetch", &["bpf_prefetch"])]);
+#[rustfmt::skip] const META_ROTATE: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_rotate64"), KinsnRef::new("bpf_rotate32")]);
+#[rustfmt::skip] const META_SELECT: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_select64")]);
+#[rustfmt::skip] const META_CCMP: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_ccmp64")]);
+#[rustfmt::skip] const META_EXTRACT: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_extract64")]);
+#[rustfmt::skip] const META_ENDIAN: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_endian_load16"), KinsnRef::new("bpf_endian_load32"), KinsnRef::new("bpf_endian_load64")]);
+#[rustfmt::skip] const META_BULK_MEMORY: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_bulk_memcpy"), KinsnRef::new("bpf_bulk_memset")]);
+#[rustfmt::skip] const META_PREFETCH: PassMetadata = PassMetadata::new(NEEDS_TARGET, &[KinsnRef::new("bpf_prefetch")]);
 
 fn reject_pass_args(pass_name: &str, args: &[String]) -> Result<()> {
     if !args.is_empty() {

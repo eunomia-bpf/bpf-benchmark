@@ -418,7 +418,7 @@ impl BpfPass for ConstPropPass {
 
         let mut plan = RewritePlan::new();
         for (&pc, replacement) in &rewrite_plan.replacements {
-            plan.replace_range(pc, insn_width(&program.insns[pc]), replacement.clone());
+            plan.replace_range(pc, insn_width(&program.insns[pc]), replacement.clone())?;
         }
 
         let mut result = plan.commit(program, BtfRemapPolicy::Remap)?;

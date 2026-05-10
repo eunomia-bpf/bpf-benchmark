@@ -9,15 +9,6 @@ const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
 const BPF_PROG_TYPE_SCHED_ACT: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_ACT;
 const BPF_PROG_TYPE_XDP: u32 = libbpf_sys::BPF_PROG_TYPE_XDP;
 
-fn jge_reg(dst: u8, src: u8, off: i16) -> BpfInsn {
-    BpfInsn::new(
-        BPF_JMP | BPF_JGE | BPF_X,
-        BpfInsn::make_regs(dst, src),
-        off,
-        0,
-    )
-}
-
 fn load_packet_root() -> Vec<BpfInsn> {
     load_packet_root_with_offsets(XDP_DATA_OFF, XDP_DATA_END_OFF)
 }
@@ -133,7 +124,7 @@ fn make_mixed_cmp_kind_program() -> Vec<BpfInsn> {
     insns.push(BpfInsn::ldx_mem(BPF_H, 6, 2, 12));
     insns.push(BpfInsn::mov64_reg(5, 2));
     insns.push(BpfInsn::add64_imm(5, 34));
-    insns.push(jge_reg(5, 3, 0));
+    insns.push(BpfInsn::jump_reg(BPF_JGE, 5, 3, 0));
     insns.push(BpfInsn::ldx_mem(BPF_W, 7, 2, 30));
     shared_error_program(insns)
 }

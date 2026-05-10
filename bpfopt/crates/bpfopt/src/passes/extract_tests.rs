@@ -6,7 +6,8 @@ use crate::test_helpers::*;
 
 fn ctx_with_extract_kfunc(btf_id: i32) -> PassContext {
     let mut ctx = PassContext::baseline();
-    ctx.kinsn_registry.extract64_btf_id = btf_id;
+    ctx.kinsn_registry
+        .set_btf_id_for_slot(KinsnSlot::Extract64, btf_id);
     ctx.platform.has_bmi1 = true;
     ctx
 }
@@ -143,7 +144,7 @@ fn test_extract_pass_skip_when_kfunc_unavailable() {
         BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
-    let mut ctx = PassContext::baseline(); // extract64_btf_id = -1
+    let mut ctx = PassContext::baseline(); // bpf_extract64 unavailable
     ctx.platform.has_bmi1 = true; // platform has BMI1, but kfunc is missing
 
     let pass = ExtractPass;
@@ -304,8 +305,7 @@ fn test_extract_pass_uses_static_call_offset() {
     let mut cache = AnalysisCache::new();
     let mut ctx = ctx_with_extract_kfunc(7777);
     ctx.kinsn_registry
-        .target_call_offsets
-        .insert("bpf_extract64".to_string(), 42);
+        .set_call_off_for_slot(KinsnSlot::Extract64, 42);
 
     let pass = ExtractPass;
     let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();

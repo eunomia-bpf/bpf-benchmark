@@ -384,12 +384,8 @@ impl BpfInsn {
     /// `call pc-relative subprogram` (src_reg = BPF_PSEUDO_CALL).
     pub fn pseudo_call_to(call_pc: usize, target_pc: usize) -> Self {
         let imm = target_pc as i64 - (call_pc as i64 + 1);
-        Self::new(
-            BPF_JMP | BPF_CALL,
-            Self::make_regs(0, BPF_PSEUDO_CALL),
-            0,
-            imm as i32,
-        )
+        let regs = Self::make_regs(0, BPF_PSEUDO_CALL);
+        Self::new(BPF_JMP | BPF_CALL, regs, 0, imm as i32)
     }
 
     /// `ja +off` (unconditional jump, NOP when off=0)
@@ -425,13 +421,9 @@ impl BpfInsn {
     }
 
     pub fn ld_imm64(dst: u8, src: u8, imm: i64) -> [Self; 2] {
+        let regs = Self::make_regs(dst, src);
         [
-            Self::new(
-                BPF_LD | BPF_DW | BPF_IMM,
-                Self::make_regs(dst, src),
-                0,
-                imm as i32,
-            ),
+            Self::new(BPF_LD | BPF_DW | BPF_IMM, regs, 0, imm as i32),
             Self::new(0, 0, 0, (imm >> 32) as i32),
         ]
     }
@@ -484,6 +476,23 @@ impl BpfInsn {
     /// `alu64 op, dst, src` (e.g., OR64_REG)
     pub fn alu64_reg(op: u8, dst: u8, src: u8) -> Self {
         Self::new(BPF_ALU64 | op | BPF_X, Self::make_regs(dst, src), 0, 0)
+    }
+
+    pub fn alu32_imm(op: u8, dst: u8, imm: i32) -> Self {
+        Self::new(BPF_ALU | op | BPF_K, Self::make_regs(dst, 0), 0, imm)
+    }
+
+    pub fn alu32_reg(op: u8, dst: u8, src: u8) -> Self {
+        Self::new(BPF_ALU | op | BPF_X, Self::make_regs(dst, src), 0, 0)
+    }
+
+    pub fn endian_to_be(dst: u8, size: i32) -> Self {
+        Self::new(
+            BPF_ALU | BPF_END | BPF_TO_BE,
+            Self::make_regs(dst, 0),
+            0,
+            size,
+        )
     }
 
     /// NOP — encoded as `ja +0`.

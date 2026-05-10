@@ -5,9 +5,10 @@ use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
+use super::rewrite::{BtfRemapPolicy, RewritePlan};
 use super::utils::{
-    emit_packed_kinsn_call_with_off, fixup_all_branches, kinsn_replacement_subprog_skip_reason,
-    map_replacement_range, remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_pass,
+    emit_packed_kinsn_call_with_off, kinsn_replacement_subprog_skip_reason,
+    resolve_kinsn_call_off_for_pass,
 };
 
 const MIN_CCMP_TERMS: usize = 2;
@@ -88,12 +89,6 @@ struct SafeCcmpSite {
     payload: u64,
 }
 
-struct PendingCcmpBranch {
-    branch_pc: usize,
-    old_target_pc: usize,
-    site_start_pc: usize,
-}
-
 struct BranchTerm {
     target_pc: usize,
     reg: u8,
@@ -126,7 +121,7 @@ impl BpfPass for CcmpPass {
             ));
         }
 
-        if ctx.kinsn_registry.ccmp64_btf_id < 0 {
+        if ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::Ccmp64) < 0 {
             return Ok(PassResult::skipped(
                 self.name(),
                 SkipReason {
@@ -217,76 +212,32 @@ impl BpfPass for CcmpPass {
             });
         }
 
-        let btf_id = ctx.kinsn_registry.ccmp64_btf_id;
+        let btf_id = ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::Ccmp64);
         let kfunc_off = resolve_kinsn_call_off_for_pass(ctx, self.name())?;
-        let orig_len = program.insns.len();
-        let mut new_insns = Vec::with_capacity(orig_len);
-        let mut addr_map = vec![0usize; orig_len + 1];
-        let mut pending_branches = Vec::new();
-        let mut pc = 0;
-        let mut site_idx = 0;
-        let mut applied = 0;
-
-        while pc < orig_len {
-            let new_pc = new_insns.len();
-            addr_map[pc] = new_pc;
-
-            if site_idx < safe_sites.len() && pc == safe_sites[site_idx].site.start_pc {
-                let safe_site = &safe_sites[site_idx];
-                let replacement =
-                    emit_packed_kinsn_call_with_off(safe_site.payload, btf_id, kfunc_off);
-                new_insns.extend_from_slice(&replacement);
-
-                let branch_pc = new_insns.len();
-                new_insns.push(BpfInsn::new(
-                    BPF_JMP | BPF_JEQ | BPF_K,
-                    BpfInsn::make_regs(safe_site.dst_reg, 0),
-                    0,
-                    0,
-                ));
-                pending_branches.push(PendingCcmpBranch {
-                    branch_pc,
-                    old_target_pc: safe_site.site.target_pc,
-                    site_start_pc: safe_site.site.start_pc,
-                });
-
-                map_replacement_range(
-                    &mut addr_map,
-                    pc,
-                    safe_site.site.old_len,
-                    new_pc,
-                    CCMP_REPLACEMENT_LEN,
-                );
-
-                pc += safe_site.site.old_len;
-                site_idx += 1;
-                applied += 1;
-            } else {
-                new_insns.push(program.insns[pc]);
-                if program.insns[pc].is_ldimm64() && pc + 1 < orig_len {
-                    pc += 1;
-                    addr_map[pc] = new_insns.len();
-                    new_insns.push(program.insns[pc]);
-                }
-                pc += 1;
-            }
+        let mut plan = RewritePlan::new();
+        for safe_site in &safe_sites {
+            let mut replacement =
+                emit_packed_kinsn_call_with_off(safe_site.payload, btf_id, kfunc_off);
+            let branch_idx = replacement.len();
+            replacement.push(BpfInsn::new(
+                BPF_JMP | BPF_JEQ | BPF_K,
+                BpfInsn::make_regs(safe_site.dst_reg, 0),
+                0,
+                0,
+            ));
+            plan.replace_range(safe_site.site.start_pc, safe_site.site.old_len, replacement)?;
+            plan.add_internal_branch(
+                safe_site.site.start_pc,
+                branch_idx,
+                safe_site.site.target_pc,
+            );
         }
-        addr_map[orig_len] = new_insns.len();
 
-        fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
-        fixup_ccmp_branches(&mut new_insns, &addr_map, &pending_branches)?;
-
-        program.insns = new_insns;
-        remap_kinsn_btf_metadata(program, &ctx.kinsn_registry)?;
-        program.remap_annotations(&addr_map);
-
-        Ok(PassResult {
-            pass_name: self.name().into(),
-            sites_applied: applied,
-            sites_skipped: skipped,
-            diagnostics: vec![],
-            ..Default::default()
-        })
+        let mut result = plan.commit(program, BtfRemapPolicy::RemapKinsn(&ctx.kinsn_registry))?;
+        result.pass_name = self.name().into();
+        result.sites_applied = safe_sites.len();
+        result.sites_skipped = skipped;
+        Ok(result)
     }
 }
 
@@ -391,29 +342,4 @@ pub(super) fn encode_ccmp_payload(payload: &CcmpPayload) -> anyhow::Result<u64> 
         encoded |= u64::from(reg) << (8 + idx * 4);
     }
     Ok(encoded)
-}
-
-fn fixup_ccmp_branches(
-    insns: &mut [BpfInsn],
-    addr_map: &[usize],
-    pending: &[PendingCcmpBranch],
-) -> anyhow::Result<()> {
-    for branch in pending {
-        let Some(&new_target) = addr_map.get(branch.old_target_pc) else {
-            anyhow::bail!(
-                "ccmp site at pc {} targets old pc {} outside address map",
-                branch.site_start_pc,
-                branch.old_target_pc
-            );
-        };
-        let new_off = new_target as i64 - (branch.branch_pc as i64 + 1);
-        let new_off = i16::try_from(new_off).map_err(|_| {
-            anyhow::anyhow!(
-                "ccmp site at pc {} branch offset {new_off} does not fit i16",
-                branch.site_start_pc
-            )
-        })?;
-        insns[branch.branch_pc].off = new_off;
-    }
-    Ok(())
 }

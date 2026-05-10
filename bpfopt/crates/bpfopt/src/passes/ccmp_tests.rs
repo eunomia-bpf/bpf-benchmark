@@ -2,7 +2,6 @@ use super::ccmp::*;
 use crate::insn::*;
 use crate::pass::*;
 use crate::pass::{AnalysisCache, PassContext};
-use crate::test_helpers::*;
 
 fn jmp_zero(op: u8, class: u8, reg: u8, off: i16) -> BpfInsn {
     BpfInsn::new(class | op | BPF_K, BpfInsn::make_regs(reg, 0), off, 0)
@@ -11,7 +10,8 @@ fn jmp_zero(op: u8, class: u8, reg: u8, off: i16) -> BpfInsn {
 fn ccmp_ctx(arch: Arch) -> PassContext {
     let mut ctx = PassContext::baseline();
     ctx.platform.arch = arch;
-    ctx.kinsn_registry.ccmp64_btf_id = 77;
+    ctx.kinsn_registry
+        .set_btf_id_for_slot(KinsnSlot::Ccmp64, 77);
     ctx
 }
 
@@ -162,7 +162,7 @@ fn ccmp_pass_emits_kinsn_and_final_branch_on_aarch64() {
     assert_eq!(program.insns[2].dst_reg(), BPF_REG_0);
     assert_eq!(program.insns[2].off, 1);
 
-    let decoded = decode_ccmp_payload(BpfInsn::sidecar_payload(&program.insns[0])).unwrap();
+    let decoded = decode_ccmp_payload(program.insns[0].sidecar_payload()).unwrap();
     assert_eq!(decoded.regs, vec![BPF_REG_1, BPF_REG_2, BPF_REG_3]);
     assert_eq!(decoded.fail_mode, CcmpFailMode::EqZero);
 }

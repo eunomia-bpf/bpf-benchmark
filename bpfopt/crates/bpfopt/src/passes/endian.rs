@@ -5,9 +5,10 @@ use crate::analysis::BranchTargetAnalysis;
 use crate::insn::*;
 use crate::pass::*;
 
+use super::rewrite::{BtfRemapPolicy, RewritePlan};
 use super::utils::{
-    emit_packed_kinsn_call_with_off, fixup_all_branches, kinsn_replacement_subprog_skip_reason,
-    remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_target,
+    emit_packed_kinsn_call_with_off, kinsn_replacement_subprog_skip_reason,
+    resolve_kinsn_call_off_for_target,
 };
 
 /// ENDIAN_FUSION optimization pass: replaces LDX_MEM + ENDIAN_TO_BE patterns
@@ -228,12 +229,13 @@ fn writes_reg(insn: &BpfInsn, reg: u8) -> bool {
 
 /// Select the appropriate BTF ID for a given load size.
 fn btf_id_for_size(ctx: &PassContext, size: u8) -> i32 {
-    match size {
-        BPF_H => ctx.kinsn_registry.endian_load16_btf_id,
-        BPF_W => ctx.kinsn_registry.endian_load32_btf_id,
-        BPF_DW => ctx.kinsn_registry.endian_load64_btf_id,
-        _ => -1,
-    }
+    let slot = match size {
+        BPF_H => KinsnSlot::EndianLoad16,
+        BPF_W => KinsnSlot::EndianLoad32,
+        BPF_DW => KinsnSlot::EndianLoad64,
+        _ => return -1,
+    };
+    ctx.kinsn_registry.btf_id_for_slot(slot)
 }
 
 fn kfunc_name_for_size(size: u8) -> Option<&'static str> {
@@ -247,9 +249,13 @@ fn kfunc_name_for_size(size: u8) -> Option<&'static str> {
 
 /// Check if any of the three endian_load kfuncs are available.
 fn any_endian_kfunc_available(ctx: &PassContext) -> bool {
-    ctx.kinsn_registry.endian_load16_btf_id >= 0
-        || ctx.kinsn_registry.endian_load32_btf_id >= 0
-        || ctx.kinsn_registry.endian_load64_btf_id >= 0
+    [
+        KinsnSlot::EndianLoad16,
+        KinsnSlot::EndianLoad32,
+        KinsnSlot::EndianLoad64,
+    ]
+    .iter()
+    .any(|&slot| ctx.kinsn_registry.btf_id_for_slot(slot) >= 0)
 }
 
 pub(super) fn endian_payload(dst_reg: u8, base_reg: u8, offset: i16) -> u64 {
@@ -479,28 +485,17 @@ impl BpfPass for EndianFusionPass {
             });
         }
 
-        // Build replacement instruction stream.
-        let orig_len = program.insns.len();
-        let mut new_insns = Vec::with_capacity(orig_len);
-        let mut addr_map = vec![0usize; orig_len + 1];
-        let mut pc = 0;
-        let mut site_idx = 0;
-        let mut applied = 0;
-
-        while pc < orig_len {
-            let new_pc = new_insns.len();
-            addr_map[pc] = new_pc;
-
-            if site_idx < safe_sites.len() && pc == safe_sites[site_idx].site.start_pc {
-                let safe_site = &safe_sites[site_idx];
-                let site = &safe_site.site;
-                let btf_id = btf_id_for_size(ctx, site.size);
-                let kfunc_name = kfunc_name_for_size(site.size).ok_or_else(|| {
-                    anyhow::anyhow!("unsupported endian fusion size {}", site.size)
-                })?;
-                let kfunc_off = resolve_kinsn_call_off_for_target(ctx, kfunc_name)?;
-
-                let replacement = emit_endian_fusion_call(
+        let mut plan = RewritePlan::new();
+        for safe_site in &safe_sites {
+            let site = &safe_site.site;
+            let btf_id = btf_id_for_size(ctx, site.size);
+            let kfunc_name = kfunc_name_for_size(site.size)
+                .ok_or_else(|| anyhow::anyhow!("unsupported endian fusion size {}", site.size))?;
+            let kfunc_off = resolve_kinsn_call_off_for_target(ctx, kfunc_name)?;
+            plan.replace_range(
+                site.start_pc,
+                1,
+                emit_endian_fusion_call(
                     site.dst_reg,
                     site.src_reg,
                     site.offset,
@@ -508,64 +503,15 @@ impl BpfPass for EndianFusionPass {
                     kfunc_off,
                     ctx.platform.arch,
                     site.size,
-                );
-                let call_len = replacement.len();
-                new_insns.extend_from_slice(&replacement);
-                let copy_start = pc + 1;
-                let copy_end = pc + site.old_len - 1;
-                new_insns.extend_from_slice(&program.insns[copy_start..copy_end]);
-                map_endian_replacement(
-                    &mut addr_map,
-                    pc,
-                    site.old_len,
-                    new_pc,
-                    call_len,
-                    new_insns.len() - new_pc,
-                );
-
-                pc += site.old_len;
-                site_idx += 1;
-                applied += 1;
-            } else {
-                new_insns.push(program.insns[pc]);
-                if program.insns[pc].is_ldimm64() && pc + 1 < orig_len {
-                    pc += 1;
-                    addr_map[pc] = new_insns.len();
-                    new_insns.push(program.insns[pc]);
-                }
-                pc += 1;
-            }
+                ),
+            )?;
+            plan.delete_range(site.start_pc + site.old_len - 1, 1)?;
         }
-        addr_map[orig_len] = new_insns.len();
 
-        // Branch fixup.
-        fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
-
-        program.insns = new_insns;
-        remap_kinsn_btf_metadata(program, &ctx.kinsn_registry)?;
-        program.remap_annotations(&addr_map);
-
-        Ok(PassResult {
-            pass_name: self.name().into(),
-            sites_applied: applied,
-            sites_skipped: skipped,
-            diagnostics: vec![],
-            ..Default::default()
-        })
+        let mut result = plan.commit(program, BtfRemapPolicy::RemapKinsn(&ctx.kinsn_registry))?;
+        result.pass_name = self.name().into();
+        result.sites_applied = safe_sites.len();
+        result.sites_skipped = skipped;
+        Ok(result)
     }
-}
-
-fn map_endian_replacement(
-    addr_map: &mut [usize],
-    old_start: usize,
-    old_len: usize,
-    new_start: usize,
-    call_len: usize,
-    new_len: usize,
-) {
-    addr_map[old_start] = new_start;
-    for old_pc in old_start + 1..old_start + old_len - 1 {
-        addr_map[old_pc] = new_start + call_len + (old_pc - old_start - 1);
-    }
-    addr_map[old_start + old_len - 1] = new_start + new_len;
 }

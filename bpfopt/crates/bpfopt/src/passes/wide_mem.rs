@@ -657,7 +657,7 @@ impl BpfPass for WideMemPass {
 
         let mut plan = RewritePlan::new();
         for site in &safe_sites {
-            plan.replace_range(site.start_pc, site.old_len, emit_wide_mem(site)?);
+            plan.replace_range(site.start_pc, site.old_len, emit_wide_mem(site)?)?;
         }
 
         let mut result = plan.commit(program, BtfRemapPolicy::Remap)?;

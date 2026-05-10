@@ -5,9 +5,10 @@ use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
+use super::rewrite::{BtfRemapPolicy, RewritePlan};
 use super::utils::{
-    emit_packed_kinsn_call_with_off, fixup_all_branches, kinsn_replacement_subprog_skip_reason,
-    map_replacement_range, remap_kinsn_btf_metadata, resolve_kinsn_call_off_for_target,
+    emit_packed_kinsn_call_with_off, kinsn_replacement_subprog_skip_reason,
+    resolve_kinsn_call_off_for_target,
 };
 
 /// ROTATE optimization pass: replaces shift+OR rotate patterns with
@@ -31,7 +32,9 @@ impl BpfPass for RotatePass {
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         // Prerequisite: check if at least one rotate kfunc is available.
-        if ctx.kinsn_registry.rotate64_btf_id < 0 && ctx.kinsn_registry.rotate32_btf_id < 0 {
+        if ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::Rotate64) < 0
+            && ctx.kinsn_registry.btf_id_for_slot(KinsnSlot::Rotate32) < 0
+        {
             return Ok(PassResult::skipped(
                 self.name(),
                 SkipReason {
@@ -116,63 +119,29 @@ impl BpfPass for RotatePass {
             });
         }
 
-        // Build replacement instruction stream.
-        let orig_len = program.insns.len();
-        let mut new_insns = Vec::with_capacity(orig_len);
-        let mut addr_map = vec![0usize; orig_len + 1];
-        let mut pc = 0;
-        let mut site_idx = 0;
-        let mut applied = 0;
-
-        while pc < orig_len {
-            let new_pc = new_insns.len();
-            addr_map[pc] = new_pc;
-
-            if site_idx < safe_sites.len() && pc == safe_sites[site_idx].site.start_pc {
-                let safe_site = &safe_sites[site_idx];
-                let site = &safe_site.site;
-                let btf_id = ctx
-                    .kinsn_registry
-                    .btf_id_for_target_name(site.width.target_name());
-                let kfunc_off = resolve_kinsn_call_off_for_target(ctx, site.width.target_name())?;
-                // Emit: bpf_rotate{32,64}(val_reg, shift_amount) -> dst_reg
-                let payload = (site.dst_reg as u64)
-                    | ((site.val_reg as u64) << 4)
-                    | ((site.shift_amount as u64) << 8)
-                    | ((site.tmp_reg as u64) << 16);
-                let replacement = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
-                new_insns.extend_from_slice(&replacement);
-                map_replacement_range(&mut addr_map, pc, site.old_len, new_pc, replacement.len());
-
-                pc += site.old_len;
-                site_idx += 1;
-                applied += 1;
-            } else {
-                new_insns.push(program.insns[pc]);
-                if program.insns[pc].is_ldimm64() && pc + 1 < orig_len {
-                    pc += 1;
-                    addr_map[pc] = new_insns.len();
-                    new_insns.push(program.insns[pc]);
-                }
-                pc += 1;
-            }
+        let mut plan = RewritePlan::new();
+        for safe_site in &safe_sites {
+            let site = &safe_site.site;
+            let btf_id = ctx
+                .kinsn_registry
+                .btf_id_for_target_name(site.width.target_name());
+            let kfunc_off = resolve_kinsn_call_off_for_target(ctx, site.width.target_name())?;
+            let payload = (site.dst_reg as u64)
+                | ((site.val_reg as u64) << 4)
+                | ((site.shift_amount as u64) << 8)
+                | ((site.tmp_reg as u64) << 16);
+            plan.replace_range(
+                site.start_pc,
+                site.old_len,
+                emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
+            )?;
         }
-        addr_map[orig_len] = new_insns.len();
 
-        // Branch fixup.
-        fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
-
-        program.insns = new_insns;
-        remap_kinsn_btf_metadata(program, &ctx.kinsn_registry)?;
-        program.remap_annotations(&addr_map);
-
-        Ok(PassResult {
-            pass_name: self.name().into(),
-            sites_applied: applied,
-            sites_skipped: skipped,
-            diagnostics: vec![],
-            ..Default::default()
-        })
+        let mut result = plan.commit(program, BtfRemapPolicy::RemapKinsn(&ctx.kinsn_registry))?;
+        result.pass_name = self.name().into();
+        result.sites_applied = safe_sites.len();
+        result.sites_skipped = skipped;
+        Ok(result)
     }
 }
 

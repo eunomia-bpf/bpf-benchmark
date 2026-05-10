@@ -13,6 +13,7 @@ use bpfopt::insn::{
     BpfInsn, BPF_DW, BPF_IMM, BPF_LD, BPF_PSEUDO_MAP_FD, BPF_PSEUDO_MAP_IDX,
     BPF_PSEUDO_MAP_IDX_VALUE, BPF_PSEUDO_MAP_VALUE,
 };
+use bpfopt::kinsn::target_spec_by_name;
 use bpfopt::pass::{
     Arch, BpfProgram, BtfInfoRecords, KinsnRegistry, PassContext, PassManager, PassResult,
     PlatformCapabilities, RegState, ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind,
@@ -55,35 +56,6 @@ const PASS_ALIASES: &[(&str, &str)] = &[
     ("skb_load_bytes", "skb_load_bytes_spec"),
     ("skb-load-bytes-spec", "skb_load_bytes_spec"),
     ("skb_load_bytes_spec", "skb_load_bytes_spec"),
-];
-
-const KINSN_ALIASES: &[(&str, &str)] = &[
-    ("bpf_rotate64", "bpf_rotate64"),
-    ("rotate64", "bpf_rotate64"),
-    ("bpf_rotate32", "bpf_rotate32"),
-    ("rotate32", "bpf_rotate32"),
-    ("bpf_select64", "bpf_select64"),
-    ("select64", "bpf_select64"),
-    ("bpf_ccmp64", "bpf_ccmp64"),
-    ("ccmp64", "bpf_ccmp64"),
-    ("bpf_extract64", "bpf_extract64"),
-    ("extract64", "bpf_extract64"),
-    ("bpf_memcpy_bulk", "bpf_memcpy_bulk"),
-    ("bpf_bulk_memcpy", "bpf_memcpy_bulk"),
-    ("memcpy_bulk", "bpf_memcpy_bulk"),
-    ("bulk_memcpy", "bpf_memcpy_bulk"),
-    ("bpf_memset_bulk", "bpf_memset_bulk"),
-    ("bpf_bulk_memset", "bpf_memset_bulk"),
-    ("memset_bulk", "bpf_memset_bulk"),
-    ("bulk_memset", "bpf_memset_bulk"),
-    ("bpf_endian_load16", "bpf_endian_load16"),
-    ("endian_load16", "bpf_endian_load16"),
-    ("bpf_endian_load32", "bpf_endian_load32"),
-    ("endian_load32", "bpf_endian_load32"),
-    ("bpf_endian_load64", "bpf_endian_load64"),
-    ("endian_load64", "bpf_endian_load64"),
-    ("bpf_prefetch", "bpf_prefetch"),
-    ("prefetch", "bpf_prefetch"),
 ];
 
 #[derive(Parser)]
@@ -350,15 +322,6 @@ fn run_single_pass(
     Ok(())
 }
 
-fn public_kinsn_name(target_name: &str) -> &str {
-    match target_name {
-        "bpf_memcpy_bulk" => "bpf_bulk_memcpy",
-        "bpf_memset_bulk" => "bpf_bulk_memset",
-        "bpf_endian_load16" | "bpf_endian_load32" | "bpf_endian_load64" => "bpf_endian_load64",
-        _ => target_name,
-    }
-}
-
 fn build_pipeline(pass_names: &[&str], pass_args: &[String]) -> Result<PassManager> {
     let mut pm = PassManager::new();
     pm.register_analysis(BranchTargetAnalysis);
@@ -425,48 +388,35 @@ fn validate_required_side_inputs(common: &CommonArgs, pass_names: &[&str]) -> Re
 
 fn validate_required_kinsns(ctx: &PassContext, pass_names: &[&str]) -> Result<()> {
     for &pass_name in pass_names {
-        match pass_name {
-            "rotate" => require_all_kinsns(ctx, &["bpf_rotate64", "bpf_rotate32"], "rotate")?,
-            "cond_select" => require_kinsn(ctx, "bpf_select64")?,
-            "ccmp" if ctx.platform.arch == Arch::Aarch64 => require_kinsn(ctx, "bpf_ccmp64")?,
-            "extract" => require_kinsn(ctx, "bpf_extract64")?,
-            "endian_fusion" => require_any_kinsn(
-                ctx,
-                &[
-                    "bpf_endian_load16",
-                    "bpf_endian_load32",
-                    "bpf_endian_load64",
-                ],
-                "endian",
-            )?,
-            "bulk_memory" => {
-                require_all_kinsns(ctx, &["bpf_memcpy_bulk", "bpf_memset_bulk"], "bulk-memory")?
-            }
-            "prefetch" => require_kinsn(ctx, "bpf_prefetch")?,
-            _ => {}
-        }
-    }
-    Ok(())
-}
-
-fn require_kinsn(ctx: &PassContext, target_name: &str) -> Result<()> {
-    if ctx.kinsn_registry.btf_id_for_target_name(target_name) < 0 {
-        bail!("kinsn '{}' not in target", public_kinsn_name(target_name));
-    }
-    Ok(())
-}
-
-fn require_all_kinsns(ctx: &PassContext, target_names: &[&str], pass_label: &str) -> Result<()> {
-    let mut missing = Vec::new();
-    for target_name in target_names {
-        if ctx.kinsn_registry.btf_id_for_target_name(target_name) >= 0 {
+        let entry = registry_entry(pass_name)?;
+        if !entry.metadata.needs_target()
+            || (pass_name == "ccmp" && ctx.platform.arch != Arch::Aarch64)
+        {
             continue;
         }
-        let public_name = public_kinsn_name(target_name);
-        if !missing.contains(&public_name) {
-            missing.push(public_name);
+        let target_names = entry
+            .metadata
+            .kinsns_used
+            .iter()
+            .map(|kinsn| kinsn.canonical_name());
+        let label = cli_name_for_pass(pass_name);
+        if pass_name == "endian_fusion" {
+            require_any_kinsn(ctx, target_names, label)?;
+        } else {
+            require_all_kinsns(ctx, target_names, label)?;
         }
     }
+    Ok(())
+}
+
+fn require_all_kinsns<I>(ctx: &PassContext, target_names: I, pass_label: &str) -> Result<()>
+where
+    I: IntoIterator<Item = &'static str>,
+{
+    let missing = target_names
+        .into_iter()
+        .filter(|target_name| ctx.kinsn_registry.btf_id_for_target_name(target_name) < 0)
+        .collect::<Vec<_>>();
     if missing.is_empty() {
         return Ok(());
     }
@@ -476,23 +426,20 @@ fn require_all_kinsns(ctx: &PassContext, target_names: &[&str], pass_label: &str
     );
 }
 
-fn require_any_kinsn(ctx: &PassContext, target_names: &[&str], pass_label: &str) -> Result<()> {
+fn require_any_kinsn<I>(ctx: &PassContext, target_names: I, pass_label: &str) -> Result<()>
+where
+    I: IntoIterator<Item = &'static str>,
+{
+    let target_names = target_names.into_iter().collect::<Vec<_>>();
     if target_names
         .iter()
         .any(|target_name| ctx.kinsn_registry.btf_id_for_target_name(target_name) >= 0)
     {
         return Ok(());
     }
-    let mut public_names = Vec::new();
-    for target_name in target_names {
-        let public_name = public_kinsn_name(target_name);
-        if !public_names.contains(&public_name) {
-            public_names.push(public_name);
-        }
-    }
     bail!(
         "{pass_label} requires at least one target kinsn: {}",
-        public_names.join(", ")
+        target_names.join(", ")
     );
 }
 
@@ -963,32 +910,13 @@ fn read_target(path: &Path) -> Result<TargetJson> {
 }
 
 fn kinsn_registry_from_target(target: &TargetJson) -> Result<KinsnRegistry> {
-    let mut registry = unavailable_kinsn_registry();
+    let mut registry = KinsnRegistry::unavailable();
     for (name, spec) in &target.kinsns {
         let canonical = canonicalize_kinsn_name(name)?;
-        set_kinsn_btf_id(&mut registry, canonical, spec.btf_func_id);
-        registry
-            .target_call_offsets
-            .insert(canonical.to_string(), spec.call_offset);
+        registry.set_btf_id_for_target_name(canonical, spec.btf_func_id)?;
+        registry.set_call_off_for_target_name(canonical, spec.call_offset)?;
     }
     Ok(registry)
-}
-
-fn unavailable_kinsn_registry() -> KinsnRegistry {
-    KinsnRegistry {
-        rotate64_btf_id: -1,
-        rotate32_btf_id: -1,
-        select64_btf_id: -1,
-        ccmp64_btf_id: -1,
-        extract64_btf_id: -1,
-        memcpy_bulk_btf_id: -1,
-        memset_bulk_btf_id: -1,
-        endian_load16_btf_id: -1,
-        endian_load32_btf_id: -1,
-        endian_load64_btf_id: -1,
-        prefetch_btf_id: -1,
-        target_call_offsets: HashMap::new(),
-    }
 }
 
 fn apply_kinsn_list(registry: &mut KinsnRegistry, kinsns: &[String]) -> Result<()> {
@@ -1007,33 +935,15 @@ fn apply_kinsn_list(registry: &mut KinsnRegistry, kinsns: &[String]) -> Result<(
             None => (trimmed, 0),
         };
         let canonical = canonicalize_kinsn_name(name)?;
-        set_kinsn_btf_id(registry, canonical, btf_id);
+        registry.set_btf_id_for_target_name(canonical, btf_id)?;
     }
     Ok(())
 }
 
 fn canonicalize_kinsn_name(input: &str) -> Result<&'static str> {
-    KINSN_ALIASES
-        .iter()
-        .find_map(|(alias, canonical)| (*alias == input).then_some(*canonical))
+    target_spec_by_name(input)
+        .map(|spec| spec.canonical_name)
         .ok_or_else(|| anyhow!("unknown kinsn name: {input}"))
-}
-
-fn set_kinsn_btf_id(registry: &mut KinsnRegistry, name: &str, btf_id: i32) {
-    match name {
-        "bpf_rotate64" => registry.rotate64_btf_id = btf_id,
-        "bpf_rotate32" => registry.rotate32_btf_id = btf_id,
-        "bpf_select64" => registry.select64_btf_id = btf_id,
-        "bpf_ccmp64" => registry.ccmp64_btf_id = btf_id,
-        "bpf_extract64" => registry.extract64_btf_id = btf_id,
-        "bpf_memcpy_bulk" => registry.memcpy_bulk_btf_id = btf_id,
-        "bpf_memset_bulk" => registry.memset_bulk_btf_id = btf_id,
-        "bpf_endian_load16" => registry.endian_load16_btf_id = btf_id,
-        "bpf_endian_load32" => registry.endian_load32_btf_id = btf_id,
-        "bpf_endian_load64" => registry.endian_load64_btf_id = btf_id,
-        "bpf_prefetch" => registry.prefetch_btf_id = btf_id,
-        _ => {}
-    }
 }
 
 fn read_verifier_states(path: &Path) -> Result<Vec<VerifierInsn>> {
@@ -1369,14 +1279,25 @@ mod tests {
         };
 
         let registry = kinsn_registry_from_target(&target).unwrap();
-        assert_eq!(registry.rotate32_btf_id, 10);
-        assert_eq!(registry.memcpy_bulk_btf_id, 11);
-        assert_eq!(registry.endian_load64_btf_id, 12);
-        assert_eq!(registry.ccmp64_btf_id, 13);
-        assert_eq!(registry.prefetch_btf_id, 14);
-        assert_eq!(registry.call_off_for_target_name("bpf_rotate32"), 1);
-        assert_eq!(registry.call_off_for_target_name("bpf_memcpy_bulk"), 2);
-        assert_eq!(registry.call_off_for_target_name("bpf_prefetch"), 7);
+        assert_eq!(registry.btf_id_for_target_name("bpf_rotate32"), 10);
+        assert_eq!(registry.btf_id_for_target_name("bpf_bulk_memcpy"), 11);
+        assert_eq!(registry.btf_id_for_target_name("bpf_endian_load64"), 12);
+        assert_eq!(registry.btf_id_for_target_name("bpf_ccmp64"), 13);
+        assert_eq!(registry.btf_id_for_target_name("bpf_prefetch"), 14);
+        assert_eq!(
+            registry.call_off_for_target_name("bpf_rotate32").unwrap(),
+            1
+        );
+        assert_eq!(
+            registry
+                .call_off_for_target_name("bpf_bulk_memcpy")
+                .unwrap(),
+            2
+        );
+        assert_eq!(
+            registry.call_off_for_target_name("bpf_prefetch").unwrap(),
+            7
+        );
     }
 
     #[test]

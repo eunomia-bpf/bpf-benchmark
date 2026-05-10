@@ -177,11 +177,11 @@ impl BpfPass for BoundsCheckMergePass {
                 rewrite.dominant_add_pc,
                 insn_width(&program.insns[rewrite.dominant_add_pc]),
                 vec![widened],
-            );
+            )?;
             skip_pcs.extend(rewrite.skip_pcs.iter().copied());
         }
         for pc in skip_pcs {
-            plan.delete_range(pc, insn_width(&program.insns[pc]));
+            plan.delete_range(pc, insn_width(&program.insns[pc]))?;
         }
 
         let mut result = plan.commit(program, BtfRemapPolicy::NoRemap)?;
