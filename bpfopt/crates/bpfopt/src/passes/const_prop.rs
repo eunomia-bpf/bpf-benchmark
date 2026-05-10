@@ -7,7 +7,7 @@ use crate::analysis::CFGAnalysis;
 use crate::insn::*;
 use crate::pass::*;
 
-use super::rewrite::{BtfRemapPolicy, RewritePlan};
+use crate::rewrite::{BtfRemapPolicy, RewritePlan};
 
 const REG_COUNT: usize = 11;
 pub(super) const VERIFIER_POST_STATE_NOT_SCALAR_EXACT: &str =
@@ -365,20 +365,15 @@ impl BpfPass for ConstPropPass {
     fn name(&self) -> &str {
         "const_prop"
     }
-
-    fn required_analyses(&self) -> Vec<&str> {
-        vec!["cfg"]
-    }
-
     fn run(
         &self,
         program: &mut BpfProgram,
         analyses: &mut AnalysisCache,
         _ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        let cfg = analyses.get(&CFGAnalysis, program);
+        let cfg = analyses.get::<CFGAnalysis>(program);
         if cfg.blocks.is_empty() {
-            return Ok(PassResult::unchanged(self.name()));
+            return Ok(PassResult::unchanged());
         }
 
         let oracle = VerifierExactConstOracle::from_states(program.verifier_states.as_ref());
@@ -398,11 +393,10 @@ impl BpfPass for ConstPropPass {
 
         if rewrite_plan.replacements.is_empty() {
             if rewrite_plan.sites_skipped.is_empty() {
-                return Ok(PassResult::unchanged(self.name()));
+                return Ok(PassResult::unchanged());
             }
 
             return Ok(PassResult {
-                pass_name: self.name().into(),
                 sites_skipped: rewrite_plan.sites_skipped,
                 diagnostics: vec!["const_prop_alu_materialized=0".to_string()],
                 ..Default::default()
@@ -421,7 +415,6 @@ impl BpfPass for ConstPropPass {
         }
 
         let mut result = plan.commit(program, BtfRemapPolicy::Remap)?;
-        result.pass_name = self.name().into();
         result.sites_applied = rewrite_plan.replacements.len();
         result.sites_skipped = rewrite_plan.sites_skipped;
         result.diagnostics = vec![format!("const_prop_alu_materialized={alu_materialized}")];

@@ -164,11 +164,8 @@ fn test_endian_fusion_pass_skip_when_kfunc_unavailable() {
     ctx.platform.has_movbe = true; // platform has MOVBE, but kfunc is missing
 
     let pass = EndianFusionPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 0);
-    assert!(result.sites_skipped[0]
-        .reason
-        .contains("kfuncs not available"));
+    let err = pass.run(&mut prog, &mut cache, &ctx).unwrap_err();
+    assert!(err.to_string().contains("bpf_endian_load32"));
 }
 
 #[test]
@@ -458,12 +455,8 @@ fn test_endian_fusion_pass_specific_size_unavailable() {
     let ctx = ctx_with_endian32_kfunc(8888); // only 32-bit available
 
     let pass = EndianFusionPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 0);
-    assert!(result
-        .sites_skipped
-        .iter()
-        .any(|s| s.reason.contains("load16")));
+    let err = pass.run(&mut prog, &mut cache, &ctx).unwrap_err();
+    assert!(err.to_string().contains("bpf_endian_load16"));
 }
 
 #[test]

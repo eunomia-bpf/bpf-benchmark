@@ -10,7 +10,7 @@ use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::rewrite::{BtfRemapPolicy, RewritePlan};
+use crate::rewrite::{BtfRemapPolicy, RewritePlan};
 
 // ═══════════════════════════════════════════════════════════════════
 // Pattern matching (absorbed from matcher.rs)
@@ -487,22 +487,15 @@ impl BpfPass for WideMemPass {
     fn name(&self) -> &str {
         "wide_mem"
     }
-
-    fn required_analyses(&self) -> Vec<&str> {
-        vec!["branch_targets", "liveness"]
-    }
-
     fn run(
         &self,
         program: &mut BpfProgram,
         analyses: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        let bt_analysis = BranchTargetAnalysis;
-        let bt = analyses.get(&bt_analysis, program);
+        let bt = analyses.get::<BranchTargetAnalysis>(program);
 
-        let liveness_analysis = LivenessAnalysis;
-        let liveness = analyses.get(&liveness_analysis, program);
+        let liveness = analyses.get::<LivenessAnalysis>(program);
 
         // Scan for wide_mem sites.
         let raw_sites = scan_wide_mem(&program.insns);
@@ -651,7 +644,7 @@ impl BpfPass for WideMemPass {
         if safe_sites.is_empty() {
             return Ok(PassResult {
                 sites_skipped: skipped,
-                ..PassResult::unchanged(self.name())
+                ..PassResult::unchanged()
             });
         }
 
@@ -661,7 +654,6 @@ impl BpfPass for WideMemPass {
         }
 
         let mut result = plan.commit(program, BtfRemapPolicy::Remap)?;
-        result.pass_name = self.name().into();
         result.sites_applied = safe_sites.len();
         result.sites_skipped = skipped;
         Ok(result)

@@ -7,7 +7,9 @@ use crate::analysis::{CFGAnalysis, CFGResult, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::rewrite::{compose_addr_maps, fixup_all_branches};
+use crate::rewrite::{
+    commit_rewrite_output, compose_addr_maps, BtfRemapPolicy, RewriteOutput, RewritePlan,
+};
 
 /// Dead code elimination pass.
 ///
@@ -19,20 +21,15 @@ impl BpfPass for DcePass {
     fn name(&self) -> &str {
         "dce"
     }
-
-    fn required_analyses(&self) -> Vec<&str> {
-        vec![]
-    }
-
     fn run(
         &self,
         program: &mut BpfProgram,
         _analyses: &mut AnalysisCache,
         _ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        let Some((final_insns, final_addr_map)) = eliminate_dead_register_defs(&program.insns)
+        let Some((final_insns, final_addr_map)) = eliminate_dead_register_defs(&program.insns)?
         else {
-            return Ok(PassResult::unchanged(self.name()));
+            return Ok(PassResult::unchanged());
         };
 
         let sites_applied = program.insns.len() - final_insns.len();
@@ -41,34 +38,37 @@ impl BpfPass for DcePass {
             diagnostics.push(format!("removed {} dead-def insns", sites_applied));
         }
 
-        program.insns = final_insns;
-        remap_btf_metadata(program, &final_addr_map)?;
-        program.remap_annotations(&final_addr_map);
-        Ok(PassResult {
-            pass_name: self.name().into(),
-            sites_applied,
-            sites_skipped: vec![],
-            diagnostics,
-            ..Default::default()
-        })
+        let mut result = commit_rewrite_output(
+            program,
+            RewriteOutput {
+                insns: final_insns,
+                addr_map: final_addr_map,
+                sites_applied,
+            },
+            BtfRemapPolicy::Remap,
+        )?;
+        result.diagnostics = diagnostics;
+        Ok(result)
     }
 }
 
-pub fn eliminate_unreachable_blocks(insns: &[BpfInsn]) -> Option<(Vec<BpfInsn>, Vec<usize>)> {
+pub fn eliminate_unreachable_blocks(
+    insns: &[BpfInsn],
+) -> anyhow::Result<Option<(Vec<BpfInsn>, Vec<usize>)>> {
     if insns.is_empty() {
-        return None;
+        return Ok(None);
     }
 
-    let cfg = CFGAnalysis.run(&BpfProgram::new(insns.to_vec()));
+    let cfg = CFGAnalysis::run(&BpfProgram::new(insns.to_vec()));
     eliminate_unreachable_blocks_with_cfg(insns, &cfg)
 }
 
 fn eliminate_unreachable_blocks_with_cfg(
     insns: &[BpfInsn],
     cfg: &CFGResult,
-) -> Option<(Vec<BpfInsn>, Vec<usize>)> {
+) -> anyhow::Result<Option<(Vec<BpfInsn>, Vec<usize>)>> {
     if insns.is_empty() || cfg.blocks.is_empty() {
-        return None;
+        return Ok(None);
     }
 
     let mut reachable = vec![false; cfg.blocks.len()];
@@ -106,23 +106,25 @@ fn eliminate_unreachable_blocks_with_cfg(
             while pc < block.end {
                 let insn = &insns[pc];
                 if insn.is_ldimm64_pseudo_func() {
-                    let target = (pc as i64 + 1 + insn.imm as i64) as usize;
-                    if target < insns.len() && subprog_entry_pcs.contains(&target) {
-                        let target_block = cfg.insn_to_block[target];
-                        if !reachable[target_block] {
-                            reachable[target_block] = true;
-                            worklist.push(target_block);
-                            found_new = true;
+                    if let Some(target) = relative_branch_target_pc(pc, i64::from(insn.imm)) {
+                        if target < insns.len() && subprog_entry_pcs.contains(&target) {
+                            let target_block = cfg.insn_to_block[target];
+                            if !reachable[target_block] {
+                                reachable[target_block] = true;
+                                worklist.push(target_block);
+                                found_new = true;
+                            }
                         }
                     }
                 } else if insn.is_call() && insn.src_reg() == 1 {
-                    let target = (pc as i64 + 1 + insn.imm as i64) as usize;
-                    if target < insns.len() && subprog_entry_pcs.contains(&target) {
-                        let target_block = cfg.insn_to_block[target];
-                        if !reachable[target_block] {
-                            reachable[target_block] = true;
-                            worklist.push(target_block);
-                            found_new = true;
+                    if let Some(target) = relative_branch_target_pc(pc, i64::from(insn.imm)) {
+                        if target < insns.len() && subprog_entry_pcs.contains(&target) {
+                            let target_block = cfg.insn_to_block[target];
+                            if !reachable[target_block] {
+                                reachable[target_block] = true;
+                                worklist.push(target_block);
+                                found_new = true;
+                            }
                         }
                     }
                 }
@@ -148,7 +150,7 @@ fn eliminate_unreachable_blocks_with_cfg(
     eliminate_marked_insns(insns, &deleted)
 }
 
-pub fn eliminate_nops(insns: &[BpfInsn]) -> Option<(Vec<BpfInsn>, Vec<usize>)> {
+pub fn eliminate_nops(insns: &[BpfInsn]) -> anyhow::Result<Option<(Vec<BpfInsn>, Vec<usize>)>> {
     let mut deleted = vec![false; insns.len()];
     let mut pc = 0usize;
 
@@ -166,15 +168,18 @@ pub fn eliminate_nops(insns: &[BpfInsn]) -> Option<(Vec<BpfInsn>, Vec<usize>)> {
     eliminate_marked_insns(insns, &deleted)
 }
 
-pub fn eliminate_dead_register_defs(insns: &[BpfInsn]) -> Option<(Vec<BpfInsn>, Vec<usize>)> {
+pub fn eliminate_dead_register_defs(
+    insns: &[BpfInsn],
+) -> anyhow::Result<Option<(Vec<BpfInsn>, Vec<usize>)>> {
     if insns.is_empty() {
-        return None;
+        return Ok(None);
     }
 
     let mut final_insns = insns.to_vec();
     let mut final_addr_map: Option<Vec<usize>> = None;
 
-    while let Some((cleaned_insns, cleanup_map)) = eliminate_dead_register_defs_once(&final_insns) {
+    while let Some((cleaned_insns, cleanup_map)) = eliminate_dead_register_defs_once(&final_insns)?
+    {
         final_addr_map = Some(match final_addr_map.take() {
             Some(existing) => compose_addr_maps(&existing, &cleanup_map),
             None => cleanup_map,
@@ -182,11 +187,13 @@ pub fn eliminate_dead_register_defs(insns: &[BpfInsn]) -> Option<(Vec<BpfInsn>, 
         final_insns = cleaned_insns;
     }
 
-    final_addr_map.map(|addr_map| (final_insns, addr_map))
+    Ok(final_addr_map.map(|addr_map| (final_insns, addr_map)))
 }
 
-fn eliminate_dead_register_defs_once(insns: &[BpfInsn]) -> Option<(Vec<BpfInsn>, Vec<usize>)> {
-    let liveness = LivenessAnalysis.run(&BpfProgram::new(insns.to_vec()));
+fn eliminate_dead_register_defs_once(
+    insns: &[BpfInsn],
+) -> anyhow::Result<Option<(Vec<BpfInsn>, Vec<usize>)>> {
+    let liveness = LivenessAnalysis::run(&BpfProgram::new(insns.to_vec()));
     let mut deleted = vec![false; insns.len()];
     let mut pc = 0usize;
 
@@ -230,43 +237,30 @@ fn is_removable_dead_def(insn: &BpfInsn, live_out: Option<&HashSet<u8>>) -> bool
 fn eliminate_marked_insns(
     insns: &[BpfInsn],
     deleted: &[bool],
-) -> Option<(Vec<BpfInsn>, Vec<usize>)> {
+) -> anyhow::Result<Option<(Vec<BpfInsn>, Vec<usize>)>> {
     if insns.is_empty() || !deleted.iter().any(|&flag| flag) {
-        return None;
+        return Ok(None);
     }
     debug_assert_eq!(insns.len(), deleted.len());
 
-    let orig_len = insns.len();
     let deleted = normalize_ldimm64_deletions(insns, deleted);
-    let mut new_insns = Vec::with_capacity(orig_len);
-    let mut addr_map = vec![0usize; orig_len + 1];
+    let mut plan = RewritePlan::new();
     let mut pc = 0usize;
-
-    while pc < orig_len {
-        let insn = &insns[pc];
-        let width = insn_width(insn);
-        let new_pc = new_insns.len();
-
-        if deleted[pc] {
-            for j in 0..width {
-                addr_map[pc + j] = new_pc;
-            }
+    while pc < insns.len() {
+        let width = insn_width(&insns[pc]);
+        if !deleted[pc] {
             pc += width;
             continue;
         }
-
-        addr_map[pc] = new_pc;
-        new_insns.push(*insn);
-        if width == 2 && pc + 1 < orig_len {
-            addr_map[pc + 1] = new_insns.len();
-            new_insns.push(insns[pc + 1]);
-        }
+        let start = pc;
         pc += width;
+        while pc < insns.len() && deleted[pc] {
+            pc += insn_width(&insns[pc]);
+        }
+        plan.delete_range(start, pc - start)?;
     }
-    addr_map[orig_len] = new_insns.len();
-
-    fixup_all_branches(&mut new_insns, insns, &addr_map);
-    Some((new_insns, addr_map))
+    let output = plan.build(insns)?;
+    Ok(Some((output.insns, output.addr_map)))
 }
 
 fn normalize_ldimm64_deletions(insns: &[BpfInsn], deleted: &[bool]) -> Vec<bool> {
@@ -306,7 +300,9 @@ mod tests {
     #[test]
     fn test_eliminate_nops_preserves_helper_call_reserved_fields() {
         let insns = vec![BpfInsn::ja(0), BpfInsn::helper_call(5), BpfInsn::exit()];
-        let (new_insns, _addr_map) = eliminate_nops(&insns).expect("nop should be removed");
+        let (new_insns, _addr_map) = eliminate_nops(&insns)
+            .expect("nop elimination should not fail")
+            .expect("nop should be removed");
 
         assert_eq!(new_insns.len(), 2);
         assert!(new_insns[0].is_call());
@@ -322,8 +318,9 @@ mod tests {
         let insns = vec![BpfInsn::ja(2), map_value[0], map_value[1], BpfInsn::exit()];
         let deleted = vec![false, false, true, false];
 
-        let (new_insns, addr_map) =
-            eliminate_marked_insns(&insns, &deleted).expect("LD_IMM64 pair should be deleted");
+        let (new_insns, addr_map) = eliminate_marked_insns(&insns, &deleted)
+            .expect("marked-insn elimination should not fail")
+            .expect("LD_IMM64 pair should be deleted");
 
         assert_eq!(new_insns, vec![BpfInsn::ja(0), BpfInsn::exit()]);
         assert_eq!(addr_map[1], 1);
@@ -345,8 +342,9 @@ mod tests {
             BpfInsn::exit(),
         ];
 
-        let (new_insns, _addr_map) =
-            eliminate_dead_register_defs(&insns).expect("dead defs should be removed");
+        let (new_insns, _addr_map) = eliminate_dead_register_defs(&insns)
+            .expect("dead-def elimination should not fail")
+            .expect("dead defs should be removed");
 
         assert_eq!(new_insns, vec![BpfInsn::mov64_imm(0, 7), BpfInsn::exit(),]);
     }

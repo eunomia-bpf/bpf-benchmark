@@ -10,10 +10,18 @@ mod cfg_tests;
 mod liveness;
 #[cfg(test)]
 mod liveness_tests;
+mod map_refs;
+#[cfg(test)]
+mod map_refs_tests;
+mod site_scan;
+#[cfg(test)]
+mod site_scan_tests;
 
 pub use branch_target::BranchTargetAnalysis;
-pub use cfg::CFGAnalysis;
-pub use liveness::LivenessAnalysis;
+pub use cfg::{subprog_bounds, subprog_ranges, CFGAnalysis};
+pub use liveness::{insn_use_def_set, LivenessAnalysis, RegUseDefSet};
+pub use map_refs::{MapBinding, MapRefsAnalysis, MapRefsResult};
+pub use site_scan::{iter_sites, Site};
 
 // Result types are used by tests and analysis cache consumers.
 pub use branch_target::BranchTargetResult;

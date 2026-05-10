@@ -1,19 +1,16 @@
 // SPDX-License-Identifier: MIT
 //! skb_load_bytes specialization pass.
 
-use crate::analysis::{BranchTargetAnalysis, BranchTargetResult};
+use crate::analysis::{iter_sites, BranchTargetAnalysis, BranchTargetResult};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::rewrite::{BtfRemapPolicy, RewritePlan};
+use crate::rewrite::{BtfRemapPolicy, RewritePlan};
 
 const BPF_FUNC_SKB_LOAD_BYTES: i32 = libbpf_sys::BPF_FUNC_skb_load_bytes as i32;
 
 const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
 const BPF_PROG_TYPE_SCHED_ACT: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_ACT;
-
-const SKB_DATA_OFF: i16 = 76;
-const SKB_DATA_END_OFF: i16 = 80;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct PacketCtxLayout {
@@ -49,11 +46,6 @@ impl BpfPass for SkbLoadBytesSpecPass {
     fn name(&self) -> &str {
         "skb_load_bytes_spec"
     }
-
-    fn required_analyses(&self) -> Vec<&str> {
-        vec!["branch_targets"]
-    }
-
     fn run(
         &self,
         program: &mut BpfProgram,
@@ -61,19 +53,19 @@ impl BpfPass for SkbLoadBytesSpecPass {
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         if program.insns.is_empty() {
-            return Ok(PassResult::unchanged(self.name()));
+            return Ok(PassResult::unchanged());
         }
 
         let Some(layout) = packet_ctx_layout(ctx.prog_type) else {
-            return Ok(PassResult::unchanged(self.name()));
+            return Ok(PassResult::unchanged());
         };
 
-        let bt = analyses.get(&BranchTargetAnalysis, program);
+        let bt = analyses.get::<BranchTargetAnalysis>(program);
         let scan = scan_sites(&program.insns, &bt);
         if scan.sites.is_empty() {
             return Ok(PassResult {
                 sites_skipped: scan.skips,
-                ..PassResult::unchanged(self.name())
+                ..PassResult::unchanged()
             });
         }
 
@@ -83,7 +75,6 @@ impl BpfPass for SkbLoadBytesSpecPass {
         }
 
         let mut result = plan.commit(program, BtfRemapPolicy::NoRemap)?;
-        result.pass_name = self.name().into();
         result.sites_applied = scan.sites.len();
         result.sites_skipped = scan.skips;
         Ok(result)
@@ -93,8 +84,8 @@ impl BpfPass for SkbLoadBytesSpecPass {
 fn packet_ctx_layout(prog_type: u32) -> Option<PacketCtxLayout> {
     match prog_type {
         BPF_PROG_TYPE_SCHED_CLS | BPF_PROG_TYPE_SCHED_ACT => Some(PacketCtxLayout {
-            data_off: SKB_DATA_OFF,
-            data_end_off: SKB_DATA_END_OFF,
+            data_off: SKB_PACKET_DATA_OFFSET,
+            data_end_off: SKB_PACKET_DATA_END_OFFSET,
         }),
         _ => None,
     }
@@ -103,9 +94,9 @@ fn packet_ctx_layout(prog_type: u32) -> Option<PacketCtxLayout> {
 fn scan_sites(insns: &[BpfInsn], bt: &BranchTargetResult) -> ScanResult {
     let mut scan = ScanResult::default();
     let mut regs = initial_reg_state();
-    let mut pc = 0usize;
 
-    while pc < insns.len() {
+    for site in iter_sites(insns, |insns, pc| Some(insn_width(&insns[pc]))) {
+        let pc = site.pc;
         if pc > 0 && bt.is_target.get(pc).copied().unwrap_or(false) {
             regs = initial_reg_state();
         }
@@ -126,7 +117,6 @@ fn scan_sites(insns: &[BpfInsn], bt: &BranchTargetResult) -> ScanResult {
         }
 
         advance_reg_state(insns, pc, &mut regs);
-        pc += insn_width(insn);
     }
 
     scan

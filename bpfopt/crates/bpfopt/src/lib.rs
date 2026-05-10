@@ -15,6 +15,7 @@ pub mod insn;
 pub mod mock_maps;
 pub mod pass;
 pub mod passes;
+pub mod rewrite;
 #[cfg(test)]
 pub mod test_helpers;
 pub mod verifier_log;

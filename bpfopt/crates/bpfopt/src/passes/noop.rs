@@ -21,6 +21,6 @@ impl BpfPass for NoopPass {
         _analyses: &mut AnalysisCache,
         _ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        Ok(PassResult::unchanged("noop"))
+        Ok(PassResult::unchanged())
     }
 }

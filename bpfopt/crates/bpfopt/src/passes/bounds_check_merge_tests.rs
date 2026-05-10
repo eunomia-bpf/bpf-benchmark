@@ -1,7 +1,6 @@
 use super::bounds_check_merge::*;
 use crate::insn::*;
 
-use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
 use crate::pass::{BpfProgram, PassContext, PassManager, PipelineResult};
 
 const BPF_PROG_TYPE_SOCKET_FILTER: u32 = libbpf_sys::BPF_PROG_TYPE_SOCKET_FILTER;
@@ -10,7 +9,7 @@ const BPF_PROG_TYPE_SCHED_ACT: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_ACT;
 const BPF_PROG_TYPE_XDP: u32 = libbpf_sys::BPF_PROG_TYPE_XDP;
 
 fn load_packet_root() -> Vec<BpfInsn> {
-    load_packet_root_with_offsets(XDP_DATA_OFF, XDP_DATA_END_OFF)
+    load_packet_root_with_offsets(XDP_PACKET_DATA_OFFSET, XDP_PACKET_DATA_END_OFFSET)
 }
 
 fn load_packet_root_with_offsets(data_off: i16, data_end_off: i16) -> Vec<BpfInsn> {
@@ -78,7 +77,8 @@ fn make_two_adjacent_checks_program() -> Vec<BpfInsn> {
 }
 
 fn make_two_adjacent_tc_checks_program() -> Vec<BpfInsn> {
-    let mut insns = load_packet_root_with_offsets(SKB_DATA_OFF, SKB_DATA_END_OFF);
+    let mut insns =
+        load_packet_root_with_offsets(SKB_PACKET_DATA_OFFSET, SKB_PACKET_DATA_END_OFFSET);
     insns.extend(guard(4, 2, 3, 14));
     insns.push(BpfInsn::ldx_mem(BPF_H, 6, 2, 12));
     insns.extend(guard(5, 2, 3, 34));
@@ -186,9 +186,6 @@ fn make_no_bounds_check_program() -> Vec<BpfInsn> {
 
 fn run_bounds_check_merge_pass(program: &mut BpfProgram, prog_type: u32) -> PipelineResult {
     let mut pm = PassManager::new();
-    pm.register_analysis(BranchTargetAnalysis);
-    pm.register_analysis(CFGAnalysis);
-    pm.register_analysis(LivenessAnalysis);
     pm.add_pass(BoundsCheckMergePass);
 
     let mut ctx = PassContext::baseline();

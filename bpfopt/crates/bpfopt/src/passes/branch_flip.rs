@@ -8,11 +8,14 @@ use std::path::{Path, PathBuf};
 use anyhow::{bail, Context, Result};
 use serde::Deserialize;
 
-use crate::analysis::BranchTargetAnalysis;
+use crate::analysis::{iter_sites, BranchTargetAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::rewrite::fixup_all_branches as fixup_branches_inline;
+use crate::rewrite::{
+    commit_rewrite_output, fixup_all_branches as fixup_branches_inline, BtfRemapPolicy,
+    RewriteOutput,
+};
 
 /// BRANCH_FLIP: PGO-guided reorder of if/else bodies.
 ///
@@ -73,10 +76,6 @@ impl BranchFlipPass {
 impl BpfPass for ProfiledBranchFlipPass {
     fn name(&self) -> &str {
         self.inner.name()
-    }
-
-    fn required_analyses(&self) -> Vec<&str> {
-        self.inner.required_analyses()
     }
 
     fn run(
@@ -214,11 +213,6 @@ impl BpfPass for BranchFlipPass {
     fn name(&self) -> &str {
         "branch_flip"
     }
-
-    fn required_analyses(&self) -> Vec<&str> {
-        vec!["branch_targets"]
-    }
-
     fn run(
         &self,
         program: &mut BpfProgram,
@@ -238,7 +232,6 @@ impl BpfPass for BranchFlipPass {
         }
         if program_miss_rate > self.max_branch_miss_rate {
             return Ok(PassResult::skipped(
-                self.name(),
                 SkipReason {
                     pc: 0,
                     reason: format!(
@@ -250,8 +243,7 @@ impl BpfPass for BranchFlipPass {
             ));
         }
 
-        let bt_analysis = BranchTargetAnalysis;
-        let bt = analyses.get(&bt_analysis, program);
+        let bt = analyses.get::<BranchTargetAnalysis>(program);
 
         let n = program.insns.len();
 
@@ -264,7 +256,9 @@ impl BpfPass for BranchFlipPass {
 
         for site in &sites {
             let jcc = &program.insns[site.pc];
-            let own_target = (site.pc as i64 + 1 + jcc.off as i64) as usize;
+            let own_target = jcc
+                .branch_target_pc(site.pc)
+                .ok_or_else(|| anyhow::anyhow!("branch_flip candidate has invalid target"))?;
             let site_end = site.pc + site.total_len();
 
             let Some(bp) = program.annotations[site.pc].branch_profile.as_ref() else {
@@ -327,7 +321,7 @@ impl BpfPass for BranchFlipPass {
         if safe_sites.is_empty() {
             return Ok(PassResult {
                 sites_skipped: skipped,
-                ..PassResult::unchanged(self.name())
+                ..PassResult::unchanged()
             });
         }
 
@@ -358,10 +352,11 @@ impl BpfPass for BranchFlipPass {
                 // Jcc' taken: skip else+JA to reach then body
                 // offset = else_len + 1 (skip M else insns + 1 JA insn)
                 let old_jcc = program.insns[site.pc];
-                let new_op = invert_jcc_op(bpf_op(old_jcc.code)).unwrap();
+                let new_op = invert_jcc_op(bpf_op(old_jcc.code))
+                    .ok_or_else(|| anyhow::anyhow!("branch_flip cannot invert condition"))?;
                 let mut new_jcc = old_jcc;
                 new_jcc.code = (old_jcc.code & 0x0f) | new_op;
-                new_jcc.off = (site.else_len + 1) as i16;
+                new_jcc.set_branch_target_delta(branch_delta(site.else_len + 1)?)?;
                 new_insns.push(new_jcc);
 
                 // Emit else body (was after JA, now first)
@@ -372,7 +367,10 @@ impl BpfPass for BranchFlipPass {
 
                 // Emit JA that skips over then body
                 addr_map[ja_pc] = new_insns.len();
-                new_insns.push(BpfInsn::ja(site.then_len as i16));
+                new_insns.push(BpfInsn::ja(checked_off16(
+                    site.then_len,
+                    "branch_flip then-body skip",
+                )?));
 
                 // Emit then body (was first, now second)
                 for (i, &insn) in program.insns[then_start..then_end].iter().enumerate() {
@@ -396,27 +394,28 @@ impl BpfPass for BranchFlipPass {
         addr_map[n] = new_insns.len();
 
         // Phase 4: fix up internal branches (for instructions NOT part of rewritten sites).
-        fixup_branches_inline(&mut new_insns, &program.insns, &addr_map);
+        fixup_branches_inline(&mut new_insns, &program.insns, &addr_map)?;
 
         // Restore the manually-set JCC and JA offsets that fixup may have overwritten.
         for site in &safe_sites {
             let new_jcc_pc = addr_map[site.pc];
-            new_insns[new_jcc_pc].off = (site.else_len + 1) as i16;
+            new_insns[new_jcc_pc].set_branch_target_delta(branch_delta(site.else_len + 1)?)?;
             let old_ja_pc = site.pc + 1 + site.then_len;
             let new_ja_pc = addr_map[old_ja_pc];
-            new_insns[new_ja_pc].off = site.then_len as i16;
+            new_insns[new_ja_pc].set_branch_target_delta(branch_delta(site.then_len)?)?;
         }
 
-        program.insns = new_insns;
-        remap_btf_metadata(program, &addr_map)?;
-        program.remap_annotations(&addr_map);
-
-        Ok(PassResult {
-            pass_name: self.name().into(),
-            sites_applied: applied,
-            sites_skipped: skipped,
-            ..Default::default()
-        })
+        let mut result = commit_rewrite_output(
+            program,
+            RewriteOutput {
+                insns: new_insns,
+                addr_map,
+                sites_applied: applied,
+            },
+            BtfRemapPolicy::Remap,
+        )?;
+        result.sites_skipped = skipped;
+        Ok(result)
     }
 }
 
@@ -463,39 +462,53 @@ fn validate_real_branch_profile(pc: usize, bp: &BranchProfile) -> anyhow::Result
 ///   pc+N:   JA +M
 ///   pc+N+1..pc+N+M: else body (M insns)
 pub(super) fn scan_branch_flip_sites(insns: &[BpfInsn]) -> Vec<BranchFlipSite> {
-    let mut sites = Vec::new();
-    let n = insns.len();
-    let mut pc = 0;
+    iter_sites(insns, |insns, pc| {
+        branch_flip_site_at(insns, pc).map(|site| site.then_len + site.else_len + 2)
+    })
+    .into_iter()
+    .filter_map(|site| branch_flip_site_at(insns, site.pc))
+    .collect()
+}
 
-    while pc < n {
-        let jcc = &insns[pc];
-        if jcc.is_cond_jmp() && jcc.off > 1 {
-            let off = jcc.off as usize;
-            // The Jcc target is pc + 1 + off = pc + N + 1 (else_start).
-            // JA is at pc + off (the last instruction of the then block + JA).
-            let ja_pc = pc + off;
-            if ja_pc < n && insns[ja_pc].is_ja() && insns[ja_pc].off > 0 {
-                let then_len = off - 1; // N-1 instructions between Jcc and JA
-                let else_len = insns[ja_pc].off as usize;
-                let site_end = ja_pc + 1 + else_len;
-                if site_end <= n {
-                    let valid = !has_straddling_ldimm64(insns, pc + 1, pc + 1 + then_len)
-                        && !has_straddling_ldimm64(insns, ja_pc + 1, ja_pc + 1 + else_len);
-                    if valid {
-                        sites.push(BranchFlipSite {
-                            pc,
-                            then_len,
-                            else_len,
-                        });
-                        pc = site_end;
-                        continue;
-                    }
-                }
-            }
-        }
-        pc += 1;
+fn branch_flip_site_at(insns: &[BpfInsn], pc: usize) -> Option<BranchFlipSite> {
+    let n = insns.len();
+    let jcc = insns.get(pc)?;
+    if !jcc.is_cond_jmp() || jcc.off <= 1 {
+        return None;
     }
-    sites
+    let off = usize::try_from(jcc.off).ok()?;
+    // The Jcc target is pc + 1 + off = pc + N + 1 (else_start).
+    // JA is at pc + off (the last instruction of the then block + JA).
+    let ja_pc = pc + off;
+    if ja_pc >= n || !insns[ja_pc].is_ja() {
+        return None;
+    }
+    let then_len = off - 1; // N-1 instructions between Jcc and JA
+    let else_len = positive_branch_delta(&insns[ja_pc])?;
+    let site_end = ja_pc + 1 + else_len;
+    if site_end > n {
+        return None;
+    }
+    let valid = !has_straddling_ldimm64(insns, pc + 1, pc + 1 + then_len)
+        && !has_straddling_ldimm64(insns, ja_pc + 1, ja_pc + 1 + else_len);
+    valid.then_some(BranchFlipSite {
+        pc,
+        then_len,
+        else_len,
+    })
+}
+
+pub(super) fn checked_off16(delta: usize, label: &str) -> Result<i16> {
+    i16::try_from(delta).with_context(|| format!("{label} {delta} exceeds i16"))
+}
+
+fn branch_delta(delta: usize) -> Result<i64> {
+    i64::try_from(delta).context("branch_flip branch delta exceeds i64")
+}
+
+fn positive_branch_delta(insn: &BpfInsn) -> Option<usize> {
+    let delta = insn.branch_target_offset()?.delta()?;
+    (delta > 0).then(|| usize::try_from(delta).ok()).flatten()
 }
 
 fn has_straddling_ldimm64(insns: &[BpfInsn], range_start: usize, range_end: usize) -> bool {

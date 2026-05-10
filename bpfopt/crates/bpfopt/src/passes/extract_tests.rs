@@ -153,11 +153,8 @@ fn test_extract_pass_skip_when_kfunc_unavailable() {
     ctx.platform.has_bmi1 = true; // platform has BMI1, but kfunc is missing
 
     let pass = ExtractPass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 0);
-    assert!(result.sites_skipped[0]
-        .reason
-        .contains("kfunc not available"));
+    let err = pass.run(&mut prog, &mut cache, &ctx).unwrap_err();
+    assert!(err.to_string().contains("bpf_extract64"));
 }
 
 #[test]

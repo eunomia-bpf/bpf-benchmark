@@ -10,17 +10,14 @@ use std::sync::OnceLock;
 use anyhow::{bail, Context, Result};
 use serde::Deserialize;
 
-use crate::analysis::BranchTargetAnalysis;
+use crate::analysis::{iter_sites, subprog_bounds, BranchTargetAnalysis};
 use crate::insn::*;
 use crate::pass::*;
+use crate::rewrite::{commit_rewrite_output, BtfRemapPolicy, RewriteOutput};
 
 mod map_info;
 pub use map_info::{MapInfo, MapInfoAnalysis, MapInfoResult, MapReference};
 
-const BPF_PSEUDO_MAP_FD: u8 = crate::insn::BPF_PSEUDO_MAP_FD;
-const BPF_PSEUDO_MAP_VALUE: u8 = crate::insn::BPF_PSEUDO_MAP_VALUE;
-const BPF_PSEUDO_MAP_IDX: u8 = crate::insn::BPF_PSEUDO_MAP_IDX;
-const BPF_PSEUDO_MAP_IDX_VALUE: u8 = crate::insn::BPF_PSEUDO_MAP_IDX_VALUE;
 const R2_SETUP_LOOKBACK_LIMIT: usize = 8;
 const REG_RESOLUTION_LIMIT: usize = 64;
 const CONST_STACK_VALUE_LOOKBACK_LIMIT: usize = 256;
@@ -75,11 +72,6 @@ impl BpfPass for MapInlineCliPass {
     fn name(&self) -> &str {
         "map_inline"
     }
-
-    fn required_analyses(&self) -> Vec<&str> {
-        vec!["branch_targets"]
-    }
-
     fn run(
         &self,
         program: &mut BpfProgram,
@@ -1070,27 +1062,24 @@ struct MapRefKey {
 
 /// Find all `bpf_map_lookup_elem()` call sites in the instruction stream.
 fn find_map_lookup_sites(insns: &[BpfInsn]) -> Vec<MapLookupSite> {
-    let mut sites = Vec::new();
-    let mut pc = 0usize;
-
-    while pc < insns.len() {
-        let insn = &insns[pc];
-        if insn.is_call()
-            && insn.src_reg() == 0
-            && insn.imm == libbpf_sys::BPF_FUNC_map_lookup_elem as i32
-        {
-            if let Some(map_load_pc) = find_map_load_for_call(insns, pc) {
-                sites.push(MapLookupSite {
+    iter_sites(insns, |insns, pc| Some(insn_width(&insns[pc])))
+        .into_iter()
+        .filter_map(|site| {
+            let pc = site.pc;
+            let insn = &insns[pc];
+            if insn.is_call()
+                && insn.src_reg() == 0
+                && insn.imm == libbpf_sys::BPF_FUNC_map_lookup_elem as i32
+            {
+                find_map_load_for_call(insns, pc).map(|map_load_pc| MapLookupSite {
                     call_pc: pc,
                     map_load_pc,
-                });
+                })
+            } else {
+                None
             }
-        }
-
-        pc += insn_width(insn);
-    }
-
-    sites
+        })
+        .collect()
 }
 
 /// Find outer-to-inner map-in-map lookup chains among direct outer lookup sites.
@@ -2343,20 +2332,17 @@ impl BpfPass for MapInlinePass {
     fn name(&self) -> &str {
         "map_inline"
     }
-
-    fn required_analyses(&self) -> Vec<&str> {
-        vec!["branch_targets", "map_info"]
-    }
-
     fn run(
         &self,
         program: &mut BpfProgram,
         analyses: &mut AnalysisCache,
         _ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        let initial_map_info = analyses
-            .get(&MapInfoAnalysis, program)
-            .map_err(anyhow::Error::msg)?;
+        let initial_map_info = analyses.get::<MapInfoAnalysis>(program);
+        let initial_map_info = initial_map_info
+            .as_ref()
+            .as_ref()
+            .map_err(|err| anyhow::Error::msg(err.clone()))?;
         let initial_kernel_mutable_maps = collect_kernel_mutable_maps(program, &initial_map_info)?;
         let initial_inline_hints =
             resolve_inline_hints(program, &initial_map_info, &initial_kernel_mutable_maps)?;
@@ -2424,7 +2410,6 @@ impl BpfPass for MapInlinePass {
         }
 
         Ok(PassResult {
-            pass_name: self.name().into(),
             sites_applied: total_applied,
             sites_skipped: final_skipped,
             diagnostics,
@@ -2441,10 +2426,12 @@ fn run_map_inline_round(
     inline_hints: &ResolvedInlineHints,
     inline_hints_consumed: &mut HashSet<MapInlineHintAnchor>,
 ) -> anyhow::Result<PassResult> {
-    let bt = analyses.get(&BranchTargetAnalysis, program);
-    let map_info = analyses
-        .get(&MapInfoAnalysis, program)
-        .map_err(anyhow::Error::msg)?;
+    let bt = analyses.get::<BranchTargetAnalysis>(program);
+    let map_info = analyses.get::<MapInfoAnalysis>(program);
+    let map_info = map_info
+        .as_ref()
+        .as_ref()
+        .map_err(|err| anyhow::Error::msg(err.clone()))?;
     let kernel_mutable_maps = collect_kernel_mutable_maps(program, &map_info)?;
     let mut skipped = Vec::new();
     let mut rewrites = Vec::new();
@@ -2817,7 +2804,7 @@ fn run_map_inline_round(
         return Ok(PassResult {
             sites_skipped: skipped,
             diagnostics,
-            ..PassResult::unchanged("map_inline")
+            ..PassResult::unchanged()
         });
     }
 
@@ -2872,74 +2859,51 @@ fn run_map_inline_round(
             sites_skipped: skipped,
             diagnostics,
             map_inline_records,
-            ..PassResult::unchanged("map_inline")
+            ..PassResult::unchanged()
         });
     }
 
-    let orig_len = program.insns.len();
-    let mut new_insns = Vec::with_capacity(orig_len);
-    let mut addr_map = vec![0usize; orig_len + 1];
-    let mut replacement_new_pcs = HashMap::new();
-    let mut pc = 0usize;
-
-    while pc < orig_len {
-        addr_map[pc] = new_insns.len();
-
-        if let Some(replacement) = replacements.get(&pc) {
-            replacement_new_pcs.insert(pc, new_insns.len());
-            new_insns.extend_from_slice(replacement);
-            pc += 1;
-            continue;
-        }
-
-        if skip_pcs.contains(&pc) {
-            pc += 1;
-            continue;
-        }
-
-        let insn = program.insns[pc];
-        new_insns.push(insn);
-        if insn.is_ldimm64() && pc + 1 < orig_len {
-            pc += 1;
-            addr_map[pc] = new_insns.len();
-            new_insns.push(program.insns[pc]);
-        }
-        pc += 1;
+    let mut plan = crate::rewrite::RewritePlan::new();
+    for (pc, replacement) in &replacements {
+        plan.replace_range(*pc, 1, replacement.clone())?;
     }
-    addr_map[orig_len] = new_insns.len();
+    let mut pc = 0usize;
+    while pc < program.insns.len() {
+        let width = insn_width(&program.insns[pc]);
+        if !skip_pcs.contains(&pc) {
+            pc += width;
+            continue;
+        }
+        let start = pc;
+        pc += width;
+        while pc < program.insns.len() && skip_pcs.contains(&pc) {
+            pc += insn_width(&program.insns[pc]);
+        }
+        plan.delete_range(start, pc - start)?;
+    }
+    for patch in &replacement_branch_patches {
+        plan.add_internal_branch(
+            patch.replacement_pc,
+            patch.replacement_insn_idx,
+            patch.target_old_pc,
+        );
+    }
 
-    super::rewrite::fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
-
-    let mut final_insns = new_insns;
-    let mut final_addr_map = addr_map;
-    let mut intermediate_to_final = (0..=final_insns.len()).collect::<Vec<_>>();
+    let output = plan.build(&program.insns)?;
+    let mut final_insns = output.insns;
+    let mut final_addr_map = output.addr_map;
     if removed_any_null_check {
         if let Some((cleaned_insns, cleanup_map)) =
-            super::dce::eliminate_unreachable_blocks(&final_insns)
+            super::dce::eliminate_unreachable_blocks(&final_insns)?
         {
-            final_addr_map = super::rewrite::compose_addr_maps(&final_addr_map, &cleanup_map);
-            intermediate_to_final =
-                super::rewrite::compose_addr_maps(&intermediate_to_final, &cleanup_map);
+            final_addr_map = crate::rewrite::compose_addr_maps(&final_addr_map, &cleanup_map);
             final_insns = cleaned_insns;
         }
-        if let Some((cleaned_insns, cleanup_map)) = super::dce::eliminate_nops(&final_insns) {
-            final_addr_map = super::rewrite::compose_addr_maps(&final_addr_map, &cleanup_map);
-            intermediate_to_final =
-                super::rewrite::compose_addr_maps(&intermediate_to_final, &cleanup_map);
+        if let Some((cleaned_insns, cleanup_map)) = super::dce::eliminate_nops(&final_insns)? {
+            final_addr_map = crate::rewrite::compose_addr_maps(&final_addr_map, &cleanup_map);
             final_insns = cleaned_insns;
         }
     }
-    patch_replacement_branch_targets(
-        &mut final_insns,
-        &replacement_branch_patches,
-        &replacement_new_pcs,
-        &intermediate_to_final,
-        &final_addr_map,
-    )?;
-
-    program.insns = final_insns;
-    remap_btf_metadata(program, &final_addr_map)?;
-    program.remap_annotations(&final_addr_map);
 
     log_map_inline_debug(&format!(
         "applied {} map_inline rewrite(s), skipped {} site(s)",
@@ -2947,14 +2911,19 @@ fn run_map_inline_round(
         skipped.len()
     ));
 
-    Ok(PassResult {
-        pass_name: "map_inline".into(),
-        sites_applied: applied,
-        sites_skipped: skipped,
-        diagnostics,
-        map_inline_records,
-        ..Default::default()
-    })
+    let mut result = commit_rewrite_output(
+        program,
+        RewriteOutput {
+            insns: final_insns,
+            addr_map: final_addr_map,
+            sites_applied: applied,
+        },
+        BtfRemapPolicy::Remap,
+    )?;
+    result.sites_skipped = skipped;
+    result.diagnostics = diagnostics;
+    result.map_inline_records = map_inline_records;
+    Ok(result)
 }
 
 fn extract_site_constant_key(
@@ -3493,51 +3462,6 @@ fn patch_relative_jump(
     Ok(())
 }
 
-fn patch_replacement_branch_targets(
-    insns: &mut [BpfInsn],
-    patches: &[ReplacementBranchPatch],
-    replacement_new_pcs: &HashMap<usize, usize>,
-    intermediate_to_final: &[usize],
-    final_addr_map: &[usize],
-) -> anyhow::Result<()> {
-    for patch in patches {
-        let replacement_base = replacement_new_pcs
-            .get(&patch.replacement_pc)
-            .copied()
-            .ok_or_else(|| {
-                anyhow::anyhow!(
-                    "missing replacement base for branch patch at old pc {}",
-                    patch.replacement_pc
-                )
-            })?;
-        let intermediate_branch_pc = replacement_base + patch.replacement_insn_idx;
-        let branch_pc = *intermediate_to_final
-            .get(intermediate_branch_pc)
-            .ok_or_else(|| {
-                anyhow::anyhow!(
-                    "replacement branch pc {} is out of final address map range",
-                    intermediate_branch_pc
-                )
-            })?;
-        let target_pc = *final_addr_map.get(patch.target_old_pc).ok_or_else(|| {
-            anyhow::anyhow!(
-                "replacement branch target old pc {} is out of address map range",
-                patch.target_old_pc
-            )
-        })?;
-        let Some(insn) = insns.get_mut(branch_pc) else {
-            bail!("replacement branch pc {branch_pc} is out of bounds");
-        };
-        if !insn.is_ja() {
-            bail!("replacement branch pc {branch_pc} is not a JA instruction");
-        }
-        let offset = target_pc as isize - branch_pc as isize - 1;
-        insn.off = i16::try_from(offset)
-            .with_context(|| format!("replacement branch offset {offset} does not fit in i16"))?;
-    }
-    Ok(())
-}
-
 fn resolve_inner_map_id_for_outer_key(
     program: &BpfProgram,
     outer_info: &MapInfo,
@@ -3915,7 +3839,7 @@ fn emit_map_ptr_load(dst_reg: u8, map_id: u32) -> Vec<BpfInsn> {
     vec![
         BpfInsn::new(
             BPF_LD | BPF_DW | BPF_IMM,
-            BpfInsn::make_regs(dst_reg, BPF_PSEUDO_MAP_FD),
+            BpfInsn::make_regs(dst_reg, MapPseudo::Fd.src_reg()),
             0,
             0,
         ),
@@ -4102,22 +4026,23 @@ fn resolve_snapshot_map_value(
 }
 
 fn map_id_for_ref(program: &BpfProgram, map_ref: MapRefKey) -> anyhow::Result<Option<u32>> {
-    if map_ref.src_reg == BPF_PSEUDO_MAP_VALUE || map_ref.src_reg == BPF_PSEUDO_MAP_FD {
-        return Ok(program.map_fd_bindings.get(&map_ref.imm).copied());
+    match MapPseudo::from_src_reg(map_ref.src_reg) {
+        Some(kind) if kind.uses_fd() => Ok(program.map_fd_bindings.get(&map_ref.imm).copied()),
+        Some(kind) if kind.uses_index() => {
+            let index = usize::try_from(map_ref.imm).map_err(|_| {
+                anyhow::anyhow!("negative canonical pseudo-map index {}", map_ref.imm)
+            })?;
+            let Some(&map_id) = program.map_ids.get(index) else {
+                anyhow::bail!(
+                    "canonical pseudo-map index {} out of range for {} map ids",
+                    index,
+                    program.map_ids.len()
+                );
+            };
+            Ok(Some(map_id))
+        }
+        _ => Ok(None),
     }
-    if map_ref.src_reg == BPF_PSEUDO_MAP_IDX_VALUE || map_ref.src_reg == BPF_PSEUDO_MAP_IDX {
-        let index = usize::try_from(map_ref.imm)
-            .map_err(|_| anyhow::anyhow!("negative canonical pseudo-map index {}", map_ref.imm))?;
-        let Some(&map_id) = program.map_ids.get(index) else {
-            anyhow::bail!(
-                "canonical pseudo-map index {} out of range for {} map ids",
-                index,
-                program.map_ids.len()
-            );
-        };
-        return Ok(Some(map_id));
-    }
-    Ok(None)
 }
 
 fn encode_key_bytes(bytes: &[u8], key_size: usize) -> Vec<u8> {
@@ -4229,9 +4154,8 @@ fn find_direct_map_load_for_reg_before_pc_inner(
     while let Some(prev_pc) = prev_real_pc_bounded(insns, cursor, subprog_start) {
         let insn = &insns[prev_pc];
         if insn_defines_reg(insn, reg) {
-            if insn.is_ldimm64()
-                && insn.dst_reg() == reg
-                && (insn.src_reg() == BPF_PSEUDO_MAP_FD || insn.src_reg() == BPF_PSEUDO_MAP_IDX)
+            if insn.dst_reg() == reg
+                && matches!(insn.map_pseudo(), Some(MapPseudo::Fd | MapPseudo::Idx))
             {
                 return Some(prev_pc);
             }
@@ -4661,7 +4585,10 @@ fn resolve_key_pointer_origin_inner(
     let insn = &insns[pc];
 
     if insn.is_ldimm64() && insn.dst_reg() == reg {
-        if insn.src_reg() == BPF_PSEUDO_MAP_VALUE || insn.src_reg() == BPF_PSEUDO_MAP_IDX_VALUE {
+        if matches!(
+            insn.map_pseudo(),
+            Some(MapPseudo::FdValue | MapPseudo::IdxValue)
+        ) {
             let value_off = insns
                 .get(pc + 1)
                 .ok_or_else(|| format!("pseudo-map-value load at pc {} is truncated", pc))?
@@ -4866,35 +4793,6 @@ fn apply_constant_alu(op: u8, lhs: u64, rhs: u64, is_32bit: bool) -> Option<u64>
         }
     };
     Some(apply_alu_width(value, is_32bit))
-}
-
-fn subprog_bounds(insns: &[BpfInsn], pc: usize) -> (usize, usize) {
-    let mut starts = vec![0usize];
-    let mut cursor = 0usize;
-    while cursor < insns.len() {
-        let insn = &insns[cursor];
-        if insn.is_call() && insn.src_reg() == BPF_PSEUDO_CALL {
-            let target = (cursor as i64 + 1 + insn.imm as i64) as usize;
-            if target < insns.len() {
-                starts.push(target);
-            }
-        }
-        cursor += insn_width(insn);
-    }
-
-    starts.sort_unstable();
-    starts.dedup();
-
-    let mut start = 0usize;
-    let mut end = insns.len();
-    for (idx, subprog_start) in starts.iter().copied().enumerate() {
-        if subprog_start > pc {
-            break;
-        }
-        start = subprog_start;
-        end = starts.get(idx + 1).copied().unwrap_or(insns.len());
-    }
-    (start, end)
 }
 
 fn site_skip_diagnostic(pc: usize, reason: &str) -> String {
@@ -5215,10 +5113,8 @@ fn advance_to_non_null_path(pc: usize, insn: &BpfInsn, insn_count: usize) -> Opt
 }
 
 fn jump_target_pc(pc: usize, insn: &BpfInsn, insn_count: usize) -> Option<usize> {
-    let target = pc as isize + 1 + insn.off as isize;
-    (0..insn_count as isize)
-        .contains(&target)
-        .then_some(target as usize)
+    let target = insn.branch_target_pc(pc)?;
+    (target < insn_count).then_some(target)
 }
 
 fn ends_current_use_region(insn: &BpfInsn, alias_regs: &HashMap<u8, i16>) -> bool {
@@ -5230,8 +5126,7 @@ fn ends_current_use_region(insn: &BpfInsn, alias_regs: &HashMap<u8, i16>) -> boo
 }
 
 fn starts_next_lookup_setup(insn: &BpfInsn) -> bool {
-    insn.is_ldimm64()
-        && (insn.src_reg() == BPF_PSEUDO_MAP_FD || insn.src_reg() == BPF_PSEUDO_MAP_IDX)
+    matches!(insn.map_pseudo(), Some(MapPseudo::Fd | MapPseudo::Idx))
 }
 
 fn alias_copy(insn: &BpfInsn, alias_regs: &HashMap<u8, i16>) -> Option<(u8, i16)> {

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 //! EXTRACT optimization pass.
 
-use crate::analysis::BranchTargetAnalysis;
+use crate::analysis::{iter_sites, BranchTargetAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::rewrite::{BtfRemapPolicy, RewritePlan};
+use crate::rewrite::{BtfRemapPolicy, RewritePlan};
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     canonical_name: "bpf_extract64",
     aliases: &["extract64"],
@@ -72,74 +72,45 @@ pub(super) fn contiguous_mask_len(mask: u64) -> Option<u32> {
 }
 
 pub(super) fn scan_extract_sites(insns: &[BpfInsn]) -> Vec<ExtractSite> {
-    let mut sites = Vec::new();
-    let n = insns.len();
-    let mut pc = 0;
+    iter_sites(insns, |insns, pc| {
+        extract_site_at(insns, pc).map(|site| site.old_len)
+    })
+    .into_iter()
+    .filter_map(|site| extract_site_at(insns, site.pc))
+    .collect()
+}
 
-    while pc + 1 < n {
-        let i0 = &insns[pc];
-        let i1 = &insns[pc + 1];
-
-        // RSH64_IMM dst, shift
-        let is_rsh = i0.code == (BPF_ALU64 | BPF_RSH | BPF_K);
-        // AND64_IMM dst, mask
-        let is_and = i1.code == (BPF_ALU64 | BPF_AND | BPF_K);
-
-        if is_rsh && is_and && i0.dst_reg() == i1.dst_reg() {
-            let shift = i0.imm as u32;
-            // AND immediate is sign-extended from i32 to 64-bit ALU semantics.
-            let mask = i1.imm as i64 as u64;
-
-            if let Some(bit_len) = contiguous_mask_len(mask) {
-                // Ensure the extraction is within 64 bits.
-                if shift + bit_len <= 64 {
-                    sites.push(ExtractSite {
-                        start_pc: pc,
-                        old_len: 2,
-                        dst_reg: i0.dst_reg(),
-                        shift_amount: shift,
-                        bit_len,
-                    });
-                    pc += 2;
-                    continue;
-                }
-            }
-        }
-
-        pc += 1;
+fn extract_site_at(insns: &[BpfInsn], pc: usize) -> Option<ExtractSite> {
+    let i0 = insns.get(pc)?;
+    let i1 = insns.get(pc + 1)?;
+    let is_rsh = i0.code == (BPF_ALU64 | BPF_RSH | BPF_K);
+    let is_and = i1.code == (BPF_ALU64 | BPF_AND | BPF_K);
+    if !is_rsh || !is_and || i0.dst_reg() != i1.dst_reg() {
+        return None;
     }
-
-    sites
+    let shift = i0.imm as u32;
+    let mask = i1.imm as i64 as u64;
+    let bit_len = contiguous_mask_len(mask)?;
+    (shift + bit_len <= 64).then_some(ExtractSite {
+        start_pc: pc,
+        old_len: 2,
+        dst_reg: i0.dst_reg(),
+        shift_amount: shift,
+        bit_len,
+    })
 }
 
 impl BpfPass for ExtractPass {
     fn name(&self) -> &str {
         "extract"
     }
-
-    fn required_analyses(&self) -> Vec<&str> {
-        vec!["branch_targets"]
-    }
-
     fn run(
         &self,
         program: &mut BpfProgram,
         analyses: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        // Check if bpf_extract64 kfunc is available.
-        if !ctx.kinsn_registry.is_target_available("bpf_extract64") {
-            return Ok(PassResult::skipped(
-                self.name(),
-                SkipReason {
-                    pc: 0,
-                    reason: "bpf_extract64 kfunc not available".into(),
-                },
-            ));
-        }
-
-        let bt_analysis = BranchTargetAnalysis;
-        let bt = analyses.get(&bt_analysis, program);
+        let bt = analyses.get::<BranchTargetAnalysis>(program);
 
         let sites = scan_extract_sites(&program.insns);
         let btf_id = ctx.kinsn_registry.btf_id_for_target_name("bpf_extract64")?;
@@ -177,7 +148,7 @@ impl BpfPass for ExtractPass {
         if safe_sites.is_empty() {
             return Ok(PassResult {
                 sites_skipped: skipped,
-                ..PassResult::unchanged(self.name())
+                ..PassResult::unchanged()
             });
         }
 
@@ -188,9 +159,21 @@ impl BpfPass for ExtractPass {
         let mut plan = RewritePlan::new();
         for safe_site in &safe_sites {
             let site = &safe_site.site;
-            let payload = (site.dst_reg as u64)
-                | ((site.shift_amount as u64) << 8)
-                | ((site.bit_len as u64) << 16);
+            let shift_amount = u8::try_from(site.shift_amount).map_err(|_| {
+                anyhow::anyhow!(
+                    "extract shift amount {} exceeds packed payload width",
+                    site.shift_amount
+                )
+            })?;
+            let bit_len = u8::try_from(site.bit_len).map_err(|_| {
+                anyhow::anyhow!(
+                    "extract bit length {} exceeds packed payload width",
+                    site.bit_len
+                )
+            })?;
+            let payload = BpfInsn::pack_u4(site.dst_reg, 0)
+                | BpfInsn::pack_u8(shift_amount, 8)
+                | BpfInsn::pack_u8(bit_len, 16);
             plan.replace_range(
                 site.start_pc,
                 site.old_len,
@@ -199,7 +182,6 @@ impl BpfPass for ExtractPass {
         }
 
         let mut result = plan.commit(program, BtfRemapPolicy::RemapKinsn(&ctx.kinsn_registry))?;
-        result.pass_name = self.name().into();
         result.sites_applied = safe_sites.len();
         result.sites_skipped = skipped;
         Ok(result)

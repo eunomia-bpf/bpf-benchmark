@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 //! ENDIAN_FUSION optimization pass.
 
-use crate::analysis::BranchTargetAnalysis;
+use crate::analysis::{iter_sites, BranchTargetAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::rewrite::{BtfRemapPolicy, RewritePlan};
+use crate::rewrite::{BtfRemapPolicy, RewritePlan};
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
         canonical_name: "bpf_endian_load16",
@@ -75,19 +75,12 @@ struct SafeEndianFusionSite {
 
 /// Scan for LDX_MEM + endian byte-swap patterns with matching or narrowed sizes.
 pub(super) fn scan_endian_fusion_sites(insns: &[BpfInsn]) -> Vec<EndianFusionSite> {
-    let mut sites = Vec::new();
-    let mut pc = 0;
-
-    while pc + 1 < insns.len() {
-        if let Some(site) = scan_endian_site(insns, pc) {
-            pc = site.start_pc + site.old_len;
-            sites.push(site);
-        } else {
-            pc += 1;
-        }
-    }
-
-    sites
+    iter_sites(insns, |insns, pc| {
+        scan_endian_site(insns, pc).map(|site| site.old_len)
+    })
+    .into_iter()
+    .filter_map(|site| scan_endian_site(insns, site.pc))
+    .collect()
 }
 
 fn scan_endian_site(insns: &[BpfInsn], pc: usize) -> Option<EndianFusionSite> {
@@ -266,15 +259,10 @@ fn kfunc_name_for_size(size: u8) -> Option<&'static str> {
     }
 }
 
-/// Check if any of the three endian_load kfuncs are available.
-fn any_endian_kfunc_available(ctx: &PassContext) -> bool {
-    KINSN_TARGETS
-        .iter()
-        .any(|target| ctx.kinsn_registry.is_target_available(target.canonical_name))
-}
-
 pub(super) fn endian_payload(dst_reg: u8, base_reg: u8, offset: i16) -> u64 {
-    (dst_reg as u64) | ((base_reg as u64) << 4) | ((offset as u16 as u64) << 8)
+    BpfInsn::pack_u4(dst_reg, 0)
+        | BpfInsn::pack_u4(base_reg, 4)
+        | BpfInsn::pack_u16(offset as u16, 8)
 }
 
 fn offset_is_directly_encodable(arch: Arch, size: u8, offset: i16) -> bool {
@@ -373,55 +361,19 @@ impl BpfPass for EndianFusionPass {
     fn name(&self) -> &str {
         "endian_fusion"
     }
-
-    fn required_analyses(&self) -> Vec<&str> {
-        vec!["branch_targets"]
-    }
-
     fn run(
         &self,
         program: &mut BpfProgram,
         analyses: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        // Check if any endian_load kfunc is available.
-        if !any_endian_kfunc_available(ctx) {
-            return Ok(PassResult::skipped(
-                self.name(),
-                SkipReason {
-                    pc: 0,
-                    reason: "bpf_endian_loadXX kfuncs not available".into(),
-                },
-            ));
-        }
-
-        let bt_analysis = BranchTargetAnalysis;
-        let bt = analyses.get(&bt_analysis, program);
+        let bt = analyses.get::<BranchTargetAnalysis>(program);
 
         let sites = scan_endian_fusion_sites(&program.insns);
         let mut safe_sites: Vec<SafeEndianFusionSite> = Vec::new();
         let mut skipped = find_blocked_narrow_sites(&program.insns);
 
         for site in sites {
-            // Check if the specific size kfunc is available.
-            let kfunc_name = kfunc_name_for_size(site.size)
-                .ok_or_else(|| anyhow::anyhow!("unsupported endian fusion size {}", site.size))?;
-            if !ctx.kinsn_registry.is_target_available(kfunc_name) {
-                skipped.push(SkipReason {
-                    pc: site.start_pc,
-                    reason: format!(
-                        "bpf_endian_load{} kfunc not available",
-                        match site.size {
-                            BPF_H => 16,
-                            BPF_W => 32,
-                            BPF_DW => 64,
-                            _ => 0,
-                        }
-                    ),
-                });
-                continue;
-            }
-
             // Safety check 1: interior branch target.
             let has_interior = (site.start_pc + 1..site.start_pc + site.old_len)
                 .any(|pc| pc < bt.is_target.len() && bt.is_target[pc]);
@@ -459,7 +411,7 @@ impl BpfPass for EndianFusionPass {
         if safe_sites.is_empty() {
             return Ok(PassResult {
                 sites_skipped: skipped,
-                ..PassResult::unchanged(self.name())
+                ..PassResult::unchanged()
             });
         }
 
@@ -487,7 +439,6 @@ impl BpfPass for EndianFusionPass {
         }
 
         let mut result = plan.commit(program, BtfRemapPolicy::RemapKinsn(&ctx.kinsn_registry))?;
-        result.pass_name = self.name().into();
         result.sites_applied = safe_sites.len();
         result.sites_skipped = skipped;
         Ok(result)

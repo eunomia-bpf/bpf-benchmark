@@ -3,12 +3,12 @@
 
 use std::collections::HashSet;
 
-use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
+use crate::analysis::{iter_sites, BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
 use super::dce::{eliminate_nops, eliminate_unreachable_blocks};
-use super::rewrite::{BtfRemapPolicy, RewritePlan};
+use crate::rewrite::{BtfRemapPolicy, RewritePlan};
 
 /// BPF_PROG_TYPE_SCHED_CLS (TC classifier).
 const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
@@ -24,11 +24,6 @@ const BPF_PROG_TYPE_LWT_IN: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_IN;
 const BPF_PROG_TYPE_LWT_OUT: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_OUT;
 /// BPF_PROG_TYPE_LWT_XMIT.
 const BPF_PROG_TYPE_LWT_XMIT: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_XMIT;
-
-pub(super) const XDP_DATA_OFF: i16 = 0;
-pub(super) const XDP_DATA_END_OFF: i16 = 4;
-pub(super) const SKB_DATA_OFF: i16 = 76;
-pub(super) const SKB_DATA_END_OFF: i16 = 80;
 
 /// Phase-1 heuristic: treat larger jumps as gapped windows and fail closed.
 const MAX_LADDER_WINDOW_GROWTH: i32 = 24;
@@ -88,11 +83,6 @@ impl BpfPass for BoundsCheckMergePass {
     fn name(&self) -> &str {
         "bounds_check_merge"
     }
-
-    fn required_analyses(&self) -> Vec<&str> {
-        vec!["cfg", "branch_targets", "liveness"]
-    }
-
     fn run(
         &self,
         program: &mut BpfProgram,
@@ -100,20 +90,20 @@ impl BpfPass for BoundsCheckMergePass {
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         let Some(layout) = packet_ctx_layout(ctx.prog_type) else {
-            return Ok(PassResult::unchanged(self.name()));
+            return Ok(PassResult::unchanged());
         };
         if program.insns.is_empty() {
-            return Ok(PassResult::unchanged(self.name()));
+            return Ok(PassResult::unchanged());
         }
 
-        let bt = analyses.get(&BranchTargetAnalysis, program);
-        let liveness = analyses.get(&LivenessAnalysis, program);
+        let bt = analyses.get::<BranchTargetAnalysis>(program);
+        let liveness = analyses.get::<LivenessAnalysis>(program);
 
         let mut scan = scan_guard_sites(&program.insns, &bt, &liveness, layout);
         if scan.guards.is_empty() {
             return Ok(PassResult {
                 sites_skipped: scan.skips,
-                ..PassResult::unchanged(self.name())
+                ..PassResult::unchanged()
             });
         }
 
@@ -164,7 +154,7 @@ impl BpfPass for BoundsCheckMergePass {
         if rewrites.is_empty() {
             return Ok(PassResult {
                 sites_skipped: scan.skips,
-                ..PassResult::unchanged(self.name())
+                ..PassResult::unchanged()
             });
         }
 
@@ -186,16 +176,14 @@ impl BpfPass for BoundsCheckMergePass {
 
         let mut result = plan.commit(program, BtfRemapPolicy::NoRemap)?;
 
-        if let Some((cleaned_insns, cleanup_map)) = eliminate_unreachable_blocks(&program.insns) {
+        if let Some((cleaned_insns, cleanup_map)) = eliminate_unreachable_blocks(&program.insns)? {
             program.insns = cleaned_insns;
             program.remap_annotations(&cleanup_map);
         }
-        while let Some((cleaned_insns, cleanup_map)) = eliminate_nops(&program.insns) {
+        while let Some((cleaned_insns, cleanup_map)) = eliminate_nops(&program.insns)? {
             program.insns = cleaned_insns;
             program.remap_annotations(&cleanup_map);
         }
-
-        result.pass_name = self.name().into();
         result.sites_applied = rewrites.len();
         result.sites_skipped = scan.skips;
         result.insns_after = program.insns.len();
@@ -206,8 +194,8 @@ impl BpfPass for BoundsCheckMergePass {
 fn packet_ctx_layout(prog_type: u32) -> Option<PacketCtxLayout> {
     match prog_type {
         BPF_PROG_TYPE_XDP => Some(PacketCtxLayout {
-            data_off: XDP_DATA_OFF,
-            data_end_off: XDP_DATA_END_OFF,
+            data_off: XDP_PACKET_DATA_OFFSET,
+            data_end_off: XDP_PACKET_DATA_END_OFFSET,
         }),
         BPF_PROG_TYPE_SCHED_CLS
         | BPF_PROG_TYPE_SCHED_ACT
@@ -215,8 +203,8 @@ fn packet_ctx_layout(prog_type: u32) -> Option<PacketCtxLayout> {
         | BPF_PROG_TYPE_LWT_IN
         | BPF_PROG_TYPE_LWT_OUT
         | BPF_PROG_TYPE_LWT_XMIT => Some(PacketCtxLayout {
-            data_off: SKB_DATA_OFF,
-            data_end_off: SKB_DATA_END_OFF,
+            data_off: SKB_PACKET_DATA_OFFSET,
+            data_end_off: SKB_PACKET_DATA_END_OFFSET,
         }),
         _ => None,
     }
@@ -232,9 +220,9 @@ fn scan_guard_sites(
     let mut next_root_id = 1u32;
     let mut last_data_root = None;
     let mut result = ScanResult::default();
-    let mut pc = 0usize;
 
-    while pc < insns.len() {
+    for site in iter_sites(insns, |insns, pc| Some(insn_width(&insns[pc]))) {
+        let pc = site.pc;
         if pc > 0 && bt.is_target.get(pc).copied().unwrap_or(false) {
             clear_states(&mut states);
             last_data_root = None;
@@ -253,7 +241,6 @@ fn scan_guard_sites(
             &mut last_data_root,
             layout,
         );
-        pc += insn_width(&insns[pc]);
     }
 
     result

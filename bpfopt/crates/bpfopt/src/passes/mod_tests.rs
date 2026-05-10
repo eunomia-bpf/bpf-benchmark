@@ -3,7 +3,7 @@ use std::collections::{BTreeSet, HashMap};
 
 use crate::bpf::use_mock_maps;
 use crate::insn::*;
-use crate::pass::{BpfProgram, PassContext, PipelineResult};
+use crate::pass::{Analysis, BpfProgram, PassContext, PipelineResult};
 use crate::test_helpers::*;
 
 const BPF_MAP_TYPE_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_HASH;
@@ -61,8 +61,7 @@ fn test_cfg_analysis_with_subprogs() {
         BpfInsn::exit(),
     ]);
 
-    let cfg = CFGAnalysis;
-    let result = cfg.run(&prog);
+    let result = CFGAnalysis::run(&prog);
 
     assert!(result.subprogs.len() >= 2);
     assert_eq!(result.subprogs[1].start, 3);
@@ -71,7 +70,6 @@ fn test_cfg_analysis_with_subprogs() {
 #[test]
 fn test_cfg_analysis_with_callback_subprog_refs() {
     use crate::analysis::CFGAnalysis;
-    use crate::pass::Analysis;
 
     let callback = BpfInsn::ld_imm64(2, BPF_PSEUDO_FUNC, 4);
     let prog = make_program(vec![
@@ -83,8 +81,7 @@ fn test_cfg_analysis_with_callback_subprog_refs() {
         BpfInsn::exit(),
     ]);
 
-    let cfg = CFGAnalysis;
-    let result = cfg.run(&prog);
+    let result = CFGAnalysis::run(&prog);
 
     assert!(result.subprogs.len() >= 2);
     assert_eq!(result.subprogs[1].start, 5);
@@ -93,7 +90,6 @@ fn test_cfg_analysis_with_callback_subprog_refs() {
 #[test]
 fn test_liveness_across_branch() {
     use crate::analysis::LivenessAnalysis;
-    use crate::pass::Analysis;
 
     let prog = make_program(vec![
         BpfInsn::mov64_imm(1, 10),
@@ -103,8 +99,7 @@ fn test_liveness_across_branch() {
         BpfInsn::exit(),
     ]);
 
-    let liveness = LivenessAnalysis;
-    let result = liveness.run(&prog);
+    let result = LivenessAnalysis::run(&prog);
 
     assert!(result.live_out[0].contains(&1));
     assert!(!result.live_out[1].contains(&0));
@@ -114,12 +109,10 @@ fn test_liveness_across_branch() {
 #[test]
 fn test_branch_targets_backward_jump() {
     use crate::analysis::BranchTargetAnalysis;
-    use crate::pass::Analysis;
 
     let prog = make_program(vec![BpfInsn::mov64_imm(0, 0), BpfInsn::ja(-2)]);
 
-    let bt = BranchTargetAnalysis;
-    let result = bt.run(&prog);
+    let result = BranchTargetAnalysis::run(&prog);
 
     assert!(result.is_target[0]);
     assert!(!result.is_target[1]);
@@ -173,8 +166,8 @@ fn cascade_const_prop_folds_non_zero_map_inline_output() {
     let map_inline_result = run_pipeline_with_passes(&mut program, &["map_inline"]);
     install_const_prop_scalar_verifier_state(&mut program, 2, 1, 52);
     let const_prop_result = run_pipeline_with_passes(&mut program, &["const_prop"]);
-    assert_eq!(map_inline_result.pass_results[0].pass_name, "map_inline");
-    assert_eq!(const_prop_result.pass_results[0].pass_name, "const_prop");
+    assert_eq!(map_inline_result.pass_names[0], "map_inline");
+    assert_eq!(const_prop_result.pass_names[0], "const_prop");
     assert_eq!(const_prop_result.pass_results[0].sites_applied, 1);
     assert_eq!(
         program.insns,
@@ -260,34 +253,42 @@ fn cascade_full_pipeline_materializes_alu_and_leaves_branch_cleanup_to_kernel() 
         let const_prop_pc = if map_type == BPF_MAP_TYPE_HASH { 2 } else { 3 };
         install_const_prop_scalar_verifier_state(&mut program, const_prop_pc, 1, 52);
         let const_prop_result = run_pipeline_with_passes(&mut program, &["const_prop", "dce"]);
+        let mut pass_names = result.pass_names;
         let mut pass_results = result.pass_results;
+        pass_names.extend(const_prop_result.pass_names);
         pass_results.extend(const_prop_result.pass_results);
-        let pipeline_result = PipelineResult { pass_results };
+        let pipeline_result = PipelineResult {
+            pass_names,
+            pass_results,
+        };
 
         assert!(program.insns.len() < original_len, "{label}");
         assert_eq!(
             pipeline_result
-                .pass_results
+                .pass_names
                 .iter()
-                .find(|pr| pr.pass_name == "map_inline")
-                .map(|pr| pr.sites_applied),
+                .zip(pipeline_result.pass_results.iter())
+                .find(|(name, _)| name.as_str() == "map_inline")
+                .map(|(_, pr)| pr.sites_applied),
             Some(1),
             "{label}"
         );
         assert_eq!(
             pipeline_result
-                .pass_results
+                .pass_names
                 .iter()
-                .find(|pr| pr.pass_name == "const_prop")
-                .map(|pr| pr.sites_applied),
+                .zip(pipeline_result.pass_results.iter())
+                .find(|(name, _)| name.as_str() == "const_prop")
+                .map(|(_, pr)| pr.sites_applied),
             Some(1),
             "{label}"
         );
         assert!(pipeline_result
-            .pass_results
+            .pass_names
             .iter()
-            .find(|pr| pr.pass_name == "dce")
-            .map(|pr| pr.sites_applied > 0)
+            .zip(pipeline_result.pass_results.iter())
+            .find(|(name, _)| name.as_str() == "dce")
+            .map(|(_, pr)| pr.sites_applied > 0)
             .unwrap_or(false));
         assert_eq!(program.insns, expected, "{label}");
     }

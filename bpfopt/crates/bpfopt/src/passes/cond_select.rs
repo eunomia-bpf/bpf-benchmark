@@ -3,11 +3,11 @@
 
 use std::collections::HashSet;
 
-use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
+use crate::analysis::{insn_use_def_set, iter_sites, BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::rewrite::{BtfRemapPolicy, RewritePlan};
+use crate::rewrite::{BtfRemapPolicy, RewritePlan};
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     canonical_name: "bpf_select64",
     aliases: &["select64"],
@@ -102,11 +102,6 @@ impl BpfPass for CondSelectPass {
     fn name(&self) -> &str {
         "cond_select"
     }
-
-    fn required_analyses(&self) -> Vec<&str> {
-        vec!["branch_targets", "liveness"]
-    }
-
     fn run(
         &self,
         program: &mut BpfProgram,
@@ -116,48 +111,14 @@ impl BpfPass for CondSelectPass {
         // Check if the target can lower bpf_select64 to branchless select
         // (CMOV on x86, CSEL on ARM64).
         if !ctx.has_branchless_select() {
-            return Ok(PassResult::skipped(
-                self.name(),
-                SkipReason {
-                    pc: 0,
-                    reason: "platform lacks branchless select support".into(),
-                },
-            ));
+            return Ok(PassResult::skipped(SkipReason {
+                pc: 0,
+                reason: "platform lacks branchless select support".into(),
+            }));
         }
 
-        // Check if bpf_select64 kfunc is available.
-        if !ctx.kinsn_registry.is_target_available("bpf_select64") {
-            // Report detected sites without emitting when the target kfunc is absent.
-            let sites = self.analyze(&program.insns);
-            let diagnostics: Vec<String> = sites
-                .iter()
-                .map(|s| {
-                    format!(
-                        "cond_select site: pc={} len={} cond=r{} dst=r{} (kfunc unavailable)",
-                        s.start_pc, s.old_len, s.cond_reg, s.dst_reg
-                    )
-                })
-                .collect();
-            if sites.is_empty() {
-                return Ok(PassResult {
-                    diagnostics,
-                    ..PassResult::unchanged(self.name())
-                });
-            }
-            return Ok(PassResult::skipped_with_diagnostics(
-                self.name(),
-                SkipReason {
-                    pc: 0,
-                    reason: "bpf_select64 kfunc not available".into(),
-                },
-                diagnostics,
-            ));
-        }
-
-        let bt_analysis = BranchTargetAnalysis;
-        let bt = analyses.get(&bt_analysis, program);
-        let liveness_analysis = LivenessAnalysis;
-        let liveness = analyses.get(&liveness_analysis, program);
+        let bt = analyses.get::<BranchTargetAnalysis>(program);
+        let liveness = analyses.get::<LivenessAnalysis>(program);
 
         let sites = self.analyze(&program.insns);
         let btf_id = ctx.kinsn_registry.btf_id_for_target_name("bpf_select64")?;
@@ -192,7 +153,13 @@ impl BpfPass for CondSelectPass {
                 site.start_pc
             };
             let jcc = &program.insns[jcc_pc];
-            let own_target = (jcc_pc as i64 + 1 + jcc.off as i64) as usize;
+            let Some(own_target) = jcc.branch_target_pc(jcc_pc) else {
+                skipped.push(SkipReason {
+                    pc: site.start_pc,
+                    reason: "invalid conditional branch target".into(),
+                });
+                continue;
+            };
             let has_interior = (site.start_pc + 1..site.start_pc + site.old_len)
                 .any(|pc| pc < bt.is_target.len() && bt.is_target[pc] && pc != own_target);
             if has_interior {
@@ -222,7 +189,7 @@ impl BpfPass for CondSelectPass {
         if safe_sites.is_empty() {
             return Ok(PassResult {
                 sites_skipped: skipped,
-                ..PassResult::unchanged(self.name())
+                ..PassResult::unchanged()
             });
         }
 
@@ -233,10 +200,10 @@ impl BpfPass for CondSelectPass {
         let mut plan = RewritePlan::new();
         for safe_site in &safe_sites {
             let site = &safe_site.site;
-            let payload = (site.dst_reg as u64)
-                | ((safe_site.lowering.a_reg as u64) << 4)
-                | ((safe_site.lowering.b_reg as u64) << 8)
-                | ((safe_site.lowering.cond_reg as u64) << 12);
+            let payload = BpfInsn::pack_u4(site.dst_reg, 0)
+                | BpfInsn::pack_u4(safe_site.lowering.a_reg, 4)
+                | BpfInsn::pack_u4(safe_site.lowering.b_reg, 8)
+                | BpfInsn::pack_u4(safe_site.lowering.cond_reg, 12);
             let kinsn_call = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
             let mut replacement =
                 Vec::with_capacity(safe_site.lowering.prefix.len() + kinsn_call.len());
@@ -246,7 +213,6 @@ impl BpfPass for CondSelectPass {
         }
 
         let mut result = plan.commit(program, BtfRemapPolicy::RemapKinsn(&ctx.kinsn_registry))?;
-        result.pass_name = self.name().into();
         result.sites_applied = safe_sites.len();
         result.sites_skipped = skipped;
         Ok(result)
@@ -254,19 +220,12 @@ impl BpfPass for CondSelectPass {
 }
 
 fn scan_cond_select_sites(insns: &[BpfInsn]) -> Vec<CondSelectSite> {
-    let mut sites = Vec::new();
-    let n = insns.len();
-    let mut pc = 0;
-    while pc < n {
-        if let Some(site) = try_match_cond_select(insns, pc) {
-            let len = site.old_len;
-            sites.push(site);
-            pc += len;
-        } else {
-            pc += 1;
-        }
-    }
-    sites
+    iter_sites(insns, |insns, pc| {
+        try_match_cond_select(insns, pc).map(|site| site.old_len)
+    })
+    .into_iter()
+    .filter_map(|site| try_match_cond_select(insns, site.pc))
+    .collect()
 }
 
 fn try_match_cond_select(insns: &[BpfInsn], pc: usize) -> Option<CondSelectSite> {
@@ -323,25 +282,14 @@ fn try_match_cond_select(insns: &[BpfInsn], pc: usize) -> Option<CondSelectSite>
             let dst_t = mov_true.dst_reg();
             let dst_f = mov_false.dst_reg();
             if dst_t == dst_f {
-                // Ensure the MOV true_val doesn't also write a register
-                // used by the JCC condition (would change semantics).
-                // For BPF_X: jcc uses dst_reg and src_reg.
-                // For BPF_K: jcc uses dst_reg.
-                let jcc_cond_reg = jcc.dst_reg();
-                let jcc_src_used = if bpf_src(jcc.code) == BPF_X {
-                    Some(jcc.src_reg())
-                } else {
-                    None
-                };
                 let mov_true_dst = mov_true.dst_reg();
-                let cond_clobbered =
-                    mov_true_dst == jcc_cond_reg || jcc_src_used.is_some_and(|s| mov_true_dst == s);
+                let cond_clobbered = insn_use_def_set(jcc).uses.contains(&mov_true_dst);
 
                 if !cond_clobbered {
                     return Some(CondSelectSite {
                         start_pc: pc - 1,
                         old_len: 3,
-                        cond_reg: jcc_cond_reg,
+                        cond_reg: jcc.dst_reg(),
                         dst_reg: dst_t,
                         true_val: extract_mov_value(mov_true),
                         false_val: extract_mov_value(mov_false),

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 //! ARM64 CCMP optimization pass.
 
-use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
+use crate::analysis::{iter_sites, BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::rewrite::{BtfRemapPolicy, RewritePlan};
+use crate::rewrite::{BtfRemapPolicy, RewritePlan};
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     canonical_name: "bpf_ccmp64",
     aliases: &["ccmp64"],
@@ -22,9 +22,9 @@ fn decode_ccmp_proof(payload: &[u8]) -> ProofRegion {
 
 fn ccmp_proof_len(payload: u64) -> anyhow::Result<usize> {
     let dst_reg = kinsn_payload_reg(payload, 0);
-    let count_bits = ((payload >> 4) & 0x3) as u8;
+    let count_bits = BpfInsn::unpack_u4(payload, 4) & 0x3;
     let count = usize::from(count_bits) + 2;
-    let mode = (payload >> 6) & 0x1;
+    let mode = BpfInsn::unpack_u4(payload, 6) & 0x1;
 
     if payload >> 24 != 0 {
         anyhow::bail!("ccmp payload has non-zero reserved bits");
@@ -141,11 +141,6 @@ impl BpfPass for CcmpPass {
     fn name(&self) -> &str {
         "ccmp"
     }
-
-    fn required_analyses(&self) -> Vec<&str> {
-        vec!["branch_targets", "liveness"]
-    }
-
     fn run(
         &self,
         program: &mut BpfProgram,
@@ -153,29 +148,14 @@ impl BpfPass for CcmpPass {
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         if ctx.platform.arch != Arch::Aarch64 {
-            return Ok(PassResult::skipped(
-                self.name(),
-                SkipReason {
-                    pc: 0,
-                    reason: "ccmp is only valid on aarch64".into(),
-                },
-            ));
+            return Ok(PassResult::skipped(SkipReason {
+                pc: 0,
+                reason: "ccmp is only valid on aarch64".into(),
+            }));
         }
 
-        if !ctx.kinsn_registry.is_target_available("bpf_ccmp64") {
-            return Ok(PassResult::skipped(
-                self.name(),
-                SkipReason {
-                    pc: 0,
-                    reason: "bpf_ccmp64 kfunc not available".into(),
-                },
-            ));
-        }
-
-        let bt_analysis = BranchTargetAnalysis;
-        let bt = analyses.get(&bt_analysis, program);
-        let liveness_analysis = LivenessAnalysis;
-        let liveness = analyses.get(&liveness_analysis, program);
+        let bt = analyses.get::<BranchTargetAnalysis>(program);
+        let liveness = analyses.get::<LivenessAnalysis>(program);
 
         let sites = scan_ccmp_sites(&program.insns);
         let mut safe_sites = Vec::new();
@@ -249,14 +229,12 @@ impl BpfPass for CcmpPass {
         if safe_sites.is_empty() {
             return Ok(PassResult {
                 sites_skipped: skipped,
-                ..PassResult::unchanged(self.name())
+                ..PassResult::unchanged()
             });
         }
 
         let btf_id = ctx.kinsn_registry.btf_id_for_target_name("bpf_ccmp64")?;
-        let kfunc_off = ctx
-            .kinsn_registry
-            .call_off_for_target_name("bpf_ccmp64")?;
+        let kfunc_off = ctx.kinsn_registry.call_off_for_target_name("bpf_ccmp64")?;
         let mut plan = RewritePlan::new();
         for safe_site in &safe_sites {
             let mut replacement =
@@ -277,7 +255,6 @@ impl BpfPass for CcmpPass {
         }
 
         let mut result = plan.commit(program, BtfRemapPolicy::RemapKinsn(&ctx.kinsn_registry))?;
-        result.pass_name = self.name().into();
         result.sites_applied = safe_sites.len();
         result.sites_skipped = skipped;
         Ok(result)
@@ -285,17 +262,12 @@ impl BpfPass for CcmpPass {
 }
 
 pub(super) fn scan_ccmp_sites(insns: &[BpfInsn]) -> Vec<CcmpSite> {
-    let mut sites = Vec::new();
-    let mut pc = 0;
-    while pc < insns.len() {
-        if let Some(site) = try_match_ccmp_chain(insns, pc) {
-            pc += site.old_len;
-            sites.push(site);
-        } else {
-            pc += 1;
-        }
-    }
-    sites
+    iter_sites(insns, |insns, pc| {
+        try_match_ccmp_chain(insns, pc).map(|site| site.old_len)
+    })
+    .into_iter()
+    .filter_map(|site| try_match_ccmp_chain(insns, site.pc))
+    .collect()
 }
 
 fn try_match_ccmp_chain(insns: &[BpfInsn], pc: usize) -> Option<CcmpSite> {
@@ -335,7 +307,7 @@ fn branch_term(insns: &[BpfInsn], pc: usize) -> Option<BranchTerm> {
     }
     let fail_mode = CcmpFailMode::from_bpf_op(bpf_op(insn.code))?;
     let width = CcmpWidth::from_class(insn.class())?;
-    let target_pc = relative_branch_target(pc, insn.off)?;
+    let target_pc = insn.branch_target_pc(pc)?;
     if target_pc >= insns.len() || target_pc <= pc {
         return None;
     }
@@ -345,11 +317,6 @@ fn branch_term(insns: &[BpfInsn], pc: usize) -> Option<BranchTerm> {
         fail_mode,
         width,
     })
-}
-
-fn relative_branch_target(pc: usize, off: i16) -> Option<usize> {
-    let target = pc as i64 + 1 + i64::from(off);
-    (target >= 0).then_some(target as usize)
 }
 
 fn choose_dead_dst_reg(site: &CcmpSite, live_out: &[std::collections::HashSet<u8>]) -> Option<u8> {
@@ -374,15 +341,15 @@ pub(super) fn encode_ccmp_payload(payload: &CcmpPayload) -> anyhow::Result<u64> 
         anyhow::bail!("ccmp dst register aliases a compare operand");
     }
 
-    let mut encoded = u64::from(payload.dst_reg)
-        | (((payload.regs.len() - 2) as u64) << 4)
-        | (payload.fail_mode.payload_bit() << 6)
-        | (payload.width.payload_bit() << 7);
+    let mut encoded = BpfInsn::pack_u4(payload.dst_reg, 0)
+        | BpfInsn::pack_u4((payload.regs.len() - 2) as u8, 4)
+        | BpfInsn::pack_u4(payload.fail_mode.payload_bit() as u8, 6)
+        | BpfInsn::pack_u4(payload.width.payload_bit() as u8, 7);
     for (idx, &reg) in payload.regs.iter().enumerate() {
         if reg > BPF_REG_10 {
             anyhow::bail!("ccmp compare register r{reg} is invalid");
         }
-        encoded |= u64::from(reg) << (8 + idx * 4);
+        encoded |= BpfInsn::pack_u4(reg, (8 + idx * 4) as u8);
     }
     Ok(encoded)
 }

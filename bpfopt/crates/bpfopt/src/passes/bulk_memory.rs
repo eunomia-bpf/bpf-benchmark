@@ -3,11 +3,13 @@
 
 use std::collections::HashSet;
 
-use crate::analysis::{BranchTargetAnalysis, BranchTargetResult, LivenessAnalysis, LivenessResult};
+use crate::analysis::{
+    insn_use_def_set, BranchTargetAnalysis, BranchTargetResult, LivenessAnalysis, LivenessResult,
+};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::rewrite::{BtfRemapPolicy, RewritePlan};
+use crate::rewrite::{BtfRemapPolicy, RewritePlan};
 const MEMCPY_TARGET: &str = "bpf_bulk_memcpy";
 const MEMSET_TARGET: &str = "bpf_bulk_memset";
 const MIN_BULK_BYTES: usize = 32;
@@ -71,9 +73,9 @@ fn memset_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
     let val_reg = kinsn_payload_reg(payload, 4);
     let dst_off = kinsn_payload_s16(payload, 8);
     let len = usize::from(kinsn_payload_u8(payload, 24)) + 1;
-    let width_class = (payload >> 32) & 0x3;
-    let value_from_reg = ((payload >> 34) & 0x1) != 0;
-    let zero_fill = ((payload >> 35) & 0x1) != 0;
+    let width_class = u64::from(BpfInsn::unpack_u4(payload, 32) & 0x3);
+    let value_from_reg = (BpfInsn::unpack_u4(payload, 34) & 0x1) != 0;
+    let zero_fill = (BpfInsn::unpack_u4(payload, 35) & 0x1) != 0;
     let fill_imm8 = kinsn_payload_u8(payload, 36);
     let width_bytes = 1usize << width_class;
 
@@ -132,13 +134,6 @@ struct BulkSite {
 }
 
 impl BulkSite {
-    fn target_name(&self) -> &'static str {
-        match self.kind {
-            BulkSiteKind::Memcpy { .. } => MEMCPY_TARGET,
-            BulkSiteKind::Memset { .. } => MEMSET_TARGET,
-        }
-    }
-
     fn replacement_len(&self) -> usize {
         match &self.kind {
             BulkSiteKind::Memcpy { chunk_sizes, .. } | BulkSiteKind::Memset { chunk_sizes, .. } => {
@@ -185,11 +180,6 @@ impl BpfPass for BulkMemoryPass {
     fn name(&self) -> &str {
         "bulk_memory"
     }
-
-    fn required_analyses(&self) -> Vec<&str> {
-        vec!["branch_targets", "liveness"]
-    }
-
     fn run(
         &self,
         program: &mut BpfProgram,
@@ -197,11 +187,11 @@ impl BpfPass for BulkMemoryPass {
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         if program.insns.is_empty() {
-            return Ok(PassResult::unchanged(self.name()));
+            return Ok(PassResult::unchanged());
         }
 
-        let bt = analyses.get(&BranchTargetAnalysis, program);
-        let liveness = analyses.get(&LivenessAnalysis, program);
+        let bt = analyses.get::<BranchTargetAnalysis>(program);
+        let liveness = analyses.get::<LivenessAnalysis>(program);
 
         let scan = scan_sites(&program.insns, &bt, &liveness);
         let mut skipped = scan.skips;
@@ -227,15 +217,6 @@ impl BpfPass for BulkMemoryPass {
                 }
             }
 
-            let target = site.target_name();
-            if !ctx.kinsn_registry.is_target_available(target) {
-                skipped.push(SkipReason {
-                    pc: site.start_pc,
-                    reason: format!("{target} kfunc not available"),
-                });
-                continue;
-            }
-
             if let Some(reason) = kinsn_replacement_subprog_skip_reason(
                 &program.insns,
                 site.start_pc,
@@ -255,7 +236,7 @@ impl BpfPass for BulkMemoryPass {
         if safe_sites.is_empty() {
             return Ok(PassResult {
                 sites_skipped: skipped,
-                ..PassResult::unchanged(self.name())
+                ..PassResult::unchanged()
             });
         }
 
@@ -269,7 +250,6 @@ impl BpfPass for BulkMemoryPass {
         }
 
         let mut result = plan.commit(program, BtfRemapPolicy::RemapKinsn(&ctx.kinsn_registry))?;
-        result.pass_name = self.name().into();
         result.sites_applied = safe_sites.len();
         result.sites_skipped = skipped;
         Ok(result)
@@ -595,22 +575,22 @@ fn pack_memcpy_payload(
     len: u8,
     temp_reg: u8,
 ) -> u64 {
-    (dst_base as u64)
-        | ((src_base as u64) << 4)
-        | ((dst_off as u16 as u64) << 8)
-        | ((src_off as u16 as u64) << 24)
-        | (((len - 1) as u64) << 40)
-        | ((temp_reg as u64) << 48)
+    BpfInsn::pack_u4(dst_base, 0)
+        | BpfInsn::pack_u4(src_base, 4)
+        | BpfInsn::pack_u16(dst_off as u16, 8)
+        | BpfInsn::pack_u16(src_off as u16, 24)
+        | BpfInsn::pack_u8(len - 1, 40)
+        | BpfInsn::pack_u4(temp_reg, 48)
 }
 
 fn pack_memset_payload(base: u8, dst_off: i16, len: u8, width: u8, fill_byte: u8) -> u64 {
     let zero_fill = fill_byte == 0;
-    (base as u64)
-        | ((dst_off as u16 as u64) << 8)
-        | (((len - 1) as u64) << 24)
-        | (width_class(width) << 32)
-        | ((zero_fill as u64) << 35)
-        | ((fill_byte as u64) << 36)
+    BpfInsn::pack_u4(base, 0)
+        | BpfInsn::pack_u16(dst_off as u16, 8)
+        | BpfInsn::pack_u8(len - 1, 24)
+        | BpfInsn::pack_u4(width_class(width) as u8, 32)
+        | BpfInsn::pack_u4(zero_fill as u8, 35)
+        | BpfInsn::pack_u8(fill_byte, 36)
 }
 
 fn width_class(size: u8) -> u64 {
@@ -727,7 +707,7 @@ fn is_likely_stack_ptr(reg: u8, before_pc: usize, insns: &[BpfInsn]) -> bool {
         let mut found_def = false;
         for pc in (start..cursor).rev() {
             let insn = &insns[pc];
-            if !writes_reg(insn, target_reg) {
+            if !insn_use_def_set(insn).defs.contains(&target_reg) {
                 continue;
             }
 
@@ -766,20 +746,6 @@ fn is_likely_stack_ptr(reg: u8, before_pc: usize, insns: &[BpfInsn]) -> bool {
     false
 }
 
-fn writes_reg(insn: &BpfInsn, reg: u8) -> bool {
-    if insn.is_call() {
-        return reg <= 5;
-    }
-    if insn.is_ldimm64() {
-        return insn.dst_reg() == reg;
-    }
-
-    match insn.class() {
-        BPF_ALU64 | BPF_ALU | BPF_LDX | BPF_LD => insn.dst_reg() == reg,
-        _ => false,
-    }
-}
-
 fn advance_reg_state_range(
     insns: &[BpfInsn],
     start_pc: usize,
@@ -798,8 +764,8 @@ fn advance_reg_state(insns: &[BpfInsn], pc: usize, regs: &mut [RegValue; 11]) {
     let insn = &insns[pc];
 
     if insn.is_call() {
-        for reg in regs.iter_mut().take(6) {
-            *reg = RegValue::Unknown;
+        for reg in insn_use_def_set(insn).defs {
+            regs[reg as usize] = RegValue::Unknown;
         }
         return;
     }

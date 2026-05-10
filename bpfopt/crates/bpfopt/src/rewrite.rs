@@ -13,7 +13,11 @@ use crate::pass::{
 /// For each instruction in the original stream that is a branch/jump, compute
 /// where it ended up in the new stream and adjust its offset so it still points
 /// to the correct target.
-pub fn fixup_all_branches(new_insns: &mut [BpfInsn], old_insns: &[BpfInsn], addr_map: &[usize]) {
+pub fn fixup_all_branches(
+    new_insns: &mut [BpfInsn],
+    old_insns: &[BpfInsn],
+    addr_map: &[usize],
+) -> anyhow::Result<()> {
     let old_n = old_insns.len();
     let mut old_pc = 0;
     while old_pc < old_n {
@@ -26,36 +30,39 @@ pub fn fixup_all_branches(new_insns: &mut [BpfInsn], old_insns: &[BpfInsn], addr
             && new_insns.get(new_pc).copied() == Some(*insn);
 
         if insn.is_ldimm64_pseudo_func() {
-            let old_target = (old_pc as i64 + 1 + insn.imm as i64) as usize;
-            if old_target < old_n
-                && survived_unchanged
-                && new_pc < new_insns.len()
-                && new_insns[new_pc].is_ldimm64_pseudo_func()
-            {
-                let new_target = addr_map[old_target];
-                let new_imm = new_target as i64 - (new_pc as i64 + 1);
-                new_insns[new_pc].imm = new_imm as i32;
+            if let Some(old_target) = relative_branch_target_pc(old_pc, i64::from(insn.imm)) {
+                if old_target < old_n
+                    && survived_unchanged
+                    && new_pc < new_insns.len()
+                    && new_insns[new_pc].is_ldimm64_pseudo_func()
+                {
+                    let new_target = addr_map[old_target];
+                    let new_imm = new_target as i64 - (new_pc as i64 + 1);
+                    new_insns[new_pc].set_pc_relative_imm_delta(new_imm)?;
+                }
             }
         } else if insn.is_call() && insn.src_reg() == 1 {
-            let old_target = (old_pc as i64 + 1 + insn.imm as i64) as usize;
-            if old_target < old_n {
-                let new_target = addr_map[old_target];
-                if survived_unchanged && new_insns[new_pc].is_call() {
-                    let new_imm = new_target as i64 - (new_pc as i64 + 1);
-                    new_insns[new_pc].imm = new_imm as i32;
+            if let Some(old_target) = relative_branch_target_pc(old_pc, i64::from(insn.imm)) {
+                if old_target < old_n {
+                    let new_target = addr_map[old_target];
+                    if survived_unchanged && new_insns[new_pc].is_call() {
+                        let new_imm = new_target as i64 - (new_pc as i64 + 1);
+                        new_insns[new_pc].set_pc_relative_imm_delta(new_imm)?;
+                    }
                 }
             }
         } else if insn.is_jmp_class() && !insn.is_call() && !insn.is_exit() {
-            let old_target = (old_pc as i64 + 1 + insn.off as i64) as usize;
-            if old_target <= old_n {
-                let new_target = addr_map[old_target];
-                if survived_unchanged
-                    && new_insns[new_pc].is_jmp_class()
-                    && !new_insns[new_pc].is_call()
-                    && !new_insns[new_pc].is_exit()
-                {
-                    let new_off = new_target as i64 - (new_pc as i64 + 1);
-                    new_insns[new_pc].off = new_off as i16;
+            if let Some(old_target) = insn.branch_target_pc(old_pc) {
+                if old_target <= old_n {
+                    let new_target = addr_map[old_target];
+                    if survived_unchanged
+                        && new_insns[new_pc].is_jmp_class()
+                        && !new_insns[new_pc].is_call()
+                        && !new_insns[new_pc].is_exit()
+                    {
+                        let new_off = new_target as i64 - (new_pc as i64 + 1);
+                        new_insns[new_pc].set_branch_target_delta(new_off)?;
+                    }
                 }
             }
         }
@@ -65,6 +72,7 @@ pub fn fixup_all_branches(new_insns: &mut [BpfInsn], old_insns: &[BpfInsn], addr
             old_pc + 1
         };
     }
+    Ok(())
 }
 
 /// Compose two address maps: `old -> mid` and `mid -> new`.
@@ -102,6 +110,43 @@ pub enum BtfRemapPolicy<'a> {
     Remap,
     RemapKinsn(&'a KinsnRegistry),
     NoRemap,
+}
+
+#[derive(Clone, Debug)]
+pub struct RewriteOutput {
+    pub insns: Vec<BpfInsn>,
+    pub addr_map: Vec<usize>,
+    pub sites_applied: usize,
+}
+
+pub fn commit_rewrite_output(
+    program: &mut BpfProgram,
+    output: RewriteOutput,
+    btf_policy: BtfRemapPolicy<'_>,
+) -> anyhow::Result<PassResult> {
+    let old_len = program.insns.len();
+    let RewriteOutput {
+        insns,
+        addr_map,
+        sites_applied,
+    } = output;
+
+    program.insns = insns;
+    match btf_policy {
+        BtfRemapPolicy::Remap => remap_btf_metadata(program, &addr_map)?,
+        BtfRemapPolicy::RemapKinsn(registry) => {
+            remap_kinsn_btf_metadata(program, registry)?;
+        }
+        BtfRemapPolicy::NoRemap => {}
+    }
+    program.remap_annotations(&addr_map);
+
+    Ok(PassResult {
+        sites_applied,
+        insns_before: old_len,
+        insns_after: program.insns.len(),
+        ..Default::default()
+    })
 }
 
 impl RewritePlan {
@@ -152,8 +197,13 @@ impl RewritePlan {
         btf_policy: BtfRemapPolicy<'_>,
     ) -> anyhow::Result<PassResult> {
         let old_insns = program.insns.clone();
+        let output = self.build(&old_insns)?;
+        commit_rewrite_output(program, output, btf_policy)
+    }
+
+    pub fn build(self, old_insns: &[BpfInsn]) -> anyhow::Result<RewriteOutput> {
         let old_len = old_insns.len();
-        self.validate(&old_insns)?;
+        self.validate(old_insns)?;
 
         let sites_applied = self.replacements.len();
         let deletions = self.deletion_starts();
@@ -199,7 +249,7 @@ impl RewritePlan {
             new_insns.extend_from_slice(insns);
         }
 
-        fixup_all_branches(&mut new_insns, &old_insns, &addr_map);
+        fixup_all_branches(&mut new_insns, &old_insns, &addr_map)?;
         patch_internal_branches(
             &mut new_insns,
             &addr_map,
@@ -207,21 +257,10 @@ impl RewritePlan {
             &self.internal_branch_patches,
         )?;
 
-        program.insns = new_insns;
-        match btf_policy {
-            BtfRemapPolicy::Remap => remap_btf_metadata(program, &addr_map)?,
-            BtfRemapPolicy::RemapKinsn(registry) => {
-                remap_kinsn_btf_metadata(program, registry)?;
-            }
-            BtfRemapPolicy::NoRemap => {}
-        }
-        program.remap_annotations(&addr_map);
-
-        Ok(PassResult {
+        Ok(RewriteOutput {
+            insns: new_insns,
+            addr_map,
             sites_applied,
-            insns_before: old_len,
-            insns_after: program.insns.len(),
-            ..Default::default()
         })
     }
 
@@ -337,11 +376,9 @@ fn patch_internal_branches(
         };
 
         if branch.is_ldimm64_pseudo_func() || branch.is_call() && branch.src_reg() == 1 {
-            branch.imm = i32::try_from(delta)
-                .map_err(|_| anyhow::anyhow!("internal pseudo-branch offset exceeds i32"))?;
+            branch.set_pc_relative_imm_delta(delta)?;
         } else if branch.is_jmp_class() && !branch.is_call() && !branch.is_exit() {
-            branch.off = i16::try_from(delta)
-                .map_err(|_| anyhow::anyhow!("internal branch offset exceeds i16"))?;
+            branch.set_branch_target_delta(delta)?;
         } else {
             anyhow::bail!("internal branch patch at new pc {new_pc} is not a branch");
         }
@@ -376,7 +413,7 @@ mod tests {
         ];
         let addr_map = vec![0, 2, 3, 4];
 
-        fixup_all_branches(&mut new_insns, &old_insns, &addr_map);
+        fixup_all_branches(&mut new_insns, &old_insns, &addr_map).unwrap();
 
         assert_eq!(new_insns[0].off, 2);
     }
@@ -392,7 +429,7 @@ mod tests {
         let mut new_insns = vec![BpfInsn::helper_call(5), BpfInsn::exit()];
         let addr_map = vec![0, 0, 0, 1, 2];
 
-        fixup_all_branches(&mut new_insns, &old_insns, &addr_map);
+        fixup_all_branches(&mut new_insns, &old_insns, &addr_map).unwrap();
 
         assert!(new_insns[0].is_call());
         assert_eq!(new_insns[0].src_reg(), 0);
@@ -413,7 +450,7 @@ mod tests {
         let mut new_insns = vec![BpfInsn::ja(1), BpfInsn::nop(), BpfInsn::exit()];
         let addr_map = vec![0, 0, 0, 1, 2, 3];
 
-        fixup_all_branches(&mut new_insns, &old_insns, &addr_map);
+        fixup_all_branches(&mut new_insns, &old_insns, &addr_map).unwrap();
 
         assert!(new_insns[0].is_ja());
         assert_eq!(new_insns[0].off, 1);
@@ -441,10 +478,57 @@ mod tests {
         ];
         let addr_map = vec![0, 1, 2, 3, 5, 6, 7];
 
-        fixup_all_branches(&mut new_insns, &old_insns, &addr_map);
+        fixup_all_branches(&mut new_insns, &old_insns, &addr_map).unwrap();
 
         assert!(new_insns[0].is_ldimm64_pseudo_func());
         assert_eq!(new_insns[0].imm, 4);
         assert_eq!(1 + new_insns[0].imm as usize, 5);
+    }
+
+    #[test]
+    fn fixup_all_branches_rewrites_ja32_imm_after_growth() {
+        let old_insns = vec![
+            BpfInsn::new(BPF_JMP32 | BPF_JA, 0, 0, 1),
+            BpfInsn::nop(),
+            BpfInsn::exit(),
+        ];
+        let mut new_insns = vec![
+            old_insns[0],
+            BpfInsn::nop(),
+            BpfInsn::nop(),
+            BpfInsn::exit(),
+        ];
+        let addr_map = vec![0, 2, 3, 4];
+
+        fixup_all_branches(&mut new_insns, &old_insns, &addr_map).unwrap();
+
+        assert_eq!(new_insns[0].imm, 2);
+        assert_eq!(new_insns[0].off, 0);
+    }
+
+    #[test]
+    fn fixup_all_branches_rejects_i16_overflow() {
+        let old_insns = vec![BpfInsn::ja(1), BpfInsn::nop(), BpfInsn::exit()];
+        let mut new_insns = vec![old_insns[0], BpfInsn::exit()];
+        let addr_map = vec![0, 1, 40_000, 40_001];
+
+        let err = fixup_all_branches(&mut new_insns, &old_insns, &addr_map).unwrap_err();
+
+        assert!(err.to_string().contains("exceeds i16"));
+    }
+
+    #[test]
+    fn fixup_all_branches_rejects_ja32_i32_overflow() {
+        let old_insns = vec![
+            BpfInsn::new(BPF_JMP32 | BPF_JA, 0, 0, 1),
+            BpfInsn::nop(),
+            BpfInsn::exit(),
+        ];
+        let mut new_insns = vec![old_insns[0], BpfInsn::exit()];
+        let addr_map = vec![0, 1, i32::MAX as usize + 10, i32::MAX as usize + 11];
+
+        let err = fixup_all_branches(&mut new_insns, &old_insns, &addr_map).unwrap_err();
+
+        assert!(err.to_string().contains("exceeds i32"));
     }
 }

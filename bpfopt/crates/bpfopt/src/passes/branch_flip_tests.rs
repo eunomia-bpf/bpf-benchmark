@@ -57,6 +57,13 @@ fn test_scan_asymmetric_diamond() {
 }
 
 #[test]
+fn test_branch_flip_rejects_oversized_manual_branch_delta() {
+    let err = checked_off16(40_000, "branch_flip regression").unwrap_err();
+
+    assert!(err.to_string().contains("exceeds i16"));
+}
+
+#[test]
 fn test_branch_flip_missing_per_site_profile_errors() {
     let mut prog = make_program(vec![
         BpfInsn::jne_imm(1, 0, 2),
@@ -358,8 +365,6 @@ fn test_profiler_to_pass_pipeline_integration() {
 
     prog.inject_profiling(&profiling);
     let mut pm = PassManager::new();
-    pm.register_analysis(crate::analysis::BranchTargetAnalysis);
-    pm.register_analysis(crate::analysis::LivenessAnalysis);
     pm.add_pass(BranchFlipPass {
         min_bias: 0.7,
         max_branch_miss_rate: 0.05,
@@ -393,8 +398,6 @@ fn test_profiler_to_pass_pipeline_integration() {
     prog2.inject_profiling(&profiling_low_miss);
 
     let mut pm2 = PassManager::new();
-    pm2.register_analysis(crate::analysis::BranchTargetAnalysis);
-    pm2.register_analysis(crate::analysis::LivenessAnalysis);
     pm2.add_pass(BranchFlipPass {
         min_bias: 0.7,
         max_branch_miss_rate: 0.05,

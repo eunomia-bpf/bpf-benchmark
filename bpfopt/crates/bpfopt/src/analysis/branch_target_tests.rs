@@ -19,7 +19,7 @@ fn branch_target_simple_ja() {
         BpfInsn::exit(),
     ];
     let prog = make_program(insns);
-    let result = BranchTargetAnalysis.run(&prog);
+    let result = BranchTargetAnalysis::run(&prog);
     assert!(!result.is_target[0]);
     assert!(!result.is_target[1]);
     assert!(!result.is_target[2]);
@@ -30,8 +30,22 @@ fn branch_target_simple_ja() {
 fn branch_target_cond_jmp() {
     let insns = vec![BpfInsn::jeq_imm(1, 0, 1), BpfInsn::nop(), BpfInsn::exit()];
     let prog = make_program(insns);
-    let result = BranchTargetAnalysis.run(&prog);
+    let result = BranchTargetAnalysis::run(&prog);
     assert!(result.is_target[2]);
+}
+
+#[test]
+fn branch_target_ja32_uses_imm_target() {
+    let insns = vec![
+        BpfInsn::new(BPF_JMP32 | BPF_JA, 0, 0, 2),
+        BpfInsn::mov64_imm(0, 0),
+        BpfInsn::mov64_imm(1, 1),
+        BpfInsn::exit(),
+    ];
+    let prog = make_program(insns);
+    let result = BranchTargetAnalysis::run(&prog);
+
+    assert!(result.is_target[3]);
 }
 
 #[test]
@@ -45,7 +59,7 @@ fn branch_target_pseudo_func_callback() {
         BpfInsn::mov64_reg(0, 1),
         BpfInsn::exit(),
     ]);
-    let result = BranchTargetAnalysis.run(&prog);
+    let result = BranchTargetAnalysis::run(&prog);
 
     assert!(result.is_target[4]);
 }
@@ -54,7 +68,7 @@ fn branch_target_pseudo_func_callback() {
 fn branch_target_no_branches() {
     let insns = vec![BpfInsn::mov64_imm(0, 42), BpfInsn::exit()];
     let prog = make_program(insns);
-    let result = BranchTargetAnalysis.run(&prog);
+    let result = BranchTargetAnalysis::run(&prog);
     assert!(!result.is_target[0]);
     assert!(!result.is_target[1]);
 }

@@ -11,6 +11,19 @@ use crate::pass::{Analysis, BpfProgram};
 
 pub struct LivenessResult {
     pub live_out: Vec<HashSet<u8>>,
+    pub use_def: Vec<RegUseDefSet>,
+}
+
+impl LivenessResult {
+    pub fn use_def_at(&self, pc: usize) -> Option<&RegUseDefSet> {
+        self.use_def.get(pc)
+    }
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct RegUseDefSet {
+    pub uses: HashSet<u8>,
+    pub defs: HashSet<u8>,
 }
 
 pub struct LivenessAnalysis;
@@ -18,12 +31,9 @@ pub struct LivenessAnalysis;
 impl Analysis for LivenessAnalysis {
     type Result = LivenessResult;
 
-    fn name(&self) -> &str {
-        "liveness"
-    }
-
-    fn run(&self, program: &BpfProgram) -> LivenessResult {
+    fn run(program: &BpfProgram) -> LivenessResult {
         let n = program.insns.len();
+        let use_def: Vec<_> = program.insns.iter().map(insn_use_def_set).collect();
         let mut live_in = vec![HashSet::new(); n];
         let mut live_out = vec![HashSet::new(); n];
 
@@ -32,8 +42,7 @@ impl Analysis for LivenessAnalysis {
         while updated {
             updated = false;
             for pc in (0..n).rev() {
-                let insn = &program.insns[pc];
-                let (uses, defs) = insn_use_def(insn);
+                let RegUseDefSet { uses, defs } = &use_def[pc];
 
                 let mut new_out = HashSet::new();
                 for s in get_successors(program, pc) {
@@ -42,8 +51,8 @@ impl Analysis for LivenessAnalysis {
                     }
                 }
 
-                let mut new_in: HashSet<u8> = new_out.difference(&defs).cloned().collect();
-                new_in.extend(&uses);
+                let mut new_in: HashSet<u8> = new_out.difference(defs).cloned().collect();
+                new_in.extend(uses);
 
                 if new_in != live_in[pc] || new_out != live_out[pc] {
                     live_in[pc] = new_in;
@@ -53,12 +62,11 @@ impl Analysis for LivenessAnalysis {
             }
         }
 
-        LivenessResult { live_out }
+        LivenessResult { live_out, use_def }
     }
 }
 
-/// Compute use/def register sets for a single instruction.
-pub(super) fn insn_use_def(insn: &BpfInsn) -> (HashSet<u8>, HashSet<u8>) {
+pub fn insn_use_def_set(insn: &BpfInsn) -> RegUseDefSet {
     let mut uses = HashSet::new();
     let mut defs = HashSet::new();
 
@@ -117,7 +125,7 @@ pub(super) fn insn_use_def(insn: &BpfInsn) -> (HashSet<u8>, HashSet<u8>) {
         _ => {}
     }
 
-    (uses, defs)
+    RegUseDefSet { uses, defs }
 }
 
 /// Get successor PCs for instruction at `pc`.
@@ -129,10 +137,14 @@ fn get_successors(program: &BpfProgram, pc: usize) -> Vec<usize> {
     if insn.is_exit() {
         // No successors
     } else if insn.is_ja() {
-        succs.push((pc as i64 + 1 + insn.off as i64) as usize);
+        if let Some(target) = insn.branch_target_pc(pc) {
+            succs.push(target);
+        }
     } else if insn.is_cond_jmp() {
         succs.push(next);
-        succs.push((pc as i64 + 1 + insn.off as i64) as usize);
+        if let Some(target) = insn.branch_target_pc(pc) {
+            succs.push(target);
+        }
     } else {
         succs.push(next);
     }

@@ -89,6 +89,12 @@ pub const BPF_REG_8: u8 = libbpf_sys::BPF_REG_8 as u8;
 pub const BPF_REG_9: u8 = libbpf_sys::BPF_REG_9 as u8;
 pub const BPF_REG_10: u8 = libbpf_sys::BPF_REG_10 as u8;
 
+// ── Program context ABI offsets ─────────────────────────────────────
+pub const XDP_PACKET_DATA_OFFSET: i16 = 0;
+pub const XDP_PACKET_DATA_END_OFFSET: i16 = 4;
+pub const SKB_PACKET_DATA_OFFSET: i16 = 76;
+pub const SKB_PACKET_DATA_END_OFFSET: i16 = 80;
+
 // ── Helper macros (as functions) ────────────────────────────────────
 #[inline]
 pub const fn bpf_class(code: u8) -> u8 {
@@ -113,6 +119,73 @@ pub const fn bpf_op(code: u8) -> u8 {
 #[inline]
 pub const fn bpf_src(code: u8) -> u8 {
     code & 0x08
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MapPseudo {
+    Fd,
+    FdValue,
+    Idx,
+    IdxValue,
+}
+
+impl MapPseudo {
+    pub fn from_src_reg(src_reg: u8) -> Option<Self> {
+        match src_reg {
+            BPF_PSEUDO_MAP_FD => Some(Self::Fd),
+            BPF_PSEUDO_MAP_VALUE => Some(Self::FdValue),
+            BPF_PSEUDO_MAP_IDX => Some(Self::Idx),
+            BPF_PSEUDO_MAP_IDX_VALUE => Some(Self::IdxValue),
+            _ => None,
+        }
+    }
+
+    pub fn src_reg(self) -> u8 {
+        match self {
+            Self::Fd => BPF_PSEUDO_MAP_FD,
+            Self::FdValue => BPF_PSEUDO_MAP_VALUE,
+            Self::Idx => BPF_PSEUDO_MAP_IDX,
+            Self::IdxValue => BPF_PSEUDO_MAP_IDX_VALUE,
+        }
+    }
+
+    pub fn uses_fd(self) -> bool {
+        matches!(self, Self::Fd | Self::FdValue)
+    }
+
+    pub fn uses_index(self) -> bool {
+        matches!(self, Self::Idx | Self::IdxValue)
+    }
+
+    pub fn has_value_offset(self) -> bool {
+        matches!(self, Self::FdValue | Self::IdxValue)
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BranchOff {
+    Off16(i16),
+    Imm32(i32),
+    None,
+}
+
+impl BranchOff {
+    #[inline]
+    pub fn delta(self) -> Option<i64> {
+        match self {
+            Self::Off16(off) => Some(i64::from(off)),
+            Self::Imm32(imm) => Some(i64::from(imm)),
+            Self::None => None,
+        }
+    }
+}
+
+#[inline]
+pub fn relative_branch_target_pc(pc: usize, delta: i64) -> Option<usize> {
+    let target = pc as i128 + 1 + delta as i128;
+    (0..=usize::MAX as i128)
+        .contains(&target)
+        .then_some(target as usize)
 }
 
 // ── BpfInsn ─────────────────────────────────────────────────────────
@@ -270,6 +343,52 @@ impl BpfInsn {
         self.is_jmp_class() && bpf_op(self.code) == BPF_JA && self.code != (BPF_JMP | BPF_CALL)
     }
 
+    #[inline]
+    pub fn branch_target_offset(&self) -> Option<BranchOff> {
+        if !self.is_jmp_class() {
+            return None;
+        }
+        if self.is_call() || self.is_exit() {
+            return Some(BranchOff::None);
+        }
+        if self.class() == BPF_JMP32 && bpf_op(self.code) == BPF_JA {
+            Some(BranchOff::Imm32(self.imm))
+        } else {
+            Some(BranchOff::Off16(self.off))
+        }
+    }
+
+    #[inline]
+    pub fn branch_target_pc(&self, pc: usize) -> Option<usize> {
+        self.branch_target_offset()
+            .and_then(BranchOff::delta)
+            .and_then(|delta| relative_branch_target_pc(pc, delta))
+    }
+
+    pub fn set_branch_target_delta(&mut self, delta: i64) -> anyhow::Result<()> {
+        match self.branch_target_offset() {
+            Some(BranchOff::Off16(_)) => {
+                self.off = i16::try_from(delta)
+                    .map_err(|_| anyhow::anyhow!("branch offset {delta} exceeds i16"))?;
+                Ok(())
+            }
+            Some(BranchOff::Imm32(_)) => {
+                self.imm = i32::try_from(delta)
+                    .map_err(|_| anyhow::anyhow!("JA32 offset {delta} exceeds i32"))?;
+                Ok(())
+            }
+            Some(BranchOff::None) | None => {
+                anyhow::bail!("instruction is not a pc-relative branch")
+            }
+        }
+    }
+
+    pub fn set_pc_relative_imm_delta(&mut self, delta: i64) -> anyhow::Result<()> {
+        self.imm = i32::try_from(delta)
+            .map_err(|_| anyhow::anyhow!("pc-relative imm offset {delta} exceeds i32"))?;
+        Ok(())
+    }
+
     /// True for BPF_CALL.
     #[inline]
     pub fn is_call(&self) -> bool {
@@ -292,6 +411,13 @@ impl BpfInsn {
     #[inline]
     pub fn is_ldimm64_pseudo_func(&self) -> bool {
         self.is_ldimm64() && self.src_reg() == BPF_PSEUDO_FUNC
+    }
+
+    #[inline]
+    pub fn map_pseudo(&self) -> Option<MapPseudo> {
+        self.is_ldimm64()
+            .then(|| MapPseudo::from_src_reg(self.src_reg()))
+            .flatten()
     }
 
     /// True for LDX_MEM of any size.
@@ -433,6 +559,46 @@ impl BpfInsn {
         Self::new(BPF_LDX | size | BPF_MEM, Self::make_regs(dst, src), off, 0)
     }
 
+    #[inline]
+    pub const fn pack_u4(value: u8, shift: u8) -> u64 {
+        ((value as u64) & 0xf) << shift
+    }
+
+    #[inline]
+    pub const fn pack_u8(value: u8, shift: u8) -> u64 {
+        (value as u64) << shift
+    }
+
+    #[inline]
+    pub const fn pack_u16(value: u16, shift: u8) -> u64 {
+        (value as u64) << shift
+    }
+
+    #[inline]
+    pub const fn pack_u32(value: u32, shift: u8) -> u64 {
+        (value as u64) << shift
+    }
+
+    #[inline]
+    pub const fn unpack_u4(payload: u64, shift: u8) -> u8 {
+        ((payload >> shift) & 0xf) as u8
+    }
+
+    #[inline]
+    pub const fn unpack_u8(payload: u64, shift: u8) -> u8 {
+        ((payload >> shift) & 0xff) as u8
+    }
+
+    #[inline]
+    pub const fn unpack_u16(payload: u64, shift: u8) -> u16 {
+        ((payload >> shift) & 0xffff) as u16
+    }
+
+    #[inline]
+    pub const fn unpack_u32(payload: u64, shift: u8) -> u32 {
+        ((payload >> shift) & 0xffff_ffff) as u32
+    }
+
     /// kinsn sidecar metadata for the immediately following kinsn call.
     ///
     /// Payload layout matches `bpf_kinsn_sidecar_payload()` in the kernel:
@@ -442,16 +608,16 @@ impl BpfInsn {
     pub fn kinsn_sidecar(payload: u64) -> Self {
         Self::new(
             BPF_ALU64 | BPF_MOV | BPF_K,
-            Self::make_regs((payload & 0xf) as u8, BPF_PSEUDO_KINSN_SIDECAR),
-            ((payload >> 4) & 0xffff) as u16 as i16,
-            ((payload >> 20) & 0xffff_ffff) as u32 as i32,
+            Self::make_regs(Self::unpack_u4(payload, 0), BPF_PSEUDO_KINSN_SIDECAR),
+            Self::unpack_u16(payload, 4) as i16,
+            Self::unpack_u32(payload, 20) as i32,
         )
     }
 
     pub fn sidecar_payload(&self) -> u64 {
-        (u64::from(self.dst_reg()) & 0xf)
-            | (u64::from(self.off as u16) << 4)
-            | (u64::from(self.imm as u32) << 20)
+        Self::pack_u4(self.dst_reg(), 0)
+            | Self::pack_u16(self.off as u16, 4)
+            | Self::pack_u32(self.imm as u32, 20)
     }
 
     /// `stx_mem size, [dst + off], src`

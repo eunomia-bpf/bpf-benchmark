@@ -1,5 +1,4 @@
 use super::const_prop::*;
-use crate::analysis::*;
 use crate::insn::*;
 use crate::pass::*;
 use crate::test_helpers::*;
@@ -58,7 +57,6 @@ fn verifier_state_in_frame(
 
 fn run_const_prop_pass(program: &mut BpfProgram) -> PipelineResult {
     let mut pm = PassManager::new();
-    pm.register_analysis(CFGAnalysis);
     pm.add_pass(ConstPropPass);
     pm.run(program, &PassContext::baseline()).unwrap()
 }

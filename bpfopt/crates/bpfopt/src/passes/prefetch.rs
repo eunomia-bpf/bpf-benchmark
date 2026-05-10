@@ -8,11 +8,13 @@ use std::path::{Path, PathBuf};
 use anyhow::{bail, Context, Result};
 use serde::Deserialize;
 
-use crate::analysis::{BranchTargetAnalysis, BranchTargetResult, CFGAnalysis, CFGResult};
+use crate::analysis::{
+    iter_sites, BranchTargetAnalysis, BranchTargetResult, CFGAnalysis, CFGResult,
+};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::rewrite::{BtfRemapPolicy, RewritePlan};
+use crate::rewrite::{BtfRemapPolicy, RewritePlan};
 pub(super) const HELPER_MAP_LOOKUP_ELEM: i32 = libbpf_sys::BPF_FUNC_map_lookup_elem as i32;
 const HELPER_XDP_ADJUST_HEAD: i32 = libbpf_sys::BPF_FUNC_xdp_adjust_head as i32;
 const PREFETCH_TARGET_NAME: &str = "bpf_prefetch";
@@ -34,18 +36,13 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     decode_proof: decode_prefetch_proof,
 }];
 
-pub(super) const XDP_DATA_OFF: i16 = 0;
-const XDP_DATA_END_OFF: i16 = 4;
-const SKB_DATA_OFF: i16 = 76;
-const SKB_DATA_END_OFF: i16 = 80;
-
 fn decode_prefetch_proof(payload: &[u8]) -> ProofRegion {
     ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(prefetch_proof_len))
 }
 
 fn prefetch_proof_len(payload: u64) -> anyhow::Result<usize> {
     validate_bpf_reg("prefetch ptr", kinsn_payload_reg(payload, 0))?;
-    if ((payload >> 4) & 0xf) != 0 {
+    if BpfInsn::unpack_u4(payload, 4) != 0 {
         anyhow::bail!("prefetch payload has unsupported hint kind");
     }
     if payload >> 8 != 0 {
@@ -81,10 +78,6 @@ impl PrefetchPass {
 impl BpfPass for ProfiledPrefetchPass {
     fn name(&self) -> &str {
         "prefetch"
-    }
-
-    fn required_analyses(&self) -> Vec<&str> {
-        PrefetchPass.required_analyses()
     }
 
     fn run(
@@ -219,41 +212,21 @@ pub(super) fn prefetch_payload(ptr_reg: u8) -> anyhow::Result<u64> {
     if ptr_reg > BPF_REG_10 {
         anyhow::bail!("prefetch ptr register {ptr_reg} is outside BPF_REG_0..BPF_REG_10");
     }
-    Ok(u64::from(ptr_reg))
+    Ok(BpfInsn::pack_u4(ptr_reg, 0))
 }
 
 impl BpfPass for PrefetchPass {
     fn name(&self) -> &str {
         "prefetch"
     }
-
-    fn required_analyses(&self) -> Vec<&str> {
-        vec!["cfg", "branch_targets"]
-    }
-
     fn run(
         &self,
         program: &mut BpfProgram,
         analyses: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        if !ctx
-            .kinsn_registry
-            .is_target_available(PREFETCH_TARGET_NAME)
-        {
-            return Ok(PassResult::skipped(
-                self.name(),
-                SkipReason {
-                    pc: 0,
-                    reason: "bpf_prefetch kfunc not available".into(),
-                },
-            ));
-        }
-
-        let cfg_analysis = CFGAnalysis;
-        let cfg = analyses.get(&cfg_analysis, program);
-        let bt_analysis = BranchTargetAnalysis;
-        let bt = analyses.get(&bt_analysis, program);
+        let cfg = analyses.get::<CFGAnalysis>(program);
+        let bt = analyses.get::<BranchTargetAnalysis>(program);
         let mut candidates = Vec::new();
         let mut skipped = Vec::new();
 
@@ -295,7 +268,7 @@ impl BpfPass for PrefetchPass {
         if candidates.is_empty() {
             return Ok(PassResult {
                 sites_skipped: skipped,
-                ..PassResult::unchanged(self.name())
+                ..PassResult::unchanged()
             });
         }
 
@@ -315,7 +288,6 @@ impl BpfPass for PrefetchPass {
         }
 
         let mut result = plan.commit(program, BtfRemapPolicy::RemapKinsn(&ctx.kinsn_registry))?;
-        result.pass_name = self.name().into();
         result.sites_applied = candidates.len();
         result.sites_skipped = skipped;
         Ok(result)
@@ -388,20 +360,18 @@ fn prefetch_profile_skip_reason(
 }
 
 fn scan_map_value_prefetch_sites(insns: &[BpfInsn], cfg: &CFGResult) -> Vec<PrefetchSite> {
-    let mut sites = Vec::new();
-    let mut pc = 0usize;
-
-    while pc < insns.len() {
-        let insn = &insns[pc];
-        if insn.is_call() && insn.src_reg() == 0 && insn.imm == HELPER_MAP_LOOKUP_ELEM {
-            if let Some(site) = first_map_value_deref_after_lookup(insns, cfg, pc) {
-                sites.push(site);
+    iter_sites(insns, |insns, pc| Some(insn_width(&insns[pc])))
+        .into_iter()
+        .filter_map(|site| {
+            let pc = site.pc;
+            let insn = &insns[pc];
+            if insn.is_call() && insn.src_reg() == 0 && insn.imm == HELPER_MAP_LOOKUP_ELEM {
+                first_map_value_deref_after_lookup(insns, cfg, pc)
+            } else {
+                None
             }
-        }
-        pc += insn_width(insn);
-    }
-
-    sites
+        })
+        .collect()
 }
 
 fn first_map_value_deref_after_lookup(
@@ -491,15 +461,15 @@ fn scan_packet_prefetch_sites(
 ) -> Vec<PrefetchSite> {
     let mut sites = Vec::new();
     let mut regs = initial_packet_regs();
-    let mut pc = 0usize;
 
-    while pc < insns.len() {
+    for site in iter_sites(insns, |insns, pc| Some(insn_width(&insns[pc]))) {
+        let pc = site.pc;
         if pc > 0 && bt.is_target.get(pc).copied().unwrap_or(false) {
             regs = [TrackedValue::Unknown; 11];
         }
 
         let insn = &insns[pc];
-        let width = insn_width(insn);
+        let width = site.len;
         if let Some(base_reg) = memory_base_reg(insn) {
             if let TrackedValue::PacketData { def_end_pc } = regs[base_reg as usize] {
                 sites.push(PrefetchSite {
@@ -513,7 +483,6 @@ fn scan_packet_prefetch_sites(
         }
 
         apply_packet_transfer(insn, pc, width, layout, &mut regs);
-        pc += width;
     }
 
     sites
@@ -522,8 +491,8 @@ fn scan_packet_prefetch_sites(
 fn packet_ctx_layout(prog_type: u32) -> Option<PacketCtxLayout> {
     match prog_type {
         BPF_PROG_TYPE_XDP => Some(PacketCtxLayout {
-            data_off: XDP_DATA_OFF,
-            data_end_off: XDP_DATA_END_OFF,
+            data_off: XDP_PACKET_DATA_OFFSET,
+            data_end_off: XDP_PACKET_DATA_END_OFFSET,
         }),
         BPF_PROG_TYPE_SCHED_CLS
         | BPF_PROG_TYPE_SCHED_ACT
@@ -531,8 +500,8 @@ fn packet_ctx_layout(prog_type: u32) -> Option<PacketCtxLayout> {
         | BPF_PROG_TYPE_LWT_IN
         | BPF_PROG_TYPE_LWT_OUT
         | BPF_PROG_TYPE_LWT_XMIT => Some(PacketCtxLayout {
-            data_off: SKB_DATA_OFF,
-            data_end_off: SKB_DATA_END_OFF,
+            data_off: SKB_PACKET_DATA_OFFSET,
+            data_end_off: SKB_PACKET_DATA_END_OFFSET,
         }),
         _ => None,
     }

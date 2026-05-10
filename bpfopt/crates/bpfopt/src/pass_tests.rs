@@ -86,7 +86,6 @@ impl BpfPass for NoOpPass {
         _ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         Ok(PassResult {
-            pass_name: self.name().into(),
             sites_applied: 0,
             sites_skipped: vec![],
             diagnostics: vec![],
@@ -113,7 +112,6 @@ impl BpfPass for AppendNopPass {
     ) -> anyhow::Result<PassResult> {
         program.insns.push(BpfInsn::nop());
         Ok(PassResult {
-            pass_name: self.name().into(),
             sites_applied: 1,
             sites_skipped: vec![],
             diagnostics: vec![],
@@ -143,7 +141,6 @@ impl BpfPass for PrependNopPass {
         let addr_map = (0..=old_len).map(|pc| pc + 1).collect::<Vec<_>>();
         program.remap_annotations(&addr_map);
         Ok(PassResult {
-            pass_name: self.name().into(),
             sites_applied: 1,
             sites_skipped: vec![],
             diagnostics: vec![],
@@ -178,7 +175,6 @@ impl BpfPass for RewriteMovImmPass {
             }
         }
         Ok(PassResult {
-            pass_name: self.name().into(),
             sites_applied: applied,
             sites_skipped: vec![],
             diagnostics: vec![],
@@ -215,10 +211,8 @@ struct InsnCountAnalysis;
 
 impl Analysis for InsnCountAnalysis {
     type Result = usize;
-    fn name(&self) -> &str {
-        "insn_count"
-    }
-    fn run(&self, program: &BpfProgram) -> usize {
+
+    fn run(program: &BpfProgram) -> usize {
         program.insns.len()
     }
 }
@@ -233,45 +227,20 @@ impl BpfPass for CountReportingPass {
     fn category(&self) -> PassCategory {
         PassCategory::Observability
     }
-    fn required_analyses(&self) -> Vec<&str> {
-        vec!["insn_count"]
-    }
+
     fn run(
         &self,
         _program: &mut BpfProgram,
         analyses: &mut AnalysisCache,
         _ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        let analysis = InsnCountAnalysis;
-        let count = analyses.get(&analysis, _program);
+        let count = analyses.get::<InsnCountAnalysis>(_program);
         Ok(PassResult {
-            pass_name: self.name().into(),
             sites_applied: 0,
             sites_skipped: vec![],
-            diagnostics: vec![format!("insn_count={}", count)],
+            diagnostics: vec![format!("insn_count={}", *count)],
             ..Default::default()
         })
-    }
-}
-
-struct MissingAnalysisPass;
-
-impl BpfPass for MissingAnalysisPass {
-    fn name(&self) -> &str {
-        "missing_analysis"
-    }
-
-    fn required_analyses(&self) -> Vec<&str> {
-        vec!["not_registered"]
-    }
-
-    fn run(
-        &self,
-        _program: &mut BpfProgram,
-        _analyses: &mut AnalysisCache,
-        _ctx: &PassContext,
-    ) -> anyhow::Result<PassResult> {
-        Ok(PassResult::unchanged(self.name()))
     }
 }
 
@@ -289,7 +258,6 @@ impl BpfPass for VerifierStateCountPass {
         _ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         Ok(PassResult {
-            pass_name: self.name().into(),
             diagnostics: vec![format!("verifier_states={}", program.verifier_states.len())],
             ..Default::default()
         })
@@ -566,11 +534,7 @@ fn remap_kinsn_btf_metadata_uses_proof_subprog_layout_for_func_info() {
     });
     program.line_info = Some(BtfInfoRecords {
         rec_size: 16,
-        bytes: [
-            pass_test_btf_record(0, 100),
-            pass_test_btf_record(999, 104),
-        ]
-        .concat(),
+        bytes: [pass_test_btf_record(0, 100), pass_test_btf_record(999, 104)].concat(),
     });
 
     let mut registry = KinsnRegistry::default();
@@ -697,44 +661,8 @@ fn remap_btf_metadata_rejects_out_of_range_func_info() {
 fn test_analysis_cache_basic() {
     let mut cache = AnalysisCache::new();
     let prog = make_program(vec![BpfInsn::nop(), BpfInsn::exit()]);
-    let analysis = InsnCountAnalysis;
-
-    assert!(!cache.is_cached::<usize>());
-    let count = cache.get(&analysis, &prog);
-    assert_eq!(count, 2);
-    assert!(cache.is_cached::<usize>());
-}
-
-#[test]
-fn test_analysis_cache_targeted_invalidation_for_known_types() {
-    use crate::analysis::{
-        BranchTargetAnalysis, BranchTargetResult, CFGAnalysis, CFGResult, LivenessAnalysis,
-        LivenessResult,
-    };
-
-    let mut cache = AnalysisCache::new();
-    let prog = make_program(vec![BpfInsn::mov64_imm(0, 42), BpfInsn::exit()]);
-
-    // Populate all three analyses.
-    cache.get(&BranchTargetAnalysis, &prog);
-    cache.get(&CFGAnalysis, &prog);
-    cache.get(&LivenessAnalysis, &prog);
-
-    assert!(cache.is_cached::<BranchTargetResult>());
-    assert!(cache.is_cached::<CFGResult>());
-    assert!(cache.is_cached::<LivenessResult>());
-
-    // Targeted invalidation of BranchTargetResult only.
-    cache.invalidate::<BranchTargetResult>();
-    assert!(!cache.is_cached::<BranchTargetResult>());
-    assert!(cache.is_cached::<CFGResult>());
-    assert!(cache.is_cached::<LivenessResult>());
-
-    // Invalidate the rest.
-    cache.invalidate::<CFGResult>();
-    cache.invalidate::<LivenessResult>();
-    assert!(!cache.is_cached::<CFGResult>());
-    assert!(!cache.is_cached::<LivenessResult>());
+    let count = cache.get::<InsnCountAnalysis>(&prog);
+    assert_eq!(*count, 2);
 }
 
 // ── PassManager tests ───────────────────────────────────────────
@@ -768,7 +696,6 @@ fn test_pass_manager_analysis_cache_invalidation() {
     // After a transform pass, the analysis cache should be invalidated.
     // A subsequent analysis read should see the updated program.
     let mut pm = PassManager::new();
-    pm.register_analysis(InsnCountAnalysis);
 
     // First pass: report count (should see 2 insns)
     pm.add_pass(CountReportingPass);
@@ -788,22 +715,6 @@ fn test_pass_manager_analysis_cache_invalidation() {
     // append_nop runs.
     // Second count_reporter should see 3 instructions (cache was invalidated).
     assert_eq!(result.pass_results[2].diagnostics, vec!["insn_count=3"]);
-}
-
-#[test]
-fn test_pass_manager_rejects_unregistered_required_analysis() {
-    let mut pm = PassManager::new();
-    pm.add_pass(MissingAnalysisPass);
-
-    let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), BpfInsn::exit()]);
-    let ctx = ctx_for_pass_manager(&pm);
-
-    let err = pm.run(&mut prog, &ctx).unwrap_err();
-    assert!(
-        err.to_string()
-            .contains("requires unknown analysis 'not_registered'"),
-        "err={err:#}"
-    );
 }
 
 #[test]
@@ -848,7 +759,7 @@ fn test_pass_manager_enabled_pass_policy() {
 
     // Only append_nop should run.
     assert_eq!(result.pass_results.len(), 1);
-    assert_eq!(result.pass_results[0].pass_name, "append_nop");
+    assert_eq!(result.pass_names[0], "append_nop");
     assert_eq!(prog.insns.len(), 2);
 }
 

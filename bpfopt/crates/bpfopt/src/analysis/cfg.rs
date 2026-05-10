@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 // CFG (Control Flow Graph) analysis.
 
-use crate::insn::BPF_PSEUDO_FUNC;
+use std::ops::Range;
+
+use crate::insn::{insn_width, relative_branch_target_pc, BpfInsn, BPF_PSEUDO_FUNC};
 use crate::pass::{Analysis, BpfProgram};
 
 /// A single basic block in the CFG.
@@ -19,6 +21,7 @@ pub struct BasicBlock {
 
 pub struct SubprogRange {
     pub start: usize,
+    pub end: usize,
 }
 
 /// Result of CFG analysis.
@@ -30,41 +33,89 @@ pub struct CFGResult {
     pub subprogs: Vec<SubprogRange>,
 }
 
+impl CFGResult {
+    pub fn subprog_bounds(&self, pc: usize) -> Option<Range<usize>> {
+        self.subprogs
+            .iter()
+            .find(|subprog| pc >= subprog.start && pc < subprog.end)
+            .map(|subprog| subprog.start..subprog.end)
+    }
+}
+
 pub struct CFGAnalysis;
+
+pub fn subprog_bounds(insns: &[BpfInsn], pc: usize) -> (usize, usize) {
+    subprog_ranges(insns)
+        .into_iter()
+        .find(|subprog| pc >= subprog.start && pc < subprog.end)
+        .map(|subprog| (subprog.start, subprog.end))
+        .unwrap_or((0, insns.len()))
+}
+
+pub fn subprog_ranges(insns: &[BpfInsn]) -> Vec<SubprogRange> {
+    let n = insns.len();
+    let mut starts = vec![0usize];
+    starts.extend(
+        collect_subprog_entries(insns)
+            .into_iter()
+            .filter(|&entry| entry > 0),
+    );
+    starts.sort_unstable();
+    starts.dedup();
+    starts
+        .iter()
+        .enumerate()
+        .map(|(idx, &start)| SubprogRange {
+            start,
+            end: starts.get(idx + 1).copied().unwrap_or(n),
+        })
+        .collect()
+}
+
+fn collect_subprog_entries(insns: &[BpfInsn]) -> Vec<usize> {
+    let mut entries = Vec::new();
+    let mut pc = 0usize;
+    while pc < insns.len() {
+        let insn = &insns[pc];
+        if insn.is_ldimm64() && insn.src_reg() == BPF_PSEUDO_FUNC {
+            if let Some(target) = relative_branch_target_pc(pc, i64::from(insn.imm)) {
+                if target < insns.len() {
+                    entries.push(target);
+                }
+            }
+        } else if insn.is_call() && insn.src_reg() == 1 {
+            if let Some(target) = relative_branch_target_pc(pc, i64::from(insn.imm)) {
+                if target < insns.len() {
+                    entries.push(target);
+                }
+            }
+        }
+        pc += insn_width(insn);
+    }
+    entries.sort_unstable();
+    entries.dedup();
+    entries
+}
 
 impl Analysis for CFGAnalysis {
     type Result = CFGResult;
 
-    fn name(&self) -> &str {
-        "cfg"
-    }
-
-    fn run(&self, program: &BpfProgram) -> CFGResult {
+    fn run(program: &BpfProgram) -> CFGResult {
         let n = program.insns.len();
         let mut branch_targets = vec![false; n + 1];
-        let mut subprog_entries = Vec::new();
+        let subprog_entries = collect_subprog_entries(&program.insns);
+        for &target in &subprog_entries {
+            branch_targets[target] = true;
+        }
 
         // Pass 1: collect branch targets and subprog entries
         let mut pc = 0;
         while pc < n {
             let insn = &program.insns[pc];
-            if insn.is_ldimm64() && insn.src_reg() == BPF_PSEUDO_FUNC {
-                let target = (pc as i64 + 1 + insn.imm as i64) as usize;
-                if target < n {
-                    branch_targets[target] = true;
-                    subprog_entries.push(target);
-                }
-            } else if insn.is_jmp_class() && !insn.is_exit() {
+            if insn.is_jmp_class() && !insn.is_exit() {
                 if insn.is_call() {
-                    if insn.src_reg() == 1 {
-                        let target = (pc as i64 + 1 + insn.imm as i64) as usize;
-                        if target < n {
-                            branch_targets[target] = true;
-                            subprog_entries.push(target);
-                        }
-                    }
-                } else {
-                    let target = (pc as i64 + 1 + insn.off as i64) as usize;
+                    // Subprogram call targets were collected above.
+                } else if let Some(target) = insn.branch_target_pc(pc) {
                     if target <= n {
                         branch_targets[target] = true;
                     }
@@ -142,18 +193,20 @@ impl Analysis for CFGAnalysis {
             if last_insn.is_exit() {
                 // No successors
             } else if last_insn.is_ja() {
-                let target = (last_pc as i64 + 1 + last_insn.off as i64) as usize;
-                if target < n {
-                    edges.push((bb_idx, insn_to_block[target]));
+                if let Some(target) = last_insn.branch_target_pc(last_pc) {
+                    if target < n {
+                        edges.push((bb_idx, insn_to_block[target]));
+                    }
                 }
             } else if last_insn.is_cond_jmp() {
                 let next_pc = last_pc + 1;
                 if next_pc < n {
                     edges.push((bb_idx, insn_to_block[next_pc]));
                 }
-                let target = (last_pc as i64 + 1 + last_insn.off as i64) as usize;
-                if target < n {
-                    edges.push((bb_idx, insn_to_block[target]));
+                if let Some(target) = last_insn.branch_target_pc(last_pc) {
+                    if target < n {
+                        edges.push((bb_idx, insn_to_block[target]));
+                    }
                 }
             } else if last_insn.is_call() {
                 let next_pc = last_pc + 1;
@@ -176,20 +229,10 @@ impl Analysis for CFGAnalysis {
             block.preds.dedup();
         }
 
-        // Subprog boundaries
-        subprog_entries.sort();
-        subprog_entries.dedup();
-        let mut subprogs = vec![SubprogRange { start: 0 }];
-        for &entry in &subprog_entries {
-            if entry > 0 {
-                subprogs.push(SubprogRange { start: entry });
-            }
-        }
-
         CFGResult {
             blocks,
             insn_to_block,
-            subprogs,
+            subprogs: subprog_ranges(&program.insns),
         }
     }
 }

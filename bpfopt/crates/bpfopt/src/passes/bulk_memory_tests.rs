@@ -1,5 +1,4 @@
 use super::bulk_memory::*;
-use crate::analysis::*;
 use crate::insn::*;
 
 use crate::pass::{BpfProgram, PassContext, PassManager, PipelineResult};
@@ -317,8 +316,6 @@ fn ctx_with_bulk_kfuncs() -> PassContext {
 
 fn run_bulk_memory_pass(program: &mut BpfProgram, ctx: &PassContext) -> PipelineResult {
     let mut pm = PassManager::new();
-    pm.register_analysis(BranchTargetAnalysis);
-    pm.register_analysis(LivenessAnalysis);
     pm.add_pass(BulkMemoryPass);
     pm.run(program, ctx).unwrap()
 }

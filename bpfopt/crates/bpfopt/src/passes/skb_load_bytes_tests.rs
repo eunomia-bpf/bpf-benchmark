@@ -1,7 +1,6 @@
 use super::skb_load_bytes::*;
 use crate::insn::*;
 
-use crate::analysis::BranchTargetAnalysis;
 use crate::pass::{BpfProgram, PassContext, PassManager};
 
 const BPF_FUNC_SKB_LOAD_BYTES: i32 = libbpf_sys::BPF_FUNC_skb_load_bytes as i32;
@@ -11,8 +10,9 @@ const BPF_PROG_TYPE_SOCKET_FILTER: u32 = libbpf_sys::BPF_PROG_TYPE_SOCKET_FILTER
 const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
 const BPF_PROG_TYPE_SCHED_ACT: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_ACT;
 
-const SKB_DATA_OFF: i16 = 76;
-const SKB_DATA_END_OFF: i16 = 80;
+use crate::insn::{
+    SKB_PACKET_DATA_END_OFFSET as SKB_DATA_END_OFF, SKB_PACKET_DATA_OFFSET as SKB_DATA_OFF,
+};
 
 fn make_skb_load_bytes_setup(offset: i32, stack_off: i32, len: i32) -> Vec<BpfInsn> {
     vec![
@@ -180,7 +180,6 @@ fn run_skb_load_bytes_pass(
     prog_type: u32,
 ) -> crate::pass::PipelineResult {
     let mut pm = PassManager::new();
-    pm.register_analysis(BranchTargetAnalysis);
     pm.add_pass(SkbLoadBytesSpecPass);
 
     let mut ctx = PassContext::baseline();

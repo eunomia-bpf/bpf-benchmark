@@ -4,7 +4,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use crate::analysis::{BranchTargetAnalysis, CFGAnalysis};
+use crate::analysis::CFGAnalysis;
 use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
 use crate::mock_maps::use_mock_maps;
 use crate::pass::{
@@ -12,7 +12,6 @@ use crate::pass::{
     MapInlineHintMode, MapInlineRecord, MapMetadata, PassContext, PassManager, RegState,
     StackState, VerifierInsn, VerifierInsnKind,
 };
-use crate::passes::MapInfoAnalysis;
 use crate::passes::{ConstPropPass, DcePass};
 use crate::test_helpers::*;
 
@@ -358,8 +357,6 @@ fn try_run_map_inline_pass(program: &mut BpfProgram) -> anyhow::Result<PipelineR
     use_mock_maps(program);
     install_synthetic_verifier_states_for_map_inline_tests(program);
     let mut pm = PassManager::new();
-    pm.register_analysis(BranchTargetAnalysis);
-    pm.register_analysis(MapInfoAnalysis);
     pm.add_pass(MapInlinePass);
     pm.run(program, &PassContext::baseline())
 }
@@ -369,8 +366,6 @@ fn try_run_map_inline_pass_without_synthetic_verifier_states(
 ) -> anyhow::Result<PipelineResult> {
     use_mock_maps(program);
     let mut pm = PassManager::new();
-    pm.register_analysis(BranchTargetAnalysis);
-    pm.register_analysis(MapInfoAnalysis);
     pm.add_pass(MapInlinePass);
     pm.run(program, &PassContext::baseline())
 }
@@ -379,9 +374,6 @@ fn run_map_inline_const_prop_dce(program: &mut BpfProgram) -> PipelineResult {
     use_mock_maps(program);
     install_synthetic_verifier_states_for_map_inline_tests(program);
     let mut pm = PassManager::new();
-    pm.register_analysis(BranchTargetAnalysis);
-    pm.register_analysis(CFGAnalysis);
-    pm.register_analysis(MapInfoAnalysis);
     pm.add_pass(MapInlinePass);
     pm.add_pass(ConstPropPass);
     pm.add_pass(DcePass);
@@ -449,7 +441,7 @@ fn has_non_constant_key_skip(result: &PipelineResult) -> bool {
 }
 
 fn cfg_unreachable_pcs(insns: &[BpfInsn]) -> Vec<usize> {
-    let cfg = CFGAnalysis.run(&BpfProgram::new(insns.to_vec()));
+    let cfg = CFGAnalysis::run(&BpfProgram::new(insns.to_vec()));
     if cfg.blocks.is_empty() || insns.is_empty() {
         return Vec::new();
     }
@@ -735,9 +727,9 @@ fn map_inline_pseudo_map_value_feeds_const_prop_and_dce_without_branch_cleanup()
     program.set_map_ids(vec![903]);
 
     let result = run_map_inline_const_prop_dce(&mut program);
-    assert_eq!(result.pass_results[0].pass_name, "map_inline");
-    assert_eq!(result.pass_results[1].pass_name, "const_prop");
-    assert_eq!(result.pass_results[2].pass_name, "dce");
+    assert_eq!(result.pass_names[0], "map_inline");
+    assert_eq!(result.pass_names[1], "const_prop");
+    assert_eq!(result.pass_names[2], "dce");
     assert_eq!(
         program.insns,
         vec![

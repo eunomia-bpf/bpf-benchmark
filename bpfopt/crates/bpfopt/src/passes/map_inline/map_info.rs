@@ -3,7 +3,8 @@
 
 use std::collections::HashMap;
 
-use crate::insn::BpfInsn;
+use crate::analysis::iter_sites;
+use crate::insn::{BpfInsn, MapPseudo};
 use crate::pass::{Analysis, BpfProgram};
 
 const BPF_MAP_TYPE_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_HASH;
@@ -16,8 +17,6 @@ const BPF_MAP_TYPE_HASH_OF_MAPS: u32 = libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS;
 const BPF_MAP_TYPE_LRU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_LRU_HASH;
 #[cfg(test)]
 const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
-const BPF_PSEUDO_MAP_FD: u8 = crate::insn::BPF_PSEUDO_MAP_FD;
-const BPF_PSEUDO_MAP_IDX: u8 = crate::insn::BPF_PSEUDO_MAP_IDX;
 
 /// Runtime metadata for a live kernel map referenced by the program.
 ///
@@ -114,11 +113,7 @@ type MapInfoAnalysisResult<T> = std::result::Result<T, String>;
 impl Analysis for MapInfoAnalysis {
     type Result = MapInfoAnalysisResult<MapInfoResult>;
 
-    fn name(&self) -> &str {
-        "map_info"
-    }
-
-    fn run(&self, program: &BpfProgram) -> MapInfoAnalysisResult<MapInfoResult> {
+    fn run(program: &BpfProgram) -> MapInfoAnalysisResult<MapInfoResult> {
         let provider = program.map_provider.clone();
         collect_map_references_with_bindings(
             &program.insns,
@@ -159,14 +154,14 @@ where
     let mut unique_old_fds = Vec::new();
     let mut resolved_by_index: HashMap<usize, Option<MapInfo>> = HashMap::new();
 
-    let mut pc = 0usize;
-    while pc < insns.len() {
+    for site in iter_sites(insns, |insns, pc| Some(crate::insn::insn_width(&insns[pc]))) {
+        let pc = site.pc;
         let insn = &insns[pc];
-        if insn.is_ldimm64()
-            && pc + 1 < insns.len()
-            && (insn.src_reg() == BPF_PSEUDO_MAP_FD || insn.src_reg() == BPF_PSEUDO_MAP_IDX)
-        {
-            let map_index = if insn.src_reg() == BPF_PSEUDO_MAP_IDX {
+        let Some(kind @ (MapPseudo::Fd | MapPseudo::Idx)) = insn.map_pseudo() else {
+            continue;
+        };
+        if pc + 1 < insns.len() {
+            let map_index = if kind == MapPseudo::Idx {
                 usize::try_from(insn.imm)
                     .map_err(|_| format!("negative pseudo-map index {} at pc {}", insn.imm, pc))?
             } else {
@@ -181,7 +176,7 @@ where
                     }
                 }
             };
-            let map_id = if insn.src_reg() == BPF_PSEUDO_MAP_IDX {
+            let map_id = if kind == MapPseudo::Idx {
                 Some(*map_ids.get(map_index).ok_or_else(|| {
                     format!(
                         "pseudo-map index {} at pc {} out of range for {} map ids",
@@ -216,12 +211,7 @@ where
                 map_id,
                 info,
             });
-
-            pc += 2;
-            continue;
         }
-
-        pc += if insn.is_ldimm64() { 2 } else { 1 };
     }
 
     let mut resolved_indexes = resolved_by_index.keys().copied().collect::<Vec<_>>();
@@ -240,7 +230,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::insn::{BpfInsn, BPF_DW, BPF_IMM, BPF_LD};
+    use crate::insn::{BpfInsn, BPF_DW, BPF_IMM, BPF_LD, BPF_PSEUDO_MAP_FD, BPF_PSEUDO_MAP_IDX};
     use crate::pass::BpfProgram;
 
     fn make_ld_imm64(dst: u8, src: u8, imm_lo: i32) -> [BpfInsn; 2] {
@@ -362,9 +352,7 @@ mod tests {
     fn map_info_analysis_runs_without_live_map_metadata() {
         let ld = make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 10);
         let program = BpfProgram::new(vec![ld[0], ld[1]]);
-        let result = MapInfoAnalysis
-            .run(&program)
-            .expect("map info analysis should succeed");
+        let result = MapInfoAnalysis::run(&program).expect("map info analysis should succeed");
 
         assert_eq!(result.references.len(), 1);
         assert_eq!(result.references[0].map_id, None);
@@ -411,9 +399,8 @@ mod tests {
         program.map_provider = std::sync::Arc::new(ErrorMapProvider);
         program.set_map_ids(vec![999_999]);
 
-        let err = MapInfoAnalysis
-            .run(&program)
-            .expect_err("missing live map metadata should propagate");
+        let err =
+            MapInfoAnalysis::run(&program).expect_err("missing live map metadata should propagate");
 
         assert!(err.contains("resolve live map info for map 999999"));
     }

@@ -1,7 +1,6 @@
 use super::dce::*;
 use crate::pass::*;
 
-use crate::analysis::CFGAnalysis;
 use crate::insn::*;
 use crate::passes::ConstPropPass;
 use crate::test_helpers::*;
@@ -9,7 +8,6 @@ use std::collections::HashMap;
 
 fn run_const_prop_then_dce(program: &mut BpfProgram) -> PipelineResult {
     let mut pm = PassManager::new();
-    pm.register_analysis(CFGAnalysis);
     pm.add_pass(ConstPropPass);
     pm.add_pass(DcePass);
     pm.run(program, &PassContext::baseline()).unwrap()
@@ -32,7 +30,7 @@ fn dce_removes_dead_defs_exposed_by_const_prop_without_branch_cleanup() {
     ]);
 
     let result = run_const_prop_then_dce(&mut program);
-    assert_eq!(result.pass_results[1].pass_name, "dce");
+    assert_eq!(result.pass_names[1], "dce");
     assert_eq!(result.pass_results[1].sites_applied, 4);
     assert!(result.pass_results[1]
         .diagnostics

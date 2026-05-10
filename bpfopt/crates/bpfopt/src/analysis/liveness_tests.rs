@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-use super::liveness::{insn_use_def, LivenessAnalysis};
+use super::liveness::{insn_use_def_set, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::Analysis;
 use crate::test_helpers::*;
@@ -9,7 +9,7 @@ use crate::test_helpers::*;
 fn liveness_simple_def_use() {
     let insns = vec![BpfInsn::mov64_imm(0, 42), BpfInsn::exit()];
     let prog = make_program(insns);
-    let liveness = LivenessAnalysis.run(&prog);
+    let liveness = LivenessAnalysis::run(&prog);
     assert!(liveness.live_out[0].contains(&0));
     assert!(!liveness.live_out[1].contains(&0));
 }
@@ -22,7 +22,7 @@ fn liveness_register_killed() {
         BpfInsn::exit(),
     ];
     let prog = make_program(insns);
-    let liveness = LivenessAnalysis.run(&prog);
+    let liveness = LivenessAnalysis::run(&prog);
     assert!(liveness.live_out[0].contains(&1));
     assert!(!liveness.live_out[1].contains(&1));
     assert!(liveness.live_out[1].contains(&0));
@@ -37,37 +37,41 @@ fn liveness_branch_merges() {
         BpfInsn::exit(),
     ];
     let prog = make_program(insns);
-    let liveness = LivenessAnalysis.run(&prog);
+    let liveness = LivenessAnalysis::run(&prog);
     assert!(liveness.live_out[1].contains(&2));
 }
 
 #[test]
 fn use_def_alu_imm() {
     let insn = BpfInsn::alu64_imm(BPF_LSH, 1, 8);
-    let (uses, defs) = insn_use_def(&insn);
-    assert!(uses.contains(&1));
-    assert!(defs.contains(&1));
+    let use_def = insn_use_def_set(&insn);
+    assert!(use_def.uses.contains(&1));
+    assert!(use_def.defs.contains(&1));
 }
 
 #[test]
 fn use_def_mov_reg() {
     let insn = BpfInsn::mov64_reg(0, 1);
-    let (uses, defs) = insn_use_def(&insn);
-    assert!(uses.contains(&1));
-    assert!(!uses.contains(&0));
-    assert!(defs.contains(&0));
+    let use_def = insn_use_def_set(&insn);
+    assert!(use_def.uses.contains(&1));
+    assert!(!use_def.uses.contains(&0));
+    assert!(use_def.defs.contains(&0));
 }
 
 #[test]
 fn use_def_call() {
     let insn = BpfInsn::call_kfunc(42);
-    let (uses, defs) = insn_use_def(&insn);
+    let use_def = insn_use_def_set(&insn);
     for r in 1..=5 {
-        assert!(uses.contains(&r));
+        assert!(use_def.uses.contains(&r));
     }
     // BPF calling convention: r0 = return value, r1-r5 = clobbered
     for r in 0..=5 {
-        assert!(defs.contains(&r), "r{} should be in defs for call", r);
+        assert!(
+            use_def.defs.contains(&r),
+            "r{} should be in defs for call",
+            r
+        );
     }
 }
 
@@ -83,7 +87,7 @@ fn liveness_call_clobbers_caller_saved() {
         BpfInsn::exit(),
     ];
     let prog = make_program(insns);
-    let liveness = LivenessAnalysis.run(&prog);
+    let liveness = LivenessAnalysis::run(&prog);
     // r6 should be live across the call (live_out[2] should contain r6)
     assert!(liveness.live_out[2].contains(&6));
     // r1 should NOT be live after the call (it's clobbered)
@@ -92,23 +96,23 @@ fn liveness_call_clobbers_caller_saved() {
 
 #[test]
 fn use_def_exit() {
-    let (uses, defs) = insn_use_def(&BpfInsn::exit());
-    assert!(uses.contains(&0));
-    assert!(defs.is_empty());
+    let use_def = insn_use_def_set(&BpfInsn::exit());
+    assert!(use_def.uses.contains(&0));
+    assert!(use_def.defs.is_empty());
 }
 
 #[test]
 fn use_def_ldx() {
     let insn = BpfInsn::ldx_mem(BPF_W, 0, 6, 4);
-    let (uses, defs) = insn_use_def(&insn);
-    assert!(uses.contains(&6));
-    assert!(defs.contains(&0));
+    let use_def = insn_use_def_set(&insn);
+    assert!(use_def.uses.contains(&6));
+    assert!(use_def.defs.contains(&0));
 }
 
 #[test]
 fn use_def_stx() {
     let insn = BpfInsn::stx_mem(BPF_DW, 10, 1, -8);
-    let (uses, _defs) = insn_use_def(&insn);
-    assert!(uses.contains(&10));
-    assert!(uses.contains(&1));
+    let use_def = insn_use_def_set(&insn);
+    assert!(use_def.uses.contains(&10));
+    assert!(use_def.uses.contains(&1));
 }

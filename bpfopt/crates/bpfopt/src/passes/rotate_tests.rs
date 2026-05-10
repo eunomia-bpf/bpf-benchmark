@@ -285,10 +285,8 @@ fn test_rotate_pass_skip_when_kfunc_unavailable() {
     let ctx = PassContext::baseline();
 
     let pass = RotatePass;
-    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-    assert_eq!(result.sites_applied, 0);
-    assert!(!result.sites_skipped.is_empty());
-    assert!(result.sites_skipped[0].reason.contains("kfunc"));
+    let err = pass.run(&mut prog, &mut cache, &ctx).unwrap_err();
+    assert!(err.to_string().contains("bpf_rotate64"));
 }
 
 #[test]

@@ -1,4 +1,5 @@
 use super::prefetch::*;
+use crate::insn::XDP_PACKET_DATA_OFFSET as XDP_DATA_OFF;
 use crate::insn::*;
 use crate::pass::*;
 use crate::pass::{AnalysisCache, PassContext};

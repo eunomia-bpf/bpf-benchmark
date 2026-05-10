@@ -13,7 +13,7 @@ use std::fmt;
 use std::sync::Arc;
 
 use crate::analysis::CFGAnalysis;
-use crate::insn::{BpfInsn, BPF_PSEUDO_KINSN_CALL};
+use crate::insn::{BpfInsn, MapPseudo, BPF_PSEUDO_KINSN_CALL};
 // MapInlineHint et al. live in passes/map_inline.rs (pass-local metadata) and are
 // re-exported here so existing `use crate::pass::*` consumers keep working.
 pub use crate::passes::map_inline::{MapInlineHint, MapInlineHintAnchor, MapInlineHintMode};
@@ -110,15 +110,15 @@ pub(crate) fn decode_packed_kinsn_payload(payload: &[u8]) -> anyhow::Result<u64>
 }
 
 pub(crate) fn kinsn_payload_reg(payload: u64, shift: u8) -> u8 {
-    ((payload >> shift) & 0xf) as u8
+    BpfInsn::unpack_u4(payload, shift)
 }
 
 pub(crate) fn kinsn_payload_u8(payload: u64, shift: u8) -> u8 {
-    ((payload >> shift) & 0xff) as u8
+    BpfInsn::unpack_u8(payload, shift)
 }
 
 pub(crate) fn kinsn_payload_s16(payload: u64, shift: u8) -> i16 {
-    ((payload >> shift) & 0xffff) as u16 as i16
+    BpfInsn::unpack_u16(payload, shift) as i16
 }
 
 pub(crate) fn validate_bpf_reg(label: &str, reg: u8) -> anyhow::Result<()> {
@@ -450,7 +450,7 @@ fn kinsn_proof_len(
 }
 
 fn kinsn_candidate_subprog_starts(insns: &[BpfInsn]) -> anyhow::Result<Vec<usize>> {
-    let cfg = CFGAnalysis.run(&BpfProgram::new(insns.to_vec()));
+    let cfg = CFGAnalysis::run(&BpfProgram::new(insns.to_vec()));
     let mut starts = Vec::with_capacity(cfg.subprogs.len());
 
     for subprog in cfg.subprogs {
@@ -932,9 +932,6 @@ impl BpfProgram {
     }
 }
 
-const BPF_PSEUDO_MAP_FD: u8 = libbpf_sys::BPF_PSEUDO_MAP_FD as u8;
-const BPF_PSEUDO_MAP_VALUE: u8 = libbpf_sys::BPF_PSEUDO_MAP_VALUE as u8;
-
 pub fn build_map_fd_bindings(insns: &[BpfInsn], map_ids: &[u32]) -> HashMap<i32, u32> {
     let mut old_fd_to_map_id = HashMap::new();
     let mut unique_old_fds = Vec::new();
@@ -943,7 +940,7 @@ pub fn build_map_fd_bindings(insns: &[BpfInsn], map_ids: &[u32]) -> HashMap<i32,
     while pc < insns.len() {
         let insn = insns[pc];
         if insn.is_ldimm64() {
-            if matches!(insn.src_reg(), BPF_PSEUDO_MAP_FD | BPF_PSEUDO_MAP_VALUE)
+            if insn.map_pseudo().is_some_and(MapPseudo::uses_fd)
                 && !unique_old_fds.contains(&insn.imm)
             {
                 unique_old_fds.push(insn.imm);
@@ -972,14 +969,11 @@ pub fn build_map_fd_bindings(insns: &[BpfInsn], map_ids: &[u32]) -> HashMap<i32,
 /// AnalysisCache and may be shared by multiple transform passes.
 pub trait Analysis: Send + Sync {
     /// The concrete result type of this analysis.
-    type Result: Any + Clone + Send + Sync;
-
-    /// Analysis name (for debug/logging).
-    fn name(&self) -> &str;
+    type Result: Any + Send + Sync;
 
     /// Run the analysis and return the result.
     /// Receives an immutable reference to BpfProgram.
-    fn run(&self, program: &BpfProgram) -> Self::Result;
+    fn run(program: &BpfProgram) -> Self::Result;
 }
 
 /// Analysis result cache — indexed by TypeId, supports invalidation.
@@ -988,7 +982,7 @@ pub trait Analysis: Send + Sync {
 /// `invalidate_all()` to clear the cache. The next pass that needs an
 /// analysis result triggers recomputation.
 pub struct AnalysisCache {
-    cache: HashMap<TypeId, Box<dyn Any + Send + Sync>>,
+    cache: HashMap<TypeId, Arc<dyn Any + Send + Sync>>,
 }
 
 impl Default for AnalysisCache {
@@ -1005,33 +999,20 @@ impl AnalysisCache {
     }
 
     /// Get analysis result. If not cached, run the analysis and cache it.
-    pub fn get<A: Analysis + 'static>(&mut self, analysis: &A, program: &BpfProgram) -> A::Result {
+    pub fn get<A: Analysis + 'static>(&mut self, program: &BpfProgram) -> Arc<A::Result> {
         let type_id = TypeId::of::<A::Result>();
         if let Some(cached) = self.cache.get(&type_id) {
-            if let Some(result) = cached.downcast_ref::<A::Result>() {
-                return result.clone();
-            }
+            return Arc::downcast::<A::Result>(Arc::clone(cached))
+                .expect("analysis cache type id matched but downcast failed");
         }
-        let result = analysis.run(program);
-        self.cache.insert(type_id, Box::new(result.clone()));
+        let result = Arc::new(A::run(program));
+        self.cache.insert(type_id, result.clone());
         result
     }
 
     /// Invalidate all cached results (called after a transform pass modifies the program).
     pub fn invalidate_all(&mut self) {
         self.cache.clear();
-    }
-
-    /// Invalidate a specific analysis result.
-    #[cfg(test)]
-    pub fn invalidate<R: Any>(&mut self) {
-        self.cache.remove(&TypeId::of::<R>());
-    }
-
-    /// Check whether a specific analysis result is currently cached.
-    #[cfg(test)]
-    pub fn is_cached<R: Any>(&self) -> bool {
-        self.cache.contains_key(&TypeId::of::<R>())
     }
 }
 
@@ -1040,8 +1021,6 @@ impl AnalysisCache {
 /// Pass execution result.
 #[derive(Clone, Debug, Default)]
 pub struct PassResult {
-    /// Pass name.
-    pub pass_name: String,
     /// Number of sites applied.
     pub sites_applied: usize,
     /// Sites that were skipped (with reasons).
@@ -1057,30 +1036,25 @@ pub struct PassResult {
 }
 
 impl PassResult {
-    pub fn unchanged(pass_name: impl Into<String>) -> Self {
+    pub fn unchanged() -> Self {
         Self {
-            pass_name: pass_name.into(),
             sites_applied: 0,
             diagnostics: Vec::new(),
             ..Default::default()
         }
     }
 
-    pub fn skipped(pass_name: impl Into<String>, reason: SkipReason) -> Self {
+    pub fn skipped(reason: SkipReason) -> Self {
         Self {
             sites_skipped: vec![reason],
-            ..Self::unchanged(pass_name)
+            ..Self::unchanged()
         }
     }
 
-    pub fn skipped_with_diagnostics(
-        pass_name: impl Into<String>,
-        reason: SkipReason,
-        diagnostics: Vec<String>,
-    ) -> Self {
+    pub fn skipped_with_diagnostics(reason: SkipReason, diagnostics: Vec<String>) -> Self {
         Self {
             diagnostics,
-            ..Self::skipped(pass_name, reason)
+            ..Self::skipped(reason)
         }
     }
 }
@@ -1119,11 +1093,6 @@ pub trait BpfPass: Send + Sync {
     #[cfg(test)]
     fn category(&self) -> PassCategory {
         PassCategory::Optimization
-    }
-
-    /// Declare analyses this pass depends on (for PassManager ordering and precomputation).
-    fn required_analyses(&self) -> Vec<&str> {
-        vec![]
     }
 
     /// Execute the pass.
@@ -1234,9 +1203,10 @@ impl KinsnRegistry {
     }
 
     pub fn btf_id_for_target_name(&self, target_name: &str) -> anyhow::Result<i32> {
-        let entry = self.by_name.get(target_name).ok_or_else(|| {
-            anyhow::anyhow!("kinsn target {target_name} not registered")
-        })?;
+        let entry = self
+            .by_name
+            .get(target_name)
+            .ok_or_else(|| anyhow::anyhow!("kinsn target {target_name} not registered"))?;
         entry
             .btf_id
             .ok_or_else(|| anyhow::anyhow!("kinsn target {target_name} not registered"))
@@ -1367,49 +1337,12 @@ pub struct PolicyConfig {
     pub enabled_passes: Vec<String>,
 }
 
-// ── Type-erased analysis wrapper ────────────────────────────────────
-
-/// Type-erased Analysis trait object wrapper.
-pub trait AnyAnalysis: Send + Sync {
-    fn run_and_cache(&self, program: &BpfProgram, cache: &mut AnalysisCache);
-}
-
-/// Blanket impl of AnyAnalysis for all Analysis types.
-impl<A: Analysis + 'static> AnyAnalysis for A
-where
-    A::Result: 'static,
-{
-    fn run_and_cache(&self, program: &BpfProgram, cache: &mut AnalysisCache) {
-        cache.get(self, program);
-    }
-}
-
-// ── Analysis registry ───────────────────────────────────────────────
-
-/// Analysis registry — stores all available analysis instances.
-pub struct AnalysisRegistry {
-    registry: HashMap<String, Box<dyn AnyAnalysis>>,
-}
-
-impl Default for AnalysisRegistry {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl AnalysisRegistry {
-    pub fn new() -> Self {
-        Self {
-            registry: HashMap::new(),
-        }
-    }
-}
-
 // ── PassManager ─────────────────────────────────────────────────────
 
 /// Pipeline execution result.
 #[derive(Clone, Debug)]
 pub struct PipelineResult {
+    pub pass_names: Vec<String>,
     pub pass_results: Vec<PassResult>,
 }
 
@@ -1419,7 +1352,6 @@ pub struct PipelineResult {
 /// manages analysis cache invalidation, and collects statistics.
 pub struct PassManager {
     passes: Vec<Box<dyn BpfPass>>,
-    analyses: AnalysisRegistry,
 }
 
 impl Default for PassManager {
@@ -1430,19 +1362,7 @@ impl Default for PassManager {
 
 impl PassManager {
     pub fn new() -> Self {
-        Self {
-            passes: Vec::new(),
-            analyses: AnalysisRegistry::new(),
-        }
-    }
-
-    /// Register an analysis.
-    pub fn register_analysis<A: Analysis + 'static>(&mut self, analysis: A)
-    where
-        A::Result: 'static,
-    {
-        let name = analysis.name().to_string();
-        self.analyses.registry.insert(name, Box::new(analysis));
+        Self { passes: Vec::new() }
     }
 
     /// Add a pass to the end of the pipeline.
@@ -1482,26 +1402,6 @@ impl PassManager {
             .any(|name| name == pass.name()))
     }
 
-    /// Precompute analyses declared by a pass.
-    fn run_required_analyses(
-        &self,
-        pass: &dyn BpfPass,
-        program: &BpfProgram,
-        cache: &mut AnalysisCache,
-    ) -> anyhow::Result<()> {
-        for analysis_name in pass.required_analyses() {
-            let analysis = self.analyses.registry.get(analysis_name).ok_or_else(|| {
-                anyhow::anyhow!(
-                    "pass '{}' requires unknown analysis '{}'",
-                    pass.name(),
-                    analysis_name
-                )
-            })?;
-            analysis.run_and_cache(program, cache);
-        }
-        Ok(())
-    }
-
     fn available_pass_names(&self) -> HashSet<&str> {
         self.passes
             .iter()
@@ -1522,6 +1422,7 @@ impl PassManager {
         ctx: &PassContext,
     ) -> anyhow::Result<PipelineResult> {
         let mut cache = AnalysisCache::new();
+        let mut pass_names = Vec::new();
         let mut pass_results = Vec::new();
         for pass in &self.passes {
             let pass = pass.as_ref();
@@ -1530,10 +1431,14 @@ impl PassManager {
             }
 
             let result = self.run_single_pass(pass, program, &mut cache, ctx)?;
+            pass_names.push(pass.name().to_string());
             pass_results.push(result);
         }
 
-        Ok(PipelineResult { pass_results })
+        Ok(PipelineResult {
+            pass_names,
+            pass_results,
+        })
     }
 
     fn run_single_pass(
@@ -1543,7 +1448,10 @@ impl PassManager {
         cache: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        self.run_required_analyses(pass, program, cache)?;
+        if let Some(skip) = required_kinsn_skip(pass.name(), ctx) {
+            return Ok(PassResult::skipped(skip));
+        }
+
         let before_insns = program.insns.clone();
         let insns_before = program.insns.len();
         let mut result = pass.run(program, cache, ctx)?;
@@ -1558,6 +1466,26 @@ impl PassManager {
 
         Ok(result)
     }
+}
+
+fn required_kinsn_skip(pass_name: &str, ctx: &PassContext) -> Option<SkipReason> {
+    if pass_name == "ccmp" && ctx.platform.arch != Arch::Aarch64 {
+        return None;
+    }
+    let entry = crate::passes::PASS_REGISTRY
+        .iter()
+        .find(|entry| entry.name == pass_name)?;
+    let missing = entry
+        .metadata
+        .required_kinsns
+        .iter()
+        .copied()
+        .filter(|target| !ctx.kinsn_registry.is_target_available(target))
+        .collect::<Vec<_>>();
+    (!missing.is_empty()).then(|| SkipReason {
+        pc: 0,
+        reason: format!("missing required kinsn target(s): {}", missing.join(", ")),
+    })
 }
 
 fn validate_policy_pass_names(
@@ -1608,8 +1536,7 @@ impl PassContext {
 
     /// Whether cond_select can lower to a target branchless-select kinsn.
     pub fn has_branchless_select(&self) -> bool {
-        self.platform.has_cmov
-            || self.kinsn_registry.is_target_available("bpf_select64")
+        self.platform.has_cmov || self.kinsn_registry.is_target_available("bpf_select64")
     }
 }
 

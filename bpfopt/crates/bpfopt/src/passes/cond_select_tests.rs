@@ -229,13 +229,11 @@ fn test_cond_select_capability_matrix() {
     let mut missing_kfunc = make_program(original.clone());
     let mut missing_ctx = PassContext::baseline();
     missing_ctx.platform.has_cmov = true;
-    let result = pass
+    let err = pass
         .run(&mut missing_kfunc, &mut AnalysisCache::new(), &missing_ctx)
-        .unwrap();
-    assert_eq!(result.sites_applied, 0);
+        .unwrap_err();
     assert_eq!(missing_kfunc.insns, original);
-    assert!(!result.diagnostics.is_empty());
-    assert!(result.diagnostics[0].contains("kfunc unavailable"));
+    assert!(err.to_string().contains("bpf_select64"));
 
     let mut arm64 = make_program(original);
     let mut arm64_ctx = ctx_with_select_kfunc(5555);
