@@ -247,8 +247,71 @@ fn const_prop_post_state_guard_rejects_packet_pointer_copy_materialization() {
     assert_eq!(pass.sites_skipped[0].pc, 1);
     assert_eq!(
         pass.sites_skipped[0].reason,
-        VERIFIER_POST_STATE_NOT_SCALAR_EXACT
+        VERIFIER_POST_STATE_POINTER_TYPE
     );
+    assert_eq!(program.insns, original);
+}
+
+#[test]
+fn const_prop_skips_frame_pointer_arithmetic_materialization() {
+    // Bug caught: stale scalar facts at the unshifted pc must not beat the
+    // shifted verifier post-state that marks the helper argument as fp.
+    let original = vec![
+        BpfInsn::mov64_imm(9, 0),
+        BpfInsn::mov64_reg(1, 10),
+        BpfInsn::add64_imm(1, -16),
+        BpfInsn::mov64_imm(2, 16),
+        BpfInsn::helper_call(112),
+        BpfInsn::exit(),
+    ];
+    let mut program = BpfProgram::new(original.clone());
+    program.set_verifier_states(vec![
+        verifier_delta_state(0, HashMap::from([(10, scalar_reg(16))])),
+        verifier_delta_state(2, HashMap::from([(1, scalar_reg(0))])),
+        verifier_delta_state(3, HashMap::from([(2, scalar_reg(16))])),
+        verifier_delta_state(6, HashMap::from([(1, fp_reg(-16))])),
+    ]);
+
+    let result = run_const_prop_pass(&mut program);
+    let pass = &result.pass_results[0];
+    assert_eq!(pass.sites_applied, 0);
+    assert!(pass
+        .sites_skipped
+        .iter()
+        .any(|skip| { skip.pc == 2 && skip.reason == VERIFIER_POST_STATE_POINTER_TYPE }));
+    assert_eq!(program.insns, original);
+}
+
+#[test]
+fn const_prop_skips_frame_pointer_plus_eight_with_shifted_post_state() {
+    // Bug caught: r1 = r10; r1 += imm must retain frame-pointer provenance
+    // even when an unrelated stale scalar post-state exists at the raw pc.
+    let original = vec![
+        BpfInsn::mov64_reg(1, 10),
+        BpfInsn::add64_imm(1, 8),
+        BpfInsn::mov64_imm(2, 16),
+        BpfInsn::helper_call(112),
+        BpfInsn::nop(),
+        BpfInsn::nop(),
+        BpfInsn::nop(),
+        BpfInsn::nop(),
+        BpfInsn::nop(),
+        BpfInsn::nop(),
+        BpfInsn::exit(),
+    ];
+    let mut program = BpfProgram::new(original.clone());
+    program.set_verifier_states(vec![
+        verifier_delta_state(1, HashMap::from([(1, scalar_reg(8))])),
+        verifier_delta_state(10, HashMap::from([(1, fp_reg(8))])),
+    ]);
+
+    let result = run_const_prop_pass(&mut program);
+    let pass = &result.pass_results[0];
+    assert_eq!(pass.sites_applied, 0);
+    assert!(pass
+        .sites_skipped
+        .iter()
+        .any(|skip| { skip.pc == 1 && skip.reason == VERIFIER_POST_STATE_POINTER_TYPE }));
     assert_eq!(program.insns, original);
 }
 

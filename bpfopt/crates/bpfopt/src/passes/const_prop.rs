@@ -10,13 +10,19 @@ use crate::pass::*;
 use crate::rewrite::{BtfRemapPolicy, RewritePlan};
 
 const REG_COUNT: usize = 11;
+// ReJIT logs can report post-state PCs slightly ahead of bpfopt's current
+// bytecode index after earlier transforms; pointer evidence must still win.
+const VERIFIER_POINTER_POST_STATE_LOOKAHEAD: usize = 8;
 pub(super) const VERIFIER_POST_STATE_NOT_SCALAR_EXACT: &str =
     "verifier post-state is not scalar-exact";
+pub(super) const VERIFIER_POST_STATE_POINTER_TYPE: &str =
+    "register has pointer type, cannot materialize";
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 struct RegConstFact {
     exact64: Option<u64>,
     exact32: Option<u32>,
+    may_pointer: bool,
 }
 
 impl RegConstFact {
@@ -24,6 +30,15 @@ impl RegConstFact {
         Self {
             exact64: None,
             exact32: None,
+            may_pointer: false,
+        }
+    }
+
+    const fn pointer() -> Self {
+        Self {
+            exact64: None,
+            exact32: None,
+            may_pointer: true,
         }
     }
 }
@@ -34,6 +49,7 @@ type RegConstState = [RegConstFact; REG_COUNT];
 struct VerifierExactConstOracle {
     facts: BTreeMap<(usize, usize, u8), RegConstFact>,
     insn_delta_scalar_post_states: BTreeMap<(usize, usize, u8), VerifierScalarExactPostState>,
+    insn_delta_pointer_post_states: BTreeSet<(usize, usize, u8)>,
     frames_by_pc: BTreeMap<usize, BTreeSet<usize>>,
     post_state_frames_by_pc: BTreeMap<usize, BTreeSet<usize>>,
 }
@@ -123,6 +139,7 @@ impl OracleExactAccumulator {
         let fact = RegConstFact {
             exact64: self.exact64.into_option(),
             exact32: self.exact32.into_option(),
+            may_pointer: false,
         };
         (fact.exact64.is_some() || fact.exact32.is_some()).then_some(fact)
     }
@@ -142,6 +159,7 @@ impl VerifierExactConstOracle {
             (usize, usize, u8),
             Consensus<VerifierScalarExactPostState>,
         > = BTreeMap::new();
+        let mut insn_delta_pointer_post_states = BTreeSet::new();
 
         for state in states {
             if state.kind == VerifierInsnKind::BranchDeltaState {
@@ -171,6 +189,9 @@ impl VerifierExactConstOracle {
                 for (&regno, reg_state) in &state.regs {
                     let key = (state.pc, state.frame, regno);
                     *post_state_observed_counts.entry(key).or_default() += 1;
+                    if verifier_type_is_pointer(&reg_state.reg_type) {
+                        insn_delta_pointer_post_states.insert(key);
+                    }
                     let acc = post_state_accumulators.entry(key).or_default();
                     match scalar_exact_post_state(reg_state) {
                         Some(post_state) => acc.observe(post_state),
@@ -211,6 +232,7 @@ impl VerifierExactConstOracle {
         Self {
             facts,
             insn_delta_scalar_post_states,
+            insn_delta_pointer_post_states,
             frames_by_pc,
             post_state_frames_by_pc,
         }
@@ -239,6 +261,7 @@ impl VerifierExactConstOracle {
         let fact = RegConstFact {
             exact64: exact64.into_option(),
             exact32: exact32.into_option(),
+            may_pointer: false,
         };
         (saw_frame && (fact.exact64.is_some() || fact.exact32.is_some())).then_some(fact)
     }
@@ -297,10 +320,32 @@ impl VerifierExactConstOracle {
         }
     }
 
+    fn instruction_post_state_has_pointer_type_in_context(
+        &self,
+        pc: usize,
+        frame: Option<usize>,
+        dst: u8,
+    ) -> bool {
+        let max_pc = pc.saturating_add(VERIFIER_POINTER_POST_STATE_LOOKAHEAD);
+        match frame {
+            Some(frame) => {
+                self.insn_delta_pointer_post_states
+                    .iter()
+                    .any(|&(state_pc, state_frame, reg)| {
+                        state_pc >= pc && state_pc <= max_pc && state_frame == frame && reg == dst
+                    })
+            }
+            None => self
+                .insn_delta_pointer_post_states
+                .iter()
+                .any(|&(state_pc, _, reg)| state_pc >= pc && state_pc <= max_pc && reg == dst),
+        }
+    }
+
     fn apply_exact_facts(&self, pc: usize, frame: Option<usize>, state: &mut RegConstState) {
         for reg in 0..REG_COUNT {
             if let Some(fact) = self.fact(pc, frame, reg as u8) {
-                set_reg_fact(state, reg as u8, fact);
+                set_reg_oracle_fact(state, reg as u8, fact);
             }
         }
     }
@@ -333,6 +378,10 @@ fn scalar_exact_post_state(reg: &crate::pass::RegState) -> Option<VerifierScalar
     };
 
     Some(VerifierScalarExactPostState { value, width })
+}
+
+fn verifier_type_is_pointer(reg_type: &str) -> bool {
+    reg_type != "scalar"
 }
 
 fn verifier_width_matches(observed: VerifierValueWidth, required: VerifierValueWidth) -> bool {
@@ -518,7 +567,7 @@ fn analyze_instruction(
                      * type via src_reg. Treat them as non-foldable so const_prop
                      * never re-emits them as plain scalar LD_IMM64.
                      */
-                    set_reg_unknown(&mut next, insn.dst_reg());
+                    set_reg_may_pointer(&mut next, insn.dst_reg());
                 }
             } else {
                 set_reg_unknown(&mut next, insn.dst_reg());
@@ -538,6 +587,9 @@ fn analyze_instruction(
             let result = evaluate_alu_result(insn, state);
             match result {
                 Some(value) => set_reg_exact64(&mut next, insn.dst_reg(), value),
+                None if alu_inputs_may_be_pointer(insn, state) => {
+                    set_reg_may_pointer(&mut next, insn.dst_reg())
+                }
                 None => set_reg_unknown(&mut next, insn.dst_reg()),
             }
             decision
@@ -595,6 +647,18 @@ fn fold_alu_instruction(
     } else {
         VerifierValueWidth::Bits64
     };
+    if alu_inputs_may_be_pointer(insn, state) {
+        return AluFoldDecision::Skip(SkipReason {
+            pc,
+            reason: VERIFIER_POST_STATE_POINTER_TYPE.to_string(),
+        });
+    }
+    if oracle.instruction_post_state_has_pointer_type_in_context(pc, frame, insn.dst_reg()) {
+        return AluFoldDecision::Skip(SkipReason {
+            pc,
+            reason: VERIFIER_POST_STATE_POINTER_TYPE.to_string(),
+        });
+    }
     if !oracle.instruction_post_state_proves_scalar_exact_in_context(
         pc,
         frame,
@@ -714,6 +778,11 @@ pub(super) fn eval_binary_alu(op: u8, lhs: u64, rhs: u64, is_32: bool) -> Option
     Some(result)
 }
 
+fn alu_inputs_may_be_pointer(insn: &BpfInsn, state: &RegConstState) -> bool {
+    reg_may_be_pointer(state, insn.dst_reg())
+        || (bpf_src(insn.code) == BPF_X && reg_may_be_pointer(state, insn.src_reg()))
+}
+
 fn normalize_alu_result(is_32: bool, value: u64) -> u64 {
     if is_32 {
         value as u32 as u64
@@ -739,8 +808,21 @@ fn reg_const(state: &RegConstState, reg: u8, is_32: bool) -> Option<u64> {
     }
 }
 
+fn reg_may_be_pointer(state: &RegConstState, reg: u8) -> bool {
+    state.get(reg as usize).is_some_and(|fact| fact.may_pointer)
+}
+
 fn set_reg_fact(state: &mut RegConstState, reg: u8, fact: RegConstFact) {
     if let Some(slot) = state.get_mut(reg as usize) {
+        *slot = fact;
+    }
+}
+
+fn set_reg_oracle_fact(state: &mut RegConstState, reg: u8, fact: RegConstFact) {
+    if let Some(slot) = state.get_mut(reg as usize) {
+        if slot.may_pointer {
+            return;
+        }
         *slot = fact;
     }
 }
@@ -752,12 +834,17 @@ fn set_reg_exact64(state: &mut RegConstState, reg: u8, value: u64) {
         RegConstFact {
             exact64: Some(value),
             exact32: Some(value as u32),
+            may_pointer: false,
         },
     );
 }
 
 fn set_reg_unknown(state: &mut RegConstState, reg: u8) {
     set_reg_fact(state, reg, RegConstFact::unknown());
+}
+
+fn set_reg_may_pointer(state: &mut RegConstState, reg: u8) {
+    set_reg_fact(state, reg, RegConstFact::pointer());
 }
 
 fn merge_reg_fact(lhs: RegConstFact, rhs: RegConstFact) -> RegConstFact {
@@ -770,6 +857,7 @@ fn merge_reg_fact(lhs: RegConstFact, rhs: RegConstFact) -> RegConstFact {
             (Some(left), Some(right)) if left == right => Some(left),
             _ => None,
         },
+        may_pointer: lhs.may_pointer || rhs.may_pointer,
     }
 }
 
@@ -782,7 +870,9 @@ fn meet_states(lhs: &RegConstState, rhs: &RegConstState) -> RegConstState {
 }
 
 fn unknown_state() -> RegConstState {
-    [RegConstFact::unknown(); REG_COUNT]
+    let mut state = [RegConstFact::unknown(); REG_COUNT];
+    state[10] = RegConstFact::pointer();
+    state
 }
 
 fn emit_constant_load(dst_reg: u8, value: u64, is_32: bool) -> Vec<BpfInsn> {
