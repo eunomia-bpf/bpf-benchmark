@@ -6,11 +6,6 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::rewrite::{BtfRemapPolicy, RewritePlan};
-use super::utils::{
-    emit_packed_kinsn_call_with_off, kinsn_replacement_subprog_skip_reason,
-    resolve_kinsn_call_off_for_target,
-};
-
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
         canonical_name: "bpf_endian_load16",
@@ -256,10 +251,10 @@ fn writes_reg(insn: &BpfInsn, reg: u8) -> bool {
 }
 
 /// Select the appropriate BTF ID for a given load size.
-fn btf_id_for_size(ctx: &PassContext, size: u8) -> i32 {
-    kfunc_name_for_size(size)
-        .map(|name| ctx.kinsn_registry.btf_id_for_target_name(name))
-        .unwrap_or(-1)
+fn btf_id_for_size(ctx: &PassContext, size: u8) -> anyhow::Result<i32> {
+    let name = kfunc_name_for_size(size)
+        .ok_or_else(|| anyhow::anyhow!("unsupported endian fusion size {size}"))?;
+    ctx.kinsn_registry.btf_id_for_target_name(name)
 }
 
 fn kfunc_name_for_size(size: u8) -> Option<&'static str> {
@@ -275,7 +270,7 @@ fn kfunc_name_for_size(size: u8) -> Option<&'static str> {
 fn any_endian_kfunc_available(ctx: &PassContext) -> bool {
     KINSN_TARGETS
         .iter()
-        .any(|target| ctx.kinsn_registry.btf_id_for_target_name(target.canonical_name) >= 0)
+        .any(|target| ctx.kinsn_registry.is_target_available(target.canonical_name))
 }
 
 pub(super) fn endian_payload(dst_reg: u8, base_reg: u8, offset: i16) -> u64 {
@@ -403,33 +398,15 @@ impl BpfPass for EndianFusionPass {
         let bt_analysis = BranchTargetAnalysis;
         let bt = analyses.get(&bt_analysis, program);
 
-        if !ctx
-            .kinsn_registry
-            .kinsn_registered_for_target_name("bpf_endian_load16")
-            && !ctx
-                .kinsn_registry
-                .kinsn_registered_for_target_name("bpf_endian_load32")
-            && !ctx
-                .kinsn_registry
-                .kinsn_registered_for_target_name("bpf_endian_load64")
-        {
-            return Ok(PassResult::skipped(
-                self.name(),
-                SkipReason {
-                    pc: 0,
-                    reason: "bpf_endian_loadXX packed ABI not available".into(),
-                },
-            ));
-        }
-
         let sites = scan_endian_fusion_sites(&program.insns);
         let mut safe_sites: Vec<SafeEndianFusionSite> = Vec::new();
         let mut skipped = find_blocked_narrow_sites(&program.insns);
 
         for site in sites {
             // Check if the specific size kfunc is available.
-            let btf_id = btf_id_for_size(ctx, site.size);
-            if btf_id < 0 {
+            let kfunc_name = kfunc_name_for_size(site.size)
+                .ok_or_else(|| anyhow::anyhow!("unsupported endian fusion size {}", site.size))?;
+            if !ctx.kinsn_registry.is_target_available(kfunc_name) {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
                     reason: format!(
@@ -452,25 +429,6 @@ impl BpfPass for EndianFusionPass {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
                     reason: "interior branch target".into(),
-                });
-                continue;
-            }
-
-            if !kfunc_name_for_size(site.size)
-                .map(|name| ctx.kinsn_registry.kinsn_registered_for_target_name(name))
-                .unwrap_or(false)
-            {
-                skipped.push(SkipReason {
-                    pc: site.start_pc,
-                    reason: format!(
-                        "bpf_endian_load{} packed ABI not available",
-                        match site.size {
-                            BPF_H => 16,
-                            BPF_W => 32,
-                            BPF_DW => 64,
-                            _ => 0,
-                        }
-                    ),
                 });
                 continue;
             }
@@ -508,10 +466,10 @@ impl BpfPass for EndianFusionPass {
         let mut plan = RewritePlan::new();
         for safe_site in &safe_sites {
             let site = &safe_site.site;
-            let btf_id = btf_id_for_size(ctx, site.size);
+            let btf_id = btf_id_for_size(ctx, site.size)?;
             let kfunc_name = kfunc_name_for_size(site.size)
                 .ok_or_else(|| anyhow::anyhow!("unsupported endian fusion size {}", site.size))?;
-            let kfunc_off = resolve_kinsn_call_off_for_target(ctx, kfunc_name)?;
+            let kfunc_off = ctx.kinsn_registry.call_off_for_target_name(kfunc_name)?;
             plan.replace_range(
                 site.start_pc,
                 1,

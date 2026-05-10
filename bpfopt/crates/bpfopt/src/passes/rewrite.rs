@@ -4,12 +4,87 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::insn::*;
-use crate::pass::{BpfProgram, KinsnRegistry, PassResult};
-
-use super::utils::{
-    fixup_all_branches, insn_width, map_replacement_range, remap_btf_metadata,
-    remap_kinsn_btf_metadata,
+use crate::pass::{
+    remap_btf_metadata, remap_kinsn_btf_metadata, BpfProgram, KinsnRegistry, PassResult,
 };
+
+/// Fix up branch and pseudo-call offsets after rewriting using an address map.
+///
+/// For each instruction in the original stream that is a branch/jump, compute
+/// where it ended up in the new stream and adjust its offset so it still points
+/// to the correct target.
+pub fn fixup_all_branches(new_insns: &mut [BpfInsn], old_insns: &[BpfInsn], addr_map: &[usize]) {
+    let old_n = old_insns.len();
+    let mut old_pc = 0;
+    while old_pc < old_n {
+        let insn = &old_insns[old_pc];
+        let new_pc = addr_map[old_pc];
+        let next_old_pc = old_pc + insn_width(insn);
+        let survived_unchanged = new_pc < new_insns.len()
+            && next_old_pc < addr_map.len()
+            && addr_map[next_old_pc] > new_pc
+            && new_insns.get(new_pc).copied() == Some(*insn);
+
+        if insn.is_ldimm64_pseudo_func() {
+            let old_target = (old_pc as i64 + 1 + insn.imm as i64) as usize;
+            if old_target < old_n
+                && survived_unchanged
+                && new_pc < new_insns.len()
+                && new_insns[new_pc].is_ldimm64_pseudo_func()
+            {
+                let new_target = addr_map[old_target];
+                let new_imm = new_target as i64 - (new_pc as i64 + 1);
+                new_insns[new_pc].imm = new_imm as i32;
+            }
+        } else if insn.is_call() && insn.src_reg() == 1 {
+            let old_target = (old_pc as i64 + 1 + insn.imm as i64) as usize;
+            if old_target < old_n {
+                let new_target = addr_map[old_target];
+                if survived_unchanged && new_insns[new_pc].is_call() {
+                    let new_imm = new_target as i64 - (new_pc as i64 + 1);
+                    new_insns[new_pc].imm = new_imm as i32;
+                }
+            }
+        } else if insn.is_jmp_class() && !insn.is_call() && !insn.is_exit() {
+            let old_target = (old_pc as i64 + 1 + insn.off as i64) as usize;
+            if old_target <= old_n {
+                let new_target = addr_map[old_target];
+                if survived_unchanged
+                    && new_insns[new_pc].is_jmp_class()
+                    && !new_insns[new_pc].is_call()
+                    && !new_insns[new_pc].is_exit()
+                {
+                    let new_off = new_target as i64 - (new_pc as i64 + 1);
+                    new_insns[new_pc].off = new_off as i16;
+                }
+            }
+        }
+        old_pc = if insn.is_ldimm64() {
+            old_pc + 2
+        } else {
+            old_pc + 1
+        };
+    }
+}
+
+/// Compose two address maps: `old -> mid` and `mid -> new`.
+pub fn compose_addr_maps(first: &[usize], second: &[usize]) -> Vec<usize> {
+    first.iter().map(|&pc| second[pc]).collect()
+}
+
+pub fn map_replacement_range(
+    addr_map: &mut [usize],
+    old_start: usize,
+    old_len: usize,
+    new_start: usize,
+    new_len: usize,
+) {
+    debug_assert!(new_len > 0);
+    for old_offset in 0..old_len {
+        let new_offset = old_offset.min(new_len.saturating_sub(1));
+        addr_map[old_start + old_offset] = new_start + new_offset;
+    }
+}
 
 #[derive(Clone, Debug, Default)]
 pub struct RewritePlan {
@@ -272,4 +347,104 @@ fn patch_internal_branches(
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn pseudo_func_ref(dst: u8, imm: i32) -> [BpfInsn; 2] {
+        [
+            BpfInsn::new(
+                BPF_LD | BPF_DW | BPF_IMM,
+                BpfInsn::make_regs(dst, BPF_PSEUDO_FUNC),
+                0,
+                imm,
+            ),
+            BpfInsn::new(0, 0, 0, 0),
+        ]
+    }
+
+    #[test]
+    fn test_fixup_all_branches_forward_jump() {
+        let old_insns = vec![BpfInsn::ja(1), BpfInsn::nop(), BpfInsn::exit()];
+        let mut new_insns = vec![
+            BpfInsn::ja(1),
+            BpfInsn::nop(),
+            BpfInsn::nop(),
+            BpfInsn::exit(),
+        ];
+        let addr_map = vec![0, 2, 3, 4];
+
+        fixup_all_branches(&mut new_insns, &old_insns, &addr_map);
+
+        assert_eq!(new_insns[0].off, 2);
+    }
+
+    #[test]
+    fn test_fixup_all_branches_does_not_write_branch_off_into_helper_call() {
+        let old_insns = vec![
+            BpfInsn::ja(1),
+            BpfInsn::nop(),
+            BpfInsn::helper_call(5),
+            BpfInsn::exit(),
+        ];
+        let mut new_insns = vec![BpfInsn::helper_call(5), BpfInsn::exit()];
+        let addr_map = vec![0, 0, 0, 1, 2];
+
+        fixup_all_branches(&mut new_insns, &old_insns, &addr_map);
+
+        assert!(new_insns[0].is_call());
+        assert_eq!(new_insns[0].src_reg(), 0);
+        assert_eq!(new_insns[0].dst_reg(), 0);
+        assert_eq!(new_insns[0].off, 0);
+        assert_eq!(new_insns[0].imm, 5);
+    }
+
+    #[test]
+    fn test_fixup_all_branches_does_not_write_deleted_branch_target_into_surviving_branch() {
+        let old_insns = vec![
+            BpfInsn::ja(1),
+            BpfInsn::nop(),
+            BpfInsn::ja(1),
+            BpfInsn::nop(),
+            BpfInsn::exit(),
+        ];
+        let mut new_insns = vec![BpfInsn::ja(1), BpfInsn::nop(), BpfInsn::exit()];
+        let addr_map = vec![0, 0, 0, 1, 2, 3];
+
+        fixup_all_branches(&mut new_insns, &old_insns, &addr_map);
+
+        assert!(new_insns[0].is_ja());
+        assert_eq!(new_insns[0].off, 1);
+    }
+
+    #[test]
+    fn test_fixup_all_branches_rewrites_pseudo_func_target_after_growth() {
+        let callback = pseudo_func_ref(2, 3);
+        let old_insns = vec![
+            callback[0],
+            callback[1],
+            BpfInsn::mov64_imm(0, 0),
+            BpfInsn::exit(),
+            BpfInsn::mov64_reg(0, 1),
+            BpfInsn::exit(),
+        ];
+        let mut new_insns = vec![
+            callback[0],
+            callback[1],
+            BpfInsn::mov64_imm(0, 0),
+            BpfInsn::exit(),
+            BpfInsn::nop(),
+            BpfInsn::mov64_reg(0, 1),
+            BpfInsn::exit(),
+        ];
+        let addr_map = vec![0, 1, 2, 3, 5, 6, 7];
+
+        fixup_all_branches(&mut new_insns, &old_insns, &addr_map);
+
+        assert!(new_insns[0].is_ldimm64_pseudo_func());
+        assert_eq!(new_insns[0].imm, 4);
+        assert_eq!(1 + new_insns[0].imm as usize, 5);
+    }
 }

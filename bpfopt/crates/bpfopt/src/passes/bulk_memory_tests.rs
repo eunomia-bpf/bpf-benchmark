@@ -1,5 +1,4 @@
 use super::bulk_memory::*;
-use super::utils::*;
 use crate::analysis::*;
 use crate::insn::*;
 
@@ -308,10 +307,10 @@ fn make_non_stack_base_memcpy_program() -> Vec<BpfInsn> {
 fn ctx_with_bulk_kfuncs() -> PassContext {
     let mut ctx = PassContext::baseline();
     ctx.kinsn_registry
-        .set_btf_id_for_target_name("bpf_bulk_memcpy", MEMCPY_BTF_ID)
+        .set_kinsn_call_for_target_name("bpf_bulk_memcpy", MEMCPY_BTF_ID, 0)
         .unwrap();
     ctx.kinsn_registry
-        .set_btf_id_for_target_name("bpf_bulk_memset", MEMSET_BTF_ID)
+        .set_kinsn_call_for_target_name("bpf_bulk_memset", MEMSET_BTF_ID, 0)
         .unwrap();
     ctx
 }

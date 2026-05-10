@@ -415,7 +415,7 @@ where
 {
     let missing = target_names
         .into_iter()
-        .filter(|target_name| ctx.kinsn_registry.btf_id_for_target_name(target_name) < 0)
+        .filter(|target_name| !ctx.kinsn_registry.is_target_available(target_name))
         .collect::<Vec<_>>();
     if missing.is_empty() {
         return Ok(());
@@ -433,7 +433,7 @@ where
     let target_names = target_names.into_iter().collect::<Vec<_>>();
     if target_names
         .iter()
-        .any(|target_name| ctx.kinsn_registry.btf_id_for_target_name(target_name) >= 0)
+        .any(|target_name| ctx.kinsn_registry.is_target_available(target_name))
     {
         return Ok(());
     }
@@ -913,8 +913,7 @@ fn kinsn_registry_from_target(target: &TargetJson) -> Result<KinsnRegistry> {
     let mut registry = KinsnRegistry::unavailable();
     for (name, spec) in &target.kinsns {
         let canonical = canonicalize_kinsn_name(name)?;
-        registry.set_btf_id_for_target_name(canonical, spec.btf_func_id)?;
-        registry.set_call_off_for_target_name(canonical, spec.call_offset)?;
+        registry.set_kinsn_call_for_target_name(canonical, spec.btf_func_id, spec.call_offset)?;
     }
     Ok(registry)
 }
@@ -935,7 +934,7 @@ fn apply_kinsn_list(registry: &mut KinsnRegistry, kinsns: &[String]) -> Result<(
             None => (trimmed, 0),
         };
         let canonical = canonicalize_kinsn_name(name)?;
-        registry.set_btf_id_for_target_name(canonical, btf_id)?;
+        registry.set_kinsn_call_for_target_name(canonical, btf_id, 0)?;
     }
     Ok(())
 }
@@ -1230,6 +1229,40 @@ mod tests {
     }
 
     #[test]
+    fn canonical_kinsn_names_accept_all_v3_aliases() {
+        for (input, expected) in [
+            ("bpf_rotate64", "bpf_rotate64"),
+            ("rotate64", "bpf_rotate64"),
+            ("bpf_rotate32", "bpf_rotate32"),
+            ("rotate32", "bpf_rotate32"),
+            ("bpf_select64", "bpf_select64"),
+            ("select64", "bpf_select64"),
+            ("bpf_ccmp64", "bpf_ccmp64"),
+            ("ccmp64", "bpf_ccmp64"),
+            ("bpf_extract64", "bpf_extract64"),
+            ("extract64", "bpf_extract64"),
+            ("bpf_endian_load16", "bpf_endian_load16"),
+            ("endian_load16", "bpf_endian_load16"),
+            ("bpf_endian_load32", "bpf_endian_load32"),
+            ("endian_load32", "bpf_endian_load32"),
+            ("bpf_endian_load64", "bpf_endian_load64"),
+            ("endian_load64", "bpf_endian_load64"),
+            ("bpf_bulk_memcpy", "bpf_bulk_memcpy"),
+            ("bulk_memcpy", "bpf_bulk_memcpy"),
+            ("bpf_memcpy_bulk", "bpf_bulk_memcpy"),
+            ("memcpy_bulk", "bpf_bulk_memcpy"),
+            ("bpf_bulk_memset", "bpf_bulk_memset"),
+            ("bulk_memset", "bpf_bulk_memset"),
+            ("bpf_memset_bulk", "bpf_bulk_memset"),
+            ("memset_bulk", "bpf_bulk_memset"),
+            ("bpf_prefetch", "bpf_prefetch"),
+            ("prefetch", "bpf_prefetch"),
+        ] {
+            assert_eq!(canonicalize_kinsn_name(input).unwrap(), expected);
+        }
+    }
+
+    #[test]
     fn target_json_maps_v3_kinsn_aliases_to_registry_fields() {
         let target = TargetJson {
             arch: Some("x86_64".to_string()),
@@ -1279,11 +1312,19 @@ mod tests {
         };
 
         let registry = kinsn_registry_from_target(&target).unwrap();
-        assert_eq!(registry.btf_id_for_target_name("bpf_rotate32"), 10);
-        assert_eq!(registry.btf_id_for_target_name("bpf_bulk_memcpy"), 11);
-        assert_eq!(registry.btf_id_for_target_name("bpf_endian_load64"), 12);
-        assert_eq!(registry.btf_id_for_target_name("bpf_ccmp64"), 13);
-        assert_eq!(registry.btf_id_for_target_name("bpf_prefetch"), 14);
+        assert_eq!(registry.btf_id_for_target_name("bpf_rotate32").unwrap(), 10);
+        assert_eq!(
+            registry.btf_id_for_target_name("bpf_bulk_memcpy").unwrap(),
+            11
+        );
+        assert_eq!(
+            registry
+                .btf_id_for_target_name("bpf_endian_load64")
+                .unwrap(),
+            12
+        );
+        assert_eq!(registry.btf_id_for_target_name("bpf_ccmp64").unwrap(), 13);
+        assert_eq!(registry.btf_id_for_target_name("bpf_prefetch").unwrap(), 14);
         assert_eq!(
             registry.call_off_for_target_name("bpf_rotate32").unwrap(),
             1
@@ -1297,6 +1338,125 @@ mod tests {
         assert_eq!(
             registry.call_off_for_target_name("bpf_prefetch").unwrap(),
             7
+        );
+    }
+
+    #[test]
+    fn target_json_disambiguates_module_local_btf_ids_by_call_offset() {
+        let target = TargetJson {
+            arch: Some("x86_64".to_string()),
+            features: Vec::new(),
+            kinsns: BTreeMap::from([
+                (
+                    "bpf_endian_load16".to_string(),
+                    KinsnJson {
+                        btf_func_id: 128703,
+                        btf_id: 1001,
+                        call_offset: 1,
+                    },
+                ),
+                (
+                    "bpf_rotate64".to_string(),
+                    KinsnJson {
+                        btf_func_id: 128703,
+                        btf_id: 1002,
+                        call_offset: 2,
+                    },
+                ),
+            ]),
+        };
+
+        let registry = kinsn_registry_from_target(&target).unwrap();
+
+        assert_eq!(
+            registry
+                .lookup_by_kinsn_call(128703, 1)
+                .unwrap()
+                .canonical_name,
+            "bpf_endian_load16"
+        );
+        assert_eq!(
+            registry
+                .lookup_by_kinsn_call(128703, 2)
+                .unwrap()
+                .canonical_name,
+            "bpf_rotate64"
+        );
+    }
+
+    #[test]
+    fn target_json_allows_shared_btf_id_when_zero_call_offset_is_first() {
+        let target = TargetJson {
+            arch: Some("x86_64".to_string()),
+            features: Vec::new(),
+            kinsns: BTreeMap::from([
+                (
+                    "bpf_endian_load16".to_string(),
+                    KinsnJson {
+                        btf_func_id: 128703,
+                        btf_id: 1001,
+                        call_offset: 0,
+                    },
+                ),
+                (
+                    "bpf_rotate64".to_string(),
+                    KinsnJson {
+                        btf_func_id: 128703,
+                        btf_id: 1002,
+                        call_offset: 2,
+                    },
+                ),
+            ]),
+        };
+
+        let registry = kinsn_registry_from_target(&target).unwrap();
+
+        assert_eq!(
+            registry
+                .lookup_by_kinsn_call(128703, 0)
+                .unwrap()
+                .canonical_name,
+            "bpf_endian_load16"
+        );
+        assert_eq!(
+            registry
+                .lookup_by_kinsn_call(128703, 2)
+                .unwrap()
+                .canonical_name,
+            "bpf_rotate64"
+        );
+    }
+
+    #[test]
+    fn target_json_rejects_ambiguous_duplicate_kinsn_call_keys() {
+        let target = TargetJson {
+            arch: Some("x86_64".to_string()),
+            features: Vec::new(),
+            kinsns: BTreeMap::from([
+                (
+                    "bpf_endian_load16".to_string(),
+                    KinsnJson {
+                        btf_func_id: 128703,
+                        btf_id: 1001,
+                        call_offset: 1,
+                    },
+                ),
+                (
+                    "bpf_rotate64".to_string(),
+                    KinsnJson {
+                        btf_func_id: 128703,
+                        btf_id: 1002,
+                        call_offset: 1,
+                    },
+                ),
+            ]),
+        };
+
+        let err = kinsn_registry_from_target(&target).unwrap_err();
+
+        assert!(
+            err.to_string().contains("btf_id 128703 call_off 1"),
+            "err={err}"
         );
     }
 

@@ -8,6 +8,48 @@ fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
     BpfProgram::new(insns)
 }
 
+fn pseudo_func_ref(dst: u8, imm: i32) -> [BpfInsn; 2] {
+    [
+        BpfInsn::new(
+            BPF_LD | BPF_DW | BPF_IMM,
+            BpfInsn::make_regs(dst, BPF_PSEUDO_FUNC),
+            0,
+            imm,
+        ),
+        BpfInsn::new(0, 0, 0, 0),
+    ]
+}
+
+fn pass_test_btf_record(insn_off: u32, type_id: u32) -> Vec<u8> {
+    [
+        insn_off.to_le_bytes(),
+        type_id.to_le_bytes(),
+        0u32.to_le_bytes(),
+        0u32.to_le_bytes(),
+    ]
+    .concat()
+}
+
+fn pass_test_func_btf_record(insn_off: u32, type_id: u32) -> Vec<u8> {
+    [insn_off.to_le_bytes(), type_id.to_le_bytes()].concat()
+}
+
+fn pass_test_btf_offsets(records: &BtfInfoRecords) -> Vec<u32> {
+    records
+        .bytes
+        .chunks(records.rec_size as usize)
+        .map(|record| u32::from_le_bytes(record[..4].try_into().unwrap()))
+        .collect()
+}
+
+fn pass_test_btf_type_ids(records: &BtfInfoRecords) -> Vec<u32> {
+    records
+        .bytes
+        .chunks(records.rec_size as usize)
+        .map(|record| u32::from_le_bytes(record[4..8].try_into().unwrap()))
+        .collect()
+}
+
 fn branch_profile(taken_count: u64, not_taken_count: u64, branch_misses: u64) -> BranchProfile {
     let branch_count = taken_count + not_taken_count;
     assert!(branch_count > 0);
@@ -382,6 +424,271 @@ fn sync_annotations_resizes_both_directions() {
         prog.sync_annotations();
         assert_eq!(prog.annotations.len(), expected_len, "{label}");
     }
+}
+
+// ── KinsnRegistry tests ─────────────────────────────────────────
+
+#[test]
+fn kinsn_registry_atomic_call_setter_allows_shared_btf_id_with_zero_call_offset() {
+    let mut registry = KinsnRegistry::default();
+
+    registry
+        .set_kinsn_call_for_target_name("bpf_endian_load16", 128703, 0)
+        .unwrap();
+    registry
+        .set_kinsn_call_for_target_name("bpf_rotate64", 128703, 2)
+        .unwrap();
+
+    assert_eq!(
+        registry
+            .lookup_by_kinsn_call(128703, 0)
+            .unwrap()
+            .canonical_name,
+        "bpf_endian_load16"
+    );
+    assert_eq!(
+        registry
+            .lookup_by_kinsn_call(128703, 2)
+            .unwrap()
+            .canonical_name,
+        "bpf_rotate64"
+    );
+    assert_eq!(
+        registry.btf_id_for_target_name("bpf_rotate64").unwrap(),
+        128703
+    );
+    assert_eq!(
+        registry.call_off_for_target_name("bpf_rotate64").unwrap(),
+        2
+    );
+}
+
+#[test]
+fn kinsn_registry_atomic_call_setter_rejects_duplicate_call_key() {
+    let mut registry = KinsnRegistry::default();
+
+    registry
+        .set_kinsn_call_for_target_name("bpf_endian_load16", 128703, 0)
+        .unwrap();
+    let err = registry
+        .set_kinsn_call_for_target_name("bpf_rotate64", 128703, 0)
+        .unwrap_err();
+
+    assert!(
+        err.to_string().contains("btf_id 128703 call_off 0"),
+        "err={err}"
+    );
+}
+
+#[test]
+fn kinsn_registry_reports_availability_separately_from_btf_id() {
+    let mut registry = KinsnRegistry::default();
+
+    assert!(!registry.is_target_available("bpf_rotate64"));
+    let err = registry.btf_id_for_target_name("bpf_rotate64").unwrap_err();
+    assert!(
+        err.to_string()
+            .contains("kinsn target bpf_rotate64 not registered"),
+        "{err:#}"
+    );
+
+    registry
+        .set_kinsn_call_for_target_name("bpf_rotate64", 128703, 2)
+        .unwrap();
+
+    assert!(registry.is_target_available("bpf_rotate64"));
+    assert_eq!(
+        registry.btf_id_for_target_name("bpf_rotate64").unwrap(),
+        128703
+    );
+}
+
+#[test]
+fn kinsn_replacement_subprog_check_allows_site_inside_one_subprog() {
+    let insns = vec![
+        BpfInsn::alu64_imm(BPF_RSH, 2, 8),
+        BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
+        BpfInsn::pseudo_call_to(2, 4),
+        BpfInsn::exit(),
+        BpfInsn::mov64_imm(0, 1),
+        BpfInsn::exit(),
+    ];
+
+    let skip = kinsn_replacement_subprog_skip_reason(&insns, 0, 2, 2).unwrap();
+
+    assert_eq!(skip, None);
+}
+
+#[test]
+fn kinsn_replacement_subprog_check_rejects_pseudo_func_boundary_inside_site() {
+    let func_ref = pseudo_func_ref(2, -4);
+    let insns = vec![
+        BpfInsn::alu64_imm(BPF_RSH, 2, 8),
+        BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
+        BpfInsn::exit(),
+        BpfInsn::mov64_imm(0, 0),
+        func_ref[0],
+        func_ref[1],
+        BpfInsn::exit(),
+    ];
+
+    let skip = kinsn_replacement_subprog_skip_reason(&insns, 0, 2, 2).unwrap();
+
+    assert!(skip
+        .as_deref()
+        .is_some_and(|reason| reason.contains("subprog boundary")));
+}
+
+#[test]
+fn remap_kinsn_btf_metadata_uses_proof_subprog_layout_for_func_info() {
+    let memcpy_btf_id = 2000;
+    let memcpy_payload = 1 | (2 << 4) | (2 << 40) | (3 << 48);
+    let mut program = BpfProgram::new(vec![
+        BpfInsn::kinsn_sidecar(memcpy_payload),
+        BpfInsn::call_kinsn_with_off(memcpy_btf_id, 1),
+        BpfInsn::new(
+            BPF_JMP | BPF_CALL,
+            BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
+            0,
+            1,
+        ),
+        BpfInsn::exit(),
+        BpfInsn::mov64_imm(0, 1),
+        BpfInsn::exit(),
+    ]);
+    program.func_info = Some(BtfInfoRecords {
+        rec_size: 8,
+        bytes: [
+            pass_test_func_btf_record(0, 10),
+            pass_test_func_btf_record(999, 11),
+        ]
+        .concat(),
+    });
+    program.line_info = Some(BtfInfoRecords {
+        rec_size: 16,
+        bytes: [
+            pass_test_btf_record(0, 100),
+            pass_test_btf_record(999, 104),
+        ]
+        .concat(),
+    });
+
+    let mut registry = KinsnRegistry::default();
+    registry
+        .set_kinsn_call_for_target_name("bpf_bulk_memcpy", memcpy_btf_id, 1)
+        .unwrap();
+
+    remap_kinsn_btf_metadata(&mut program, &registry).unwrap();
+
+    assert_eq!(
+        pass_test_btf_offsets(program.func_info.as_ref().unwrap()),
+        vec![0, 8]
+    );
+    assert_eq!(
+        pass_test_btf_type_ids(program.func_info.as_ref().unwrap()),
+        vec![10, 11]
+    );
+    assert!(program.line_info.as_ref().unwrap().bytes.is_empty());
+}
+
+#[test]
+fn remap_kinsn_btf_metadata_disambiguates_duplicate_btf_ids_by_call_offset() {
+    let shared_btf_id = 2000;
+    let extract_payload = 2 | (16 << 8) | (12 << 16);
+    let mut program = BpfProgram::new(vec![
+        BpfInsn::kinsn_sidecar(extract_payload),
+        BpfInsn::call_kinsn_with_off(shared_btf_id, 5),
+        BpfInsn::new(
+            BPF_JMP | BPF_CALL,
+            BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
+            0,
+            1,
+        ),
+        BpfInsn::exit(),
+        BpfInsn::mov64_imm(0, 1),
+        BpfInsn::exit(),
+    ]);
+    program.func_info = Some(BtfInfoRecords {
+        rec_size: 8,
+        bytes: [
+            pass_test_func_btf_record(0, 10),
+            pass_test_func_btf_record(999, 11),
+        ]
+        .concat(),
+    });
+
+    let mut registry = KinsnRegistry::default();
+    registry
+        .set_kinsn_call_for_target_name("bpf_rotate64", shared_btf_id, 3)
+        .unwrap();
+    registry
+        .set_kinsn_call_for_target_name("bpf_extract64", shared_btf_id, 5)
+        .unwrap();
+
+    remap_kinsn_btf_metadata(&mut program, &registry).unwrap();
+
+    assert_eq!(
+        pass_test_btf_offsets(program.func_info.as_ref().unwrap()),
+        vec![0, 4]
+    );
+}
+
+#[test]
+fn remap_btf_metadata_drops_deleted_entries_and_shifts_survivors() {
+    let mut program = BpfProgram::new(vec![
+        BpfInsn::mov64_imm(0, 0),
+        BpfInsn::mov64_imm(9, 9),
+        BpfInsn::mov64_imm(1, 1),
+        BpfInsn::mov64_imm(2, 2),
+    ]);
+    program.func_info = Some(BtfInfoRecords {
+        rec_size: 8,
+        bytes: pass_test_func_btf_record(0, 10),
+    });
+    program.line_info = Some(BtfInfoRecords {
+        rec_size: 16,
+        bytes: [
+            pass_test_btf_record(0, 100),
+            pass_test_btf_record(1, 101),
+            pass_test_btf_record(2, 102),
+            pass_test_btf_record(3, 103),
+        ]
+        .concat(),
+    });
+
+    let addr_map = vec![0, 2, 2, 3, 4];
+
+    remap_btf_metadata(&mut program, &addr_map).unwrap();
+
+    assert_eq!(
+        pass_test_btf_offsets(program.func_info.as_ref().unwrap()),
+        vec![0]
+    );
+    assert_eq!(
+        pass_test_btf_offsets(program.line_info.as_ref().unwrap()),
+        vec![0, 2, 3]
+    );
+    assert_eq!(
+        pass_test_btf_type_ids(program.line_info.as_ref().unwrap()),
+        vec![100, 102, 103]
+    );
+}
+
+#[test]
+fn remap_btf_metadata_rejects_out_of_range_func_info() {
+    let mut program = BpfProgram::new(vec![BpfInsn::mov64_imm(0, 0), BpfInsn::exit()]);
+    program.func_info = Some(BtfInfoRecords {
+        rec_size: 8,
+        bytes: pass_test_func_btf_record(2, 10),
+    });
+
+    let err = remap_btf_metadata(&mut program, &[0, 1, 2]).unwrap_err();
+
+    assert!(
+        err.to_string()
+            .contains("func_info insn_off 2 is outside old instruction length 2"),
+        "{err:#}"
+    );
 }
 
 // ── AnalysisCache tests ─────────────────────────────────────────

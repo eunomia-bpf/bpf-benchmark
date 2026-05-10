@@ -10,7 +10,6 @@ use std::sync::OnceLock;
 use anyhow::{bail, Context, Result};
 use serde::Deserialize;
 
-use super::utils::{emit_ldimm64, insn_width};
 use crate::analysis::BranchTargetAnalysis;
 use crate::insn::*;
 use crate::pass::*;
@@ -2909,24 +2908,24 @@ fn run_map_inline_round(
     }
     addr_map[orig_len] = new_insns.len();
 
-    super::utils::fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
+    super::rewrite::fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
 
     let mut final_insns = new_insns;
     let mut final_addr_map = addr_map;
     let mut intermediate_to_final = (0..=final_insns.len()).collect::<Vec<_>>();
     if removed_any_null_check {
         if let Some((cleaned_insns, cleanup_map)) =
-            super::utils::eliminate_unreachable_blocks(&final_insns)
+            super::dce::eliminate_unreachable_blocks(&final_insns)
         {
-            final_addr_map = super::utils::compose_addr_maps(&final_addr_map, &cleanup_map);
+            final_addr_map = super::rewrite::compose_addr_maps(&final_addr_map, &cleanup_map);
             intermediate_to_final =
-                super::utils::compose_addr_maps(&intermediate_to_final, &cleanup_map);
+                super::rewrite::compose_addr_maps(&intermediate_to_final, &cleanup_map);
             final_insns = cleaned_insns;
         }
-        if let Some((cleaned_insns, cleanup_map)) = super::utils::eliminate_nops(&final_insns) {
-            final_addr_map = super::utils::compose_addr_maps(&final_addr_map, &cleanup_map);
+        if let Some((cleaned_insns, cleanup_map)) = super::dce::eliminate_nops(&final_insns) {
+            final_addr_map = super::rewrite::compose_addr_maps(&final_addr_map, &cleanup_map);
             intermediate_to_final =
-                super::utils::compose_addr_maps(&intermediate_to_final, &cleanup_map);
+                super::rewrite::compose_addr_maps(&intermediate_to_final, &cleanup_map);
             final_insns = cleaned_insns;
         }
     }
@@ -2939,7 +2938,7 @@ fn run_map_inline_round(
     )?;
 
     program.insns = final_insns;
-    super::utils::remap_btf_metadata(program, &final_addr_map)?;
+    remap_btf_metadata(program, &final_addr_map)?;
     program.remap_annotations(&final_addr_map);
 
     log_map_inline_debug(&format!(

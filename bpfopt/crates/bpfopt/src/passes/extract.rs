@@ -6,11 +6,6 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::rewrite::{BtfRemapPolicy, RewritePlan};
-use super::utils::{
-    emit_packed_kinsn_call_with_off, kinsn_replacement_subprog_skip_reason,
-    resolve_kinsn_call_off_for_pass,
-};
-
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     canonical_name: "bpf_extract64",
     aliases: &["extract64"],
@@ -133,7 +128,7 @@ impl BpfPass for ExtractPass {
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         // Check if bpf_extract64 kfunc is available.
-        if ctx.kinsn_registry.btf_id_for_target_name("bpf_extract64") < 0 {
+        if !ctx.kinsn_registry.is_target_available("bpf_extract64") {
             return Ok(PassResult::skipped(
                 self.name(),
                 SkipReason {
@@ -147,7 +142,7 @@ impl BpfPass for ExtractPass {
         let bt = analyses.get(&bt_analysis, program);
 
         let sites = scan_extract_sites(&program.insns);
-        let btf_id = ctx.kinsn_registry.btf_id_for_target_name("bpf_extract64");
+        let btf_id = ctx.kinsn_registry.btf_id_for_target_name("bpf_extract64")?;
         let mut safe_sites: Vec<SafeExtractSite> = Vec::new();
         let mut skipped = Vec::new();
 
@@ -186,7 +181,9 @@ impl BpfPass for ExtractPass {
             });
         }
 
-        let kfunc_off = resolve_kinsn_call_off_for_pass(ctx, self.name())?;
+        let kfunc_off = ctx
+            .kinsn_registry
+            .call_off_for_target_name("bpf_extract64")?;
 
         let mut plan = RewritePlan::new();
         for safe_site in &safe_sites {

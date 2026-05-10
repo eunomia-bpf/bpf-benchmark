@@ -6,7 +6,6 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::rewrite::{BtfRemapPolicy, RewritePlan};
-use super::utils::insn_width;
 
 const BPF_FUNC_SKB_LOAD_BYTES: i32 = libbpf_sys::BPF_FUNC_skb_load_bytes as i32;
 

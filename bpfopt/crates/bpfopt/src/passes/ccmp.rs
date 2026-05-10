@@ -6,11 +6,6 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::rewrite::{BtfRemapPolicy, RewritePlan};
-use super::utils::{
-    emit_packed_kinsn_call_with_off, kinsn_replacement_subprog_skip_reason,
-    resolve_kinsn_call_off_for_pass,
-};
-
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     canonical_name: "bpf_ccmp64",
     aliases: &["ccmp64"],
@@ -167,7 +162,7 @@ impl BpfPass for CcmpPass {
             ));
         }
 
-        if ctx.kinsn_registry.btf_id_for_target_name("bpf_ccmp64") < 0 {
+        if !ctx.kinsn_registry.is_target_available("bpf_ccmp64") {
             return Ok(PassResult::skipped(
                 self.name(),
                 SkipReason {
@@ -258,8 +253,10 @@ impl BpfPass for CcmpPass {
             });
         }
 
-        let btf_id = ctx.kinsn_registry.btf_id_for_target_name("bpf_ccmp64");
-        let kfunc_off = resolve_kinsn_call_off_for_pass(ctx, self.name())?;
+        let btf_id = ctx.kinsn_registry.btf_id_for_target_name("bpf_ccmp64")?;
+        let kfunc_off = ctx
+            .kinsn_registry
+            .call_off_for_target_name("bpf_ccmp64")?;
         let mut plan = RewritePlan::new();
         for safe_site in &safe_sites {
             let mut replacement =

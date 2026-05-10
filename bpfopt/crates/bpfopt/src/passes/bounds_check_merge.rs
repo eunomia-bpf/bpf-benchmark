@@ -7,8 +7,8 @@ use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
+use super::dce::{eliminate_nops, eliminate_unreachable_blocks};
 use super::rewrite::{BtfRemapPolicy, RewritePlan};
-use super::utils::{eliminate_nops, eliminate_unreachable_blocks, insn_width};
 
 /// BPF_PROG_TYPE_SCHED_CLS (TC classifier).
 const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;

@@ -12,7 +12,7 @@ use crate::analysis::BranchTargetAnalysis;
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{fixup_all_branches as fixup_branches_inline, remap_btf_metadata};
+use super::rewrite::fixup_all_branches as fixup_branches_inline;
 
 /// BRANCH_FLIP: PGO-guided reorder of if/else bodies.
 ///

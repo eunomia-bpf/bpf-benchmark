@@ -8,11 +8,6 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::rewrite::{BtfRemapPolicy, RewritePlan};
-use super::utils::{
-    emit_packed_kinsn_call_with_off, insn_width, kinsn_replacement_subprog_skip_reason,
-    resolve_kinsn_call_off_for_target,
-};
-
 const MEMCPY_TARGET: &str = "bpf_bulk_memcpy";
 const MEMSET_TARGET: &str = "bpf_bulk_memset";
 const MIN_BULK_BYTES: usize = 32;
@@ -211,9 +206,6 @@ impl BpfPass for BulkMemoryPass {
         let scan = scan_sites(&program.insns, &bt, &liveness);
         let mut skipped = scan.skips;
 
-        let memcpy_btf_id = ctx.kinsn_registry.btf_id_for_target_name(MEMCPY_TARGET);
-        let memset_btf_id = ctx.kinsn_registry.btf_id_for_target_name(MEMSET_TARGET);
-
         let mut safe_sites = Vec::new();
         for site in scan.sites {
             if let BulkSiteKind::Memcpy {
@@ -236,24 +228,10 @@ impl BpfPass for BulkMemoryPass {
             }
 
             let target = site.target_name();
-            let btf_id = match target {
-                MEMCPY_TARGET => memcpy_btf_id,
-                MEMSET_TARGET => memset_btf_id,
-                _ => -1,
-            };
-
-            if btf_id < 0 {
+            if !ctx.kinsn_registry.is_target_available(target) {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
                     reason: format!("{target} kfunc not available"),
-                });
-                continue;
-            }
-
-            if !ctx.kinsn_registry.kinsn_registered_for_target_name(target) {
-                skipped.push(SkipReason {
-                    pc: site.start_pc,
-                    reason: format!("{target} packed ABI not available"),
                 });
                 continue;
             }
@@ -281,23 +259,12 @@ impl BpfPass for BulkMemoryPass {
             });
         }
 
-        let memcpy_off = if memcpy_btf_id >= 0 {
-            resolve_kinsn_call_off_for_target(ctx, MEMCPY_TARGET)?
-        } else {
-            0
-        };
-        let memset_off = if memset_btf_id >= 0 {
-            resolve_kinsn_call_off_for_target(ctx, MEMSET_TARGET)?
-        } else {
-            0
-        };
-
         let mut plan = RewritePlan::new();
         for site in &safe_sites {
             plan.replace_range(
                 site.start_pc,
                 site.old_len,
-                emit_site_replacement(site, memcpy_btf_id, memcpy_off, memset_btf_id, memset_off),
+                emit_site_replacement(site, &ctx.kinsn_registry)?,
             )?;
         }
 
@@ -556,11 +523,8 @@ fn memset_lane_at(insns: &[BpfInsn], pc: usize, regs: &[RegValue; 11]) -> Option
 
 fn emit_site_replacement(
     site: &BulkSite,
-    memcpy_btf_id: i32,
-    memcpy_off: i16,
-    memset_btf_id: i32,
-    memset_off: i16,
-) -> Vec<BpfInsn> {
+    kinsn_registry: &KinsnRegistry,
+) -> anyhow::Result<Vec<BpfInsn>> {
     match &site.kind {
         BulkSiteKind::Memcpy {
             dst_base,
@@ -570,6 +534,8 @@ fn emit_site_replacement(
             temp_reg,
             chunk_sizes,
         } => {
+            let memcpy_btf_id = kinsn_registry.btf_id_for_target_name(MEMCPY_TARGET)?;
+            let memcpy_off = kinsn_registry.call_off_for_target_name(MEMCPY_TARGET)?;
             let mut out = Vec::with_capacity(chunk_sizes.len() * 2);
             let mut cur_dst_off = *dst_off as i32;
             let mut cur_src_off = *src_off as i32;
@@ -589,7 +555,7 @@ fn emit_site_replacement(
                 cur_dst_off += chunk_size as i32;
                 cur_src_off += chunk_size as i32;
             }
-            out
+            Ok(out)
         }
         BulkSiteKind::Memset {
             base,
@@ -598,6 +564,8 @@ fn emit_site_replacement(
             fill_byte,
             chunk_sizes,
         } => {
+            let memset_btf_id = kinsn_registry.btf_id_for_target_name(MEMSET_TARGET)?;
+            let memset_off = kinsn_registry.call_off_for_target_name(MEMSET_TARGET)?;
             let mut out = Vec::with_capacity(chunk_sizes.len() * 2);
             let mut cur_dst_off = *dst_off as i32;
             for &chunk_size in chunk_sizes {
@@ -614,7 +582,7 @@ fn emit_site_replacement(
                 ));
                 cur_dst_off += chunk_size as i32;
             }
-            out
+            Ok(out)
         }
     }
 }

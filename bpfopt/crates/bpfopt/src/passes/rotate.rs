@@ -6,11 +6,6 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::rewrite::{BtfRemapPolicy, RewritePlan};
-use super::utils::{
-    emit_packed_kinsn_call_with_off, kinsn_replacement_subprog_skip_reason,
-    resolve_kinsn_call_off_for_target,
-};
-
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
         canonical_name: "bpf_rotate64",
@@ -81,8 +76,8 @@ impl BpfPass for RotatePass {
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         // Prerequisite: check if at least one rotate kfunc is available.
-        if ctx.kinsn_registry.btf_id_for_target_name("bpf_rotate64") < 0
-            && ctx.kinsn_registry.btf_id_for_target_name("bpf_rotate32") < 0
+        if !ctx.kinsn_registry.is_target_available("bpf_rotate64")
+            && !ctx.kinsn_registry.is_target_available("bpf_rotate32")
         {
             return Ok(PassResult::skipped(
                 self.name(),
@@ -127,10 +122,9 @@ impl BpfPass for RotatePass {
                 continue;
             }
 
-            if ctx
+            if !ctx
                 .kinsn_registry
-                .btf_id_for_target_name(site.width.target_name())
-                < 0
+                .is_target_available(site.width.target_name())
             {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
@@ -173,8 +167,10 @@ impl BpfPass for RotatePass {
             let site = &safe_site.site;
             let btf_id = ctx
                 .kinsn_registry
-                .btf_id_for_target_name(site.width.target_name());
-            let kfunc_off = resolve_kinsn_call_off_for_target(ctx, site.width.target_name())?;
+                .btf_id_for_target_name(site.width.target_name())?;
+            let kfunc_off = ctx
+                .kinsn_registry
+                .call_off_for_target_name(site.width.target_name())?;
             let payload = (site.dst_reg as u64)
                 | ((site.val_reg as u64) << 4)
                 | ((site.shift_amount as u64) << 8)

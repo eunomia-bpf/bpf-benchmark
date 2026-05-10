@@ -12,7 +12,7 @@ fn filler(dst: u8, count: usize) -> Vec<BpfInsn> {
 fn ctx_with_prefetch_kfunc(btf_id: i32) -> PassContext {
     let mut ctx = PassContext::baseline();
     ctx.kinsn_registry
-        .set_btf_id_for_target_name("bpf_prefetch", btf_id)
+        .set_kinsn_call_for_target_name("bpf_prefetch", btf_id, 0)
         .unwrap();
     ctx
 }

@@ -8,7 +8,6 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::rewrite::{BtfRemapPolicy, RewritePlan};
-use super::utils::{emit_ldimm64, insn_width};
 
 const REG_COUNT: usize = 11;
 pub(super) const VERIFIER_POST_STATE_NOT_SCALAR_EXACT: &str =

@@ -12,7 +12,8 @@ use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::sync::Arc;
 
-use crate::insn::BpfInsn;
+use crate::analysis::CFGAnalysis;
+use crate::insn::{BpfInsn, BPF_PSEUDO_KINSN_CALL};
 // MapInlineHint et al. live in passes/map_inline.rs (pass-local metadata) and are
 // re-exported here so existing `use crate::pass::*` consumers keep working.
 pub use crate::passes::map_inline::{MapInlineHint, MapInlineHintAnchor, MapInlineHintMode};
@@ -184,6 +185,400 @@ impl BtfInfoRecords {
         }
         Ok(Self { rec_size, bytes })
     }
+}
+
+pub fn remap_btf_metadata(program: &mut BpfProgram, addr_map: &[usize]) -> anyhow::Result<()> {
+    remap_btf_records(
+        "func_info",
+        BtfRecordKind::Func,
+        program.func_info.as_mut(),
+        addr_map,
+        &program.insns,
+    )?;
+    remap_btf_records(
+        "line_info",
+        BtfRecordKind::Line,
+        program.line_info.as_mut(),
+        addr_map,
+        &program.insns,
+    )?;
+    Ok(())
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum BtfRecordKind {
+    Func,
+    Line,
+}
+
+fn remap_btf_records(
+    label: &str,
+    kind: BtfRecordKind,
+    records: Option<&mut BtfInfoRecords>,
+    addr_map: &[usize],
+    new_insns: &[BpfInsn],
+) -> anyhow::Result<()> {
+    remap_btf_records_for_len(
+        label,
+        kind,
+        records,
+        addr_map,
+        new_insns.len(),
+        Some(new_insns),
+    )
+}
+
+fn remap_btf_records_for_len(
+    label: &str,
+    kind: BtfRecordKind,
+    records: Option<&mut BtfInfoRecords>,
+    addr_map: &[usize],
+    new_len: usize,
+    new_insns: Option<&[BpfInsn]>,
+) -> anyhow::Result<()> {
+    let Some(records) = records else {
+        return Ok(());
+    };
+    if records.bytes.is_empty() {
+        return Ok(());
+    }
+    if records.rec_size < std::mem::size_of::<u32>() as u32 {
+        anyhow::bail!(
+            "{label} rec_size {} is too small to hold insn_off",
+            records.rec_size
+        );
+    }
+    let rec_size = records.rec_size as usize;
+    if !records.bytes.len().is_multiple_of(rec_size) {
+        anyhow::bail!(
+            "{label} byte length {} is not a multiple of rec_size {}",
+            records.bytes.len(),
+            records.rec_size
+        );
+    }
+
+    let mut remapped = Vec::with_capacity(records.bytes.len());
+    let mut previous_new_pc = None;
+
+    for record in records.bytes.chunks(rec_size) {
+        let old_pc =
+            u32::from_le_bytes(record[..4].try_into().expect("record has insn_off")) as usize;
+        let Some(new_pc) = remapped_pc(label, kind, old_pc, addr_map, new_len)? else {
+            continue;
+        };
+        if kind == BtfRecordKind::Line
+            && new_insns.is_some_and(|insns| !valid_line_info_pc(insns, new_pc))
+        {
+            continue;
+        };
+        if let Some(previous) = previous_new_pc {
+            if new_pc < previous {
+                anyhow::bail!(
+                    "{label} remap produced non-increasing insn_off {new_pc} after {previous}"
+                );
+            }
+            if new_pc == previous {
+                if kind == BtfRecordKind::Line {
+                    continue;
+                }
+                anyhow::bail!(
+                    "{label} remap produced non-increasing insn_off {new_pc} after {previous}"
+                );
+            }
+        }
+
+        let new_pc: u32 = new_pc
+            .try_into()
+            .map_err(|_| anyhow::anyhow!("{label} remapped insn_off does not fit u32"))?;
+        remapped.extend_from_slice(record);
+        let start = remapped.len() - rec_size;
+        remapped[start..start + 4].copy_from_slice(&new_pc.to_le_bytes());
+        previous_new_pc = Some(new_pc as usize);
+    }
+
+    records.bytes = remapped;
+    Ok(())
+}
+
+fn valid_line_info_pc(insns: &[BpfInsn], pc: usize) -> bool {
+    insns.get(pc).is_some_and(|insn| insn.code != 0)
+}
+
+fn remapped_pc(
+    label: &str,
+    kind: BtfRecordKind,
+    old_pc: usize,
+    addr_map: &[usize],
+    new_len: usize,
+) -> anyhow::Result<Option<usize>> {
+    let old_len = addr_map
+        .len()
+        .checked_sub(1)
+        .ok_or_else(|| anyhow::anyhow!("{label} remap address map is empty"))?;
+    if old_pc >= old_len {
+        if kind == BtfRecordKind::Line {
+            return Ok(None);
+        }
+        anyhow::bail!("{label} insn_off {old_pc} is outside old instruction length {old_len}");
+    }
+    let new_pc = addr_map[old_pc];
+    if new_pc >= new_len {
+        return Ok(None);
+    }
+    if kind == BtfRecordKind::Func {
+        return Ok(Some(new_pc));
+    }
+    let next_pc = addr_map[old_pc + 1];
+    if next_pc < new_pc {
+        anyhow::bail!(
+            "{label} remap address map is non-monotonic at old pc {old_pc}: {new_pc} -> {next_pc}"
+        );
+    }
+    Ok((next_pc > new_pc).then_some(new_pc))
+}
+
+pub fn remap_kinsn_btf_metadata(
+    program: &mut BpfProgram,
+    registry: &KinsnRegistry,
+) -> anyhow::Result<()> {
+    let proof_subprog_starts = kinsn_proof_subprog_starts(&program.insns, registry)?;
+    rewrite_func_info_to_subprog_layout(program.func_info.as_mut(), &proof_subprog_starts)?;
+
+    if let Some(records) = program.line_info.as_mut() {
+        records.bytes.clear();
+    }
+    Ok(())
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct KinsnProofRegion {
+    sidecar_pc: usize,
+    call_pc: usize,
+    proof_len: usize,
+}
+
+fn kinsn_proof_subprog_starts(
+    insns: &[BpfInsn],
+    registry: &KinsnRegistry,
+) -> anyhow::Result<Vec<usize>> {
+    let mut starts = kinsn_candidate_subprog_starts(insns)?;
+    let regions = collect_kinsn_proof_regions(insns, registry)?;
+
+    for region in regions.iter().rev() {
+        if starts.contains(&region.call_pc) {
+            anyhow::bail!(
+                "kinsn call at pc {} starts a subprogram and cannot use pc {} as sidecar",
+                region.call_pc,
+                region.sidecar_pc
+            );
+        }
+        let delta = region.proof_len as isize - 2;
+        if delta == 0 {
+            continue;
+        }
+        for start in &mut starts {
+            if *start <= region.sidecar_pc {
+                continue;
+            }
+            *start = if delta > 0 {
+                start.checked_add(delta as usize).ok_or_else(|| {
+                    anyhow::anyhow!("kinsn proof subprog offset overflow at pc {start}")
+                })?
+            } else {
+                start.checked_sub((-delta) as usize).ok_or_else(|| {
+                    anyhow::anyhow!("kinsn proof subprog offset underflow at pc {start}")
+                })?
+            };
+        }
+    }
+
+    Ok(starts)
+}
+
+fn collect_kinsn_proof_regions(
+    insns: &[BpfInsn],
+    registry: &KinsnRegistry,
+) -> anyhow::Result<Vec<KinsnProofRegion>> {
+    let mut regions = Vec::new();
+    let mut pc = 0usize;
+    while pc < insns.len() {
+        if pc + 1 < insns.len()
+            && insns[pc].is_kinsn_sidecar()
+            && insns[pc + 1].is_call()
+            && insns[pc + 1].src_reg() == BPF_PSEUDO_KINSN_CALL
+        {
+            let payload = insns[pc].sidecar_payload().to_le_bytes();
+            let btf_id = insns[pc + 1].imm;
+            let call_off = insns[pc + 1].off;
+            let proof_len = kinsn_proof_len(registry, btf_id, call_off, &payload)?;
+            regions.push(KinsnProofRegion {
+                sidecar_pc: pc,
+                call_pc: pc + 1,
+                proof_len,
+            });
+            pc += 2;
+            continue;
+        }
+
+        if insns[pc].is_kinsn_sidecar() {
+            anyhow::bail!("kinsn sidecar at pc {pc} is not followed by a kinsn call");
+        }
+        if insns[pc].is_call() && insns[pc].src_reg() == BPF_PSEUDO_KINSN_CALL {
+            anyhow::bail!("kinsn call at pc {pc} is missing its packed sidecar");
+        }
+
+        pc += 1;
+    }
+
+    Ok(regions)
+}
+
+fn kinsn_proof_len(
+    registry: &KinsnRegistry,
+    btf_id: i32,
+    call_off: i16,
+    payload: &[u8],
+) -> anyhow::Result<usize> {
+    let desc = registry.lookup_by_kinsn_call(btf_id, call_off)?;
+    let proof = (desc.decode_proof)(payload);
+    proof.proof_len().map_err(|err| {
+        anyhow::anyhow!(
+            "failed to decode proof region for {}: {err}",
+            desc.canonical_name
+        )
+    })
+}
+
+fn kinsn_candidate_subprog_starts(insns: &[BpfInsn]) -> anyhow::Result<Vec<usize>> {
+    let cfg = CFGAnalysis.run(&BpfProgram::new(insns.to_vec()));
+    let mut starts = Vec::with_capacity(cfg.subprogs.len());
+
+    for subprog in cfg.subprogs {
+        if subprog.start >= insns.len() {
+            anyhow::bail!(
+                "subprog start {} is outside candidate instruction length {}",
+                subprog.start,
+                insns.len()
+            );
+        }
+        starts.push(subprog.start);
+    }
+
+    if starts.is_empty() {
+        starts.push(0);
+    }
+    if starts[0] != 0 {
+        anyhow::bail!(
+            "first subprog starts at candidate pc {}, expected 0",
+            starts[0]
+        );
+    }
+    for window in starts.windows(2) {
+        if window[0] >= window[1] {
+            anyhow::bail!(
+                "candidate subprog starts are not strictly increasing: {} then {}",
+                window[0],
+                window[1]
+            );
+        }
+    }
+    Ok(starts)
+}
+
+fn rewrite_func_info_to_subprog_layout(
+    records: Option<&mut BtfInfoRecords>,
+    subprog_starts: &[usize],
+) -> anyhow::Result<()> {
+    let Some(records) = records else {
+        return Ok(());
+    };
+    if records.bytes.is_empty() {
+        return Ok(());
+    }
+    if records.rec_size < std::mem::size_of::<u32>() as u32 {
+        anyhow::bail!(
+            "func_info rec_size {} is too small to hold insn_off",
+            records.rec_size
+        );
+    }
+    let rec_size = records.rec_size as usize;
+    if !records.bytes.len().is_multiple_of(rec_size) {
+        anyhow::bail!(
+            "func_info byte length {} is not a multiple of rec_size {}",
+            records.bytes.len(),
+            records.rec_size
+        );
+    }
+    let record_count = records.bytes.len() / rec_size;
+    if record_count != subprog_starts.len() {
+        anyhow::bail!(
+            "func_info record count {} does not match subprog count {}",
+            record_count,
+            subprog_starts.len()
+        );
+    }
+
+    for (record, &pc) in records.bytes.chunks_mut(rec_size).zip(subprog_starts) {
+        let pc: u32 = pc
+            .try_into()
+            .map_err(|_| anyhow::anyhow!("func_info subprog insn_off does not fit u32"))?;
+        record[..4].copy_from_slice(&pc.to_le_bytes());
+    }
+    Ok(())
+}
+
+pub fn kinsn_replacement_subprog_skip_reason(
+    insns: &[BpfInsn],
+    start_pc: usize,
+    old_len: usize,
+    replacement_len: usize,
+) -> anyhow::Result<Option<String>> {
+    if old_len == 0 {
+        anyhow::bail!("kinsn replacement site at pc {start_pc} has zero old length");
+    }
+    if replacement_len == 0 {
+        anyhow::bail!("kinsn replacement site at pc {start_pc} has zero replacement length");
+    }
+    let old_end = start_pc
+        .checked_add(old_len)
+        .ok_or_else(|| anyhow::anyhow!("kinsn replacement site at pc {start_pc} overflows"))?;
+    let replacement_end = start_pc.checked_add(replacement_len).ok_or_else(|| {
+        anyhow::anyhow!("kinsn replacement at pc {start_pc} replacement length overflows")
+    })?;
+    if old_end > insns.len() {
+        anyhow::bail!(
+            "kinsn replacement site {start_pc}..{old_end} exceeds instruction length {}",
+            insns.len()
+        );
+    }
+
+    let starts = kinsn_candidate_subprog_starts(insns)?;
+    let Some(subprog_idx) = starts.iter().rposition(|&start| start <= start_pc) else {
+        anyhow::bail!("no subprogram contains kinsn replacement site at pc {start_pc}");
+    };
+    let subprog_start = starts[subprog_idx];
+    let subprog_end = starts.get(subprog_idx + 1).copied().unwrap_or(insns.len());
+
+    if old_end > subprog_end {
+        return Ok(Some(format!(
+            "kinsn site crosses subprog boundary (site {start_pc}..{old_end}, subprog {subprog_start}..{subprog_end})"
+        )));
+    }
+    if replacement_end > subprog_end {
+        return Ok(Some(format!(
+            "kinsn replacement crosses subprog boundary (replacement {start_pc}..{replacement_end}, subprog {subprog_start}..{subprog_end})"
+        )));
+    }
+    if starts
+        .iter()
+        .any(|&subprog| subprog > start_pc && subprog < old_end)
+    {
+        return Ok(Some(format!(
+            "kinsn site contains subprog entry inside replacement range {start_pc}..{old_end}"
+        )));
+    }
+
+    Ok(None)
 }
 
 // ── Program IR ──────────────────────────────────────────────────────
@@ -764,18 +1159,23 @@ pub struct PassContext {
 }
 
 /// Available kinsn targets resolved at runtime.
-/// BTF ID = -1 means the target is not available.
 #[derive(Clone, Debug)]
 pub struct KinsnRegistry {
     by_name: HashMap<&'static str, RegistryEntry>,
-    by_btf_id: HashMap<i32, &'static KinsnDescriptor>,
+    by_call: HashMap<KinsnCallKey, &'static KinsnDescriptor>,
 }
 
 #[derive(Clone, Copy, Debug)]
 struct RegistryEntry {
-    btf_id: i32,
+    btf_id: Option<i32>,
     call_off: i16,
     descriptor: &'static KinsnDescriptor,
+}
+
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+struct KinsnCallKey {
+    btf_id: i32,
+    call_off: i16,
 }
 
 impl Default for KinsnRegistry {
@@ -788,7 +1188,7 @@ impl KinsnRegistry {
     pub fn new() -> Self {
         let mut registry = Self {
             by_name: HashMap::new(),
-            by_btf_id: HashMap::new(),
+            by_call: HashMap::new(),
         };
         for pass in crate::passes::PASS_REGISTRY {
             for descriptor in pass.metadata.kinsn_targets {
@@ -802,53 +1202,44 @@ impl KinsnRegistry {
         Self::new()
     }
 
-    pub fn target_name_for_pass(pass_name: &str) -> Option<&'static str> {
-        crate::passes::PASS_REGISTRY
-            .iter()
-            .find(|entry| entry.name == pass_name)
-            .and_then(|entry| entry.metadata.kinsn_targets.first())
-            .map(|descriptor| descriptor.canonical_name)
-    }
-
     pub fn canonical_name_for_target_name(&self, target_name: &str) -> Option<&'static str> {
         self.by_name
             .get(target_name)
             .map(|entry| entry.descriptor.canonical_name)
     }
 
-    pub fn lookup_by_btf_id(&self, btf_id: i32) -> anyhow::Result<&'static KinsnDescriptor> {
-        self.by_btf_id
-            .get(&btf_id)
+    pub fn lookup_by_kinsn_call(
+        &self,
+        btf_id: i32,
+        call_off: i16,
+    ) -> anyhow::Result<&'static KinsnDescriptor> {
+        self.by_call
+            .get(&KinsnCallKey { btf_id, call_off })
             .copied()
-            .ok_or_else(|| anyhow::anyhow!("kinsn call btf_id {btf_id} is not present in the kinsn registry"))
+            .ok_or_else(|| {
+                anyhow::anyhow!(
+                    "kinsn call btf_id {btf_id} call_off {call_off} is not present in the kinsn registry"
+                )
+            })
     }
 
-    pub fn set_btf_id_for_target_name(
+    pub fn set_kinsn_call_for_target_name(
         &mut self,
         target_name: &str,
         btf_id: i32,
-    ) -> anyhow::Result<()> {
-        let descriptor = self.descriptor_for_target_name(target_name)?;
-        self.set_btf_id_for_descriptor(descriptor, btf_id)
-    }
-
-    pub fn set_call_off_for_target_name(
-        &mut self,
-        target_name: &str,
         call_off: i16,
     ) -> anyhow::Result<()> {
         let descriptor = self.descriptor_for_target_name(target_name)?;
-        for entry in self.entries_for_descriptor_mut(descriptor) {
-            entry.call_off = call_off;
-        }
-        Ok(())
+        self.set_kinsn_call_for_descriptor(descriptor, btf_id, call_off)
     }
 
-    pub fn btf_id_for_target_name(&self, target_name: &str) -> i32 {
-        self.by_name
-            .get(target_name)
-            .map(|entry| entry.btf_id)
-            .unwrap_or(-1)
+    pub fn btf_id_for_target_name(&self, target_name: &str) -> anyhow::Result<i32> {
+        let entry = self.by_name.get(target_name).ok_or_else(|| {
+            anyhow::anyhow!("kinsn target {target_name} not registered")
+        })?;
+        entry
+            .btf_id
+            .ok_or_else(|| anyhow::anyhow!("kinsn target {target_name} not registered"))
     }
 
     pub fn call_off_for_target_name(&self, target_name: &str) -> anyhow::Result<i16> {
@@ -858,9 +1249,10 @@ impl KinsnRegistry {
             .ok_or_else(|| anyhow::anyhow!("unknown kinsn target: {target_name}"))
     }
 
-    /// Whether the kinsn for the named target is registered (btf_id ≥ 0).
-    pub fn kinsn_registered_for_target_name(&self, target_name: &str) -> bool {
-        self.btf_id_for_target_name(target_name) >= 0
+    pub fn is_target_available(&self, target_name: &str) -> bool {
+        self.by_name
+            .get(target_name)
+            .is_some_and(|entry| entry.btf_id.is_some())
     }
 
     fn register_descriptor(&mut self, descriptor: &'static KinsnDescriptor) {
@@ -878,7 +1270,7 @@ impl KinsnRegistry {
         let previous = self.by_name.insert(
             name,
             RegistryEntry {
-                btf_id: -1,
+                btf_id: None,
                 call_off: 0,
                 descriptor,
             },
@@ -896,32 +1288,45 @@ impl KinsnRegistry {
             .ok_or_else(|| anyhow::anyhow!("unknown kinsn target: {target_name}"))
     }
 
-    fn set_btf_id_for_descriptor(
+    fn set_kinsn_call_for_descriptor(
         &mut self,
         descriptor: &'static KinsnDescriptor,
         btf_id: i32,
+        call_off: i16,
     ) -> anyhow::Result<()> {
-        if let Some(old_btf_id) = self
+        if btf_id < 0 {
+            anyhow::bail!(
+                "kinsn target {} cannot be registered with negative btf_id {btf_id}",
+                descriptor.canonical_name
+            );
+        }
+        let (old_btf_id, old_call_off) = self
             .by_name
             .get(descriptor.canonical_name)
-            .map(|entry| entry.btf_id)
-            .filter(|btf_id| *btf_id >= 0)
-        {
-            self.by_btf_id.remove(&old_btf_id);
-        }
-        if btf_id >= 0 {
-            if let Some(existing) = self.by_btf_id.get(&btf_id) {
-                if existing.canonical_name != descriptor.canonical_name {
-                    anyhow::bail!(
-                        "kinsn btf_id {btf_id} is already registered for {}",
-                        existing.canonical_name
-                    );
-                }
+            .map(|entry| (entry.btf_id, entry.call_off))
+            .ok_or_else(|| {
+                anyhow::anyhow!("unknown kinsn target: {}", descriptor.canonical_name)
+            })?;
+
+        let key = KinsnCallKey { btf_id, call_off };
+        if let Some(existing) = self.by_call.get(&key) {
+            if existing.canonical_name != descriptor.canonical_name {
+                anyhow::bail!(
+                    "kinsn btf_id {btf_id} call_off {call_off} is already registered for {}",
+                    existing.canonical_name
+                );
             }
-            self.by_btf_id.insert(btf_id, descriptor);
         }
+        if let Some(btf_id) = old_btf_id {
+            self.by_call.remove(&KinsnCallKey {
+                btf_id,
+                call_off: old_call_off,
+            });
+        }
+        self.by_call.insert(key, descriptor);
         for entry in self.entries_for_descriptor_mut(descriptor) {
-            entry.btf_id = btf_id;
+            entry.btf_id = Some(btf_id);
+            entry.call_off = call_off;
         }
         Ok(())
     }
@@ -1191,7 +1596,7 @@ impl Default for PassContext {
 
 impl PassContext {
     /// Create a minimal PassContext suitable for testing.
-    /// All kinsn targets unavailable (btf_id = -1), no special CPU features.
+    /// All kinsn targets unavailable, no special CPU features.
     pub fn baseline() -> Self {
         Self {
             kinsn_registry: KinsnRegistry::unavailable(),
@@ -1204,9 +1609,7 @@ impl PassContext {
     /// Whether cond_select can lower to a target branchless-select kinsn.
     pub fn has_branchless_select(&self) -> bool {
         self.platform.has_cmov
-            || self
-                .kinsn_registry
-                .kinsn_registered_for_target_name("bpf_select64")
+            || self.kinsn_registry.is_target_available("bpf_select64")
     }
 }
 

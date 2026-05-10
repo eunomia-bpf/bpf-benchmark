@@ -13,10 +13,6 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::rewrite::{BtfRemapPolicy, RewritePlan};
-use super::utils::{
-    emit_packed_kinsn_call_with_off, insn_width, resolve_kinsn_call_off_for_target,
-};
-
 pub(super) const HELPER_MAP_LOOKUP_ELEM: i32 = libbpf_sys::BPF_FUNC_map_lookup_elem as i32;
 const HELPER_XDP_ADJUST_HEAD: i32 = libbpf_sys::BPF_FUNC_xdp_adjust_head as i32;
 const PREFETCH_TARGET_NAME: &str = "bpf_prefetch";
@@ -241,29 +237,15 @@ impl BpfPass for PrefetchPass {
         analyses: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        if ctx
+        if !ctx
             .kinsn_registry
-            .btf_id_for_target_name(PREFETCH_TARGET_NAME)
-            < 0
+            .is_target_available(PREFETCH_TARGET_NAME)
         {
             return Ok(PassResult::skipped(
                 self.name(),
                 SkipReason {
                     pc: 0,
                     reason: "bpf_prefetch kfunc not available".into(),
-                },
-            ));
-        }
-
-        if !ctx
-            .kinsn_registry
-            .kinsn_registered_for_target_name(PREFETCH_TARGET_NAME)
-        {
-            return Ok(PassResult::skipped(
-                self.name(),
-                SkipReason {
-                    pc: 0,
-                    reason: "bpf_prefetch packed ABI not available".into(),
                 },
             ));
         }
@@ -319,8 +301,10 @@ impl BpfPass for PrefetchPass {
 
         let btf_id = ctx
             .kinsn_registry
-            .btf_id_for_target_name(PREFETCH_TARGET_NAME);
-        let kfunc_off = resolve_kinsn_call_off_for_target(ctx, PREFETCH_TARGET_NAME)?;
+            .btf_id_for_target_name(PREFETCH_TARGET_NAME)?;
+        let kfunc_off = ctx
+            .kinsn_registry
+            .call_off_for_target_name(PREFETCH_TARGET_NAME)?;
         let mut plan = RewritePlan::new();
         for candidate in &candidates {
             let payload = prefetch_payload(candidate.ptr_reg)?;

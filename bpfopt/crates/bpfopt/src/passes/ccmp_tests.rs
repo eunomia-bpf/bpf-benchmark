@@ -11,7 +11,7 @@ fn ccmp_ctx(arch: Arch) -> PassContext {
     let mut ctx = PassContext::baseline();
     ctx.platform.arch = arch;
     ctx.kinsn_registry
-        .set_btf_id_for_target_name("bpf_ccmp64", 77)
+        .set_kinsn_call_for_target_name("bpf_ccmp64", 77, 0)
         .unwrap();
     ctx
 }

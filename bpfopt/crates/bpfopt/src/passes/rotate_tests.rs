@@ -7,7 +7,7 @@ use crate::test_helpers::*;
 fn ctx_with_rotate_kfunc(btf_id: i32) -> PassContext {
     let mut ctx = PassContext::baseline();
     ctx.kinsn_registry
-        .set_btf_id_for_target_name("bpf_rotate64", btf_id)
+        .set_kinsn_call_for_target_name("bpf_rotate64", btf_id, 0)
         .unwrap();
     ctx.platform.has_rorx = true;
     ctx
@@ -16,7 +16,7 @@ fn ctx_with_rotate_kfunc(btf_id: i32) -> PassContext {
 fn ctx_with_rotate32_kfunc(btf_id: i32) -> PassContext {
     let mut ctx = PassContext::baseline();
     ctx.kinsn_registry
-        .set_btf_id_for_target_name("bpf_rotate32", btf_id)
+        .set_kinsn_call_for_target_name("bpf_rotate32", btf_id, 0)
         .unwrap();
     ctx.platform.has_rorx = true;
     ctx

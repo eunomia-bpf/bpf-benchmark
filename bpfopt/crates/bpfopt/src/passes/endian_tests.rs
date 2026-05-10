@@ -5,16 +5,33 @@ use crate::pass::{AnalysisCache, PassContext};
 use crate::test_helpers::*;
 
 fn ctx_with_endian_kfuncs(btf_id16: i32, btf_id32: i32, btf_id64: i32) -> PassContext {
+    ctx_with_endian_kfunc_calls(btf_id16, 0, btf_id32, 0, btf_id64, 0)
+}
+
+fn ctx_with_endian_kfunc_calls(
+    btf_id16: i32,
+    call_off16: i16,
+    btf_id32: i32,
+    call_off32: i16,
+    btf_id64: i32,
+    call_off64: i16,
+) -> PassContext {
     let mut ctx = PassContext::baseline();
-    ctx.kinsn_registry
-        .set_btf_id_for_target_name("bpf_endian_load16", btf_id16)
-        .unwrap();
-    ctx.kinsn_registry
-        .set_btf_id_for_target_name("bpf_endian_load32", btf_id32)
-        .unwrap();
-    ctx.kinsn_registry
-        .set_btf_id_for_target_name("bpf_endian_load64", btf_id64)
-        .unwrap();
+    if btf_id16 >= 0 {
+        ctx.kinsn_registry
+            .set_kinsn_call_for_target_name("bpf_endian_load16", btf_id16, call_off16)
+            .unwrap();
+    }
+    if btf_id32 >= 0 {
+        ctx.kinsn_registry
+            .set_kinsn_call_for_target_name("bpf_endian_load32", btf_id32, call_off32)
+            .unwrap();
+    }
+    if btf_id64 >= 0 {
+        ctx.kinsn_registry
+            .set_kinsn_call_for_target_name("bpf_endian_load64", btf_id64, call_off64)
+            .unwrap();
+    }
     ctx.platform.has_movbe = true;
     ctx
 }
@@ -143,7 +160,7 @@ fn test_endian_fusion_pass_skip_when_kfunc_unavailable() {
         BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
-    let mut ctx = PassContext::baseline(); // all btf_ids = -1
+    let mut ctx = PassContext::baseline();
     ctx.platform.has_movbe = true; // platform has MOVBE, but kfunc is missing
 
     let pass = EndianFusionPass;
@@ -388,10 +405,7 @@ fn test_endian_fusion_pass_uses_static_call_offset() {
         BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
-    let mut ctx = ctx_with_endian32_kfunc(8888);
-    ctx.kinsn_registry
-        .set_call_off_for_target_name("bpf_endian_load32", 42)
-        .unwrap();
+    let ctx = ctx_with_endian_kfunc_calls(-1, 0, 8888, 42, -1, 0);
 
     let pass = EndianFusionPass;
     let _result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
@@ -413,16 +427,7 @@ fn test_endian_fusion_pass_uses_per_size_call_offsets() {
         BpfInsn::exit(),
     ]);
     let mut cache = AnalysisCache::new();
-    let mut ctx = ctx_with_endian_kfuncs(111, 222, 333);
-    ctx.kinsn_registry
-        .set_call_off_for_target_name("bpf_endian_load16", 11)
-        .unwrap();
-    ctx.kinsn_registry
-        .set_call_off_for_target_name("bpf_endian_load32", 22)
-        .unwrap();
-    ctx.kinsn_registry
-        .set_call_off_for_target_name("bpf_endian_load64", 33)
-        .unwrap();
+    let ctx = ctx_with_endian_kfunc_calls(111, 11, 222, 22, 333, 33);
 
     let pass = EndianFusionPass;
     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();

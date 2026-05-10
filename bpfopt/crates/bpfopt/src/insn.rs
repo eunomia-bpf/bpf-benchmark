@@ -506,6 +506,42 @@ impl BpfInsn {
     }
 }
 
+/// Returns the instruction width in slots: 2 for LD_IMM64, 1 for all others.
+pub fn insn_width(insn: &BpfInsn) -> usize {
+    if insn.is_ldimm64() {
+        2
+    } else {
+        1
+    }
+}
+
+/// Emit a two-instruction `LD_IMM64 dst, value` sequence.
+pub fn emit_ldimm64(dst_reg: u8, value: u64) -> Vec<BpfInsn> {
+    vec![
+        BpfInsn::new(
+            BPF_LD | BPF_DW | BPF_IMM,
+            BpfInsn::make_regs(dst_reg, 0),
+            0,
+            value as u32 as i32,
+        ),
+        BpfInsn::new(0, 0, 0, (value >> 32) as u32 as i32),
+    ]
+}
+
+/// Emit a packed-ABI kinsn call using a sidecar pseudo-insn immediately before
+/// the kinsn CALL. The result register is part of `payload`, so no extra
+/// `mov dst, r0` is emitted here.
+pub fn emit_packed_kinsn_call_with_off(
+    payload: u64,
+    kinsn_btf_id: i32,
+    kinsn_off: i16,
+) -> Vec<BpfInsn> {
+    vec![
+        BpfInsn::kinsn_sidecar(payload),
+        BpfInsn::call_kinsn_with_off(kinsn_btf_id, kinsn_off),
+    ]
+}
+
 impl fmt::Debug for BpfInsn {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -561,5 +597,34 @@ mod tests {
         let insn = BpfInsn::new(BPF_JMP32 | BPF_JNE | BPF_X, BpfInsn::make_regs(2, 3), 3, 0);
         assert!(insn.is_cond_jmp());
         assert!(insn.is_jmp_class());
+    }
+
+    #[test]
+    fn test_emit_packed_kinsn_call_with_module_off() {
+        let payload = 0x12345;
+        let insns = emit_packed_kinsn_call_with_off(payload, 1234, 2);
+
+        assert_eq!(insns.len(), 2);
+        assert!(insns[0].is_kinsn_sidecar());
+        assert_eq!(insns[0].dst_reg(), 0x5);
+        assert_eq!(insns[0].off, 0x1234);
+        assert_eq!(insns[0].imm, 0);
+        assert!(insns[1].is_call());
+        assert_eq!(insns[1].imm, 1234);
+        assert_eq!(insns[1].off, 2);
+    }
+
+    #[test]
+    fn test_emit_packed_kinsn_call_wide_payload() {
+        let payload = 0xabcde12345;
+        let insns = emit_packed_kinsn_call_with_off(payload, 5555, 0);
+
+        assert_eq!(insns.len(), 2);
+        assert!(insns[0].is_kinsn_sidecar());
+        assert_eq!(insns[0].dst_reg(), 0x5);
+        assert_eq!(insns[0].off, 0x1234);
+        assert_eq!(insns[0].imm, 0xabcde);
+        assert!(insns[1].is_call());
+        assert_eq!(insns[1].imm, 5555);
     }
 }

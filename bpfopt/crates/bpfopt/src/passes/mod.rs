@@ -42,7 +42,6 @@ mod rotate_tests;
 mod skb_load_bytes;
 #[cfg(test)]
 mod skb_load_bytes_tests;
-mod utils;
 mod wide_mem;
 #[cfg(test)]
 mod wide_mem_tests;
