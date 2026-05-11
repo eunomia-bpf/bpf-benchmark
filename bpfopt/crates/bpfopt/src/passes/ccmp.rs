@@ -25,7 +25,6 @@ fn ccmp_proof_len(payload: u64) -> anyhow::Result<usize> {
     let dst_reg = kinsn_payload_reg(payload, 0);
     let count_bits = BpfInsn::unpack_u4(payload, 4) & 0x3;
     let count = usize::from(count_bits) + 2;
-    let mode = BpfInsn::unpack_u4(payload, 6) & 0x1;
 
     if payload >> 24 != 0 {
         anyhow::bail!("ccmp payload has non-zero reserved bits");
@@ -36,10 +35,6 @@ fn ccmp_proof_len(payload: u64) -> anyhow::Result<usize> {
     if dst_reg > BPF_REG_9 {
         anyhow::bail!("ccmp dst register {dst_reg} is outside BPF_REG_0..BPF_REG_9");
     }
-    if mode > 1 {
-        anyhow::bail!("ccmp mode {mode} is invalid");
-    }
-
     for idx in 0..4 {
         let reg = kinsn_payload_reg(payload, (8 + idx * 4) as u8);
         if idx >= count {
@@ -277,14 +272,14 @@ fn apply_ccmp_site(
     }
     let removed_chain_blocks = chain[1..].to_vec();
     let merged = prog.merge_linear_chain(&chain)?;
-    let target = remap_after_remove(target, &removed_chain_blocks)?;
-    let success = remap_after_remove(success, &removed_chain_blocks)?;
+    let target = BBProgram::remap_block_after_remove(target, &removed_chain_blocks)?;
+    let success = BBProgram::remap_block_after_remove(success, &removed_chain_blocks)?;
 
-    let mut replacement = emit_packed_kinsn_call_with_off(safe_site.payload, btf_id, kfunc_off);
+    let block_len = prog.block(merged)?.insns.len();
     prog.replace_range(
         merged,
-        0..prog.blocks[merged.0].insns.len(),
-        replacement.split_off(0),
+        0..block_len,
+        emit_packed_kinsn_call_with_off(safe_site.payload, btf_id, kfunc_off),
     )?;
 
     let branch = BpfInsn::new(
@@ -318,10 +313,10 @@ fn ccmp_chain_blocks(
     if block_len > 0 {
         let (_, tail) = prog.split_block(site.start_site)?;
         for block in &mut chain {
-            *block = remap_after_insert(*block, first, tail);
+            *block = BBProgram::remap_block_after_insert(*block, first, tail);
         }
-        target = remap_after_insert(target, first, tail);
-        success = remap_after_insert(success, first, tail);
+        target = BBProgram::remap_block_after_insert(target, first, tail);
+        success = BBProgram::remap_block_after_insert(success, first, tail);
         chain[0] = tail;
     }
     Ok((chain, target, success))
@@ -356,7 +351,10 @@ fn validate_chain_edges(
                 target
             );
         }
-        let expected_fallthrough = chain.get(idx + 1).copied().unwrap_or(success);
+        let expected_fallthrough = match chain.get(idx + 1) {
+            Some(&next) => next,
+            None => success,
+        };
         if fallthrough != expected_fallthrough {
             anyhow::bail!(
                 "ccmp chain block {:?} falls through to {:?}, expected {:?}",
@@ -374,24 +372,6 @@ fn validate_chain_edges(
         }
     }
     Ok(())
-}
-
-fn remap_after_insert(block: BlockId, split_head: BlockId, split_tail: BlockId) -> BlockId {
-    if block == split_head {
-        split_tail
-    } else if block.0 >= split_tail.0 {
-        BlockId(block.0 + 1)
-    } else {
-        block
-    }
-}
-
-fn remap_after_remove(block: BlockId, removed: &[BlockId]) -> anyhow::Result<BlockId> {
-    if removed.contains(&block) {
-        anyhow::bail!("ccmp target block {:?} was removed with the chain", block);
-    }
-    let shift = removed.iter().filter(|removed| removed.0 < block.0).count();
-    Ok(BlockId(block.0 - shift))
 }
 
 pub(super) fn scan_ccmp_sites(prog: &BBProgram) -> anyhow::Result<Vec<CcmpSite>> {

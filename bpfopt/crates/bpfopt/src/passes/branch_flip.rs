@@ -252,6 +252,7 @@ pub fn run_on_bbprogram(
     }
 
     let branch_targets = prog.branch_target_pcs()?;
+    let site_pcs = prog.current_site_pcs()?;
 
     // Phase 1: scan for all candidate sites.
     let sites = scan_branch_flip_sites(prog)?;
@@ -275,8 +276,11 @@ pub fn run_on_bbprogram(
         };
         let direction_total = validate_real_branch_profile(site.pc, bp)?;
 
-        let has_exterior_interior = (site.pc + 1..site_end)
-            .any(|pc_inner| branch_targets.contains(&pc_inner) && pc_inner != own_target);
+        let frame = prog.block(site.pred)?.frame;
+        let has_exterior_interior = prog
+            .sites_in_frame_pc_range(&site_pcs, frame, site.pc + 1, site_end)?
+            .into_iter()
+            .any(|(pc_inner, _)| branch_targets.contains(&pc_inner) && pc_inner != own_target);
 
         if has_exterior_interior {
             skipped.push(SkipReason {

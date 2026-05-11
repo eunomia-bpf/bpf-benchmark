@@ -12,9 +12,9 @@ use anyhow::{anyhow, bail, Context, Result};
 use bpfopt::analysis::{lift_with_kinsn_registry, lower, BBProgram};
 use bpfopt::insn::{BpfInsn, MapPseudo};
 use bpfopt::pass::{
-    Arch, BtfInfoRecords, KinsnDescriptor, KinsnRegistry, PassContext, PassManager, PassResult,
-    PlatformCapabilities, RegState, ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind,
-    VerifierValueWidth,
+    run_pass_once, Arch, BpfPass, BtfInfoRecords, KinsnDescriptor, KinsnRegistry, PassContext,
+    PassResult, PlatformCapabilities, RegState, ScalarRange, StackState, Tnum, VerifierInsn,
+    VerifierInsnKind, VerifierValueWidth,
 };
 use bpfopt::passes::PASS_REGISTRY;
 #[cfg(test)]
@@ -297,9 +297,8 @@ fn run_single_pass(
     validate_required_side_inputs(common, &[pass_name])?;
 
     let input = read_bytecode(common.input.as_deref())?;
-    let mut ctx = build_pass_context(common)?;
+    let ctx = build_pass_context(common)?;
     validate_required_kinsns(&ctx, &[pass_name])?;
-    ctx.policy.enabled_passes = vec![pass_name.to_string()];
     let mut program = lift_with_kinsn_registry(
         &input,
         (!ctx.verifier_states.is_empty()).then(|| Arc::clone(&ctx.verifier_states)),
@@ -311,34 +310,23 @@ fn run_single_pass(
         ctx.func_info.clone(),
         ctx.line_info.clone(),
     )?;
-    let pipeline = build_pipeline(&[pass_name], pass_args)?;
-    let result = pipeline.run(&mut program, &ctx)?;
+    let pass = build_pass(pass_name, pass_args)?;
+    let result = run_pass_once(pass.as_ref(), &mut program, &ctx)?;
     let output = lower(&program)?;
     write_bytecode(common.output.as_deref(), &output)?;
     write_btf_info_outputs(common, &program)?;
 
     if let Some(report_path) = common.report.as_deref() {
-        if result.pass_results.len() != 1 {
-            bail!(
-                "requested pass {pass_name} returned {} pass reports",
-                result.pass_results.len()
-            );
-        }
-        let report = pass_report(pass_name, &result.pass_results[0]);
+        let report = pass_report(pass_name, &result);
         write_json(Some(report_path), &report)?;
     }
 
     Ok(())
 }
 
-fn build_pipeline(pass_names: &[&str], pass_args: &[String]) -> Result<PassManager> {
-    let mut pm = PassManager::new();
-
-    for &name in pass_names {
-        let entry = registry_entry(name)?;
-        pm.add_pass_boxed((entry.make)(pass_args)?);
-    }
-    Ok(pm)
+fn build_pass(name: &str, pass_args: &[String]) -> Result<Box<dyn BpfPass>> {
+    let entry = registry_entry(name)?;
+    (entry.make)(pass_args)
 }
 
 fn registry_entry(name: &str) -> Result<&'static bpfopt::passes::PassRegistryEntry> {
@@ -453,6 +441,9 @@ fn parse_bytecode(bytes: &[u8]) -> Result<Vec<BpfInsn>> {
         .collect())
 }
 
+// Snapshot initialization canonicalizes loader-owned map references before the
+// daemon lifts bytecode into BBProgram. This is intentionally the only raw Vec
+// mutation path in the CLI; optimization passes must operate through BBProgram.
 fn canonicalize_map_refs_to_idx(
     insns: &mut [BpfInsn],
     original_loader_fd_array: Option<&[i32]>,
@@ -722,7 +713,7 @@ fn write_btf_info_outputs(common: &CommonArgs, program: &BBProgram) -> Result<()
 }
 
 fn build_pass_context(common: &CommonArgs) -> Result<PassContext> {
-    let mut ctx = PassContext::baseline();
+    let mut ctx = PassContext::try_baseline()?;
     ctx.platform = detect_platform();
     ctx.map_ids = common.map_ids.clone();
     if let Some(path) = common.verifier_states.as_deref() {
@@ -862,7 +853,7 @@ fn read_target(path: &Path) -> Result<TargetJson> {
 }
 
 fn kinsn_registry_from_target(target: &TargetJson) -> Result<KinsnRegistry> {
-    let mut registry = KinsnRegistry::unavailable();
+    let mut registry = KinsnRegistry::unavailable()?;
     for (name, spec) in &target.kinsns {
         let canonical = canonicalize_kinsn_name(name)?;
         registry.set_kinsn_call_for_target_name(canonical, spec.btf_func_id, spec.call_offset)?;
@@ -892,7 +883,7 @@ fn apply_kinsn_list(registry: &mut KinsnRegistry, kinsns: &[String]) -> Result<(
 }
 
 fn canonicalize_kinsn_name(input: &str) -> Result<&'static str> {
-    KinsnRegistry::unavailable()
+    KinsnRegistry::unavailable()?
         .canonical_name_for_target_name(input)
         .ok_or_else(|| anyhow!("unknown kinsn name: {input}"))
 }
@@ -944,7 +935,11 @@ fn read_verifier_states(path: &Path) -> Result<Vec<VerifierInsn>> {
 }
 
 fn verifier_insn_kind(kind: Option<&str>) -> Result<VerifierInsnKind> {
-    match kind.unwrap_or("insn_delta_state") {
+    let mut kind_value = "insn_delta_state";
+    if let Some(kind) = kind {
+        kind_value = kind;
+    }
+    match kind_value {
         "edge_full_state" => Ok(VerifierInsnKind::EdgeFullState),
         "pc_full_state" => Ok(VerifierInsnKind::PcFullState),
         "branch_delta_state" => Ok(VerifierInsnKind::BranchDeltaState),
@@ -954,10 +949,10 @@ fn verifier_insn_kind(kind: Option<&str>) -> Result<VerifierInsnKind> {
 }
 
 fn parse_reg_name(reg: &str) -> Result<u8> {
-    let reg = reg
-        .strip_prefix('r')
-        .or_else(|| reg.strip_prefix('R'))
-        .unwrap_or(reg);
+    let reg = match reg.strip_prefix('r').or_else(|| reg.strip_prefix('R')) {
+        Some(stripped) => stripped,
+        None => reg,
+    };
     let value = reg
         .parse::<u8>()
         .with_context(|| format!("invalid register name: {reg}"))?;
@@ -968,10 +963,10 @@ fn parse_reg_name(reg: &str) -> Result<u8> {
 }
 
 fn parse_stack_name(off: &str) -> Result<i16> {
-    let off = off
-        .strip_prefix("fp")
-        .or_else(|| off.strip_prefix("FP"))
-        .unwrap_or(off);
+    let off = match off.strip_prefix("fp").or_else(|| off.strip_prefix("FP")) {
+        Some(stripped) => stripped,
+        None => off,
+    };
     let value = off
         .parse::<i16>()
         .with_context(|| format!("invalid stack slot name: {off}"))?;
@@ -1001,10 +996,14 @@ fn verifier_stack_state(state: VerifierStackJson) -> Result<StackState> {
 fn verifier_reg_state(state: VerifierRegJson) -> Result<RegState> {
     let exact_value = state.const_val.map(|value| value as u64);
     let tnum = state.tnum.as_deref().map(parse_tnum).transpose()?;
+    let mut precise = false;
+    if let Some(state_precise) = state.precise {
+        precise = state_precise;
+    }
     Ok(RegState {
         reg_type: state.reg_type,
         value_width: VerifierValueWidth::Unknown,
-        precise: state.precise.unwrap_or(false),
+        precise,
         exact_value,
         tnum,
         range: ScalarRange {
@@ -1093,379 +1092,5 @@ fn hex_bytes(bytes: &[u8]) -> String {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use bpfopt::insn::{MapPseudo, BPF_DW, BPF_IMM, BPF_LD};
-
-    fn minimal_program_bytes() -> Vec<u8> {
-        vec![
-            0xb7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x95, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00,
-        ]
-    }
-
-    #[test]
-    fn parse_bytecode_rejects_non_instruction_multiple() {
-        let err = parse_bytecode(&[0u8; 9]).unwrap_err().to_string();
-        assert!(err.contains("multiple of 8"));
-    }
-
-    #[test]
-    fn parse_bytecode_round_trips_raw_instruction_bytes() {
-        let raw = minimal_program_bytes();
-        let insns = parse_bytecode(&raw).unwrap();
-        let encoded = insns
-            .iter()
-            .flat_map(|insn| insn.raw_bytes())
-            .collect::<Vec<_>>();
-        assert_eq!(encoded, raw);
-    }
-
-    fn make_ld_imm64(dst: u8, src: u8, imm: i32) -> [BpfInsn; 2] {
-        [
-            BpfInsn::new(
-                BPF_LD | BPF_DW | BPF_IMM,
-                BpfInsn::make_regs(dst, src),
-                0,
-                imm,
-            ),
-            BpfInsn::new(0, 0, 0, 0),
-        ]
-    }
-
-    fn pseudo_pairs(insns: &[BpfInsn]) -> Vec<(u8, i32, i32)> {
-        insns
-            .chunks_exact(2)
-            .map(|pair| (pair[0].src_reg(), pair[0].imm, pair[1].imm))
-            .collect()
-    }
-
-    fn kinsn_target(entries: &[(&str, i32, i16)]) -> TargetJson {
-        TargetJson {
-            arch: Some("x86_64".to_string()),
-            features: Vec::new(),
-            kinsns: entries
-                .iter()
-                .map(|(name, btf_func_id, call_offset)| {
-                    (
-                        (*name).to_string(),
-                        KinsnJson {
-                            btf_func_id: *btf_func_id,
-                            btf_id: *btf_func_id as u32,
-                            call_offset: *call_offset,
-                        },
-                    )
-                })
-                .collect(),
-        }
-    }
-
-    fn registered_call_name(registry: &KinsnRegistry, btf_id: i32, call_off: i16) -> &'static str {
-        registry
-            .lookup_by_kinsn_call(btf_id, call_off)
-            .unwrap()
-            .canonical_name
-    }
-
-    #[test]
-    fn canonicalize_map_refs_rewrites_fd_pseudos_in_first_seen_order() {
-        let mut insns = Vec::new();
-        insns.extend(make_ld_imm64(1, MapPseudo::Fd.src_reg(), 489));
-        insns.extend(make_ld_imm64(1, MapPseudo::FdValue.src_reg(), 466));
-        insns.extend(make_ld_imm64(1, MapPseudo::Fd.src_reg(), 489));
-
-        canonicalize_map_refs_to_idx(&mut insns, None, &[101, 102]).unwrap();
-
-        assert_eq!(
-            pseudo_pairs(&insns),
-            vec![
-                (MapPseudo::Idx.src_reg(), 0, 0),
-                (MapPseudo::IdxValue.src_reg(), 1, 0),
-                (MapPseudo::Idx.src_reg(), 0, 0),
-            ]
-        );
-    }
-
-    #[test]
-    fn canonicalize_map_refs_checks_idx_range_without_fd_array() {
-        let mut insns = Vec::new();
-        insns.extend(make_ld_imm64(1, MapPseudo::Idx.src_reg(), 2));
-
-        let err = canonicalize_map_refs_to_idx(&mut insns, None, &[42]).unwrap_err();
-
-        assert!(err.to_string().contains("out of range"), "err={err:#}");
-    }
-
-    #[test]
-    fn canonical_pass_names_accept_v3_cli_names() {
-        assert_eq!(canonicalize_pass_name("wide-mem").unwrap(), "wide_mem");
-        assert_eq!(canonicalize_pass_name("ccmp").unwrap(), "ccmp");
-        assert_eq!(
-            canonicalize_pass_name("skb-load-bytes").unwrap(),
-            "skb_load_bytes_spec"
-        );
-        assert_eq!(canonicalize_pass_name("prefetch").unwrap(), "prefetch");
-        assert!(canonicalize_pass_name("wide_mem2").is_err());
-    }
-
-    #[test]
-    fn canonical_kinsn_names_accept_all_v3_aliases() {
-        for (input, expected) in [
-            ("bpf_rotate64", "bpf_rotate64"),
-            ("rotate64", "bpf_rotate64"),
-            ("bpf_rotate32", "bpf_rotate32"),
-            ("rotate32", "bpf_rotate32"),
-            ("bpf_select64", "bpf_select64"),
-            ("select64", "bpf_select64"),
-            ("bpf_ccmp64", "bpf_ccmp64"),
-            ("ccmp64", "bpf_ccmp64"),
-            ("bpf_extract64", "bpf_extract64"),
-            ("extract64", "bpf_extract64"),
-            ("bpf_endian_load16", "bpf_endian_load16"),
-            ("endian_load16", "bpf_endian_load16"),
-            ("bpf_endian_load32", "bpf_endian_load32"),
-            ("endian_load32", "bpf_endian_load32"),
-            ("bpf_endian_load64", "bpf_endian_load64"),
-            ("endian_load64", "bpf_endian_load64"),
-            ("bpf_bulk_memcpy", "bpf_bulk_memcpy"),
-            ("bulk_memcpy", "bpf_bulk_memcpy"),
-            ("bpf_memcpy_bulk", "bpf_bulk_memcpy"),
-            ("memcpy_bulk", "bpf_bulk_memcpy"),
-            ("bpf_bulk_memset", "bpf_bulk_memset"),
-            ("bulk_memset", "bpf_bulk_memset"),
-            ("bpf_memset_bulk", "bpf_bulk_memset"),
-            ("memset_bulk", "bpf_bulk_memset"),
-            ("bpf_prefetch", "bpf_prefetch"),
-            ("prefetch", "bpf_prefetch"),
-        ] {
-            assert_eq!(canonicalize_kinsn_name(input).unwrap(), expected);
-        }
-    }
-
-    #[test]
-    fn target_json_maps_v3_kinsn_aliases_to_registry_fields() {
-        let mut target = kinsn_target(&[
-            ("rotate32", 10, 1),
-            ("bpf_bulk_memcpy", 11, 2),
-            ("bpf_endian_load64", 12, 0),
-            ("bpf_ccmp64", 13, 0),
-            ("bpf_prefetch", 14, 7),
-        ]);
-        target.features = vec!["cmov".to_string(), "movbe".to_string()];
-
-        let registry = kinsn_registry_from_target(&target).unwrap();
-        for (name, btf_id) in [
-            ("bpf_rotate32", 10),
-            ("bpf_bulk_memcpy", 11),
-            ("bpf_endian_load64", 12),
-            ("bpf_ccmp64", 13),
-            ("bpf_prefetch", 14),
-        ] {
-            assert_eq!(registry.btf_id_for_target_name(name).unwrap(), btf_id);
-        }
-        for (name, call_off) in [
-            ("bpf_rotate32", 1),
-            ("bpf_bulk_memcpy", 2),
-            ("bpf_prefetch", 7),
-        ] {
-            assert_eq!(registry.call_off_for_target_name(name).unwrap(), call_off);
-        }
-    }
-
-    #[test]
-    fn target_json_disambiguates_module_local_btf_ids_by_call_offset() {
-        let target = kinsn_target(&[
-            ("bpf_endian_load16", 128703, 1),
-            ("bpf_rotate64", 128703, 2),
-        ]);
-        let registry = kinsn_registry_from_target(&target).unwrap();
-
-        assert_eq!(
-            registered_call_name(&registry, 128703, 1),
-            "bpf_endian_load16"
-        );
-        assert_eq!(registered_call_name(&registry, 128703, 2), "bpf_rotate64");
-    }
-
-    #[test]
-    fn target_json_allows_shared_btf_id_when_zero_call_offset_is_first() {
-        let target = kinsn_target(&[
-            ("bpf_endian_load16", 128703, 0),
-            ("bpf_rotate64", 128703, 2),
-        ]);
-        let registry = kinsn_registry_from_target(&target).unwrap();
-
-        assert_eq!(
-            registered_call_name(&registry, 128703, 0),
-            "bpf_endian_load16"
-        );
-        assert_eq!(registered_call_name(&registry, 128703, 2), "bpf_rotate64");
-    }
-
-    #[test]
-    fn target_json_rejects_ambiguous_duplicate_kinsn_call_keys() {
-        let target = kinsn_target(&[
-            ("bpf_endian_load16", 128703, 1),
-            ("bpf_rotate64", 128703, 1),
-        ]);
-
-        let err = kinsn_registry_from_target(&target).unwrap_err();
-
-        assert!(
-            err.to_string().contains("btf_id 128703 call_off 1"),
-            "err={err}"
-        );
-    }
-
-    #[test]
-    fn target_json_requires_call_offset_for_each_kinsn() {
-        let err = serde_json::from_str::<TargetJson>(
-            r#"{
-              "arch": "x86_64",
-              "kinsns": {
-                "bpf_extract64": { "btf_func_id": 129876 }
-              }
-            }"#,
-        )
-        .unwrap_err();
-
-        assert!(err.to_string().contains("call_offset"), "err={err}");
-    }
-
-    #[test]
-    fn target_call_offsets_shift_after_map_prefix() {
-        let mut target = TargetJson {
-            arch: Some("x86_64".to_string()),
-            features: Vec::new(),
-            kinsns: BTreeMap::from([
-                (
-                    "bpf_rotate64".to_string(),
-                    KinsnJson {
-                        btf_func_id: 1,
-                        btf_id: 100,
-                        call_offset: 1,
-                    },
-                ),
-                (
-                    "bpf_extract64".to_string(),
-                    KinsnJson {
-                        btf_func_id: 2,
-                        btf_id: 200,
-                        call_offset: 2,
-                    },
-                ),
-                (
-                    "bpf_select64".to_string(),
-                    KinsnJson {
-                        btf_func_id: 3,
-                        btf_id: 0,
-                        call_offset: 0,
-                    },
-                ),
-            ]),
-        };
-
-        shift_target_module_call_offsets_for_map_prefix(&mut target, 5).unwrap();
-
-        assert_eq!(target.kinsns["bpf_rotate64"].call_offset, 5);
-        assert_eq!(target.kinsns["bpf_extract64"].call_offset, 6);
-        assert_eq!(target.kinsns["bpf_select64"].call_offset, 0);
-    }
-
-    #[test]
-    fn pass_report_serializes_inlined_map_entries_as_hex() {
-        let result = PassResult {
-            sites_applied: 1,
-            map_inline_records: vec![bpfopt::pass::MapInlineRecord {
-                map_id: 7,
-                key: vec![1, 0, 0, 0],
-                value: vec![42, 0, 0, 0],
-            }],
-            insns_before: 4,
-            insns_after: 2,
-            ..PassResult::default()
-        };
-
-        let report = serde_json::to_value(pass_report("map_inline", &result)).unwrap();
-
-        assert_eq!(report["inlined_map_entries"][0]["map_id"], 7);
-        assert_eq!(report["inlined_map_entries"][0]["key_hex"], "01000000");
-        assert_eq!(report["inlined_map_entries"][0]["value_hex"], "2a000000");
-    }
-
-    #[test]
-    fn verifier_states_json_builds_const_prop_delta_states() {
-        let state = VerifierInsnJson {
-            pc: 5,
-            frame: 0,
-            kind: None,
-            stack: BTreeMap::new(),
-            regs: std::collections::BTreeMap::from([(
-                "r1".to_string(),
-                VerifierRegJson {
-                    reg_type: "scalar".to_string(),
-                    precise: Some(false),
-                    offset: None,
-                    const_val: Some(42),
-                    min: None,
-                    max: None,
-                    tnum: Some("0x2a/0x0".to_string()),
-                },
-            )]),
-        };
-
-        let regs = state
-            .regs
-            .into_iter()
-            .map(|(reg, state)| Ok((parse_reg_name(&reg)?, verifier_reg_state(state)?)))
-            .collect::<Result<HashMap<_, _>>>()
-            .unwrap();
-
-        assert_eq!(regs[&1].exact_value, Some(42));
-        assert!(!regs[&1].precise);
-        assert_eq!(regs[&1].tnum.unwrap().value, 42);
-    }
-
-    #[test]
-    fn verifier_states_log_builds_stack_states() {
-        let path = std::env::temp_dir().join(format!(
-            "bpfopt-verifier-states-{}-{}.log",
-            std::process::id(),
-            std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .unwrap()
-                .as_nanos()
-        ));
-        fs::write(&path, "9: R2=fp-16 fp-16=rrrrrrrr P42\n").unwrap();
-
-        let states = read_verifier_states(&path).unwrap();
-        assert_eq!(states.len(), 1);
-        assert_eq!(states[0].regs[&2].offset, Some(-16));
-        let stack = states[0].stack.get(&-16).unwrap();
-        assert_eq!(stack.slot_types.as_deref(), Some("rrrrrrrr"));
-        let value = stack.value.as_ref().unwrap();
-        assert_eq!(value.exact_value, Some(42));
-        assert!(value.precise);
-        fs::remove_file(path).unwrap();
-    }
-
-    #[test]
-    fn verifier_states_log_preserves_full_state_kind() {
-        let path = std::env::temp_dir().join(format!(
-            "bpfopt-verifier-kind-{}-{}.log",
-            std::process::id(),
-            std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .unwrap()
-                .as_nanos()
-        ));
-        fs::write(&path, "from 8 to 11: R2=fp-4 fp-8=rrrr???? P4294967296\n").unwrap();
-
-        let states = read_verifier_states(&path).unwrap();
-        assert_eq!(states.len(), 1);
-        assert_eq!(states[0].kind, VerifierInsnKind::EdgeFullState);
-        assert_eq!(states[0].regs[&2].reg_type, "fp");
-        assert!(states[0].stack.contains_key(&-8));
-        fs::remove_file(path).unwrap();
-    }
-}
+#[path = "main_tests.rs"]
+mod tests;

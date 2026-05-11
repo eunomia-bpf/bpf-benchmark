@@ -669,7 +669,7 @@ fn materialize_value(
         CondSelectValue::Imm(imm) => prefix.push(BpfInsn::mov64_imm(reg, imm)),
         CondSelectValue::Reg32(src) => prefix.push(BpfInsn::mov32_reg(reg, src)),
         CondSelectValue::Imm32(imm) => prefix.push(BpfInsn::mov32_imm(reg, imm)),
-        CondSelectValue::Reg(_) => unreachable!(),
+        CondSelectValue::Reg(reg) => return Ok(reg),
     }
     allocated.push(reg);
     imm_regs.push((value, reg));

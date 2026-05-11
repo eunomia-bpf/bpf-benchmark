@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 //! ENDIAN_FUSION optimization pass.
 
-use std::collections::BTreeMap;
 use std::ops::Range;
 
-use crate::analysis::{block_slot_offset, site_current_pc, BBProgram, BlockId, InsnSite};
+use crate::analysis::{block_slot_offset, BBProgram, BlockId, InsnSite};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
@@ -43,8 +42,7 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
 ///
 /// The payload carries the original memory offset directly. When a target
 /// cannot natively encode a given offset in its packed endian JIT path, the
-/// pass falls back to materializing the effective address around a zero-offset
-/// packed call instead of using any legacy call ABI.
+/// pass materializes the effective address around a zero-offset packed call.
 pub struct EndianFusionPass;
 
 const BPF_TO_LE: u8 = 0x00;
@@ -171,14 +169,11 @@ fn is_narrowing(load_size: u8, endian_size: u8) -> bool {
     )
 }
 
-fn find_blocked_narrow_sites(
-    prog: &BBProgram,
-    site_pcs: &BTreeMap<InsnSite, usize>,
-) -> anyhow::Result<Vec<SkipReason>> {
+fn find_blocked_narrow_sites(prog: &BBProgram) -> anyhow::Result<Vec<SkipReason>> {
     let mut skips = Vec::new();
 
-    for block in prog.blocks().map(|block| block.id).collect::<Vec<_>>() {
-        let insns = &prog.blocks[block.0].insns;
+    for block in prog.block_ids().collect::<Vec<_>>() {
+        let insns = prog.copied_body_insns(block)?;
         for load_idx in 0..insns.len().saturating_sub(2) {
             let load = &insns[load_idx];
             if !load.is_ldx_mem() || !matches!(bpf_size(load.code), BPF_W | BPF_DW) {
@@ -196,13 +191,10 @@ fn find_blocked_narrow_sites(
                 {
                     if read_before_endian {
                         skips.push(SkipReason {
-                            pc: site_current_pc(
-                                site_pcs,
-                                InsnSite {
-                                    block,
-                                    idx: load_idx,
-                                },
-                            )?,
+                            pc: prog.report_pc(InsnSite {
+                                block,
+                                idx: load_idx,
+                            })?,
                             reason:
                                 "narrow endian fusion blocked: possible upper bits read before endian"
                                     .into(),
@@ -375,23 +367,22 @@ impl BpfPass for EndianFusionPass {
 pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
     let mut safe_sites: Vec<SafeEndianFusionSite> = Vec::new();
     let mut skipped = Vec::new();
-    let site_pcs = prog.current_site_pcs()?;
-    let pc_sites = prog.current_pc_sites()?;
 
-    skipped.extend(find_blocked_narrow_sites(prog, &site_pcs)?);
+    skipped.extend(find_blocked_narrow_sites(prog)?);
 
-    for block in prog.blocks().map(|block| block.id).collect::<Vec<_>>() {
-        for start in prog.sites_in_block(block).collect::<Vec<_>>() {
-            if let Some(skip) = cross_block_endian_skip(prog, start, &site_pcs, &pc_sites)? {
+    for block in prog.block_ids().collect::<Vec<_>>() {
+        let insns = prog.copied_body_insns(block)?;
+        for start in prog.sites_in_block(block)? {
+            if let Some(skip) = cross_block_endian_skip(prog, start)? {
                 skipped.push(skip);
                 continue;
             }
 
-            let Some(mut site) = scan_endian_site(&prog.blocks[block.0].insns, start.idx) else {
+            let Some(mut site) = scan_endian_site(&insns, start.idx) else {
                 continue;
             };
             let start_slot = block_slot_offset(prog, start)?;
-            site.start_pc = site_current_pc(&site_pcs, start)?;
+            site.start_pc = prog.report_pc(start)?;
             let range = start.idx..start.idx + site.old_len;
 
             let replacement_len = endian_fusion_replacement_len(
@@ -414,8 +405,11 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                 continue;
             }
 
-            let preserved =
-                prog.blocks[block.0].insns[start.idx + 1..start.idx + site.old_len - 1].to_vec();
+            let preserved = prog.body_insn_window(
+                block,
+                start.idx + 1,
+                site.old_len.saturating_sub(2),
+            )?;
             safe_sites.push(SafeEndianFusionSite {
                 block,
                 range,
@@ -461,26 +455,23 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
 fn cross_block_endian_skip(
     prog: &BBProgram,
     start: InsnSite,
-    site_pcs: &BTreeMap<InsnSite, usize>,
-    pc_sites: &BTreeMap<usize, InsnSite>,
 ) -> anyhow::Result<Option<SkipReason>> {
-    let Some(load) = prog.insn_at(start) else {
-        return Ok(None);
-    };
+    let load = prog
+        .insn_at(start)
+        .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", start))?;
     if !load.is_ldx_mem() {
         return Ok(None);
     }
-    let start_pc = site_current_pc(site_pcs, start)?;
-    let next_pc = start_pc + prog.insn_slot_width(start)?;
-    let Some(next) = pc_sites.get(&next_pc).copied() else {
+    let start_pc = prog.report_pc(start)?;
+    let Some(next) = prog.next_site_in_linear_order(start)? else {
         return Ok(None);
     };
     if next.block == start.block {
         return Ok(None);
     }
-    let Some(endian) = prog.insn_at(next) else {
-        return Ok(None);
-    };
+    let endian = prog
+        .insn_at(next)
+        .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", next))?;
     let load_size = bpf_size(load.code);
     let matches_cross_block = endian.dst_reg() == load.dst_reg()
         && endian_swap_size(endian)

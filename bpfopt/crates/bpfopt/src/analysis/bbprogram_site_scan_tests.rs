@@ -9,8 +9,9 @@ fn bbprogram_sites_in_block_treats_ldimm64_as_one_logical_site() {
     let wide = BpfInsn::ld_imm64(BPF_REG_1, 0, 0x1_0000_0000);
     let prog = lift_test_program(&[wide[0], wide[1], BpfInsn::exit()], &pass_ctx());
 
-    // IMPL: needs BBProgram::sites_in_block(BlockId) -> impl Iterator<Item = InsnSite>.
-    let sites = prog.sites_in_block(BlockId(0)).collect::<Vec<_>>();
+    let sites = prog
+        .sites_in_block(BlockId(0))
+        .expect("valid block should enumerate body sites");
     assert_eq!(
         sites,
         vec![InsnSite {
@@ -32,7 +33,9 @@ fn bbprogram_sites_in_block_excludes_terminator_from_body_iteration() {
         &pass_ctx(),
     );
 
-    let sites = prog.sites_in_block(BlockId(0)).collect::<Vec<_>>();
+    let sites = prog
+        .sites_in_block(BlockId(0))
+        .expect("valid block should enumerate body sites");
     assert_eq!(
         sites,
         vec![InsnSite {
@@ -49,11 +52,9 @@ fn bbprogram_sites_can_include_terminators_when_requested() {
         &pass_ctx(),
     );
 
-    // IMPL: needs BBProgram::logical_sites_in_block(BlockId) as public API, or
-    // BBProgram::sites_in_block_with_terminator(BlockId) equivalent.
     let sites = prog
         .sites_in_block_with_terminator(BlockId(0))
-        .collect::<Vec<_>>();
+        .expect("valid block should enumerate logical sites");
     assert_eq!(
         sites,
         vec![InsnSite {

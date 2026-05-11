@@ -20,7 +20,3 @@ impl BpfPass for NoopPass {
         Ok(PassResult::unchanged())
     }
 }
-
-pub fn run_on_bbprogram(_prog: &mut BBProgram) -> anyhow::Result<PassResult> {
-    Ok(PassResult::unchanged())
-}

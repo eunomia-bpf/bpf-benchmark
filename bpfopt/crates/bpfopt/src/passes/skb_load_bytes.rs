@@ -122,15 +122,19 @@ fn scan_sites(prog: &BBProgram, branch_targets: &BTreeSet<usize>) -> anyhow::Res
     let mut regs = initial_reg_state();
 
     for block in prog.blocks().map(|block| block.id).collect::<Vec<_>>() {
-        let view = prog.block_body_linear_view(block)?;
-        let mut rel_pc = 0usize;
-        while rel_pc < view.insns.len() {
-            let pc = view.absolute_pc(rel_pc)?;
-            if pc > 0 && branch_targets.contains(&pc) {
+        if prog.should_reset_linear_state_at_block(block)? {
+            regs = initial_reg_state();
+        }
+        let sites = prog.sites_in_block(block)?;
+        for (index, site) in sites.iter().copied().enumerate() {
+            let pc = prog.site_current_pc(site)?;
+            if index == 0 && pc > 0 && prog.branch_target_pcs()?.contains(&pc) {
                 regs = initial_reg_state();
             }
 
-            let insn = &view.insns[rel_pc];
+            let insn = prog
+                .insn_at(site)
+                .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
             if insn.is_call() && insn.imm == BPF_FUNC_SKB_LOAD_BYTES {
                 if insn.src_reg() != 0 {
                     scan.skips.push(SkipReason {
@@ -139,18 +143,24 @@ fn scan_sites(prog: &BBProgram, branch_targets: &BTreeSet<usize>) -> anyhow::Res
                     });
                 } else {
                     match classify_site(pc, branch_targets, &regs) {
-                        Ok(site) => scan.sites.push(AppliedRewriteSite {
+                        Ok(rewrite_site) => scan.sites.push(AppliedRewriteSite {
                             block,
-                            range: view.range_for_slots(rel_pc, insn_width(insn))?,
-                            site,
+                            range: site.idx..site.idx + 1,
+                            site: rewrite_site,
                         }),
                         Err(reason) => scan.skips.push(SkipReason { pc, reason }),
                     }
                 }
             }
 
-            advance_simple_reg_state(&view.insns[rel_pc], view.insns.get(rel_pc + 1), &mut regs)?;
-            rel_pc += insn_width(insn);
+            let ldimm64_hi = if insn.is_ldimm64() {
+                Some(prog.ldimm64_second_slots.get(&site).ok_or_else(|| {
+                    anyhow::anyhow!("LD_IMM64 at {:?} is missing high half", site)
+                })?)
+            } else {
+                None
+            };
+            advance_simple_reg_state(insn, ldimm64_hi, &mut regs)?;
         }
     }
 

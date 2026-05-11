@@ -83,50 +83,7 @@ pub(crate) fn remap_btf_records_view(
     Ok(out)
 }
 
-pub(crate) fn remap_btf_records_bytes(
-    prog: &BBProgram,
-    records: Option<&BtfInfoRecords>,
-    kind: BtfRecordKind,
-) -> anyhow::Result<Option<BtfInfoRecords>> {
-    let Some(records) = records else {
-        return Ok(None);
-    };
-    if records.bytes.is_empty() {
-        return Ok(Some(records.clone()));
-    }
-    validate_btf_records(records)?;
-
-    let rec_size = records.rec_size as usize;
-    let old_to_new = old_pc_to_current_pc(prog)?;
-    let mut out = Vec::with_capacity(records.bytes.len());
-    let mut previous = None;
-    for record in records.bytes.chunks(rec_size) {
-        let old_pc = read_u32_field(record, 0, "insn_off")?;
-        let Some(&new_pc) = old_to_new.get(&(old_pc as usize)) else {
-            continue;
-        };
-        if previous.is_some_and(|prev| new_pc <= prev) {
-            if kind == BtfRecordKind::Line && previous == Some(new_pc) {
-                continue;
-            }
-            anyhow::bail!("BTF remap produced non-increasing insn_off");
-        }
-        let new_pc: u32 = new_pc
-            .try_into()
-            .map_err(|_| anyhow::anyhow!("BTF remapped insn_off does not fit u32"))?;
-        out.extend_from_slice(record);
-        let start = out.len() - rec_size;
-        out[start..start + 4].copy_from_slice(&new_pc.to_le_bytes());
-        previous = Some(new_pc as usize);
-    }
-
-    Ok(Some(BtfInfoRecords {
-        rec_size: records.rec_size,
-        bytes: out,
-    }))
-}
-
-fn validate_btf_records(records: &BtfInfoRecords) -> anyhow::Result<()> {
+pub(crate) fn validate_btf_records(records: &BtfInfoRecords) -> anyhow::Result<()> {
     if records.rec_size < std::mem::size_of::<u32>() as u32 {
         anyhow::bail!("BTF record size {} is too small", records.rec_size);
     }
@@ -141,7 +98,7 @@ fn validate_btf_records(records: &BtfInfoRecords) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn read_u32_field(record: &[u8], offset: usize, label: &str) -> anyhow::Result<u32> {
+pub(crate) fn read_u32_field(record: &[u8], offset: usize, label: &str) -> anyhow::Result<u32> {
     let bytes = record
         .get(offset..offset + 4)
         .ok_or_else(|| anyhow::anyhow!("BTF record is missing {label} field"))?;
@@ -150,7 +107,7 @@ fn read_u32_field(record: &[u8], offset: usize, label: &str) -> anyhow::Result<u
     })?))
 }
 
-fn old_pc_to_current_pc(prog: &BBProgram) -> anyhow::Result<BTreeMap<usize, usize>> {
+pub(crate) fn old_pc_to_current_pc(prog: &BBProgram) -> anyhow::Result<BTreeMap<usize, usize>> {
     let site_pcs = prog.current_site_pcs()?;
     let mut old_to_new = BTreeMap::new();
     for (&site, &old_pc) in &prog.btf {

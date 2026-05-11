@@ -31,7 +31,7 @@ pub use dce::{run_on_bbprogram as run_dce_on_bbprogram, DcePass};
 pub use endian::{run_on_bbprogram as run_endian_fusion_on_bbprogram, EndianFusionPass};
 pub use extract::{run_on_bbprogram as run_extract_on_bbprogram, ExtractPass};
 pub use map_inline::{MapInfo, MapInfoAnalysis, MapInfoResult, MapInlinePass, MapReference};
-pub use noop::{run_on_bbprogram as run_noop_on_bbprogram, NoopPass};
+pub use noop::NoopPass;
 pub use prefetch::{run_on_bbprogram as run_prefetch_on_bbprogram, PrefetchPass};
 pub use rotate::{run_on_bbprogram as run_rotate_on_bbprogram, RotatePass};
 pub use skb_load_bytes::{

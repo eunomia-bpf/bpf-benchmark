@@ -375,10 +375,8 @@ fn is_btf_struct_ptr_type(reg_type: &str) -> bool {
 /// assignment for the register.  If the verifier shows a BTF struct pointer,
 /// wide loads are unsafe.
 ///
-/// Returns `false` (safe to widen) when:
-///   - No verifier states are available (offline snapshot absent).
-///   - The register is not mentioned in any state at or before `pc`.
-///   - The register has a safe type (scalar, fp, map_value, pkt, etc.).
+/// Returns `false` when the register is not mentioned at or before `pc`, or when
+/// the register has a safe type (scalar, fp, map_value, pkt, etc.).
 fn base_reg_is_btf_ptr_from_states(
     reg: u8,
     site_pc: usize,
@@ -504,29 +502,40 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     }
 
     let branch_targets = prog.branch_target_pcs()?;
-    let verifier_states = prog.oracle.as_deref().unwrap_or(&[]);
+    let verifier_states = prog.oracle.as_deref();
 
     let mut safe_sites = Vec::new();
     let mut skipped = Vec::new();
     let mut reported_starts = BTreeSet::new();
 
     for block in prog.blocks().map(|block| block.id).collect::<Vec<_>>() {
-        let view = prog.block_body_linear_view(block)?;
-        for mut site in scan_wide_mem(&view.insns) {
-            let start_slot = site.start_pc;
-            let start_pc = view.absolute_pc(start_slot)?;
+        let block_sites = prog.sites_in_block(block)?;
+        let block_insns = block_sites
+            .iter()
+            .map(|&site| {
+                prog.insn_at(site)
+                    .copied()
+                    .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))
+            })
+            .collect::<anyhow::Result<Vec<_>>>()?;
+        for mut site in scan_wide_mem(&block_insns) {
+            let start_idx = site.start_pc;
+            let start_site = block_sites
+                .get(start_idx)
+                .copied()
+                .ok_or_else(|| anyhow::anyhow!("wide_mem start index {start_idx} missing"))?;
+            let start_pc = prog.site_current_pc(start_site)?;
             site.start_pc = start_pc;
             reported_starts.insert(site.start_pc);
-            let range = match view.range_for_slots(start_slot, site.old_len) {
-                Ok(range) => range,
-                Err(_) => {
-                    skipped.push(SkipReason {
-                        pc: site.start_pc,
-                        reason: "interior branch target".into(),
-                    });
-                    continue;
-                }
-            };
+            let end_idx = start_idx + site.old_len;
+            if end_idx > block_sites.len() {
+                anyhow::bail!(
+                    "wide_mem site at {:?} spans beyond block {:?} body",
+                    start_site,
+                    block
+                );
+            }
+            let range = start_site.idx..start_site.idx + site.old_len;
 
             let has_interior_target = (site.start_pc + 1..site.start_pc + site.old_len)
                 .any(|pc| branch_targets.contains(&pc));
@@ -542,11 +551,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             let dst_reg = u8::try_from(site.required_binding("dst_reg")?)
                 .context("wide_mem dst_reg binding does not fit u8")?;
             let mut scratch_regs = std::collections::HashSet::new();
-            let site_end = start_slot + site.old_len;
-            for pc in start_slot..site_end {
-                let Some(insn) = view.insns.get(pc) else {
-                    continue;
-                };
+            for insn in &block_insns[start_idx..end_idx] {
                 let class = insn.class();
                 if class == BPF_ALU64 || class == BPF_ALU || class == BPF_LDX {
                     let dreg = insn.dst_reg();
@@ -593,7 +598,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                 let base_reg = site.required_binding("base_reg")?;
                 let base_reg_i32 = i32::try_from(base_reg)
                     .context("wide_mem base_reg binding does not fit i32")?;
-                if base_reg != 10 && is_likely_packet_ptr(base_reg_i32, start_slot, &view.insns) {
+                if base_reg != 10 && is_likely_packet_ptr(base_reg_i32, start_idx, &block_insns) {
                     skipped.push(SkipReason {
                         pc: site.start_pc,
                         reason: format!(
@@ -607,7 +612,9 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
 
             let base_reg = u8::try_from(site.required_binding("base_reg")?)
                 .context("wide_mem base_reg binding does not fit u8")?;
-            if base_reg_is_btf_ptr_from_states(base_reg, site.start_pc, verifier_states) {
+            if verifier_states.is_some_and(|states| {
+                base_reg_is_btf_ptr_from_states(base_reg, site.start_pc, states)
+            }) {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
                     reason: format!(
@@ -655,9 +662,9 @@ fn add_cross_block_wide_mem_skips(
                 block: block.id,
                 idx,
             };
-            let Some(&start_pc) = site_pcs.get(&site) else {
-                continue;
-            };
+            let start_pc = *site_pcs
+                .get(&site)
+                .ok_or_else(|| anyhow::anyhow!("missing current pc for {:?}", site))?;
             if reported_starts.contains(&start_pc) {
                 continue;
             }

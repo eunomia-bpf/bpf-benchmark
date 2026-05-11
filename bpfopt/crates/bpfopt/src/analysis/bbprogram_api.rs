@@ -18,6 +18,13 @@ pub struct DiamondPattern {
 
 impl BBProgram {
     pub fn delete_insn(&mut self, site: DefSite) -> anyhow::Result<usize> {
+        let mut next = self.clone();
+        let removed_slots = next.delete_insn_in_place(site)?;
+        *self = next;
+        Ok(removed_slots)
+    }
+
+    fn delete_insn_in_place(&mut self, site: DefSite) -> anyhow::Result<usize> {
         let site = site.site();
         let removed_slots = self.insn_slot_width(site)?;
         {
@@ -118,6 +125,13 @@ impl BBProgram {
     }
 
     pub fn delete_cond_branch(&mut self, block: BlockId) -> anyhow::Result<()> {
+        let mut next = self.clone();
+        next.delete_cond_branch_in_place(block)?;
+        *self = next;
+        Ok(())
+    }
+
+    fn delete_cond_branch_in_place(&mut self, block: BlockId) -> anyhow::Result<()> {
         let fallthrough = match self.block(block)?.terminator {
             Terminator::CondBranch { fallthrough, .. } => fallthrough,
             ref term => anyhow::bail!(
@@ -134,11 +148,22 @@ impl BBProgram {
         self.ldimm64_second_slots.remove(&site);
         self.pc_relative_ldimm64_targets.remove(&site);
         self.block_mut(block)?.terminator = Terminator::Fallthrough { next: fallthrough };
-        self.rebuild_cfg_edges();
+        self.rebuild_cfg_edges()?;
         self.rebuild_use_def_after_mutation()
     }
 
     pub fn replace_terminator(
+        &mut self,
+        block: BlockId,
+        terminator: Terminator,
+    ) -> anyhow::Result<()> {
+        let mut next = self.clone();
+        next.replace_terminator_in_place(block, terminator)?;
+        *self = next;
+        Ok(())
+    }
+
+    fn replace_terminator_in_place(
         &mut self,
         block: BlockId,
         terminator: Terminator,
@@ -151,11 +176,18 @@ impl BBProgram {
         self.ldimm64_second_slots.remove(&site);
         self.pc_relative_ldimm64_targets.remove(&site);
         self.block_mut(block)?.terminator = terminator;
-        self.rebuild_cfg_edges();
+        self.rebuild_cfg_edges()?;
         self.rebuild_use_def_after_mutation()
     }
 
     pub fn permute_blocks(&mut self, new_order: &[BlockId]) -> anyhow::Result<()> {
+        let mut next = self.clone();
+        next.permute_blocks_in_place(new_order)?;
+        *self = next;
+        Ok(())
+    }
+
+    fn permute_blocks_in_place(&mut self, new_order: &[BlockId]) -> anyhow::Result<()> {
         if new_order.len() != self.blocks.len() {
             anyhow::bail!(
                 "permute_blocks got {} blocks, expected {}",
@@ -189,7 +221,7 @@ impl BBProgram {
             })
         });
         self.remap_pc_relative_targets_after_remove(&old_to_new)?;
-        self.rebuild_cfg_edges();
+        self.rebuild_cfg_edges()?;
         self.rebuild_use_def_after_mutation()
     }
 
@@ -323,10 +355,6 @@ impl BBProgram {
         Ok(removed)
     }
 
-    pub fn try_split_block(&mut self, at: InsnSite) -> anyhow::Result<(BlockId, BlockId)> {
-        self.split_block(at)
-    }
-
     pub fn split_block(&mut self, at: InsnSite) -> anyhow::Result<(BlockId, BlockId)> {
         let mut next = self.clone();
         let split = next.split_block_in_place(at)?;
@@ -378,7 +406,7 @@ impl BBProgram {
         if self.entry.0 >= tail.0 {
             self.entry.0 += 1;
         }
-        self.rebuild_cfg_edges();
+        self.rebuild_cfg_edges()?;
         self.rebuild_use_def_after_mutation()?;
         Ok((head, tail))
     }
@@ -525,7 +553,7 @@ impl BBProgram {
             })
         });
         self.remap_pc_relative_targets_after_remove(&old_to_new)?;
-        self.rebuild_cfg_edges();
+        self.rebuild_cfg_edges()?;
         self.rebuild_use_def_after_mutation()
     }
 

@@ -74,9 +74,8 @@ pub fn run_on_bbprogram(
     }
 
     let site_pcs = prog.current_site_pcs()?;
-    let pc_sites = prog.current_pc_sites()?;
     let target_pcs = prog.branch_target_pcs()?;
-    let old_len = current_program_len(prog, &site_pcs)?;
+    let old_len = prog.program_slot_len()?;
     let mut scan = scan_guard_sites(prog, &site_pcs, &target_pcs, layout)?;
     if scan.guards.is_empty() {
         return Ok((
@@ -102,7 +101,7 @@ pub fn run_on_bbprogram(
         while j < scan.guards.len() {
             let prev = &scan.guards[group[group.len() - 1]];
             let next = &scan.guards[j];
-            if !can_extend_ladder(prev, next, prog, &pc_sites, &target_pcs) {
+            if !can_extend_ladder(prev, next, prog, &site_pcs, &target_pcs)? {
                 break;
             }
             group.push(j);
@@ -115,7 +114,7 @@ pub fn run_on_bbprogram(
                     consumed[idx] = true;
                 }
                 rewrites.push(rewrite);
-                i = group.last().copied().unwrap_or(i) + 1;
+                i = j;
                 continue;
             }
         }
@@ -174,7 +173,7 @@ fn apply_rewrites(
         )?;
 
         for &site in skip_sites {
-            if is_terminator_site(prog, site)? {
+            if prog.is_terminator_site(site)? {
                 deleted_branches.insert(site.block);
             } else {
                 deleted_sites.insert(site);
@@ -207,11 +206,6 @@ fn apply_rewrites(
     Ok(addr_map_after_deletions(old_len, &deleted_pcs))
 }
 
-fn is_terminator_site(prog: &BBProgram, site: InsnSite) -> anyhow::Result<bool> {
-    let block = prog.block(site.block)?;
-    Ok(site.idx == block.insns.len() && block.terminator.raw_insn().is_some())
-}
-
 fn addr_map_after_deletions(old_len: usize, deleted_pcs: &BTreeSet<usize>) -> Vec<usize> {
     let mut addr_map = vec![0usize; old_len + 1];
     let mut new_pc = 0usize;
@@ -223,17 +217,6 @@ fn addr_map_after_deletions(old_len: usize, deleted_pcs: &BTreeSet<usize>) -> Ve
     }
     addr_map[old_len] = new_pc;
     addr_map
-}
-
-fn current_program_len(
-    prog: &BBProgram,
-    site_pcs: &BTreeMap<InsnSite, usize>,
-) -> anyhow::Result<usize> {
-    let mut len = 0usize;
-    for (&site, &pc) in site_pcs {
-        len = len.max(pc + prog.insn_slot_width(site)?);
-    }
-    Ok(len)
 }
 
 fn scan_guard_sites(
@@ -254,7 +237,7 @@ fn scan_guard_sites(
             last_data_root = None;
         }
 
-        for site in prog.logical_sites_in_block(block.id) {
+        for site in prog.logical_sites_in_block(block.id)? {
             let Some(&insn) = prog.insn_at(site) else {
                 continue;
             };
@@ -347,7 +330,7 @@ fn detect_guard_site(
     }
 
     let slow_target = match prog.block(site.block)?.terminator {
-        Terminator::CondBranch { taken, .. } if is_terminator_site(prog, site)? => taken,
+        Terminator::CondBranch { taken, .. } if prog.is_terminator_site(site)? => taken,
         _ => return Ok(None),
     };
     let cursor_dead = cursor_dead_after_compare(prog, add_site, site, cursor_reg);
@@ -483,9 +466,9 @@ fn can_extend_ladder(
     prev: &GuardSite,
     next: &GuardSite,
     prog: &BBProgram,
-    pc_sites: &BTreeMap<usize, InsnSite>,
+    site_pcs: &BTreeMap<InsnSite, usize>,
     target_pcs: &BTreeSet<usize>,
-) -> bool {
+) -> anyhow::Result<bool> {
     if prev.root_id != next.root_id
         || prev.root_reg != next.root_reg
         || prev.data_end_reg != next.data_end_reg
@@ -495,39 +478,39 @@ fn can_extend_ladder(
         || next.window_end - prev.window_end > MAX_LADDER_WINDOW_GROWTH
         || next.mov_pc <= prev.compare_pc
     {
-        return false;
+        return Ok(false);
     }
 
-    for pc in (prev.compare_pc + 1)..next.mov_pc {
-        if !is_merge_safe_interleave(pc, prog, pc_sites, target_pcs) {
-            return false;
+    let frame = prog.block(prev.compare.block)?.frame;
+    for (pc, site) in
+        prog.sites_in_frame_pc_range(site_pcs, frame, prev.compare_pc + 1, next.mov_pc)?
+    {
+        if !is_merge_safe_interleave(pc, site, prog, target_pcs)? {
+            return Ok(false);
         }
     }
 
-    !target_pcs.contains(&next.compare_pc)
+    Ok(!target_pcs.contains(&next.compare_pc))
 }
 
 fn is_merge_safe_interleave(
     pc: usize,
+    site: InsnSite,
     prog: &BBProgram,
-    pc_sites: &BTreeMap<usize, InsnSite>,
     target_pcs: &BTreeSet<usize>,
-) -> bool {
+) -> anyhow::Result<bool> {
     if target_pcs.contains(&pc) {
-        return false;
+        return Ok(false);
     }
 
-    let Some(&site) = pc_sites.get(&pc) else {
-        return false;
-    };
-    let Some(insn) = prog.insn_at(site) else {
-        return false;
-    };
-    match insn.class() {
+    let insn = prog
+        .insn_at(site)
+        .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
+    Ok(match insn.class() {
         BPF_JMP | BPF_JMP32 => false,
         BPF_ST | BPF_STX => insn.dst_reg() == 10,
         _ => true,
-    }
+    })
 }
 
 fn build_ladder_rewrite(
@@ -581,11 +564,14 @@ fn apply_transfer(
                 };
                 *last_data_root = Some(root_id);
             } else if is_ctx_data_end_load(&insn, layout) {
-                let root_id = last_data_root.unwrap_or_else(|| {
-                    let root_id = *next_root_id;
-                    *next_root_id += 1;
-                    root_id
-                });
+                let root_id = match *last_data_root {
+                    Some(root_id) => root_id,
+                    None => {
+                        let root_id = *next_root_id;
+                        *next_root_id += 1;
+                        root_id
+                    }
+                };
                 states[dst] = RegValue::PacketEnd { root_id };
             } else {
                 states[dst] = RegValue::Scalar;
@@ -595,12 +581,15 @@ fn apply_transfer(
             let op = bpf_op(insn.code);
             match (op, bpf_src(insn.code)) {
                 (BPF_MOV, BPF_X) => {
-                    states[dst] = states.get(src).cloned().unwrap_or(RegValue::Unknown)
+                    states[dst] = match states.get(src).cloned() {
+                        Some(state) => state,
+                        None => RegValue::Unknown,
+                    }
                 }
                 (BPF_MOV, _) => states[dst] = RegValue::Scalar,
                 (BPF_ADD, BPF_K) => {
-                    states[dst] = match states.get(dst).cloned().unwrap_or(RegValue::Unknown) {
-                        RegValue::PacketData { root_id, const_off } => RegValue::PacketData {
+                    states[dst] = match states.get(dst).cloned() {
+                        Some(RegValue::PacketData { root_id, const_off }) => RegValue::PacketData {
                             root_id,
                             const_off: const_off + insn.imm,
                         },

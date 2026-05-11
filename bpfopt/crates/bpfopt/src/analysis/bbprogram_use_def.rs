@@ -41,8 +41,8 @@ impl UseSite {
 
 #[derive(Clone, Debug, Default)]
 pub struct UseDefGraph {
-    pub defs: BTreeMap<DefSite, Vec<UseSite>>,
-    pub uses: BTreeMap<UseSite, Vec<DefSite>>,
+    pub(super) defs: BTreeMap<DefSite, Vec<UseSite>>,
+    pub(super) uses: BTreeMap<UseSite, Vec<DefSite>>,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -91,7 +91,18 @@ impl UseDefGraph {
     }
 
     pub fn uses_for(&self, def: DefSite) -> &[UseSite] {
-        self.defs.get(&def).map(Vec::as_slice).unwrap_or(&[])
+        match self.defs.get(&def) {
+            Some(uses) => uses.as_slice(),
+            None => &[],
+        }
+    }
+
+    pub fn defs(&self) -> impl Iterator<Item = &DefSite> {
+        self.defs.keys()
+    }
+
+    pub fn uses(&self) -> impl Iterator<Item = &UseSite> {
+        self.uses.keys()
     }
 }
 
@@ -104,7 +115,7 @@ fn process_block_state(
 ) -> anyhow::Result<ReachingState> {
     let mut graph = graph;
     let mut state = input.clone();
-    for site in prog.logical_sites_in_block(block) {
+    for site in prog.logical_sites_in_block(block)? {
         let Some(facts) = site_facts.get(&site) else {
             anyhow::bail!("missing use-def facts for site {:?}", site);
         };
@@ -166,7 +177,7 @@ fn kinsn_aware_site_facts(prog: &BBProgram) -> anyhow::Result<BTreeMap<InsnSite,
     let mut sites = Vec::new();
 
     for block in prog.blocks() {
-        for site in prog.logical_sites_in_block(block.id) {
+        for site in prog.logical_sites_in_block(block.id)? {
             let insn = prog
                 .insn_at(site)
                 .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;

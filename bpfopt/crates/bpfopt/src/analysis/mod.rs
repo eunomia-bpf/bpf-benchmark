@@ -10,8 +10,8 @@ pub mod bbprogram_lower;
 mod bbprogram_use_def;
 
 pub use bbprogram::{
-    BBMapBinding, BBProgram, Block, BlockBodyLinearView, BlockId, BtfMetadataMap, FrameId,
-    InsnSite, ProgramLinearView, Terminator, VerifierOracle,
+    BBMapBinding, BBProgram, Block, BlockId, BtfMetadataMap, FrameId, InsnSite, Terminator,
+    VerifierOracle,
 };
 pub use bbprogram_api::DiamondPattern;
 pub use bbprogram_btf::BtfRecordsView;

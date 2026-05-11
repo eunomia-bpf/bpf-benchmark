@@ -11,7 +11,7 @@ use crate::insn::*;
 use crate::pass::KinsnRegistry;
 
 pub fn lift(insns: &[BpfInsn], oracle: Option<VerifierOracle>) -> anyhow::Result<BBProgram> {
-    lift_with_kinsn_registry(insns, oracle, Arc::new(KinsnRegistry::default()))
+    lift_with_kinsn_registry(insns, oracle, Arc::new(KinsnRegistry::unavailable()?))
 }
 
 pub fn lift_with_kinsn_registry(
@@ -45,12 +45,16 @@ pub fn lift_with_kinsn_registry(
     let mut pc_relative_ldimm64_targets = BTreeMap::new();
 
     for (block_idx, &start_pc) in block_starts.iter().enumerate() {
-        let end_pc = block_starts
-            .get(block_idx + 1)
-            .copied()
-            .unwrap_or(insns.len());
+        let end_pc = match block_starts.get(block_idx + 1).copied() {
+            Some(end_pc) => end_pc,
+            None => insns.len(),
+        };
         let id = BlockId(block_idx);
-        let frame = FrameId(frame_by_pc.get(start_pc).copied().unwrap_or(0));
+        let mut frame = 0usize;
+        if let Some(current_frame) = frame_by_pc.get(start_pc).copied() {
+            frame = current_frame;
+        }
+        let frame = FrameId(frame);
         let mut block = Block {
             id,
             insns: Vec::new(),
@@ -227,26 +231,32 @@ fn collect_subprog_starts(insns: &[BpfInsn], boundaries: &[bool]) -> anyhow::Res
 fn pc_to_block_map(program_len: usize, block_starts: &[usize]) -> Vec<BlockId> {
     let mut pc_to_block = vec![BlockId(0); program_len + 1];
     for (idx, &start) in block_starts.iter().enumerate() {
-        let end = block_starts.get(idx + 1).copied().unwrap_or(program_len);
+        let end = match block_starts.get(idx + 1).copied() {
+            Some(end) => end,
+            None => program_len,
+        };
         for slot in pc_to_block.iter_mut().take(end).skip(start) {
             *slot = BlockId(idx);
         }
     }
-    pc_to_block[program_len] = block_starts
+    pc_to_block[program_len] = match block_starts
         .iter()
         .position(|&start| start == program_len)
         .map(BlockId)
-        .unwrap_or(BlockId(block_starts.len()));
+    {
+        Some(block) => block,
+        None => BlockId(block_starts.len()),
+    };
     pc_to_block
 }
 
 fn frame_by_pc_map(program_len: usize, subprog_starts: &[usize]) -> Vec<usize> {
     let mut frame_by_pc = vec![0usize; program_len];
     for (frame, &start) in subprog_starts.iter().enumerate() {
-        let end = subprog_starts
-            .get(frame + 1)
-            .copied()
-            .unwrap_or(program_len);
+        let end = match subprog_starts.get(frame + 1).copied() {
+            Some(end) => end,
+            None => program_len,
+        };
         for slot in &mut frame_by_pc[start..end] {
             *slot = frame;
         }
@@ -355,140 +365,5 @@ fn target_block_for_pc_relative_imm(
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::analysis::bbprogram_lower::lower;
-
-    fn roundtrip(insns: &[BpfInsn]) {
-        let prog = lift(insns, None).expect("lift should succeed");
-        let lowered = lower(&prog).expect("lower should succeed");
-        assert_eq!(lowered, insns);
-    }
-
-    fn block_for_original_pc(prog: &BBProgram, pc: usize) -> BlockId {
-        prog.btf
-            .iter()
-            .find_map(|(site, &old_pc)| (old_pc == pc).then_some(site.block))
-            .expect("original pc should map to a block")
-    }
-
-    #[test]
-    fn lift_treats_ldimm64_as_one_logical_instruction_with_second_slot_metadata() {
-        let imm = BpfInsn::ld_imm64(1, 0, 0x1122_3344_5566_7788);
-        let insns = vec![imm[0], imm[1], BpfInsn::mov64_reg(0, 1), BpfInsn::exit()];
-
-        let prog = lift(&insns, None).expect("lift should keep LD_IMM64 metadata");
-
-        assert_eq!(prog.blocks[0].insns.len(), 2);
-        assert!(prog.ldimm64_second_slots.contains_key(&InsnSite {
-            block: BlockId(0),
-            idx: 0
-        }));
-        roundtrip(&insns);
-    }
-
-    #[test]
-    fn lift_assigns_pseudo_call_target_to_a_subprogram_frame() {
-        let insns = vec![
-            BpfInsn::pseudo_call_to(0, 3),
-            BpfInsn::mov64_imm(0, 0),
-            BpfInsn::exit(),
-            BpfInsn::mov64_imm(0, 1),
-            BpfInsn::exit(),
-        ];
-
-        let prog = lift(&insns, None).expect("lift should resolve pseudo_call");
-        let entry = &prog.blocks[0];
-        let Terminator::Call {
-            callee, return_to, ..
-        } = entry.terminator
-        else {
-            panic!("entry block should end in a pseudo_call terminator");
-        };
-
-        assert_eq!(prog.blocks[callee.0].frame, FrameId(1));
-        assert_eq!(prog.blocks[return_to.0].frame, FrameId(0));
-        roundtrip(&insns);
-    }
-
-    #[test]
-    fn lift_preserves_ja32_imm_targets_separately_from_ja_off_targets() {
-        let ja32 = vec![
-            BpfInsn::new(BPF_JMP32 | BPF_JA, 0, 0, 2),
-            BpfInsn::mov64_imm(0, 0),
-            BpfInsn::mov64_imm(1, 1),
-            BpfInsn::exit(),
-        ];
-        let ja = vec![
-            BpfInsn::ja(2),
-            BpfInsn::mov64_imm(0, 0),
-            BpfInsn::mov64_imm(1, 1),
-            BpfInsn::exit(),
-        ];
-
-        for insns in [&ja32, &ja] {
-            let prog = lift(insns, None).expect("lift should resolve unconditional jump");
-            let target = block_for_original_pc(&prog, 3);
-            let Terminator::Jump { target: actual, .. } = prog.blocks[0].terminator else {
-                panic!("entry block should end in a jump");
-            };
-            assert_eq!(actual, target);
-            roundtrip(insns);
-        }
-    }
-
-    #[test]
-    fn lift_resolves_conditional_branch_taken_and_fallthrough_blocks() {
-        let insns = vec![
-            BpfInsn::jeq_imm(1, 0, 1),
-            BpfInsn::mov64_imm(0, 0),
-            BpfInsn::exit(),
-        ];
-
-        let prog = lift(&insns, None).expect("lift should resolve conditional branch");
-        let taken_block = block_for_original_pc(&prog, 2);
-        let fallthrough_block = block_for_original_pc(&prog, 1);
-        let Terminator::CondBranch {
-            taken, fallthrough, ..
-        } = prog.blocks[0].terminator
-        else {
-            panic!("entry block should end in a conditional branch");
-        };
-
-        assert_eq!(taken, taken_block);
-        assert_eq!(fallthrough, fallthrough_block);
-        roundtrip(&insns);
-    }
-
-    #[test]
-    fn lift_records_exit_as_a_raw_terminator() {
-        let insns = vec![BpfInsn::mov64_imm(0, 0), BpfInsn::exit()];
-
-        let prog = lift(&insns, None).expect("lift should keep exit terminator");
-
-        let Terminator::Exit { insn } = prog.blocks[0].terminator else {
-            panic!("block should end in exit");
-        };
-        assert_eq!(insn, BpfInsn::exit());
-        roundtrip(&insns);
-    }
-
-    #[test]
-    fn lift_creates_subprogram_entry_blocks_for_pseudo_func_ldimm64_targets() {
-        let callback = BpfInsn::ld_imm64(2, BPF_PSEUDO_FUNC, 3);
-        let insns = vec![
-            callback[0],
-            callback[1],
-            BpfInsn::mov64_imm(0, 0),
-            BpfInsn::exit(),
-            BpfInsn::mov64_reg(0, 1),
-            BpfInsn::exit(),
-        ];
-
-        let prog = lift(&insns, None).expect("lift should mark pseudo_func subprogram entry");
-        let subprog_block = block_for_original_pc(&prog, 4);
-
-        assert_eq!(prog.blocks[subprog_block.0].frame, FrameId(1));
-        roundtrip(&insns);
-    }
-}
+#[path = "bbprogram_lift_tests.rs"]
+mod tests;

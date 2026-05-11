@@ -11,11 +11,9 @@ use std::fmt;
 use std::sync::Arc;
 
 use crate::analysis::BBProgram;
+use crate::insn::BpfInsn;
 #[cfg(test)]
 use crate::insn::MapPseudo;
-use crate::insn::{
-    insn_width, relative_branch_target_pc, BpfInsn, BPF_PSEUDO_CALL, BPF_PSEUDO_FUNC,
-};
 // MapInlineHint et al. live in passes/map_inline.rs (pass-local metadata) and are
 // re-exported here so existing `use crate::pass::*` consumers keep working.
 pub use crate::passes::map_inline::{MapInlineHint, MapInlineHintAnchor, MapInlineHintMode};
@@ -190,100 +188,6 @@ impl BtfInfoRecords {
         }
         Ok(Self { rec_size, bytes })
     }
-}
-
-fn kinsn_candidate_subprog_starts(insns: &[BpfInsn]) -> anyhow::Result<Vec<usize>> {
-    let mut starts = vec![0usize];
-    let mut pc = 0usize;
-    while pc < insns.len() {
-        let insn = &insns[pc];
-        if (insn.is_ldimm64() && insn.src_reg() == BPF_PSEUDO_FUNC)
-            || (insn.is_call() && insn.src_reg() == BPF_PSEUDO_CALL)
-        {
-            if let Some(target) = relative_branch_target_pc(pc, i64::from(insn.imm)) {
-                if target < insns.len() {
-                    starts.push(target);
-                }
-            }
-        }
-        pc += insn_width(insn);
-    }
-
-    starts.sort_unstable();
-    starts.dedup();
-    if starts.is_empty() {
-        starts.push(0);
-    }
-    if starts[0] != 0 {
-        anyhow::bail!(
-            "first subprog starts at candidate pc {}, expected 0",
-            starts[0]
-        );
-    }
-    for window in starts.windows(2) {
-        if window[0] >= window[1] {
-            anyhow::bail!(
-                "candidate subprog starts are not strictly increasing: {} then {}",
-                window[0],
-                window[1]
-            );
-        }
-    }
-    Ok(starts)
-}
-
-pub fn kinsn_replacement_subprog_skip_reason(
-    insns: &[BpfInsn],
-    start_pc: usize,
-    old_len: usize,
-    replacement_len: usize,
-) -> anyhow::Result<Option<String>> {
-    if old_len == 0 {
-        anyhow::bail!("kinsn replacement site at pc {start_pc} has zero old length");
-    }
-    if replacement_len == 0 {
-        anyhow::bail!("kinsn replacement site at pc {start_pc} has zero replacement length");
-    }
-    let old_end = start_pc
-        .checked_add(old_len)
-        .ok_or_else(|| anyhow::anyhow!("kinsn replacement site at pc {start_pc} overflows"))?;
-    let replacement_end = start_pc.checked_add(replacement_len).ok_or_else(|| {
-        anyhow::anyhow!("kinsn replacement at pc {start_pc} replacement length overflows")
-    })?;
-    if old_end > insns.len() {
-        anyhow::bail!(
-            "kinsn replacement site {start_pc}..{old_end} exceeds instruction length {}",
-            insns.len()
-        );
-    }
-
-    let starts = kinsn_candidate_subprog_starts(insns)?;
-    let Some(subprog_idx) = starts.iter().rposition(|&start| start <= start_pc) else {
-        anyhow::bail!("no subprogram contains kinsn replacement site at pc {start_pc}");
-    };
-    let subprog_start = starts[subprog_idx];
-    let subprog_end = starts.get(subprog_idx + 1).copied().unwrap_or(insns.len());
-
-    if old_end > subprog_end {
-        return Ok(Some(format!(
-            "kinsn site crosses subprog boundary (site {start_pc}..{old_end}, subprog {subprog_start}..{subprog_end})"
-        )));
-    }
-    if replacement_end > subprog_end {
-        return Ok(Some(format!(
-            "kinsn replacement crosses subprog boundary (replacement {start_pc}..{replacement_end}, subprog {subprog_start}..{subprog_end})"
-        )));
-    }
-    if starts
-        .iter()
-        .any(|&subprog| subprog > start_pc && subprog < old_end)
-    {
-        return Ok(Some(format!(
-            "kinsn site contains subprog entry inside replacement range {start_pc}..{old_end}"
-        )));
-    }
-
-    Ok(None)
 }
 
 // ── Program IR ──────────────────────────────────────────────────────
@@ -669,7 +573,7 @@ pub trait BpfPass: Send + Sync {
 /// Pass execution context — contains platform info and external configuration.
 ///
 /// These values are invariant for the duration of a pipeline execution.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct PassContext {
     /// Available kinsn targets and static metadata.
     pub kinsn_registry: KinsnRegistry,
@@ -727,27 +631,28 @@ struct KinsnCallKey {
     call_off: i16,
 }
 
+#[cfg(test)]
 impl Default for KinsnRegistry {
     fn default() -> Self {
-        Self::new()
+        Self::new().expect("built-in kinsn registry should not contain duplicate target names")
     }
 }
 
 impl KinsnRegistry {
-    pub fn new() -> Self {
+    pub fn new() -> anyhow::Result<Self> {
         let mut registry = Self {
             by_name: HashMap::new(),
             by_call: HashMap::new(),
         };
         for pass in crate::passes::PASS_REGISTRY {
             for descriptor in pass.metadata.kinsn_targets {
-                registry.register_descriptor(descriptor);
+                registry.register_descriptor(descriptor)?;
             }
         }
-        registry
+        Ok(registry)
     }
 
-    pub fn unavailable() -> Self {
+    pub fn unavailable() -> anyhow::Result<Self> {
         Self::new()
     }
 
@@ -805,18 +710,19 @@ impl KinsnRegistry {
             .is_some_and(|entry| entry.btf_id.is_some())
     }
 
-    fn register_descriptor(&mut self, descriptor: &'static KinsnDescriptor) {
-        self.register_descriptor_name(descriptor.canonical_name, descriptor);
+    fn register_descriptor(&mut self, descriptor: &'static KinsnDescriptor) -> anyhow::Result<()> {
+        self.register_descriptor_name(descriptor.canonical_name, descriptor)?;
         for alias in descriptor.aliases {
-            self.register_descriptor_name(alias, descriptor);
+            self.register_descriptor_name(alias, descriptor)?;
         }
+        Ok(())
     }
 
     fn register_descriptor_name(
         &mut self,
         name: &'static str,
         descriptor: &'static KinsnDescriptor,
-    ) {
+    ) -> anyhow::Result<()> {
         let previous = self.by_name.insert(
             name,
             RegistryEntry {
@@ -825,7 +731,10 @@ impl KinsnRegistry {
                 descriptor,
             },
         );
-        assert!(previous.is_none(), "duplicate kinsn target name {name}");
+        if previous.is_some() {
+            anyhow::bail!("duplicate kinsn target name {name}");
+        }
+        Ok(())
     }
 
     fn descriptor_for_target_name(
@@ -1002,7 +911,7 @@ impl PassManager {
                 continue;
             }
 
-            let result = self.run_single_pass(pass, program, ctx)?;
+            let result = run_pass_once(pass, program, ctx)?;
             pass_names.push(pass.name().to_string());
             pass_results.push(result);
         }
@@ -1012,29 +921,28 @@ impl PassManager {
             pass_results,
         })
     }
+}
 
-    fn run_single_pass(
-        &self,
-        pass: &dyn BpfPass,
-        program: &mut BBProgram,
-        ctx: &PassContext,
-    ) -> anyhow::Result<PassResult> {
-        if let Some(skip) = required_kinsn_skip(pass.name(), ctx) {
-            return Ok(PassResult::skipped(skip));
-        }
-
-        let insns_before = program.program_linear_view()?.insns.len();
-        let mut result = pass.run(program, ctx)?;
-        let insns_after = program.program_linear_view()?.insns.len();
-        result.insns_before = insns_before;
-        result.insns_after = insns_after;
-
-        if insns_after != insns_before {
-            program.invalidate_oracle();
-        }
-
-        Ok(result)
+pub fn run_pass_once(
+    pass: &dyn BpfPass,
+    program: &mut BBProgram,
+    ctx: &PassContext,
+) -> anyhow::Result<PassResult> {
+    if let Some(skip) = required_kinsn_skip(pass.name(), ctx) {
+        return Ok(PassResult::skipped(skip));
     }
+
+    let insns_before = program.program_slot_len()?;
+    let mut result = pass.run(program, ctx)?;
+    let insns_after = program.program_slot_len()?;
+    result.insns_before = insns_before;
+    result.insns_after = insns_after;
+
+    if insns_after != insns_before {
+        program.invalidate_oracle();
+    }
+
+    Ok(result)
 }
 
 fn required_kinsn_skip(pass_name: &str, ctx: &PassContext) -> Option<SkipReason> {
@@ -1081,11 +989,9 @@ fn validate_policy_pass_names(
 // ── Helper: default PassContext for testing ──────────────────────────
 
 impl PassContext {
-    /// Create a minimal PassContext suitable for testing.
-    /// All kinsn targets unavailable, no special CPU features.
-    pub fn baseline() -> Self {
-        Self {
-            kinsn_registry: KinsnRegistry::unavailable(),
+    pub fn try_baseline() -> anyhow::Result<Self> {
+        Ok(Self {
+            kinsn_registry: KinsnRegistry::unavailable()?,
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig::default(),
             prog_type: 0,
@@ -1101,7 +1007,14 @@ impl PassContext {
             map_inline_hints: Vec::new(),
             func_info: None,
             line_info: None,
-        }
+        })
+    }
+
+    /// Create a minimal PassContext suitable for testing.
+    /// All kinsn targets unavailable, no special CPU features.
+    #[cfg(test)]
+    pub fn baseline() -> Self {
+        Self::try_baseline().expect("baseline pass context should build")
     }
 
     /// Whether cond_select can lower to a target branchless-select kinsn.

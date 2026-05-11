@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 //! EXTRACT optimization pass.
 
-use std::collections::BTreeMap;
 use std::ops::Range;
 
-use crate::analysis::{block_slot_offset, site_current_pc, BBProgram, BlockId, InsnSite};
+use crate::analysis::{block_slot_offset, BBProgram, BlockId, InsnSite};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
@@ -116,21 +115,20 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     let btf_id = ctx.kinsn_registry.btf_id_for_target_name("bpf_extract64")?;
     let mut safe_sites: Vec<SafeExtractSite> = Vec::new();
     let mut skipped = Vec::new();
-    let site_pcs = prog.current_site_pcs()?;
-    let pc_sites = prog.current_pc_sites()?;
 
-    for block in prog.blocks().map(|block| block.id).collect::<Vec<_>>() {
-        for start in prog.sites_in_block(block).collect::<Vec<_>>() {
-            if let Some(skip) = cross_block_extract_skip(prog, start, &site_pcs, &pc_sites)? {
+    for block in prog.block_ids().collect::<Vec<_>>() {
+        let insns = prog.copied_body_insns(block)?;
+        for start in prog.sites_in_block(block)? {
+            if let Some(skip) = cross_block_extract_skip(prog, start)? {
                 skipped.push(skip);
                 continue;
             }
 
-            let Some(mut site) = extract_site_at(&prog.blocks[block.0].insns, start.idx) else {
+            let Some(mut site) = extract_site_at(&insns, start.idx) else {
                 continue;
             };
             let start_slot = block_slot_offset(prog, start)?;
-            site.start_pc = site_current_pc(&site_pcs, start)?;
+            site.start_pc = prog.report_pc(start)?;
             let range = start.idx..start.idx + site.old_len;
 
             if let Some(reason) =
@@ -192,23 +190,20 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
 fn cross_block_extract_skip(
     prog: &BBProgram,
     start: InsnSite,
-    site_pcs: &BTreeMap<InsnSite, usize>,
-    pc_sites: &BTreeMap<usize, InsnSite>,
 ) -> anyhow::Result<Option<SkipReason>> {
-    let Some(i0) = prog.insn_at(start) else {
-        return Ok(None);
-    };
-    let start_pc = site_current_pc(site_pcs, start)?;
-    let next_pc = start_pc + prog.insn_slot_width(start)?;
-    let Some(next) = pc_sites.get(&next_pc).copied() else {
+    let i0 = prog
+        .insn_at(start)
+        .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", start))?;
+    let start_pc = prog.report_pc(start)?;
+    let Some(next) = prog.next_site_in_linear_order(start)? else {
         return Ok(None);
     };
     if next.block == start.block {
         return Ok(None);
     }
-    let Some(i1) = prog.insn_at(next) else {
-        return Ok(None);
-    };
+    let i1 = prog
+        .insn_at(next)
+        .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", next))?;
     Ok(
         extract_site_from_pair(i0, i1, start_pc).map(|_| SkipReason {
             pc: start_pc,

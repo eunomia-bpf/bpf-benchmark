@@ -128,7 +128,7 @@ pub(crate) fn advance_reg_state<V: SimpleRegValue>(
     if insn.is_ldimm64() {
         let hi =
             ldimm64_hi.ok_or_else(|| anyhow::anyhow!("LD_IMM64 is missing its second slot"))?;
-        regs[insn.dst_reg() as usize] = V::const64(combine_ldimm64(insn, hi));
+        regs[insn.dst_reg() as usize] = V::const64(decode_ldimm64_value(insn, hi) as i64);
         return Ok(());
     }
 
@@ -164,10 +164,4 @@ fn advance_alu32_state<V: SimpleRegValue>(insn: &BpfInsn, regs: &mut [V; 11]) {
         _ => V::unknown(),
     };
     regs[dst] = next;
-}
-
-fn combine_ldimm64(lo: &BpfInsn, hi: &BpfInsn) -> i64 {
-    let low = lo.imm as u32 as u64;
-    let high = hi.imm as u32 as u64;
-    i64::from_le_bytes((low | (high << 32)).to_le_bytes())
 }

@@ -3,7 +3,7 @@
 
 use std::ops::Range;
 
-use crate::analysis::{block_slot_offset, site_current_pc, BBProgram, BlockId, InsnSite};
+use crate::analysis::{block_slot_offset, BBProgram, BlockId, InsnSite};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
@@ -80,10 +80,9 @@ impl BpfPass for RotatePass {
 pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
     let mut safe_sites: Vec<SafeRotateSite> = Vec::new();
     let mut skipped = Vec::new();
-    let site_pcs = prog.current_site_pcs()?;
 
-    for block in prog.blocks().map(|block| block.id).collect::<Vec<_>>() {
-        for start in prog.sites_in_block(block).collect::<Vec<_>>() {
+    for block in prog.block_ids().collect::<Vec<_>>() {
+        for start in prog.sites_in_block(block)? {
             let Some(mut site) = rotate_site_at(prog, start)? else {
                 continue;
             };
@@ -92,7 +91,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                 idx: site.start_pc,
             };
             let start_slot = block_slot_offset(prog, replacement_start)?;
-            site.start_pc = site_current_pc(&site_pcs, replacement_start)?;
+            site.start_pc = prog.report_pc(replacement_start)?;
             let range = replacement_start.idx..replacement_start.idx + site.old_len;
 
             if let Some(reason) =
@@ -164,21 +163,16 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
 }
 
 fn rotate_site_at(prog: &BBProgram, site: InsnSite) -> anyhow::Result<Option<RotateSite>> {
-    let block = prog
-        .blocks
-        .get(site.block.0)
-        .ok_or_else(|| anyhow::anyhow!("invalid block id {:?}", site.block))?;
     let idx = site.idx;
-    let Some(i0) = block.insns.get(idx) else {
+    if idx + 3 > prog.block_body_len(site.block)? {
+        return Ok(None);
+    }
+    let insns = prog.copied_body_insns(site.block)?;
+    let (Some(i0), Some(i1), Some(i2)) = (insns.get(idx), insns.get(idx + 1), insns.get(idx + 2))
+    else {
         return Ok(None);
     };
-    let Some(i1) = block.insns.get(idx + 1) else {
-        return Ok(None);
-    };
-    let Some(i2) = block.insns.get(idx + 2) else {
-        return Ok(None);
-    };
-    Ok(try_match_rotate(&block.insns, i0, i1, i2, idx))
+    Ok(try_match_rotate(&insns, i0, i1, i2, idx))
 }
 
 pub(super) struct RotateSite {

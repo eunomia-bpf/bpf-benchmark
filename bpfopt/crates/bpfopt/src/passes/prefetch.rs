@@ -9,7 +9,7 @@ use serde::Deserialize;
 
 use crate::analysis::{
     annotations_from_profile, packet_ctx_layout, read_json_file, site_current_pc, BBProgram,
-    BlockId, FrameId, InsnSite, PacketCtxLayout, PacketCtxLayoutScope,
+    BlockId, InsnSite, PacketCtxLayout, PacketCtxLayoutScope,
 };
 use crate::insn::*;
 use crate::pass::*;
@@ -237,7 +237,7 @@ fn run_on_bbprogram_with_prefetch_profiles(
             None => default_site_score(site),
         };
 
-        let (insert_pc, insert_site) = match choose_prefetch_insert_site(prog, &site_pcs, site) {
+        let (insert_pc, insert_site) = match choose_prefetch_insert_site(prog, &site_pcs, site)? {
             Ok(insert) => insert,
             Err(reason) => {
                 skipped.push(SkipReason {
@@ -356,10 +356,10 @@ fn scan_map_value_prefetch_sites(
 ) -> anyhow::Result<Vec<PrefetchSite>> {
     let mut sites = Vec::new();
     for block in prog.blocks().map(|block| block.id).collect::<Vec<_>>() {
-        for site in prog.sites_in_block(block) {
-            let Some(insn) = prog.insn_at(site) else {
-                continue;
-            };
+        for site in prog.sites_in_block(block)? {
+            let insn = prog
+                .insn_at(site)
+                .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
             if insn.is_call() && insn.src_reg() == 0 && insn.imm == HELPER_MAP_LOOKUP_ELEM {
                 if let Some(prefetch) = first_map_value_deref_after_lookup(prog, site_pcs, site)? {
                     sites.push(prefetch);
@@ -377,18 +377,18 @@ fn first_map_value_deref_after_lookup(
 ) -> anyhow::Result<Option<PrefetchSite>> {
     let call_pc = site_current_pc(site_pcs, call_site)?;
     let call_width = prog.insn_slot_width(call_site)?;
-    let frame = prog.blocks[call_site.block.0].frame;
-    let (_, subprog_end) = frame_bounds(prog, frame)?;
+    let frame = prog.block(call_site.block)?.frame;
+    let (_, subprog_end) = prog.frame_slot_bounds(frame)?;
     let scan_end = subprog_end.min(call_pc.saturating_add(MAP_VALUE_LOOKAHEAD));
     let mut aliases = [None::<usize>; 11];
     aliases[BPF_REG_0 as usize] = Some(call_pc + call_width);
 
     for (pc, site) in
-        sites_in_frame_pc_range(prog, site_pcs, frame, call_pc + call_width, scan_end)?
+        prog.sites_in_frame_pc_range(site_pcs, frame, call_pc + call_width, scan_end)?
     {
-        let Some(insn) = prog.insn_at(site) else {
-            continue;
-        };
+        let insn = prog
+            .insn_at(site)
+            .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
         let width = prog.insn_slot_width(site)?;
 
         if let Some(base_reg) = memory_base_reg(insn) {
@@ -465,15 +465,15 @@ fn scan_packet_prefetch_sites(
     let mut regs = initial_packet_regs();
 
     for block in prog.blocks().map(|block| block.id).collect::<Vec<_>>() {
-        if should_reset_tracked_packet_state_at_block(prog, block) {
+        if prog.should_reset_linear_state_at_block(block)? {
             regs = [TrackedValue::Unknown; 11];
         }
 
-        for site in prog.sites_in_block_with_terminator(block) {
+        for site in prog.sites_in_block_with_terminator(block)? {
             let pc = site_current_pc(site_pcs, site)?;
-            let Some(insn) = prog.insn_at(site) else {
-                continue;
-            };
+            let insn = prog
+                .insn_at(site)
+                .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
             let width = prog.insn_slot_width(site)?;
             if let Some(base_reg) = memory_base_reg(insn) {
                 if let TrackedValue::PacketData { def_end_pc } = regs[base_reg as usize] {
@@ -493,27 +493,6 @@ fn scan_packet_prefetch_sites(
     }
 
     Ok(sites)
-}
-
-fn should_reset_tracked_packet_state_at_block(prog: &BBProgram, block: BlockId) -> bool {
-    if block.0 == 0 {
-        return false;
-    }
-    let preds = prog.predecessors(block);
-    if preds.len() != 1 {
-        return true;
-    }
-    let pred = preds[0];
-    if pred.0 + 1 != block.0 {
-        return true;
-    }
-    !matches!(
-        prog.blocks[pred.0].terminator,
-        crate::analysis::Terminator::Fallthrough { next } if next == block
-    ) && !matches!(
-        prog.blocks[pred.0].terminator,
-        crate::analysis::Terminator::CondBranch { fallthrough, .. } if fallthrough == block
-    )
 }
 
 fn initial_packet_regs() -> [TrackedValue; 11] {
@@ -622,17 +601,17 @@ fn choose_prefetch_insert_site(
     prog: &BBProgram,
     site_pcs: &BTreeMap<InsnSite, usize>,
     site: PrefetchSite,
-) -> Result<(usize, InsnSite), String> {
+) -> anyhow::Result<Result<(usize, InsnSite), String>> {
     let target_pc = site.target_pc;
     let block = site.target_site.block;
-    let (block_start, block_end) = block_slot_bounds(prog, block).map_err(|err| err.to_string())?;
-    let frame = prog.blocks[block.0].frame;
-    let (subprog_start, subprog_end) = frame_bounds(prog, frame).map_err(|err| err.to_string())?;
+    let (block_start, block_end) = prog.block_slot_bounds(block)?;
+    let frame = prog.block(block)?.frame;
+    let (subprog_start, subprog_end) = prog.frame_slot_bounds(frame)?;
     if block_start < subprog_start || block_end > subprog_end {
-        return Err(format!(
+        return Ok(Err(format!(
             "prefetch basic block crosses subprog boundary (block {}..{}, subprog {}..{})",
             block_start, block_end, subprog_start, subprog_end
-        ));
+        )));
     }
 
     let valid_start = block_start
@@ -640,19 +619,29 @@ fn choose_prefetch_insert_site(
         .max(target_pc.saturating_sub(MAX_PREFETCH_DISTANCE))
         .max(site.ptr_def_end_pc);
     if valid_start > target_pc {
-        return Err("no valid prefetch insertion window".into());
+        return Ok(Err("no valid prefetch insertion window".into()));
     }
 
-    reject_control_flow_between(prog, site_pcs, block, valid_start, target_pc)?;
-    reject_reg_write_between(prog, site_pcs, block, site.ptr_reg, valid_start, target_pc)?;
+    if let Some(reason) =
+        reject_control_flow_between(prog, site_pcs, block, valid_start, target_pc)?
+    {
+        return Ok(Err(reason));
+    }
+    if let Some(reason) =
+        reject_reg_write_between(prog, site_pcs, block, site.ptr_reg, valid_start, target_pc)?
+    {
+        return Ok(Err(reason));
+    }
 
     let ideal = target_pc.saturating_sub(TARGET_PREFETCH_DISTANCE);
     let Some((insert_pc, insert_site)) =
         nearest_instruction_boundary(prog, site_pcs, block, valid_start, target_pc, ideal)?
     else {
-        return Err("prefetch insertion window has no instruction boundary".into());
+        return Ok(Err(
+            "prefetch insertion window has no instruction boundary".into()
+        ));
     };
-    Ok((insert_pc, insert_site))
+    Ok(Ok((insert_pc, insert_site)))
 }
 
 fn reject_control_flow_between(
@@ -661,19 +650,19 @@ fn reject_control_flow_between(
     block: BlockId,
     start_pc: usize,
     end_pc: usize,
-) -> Result<(), String> {
-    for (pc, site) in sites_in_block_pc_range(prog, site_pcs, block, start_pc, end_pc)? {
-        let Some(insn) = prog.insn_at(site) else {
-            continue;
-        };
+) -> anyhow::Result<Option<String>> {
+    for (pc, site) in prog.sites_in_block_pc_range(site_pcs, block, start_pc, end_pc)? {
+        let insn = prog
+            .insn_at(site)
+            .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
         if insn.is_call() || insn.is_exit() || insn.is_jmp_class() || insn.is_ldimm64_pseudo_func()
         {
-            return Err(format!(
+            return Ok(Some(format!(
                 "prefetch window contains control-flow instruction at pc {pc}"
-            ));
+            )));
         }
     }
-    Ok(())
+    Ok(None)
 }
 
 fn reject_reg_write_between(
@@ -683,18 +672,18 @@ fn reject_reg_write_between(
     reg: u8,
     start_pc: usize,
     end_pc: usize,
-) -> Result<(), String> {
-    for (pc, site) in sites_in_block_pc_range(prog, site_pcs, block, start_pc, end_pc)? {
-        let Some(insn) = prog.insn_at(site) else {
-            continue;
-        };
+) -> anyhow::Result<Option<String>> {
+    for (pc, site) in prog.sites_in_block_pc_range(site_pcs, block, start_pc, end_pc)? {
+        let insn = prog
+            .insn_at(site)
+            .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
         if reg_write_kind(insn, reg).is_some() {
-            return Err(format!(
+            return Ok(Some(format!(
                 "r{reg} is redefined inside the prefetch window at pc {pc}"
-            ));
+            )));
         }
     }
-    Ok(())
+    Ok(None)
 }
 
 fn nearest_instruction_boundary(
@@ -704,90 +693,25 @@ fn nearest_instruction_boundary(
     valid_start: usize,
     valid_end: usize,
     ideal: usize,
-) -> Result<Option<(usize, InsnSite)>, String> {
+) -> anyhow::Result<Option<(usize, InsnSite)>> {
     let mut best = None;
 
-    for site in prog.sites_in_block(block) {
-        let pc = site_current_pc(site_pcs, site).map_err(|err| err.to_string())?;
+    for site in prog.sites_in_block(block)? {
+        let pc = site_current_pc(site_pcs, site)?;
         if pc >= valid_start && pc <= valid_end {
             let distance = pc.abs_diff(ideal);
-            let replace = best
-                .map(|(best_distance, best_pc, _)| {
+            if match best {
+                Some((best_distance, best_pc, _)) => {
                     distance < best_distance || (distance == best_distance && pc < best_pc)
-                })
-                .unwrap_or(true);
-            if replace {
+                }
+                None => true,
+            } {
                 best = Some((distance, pc, site));
             }
         }
     }
 
     Ok(best.map(|(_, pc, site)| (pc, site)))
-}
-
-fn sites_in_frame_pc_range(
-    prog: &BBProgram,
-    site_pcs: &BTreeMap<InsnSite, usize>,
-    frame: FrameId,
-    start_pc: usize,
-    end_pc: usize,
-) -> anyhow::Result<Vec<(usize, InsnSite)>> {
-    let mut sites = Vec::new();
-    for block in prog.blocks().filter(|block| block.frame == frame) {
-        for site in prog.sites_in_block_with_terminator(block.id) {
-            let pc = site_current_pc(site_pcs, site)?;
-            if pc >= start_pc && pc < end_pc {
-                sites.push((pc, site));
-            }
-        }
-    }
-    sites.sort_by_key(|(pc, _)| *pc);
-    Ok(sites)
-}
-
-fn sites_in_block_pc_range(
-    prog: &BBProgram,
-    site_pcs: &BTreeMap<InsnSite, usize>,
-    block: BlockId,
-    start_pc: usize,
-    end_pc: usize,
-) -> Result<Vec<(usize, InsnSite)>, String> {
-    let mut sites = Vec::new();
-    for site in prog.sites_in_block_with_terminator(block) {
-        let pc = site_current_pc(site_pcs, site).map_err(|err| err.to_string())?;
-        if pc >= start_pc && pc < end_pc {
-            sites.push((pc, site));
-        }
-    }
-    sites.sort_by_key(|(pc, _)| *pc);
-    Ok(sites)
-}
-
-fn frame_bounds(prog: &BBProgram, frame: FrameId) -> anyhow::Result<(usize, usize)> {
-    let mut start = usize::MAX;
-    let mut end = 0usize;
-    for block in prog.blocks().filter(|block| block.frame == frame) {
-        let (block_start, block_end) = block_slot_bounds(prog, block.id)?;
-        start = start.min(block_start);
-        end = end.max(block_end);
-    }
-    if start == usize::MAX {
-        anyhow::bail!("frame {:?} has no blocks", frame);
-    }
-    Ok((start, end))
-}
-
-fn block_slot_bounds(prog: &BBProgram, block: BlockId) -> anyhow::Result<(usize, usize)> {
-    let start = prog.current_block_start_pc(block)?;
-    let block_ref = &prog.blocks[block.0];
-    let mut end = start;
-    for site in prog.sites_in_block(block) {
-        end += prog.insn_slot_width(site)?;
-    }
-    if block_ref.terminator.raw_insn().is_some() {
-        end += 1;
-    }
-    Ok((start, end))
 }
 
 fn reg_write_kind(insn: &BpfInsn, reg: u8) -> Option<RegWriteKind> {
