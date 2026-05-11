@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 //! ARM64 CCMP optimization pass.
 
-use crate::analysis::{
-    admit_kinsn_site_window, block_start_slot, site_pc, BBProgram, BlockId, InsnSite, Terminator,
-};
+use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
@@ -119,10 +117,8 @@ pub(super) struct CcmpPayload {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(super) struct CcmpSite {
-    pub(super) start_pc: usize,
     start_site: InsnSite,
     pub(super) old_len: usize,
-    pub(super) target_pc: usize,
     target_block: BlockId,
     success_block: BlockId,
     blocks: Vec<BlockId>,
@@ -138,9 +134,7 @@ struct SafeCcmpSite {
 }
 
 struct BranchTerm {
-    pc: usize,
     block: BlockId,
-    target_pc: usize,
     target_block: BlockId,
     fallthrough: BlockId,
     reg: u8,
@@ -159,8 +153,8 @@ impl BpfPass for CcmpPass {
 
 pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
     if ctx.platform.arch != Arch::Aarch64 {
-        return Ok(PassResult::skipped(SkipReason {
-            pc: 0,
+        return Ok(PassResult::skipped_site(SiteSkipReason {
+            site: first_report_site(prog)?,
             reason: "ccmp is only valid on aarch64".into(),
         }));
     }
@@ -171,8 +165,8 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
 
     for site in sites {
         if site.regs.len() > MAX_CCMP_TERMS {
-            skipped.push(SkipReason {
-                pc: site.start_pc,
+            skipped.push(SiteSkipReason {
+                site: site.start_site,
                 reason: format!(
                     "ccmp chain length {} exceeds maximum {}",
                     site.regs.len(),
@@ -182,29 +176,29 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             continue;
         }
 
-        if site.target_pc <= site.start_pc + site.old_len {
-            skipped.push(SkipReason {
-                pc: site.start_pc,
+        if site.blocks.contains(&site.target_block) {
+            skipped.push(SiteSkipReason {
+                site: site.start_site,
                 reason: "ccmp chain target is inside the chain boundary".into(),
             });
             continue;
         }
 
-        if admit_kinsn_site_window(
-            prog,
-            site.start_site,
-            site.old_len,
-            CCMP_REPLACEMENT_LEN,
-            &mut skipped,
-        )?
-        .is_none()
+        if prog
+            .rep_admit_kinsn_site_window(
+                site.start_site,
+                site.old_len,
+                CCMP_REPLACEMENT_LEN,
+                &mut skipped,
+            )?
+            .is_none()
         {
             continue;
         }
 
         let Some(dst_reg) = choose_dead_dst_reg(prog, &site)? else {
-            skipped.push(SkipReason {
-                pc: site.start_pc,
+            skipped.push(SiteSkipReason {
+                site: site.start_site,
                 reason: "no dead register available for ccmp predicate".into(),
             });
             continue;
@@ -227,21 +221,21 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
 
     if safe_sites.is_empty() {
         return Ok(PassResult {
-            sites_skipped: skipped,
+            site_skipped: skipped,
             ..PassResult::unchanged()
         });
     }
 
     let btf_id = ctx.kinsn_registry.btf_id_for_target_name("bpf_ccmp64")?;
     let kfunc_off = ctx.kinsn_registry.call_off_for_target_name("bpf_ccmp64")?;
-    safe_sites.sort_by_key(|safe| safe.site.start_pc);
+    safe_sites.sort_by_key(|safe| safe.site.start_site);
     for safe_site in safe_sites.iter().rev() {
         apply_ccmp_site(prog, safe_site, btf_id, kfunc_off)?;
     }
 
     Ok(PassResult {
         sites_applied: safe_sites.len(),
-        sites_skipped: skipped,
+        site_skipped: skipped,
         ..Default::default()
     })
 }
@@ -301,7 +295,10 @@ fn ccmp_chain_blocks(
     let first = site.start_site.block;
     let block_len = prog.block_body_len(first)?;
     if site.start_site.idx != block_len {
-        anyhow::bail!("ccmp branch pc {} is not a block terminator", site.start_pc);
+        anyhow::bail!(
+            "ccmp branch site {:?} is not a block terminator",
+            site.start_site
+        );
     }
     if block_len > 0 {
         let (_, tail) = prog.split_block(site.start_site)?;
@@ -369,17 +366,15 @@ fn validate_chain_edges(
 
 pub(super) fn scan_ccmp_sites(prog: &BBProgram) -> anyhow::Result<Vec<CcmpSite>> {
     let mut sites = Vec::new();
-    let mut next_allowed_pc = 0usize;
 
     for block in prog.blocks() {
         let Some(first) = branch_term(prog, block.id)? else {
             continue;
         };
-        if first.pc < next_allowed_pc || has_same_chain_predecessor(prog, &first)? {
+        if has_same_chain_predecessor(prog, &first)? {
             continue;
         }
         if let Some(site) = try_match_ccmp_chain(prog, first)? {
-            next_allowed_pc = site.start_pc + site.old_len;
             sites.push(site);
         }
     }
@@ -390,13 +385,12 @@ fn try_match_ccmp_chain(prog: &BBProgram, first: BranchTerm) -> anyhow::Result<O
     let mut regs = Vec::new();
     let mut blocks = Vec::new();
     let mut cursor = first.block;
-    let mut expected_pc = first.pc;
 
     while let Some(term) = branch_term(prog, cursor)? {
-        if term.pc != expected_pc {
+        if blocks.contains(&term.block) {
             break;
         }
-        if term.target_pc != first.target_pc
+        if term.target_block != first.target_block
             || term.fail_mode != first.fail_mode
             || term.width != first.width
         {
@@ -405,7 +399,6 @@ fn try_match_ccmp_chain(prog: &BBProgram, first: BranchTerm) -> anyhow::Result<O
         regs.push(term.reg);
         blocks.push(term.block);
         cursor = term.fallthrough;
-        expected_pc += 1;
     }
 
     if regs.len() < MIN_CCMP_TERMS {
@@ -418,10 +411,8 @@ fn try_match_ccmp_chain(prog: &BBProgram, first: BranchTerm) -> anyhow::Result<O
     };
     let success_block = cursor;
     Ok(Some(CcmpSite {
-        start_pc: first.pc,
         start_site,
         old_len: regs.len(),
-        target_pc: first.target_pc,
         target_block: first.target_block,
         success_block,
         blocks,
@@ -440,7 +431,6 @@ fn has_same_chain_predecessor(prog: &BBProgram, first: &BranchTerm) -> anyhow::R
             && term.target_block == first.target_block
             && term.fail_mode == first.fail_mode
             && term.width == first.width
-            && term.pc + 1 == first.pc
         {
             return Ok(true);
         }
@@ -460,6 +450,9 @@ fn branch_term(prog: &BBProgram, block: BlockId) -> anyhow::Result<Option<Branch
     if !insn.is_cond_jmp() || bpf_src(insn.code) != BPF_K || insn.imm != 0 {
         return Ok(None);
     }
+    if taken == fallthrough {
+        return Ok(None);
+    }
     let Some(fail_mode) = CcmpFailMode::from_bpf_op(bpf_op(insn.code)) else {
         return Ok(None);
     };
@@ -470,19 +463,10 @@ fn branch_term(prog: &BBProgram, block: BlockId) -> anyhow::Result<Option<Branch
         block,
         idx: prog.block_body_len(block)?,
     };
-    let pc = site_pc(prog, branch_site)?;
-    let target_pc = block_start_slot(prog, taken)?;
-    if target_pc <= pc {
-        return Ok(None);
-    }
-    let fallthrough_pc = block_start_slot(prog, fallthrough)?;
-    if fallthrough_pc != pc + 1 {
-        return Ok(None);
-    }
+    prog.insn_at(branch_site)
+        .ok_or_else(|| anyhow::anyhow!("missing branch terminator at {:?}", branch_site))?;
     Ok(Some(BranchTerm {
-        pc,
         block,
-        target_pc,
         target_block: taken,
         fallthrough,
         reg: insn.dst_reg(),
@@ -496,7 +480,7 @@ fn choose_dead_dst_reg(prog: &BBProgram, site: &CcmpSite) -> anyhow::Result<Opti
         .blocks
         .last()
         .copied()
-        .ok_or_else(|| anyhow::anyhow!("ccmp site at pc {} has no blocks", site.start_pc))?;
+        .ok_or_else(|| anyhow::anyhow!("ccmp site {:?} has no blocks", site.start_site))?;
     let last_site = prog
         .terminator_site(last_block)?
         .ok_or_else(|| anyhow::anyhow!("ccmp block {:?} has no terminator site", last_block))?;

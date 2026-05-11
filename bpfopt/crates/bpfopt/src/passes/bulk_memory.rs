@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 use crate::analysis::{
-    admit_kinsn_site_window, advance_reg_state as advance_simple_reg_state, insn_use_def_set,
-    site_pc, BBProgram, BlockId, InsnSite, SimpleRegValue,
+    advance_reg_state as advance_simple_reg_state, insn_use_def_set, BBProgram, BlockId, InsnSite,
+    SimpleRegValue,
 };
 use crate::insn::*;
 use crate::pass::*;
@@ -175,7 +175,7 @@ struct AppliedBulkSite {
 #[derive(Default)]
 struct ScanResult {
     sites: Vec<AppliedBulkSite>,
-    skips: Vec<SkipReason>,
+    skips: Vec<SiteSkipReason>,
 }
 enum MatchOutcome {
     Apply(BulkSite),
@@ -226,14 +226,14 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             block: site.block,
             idx: site.range.start,
         };
-        if admit_kinsn_site_window(
-            prog,
-            start,
-            site.site.old_len,
-            site.site.replacement_len(),
-            &mut skipped,
-        )?
-        .is_none()
+        if prog
+            .rep_admit_kinsn_site_window(
+                start,
+                site.site.old_len,
+                site.site.replacement_len(),
+                &mut skipped,
+            )?
+            .is_none()
         {
             continue;
         }
@@ -241,7 +241,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     }
     if safe_sites.is_empty() {
         return Ok(PassResult {
-            sites_skipped: skipped,
+            site_skipped: skipped,
             ..PassResult::unchanged()
         });
     }
@@ -254,7 +254,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     }
     Ok(PassResult {
         sites_applied: safe_sites.len(),
-        sites_skipped: skipped,
+        site_skipped: skipped,
         ..Default::default()
     })
 }
@@ -273,7 +273,6 @@ fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
         let mut idx = 0usize;
         while idx < insns.len() {
             let start = InsnSite { block, idx };
-            let report_pc = site_pc(prog, start)?;
             match try_match_memcpy_run_at(&insns, block, idx, &live_out)? {
                 MatchOutcome::Apply(site) => {
                     if let BulkSiteKind::Memcpy {
@@ -284,8 +283,8 @@ fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
                             let src_stack = is_likely_stack_ptr(*src_base, idx, &insns);
                             let dst_stack = is_likely_stack_ptr(*dst_base, idx, &insns);
                             if src_stack == dst_stack {
-                                scan.skips.push(SkipReason {
-                                    pc: report_pc,
+                                scan.skips.push(SiteSkipReason {
+                                    site: start,
                                     reason: format!(
                                         "different-base memcpy alias not provably safe (src r{src_base}, dst r{dst_base})"
                                     ),
@@ -309,8 +308,8 @@ fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
                 MatchOutcome::Skip { reason, advance } => {
                     let advance = advance.max(1);
                     advance_reg_state_range(prog, block, idx, advance, &mut regs)?;
-                    scan.skips.push(SkipReason {
-                        pc: report_pc,
+                    scan.skips.push(SiteSkipReason {
+                        site: start,
                         reason,
                     });
                     idx += advance;
@@ -704,14 +703,14 @@ fn width_bytes(width: u8) -> anyhow::Result<usize> {
         _ => anyhow::bail!("bulk_memory unsupported width opcode {width:#x}"),
     })
 }
-fn is_likely_stack_ptr(reg: u8, before_pc: usize, insns: &[BpfInsn]) -> bool {
+fn is_likely_stack_ptr(reg: u8, before_slot: usize, insns: &[BpfInsn]) -> bool {
     if reg == STACK_PTR_REG {
         return true;
     }
     const LOOKBACK: usize = 32;
-    let start = before_pc.saturating_sub(LOOKBACK);
+    let start = before_slot.saturating_sub(LOOKBACK);
     let mut target_reg = reg;
-    let mut cursor = before_pc;
+    let mut cursor = before_slot;
     for _ in 0..LOOKBACK {
         let mut found_def = false;
         for def_idx in (start..cursor).rev() {

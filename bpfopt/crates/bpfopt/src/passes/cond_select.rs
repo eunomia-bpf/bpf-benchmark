@@ -3,10 +3,7 @@
 
 use std::collections::HashSet;
 
-use crate::analysis::{
-    admit_kinsn_site_window, block_start_slot, insn_use_def_set, site_pc, BBProgram, BlockId,
-    DiamondPattern, InsnSite, Terminator,
-};
+use crate::analysis::{insn_use_def_set, BBProgram, BlockId, DiamondPattern, InsnSite, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
@@ -62,7 +59,6 @@ pub struct CondSelectPass;
 
 /// A detected cond-select site.
 pub(super) struct CondSelectSite {
-    pub(super) start_pc: usize,
     start_site: InsnSite,
     end_site: InsnSite,
     pub(super) old_len: usize,
@@ -99,7 +95,6 @@ struct CondSelectLowering {
 struct CondBranchShape {
     block: BlockId,
     site: InsnSite,
-    pc: usize,
     cond: BpfInsn,
     taken: BlockId,
     fallthrough: BlockId,
@@ -126,8 +121,8 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     // Check if the target can lower bpf_select64 to branchless select
     // (CMOV on x86, CSEL on ARM64).
     if !ctx.has_branchless_select() {
-        return Ok(PassResult::skipped(SkipReason {
-            pc: 0,
+        return Ok(PassResult::skipped_site(SiteSkipReason {
+            site: first_report_site(prog)?,
             reason: "platform lacks branchless select support".into(),
         }));
     }
@@ -146,22 +141,22 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
         let lowering = match build_lowering(&site, &live_after) {
             Ok(lowering) => lowering,
             Err(reason) => {
-                skipped.push(SkipReason {
-                    pc: site.start_pc,
+                skipped.push(SiteSkipReason {
+                    site: site.start_site,
                     reason,
                 });
                 continue;
             }
         };
 
-        if admit_kinsn_site_window(
-            prog,
-            site.start_site,
-            site.old_len,
-            lowering.prefix.len() + 2,
-            &mut skipped,
-        )?
-        .is_none()
+        if prog
+            .rep_admit_kinsn_site_window(
+                site.start_site,
+                site.old_len,
+                lowering.prefix.len() + 2,
+                &mut skipped,
+            )?
+            .is_none()
         {
             continue;
         }
@@ -173,12 +168,12 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
 
     if safe_sites.is_empty() {
         return Ok(PassResult {
-            sites_skipped: skipped,
+            site_skipped: skipped,
             ..PassResult::unchanged()
         });
     }
 
-    safe_sites.sort_by_key(|safe| safe.site.start_pc);
+    safe_sites.sort_by_key(|safe| safe.site.start_site);
     for safe_site in safe_sites.iter().rev() {
         let site = &safe_site.site;
         let payload = BpfInsn::pack_u4(site.dst_reg, 0)
@@ -196,7 +191,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
 
     Ok(PassResult {
         sites_applied: safe_sites.len(),
-        sites_skipped: skipped,
+        site_skipped: skipped,
         ..Default::default()
     })
 }
@@ -227,8 +222,8 @@ fn pattern_a_for_site(
     let block_len = prog.block_body_len(jcc_site.block)?;
     if jcc_site.idx != block_len {
         anyhow::bail!(
-            "pattern A branch pc {} is not a block terminator",
-            site.start_pc
+            "pattern A branch site {:?} is not a block terminator",
+            site.start_site
         );
     }
     if block_len > 0 {
@@ -307,11 +302,9 @@ fn scan_cond_select_sites(prog: &BBProgram) -> anyhow::Result<Vec<CondSelectSite
             block: block.id,
             idx: prog.block_body_len(block.id)?,
         };
-        let branch_pc = site_pc(prog, branch_site)?;
         let shape = CondBranchShape {
             block: block.id,
             site: branch_site,
-            pc: branch_pc,
             cond,
             taken,
             fallthrough,
@@ -323,7 +316,7 @@ fn scan_cond_select_sites(prog: &BBProgram) -> anyhow::Result<Vec<CondSelectSite
             sites.push(site);
         }
     }
-    sites.sort_by_key(|site| site.start_pc);
+    sites.sort_by_key(|site| site.start_site);
     Ok(sites)
 }
 
@@ -353,26 +346,14 @@ fn try_match_pattern_a(
     if false_join != true_join || mov_false.dst_reg() != mov_true.dst_reg() {
         return Ok(None);
     }
-    if block_start_slot(prog, shape.fallthrough)? != shape.pc + 1 {
-        return Ok(None);
-    }
-    let false_mov_site = InsnSite {
-        block: shape.fallthrough,
-        idx: 0,
-    };
     let true_mov_site = InsnSite {
         block: shape.taken,
         idx: 0,
     };
-    let false_mov_pc = site_pc(prog, false_mov_site)?;
-    if block_start_slot(prog, shape.taken)? != false_mov_pc + 2 {
-        return Ok(None);
-    }
     if shape.block == shape.taken || shape.block == shape.fallthrough {
         return Ok(None);
     }
     Ok(Some(CondSelectSite {
-        start_pc: shape.pc,
         start_site: shape.site,
         end_site: true_mov_site,
         old_len: 4,
@@ -429,9 +410,7 @@ fn try_match_pattern_c(
         block: shape.block,
         idx: mov_true_idx,
     };
-    let start_pc = site_pc(prog, start_site)?;
     Ok(Some(CondSelectSite {
-        start_pc,
         start_site,
         end_site: InsnSite {
             block: shape.fallthrough,

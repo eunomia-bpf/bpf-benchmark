@@ -7,7 +7,7 @@ use crate::analysis::{lift_with_kinsn_registry, lower, BBProgram};
 use crate::insn::{BpfInsn, MapPseudo};
 use crate::pass::{
     BpfPass, CompressedMapValues, InsnAnnotation, MapInlineHint, MapLookupError, MapMetadata,
-    PassContext, PassResult, RegState, ScalarRange, StackState, Tnum, VerifierInsn,
+    PassContext, PassResult, RegState, ScalarRange, SkipReason, StackState, Tnum, VerifierInsn,
     VerifierInsnKind, VerifierValueWidth,
 };
 use crate::passes::MapInfo;
@@ -224,10 +224,12 @@ pub fn lower_test_program(prog: &BBProgram) -> Vec<BpfInsn> {
 
 pub fn run_pass_on_insns<P: BpfPass>(pass: P, insns: Vec<BpfInsn>, ctx: &PassContext) -> PassRun {
     let mut prog = lift_test_program(&insns, ctx);
+    let report_prog = prog.clone();
     // Test helpers run passes through the production BBProgram API.
-    let result = pass
+    let mut result = pass
         .run(&mut prog, ctx)
         .expect("future BBProgram-native pass should run");
+    materialize_site_skips_for_tests(&report_prog, &mut result);
     let lowered = lower_test_program(&prog);
     PassRun {
         result,
@@ -252,14 +254,28 @@ pub fn run_pipeline_on_insns(
     let mut prog = lift_test_program(&insns, ctx);
     let mut results = Vec::new();
     for pass in passes {
+        let report_prog = prog.clone();
         // Test helpers run passes through the production BBProgram API.
-        results.push(
-            pass.run(&mut prog, ctx)
-                .expect("future BBProgram-native pipeline pass should run"),
-        );
+        let mut result = pass
+            .run(&mut prog, ctx)
+            .expect("future BBProgram-native pipeline pass should run");
+        materialize_site_skips_for_tests(&report_prog, &mut result);
+        results.push(result);
     }
     let lowered = lower_test_program(&prog);
     (results, lowered, prog)
+}
+
+fn materialize_site_skips_for_tests(report_prog: &BBProgram, result: &mut PassResult) {
+    for skip in result.site_skipped.drain(..) {
+        let pc = report_prog
+            .rep_site_slot(skip.site)
+            .expect("test site skip should resolve to a report pc");
+        result.sites_skipped.push(SkipReason {
+            pc,
+            reason: skip.reason,
+        });
+    }
 }
 
 pub fn pass_ctx() -> PassContext {

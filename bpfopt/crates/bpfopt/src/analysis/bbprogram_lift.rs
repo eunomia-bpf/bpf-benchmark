@@ -8,22 +8,22 @@ use crate::analysis::{
     BBProgram, Block, BlockId, BtfMetadataMap, FrameId, InsnSite, Terminator, VerifierOracle,
 };
 use crate::insn::*;
-use crate::pass::KinsnRegistry;
+use crate::pass::{KinsnRegistry, PrefetchProfile, VerifierInsn, VerifierInsnKind};
 
-pub fn lift(insns: &[BpfInsn], oracle: Option<VerifierOracle>) -> anyhow::Result<BBProgram> {
+pub fn lift(insns: &[BpfInsn], oracle: Option<Arc<[VerifierInsn]>>) -> anyhow::Result<BBProgram> {
     lift_with_kinsn_registry(insns, oracle, Arc::new(KinsnRegistry::unavailable()?))
 }
 
 pub fn lift_with_kinsn_registry(
     insns: &[BpfInsn],
-    oracle: Option<VerifierOracle>,
+    oracle: Option<Arc<[VerifierInsn]>>,
     kinsn_reg: Arc<KinsnRegistry>,
 ) -> anyhow::Result<BBProgram> {
     if insns.is_empty() {
         return BBProgram::new(
             Vec::new(),
             BlockId(0),
-            oracle,
+            lift_oracle(oracle, &BTreeMap::new())?,
             BTreeMap::new(),
             kinsn_reg,
             BTreeMap::new(),
@@ -114,6 +114,8 @@ pub fn lift_with_kinsn_registry(
         blocks.push(block);
     }
 
+    let oracle = lift_oracle(oracle, &btf)?;
+
     BBProgram::new(
         blocks,
         BlockId(0),
@@ -123,6 +125,72 @@ pub fn lift_with_kinsn_registry(
         ldimm64_second_slots,
         pc_relative_ldimm64_targets,
     )
+}
+
+fn lift_oracle(
+    oracle: Option<Arc<[VerifierInsn]>>,
+    btf: &BtfMetadataMap,
+) -> anyhow::Result<Option<VerifierOracle>> {
+    let Some(oracle) = oracle else {
+        return Ok(None);
+    };
+    let pc_to_site = btf
+        .iter()
+        .map(|(&site, &pc)| (pc, site))
+        .collect::<BTreeMap<_, _>>();
+    let mut states_by_site = BTreeMap::<InsnSite, Vec<VerifierInsn>>::new();
+    for state in oracle.iter() {
+        states_by_site
+            .entry(verifier_state_site(state, &pc_to_site)?)
+            .or_default()
+            .push(state.clone());
+    }
+    Ok(Some(
+        states_by_site
+            .into_iter()
+            .map(|(site, states)| (site, Arc::from(states)))
+            .collect(),
+    ))
+}
+
+fn verifier_state_site(
+    state: &VerifierInsn,
+    pc_to_site: &BTreeMap<usize, InsnSite>,
+) -> anyhow::Result<InsnSite> {
+    if let Some(&site) = pc_to_site.get(&state.pc) {
+        return Ok(site);
+    }
+    if state.kind != VerifierInsnKind::InsnDeltaState {
+        anyhow::bail!("verifier state pc {} is not present in BBProgram", state.pc);
+    }
+    pc_to_site
+        .range(state.pc..)
+        .next()
+        .map(|(_, &site)| site)
+        .or_else(|| pc_to_site.iter().next_back().map(|(_, &site)| site))
+        .ok_or_else(|| anyhow::anyhow!("verifier state pc {} has no BBProgram site", state.pc))
+}
+
+pub(crate) fn lift_prefetch_profiles_from_original_pc_strings<I>(
+    prog: &BBProgram,
+    profiles: I,
+) -> anyhow::Result<BTreeMap<InsnSite, PrefetchProfile>>
+where
+    I: IntoIterator<Item = (String, PrefetchProfile)>,
+{
+    let mut lifted = BTreeMap::new();
+    for (pc, profile) in profiles {
+        let parsed_pc = pc
+            .parse::<usize>()
+            .map_err(|err| anyhow::anyhow!("invalid prefetch_sites pc key {pc}: {err}"))?;
+        let site = prog.original_pc_to_site(parsed_pc).ok_or_else(|| {
+            anyhow::anyhow!("prefetch profile pc {parsed_pc} is not present in BBProgram")
+        })?;
+        if lifted.insert(site, profile).is_some() {
+            anyhow::bail!("duplicate prefetch profile for site {:?}", site);
+        }
+    }
+    Ok(lifted)
 }
 
 fn instruction_boundaries(insns: &[BpfInsn]) -> anyhow::Result<Vec<bool>> {

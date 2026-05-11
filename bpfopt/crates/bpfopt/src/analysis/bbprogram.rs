@@ -6,11 +6,14 @@ use crate::analysis::bbprogram_btf::{remap_btf_records_view, BtfRemapView};
 use crate::analysis::bbprogram_lower::remap_btf_records_for_lowering;
 use crate::analysis::{DefSite, UseDefGraph};
 use crate::insn::{insn_width, BpfInsn, MapPseudo};
-use crate::pass::{BtfInfoRecords, KinsnRegistry, RegSet, RegState, VerifierInsn};
+use crate::pass::{
+    BtfInfoRecords, InsnAnnotation, KinsnRegistry, PmuRecord, PrefetchProfile, ProfilingData,
+    RegSet, VerifierInsn,
+};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::ops::Range;
 use std::sync::Arc;
-pub type VerifierOracle = Arc<[VerifierInsn]>;
+pub type VerifierOracle = BTreeMap<InsnSite, Arc<[VerifierInsn]>>;
 pub type BtfMetadataMap = BTreeMap<InsnSite, usize>;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BlockId(pub usize);
@@ -19,7 +22,7 @@ pub struct FrameId(pub usize);
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct InsnSite {
     pub block: BlockId,
-    pub idx: usize,
+    pub(super) idx: usize,
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BBMapBinding {
@@ -32,6 +35,7 @@ pub struct BBProgram {
     pub(crate) entry: BlockId,
     pub(super) use_def: UseDefGraph,
     pub(super) oracle: Option<VerifierOracle>,
+    pub(super) pmu_profile: BTreeMap<InsnSite, PmuRecord>,
     pub(super) btf: BtfMetadataMap,
     pub(super) kinsn_reg: Arc<KinsnRegistry>,
     pub(crate) map_ids: Vec<u32>,
@@ -89,6 +93,7 @@ impl BBProgram {
             entry,
             use_def: UseDefGraph::default(),
             oracle,
+            pmu_profile: BTreeMap::new(),
             btf,
             kinsn_reg,
             map_ids: Vec::new(),
@@ -259,22 +264,75 @@ impl BBProgram {
             .map(|binding| (binding.old_fd, binding.map_id))
             .collect()
     }
-    pub fn oracle(&self) -> Option<&[VerifierInsn]> {
-        self.oracle.as_deref()
+    pub fn oracle(&self) -> Option<&VerifierOracle> {
+        self.oracle.as_ref()
     }
-    pub fn oracle_at(&self, site: InsnSite, reg: u8) -> anyhow::Result<Option<&RegState>> {
-        let pc = *self
-            .current_site_pcs()?
-            .get(&site)
-            .ok_or_else(|| anyhow::anyhow!("site {:?} is not in current program order", site))?;
-        Ok(self.oracle.as_deref().and_then(|states| {
-            states
-                .iter()
-                .filter(|state| state.pc <= pc)
-                .filter_map(|state| state.regs.get(&reg).map(|reg_state| (state.pc, reg_state)))
-                .max_by_key(|(state_pc, _)| *state_pc)
-                .map(|(_, reg_state)| reg_state)
-        }))
+    pub fn oracle_at(&self, site: InsnSite) -> Option<&VerifierInsn> {
+        self.oracle.as_ref()?.get(&site)?.first()
+    }
+    pub(crate) fn verifier_states_at(&self, site: InsnSite) -> Option<&[VerifierInsn]> {
+        self.oracle.as_ref()?.get(&site).map(AsRef::as_ref)
+    }
+    pub fn profile_at(&self, site: InsnSite) -> Option<&PmuRecord> {
+        self.pmu_profile.get(&site)
+    }
+    pub(crate) fn attach_profile_from_annotations(
+        &mut self,
+        annotations: &[InsnAnnotation],
+    ) -> anyhow::Result<()> {
+        let profiles = annotations
+            .iter()
+            .enumerate()
+            .filter(|(_, annotation)| {
+                annotation.branch_profile.is_some() || annotation.prefetch_profile.is_some()
+            })
+            .map(|(pc, annotation)| (pc, annotation.clone()))
+            .collect::<HashMap<_, _>>();
+        self.attach_pmu_records_from_original_pcs(&profiles)
+    }
+    pub(crate) fn attach_prefetch_profile_from_original_pcs(
+        &mut self,
+        profiles: &HashMap<usize, PrefetchProfile>,
+    ) -> anyhow::Result<()> {
+        let records = profiles
+            .iter()
+            .map(|(&pc, profile)| {
+                (
+                    pc,
+                    PmuRecord {
+                        prefetch_profile: Some(profile.clone()),
+                        ..Default::default()
+                    },
+                )
+            })
+            .collect::<HashMap<_, _>>();
+        self.attach_pmu_records_from_original_pcs(&records)
+    }
+    pub(crate) fn attach_profile_data(&mut self, profile: &ProfilingData) -> anyhow::Result<()> {
+        if profile.branch_profiles.is_empty() {
+            return self.attach_prefetch_profile_from_original_pcs(&profile.prefetch_profiles);
+        }
+        let mut records = HashMap::<usize, PmuRecord>::new();
+        for (&pc, branch_profile) in &profile.branch_profiles {
+            records.entry(pc).or_default().branch_profile = Some(branch_profile.clone());
+        }
+        for (&pc, prefetch_profile) in &profile.prefetch_profiles {
+            records.entry(pc).or_default().prefetch_profile = Some(prefetch_profile.clone());
+        }
+        self.attach_pmu_records_from_original_pcs(&records)
+    }
+    fn attach_pmu_records_from_original_pcs(
+        &mut self,
+        profiles: &HashMap<usize, PmuRecord>,
+    ) -> anyhow::Result<()> {
+        self.pmu_profile.clear();
+        for (&pc, profile) in profiles {
+            let site = self
+                .original_pc_to_site(pc)
+                .ok_or_else(|| anyhow::anyhow!("profile pc {pc} is not present in BBProgram"))?;
+            self.pmu_profile.insert(site, profile.clone());
+        }
+        Ok(())
     }
     pub fn kinsn_registry(&self) -> &KinsnRegistry {
         &self.kinsn_reg
@@ -355,13 +413,23 @@ impl BBProgram {
             .copied()
             .ok_or_else(|| anyhow::anyhow!("site {:?} has no original-PC mapping", site))
     }
-    pub fn site_from_original_pc(&self, pc: usize) -> Option<InsnSite> {
+    pub fn original_pc_to_site(&self, pc: usize) -> Option<InsnSite> {
         self.btf
             .iter()
             .find_map(|(&site, &original_pc)| (original_pc == pc).then_some(site))
     }
+    pub fn site_current_pc(&self, site: InsnSite) -> anyhow::Result<usize> {
+        self.current_site_pcs()?
+            .get(&site)
+            .copied()
+            .ok_or_else(|| anyhow::anyhow!("site {:?} is not in current program order", site))
+    }
     pub fn first_site_in_block(&self, block: BlockId) -> anyhow::Result<Option<InsnSite>> {
         Ok(self.logical_sites_in_block(block)?.into_iter().next())
+    }
+    pub fn block_entry_site(&self, block: BlockId) -> anyhow::Result<InsnSite> {
+        self.first_site_in_block(block)?
+            .ok_or_else(|| anyhow::anyhow!("block {:?} has no entry instruction site", block))
     }
     pub fn terminator_site(&self, block: BlockId) -> anyhow::Result<Option<InsnSite>> {
         let block_ref = self.block(block)?;
@@ -637,6 +705,7 @@ impl BBProgram {
     }
     pub(crate) fn invalidate_oracle(&mut self) {
         self.oracle = None;
+        self.pmu_profile.clear();
     }
     pub fn reset_btf_to_current_pcs(&mut self) -> anyhow::Result<()> {
         self.btf = current_site_pcs(self)?;
@@ -1106,13 +1175,322 @@ fn first_logical_sites(
     }
     Ok(successors)
 }
+impl BBProgram {
+    pub(crate) fn bf_skip_reason(
+        &self,
+        site: InsnSite,
+        reason: String,
+    ) -> anyhow::Result<crate::pass::SiteSkipReason> {
+        self.insn(site)?;
+        Ok(crate::pass::SiteSkipReason { site, reason })
+    }
+
+    pub(crate) fn bf_blocks_are_adjacent(
+        &self,
+        left: BlockId,
+        right: BlockId,
+    ) -> anyhow::Result<bool> {
+        self.block(left)?;
+        self.block(right)?;
+        Ok(left.0 + 1 == right.0)
+    }
+
+    pub(crate) fn bf_block_range_has_body_site(
+        &self,
+        first: BlockId,
+        last: BlockId,
+    ) -> anyhow::Result<bool> {
+        if first.0 > last.0 {
+            anyhow::bail!(
+                "branch_flip block range {:?}..={:?} is inverted",
+                first,
+                last
+            );
+        }
+        for block in first.0..=last.0 {
+            if !self.sites_in_block(BlockId(block))?.is_empty() {
+                return Ok(true);
+            }
+        }
+        Ok(false)
+    }
+
+    pub(crate) fn bf_validate_flipped_branch_deltas(
+        &self,
+        report_site: InsnSite,
+        then_first: BlockId,
+        then_last: BlockId,
+        else_first: BlockId,
+        else_last: BlockId,
+        cond: BpfInsn,
+    ) -> anyhow::Result<()> {
+        let then_len = self.bf_block_range_body_slot_len(then_first, then_last)?;
+        let else_len = self.bf_block_range_body_slot_len(else_first, else_last)?;
+        let cond_delta = else_len.checked_add(1).ok_or_else(|| {
+            anyhow::anyhow!(
+                "branch_flip site {:?} else arm overflows branch delta",
+                report_site
+            )
+        })?;
+        let mut inverted = cond;
+        inverted.set_branch_target_delta(i64::try_from(cond_delta).map_err(|_| {
+            anyhow::anyhow!(
+                "branch_flip site {:?} else arm length {} overflows branch delta",
+                report_site,
+                else_len
+            )
+        })?)?;
+        let mut ja = BpfInsn::ja(0);
+        ja.set_branch_target_delta(i64::try_from(then_len).map_err(|_| {
+            anyhow::anyhow!(
+                "branch_flip site {:?} then arm length {} overflows branch delta",
+                report_site,
+                then_len
+            )
+        })?)?;
+        Ok(())
+    }
+
+    fn bf_block_range_body_slot_len(&self, first: BlockId, last: BlockId) -> anyhow::Result<usize> {
+        if first.0 > last.0 {
+            anyhow::bail!(
+                "branch_flip block range {:?}..={:?} is inverted",
+                first,
+                last
+            );
+        }
+        let mut len = 0usize;
+        for block in first.0..=last.0 {
+            for site in self.sites_in_block(BlockId(block))? {
+                len = len
+                    .checked_add(self.insn_slot_width(site)?)
+                    .ok_or_else(|| anyhow::anyhow!("branch_flip arm slot length overflows"))?;
+            }
+        }
+        Ok(len)
+    }
+
+    pub(crate) fn pf_attach_prefetch_profiles(
+        &mut self,
+        profiles: &BTreeMap<InsnSite, PrefetchProfile>,
+    ) -> anyhow::Result<()> {
+        self.pmu_profile.clear();
+        for (&site, profile) in profiles {
+            self.insn_at(site).ok_or_else(|| {
+                anyhow::anyhow!("prefetch profile site {:?} is not present", site)
+            })?;
+            self.pmu_profile.insert(
+                site,
+                PmuRecord {
+                    prefetch_profile: Some(profile.clone()),
+                    ..Default::default()
+                },
+            );
+        }
+        Ok(())
+    }
+
+    pub(crate) fn pf_skip_reason(
+        &self,
+        site: InsnSite,
+        reason: String,
+    ) -> anyhow::Result<crate::pass::SiteSkipReason> {
+        self.insn(site)?;
+        Ok(crate::pass::SiteSkipReason { site, reason })
+    }
+
+    pub(crate) fn pf_sites_after_in_frame(
+        &self,
+        anchor: InsnSite,
+        max_slots: usize,
+    ) -> anyhow::Result<Vec<InsnSite>> {
+        self.insn(anchor)?;
+        let frame = self.block_frame(anchor.block)?;
+        let scan_start = self.pf_site_end_slot(anchor)?;
+        let scan_end = scan_start
+            .checked_add(max_slots)
+            .ok_or_else(|| anyhow::anyhow!("prefetch scan after {:?} overflows", anchor))?;
+        let mut sites = Vec::new();
+        for block in self.subprog_blocks(frame) {
+            for site in self.sites_in_block_with_terminator(block)? {
+                let site_start = self.pf_site_start_slot(site)?;
+                if site_start < scan_start {
+                    continue;
+                }
+                if site_start >= scan_end {
+                    return Ok(sites);
+                }
+                sites.push(site);
+            }
+        }
+        Ok(sites)
+    }
+
+    pub(crate) fn pf_prefetch_window_sites(
+        &self,
+        ptr_def: InsnSite,
+        target: InsnSite,
+        max_slots: usize,
+    ) -> anyhow::Result<Vec<InsnSite>> {
+        self.insn(ptr_def)?;
+        self.insn(target)?;
+        let frame = self.block_frame(target.block)?;
+        if self.block_frame(ptr_def.block)? != frame {
+            anyhow::bail!(
+                "prefetch pointer definition {:?} and target {:?} are in different frames",
+                ptr_def,
+                target
+            );
+        }
+        let (block_start, block_end) = self.block_slot_bounds(target.block)?;
+        let (frame_start, frame_end) = self.frame_slot_bounds(frame)?;
+        if block_start < frame_start || block_end > frame_end {
+            anyhow::bail!(
+                "prefetch block {:?} crosses frame {:?}: block {}..{}, frame {}..{}",
+                target.block,
+                frame,
+                block_start,
+                block_end,
+                frame_start,
+                frame_end
+            );
+        }
+        let target_start = self.pf_site_start_slot(target)?;
+        let ptr_def_end = self.pf_site_end_slot(ptr_def)?;
+        let valid_start = block_start
+            .max(target_start.saturating_sub(max_slots))
+            .max(ptr_def_end);
+        if valid_start > target_start {
+            return Ok(Vec::new());
+        }
+        let mut sites = Vec::new();
+        for site in self.sites_in_block(target.block)? {
+            let site_start = self.pf_site_start_slot(site)?;
+            if site_start >= valid_start && site_start <= target_start {
+                sites.push(site);
+            }
+        }
+        Ok(sites)
+    }
+
+    pub(crate) fn pf_nearest_prefetch_insert_site(
+        &self,
+        sites: &[InsnSite],
+        target: InsnSite,
+        ideal_distance: usize,
+    ) -> anyhow::Result<Option<InsnSite>> {
+        let ideal = self
+            .pf_site_start_slot(target)?
+            .saturating_sub(ideal_distance);
+        let mut best = None;
+        for &site in sites {
+            let site_start = self.pf_site_start_slot(site)?;
+            let distance = site_start.abs_diff(ideal);
+            if best.is_none_or(|(best_distance, best_start, _)| {
+                distance < best_distance || (distance == best_distance && site_start < best_start)
+            }) {
+                best = Some((distance, site_start, site));
+            }
+        }
+        Ok(best.map(|(_, _, site)| site))
+    }
+
+    fn pf_site_start_slot(&self, site: InsnSite) -> anyhow::Result<usize> {
+        self.rep_site_slot(site)
+    }
+
+    fn pf_site_end_slot(&self, site: InsnSite) -> anyhow::Result<usize> {
+        self.pf_site_start_slot(site)?
+            .checked_add(self.insn_slot_width(site)?)
+            .ok_or_else(|| anyhow::anyhow!("prefetch site {:?} end slot overflows", site))
+    }
+}
+
+impl BBProgram {
+    pub fn rep_site_slot(&self, site: InsnSite) -> anyhow::Result<usize> {
+        let mut offset = 0usize;
+        for idx in 0..site.idx {
+            offset += self.insn_slot_width(InsnSite {
+                block: site.block,
+                idx,
+            })?;
+        }
+        Ok(self.block_slot_bounds(site.block)?.0 + offset)
+    }
+
+    pub fn rep_admit_kinsn_site_window(
+        &self,
+        start: InsnSite,
+        old_len: usize,
+        replacement_len: usize,
+        skipped: &mut Vec<crate::pass::SiteSkipReason>,
+    ) -> anyhow::Result<Option<(BlockId, Range<usize>)>> {
+        let mut start_slot = 0usize;
+        for idx in 0..start.idx {
+            start_slot += self.insn_slot_width(InsnSite {
+                block: start.block,
+                idx,
+            })?;
+        }
+        if let Some(reason) = self.kinsn_replacement_subprog_skip_reason(
+            start.block,
+            start_slot,
+            old_len,
+            replacement_len,
+        )? {
+            skipped.push(crate::pass::SiteSkipReason {
+                site: start,
+                reason,
+            });
+            return Ok(None);
+        }
+        Ok(Some((start.block, start.idx..start.idx + old_len)))
+    }
+}
+
+impl BBProgram {
+    pub fn bcm_sites_between(
+        &self,
+        start: InsnSite,
+        end: InsnSite,
+    ) -> anyhow::Result<Option<Vec<InsnSite>>> {
+        let frame = self.block_frame(start.block)?;
+        if self.block_frame(end.block)? != frame || !self.is_terminator_site(start)? {
+            return Ok(None);
+        }
+
+        let Terminator::CondBranch { fallthrough, .. } = self.terminator(start.block)? else {
+            return Ok(None);
+        };
+
+        let mut sites = Vec::new();
+        let mut cursor = fallthrough;
+        let mut visited = BTreeSet::new();
+        loop {
+            if !visited.insert(cursor) || self.block_frame(cursor)? != frame {
+                return Ok(None);
+            }
+
+            for site in self.sites_in_block_with_terminator(cursor)? {
+                if cursor == end.block && site == end {
+                    return Ok(Some(sites));
+                }
+                sites.push(site);
+            }
+
+            let Terminator::Fallthrough { next } = self.terminator(cursor)? else {
+                return Ok(None);
+            };
+            cursor = next;
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::insn::*;
     use crate::test_helpers::*;
-
     #[test]
     fn bbprogram_ja32_successor_uses_imm_target() {
         let insns = vec![
@@ -1123,7 +1501,6 @@ mod tests {
             BpfInsn::exit(),
         ];
         let prog = lift_test_program(&insns, &pass_ctx());
-
         assert!(prog.successors(BlockId(0)).contains(&BlockId(2)));
         assert!(matches!(
             prog.blocks().next().unwrap().terminator,
@@ -1133,7 +1510,6 @@ mod tests {
             }
         ));
     }
-
     #[test]
     fn bbprogram_cond_branch_exposes_taken_and_fallthrough_edges() {
         let insns = vec![
@@ -1143,7 +1519,6 @@ mod tests {
             BpfInsn::exit(),
         ];
         let prog = lift_test_program(&insns, &pass_ctx());
-
         assert_eq!(prog.successors(BlockId(0)), &[BlockId(1), BlockId(2)]);
         assert!(matches!(
             prog.blocks().next().unwrap().terminator,
@@ -1154,7 +1529,6 @@ mod tests {
             }
         ));
     }
-
     #[test]
     fn bbprogram_pseudo_call_records_callee_and_return_blocks() {
         let insns = vec![
@@ -1165,7 +1539,6 @@ mod tests {
             BpfInsn::exit(),
         ];
         let prog = lift_test_program(&insns, &pass_ctx());
-
         assert!(matches!(
             prog.blocks().next().unwrap().terminator,
             Terminator::Call {
@@ -1176,7 +1549,6 @@ mod tests {
         ));
         assert_eq!(prog.successors(BlockId(0)), &[BlockId(1), BlockId(2)]);
     }
-
     #[test]
     fn bbprogram_predecessors_are_derived_from_symbolic_successors() {
         let insns = vec![
@@ -1186,7 +1558,6 @@ mod tests {
             BpfInsn::exit(),
         ];
         let prog = lift_test_program(&insns, &pass_ctx());
-
         assert_eq!(prog.successors(BlockId(0)), &[BlockId(1), BlockId(2)]);
         assert_eq!(prog.predecessors(BlockId(1)), &[BlockId(0)]);
         assert_eq!(prog.predecessors(BlockId(2)), &[BlockId(0), BlockId(1)]);
@@ -1194,7 +1565,6 @@ mod tests {
         assert!(dom.dominates(BlockId(0), BlockId(1)));
         assert!(dom.dominates(BlockId(0), BlockId(2)));
     }
-
     #[test]
     fn bbprogram_cfg_edges_use_ja32_imm_target() {
         let insns = vec![
@@ -1205,11 +1575,9 @@ mod tests {
             BpfInsn::exit(),
         ];
         let prog = lift_test_program(&insns, &pass_ctx());
-
         assert_eq!(prog.successors(BlockId(0)), &[BlockId(2)]);
         assert_eq!(prog.predecessors(BlockId(2)), &[BlockId(0)]);
     }
-
     #[test]
     fn bbprogram_subprog_blocks_cover_callback_body_range() {
         let insns = vec![
@@ -1221,11 +1589,9 @@ mod tests {
             BpfInsn::exit(),
         ];
         let prog = lift_test_program(&insns, &pass_ctx());
-
         let callback_blocks = prog.subprog_blocks(FrameId(1)).collect::<Vec<_>>();
         assert_eq!(callback_blocks, vec![BlockId(2)]);
     }
-
     #[test]
     fn bbprogram_map_bindings_preserve_loader_fd_order() {
         let a = BpfInsn::ld_imm64(BPF_REG_1, BPF_PSEUDO_MAP_FD, 11);
@@ -1233,14 +1599,12 @@ mod tests {
         let mut ctx = pass_ctx();
         set_map_ids(&mut ctx, vec![101, 202]);
         let prog = lift_test_program(&[a[0], a[1], b[0], b[1], BpfInsn::exit()], &ctx);
-
         let bindings = prog.map_bindings();
         assert_eq!(bindings[0].old_fd, 11);
         assert_eq!(bindings[0].map_id, 101);
         assert_eq!(bindings[1].old_fd, 22);
         assert_eq!(bindings[1].map_id, 202);
     }
-
     #[test]
     fn bbprogram_map_bindings_survive_dead_pseudo_load_deletion() {
         let a = BpfInsn::ld_imm64(BPF_REG_1, BPF_PSEUDO_MAP_FD, 11);
@@ -1253,22 +1617,18 @@ mod tests {
             .defs_for(BPF_REG_1)
             .next()
             .expect("map fd r1 def should exist");
-
         prog.delete_insn(def)
             .expect("delete should keep stable binding");
-
         let bindings = prog.map_bindings();
         assert_eq!(bindings[0].old_fd, 11);
         assert_eq!(bindings[0].map_id, 101);
         assert_eq!(bindings[1].old_fd, 22);
         assert_eq!(bindings[1].map_id, 202);
     }
-
     #[test]
     fn bbprogram_sites_in_block_treats_ldimm64_as_one_logical_site() {
         let wide = BpfInsn::ld_imm64(BPF_REG_1, 0, 0x1_0000_0000);
         let prog = lift_test_program(&[wide[0], wide[1], BpfInsn::exit()], &pass_ctx());
-
         let sites = prog
             .sites_in_block(BlockId(0))
             .expect("valid block should enumerate body sites");
@@ -1280,7 +1640,6 @@ mod tests {
             }]
         );
     }
-
     #[test]
     fn bbprogram_sites_in_block_excludes_terminator_from_body_iteration() {
         let prog = lift_test_program(
@@ -1292,7 +1651,6 @@ mod tests {
             ],
             &pass_ctx(),
         );
-
         let sites = prog
             .sites_in_block(BlockId(0))
             .expect("valid block should enumerate body sites");
@@ -1304,14 +1662,12 @@ mod tests {
             }]
         );
     }
-
     #[test]
     fn bbprogram_sites_can_include_terminators_when_requested() {
         let prog = lift_test_program(
             &[BpfInsn::jeq_imm(BPF_REG_0, 0, 1), BpfInsn::exit()],
             &pass_ctx(),
         );
-
         let sites = prog
             .sites_in_block_with_terminator(BlockId(0))
             .expect("valid block should enumerate logical sites");
@@ -1322,5 +1678,103 @@ mod tests {
                 idx: 0
             }]
         );
+    }
+}
+
+impl BBProgram {
+    /// Returns the InsnSite at the start of a block's body, or None if empty.
+    pub fn block_first_body_site(&self, block: BlockId) -> Option<InsnSite> {
+        let block_ref = self.blocks.get(block.0)?;
+        (!block_ref.insns.is_empty()).then_some(InsnSite { block, idx: 0 })
+    }
+
+    /// Returns the InsnSite immediately following `site` within the same block.
+    /// Returns None if `site` is the last body site in its block.
+    pub fn next_site_in_block(&self, site: InsnSite) -> Option<InsnSite> {
+        let block_ref = self.blocks.get(site.block.0)?;
+        let next_idx = site.idx.checked_add(1)?;
+        (next_idx < block_ref.insns.len()).then_some(InsnSite {
+            block: site.block,
+            idx: next_idx,
+        })
+    }
+
+    /// True iff `a` and `b` are in the same block and `b` immediately follows `a`.
+    pub fn is_immediately_followed_by(&self, a: InsnSite, b: InsnSite) -> bool {
+        self.next_site_in_block(a) == Some(b)
+    }
+
+    /// Iterator over adjacent body-site pairs within `block`.
+    pub fn adjacent_pairs_in_block(
+        &self,
+        block: BlockId,
+    ) -> impl Iterator<Item = (InsnSite, InsnSite)> + '_ {
+        let pair_count = self
+            .blocks
+            .get(block.0)
+            .map_or(0, |block_ref| block_ref.insns.len().saturating_sub(1));
+        (0..pair_count).map(move |idx| {
+            (
+                InsnSite { block, idx },
+                InsnSite {
+                    block,
+                    idx: idx + 1,
+                },
+            )
+        })
+    }
+
+    /// Iterator over fixed-size adjacent body-site windows within `block`.
+    /// Empty iterator if block body has fewer than N sites.
+    pub fn adjacent_windows_in_block<const N: usize>(
+        &self,
+        block: BlockId,
+    ) -> impl Iterator<Item = [InsnSite; N]> + '_ {
+        let body_len = self
+            .blocks
+            .get(block.0)
+            .map_or(0, |block_ref| block_ref.insns.len());
+        let window_count = if N == 0 || body_len < N {
+            0
+        } else {
+            body_len - N + 1
+        };
+        (0..window_count).map(move |start| {
+            std::array::from_fn(|offset| InsnSite {
+                block,
+                idx: start + offset,
+            })
+        })
+    }
+
+    /// Replace-range helper that takes an InsnSite + length, hiding
+    /// `idx..idx+len` arithmetic from passes.
+    pub fn replace_range_at(
+        &mut self,
+        site: InsnSite,
+        len: usize,
+        replacement: Vec<BpfInsn>,
+    ) -> anyhow::Result<()> {
+        let block_ref = self.block(site.block)?;
+        if site.idx > block_ref.insns.len() {
+            anyhow::bail!(
+                "replace_range_at starts at {:?}, beyond block body length {}",
+                site,
+                block_ref.insns.len()
+            );
+        }
+        let end = site
+            .idx
+            .checked_add(len)
+            .ok_or_else(|| anyhow::anyhow!("replace_range_at at {:?} overflows", site))?;
+        if end > block_ref.insns.len() {
+            anyhow::bail!(
+                "replace_range_at {:?} length {} exceeds block body length {}",
+                site,
+                len,
+                block_ref.insns.len()
+            );
+        }
+        self.replace_range(site.block, site.idx..end, replacement)
     }
 }

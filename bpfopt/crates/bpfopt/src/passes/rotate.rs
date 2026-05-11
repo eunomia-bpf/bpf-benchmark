@@ -1,8 +1,7 @@
-
 // SPDX-License-Identifier: MIT
 use std::ops::Range;
 
-use crate::analysis::{admit_kinsn_site_window, site_pc, BBProgram, BlockId, InsnSite};
+use crate::analysis::{BBProgram, BlockId, InsnSite};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
@@ -85,31 +84,30 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                 block,
                 idx: site.start_idx,
             };
-            let Some(admission) =
-                admit_kinsn_site_window(prog, replacement_start, site.old_len, 2, &mut skipped)?
+            let Some((admission_block, admission_range)) =
+                prog.rep_admit_kinsn_site_window(replacement_start, site.old_len, 2, &mut skipped)?
             else {
                 continue;
             };
-            let report_pc = site_pc(prog, replacement_start)?;
 
             let last_site = InsnSite {
                 block,
-                idx: admission.range.end - 1,
+                idx: admission_range.end - 1,
             };
             if prog
                 .live_out_site_checked(last_site)?
                 .contains(&site.tmp_reg)
             {
-                skipped.push(SkipReason {
-                    pc: report_pc,
+                skipped.push(SiteSkipReason {
+                    site: replacement_start,
                     reason: format!("tmp_reg r{} is live after site", site.tmp_reg),
                 });
                 continue;
             }
 
             safe_sites.push(SafeRotateSite {
-                block: admission.block,
-                range: admission.range,
+                block: admission_block,
+                range: admission_range,
                 site,
             });
         }
@@ -117,7 +115,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
 
     if safe_sites.is_empty() {
         return Ok(PassResult {
-            sites_skipped: skipped,
+            site_skipped: skipped,
             ..PassResult::unchanged()
         });
     }
@@ -149,7 +147,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
 
     Ok(PassResult {
         sites_applied: safe_sites.len(),
-        sites_skipped: skipped,
+        site_skipped: skipped,
         ..Default::default()
     })
 }

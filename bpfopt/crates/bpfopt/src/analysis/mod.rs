@@ -15,8 +15,7 @@ pub use bbprogram::{
 };
 pub use bbprogram_api::DiamondPattern;
 pub(crate) use bbprogram_helpers::{
-    admit_kinsn_site_window, advance_reg_state, annotations_from_profile, block_start_slot,
-    control_flow_target_sites, packet_ctx_layout, program_sites, read_json_file, site_pc,
+    advance_reg_state, control_flow_target_sites, packet_ctx_layout, program_sites, read_json_file,
     PacketCtxLayout, PacketCtxLayoutScope, SimpleRegValue,
 };
 pub use bbprogram_lift::{lift, lift_with_kinsn_registry};

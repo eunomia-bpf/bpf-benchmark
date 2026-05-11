@@ -9,7 +9,7 @@ use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::sync::Arc;
 
-use crate::analysis::BBProgram;
+use crate::analysis::{BBProgram, InsnSite};
 use crate::insn::BpfInsn;
 #[cfg(test)]
 pub use crate::test_helpers::{
@@ -161,6 +161,7 @@ pub struct PrefetchProfile {
     pub cache_misses: u64,
     pub miss_rate: f64,
 }
+pub type PmuRecord = InsnAnnotation;
 
 #[derive(Clone, Debug, Default)]
 pub struct ProfilingData {
@@ -284,8 +285,14 @@ pub struct PassResult {
     pub sites_applied: usize,
     /// Sites that were skipped (with reasons).
     pub sites_skipped: Vec<SkipReason>,
+    /// Sites that were skipped by BBProgram-native passes before report PC
+    /// materialization.
+    pub site_skipped: Vec<SiteSkipReason>,
     /// Diagnostic messages (read by tests and debug output).
     pub diagnostics: Vec<String>,
+    /// Site-keyed diagnostic messages materialized to report PCs by the CLI
+    /// report sink.
+    pub site_diagnostics: Vec<SiteDiagnostic>,
     /// Map-inline sites produced by this pass.
     pub map_inline_records: Vec<MapInlineRecord>,
     /// Instruction count before this pass ran.
@@ -309,12 +316,31 @@ impl PassResult {
             ..Self::unchanged()
         }
     }
+
+    pub fn skipped_site(reason: SiteSkipReason) -> Self {
+        Self {
+            site_skipped: vec![reason],
+            ..Self::unchanged()
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
 pub struct SkipReason {
     pub pc: usize,
     pub reason: String,
+}
+
+#[derive(Clone, Debug)]
+pub struct SiteSkipReason {
+    pub site: InsnSite,
+    pub reason: String,
+}
+
+#[derive(Clone, Debug)]
+pub struct SiteDiagnostic {
+    pub site: InsnSite,
+    pub message: String,
 }
 
 /// One specialized map value snapshot emitted by `MapInlinePass`.
@@ -616,8 +642,8 @@ pub fn run_pass_once(
     program: &mut BBProgram,
     ctx: &PassContext,
 ) -> anyhow::Result<PassResult> {
-    if let Some(skip) = required_kinsn_skip(pass.name(), ctx) {
-        return Ok(PassResult::skipped(skip));
+    if let Some(skip) = required_kinsn_skip(pass.name(), program, ctx)? {
+        return Ok(PassResult::skipped_site(skip));
     }
 
     let insns_before = program.program_slot_len()?;
@@ -633,13 +659,20 @@ pub fn run_pass_once(
     Ok(result)
 }
 
-fn required_kinsn_skip(pass_name: &str, ctx: &PassContext) -> Option<SkipReason> {
+fn required_kinsn_skip(
+    pass_name: &str,
+    program: &BBProgram,
+    ctx: &PassContext,
+) -> anyhow::Result<Option<SiteSkipReason>> {
     if pass_name == "ccmp" && ctx.platform.arch != Arch::Aarch64 {
-        return None;
+        return Ok(None);
     }
-    let entry = crate::passes::PASS_REGISTRY
+    let Some(entry) = crate::passes::PASS_REGISTRY
         .iter()
-        .find(|entry| entry.name == pass_name)?;
+        .find(|entry| entry.name == pass_name)
+    else {
+        return Ok(None);
+    };
     let missing = entry
         .metadata
         .required_kinsns
@@ -647,10 +680,22 @@ fn required_kinsn_skip(pass_name: &str, ctx: &PassContext) -> Option<SkipReason>
         .copied()
         .filter(|target| !ctx.kinsn_registry.is_target_available(target))
         .collect::<Vec<_>>();
-    (!missing.is_empty()).then(|| SkipReason {
-        pc: 0,
+    if missing.is_empty() {
+        return Ok(None);
+    }
+    Ok(Some(SiteSkipReason {
+        site: first_report_site(program)?,
         reason: format!("missing required kinsn target(s): {}", missing.join(", ")),
-    })
+    }))
+}
+
+pub fn first_report_site(program: &BBProgram) -> anyhow::Result<InsnSite> {
+    for block in program.block_ids() {
+        if let Some(site) = program.first_site_in_block(block)? {
+            return Ok(site);
+        }
+    }
+    anyhow::bail!("cannot report a pass site for an empty BBProgram")
 }
 
 // ── Helper: default PassContext for testing ──────────────────────────

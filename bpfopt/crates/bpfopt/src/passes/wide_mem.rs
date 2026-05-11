@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
+use crate::analysis::{control_flow_target_sites, BBProgram, BlockId, InsnSite, Terminator};
+use crate::insn::*;
+use crate::pass::*;
 use anyhow::{bail, Context};
 use std::collections::BTreeSet;
 use std::ops::Range;
-use crate::analysis::{
-    control_flow_target_sites, site_pc, BBProgram, BlockId, InsnSite, Terminator,
-};
-use crate::insn::*;
-use crate::pass::*;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(super) struct Binding {
     pub(super) name: &'static str,
@@ -264,12 +262,26 @@ fn wide_load_alignment_skip_reason(site: &RewriteSite) -> anyhow::Result<Option<
 fn is_btf_struct_ptr_type(reg_type: &str) -> bool {
     let safe = matches!(
         reg_type,
-        "scalar" | "fp" | "map_value" | "map_key" | "pkt" | "pkt_meta"
-            | "ctx" | "mem" | "buf" | "ringbuf_mem" | "iter"
-    )
-        || reg_type.starts_with("scalar")
+        "scalar"
+            | "fp"
+            | "map_value"
+            | "map_key"
+            | "pkt"
+            | "pkt_meta"
+            | "ctx"
+            | "mem"
+            | "buf"
+            | "ringbuf_mem"
+            | "iter"
+    ) || reg_type.starts_with("scalar")
         || reg_type.starts_with("fp");
     !safe
+}
+fn skip_site(site: InsnSite, reason: impl Into<String>) -> SiteSkipReason {
+    SiteSkipReason {
+        site,
+        reason: reason.into(),
+    }
 }
 const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
 const BPF_PROG_TYPE_SCHED_ACT: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_ACT;
@@ -290,10 +302,10 @@ fn is_packet_unsafe_prog_type(prog_type: u32) -> bool {
             | BPF_PROG_TYPE_SK_SKB
     )
 }
-fn is_likely_packet_ptr(reg: i32, before_pc: usize, insns: &[BpfInsn]) -> bool {
+fn is_likely_packet_ptr(reg: i32, before_slot: usize, insns: &[BpfInsn]) -> bool {
     const LOOKBACK: usize = 32;
-    let start = before_pc.saturating_sub(LOOKBACK);
-    for i in (start..before_pc).rev() {
+    let start = before_slot.saturating_sub(LOOKBACK);
+    for i in (start..before_slot).rev() {
         let insn = &insns[i];
         if insn.dst_reg() as i32 == reg {
             if insn.is_ldx_mem() {
@@ -350,7 +362,6 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                 .get(start_idx)
                 .copied()
                 .ok_or_else(|| anyhow::anyhow!("wide_mem start index {start_idx} missing"))?;
-            let report_pc = site_pc(prog, start_site)?;
             reported_starts.insert(start_site);
             let end_idx = start_idx + site.old_len;
             if end_idx > block_sites.len() {
@@ -365,10 +376,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                 .iter()
                 .any(|candidate| branch_targets.contains(candidate));
             if has_interior_target {
-                skipped.push(SkipReason {
-                    pc: report_pc,
-                    reason: "interior branch target".into(),
-                });
+                skipped.push(skip_site(start_site, "interior branch target"));
                 continue;
             }
             let dst_reg = u8::try_from(site.required_binding("dst_reg")?)
@@ -387,25 +395,19 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             let live_after = prog.live_out_site_checked(last_site)?;
             let has_live_scratch = scratch_regs.iter().any(|r| live_after.contains(r));
             if has_live_scratch {
-                skipped.push(SkipReason {
-                    pc: report_pc,
-                    reason: "scratch register live after site".into(),
-                });
+                skipped.push(skip_site(start_site, "scratch register live after site"));
                 continue;
             }
             let width = site.required_binding("width")?;
             if width != 2 && width != 4 && width != 8 {
-                skipped.push(SkipReason {
-                    pc: report_pc,
-                    reason: format!("unsupported width {} (supports 2, 4, 8)", width),
-                });
+                skipped.push(skip_site(
+                    start_site,
+                    format!("unsupported width {} (supports 2, 4, 8)", width),
+                ));
                 continue;
             }
             if let Some(reason) = wide_load_alignment_skip_reason(&site)? {
-                skipped.push(SkipReason {
-                    pc: report_pc,
-                    reason,
-                });
+                skipped.push(skip_site(start_site, reason));
                 continue;
             }
             if is_packet_unsafe_prog_type(ctx.prog_type) {
@@ -413,30 +415,30 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                 let base_reg_i32 = i32::try_from(base_reg)
                     .context("wide_mem base_reg binding does not fit i32")?;
                 if base_reg != 10 && is_likely_packet_ptr(base_reg_i32, start_idx, &block_insns) {
-                    skipped.push(SkipReason {
-                        pc: report_pc,
-                        reason: format!(
+                    skipped.push(skip_site(
+                        start_site,
+                        format!(
                             "likely packet pointer r{} in XDP/TC prog (prog_type={})",
                             base_reg, ctx.prog_type
                         ),
-                    });
+                    ));
                     continue;
                 }
             }
             let base_reg = u8::try_from(site.required_binding("base_reg")?)
                 .context("wide_mem base_reg binding does not fit u8")?;
             if prog
-                .oracle_at(start_site, base_reg)?
+                .oracle_at(start_site)
+                .and_then(|state| state.regs.get(&base_reg))
                 .is_some_and(|state| is_btf_struct_ptr_type(&state.reg_type))
             {
-                skipped.push(SkipReason {
-                    pc: report_pc,
-                    reason: format!(
-                        "base register r{} is a BTF struct pointer; \
-                             wide load may cross field boundary",
-                        base_reg
-                    ),
-                });
+                skipped.push(skip_site(
+                    start_site,
+                    format!(
+                    "base register r{} is a BTF struct pointer; wide load may cross field boundary",
+                    base_reg
+                ),
+                ));
                 continue;
             }
             safe_sites.push(SafeWideMemSite { block, range, site });
@@ -445,7 +447,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     add_cross_block_wide_mem_skips(prog, &branch_targets, &mut reported_starts, &mut skipped)?;
     if safe_sites.is_empty() {
         return Ok(PassResult {
-            sites_skipped: skipped,
+            site_skipped: skipped,
             ..PassResult::unchanged()
         });
     }
@@ -454,7 +456,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     }
     Ok(PassResult {
         sites_applied: safe_sites.len(),
-        sites_skipped: skipped,
+        site_skipped: skipped,
         ..Default::default()
     })
 }
@@ -462,13 +464,12 @@ fn add_cross_block_wide_mem_skips(
     prog: &BBProgram,
     branch_targets: &BTreeSet<InsnSite>,
     reported_starts: &mut BTreeSet<InsnSite>,
-    skipped: &mut Vec<SkipReason>,
+    skipped: &mut Vec<SiteSkipReason>,
 ) -> anyhow::Result<()> {
     for block in prog.block_ids().collect::<Vec<_>>() {
         let block_len = prog.block_body_len(block)?;
         for idx in 0..block_len {
             let site = InsnSite { block, idx };
-            let report_pc = site_pc(prog, site)?;
             if reported_starts.contains(&site) {
                 continue;
             }
@@ -484,10 +485,7 @@ fn add_cross_block_wide_mem_skips(
                 continue;
             }
             reported_starts.insert(site);
-            skipped.push(SkipReason {
-                pc: report_pc,
-                reason: "interior branch target".into(),
-            });
+            skipped.push(skip_site(site, "interior branch target"));
         }
     }
     Ok(())

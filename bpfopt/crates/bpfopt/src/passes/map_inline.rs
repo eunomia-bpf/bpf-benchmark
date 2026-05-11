@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 use crate::analysis::{
-    control_flow_target_sites, insn_use_def_set, program_sites, read_json_file, site_pc, BBProgram,
+    control_flow_target_sites, insn_use_def_set, program_sites, read_json_file, BBProgram,
     InsnSite, Terminator,
 };
 use crate::insn::*;
@@ -955,11 +955,6 @@ struct MapLookupSite {
     call_site: InsnSite,
     map_load_site: InsnSite,
 }
-impl MapLookupSite {
-    fn pc(&self, prog: &BBProgram) -> anyhow::Result<usize> {
-        site_pc(prog, self.call_site)
-    }
-}
 
 fn sites_after_site_in_frame(prog: &BBProgram, start: InsnSite) -> anyhow::Result<Vec<InsnSite>> {
     let frame = prog.block_frame(start.block)?;
@@ -1048,11 +1043,6 @@ struct FixedLoadUse {
     size: u8,
     offset: i16,
 }
-impl FixedLoadUse {
-    fn pc(&self, prog: &BBProgram) -> anyhow::Result<usize> {
-        site_pc(prog, self.site)
-    }
-}
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 struct R0UseClassification {
     fixed_loads: Vec<FixedLoadUse>,
@@ -1087,7 +1077,7 @@ struct SiteReplacement {
 struct DirectMapValueLoadRewriteResult {
     replacements: Vec<SiteReplacement>,
     sites_applied: usize,
-    diagnostics: Vec<String>,
+    site_diagnostics: Vec<SiteDiagnostic>,
     records: Vec<MapInlineRecord>,
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -1220,113 +1210,24 @@ fn find_map_in_map_chain_for_outer(
 }
 fn try_extract_constant_key_verifier_guided(
     prog: &BBProgram,
-    verifier_states: &[VerifierInsn],
     call_site: InsnSite,
     key_size: u32,
 ) -> Result<ConstantKey, String> {
-    if verifier_states.is_empty() {
-        return Err("no verifier states available".to_string());
-    }
     if key_size == 0 {
         return Err("map key size is zero".to_string());
     }
     let key_width: usize = key_size
         .try_into()
         .map_err(|_| format!("map key size {} does not fit in usize", key_size))?;
-    let call_pc = site_pc(prog, call_site).map_err(|err| err.to_string())?;
-    let mut occurrences = verifier_states
-        .iter()
-        .enumerate()
-        .filter(|(_, state)| state.pc == call_pc)
-        .collect::<Vec<_>>();
-    if occurrences.is_empty() {
-        if let Some((idx, state)) =
-            verifier_state_for_lookup_occurrence(prog, verifier_states, call_site)?
-        {
-            occurrences.push((idx, state));
-        }
-    }
-    if occurrences.is_empty() {
-        return Err(format!(
-            "verifier log has no state snapshot at call pc {}",
-            call_pc
-        ));
-    }
-    let mut extracted = Vec::new();
-    for (occ_idx, state) in occurrences {
-        extracted.push(try_extract_constant_key_for_occurrence(
-            prog,
-            verifier_states,
-            call_site,
-            key_width,
-            occ_idx,
-            state.frame,
-        )?);
-    }
-    let first = extracted
-        .first()
-        .cloned()
-        .ok_or_else(|| format!("no verifier-guided key candidates at pc {}", call_pc))?;
-    let all_same = extracted.iter().all(|key| {
-        key.stack_off == first.stack_off
-            && key.width == first.width
-            && key.bytes == first.bytes
-            && key.store_site == first.store_site
-            && key.materialization_sites == first.materialization_sites
-    });
-    if !all_same {
-        return Err(format!(
-            "verifier-derived key candidates disagree across {} state(s)",
-            extracted.len()
-        ));
-    }
-    Ok(first)
-}
-fn verifier_state_for_lookup_occurrence<'a>(
-    prog: &BBProgram,
-    verifier_states: &'a [VerifierInsn],
-    call_site: InsnSite,
-) -> Result<Option<(usize, &'a VerifierInsn)>, String> {
-    let lookup_sites = lookup_call_sites(prog).map_err(|err| err.to_string())?;
-    let lookup_idx = lookup_sites
-        .iter()
-        .copied()
-        .position(|site| site == call_site);
-    let Some(lookup_idx) = lookup_idx else {
-        return Ok(None);
-    };
-    let Some(state) = verifier_states.get(lookup_idx) else {
-        return Ok(None);
-    };
-    let slot_len = prog.program_slot_len().map_err(|err| err.to_string())?;
-    Ok((state.pc >= slot_len).then_some((lookup_idx, state)))
-}
-fn try_extract_constant_key_for_occurrence(
-    prog: &BBProgram,
-    verifier_states: &[VerifierInsn],
-    call_site: InsnSite,
-    key_width: usize,
-    occurrence_idx: usize,
-    frame: usize,
-) -> Result<ConstantKey, String> {
-    let call_pc = site_pc(prog, call_site).map_err(|err| err.to_string())?;
-    let state = verifier_states.get(occurrence_idx).ok_or_else(|| {
-        format!(
-            "verifier state occurrence {} is out of range",
-            occurrence_idx
-        )
-    })?;
-    if state.frame != frame {
-        return Err(format!(
-            "verifier state occurrence frame {} does not match expected frame {} at pc {}",
-            state.frame, frame, call_pc
-        ));
-    }
-    let key_off = stack_range_at_lookup(state, call_pc)?;
+    let state = prog
+        .oracle_at(call_site)
+        .ok_or_else(|| format!("verifier oracle has no state snapshot at {:?}", call_site))?;
+    let key_off = stack_range_at_lookup(state, call_site)?;
     let bytes = constant_stack_bytes_for_range(&state.stack, key_off, key_width).ok_or_else(
         || {
             format!(
-                "verifier log did not expose constant stack bytes covering fp{key_off} width {key_width} at call pc {call_pc}"
+                "verifier log did not expose constant stack bytes covering fp{key_off} width {key_width} at {:?}",
+                call_site
             )
         },
     )?;
@@ -1355,29 +1256,29 @@ fn try_extract_constant_key_for_occurrence(
         r2_add_site: removable_setup.map(|(_, add_site, _)| add_site),
     })
 }
-fn stack_range_at_lookup(state: &VerifierInsn, pc: usize) -> Result<i16, String> {
+fn stack_range_at_lookup(state: &VerifierInsn, call_site: InsnSite) -> Result<i16, String> {
     let reg = state.regs.get(&2).ok_or_else(|| {
         format!(
-            "verifier log did not expose r2 stack pointer at call pc {}",
-            pc
+            "verifier log did not expose r2 stack pointer at {:?}",
+            call_site
         )
     })?;
     if reg.reg_type != "fp" {
         return Err(format!(
-            "verifier log r2 at call pc {} has type {}, expected fp",
-            pc, reg.reg_type
+            "verifier log r2 at {:?} has type {}, expected fp",
+            call_site, reg.reg_type
         ));
     }
     let offset = reg.offset.ok_or_else(|| {
         format!(
-            "verifier log r2 stack pointer at call pc {} has no fixed offset",
-            pc
+            "verifier log r2 stack pointer at {:?} has no fixed offset",
+            call_site
         )
     })?;
     i16::try_from(offset).map_err(|_| {
         format!(
-            "verifier log r2 stack pointer offset {} at call pc {} does not fit in i16",
-            offset, pc
+            "verifier log r2 stack pointer offset {} at {:?} does not fit in i16",
+            offset, call_site
         )
     })
 }
@@ -1513,10 +1414,9 @@ fn find_constant_stack_bytes_with_limit(
             let store_idx = usize::try_from(absolute_off - store_start)
                 .map_err(|_| format!("negative store byte index at stack offset {absolute_off}"))?;
             if store_idx >= bytes.len() {
-                let pc = site_pc(prog, site).map_err(|err| err.to_string())?;
                 return Err(format!(
-                    "stack store at pc {} does not cover expected byte offset {}",
-                    pc, absolute_off
+                    "stack store at {:?} does not cover expected byte offset {}",
+                    site, absolute_off
                 ));
             }
             raw[key_idx] = Some(bytes[store_idx]);
@@ -1551,11 +1451,10 @@ fn find_constant_stack_bytes_with_limit(
 }
 fn constant_stack_store_bytes(prog: &BBProgram, store_site: InsnSite) -> Result<Vec<u8>, String> {
     let insn = prog.insn(store_site).map_err(|err| err.to_string())?;
-    let store_diag_pc = site_pc(prog, store_site).map_err(|err| err.to_string())?;
     let width = size_in_bytes(bpf_size(insn.code)).ok_or_else(|| {
         format!(
-            "stack store at pc {} uses unsupported width opcode {:#x}",
-            store_diag_pc, insn.code
+            "stack store at {:?} uses unsupported width opcode {:#x}",
+            store_site, insn.code
         )
     })?;
     let value = if bpf_class(insn.code) == BPF_ST {
@@ -1565,8 +1464,8 @@ fn constant_stack_store_bytes(prog: &BBProgram, store_site: InsnSite) -> Result<
         truncate_value(resolved.value, width)
     } else {
         return Err(format!(
-            "instruction at pc {} is not a stack store",
-            store_diag_pc
+            "instruction at {:?} is not a stack store",
+            store_site
         ));
     };
     Ok(value.to_le_bytes()[..usize::from(width)].to_vec())
@@ -1576,14 +1475,13 @@ fn constant_stack_store_source_site(
     store_site: InsnSite,
 ) -> Result<Option<InsnSite>, String> {
     let insn = prog.insn(store_site).map_err(|err| err.to_string())?;
-    let store_diag_pc = site_pc(prog, store_site).map_err(|err| err.to_string())?;
     if bpf_class(insn.code) == BPF_ST {
         return Ok(None);
     }
     if bpf_class(insn.code) != BPF_STX {
         return Err(format!(
-            "instruction at pc {} is not a stack store",
-            store_diag_pc
+            "instruction at {:?} is not a stack store",
+            store_site
         ));
     }
     Ok(resolve_constant_reg_value(prog, store_site, insn.src_reg())?.source_site)
@@ -1620,7 +1518,7 @@ fn site_replacement(
     site: InsnSite,
     replacement: Vec<BpfInsn>,
 ) -> SiteRewriteResult<SiteReplacement> {
-    site_pc(prog, site).map_err(SiteRewriteError::Error)?;
+    prog.insn(site).map_err(SiteRewriteError::Error)?;
     Ok(SiteReplacement { site, replacement })
 }
 #[derive(Clone, Debug)]
@@ -1680,16 +1578,13 @@ fn lookup_call_sites(prog: &BBProgram) -> anyhow::Result<Vec<InsnSite>> {
 }
 
 fn lookup_call_site_at_pc(prog: &BBProgram, pc: usize) -> anyhow::Result<Option<InsnSite>> {
-    let mut found = None;
-    for site in lookup_call_sites(prog)? {
-        if site_pc(prog, site)? != pc {
-            continue;
-        }
-        if found.replace(site).is_some() {
-            anyhow::bail!("inline hint pc {pc} maps to multiple lookup calls");
-        }
-    }
-    Ok(found)
+    let Some(site) = prog.original_pc_to_site(pc) else {
+        return Ok(None);
+    };
+    Ok(prog
+        .insn_at(site)
+        .is_some_and(is_map_lookup_elem_call)
+        .then_some(site))
 }
 
 fn collect_kernel_mutable_maps(
@@ -1731,17 +1626,19 @@ fn collect_kernel_mutable_maps(
             else {
                 continue;
             };
-            let pc = site_pc(prog, site)?;
-            let map_load_pc = site_pc(prog, map_load_site)?;
             let helper_name = map_writer_helper_name(insn.imm);
             let map_ref = map_info.reference_at_site(map_load_site).ok_or_else(|| {
                 anyhow::anyhow!(
-                    "map_inline cannot resolve map reference at pc {map_load_pc} for {helper_name} helper at pc {pc}"
+                    "map_inline cannot resolve map reference at {:?} for {helper_name} helper at {:?}",
+                    map_load_site,
+                    site
                 )
             })?;
             let map_id = map_ref.map_id.ok_or_else(|| {
                 anyhow::anyhow!(
-                    "map_inline cannot resolve map_id at pc {map_load_pc} for {helper_name} helper at pc {pc}"
+                    "map_inline cannot resolve map_id at {:?} for {helper_name} helper at {:?}",
+                    map_load_site,
+                    site
                 )
             })?;
             ids.insert(map_id);
@@ -2328,6 +2225,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     let mut total_applied = 0usize;
     let mut final_skipped = Vec::new();
     let mut diagnostics = Vec::new();
+    let mut site_diagnostics = Vec::new();
     let mut map_inline_records = Vec::new();
     let mut hit_iteration_cap = false;
     let mut inline_hints_consumed = HashSet::<MapInlineHintAnchor>::new();
@@ -2346,11 +2244,12 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             &mut inline_hints_consumed,
         )?;
         let round_modified = round.sites_applied > 0;
-        final_skipped = round.sites_skipped;
+        final_skipped = round.site_skipped;
         total_applied += round.sites_applied;
         map_inline_records.extend(round.map_inline_records);
         if iter == 0 {
             diagnostics.extend(round.diagnostics);
+            site_diagnostics.extend(round.site_diagnostics);
         } else {
             diagnostics.extend(
                 round
@@ -2358,6 +2257,12 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                     .into_iter()
                     .map(|diag| format!("round {}: {}", iter + 1, diag)),
             );
+            site_diagnostics.extend(round.site_diagnostics.into_iter().map(|diag| {
+                SiteDiagnostic {
+                    site: diag.site,
+                    message: format!("round {}: {}", iter + 1, diag.message),
+                }
+            }));
         }
         if !round_modified {
             break;
@@ -2386,8 +2291,9 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     }
     Ok(PassResult {
         sites_applied: total_applied,
-        sites_skipped: final_skipped,
+        site_skipped: final_skipped,
         diagnostics,
+        site_diagnostics,
         map_inline_records,
         ..Default::default()
     })
@@ -2406,27 +2312,27 @@ fn run_map_inline_round(
     let mut skipped = Vec::new();
     let mut rewrites = Vec::new();
     let mut diagnostics = Vec::new();
+    let mut site_diagnostics = Vec::new();
     if use_verifier_guided_keys {
         record_maps_skipped_by_size_counter(ctx, &mut diagnostics);
     }
     let DirectMapValueLoadRewriteResult {
         replacements: direct_replacements,
         sites_applied: direct_sites_applied,
-        diagnostics: direct_diagnostics,
+        site_diagnostics: direct_site_diagnostics,
         records: direct_records,
     } = build_direct_map_value_load_rewrites(prog, ctx, &kernel_mutable_maps)?;
-    diagnostics.extend(direct_diagnostics);
+    site_diagnostics.extend(direct_site_diagnostics);
     let sites = find_map_lookup_sites(prog)?;
     let has_writer = program_sites(prog)?
         .into_iter()
         .any(|site| prog.insn_at(site).is_some_and(is_map_writer_helper_call));
     if sites.is_empty() && has_writer {
         for site in lookup_call_sites(prog)? {
-            let pc = site_pc(prog, site)?;
             record_skip(
                 &mut skipped,
-                &mut diagnostics,
-                pc,
+                &mut site_diagnostics,
+                site,
                 kernel_mutable_writer_reason(ctx),
                 None,
             );
@@ -2438,33 +2344,43 @@ fn run_map_inline_round(
         use_verifier_guided_keys
     ));
     for site in sites {
-        let call_pc = site.pc(prog)?;
-        let map_load_pc = site_pc(prog, site.map_load_site)?;
         log_map_inline_debug(&format!(
-            "evaluating site at PC={} (map_load_pc={})",
-            call_pc, map_load_pc
+            "evaluating lookup {:?} (map_load_site {:?})",
+            site.call_site, site.map_load_site
         ));
         let Some(map_ref) = map_info.reference_at_site(site.map_load_site) else {
             log_map_inline_debug(&format!(
-                "site pc={} skip: map reference unavailable",
-                call_pc
+                "lookup {:?} skip: map reference unavailable",
+                site.call_site
             ));
             let reason = "map reference metadata unavailable".to_string();
-            record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+            record_skip(
+                &mut skipped,
+                &mut site_diagnostics,
+                site.call_site,
+                reason,
+                None,
+            );
             continue;
         };
         log_map_inline_debug(&format!(
-            "site at PC={}: map_ref imm={} map_index={} map_id={:?}",
-            call_pc, map_ref.imm, map_ref.map_index, map_ref.map_id
+            "lookup {:?}: map_ref imm={} map_index={} map_id={:?}",
+            site.call_site, map_ref.imm, map_ref.map_index, map_ref.map_id
         ));
         let Some(info) = map_ref.info.as_ref() else {
             let reason = "map info unavailable".to_string();
-            record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+            record_skip(
+                &mut skipped,
+                &mut site_diagnostics,
+                site.call_site,
+                reason,
+                None,
+            );
             continue;
         };
         log_map_inline_debug(&format!(
-            "site at PC={}: resolved map_id={} map_type={} key_size={} value_size={} max_entries={}",
-            call_pc,
+            "lookup {:?}: resolved map_id={} map_type={} key_size={} value_size={} max_entries={}",
+            site.call_site,
             info.map_id,
             info.map_type,
             info.key_size,
@@ -2472,19 +2388,31 @@ fn run_map_inline_round(
             info.max_entries,
         ));
         if let Some(reason) = kernel_mutable_reason_for_map(&kernel_mutable_maps, info) {
-            record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+            record_skip(
+                &mut skipped,
+                &mut site_diagnostics,
+                site.call_site,
+                reason,
+                None,
+            );
             continue;
         }
         if map_snapshot_skipped_by_size(ctx, info.map_id) {
             log_map_inline_debug(&format!(
-                "site pc={} skip: map {} snapshot skipped by size",
-                call_pc, info.map_id
+                "lookup {:?} skip: map {} snapshot skipped by size",
+                site.call_site, info.map_id
             ));
             if !ctx.map_value_overlays.contains_key(&info.map_id) {
                 return Err(anyhow::anyhow!("snapshot skipped map {}", info.map_id));
             }
             let reason = map_snapshot_skipped_by_size_site_reason(ctx, info.map_id);
-            record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+            record_skip(
+                &mut skipped,
+                &mut site_diagnostics,
+                site.call_site,
+                reason,
+                None,
+            );
             continue;
         }
         let site_inline_hints = inline_hints.for_call_site(site.call_site);
@@ -2503,12 +2431,10 @@ fn run_map_inline_round(
                         .iter()
                         .any(|site| branch_target_sites.contains(site))
                     {
-                        record_diagnostic(
-                            &mut diagnostics,
-                            format!(
-                                "site at PC={}: keeping map-in-map lookup chain because removal would cross a branch target",
-                                call_pc
-                            ),
+                        record_site_diagnostic(
+                            &mut site_diagnostics,
+                            site.call_site,
+                            "keeping map-in-map lookup chain because removal would cross a branch target".to_string(),
                         );
                         rewrite.skipped_sites.clear();
                         rewrite.removed_null_check = false;
@@ -2519,12 +2445,18 @@ fn run_map_inline_round(
                         .any(|replacement| rewrite.skipped_sites.contains(&replacement.site))
                     {
                         let reason = "internal rewrite overlap".to_string();
-                        record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+                        record_skip(
+                            &mut skipped,
+                            &mut site_diagnostics,
+                            site.call_site,
+                            reason,
+                            None,
+                        );
                         continue;
                     }
                     log_map_inline_debug(&format!(
-                        "site at PC={}: map-in-map rewrite prepared with {} replacement load(s), removed_null_check={}",
-                        call_pc,
+                        "lookup {:?}: map-in-map rewrite prepared with {} replacement load(s), removed_null_check={}",
+                        site.call_site,
                         rewrite.replacements.len(),
                         rewrite.removed_null_check
                     ));
@@ -2546,17 +2478,29 @@ fn run_map_inline_round(
                         );
                     }
                     let reason = "map-in-map chain is not inlineable".to_string();
-                    record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+                    record_skip(
+                        &mut skipped,
+                        &mut site_diagnostics,
+                        site.call_site,
+                        reason,
+                        None,
+                    );
                 }
                 Err(err) => match err {
                     SiteRewriteError::Veto(reason) => {
-                        record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+                        record_skip(
+                            &mut skipped,
+                            &mut site_diagnostics,
+                            site.call_site,
+                            reason,
+                            None,
+                        );
                         continue;
                     }
                     SiteRewriteError::MissingSnapshot(err) => {
                         return Err(err.context(format!(
-                            "map_inline requires a concrete map-in-map snapshot at outer lookup pc {}",
-                            call_pc
+                            "map_inline requires a concrete map-in-map snapshot at outer lookup {:?}",
+                            site.call_site
                         )));
                     }
                     SiteRewriteError::Error(err) => return Err(err),
@@ -2567,7 +2511,6 @@ fn run_map_inline_round(
         if hard_null_hint(site_inline_hints).is_some() {
             let extracted_key = match extract_site_constant_key(
                 prog,
-                ctx,
                 site.call_site,
                 info,
                 use_verifier_guided_keys,
@@ -2577,10 +2520,10 @@ fn run_map_inline_round(
                 Err(KeyExtractionError::Unavailable(detail)) => {
                     record_skip(
                         &mut skipped,
-                        &mut diagnostics,
-                        call_pc,
+                        &mut site_diagnostics,
+                        site.call_site,
                         "lookup key is not available from inline hint".into(),
-                        Some(format!("site at PC={}: {}", call_pc, detail)),
+                        Some(detail),
                     );
                     continue;
                 }
@@ -2595,13 +2538,25 @@ fn run_map_inline_round(
                     "key width {} is smaller than map key size {}",
                     key.width, info.key_size
                 );
-                record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+                record_skip(
+                    &mut skipped,
+                    &mut site_diagnostics,
+                    site.call_site,
+                    reason,
+                    None,
+                );
                 continue;
             }
             let mut rewrite = match build_hard_null_site_rewrite(prog, &site, &key, info) {
                 Ok(rewrite) => rewrite,
                 Err(SiteRewriteError::Veto(reason)) => {
-                    record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+                    record_skip(
+                        &mut skipped,
+                        &mut site_diagnostics,
+                        site.call_site,
+                        reason,
+                        None,
+                    );
                     continue;
                 }
                 Err(SiteRewriteError::MissingSnapshot(err) | SiteRewriteError::Error(err)) => {
@@ -2613,12 +2568,10 @@ fn run_map_inline_round(
                 .iter()
                 .any(|site| branch_target_sites.contains(site))
             {
-                record_diagnostic(
-                    &mut diagnostics,
-                    format!(
-                        "site at PC={}: keeping lookup setup because removal would cross a branch target",
-                        call_pc
-                    ),
+                record_site_diagnostic(
+                    &mut site_diagnostics,
+                    site.call_site,
+                    "keeping lookup setup because removal would cross a branch target".to_string(),
                 );
                 rewrite.skipped_sites.clear();
             }
@@ -2627,18 +2580,18 @@ fn run_map_inline_round(
         }
         if !info.supports_direct_value_access() {
             log_map_inline_debug(&format!(
-                "site pc={} skip: map type {} not inlineable",
-                call_pc, info.map_type
+                "lookup {:?} skip: map type {} not inlineable",
+                site.call_site, info.map_type
             ));
             let reason = format!("map type {} not inlineable", info.map_type);
             record_skip(
                 &mut skipped,
-                &mut diagnostics,
-                call_pc,
+                &mut site_diagnostics,
+                site.call_site,
                 reason,
                 Some(format!(
-                    "site at PC={}: map_type={}, skip reason: unsupported map type",
-                    call_pc, info.map_type
+                    "map_type={}, skip reason: unsupported map type",
+                    info.map_type
                 )),
             );
             continue;
@@ -2651,7 +2604,10 @@ fn run_map_inline_round(
         };
         if has_soft_hint {
             let Some(site_inline_hints) = site_inline_hints else {
-                anyhow::bail!("soft inline hint disappeared for map lookup pc {call_pc}");
+                anyhow::bail!(
+                    "soft inline hint disappeared for map lookup {:?}",
+                    site.call_site
+                );
             };
             match build_soft_hint_site_rewrite(prog, &site, info, site_inline_hints) {
                 Ok(Some(rewrite)) => {
@@ -2664,7 +2620,13 @@ fn run_map_inline_round(
                         .any(|site| branch_target_sites.contains(site))
                     {
                         let reason = "soft fold removal would cross a branch target".to_string();
-                        record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+                        record_skip(
+                            &mut skipped,
+                            &mut site_diagnostics,
+                            site.call_site,
+                            reason,
+                            None,
+                        );
                         continue;
                     }
                     if rewrite
@@ -2673,17 +2635,35 @@ fn run_map_inline_round(
                         .any(|replacement| rewrite.skipped_sites.contains(&replacement.site))
                     {
                         let reason = "internal rewrite overlap".to_string();
-                        record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+                        record_skip(
+                            &mut skipped,
+                            &mut site_diagnostics,
+                            site.call_site,
+                            reason,
+                            None,
+                        );
                         continue;
                     }
                     rewrites.push(rewrite);
                 }
                 Ok(None) => {
                     let reason = "soft inline hint emitted no replacement bytecode".to_string();
-                    record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+                    record_skip(
+                        &mut skipped,
+                        &mut site_diagnostics,
+                        site.call_site,
+                        reason,
+                        None,
+                    );
                 }
                 Err(SiteRewriteError::Veto(reason)) => {
-                    record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+                    record_skip(
+                        &mut skipped,
+                        &mut site_diagnostics,
+                        site.call_site,
+                        reason,
+                        None,
+                    );
                 }
                 Err(SiteRewriteError::MissingSnapshot(err) | SiteRewriteError::Error(err)) => {
                     return Err(err);
@@ -2693,7 +2673,6 @@ fn run_map_inline_round(
         }
         let extracted_key = match extract_site_constant_key(
             prog,
-            ctx,
             site.call_site,
             info,
             use_verifier_guided_keys,
@@ -2703,10 +2682,10 @@ fn run_map_inline_round(
             Err(KeyExtractionError::Unavailable(detail)) => {
                 record_skip(
                     &mut skipped,
-                    &mut diagnostics,
-                    call_pc,
+                    &mut site_diagnostics,
+                    site.call_site,
                     "lookup key is not available from verifier-guided state".into(),
-                    Some(format!("site at PC={}: {}", call_pc, detail)),
+                    Some(detail),
                 );
                 continue;
             }
@@ -2721,7 +2700,13 @@ fn run_map_inline_round(
                 "key width {} is smaller than map key size {}",
                 key.width, info.key_size
             );
-            record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+            record_skip(
+                &mut skipped,
+                &mut site_diagnostics,
+                site.call_site,
+                reason,
+                None,
+            );
             continue;
         }
         if info.has_removable_lookup_pattern()
@@ -2732,7 +2717,13 @@ fn run_map_inline_round(
                 "constant key {} out of range for max_entries {}",
                 key.value, info.max_entries
             );
-            record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+            record_skip(
+                &mut skipped,
+                &mut site_diagnostics,
+                site.call_site,
+                reason,
+                None,
+            );
             continue;
         }
         let uses = classify_r0_uses_with_options(
@@ -2744,22 +2735,32 @@ fn run_map_inline_round(
         let null_check_site = uses.null_check_site;
         if info.requires_entry_presence_check() && null_check_site.is_none() {
             let reason = "hash map inline requires an immediate null check".to_string();
-            record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+            record_skip(
+                &mut skipped,
+                &mut site_diagnostics,
+                site.call_site,
+                reason,
+                None,
+            );
             continue;
         }
         log_map_inline_debug(&format!(
-            "site at PC={}: null_check_diag_pc={:?} alias_copies={} fixed_loads={} other_uses={}",
-            call_pc,
-            null_check_site
-                .map(|site| site_pc(prog, site))
-                .transpose()?,
+            "lookup {:?}: null_check_site={:?} alias_copies={} fixed_loads={} other_uses={}",
+            site.call_site,
+            null_check_site,
             uses.alias_copy_sites.len(),
             uses.fixed_loads.len(),
             uses.other_use_sites.len()
         ));
         if uses.fixed_loads.is_empty() {
             let reason = "lookup result is not consumed by fixed-offset scalar loads".to_string();
-            record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+            record_skip(
+                &mut skipped,
+                &mut site_diagnostics,
+                site.call_site,
+                reason,
+                None,
+            );
             continue;
         }
         let mut rewrite = match build_site_rewrite(
@@ -2774,21 +2775,33 @@ fn run_map_inline_round(
             Ok(Some(rewrite)) => rewrite,
             Ok(None) => {
                 let reason = "failed to materialize replacement constants".to_string();
-                record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+                record_skip(
+                    &mut skipped,
+                    &mut site_diagnostics,
+                    site.call_site,
+                    reason,
+                    None,
+                );
                 continue;
             }
             Err(err) => match err {
                 SiteRewriteError::Veto(reason) => {
-                    record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+                    record_skip(
+                        &mut skipped,
+                        &mut site_diagnostics,
+                        site.call_site,
+                        reason,
+                        None,
+                    );
                     continue;
                 }
                 SiteRewriteError::MissingSnapshot(err) => {
                     let detail = err.to_string();
                     return Err(err.context(format!(
-                        "map_inline requires a concrete snapshot value for map {} key {} at lookup pc {}: {}",
+                        "map_inline requires a concrete snapshot value for map {} key {} at lookup {:?}: {}",
                         info.map_id,
                         format_bytes_preview(&key.bytes),
-                        call_pc,
+                        site.call_site,
                         detail
                     )));
                 }
@@ -2800,12 +2813,10 @@ fn run_map_inline_round(
             .iter()
             .any(|site| branch_target_sites.contains(site))
         {
-            record_diagnostic(
-                &mut diagnostics,
-                format!(
-                    "site at PC={}: keeping lookup pattern because removal would cross a branch target",
-                    call_pc
-                ),
+            record_site_diagnostic(
+                &mut site_diagnostics,
+                site.call_site,
+                "keeping lookup pattern because removal would cross a branch target".to_string(),
             );
             rewrite.skipped_sites.clear();
             rewrite.removed_null_check = false;
@@ -2816,12 +2827,18 @@ fn run_map_inline_round(
             .any(|replacement| rewrite.skipped_sites.contains(&replacement.site))
         {
             let reason = "internal rewrite overlap".to_string();
-            record_skip(&mut skipped, &mut diagnostics, call_pc, reason, None);
+            record_skip(
+                &mut skipped,
+                &mut site_diagnostics,
+                site.call_site,
+                reason,
+                None,
+            );
             continue;
         }
         log_map_inline_debug(&format!(
-            "site at PC={}: rewrite prepared with {} replacement load(s), removed_null_check={}",
-            call_pc,
+            "lookup {:?}: rewrite prepared with {} replacement load(s), removed_null_check={}",
+            site.call_site,
             rewrite.replacements.len(),
             rewrite.removed_null_check
         ));
@@ -2830,8 +2847,9 @@ fn run_map_inline_round(
     if rewrites.is_empty() && direct_replacements.is_empty() {
         log_map_inline_debug("no map_inline rewrites prepared");
         return Ok(PassResult {
-            sites_skipped: skipped,
+            site_skipped: skipped,
             diagnostics,
+            site_diagnostics,
             ..PassResult::unchanged()
         });
     }
@@ -2845,7 +2863,6 @@ fn run_map_inline_round(
     let mut applied = direct_sites_applied;
     let mut removed_any_null_check = false;
     for rewrite in rewrites {
-        let rewrite_call_pc = site_pc(prog, rewrite.call_site)?;
         let conflict = rewrite
             .skipped_sites
             .iter()
@@ -2858,20 +2875,18 @@ fn run_map_inline_round(
             let reason = "overlapping map inline rewrite".to_string();
             record_skip(
                 &mut skipped,
-                &mut diagnostics,
-                rewrite_call_pc,
+                &mut site_diagnostics,
+                rewrite.call_site,
                 reason,
                 None,
             );
             continue;
         }
         removed_any_null_check |= rewrite.removed_null_check;
-        record_diagnostic(
-            &mut diagnostics,
-            format!(
-                "site at PC={}: inlined successfully, value={}",
-                rewrite_call_pc, rewrite.diagnostic_value
-            ),
+        record_site_diagnostic(
+            &mut site_diagnostics,
+            rewrite.call_site,
+            format!("inlined successfully, value={}", rewrite.diagnostic_value),
         );
         map_inline_records.extend(rewrite.map_inline_records);
         skip_sites.extend(rewrite.skipped_sites);
@@ -2887,8 +2902,9 @@ fn run_map_inline_round(
     if applied == 0 {
         log_map_inline_debug("all prepared rewrites were discarded");
         return Ok(PassResult {
-            sites_skipped: skipped,
+            site_skipped: skipped,
             diagnostics,
+            site_diagnostics,
             map_inline_records,
             ..PassResult::unchanged()
         });
@@ -2906,8 +2922,9 @@ fn run_map_inline_round(
         removed_any_null_check,
         applied,
     )?;
-    result.sites_skipped = skipped;
+    result.site_skipped = skipped;
     result.diagnostics = diagnostics;
+    result.site_diagnostics = site_diagnostics;
     result.map_inline_records = map_inline_records;
     Ok(result)
 }
@@ -2972,11 +2989,7 @@ fn replace_site(prog: &mut BBProgram, replacement: SiteReplacement) -> anyhow::R
             terminator_for_site_replacement(prog, replacement.site, &replacement.replacement)?;
         return prog.replace_terminator(replacement.site.block, terminator);
     }
-    prog.replace_range(
-        replacement.site.block,
-        replacement.site.idx..replacement.site.idx + 1,
-        replacement.replacement,
-    )
+    prog.replace_range_at(replacement.site, 1, replacement.replacement)
 }
 fn delete_site(prog: &mut BBProgram, site: InsnSite) -> anyhow::Result<()> {
     if prog.is_terminator_site(site)? {
@@ -2992,7 +3005,7 @@ fn delete_site(prog: &mut BBProgram, site: InsnSite) -> anyhow::Result<()> {
         };
         return prog.replace_terminator(site.block, terminator);
     }
-    prog.replace_range(site.block, site.idx..site.idx + 1, Vec::new())
+    prog.replace_range_at(site, 1, Vec::new())
 }
 fn reset_btf_to_current_pcs(prog: &mut BBProgram) -> anyhow::Result<()> {
     prog.reset_btf_to_current_pcs()
@@ -3062,13 +3075,11 @@ fn cleanup_map_inline_bbprogram(prog: &mut BBProgram) -> anyhow::Result<()> {
 }
 fn extract_site_constant_key(
     prog: &BBProgram,
-    ctx: &PassContext,
     call_site: InsnSite,
     info: &MapInfo,
     use_verifier_guided_keys: bool,
     site_inline_hints: Option<&[ResolvedInlineHint]>,
 ) -> std::result::Result<ExtractedConstantKey, KeyExtractionError> {
-    let call_pc = site_pc(prog, call_site).map_err(KeyExtractionError::Error)?;
     if let Some(hint) = site_inline_hints.and_then(|hints| {
         hints
             .iter()
@@ -3107,24 +3118,14 @@ fn extract_site_constant_key(
             r2_mov_site: r2_setup.map(|(mov_site, _, _)| mov_site),
             r2_add_site: r2_setup.map(|(_, add_site, _)| add_site),
         };
-        let r2_mov_diag = key
-            .r2_mov_site
-            .map(|site| site_pc(prog, site))
-            .transpose()
-            .map_err(KeyExtractionError::Error)?;
-        let r2_add_diag = key
-            .r2_add_site
-            .map(|site| site_pc(prog, site))
-            .transpose()
-            .map_err(KeyExtractionError::Error)?;
         log_map_inline_debug(&format!(
-            "site at PC={}: inline-hint key={} width={} stack_off={:?} r2_mov_diag={:?} r2_add_diag={:?}",
-            call_pc,
+            "lookup {:?}: inline-hint key={} width={} stack_off={:?} r2_mov_site={:?} r2_add_site={:?}",
+            call_site,
             format_constant_key(&key),
             key.width,
             key.stack_off,
-            r2_mov_diag,
-            r2_add_diag
+            key.r2_mov_site,
+            key.r2_add_site
         ));
         return Ok(ExtractedConstantKey {
             key,
@@ -3132,40 +3133,18 @@ fn extract_site_constant_key(
         });
     }
     if use_verifier_guided_keys {
-        return match try_extract_constant_key_verifier_guided(
-            prog,
-            ctx.verifier_states.as_ref(),
-            call_site,
-            info.key_size,
-        ) {
+        return match try_extract_constant_key_verifier_guided(prog, call_site, info.key_size) {
             Ok(key) => {
-                let store_diag_pc =
-                    site_pc(prog, key.store_site).map_err(KeyExtractionError::Error)?;
-                let source_imm_diag_pc = key
-                    .source_imm_site
-                    .map(|site| site_pc(prog, site))
-                    .transpose()
-                    .map_err(KeyExtractionError::Error)?;
-                let r2_mov_diag = key
-                    .r2_mov_site
-                    .map(|site| site_pc(prog, site))
-                    .transpose()
-                    .map_err(KeyExtractionError::Error)?;
-                let r2_add_diag = key
-                    .r2_add_site
-                    .map(|site| site_pc(prog, site))
-                    .transpose()
-                    .map_err(KeyExtractionError::Error)?;
                 log_map_inline_debug(&format!(
-                    "site at PC={}: verifier-guided key={} width={} stack_off={:?} store_diag_pc={} source_imm_diag_pc={:?} r2_mov_diag={:?} r2_add_diag={:?}",
-                    call_pc,
+                    "lookup {:?}: verifier-guided key={} width={} stack_off={:?} store_site={:?} source_imm_site={:?} r2_mov_site={:?} r2_add_site={:?}",
+                    call_site,
                     format_constant_key(&key),
                     key.width,
                     key.stack_off,
-                    store_diag_pc,
-                    source_imm_diag_pc,
-                    r2_mov_diag,
-                    r2_add_diag
+                    key.store_site,
+                    key.source_imm_site,
+                    key.r2_mov_site,
+                    key.r2_add_site
                 ));
                 Ok(ExtractedConstantKey {
                     key,
@@ -3174,8 +3153,8 @@ fn extract_site_constant_key(
             }
             Err(verifier_err) => {
                 log_map_inline_debug(&format!(
-                    "site pc={} skip: verifier-guided key extraction failed: {}",
-                    call_pc, verifier_err
+                    "lookup {:?} skip: verifier-guided key extraction failed: {}",
+                    call_site, verifier_err
                 ));
                 Err(KeyExtractionError::Unavailable(format!(
                     "verifier-guided key extraction failed: {}",
@@ -3186,7 +3165,7 @@ fn extract_site_constant_key(
     }
     let detail = "verifier-guided key extraction is unavailable after a prior map_inline rewrite"
         .to_string();
-    log_map_inline_debug(&format!("site pc={} skip: {}", call_pc, detail));
+    log_map_inline_debug(&format!("lookup {:?} skip: {}", call_site, detail));
     Err(KeyExtractionError::Unavailable(detail))
 }
 fn build_site_rewrite(
@@ -3198,18 +3177,20 @@ fn build_site_rewrite(
     info: &MapInfo,
     null_check_site: Option<InsnSite>,
 ) -> SiteRewriteResult<Option<SiteRewrite>> {
-    let call_pc = site.pc(prog).map_err(SiteRewriteError::Error)?;
     let remove_lookup_pattern =
         site_can_attempt_lookup_pattern_removal(prog, uses, info, null_check_site);
     let encoded_key = encode_key_bytes(&key.bytes, info.key_size as usize);
     let lookup_value_size = lookup_value_size(ctx, info).map_err(anyhow::Error::msg)?;
     log_map_inline_debug(&format!(
-        "site pc={} reading map_id={} key={:?} lookup_value_size={}",
-        call_pc, info.map_id, encoded_key, lookup_value_size
+        "lookup {:?} reading map_id={} key={:?} lookup_value_size={}",
+        site.call_site, info.map_id, encoded_key, lookup_value_size
     ));
     let value = match lookup_elem(ctx, info.map_id, &encoded_key, lookup_value_size) {
         Ok(value) => {
-            log_map_inline_debug(&format!("site pc={} INLINE value={:?}", call_pc, value));
+            log_map_inline_debug(&format!(
+                "lookup {:?} INLINE value={:?}",
+                site.call_site, value
+            ));
             value
         }
         Err(MapLookupError::MissingKey { .. }) if is_hash_like_map_type(info.map_type) => {
@@ -3226,8 +3207,8 @@ fn build_site_rewrite(
         }
         Err(err) => {
             log_map_inline_debug(&format!(
-                "site at PC={}: map lookup(map_id={}, key={}) failed: {}",
-                call_pc,
+                "lookup {:?}: map lookup(map_id={}, key={}) failed: {}",
+                site.call_site,
                 info.map_id,
                 format_bytes_preview(&encoded_key),
                 err
@@ -3286,12 +3267,11 @@ fn build_site_rewrite(
     };
     let mut replacements = Vec::new();
     for load in &uses.fixed_loads {
-        let load_pc = load.pc(prog)?;
         let scalar =
             read_scalar_from_value(&inline_value, load.offset, load.size).ok_or_else(|| {
                 anyhow::anyhow!(
-                    "map value read out of bounds for load pc {} (offset {}, size {})",
-                    load_pc,
+                    "map value read out of bounds for load {:?} (offset {}, size {})",
+                    load.site,
                     load.offset,
                     load.size
                 )
@@ -3520,7 +3500,6 @@ fn build_map_in_map_chain_rewrite(
     };
     let extracted_outer_key = extract_site_constant_key(
         prog,
-        state.ctx,
         outer_site.call_site,
         outer_info,
         state.use_verifier_guided_keys,
@@ -3588,7 +3567,6 @@ fn build_map_in_map_chain_rewrite(
     }
     let extracted_inner_key = extract_site_constant_key(
         prog,
-        state.ctx,
         chain.inner_call_site,
         &inner_info,
         state.use_verifier_guided_keys,
@@ -3653,12 +3631,11 @@ fn build_map_in_map_chain_rewrite(
     let inline_value = prepare_inline_value(&inner_info, &value).map_err(site_level_inline_veto)?;
     let mut replacements = Vec::new();
     for load in &uses.fixed_loads {
-        let load_pc = load.pc(prog)?;
         let scalar =
             read_scalar_from_value(&inline_value, load.offset, load.size).ok_or_else(|| {
                 anyhow::anyhow!(
-                    "inner map value read out of bounds for load pc {} (offset {}, size {})",
-                    load_pc,
+                    "inner map value read out of bounds for load {:?} (offset {}, size {})",
+                    load.site,
                     load.offset,
                     load.size
                 )
@@ -3785,7 +3762,6 @@ fn build_map_in_map_outer_only_rewrite(
     encoded_outer_key: &[u8],
     inner_map_id: u32,
 ) -> SiteRewriteResult<SiteRewrite> {
-    let _outer_call_pc = outer_site.pc(prog).map_err(SiteRewriteError::Error)?;
     let mut skipped_sites = BTreeSet::new();
     skipped_sites.insert(outer_site.map_load_site);
     skipped_sites.extend(outer_key.materialization_sites.iter().copied());
@@ -3848,7 +3824,7 @@ fn build_direct_map_value_load_rewrites(
 ) -> anyhow::Result<DirectMapValueLoadRewriteResult> {
     let mut replacements = Vec::new();
     let mut sites_applied = 0usize;
-    let mut diagnostics = Vec::new();
+    let mut site_diagnostics = Vec::new();
     let mut map_inline_records = Vec::new();
     let mut map_cache: HashMap<MapRefKey, Option<SnapshotMapValue>> = HashMap::new();
     for block in prog.blocks() {
@@ -3856,7 +3832,6 @@ fn build_direct_map_value_load_rewrites(
             let Some(insn) = prog.insn_at(site) else {
                 continue;
             };
-            let pc = site_pc(prog, site)?;
             if !insn.is_ldx_mem() {
                 continue;
             }
@@ -3871,22 +3846,21 @@ fn build_direct_map_value_load_rewrites(
                 continue;
             };
             let Some(total_off) = value_off.checked_add(insn.off as i32) else {
-                record_diagnostic(
-                    &mut diagnostics,
+                record_site_diagnostic(
+                    &mut site_diagnostics,
+                    site,
                     format!(
-                        "site at PC={}: pseudo-map-value offset overflow (base {} + load off {})",
-                        pc, value_off, insn.off
+                        "pseudo-map-value offset overflow (base {} + load off {})",
+                        value_off, insn.off
                     ),
                 );
                 continue;
             };
             if total_off < 0 {
-                record_diagnostic(
-                    &mut diagnostics,
-                    format!(
-                        "site at PC={}: pseudo-map-value load offset {} is negative",
-                        pc, total_off
-                    ),
+                record_site_diagnostic(
+                    &mut site_diagnostics,
+                    site,
+                    format!("pseudo-map-value load offset {} is negative", total_off),
                 );
                 continue;
             }
@@ -3908,14 +3882,12 @@ fn build_direct_map_value_load_rewrites(
                     Some(size) => size.to_string(),
                     None => "invalid".to_string(),
                 };
-                record_diagnostic(
-                    &mut diagnostics,
+                record_site_diagnostic(
+                    &mut site_diagnostics,
+                    site,
                     format!(
-                        "site at PC={}: pseudo-map-value load out of bounds (map_id={}, off={}, size={})",
-                        pc,
-                        map_value.map_id,
-                        offset,
-                        size
+                        "pseudo-map-value load out of bounds (map_id={}, off={}, size={})",
+                        map_value.map_id, offset, size
                     ),
                 );
                 continue;
@@ -3934,11 +3906,12 @@ fn build_direct_map_value_load_rewrites(
                 key: map_value.key.clone(),
                 value: map_value.value.clone(),
             });
-            record_diagnostic(
-                &mut diagnostics,
+            record_site_diagnostic(
+                &mut site_diagnostics,
+                site,
                 format!(
-                    "site at PC={}: constantized pseudo-map-value load from map_id={} off={} value=0x{:x}",
-                    pc, map_value.map_id, offset, scalar
+                    "constantized pseudo-map-value load from map_id={} off={} value=0x{:x}",
+                    map_value.map_id, offset, scalar
                 ),
             );
         }
@@ -3946,7 +3919,7 @@ fn build_direct_map_value_load_rewrites(
     Ok(DirectMapValueLoadRewriteResult {
         replacements,
         sites_applied,
-        diagnostics,
+        site_diagnostics,
         records: map_inline_records,
     })
 }
@@ -4293,13 +4266,12 @@ fn resolve_constant_reg_value_inner(
         return Err(format!("no definition for source register r{}", reg));
     };
     let insn = *prog.insn(site).map_err(|err| err.to_string())?;
-    let pc = site_pc(prog, site).map_err(|err| err.to_string())?;
     if insn.is_ldimm64() && insn.dst_reg() == reg {
         if insn.src_reg() != 0 {
             return Err(format!(
-                "register r{} at pc {} is loaded from pseudo source {}",
+                "register r{} at {:?} is loaded from pseudo source {}",
                 reg,
-                pc,
+                site,
                 insn.src_reg()
             ));
         }
@@ -4364,8 +4336,8 @@ fn resolve_constant_reg_value_inner(
         };
         let value = apply_constant_alu(op, lhs.value, rhs, is_32bit).ok_or_else(|| {
             format!(
-                "register r{} definition at pc {} uses unsupported constant op {:#x}",
-                reg, pc, insn.code
+                "register r{} definition at {:?} uses unsupported constant op {:#x}",
+                reg, site, insn.code
             )
         })?;
         return Ok(ConstantRegValue {
@@ -4374,8 +4346,8 @@ fn resolve_constant_reg_value_inner(
         });
     }
     Err(format!(
-        "register r{} definition at pc {} is not a supported constant materialization",
-        reg, pc
+        "register r{} definition at {:?} is not a supported constant materialization",
+        reg, site
     ))
 }
 fn size_in_bytes(size: u8) -> Option<u8> {
@@ -4438,7 +4410,6 @@ fn resolve_key_pointer_origin_inner(
         return Ok(None);
     };
     let insn = *prog.insn(site).map_err(|err| err.to_string())?;
-    let pc = site_pc(prog, site).map_err(|err| err.to_string())?;
     if insn.is_ldimm64() && insn.dst_reg() == reg {
         if matches!(
             insn.map_pseudo(),
@@ -4447,7 +4418,7 @@ fn resolve_key_pointer_origin_inner(
             let value_off = prog
                 .ldimm64_second_slots
                 .get(&site)
-                .ok_or_else(|| format!("pseudo-map-value load at pc {} is truncated", pc))?
+                .ok_or_else(|| format!("pseudo-map-value load at {:?} is truncated", site))?
                 .imm;
             return Ok(Some(KeyPointerOrigin::MapValue {
                 map_ref: MapRefKey {
@@ -4533,7 +4504,6 @@ fn resolve_stack_pointer_to_stack_inner(
         return Err(format!("no definition for key pointer register r{}", reg));
     };
     let insn = *prog.insn(site).map_err(|err| err.to_string())?;
-    let pc = site_pc(prog, site).map_err(|err| err.to_string())?;
     if (insn.class() == BPF_ALU64 || insn.class() == BPF_ALU) && insn.dst_reg() == reg {
         let op = bpf_op(insn.code);
         let src_mode = bpf_src(insn.code);
@@ -4559,17 +4529,16 @@ fn resolve_stack_pointer_to_stack_inner(
         }
     }
     Err(format!(
-        "register r{} definition at pc {} does not resolve to fp-relative stack memory",
-        reg, pc
+        "register r{} definition at {:?} does not resolve to fp-relative stack memory",
+        reg, site
     ))
 }
 fn decode_ldimm64(prog: &BBProgram, site: InsnSite) -> Result<u64, String> {
-    let pc = site_pc(prog, site).map_err(|err| err.to_string())?;
     let lo = prog.insn(site).map_err(|err| err.to_string())?;
     let hi = prog
         .ldimm64_second_slots
         .get(&site)
-        .ok_or_else(|| format!("ldimm64 at pc {} is missing high half", pc))?;
+        .ok_or_else(|| format!("ldimm64 at {:?} is missing high half", site))?;
     Ok(decode_ldimm64_value(lo, hi))
 }
 fn apply_alu_width(value: u64, is_32bit: bool) -> u64 {
@@ -4588,9 +4557,6 @@ fn apply_constant_alu(op: u8, lhs: u64, rhs: u64, is_32bit: bool) -> Option<u64>
     }
     eval_binary_alu_const(op, lhs, rhs, is_32bit).map(|value| apply_alu_width(value, is_32bit))
 }
-fn site_skip_diagnostic(pc: usize, reason: &str) -> String {
-    format!("site at PC={}: skip reason: {}", pc, reason)
-}
 fn log_map_inline_debug(message: &str) {
     static ENABLED: OnceLock<bool> = OnceLock::new();
     if *ENABLED.get_or_init(|| std::env::var_os("BPFREJIT_MAP_INLINE_DEBUG").is_some()) {
@@ -4600,6 +4566,10 @@ fn log_map_inline_debug(message: &str) {
 fn record_diagnostic(diagnostics: &mut Vec<String>, message: String) {
     log_map_inline_debug(&message);
     diagnostics.push(message);
+}
+fn record_site_diagnostic(diagnostics: &mut Vec<SiteDiagnostic>, site: InsnSite, message: String) {
+    log_map_inline_debug(&format!("site {:?}: {}", site, message));
+    diagnostics.push(SiteDiagnostic { site, message });
 }
 fn record_maps_skipped_by_size_counter(ctx: &PassContext, diagnostics: &mut Vec<String>) {
     let count = ctx
@@ -4633,19 +4603,19 @@ fn map_name_for_id(ctx: &PassContext, map_id: u32) -> String {
     }
 }
 fn record_skip(
-    skipped: &mut Vec<SkipReason>,
-    diagnostics: &mut Vec<String>,
-    pc: usize,
+    skipped: &mut Vec<SiteSkipReason>,
+    diagnostics: &mut Vec<SiteDiagnostic>,
+    site: InsnSite,
     reason: String,
     detail: Option<String>,
 ) {
-    skipped.push(SkipReason {
-        pc,
+    skipped.push(SiteSkipReason {
+        site,
         reason: reason.clone(),
     });
-    record_diagnostic(diagnostics, site_skip_diagnostic(pc, &reason));
+    record_site_diagnostic(diagnostics, site, format!("skip reason: {}", reason));
     if let Some(detail) = detail {
-        record_diagnostic(diagnostics, detail);
+        record_site_diagnostic(diagnostics, site, detail);
     }
 }
 fn format_bytes_preview(bytes: &[u8]) -> String {

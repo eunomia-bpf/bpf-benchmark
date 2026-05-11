@@ -151,6 +151,8 @@ struct PassReport {
     sites_matched: usize,
     sites_skipped: usize,
     skip_reasons: BTreeMap<String, usize>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    skipped_sites: Vec<SkippedSiteReport>,
     diagnostics: Vec<String>,
     insn_count_before: usize,
     insn_count_after: usize,
@@ -164,6 +166,12 @@ struct InlinedMapEntryReport {
     map_id: u32,
     key_hex: String,
     value_hex: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct SkippedSiteReport {
+    pc: usize,
+    reason: String,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -310,6 +318,11 @@ fn run_single_pass(
         ctx.func_info.clone(),
         ctx.line_info.clone(),
     )?;
+    let report_program = if common.report.is_some() {
+        Some(program.clone())
+    } else {
+        None
+    };
     let pass = build_pass(pass_name, pass_args)?;
     let result = run_pass_once(pass.as_ref(), &mut program, &ctx)?;
     let output = lower(&program)?;
@@ -317,7 +330,13 @@ fn run_single_pass(
     write_btf_info_outputs(common, &program)?;
 
     if let Some(report_path) = common.report.as_deref() {
-        let report = pass_report(pass_name, &result);
+        let report = pass_report(
+            pass_name,
+            report_program
+                .as_ref()
+                .ok_or_else(|| anyhow!("report program snapshot is unavailable"))?,
+            &result,
+        )?;
         write_json(Some(report_path), &report)?;
     }
 
@@ -1053,18 +1072,36 @@ fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Res
         .with_context(|| format!("failed to parse {label} from {}", path.display()))
 }
 
-fn pass_report(pass_name: &str, result: &PassResult) -> PassReport {
+fn pass_report(pass_name: &str, program: &BBProgram, result: &PassResult) -> Result<PassReport> {
     let mut skip_reasons = BTreeMap::new();
     for skip in &result.sites_skipped {
         *skip_reasons.entry(skip.reason.clone()).or_insert(0) += 1;
     }
-    PassReport {
+    for skip in &result.site_skipped {
+        *skip_reasons.entry(skip.reason.clone()).or_insert(0) += 1;
+    }
+    let mut diagnostics = result.diagnostics.clone();
+    for diagnostic in &result.site_diagnostics {
+        diagnostics.push(site_diagnostic_report(program, diagnostic)?);
+    }
+    let mut skipped_sites = result
+        .sites_skipped
+        .iter()
+        .map(legacy_skip_report)
+        .collect::<Vec<_>>();
+    for skip in &result.site_skipped {
+        skipped_sites.push(site_skip_report(program, skip)?);
+    }
+    Ok(PassReport {
         pass: pass_name.to_string(),
         sites_applied: result.sites_applied,
-        sites_matched: result.sites_applied + result.sites_skipped.len(),
-        sites_skipped: result.sites_skipped.len(),
+        sites_matched: result.sites_applied
+            + result.sites_skipped.len()
+            + result.site_skipped.len(),
+        sites_skipped: result.sites_skipped.len() + result.site_skipped.len(),
         skip_reasons,
-        diagnostics: result.diagnostics.clone(),
+        skipped_sites,
+        diagnostics,
         insn_count_before: result.insns_before,
         insn_count_after: result.insns_after,
         insn_delta: result.insns_after as isize - result.insns_before as isize,
@@ -1073,7 +1110,36 @@ fn pass_report(pass_name: &str, result: &PassResult) -> PassReport {
             .iter()
             .map(inlined_map_entry_report)
             .collect(),
+    })
+}
+
+fn site_skip_report(
+    program: &BBProgram,
+    skip: &bpfopt::pass::SiteSkipReason,
+) -> Result<SkippedSiteReport> {
+    Ok(SkippedSiteReport {
+        pc: report_pc(program, skip.site)?,
+        reason: skip.reason.clone(),
+    })
+}
+
+fn legacy_skip_report(skip: &bpfopt::pass::SkipReason) -> SkippedSiteReport {
+    SkippedSiteReport {
+        pc: skip.pc,
+        reason: skip.reason.clone(),
     }
+}
+
+fn site_diagnostic_report(
+    program: &BBProgram,
+    diagnostic: &bpfopt::pass::SiteDiagnostic,
+) -> Result<String> {
+    let pc = report_pc(program, diagnostic.site)?;
+    Ok(format!("site at PC={}: {}", pc, diagnostic.message))
+}
+
+fn report_pc(program: &BBProgram, site: bpfopt::analysis::InsnSite) -> Result<usize> {
+    program.site_current_pc(site)
 }
 
 fn inlined_map_entry_report(record: &bpfopt::pass::MapInlineRecord) -> InlinedMapEntryReport {

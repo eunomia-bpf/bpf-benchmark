@@ -1,10 +1,9 @@
-
 // SPDX-License-Identifier: MIT
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::analysis::{
-    control_flow_target_sites, packet_ctx_layout, site_pc, BBProgram, BlockId, InsnSite,
-    PacketCtxLayout, PacketCtxLayoutScope, Terminator,
+    control_flow_target_sites, packet_ctx_layout, BBProgram, BlockId, InsnSite, PacketCtxLayout,
+    PacketCtxLayoutScope, Terminator,
 };
 use crate::insn::*;
 use crate::pass::*;
@@ -29,7 +28,6 @@ struct GuardSite {
     mov: InsnSite,
     add: InsnSite,
     compare: InsnSite,
-    compare_pc: usize,
     root_reg: u8,
     data_end_reg: u8,
     root_id: u32,
@@ -43,7 +41,7 @@ struct GuardSite {
 #[derive(Default)]
 struct ScanResult {
     guards: Vec<GuardSite>,
-    skips: Vec<SkipReason>,
+    skips: Vec<SiteSkipReason>,
 }
 pub struct BoundsCheckMergePass;
 
@@ -68,7 +66,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<
     let mut scan = scan_guard_sites(prog, &target_sites, layout)?;
     if scan.guards.is_empty() {
         return Ok(PassResult {
-            sites_skipped: scan.skips,
+            site_skipped: scan.skips,
             ..PassResult::unchanged()
         });
     }
@@ -110,8 +108,8 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<
 
     for (idx, guard) in scan.guards.iter().enumerate() {
         if !consumed[idx] {
-            scan.skips.push(SkipReason {
-                pc: guard.compare_pc,
+            scan.skips.push(SiteSkipReason {
+                site: guard.compare,
                 reason: "guard not part of a mergeable ladder".into(),
             });
         }
@@ -119,7 +117,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<
 
     if rewrites.is_empty() {
         return Ok(PassResult {
-            sites_skipped: scan.skips,
+            site_skipped: scan.skips,
             ..PassResult::unchanged()
         });
     }
@@ -127,7 +125,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<
     apply_rewrites(prog, &rewrites)?;
     Ok(PassResult {
         sites_applied: rewrites.len(),
-        sites_skipped: scan.skips,
+        site_skipped: scan.skips,
         ..Default::default()
     })
 }
@@ -144,11 +142,7 @@ fn apply_rewrites(
             .insn_at(*dominant_add)
             .ok_or_else(|| anyhow::anyhow!("missing dominant add at {:?}", dominant_add))?;
         widened.imm = *merged_end;
-        prog.replace_range(
-            dominant_add.block,
-            dominant_add.idx..dominant_add.idx + 1,
-            vec![widened],
-        )?;
+        prog.replace_range_at(*dominant_add, 1, vec![widened])?;
 
         for &site in skip_sites {
             if prog.is_terminator_site(site)? {
@@ -159,17 +153,17 @@ fn apply_rewrites(
         }
     }
 
-    let mut deletions_by_block: BTreeMap<BlockId, Vec<usize>> = BTreeMap::new();
+    let mut deletions_by_block: BTreeMap<BlockId, Vec<InsnSite>> = BTreeMap::new();
     for site in &deleted_sites {
         deletions_by_block
             .entry(site.block)
             .or_default()
-            .push(site.idx);
+            .push(*site);
     }
-    for (block, mut indices) in deletions_by_block {
-        indices.sort_unstable_by(|a, b| b.cmp(a));
-        for idx in indices {
-            prog.replace_range(block, idx..idx + 1, Vec::new())?;
+    for (_, mut sites) in deletions_by_block {
+        sites.sort_unstable_by(|a, b| b.cmp(a));
+        for site in sites {
+            prog.replace_range_at(site, 1, Vec::new())?;
         }
     }
     for block in deleted_branches {
@@ -197,13 +191,18 @@ fn scan_guard_sites(
             last_data_root = None;
         }
 
-        for site in prog.sites_in_block_with_terminator(block.id)? {
+        let block_sites = prog.sites_in_block_with_terminator(block.id)?;
+        let setup_by_compare = guard_setup_windows(&block_sites);
+
+        for site in block_sites {
             let Some(&insn) = prog.insn_at(site) else {
                 continue;
             };
-            if let Some(skip) = detect_variable_guard(site, prog, &states)? {
+            let setup = setup_by_compare.get(&site).copied();
+            if let Some(skip) = detect_variable_guard(site, prog, setup, &states)? {
                 result.skips.push(skip);
-            } else if let Some(site) = detect_guard_site(site, prog, target_sites, &states)? {
+            } else if let Some(site) = detect_guard_site(site, prog, target_sites, setup, &states)?
+            {
                 result.guards.push(site);
             }
 
@@ -224,6 +223,7 @@ fn detect_guard_site(
     site: InsnSite,
     prog: &BBProgram,
     target_sites: &BTreeSet<InsnSite>,
+    setup: Option<(InsnSite, InsnSite)>,
     states: &[RegValue],
 ) -> anyhow::Result<Option<GuardSite>> {
     let Some(insn) = prog.insn_at(site) else {
@@ -232,7 +232,7 @@ fn detect_guard_site(
     let Some((cursor_reg, data_end_reg, cmp_kind)) = normalize_slow_guard(insn) else {
         return Ok(None);
     };
-    let Some((mov_site, add_site)) = guard_setup_sites(site, prog)? else {
+    let Some((mov_site, add_site)) = setup else {
         return Ok(None);
     };
     let mov = prog
@@ -241,8 +241,6 @@ fn detect_guard_site(
     let add = prog
         .insn_at(add_site)
         .ok_or_else(|| anyhow::anyhow!("missing guard setup add at {:?}", add_site))?;
-    let compare_pc = site_pc(prog, site)?;
-
     if mov.code != (BPF_ALU64 | BPF_MOV | BPF_X) || mov.dst_reg() != cursor_reg {
         return Ok(None);
     }
@@ -295,7 +293,6 @@ fn detect_guard_site(
         mov: mov_site,
         add: add_site,
         compare: site,
-        compare_pc,
         root_reg,
         data_end_reg,
         root_id,
@@ -310,15 +307,16 @@ fn detect_guard_site(
 fn detect_variable_guard(
     site: InsnSite,
     prog: &BBProgram,
+    setup: Option<(InsnSite, InsnSite)>,
     states: &[RegValue],
-) -> anyhow::Result<Option<SkipReason>> {
+) -> anyhow::Result<Option<SiteSkipReason>> {
     let Some(insn) = prog.insn_at(site) else {
         return Ok(None);
     };
     let Some((cursor_reg, data_end_reg, _)) = normalize_slow_guard(insn) else {
         return Ok(None);
     };
-    let Some((mov_site, add_site)) = guard_setup_sites(site, prog)? else {
+    let Some((mov_site, add_site)) = setup else {
         return Ok(None);
     };
     let mov = prog
@@ -350,8 +348,8 @@ fn detect_variable_guard(
             RegValue::PacketEnd {
                 root_id: right_root,
             },
-        ) if left_root == right_root => Some(SkipReason {
-            pc: site_pc(prog, site)?,
+        ) if left_root == right_root => Some(SiteSkipReason {
+            site,
             reason: "variable packet window is not mergeable in v1".into(),
         }),
         _ => None,
@@ -359,23 +357,11 @@ fn detect_variable_guard(
     Ok(skip)
 }
 
-fn guard_setup_sites(
-    compare: InsnSite,
-    prog: &BBProgram,
-) -> anyhow::Result<Option<(InsnSite, InsnSite)>> {
-    if compare.idx < 2 || compare.idx > prog.block_body_len(compare.block)? {
-        return Ok(None);
-    }
-    Ok(Some((
-        InsnSite {
-            block: compare.block,
-            idx: compare.idx - 2,
-        },
-        InsnSite {
-            block: compare.block,
-            idx: compare.idx - 1,
-        },
-    )))
+fn guard_setup_windows(sites: &[InsnSite]) -> BTreeMap<InsnSite, (InsnSite, InsnSite)> {
+    sites
+        .windows(3)
+        .map(|window| (window[2], (window[0], window[1])))
+        .collect()
 }
 
 fn cursor_dead_after_compare(
@@ -384,10 +370,11 @@ fn cursor_dead_after_compare(
     compare_site: InsnSite,
     cursor_reg: u8,
 ) -> bool {
-    let def = crate::analysis::DefSite {
-        block: add_site.block,
-        idx: add_site.idx,
-        reg: cursor_reg,
+    let Some(def) = prog
+        .def_sites()
+        .find(|def| def.site() == add_site && def.reg == cursor_reg)
+    else {
+        return false;
     };
     prog.uses_for_def(def)
         .iter()
@@ -424,25 +411,12 @@ fn can_extend_ladder(
     {
         return Ok(false);
     }
-    let frame = prog.block_frame(prev.compare.block)?;
-    let start_pc = site_pc(prog, prev.compare)?;
-    let end_pc = site_pc(prog, next.mov)?;
-    if end_pc < start_pc {
-        anyhow::bail!(
-            "bounds_check_merge range end {:?} precedes start {:?}",
-            next.mov,
-            prev.compare
-        );
-    }
-    for block in prog.subprog_blocks(frame) {
-        for site in prog.sites_in_block_with_terminator(block)? {
-            let pc = site_pc(prog, site)?;
-            if pc <= start_pc || pc >= end_pc {
-                continue;
-            }
-            if !is_merge_safe_interleave(site, prog, target_sites)? {
-                return Ok(false);
-            }
+    let Some(interleaves) = prog.bcm_sites_between(prev.compare, next.mov)? else {
+        return Ok(false);
+    };
+    for site in interleaves {
+        if !is_merge_safe_interleave(site, prog, target_sites)? {
+            return Ok(false);
         }
     }
 

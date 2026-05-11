@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: MIT
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -7,8 +6,7 @@ use anyhow::{bail, Context, Result};
 use serde::Deserialize;
 
 use crate::analysis::{
-    annotations_from_profile, block_start_slot, control_flow_target_sites, read_json_file, site_pc,
-    BBProgram, BlockId, InsnSite, Terminator,
+    control_flow_target_sites, read_json_file, BBProgram, BlockId, InsnSite, Terminator,
 };
 use crate::insn::*;
 use crate::pass::*;
@@ -41,10 +39,9 @@ impl BpfPass for ProfiledBranchFlipPass {
     }
 
     fn run(&self, program: &mut BBProgram, _ctx: &PassContext) -> anyhow::Result<PassResult> {
-        let annotations = annotations_from_profile(&self.profiling);
+        program.attach_profile_data(&self.profiling)?;
         run_on_bbprogram(
             program,
-            &annotations,
             self.profiling.branch_miss_rate,
             self.inner.min_bias,
             self.inner.max_branch_miss_rate,
@@ -150,20 +147,18 @@ fn read_branch_flip_profile(path: &Path) -> Result<ProfilingData> {
 }
 #[derive(Clone)]
 pub(super) struct BranchFlipSite {
-    pub(super) pc: usize,
+    cond_site: InsnSite,
     pred: BlockId,
     then_first: BlockId,
     then_last: BlockId,
     else_first: BlockId,
     else_last: BlockId,
     join: BlockId,
-    pub(super) then_len: usize,
-    pub(super) else_len: usize,
 }
 
 impl BranchFlipSite {
-    pub(super) fn total_len(&self) -> usize {
-        1 + self.then_len + 1 + self.else_len
+    fn body_blocks(&self) -> impl Iterator<Item = BlockId> {
+        (self.then_first.0..=self.else_last.0).map(BlockId)
     }
 }
 
@@ -172,9 +167,9 @@ impl BpfPass for BranchFlipPass {
         "branch_flip"
     }
     fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        program.attach_profile_from_annotations(&ctx.annotations)?;
         run_on_bbprogram(
             program,
-            &ctx.annotations,
             ctx.branch_miss_rate,
             self.min_bias,
             self.max_branch_miss_rate,
@@ -184,7 +179,6 @@ impl BpfPass for BranchFlipPass {
 
 pub fn run_on_bbprogram(
     prog: &mut BBProgram,
-    annotations: &[InsnAnnotation],
     branch_miss_rate: Option<f64>,
     min_bias: f64,
     max_branch_miss_rate: f64,
@@ -199,8 +193,8 @@ pub fn run_on_bbprogram(
         );
     }
     if program_miss_rate > max_branch_miss_rate {
-        return Ok(PassResult::skipped(SkipReason {
-            pc: 0,
+        return Ok(PassResult::skipped_site(SiteSkipReason {
+            site: first_report_site(prog)?,
             reason: format!(
                 "program branch_miss_rate {:.1}% exceeds threshold {:.1}% (unpredictable branches)",
                 program_miss_rate * 100.0,
@@ -215,128 +209,105 @@ pub fn run_on_bbprogram(
     let mut skipped = Vec::new();
 
     for site in &sites {
-        let own_target = prog.first_site_in_block(site.else_first)?;
-
-        let Some(bp) = annotations
-            .get(site.pc)
-            .and_then(|annotation| annotation.branch_profile.as_ref())
+        let Some(bp) = prog
+            .profile_at(site.cond_site)
+            .and_then(|record| record.branch_profile.as_ref())
         else {
             anyhow::bail!(
-                "branch_flip candidate at pc {} has no real per-site profile data",
-                site.pc
+                "branch_flip candidate at {:?} has no real per-site profile data",
+                site.cond_site
             );
         };
-        let direction_total = validate_real_branch_profile(site.pc, bp)?;
+        let direction_total = validate_real_branch_profile(site.cond_site, bp)?;
 
-        let frame = prog.block_frame(site.pred)?;
-        let mut has_exterior_interior = false;
-        let cond_site = prog.terminator_site(site.pred)?.ok_or_else(|| {
-            anyhow::anyhow!(
-                "branch_flip predecessor {:?} has no terminator site",
-                site.pred
-            )
-        })?;
-        let cond_pc = site_pc(prog, cond_site)?;
-        let window_end = cond_pc
-            .checked_add(site.total_len())
-            .ok_or_else(|| anyhow::anyhow!("branch_flip site at pc {} overflows", site.pc))?;
-        for block in prog.subprog_blocks(frame) {
-            for candidate in prog.sites_in_block_with_terminator(block)? {
-                let candidate_pc = site_pc(prog, candidate)?;
-                if candidate_pc <= cond_pc || candidate_pc >= window_end {
-                    continue;
-                }
-                if !branch_targets.contains(&candidate) || Some(candidate) == own_target {
-                    continue;
-                }
-                has_exterior_interior = true;
-                break;
-            }
-            if has_exterior_interior {
-                break;
-            }
-        }
-
-        if has_exterior_interior {
-            skipped.push(SkipReason {
-                pc: site.pc,
-                reason: "interior branch target from external source".into(),
-            });
+        if has_exterior_interior_target(prog, &branch_targets, site)? {
+            skipped.push(prog.bf_skip_reason(
+                site.cond_site,
+                "interior branch target from external source".into(),
+            )?);
             continue;
         }
         let cond = match prog.terminator(site.pred)? {
             Terminator::CondBranch { cond, .. } => cond,
             term => anyhow::bail!(
-                "branch_flip site at pc {} expected conditional terminator, got {:?}",
-                site.pc,
+                "branch_flip site at {:?} expected conditional terminator, got {:?}",
+                site.cond_site,
                 term
             ),
         };
         if invert_jcc_op(bpf_op(cond.code)).is_none() {
-            skipped.push(SkipReason {
-                pc: site.pc,
-                reason: "cannot invert condition opcode".into(),
-            });
+            skipped.push(
+                prog.bf_skip_reason(site.cond_site, "cannot invert condition opcode".into())?,
+            );
             continue;
         }
 
         if bp.miss_rate > max_branch_miss_rate {
-            skipped.push(SkipReason {
-                pc: site.pc,
-                reason: format!(
+            skipped.push(prog.bf_skip_reason(
+                site.cond_site,
+                format!(
                     "site branch_miss_rate {:.1}% exceeds threshold {:.1}% (unpredictable branch)",
                     bp.miss_rate * 100.0,
                     max_branch_miss_rate * 100.0,
                 ),
-            });
+            )?);
             continue;
         }
 
         let should_flip = bp.taken_count as f64 / (direction_total as f64) >= min_bias;
 
         if !should_flip {
-            skipped.push(SkipReason {
-                pc: site.pc,
-                reason: "branch not biased enough".into(),
-            });
+            skipped.push(prog.bf_skip_reason(site.cond_site, "branch not biased enough".into())?);
             continue;
         }
-        validate_flipped_branch_deltas(site, cond)?;
+        prog.bf_validate_flipped_branch_deltas(
+            site.cond_site,
+            site.then_first,
+            site.then_last,
+            site.else_first,
+            site.else_last,
+            cond,
+        )?;
         safe_sites.push(site.clone());
     }
 
     if safe_sites.is_empty() {
         return Ok(PassResult {
-            sites_skipped: skipped,
+            site_skipped: skipped,
             ..PassResult::unchanged()
         });
     }
-    safe_sites.sort_by_key(|s| s.pc);
+    safe_sites.sort_by_key(|site| site.cond_site);
     for site in &safe_sites {
         apply_branch_flip_site(prog, site)?;
     }
 
     Ok(PassResult {
         sites_applied: safe_sites.len(),
-        sites_skipped: skipped,
+        site_skipped: skipped,
         ..PassResult::unchanged()
     })
 }
 
-fn validate_real_branch_profile(pc: usize, bp: &BranchProfile) -> anyhow::Result<u64> {
+fn validate_real_branch_profile(report_site: InsnSite, bp: &BranchProfile) -> anyhow::Result<u64> {
     if bp.branch_count == 0 {
-        anyhow::bail!("branch_flip candidate at pc {pc} has zero branch_count");
+        anyhow::bail!(
+            "branch_flip candidate at {:?} has zero branch_count",
+            report_site
+        );
     }
     if bp.branch_misses > bp.branch_count {
         anyhow::bail!(
-            "branch_flip candidate at pc {pc} has branch_misses {} exceeding branch_count {}",
+            "branch_flip candidate at {:?} has branch_misses {} exceeding branch_count {}",
+            report_site,
             bp.branch_misses,
             bp.branch_count
         );
     }
     if !bp.miss_rate.is_finite() || !(0.0..=1.0).contains(&bp.miss_rate) {
         anyhow::bail!(
-            "branch_flip candidate at pc {pc} has invalid miss_rate {}",
+            "branch_flip candidate at {:?} has invalid miss_rate {}",
+            report_site,
             bp.miss_rate
         );
     }
@@ -344,14 +315,21 @@ fn validate_real_branch_profile(pc: usize, bp: &BranchProfile) -> anyhow::Result
         .taken_count
         .checked_add(bp.not_taken_count)
         .ok_or_else(|| {
-            anyhow::anyhow!("branch_flip candidate at pc {pc} direction counters overflow")
+            anyhow::anyhow!(
+                "branch_flip candidate at {:?} direction counters overflow",
+                report_site
+            )
         })?;
     if direction_total == 0 {
-        anyhow::bail!("branch_flip candidate at pc {pc} has no real per-site direction data");
+        anyhow::bail!(
+            "branch_flip candidate at {:?} has no real per-site direction data",
+            report_site
+        );
     }
     if direction_total > bp.branch_count {
         anyhow::bail!(
-            "branch_flip candidate at pc {pc} direction count {direction_total} exceeds branch_count {}",
+            "branch_flip candidate at {:?} direction count {direction_total} exceeds branch_count {}",
+            report_site,
             bp.branch_count
         );
     }
@@ -371,8 +349,8 @@ fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow
         || else_first.0 > else_last.0
     {
         anyhow::bail!(
-            "branch_flip site at pc {} is not a contiguous BBProgram diamond",
-            site.pc
+            "branch_flip site at {:?} is not a contiguous BBProgram diamond",
+            site.cond_site
         );
     }
 
@@ -383,15 +361,15 @@ fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow
             fallthrough,
         } => (cond, taken, fallthrough),
         term => anyhow::bail!(
-            "branch_flip site at pc {} expected conditional terminator, got {:?}",
-            site.pc,
+            "branch_flip site at {:?} expected conditional terminator, got {:?}",
+            site.cond_site,
             term
         ),
     };
     if taken != else_first || fallthrough != then_first {
         anyhow::bail!(
-            "branch_flip site at pc {} has unexpected cond targets taken={:?} fallthrough={:?}",
-            site.pc,
+            "branch_flip site at {:?} has unexpected cond targets taken={:?} fallthrough={:?}",
+            site.cond_site,
             taken,
             fallthrough
         );
@@ -400,15 +378,15 @@ fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow
     let (ja, join) = match prog.terminator(then_last)? {
         Terminator::Jump { insn, target } => (insn, target),
         term => anyhow::bail!(
-            "branch_flip site at pc {} expected then-body JA terminator, got {:?}",
-            site.pc,
+            "branch_flip site at {:?} expected then-body JA terminator, got {:?}",
+            site.cond_site,
             term
         ),
     };
     if join != site.join {
         anyhow::bail!(
-            "branch_flip site at pc {} expected join {:?}, got {:?}",
-            site.pc,
+            "branch_flip site at {:?} expected join {:?}, got {:?}",
+            site.cond_site,
             site.join,
             join
         );
@@ -416,8 +394,8 @@ fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow
     match prog.terminator(else_last)? {
         Terminator::Fallthrough { next } if next == join => {}
         term => anyhow::bail!(
-            "branch_flip site at pc {} expected else-body fallthrough to {:?}, got {:?}",
-            site.pc,
+            "branch_flip site at {:?} expected else-body fallthrough to {:?}, got {:?}",
+            site.cond_site,
             join,
             term
         ),
@@ -479,28 +457,20 @@ fn swapped_range_order(
 }
 pub(super) fn scan_branch_flip_sites(prog: &BBProgram) -> anyhow::Result<Vec<BranchFlipSite>> {
     let mut sites = Vec::new();
-    let mut next_allowed_pc = 0usize;
+    let mut next_allowed_block = 0usize;
     for block in prog.blocks() {
-        let Some(branch_site) = prog.terminator_site(block.id)? else {
-            continue;
-        };
-        let pc = site_pc(prog, branch_site)?;
-        if pc < next_allowed_pc {
+        if block.id.0 < next_allowed_block {
             continue;
         }
-        if let Some(site) = branch_flip_site_at(prog, block.id, pc)? {
-            next_allowed_pc = site.pc + site.total_len();
+        if let Some(site) = branch_flip_site_at(prog, block.id)? {
+            next_allowed_block = site.join.0;
             sites.push(site);
         }
     }
     Ok(sites)
 }
 
-fn branch_flip_site_at(
-    prog: &BBProgram,
-    pred: BlockId,
-    pc: usize,
-) -> anyhow::Result<Option<BranchFlipSite>> {
+fn branch_flip_site_at(prog: &BBProgram, pred: BlockId) -> anyhow::Result<Option<BranchFlipSite>> {
     let Terminator::CondBranch {
         cond,
         taken: else_first,
@@ -512,44 +482,38 @@ fn branch_flip_site_at(
     if !cond.is_cond_jmp() {
         return Ok(None);
     }
-    if block_start_slot(prog, then_first)? != pc + 1 {
+    if !prog.bf_blocks_are_adjacent(pred, then_first)? {
         return Ok(None);
     }
-    let Some((then_last, join, ja_pc)) = then_arm(prog, then_first, else_first)? else {
+    let Some((then_last, join)) = then_arm(prog, then_first, else_first)? else {
         return Ok(None);
     };
-    let Some((else_last, else_end_pc)) = else_arm(prog, else_first, join)? else {
+    let Some(else_last) = else_arm(prog, else_first, join)? else {
         return Ok(None);
     };
-    if then_last.0 + 1 != else_first.0 {
+    if !prog.bf_blocks_are_adjacent(then_last, else_first)? {
         return Ok(None);
     }
-    let then_len = ja_pc
-        .checked_sub(pc + 1)
-        .ok_or_else(|| anyhow::anyhow!("branch_flip then length underflows at pc {pc}"))?;
-    if then_len == 0 {
+    if !prog.bf_block_range_has_body_site(then_first, then_last)? {
         return Ok(None);
     }
-    let else_start = ja_pc + 1;
-    if block_start_slot(prog, else_first)? != else_start {
+    if !prog.bf_blocks_are_adjacent(else_last, join)? {
         return Ok(None);
     }
-    let else_len = else_end_pc
-        .checked_sub(else_start)
-        .ok_or_else(|| anyhow::anyhow!("branch_flip else length underflows at pc {pc}"))?;
-    if else_len == 0 {
+    if !prog.bf_block_range_has_body_site(else_first, else_last)? {
         return Ok(None);
     }
+    let Some(cond_site) = prog.terminator_site(pred)? else {
+        return Ok(None);
+    };
     Ok(Some(BranchFlipSite {
-        pc,
+        cond_site,
         pred,
         then_first,
         then_last,
         else_first,
         else_last,
         join,
-        then_len,
-        else_len,
     }))
 }
 
@@ -557,7 +521,7 @@ fn then_arm(
     prog: &BBProgram,
     start: BlockId,
     else_first: BlockId,
-) -> anyhow::Result<Option<(BlockId, BlockId, usize)>> {
+) -> anyhow::Result<Option<(BlockId, BlockId)>> {
     let mut block = start;
     loop {
         if block.0 >= else_first.0 {
@@ -569,28 +533,19 @@ fn then_arm(
                 if !insn.is_ja() {
                     return Ok(None);
                 }
-                let site = InsnSite {
-                    block,
-                    idx: prog.block_body_len(block)?,
-                };
-                let ja_pc = site_pc(prog, site)?;
-                return Ok(Some((block, target, ja_pc)));
+                return Ok(Some((block, target)));
             }
             _ => return Ok(None),
         }
     }
 }
 
-fn else_arm(
-    prog: &BBProgram,
-    start: BlockId,
-    join: BlockId,
-) -> anyhow::Result<Option<(BlockId, usize)>> {
+fn else_arm(prog: &BBProgram, start: BlockId, join: BlockId) -> anyhow::Result<Option<BlockId>> {
     let mut block = start;
     loop {
         match prog.terminator(block)? {
             Terminator::Fallthrough { next } if next == join => {
-                return Ok(Some((block, block_start_slot(prog, join)?)));
+                return Ok(Some(block));
             }
             Terminator::Fallthrough { next } if next.0 == block.0 + 1 => block = next,
             _ => return Ok(None),
@@ -598,24 +553,20 @@ fn else_arm(
     }
 }
 
-fn validate_flipped_branch_deltas(site: &BranchFlipSite, cond: BpfInsn) -> anyhow::Result<()> {
-    let mut inverted = cond;
-    inverted.set_branch_target_delta(i64::try_from(site.else_len + 1).map_err(|_| {
-        anyhow::anyhow!(
-            "branch_flip site at pc {} else length {} overflows branch delta",
-            site.pc,
-            site.else_len
-        )
-    })?)?;
-    let mut ja = BpfInsn::ja(0);
-    ja.set_branch_target_delta(i64::try_from(site.then_len).map_err(|_| {
-        anyhow::anyhow!(
-            "branch_flip site at pc {} then length {} overflows branch delta",
-            site.pc,
-            site.then_len
-        )
-    })?)?;
-    Ok(())
+fn has_exterior_interior_target(
+    prog: &BBProgram,
+    branch_targets: &std::collections::BTreeSet<InsnSite>,
+    site: &BranchFlipSite,
+) -> anyhow::Result<bool> {
+    let own_target = prog.first_site_in_block(site.else_first)?;
+    for block in site.body_blocks() {
+        for candidate in prog.sites_in_block_with_terminator(block)? {
+            if branch_targets.contains(&candidate) && Some(candidate) != own_target {
+                return Ok(true);
+            }
+        }
+    }
+    Ok(false)
 }
 
 pub(super) fn invert_jcc_op(op: u8) -> Option<u8> {

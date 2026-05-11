@@ -3,7 +3,7 @@
 
 use std::collections::{BTreeMap, HashMap};
 
-use crate::analysis::{program_sites, site_pc, BBProgram, InsnSite};
+use crate::analysis::{program_sites, BBProgram, InsnSite};
 use crate::insn::MapPseudo;
 use crate::pass::PassContext;
 
@@ -75,7 +75,7 @@ impl MapInfo {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MapReference {
     pub site: InsnSite,
-    pub pc: usize,
+    pub slot: usize,
     pub dst_reg: u8,
     pub imm: i32,
     pub map_index: usize,
@@ -155,7 +155,7 @@ fn collect_map_bindings_from_sites(
             continue;
         };
         if let Some(kind) = insn.map_pseudo_kind() {
-            let pc = site_pc(program, site).map_err(|err| err.to_string())?;
+            let pc = program.rep_site_slot(site).map_err(|err| err.to_string())?;
             let (map_idx, map_id) =
                 resolve_map_ref(kind, insn.imm, map_ids, fd_bindings, &mut fd_order);
             bindings.push(MapBinding {
@@ -243,7 +243,7 @@ where
 
         references.push(MapReference {
             site: binding.site,
-            pc: binding.pc_load,
+            slot: binding.pc_load,
             dst_reg: binding.dst_reg,
             imm: binding.imm,
             map_index,

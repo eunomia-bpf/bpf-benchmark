@@ -2,11 +2,10 @@
 //! skb_load_bytes specialization pass.
 
 use std::collections::BTreeSet;
-use std::ops::Range;
 
 use crate::analysis::{
     advance_reg_state as advance_simple_reg_state, control_flow_target_sites, packet_ctx_layout,
-    site_pc, BBProgram, BlockId, InsnSite, PacketCtxLayout, PacketCtxLayoutScope, SimpleRegValue,
+    BBProgram, InsnSite, PacketCtxLayout, PacketCtxLayoutScope, SimpleRegValue,
 };
 use crate::insn::*;
 use crate::pass::*;
@@ -52,22 +51,20 @@ impl SimpleRegValue for RegValue {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct RewriteSite {
-    call_pc: usize,
     offset: i32,
     len: i32,
 }
 
 #[derive(Clone, Debug)]
 struct AppliedRewriteSite {
-    block: BlockId,
-    range: Range<usize>,
-    site: RewriteSite,
+    call_site: InsnSite,
+    rewrite: RewriteSite,
 }
 
 #[derive(Default)]
 struct ScanResult {
     sites: Vec<AppliedRewriteSite>,
-    skips: Vec<SkipReason>,
+    skips: Vec<SiteSkipReason>,
 }
 
 /// Specialize eligible `bpf_skb_load_bytes()` helper sites into direct packet access.
@@ -90,14 +87,14 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<
     let scan = scan_sites(prog, &branch_targets)?;
     if scan.sites.is_empty() {
         return Ok(PassResult {
-            sites_skipped: scan.skips,
+            site_skipped: scan.skips,
             ..PassResult::unchanged()
         });
     }
     apply_skb_load_bytes_sites(prog, &scan.sites, layout)?;
     Ok(PassResult {
         sites_applied: scan.sites.len(),
-        sites_skipped: scan.skips,
+        site_skipped: scan.skips,
         ..PassResult::unchanged()
     })
 }
@@ -108,47 +105,34 @@ fn apply_skb_load_bytes_sites(
     layout: PacketCtxLayout,
 ) -> anyhow::Result<()> {
     for site in sites.iter().rev() {
-        prog.replace_range(
-            site.block,
-            site.range.clone(),
-            emit_replacement(site.site, layout),
-        )?;
+        prog.replace_range_at(site.call_site, 1, emit_replacement(site.rewrite, layout))?;
     }
     Ok(())
 }
 
 fn scan_sites(prog: &BBProgram, branch_targets: &BTreeSet<InsnSite>) -> anyhow::Result<ScanResult> {
     let mut scan = ScanResult::default();
-    let mut regs = initial_reg_state();
 
     for block in prog.block_ids().collect::<Vec<_>>() {
-        if prog.should_reset_linear_state_at_block(block)? {
-            regs = initial_reg_state();
-        }
+        let mut regs = initial_reg_state();
         let sites = prog.sites_in_block(block)?;
-        for (index, site) in sites.iter().copied().enumerate() {
-            let pc = site_pc(prog, site)?;
-            if index == 0 && pc > 0 && branch_targets.contains(&site) {
-                regs = initial_reg_state();
-            }
-
+        for site in sites {
             let insn = prog
                 .insn_at(site)
                 .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
             if insn.is_call() && insn.imm == BPF_FUNC_SKB_LOAD_BYTES {
                 if insn.src_reg() != 0 {
-                    scan.skips.push(SkipReason {
-                        pc,
+                    scan.skips.push(SiteSkipReason {
+                        site,
                         reason: "helper is not regular call #26".into(),
                     });
                 } else {
-                    match classify_site(pc, branch_targets.contains(&site), &regs) {
+                    match classify_site(branch_targets.contains(&site), &regs) {
                         Ok(rewrite_site) => scan.sites.push(AppliedRewriteSite {
-                            block,
-                            range: site.idx..site.idx + 1,
-                            site: rewrite_site,
+                            call_site: site,
+                            rewrite: rewrite_site,
                         }),
-                        Err(reason) => scan.skips.push(SkipReason { pc, reason }),
+                        Err(reason) => scan.skips.push(SiteSkipReason { site, reason }),
                     }
                 }
             }
@@ -167,13 +151,9 @@ fn scan_sites(prog: &BBProgram, branch_targets: &BTreeSet<InsnSite>) -> anyhow::
     Ok(scan)
 }
 
-fn classify_site(
-    call_pc: usize,
-    is_branch_target: bool,
-    regs: &[RegValue; 11],
-) -> Result<RewriteSite, String> {
+fn classify_site(is_branch_target: bool, regs: &[RegValue; 11]) -> Result<RewriteSite, String> {
     if is_branch_target {
-        return Err("call pc is a branch target".into());
+        return Err("call site is a branch target".into());
     }
     if regs[1] != RegValue::Ctx {
         return Err("arg1 is not ctx".into());
@@ -203,11 +183,7 @@ fn classify_site(
         return Err("offset + len exceeds i32".into());
     }
 
-    Ok(RewriteSite {
-        call_pc,
-        offset,
-        len,
-    })
+    Ok(RewriteSite { offset, len })
 }
 
 fn emit_replacement(site: RewriteSite, layout: PacketCtxLayout) -> Vec<BpfInsn> {

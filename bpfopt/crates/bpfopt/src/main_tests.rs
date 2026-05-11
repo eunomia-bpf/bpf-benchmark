@@ -290,7 +290,15 @@ fn pass_report_serializes_inlined_map_entries_as_hex() {
         ..PassResult::default()
     };
 
-    let report = serde_json::to_value(pass_report("map_inline", &result)).unwrap();
+    let insns = parse_bytecode(&minimal_program_bytes()).unwrap();
+    let program = lift_with_kinsn_registry(
+        &insns,
+        None,
+        Arc::new(KinsnRegistry::unavailable().unwrap()),
+    )
+    .unwrap();
+    let report =
+        serde_json::to_value(pass_report("map_inline", &program, &result).unwrap()).unwrap();
 
     assert_eq!(report["inlined_map_entries"][0]["map_id"], 7);
     assert_eq!(report["inlined_map_entries"][0]["key_hex"], "01000000");
