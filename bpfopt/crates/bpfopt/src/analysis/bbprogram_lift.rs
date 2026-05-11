@@ -8,7 +8,7 @@ use crate::analysis::{
     BBProgram, Block, BlockId, BtfMetadataMap, FrameId, InsnSite, Terminator, VerifierOracle,
 };
 use crate::insn::*;
-use crate::pass::{KinsnRegistry, PrefetchProfile, VerifierInsn, VerifierInsnKind};
+use crate::pass::{BtfInfoRecords, InsnAnnotation, KinsnRegistry, VerifierInsn, VerifierInsnKind};
 
 pub fn lift(insns: &[BpfInsn], oracle: Option<Arc<[VerifierInsn]>>) -> anyhow::Result<BBProgram> {
     lift_with_kinsn_registry(insns, oracle, Arc::new(KinsnRegistry::unavailable()?))
@@ -127,6 +127,21 @@ pub fn lift_with_kinsn_registry(
     )
 }
 
+pub fn lift_with_kinsn_registry_and_side_inputs(
+    insns: &[BpfInsn],
+    oracle: Option<Arc<[VerifierInsn]>>,
+    kinsn_reg: Arc<KinsnRegistry>,
+    map_ids: Vec<u32>,
+    func_info: Option<BtfInfoRecords>,
+    line_info: Option<BtfInfoRecords>,
+    annotations: &[InsnAnnotation],
+) -> anyhow::Result<BBProgram> {
+    let mut prog = lift_with_kinsn_registry(insns, oracle, kinsn_reg)?;
+    prog.attach_side_inputs(insns, map_ids, func_info, line_info)?;
+    prog.attach_profile_from_annotations(annotations)?;
+    Ok(prog)
+}
+
 fn lift_oracle(
     oracle: Option<Arc<[VerifierInsn]>>,
     btf: &BtfMetadataMap,
@@ -169,28 +184,6 @@ fn verifier_state_site(
         .map(|(_, &site)| site)
         .or_else(|| pc_to_site.iter().next_back().map(|(_, &site)| site))
         .ok_or_else(|| anyhow::anyhow!("verifier state pc {} has no BBProgram site", state.pc))
-}
-
-pub(crate) fn lift_prefetch_profiles_from_original_pc_strings<I>(
-    prog: &BBProgram,
-    profiles: I,
-) -> anyhow::Result<BTreeMap<InsnSite, PrefetchProfile>>
-where
-    I: IntoIterator<Item = (String, PrefetchProfile)>,
-{
-    let mut lifted = BTreeMap::new();
-    for (pc, profile) in profiles {
-        let parsed_pc = pc
-            .parse::<usize>()
-            .map_err(|err| anyhow::anyhow!("invalid prefetch_sites pc key {pc}: {err}"))?;
-        let site = prog.original_pc_to_site(parsed_pc).ok_or_else(|| {
-            anyhow::anyhow!("prefetch profile pc {parsed_pc} is not present in BBProgram")
-        })?;
-        if lifted.insert(site, profile).is_some() {
-            anyhow::bail!("duplicate prefetch profile for site {:?}", site);
-        }
-    }
-    Ok(lifted)
 }
 
 fn instruction_boundaries(insns: &[BpfInsn]) -> anyhow::Result<Vec<bool>> {

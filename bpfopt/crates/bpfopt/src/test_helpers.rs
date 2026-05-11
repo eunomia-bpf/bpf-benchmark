@@ -3,7 +3,7 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
-use crate::analysis::{lift_with_kinsn_registry, lower, BBProgram};
+use crate::analysis::{lift_with_kinsn_registry_and_side_inputs, lower, BBProgram};
 use crate::insn::{BpfInsn, MapPseudo};
 use crate::pass::{
     BpfPass, CompressedMapValues, InsnAnnotation, MapInlineHint, MapLookupError, MapMetadata,
@@ -206,16 +206,16 @@ pub struct PassRun {
 
 pub fn lift_test_program(insns: &[BpfInsn], ctx: &PassContext) -> BBProgram {
     let oracle = (!ctx.verifier_states.is_empty()).then(|| Arc::clone(&ctx.verifier_states));
-    let mut prog = lift_with_kinsn_registry(insns, oracle, Arc::new(ctx.kinsn_registry.clone()))
-        .expect("test bytecode should lift into BBProgram");
-    prog.attach_side_inputs(
+    lift_with_kinsn_registry_and_side_inputs(
         insns,
+        oracle,
+        Arc::new(ctx.kinsn_registry.clone()),
         ctx.map_ids.clone(),
         ctx.func_info.clone(),
         ctx.line_info.clone(),
+        &ctx.annotations,
     )
-    .expect("test side inputs should attach to BBProgram");
-    prog
+    .expect("test bytecode and side inputs should lift into BBProgram")
 }
 
 pub fn lower_test_program(prog: &BBProgram) -> Vec<BpfInsn> {

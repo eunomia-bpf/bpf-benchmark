@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT
-use std::ops::Range;
-
-use crate::analysis::{BBProgram, BlockId, InsnSite};
+use crate::analysis::{BBProgram, InsnSite};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
@@ -76,24 +74,30 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     let mut skipped = Vec::new();
 
     for block in prog.block_ids().collect::<Vec<_>>() {
-        for start in prog.sites_in_block(block)? {
-            let Some(site) = rotate_site_at(prog, start)? else {
+        let block_sites = prog.sites_in_block(block)?;
+        let block_insns = prog.copied_body_insns(block)?;
+        for (start_idx, _) in block_sites.iter().enumerate() {
+            let Some(site) = rotate_site_at(&block_insns, start_idx) else {
                 continue;
             };
-            let replacement_start = InsnSite {
-                block,
-                idx: site.start_idx,
-            };
-            let Some((admission_block, admission_range)) =
+            let replacement_start = block_sites
+                .get(site.start_idx)
+                .copied()
+                .ok_or_else(|| anyhow::anyhow!("rotate start index {} missing", site.start_idx))?;
+            let Some((_, admission_range)) =
                 prog.rep_admit_kinsn_site_window(replacement_start, site.old_len, 2, &mut skipped)?
             else {
                 continue;
             };
 
-            let last_site = InsnSite {
-                block,
-                idx: admission_range.end - 1,
-            };
+            let last_idx = admission_range
+                .end
+                .checked_sub(1)
+                .ok_or_else(|| anyhow::anyhow!("rotate admission range is empty"))?;
+            let last_site = block_sites
+                .get(last_idx)
+                .copied()
+                .ok_or_else(|| anyhow::anyhow!("rotate last index {last_idx} missing"))?;
             if prog
                 .live_out_site_checked(last_site)?
                 .contains(&site.tmp_reg)
@@ -106,8 +110,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             }
 
             safe_sites.push(SafeRotateSite {
-                block: admission_block,
-                range: admission_range,
+                start: replacement_start,
                 site,
             });
         }
@@ -138,9 +141,9 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             | BpfInsn::pack_u4(site.val_reg, 4)
             | BpfInsn::pack_u8(shift_amount, 8)
             | BpfInsn::pack_u4(site.tmp_reg, 16);
-        prog.replace_range(
-            safe_site.block,
-            safe_site.range.clone(),
+        prog.replace_range_at(
+            safe_site.start,
+            site.old_len,
             emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
         )?;
     }
@@ -152,17 +155,15 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     })
 }
 
-fn rotate_site_at(prog: &BBProgram, site: InsnSite) -> anyhow::Result<Option<RotateSite>> {
-    let idx = site.idx;
-    if idx + 3 > prog.block_body_len(site.block)? {
-        return Ok(None);
+fn rotate_site_at(insns: &[BpfInsn], idx: usize) -> Option<RotateSite> {
+    if idx + 3 > insns.len() {
+        return None;
     }
-    let insns = prog.copied_body_insns(site.block)?;
     let (Some(i0), Some(i1), Some(i2)) = (insns.get(idx), insns.get(idx + 1), insns.get(idx + 2))
     else {
-        return Ok(None);
+        return None;
     };
-    Ok(try_match_rotate(&insns, i0, i1, i2, idx))
+    try_match_rotate(insns, i0, i1, i2, idx)
 }
 
 pub(super) struct RotateSite {
@@ -175,8 +176,7 @@ pub(super) struct RotateSite {
     pub(super) width: RotateWidth,
 }
 struct SafeRotateSite {
-    block: BlockId,
-    range: Range<usize>,
+    start: InsnSite,
     site: RotateSite,
 }
 

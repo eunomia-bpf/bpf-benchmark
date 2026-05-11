@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: MIT
-use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::collections::BTreeSet;
 
-use anyhow::{bail, Context, Result};
-use serde::Deserialize;
+use anyhow::{bail, Result};
 
-use crate::analysis::{
-    control_flow_target_sites, read_json_file, BBProgram, BlockId, InsnSite, Terminator,
-};
+use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 pub struct BranchFlipPass {
@@ -15,135 +11,18 @@ pub struct BranchFlipPass {
     pub max_branch_miss_rate: f64,
 }
 
-struct ProfiledBranchFlipPass {
-    inner: BranchFlipPass,
-    profiling: ProfilingData,
-}
-
 impl BranchFlipPass {
     pub fn from_cli_args(args: &[String]) -> Result<Box<dyn BpfPass>> {
-        let profile = BranchFlipCliArgs::parse(args)?;
-        Ok(Box::new(ProfiledBranchFlipPass {
-            inner: BranchFlipPass {
-                min_bias: 0.7,
-                max_branch_miss_rate: 0.05,
-            },
-            profiling: read_branch_flip_profile(&profile.profile)?,
+        if let Some(arg) = args.first() {
+            bail!(
+                "branch_flip pass-local profile arguments moved to BBProgram side inputs; unexpected arg: {arg}"
+            );
+        }
+        Ok(Box::new(BranchFlipPass {
+            min_bias: 0.7,
+            max_branch_miss_rate: 0.05,
         }))
     }
-}
-
-impl BpfPass for ProfiledBranchFlipPass {
-    fn name(&self) -> &str {
-        self.inner.name()
-    }
-
-    fn run(&self, program: &mut BBProgram, _ctx: &PassContext) -> anyhow::Result<PassResult> {
-        program.attach_profile_data(&self.profiling)?;
-        run_on_bbprogram(
-            program,
-            self.profiling.branch_miss_rate,
-            self.inner.min_bias,
-            self.inner.max_branch_miss_rate,
-        )
-    }
-}
-
-struct BranchFlipCliArgs {
-    profile: PathBuf,
-}
-
-impl BranchFlipCliArgs {
-    fn parse(args: &[String]) -> Result<Self> {
-        let mut profile = None;
-        let mut iter = args.iter();
-        while let Some(arg) = iter.next() {
-            match arg.as_str() {
-                "--profile" => {
-                    let value = iter
-                        .next()
-                        .ok_or_else(|| anyhow::anyhow!("--profile requires FILE"))?;
-                    profile = Some(PathBuf::from(value));
-                }
-                other => bail!("branch_flip unknown pass-local arg: {other}"),
-            }
-        }
-        Ok(Self {
-            profile: profile.ok_or_else(|| anyhow::anyhow!("branch_flip requires --profile"))?,
-        })
-    }
-}
-
-#[derive(Debug, Deserialize)]
-struct BranchProfileJson {
-    branch_miss_rate: f64,
-    #[serde(default)]
-    per_site: HashMap<String, BranchProfileSiteJson>,
-}
-
-#[derive(Debug, Deserialize)]
-struct BranchProfileSiteJson {
-    branch_count: u64,
-    branch_misses: u64,
-    miss_rate: f64,
-    taken: u64,
-    not_taken: u64,
-}
-
-fn read_branch_flip_profile(path: &Path) -> Result<ProfilingData> {
-    let profile: BranchProfileJson = read_json_file(path, "branch-flip profile JSON")?;
-    if !profile.branch_miss_rate.is_finite() || !(0.0..=1.0).contains(&profile.branch_miss_rate) {
-        bail!(
-            "profile branch_miss_rate must be finite and within [0, 1], got {}",
-            profile.branch_miss_rate
-        );
-    }
-    let mut data = ProfilingData {
-        branch_miss_rate: Some(profile.branch_miss_rate),
-        ..ProfilingData::default()
-    };
-    for (pc, counts) in profile.per_site {
-        let pc = pc
-            .parse::<usize>()
-            .with_context(|| format!("invalid per_site pc key: {pc}"))?;
-        if counts.branch_count == 0 {
-            bail!("profile per_site[{pc}] has zero branch_count");
-        }
-        if counts.branch_misses > counts.branch_count {
-            bail!(
-                "profile per_site[{pc}] branch_misses {} exceeds branch_count {}",
-                counts.branch_misses,
-                counts.branch_count
-            );
-        }
-        if !counts.miss_rate.is_finite() || !(0.0..=1.0).contains(&counts.miss_rate) {
-            bail!(
-                "profile per_site[{pc}] miss_rate must be finite and within [0, 1], got {}",
-                counts.miss_rate
-            );
-        }
-        let direction_count = counts
-            .taken
-            .checked_add(counts.not_taken)
-            .ok_or_else(|| anyhow::anyhow!("profile per_site[{pc}] direction counters overflow"))?;
-        if direction_count > counts.branch_count {
-            bail!(
-                "profile per_site[{pc}] direction count {direction_count} exceeds branch_count {}",
-                counts.branch_count
-            );
-        }
-        data.branch_profiles.insert(
-            pc,
-            BranchProfile {
-                branch_count: counts.branch_count,
-                branch_misses: counts.branch_misses,
-                miss_rate: counts.miss_rate,
-                taken_count: counts.taken,
-                not_taken_count: counts.not_taken,
-            },
-        );
-    }
-    Ok(data)
 }
 #[derive(Clone)]
 pub(super) struct BranchFlipSite {
@@ -154,11 +33,16 @@ pub(super) struct BranchFlipSite {
     else_first: BlockId,
     else_last: BlockId,
     join: BlockId,
+    then_blocks: Vec<BlockId>,
+    else_blocks: Vec<BlockId>,
 }
 
 impl BranchFlipSite {
-    fn body_blocks(&self) -> impl Iterator<Item = BlockId> {
-        (self.then_first.0..=self.else_last.0).map(BlockId)
+    fn body_blocks(&self) -> impl Iterator<Item = BlockId> + '_ {
+        self.then_blocks
+            .iter()
+            .chain(self.else_blocks.iter())
+            .copied()
     }
 }
 
@@ -167,7 +51,6 @@ impl BpfPass for BranchFlipPass {
         "branch_flip"
     }
     fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
-        program.attach_profile_from_annotations(&ctx.annotations)?;
         run_on_bbprogram(
             program,
             ctx.branch_miss_rate,
@@ -203,22 +86,31 @@ pub fn run_on_bbprogram(
         }));
     }
 
-    let branch_targets = control_flow_target_sites(prog)?;
+    let branch_targets = prog.branch_target_entry_sites()?;
     let sites = scan_branch_flip_sites(prog)?;
     let mut safe_sites: Vec<BranchFlipSite> = Vec::new();
     let mut skipped = Vec::new();
 
     for site in &sites {
-        let Some(bp) = prog
-            .profile_at(site.cond_site)
-            .and_then(|record| record.branch_profile.as_ref())
-        else {
-            anyhow::bail!(
-                "branch_flip candidate at {:?} has no real per-site profile data",
+        let branch_count = prog.site_hotness(site.cond_site).ok_or_else(|| {
+            anyhow::anyhow!(
+                "branch_flip candidate at {:?} has no real per-site branch count",
                 site.cond_site
-            );
-        };
-        let direction_total = validate_real_branch_profile(site.cond_site, bp)?;
+            )
+        })?;
+        let site_miss_rate = prog.branch_miss_rate(site.cond_site).ok_or_else(|| {
+            anyhow::anyhow!(
+                "branch_flip candidate at {:?} has no real per-site branch miss rate",
+                site.cond_site
+            )
+        })?;
+        let taken_rate = prog.branch_taken_rate(site.cond_site).ok_or_else(|| {
+            anyhow::anyhow!(
+                "branch_flip candidate at {:?} has no real per-site branch direction data",
+                site.cond_site
+            )
+        })?;
+        validate_real_branch_profile(site.cond_site, branch_count, site_miss_rate, taken_rate)?;
 
         if has_exterior_interior_target(prog, &branch_targets, site)? {
             skipped.push(prog.bf_skip_reason(
@@ -242,19 +134,19 @@ pub fn run_on_bbprogram(
             continue;
         }
 
-        if bp.miss_rate > max_branch_miss_rate {
+        if f64::from(site_miss_rate) > max_branch_miss_rate {
             skipped.push(prog.bf_skip_reason(
                 site.cond_site,
                 format!(
                     "site branch_miss_rate {:.1}% exceeds threshold {:.1}% (unpredictable branch)",
-                    bp.miss_rate * 100.0,
+                    f64::from(site_miss_rate) * 100.0,
                     max_branch_miss_rate * 100.0,
                 ),
             )?);
             continue;
         }
 
-        let should_flip = bp.taken_count as f64 / (direction_total as f64) >= min_bias;
+        let should_flip = f64::from(taken_rate) >= min_bias;
 
         if !should_flip {
             skipped.push(prog.bf_skip_reason(site.cond_site, "branch not biased enough".into())?);
@@ -289,51 +181,33 @@ pub fn run_on_bbprogram(
     })
 }
 
-fn validate_real_branch_profile(report_site: InsnSite, bp: &BranchProfile) -> anyhow::Result<u64> {
-    if bp.branch_count == 0 {
+fn validate_real_branch_profile(
+    report_site: InsnSite,
+    branch_count: u64,
+    miss_rate: f32,
+    taken_rate: f32,
+) -> anyhow::Result<()> {
+    if branch_count == 0 {
         anyhow::bail!(
             "branch_flip candidate at {:?} has zero branch_count",
             report_site
         );
     }
-    if bp.branch_misses > bp.branch_count {
-        anyhow::bail!(
-            "branch_flip candidate at {:?} has branch_misses {} exceeding branch_count {}",
-            report_site,
-            bp.branch_misses,
-            bp.branch_count
-        );
-    }
-    if !bp.miss_rate.is_finite() || !(0.0..=1.0).contains(&bp.miss_rate) {
+    if !miss_rate.is_finite() || !(0.0..=1.0).contains(&miss_rate) {
         anyhow::bail!(
             "branch_flip candidate at {:?} has invalid miss_rate {}",
             report_site,
-            bp.miss_rate
+            miss_rate
         );
     }
-    let direction_total = bp
-        .taken_count
-        .checked_add(bp.not_taken_count)
-        .ok_or_else(|| {
-            anyhow::anyhow!(
-                "branch_flip candidate at {:?} direction counters overflow",
-                report_site
-            )
-        })?;
-    if direction_total == 0 {
+    if !taken_rate.is_finite() || !(0.0..=1.0).contains(&taken_rate) {
         anyhow::bail!(
-            "branch_flip candidate at {:?} has no real per-site direction data",
-            report_site
-        );
-    }
-    if direction_total > bp.branch_count {
-        anyhow::bail!(
-            "branch_flip candidate at {:?} direction count {direction_total} exceeds branch_count {}",
+            "branch_flip candidate at {:?} has invalid taken_rate {}",
             report_site,
-            bp.branch_count
+            taken_rate
         );
     }
-    Ok(direction_total)
+    Ok(())
 }
 
 fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow::Result<()> {
@@ -343,10 +217,10 @@ fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow
     let else_first = site.else_first;
     let else_last = site.else_last;
 
-    if pred.0 + 1 != then_first.0
-        || then_first.0 > then_last.0
-        || then_last.0 + 1 != else_first.0
-        || else_first.0 > else_last.0
+    if !prog.bf_blocks_are_adjacent(pred, then_first)?
+        || then_first > then_last
+        || !prog.bf_blocks_are_adjacent(then_last, else_first)?
+        || else_first > else_last
     {
         anyhow::bail!(
             "branch_flip site at {:?} is not a contiguous BBProgram diamond",
@@ -422,48 +296,45 @@ fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow
         },
     )?;
 
-    let order = swapped_range_order(
-        prog.block_count(),
-        then_first..=then_last,
-        else_first..=else_last,
-    );
+    let order = swapped_range_order(prog, &site.then_blocks, &site.else_blocks)?;
     prog.permute_blocks(&order)
 }
 
 fn swapped_range_order(
-    block_count: usize,
-    first: std::ops::RangeInclusive<BlockId>,
-    second: std::ops::RangeInclusive<BlockId>,
-) -> Vec<BlockId> {
-    let first_start = first.start().0;
-    let first_end = first.end().0;
-    let second_start = second.start().0;
-    let second_end = second.end().0;
-    let mut order = Vec::with_capacity(block_count);
-    let mut block = 0usize;
-    while block < block_count {
-        if block == first_start {
-            order.extend((second_start..=second_end).map(BlockId));
-            order.extend((first_start..=first_end).map(BlockId));
-            block = second_end + 1;
-        } else if (first_start..=second_end).contains(&block) {
-            block += 1;
+    prog: &BBProgram,
+    first: &[BlockId],
+    second: &[BlockId],
+) -> anyhow::Result<Vec<BlockId>> {
+    if first.is_empty() || second.is_empty() {
+        anyhow::bail!("branch_flip cannot swap an empty block range");
+    }
+    let mut order = Vec::with_capacity(prog.block_count());
+    let mut emitted_swap = false;
+    for block in prog.block_ids() {
+        if first.contains(&block) || second.contains(&block) {
+            if !emitted_swap {
+                order.extend_from_slice(second);
+                order.extend_from_slice(first);
+                emitted_swap = true;
+            }
         } else {
-            order.push(BlockId(block));
-            block += 1;
+            order.push(block);
         }
     }
-    order
+    if !emitted_swap {
+        anyhow::bail!("branch_flip swap range was not present in BBProgram order");
+    }
+    Ok(order)
 }
 pub(super) fn scan_branch_flip_sites(prog: &BBProgram) -> anyhow::Result<Vec<BranchFlipSite>> {
     let mut sites = Vec::new();
-    let mut next_allowed_block = 0usize;
+    let mut covered_blocks = BTreeSet::new();
     for block in prog.blocks() {
-        if block.id.0 < next_allowed_block {
+        if covered_blocks.contains(&block.id) {
             continue;
         }
         if let Some(site) = branch_flip_site_at(prog, block.id)? {
-            next_allowed_block = site.join.0;
+            covered_blocks.extend(site.body_blocks());
             sites.push(site);
         }
     }
@@ -485,10 +356,10 @@ fn branch_flip_site_at(prog: &BBProgram, pred: BlockId) -> anyhow::Result<Option
     if !prog.bf_blocks_are_adjacent(pred, then_first)? {
         return Ok(None);
     }
-    let Some((then_last, join)) = then_arm(prog, then_first, else_first)? else {
+    let Some((then_blocks, then_last, join)) = then_arm(prog, then_first, else_first)? else {
         return Ok(None);
     };
-    let Some(else_last) = else_arm(prog, else_first, join)? else {
+    let Some((else_blocks, else_last)) = else_arm(prog, else_first, join)? else {
         return Ok(None);
     };
     if !prog.bf_blocks_are_adjacent(then_last, else_first)? {
@@ -514,6 +385,8 @@ fn branch_flip_site_at(prog: &BBProgram, pred: BlockId) -> anyhow::Result<Option
         else_first,
         else_last,
         join,
+        then_blocks,
+        else_blocks,
     }))
 }
 
@@ -521,33 +394,48 @@ fn then_arm(
     prog: &BBProgram,
     start: BlockId,
     else_first: BlockId,
-) -> anyhow::Result<Option<(BlockId, BlockId)>> {
+) -> anyhow::Result<Option<(Vec<BlockId>, BlockId, BlockId)>> {
     let mut block = start;
+    let mut blocks = Vec::new();
     loop {
-        if block.0 >= else_first.0 {
+        if block >= else_first {
             return Ok(None);
         }
+        blocks.push(block);
         match prog.terminator(block)? {
-            Terminator::Fallthrough { next } if next.0 == block.0 + 1 => block = next,
+            Terminator::Fallthrough { next } if prog.bf_blocks_are_adjacent(block, next)? => {
+                block = next
+            }
             Terminator::Jump { insn, target } => {
                 if !insn.is_ja() {
                     return Ok(None);
                 }
-                return Ok(Some((block, target)));
+                return Ok(Some((blocks, block, target)));
             }
             _ => return Ok(None),
         }
     }
 }
 
-fn else_arm(prog: &BBProgram, start: BlockId, join: BlockId) -> anyhow::Result<Option<BlockId>> {
+fn else_arm(
+    prog: &BBProgram,
+    start: BlockId,
+    join: BlockId,
+) -> anyhow::Result<Option<(Vec<BlockId>, BlockId)>> {
     let mut block = start;
+    let mut blocks = Vec::new();
     loop {
+        if block >= join {
+            return Ok(None);
+        }
+        blocks.push(block);
         match prog.terminator(block)? {
             Terminator::Fallthrough { next } if next == join => {
-                return Ok(Some(block));
+                return Ok(Some((blocks, block)));
             }
-            Terminator::Fallthrough { next } if next.0 == block.0 + 1 => block = next,
+            Terminator::Fallthrough { next } if prog.bf_blocks_are_adjacent(block, next)? => {
+                block = next
+            }
             _ => return Ok(None),
         }
     }
@@ -558,7 +446,10 @@ fn has_exterior_interior_target(
     branch_targets: &std::collections::BTreeSet<InsnSite>,
     site: &BranchFlipSite,
 ) -> anyhow::Result<bool> {
-    let own_target = prog.first_site_in_block(site.else_first)?;
+    let own_target = prog
+        .sites_in_block_with_terminator(site.else_first)?
+        .first()
+        .copied();
     for block in site.body_blocks() {
         for candidate in prog.sites_in_block_with_terminator(block)? {
             if branch_targets.contains(&candidate) && Some(candidate) != own_target {

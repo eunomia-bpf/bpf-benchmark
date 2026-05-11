@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{control_flow_target_sites, BBProgram, BlockId, InsnSite, Terminator};
+use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 use anyhow::{bail, Context};
 use std::collections::BTreeSet;
-use std::ops::Range;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(super) struct Binding {
     pub(super) name: &'static str,
@@ -259,24 +258,6 @@ fn wide_load_alignment_skip_reason(site: &RewriteSite) -> anyhow::Result<Option<
     }
     Ok(None)
 }
-fn is_btf_struct_ptr_type(reg_type: &str) -> bool {
-    let safe = matches!(
-        reg_type,
-        "scalar"
-            | "fp"
-            | "map_value"
-            | "map_key"
-            | "pkt"
-            | "pkt_meta"
-            | "ctx"
-            | "mem"
-            | "buf"
-            | "ringbuf_mem"
-            | "iter"
-    ) || reg_type.starts_with("scalar")
-        || reg_type.starts_with("fp");
-    !safe
-}
 fn skip_site(site: InsnSite, reason: impl Into<String>) -> SiteSkipReason {
     SiteSkipReason {
         site,
@@ -302,10 +283,10 @@ fn is_packet_unsafe_prog_type(prog_type: u32) -> bool {
             | BPF_PROG_TYPE_SK_SKB
     )
 }
-fn is_likely_packet_ptr(reg: i32, before_slot: usize, insns: &[BpfInsn]) -> bool {
+fn is_likely_packet_ptr(reg: i32, before_insn_count: usize, insns: &[BpfInsn]) -> bool {
     const LOOKBACK: usize = 32;
-    let start = before_slot.saturating_sub(LOOKBACK);
-    for i in (start..before_slot).rev() {
+    let start = before_insn_count.saturating_sub(LOOKBACK);
+    for i in (start..before_insn_count).rev() {
         let insn = &insns[i];
         if insn.dst_reg() as i32 == reg {
             if insn.is_ldx_mem() {
@@ -319,8 +300,7 @@ fn is_likely_packet_ptr(reg: i32, before_slot: usize, insns: &[BpfInsn]) -> bool
 pub struct WideMemPass;
 #[derive(Clone, Debug)]
 struct SafeWideMemSite {
-    block: BlockId,
-    range: Range<usize>,
+    start: InsnSite,
     site: RewriteSite,
 }
 impl BpfPass for WideMemPass {
@@ -342,7 +322,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     {
         return Ok(PassResult::unchanged());
     }
-    let branch_targets = control_flow_target_sites(prog)?;
+    let branch_targets = prog.branch_target_entry_sites()?;
     let mut safe_sites = Vec::new();
     let mut skipped = Vec::new();
     let mut reported_starts = BTreeSet::new();
@@ -371,7 +351,6 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                     block
                 );
             }
-            let range = start_site.idx..start_site.idx + site.old_len;
             let has_interior_target = block_sites[start_idx + 1..end_idx]
                 .iter()
                 .any(|candidate| branch_targets.contains(candidate));
@@ -427,11 +406,9 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             }
             let base_reg = u8::try_from(site.required_binding("base_reg")?)
                 .context("wide_mem base_reg binding does not fit u8")?;
-            if prog
-                .oracle_at(start_site)
-                .and_then(|state| state.regs.get(&base_reg))
-                .is_some_and(|state| is_btf_struct_ptr_type(&state.reg_type))
-            {
+            if prog.reg_kind(start_site, base_reg).is_some_and(|kind| {
+                matches!(kind, RegKind::BtfStructPointer | RegKind::OtherPointer)
+            }) {
                 skipped.push(skip_site(
                     start_site,
                     format!(
@@ -441,7 +418,10 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                 ));
                 continue;
             }
-            safe_sites.push(SafeWideMemSite { block, range, site });
+            safe_sites.push(SafeWideMemSite {
+                start: start_site,
+                site,
+            });
         }
     }
     add_cross_block_wide_mem_skips(prog, &branch_targets, &mut reported_starts, &mut skipped)?;
@@ -452,7 +432,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
         });
     }
     for site in safe_sites.iter().rev() {
-        prog.replace_range(site.block, site.range.clone(), emit_wide_mem(&site.site)?)?;
+        prog.replace_range_at(site.start, site.site.old_len, emit_wide_mem(&site.site)?)?;
     }
     Ok(PassResult {
         sites_applied: safe_sites.len(),
@@ -467,13 +447,12 @@ fn add_cross_block_wide_mem_skips(
     skipped: &mut Vec<SiteSkipReason>,
 ) -> anyhow::Result<()> {
     for block in prog.block_ids().collect::<Vec<_>>() {
-        let block_len = prog.block_body_len(block)?;
-        for idx in 0..block_len {
-            let site = InsnSite { block, idx };
+        let block_sites = prog.sites_in_block(block)?;
+        for (idx, site) in block_sites.iter().copied().enumerate() {
             if reported_starts.contains(&site) {
                 continue;
             }
-            let first_block_remaining = block_len - idx;
+            let first_block_remaining = block_sites.len() - idx;
             let window = collect_wide_mem_window(prog, block, idx, branch_targets)?;
             if !window.crossed_branch_target {
                 continue;
@@ -506,9 +485,9 @@ fn collect_wide_mem_window(
     let mut block = start_block;
     let mut idx = start_idx;
     while insns.len() < MAX_WIDE_MEM_LEN {
-        let block_len = prog.block_body_len(block)?;
-        while idx < block_len && insns.len() < MAX_WIDE_MEM_LEN {
-            let site = InsnSite { block, idx };
+        let block_sites = prog.sites_in_block(block)?;
+        while idx < block_sites.len() && insns.len() < MAX_WIDE_MEM_LEN {
+            let site = block_sites[idx];
             insns.push(
                 *prog
                     .insn_at(site)
@@ -520,8 +499,8 @@ fn collect_wide_mem_window(
             break;
         }
         match prog.terminator(block)? {
-            Terminator::Fallthrough { next } if next.0 == block.0 + 1 => {
-                if let Some(site) = prog.first_site_in_block(next)? {
+            Terminator::Fallthrough { next } => {
+                if let Some(site) = prog.sites_in_block(next)?.first().copied() {
                     crossed_branch_target |= branch_targets.contains(&site);
                 }
                 block = next;

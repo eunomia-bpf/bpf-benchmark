@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{program_sites, BBProgram, BlockId, InsnSite};
+use crate::analysis::{BBProgram, BlockId, InsnSite};
 use crate::insn::*;
 use crate::pass::*;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 const REG_COUNT: usize = 11;
-const VERIFIER_POINTER_POST_STATE_LOOKAHEAD: usize = 8;
 pub(super) const VERIFIER_POST_STATE_NOT_SCALAR_EXACT: &str =
     "verifier post-state is not scalar-exact";
 pub(super) const VERIFIER_POST_STATE_POINTER_TYPE: &str =
@@ -32,350 +31,10 @@ impl RegConstFact {
     }
 }
 type RegConstState = [RegConstFact; REG_COUNT];
-#[derive(Default)]
-struct VerifierExactConstOracle {
-    facts: BTreeMap<(InsnSite, usize, u8), RegConstFact>,
-    insn_delta_scalar_post_states: BTreeMap<(InsnSite, usize, u8), VerifierScalarExactPostState>,
-    insn_delta_pointer_post_states: BTreeSet<(usize, usize, u8)>,
-    frames_by_site: BTreeMap<InsnSite, BTreeSet<usize>>,
-    post_state_frames_by_site: BTreeMap<InsnSite, BTreeSet<usize>>,
-    site_ordinals: BTreeMap<InsnSite, usize>,
-}
-#[derive(Clone, Copy, Debug, Default)]
-struct OracleExactAccumulator {
-    saw_observation: bool,
-    exact64: Consensus<u64>,
-    exact32: Consensus<u32>,
-}
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-struct VerifierScalarExactPostState {
-    value: u64,
-    width: VerifierValueWidth,
-}
-#[derive(Clone, Copy, Debug)]
-enum Consensus<T> {
-    Unseen,
-    Exact(T),
-    Conflict,
-}
-impl<T> Default for Consensus<T> {
-    fn default() -> Self {
-        Self::Unseen
-    }
-}
-impl<T: Copy + Eq> Consensus<T> {
-    fn observe(&mut self, value: T) {
-        *self = match *self {
-            Self::Unseen => Self::Exact(value),
-            Self::Exact(current) if current == value => Self::Exact(current),
-            Self::Exact(_) | Self::Conflict => Self::Conflict,
-        };
-    }
-    fn invalidate(&mut self) {
-        *self = Self::Conflict;
-    }
-    fn into_option(self) -> Option<T> {
-        match self {
-            Self::Exact(value) => Some(value),
-            Self::Unseen | Self::Conflict => None,
-        }
-    }
-}
-impl OracleExactAccumulator {
-    fn observe(&mut self, reg: &crate::pass::RegState) {
-        self.saw_observation = true;
-        if reg.reg_type != "scalar" {
-            self.exact64.invalidate();
-            self.exact32.invalidate();
-            return;
-        }
-        match (reg.exact_u64(), reg.exact_u32()) {
-            (Some(exact64), Some(exact32)) => {
-                self.exact64.observe(exact64);
-                self.exact32.observe(exact32);
-            }
-            (Some(_), None) => {
-                self.exact64.invalidate();
-                self.exact32.invalidate();
-            }
-            (None, Some(exact32)) => {
-                self.exact64.invalidate();
-                self.exact32.observe(exact32);
-            }
-            (None, None) => {
-                self.exact64.invalidate();
-                self.exact32.invalidate();
-            }
-        }
-    }
-    fn into_fact(self) -> Option<RegConstFact> {
-        if !self.saw_observation {
-            return None;
-        }
-        let fact = RegConstFact {
-            exact64: self.exact64.into_option(),
-            exact32: self.exact32.into_option(),
-            may_pointer: false,
-        };
-        (fact.exact64.is_some() || fact.exact32.is_some()).then_some(fact)
-    }
-}
-impl VerifierExactConstOracle {
-    fn from_program(prog: &BBProgram) -> anyhow::Result<Option<Self>> {
-        let ordered_sites = program_sites(prog)?;
-        if ordered_sites
-            .iter()
-            .all(|&site| prog.verifier_states_at(site).is_none_or(<[_]>::is_empty))
-        {
-            return Ok(None);
-        }
-        let site_ordinals = ordered_sites
-            .iter()
-            .enumerate()
-            .map(|(ordinal, &site)| (site, ordinal))
-            .collect::<BTreeMap<_, _>>();
-        let mut frames_by_site: BTreeMap<InsnSite, BTreeSet<usize>> = BTreeMap::new();
-        let mut visit_counts: BTreeMap<(InsnSite, usize), usize> = BTreeMap::new();
-        let mut observed_counts: BTreeMap<(InsnSite, usize, u8), usize> = BTreeMap::new();
-        let mut accumulators: BTreeMap<(InsnSite, usize, u8), OracleExactAccumulator> =
-            BTreeMap::new();
-        let mut post_state_frames_by_site: BTreeMap<InsnSite, BTreeSet<usize>> = BTreeMap::new();
-        let mut post_state_visit_counts: BTreeMap<(InsnSite, usize), usize> = BTreeMap::new();
-        let mut post_state_observed_counts: BTreeMap<(InsnSite, usize, u8), usize> =
-            BTreeMap::new();
-        let mut post_state_accumulators: BTreeMap<
-            (InsnSite, usize, u8),
-            Consensus<VerifierScalarExactPostState>,
-        > = BTreeMap::new();
-        let mut insn_delta_pointer_post_states = BTreeSet::new();
-        for site in ordered_sites.iter().copied() {
-            let Some(states) = prog.verifier_states_at(site) else {
-                continue;
-            };
-            let ordinal = site_ordinals[&site];
-            for state in states {
-                if state.kind == VerifierInsnKind::BranchDeltaState {
-                    continue;
-                }
-                frames_by_site.entry(site).or_default().insert(state.frame);
-                *visit_counts.entry((site, state.frame)).or_default() += 1;
-                for (&regno, reg_state) in &state.regs {
-                    let key = (site, state.frame, regno);
-                    *observed_counts.entry(key).or_default() += 1;
-                    accumulators.entry(key).or_default().observe(reg_state);
-                }
-                if state.kind == VerifierInsnKind::InsnDeltaState {
-                    for (&regno, reg_state) in &state.regs {
-                        if verifier_type_is_pointer(&reg_state.reg_type) {
-                            insn_delta_pointer_post_states.insert((ordinal, state.frame, regno));
-                        }
-                    }
-                    post_state_frames_by_site
-                        .entry(site)
-                        .or_default()
-                        .insert(state.frame);
-                    *post_state_visit_counts
-                        .entry((site, state.frame))
-                        .or_default() += 1;
-                    for (&regno, reg_state) in &state.regs {
-                        let key = (site, state.frame, regno);
-                        *post_state_observed_counts.entry(key).or_default() += 1;
-                        let acc = post_state_accumulators.entry(key).or_default();
-                        match scalar_exact_post_state(reg_state) {
-                            Some(post_state) => acc.observe(post_state),
-                            None => acc.invalidate(),
-                        }
-                    }
-                }
-            }
-        }
-        let mut facts = BTreeMap::new();
-        for (key, acc) in accumulators {
-            let (site, frame, _) = key;
-            let visit_key = (site, frame);
-            let visits = counter_value(&visit_counts, &visit_key);
-            let observations = counter_value(&observed_counts, &key);
-            if observations != visits {
-                continue;
-            }
-            if let Some(fact) = acc.into_fact() {
-                facts.insert(key, fact);
-            }
-        }
-        let mut insn_delta_scalar_post_states = BTreeMap::new();
-        for (key, acc) in post_state_accumulators {
-            let (site, frame, _) = key;
-            let visit_key = (site, frame);
-            let visits = counter_value(&post_state_visit_counts, &visit_key);
-            let observations = counter_value(&post_state_observed_counts, &key);
-            if observations != visits {
-                continue;
-            }
-            if let Some(state) = acc.into_option() {
-                insn_delta_scalar_post_states.insert(key, state);
-            }
-        }
-        Ok(Some(Self {
-            facts,
-            insn_delta_scalar_post_states,
-            insn_delta_pointer_post_states,
-            frames_by_site,
-            post_state_frames_by_site,
-            site_ordinals,
-        }))
-    }
-    fn fact(&self, site: InsnSite, frame: Option<usize>, reg: u8) -> Option<RegConstFact> {
-        match frame {
-            Some(frame) => self.facts.get(&(site, frame, reg)).copied(),
-            None => self.frame_invariant_fact(site, reg),
-        }
-    }
-    fn frame_invariant_fact(&self, site: InsnSite, reg: u8) -> Option<RegConstFact> {
-        let frames = self.frames_by_site.get(&site)?;
-        let mut exact64 = Consensus::Unseen;
-        let mut exact32 = Consensus::Unseen;
-        let mut saw_frame = false;
-        for &frame in frames {
-            let fact = self.facts.get(&(site, frame, reg)).copied()?;
-            saw_frame = true;
-            observe_optional(&mut exact64, fact.exact64);
-            observe_optional(&mut exact32, fact.exact32);
-        }
-        let fact = RegConstFact {
-            exact64: exact64.into_option(),
-            exact32: exact32.into_option(),
-            may_pointer: false,
-        };
-        (saw_frame && (fact.exact64.is_some() || fact.exact32.is_some())).then_some(fact)
-    }
-    fn exact_for_instruction(
-        &self,
-        site: InsnSite,
-        frame: Option<usize>,
-        reg: u8,
-        is_32: bool,
-    ) -> Option<u64> {
-        let fact = self.fact(site, frame, reg)?;
-        if is_32 {
-            fact.exact32.map(u64::from)
-        } else {
-            fact.exact64
-        }
-    }
-    fn instruction_post_state_proves_scalar_exact(
-        &self,
-        site: InsnSite,
-        frame: usize,
-        dst: u8,
-        value: i64,
-        width: VerifierValueWidth,
-    ) -> bool {
-        self.insn_delta_scalar_post_states
-            .get(&(site, frame, dst))
-            .is_some_and(|state| state.matches(value, width))
-    }
-    fn instruction_post_state_proves_scalar_exact_in_context(
-        &self,
-        site: InsnSite,
-        frame: Option<usize>,
-        dst: u8,
-        value: i64,
-        width: VerifierValueWidth,
-    ) -> bool {
-        match frame {
-            Some(frame) => {
-                self.instruction_post_state_proves_scalar_exact(site, frame, dst, value, width)
-            }
-            None => self
-                .post_state_frames_by_site
-                .get(&site)
-                .filter(|frames| !frames.is_empty())
-                .is_some_and(|frames| {
-                    frames.iter().all(|&frame| {
-                        self.instruction_post_state_proves_scalar_exact(
-                            site, frame, dst, value, width,
-                        )
-                    })
-                }),
-        }
-    }
-    fn instruction_post_state_has_pointer_type_in_context(
-        &self,
-        site: InsnSite,
-        frame: Option<usize>,
-        dst: u8,
-    ) -> bool {
-        let Some(&ordinal) = self.site_ordinals.get(&site) else {
-            return false;
-        };
-        let max_ordinal = ordinal.saturating_add(VERIFIER_POINTER_POST_STATE_LOOKAHEAD);
-        match frame {
-            Some(frame) => self.insn_delta_pointer_post_states.iter().any(
-                |&(state_ordinal, state_frame, reg)| {
-                    state_ordinal >= ordinal
-                        && state_ordinal <= max_ordinal
-                        && state_frame == frame
-                        && reg == dst
-                },
-            ),
-            None => self
-                .insn_delta_pointer_post_states
-                .iter()
-                .any(|&(state_ordinal, _, reg)| {
-                    state_ordinal >= ordinal && state_ordinal <= max_ordinal && reg == dst
-                }),
-        }
-    }
-    fn apply_exact_facts(&self, site: InsnSite, frame: Option<usize>, state: &mut RegConstState) {
-        for reg in 0..REG_COUNT {
-            if let Some(fact) = self.fact(site, frame, reg as u8) {
-                set_reg_oracle_fact(state, reg as u8, fact);
-            }
-        }
-    }
-}
-fn counter_value<K: Ord>(counts: &BTreeMap<K, usize>, key: &K) -> usize {
-    let mut value = 0usize;
-    if let Some(count) = counts.get(key) {
-        value = *count;
-    }
-    value
-}
-impl VerifierScalarExactPostState {
-    fn matches(self, value: i64, width: VerifierValueWidth) -> bool {
-        let expected = match width {
-            VerifierValueWidth::Bits32 => value as u32 as u64,
-            VerifierValueWidth::Bits64 => value as u64,
-            VerifierValueWidth::Unknown => return false,
-        };
-        self.value == expected && verifier_width_matches(self.width, width)
-    }
-}
-fn scalar_exact_post_state(reg: &crate::pass::RegState) -> Option<VerifierScalarExactPostState> {
-    if reg.reg_type != "scalar" {
-        return None;
-    }
-    let (value, width) = match reg.value_width {
-        VerifierValueWidth::Bits32 => (u64::from(reg.exact_u32()?), VerifierValueWidth::Bits32),
-        VerifierValueWidth::Bits64 => (reg.exact_u64()?, VerifierValueWidth::Bits64),
-        VerifierValueWidth::Unknown => {
-            let value = reg.exact_u64().or_else(|| reg.exact_u32().map(u64::from))?;
-            (value, VerifierValueWidth::Unknown)
-        }
-    };
-    Some(VerifierScalarExactPostState { value, width })
-}
-fn verifier_type_is_pointer(reg_type: &str) -> bool {
-    reg_type != "scalar"
-}
-fn verifier_width_matches(observed: VerifierValueWidth, required: VerifierValueWidth) -> bool {
-    observed == required || observed == VerifierValueWidth::Unknown
-}
-fn observe_optional<T: Copy + Eq>(consensus: &mut Consensus<T>, value: Option<T>) {
-    match value {
-        Some(value) => consensus.observe(value),
-        None => consensus.invalidate(),
-    }
+enum AluWidth {
+    Bits32,
+    Bits64,
 }
 enum AluFoldDecision {
     Replace(Vec<BpfInsn>),
@@ -400,19 +59,18 @@ pub fn run_on_bbprogram(prog: &mut BBProgram) -> anyhow::Result<PassResult> {
     if prog.is_empty() {
         return Ok(PassResult::unchanged());
     }
-    let Some(oracle) = VerifierExactConstOracle::from_program(prog)? else {
-        return Ok(PassResult::unchanged());
-    };
     let dataflow_preds = dataflow_predecessors(prog)?;
-    let block_in = solve_block_entry_states(prog, &dataflow_preds, &oracle)?;
+    let block_in = solve_block_entry_states(prog, &dataflow_preds)?;
     let mut replacements = Vec::<(InsnSite, Vec<BpfInsn>)>::new();
     let mut sites_skipped = Vec::new();
     for block in prog.block_ids().collect::<Vec<_>>() {
+        let in_state = *block_in
+            .get(&block)
+            .ok_or_else(|| anyhow::anyhow!("block {:?} is missing solved input state", block))?;
         simulate_block(
             prog,
             block,
-            block_in[block.0],
-            &oracle,
+            in_state,
             Some(RewriteOutputs {
                 replacements: &mut replacements,
                 sites_skipped: &mut sites_skipped,
@@ -443,17 +101,20 @@ pub fn run_on_bbprogram(prog: &mut BBProgram) -> anyhow::Result<PassResult> {
         ..Default::default()
     })
 }
-fn dataflow_predecessors(prog: &BBProgram) -> anyhow::Result<Vec<Vec<BlockId>>> {
-    let mut preds = vec![Vec::new(); prog.block_count()];
+fn dataflow_predecessors(prog: &BBProgram) -> anyhow::Result<BTreeMap<BlockId, Vec<BlockId>>> {
+    let mut preds = prog
+        .block_ids()
+        .map(|block| (block, Vec::new()))
+        .collect::<BTreeMap<_, _>>();
     for block in prog.blocks() {
         for succ in prog.dataflow_successors(block.id)? {
-            let Some(slot) = preds.get_mut(succ.0) else {
+            let Some(slot) = preds.get_mut(&succ) else {
                 anyhow::bail!("block {:?} has invalid successor {:?}", block.id, succ);
             };
             slot.push(block.id);
         }
     }
-    for slot in &mut preds {
+    for slot in preds.values_mut() {
         slot.sort_unstable();
         slot.dedup();
     }
@@ -461,46 +122,60 @@ fn dataflow_predecessors(prog: &BBProgram) -> anyhow::Result<Vec<Vec<BlockId>>> 
 }
 fn solve_block_entry_states(
     prog: &BBProgram,
-    dataflow_preds: &[Vec<BlockId>],
-    oracle: &VerifierExactConstOracle,
-) -> anyhow::Result<Vec<RegConstState>> {
-    let mut block_in = vec![unknown_state(); prog.block_count()];
-    let mut block_out = vec![unknown_state(); prog.block_count()];
+    dataflow_preds: &BTreeMap<BlockId, Vec<BlockId>>,
+) -> anyhow::Result<BTreeMap<BlockId, RegConstState>> {
+    let mut block_in = prog
+        .block_ids()
+        .map(|block| (block, unknown_state()))
+        .collect::<BTreeMap<_, _>>();
+    let mut block_out = block_in.clone();
     let mut updated = true;
     while updated {
         updated = false;
         for block in prog.blocks() {
-            let block_idx = block.id.0;
-            let in_state = merge_predecessor_states(&dataflow_preds[block_idx], &block_out);
-            let out_state = simulate_block(prog, block.id, in_state, oracle, None)?;
-            if block_in[block_idx] != in_state || block_out[block_idx] != out_state {
-                block_in[block_idx] = in_state;
-                block_out[block_idx] = out_state;
+            let preds = dataflow_preds.get(&block.id).ok_or_else(|| {
+                anyhow::anyhow!("block {:?} is missing predecessor state", block.id)
+            })?;
+            let in_state = merge_predecessor_states(preds, &block_out)?;
+            let out_state = simulate_block(prog, block.id, in_state, None)?;
+            if block_in.get(&block.id) != Some(&in_state)
+                || block_out.get(&block.id) != Some(&out_state)
+            {
+                block_in.insert(block.id, in_state);
+                block_out.insert(block.id, out_state);
                 updated = true;
             }
         }
     }
     Ok(block_in)
 }
-fn merge_predecessor_states(preds: &[BlockId], block_out: &[RegConstState]) -> RegConstState {
+fn merge_predecessor_states(
+    preds: &[BlockId],
+    block_out: &BTreeMap<BlockId, RegConstState>,
+) -> anyhow::Result<RegConstState> {
     let Some((&first, rest)) = preds.split_first() else {
-        return unknown_state();
+        return Ok(unknown_state());
     };
-    let mut merged = block_out[first.0];
+    let mut merged = *block_out
+        .get(&first)
+        .ok_or_else(|| anyhow::anyhow!("predecessor {:?} is missing output state", first))?;
     for &pred in rest {
-        merged = meet_states(&merged, &block_out[pred.0]);
+        let pred_state = *block_out
+            .get(&pred)
+            .ok_or_else(|| anyhow::anyhow!("predecessor {:?} is missing output state", pred))?;
+        merged = meet_states(&merged, &pred_state);
     }
-    merged
+    Ok(merged)
 }
 fn simulate_block(
     prog: &BBProgram,
     block: BlockId,
     mut state: RegConstState,
-    oracle: &VerifierExactConstOracle,
     mut rewrite_outputs: Option<RewriteOutputs<'_>>,
 ) -> anyhow::Result<RegConstState> {
     let collect_rewrites = rewrite_outputs.is_some();
     for site in prog.sites_in_block_with_terminator(block)? {
+        apply_program_facts(prog, site, &mut state);
         let insn = *prog
             .insn_at(site)
             .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
@@ -510,7 +185,7 @@ fn simulate_block(
             None
         };
         let (next_state, decision) =
-            analyze_instruction(&insn, ldimm64_value, site, &state, oracle, collect_rewrites)?;
+            analyze_instruction(prog, &insn, ldimm64_value, site, &state, collect_rewrites)?;
         if let Some(outputs) = rewrite_outputs.as_mut() {
             match decision {
                 AluFoldDecision::Replace(replacement) => {
@@ -525,11 +200,11 @@ fn simulate_block(
     Ok(state)
 }
 fn analyze_instruction(
+    prog: &BBProgram,
     insn: &BpfInsn,
     ldimm64_value: Option<u64>,
     site: InsnSite,
     state: &RegConstState,
-    oracle: &VerifierExactConstOracle,
     collect_rewrites: bool,
 ) -> anyhow::Result<(RegConstState, AluFoldDecision)> {
     let mut next = *state;
@@ -557,8 +232,8 @@ fn analyze_instruction(
             AluFoldDecision::None
         }
         BPF_ALU | BPF_ALU64 => {
-            let decision = if collect_rewrites {
-                fold_alu_instruction(insn, site, None, state, oracle)
+            let decision = if collect_rewrites && !prog.site_is_dead_code(site) {
+                fold_alu_instruction(prog, insn, site, state)
             } else {
                 AluFoldDecision::None
             };
@@ -582,28 +257,27 @@ fn analyze_instruction(
         }
         _ => AluFoldDecision::None,
     };
-    if can_apply_oracle_facts(insn) {
-        oracle.apply_exact_facts(site, None, &mut next);
+    if can_apply_program_facts(insn) {
+        apply_program_facts(prog, site, &mut next);
     }
     Ok((next, decision))
 }
-fn can_apply_oracle_facts(insn: &BpfInsn) -> bool {
+fn can_apply_program_facts(insn: &BpfInsn) -> bool {
     !(insn.is_call() || insn.is_mov64_reg() || insn.is_mov32_reg())
 }
 fn fold_alu_instruction(
+    prog: &BBProgram,
     insn: &BpfInsn,
     site: InsnSite,
-    frame: Option<usize>,
     state: &RegConstState,
-    oracle: &VerifierExactConstOracle,
 ) -> AluFoldDecision {
     if bpf_op(insn.code) == BPF_MOV && bpf_src(insn.code) == BPF_K {
         return AluFoldDecision::None;
     }
     let is_32 = insn.class() == BPF_ALU;
     let result = evaluate_alu_result(insn, state).or_else(|| {
-        oracle_materializes_alu_result(insn)
-            .then(|| oracle.exact_for_instruction(site, frame, insn.dst_reg(), is_32))
+        program_materializes_alu_result(insn)
+            .then(|| program_exact_for_instruction(prog, site, insn.dst_reg(), is_32))
             .flatten()
     });
     let Some(result) = result else {
@@ -614,9 +288,9 @@ fn fold_alu_instruction(
         return AluFoldDecision::None;
     }
     let width = if is_32 {
-        VerifierValueWidth::Bits32
+        AluWidth::Bits32
     } else {
-        VerifierValueWidth::Bits64
+        AluWidth::Bits64
     };
     if alu_inputs_may_be_pointer(insn, state) {
         return AluFoldDecision::Skip(SiteSkipReason {
@@ -624,19 +298,13 @@ fn fold_alu_instruction(
             reason: VERIFIER_POST_STATE_POINTER_TYPE.to_string(),
         });
     }
-    if oracle.instruction_post_state_has_pointer_type_in_context(site, frame, insn.dst_reg()) {
+    if prog.reg_known_map_ptr(site, insn.dst_reg()).is_some() {
         return AluFoldDecision::Skip(SiteSkipReason {
             site,
             reason: VERIFIER_POST_STATE_POINTER_TYPE.to_string(),
         });
     }
-    if !oracle.instruction_post_state_proves_scalar_exact_in_context(
-        site,
-        frame,
-        insn.dst_reg(),
-        result as i64,
-        width,
-    ) {
+    if !program_proves_scalar_exact(prog, site, insn.dst_reg(), result, width) {
         return AluFoldDecision::Skip(SiteSkipReason {
             site,
             reason: VERIFIER_POST_STATE_NOT_SCALAR_EXACT.to_string(),
@@ -644,8 +312,51 @@ fn fold_alu_instruction(
     }
     AluFoldDecision::Replace(candidate)
 }
-fn oracle_materializes_alu_result(insn: &BpfInsn) -> bool {
+fn program_materializes_alu_result(insn: &BpfInsn) -> bool {
     !(insn.is_mov64_reg() || insn.is_mov32_reg())
+}
+fn program_exact_for_instruction(
+    prog: &BBProgram,
+    site: InsnSite,
+    reg: u8,
+    is_32: bool,
+) -> Option<u64> {
+    let value = prog.reg_known_constant(site, reg)? as u64;
+    Some(normalize_alu_result(is_32, value))
+}
+fn program_proves_scalar_exact(
+    prog: &BBProgram,
+    site: InsnSite,
+    reg: u8,
+    expected: u64,
+    width: AluWidth,
+) -> bool {
+    let Some(value) = prog.reg_known_constant(site, reg) else {
+        return false;
+    };
+    match width {
+        AluWidth::Bits32 => value as u32 as u64 == expected as u32 as u64,
+        AluWidth::Bits64 => value as u64 == expected,
+    }
+}
+fn apply_program_facts(prog: &BBProgram, site: InsnSite, state: &mut RegConstState) {
+    for reg in 0..REG_COUNT {
+        let reg = reg as u8;
+        let _ = prog.reg_kind(site, reg);
+        let fact = if prog.reg_known_map_ptr(site, reg).is_some() {
+            Some(RegConstFact::pointer())
+        } else {
+            prog.reg_known_constant(site, reg)
+                .map(|value| RegConstFact {
+                    exact64: Some(value as u64),
+                    exact32: Some(value as u32),
+                    may_pointer: false,
+                })
+        };
+        if let Some(fact) = fact {
+            set_reg_program_fact(state, reg, fact);
+        }
+    }
 }
 fn evaluate_alu_result(insn: &BpfInsn, state: &RegConstState) -> Option<u64> {
     let is_32 = insn.class() == BPF_ALU;
@@ -709,7 +420,7 @@ fn set_reg_fact(state: &mut RegConstState, reg: u8, fact: RegConstFact) {
         *slot = fact;
     }
 }
-fn set_reg_oracle_fact(state: &mut RegConstState, reg: u8, fact: RegConstFact) {
+fn set_reg_program_fact(state: &mut RegConstState, reg: u8, fact: RegConstFact) {
     if let Some(slot) = state.get_mut(reg as usize) {
         if slot.may_pointer {
             return;

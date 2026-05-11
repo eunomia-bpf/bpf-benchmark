@@ -53,7 +53,7 @@ fn branch_flip_requires_per_site_pgo_data() {
 
     let err = pass_error_on_insns(pass(), diamond(), &ctx);
 
-    assert!(err.contains("no real per-site profile data"));
+    assert!(err.contains("no real per-site branch count"));
 }
 
 #[test]

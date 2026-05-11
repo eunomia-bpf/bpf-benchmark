@@ -1,8 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{
-    control_flow_target_sites, insn_use_def_set, program_sites, read_json_file, BBProgram,
-    InsnSite, Terminator,
-};
+use crate::analysis::{insn_use_def_set, BBProgram, InsnSite, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 use anyhow::{anyhow, bail, Context, Result};
@@ -19,6 +16,11 @@ const REG_RESOLUTION_LIMIT: usize = 64;
 const CONST_STACK_VALUE_LOOKBACK_LIMIT: usize = 256;
 const MAP_INLINE_FIXED_POINT_MAX_ITERS: usize = 8;
 const VALUE_PREVIEW_BYTES: usize = 32;
+fn read_json_from_path<T: serde::de::DeserializeOwned>(path: &Path, label: &str) -> Result<T> {
+    let data = fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
+    serde_json::from_slice(&data)
+        .with_context(|| format!("failed to parse {label} from {}", path.display()))
+}
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum MapInlineHintAnchor {
     Pc(usize),
@@ -455,7 +457,7 @@ fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
 }
 fn read_bpftool_map_show(path: &Path, map_id: u32) -> Result<BpftoolMapShowJson> {
     let show_path = bpftool_map_show_path(path, map_id);
-    let show: BpftoolMapShowJson = read_json_file(&show_path, "bpftool map show JSON")?;
+    let show: BpftoolMapShowJson = read_json_from_path(&show_path, "bpftool map show JSON")?;
     if show.id != map_id {
         bail!(
             "{} contains map id {}, expected {}",
@@ -934,7 +936,8 @@ fn parse_map_type(map_type: &MapTypeJson) -> Result<u32> {
 }
 fn parse_map_ids_arg(value: &str) -> Result<Vec<u32>> {
     if value.contains('/') || value.ends_with(".json") {
-        let prog_info: ProgInfoMapIdsJson = read_json_file(Path::new(value), "prog_info JSON")?;
+        let prog_info: ProgInfoMapIdsJson =
+            read_json_from_path(Path::new(value), "prog_info JSON")?;
         return Ok(prog_info.map_ids);
     }
     parse_u32_csv(value, "--map-ids")
@@ -1219,123 +1222,40 @@ fn try_extract_constant_key_verifier_guided(
     let key_width: usize = key_size
         .try_into()
         .map_err(|_| format!("map key size {} does not fit in usize", key_size))?;
-    let state = prog
-        .oracle_at(call_site)
-        .ok_or_else(|| format!("verifier oracle has no state snapshot at {:?}", call_site))?;
-    let key_off = stack_range_at_lookup(state, call_site)?;
-    let bytes = constant_stack_bytes_for_range(&state.stack, key_off, key_width).ok_or_else(
-        || {
+    if prog.site_is_dead_code(call_site) {
+        return Err(format!("lookup call at {:?} is dead code", call_site));
+    }
+    let _r2_kind = prog.reg_kind(call_site, BPF_REG_2);
+    let _r2_bounds = prog.reg_proven_bounds(call_site, BPF_REG_2);
+    let (r2_mov_site, r2_add_site, key_off) = find_r2_stack_pointer_setup_simple(prog, call_site)
+        .map_err(|err| err.to_string())?
+        .ok_or_else(|| {
             format!(
-                "verifier log did not expose constant stack bytes covering fp{key_off} width {key_width} at {:?}",
+                "no materialized r2 stack pointer setup found for lookup at {:?}",
                 call_site
             )
-        },
+        })?;
+    let key_width_u8 = u8::try_from(key_width)
+        .map_err(|_| format!("map key size {} does not fit in u8", key_size))?;
+    let stack_bytes = find_constant_stack_bytes_with_limit(
+        prog,
+        call_site,
+        key_off,
+        key_width_u8,
+        Some(CONST_STACK_VALUE_LOOKBACK_LIMIT),
     )?;
-    let materialization =
-        materialization_for_snapshot_key(prog, call_site, key_off, key_width, &bytes)?;
-    let removable_setup = find_r2_stack_pointer_setup_simple(prog, call_site)
-        .map_err(|err| err.to_string())?
-        .filter(|(_, _, off)| *off == key_off);
-    let (store_site, source_imm_site, materialization_sites) = match materialization {
-        Some(stack_bytes) => (
-            stack_bytes.latest_store_site,
-            stack_bytes.latest_source_imm_site,
-            stack_bytes.materialization_sites,
-        ),
-        None => (call_site, None, BTreeSet::new()),
-    };
+    let bytes = stack_bytes.bytes;
     Ok(ConstantKey {
         stack_off: Some(key_off),
         width: key_width,
         value: constant_key_value(&bytes),
         bytes,
-        store_site,
-        source_imm_site,
-        materialization_sites,
-        r2_mov_site: removable_setup.map(|(mov_site, _, _)| mov_site),
-        r2_add_site: removable_setup.map(|(_, add_site, _)| add_site),
+        store_site: stack_bytes.latest_store_site,
+        source_imm_site: stack_bytes.latest_source_imm_site,
+        materialization_sites: stack_bytes.materialization_sites,
+        r2_mov_site: Some(r2_mov_site),
+        r2_add_site: Some(r2_add_site),
     })
-}
-fn stack_range_at_lookup(state: &VerifierInsn, call_site: InsnSite) -> Result<i16, String> {
-    let reg = state.regs.get(&2).ok_or_else(|| {
-        format!(
-            "verifier log did not expose r2 stack pointer at {:?}",
-            call_site
-        )
-    })?;
-    if reg.reg_type != "fp" {
-        return Err(format!(
-            "verifier log r2 at {:?} has type {}, expected fp",
-            call_site, reg.reg_type
-        ));
-    }
-    let offset = reg.offset.ok_or_else(|| {
-        format!(
-            "verifier log r2 stack pointer at {:?} has no fixed offset",
-            call_site
-        )
-    })?;
-    i16::try_from(offset).map_err(|_| {
-        format!(
-            "verifier log r2 stack pointer offset {} at {:?} does not fit in i16",
-            offset, call_site
-        )
-    })
-}
-fn constant_stack_bytes_for_range(
-    stack: &HashMap<i16, StackState>,
-    stack_off: i16,
-    key_width: usize,
-) -> Option<Vec<u8>> {
-    let start = i32::from(stack_off);
-    let width = match i32::try_from(key_width) {
-        Ok(width) => width,
-        Err(_) => return None,
-    };
-    let end = start.checked_add(width)?;
-    if start >= 0 || end > 0 {
-        return None;
-    }
-    let mut bytes = Vec::with_capacity(key_width);
-    for absolute_off in start..end {
-        bytes.push(constant_stack_byte(stack, absolute_off)?);
-    }
-    Some(bytes)
-}
-fn constant_stack_byte(stack: &HashMap<i16, StackState>, absolute_off: i32) -> Option<u8> {
-    if absolute_off >= 0 {
-        return None;
-    }
-    let slot_index = ((-absolute_off - 1) / 8) + 1;
-    let slot_start_i32 = -slot_index * 8;
-    let slot_start = match i16::try_from(slot_start_i32) {
-        Ok(slot_start) => slot_start,
-        Err(_) => return None,
-    };
-    let byte_index = match usize::try_from(absolute_off - slot_start_i32) {
-        Ok(byte_index) => byte_index,
-        Err(_) => return None,
-    };
-    if byte_index >= 8 {
-        return None;
-    }
-    let state = stack.get(&slot_start)?;
-    let type_index = 7usize.checked_sub(byte_index)?;
-    if let Some(slot_types) = state.slot_types.as_deref() {
-        let slot_type = slot_types
-            .as_bytes()
-            .get(type_index)
-            .copied()
-            .or(Some(b'r'));
-        if slot_type == Some(b'0') {
-            return Some(0);
-        }
-        if slot_type != Some(b'r') {
-            return None;
-        }
-    }
-    let value = verifier_known_scalar_value(state.value.as_ref()?)?;
-    Some(value.to_le_bytes()[byte_index])
 }
 fn materialization_for_snapshot_key(
     prog: &BBProgram,
@@ -1486,12 +1406,6 @@ fn constant_stack_store_source_site(
     }
     Ok(resolve_constant_reg_value(prog, store_site, insn.src_reg())?.source_site)
 }
-fn verifier_known_scalar_value(reg: &crate::pass::RegState) -> Option<u64> {
-    if reg.reg_type != "scalar" || !reg.precise {
-        return None;
-    }
-    reg.exact_u64().or_else(|| reg.exact_u32().map(u64::from))
-}
 #[derive(Clone, Debug)]
 struct SiteRewrite {
     call_site: InsnSite,
@@ -1569,7 +1483,7 @@ fn is_map_lookup_elem_call(insn: &BpfInsn) -> bool {
 }
 fn lookup_call_sites(prog: &BBProgram) -> anyhow::Result<Vec<InsnSite>> {
     let mut sites = Vec::new();
-    for site in program_sites(prog)? {
+    for site in prog.all_sites() {
         if prog.insn_at(site).is_some_and(is_map_lookup_elem_call) {
             sites.push(site);
         }
@@ -1578,13 +1492,10 @@ fn lookup_call_sites(prog: &BBProgram) -> anyhow::Result<Vec<InsnSite>> {
 }
 
 fn lookup_call_site_at_pc(prog: &BBProgram, pc: usize) -> anyhow::Result<Option<InsnSite>> {
-    let Some(site) = prog.original_pc_to_site(pc) else {
-        return Ok(None);
-    };
-    Ok(prog
-        .insn_at(site)
-        .is_some_and(is_map_lookup_elem_call)
-        .then_some(site))
+    let _ = prog;
+    anyhow::bail!(
+        "pc-addressed map_inline hints must be resolved before pass execution; unresolved pc {pc}"
+    )
 }
 
 fn collect_kernel_mutable_maps(
@@ -1619,7 +1530,7 @@ fn collect_kernel_mutable_maps(
             ),
         );
     }
-    for site in program_sites(prog)? {
+    for site in prog.all_sites() {
         let insn = prog.insn(site)?;
         if is_map_writer_helper_call(insn) {
             let Some(map_load_site) = find_direct_map_load_for_reg_before_site(prog, site, 1)?
@@ -2202,8 +2113,8 @@ impl BpfPass for MapInlinePass {
 pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
     let initial_map_info = analyze_map_info(prog, ctx).map_err(anyhow::Error::msg)?;
     let initial_kernel_mutable_maps = collect_kernel_mutable_maps(prog, ctx, &initial_map_info)?;
-    if program_sites(prog)?
-        .into_iter()
+    if prog
+        .all_sites()
         .any(|site| prog.insn_at(site).is_some_and(is_map_writer_helper_call))
         && !ctx.map_inline_hints.is_empty()
         && !ctx.map_inner_map_ids.is_empty()
@@ -2305,8 +2216,8 @@ fn run_map_inline_round(
     inline_hints: &ResolvedInlineHints,
     inline_hints_consumed: &mut HashSet<MapInlineHintAnchor>,
 ) -> anyhow::Result<PassResult> {
-    let old_len = prog.program_slot_len()?;
-    let branch_target_sites = control_flow_target_sites(prog)?;
+    let old_len = prog.all_sites().count();
+    let branch_target_sites = prog.branch_target_entry_sites()?;
     let map_info = analyze_map_info(prog, ctx).map_err(anyhow::Error::msg)?;
     let kernel_mutable_maps = collect_kernel_mutable_maps(prog, ctx, &map_info)?;
     let mut skipped = Vec::new();
@@ -2324,8 +2235,8 @@ fn run_map_inline_round(
     } = build_direct_map_value_load_rewrites(prog, ctx, &kernel_mutable_maps)?;
     site_diagnostics.extend(direct_site_diagnostics);
     let sites = find_map_lookup_sites(prog)?;
-    let has_writer = program_sites(prog)?
-        .into_iter()
+    let has_writer = prog
+        .all_sites()
         .any(|site| prog.insn_at(site).is_some_and(is_map_writer_helper_call));
     if sites.is_empty() && has_writer {
         for site in lookup_call_sites(prog)? {
@@ -2364,8 +2275,8 @@ fn run_map_inline_round(
             continue;
         };
         log_map_inline_debug(&format!(
-            "lookup {:?}: map_ref imm={} map_index={} map_id={:?}",
-            site.call_site, map_ref.imm, map_ref.map_index, map_ref.map_id
+            "lookup {:?}: map_ref imm={} map_ordinal={} map_id={:?}",
+            site.call_site, map_ref.imm, map_ref.map_ordinal, map_ref.map_id
         ));
         let Some(info) = map_ref.info.as_ref() else {
             let reason = "map info unavailable".to_string();
@@ -2942,7 +2853,7 @@ fn apply_map_inline_edit(
         cleanup_map_inline_bbprogram(&mut next)?;
     }
     reset_btf_to_current_pcs(&mut next)?;
-    let new_len = next.program_slot_len()?;
+    let new_len = next.all_sites().count();
     *prog = next;
     Ok(PassResult {
         sites_applied,
@@ -3060,10 +2971,14 @@ fn cleanup_map_inline_bbprogram(prog: &mut BBProgram) -> anyhow::Result<()> {
             break;
         }
     }
+    let ordered_blocks = prog.block_ids().collect::<Vec<_>>();
     let mut nops = Vec::new();
     for block in prog.blocks() {
         if let Terminator::Jump { insn, target } = prog.terminator(block.id)? {
-            if insn == BpfInsn::nop() || target.0 == block.id.0 + 1 {
+            let linear_target = ordered_blocks
+                .windows(2)
+                .any(|window| window[0] == block.id && window[1] == target);
+            if insn == BpfInsn::nop() || linear_target {
                 nops.push((block.id, target));
             }
         }
@@ -4160,7 +4075,7 @@ fn lookup_pattern_removal_is_safe(
     if skipped_sites.is_empty() {
         return Ok(false);
     }
-    let sites = program_sites(prog)?;
+    let sites = prog.all_sites().collect::<Vec<_>>();
     let mut min_removed_pos = usize::MAX;
     for site in skipped_sites {
         min_removed_pos = min_removed_pos.min(position_in_sites(&sites, *site)?);
@@ -4954,7 +4869,7 @@ fn null_check_removal_window_is_trivial(
     else {
         return Ok(false);
     };
-    let sites = program_sites(prog)?;
+    let sites = prog.all_sites().collect::<Vec<_>>();
     let mut pos = position_in_sites(&sites, non_null_site)?;
     let target_pos = position_in_sites(&sites, null_target_site)?;
     let load_dst_regs = uses

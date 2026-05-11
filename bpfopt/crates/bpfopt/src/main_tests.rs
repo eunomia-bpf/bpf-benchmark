@@ -1,4 +1,5 @@
 use super::*;
+use bpfopt::analysis::lift_with_kinsn_registry;
 use bpfopt::insn::{MapPseudo, BPF_DW, BPF_IMM, BPF_LD};
 
 fn minimal_program_bytes() -> Vec<u8> {

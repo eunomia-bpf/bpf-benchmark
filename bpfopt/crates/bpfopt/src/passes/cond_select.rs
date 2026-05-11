@@ -219,19 +219,17 @@ fn pattern_a_for_site(
     site: &CondSelectSite,
 ) -> anyhow::Result<DiamondPattern> {
     let mut jcc_site = site.start_site;
-    let block_len = prog.block_body_len(jcc_site.block)?;
-    if jcc_site.idx != block_len {
+    if !prog.is_terminator_site(jcc_site)? {
         anyhow::bail!(
             "pattern A branch site {:?} is not a block terminator",
             site.start_site
         );
     }
-    if block_len > 0 {
+    if !prog.sites_in_block(jcc_site.block)?.is_empty() {
         let (_, tail) = prog.split_block(jcc_site)?;
-        jcc_site = InsnSite {
-            block: tail,
-            idx: prog.block_body_len(tail)?,
-        };
+        jcc_site = prog
+            .terminator_site(tail)?
+            .ok_or_else(|| anyhow::anyhow!("split tail {:?} has no terminator site", tail))?;
     }
     let predecessor = jcc_site.block;
     let Terminator::CondBranch {
@@ -257,7 +255,11 @@ fn pattern_c_for_site(
     site: &CondSelectSite,
 ) -> anyhow::Result<DiamondPattern> {
     let start_site = site.start_site;
-    let predecessor = if start_site.idx == 0 {
+    let first_site = prog
+        .sites_in_block_with_terminator(start_site.block)?
+        .first()
+        .copied();
+    let predecessor = if first_site == Some(start_site) {
         start_site.block
     } else {
         prog.split_block(start_site)?.1
@@ -298,10 +300,9 @@ fn scan_cond_select_sites(prog: &BBProgram) -> anyhow::Result<Vec<CondSelectSite
         else {
             continue;
         };
-        let branch_site = InsnSite {
-            block: block.id,
-            idx: prog.block_body_len(block.id)?,
-        };
+        let branch_site = prog.terminator_site(block.id)?.ok_or_else(|| {
+            anyhow::anyhow!("conditional block {:?} has no terminator site", block.id)
+        })?;
         let shape = CondBranchShape {
             block: block.id,
             site: branch_site,
@@ -346,10 +347,11 @@ fn try_match_pattern_a(
     if false_join != true_join || mov_false.dst_reg() != mov_true.dst_reg() {
         return Ok(None);
     }
-    let true_mov_site = InsnSite {
-        block: shape.taken,
-        idx: 0,
-    };
+    let true_mov_site = prog
+        .sites_in_block(shape.taken)?
+        .first()
+        .copied()
+        .ok_or_else(|| anyhow::anyhow!("true branch {:?} has no body site", shape.taken))?;
     if shape.block == shape.taken || shape.block == shape.fallthrough {
         return Ok(None);
     }
@@ -377,12 +379,9 @@ fn try_match_pattern_c(
     if !jcc.is_cond_jmp() {
         return Ok(None);
     }
-    let Some(mov_true_idx) = prog.block_body_len(shape.block)?.checked_sub(1) else {
+    let block_sites = prog.sites_in_block(shape.block)?;
+    let Some(mov_true_site) = block_sites.last().copied() else {
         return Ok(None);
-    };
-    let mov_true_site = InsnSite {
-        block: shape.block,
-        idx: mov_true_idx,
     };
     let mov_true = prog
         .insn_at(mov_true_site)
@@ -406,16 +405,15 @@ fn try_match_pattern_c(
     if insn_use_def_set(&jcc).uses.contains(&mov_true_dst) {
         return Ok(None);
     }
-    let start_site = InsnSite {
-        block: shape.block,
-        idx: mov_true_idx,
-    };
+    let start_site = mov_true_site;
+    let end_site = prog
+        .sites_in_block(shape.fallthrough)?
+        .first()
+        .copied()
+        .ok_or_else(|| anyhow::anyhow!("false branch {:?} has no body site", shape.fallthrough))?;
     Ok(Some(CondSelectSite {
         start_site,
-        end_site: InsnSite {
-            block: shape.fallthrough,
-            idx: 0,
-        },
+        end_site,
         old_len: 3,
         cond_reg: jcc.dst_reg(),
         dst_reg: mov_true.dst_reg(),

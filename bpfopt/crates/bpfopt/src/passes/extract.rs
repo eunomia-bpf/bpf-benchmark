@@ -74,7 +74,10 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                 skipped.push(skip);
             };
         }
-        for [start, next] in prog.adjacent_windows_in_block::<2>(block) {
+        let block_sites = prog.sites_in_block(block)?;
+        for window in block_sites.windows(2) {
+            let start = window[0];
+            let next = window[1];
             let i0 = prog
                 .insn_at(start)
                 .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", start))?;
@@ -84,12 +87,13 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             let Some(site) = extract_site_from_pair(i0, i1) else {
                 continue;
             };
-            let Some((admission_block, admission_range)) =
-                prog.rep_admit_kinsn_site_window(start, site.old_len, 2, &mut skipped)?
-            else {
+            if prog
+                .rep_admit_kinsn_site_window(start, site.old_len, 2, &mut skipped)?
+                .is_none()
+            {
                 continue;
-            };
-            safe_sites.push((admission_block, admission_range, site));
+            }
+            safe_sites.push((start, site));
         }
     }
     if safe_sites.is_empty() {
@@ -101,7 +105,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     let kfunc_off = ctx
         .kinsn_registry
         .call_off_for_target_name("bpf_extract64")?;
-    for (block, range, site) in safe_sites.iter().rev() {
+    for (start, site) in safe_sites.iter().rev() {
         let shift_amount = u8::try_from(site.shift_amount).map_err(|_| {
             anyhow::anyhow!(
                 "extract shift amount {} exceeds packed payload width",
@@ -117,9 +121,9 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
         let payload = BpfInsn::pack_u4(site.dst_reg, 0)
             | BpfInsn::pack_u8(shift_amount, 8)
             | BpfInsn::pack_u8(bit_len, 16);
-        prog.replace_range(
-            *block,
-            range.clone(),
+        prog.replace_range_at(
+            *start,
+            site.old_len,
             emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
         )?;
     }
@@ -136,7 +140,7 @@ fn cross_block_extract_skip(
     let i0 = prog
         .insn_at(start)
         .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", start))?;
-    if prog.next_site_in_block(start).is_some() {
+    if next_body_site_in_block(prog, start)?.is_some() {
         return Ok(None);
     }
     let next_block = match prog.terminator(start.block)? {
@@ -150,7 +154,7 @@ fn cross_block_extract_skip(
             start.block
         );
     }
-    let Some(next) = prog.block_first_body_site(next_block) else {
+    let Some(next) = prog.sites_in_block(next_block)?.first().copied() else {
         return Ok(None);
     };
     let i1 = prog
@@ -160,4 +164,11 @@ fn cross_block_extract_skip(
         site: start,
         reason: "interior branch target".into(),
     }))
+}
+
+fn next_body_site_in_block(prog: &BBProgram, site: InsnSite) -> anyhow::Result<Option<InsnSite>> {
+    Ok(prog
+        .sites_in_block(site.block)?
+        .windows(2)
+        .find_map(|window| (window[0] == site).then_some(window[1])))
 }

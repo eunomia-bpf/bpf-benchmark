@@ -59,18 +59,15 @@ fn collect_map_bindings(
     while pc < insns.len() {
         let insn = insns[pc];
         if let Some(kind) = insn.map_pseudo_kind() {
-            let (map_idx, map_id) =
+            let (map_ordinal, map_id) =
                 resolve_map_ref(kind, insn.imm, map_ids, fd_bindings, &mut fd_order);
             bindings.push(MapBinding {
-                site: InsnSite {
-                    block: BlockId(0),
-                    idx: bindings.len(),
-                },
+                site: InsnSite::for_test(BlockId(0), bindings.len()),
                 pc_load: pc,
                 kind,
                 dst_reg: insn.dst_reg(),
                 imm: insn.imm,
-                map_idx,
+                map_ordinal,
                 map_id,
             });
         }
@@ -138,9 +135,9 @@ fn collect_map_references_tracks_unique_fd_order() {
     .expect("map reference collection should succeed");
 
     assert_eq!(result.references.len(), 3);
-    assert_eq!(result.references[0].map_index, 0);
-    assert_eq!(result.references[1].map_index, 1);
-    assert_eq!(result.references[2].map_index, 0);
+    assert_eq!(result.references[0].map_ordinal, 0);
+    assert_eq!(result.references[1].map_ordinal, 1);
+    assert_eq!(result.references[2].map_ordinal, 0);
     assert_eq!(result.references[0].map_id, Some(101));
     assert_eq!(result.references[1].map_id, Some(202));
     assert_eq!(result.unique_maps.len(), 2);
@@ -284,9 +281,9 @@ fn map_info_analysis_resolves_canonical_idx_refs_by_map_id_order() {
     .expect("canonical IDX references should resolve through map_ids");
 
     assert_eq!(result.references.len(), 2);
-    assert_eq!(result.references[0].map_index, 1);
+    assert_eq!(result.references[0].map_ordinal, 1);
     assert_eq!(result.references[0].map_id, Some(202));
-    assert_eq!(result.references[1].map_index, 0);
+    assert_eq!(result.references[1].map_ordinal, 0);
     assert_eq!(result.references[1].map_id, Some(101));
     assert_eq!(result.unique_maps.len(), 2);
 }

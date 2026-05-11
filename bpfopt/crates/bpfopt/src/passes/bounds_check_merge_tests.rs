@@ -27,12 +27,12 @@ fn guard(cursor: u8, root: u8, data_end: u8, window_end: i32) -> Vec<BpfInsn> {
 fn shared_error_program(mut body: Vec<BpfInsn>) -> Vec<BpfInsn> {
     body.push(BpfInsn::mov64_imm(BPF_REG_0, 1));
     body.push(BpfInsn::exit());
-    let error_pc = body.len();
+    let error_target = body.len();
     body.push(BpfInsn::mov64_imm(BPF_REG_0, 0));
     body.push(BpfInsn::exit());
-    for pc in compare_pcs(&body) {
-        if body[pc].off == 0 {
-            body[pc].off = (error_pc as isize - pc as isize - 1) as i16;
+    for compare_idx in compare_pcs(&body) {
+        if body[compare_idx].off == 0 {
+            body[compare_idx].off = (error_target as isize - compare_idx as isize - 1) as i16;
         }
     }
     body
@@ -191,16 +191,16 @@ fn test_different_error_targets_not_merged() {
     insns.push(BpfInsn::mov64_imm(BPF_REG_0, 1));
     insns.push(BpfInsn::exit());
 
-    let err_a_pc = insns.len();
+    let err_a_target = insns.len();
     insns.push(BpfInsn::mov64_imm(BPF_REG_0, 0));
     insns.push(BpfInsn::exit());
 
-    let err_b_pc = insns.len();
+    let err_b_target = insns.len();
     insns.push(BpfInsn::mov64_imm(BPF_REG_0, 2));
     insns.push(BpfInsn::exit());
 
-    insns[4].off = (err_a_pc as isize - 4 - 1) as i16;
-    insns[8].off = (err_b_pc as isize - 8 - 1) as i16;
+    insns[4].off = (err_a_target as isize - 4 - 1) as i16;
+    insns[8].off = (err_b_target as isize - 8 - 1) as i16;
     let input = insns;
 
     let run = run_bounds(input.clone(), XDP);

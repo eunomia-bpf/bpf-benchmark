@@ -1,12 +1,8 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{
-    advance_reg_state as advance_simple_reg_state, insn_use_def_set, BBProgram, BlockId, InsnSite,
-    SimpleRegValue,
-};
-use crate::insn::*;
+use crate::analysis::{insn_use_def_set, BBProgram, BlockId, InsnSite};
+use crate::insn::{advance_reg_state as advance_simple_reg_state, SimpleRegValue, *};
 use crate::pass::*;
 use std::collections::{HashMap, HashSet};
-use std::ops::Range;
 const MEMCPY_TARGET: &str = "bpf_bulk_memcpy";
 const MEMSET_TARGET: &str = "bpf_bulk_memset";
 const MIN_BULK_BYTES: usize = 32;
@@ -168,8 +164,7 @@ impl BulkSite {
 }
 #[derive(Clone, Debug)]
 struct AppliedBulkSite {
-    block: BlockId,
-    range: Range<usize>,
+    start: InsnSite,
     site: BulkSite,
 }
 #[derive(Default)]
@@ -222,13 +217,9 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     let mut skipped = scan.skips;
     let mut safe_sites = Vec::new();
     for site in scan.sites {
-        let start = InsnSite {
-            block: site.block,
-            idx: site.range.start,
-        };
         if prog
             .rep_admit_kinsn_site_window(
-                start,
+                site.start,
                 site.site.old_len,
                 site.site.replacement_len(),
                 &mut skipped,
@@ -246,9 +237,9 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
         });
     }
     for site in safe_sites.iter().rev() {
-        prog.replace_range(
-            site.block,
-            site.range.clone(),
+        prog.replace_range_at(
+            site.start,
+            site.site.old_len,
             emit_site_replacement(&site.site, &ctx.kinsn_registry)?,
         )?;
     }
@@ -266,14 +257,18 @@ fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
             regs = [RegValue::Unknown; 11];
         }
         let insns = prog.copied_body_insns(block)?;
+        let block_sites = prog.sites_in_block(block)?;
         let mut live_out = HashMap::new();
-        for site in prog.sites_in_block(block)? {
+        for &site in &block_sites {
             live_out.insert(site, prog.live_out_site_checked(site)?);
         }
         let mut idx = 0usize;
         while idx < insns.len() {
-            let start = InsnSite { block, idx };
-            match try_match_memcpy_run_at(&insns, block, idx, &live_out)? {
+            let start = block_sites
+                .get(idx)
+                .copied()
+                .ok_or_else(|| anyhow::anyhow!("bulk_memory start index {idx} missing"))?;
+            match try_match_memcpy_run_at(&insns, &block_sites, idx, &live_out)? {
                 MatchOutcome::Apply(site) => {
                     if let BulkSiteKind::Memcpy {
                         src_base, dst_base, ..
@@ -297,11 +292,7 @@ fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
                     }
                     let old_len = site.old_len;
                     advance_reg_state_range(prog, block, idx, old_len, &mut regs)?;
-                    scan.sites.push(AppliedBulkSite {
-                        block,
-                        range: idx..idx + old_len,
-                        site,
-                    });
+                    scan.sites.push(AppliedBulkSite { start, site });
                     idx += old_len;
                     continue;
                 }
@@ -320,11 +311,7 @@ fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
             if let Some(site) = try_match_memset_run_at(&insns, idx, &regs)? {
                 let old_len = site.old_len;
                 advance_reg_state_range(prog, block, idx, old_len, &mut regs)?;
-                scan.sites.push(AppliedBulkSite {
-                    block,
-                    range: idx..idx + old_len,
-                    site,
-                });
+                scan.sites.push(AppliedBulkSite { start, site });
                 idx += old_len;
                 continue;
             }
@@ -336,7 +323,7 @@ fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
 }
 fn try_match_memcpy_run_at(
     insns: &[BpfInsn],
-    block: BlockId,
+    sites: &[InsnSite],
     idx: usize,
     live_out: &HashMap<InsnSite, RegSet>,
 ) -> anyhow::Result<MatchOutcome> {
@@ -376,10 +363,11 @@ fn try_match_memcpy_run_at(
     let consumed_bytes: usize = chunk_sizes.iter().sum();
     let consumed_pairs = consumed_bytes / lane_bytes;
     let old_len = consumed_pairs * 2;
-    let last_site = InsnSite {
-        block,
-        idx: idx + old_len - 1,
-    };
+    let last_idx = idx + old_len - 1;
+    let last_site = sites
+        .get(last_idx)
+        .copied()
+        .ok_or_else(|| anyhow::anyhow!("bulk_memory last index {last_idx} missing"))?;
     if first.src_base == first.dst_base && ranges_overlap(first.src_off, first.dst_off, raw_bytes) {
         return Ok(MatchOutcome::Skip {
             reason: "alias overlap in same-base memcpy run".into(),
@@ -703,14 +691,14 @@ fn width_bytes(width: u8) -> anyhow::Result<usize> {
         _ => anyhow::bail!("bulk_memory unsupported width opcode {width:#x}"),
     })
 }
-fn is_likely_stack_ptr(reg: u8, before_slot: usize, insns: &[BpfInsn]) -> bool {
+fn is_likely_stack_ptr(reg: u8, before_insn_count: usize, insns: &[BpfInsn]) -> bool {
     if reg == STACK_PTR_REG {
         return true;
     }
     const LOOKBACK: usize = 32;
-    let start = before_slot.saturating_sub(LOOKBACK);
+    let start = before_insn_count.saturating_sub(LOOKBACK);
     let mut target_reg = reg;
-    let mut cursor = before_slot;
+    let mut cursor = before_insn_count;
     for _ in 0..LOOKBACK {
         let mut found_def = false;
         for def_idx in (start..cursor).rev() {
@@ -758,7 +746,7 @@ fn advance_reg_state_range(
     let end_idx = start_idx.checked_add(len).ok_or_else(|| {
         anyhow::anyhow!("bulk_memory range start {start_idx} + len {len} overflows")
     })?;
-    let block_len = prog.block_body_len(block)?;
+    let block_len = prog.sites_in_block(block)?.len();
     if end_idx > block_len {
         anyhow::bail!(
             "bulk_memory range {}..{} exceeds block {:?} body length {}",
@@ -768,8 +756,12 @@ fn advance_reg_state_range(
             block_len
         );
     }
-    for idx in start_idx..end_idx {
-        advance_reg_state_at_site(prog, InsnSite { block, idx }, regs)?;
+    let block_sites = prog.sites_in_block(block)?;
+    for site in block_sites
+        .get(start_idx..end_idx)
+        .ok_or_else(|| anyhow::anyhow!("bulk_memory site range missing"))?
+    {
+        advance_reg_state_at_site(prog, *site, regs)?;
     }
     Ok(())
 }

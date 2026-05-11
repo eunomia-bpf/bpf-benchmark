@@ -130,7 +130,8 @@ pub(crate) fn read_u32_field(record: &[u8], offset: usize, label: &str) -> anyho
 pub(crate) fn old_pc_to_current_pc(prog: &BBProgram) -> anyhow::Result<BTreeMap<usize, usize>> {
     let site_pcs = prog.current_site_pcs()?;
     let mut old_to_new = BTreeMap::new();
-    for (&site, &old_pc) in &prog.btf {
+    for &site in prog.btf.keys() {
+        let old_pc = prog.original_pc(site)?;
         if let Some(&new_pc) = site_pcs.get(&site) {
             old_to_new.insert(old_pc, new_pc);
         }

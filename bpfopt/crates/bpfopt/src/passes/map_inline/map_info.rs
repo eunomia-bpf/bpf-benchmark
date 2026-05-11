@@ -3,7 +3,7 @@
 
 use std::collections::{BTreeMap, HashMap};
 
-use crate::analysis::{program_sites, BBProgram, InsnSite};
+use crate::analysis::{BBProgram, InsnSite};
 use crate::insn::MapPseudo;
 use crate::pass::PassContext;
 
@@ -78,7 +78,7 @@ pub struct MapReference {
     pub slot: usize,
     pub dst_reg: u8,
     pub imm: i32,
-    pub map_index: usize,
+    pub map_ordinal: usize,
     pub map_id: Option<u32>,
     pub info: Option<MapInfo>,
 }
@@ -111,7 +111,7 @@ struct MapBinding {
     kind: MapPseudo,
     dst_reg: u8,
     imm: i32,
-    map_idx: Option<usize>,
+    map_ordinal: Option<usize>,
     map_id: Option<u32>,
 }
 
@@ -150,13 +150,13 @@ fn collect_map_bindings_from_sites(
     let mut bindings = Vec::new();
     let mut fd_order = Vec::<i32>::new();
 
-    for site in program_sites(program).map_err(|err| err.to_string())? {
+    for site in program.all_sites() {
         let Some(insn) = program.insn_at(site) else {
             continue;
         };
         if let Some(kind) = insn.map_pseudo_kind() {
             let pc = program.rep_site_slot(site).map_err(|err| err.to_string())?;
-            let (map_idx, map_id) =
+            let (map_ordinal, map_id) =
                 resolve_map_ref(kind, insn.imm, map_ids, fd_bindings, &mut fd_order);
             bindings.push(MapBinding {
                 site,
@@ -164,7 +164,7 @@ fn collect_map_bindings_from_sites(
                 kind,
                 dst_reg: insn.dst_reg(),
                 imm: insn.imm,
-                map_idx,
+                map_ordinal,
                 map_id,
             });
         }
@@ -213,7 +213,7 @@ where
         let kind @ (MapPseudo::Fd | MapPseudo::Idx) = binding.kind else {
             continue;
         };
-        let map_index = binding.map_idx.ok_or_else(|| {
+        let map_ordinal = binding.map_ordinal.ok_or_else(|| {
             format!(
                 "negative pseudo-map index {} at pc {}",
                 binding.imm, binding.pc_load
@@ -223,20 +223,20 @@ where
             Some(binding.map_id.ok_or_else(|| {
                 format!(
                     "pseudo-map index {} at pc {} out of range for {} map ids",
-                    map_index, binding.pc_load, map_id_count
+                    map_ordinal, binding.pc_load, map_id_count
                 )
             })?)
         } else {
             binding.map_id
         };
-        let info = match resolved_by_index.get(&map_index) {
+        let info = match resolved_by_index.get(&map_ordinal) {
             Some(info) => info.clone(),
             None => {
                 let resolved = match map_id {
                     Some(map_id) => resolver(map_id)?,
                     None => None,
                 };
-                resolved_by_index.insert(map_index, resolved.clone());
+                resolved_by_index.insert(map_ordinal, resolved.clone());
                 resolved
             }
         };
@@ -246,7 +246,7 @@ where
             slot: binding.pc_load,
             dst_reg: binding.dst_reg,
             imm: binding.imm,
-            map_index,
+            map_ordinal,
             map_id,
             info,
         });

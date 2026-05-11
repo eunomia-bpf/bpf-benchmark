@@ -7,22 +7,28 @@ use crate::analysis::bbprogram_lower::remap_btf_records_for_lowering;
 use crate::analysis::{DefSite, UseDefGraph};
 use crate::insn::{insn_width, BpfInsn, MapPseudo};
 use crate::pass::{
-    BtfInfoRecords, InsnAnnotation, KinsnRegistry, PmuRecord, PrefetchProfile, ProfilingData,
-    RegSet, VerifierInsn,
+    BtfInfoRecords, InsnAnnotation, KinsnRegistry, MapPtr, PmuRecord, PrefetchHint,
+    PrefetchProfile, ProfilingData, RegKind, RegSet, VerifierInsn,
 };
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::ops::Range;
 use std::sync::Arc;
-pub type VerifierOracle = BTreeMap<InsnSite, Arc<[VerifierInsn]>>;
-pub type BtfMetadataMap = BTreeMap<InsnSite, usize>;
+pub(crate) type VerifierOracle = BTreeMap<InsnSite, Arc<[VerifierInsn]>>;
+pub(crate) type BtfMetadataMap = BTreeMap<InsnSite, usize>;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct BlockId(pub usize);
+pub struct BlockId(pub(crate) usize);
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct FrameId(pub usize);
+pub struct FrameId(pub(crate) usize);
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct InsnSite {
-    pub block: BlockId,
-    pub(super) idx: usize,
+    pub(crate) block: BlockId,
+    pub(crate) idx: usize,
+}
+#[cfg(test)]
+impl InsnSite {
+    pub(crate) fn for_test(block: BlockId, idx: usize) -> Self {
+        Self { block, idx }
+    }
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BBMapBinding {
@@ -38,7 +44,6 @@ pub struct BBProgram {
     pub(super) pmu_profile: BTreeMap<InsnSite, PmuRecord>,
     pub(super) btf: BtfMetadataMap,
     pub(super) kinsn_reg: Arc<KinsnRegistry>,
-    pub(crate) map_ids: Vec<u32>,
     pub(crate) map_bindings: Vec<BBMapBinding>,
     pub(crate) func_info: Option<BtfInfoRecords>,
     pub(crate) line_info: Option<BtfInfoRecords>,
@@ -96,7 +101,6 @@ impl BBProgram {
             pmu_profile: BTreeMap::new(),
             btf,
             kinsn_reg,
-            map_ids: Vec::new(),
             map_bindings: Vec::new(),
             func_info: None,
             line_info: None,
@@ -123,6 +127,9 @@ impl BBProgram {
     }
     pub fn block_ids(&self) -> impl Iterator<Item = BlockId> + '_ {
         self.blocks.iter().map(|block| block.id)
+    }
+    pub fn all_sites(&self) -> impl Iterator<Item = InsnSite> + '_ {
+        self.blocks.iter().flat_map(logical_sites_for_block)
     }
     pub fn block_body_len(&self, block: BlockId) -> anyhow::Result<usize> {
         Ok(self.block(block)?.insns.len())
@@ -264,31 +271,106 @@ impl BBProgram {
             .map(|binding| (binding.old_fd, binding.map_id))
             .collect()
     }
-    pub fn oracle(&self) -> Option<&VerifierOracle> {
+    #[cfg(test)]
+    pub(crate) fn oracle(&self) -> Option<&VerifierOracle> {
         self.oracle.as_ref()
-    }
-    pub fn oracle_at(&self, site: InsnSite) -> Option<&VerifierInsn> {
-        self.oracle.as_ref()?.get(&site)?.first()
     }
     pub(crate) fn verifier_states_at(&self, site: InsnSite) -> Option<&[VerifierInsn]> {
         self.oracle.as_ref()?.get(&site).map(AsRef::as_ref)
     }
-    pub fn profile_at(&self, site: InsnSite) -> Option<&PmuRecord> {
-        self.pmu_profile.get(&site)
+    pub fn reg_known_constant(&self, site: InsnSite, reg: u8) -> Option<i64> {
+        let state = self.verifier_reg_state(site, reg)?;
+        let value = state
+            .exact_u64()
+            .or_else(|| state.exact_u32().map(u64::from))?;
+        Some(value as i64)
+    }
+    pub fn reg_known_map_ptr(&self, site: InsnSite, reg: u8) -> Option<MapPtr> {
+        let state = self.verifier_reg_state(site, reg)?;
+        let kind = reg_kind_from_verifier_type(&state.reg_type);
+        matches!(kind, RegKind::MapPointer | RegKind::MapValue).then_some(MapPtr {
+            id: state.id,
+            offset: state.offset,
+            is_value: kind == RegKind::MapValue,
+        })
+    }
+    pub fn reg_proven_bounds(&self, site: InsnSite, reg: u8) -> Option<(i64, i64)> {
+        let state = self.verifier_reg_state(site, reg)?;
+        if let Some(value) = state
+            .exact_u64()
+            .or_else(|| state.exact_u32().map(u64::from))
+        {
+            let value = value as i64;
+            return Some((value, value));
+        }
+        if let (Some(min), Some(max)) = (state.range.smin, state.range.smax) {
+            return Some((min, max));
+        }
+        let min = i64::try_from(state.range.umin?).ok()?;
+        let max = i64::try_from(state.range.umax?).ok()?;
+        Some((min, max))
+    }
+    pub fn reg_kind(&self, site: InsnSite, reg: u8) -> Option<RegKind> {
+        Some(reg_kind_from_verifier_type(
+            &self.verifier_reg_state(site, reg)?.reg_type,
+        ))
+    }
+    pub fn site_is_dead_code(&self, site: InsnSite) -> bool {
+        self.verifier_states_at(site).is_some_and(|states| {
+            !states.is_empty() && states.iter().all(|state| state.speculative)
+        })
+    }
+    pub fn branch_taken_rate(&self, site: InsnSite) -> Option<f32> {
+        let profile = self.pmu_profile.get(&site)?.branch_profile.as_ref()?;
+        let total = profile.taken_count.checked_add(profile.not_taken_count)?;
+        (total != 0).then_some(profile.taken_count as f32 / total as f32)
+    }
+    pub fn branch_miss_rate(&self, site: InsnSite) -> Option<f32> {
+        let miss_rate = self
+            .pmu_profile
+            .get(&site)?
+            .branch_profile
+            .as_ref()?
+            .miss_rate;
+        miss_rate.is_finite().then_some(miss_rate as f32)
+    }
+    pub fn site_hotness(&self, site: InsnSite) -> Option<u64> {
+        let record = self.pmu_profile.get(&site)?;
+        let branch_count = record
+            .branch_profile
+            .as_ref()
+            .map(|profile| profile.branch_count);
+        let execution_count = record
+            .prefetch_profile
+            .as_ref()
+            .map(|profile| profile.execution_count);
+        branch_count.into_iter().chain(execution_count).max()
+    }
+    pub fn prefetch_hint(&self, site: InsnSite) -> Option<PrefetchHint> {
+        let profile = self.pmu_profile.get(&site)?.prefetch_profile.as_ref()?;
+        Some(PrefetchHint {
+            execution_count: profile.execution_count,
+            cache_references: profile.cache_references,
+            cache_misses: profile.cache_misses,
+            miss_rate: profile.miss_rate as f32,
+        })
     }
     pub(crate) fn attach_profile_from_annotations(
         &mut self,
         annotations: &[InsnAnnotation],
     ) -> anyhow::Result<()> {
-        let profiles = annotations
-            .iter()
-            .enumerate()
-            .filter(|(_, annotation)| {
-                annotation.branch_profile.is_some() || annotation.prefetch_profile.is_some()
-            })
-            .map(|(pc, annotation)| (pc, annotation.clone()))
-            .collect::<HashMap<_, _>>();
-        self.attach_pmu_records_from_original_pcs(&profiles)
+        let mut profile = ProfilingData::default();
+        for (pc, annotation) in annotations.iter().enumerate() {
+            if let Some(branch_profile) = &annotation.branch_profile {
+                profile.branch_profiles.insert(pc, branch_profile.clone());
+            }
+            if let Some(prefetch_profile) = &annotation.prefetch_profile {
+                profile
+                    .prefetch_profiles
+                    .insert(pc, prefetch_profile.clone());
+            }
+        }
+        self.attach_profile_data(&profile)
     }
     pub(crate) fn attach_prefetch_profile_from_original_pcs(
         &mut self,
@@ -407,22 +489,44 @@ impl BBProgram {
     pub(super) fn current_site_pcs(&self) -> anyhow::Result<BTreeMap<InsnSite, usize>> {
         current_site_pcs(self)
     }
-    pub fn original_pc(&self, site: InsnSite) -> anyhow::Result<usize> {
+    pub(crate) fn original_pc(&self, site: InsnSite) -> anyhow::Result<usize> {
         self.btf
             .get(&site)
             .copied()
             .ok_or_else(|| anyhow::anyhow!("site {:?} has no original-PC mapping", site))
     }
-    pub fn original_pc_to_site(&self, pc: usize) -> Option<InsnSite> {
+    pub(crate) fn original_pc_to_site(&self, pc: usize) -> Option<InsnSite> {
         self.btf
             .iter()
             .find_map(|(&site, &original_pc)| (original_pc == pc).then_some(site))
     }
-    pub fn site_current_pc(&self, site: InsnSite) -> anyhow::Result<usize> {
+    pub(crate) fn site_current_pc(&self, site: InsnSite) -> anyhow::Result<usize> {
         self.current_site_pcs()?
             .get(&site)
             .copied()
             .ok_or_else(|| anyhow::anyhow!("site {:?} is not in current program order", site))
+    }
+    pub fn branch_target_entry_sites(&self) -> anyhow::Result<BTreeSet<InsnSite>> {
+        let mut targets = BTreeSet::new();
+        for block in self.blocks() {
+            let target = match self.terminator(block.id)? {
+                Terminator::Jump { target, .. } => Some(target),
+                Terminator::CondBranch { taken, .. } => Some(taken),
+                Terminator::Call { callee, .. } => Some(callee),
+                Terminator::Fallthrough { .. } | Terminator::Exit { .. } | Terminator::End => None,
+            };
+            if let Some(target) = target {
+                if let Some(site) = self.first_site_in_block(target)? {
+                    targets.insert(site);
+                }
+            }
+        }
+        for &target in self.pc_relative_ldimm64_targets.values() {
+            if let Some(site) = self.first_site_in_block(target)? {
+                targets.insert(site);
+            }
+        }
+        Ok(targets)
     }
     pub fn first_site_in_block(&self, block: BlockId) -> anyhow::Result<Option<InsnSite>> {
         Ok(self.logical_sites_in_block(block)?.into_iter().next())
@@ -438,21 +542,6 @@ impl BBProgram {
             idx: block_ref.insns.len(),
         }))
     }
-    pub fn sites_in_block_slot_range(
-        &self,
-        block: BlockId,
-        range: Range<usize>,
-    ) -> anyhow::Result<Vec<InsnSite>> {
-        self.block(block)?;
-        let mut sites = Vec::new();
-        for slot in range {
-            let site = self.site_for_block_slot(block, slot)?;
-            if !sites.contains(&site) {
-                sites.push(site);
-            }
-        }
-        Ok(sites)
-    }
     pub fn insn_at(&self, site: InsnSite) -> Option<&BpfInsn> {
         let block = self.blocks.get(site.block.0)?;
         if site.idx < block.insns.len() {
@@ -466,14 +555,14 @@ impl BBProgram {
         self.insn_at(site)
             .ok_or_else(|| anyhow::anyhow!("no instruction at BBProgram site {:?}", site))
     }
-    pub fn ldimm64_second_slot(&self, site: InsnSite) -> Option<&BpfInsn> {
+    pub(crate) fn ldimm64_second_slot(&self, site: InsnSite) -> Option<&BpfInsn> {
         self.ldimm64_second_slots.get(&site)
     }
-    pub fn block_start_pc(&self, block: BlockId) -> anyhow::Result<usize> {
+    pub(crate) fn block_start_pc(&self, block: BlockId) -> anyhow::Result<usize> {
         self.block(block)?;
         Ok(current_block_start_pcs(self)?[block.0])
     }
-    pub fn kinsn_replacement_subprog_skip_reason(
+    fn kinsn_replacement_subprog_skip_reason(
         &self,
         block: BlockId,
         start_slot: usize,
@@ -494,7 +583,7 @@ impl BBProgram {
         }
         let block_ref = self.block(block)?;
         let frame = block_ref.frame;
-        let frame_start_slot = self.frame_relative_slot(block, start_slot)?;
+        let frame_start_slot = frame_relative_logical_slot(self, block, start_slot)?;
         let old_end = frame_start_slot
             .checked_add(old_len)
             .ok_or_else(|| anyhow::anyhow!("kinsn replacement old range overflows"))?;
@@ -504,8 +593,8 @@ impl BBProgram {
         let mut frame_start_slot_abs = usize::MAX;
         let mut frame_end_slot_abs = 0usize;
         for frame_block in self.blocks().filter(|candidate| candidate.frame == frame) {
-            let block_start = self.frame_relative_slot(frame_block.id, 0)?;
-            let block_end = block_start + self.block_slot_len(frame_block.id)?;
+            let block_start = frame_relative_logical_slot(self, frame_block.id, 0)?;
+            let block_end = block_start + block_logical_slot_len(self, frame_block.id)?;
             frame_start_slot_abs = frame_start_slot_abs.min(block_start);
             frame_end_slot_abs = frame_end_slot_abs.max(block_end);
         }
@@ -524,38 +613,7 @@ impl BBProgram {
         }
         Ok(None)
     }
-    pub fn block_slot_len(&self, block: BlockId) -> anyhow::Result<usize> {
-        let block_ref = self.block(block)?;
-        let mut len = 0usize;
-        for idx in 0..block_ref.insns.len() {
-            len += self.insn_slot_width(InsnSite { block, idx })?;
-        }
-        if block_ref.terminator.raw_insn().is_some() {
-            len += 1;
-        }
-        Ok(len)
-    }
-    pub fn block_slot_bounds(&self, block: BlockId) -> anyhow::Result<(usize, usize)> {
-        let start = self.block_start_pc(block)?;
-        let len = self.block_slot_len(block)?;
-        Ok((start, start + len))
-    }
-    pub fn frame_relative_slot(&self, block: BlockId, slot: usize) -> anyhow::Result<usize> {
-        let frame = self.block(block)?.frame;
-        let mut offset = 0usize;
-        for candidate in self.blocks().filter(|candidate| candidate.frame == frame) {
-            if candidate.id == block {
-                return offset
-                    .checked_add(slot)
-                    .ok_or_else(|| anyhow::anyhow!("frame-relative slot {slot} overflows"));
-            }
-            offset = offset
-                .checked_add(self.block_slot_len(candidate.id)?)
-                .ok_or_else(|| anyhow::anyhow!("frame-relative block offset overflows"))?;
-        }
-        anyhow::bail!("block {:?} is missing from its frame", block)
-    }
-    pub fn remap_block_after_insert(
+    pub(crate) fn remap_block_after_insert(
         block: BlockId,
         split_head: BlockId,
         split_tail: BlockId,
@@ -568,7 +626,7 @@ impl BBProgram {
             block
         }
     }
-    pub fn remap_block_after_remove(
+    pub(crate) fn remap_block_after_remove(
         block: BlockId,
         removed: &[BlockId],
     ) -> anyhow::Result<BlockId> {
@@ -578,75 +636,11 @@ impl BBProgram {
         let shift = removed.iter().filter(|removed| removed.0 < block.0).count();
         Ok(BlockId(block.0 - shift))
     }
-    pub fn frame_slot_bounds(&self, frame: FrameId) -> anyhow::Result<(usize, usize)> {
-        let mut start = usize::MAX;
-        let mut end = 0usize;
-        for block in self.blocks().filter(|block| block.frame == frame) {
-            let (block_start, block_end) = self.block_slot_bounds(block.id)?;
-            start = start.min(block_start);
-            end = end.max(block_end);
-        }
-        if start == usize::MAX {
-            anyhow::bail!("frame {:?} has no blocks", frame);
-        }
-        Ok((start, end))
-    }
-    pub fn program_slot_len(&self) -> anyhow::Result<usize> {
-        self.blocks().try_fold(
-            0usize,
-            |len, block| Ok(len + self.block_slot_len(block.id)?),
-        )
-    }
-    pub fn block_range_for_slots(
-        &self,
-        block: BlockId,
-        start_slot: usize,
-        old_len: usize,
-    ) -> anyhow::Result<std::ops::Range<usize>> {
-        if old_len == 0 {
-            anyhow::bail!(
-                "block {:?} replacement at slot {} has zero old length",
-                block,
-                start_slot
-            );
-        }
-        let end_slot = start_slot
-            .checked_add(old_len - 1)
-            .ok_or_else(|| anyhow::anyhow!("slot range at {start_slot} overflows"))?;
-        let start = self.site_for_block_slot(block, start_slot)?;
-        let end = self.site_for_block_slot(block, end_slot)?;
-        if start.block != block || end.block != block {
-            anyhow::bail!(
-                "slot range {}..{} does not stay in block {:?}",
-                start_slot,
-                end_slot + 1,
-                block
-            );
-        }
-        Ok(start.idx..end.idx + 1)
-    }
-    pub fn site_for_block_slot(&self, block: BlockId, slot: usize) -> anyhow::Result<InsnSite> {
-        let block_ref = self.block(block)?;
-        let mut current = 0usize;
-        for idx in 0..block_ref.insns.len() {
-            let site = InsnSite { block, idx };
-            let width = self.insn_slot_width(site)?;
-            if slot >= current && slot < current + width {
-                return Ok(site);
-            }
-            current += width;
-        }
-        anyhow::bail!(
-            "block {:?} has no logical instruction site for body slot {}",
-            block,
-            slot
-        )
-    }
     pub fn is_terminator_site(&self, site: InsnSite) -> anyhow::Result<bool> {
         let block = self.block(site.block)?;
         Ok(site.idx == block.insns.len() && block.terminator.raw_insn().is_some())
     }
-    pub fn insn_slot_width(&self, site: InsnSite) -> anyhow::Result<usize> {
+    pub(crate) fn insn_slot_width(&self, site: InsnSite) -> anyhow::Result<usize> {
         let insn = self
             .insn_at(site)
             .ok_or_else(|| anyhow::anyhow!("invalid instruction site {:?}", site))?;
@@ -690,7 +684,7 @@ impl BBProgram {
         self.use_def = UseDefGraph::build(self)?;
         Ok(())
     }
-    pub fn attach_side_inputs(
+    pub(crate) fn attach_side_inputs(
         &mut self,
         insns: &[BpfInsn],
         map_ids: Vec<u32>,
@@ -698,7 +692,6 @@ impl BBProgram {
         line_info: Option<BtfInfoRecords>,
     ) -> anyhow::Result<()> {
         self.map_bindings = collect_map_bindings(insns, &map_ids)?;
-        self.map_ids = map_ids;
         self.func_info = func_info;
         self.line_info = line_info;
         Ok(())
@@ -707,7 +700,7 @@ impl BBProgram {
         self.oracle = None;
         self.pmu_profile.clear();
     }
-    pub fn reset_btf_to_current_pcs(&mut self) -> anyhow::Result<()> {
+    pub(crate) fn reset_btf_to_current_pcs(&mut self) -> anyhow::Result<()> {
         self.btf = current_site_pcs(self)?;
         Ok(())
     }
@@ -821,8 +814,31 @@ fn resolve_map_id(
         .ok_or_else(|| anyhow::anyhow!("failed to resolve map fd order for fd {imm}"))?;
     Ok(map_ids.get(index).copied())
 }
+impl BBProgram {
+    fn verifier_reg_state(&self, site: InsnSite, reg: u8) -> Option<&crate::pass::RegState> {
+        self.verifier_states_at(site)?.first()?.regs.get(&reg)
+    }
+}
+fn reg_kind_from_verifier_type(reg_type: &str) -> RegKind {
+    match reg_type {
+        "scalar" => RegKind::Scalar,
+        "fp" => RegKind::FramePointer,
+        "ctx" => RegKind::Context,
+        "pkt" => RegKind::PacketPointer,
+        "pkt_meta" => RegKind::PacketMetaPointer,
+        "map_ptr" => RegKind::MapPointer,
+        "map_value" => RegKind::MapValue,
+        "map_key" => RegKind::MapKey,
+        "mem" | "buf" | "ringbuf_mem" | "iter" => RegKind::Memory,
+        other if other.starts_with("scalar") => RegKind::Scalar,
+        other if other.starts_with("fp") => RegKind::FramePointer,
+        "" => RegKind::Unknown,
+        other if other.contains("ptr_") || other.contains("_ptr") => RegKind::BtfStructPointer,
+        _ => RegKind::OtherPointer,
+    }
+}
 impl Terminator {
-    pub fn raw_insn(&self) -> Option<&BpfInsn> {
+    pub(crate) fn raw_insn(&self) -> Option<&BpfInsn> {
         match self {
             Self::Jump { insn, .. } => Some(insn),
             Self::CondBranch { cond, .. } => Some(cond),
@@ -981,6 +997,71 @@ fn current_block_start_pcs(prog: &BBProgram) -> anyhow::Result<Vec<usize>> {
         }
     }
     Ok(block_start_pc)
+}
+fn block_logical_slot_len(prog: &BBProgram, block: BlockId) -> anyhow::Result<usize> {
+    let block_ref = prog.block(block)?;
+    let mut len = 0usize;
+    for idx in 0..block_ref.insns.len() {
+        len = len
+            .checked_add(prog.insn_slot_width(InsnSite { block, idx })?)
+            .ok_or_else(|| anyhow::anyhow!("block logical slot length overflows"))?;
+    }
+    if block_ref.terminator.raw_insn().is_some() {
+        len = len
+            .checked_add(1)
+            .ok_or_else(|| anyhow::anyhow!("block logical slot length overflows"))?;
+    }
+    Ok(len)
+}
+fn block_logical_slot_bounds(prog: &BBProgram, block: BlockId) -> anyhow::Result<(usize, usize)> {
+    let start = prog.block_start_pc(block)?;
+    let len = block_logical_slot_len(prog, block)?;
+    Ok((start, start + len))
+}
+fn frame_relative_logical_slot(
+    prog: &BBProgram,
+    block: BlockId,
+    slot: usize,
+) -> anyhow::Result<usize> {
+    let frame = prog.block(block)?.frame;
+    let mut offset = 0usize;
+    for candidate in prog.blocks().filter(|candidate| candidate.frame == frame) {
+        if candidate.id == block {
+            return offset
+                .checked_add(slot)
+                .ok_or_else(|| anyhow::anyhow!("frame-relative slot {slot} overflows"));
+        }
+        offset = offset
+            .checked_add(block_logical_slot_len(prog, candidate.id)?)
+            .ok_or_else(|| anyhow::anyhow!("frame-relative block offset overflows"))?;
+    }
+    anyhow::bail!("block {:?} is missing from its frame", block)
+}
+fn frame_logical_slot_bounds(prog: &BBProgram, frame: FrameId) -> anyhow::Result<(usize, usize)> {
+    let mut start = usize::MAX;
+    let mut end = 0usize;
+    for block in prog.blocks().filter(|block| block.frame == frame) {
+        let (block_start, block_end) = block_logical_slot_bounds(prog, block.id)?;
+        start = start.min(block_start);
+        end = end.max(block_end);
+    }
+    if start == usize::MAX {
+        anyhow::bail!("frame {:?} has no blocks", frame);
+    }
+    Ok((start, end))
+}
+fn site_offset_in_block_slots(prog: &BBProgram, site: InsnSite) -> anyhow::Result<usize> {
+    prog.block(site.block)?;
+    let mut offset = 0usize;
+    for idx in 0..site.idx {
+        offset = offset
+            .checked_add(prog.insn_slot_width(InsnSite {
+                block: site.block,
+                idx,
+            })?)
+            .ok_or_else(|| anyhow::anyhow!("site offset in block overflows"))?;
+    }
+    Ok(offset)
 }
 fn logical_sites_for_block(block: &Block) -> Vec<InsnSite> {
     let mut sites = (0..block.insns.len())
@@ -1270,26 +1351,6 @@ impl BBProgram {
         Ok(len)
     }
 
-    pub(crate) fn pf_attach_prefetch_profiles(
-        &mut self,
-        profiles: &BTreeMap<InsnSite, PrefetchProfile>,
-    ) -> anyhow::Result<()> {
-        self.pmu_profile.clear();
-        for (&site, profile) in profiles {
-            self.insn_at(site).ok_or_else(|| {
-                anyhow::anyhow!("prefetch profile site {:?} is not present", site)
-            })?;
-            self.pmu_profile.insert(
-                site,
-                PmuRecord {
-                    prefetch_profile: Some(profile.clone()),
-                    ..Default::default()
-                },
-            );
-        }
-        Ok(())
-    }
-
     pub(crate) fn pf_skip_reason(
         &self,
         site: InsnSite,
@@ -1342,8 +1403,8 @@ impl BBProgram {
                 target
             );
         }
-        let (block_start, block_end) = self.block_slot_bounds(target.block)?;
-        let (frame_start, frame_end) = self.frame_slot_bounds(frame)?;
+        let (block_start, block_end) = block_logical_slot_bounds(self, target.block)?;
+        let (frame_start, frame_end) = frame_logical_slot_bounds(self, frame)?;
         if block_start < frame_start || block_end > frame_end {
             anyhow::bail!(
                 "prefetch block {:?} crosses frame {:?}: block {}..{}, frame {}..{}",
@@ -1407,31 +1468,19 @@ impl BBProgram {
 }
 
 impl BBProgram {
-    pub fn rep_site_slot(&self, site: InsnSite) -> anyhow::Result<usize> {
-        let mut offset = 0usize;
-        for idx in 0..site.idx {
-            offset += self.insn_slot_width(InsnSite {
-                block: site.block,
-                idx,
-            })?;
-        }
-        Ok(self.block_slot_bounds(site.block)?.0 + offset)
+    pub(crate) fn rep_site_slot(&self, site: InsnSite) -> anyhow::Result<usize> {
+        let offset = site_offset_in_block_slots(self, site)?;
+        Ok(block_logical_slot_bounds(self, site.block)?.0 + offset)
     }
 
-    pub fn rep_admit_kinsn_site_window(
+    pub(crate) fn rep_admit_kinsn_site_window(
         &self,
         start: InsnSite,
         old_len: usize,
         replacement_len: usize,
         skipped: &mut Vec<crate::pass::SiteSkipReason>,
     ) -> anyhow::Result<Option<(BlockId, Range<usize>)>> {
-        let mut start_slot = 0usize;
-        for idx in 0..start.idx {
-            start_slot += self.insn_slot_width(InsnSite {
-                block: start.block,
-                idx,
-            })?;
-        }
+        let start_slot = site_offset_in_block_slots(self, start)?;
         if let Some(reason) = self.kinsn_replacement_subprog_skip_reason(
             start.block,
             start_slot,
@@ -1444,12 +1493,16 @@ impl BBProgram {
             });
             return Ok(None);
         }
-        Ok(Some((start.block, start.idx..start.idx + old_len)))
+        let end = start
+            .idx
+            .checked_add(old_len)
+            .ok_or_else(|| anyhow::anyhow!("kinsn replacement site window overflows"))?;
+        Ok(Some((start.block, start.idx..end)))
     }
 }
 
 impl BBProgram {
-    pub fn bcm_sites_between(
+    pub(crate) fn bcm_sites_between(
         &self,
         start: InsnSite,
         end: InsnSite,
@@ -1678,103 +1731,5 @@ mod tests {
                 idx: 0
             }]
         );
-    }
-}
-
-impl BBProgram {
-    /// Returns the InsnSite at the start of a block's body, or None if empty.
-    pub fn block_first_body_site(&self, block: BlockId) -> Option<InsnSite> {
-        let block_ref = self.blocks.get(block.0)?;
-        (!block_ref.insns.is_empty()).then_some(InsnSite { block, idx: 0 })
-    }
-
-    /// Returns the InsnSite immediately following `site` within the same block.
-    /// Returns None if `site` is the last body site in its block.
-    pub fn next_site_in_block(&self, site: InsnSite) -> Option<InsnSite> {
-        let block_ref = self.blocks.get(site.block.0)?;
-        let next_idx = site.idx.checked_add(1)?;
-        (next_idx < block_ref.insns.len()).then_some(InsnSite {
-            block: site.block,
-            idx: next_idx,
-        })
-    }
-
-    /// True iff `a` and `b` are in the same block and `b` immediately follows `a`.
-    pub fn is_immediately_followed_by(&self, a: InsnSite, b: InsnSite) -> bool {
-        self.next_site_in_block(a) == Some(b)
-    }
-
-    /// Iterator over adjacent body-site pairs within `block`.
-    pub fn adjacent_pairs_in_block(
-        &self,
-        block: BlockId,
-    ) -> impl Iterator<Item = (InsnSite, InsnSite)> + '_ {
-        let pair_count = self
-            .blocks
-            .get(block.0)
-            .map_or(0, |block_ref| block_ref.insns.len().saturating_sub(1));
-        (0..pair_count).map(move |idx| {
-            (
-                InsnSite { block, idx },
-                InsnSite {
-                    block,
-                    idx: idx + 1,
-                },
-            )
-        })
-    }
-
-    /// Iterator over fixed-size adjacent body-site windows within `block`.
-    /// Empty iterator if block body has fewer than N sites.
-    pub fn adjacent_windows_in_block<const N: usize>(
-        &self,
-        block: BlockId,
-    ) -> impl Iterator<Item = [InsnSite; N]> + '_ {
-        let body_len = self
-            .blocks
-            .get(block.0)
-            .map_or(0, |block_ref| block_ref.insns.len());
-        let window_count = if N == 0 || body_len < N {
-            0
-        } else {
-            body_len - N + 1
-        };
-        (0..window_count).map(move |start| {
-            std::array::from_fn(|offset| InsnSite {
-                block,
-                idx: start + offset,
-            })
-        })
-    }
-
-    /// Replace-range helper that takes an InsnSite + length, hiding
-    /// `idx..idx+len` arithmetic from passes.
-    pub fn replace_range_at(
-        &mut self,
-        site: InsnSite,
-        len: usize,
-        replacement: Vec<BpfInsn>,
-    ) -> anyhow::Result<()> {
-        let block_ref = self.block(site.block)?;
-        if site.idx > block_ref.insns.len() {
-            anyhow::bail!(
-                "replace_range_at starts at {:?}, beyond block body length {}",
-                site,
-                block_ref.insns.len()
-            );
-        }
-        let end = site
-            .idx
-            .checked_add(len)
-            .ok_or_else(|| anyhow::anyhow!("replace_range_at at {:?} overflows", site))?;
-        if end > block_ref.insns.len() {
-            anyhow::bail!(
-                "replace_range_at {:?} length {} exceeds block body length {}",
-                site,
-                len,
-                block_ref.insns.len()
-            );
-        }
-        self.replace_range(site.block, site.idx..end, replacement)
     }
 }

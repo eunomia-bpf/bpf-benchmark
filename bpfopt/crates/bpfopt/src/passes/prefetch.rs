@@ -1,14 +1,8 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{
-    packet_ctx_layout, program_sites, read_json_file, BBProgram, InsnSite, PacketCtxLayout,
-    PacketCtxLayoutScope,
-};
+use crate::analysis::{BBProgram, InsnSite};
 use crate::insn::*;
 use crate::pass::*;
 use anyhow::{bail, Result};
-use serde::Deserialize;
-use std::collections::HashMap;
-use std::path::{Path, PathBuf};
 pub(super) const HELPER_MAP_LOOKUP_ELEM: i32 = libbpf_sys::BPF_FUNC_map_lookup_elem as i32;
 const HELPER_XDP_ADJUST_HEAD: i32 = libbpf_sys::BPF_FUNC_xdp_adjust_head as i32;
 const PREFETCH_TARGET_NAME: &str = "bpf_prefetch";
@@ -38,91 +32,15 @@ fn prefetch_register_uses(payload: u64) -> RegSet {
     [kinsn_payload_reg(payload, 0)].into_iter().collect()
 }
 pub struct PrefetchPass;
-struct ProfiledPrefetchPass {
-    profile: PathBuf,
-}
 impl PrefetchPass {
     pub fn from_cli_args(args: &[String]) -> Result<Box<dyn BpfPass>> {
-        let Some(profile) = PrefetchCliArgs::parse(args)? else {
-            return Ok(Box::new(PrefetchPass));
-        };
-        Ok(Box::new(ProfiledPrefetchPass { profile }))
-    }
-}
-impl BpfPass for ProfiledPrefetchPass {
-    fn name(&self) -> &str {
-        "prefetch"
-    }
-    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
-        let profiles = read_prefetch_profile(&self.profile, program)?;
-        program.pf_attach_prefetch_profiles(&profiles)?;
-        run_on_bbprogram(program, ctx)
-    }
-}
-struct PrefetchCliArgs;
-impl PrefetchCliArgs {
-    fn parse(args: &[String]) -> Result<Option<PathBuf>> {
-        let mut profile = None;
-        let mut iter = args.iter();
-        while let Some(arg) = iter.next() {
-            match arg.as_str() {
-                "--profile" => {
-                    let value = iter
-                        .next()
-                        .ok_or_else(|| anyhow::anyhow!("--profile requires FILE"))?;
-                    profile = Some(PathBuf::from(value));
-                }
-                other => bail!("prefetch unknown pass-local arg: {other}"),
-            }
-        }
-        Ok(profile)
-    }
-}
-#[derive(Debug, Deserialize)]
-struct PrefetchProfileJson {
-    #[serde(default)]
-    prefetch_sites: HashMap<String, PrefetchProfileSiteJson>,
-}
-#[derive(Debug, Deserialize)]
-struct PrefetchProfileSiteJson {
-    execution_count: u64,
-    cache_references: u64,
-    cache_misses: u64,
-    miss_rate: f64,
-}
-fn read_prefetch_profile(
-    path: &Path,
-    program: &BBProgram,
-) -> Result<std::collections::BTreeMap<InsnSite, PrefetchProfile>> {
-    let profile: PrefetchProfileJson = read_json_file(path, "prefetch profile JSON")?;
-    let mut profiles = Vec::new();
-    for (pc, counts) in profile.prefetch_sites {
-        if counts.cache_misses > counts.cache_references {
+        if let Some(arg) = args.first() {
             bail!(
-                "profile prefetch_sites[{pc}] cache_misses {} exceeds cache_references {}",
-                counts.cache_misses,
-                counts.cache_references
+                "prefetch pass-local profile arguments moved to BBProgram side inputs; unexpected arg: {arg}"
             );
         }
-        if !counts.miss_rate.is_finite() || !(0.0..=1.0).contains(&counts.miss_rate) {
-            bail!(
-                "profile prefetch_sites[{pc}] miss_rate must be finite and within [0, 1], got {}",
-                counts.miss_rate
-            );
-        }
-        profiles.push((
-            pc,
-            PrefetchProfile {
-                execution_count: counts.execution_count,
-                cache_references: counts.cache_references,
-                cache_misses: counts.cache_misses,
-                miss_rate: counts.miss_rate,
-            },
-        ));
+        Ok(Box::new(PrefetchPass))
     }
-    crate::analysis::bbprogram_lift::lift_prefetch_profiles_from_original_pc_strings(
-        program, profiles,
-    )
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum PrefetchKind {
@@ -190,26 +108,26 @@ impl BpfPass for PrefetchPass {
         "prefetch"
     }
     fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
-        program.attach_profile_from_annotations(&ctx.annotations)?;
         run_on_bbprogram(program, ctx)
     }
 }
 pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
-    if program_sites(prog)?.is_empty() {
+    if prog.all_sites().next().is_none() {
         return Ok(PassResult::unchanged());
     }
     let mut candidates = Vec::new();
     let mut skipped = Vec::new();
     for site in scan_prefetch_sites(prog, ctx.prog_type)? {
-        let score = match prefetch_profile_for_site(prog, site) {
-            Some(profile) => {
-                if let Some(reason) = prefetch_profile_skip_reason(site.target, profile)? {
-                    skipped.push(skip_at(prog, site.target, reason)?);
-                    continue;
-                }
-                profile.execution_count
+        let score = match prefetch_score_for_site(prog, site)? {
+            Some(score) => score,
+            None => {
+                skipped.push(skip_at(
+                    prog,
+                    site.target,
+                    "prefetch site execution_count is zero".into(),
+                )?);
+                continue;
             }
-            None => default_site_score(site),
         };
         let insert_site = match choose_prefetch_insert_site(prog, site)? {
             Ok(insert) => insert,
@@ -259,49 +177,30 @@ fn scan_prefetch_sites(prog: &BBProgram, prog_type: u32) -> anyhow::Result<Vec<P
     }
     Ok(sites)
 }
-fn prefetch_profile_for_site(prog: &BBProgram, site: PrefetchSite) -> Option<&PrefetchProfile> {
-    prog.profile_at(site.target)
-        .and_then(|record| record.prefetch_profile.as_ref())
-        .or_else(|| {
-            prog.profile_at(site.anchor)
-                .and_then(|record| record.prefetch_profile.as_ref())
-        })
+fn prefetch_score_for_site(prog: &BBProgram, site: PrefetchSite) -> anyhow::Result<Option<u64>> {
+    let has_profile_hint = prog
+        .prefetch_hint(site.target)
+        .or_else(|| prog.prefetch_hint(site.anchor))
+        .is_some();
+    if !has_profile_hint {
+        return Ok(Some(default_site_score(site)));
+    }
+    let hotness = prog
+        .site_hotness(site.target)
+        .or_else(|| prog.site_hotness(site.anchor))
+        .ok_or_else(|| {
+            anyhow::anyhow!(
+                "prefetch candidate at {:?} has profile hint but no execution count",
+                site.target
+            )
+        })?;
+    Ok((hotness != 0).then_some(hotness))
 }
 fn default_site_score(site: PrefetchSite) -> u64 {
     match site.kind {
         PrefetchKind::MapValue => 2,
         PrefetchKind::Packet => 1,
     }
-}
-fn prefetch_profile_skip_reason(
-    site: InsnSite,
-    profile: &PrefetchProfile,
-) -> anyhow::Result<Option<String>> {
-    if profile.execution_count == 0 {
-        return Ok(Some("prefetch site execution_count is zero".into()));
-    }
-    if profile.cache_misses > profile.cache_references {
-        anyhow::bail!(
-            "prefetch candidate at {:?} has cache_misses {} exceeding cache_references {}",
-            site,
-            profile.cache_misses,
-            profile.cache_references
-        );
-    }
-    if !profile.miss_rate.is_finite() || !(0.0..=1.0).contains(&profile.miss_rate) {
-        anyhow::bail!(
-            "prefetch candidate at {:?} has invalid cache miss_rate {}",
-            site,
-            profile.miss_rate
-        );
-    }
-    if profile.cache_references == 0 {
-        return Ok(Some("prefetch site has zero cache_references".into()));
-    }
-    if profile.cache_misses == 0 || profile.miss_rate == 0.0 {
-        return Ok(Some("prefetch site has no observed cache misses".into()));
-    }
-    Ok(None)
 }
 fn scan_map_value_prefetch_sites(prog: &BBProgram) -> anyhow::Result<Vec<PrefetchSite>> {
     let mut sites = Vec::new();

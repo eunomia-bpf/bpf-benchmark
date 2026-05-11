@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: MIT
 use std::collections::{BTreeMap, BTreeSet};
 
-use crate::analysis::{
-    control_flow_target_sites, packet_ctx_layout, BBProgram, BlockId, InsnSite, PacketCtxLayout,
-    PacketCtxLayoutScope, Terminator,
-};
+use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 const MAX_LADDER_WINDOW_GROWTH: i32 = 24;
@@ -62,7 +59,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<
         return Ok(PassResult::unchanged());
     }
 
-    let target_sites = control_flow_target_sites(prog)?;
+    let target_sites = prog.branch_target_entry_sites()?;
     let mut scan = scan_guard_sites(prog, &target_sites, layout)?;
     if scan.guards.is_empty() {
         return Ok(PassResult {
@@ -184,7 +181,9 @@ fn scan_guard_sites(
 
     for block in prog.blocks() {
         if prog
-            .first_site_in_block(block.id)?
+            .sites_in_block_with_terminator(block.id)?
+            .first()
+            .copied()
             .is_some_and(|site| target_sites.contains(&site))
         {
             clear_states(&mut states);

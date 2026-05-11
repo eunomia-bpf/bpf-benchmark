@@ -46,14 +46,35 @@ impl BBProgram {
         Ok(removed_slots)
     }
 
-    pub fn replace_range(
+    pub fn replace_range_at(
         &mut self,
-        block: BlockId,
-        range: Range<usize>,
+        site: InsnSite,
+        len: usize,
         replacement: Vec<BpfInsn>,
     ) -> anyhow::Result<()> {
+        let block_ref = self.block(site.block)?;
+        if site.idx > block_ref.insns.len() {
+            anyhow::bail!(
+                "replace_range_at starts at {:?}, beyond block body length {}",
+                site,
+                block_ref.insns.len()
+            );
+        }
+        let end = site
+            .idx
+            .checked_add(len)
+            .ok_or_else(|| anyhow::anyhow!("replace_range_at at {:?} overflows", site))?;
+        if end > block_ref.insns.len() {
+            anyhow::bail!(
+                "replace_range_at {:?} length {} exceeds block body length {}",
+                site,
+                len,
+                block_ref.insns.len()
+            );
+        }
+
         let mut next = self.clone();
-        next.replace_range_in_place(block, range, replacement)?;
+        next.replace_range_in_place(site.block, site.idx..end, replacement)?;
         *self = next;
         Ok(())
     }
@@ -70,7 +91,7 @@ impl BBProgram {
             let block_ref = self.block(block)?;
             if range.end > block_ref.insns.len() {
                 anyhow::bail!(
-                    "replace_range {:?} exceeds block {:?} body length {}",
+                    "replace_range_at {:?} exceeds block {:?} body length {}",
                     range,
                     block,
                     block_ref.insns.len()
@@ -522,18 +543,17 @@ impl BBProgram {
             anyhow::bail!("cannot remove entry block {:?}", self.entry);
         }
 
+        let removed = remove.iter().copied().collect::<Vec<_>>();
         let mut old_to_new = vec![None; self.blocks.len()];
-        let mut next = 0usize;
         for (old, slot) in old_to_new.iter_mut().enumerate() {
             let old_id = BlockId(old);
             if remove.contains(&old_id) {
                 continue;
             }
-            *slot = Some(BlockId(next));
-            next += 1;
+            *slot = Some(Self::remap_block_after_remove(old_id, &removed)?);
         }
 
-        let mut blocks = Vec::with_capacity(next);
+        let mut blocks = Vec::with_capacity(self.blocks.len() - remove.len());
         for block in self
             .blocks
             .iter()
@@ -577,13 +597,13 @@ impl BBProgram {
                     Some(site)
                 } else {
                     Some(InsnSite {
-                        block: tail,
+                        block: Self::remap_block_after_insert(site.block, at.block, tail),
                         idx: site.idx - at.idx,
                     })
                 }
             } else if site.block.0 >= tail.0 {
                 Some(InsnSite {
-                    block: BlockId(site.block.0 + 1),
+                    block: Self::remap_block_after_insert(site.block, at.block, tail),
                     idx: site.idx,
                 })
             } else {

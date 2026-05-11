@@ -9,18 +9,18 @@ use std::process::ExitCode;
 use std::sync::Arc;
 
 use anyhow::{anyhow, bail, Context, Result};
-use bpfopt::analysis::{lift_with_kinsn_registry, lower, BBProgram};
+use bpfopt::analysis::{lift_with_kinsn_registry_and_side_inputs, lower, BBProgram};
 use bpfopt::insn::{BpfInsn, MapPseudo};
 use bpfopt::pass::{
-    run_pass_once, Arch, BpfPass, BtfInfoRecords, KinsnDescriptor, KinsnRegistry, PassContext,
-    PassResult, PlatformCapabilities, RegState, ScalarRange, StackState, Tnum, VerifierInsn,
-    VerifierInsnKind, VerifierValueWidth,
+    run_pass_once, Arch, BpfPass, BtfInfoRecords, KinsnDescriptor, KinsnRegistry, PassAction,
+    PassContext, PassManager, PassReportSite, PassResult, PlatformCapabilities, RegState,
+    ScalarRange, StackState, Tnum, VerifierInsnKind, VerifierValueWidth,
 };
 use bpfopt::passes::PASS_REGISTRY;
 #[cfg(test)]
 use bpfopt::verifier_log::VerifierInsnJson;
 use bpfopt::verifier_log::{
-    verifier_states_from_log, VerifierRegJson, VerifierStackJson, VerifierStatesJson,
+    verifier_states_from_log, VerifierInsn, VerifierRegJson, VerifierStackJson, VerifierStatesJson,
 };
 use clap::{Args, Parser, Subcommand};
 use serde::{Deserialize, Serialize};
@@ -170,7 +170,7 @@ struct InlinedMapEntryReport {
 
 #[derive(Clone, Debug, Serialize)]
 struct SkippedSiteReport {
-    pc: usize,
+    pc: u64,
     reason: String,
 }
 
@@ -307,16 +307,14 @@ fn run_single_pass(
     let input = read_bytecode(common.input.as_deref())?;
     let ctx = build_pass_context(common)?;
     validate_required_kinsns(&ctx, &[pass_name])?;
-    let mut program = lift_with_kinsn_registry(
+    let mut program = lift_with_kinsn_registry_and_side_inputs(
         &input,
         (!ctx.verifier_states.is_empty()).then(|| Arc::clone(&ctx.verifier_states)),
         Arc::new(ctx.kinsn_registry.clone()),
-    )?;
-    program.attach_side_inputs(
-        &input,
         ctx.map_ids.clone(),
         ctx.func_info.clone(),
         ctx.line_info.clone(),
+        &ctx.annotations,
     )?;
     let report_program = if common.report.is_some() {
         Some(program.clone())
@@ -1081,17 +1079,13 @@ fn pass_report(pass_name: &str, program: &BBProgram, result: &PassResult) -> Res
         *skip_reasons.entry(skip.reason.clone()).or_insert(0) += 1;
     }
     let mut diagnostics = result.diagnostics.clone();
-    for diagnostic in &result.site_diagnostics {
-        diagnostics.push(site_diagnostic_report(program, diagnostic)?);
-    }
+    diagnostics.extend(site_diagnostic_reports(program, &result.site_diagnostics)?);
     let mut skipped_sites = result
         .sites_skipped
         .iter()
         .map(legacy_skip_report)
         .collect::<Vec<_>>();
-    for skip in &result.site_skipped {
-        skipped_sites.push(site_skip_report(program, skip)?);
-    }
+    skipped_sites.extend(site_skip_reports(program, &result.site_skipped)?);
     Ok(PassReport {
         pass: pass_name.to_string(),
         sites_applied: result.sites_applied,
@@ -1113,33 +1107,60 @@ fn pass_report(pass_name: &str, program: &BBProgram, result: &PassResult) -> Res
     })
 }
 
-fn site_skip_report(
+fn site_skip_reports(
     program: &BBProgram,
-    skip: &bpfopt::pass::SiteSkipReason,
-) -> Result<SkippedSiteReport> {
-    Ok(SkippedSiteReport {
-        pc: report_pc(program, skip.site)?,
-        reason: skip.reason.clone(),
-    })
+    skips: &[bpfopt::pass::SiteSkipReason],
+) -> Result<Vec<SkippedSiteReport>> {
+    let reports = skips
+        .iter()
+        .map(|skip| PassReportSite {
+            site: skip.site,
+            action: PassAction::Skipped,
+            message: skip.reason.clone(),
+        })
+        .collect::<Vec<_>>();
+    PassManager::finalize_reports(reports, program)?
+        .into_iter()
+        .map(|report| {
+            if report.action != PassAction::Skipped {
+                bail!("internal report action mismatch for skipped site");
+            }
+            Ok(SkippedSiteReport {
+                pc: report.pc,
+                reason: report.message,
+            })
+        })
+        .collect()
 }
 
 fn legacy_skip_report(skip: &bpfopt::pass::SkipReason) -> SkippedSiteReport {
     SkippedSiteReport {
-        pc: skip.pc,
+        pc: skip.pc as u64,
         reason: skip.reason.clone(),
     }
 }
 
-fn site_diagnostic_report(
+fn site_diagnostic_reports(
     program: &BBProgram,
-    diagnostic: &bpfopt::pass::SiteDiagnostic,
-) -> Result<String> {
-    let pc = report_pc(program, diagnostic.site)?;
-    Ok(format!("site at PC={}: {}", pc, diagnostic.message))
-}
-
-fn report_pc(program: &BBProgram, site: bpfopt::analysis::InsnSite) -> Result<usize> {
-    program.site_current_pc(site)
+    diagnostics: &[bpfopt::pass::SiteDiagnostic],
+) -> Result<Vec<String>> {
+    let reports = diagnostics
+        .iter()
+        .map(|diagnostic| PassReportSite {
+            site: diagnostic.site,
+            action: PassAction::Diagnostic,
+            message: diagnostic.message.clone(),
+        })
+        .collect::<Vec<_>>();
+    PassManager::finalize_reports(reports, program)?
+        .into_iter()
+        .map(|report| {
+            if report.action != PassAction::Diagnostic {
+                bail!("internal report action mismatch for diagnostic site");
+            }
+            Ok(format!("site at PC={}: {}", report.pc, report.message))
+        })
+        .collect()
 }
 
 fn inlined_map_entry_report(record: &bpfopt::pass::MapInlineRecord) -> InlinedMapEntryReport {

@@ -3,10 +3,7 @@
 
 use std::collections::BTreeSet;
 
-use crate::analysis::{
-    advance_reg_state as advance_simple_reg_state, control_flow_target_sites, packet_ctx_layout,
-    BBProgram, InsnSite, PacketCtxLayout, PacketCtxLayoutScope, SimpleRegValue,
-};
+use crate::analysis::{BBProgram, InsnSite};
 use crate::insn::*;
 use crate::pass::*;
 
@@ -83,7 +80,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<
     let Some(layout) = packet_ctx_layout(prog_type, PacketCtxLayoutScope::SkbHelper) else {
         return Ok(PassResult::unchanged());
     };
-    let branch_targets = control_flow_target_sites(prog)?;
+    let branch_targets = prog.branch_target_entry_sites()?;
     let scan = scan_sites(prog, &branch_targets)?;
     if scan.sites.is_empty() {
         return Ok(PassResult {
@@ -144,7 +141,7 @@ fn scan_sites(prog: &BBProgram, branch_targets: &BTreeSet<InsnSite>) -> anyhow::
             } else {
                 None
             };
-            advance_simple_reg_state(insn, ldimm64_hi, &mut regs)?;
+            advance_reg_state(insn, ldimm64_hi, &mut regs)?;
         }
     }
 

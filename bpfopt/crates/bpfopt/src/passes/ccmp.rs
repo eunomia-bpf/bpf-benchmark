@@ -257,15 +257,27 @@ fn apply_ccmp_site(
     for pair in chain.windows(2) {
         prog.replace_terminator(pair[0], Terminator::Fallthrough { next: pair[1] })?;
     }
-    let removed_chain_blocks = chain[1..].to_vec();
     let merged = prog.merge_linear_chain(&chain)?;
-    let target = BBProgram::remap_block_after_remove(target, &removed_chain_blocks)?;
-    let success = BBProgram::remap_block_after_remove(success, &removed_chain_blocks)?;
-
-    let block_len = prog.block_body_len(merged)?;
-    prog.replace_range(
-        merged,
-        0..block_len,
+    let (target, success) = match prog.terminator(merged)? {
+        Terminator::CondBranch {
+            taken, fallthrough, ..
+        } => (taken, fallthrough),
+        term => anyhow::bail!(
+            "ccmp merged block {:?} expected conditional terminator, got {:?}",
+            merged,
+            term
+        ),
+    };
+    let merged_sites = prog.sites_in_block(merged)?;
+    let replacement_start = match merged_sites.first().copied() {
+        Some(site) => site,
+        None => prog.terminator_site(merged)?.ok_or_else(|| {
+            anyhow::anyhow!("ccmp merged block {:?} has no insertion site", merged)
+        })?,
+    };
+    prog.replace_range_at(
+        replacement_start,
+        merged_sites.len(),
         emit_packed_kinsn_call_with_off(safe_site.payload, btf_id, kfunc_off),
     )?;
 
@@ -293,21 +305,23 @@ fn ccmp_chain_blocks(
     let mut target = site.target_block;
     let mut success = site.success_block;
     let first = site.start_site.block;
-    let block_len = prog.block_body_len(first)?;
-    if site.start_site.idx != block_len {
+    if !prog.is_terminator_site(site.start_site)? {
         anyhow::bail!(
             "ccmp branch site {:?} is not a block terminator",
             site.start_site
         );
     }
-    if block_len > 0 {
+    if !prog.sites_in_block(first)?.is_empty() {
         let (_, tail) = prog.split_block(site.start_site)?;
-        for block in &mut chain {
-            *block = BBProgram::remap_block_after_insert(*block, first, tail);
-        }
-        target = BBProgram::remap_block_after_insert(target, first, tail);
-        success = BBProgram::remap_block_after_insert(success, first, tail);
-        chain[0] = tail;
+        let Some(first_term) = branch_term(prog, tail)? else {
+            anyhow::bail!("ccmp split tail {:?} has no branch term", tail);
+        };
+        let Some(updated) = try_match_ccmp_chain(prog, first_term)? else {
+            anyhow::bail!("ccmp split tail {:?} no longer matches a chain", tail);
+        };
+        chain = updated.blocks;
+        target = updated.target_block;
+        success = updated.success_block;
     }
     Ok((chain, target, success))
 }
@@ -405,10 +419,9 @@ fn try_match_ccmp_chain(prog: &BBProgram, first: BranchTerm) -> anyhow::Result<O
         return Ok(None);
     }
 
-    let start_site = InsnSite {
-        block: first.block,
-        idx: prog.block_body_len(first.block)?,
-    };
+    let start_site = prog
+        .terminator_site(first.block)?
+        .ok_or_else(|| anyhow::anyhow!("ccmp block {:?} has no terminator site", first.block))?;
     let success_block = cursor;
     Ok(Some(CcmpSite {
         start_site,
@@ -459,10 +472,9 @@ fn branch_term(prog: &BBProgram, block: BlockId) -> anyhow::Result<Option<Branch
     let Some(width) = CcmpWidth::from_class(insn.class()) else {
         return Ok(None);
     };
-    let branch_site = InsnSite {
-        block,
-        idx: prog.block_body_len(block)?,
-    };
+    let branch_site = prog
+        .terminator_site(block)?
+        .ok_or_else(|| anyhow::anyhow!("ccmp block {:?} has no terminator site", block))?;
     prog.insn_at(branch_site)
         .ok_or_else(|| anyhow::anyhow!("missing branch terminator at {:?}", branch_site))?;
     Ok(Some(BranchTerm {

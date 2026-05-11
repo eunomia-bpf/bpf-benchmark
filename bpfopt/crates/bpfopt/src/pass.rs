@@ -18,13 +18,45 @@ pub use crate::test_helpers::{
 // MapInlineHint et al. live in passes/map_inline.rs (pass-local metadata) and are
 // re-exported here so existing `use crate::pass::*` consumers keep working.
 pub use crate::passes::map_inline::{MapInlineHint, MapInlineHintAnchor, MapInlineHintMode};
+pub(crate) use crate::verifier_log::VerifierInsn;
 pub use crate::verifier_log::{
-    RegState, ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
+    RegState, ScalarRange, StackState, Tnum, VerifierInsnKind, VerifierValueWidth,
 };
 use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
 
 pub type RegSet = HashSet<u8>;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct MapPtr {
+    pub id: Option<u32>,
+    pub offset: Option<i32>,
+    pub is_value: bool,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RegKind {
+    Scalar,
+    FramePointer,
+    Context,
+    PacketPointer,
+    PacketMetaPointer,
+    MapPointer,
+    MapValue,
+    MapKey,
+    Memory,
+    BtfStructPointer,
+    OtherPointer,
+    Unknown,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct PrefetchHint {
+    pub execution_count: u64,
+    pub cache_references: u64,
+    pub cache_misses: u64,
+    pub miss_rate: f32,
+}
 
 #[derive(Clone, Copy, Debug)]
 pub struct KinsnDescriptor {
@@ -140,7 +172,7 @@ pub struct InsnAnnotation {
     pub branch_profile: Option<BranchProfile>,
     /// Optional PMU data for prefetch admission.
     /// Used by PrefetchPass to suppress structurally valid but cold sites.
-    pub prefetch_profile: Option<PrefetchProfile>,
+    pub(crate) prefetch_profile: Option<PrefetchProfile>,
 }
 
 /// Real per-site PMU branch statistics.
@@ -155,18 +187,17 @@ pub struct BranchProfile {
 
 /// Real per-site PMU memory statistics for optional prefetch admission.
 #[derive(Clone, Debug)]
-pub struct PrefetchProfile {
+pub(crate) struct PrefetchProfile {
     pub execution_count: u64,
     pub cache_references: u64,
     pub cache_misses: u64,
     pub miss_rate: f64,
 }
-pub type PmuRecord = InsnAnnotation;
+pub(crate) type PmuRecord = InsnAnnotation;
 
 #[derive(Clone, Debug, Default)]
-pub struct ProfilingData {
+pub(crate) struct ProfilingData {
     pub branch_profiles: HashMap<usize, BranchProfile>,
-    pub branch_miss_rate: Option<f64>,
     pub prefetch_profiles: HashMap<usize, PrefetchProfile>,
 }
 
@@ -342,6 +373,28 @@ pub struct SiteDiagnostic {
     pub site: InsnSite,
     pub message: String,
 }
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+pub enum PassAction {
+    Skipped,
+    Diagnostic,
+}
+
+#[derive(Clone, Debug)]
+pub struct PassReportSite {
+    pub site: InsnSite,
+    pub action: PassAction,
+    pub message: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct PassReportPc {
+    pub pc: u64,
+    pub action: PassAction,
+    pub message: String,
+}
+
+pub struct PassManager;
 
 /// One specialized map value snapshot emitted by `MapInlinePass`.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -646,9 +699,9 @@ pub fn run_pass_once(
         return Ok(PassResult::skipped_site(skip));
     }
 
-    let insns_before = program.program_slot_len()?;
+    let insns_before = program_instruction_slots(program)?;
     let mut result = pass.run(program, ctx)?;
-    let insns_after = program.program_slot_len()?;
+    let insns_after = program_instruction_slots(program)?;
     result.insns_before = insns_before;
     result.insns_after = insns_after;
 
@@ -657,6 +710,37 @@ pub fn run_pass_once(
     }
 
     Ok(result)
+}
+
+impl PassManager {
+    pub fn finalize_reports(
+        reports: Vec<PassReportSite>,
+        prog: &BBProgram,
+    ) -> anyhow::Result<Vec<PassReportPc>> {
+        reports
+            .into_iter()
+            .map(|report| {
+                let pc = prog.site_current_pc(report.site)?;
+                Ok(PassReportPc {
+                    pc: u64::try_from(pc).map_err(|_| {
+                        anyhow::anyhow!("report PC {pc} for {:?} does not fit u64", report.site)
+                    })?,
+                    action: report.action,
+                    message: report.message,
+                })
+            })
+            .collect()
+    }
+}
+
+fn program_instruction_slots(program: &BBProgram) -> anyhow::Result<usize> {
+    let mut len = 0usize;
+    for site in program.all_sites() {
+        len = len
+            .checked_add(program.insn_slot_width(site)?)
+            .ok_or_else(|| anyhow::anyhow!("program instruction slot count overflows"))?;
+    }
+    Ok(len)
 }
 
 fn required_kinsn_skip(
