@@ -1,40 +1,17 @@
 // SPDX-License-Identifier: MIT
 //! Bounds-check merge optimization pass.
 
-use std::collections::HashSet;
+use std::collections::{BTreeMap, BTreeSet};
 
-use crate::analysis::{iter_sites, BranchTargetAnalysis, LivenessAnalysis};
+use crate::analysis::{
+    packet_ctx_layout, BBProgram, BlockId, InsnSite, PacketCtxLayout, PacketCtxLayoutScope,
+    Terminator,
+};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::dce::{eliminate_nops, eliminate_unreachable_blocks};
-use crate::rewrite::{
-    commit_rewrite_output, compose_addr_maps, BtfRemapPolicy, RewriteOutput, RewritePlan,
-};
-
-/// BPF_PROG_TYPE_SCHED_CLS (TC classifier).
-const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
-/// BPF_PROG_TYPE_SCHED_ACT (TC action).
-const BPF_PROG_TYPE_SCHED_ACT: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_ACT;
-/// BPF_PROG_TYPE_XDP.
-const BPF_PROG_TYPE_XDP: u32 = libbpf_sys::BPF_PROG_TYPE_XDP;
-/// BPF_PROG_TYPE_SK_SKB.
-const BPF_PROG_TYPE_SK_SKB: u32 = libbpf_sys::BPF_PROG_TYPE_SK_SKB;
-/// BPF_PROG_TYPE_LWT_IN.
-const BPF_PROG_TYPE_LWT_IN: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_IN;
-/// BPF_PROG_TYPE_LWT_OUT.
-const BPF_PROG_TYPE_LWT_OUT: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_OUT;
-/// BPF_PROG_TYPE_LWT_XMIT.
-const BPF_PROG_TYPE_LWT_XMIT: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_XMIT;
-
 /// Phase-1 heuristic: treat larger jumps as gapped windows and fail closed.
 const MAX_LADDER_WINDOW_GROWTH: i32 = 24;
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-struct PacketCtxLayout {
-    data_off: i16,
-    data_end_off: i16,
-}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum RegValue {
@@ -52,24 +29,19 @@ enum GuardCmpKind {
 
 #[derive(Clone, Debug)]
 struct GuardSite {
+    mov: InsnSite,
+    add: InsnSite,
+    compare: InsnSite,
     mov_pc: usize,
-    add_pc: usize,
     compare_pc: usize,
     root_reg: u8,
     data_end_reg: u8,
     root_id: u32,
     window_end: i32,
     cmp_kind: GuardCmpKind,
-    slow_target_pc: usize,
+    slow_target: BlockId,
     can_widen_in_place: bool,
     can_remove_setup: bool,
-}
-
-#[derive(Clone, Debug)]
-struct LadderRewrite {
-    dominant_add_pc: usize,
-    merged_end: i32,
-    skip_pcs: Vec<usize>,
 }
 
 #[derive(Default)]
@@ -85,276 +57,360 @@ impl BpfPass for BoundsCheckMergePass {
     fn name(&self) -> &str {
         "bounds_check_merge"
     }
-    fn run(
-        &self,
-        program: &mut BpfProgram,
-        analyses: &mut AnalysisCache,
-        ctx: &PassContext,
-    ) -> anyhow::Result<PassResult> {
-        let Some(layout) = packet_ctx_layout(ctx.prog_type) else {
-            return Ok(PassResult::unchanged());
-        };
-        if program.insns.is_empty() {
-            return Ok(PassResult::unchanged());
-        }
-
-        let bt = analyses.get::<BranchTargetAnalysis>(program);
-        let liveness = analyses.get::<LivenessAnalysis>(program);
-
-        let mut scan = scan_guard_sites(&program.insns, &bt, &liveness, layout);
-        if scan.guards.is_empty() {
-            return Ok(PassResult {
-                sites_skipped: scan.skips,
-                ..PassResult::unchanged()
-            });
-        }
-
-        let mut rewrites = Vec::new();
-        let mut consumed = vec![false; scan.guards.len()];
-        let mut i = 0usize;
-        while i < scan.guards.len() {
-            if consumed[i] {
-                i += 1;
-                continue;
-            }
-
-            let mut group = vec![i];
-            let mut j = i + 1;
-            while j < scan.guards.len() {
-                let prev = &scan.guards[*group.last().unwrap()];
-                let next = &scan.guards[j];
-                if !can_extend_ladder(prev, next, &program.insns, &bt) {
-                    break;
-                }
-                group.push(j);
-                j += 1;
-            }
-
-            if group.len() >= 2 {
-                if let Some(rewrite) = build_ladder_rewrite(&group, &scan.guards, &bt) {
-                    for &idx in &group {
-                        consumed[idx] = true;
-                    }
-                    rewrites.push(rewrite);
-                    i = group.last().copied().unwrap_or(i) + 1;
-                    continue;
-                }
-            }
-
-            i += 1;
-        }
-
-        for (idx, guard) in scan.guards.iter().enumerate() {
-            if !consumed[idx] {
-                scan.skips.push(SkipReason {
-                    pc: guard.compare_pc,
-                    reason: "guard not part of a mergeable ladder".into(),
-                });
-            }
-        }
-
-        if rewrites.is_empty() {
-            return Ok(PassResult {
-                sites_skipped: scan.skips,
-                ..PassResult::unchanged()
-            });
-        }
-
-        let mut plan = RewritePlan::new();
-        let mut skip_pcs = HashSet::new();
-        for rewrite in &rewrites {
-            let mut widened = program.insns[rewrite.dominant_add_pc];
-            widened.imm = rewrite.merged_end;
-            plan.replace_range(
-                rewrite.dominant_add_pc,
-                insn_width(&program.insns[rewrite.dominant_add_pc]),
-                vec![widened],
-            )?;
-            skip_pcs.extend(rewrite.skip_pcs.iter().copied());
-        }
-        for pc in skip_pcs {
-            plan.delete_range(pc, insn_width(&program.insns[pc]))?;
-        }
-
-        let output = plan.build(&program.insns)?;
-        let mut final_insns = output.insns;
-        let mut final_addr_map = output.addr_map;
-
-        if let Some((cleaned_insns, cleanup_map)) = eliminate_unreachable_blocks(&final_insns)? {
-            final_addr_map = compose_addr_maps(&final_addr_map, &cleanup_map);
-            final_insns = cleaned_insns;
-        }
-        while let Some((cleaned_insns, cleanup_map)) = eliminate_nops(&final_insns)? {
-            final_addr_map = compose_addr_maps(&final_addr_map, &cleanup_map);
-            final_insns = cleaned_insns;
-        }
-
-        let mut result = commit_rewrite_output(
-            program,
-            RewriteOutput {
-                insns: final_insns,
-                addr_map: final_addr_map,
-                sites_applied: rewrites.len(),
-            },
-            BtfRemapPolicy::Remap,
-        )?;
-        result.sites_skipped = scan.skips;
-        Ok(result)
+    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        Ok(run_on_bbprogram(program, ctx.prog_type)?.0)
     }
 }
 
-fn packet_ctx_layout(prog_type: u32) -> Option<PacketCtxLayout> {
-    match prog_type {
-        BPF_PROG_TYPE_XDP => Some(PacketCtxLayout {
-            data_off: XDP_PACKET_DATA_OFFSET,
-            data_end_off: XDP_PACKET_DATA_END_OFFSET,
-        }),
-        BPF_PROG_TYPE_SCHED_CLS
-        | BPF_PROG_TYPE_SCHED_ACT
-        | BPF_PROG_TYPE_SK_SKB
-        | BPF_PROG_TYPE_LWT_IN
-        | BPF_PROG_TYPE_LWT_OUT
-        | BPF_PROG_TYPE_LWT_XMIT => Some(PacketCtxLayout {
-            data_off: SKB_PACKET_DATA_OFFSET,
-            data_end_off: SKB_PACKET_DATA_END_OFFSET,
-        }),
-        _ => None,
+pub fn run_on_bbprogram(
+    prog: &mut BBProgram,
+    prog_type: u32,
+) -> anyhow::Result<(PassResult, Option<Vec<usize>>)> {
+    let Some(layout) = packet_ctx_layout(prog_type, PacketCtxLayoutScope::PacketAccess) else {
+        return Ok((PassResult::unchanged(), None));
+    };
+    if prog.blocks.is_empty() {
+        return Ok((PassResult::unchanged(), None));
     }
+
+    let site_pcs = prog.current_site_pcs()?;
+    let pc_sites = prog.current_pc_sites()?;
+    let target_pcs = prog.branch_target_pcs()?;
+    let old_len = current_program_len(prog, &site_pcs)?;
+    let mut scan = scan_guard_sites(prog, &site_pcs, &target_pcs, layout)?;
+    if scan.guards.is_empty() {
+        return Ok((
+            PassResult {
+                sites_skipped: scan.skips,
+                ..PassResult::unchanged()
+            },
+            None,
+        ));
+    }
+
+    let mut rewrites = Vec::new();
+    let mut consumed = vec![false; scan.guards.len()];
+    let mut i = 0usize;
+    while i < scan.guards.len() {
+        if consumed[i] {
+            i += 1;
+            continue;
+        }
+
+        let mut group = vec![i];
+        let mut j = i + 1;
+        while j < scan.guards.len() {
+            let prev = &scan.guards[group[group.len() - 1]];
+            let next = &scan.guards[j];
+            if !can_extend_ladder(prev, next, prog, &pc_sites, &target_pcs) {
+                break;
+            }
+            group.push(j);
+            j += 1;
+        }
+
+        if group.len() >= 2 {
+            if let Some(rewrite) = build_ladder_rewrite(&group, &scan.guards, &target_pcs) {
+                for &idx in &group {
+                    consumed[idx] = true;
+                }
+                rewrites.push(rewrite);
+                i = group.last().copied().unwrap_or(i) + 1;
+                continue;
+            }
+        }
+
+        i += 1;
+    }
+
+    for (idx, guard) in scan.guards.iter().enumerate() {
+        if !consumed[idx] {
+            scan.skips.push(SkipReason {
+                pc: guard.compare_pc,
+                reason: "guard not part of a mergeable ladder".into(),
+            });
+        }
+    }
+
+    if rewrites.is_empty() {
+        return Ok((
+            PassResult {
+                sites_skipped: scan.skips,
+                ..PassResult::unchanged()
+            },
+            None,
+        ));
+    }
+
+    let addr_map = apply_rewrites(prog, &rewrites, &site_pcs, old_len)?;
+    Ok((
+        PassResult {
+            sites_applied: rewrites.len(),
+            sites_skipped: scan.skips,
+            ..Default::default()
+        },
+        Some(addr_map),
+    ))
+}
+
+fn apply_rewrites(
+    prog: &mut BBProgram,
+    rewrites: &[(InsnSite, i32, Vec<InsnSite>)],
+    site_pcs: &BTreeMap<InsnSite, usize>,
+    old_len: usize,
+) -> anyhow::Result<Vec<usize>> {
+    let mut deleted_sites = BTreeSet::new();
+    let mut deleted_branches = BTreeSet::new();
+
+    for (dominant_add, merged_end, skip_sites) in rewrites {
+        let mut widened = *prog
+            .insn_at(*dominant_add)
+            .ok_or_else(|| anyhow::anyhow!("missing dominant add at {:?}", dominant_add))?;
+        widened.imm = *merged_end;
+        prog.replace_range(
+            dominant_add.block,
+            dominant_add.idx..dominant_add.idx + 1,
+            vec![widened],
+        )?;
+
+        for &site in skip_sites {
+            if is_terminator_site(prog, site)? {
+                deleted_branches.insert(site.block);
+            } else {
+                deleted_sites.insert(site);
+            }
+        }
+    }
+
+    let mut deletions_by_block: BTreeMap<BlockId, Vec<usize>> = BTreeMap::new();
+    for site in &deleted_sites {
+        deletions_by_block
+            .entry(site.block)
+            .or_default()
+            .push(site.idx);
+    }
+    for (block, mut indices) in deletions_by_block {
+        indices.sort_unstable_by(|a, b| b.cmp(a));
+        for idx in indices {
+            prog.replace_range(block, idx..idx + 1, Vec::new())?;
+        }
+    }
+    for block in deleted_branches {
+        prog.delete_cond_branch(block)?;
+    }
+
+    let deleted_pcs = rewrites
+        .iter()
+        .flat_map(|(_, _, skip_sites)| skip_sites.iter())
+        .filter_map(|site| site_pcs.get(site).copied())
+        .collect::<BTreeSet<_>>();
+    Ok(addr_map_after_deletions(old_len, &deleted_pcs))
+}
+
+fn is_terminator_site(prog: &BBProgram, site: InsnSite) -> anyhow::Result<bool> {
+    let block = prog.block(site.block)?;
+    Ok(site.idx == block.insns.len() && block.terminator.raw_insn().is_some())
+}
+
+fn addr_map_after_deletions(old_len: usize, deleted_pcs: &BTreeSet<usize>) -> Vec<usize> {
+    let mut addr_map = vec![0usize; old_len + 1];
+    let mut new_pc = 0usize;
+    for (old_pc, slot) in addr_map.iter_mut().enumerate().take(old_len) {
+        *slot = new_pc;
+        if !deleted_pcs.contains(&old_pc) {
+            new_pc += 1;
+        }
+    }
+    addr_map[old_len] = new_pc;
+    addr_map
+}
+
+fn current_program_len(
+    prog: &BBProgram,
+    site_pcs: &BTreeMap<InsnSite, usize>,
+) -> anyhow::Result<usize> {
+    let mut len = 0usize;
+    for (&site, &pc) in site_pcs {
+        len = len.max(pc + prog.insn_slot_width(site)?);
+    }
+    Ok(len)
 }
 
 fn scan_guard_sites(
-    insns: &[BpfInsn],
-    bt: &crate::analysis::BranchTargetResult,
-    liveness: &crate::analysis::LivenessResult,
+    prog: &BBProgram,
+    site_pcs: &BTreeMap<InsnSite, usize>,
+    target_pcs: &BTreeSet<usize>,
     layout: PacketCtxLayout,
-) -> ScanResult {
+) -> anyhow::Result<ScanResult> {
     let mut states = vec![RegValue::Unknown; 11];
     let mut next_root_id = 1u32;
     let mut last_data_root = None;
     let mut result = ScanResult::default();
 
-    for site in iter_sites(insns, |insns, pc| Some(insn_width(&insns[pc]))) {
-        let pc = site.pc;
-        if pc > 0 && bt.is_target.get(pc).copied().unwrap_or(false) {
+    for block in prog.blocks() {
+        let block_start = prog.current_block_start_pc(block.id)?;
+        if target_pcs.contains(&block_start) {
             clear_states(&mut states);
             last_data_root = None;
         }
 
-        if let Some(skip) = detect_variable_guard(pc, insns, &states) {
-            result.skips.push(skip);
-        } else if let Some(site) = detect_guard_site(pc, insns, bt, liveness, &states) {
-            result.guards.push(site);
-        }
+        for site in prog.logical_sites_in_block(block.id) {
+            let Some(&insn) = prog.insn_at(site) else {
+                continue;
+            };
+            if let Some(skip) = detect_variable_guard(site, prog, site_pcs, &states)? {
+                result.skips.push(skip);
+            } else if let Some(site) = detect_guard_site(site, prog, site_pcs, target_pcs, &states)?
+            {
+                result.guards.push(site);
+            }
 
-        apply_transfer(
-            insns[pc],
-            &mut states,
-            &mut next_root_id,
-            &mut last_data_root,
-            layout,
-        );
+            apply_transfer(
+                insn,
+                &mut states,
+                &mut next_root_id,
+                &mut last_data_root,
+                layout,
+            );
+        }
     }
 
-    result
+    Ok(result)
 }
 
 fn detect_guard_site(
-    pc: usize,
-    insns: &[BpfInsn],
-    bt: &crate::analysis::BranchTargetResult,
-    liveness: &crate::analysis::LivenessResult,
+    site: InsnSite,
+    prog: &BBProgram,
+    site_pcs: &BTreeMap<InsnSite, usize>,
+    target_pcs: &BTreeSet<usize>,
     states: &[RegValue],
-) -> Option<GuardSite> {
-    let insn = insns.get(pc)?;
-    let (cursor_reg, data_end_reg, cmp_kind) = normalize_slow_guard(insn)?;
-    let mov_pc = pc.checked_sub(2)?;
-    let add_pc = pc.checked_sub(1)?;
-    let mov = insns.get(mov_pc)?;
-    let add = insns.get(add_pc)?;
+) -> anyhow::Result<Option<GuardSite>> {
+    let Some(insn) = prog.insn_at(site) else {
+        return Ok(None);
+    };
+    let Some((cursor_reg, data_end_reg, cmp_kind)) = normalize_slow_guard(insn) else {
+        return Ok(None);
+    };
+    let Some((mov_site, add_site)) = guard_setup_sites(site, prog)? else {
+        return Ok(None);
+    };
+    let mov = prog
+        .insn_at(mov_site)
+        .ok_or_else(|| anyhow::anyhow!("missing guard setup mov at {:?}", mov_site))?;
+    let add = prog
+        .insn_at(add_site)
+        .ok_or_else(|| anyhow::anyhow!("missing guard setup add at {:?}", add_site))?;
+    let Some(&mov_pc) = site_pcs.get(&mov_site) else {
+        return Ok(None);
+    };
+    let Some(&add_pc) = site_pcs.get(&add_site) else {
+        return Ok(None);
+    };
+    let Some(&compare_pc) = site_pcs.get(&site) else {
+        return Ok(None);
+    };
 
     if mov.code != (BPF_ALU64 | BPF_MOV | BPF_X) || mov.dst_reg() != cursor_reg {
-        return None;
+        return Ok(None);
     }
     if add.code != (BPF_ALU64 | BPF_ADD | BPF_K) || add.dst_reg() != cursor_reg {
-        return None;
+        return Ok(None);
     }
 
     let root_reg = mov.src_reg();
     let window_end = add.imm;
     if window_end <= 0 {
-        return None;
+        return Ok(None);
     }
 
-    let RegValue::PacketData { root_id, const_off } = reg_state(states, cursor_reg)?.clone() else {
-        return None;
+    let Some(RegValue::PacketData { root_id, const_off }) = reg_state(states, cursor_reg).cloned()
+    else {
+        return Ok(None);
     };
-    let RegValue::PacketData {
+    let Some(RegValue::PacketData {
         root_id: root_base_id,
         const_off: root_off,
-    } = reg_state(states, root_reg)?.clone()
+    }) = reg_state(states, root_reg).cloned()
     else {
-        return None;
+        return Ok(None);
     };
-    let RegValue::PacketEnd {
+    let Some(RegValue::PacketEnd {
         root_id: end_root_id,
-    } = reg_state(states, data_end_reg)?.clone()
+    }) = reg_state(states, data_end_reg).cloned()
     else {
-        return None;
+        return Ok(None);
     };
 
     if root_id != root_base_id || root_id != end_root_id || root_off != 0 || const_off != window_end
     {
-        return None;
+        return Ok(None);
     }
 
-    let slow_target_pc = target_pc(pc, insn.off)?;
-    if slow_target_pc >= insns.len() {
-        return None;
-    }
+    let slow_target = match prog.block(site.block)?.terminator {
+        Terminator::CondBranch { taken, .. } if is_terminator_site(prog, site)? => taken,
+        _ => return Ok(None),
+    };
+    let cursor_dead = cursor_dead_after_compare(prog, add_site, site, cursor_reg);
+    let can_widen_in_place = !target_pcs.contains(&mov_pc)
+        && !target_pcs.contains(&add_pc)
+        && !target_pcs.contains(&compare_pc)
+        && cursor_dead;
+    let can_remove_setup =
+        !target_pcs.contains(&mov_pc) && !target_pcs.contains(&add_pc) && cursor_dead;
 
-    let can_widen_in_place = !bt.is_target.get(mov_pc).copied().unwrap_or(false)
-        && !bt.is_target.get(add_pc).copied().unwrap_or(false)
-        && !bt.is_target.get(pc).copied().unwrap_or(false)
-        && !liveness.live_out.get(pc)?.contains(&cursor_reg);
-    let can_remove_setup = !bt.is_target.get(mov_pc).copied().unwrap_or(false)
-        && !bt.is_target.get(add_pc).copied().unwrap_or(false)
-        && !liveness.live_out.get(pc)?.contains(&cursor_reg);
-
-    Some(GuardSite {
+    Ok(Some(GuardSite {
+        mov: mov_site,
+        add: add_site,
+        compare: site,
         mov_pc,
-        add_pc,
-        compare_pc: pc,
+        compare_pc,
         root_reg,
         data_end_reg,
         root_id,
         window_end,
         cmp_kind,
-        slow_target_pc,
+        slow_target,
         can_widen_in_place,
         can_remove_setup,
-    })
+    }))
 }
 
-fn detect_variable_guard(pc: usize, insns: &[BpfInsn], states: &[RegValue]) -> Option<SkipReason> {
-    let insn = insns.get(pc)?;
-    let (cursor_reg, data_end_reg, _) = normalize_slow_guard(insn)?;
-    let mov_pc = pc.checked_sub(2)?;
-    let add_pc = pc.checked_sub(1)?;
-    let mov = insns.get(mov_pc)?;
-    let add = insns.get(add_pc)?;
+fn detect_variable_guard(
+    site: InsnSite,
+    prog: &BBProgram,
+    site_pcs: &BTreeMap<InsnSite, usize>,
+    states: &[RegValue],
+) -> anyhow::Result<Option<SkipReason>> {
+    let Some(insn) = prog.insn_at(site) else {
+        return Ok(None);
+    };
+    let Some((cursor_reg, data_end_reg, _)) = normalize_slow_guard(insn) else {
+        return Ok(None);
+    };
+    let Some((mov_site, add_site)) = guard_setup_sites(site, prog)? else {
+        return Ok(None);
+    };
+    let mov = prog
+        .insn_at(mov_site)
+        .ok_or_else(|| anyhow::anyhow!("missing variable guard setup mov at {:?}", mov_site))?;
+    let add = prog
+        .insn_at(add_site)
+        .ok_or_else(|| anyhow::anyhow!("missing variable guard setup add at {:?}", add_site))?;
 
     if mov.code != (BPF_ALU64 | BPF_MOV | BPF_X) || mov.dst_reg() != cursor_reg {
-        return None;
+        return Ok(None);
     }
     if add.code != (BPF_ALU64 | BPF_ADD | BPF_X) || add.dst_reg() != cursor_reg {
-        return None;
+        return Ok(None);
     }
 
     let root_reg = mov.src_reg();
-    match (
-        reg_state(states, root_reg)?,
-        reg_state(states, data_end_reg)?,
-    ) {
+    let (Some(root_state), Some(end_state)) =
+        (reg_state(states, root_reg), reg_state(states, data_end_reg))
+    else {
+        return Ok(None);
+    };
+    let skip = match (root_state, end_state) {
         (
             RegValue::PacketData {
                 root_id: left_root,
@@ -363,12 +419,50 @@ fn detect_variable_guard(pc: usize, insns: &[BpfInsn], states: &[RegValue]) -> O
             RegValue::PacketEnd {
                 root_id: right_root,
             },
-        ) if left_root == right_root => Some(SkipReason {
+        ) if left_root == right_root => site_pcs.get(&site).copied().map(|pc| SkipReason {
             pc,
             reason: "variable packet window is not mergeable in v1".into(),
         }),
         _ => None,
+    };
+    Ok(skip)
+}
+
+fn guard_setup_sites(
+    compare: InsnSite,
+    prog: &BBProgram,
+) -> anyhow::Result<Option<(InsnSite, InsnSite)>> {
+    let block = prog.block(compare.block)?;
+    if compare.idx < 2 || compare.idx > block.insns.len() {
+        return Ok(None);
     }
+    Ok(Some((
+        InsnSite {
+            block: compare.block,
+            idx: compare.idx - 2,
+        },
+        InsnSite {
+            block: compare.block,
+            idx: compare.idx - 1,
+        },
+    )))
+}
+
+fn cursor_dead_after_compare(
+    prog: &BBProgram,
+    add_site: InsnSite,
+    compare_site: InsnSite,
+    cursor_reg: u8,
+) -> bool {
+    let def = crate::analysis::DefSite {
+        block: add_site.block,
+        idx: add_site.idx,
+        reg: cursor_reg,
+    };
+    prog.use_def
+        .uses_for(def)
+        .iter()
+        .all(|use_site| use_site.site() == compare_site)
 }
 
 fn normalize_slow_guard(insn: &BpfInsn) -> Option<(u8, u8, GuardCmpKind)> {
@@ -388,14 +482,15 @@ fn normalize_slow_guard(insn: &BpfInsn) -> Option<(u8, u8, GuardCmpKind)> {
 fn can_extend_ladder(
     prev: &GuardSite,
     next: &GuardSite,
-    insns: &[BpfInsn],
-    bt: &crate::analysis::BranchTargetResult,
+    prog: &BBProgram,
+    pc_sites: &BTreeMap<usize, InsnSite>,
+    target_pcs: &BTreeSet<usize>,
 ) -> bool {
     if prev.root_id != next.root_id
         || prev.root_reg != next.root_reg
         || prev.data_end_reg != next.data_end_reg
         || prev.cmp_kind != next.cmp_kind
-        || prev.slow_target_pc != next.slow_target_pc
+        || prev.slow_target != next.slow_target
         || next.window_end <= prev.window_end
         || next.window_end - prev.window_end > MAX_LADDER_WINDOW_GROWTH
         || next.mov_pc <= prev.compare_pc
@@ -404,24 +499,30 @@ fn can_extend_ladder(
     }
 
     for pc in (prev.compare_pc + 1)..next.mov_pc {
-        if !is_merge_safe_interleave(pc, insns, bt) {
+        if !is_merge_safe_interleave(pc, prog, pc_sites, target_pcs) {
             return false;
         }
     }
 
-    !bt.is_target.get(next.compare_pc).copied().unwrap_or(false)
+    !target_pcs.contains(&next.compare_pc)
 }
 
 fn is_merge_safe_interleave(
     pc: usize,
-    insns: &[BpfInsn],
-    bt: &crate::analysis::BranchTargetResult,
+    prog: &BBProgram,
+    pc_sites: &BTreeMap<usize, InsnSite>,
+    target_pcs: &BTreeSet<usize>,
 ) -> bool {
-    if bt.is_target.get(pc).copied().unwrap_or(false) {
+    if target_pcs.contains(&pc) {
         return false;
     }
 
-    let insn = &insns[pc];
+    let Some(&site) = pc_sites.get(&pc) else {
+        return false;
+    };
+    let Some(insn) = prog.insn_at(site) else {
+        return false;
+    };
     match insn.class() {
         BPF_JMP | BPF_JMP32 => false,
         BPF_ST | BPF_STX => insn.dst_reg() == 10,
@@ -432,35 +533,31 @@ fn is_merge_safe_interleave(
 fn build_ladder_rewrite(
     group: &[usize],
     guards: &[GuardSite],
-    bt: &crate::analysis::BranchTargetResult,
-) -> Option<LadderRewrite> {
+    target_pcs: &BTreeSet<usize>,
+) -> Option<(InsnSite, i32, Vec<InsnSite>)> {
     let dominant = guards.get(*group.first()?)?;
     if !dominant.can_widen_in_place {
         return None;
     }
 
     let mut merged_end = dominant.window_end;
-    let mut skip_pcs = Vec::new();
+    let mut skip_sites = Vec::new();
 
     for &idx in group.iter().skip(1) {
         let site = guards.get(idx)?;
         merged_end = merged_end.max(site.window_end);
-        if bt.is_target.get(site.compare_pc).copied().unwrap_or(false) {
+        if target_pcs.contains(&site.compare_pc) {
             return None;
         }
 
         if site.can_remove_setup {
-            skip_pcs.extend([site.mov_pc, site.add_pc, site.compare_pc]);
+            skip_sites.extend([site.mov, site.add, site.compare]);
         } else {
-            skip_pcs.push(site.compare_pc);
+            skip_sites.push(site.compare);
         }
     }
 
-    Some(LadderRewrite {
-        dominant_add_pc: dominant.add_pc,
-        merged_end,
-        skip_pcs,
-    })
+    Some((dominant.add, merged_end, skip_sites))
 }
 
 fn apply_transfer(
@@ -540,10 +637,4 @@ fn clear_states(states: &mut [RegValue]) {
     for state in states {
         *state = RegValue::Unknown;
     }
-}
-
-fn target_pc(pc: usize, off: i16) -> Option<usize> {
-    let pc = pc as i64;
-    let target = pc + 1 + off as i64;
-    (target >= 0).then_some(target as usize)
 }

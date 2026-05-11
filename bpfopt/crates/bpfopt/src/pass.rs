@@ -1,19 +1,21 @@
 // SPDX-License-Identifier: MIT
-//! Pass framework — LLVM-style PassManager for BPF program transformations.
+//! Pass framework for BPF program transformations.
 //!
 //! Core abstractions:
-//! - `BpfProgram`: linear instruction stream + per-insn annotations + metadata
-//! - `Analysis`: read-only analysis producing typed, cached results
+//! - `BBProgram`: basic-block IR used by production pass execution
 //! - `BpfPass`: transformation pass that may modify the program
-//! - `PassManager`: orchestrates pass execution and analysis cache invalidation
+//! - `PassManager`: thin policy and reporting runner for explicit pass lists
 
-use std::any::{Any, TypeId};
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::sync::Arc;
 
-use crate::analysis::CFGAnalysis;
-use crate::insn::{BpfInsn, MapPseudo, BPF_PSEUDO_KINSN_CALL};
+use crate::analysis::BBProgram;
+#[cfg(test)]
+use crate::insn::MapPseudo;
+use crate::insn::{
+    insn_width, relative_branch_target_pc, BpfInsn, BPF_PSEUDO_CALL, BPF_PSEUDO_FUNC,
+};
 // MapInlineHint et al. live in passes/map_inline.rs (pass-local metadata) and are
 // re-exported here so existing `use crate::pass::*` consumers keep working.
 pub use crate::passes::map_inline::{MapInlineHint, MapInlineHintAnchor, MapInlineHintMode};
@@ -190,283 +192,25 @@ impl BtfInfoRecords {
     }
 }
 
-pub fn remap_btf_metadata(program: &mut BpfProgram, addr_map: &[usize]) -> anyhow::Result<()> {
-    remap_btf_records(
-        "func_info",
-        BtfRecordKind::Func,
-        program.func_info.as_mut(),
-        addr_map,
-        &program.insns,
-    )?;
-    remap_btf_records(
-        "line_info",
-        BtfRecordKind::Line,
-        program.line_info.as_mut(),
-        addr_map,
-        &program.insns,
-    )?;
-    Ok(())
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum BtfRecordKind {
-    Func,
-    Line,
-}
-
-fn remap_btf_records(
-    label: &str,
-    kind: BtfRecordKind,
-    records: Option<&mut BtfInfoRecords>,
-    addr_map: &[usize],
-    new_insns: &[BpfInsn],
-) -> anyhow::Result<()> {
-    remap_btf_records_for_len(
-        label,
-        kind,
-        records,
-        addr_map,
-        new_insns.len(),
-        Some(new_insns),
-    )
-}
-
-fn remap_btf_records_for_len(
-    label: &str,
-    kind: BtfRecordKind,
-    records: Option<&mut BtfInfoRecords>,
-    addr_map: &[usize],
-    new_len: usize,
-    new_insns: Option<&[BpfInsn]>,
-) -> anyhow::Result<()> {
-    let Some(records) = records else {
-        return Ok(());
-    };
-    if records.bytes.is_empty() {
-        return Ok(());
-    }
-    if records.rec_size < std::mem::size_of::<u32>() as u32 {
-        anyhow::bail!(
-            "{label} rec_size {} is too small to hold insn_off",
-            records.rec_size
-        );
-    }
-    let rec_size = records.rec_size as usize;
-    if !records.bytes.len().is_multiple_of(rec_size) {
-        anyhow::bail!(
-            "{label} byte length {} is not a multiple of rec_size {}",
-            records.bytes.len(),
-            records.rec_size
-        );
-    }
-
-    let mut remapped = Vec::with_capacity(records.bytes.len());
-    let mut previous_new_pc = None;
-
-    for record in records.bytes.chunks(rec_size) {
-        let old_pc =
-            u32::from_le_bytes(record[..4].try_into().expect("record has insn_off")) as usize;
-        let Some(new_pc) = remapped_pc(label, kind, old_pc, addr_map, new_len)? else {
-            continue;
-        };
-        if kind == BtfRecordKind::Line
-            && new_insns.is_some_and(|insns| !valid_line_info_pc(insns, new_pc))
-        {
-            continue;
-        };
-        if let Some(previous) = previous_new_pc {
-            if new_pc < previous {
-                anyhow::bail!(
-                    "{label} remap produced non-increasing insn_off {new_pc} after {previous}"
-                );
-            }
-            if new_pc == previous {
-                if kind == BtfRecordKind::Line {
-                    continue;
-                }
-                anyhow::bail!(
-                    "{label} remap produced non-increasing insn_off {new_pc} after {previous}"
-                );
-            }
-        }
-
-        let new_pc: u32 = new_pc
-            .try_into()
-            .map_err(|_| anyhow::anyhow!("{label} remapped insn_off does not fit u32"))?;
-        remapped.extend_from_slice(record);
-        let start = remapped.len() - rec_size;
-        remapped[start..start + 4].copy_from_slice(&new_pc.to_le_bytes());
-        previous_new_pc = Some(new_pc as usize);
-    }
-
-    records.bytes = remapped;
-    Ok(())
-}
-
-fn valid_line_info_pc(insns: &[BpfInsn], pc: usize) -> bool {
-    insns.get(pc).is_some_and(|insn| insn.code != 0)
-}
-
-fn remapped_pc(
-    label: &str,
-    kind: BtfRecordKind,
-    old_pc: usize,
-    addr_map: &[usize],
-    new_len: usize,
-) -> anyhow::Result<Option<usize>> {
-    let old_len = addr_map
-        .len()
-        .checked_sub(1)
-        .ok_or_else(|| anyhow::anyhow!("{label} remap address map is empty"))?;
-    if old_pc >= old_len {
-        if kind == BtfRecordKind::Line {
-            return Ok(None);
-        }
-        anyhow::bail!("{label} insn_off {old_pc} is outside old instruction length {old_len}");
-    }
-    let new_pc = addr_map[old_pc];
-    if new_pc >= new_len {
-        return Ok(None);
-    }
-    if kind == BtfRecordKind::Func {
-        return Ok(Some(new_pc));
-    }
-    let next_pc = addr_map[old_pc + 1];
-    if next_pc < new_pc {
-        anyhow::bail!(
-            "{label} remap address map is non-monotonic at old pc {old_pc}: {new_pc} -> {next_pc}"
-        );
-    }
-    Ok((next_pc > new_pc).then_some(new_pc))
-}
-
-pub fn remap_kinsn_btf_metadata(
-    program: &mut BpfProgram,
-    registry: &KinsnRegistry,
-) -> anyhow::Result<()> {
-    let proof_subprog_starts = kinsn_proof_subprog_starts(&program.insns, registry)?;
-    rewrite_func_info_to_subprog_layout(program.func_info.as_mut(), &proof_subprog_starts)?;
-
-    if let Some(records) = program.line_info.as_mut() {
-        records.bytes.clear();
-    }
-    Ok(())
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-struct KinsnProofRegion {
-    sidecar_pc: usize,
-    call_pc: usize,
-    proof_len: usize,
-}
-
-fn kinsn_proof_subprog_starts(
-    insns: &[BpfInsn],
-    registry: &KinsnRegistry,
-) -> anyhow::Result<Vec<usize>> {
-    let mut starts = kinsn_candidate_subprog_starts(insns)?;
-    let regions = collect_kinsn_proof_regions(insns, registry)?;
-
-    for region in regions.iter().rev() {
-        if starts.contains(&region.call_pc) {
-            anyhow::bail!(
-                "kinsn call at pc {} starts a subprogram and cannot use pc {} as sidecar",
-                region.call_pc,
-                region.sidecar_pc
-            );
-        }
-        let delta = region.proof_len as isize - 2;
-        if delta == 0 {
-            continue;
-        }
-        for start in &mut starts {
-            if *start <= region.sidecar_pc {
-                continue;
-            }
-            *start = if delta > 0 {
-                start.checked_add(delta as usize).ok_or_else(|| {
-                    anyhow::anyhow!("kinsn proof subprog offset overflow at pc {start}")
-                })?
-            } else {
-                start.checked_sub((-delta) as usize).ok_or_else(|| {
-                    anyhow::anyhow!("kinsn proof subprog offset underflow at pc {start}")
-                })?
-            };
-        }
-    }
-
-    Ok(starts)
-}
-
-fn collect_kinsn_proof_regions(
-    insns: &[BpfInsn],
-    registry: &KinsnRegistry,
-) -> anyhow::Result<Vec<KinsnProofRegion>> {
-    let mut regions = Vec::new();
+fn kinsn_candidate_subprog_starts(insns: &[BpfInsn]) -> anyhow::Result<Vec<usize>> {
+    let mut starts = vec![0usize];
     let mut pc = 0usize;
     while pc < insns.len() {
-        if pc + 1 < insns.len()
-            && insns[pc].is_kinsn_sidecar()
-            && insns[pc + 1].is_call()
-            && insns[pc + 1].src_reg() == BPF_PSEUDO_KINSN_CALL
+        let insn = &insns[pc];
+        if (insn.is_ldimm64() && insn.src_reg() == BPF_PSEUDO_FUNC)
+            || (insn.is_call() && insn.src_reg() == BPF_PSEUDO_CALL)
         {
-            let payload = insns[pc].sidecar_payload().to_le_bytes();
-            let btf_id = insns[pc + 1].imm;
-            let call_off = insns[pc + 1].off;
-            let proof_len = kinsn_proof_len(registry, btf_id, call_off, &payload)?;
-            regions.push(KinsnProofRegion {
-                sidecar_pc: pc,
-                call_pc: pc + 1,
-                proof_len,
-            });
-            pc += 2;
-            continue;
+            if let Some(target) = relative_branch_target_pc(pc, i64::from(insn.imm)) {
+                if target < insns.len() {
+                    starts.push(target);
+                }
+            }
         }
-
-        if insns[pc].is_kinsn_sidecar() {
-            anyhow::bail!("kinsn sidecar at pc {pc} is not followed by a kinsn call");
-        }
-        if insns[pc].is_call() && insns[pc].src_reg() == BPF_PSEUDO_KINSN_CALL {
-            anyhow::bail!("kinsn call at pc {pc} is missing its packed sidecar");
-        }
-
-        pc += 1;
+        pc += insn_width(insn);
     }
 
-    Ok(regions)
-}
-
-fn kinsn_proof_len(
-    registry: &KinsnRegistry,
-    btf_id: i32,
-    call_off: i16,
-    payload: &[u8],
-) -> anyhow::Result<usize> {
-    let desc = registry.lookup_by_kinsn_call(btf_id, call_off)?;
-    let proof = (desc.decode_proof)(payload);
-    proof.proof_len().map_err(|err| {
-        anyhow::anyhow!(
-            "failed to decode proof region for {}: {err}",
-            desc.canonical_name
-        )
-    })
-}
-
-fn kinsn_candidate_subprog_starts(insns: &[BpfInsn]) -> anyhow::Result<Vec<usize>> {
-    let cfg = CFGAnalysis::run(&BpfProgram::new(insns.to_vec()));
-    let mut starts = Vec::with_capacity(cfg.subprogs.len());
-
-    for subprog in cfg.subprogs {
-        if subprog.start >= insns.len() {
-            anyhow::bail!(
-                "subprog start {} is outside candidate instruction length {}",
-                subprog.start,
-                insns.len()
-            );
-        }
-        starts.push(subprog.start);
-    }
-
+    starts.sort_unstable();
+    starts.dedup();
     if starts.is_empty() {
         starts.push(0);
     }
@@ -486,48 +230,6 @@ fn kinsn_candidate_subprog_starts(insns: &[BpfInsn]) -> anyhow::Result<Vec<usize
         }
     }
     Ok(starts)
-}
-
-fn rewrite_func_info_to_subprog_layout(
-    records: Option<&mut BtfInfoRecords>,
-    subprog_starts: &[usize],
-) -> anyhow::Result<()> {
-    let Some(records) = records else {
-        return Ok(());
-    };
-    if records.bytes.is_empty() {
-        return Ok(());
-    }
-    if records.rec_size < std::mem::size_of::<u32>() as u32 {
-        anyhow::bail!(
-            "func_info rec_size {} is too small to hold insn_off",
-            records.rec_size
-        );
-    }
-    let rec_size = records.rec_size as usize;
-    if !records.bytes.len().is_multiple_of(rec_size) {
-        anyhow::bail!(
-            "func_info byte length {} is not a multiple of rec_size {}",
-            records.bytes.len(),
-            records.rec_size
-        );
-    }
-    let record_count = records.bytes.len() / rec_size;
-    if record_count != subprog_starts.len() {
-        anyhow::bail!(
-            "func_info record count {} does not match subprog count {}",
-            record_count,
-            subprog_starts.len()
-        );
-    }
-
-    for (record, &pc) in records.bytes.chunks_mut(rec_size).zip(subprog_starts) {
-        let pc: u32 = pc
-            .try_into()
-            .map_err(|_| anyhow::anyhow!("func_info subprog insn_off does not fit u32"))?;
-        record[..4].copy_from_slice(&pc.to_le_bytes());
-    }
-    Ok(())
 }
 
 pub fn kinsn_replacement_subprog_skip_reason(
@@ -586,16 +288,12 @@ pub fn kinsn_replacement_subprog_skip_reason(
 
 // ── Program IR ──────────────────────────────────────────────────────
 
-/// BPF program IR — linear instruction stream + per-insn annotations + metadata.
-///
-/// This is the core data structure operated on by all passes. Transform passes
-/// modify `insns`; analysis passes populate `annotations` and the analysis cache.
+/// Linear BPF program view used by map snapshot helpers.
+#[cfg(test)]
 #[derive(Clone)]
 pub struct BpfProgram {
-    /// Instruction stream (mutable — transform passes modify this).
+    /// Instruction stream.
     pub insns: Vec<BpfInsn>,
-    /// Per-insn annotations (length synchronized with insns).
-    pub annotations: Vec<InsnAnnotation>,
     /// Map IDs referenced by this program, in the kernel's `used_maps` order.
     /// This metadata lets analyses resolve pseudo-map references found in the
     /// original bytecode back to live kernel map objects.
@@ -603,16 +301,8 @@ pub struct BpfProgram {
     /// Stable `old_fd -> map_id` bindings captured from the original program
     /// before any transform removes or reorders pseudo-map loads.
     pub map_fd_bindings: HashMap<i32, u32>,
-    /// Program-level branch miss rate from PMU hardware counters.
-    /// Set by `inject_profiling` when PMU data is available.
-    /// Consumed by BranchFlipPass to gate optimization.
-    pub branch_miss_rate: Option<f64>,
     /// Parsed `log_level=2` verifier state snapshots for the original program.
     pub verifier_states: Arc<[VerifierInsn]>,
-    /// Optional raw func_info records for offline metadata remapping.
-    pub func_info: Option<BtfInfoRecords>,
-    /// Optional raw line_info records for offline metadata remapping.
-    pub line_info: Option<BtfInfoRecords>,
     /// Pre-loaded map value snapshot: (map_id, key_bytes) -> value_bytes.
     /// Used by offline snapshot callers and unit tests.
     pub map_values: HashMap<(u32, Vec<u8>), Vec<u8>>,
@@ -679,6 +369,7 @@ impl CompressedMapValues {
 }
 
 /// Provider for resolving map metadata and values.
+#[cfg(test)]
 pub trait MapProvider: Send + Sync + std::fmt::Debug {
     fn map_info(
         &self,
@@ -730,9 +421,11 @@ impl fmt::Display for MapLookupError {
 impl std::error::Error for MapLookupError {}
 
 /// Snapshot-backed map provider used by offline snapshots.
+#[cfg(test)]
 #[derive(Clone, Debug, Default)]
 pub struct SnapshotMapProvider;
 
+#[cfg(test)]
 impl MapProvider for SnapshotMapProvider {
     fn map_info(
         &self,
@@ -838,19 +531,15 @@ fn hex_bytes(bytes: &[u8]) -> String {
     out
 }
 
+#[cfg(test)]
 impl BpfProgram {
-    /// Create from raw instructions. Annotations are default-initialized.
+    /// Create from raw instructions.
     pub fn new(insns: Vec<BpfInsn>) -> Self {
-        let len = insns.len();
         Self {
             insns,
-            annotations: vec![InsnAnnotation::default(); len],
             map_ids: Vec::new(),
             map_fd_bindings: HashMap::new(),
-            branch_miss_rate: None,
             verifier_states: Arc::from([]),
-            func_info: None,
-            line_info: None,
             map_values: HashMap::new(),
             map_value_overlays: HashMap::new(),
             map_inner_map_ids: HashMap::new(),
@@ -861,80 +550,14 @@ impl BpfProgram {
         }
     }
 
-    /// Install a map provider for specialized test execution.
-    pub fn set_map_provider(&mut self, map_provider: Arc<dyn MapProvider>) {
-        self.map_provider = map_provider;
-    }
-
     /// Attach live-kernel map IDs to this program.
     pub fn set_map_ids(&mut self, map_ids: Vec<u32>) {
         self.map_fd_bindings = build_map_fd_bindings(&self.insns, &map_ids);
         self.map_ids = map_ids;
     }
-
-    /// Resynchronize annotations length after instruction stream changes.
-    /// Transform passes must call this after modifying insns.
-    pub fn sync_annotations(&mut self) {
-        self.annotations
-            .resize_with(self.insns.len(), InsnAnnotation::default);
-    }
-
-    /// Remap annotations using an address map (old_pc -> new_pc).
-    ///
-    /// After a transform pass changes instruction count, annotations from the
-    /// old program need to be remapped to their new positions. The addr_map
-    /// must have length >= old_annotations_len, where addr_map[old_pc] gives
-    /// the new_pc for that instruction. Annotations for old PCs that map to
-    /// valid new PCs are placed at the new location; all other positions get
-    /// default annotations.
-    pub fn remap_annotations(&mut self, addr_map: &[usize]) {
-        let new_len = self.insns.len();
-        let old_annotations = std::mem::take(&mut self.annotations);
-        let mut new_annotations = vec![InsnAnnotation::default(); new_len];
-
-        for (old_pc, ann) in old_annotations.into_iter().enumerate() {
-            // Skip default annotations (nothing to remap).
-            if ann.branch_profile.is_none() && ann.prefetch_profile.is_none() {
-                continue;
-            }
-            if old_pc < addr_map.len() {
-                let new_pc = addr_map[old_pc];
-                if new_pc < new_len {
-                    new_annotations[new_pc] = ann;
-                }
-            }
-        }
-
-        self.annotations = new_annotations;
-    }
-
-    /// Inject profiling data into annotations.
-    ///
-    /// For each PC in the profiling data that is within bounds, sets the
-    /// corresponding annotation's branch_profile.
-    pub fn inject_profiling(&mut self, data: &ProfilingData) {
-        for (&pc, profile) in &data.branch_profiles {
-            if pc < self.annotations.len() {
-                self.annotations[pc].branch_profile = Some(profile.clone());
-            }
-        }
-        for (&pc, profile) in &data.prefetch_profiles {
-            if pc < self.annotations.len() {
-                self.annotations[pc].prefetch_profile = Some(profile.clone());
-            }
-        }
-        // Propagate program-level PMU branch miss rate.
-        if data.branch_miss_rate.is_some() {
-            self.branch_miss_rate = data.branch_miss_rate;
-        }
-    }
-
-    /// Attach parsed verifier states to this program.
-    pub fn set_verifier_states(&mut self, states: Vec<VerifierInsn>) {
-        self.verifier_states = Arc::from(states);
-    }
 }
 
+#[cfg(test)]
 pub fn build_map_fd_bindings(insns: &[BpfInsn], map_ids: &[u32]) -> HashMap<i32, u32> {
     let mut old_fd_to_map_id = HashMap::new();
     let mut unique_old_fds = Vec::new();
@@ -961,62 +584,6 @@ pub fn build_map_fd_bindings(insns: &[BpfInsn], map_ids: &[u32]) -> HashMap<i32,
     }
 
     old_fd_to_map_id
-}
-
-// ── Analysis trait ──────────────────────────────────────────────────
-
-/// Analysis pass trait. Each analysis produces a typed Result.
-///
-/// Analysis passes do not modify the instruction stream — they only read
-/// the program and produce analysis results. Results are stored in
-/// AnalysisCache and may be shared by multiple transform passes.
-pub trait Analysis: Send + Sync {
-    /// The concrete result type of this analysis.
-    type Result: Any + Send + Sync;
-
-    /// Run the analysis and return the result.
-    /// Receives an immutable reference to BpfProgram.
-    fn run(program: &BpfProgram) -> Self::Result;
-}
-
-/// Analysis result cache — indexed by TypeId, supports invalidation.
-///
-/// When a transform pass modifies the program, the PassManager calls
-/// `invalidate_all()` to clear the cache. The next pass that needs an
-/// analysis result triggers recomputation.
-pub struct AnalysisCache {
-    cache: HashMap<TypeId, Arc<dyn Any + Send + Sync>>,
-}
-
-impl Default for AnalysisCache {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl AnalysisCache {
-    pub fn new() -> Self {
-        Self {
-            cache: HashMap::new(),
-        }
-    }
-
-    /// Get analysis result. If not cached, run the analysis and cache it.
-    pub fn get<A: Analysis + 'static>(&mut self, program: &BpfProgram) -> Arc<A::Result> {
-        let type_id = TypeId::of::<A::Result>();
-        if let Some(cached) = self.cache.get(&type_id) {
-            return Arc::downcast::<A::Result>(Arc::clone(cached))
-                .expect("analysis cache type id matched but downcast failed");
-        }
-        let result = Arc::new(A::run(program));
-        self.cache.insert(type_id, result.clone());
-        result
-    }
-
-    /// Invalidate all cached results (called after a transform pass modifies the program).
-    pub fn invalidate_all(&mut self) {
-        self.cache.clear();
-    }
 }
 
 // ── BpfPass trait ───────────────────────────────────────────────────
@@ -1053,13 +620,6 @@ impl PassResult {
             ..Self::unchanged()
         }
     }
-
-    pub fn skipped_with_diagnostics(reason: SkipReason, diagnostics: Vec<String>) -> Self {
-        Self {
-            diagnostics,
-            ..Self::skipped(reason)
-        }
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -1087,7 +647,6 @@ pub enum PassCategory {
 /// Transform pass trait.
 ///
 /// Each optimization is a pass: scan the program, find rewrite sites, apply transforms.
-/// Passes can read analysis results through AnalysisCache.
 pub trait BpfPass: Send + Sync {
     /// Pass name.
     fn name(&self) -> &str;
@@ -1101,22 +660,16 @@ pub trait BpfPass: Send + Sync {
     /// Execute the pass.
     ///
     /// - `program`: mutable reference — pass may modify the instruction stream
-    /// - `analyses`: analysis cache — pass may obtain analysis results
     /// - `ctx`: platform context (kfunc availability, CPU features, etc.)
     ///
     /// Returns PassResult describing what was done.
-    fn run(
-        &self,
-        program: &mut BpfProgram,
-        analyses: &mut AnalysisCache,
-        ctx: &PassContext,
-    ) -> anyhow::Result<PassResult>;
+    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult>;
 }
 
 /// Pass execution context — contains platform info and external configuration.
 ///
 /// These values are invariant for the duration of a pipeline execution.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct PassContext {
     /// Available kinsn targets and static metadata.
     pub kinsn_registry: KinsnRegistry,
@@ -1128,6 +681,30 @@ pub struct PassContext {
     /// Used by passes to apply program-type-specific safety filters.
     /// 0 = unspecified (conservative behavior applies).
     pub prog_type: u32,
+    /// Parsed verifier state snapshots consumed at the BBProgram lift boundary.
+    pub verifier_states: Arc<[VerifierInsn]>,
+    /// Per-original-PC annotations used by profile-guided passes.
+    pub annotations: Vec<InsnAnnotation>,
+    /// Program-level branch miss rate from real PMU data.
+    pub branch_miss_rate: Option<f64>,
+    /// Program map IDs in kernel `used_maps` order.
+    pub map_ids: Vec<u32>,
+    /// Pre-loaded map metadata side inputs.
+    pub map_metadata: HashMap<u32, MapMetadata>,
+    /// Pre-loaded map value snapshots.
+    pub map_values: HashMap<(u32, Vec<u8>), Vec<u8>>,
+    /// Compressed map value overlays.
+    pub map_value_overlays: HashMap<u32, CompressedMapValues>,
+    /// Map-in-map outer entries: (outer map id, key bytes) -> inner map id.
+    pub map_inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
+    /// Map snapshots intentionally skipped by size.
+    pub map_snapshots_skipped_by_size: HashSet<u32>,
+    /// Explicit map_inline key hints.
+    pub map_inline_hints: Vec<MapInlineHint>,
+    /// Raw func_info records for BBProgram/lower remapping.
+    pub func_info: Option<BtfInfoRecords>,
+    /// Raw line_info records for BBProgram/lower remapping.
+    pub line_info: Option<BtfInfoRecords>,
 }
 
 /// Available kinsn targets resolved at runtime.
@@ -1349,10 +926,7 @@ pub struct PipelineResult {
     pub pass_results: Vec<PassResult>,
 }
 
-/// PassManager — manages and executes the pass pipeline.
-///
-/// Similar to LLVM's FunctionPassManager: executes passes in order,
-/// manages analysis cache invalidation, and collects statistics.
+/// Thin runner for an explicit pass pipeline.
 pub struct PassManager {
     passes: Vec<Box<dyn BpfPass>>,
 }
@@ -1415,16 +989,11 @@ impl PassManager {
 
     /// Execute the entire pipeline.
     ///
-    /// For each pass:
-    /// 1. Ensure required analyses are computed
-    /// 2. Run the pass
-    /// 3. If the pass modified the program, invalidate the analysis cache
     pub fn run(
         &self,
-        program: &mut BpfProgram,
+        program: &mut BBProgram,
         ctx: &PassContext,
     ) -> anyhow::Result<PipelineResult> {
-        let mut cache = AnalysisCache::new();
         let mut pass_names = Vec::new();
         let mut pass_results = Vec::new();
         for pass in &self.passes {
@@ -1433,7 +1002,7 @@ impl PassManager {
                 continue;
             }
 
-            let result = self.run_single_pass(pass, program, &mut cache, ctx)?;
+            let result = self.run_single_pass(pass, program, ctx)?;
             pass_names.push(pass.name().to_string());
             pass_results.push(result);
         }
@@ -1447,24 +1016,21 @@ impl PassManager {
     fn run_single_pass(
         &self,
         pass: &dyn BpfPass,
-        program: &mut BpfProgram,
-        cache: &mut AnalysisCache,
+        program: &mut BBProgram,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         if let Some(skip) = required_kinsn_skip(pass.name(), ctx) {
             return Ok(PassResult::skipped(skip));
         }
 
-        let before_insns = program.insns.clone();
-        let insns_before = program.insns.len();
-        let mut result = pass.run(program, cache, ctx)?;
+        let insns_before = program.program_linear_view()?.insns.len();
+        let mut result = pass.run(program, ctx)?;
+        let insns_after = program.program_linear_view()?.insns.len();
         result.insns_before = insns_before;
-        result.insns_after = program.insns.len();
+        result.insns_after = insns_after;
 
-        if program.insns != before_insns {
-            cache.invalidate_all();
-            program.verifier_states = Arc::from([]);
-            program.sync_annotations();
+        if insns_after != insns_before {
+            program.invalidate_oracle();
         }
 
         Ok(result)
@@ -1514,17 +1080,6 @@ fn validate_policy_pass_names(
 
 // ── Helper: default PassContext for testing ──────────────────────────
 
-impl Default for PassContext {
-    fn default() -> Self {
-        Self {
-            kinsn_registry: KinsnRegistry::default(),
-            platform: PlatformCapabilities::default(),
-            policy: PolicyConfig::default(),
-            prog_type: 0,
-        }
-    }
-}
-
 impl PassContext {
     /// Create a minimal PassContext suitable for testing.
     /// All kinsn targets unavailable, no special CPU features.
@@ -1534,6 +1089,18 @@ impl PassContext {
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig::default(),
             prog_type: 0,
+            verifier_states: Arc::from([]),
+            annotations: Vec::new(),
+            branch_miss_rate: None,
+            map_ids: Vec::new(),
+            map_metadata: HashMap::new(),
+            map_values: HashMap::new(),
+            map_value_overlays: HashMap::new(),
+            map_inner_map_ids: HashMap::new(),
+            map_snapshots_skipped_by_size: HashSet::new(),
+            map_inline_hints: Vec::new(),
+            func_info: None,
+            line_info: None,
         }
     }
 
@@ -1542,9 +1109,3 @@ impl PassContext {
         self.platform.has_cmov || self.kinsn_registry.is_target_available("bpf_select64")
     }
 }
-
-// ── Tests ───────────────────────────────────────────────────────────
-
-#[cfg(test)]
-#[path = "pass_tests.rs"]
-mod tests;

@@ -3,11 +3,9 @@
 
 use std::collections::HashSet;
 
-use crate::analysis::{insn_use_def_set, iter_sites, BranchTargetAnalysis, LivenessAnalysis};
+use crate::analysis::{insn_use_def_set, BBProgram, BlockId, DiamondPattern, InsnSite, Terminator};
 use crate::insn::*;
 use crate::pass::*;
-
-use crate::rewrite::{BtfRemapPolicy, RewritePlan};
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     canonical_name: "bpf_select64",
     aliases: &["select64"],
@@ -62,6 +60,7 @@ pub struct CondSelectPass;
 /// A detected cond-select site.
 pub(super) struct CondSelectSite {
     pub(super) start_pc: usize,
+    start_site: InsnSite,
     pub(super) old_len: usize,
     pub(super) cond_reg: u8,
     pub(super) dst_reg: u8,
@@ -92,6 +91,16 @@ struct CondSelectLowering {
     cond_reg: u8,
 }
 
+#[derive(Clone, Copy)]
+struct CondBranchShape {
+    block: BlockId,
+    site: InsnSite,
+    pc: usize,
+    cond: BpfInsn,
+    taken: BlockId,
+    fallthrough: BlockId,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(super) enum CondSelectValue {
     Reg(u8),
@@ -100,223 +109,364 @@ pub(super) enum CondSelectValue {
     Imm32(i32),
 }
 
-impl CondSelectPass {
-    /// Analyze the program and return all detected cond-select sites.
-    ///
-    /// This is the pure detection phase. Each returned `CondSelectSite`
-    /// describes a JCC+MOV pattern that could be lowered to a select kfunc.
-    pub(super) fn analyze(&self, insns: &[BpfInsn]) -> Vec<CondSelectSite> {
-        scan_cond_select_sites(insns)
-    }
-}
-
 impl BpfPass for CondSelectPass {
     fn name(&self) -> &str {
         "cond_select"
     }
-    fn run(
-        &self,
-        program: &mut BpfProgram,
-        analyses: &mut AnalysisCache,
-        ctx: &PassContext,
-    ) -> anyhow::Result<PassResult> {
-        // Check if the target can lower bpf_select64 to branchless select
-        // (CMOV on x86, CSEL on ARM64).
-        if !ctx.has_branchless_select() {
-            return Ok(PassResult::skipped(SkipReason {
-                pc: 0,
-                reason: "platform lacks branchless select support".into(),
-            }));
-        }
+    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        run_on_bbprogram(program, ctx)
+    }
+}
 
-        let bt = analyses.get::<BranchTargetAnalysis>(program);
-        let liveness = analyses.get::<LivenessAnalysis>(program);
+pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+    // Check if the target can lower bpf_select64 to branchless select
+    // (CMOV on x86, CSEL on ARM64).
+    if !ctx.has_branchless_select() {
+        return Ok(PassResult::skipped(SkipReason {
+            pc: 0,
+            reason: "platform lacks branchless select support".into(),
+        }));
+    }
 
-        let sites = self.analyze(&program.insns);
-        let btf_id = ctx.kinsn_registry.btf_id_for_target_name("bpf_select64")?;
-        let mut safe_sites: Vec<SafeCondSelectSite> = Vec::new();
-        let mut skipped = Vec::new();
+    let sites = scan_cond_select_sites(prog)?;
+    let btf_id = ctx.kinsn_registry.btf_id_for_target_name("bpf_select64")?;
+    let kfunc_off = ctx
+        .kinsn_registry
+        .call_off_for_target_name("bpf_select64")?;
+    let mut safe_sites: Vec<SafeCondSelectSite> = Vec::new();
+    let mut skipped = Vec::new();
 
-        for site in sites {
-            let Some(live_after) = liveness.live_out.get(site.start_pc + site.old_len - 1) else {
-                skipped.push(SkipReason {
-                    pc: site.start_pc,
-                    reason: "missing liveness for cond_select site".into(),
-                });
-                continue;
-            };
+    for site in sites {
+        let live_after = prog.live_out_current_pc(site.start_pc + site.old_len - 1)?;
 
-            let lowering = match build_lowering(&site, live_after) {
-                Ok(lowering) => lowering,
-                Err(reason) => {
-                    skipped.push(SkipReason {
-                        pc: site.start_pc,
-                        reason,
-                    });
-                    continue;
-                }
-            };
-
-            // Safety check 1: interior branch target (excluding the JCC's own target).
-            // For Pattern C (3-insn), the JCC is at start_pc+1, not start_pc.
-            let jcc_pc = if site.old_len == 3 {
-                site.start_pc + 1
-            } else {
-                site.start_pc
-            };
-            let jcc = &program.insns[jcc_pc];
-            let Some(own_target) = jcc.branch_target_pc(jcc_pc) else {
-                skipped.push(SkipReason {
-                    pc: site.start_pc,
-                    reason: "invalid conditional branch target".into(),
-                });
-                continue;
-            };
-            let has_interior = (site.start_pc + 1..site.start_pc + site.old_len)
-                .any(|pc| pc < bt.is_target.len() && bt.is_target[pc] && pc != own_target);
-            if has_interior {
-                skipped.push(SkipReason {
-                    pc: site.start_pc,
-                    reason: "interior branch target".into(),
-                });
-                continue;
-            }
-
-            if let Some(reason) = kinsn_replacement_subprog_skip_reason(
-                &program.insns,
-                site.start_pc,
-                site.old_len,
-                lowering.prefix.len() + 2,
-            )? {
+        let lowering = match build_lowering(&site, &live_after) {
+            Ok(lowering) => lowering,
+            Err(reason) => {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
                     reason,
                 });
                 continue;
             }
+        };
 
-            safe_sites.push(SafeCondSelectSite { site, lowering });
-        }
-
-        if safe_sites.is_empty() {
-            return Ok(PassResult {
-                sites_skipped: skipped,
-                ..PassResult::unchanged()
+        if let Some(reason) = prog.kinsn_replacement_subprog_skip_reason(
+            site.start_site.block,
+            site.start_site.idx,
+            site.old_len,
+            lowering.prefix.len() + 2,
+        )? {
+            skipped.push(SkipReason {
+                pc: site.start_pc,
+                reason,
             });
+            continue;
         }
 
-        let kfunc_off = ctx
-            .kinsn_registry
-            .call_off_for_target_name("bpf_select64")?;
-
-        let mut plan = RewritePlan::new();
-        for safe_site in &safe_sites {
-            let site = &safe_site.site;
-            let payload = BpfInsn::pack_u4(site.dst_reg, 0)
-                | BpfInsn::pack_u4(safe_site.lowering.a_reg, 4)
-                | BpfInsn::pack_u4(safe_site.lowering.b_reg, 8)
-                | BpfInsn::pack_u4(safe_site.lowering.cond_reg, 12);
-            let kinsn_call = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
-            let mut replacement =
-                Vec::with_capacity(safe_site.lowering.prefix.len() + kinsn_call.len());
-            replacement.extend_from_slice(&safe_site.lowering.prefix);
-            replacement.extend_from_slice(&kinsn_call);
-            plan.replace_range(site.start_pc, site.old_len, replacement)?;
+        if let Err(err) = validate_diamond_site(prog, &site) {
+            skipped.push(SkipReason {
+                pc: site.start_pc,
+                reason: err.to_string(),
+            });
+            continue;
         }
 
-        let mut result = plan.commit(program, BtfRemapPolicy::RemapKinsn(&ctx.kinsn_registry))?;
-        result.sites_applied = safe_sites.len();
-        result.sites_skipped = skipped;
-        Ok(result)
+        safe_sites.push(SafeCondSelectSite { site, lowering });
     }
-}
 
-fn scan_cond_select_sites(insns: &[BpfInsn]) -> Vec<CondSelectSite> {
-    iter_sites(insns, |insns, pc| {
-        try_match_cond_select(insns, pc).map(|site| site.old_len)
+    if safe_sites.is_empty() {
+        return Ok(PassResult {
+            sites_skipped: skipped,
+            ..PassResult::unchanged()
+        });
+    }
+
+    safe_sites.sort_by_key(|safe| safe.site.start_pc);
+    for safe_site in safe_sites.iter().rev() {
+        let site = &safe_site.site;
+        let payload = BpfInsn::pack_u4(site.dst_reg, 0)
+            | BpfInsn::pack_u4(safe_site.lowering.a_reg, 4)
+            | BpfInsn::pack_u4(safe_site.lowering.b_reg, 8)
+            | BpfInsn::pack_u4(safe_site.lowering.cond_reg, 12);
+        let kinsn_call = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
+        let mut replacement =
+            Vec::with_capacity(safe_site.lowering.prefix.len() + kinsn_call.len());
+        replacement.extend_from_slice(&safe_site.lowering.prefix);
+        replacement.extend_from_slice(&kinsn_call);
+        let pattern = diamond_pattern_for_site(prog, site)?;
+        prog.replace_diamond_with_insns(pattern, replacement)?;
+    }
+
+    Ok(PassResult {
+        sites_applied: safe_sites.len(),
+        sites_skipped: skipped,
+        ..Default::default()
     })
-    .into_iter()
-    .filter_map(|site| try_match_cond_select(insns, site.pc))
-    .collect()
 }
 
-fn try_match_cond_select(insns: &[BpfInsn], pc: usize) -> Option<CondSelectSite> {
-    let n = insns.len();
+fn validate_diamond_site(prog: &BBProgram, site: &CondSelectSite) -> anyhow::Result<()> {
+    let mut trial = prog.clone();
+    let pattern = diamond_pattern_for_site(&mut trial, site)?;
+    trial.replace_diamond_with_insns(pattern, vec![BpfInsn::nop()])?;
+    Ok(())
+}
 
-    // Pattern A: 4-insn diamond
-    //   Jcc +2 ; MOV dst, false_val ; JA +1 ; MOV dst, true_val
-    if pc + 3 < n {
-        let jcc = &insns[pc];
-        if jcc.is_cond_jmp() && jcc.off == 2 {
-            let mov_false = &insns[pc + 1];
-            let ja = &insns[pc + 2];
-            let mov_true = &insns[pc + 3];
+fn diamond_pattern_for_site(
+    prog: &mut BBProgram,
+    site: &CondSelectSite,
+) -> anyhow::Result<DiamondPattern> {
+    match site.old_len {
+        4 => pattern_a_for_site(prog, site),
+        3 => pattern_c_for_site(prog, site),
+        old_len => anyhow::bail!("unsupported cond_select site length {old_len}"),
+    }
+}
 
-            if is_select_mov(mov_false) && ja.is_ja() && ja.off == 1 && is_select_mov(mov_true) {
-                let dst_f = mov_false.dst_reg();
-                let dst_t = mov_true.dst_reg();
-                if dst_f == dst_t {
-                    return Some(CondSelectSite {
-                        start_pc: pc,
-                        old_len: 4,
-                        cond_reg: jcc.dst_reg(),
-                        dst_reg: dst_f,
-                        true_val: extract_mov_value(mov_true),
-                        false_val: extract_mov_value(mov_false),
-                        jcc_op: bpf_op(jcc.code),
-                        jcc_imm: jcc.imm,
-                        jcc_src: bpf_src(jcc.code),
-                        jcc_code: jcc.code,
-                        jcc_src_reg: jcc.src_reg(),
-                    });
-                }
-            }
+fn pattern_a_for_site(
+    prog: &mut BBProgram,
+    site: &CondSelectSite,
+) -> anyhow::Result<DiamondPattern> {
+    let mut jcc_site = site.start_site;
+    let block_len = prog.block(jcc_site.block)?.insns.len();
+    if jcc_site.idx != block_len {
+        anyhow::bail!(
+            "pattern A branch pc {} is not a block terminator",
+            site.start_pc
+        );
+    }
+    if block_len > 0 {
+        let (_, tail) = prog.split_block(jcc_site)?;
+        jcc_site = InsnSite {
+            block: tail,
+            idx: prog.block(tail)?.insns.len(),
+        };
+    }
+    let predecessor = jcc_site.block;
+    let Terminator::CondBranch {
+        taken, fallthrough, ..
+    } = prog.block(predecessor)?.terminator
+    else {
+        anyhow::bail!(
+            "pattern A predecessor {:?} is not a conditional branch",
+            predecessor
+        );
+    };
+    let join = common_successor(prog, taken, fallthrough)?;
+    Ok(DiamondPattern {
+        predecessor,
+        true_branch: taken,
+        false_branch: fallthrough,
+        join: Some(join),
+    })
+}
+
+fn pattern_c_for_site(
+    prog: &mut BBProgram,
+    site: &CondSelectSite,
+) -> anyhow::Result<DiamondPattern> {
+    let start_site = site.start_site;
+    let predecessor = if start_site.idx == 0 {
+        start_site.block
+    } else {
+        prog.split_block(start_site)?.1
+    };
+    let Terminator::CondBranch {
+        taken, fallthrough, ..
+    } = prog.block(predecessor)?.terminator
+    else {
+        anyhow::bail!(
+            "pattern C predecessor {:?} is not a conditional branch",
+            predecessor
+        );
+    };
+    Ok(DiamondPattern {
+        predecessor,
+        true_branch: predecessor,
+        false_branch: fallthrough,
+        join: Some(taken),
+    })
+}
+
+fn common_successor(prog: &BBProgram, a: BlockId, b: BlockId) -> anyhow::Result<BlockId> {
+    prog.successors(a)
+        .iter()
+        .copied()
+        .find(|succ| prog.successors(b).contains(succ))
+        .ok_or_else(|| anyhow::anyhow!("blocks {:?} and {:?} do not share a join", a, b))
+}
+
+fn scan_cond_select_sites(prog: &BBProgram) -> anyhow::Result<Vec<CondSelectSite>> {
+    let site_pcs = prog.current_site_pcs()?;
+    let mut sites = Vec::new();
+    for block in prog.blocks() {
+        let Terminator::CondBranch {
+            cond,
+            taken,
+            fallthrough,
+        } = block.terminator
+        else {
+            continue;
+        };
+        let branch_site = InsnSite {
+            block: block.id,
+            idx: block.insns.len(),
+        };
+        let branch_pc = *site_pcs
+            .get(&branch_site)
+            .ok_or_else(|| anyhow::anyhow!("missing current pc for {:?}", branch_site))?;
+        let shape = CondBranchShape {
+            block: block.id,
+            site: branch_site,
+            pc: branch_pc,
+            cond,
+            taken,
+            fallthrough,
+        };
+        if let Some(site) = try_match_pattern_a(prog, &site_pcs, shape)? {
+            sites.push(site);
+        }
+        if let Some(site) = try_match_pattern_c(prog, &site_pcs, shape)? {
+            sites.push(site);
         }
     }
+    sites.sort_by_key(|site| site.start_pc);
+    Ok(sites)
+}
 
-    // Pattern C: 3-insn short conditional MOV (clang's common pattern)
-    //   MOV dst, true_val ; Jcc +1 ; MOV dst, false_val
-    //
-    // Semantics:
-    //   - dst is set to true_val unconditionally
-    //   - If Jcc taken (condition true): skip false MOV, dst = true_val
-    //   - If Jcc not taken (condition false): execute false MOV, dst = false_val
-    //
-    // The site starts at the MOV before the Jcc (pc-1 relative to the Jcc).
-    // We check pc as potential Jcc position.
-    if pc >= 1 && pc + 1 < n {
-        let mov_true = &insns[pc - 1];
-        let jcc = &insns[pc];
-        let mov_false = &insns[pc + 1];
-
-        if jcc.is_cond_jmp() && jcc.off == 1 && is_select_mov(mov_true) && is_select_mov(mov_false)
-        {
-            let dst_t = mov_true.dst_reg();
-            let dst_f = mov_false.dst_reg();
-            if dst_t == dst_f {
-                let mov_true_dst = mov_true.dst_reg();
-                let cond_clobbered = insn_use_def_set(jcc).uses.contains(&mov_true_dst);
-
-                if !cond_clobbered {
-                    return Some(CondSelectSite {
-                        start_pc: pc - 1,
-                        old_len: 3,
-                        cond_reg: jcc.dst_reg(),
-                        dst_reg: dst_t,
-                        true_val: extract_mov_value(mov_true),
-                        false_val: extract_mov_value(mov_false),
-                        jcc_op: bpf_op(jcc.code),
-                        jcc_imm: jcc.imm,
-                        jcc_src: bpf_src(jcc.code),
-                        jcc_code: jcc.code,
-                        jcc_src_reg: jcc.src_reg(),
-                    });
-                }
-            }
-        }
+fn try_match_pattern_a(
+    prog: &BBProgram,
+    site_pcs: &std::collections::BTreeMap<InsnSite, usize>,
+    shape: CondBranchShape,
+) -> anyhow::Result<Option<CondSelectSite>> {
+    let jcc = shape.cond;
+    if !jcc.is_cond_jmp() {
+        return Ok(None);
     }
+    let false_block = prog.block(shape.fallthrough)?;
+    let true_block = prog.block(shape.taken)?;
+    let Some(mov_false) = single_body_insn(false_block) else {
+        return Ok(None);
+    };
+    let Some(mov_true) = single_body_insn(true_block) else {
+        return Ok(None);
+    };
+    if !is_select_mov(mov_false) || !is_select_mov(mov_true) {
+        return Ok(None);
+    }
+    let Some(false_join) = single_successor(false_block) else {
+        return Ok(None);
+    };
+    let Some(true_join) = single_successor(true_block) else {
+        return Ok(None);
+    };
+    if false_join != true_join || mov_false.dst_reg() != mov_true.dst_reg() {
+        return Ok(None);
+    }
+    if prog.current_block_start_pc(shape.fallthrough)? != shape.pc + 1 {
+        return Ok(None);
+    }
+    let false_mov_site = InsnSite {
+        block: shape.fallthrough,
+        idx: 0,
+    };
+    let false_mov_pc = *site_pcs
+        .get(&false_mov_site)
+        .ok_or_else(|| anyhow::anyhow!("missing current pc for {:?}", false_mov_site))?;
+    if prog.current_block_start_pc(shape.taken)? != false_mov_pc + 2 {
+        return Ok(None);
+    }
+    if shape.block == shape.taken || shape.block == shape.fallthrough {
+        return Ok(None);
+    }
+    Ok(Some(CondSelectSite {
+        start_pc: shape.pc,
+        start_site: shape.site,
+        old_len: 4,
+        cond_reg: jcc.dst_reg(),
+        dst_reg: mov_false.dst_reg(),
+        true_val: extract_mov_value(mov_true),
+        false_val: extract_mov_value(mov_false),
+        jcc_op: bpf_op(jcc.code),
+        jcc_imm: jcc.imm,
+        jcc_src: bpf_src(jcc.code),
+        jcc_code: jcc.code,
+        jcc_src_reg: jcc.src_reg(),
+    }))
+}
 
-    None
+fn try_match_pattern_c(
+    prog: &BBProgram,
+    site_pcs: &std::collections::BTreeMap<InsnSite, usize>,
+    shape: CondBranchShape,
+) -> anyhow::Result<Option<CondSelectSite>> {
+    let jcc = shape.cond;
+    if !jcc.is_cond_jmp() {
+        return Ok(None);
+    }
+    let block = prog.block(shape.block)?;
+    let Some((mov_true_idx, mov_true)) = block
+        .insns
+        .len()
+        .checked_sub(1)
+        .map(|idx| (idx, &block.insns[idx]))
+    else {
+        return Ok(None);
+    };
+    let false_block = prog.block(shape.fallthrough)?;
+    let Some(mov_false) = single_body_insn(false_block) else {
+        return Ok(None);
+    };
+    if !is_select_mov(mov_true) || !is_select_mov(mov_false) {
+        return Ok(None);
+    }
+    if mov_true.dst_reg() != mov_false.dst_reg() {
+        return Ok(None);
+    }
+    let Some(false_join) = single_successor(false_block) else {
+        return Ok(None);
+    };
+    if false_join != shape.taken {
+        return Ok(None);
+    }
+    let mov_true_dst = mov_true.dst_reg();
+    if insn_use_def_set(&jcc).uses.contains(&mov_true_dst) {
+        return Ok(None);
+    }
+    let start_site = InsnSite {
+        block: shape.block,
+        idx: mov_true_idx,
+    };
+    let start_pc = *site_pcs
+        .get(&start_site)
+        .ok_or_else(|| anyhow::anyhow!("missing current pc for {:?}", start_site))?;
+    Ok(Some(CondSelectSite {
+        start_pc,
+        start_site,
+        old_len: 3,
+        cond_reg: jcc.dst_reg(),
+        dst_reg: mov_true.dst_reg(),
+        true_val: extract_mov_value(mov_true),
+        false_val: extract_mov_value(mov_false),
+        jcc_op: bpf_op(jcc.code),
+        jcc_imm: jcc.imm,
+        jcc_src: bpf_src(jcc.code),
+        jcc_code: jcc.code,
+        jcc_src_reg: jcc.src_reg(),
+    }))
+}
+
+fn single_body_insn(block: &crate::analysis::Block) -> Option<&BpfInsn> {
+    (block.insns.len() == 1).then(|| &block.insns[0])
+}
+
+fn single_successor(block: &crate::analysis::Block) -> Option<BlockId> {
+    match block.terminator {
+        Terminator::Fallthrough { next } | Terminator::Jump { target: next, .. } => Some(next),
+        Terminator::CondBranch { .. }
+        | Terminator::Call { .. }
+        | Terminator::Exit { .. }
+        | Terminator::End => None,
+    }
 }
 
 fn is_select_mov(insn: &BpfInsn) -> bool {

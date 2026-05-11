@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 //! Bulk-memory optimization pass.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
+use std::ops::Range;
 
 use crate::analysis::{
-    insn_use_def_set, BranchTargetAnalysis, BranchTargetResult, LivenessAnalysis, LivenessResult,
+    advance_reg_state as advance_simple_reg_state, block_slot_offset, insn_use_def_set,
+    site_current_pc, BBProgram, BlockId, InsnSite, SimpleRegValue, Terminator,
 };
 use crate::insn::*;
 use crate::pass::*;
-
-use crate::rewrite::{BtfRemapPolicy, RewritePlan};
 const MEMCPY_TARGET: &str = "bpf_bulk_memcpy";
 const MEMSET_TARGET: &str = "bpf_bulk_memset";
 const MIN_BULK_BYTES: usize = 32;
@@ -123,6 +123,39 @@ enum RegValue {
     Const(u64),
 }
 
+impl SimpleRegValue for RegValue {
+    fn unknown() -> Self {
+        Self::Unknown
+    }
+
+    fn const64(value: i64) -> Self {
+        Self::Const(value as u64)
+    }
+
+    fn const32(value: u32) -> Self {
+        Self::Const(u64::from(value))
+    }
+
+    fn mov32(value: Self) -> Self {
+        match value {
+            Self::Const(value) => Self::Const(u64::from(value as u32)),
+            Self::Unknown => Self::Unknown,
+        }
+    }
+
+    fn xor_self() -> Self {
+        Self::Const(0)
+    }
+
+    fn alu64_imm(_value: Self, _op: u8, _imm: i32) -> Self {
+        Self::Unknown
+    }
+
+    fn alu32_add_sub(_value: Self, _imm: i32, _is_add: bool) -> Self {
+        Self::Unknown
+    }
+}
+
 #[derive(Clone, Debug)]
 enum BulkSiteKind {
     Memcpy {
@@ -159,9 +192,17 @@ impl BulkSite {
     }
 }
 
+#[derive(Clone, Debug)]
+struct AppliedBulkSite {
+    block: BlockId,
+    start_slot: usize,
+    range: Range<usize>,
+    site: BulkSite,
+}
+
 #[derive(Default)]
 struct ScanResult {
-    sites: Vec<BulkSite>,
+    sites: Vec<AppliedBulkSite>,
     skips: Vec<SkipReason>,
 }
 
@@ -196,135 +237,175 @@ impl BpfPass for BulkMemoryPass {
     fn name(&self) -> &str {
         "bulk_memory"
     }
-    fn run(
-        &self,
-        program: &mut BpfProgram,
-        analyses: &mut AnalysisCache,
-        ctx: &PassContext,
-    ) -> anyhow::Result<PassResult> {
-        if program.insns.is_empty() {
-            return Ok(PassResult::unchanged());
-        }
-
-        let bt = analyses.get::<BranchTargetAnalysis>(program);
-        let liveness = analyses.get::<LivenessAnalysis>(program);
-
-        let scan = scan_sites(&program.insns, &bt, &liveness);
-        let mut skipped = scan.skips;
-
-        let mut safe_sites = Vec::new();
-        for site in scan.sites {
-            if let BulkSiteKind::Memcpy {
-                src_base, dst_base, ..
-            } = &site.kind
-            {
-                if src_base != dst_base {
-                    let src_stack = is_likely_stack_ptr(*src_base, site.start_pc, &program.insns);
-                    let dst_stack = is_likely_stack_ptr(*dst_base, site.start_pc, &program.insns);
-                    if src_stack == dst_stack {
-                        skipped.push(SkipReason {
-                            pc: site.start_pc,
-                            reason: format!(
-                                "different-base memcpy alias not provably safe (src r{src_base}, dst r{dst_base})"
-                            ),
-                        });
-                        continue;
-                    }
-                }
-            }
-
-            if let Some(reason) = kinsn_replacement_subprog_skip_reason(
-                &program.insns,
-                site.start_pc,
-                site.old_len,
-                site.replacement_len(),
-            )? {
-                skipped.push(SkipReason {
-                    pc: site.start_pc,
-                    reason,
-                });
-                continue;
-            }
-
-            safe_sites.push(site);
-        }
-
-        if safe_sites.is_empty() {
-            return Ok(PassResult {
-                sites_skipped: skipped,
-                ..PassResult::unchanged()
-            });
-        }
-
-        let mut plan = RewritePlan::new();
-        for site in &safe_sites {
-            plan.replace_range(
-                site.start_pc,
-                site.old_len,
-                emit_site_replacement(site, &ctx.kinsn_registry)?,
-            )?;
-        }
-
-        let mut result = plan.commit(program, BtfRemapPolicy::RemapKinsn(&ctx.kinsn_registry))?;
-        result.sites_applied = safe_sites.len();
-        result.sites_skipped = skipped;
-        Ok(result)
+    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        run_on_bbprogram(program, ctx)
     }
 }
 
-fn scan_sites(insns: &[BpfInsn], bt: &BranchTargetResult, liveness: &LivenessResult) -> ScanResult {
-    let mut scan = ScanResult::default();
-    let mut regs = [RegValue::Unknown; 11];
-    let mut pc = 0usize;
+pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+    if prog.blocks().all(|block| block.insns.is_empty()) {
+        return Ok(PassResult::unchanged());
+    }
 
-    while pc < insns.len() {
-        if pc > 0 && bt.is_target.get(pc).copied().unwrap_or(false) {
-            regs = [RegValue::Unknown; 11];
-        }
+    let scan = scan_sites(prog)?;
+    let mut skipped = scan.skips;
 
-        match try_match_memcpy_run_at(insns, pc, bt, liveness) {
-            MatchOutcome::Apply(site) => {
-                advance_reg_state_range(insns, pc, site.old_len, &mut regs);
-                pc += site.old_len;
-                scan.sites.push(site);
-                continue;
-            }
-            MatchOutcome::Skip { reason, advance } => {
-                let advance = advance.max(1);
-                advance_reg_state_range(insns, pc, advance, &mut regs);
-                scan.skips.push(SkipReason { pc, reason });
-                pc += advance;
-                continue;
-            }
-            MatchOutcome::NoMatch => {}
-        }
-
-        if let Some(site) = try_match_memset_run_at(insns, pc, bt, &regs) {
-            advance_reg_state_range(insns, pc, site.old_len, &mut regs);
-            pc += site.old_len;
-            scan.sites.push(site);
+    let mut safe_sites = Vec::new();
+    for site in scan.sites {
+        if let Some(reason) = prog.kinsn_replacement_subprog_skip_reason(
+            site.block,
+            site.start_slot,
+            site.site.old_len,
+            site.site.replacement_len(),
+        )? {
+            skipped.push(SkipReason {
+                pc: site.site.start_pc,
+                reason,
+            });
             continue;
         }
 
-        advance_reg_state(insns, pc, &mut regs);
-        pc += insn_width(&insns[pc]);
+        safe_sites.push(site);
     }
 
-    scan
+    if safe_sites.is_empty() {
+        return Ok(PassResult {
+            sites_skipped: skipped,
+            ..PassResult::unchanged()
+        });
+    }
+
+    for site in safe_sites.iter().rev() {
+        prog.replace_range(
+            site.block,
+            site.range.clone(),
+            emit_site_replacement(&site.site, &ctx.kinsn_registry)?,
+        )?;
+    }
+
+    Ok(PassResult {
+        sites_applied: safe_sites.len(),
+        sites_skipped: skipped,
+        ..Default::default()
+    })
+}
+
+fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
+    let mut scan = ScanResult::default();
+    let mut regs = [RegValue::Unknown; 11];
+    let site_pcs = prog.current_site_pcs()?;
+
+    for block in prog.blocks().map(|block| block.id).collect::<Vec<_>>() {
+        if should_reset_reg_state_at_block(prog, block) {
+            regs = [RegValue::Unknown; 11];
+        }
+
+        let insns = &prog.blocks[block.0].insns;
+        let mut live_out = HashMap::new();
+        for site in prog.sites_in_block(block) {
+            live_out.insert(site.idx, prog.live_out_site_checked(site)?);
+        }
+
+        let mut idx = 0usize;
+        while idx < insns.len() {
+            let start = InsnSite { block, idx };
+            let abs_pc = site_current_pc(&site_pcs, start)?;
+
+            match try_match_memcpy_run_at(insns, idx, &live_out) {
+                MatchOutcome::Apply(mut site) => {
+                    if let BulkSiteKind::Memcpy {
+                        src_base, dst_base, ..
+                    } = &site.kind
+                    {
+                        if src_base != dst_base {
+                            let src_stack = is_likely_stack_ptr(*src_base, idx, insns);
+                            let dst_stack = is_likely_stack_ptr(*dst_base, idx, insns);
+                            if src_stack == dst_stack {
+                                scan.skips.push(SkipReason {
+                                    pc: abs_pc,
+                                    reason: format!(
+                                        "different-base memcpy alias not provably safe (src r{src_base}, dst r{dst_base})"
+                                    ),
+                                });
+                                advance_reg_state_range(prog, block, idx, site.old_len, &mut regs)?;
+                                idx += site.old_len;
+                                continue;
+                            }
+                        }
+                    }
+                    let old_len = site.old_len;
+                    site.start_pc = abs_pc;
+                    advance_reg_state_range(prog, block, idx, old_len, &mut regs)?;
+                    scan.sites.push(AppliedBulkSite {
+                        block,
+                        start_slot: block_slot_offset(prog, start)?,
+                        range: idx..idx + old_len,
+                        site,
+                    });
+                    idx += old_len;
+                    continue;
+                }
+                MatchOutcome::Skip { reason, advance } => {
+                    let advance = advance.max(1);
+                    advance_reg_state_range(prog, block, idx, advance, &mut regs)?;
+                    scan.skips.push(SkipReason { pc: abs_pc, reason });
+                    idx += advance;
+                    continue;
+                }
+                MatchOutcome::NoMatch => {}
+            }
+
+            if let Some(mut site) = try_match_memset_run_at(insns, idx, &regs) {
+                let old_len = site.old_len;
+                site.start_pc = abs_pc;
+                advance_reg_state_range(prog, block, idx, old_len, &mut regs)?;
+                scan.sites.push(AppliedBulkSite {
+                    block,
+                    start_slot: block_slot_offset(prog, start)?,
+                    range: idx..idx + old_len,
+                    site,
+                });
+                idx += old_len;
+                continue;
+            }
+
+            advance_reg_state_at_site(prog, start, &mut regs)?;
+            idx += 1;
+        }
+    }
+
+    Ok(scan)
+}
+
+fn should_reset_reg_state_at_block(prog: &BBProgram, block: BlockId) -> bool {
+    if block.0 == 0 {
+        return false;
+    }
+    let preds = prog.predecessors(block);
+    if preds.len() != 1 {
+        return true;
+    }
+    let pred = preds[0];
+    if pred.0 + 1 != block.0 {
+        return true;
+    }
+    !matches!(
+        prog.blocks[pred.0].terminator,
+        Terminator::Fallthrough { next } if next == block
+    ) && !matches!(
+        prog.blocks[pred.0].terminator,
+        Terminator::CondBranch { fallthrough, .. } if fallthrough == block
+    )
 }
 
 fn try_match_memcpy_run_at(
     insns: &[BpfInsn],
     pc: usize,
-    bt: &BranchTargetResult,
-    liveness: &LivenessResult,
+    live_out: &HashMap<usize, RegSet>,
 ) -> MatchOutcome {
     let Some(first) = memcpy_lane_at(insns, pc) else {
         return MatchOutcome::NoMatch;
     };
-    if bt.is_target.get(pc + 1).copied().unwrap_or(false) {
-        return MatchOutcome::NoMatch;
-    }
 
     let lane_bytes = width_bytes(first.width);
     let mut cursor = pc + 2;
@@ -334,12 +415,6 @@ fn try_match_memcpy_run_at(
     let mut next_dst_off = first.dst_off as i32 + lane_bytes as i32;
 
     while cursor + 1 < insns.len() {
-        if bt.is_target.get(cursor).copied().unwrap_or(false)
-            || bt.is_target.get(cursor + 1).copied().unwrap_or(false)
-        {
-            break;
-        }
-
         let Some(lane) = memcpy_lane_at(insns, cursor) else {
             break;
         };
@@ -373,17 +448,17 @@ fn try_match_memcpy_run_at(
     let last_pc = pc + old_len - 1;
     if first.src_base == first.dst_base && ranges_overlap(first.src_off, first.dst_off, raw_bytes) {
         return MatchOutcome::Skip {
-            reason: "overlapping same-base memcpy run".into(),
+            reason: "alias overlap in same-base memcpy run".into(),
             advance: raw_len,
         };
     }
 
-    if let Some(live_after) = liveness.live_out.get(last_pc) {
+    if let Some(live_after) = live_out.get(&last_pc) {
         let mut seen = HashSet::new();
         for tmp_reg in tmp_regs.iter().take(consumed_pairs).copied() {
             if seen.insert(tmp_reg) && live_after.contains(&tmp_reg) {
                 return MatchOutcome::Skip {
-                    reason: format!("tmp_reg r{tmp_reg} is live after site"),
+                    reason: format!("temp tmp_reg r{tmp_reg} is live after site"),
                     advance: raw_len,
                 };
             }
@@ -407,7 +482,6 @@ fn try_match_memcpy_run_at(
 fn try_match_memset_run_at(
     insns: &[BpfInsn],
     pc: usize,
-    bt: &BranchTargetResult,
     regs: &[RegValue; 11],
 ) -> Option<BulkSite> {
     let first = memset_lane_at(insns, pc, regs)?;
@@ -416,10 +490,6 @@ fn try_match_memset_run_at(
     let mut next_off = first.off as i32 + width_bytes(first.width) as i32;
 
     while cursor < insns.len() {
-        if bt.is_target.get(cursor).copied().unwrap_or(false) {
-            break;
-        }
-
         let Some(lane) = memset_lane_at(insns, cursor, regs) else {
             break;
         };
@@ -763,73 +833,36 @@ fn is_likely_stack_ptr(reg: u8, before_pc: usize, insns: &[BpfInsn]) -> bool {
 }
 
 fn advance_reg_state_range(
-    insns: &[BpfInsn],
-    start_pc: usize,
+    prog: &BBProgram,
+    block: BlockId,
+    start_idx: usize,
     len: usize,
     regs: &mut [RegValue; 11],
-) {
-    let end_pc = start_pc.saturating_add(len).min(insns.len());
-    let mut pc = start_pc;
-    while pc < end_pc {
-        advance_reg_state(insns, pc, regs);
-        pc += insn_width(&insns[pc]);
+) -> anyhow::Result<()> {
+    let end_idx = start_idx
+        .saturating_add(len)
+        .min(prog.blocks[block.0].insns.len());
+    for idx in start_idx..end_idx {
+        advance_reg_state_at_site(prog, InsnSite { block, idx }, regs)?;
     }
+    Ok(())
 }
 
-fn advance_reg_state(insns: &[BpfInsn], pc: usize, regs: &mut [RegValue; 11]) {
-    let insn = &insns[pc];
-
-    if insn.is_call() {
-        for reg in insn_use_def_set(insn).defs {
-            regs[reg as usize] = RegValue::Unknown;
-        }
-        return;
-    }
-
-    if insn.is_ldimm64() {
-        let next = insns.get(pc + 1);
-        regs[insn.dst_reg() as usize] = next
-            .map(|hi| combine_ldimm64(insn, hi) as u64)
-            .map(RegValue::Const)
-            .unwrap_or(RegValue::Unknown);
-        return;
-    }
-
-    match insn.class() {
-        BPF_ALU64 => advance_alu64_state(insn, regs),
-        BPF_ALU => advance_alu32_state(insn, regs),
-        BPF_LDX | BPF_LD => regs[insn.dst_reg() as usize] = RegValue::Unknown,
-        _ => {}
-    }
-}
-
-fn advance_alu64_state(insn: &BpfInsn, regs: &mut [RegValue; 11]) {
-    let dst = insn.dst_reg() as usize;
-    let next = match (bpf_op(insn.code), bpf_src(insn.code)) {
-        (BPF_MOV, BPF_K) => RegValue::Const(insn.imm as i64 as u64),
-        (BPF_MOV, BPF_X) => regs[insn.src_reg() as usize],
-        (BPF_XOR, BPF_X) if insn.dst_reg() == insn.src_reg() => RegValue::Const(0),
-        _ => RegValue::Unknown,
-    };
-    regs[dst] = next;
-}
-
-fn advance_alu32_state(insn: &BpfInsn, regs: &mut [RegValue; 11]) {
-    let dst = insn.dst_reg() as usize;
-    let next = match (bpf_op(insn.code), bpf_src(insn.code)) {
-        (BPF_MOV, BPF_K) => RegValue::Const(insn.imm as u32 as u64),
-        (BPF_MOV, BPF_X) => match regs[insn.src_reg() as usize] {
-            RegValue::Const(value) => RegValue::Const(value as u32 as u64),
-            RegValue::Unknown => RegValue::Unknown,
-        },
-        (BPF_XOR, BPF_X) if insn.dst_reg() == insn.src_reg() => RegValue::Const(0),
-        _ => RegValue::Unknown,
-    };
-    regs[dst] = next;
-}
-
-fn combine_ldimm64(lo: &BpfInsn, hi: &BpfInsn) -> i64 {
-    let low = lo.imm as u32 as u64;
-    let high = hi.imm as u32 as u64;
-    i64::from_le_bytes((low | (high << 32)).to_le_bytes())
+fn advance_reg_state_at_site(
+    prog: &BBProgram,
+    site: InsnSite,
+    regs: &mut [RegValue; 11],
+) -> anyhow::Result<()> {
+    let insn = prog
+        .insn_at(site)
+        .ok_or_else(|| anyhow::anyhow!("invalid instruction site {:?}", site))?;
+    let ldimm64_hi =
+        if insn.is_ldimm64() {
+            Some(prog.ldimm64_second_slots.get(&site).ok_or_else(|| {
+                anyhow::anyhow!("LD_IMM64 at {:?} is missing its second slot", site)
+            })?)
+        } else {
+            None
+        };
+    advance_simple_reg_state(insn, ldimm64_hi, regs)
 }

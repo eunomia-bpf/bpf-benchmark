@@ -3,9 +3,11 @@
 
 use std::collections::HashMap;
 
-use crate::analysis::{MapRefsAnalysis, MapRefsResult};
-use crate::insn::{BpfInsn, MapPseudo};
-use crate::pass::{Analysis, BpfProgram};
+use crate::insn::{insn_width, BpfInsn, MapPseudo};
+#[cfg(test)]
+use crate::pass::BpfProgram;
+
+use super::MapInlineView;
 
 const BPF_MAP_TYPE_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_HASH;
 const BPF_MAP_TYPE_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_ARRAY;
@@ -110,19 +112,48 @@ pub struct MapInfoAnalysis;
 
 type MapInfoAnalysisResult<T> = std::result::Result<T, String>;
 
-impl Analysis for MapInfoAnalysis {
-    type Result = MapInfoAnalysisResult<MapInfoResult>;
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct MapBinding {
+    pc_load: usize,
+    kind: MapPseudo,
+    imm: i32,
+    map_idx: Option<usize>,
+    map_id: Option<u32>,
+}
 
-    fn run(program: &BpfProgram) -> MapInfoAnalysisResult<MapInfoResult> {
-        let provider = program.map_provider.clone();
-        let map_refs = MapRefsAnalysis::run(program);
-        collect_map_references_from_bindings(
-            &program.insns,
-            program.map_ids.len(),
-            map_refs,
-            move |map_id| provider.map_info(program, map_id),
-        )
+impl MapInfoAnalysis {
+    #[cfg(test)]
+    pub fn run(program: &BpfProgram) -> MapInfoAnalysisResult<MapInfoResult> {
+        analyze_map_info_from_bpf_program(program)
     }
+}
+
+pub(super) fn analyze_map_info(
+    program: &MapInlineView<'_>,
+) -> MapInfoAnalysisResult<MapInfoResult> {
+    let map_refs = collect_map_bindings(
+        &program.linear.insns,
+        &program.ctx.map_ids,
+        &program.map_fd_bindings,
+    );
+    collect_map_references_from_bindings(
+        &program.linear.insns,
+        program.ctx.map_ids.len(),
+        map_refs,
+        |map_id| program.map_info(map_id),
+    )
+}
+
+#[cfg(test)]
+fn analyze_map_info_from_bpf_program(program: &BpfProgram) -> MapInfoAnalysisResult<MapInfoResult> {
+    let provider = program.map_provider.clone();
+    let map_refs = collect_map_bindings(&program.insns, &program.map_ids, &program.map_fd_bindings);
+    collect_map_references_from_bindings(
+        &program.insns,
+        program.map_ids.len(),
+        map_refs,
+        move |map_id| provider.map_info(program, map_id),
+    )
 }
 
 /// Scan the instruction stream and resolve each unique map reference.
@@ -154,14 +185,67 @@ where
     let mut program = BpfProgram::new(insns.to_vec());
     program.map_ids = map_ids.to_vec();
     program.map_fd_bindings = map_fd_bindings.clone();
-    let map_refs = MapRefsAnalysis::run(&program);
+    let map_refs = collect_map_bindings(&program.insns, &program.map_ids, &program.map_fd_bindings);
     collect_map_references_from_bindings(insns, map_ids.len(), map_refs, resolver)
+}
+
+fn collect_map_bindings(
+    insns: &[BpfInsn],
+    map_ids: &[u32],
+    fd_bindings: &HashMap<i32, u32>,
+) -> Vec<MapBinding> {
+    let mut bindings = Vec::new();
+    let mut fd_order = Vec::<i32>::new();
+    let mut pc = 0usize;
+
+    while pc < insns.len() {
+        let insn = insns[pc];
+        if let Some(kind) = insn.map_pseudo_kind() {
+            let (map_idx, map_id) =
+                resolve_map_ref(kind, insn.imm, map_ids, fd_bindings, &mut fd_order);
+            bindings.push(MapBinding {
+                pc_load: pc,
+                kind,
+                imm: insn.imm,
+                map_idx,
+                map_id,
+            });
+        }
+        pc += insn_width(&insn);
+    }
+
+    bindings
+}
+
+fn resolve_map_ref(
+    kind: MapPseudo,
+    imm: i32,
+    map_ids: &[u32],
+    fd_bindings: &HashMap<i32, u32>,
+    fd_order: &mut Vec<i32>,
+) -> (Option<usize>, Option<u32>) {
+    if kind.uses_index() {
+        let Ok(index) = usize::try_from(imm) else {
+            return (None, None);
+        };
+        return (Some(index), map_ids.get(index).copied());
+    }
+
+    if !fd_order.contains(&imm) {
+        fd_order.push(imm);
+    }
+    let index = fd_order.iter().position(|fd| *fd == imm);
+    let map_id = fd_bindings
+        .get(&imm)
+        .copied()
+        .or_else(|| index.and_then(|idx| map_ids.get(idx).copied()));
+    (index, map_id)
 }
 
 fn collect_map_references_from_bindings<F>(
     insns: &[BpfInsn],
     map_id_count: usize,
-    map_refs: MapRefsResult,
+    map_refs: Vec<MapBinding>,
     mut resolver: F,
 ) -> MapInfoAnalysisResult<MapInfoResult>
 where
@@ -170,7 +254,7 @@ where
     let mut references = Vec::new();
     let mut resolved_by_index: HashMap<usize, Option<MapInfo>> = HashMap::new();
 
-    for binding in map_refs.bindings {
+    for binding in map_refs {
         let kind @ (MapPseudo::Fd | MapPseudo::Idx) = binding.kind else {
             continue;
         };

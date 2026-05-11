@@ -6,16 +6,12 @@
 //! Zero kernel dependency — pure bytecode in, bytecode out.
 
 pub mod analysis;
-#[cfg(test)]
-pub mod bpf {
-    pub use crate::mock_maps::{install_mock_map, use_mock_maps, BpfMapInfo, MockMapState};
-}
 pub mod insn;
-#[cfg(test)]
-pub mod mock_maps;
 pub mod pass;
 pub mod passes;
-pub mod rewrite;
-#[cfg(test)]
-pub mod test_helpers;
 pub mod verifier_log;
+
+#[cfg(test)]
+mod pass_tests;
+#[cfg(test)]
+pub(crate) mod test_helpers;

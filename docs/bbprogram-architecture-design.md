@@ -1,7 +1,33 @@
 # BBProgram Architecture Flip — Design Doc
 
-Date: 2026-05-10
-Status: Design pinned; implementation deferred (Stage 1 codex was stopped pending plan review)
+Date: 2026-05-10  
+Status: Stage 1 (BBProgram infra + dce migration) done in working tree.
+Remaining stages 2-12 to be executed as a single autonomous codex run that
+finishes the migration end-to-end.
+
+## File-layout rule
+
+**NO new top-level `bbprogram/` subdirectory.** All new modules live under the
+existing `bpfopt/crates/bpfopt/src/analysis/` directory:
+
+```
+analysis/
+├── mod.rs                  (existing — re-exports analyses + bbprogram items)
+├── cfg.rs                  (existing — gradually folded into bbprogram view)
+├── liveness.rs             (existing — replaced by bbprogram::live_in/out method)
+├── branch_target.rs        (existing — replaced by bbprogram::successors)
+├── site_scan.rs            (existing — kept, pass-local)
+├── map_refs.rs             (existing — folded into bbprogram method)
+├── bbprogram.rs            (new — type defs: BBProgram, Block, Terminator, ...)
+├── bbprogram_lift.rs       (new — lift())
+├── bbprogram_lower.rs      (new — lower())
+├── bbprogram_use_def.rs    (new — UseDefGraph + auto-maintenance)
+└── bbprogram_api.rs        (new — single-insn / range / block-level mutation)
+```
+
+The Stage-1 working-tree currently has `bpfopt/crates/bpfopt/src/bbprogram/`.
+Migration step zero relocates that directory's contents into `analysis/` with
+`bbprogram_*.rs` filenames and updates the import paths.
 
 ## 1. Goal
 
@@ -272,73 +298,80 @@ fn cond_select_run(prog: &mut BBProgram, ctx: &PassCtx) -> PassReport {
 Single-block kinsn (rotate / extract / endian / bulk_memory / prefetch) use
 `replace_range` only.
 
-## 10. Stage Plan
+## 10. Stage Plan — single autonomous codex run
 
-The original "Stage 1 = infra only" split has been collapsed. Stage 1 now does
-**both** infrastructure and the first pass migration (`dce`) in a single codex
-run. There is no isolated infra-only milestone; the foundation is validated
-through `dce` actually running on the BBProgram instead of a synthetic
-roundtrip alone.
+Stages 2-12 are executed as **one continuous codex run** that completes every
+remaining migration end-to-end. There are no per-stage human gates between 2
+and 12. Stage 1 (infra + dce) is done; the remaining work is enumerated below
+so the codex tracks progress, but the deliverable is a single working tree
+with all migrations finished and code-volume reduction verified.
 
-| Stage | Scope                                                            | LOC delta |
-|-------|------------------------------------------------------------------|-----------|
-| 1     | bbprogram/ infra **+** migrate `dce` to BBProgram API + tests    | +1050     |
-| 2     | Migrate `const_prop`                                             | -900      |
-| 3     | Migrate `bounds_check_merge`                                      | -350      |
-| 4     | Migrate `cond_select` (uses multi-block API)                     | -250      |
-| 5     | Migrate `ccmp` (uses multi-block API)                            | -250      |
-| 6-10  | Migrate 5 single-block kinsn passes + pattern DSL                | -1000     |
-| 11    | Migrate `wide_mem`, `branch_flip`, `map_inline`                  | -700      |
-| 12    | Delete `AnalysisCache`, `RewritePlan`, dead helpers              | -600      |
-| **Total** |                                                              | **-3000** |
+| Sub-step | Scope                                                          | LOC delta |
+|----------|----------------------------------------------------------------|-----------|
+| 0        | Relocate `bbprogram/` into `analysis/bbprogram_*.rs`            | 0         |
+| 1 (done) | analysis/bbprogram_* infra + migrate `dce` + tests              | done      |
+| 2        | Migrate `const_prop`                                            | -900      |
+| 3        | Migrate `bounds_check_merge`                                    | -350      |
+| 4        | Migrate `cond_select` (multi-block API)                         | -250      |
+| 5        | Migrate `ccmp` (multi-block API)                                | -250      |
+| 6        | Migrate `rotate`                                                 | -200      |
+| 7        | Migrate `extract`                                                | -200      |
+| 8        | Migrate `endian_fusion`                                          | -200      |
+| 9        | Migrate `bulk_memory`                                            | -200      |
+| 10       | Migrate `prefetch`                                               | -200      |
+| 11       | Migrate `wide_mem`, `branch_flip`, `map_inline`, `noop`,         | -700      |
+|          | `skb_load_bytes_spec`                                            |           |
+| 12       | Delete `AnalysisCache`, `RewritePlan`, `RewriteOutput`,          | -800      |
+|          | `commit_rewrite_output`, `compose_addr_maps`, `BtfRemapPolicy`,  |           |
+|          | `legacy_cleanup`, dead helpers; collapse `analysis/cfg.rs`,      |           |
+|          | `analysis/liveness.rs`, `analysis/branch_target.rs`,             |           |
+|          | `analysis/map_refs.rs` into BBProgram methods if not already.    |           |
+| **Total** |                                                              | **-4250** |
 
-Each stage is an independent codex run. No commits between stages without
-user approval.
+After step 12, the only mutation API is BBProgram. Every CLI pass invocation
+(`bpfopt --pass <name>`) lifts → runs the migrated pass on `&mut BBProgram` →
+lowers. There is no `Vec<bpf_insn>`-based mutation path in the lib crate.
 
-## 11. Stage 1 Acceptance Criteria
+## 11. Final Acceptance Criteria (after sub-step 12)
 
 `cargo build --release` is clean and all of the following hold simultaneously:
 
-1. **Roundtrip integrity** (infra correctness):
-   - Integration test `bbprogram_roundtrip.rs` walks every
-     `bpfopt/testbin/<app>/<prog>/canonicalize_output.bin` (542 programs).
-   - `lift(insns) → lower(...)` is byte-identical for all 542 programs.
-   - Output: `542/542 programs roundtripped byte-identical`.
+1. **Roundtrip integrity** (already passing): 542/542 testbin programs
+   roundtrip byte-identical via `lift→lower`.
 
-2. **dce migrated to BBProgram API**:
-   - `bpfopt/crates/bpfopt/src/passes/dce.rs` no longer references
-     `AnalysisCache`, `RewritePlan`, `LivenessAnalysis`, or `Vec<BpfInsn>`-based
-     rewrite plans. It works on `&mut BBProgram` directly.
-   - `dce::run` body is dramatically shorter (~50 LOC vs current ~500 LOC).
-   - kinsn-aware register uses still respected (P1-F regression must not
-     reappear): use-def graph reflects implicit kinsn payload register reads.
+2. **Pass-equivalence on every migrated pass**: for each of the 14 pass names,
+   an integration test like `<pass>_equivalence.rs` shows the new BBProgram
+   path produces exactly the same `applied/matched/skipped` counts and the
+   same output bytecode as the legacy path on every testbin program.
+   Zero divergence on all 542 programs.
 
-3. **dce equivalence** against current behavior:
-   - For every testbin prog, lifting → running new `dce` → lowering produces
-     **exactly the same applied/skipped sites** as the current `dce`
-     implementation on the same input.
-   - Implementation: integration test `dce_equivalence.rs` runs both old and
-     new `dce` paths in the same process and diffs report counts. Zero
-     divergence required.
-   - The P1-F kinsn-aware regression test in `dce_tests.rs` still passes.
+   The legacy implementation may be kept temporarily inside an
+   `#[cfg(test)]` module purely for the equivalence test, then deleted
+   in sub-step 12 along with its support code (`RewritePlan`, etc.).
 
-4. **Non-dce passes unchanged**:
-   - `const_prop`, `wide_mem`, `bounds_check_merge`, `cond_select`, `ccmp`,
-     `extract`, `endian_fusion`, `bulk_memory`, `prefetch`, `rotate`,
-     `branch_flip`, `map_inline`, `noop` continue to operate on `Vec<BpfInsn>`
-     via the legacy interface. They are not migrated in Stage 1.
-   - Coexistence shim: `bpfopt --pass dce` lifts → runs → lowers; other
-     `--pass <name>` invocations stay on the legacy path. The daemon protocol
-     is unchanged.
+3. **No `Vec<BpfInsn>` mutation path in production**: the production code
+   path for every `--pass <name>` invocation is `lift → migrated_pass →
+   lower`. Search for `RewritePlan`, `RewriteOutput`, `AnalysisCache`,
+   `commit_rewrite_output`, `compose_addr_maps`, `BtfRemapPolicy`,
+   `legacy_cleanup` — all must be deleted (or live only inside
+   `#[cfg(test)]` equivalence harnesses, deleted entirely in sub-step 12).
 
-5. **No `AnalysisCache` removal in Stage 1**:
-   - `AnalysisCache` and `RewritePlan` continue to exist for legacy passes.
-   - They are deleted only when the last consumer migrates (Stage 12).
+4. **No `bbprogram/` directory**: all BBProgram modules live in
+   `analysis/bbprogram_*.rs`.
 
-6. **All 402 existing tests still pass** plus the new roundtrip and dce
-   equivalence tests.
+5. **No benchmark-framework changes**: `corpus/`, `runner/`, `e2e/`,
+   `micro/`, `daemon/` untouched. The daemon socket protocol and per-pass
+   CLI invocation contract are unchanged. `runner/config/passes/dce/default.yaml`
+   etc. are NOT edited.
 
-7. **No commit**. Working-tree only.
+6. **Significant code-volume reduction**: total `bpfopt/crates/bpfopt/src/`
+   line count after sub-step 12 must be at least **2500 LOC less** than at
+   the start of this work. Report before/after numbers per file.
+
+7. **All existing 402 tests still pass**, plus 14 equivalence tests, plus
+   the roundtrip test. Cargo test suite is green at every step.
+
+8. **No commit**. Working-tree only.
 
 ## 12. Risks
 

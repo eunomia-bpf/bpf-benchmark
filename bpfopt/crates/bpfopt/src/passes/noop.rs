@@ -6,6 +6,7 @@
 //! bytecode transform. Useful for isolating ReJIT pipeline overhead from the
 //! per-pass optimization effect in performance regressions.
 
+use crate::analysis::BBProgram;
 use crate::pass::*;
 
 pub struct NoopPass;
@@ -15,12 +16,11 @@ impl BpfPass for NoopPass {
         "noop"
     }
 
-    fn run(
-        &self,
-        _program: &mut BpfProgram,
-        _analyses: &mut AnalysisCache,
-        _ctx: &PassContext,
-    ) -> anyhow::Result<PassResult> {
+    fn run(&self, _program: &mut BBProgram, _ctx: &PassContext) -> anyhow::Result<PassResult> {
         Ok(PassResult::unchanged())
     }
+}
+
+pub fn run_on_bbprogram(_prog: &mut BBProgram) -> anyhow::Result<PassResult> {
+    Ok(PassResult::unchanged())
 }

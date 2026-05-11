@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 //! EXTRACT optimization pass.
 
-use crate::analysis::{iter_sites, BranchTargetAnalysis};
+use std::collections::BTreeMap;
+use std::ops::Range;
+
+use crate::analysis::{block_slot_offset, site_current_pc, BBProgram, BlockId, InsnSite};
 use crate::insn::*;
 use crate::pass::*;
-
-use crate::rewrite::{BtfRemapPolicy, RewritePlan};
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     canonical_name: "bpf_extract64",
     aliases: &["extract64"],
@@ -21,7 +22,7 @@ fn extract_proof_len(payload: u64) -> anyhow::Result<usize> {
     validate_bpf_reg("extract dst", kinsn_payload_reg(payload, 0))?;
     let start = kinsn_payload_u8(payload, 8);
     let bit_len = kinsn_payload_u8(payload, 16);
-    if start >= 64 || bit_len == 0 || bit_len > 32 || u16::from(start) + u16::from(bit_len) > 64 {
+    if start >= 64 || bit_len == 0 || bit_len > 64 || u16::from(start) + u16::from(bit_len) > 64 {
         anyhow::bail!("extract payload has invalid range start={start} bit_len={bit_len}");
     }
     Ok(usize::from(start != 0) + 1)
@@ -58,6 +59,8 @@ pub(super) struct ExtractSite {
 
 /// An extract site that has passed safety checks, ready for transformation.
 struct SafeExtractSite {
+    block: BlockId,
+    range: Range<usize>,
     site: ExtractSite,
 }
 
@@ -76,18 +79,13 @@ pub(super) fn contiguous_mask_len(mask: u64) -> Option<u32> {
     }
 }
 
-pub(super) fn scan_extract_sites(insns: &[BpfInsn]) -> Vec<ExtractSite> {
-    iter_sites(insns, |insns, pc| {
-        extract_site_at(insns, pc).map(|site| site.old_len)
-    })
-    .into_iter()
-    .filter_map(|site| extract_site_at(insns, site.pc))
-    .collect()
-}
-
 fn extract_site_at(insns: &[BpfInsn], pc: usize) -> Option<ExtractSite> {
     let i0 = insns.get(pc)?;
     let i1 = insns.get(pc + 1)?;
+    extract_site_from_pair(i0, i1, pc)
+}
+
+fn extract_site_from_pair(i0: &BpfInsn, i1: &BpfInsn, start_pc: usize) -> Option<ExtractSite> {
     let is_rsh = i0.code == (BPF_ALU64 | BPF_RSH | BPF_K);
     let is_and = i1.code == (BPF_ALU64 | BPF_AND | BPF_K);
     if !is_rsh || !is_and || i0.dst_reg() != i1.dst_reg() {
@@ -97,7 +95,7 @@ fn extract_site_at(insns: &[BpfInsn], pc: usize) -> Option<ExtractSite> {
     let mask = i1.imm as i64 as u64;
     let bit_len = contiguous_mask_len(mask)?;
     (shift + bit_len <= 64).then_some(ExtractSite {
-        start_pc: pc,
+        start_pc,
         old_len: 2,
         dst_reg: i0.dst_reg(),
         shift_amount: shift,
@@ -109,37 +107,35 @@ impl BpfPass for ExtractPass {
     fn name(&self) -> &str {
         "extract"
     }
-    fn run(
-        &self,
-        program: &mut BpfProgram,
-        analyses: &mut AnalysisCache,
-        ctx: &PassContext,
-    ) -> anyhow::Result<PassResult> {
-        let bt = analyses.get::<BranchTargetAnalysis>(program);
+    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        run_on_bbprogram(program, ctx)
+    }
+}
 
-        let sites = scan_extract_sites(&program.insns);
-        let btf_id = ctx.kinsn_registry.btf_id_for_target_name("bpf_extract64")?;
-        let mut safe_sites: Vec<SafeExtractSite> = Vec::new();
-        let mut skipped = Vec::new();
+pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+    let btf_id = ctx.kinsn_registry.btf_id_for_target_name("bpf_extract64")?;
+    let mut safe_sites: Vec<SafeExtractSite> = Vec::new();
+    let mut skipped = Vec::new();
+    let site_pcs = prog.current_site_pcs()?;
+    let pc_sites = prog.current_pc_sites()?;
 
-        for site in sites {
-            // Safety check 1: interior branch target.
-            let has_interior = (site.start_pc + 1..site.start_pc + site.old_len)
-                .any(|pc| pc < bt.is_target.len() && bt.is_target[pc]);
-            if has_interior {
-                skipped.push(SkipReason {
-                    pc: site.start_pc,
-                    reason: "interior branch target".into(),
-                });
+    for block in prog.blocks().map(|block| block.id).collect::<Vec<_>>() {
+        for start in prog.sites_in_block(block).collect::<Vec<_>>() {
+            if let Some(skip) = cross_block_extract_skip(prog, start, &site_pcs, &pc_sites)? {
+                skipped.push(skip);
                 continue;
             }
 
-            if let Some(reason) = kinsn_replacement_subprog_skip_reason(
-                &program.insns,
-                site.start_pc,
-                site.old_len,
-                2,
-            )? {
+            let Some(mut site) = extract_site_at(&prog.blocks[block.0].insns, start.idx) else {
+                continue;
+            };
+            let start_slot = block_slot_offset(prog, start)?;
+            site.start_pc = site_current_pc(&site_pcs, start)?;
+            let range = start.idx..start.idx + site.old_len;
+
+            if let Some(reason) =
+                prog.kinsn_replacement_subprog_skip_reason(block, start_slot, site.old_len, 2)?
+            {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
                     reason,
@@ -147,48 +143,76 @@ impl BpfPass for ExtractPass {
                 continue;
             }
 
-            safe_sites.push(SafeExtractSite { site });
+            safe_sites.push(SafeExtractSite { block, range, site });
         }
-
-        if safe_sites.is_empty() {
-            return Ok(PassResult {
-                sites_skipped: skipped,
-                ..PassResult::unchanged()
-            });
-        }
-
-        let kfunc_off = ctx
-            .kinsn_registry
-            .call_off_for_target_name("bpf_extract64")?;
-
-        let mut plan = RewritePlan::new();
-        for safe_site in &safe_sites {
-            let site = &safe_site.site;
-            let shift_amount = u8::try_from(site.shift_amount).map_err(|_| {
-                anyhow::anyhow!(
-                    "extract shift amount {} exceeds packed payload width",
-                    site.shift_amount
-                )
-            })?;
-            let bit_len = u8::try_from(site.bit_len).map_err(|_| {
-                anyhow::anyhow!(
-                    "extract bit length {} exceeds packed payload width",
-                    site.bit_len
-                )
-            })?;
-            let payload = BpfInsn::pack_u4(site.dst_reg, 0)
-                | BpfInsn::pack_u8(shift_amount, 8)
-                | BpfInsn::pack_u8(bit_len, 16);
-            plan.replace_range(
-                site.start_pc,
-                site.old_len,
-                emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
-            )?;
-        }
-
-        let mut result = plan.commit(program, BtfRemapPolicy::RemapKinsn(&ctx.kinsn_registry))?;
-        result.sites_applied = safe_sites.len();
-        result.sites_skipped = skipped;
-        Ok(result)
     }
+
+    if safe_sites.is_empty() {
+        return Ok(PassResult {
+            sites_skipped: skipped,
+            ..PassResult::unchanged()
+        });
+    }
+
+    let kfunc_off = ctx
+        .kinsn_registry
+        .call_off_for_target_name("bpf_extract64")?;
+
+    for safe_site in safe_sites.iter().rev() {
+        let site = &safe_site.site;
+        let shift_amount = u8::try_from(site.shift_amount).map_err(|_| {
+            anyhow::anyhow!(
+                "extract shift amount {} exceeds packed payload width",
+                site.shift_amount
+            )
+        })?;
+        let bit_len = u8::try_from(site.bit_len).map_err(|_| {
+            anyhow::anyhow!(
+                "extract bit length {} exceeds packed payload width",
+                site.bit_len
+            )
+        })?;
+        let payload = BpfInsn::pack_u4(site.dst_reg, 0)
+            | BpfInsn::pack_u8(shift_amount, 8)
+            | BpfInsn::pack_u8(bit_len, 16);
+        prog.replace_range(
+            safe_site.block,
+            safe_site.range.clone(),
+            emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
+        )?;
+    }
+
+    Ok(PassResult {
+        sites_applied: safe_sites.len(),
+        sites_skipped: skipped,
+        ..Default::default()
+    })
+}
+
+fn cross_block_extract_skip(
+    prog: &BBProgram,
+    start: InsnSite,
+    site_pcs: &BTreeMap<InsnSite, usize>,
+    pc_sites: &BTreeMap<usize, InsnSite>,
+) -> anyhow::Result<Option<SkipReason>> {
+    let Some(i0) = prog.insn_at(start) else {
+        return Ok(None);
+    };
+    let start_pc = site_current_pc(site_pcs, start)?;
+    let next_pc = start_pc + prog.insn_slot_width(start)?;
+    let Some(next) = pc_sites.get(&next_pc).copied() else {
+        return Ok(None);
+    };
+    if next.block == start.block {
+        return Ok(None);
+    }
+    let Some(i1) = prog.insn_at(next) else {
+        return Ok(None);
+    };
+    Ok(
+        extract_site_from_pair(i0, i1, start_pc).map(|_| SkipReason {
+            pc: start_pc,
+            reason: "interior branch target".into(),
+        }),
+    )
 }

@@ -1,34 +1,24 @@
 // SPDX-License-Identifier: MIT
 //! PREFETCH optimization pass.
 
-use std::collections::HashMap;
-use std::fs;
+use std::collections::{BTreeMap, HashMap};
 use std::path::{Path, PathBuf};
 
 use anyhow::{bail, Context, Result};
 use serde::Deserialize;
 
 use crate::analysis::{
-    iter_sites, BranchTargetAnalysis, BranchTargetResult, CFGAnalysis, CFGResult,
+    annotations_from_profile, packet_ctx_layout, read_json_file, site_current_pc, BBProgram,
+    BlockId, FrameId, InsnSite, PacketCtxLayout, PacketCtxLayoutScope,
 };
 use crate::insn::*;
 use crate::pass::*;
-
-use crate::rewrite::{BtfRemapPolicy, RewritePlan};
 pub(super) const HELPER_MAP_LOOKUP_ELEM: i32 = libbpf_sys::BPF_FUNC_map_lookup_elem as i32;
 const HELPER_XDP_ADJUST_HEAD: i32 = libbpf_sys::BPF_FUNC_xdp_adjust_head as i32;
 const PREFETCH_TARGET_NAME: &str = "bpf_prefetch";
 const TARGET_PREFETCH_DISTANCE: usize = 8;
 const MAX_PREFETCH_DISTANCE: usize = 16;
 const MAP_VALUE_LOOKAHEAD: usize = 64;
-
-const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
-const BPF_PROG_TYPE_SCHED_ACT: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_ACT;
-pub(super) const BPF_PROG_TYPE_XDP: u32 = libbpf_sys::BPF_PROG_TYPE_XDP;
-const BPF_PROG_TYPE_SK_SKB: u32 = libbpf_sys::BPF_PROG_TYPE_SK_SKB;
-const BPF_PROG_TYPE_LWT_IN: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_IN;
-const BPF_PROG_TYPE_LWT_OUT: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_OUT;
-const BPF_PROG_TYPE_LWT_XMIT: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_XMIT;
 
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     canonical_name: PREFETCH_TARGET_NAME,
@@ -85,14 +75,9 @@ impl BpfPass for ProfiledPrefetchPass {
         "prefetch"
     }
 
-    fn run(
-        &self,
-        program: &mut BpfProgram,
-        analyses: &mut AnalysisCache,
-        ctx: &PassContext,
-    ) -> anyhow::Result<PassResult> {
-        program.inject_profiling(&self.profiling);
-        PrefetchPass.run(program, analyses, ctx)
+    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        let annotations = annotations_from_profile(&self.profiling);
+        run_on_bbprogram_with_prefetch_profiles(program, ctx, &annotations)
     }
 }
 
@@ -164,12 +149,6 @@ fn read_prefetch_profile(path: &Path) -> Result<ProfilingData> {
     Ok(data)
 }
 
-fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Result<T> {
-    let data = fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
-    serde_json::from_slice(&data)
-        .with_context(|| format!("failed to parse {label} from {}", path.display()))
-}
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum PrefetchKind {
     MapValue,
@@ -180,6 +159,7 @@ enum PrefetchKind {
 struct PrefetchSite {
     anchor_pc: usize,
     target_pc: usize,
+    target_site: InsnSite,
     ptr_reg: u8,
     ptr_def_end_pc: usize,
     kind: PrefetchKind,
@@ -189,14 +169,10 @@ struct PrefetchSite {
 struct PrefetchCandidate {
     target_pc: usize,
     insert_pc: usize,
+    insert_block: BlockId,
+    insert_idx: usize,
     ptr_reg: u8,
     score: u64,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-struct PacketCtxLayout {
-    data_off: i16,
-    data_end_off: i16,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -224,105 +200,115 @@ impl BpfPass for PrefetchPass {
     fn name(&self) -> &str {
         "prefetch"
     }
-    fn run(
-        &self,
-        program: &mut BpfProgram,
-        analyses: &mut AnalysisCache,
-        ctx: &PassContext,
-    ) -> anyhow::Result<PassResult> {
-        let cfg = analyses.get::<CFGAnalysis>(program);
-        let bt = analyses.get::<BranchTargetAnalysis>(program);
-        let mut candidates = Vec::new();
-        let mut skipped = Vec::new();
+    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        run_on_bbprogram_with_prefetch_profiles(program, ctx, &ctx.annotations)
+    }
+}
 
-        for site in scan_prefetch_sites(&program.insns, &cfg, &bt, ctx.prog_type) {
-            let score = match prefetch_profile_for_site(program, site) {
-                Some(profile) => {
-                    if let Some(reason) = prefetch_profile_skip_reason(site.target_pc, profile)? {
-                        skipped.push(SkipReason {
-                            pc: site.target_pc,
-                            reason,
-                        });
-                        continue;
-                    }
-                    profile.execution_count
-                }
-                None => default_site_score(site),
-            };
+pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+    run_on_bbprogram_with_prefetch_profiles(prog, ctx, &[])
+}
 
-            let insert_pc = match choose_prefetch_insert_pc(program, &cfg, site) {
-                Ok(insert_pc) => insert_pc,
-                Err(reason) => {
+fn run_on_bbprogram_with_prefetch_profiles(
+    prog: &mut BBProgram,
+    ctx: &PassContext,
+    annotations: &[InsnAnnotation],
+) -> anyhow::Result<PassResult> {
+    let site_pcs = prog.current_site_pcs()?;
+    if site_pcs.is_empty() {
+        return Ok(PassResult::unchanged());
+    }
+
+    let mut candidates = Vec::new();
+    let mut skipped = Vec::new();
+
+    for site in scan_prefetch_sites(prog, &site_pcs, ctx.prog_type)? {
+        let score = match prefetch_profile_for_site(annotations, site) {
+            Some(profile) => {
+                if let Some(reason) = prefetch_profile_skip_reason(site.target_pc, profile)? {
                     skipped.push(SkipReason {
                         pc: site.target_pc,
                         reason,
                     });
                     continue;
                 }
-            };
+                profile.execution_count
+            }
+            None => default_site_score(site),
+        };
 
-            candidates.push(PrefetchCandidate {
-                target_pc: site.target_pc,
-                insert_pc,
-                ptr_reg: site.ptr_reg,
-                score,
-            });
-        }
+        let (insert_pc, insert_site) = match choose_prefetch_insert_site(prog, &site_pcs, site) {
+            Ok(insert) => insert,
+            Err(reason) => {
+                skipped.push(SkipReason {
+                    pc: site.target_pc,
+                    reason,
+                });
+                continue;
+            }
+        };
 
-        let candidates = dedup_candidates(candidates);
-        if candidates.is_empty() {
-            return Ok(PassResult {
-                sites_skipped: skipped,
-                ..PassResult::unchanged()
-            });
-        }
-
-        let btf_id = ctx
-            .kinsn_registry
-            .btf_id_for_target_name(PREFETCH_TARGET_NAME)?;
-        let kfunc_off = ctx
-            .kinsn_registry
-            .call_off_for_target_name(PREFETCH_TARGET_NAME)?;
-        let mut plan = RewritePlan::new();
-        for candidate in &candidates {
-            let payload = prefetch_payload(candidate.ptr_reg)?;
-            plan.insert_before(
-                candidate.insert_pc,
-                emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
-            );
-        }
-
-        let mut result = plan.commit(program, BtfRemapPolicy::RemapKinsn(&ctx.kinsn_registry))?;
-        result.sites_applied = candidates.len();
-        result.sites_skipped = skipped;
-        Ok(result)
+        candidates.push(PrefetchCandidate {
+            target_pc: site.target_pc,
+            insert_pc,
+            insert_block: insert_site.block,
+            insert_idx: insert_site.idx,
+            ptr_reg: site.ptr_reg,
+            score,
+        });
     }
+
+    let candidates = dedup_candidates(candidates);
+    if candidates.is_empty() {
+        return Ok(PassResult {
+            sites_skipped: skipped,
+            ..PassResult::unchanged()
+        });
+    }
+
+    let btf_id = ctx
+        .kinsn_registry
+        .btf_id_for_target_name(PREFETCH_TARGET_NAME)?;
+    let kfunc_off = ctx
+        .kinsn_registry
+        .call_off_for_target_name(PREFETCH_TARGET_NAME)?;
+    for candidate in candidates.iter().rev() {
+        let payload = prefetch_payload(candidate.ptr_reg)?;
+        prog.replace_range(
+            candidate.insert_block,
+            candidate.insert_idx..candidate.insert_idx,
+            emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
+        )?;
+    }
+
+    Ok(PassResult {
+        sites_applied: candidates.len(),
+        sites_skipped: skipped,
+        ..Default::default()
+    })
 }
 
 fn scan_prefetch_sites(
-    insns: &[BpfInsn],
-    cfg: &CFGResult,
-    bt: &BranchTargetResult,
+    prog: &BBProgram,
+    site_pcs: &BTreeMap<InsnSite, usize>,
     prog_type: u32,
-) -> Vec<PrefetchSite> {
-    let mut sites = scan_map_value_prefetch_sites(insns, cfg);
-    if let Some(layout) = packet_ctx_layout(prog_type) {
-        sites.extend(scan_packet_prefetch_sites(insns, bt, layout));
+) -> anyhow::Result<Vec<PrefetchSite>> {
+    let mut sites = scan_map_value_prefetch_sites(prog, site_pcs)?;
+    if let Some(layout) = packet_ctx_layout(prog_type, PacketCtxLayoutScope::PacketAccess) {
+        sites.extend(scan_packet_prefetch_sites(prog, site_pcs, layout)?);
     }
-    sites
+    Ok(sites)
 }
 
-fn prefetch_profile_for_site<'a>(
-    program: &'a BpfProgram,
+fn prefetch_profile_for_site(
+    annotations: &[InsnAnnotation],
     site: PrefetchSite,
-) -> Option<&'a PrefetchProfile> {
-    program
-        .annotations
+) -> Option<&PrefetchProfile> {
+    annotations
         .get(site.target_pc)
         .and_then(|ann| ann.prefetch_profile.as_ref())
         .or_else(|| {
-            program
-                .annotations
+            annotations
                 .get(site.anchor_pc)
                 .and_then(|ann| ann.prefetch_profile.as_ref())
         })
@@ -364,45 +350,57 @@ fn prefetch_profile_skip_reason(
     Ok(None)
 }
 
-fn scan_map_value_prefetch_sites(insns: &[BpfInsn], cfg: &CFGResult) -> Vec<PrefetchSite> {
-    iter_sites(insns, |insns, pc| Some(insn_width(&insns[pc])))
-        .into_iter()
-        .filter_map(|site| {
-            let pc = site.pc;
-            let insn = &insns[pc];
+fn scan_map_value_prefetch_sites(
+    prog: &BBProgram,
+    site_pcs: &BTreeMap<InsnSite, usize>,
+) -> anyhow::Result<Vec<PrefetchSite>> {
+    let mut sites = Vec::new();
+    for block in prog.blocks().map(|block| block.id).collect::<Vec<_>>() {
+        for site in prog.sites_in_block(block) {
+            let Some(insn) = prog.insn_at(site) else {
+                continue;
+            };
             if insn.is_call() && insn.src_reg() == 0 && insn.imm == HELPER_MAP_LOOKUP_ELEM {
-                first_map_value_deref_after_lookup(insns, cfg, pc)
-            } else {
-                None
+                if let Some(prefetch) = first_map_value_deref_after_lookup(prog, site_pcs, site)? {
+                    sites.push(prefetch);
+                }
             }
-        })
-        .collect()
+        }
+    }
+    Ok(sites)
 }
 
 fn first_map_value_deref_after_lookup(
-    insns: &[BpfInsn],
-    cfg: &CFGResult,
-    call_pc: usize,
-) -> Option<PrefetchSite> {
-    let (_, subprog_end) = subprog_bounds(cfg, insns.len(), call_pc)?;
+    prog: &BBProgram,
+    site_pcs: &BTreeMap<InsnSite, usize>,
+    call_site: InsnSite,
+) -> anyhow::Result<Option<PrefetchSite>> {
+    let call_pc = site_current_pc(site_pcs, call_site)?;
+    let call_width = prog.insn_slot_width(call_site)?;
+    let frame = prog.blocks[call_site.block.0].frame;
+    let (_, subprog_end) = frame_bounds(prog, frame)?;
     let scan_end = subprog_end.min(call_pc.saturating_add(MAP_VALUE_LOOKAHEAD));
     let mut aliases = [None::<usize>; 11];
-    aliases[BPF_REG_0 as usize] = Some(call_pc + 1);
-    let mut pc = call_pc + 1;
+    aliases[BPF_REG_0 as usize] = Some(call_pc + call_width);
 
-    while pc < scan_end {
-        let insn = &insns[pc];
-        let width = insn_width(insn);
+    for (pc, site) in
+        sites_in_frame_pc_range(prog, site_pcs, frame, call_pc + call_width, scan_end)?
+    {
+        let Some(insn) = prog.insn_at(site) else {
+            continue;
+        };
+        let width = prog.insn_slot_width(site)?;
 
         if let Some(base_reg) = memory_base_reg(insn) {
             if let Some(def_end_pc) = aliases[base_reg as usize] {
-                return Some(PrefetchSite {
+                return Ok(Some(PrefetchSite {
                     anchor_pc: call_pc,
                     target_pc: pc,
+                    target_site: site,
                     ptr_reg: base_reg,
                     ptr_def_end_pc: def_end_pc,
                     kind: PrefetchKind::MapValue,
-                });
+                }));
             }
         }
 
@@ -410,10 +408,9 @@ fn first_map_value_deref_after_lookup(
             break;
         }
         apply_map_value_alias_transfer(insn, pc, width, &mut aliases);
-        pc += width;
     }
 
-    None
+    Ok(None)
 }
 
 fn stops_map_value_scan(insn: &BpfInsn) -> bool {
@@ -460,56 +457,63 @@ fn apply_map_value_alu64_transfer(
 }
 
 fn scan_packet_prefetch_sites(
-    insns: &[BpfInsn],
-    bt: &BranchTargetResult,
+    prog: &BBProgram,
+    site_pcs: &BTreeMap<InsnSite, usize>,
     layout: PacketCtxLayout,
-) -> Vec<PrefetchSite> {
+) -> anyhow::Result<Vec<PrefetchSite>> {
     let mut sites = Vec::new();
     let mut regs = initial_packet_regs();
 
-    for site in iter_sites(insns, |insns, pc| Some(insn_width(&insns[pc]))) {
-        let pc = site.pc;
-        if pc > 0 && bt.is_target.get(pc).copied().unwrap_or(false) {
+    for block in prog.blocks().map(|block| block.id).collect::<Vec<_>>() {
+        if should_reset_tracked_packet_state_at_block(prog, block) {
             regs = [TrackedValue::Unknown; 11];
         }
 
-        let insn = &insns[pc];
-        let width = site.len;
-        if let Some(base_reg) = memory_base_reg(insn) {
-            if let TrackedValue::PacketData { def_end_pc } = regs[base_reg as usize] {
-                sites.push(PrefetchSite {
-                    anchor_pc: pc,
-                    target_pc: pc,
-                    ptr_reg: base_reg,
-                    ptr_def_end_pc: def_end_pc,
-                    kind: PrefetchKind::Packet,
-                });
+        for site in prog.sites_in_block_with_terminator(block) {
+            let pc = site_current_pc(site_pcs, site)?;
+            let Some(insn) = prog.insn_at(site) else {
+                continue;
+            };
+            let width = prog.insn_slot_width(site)?;
+            if let Some(base_reg) = memory_base_reg(insn) {
+                if let TrackedValue::PacketData { def_end_pc } = regs[base_reg as usize] {
+                    sites.push(PrefetchSite {
+                        anchor_pc: pc,
+                        target_pc: pc,
+                        target_site: site,
+                        ptr_reg: base_reg,
+                        ptr_def_end_pc: def_end_pc,
+                        kind: PrefetchKind::Packet,
+                    });
+                }
             }
-        }
 
-        apply_packet_transfer(insn, pc, width, layout, &mut regs);
+            apply_packet_transfer(insn, pc, width, layout, &mut regs);
+        }
     }
 
-    sites
+    Ok(sites)
 }
 
-fn packet_ctx_layout(prog_type: u32) -> Option<PacketCtxLayout> {
-    match prog_type {
-        BPF_PROG_TYPE_XDP => Some(PacketCtxLayout {
-            data_off: XDP_PACKET_DATA_OFFSET,
-            data_end_off: XDP_PACKET_DATA_END_OFFSET,
-        }),
-        BPF_PROG_TYPE_SCHED_CLS
-        | BPF_PROG_TYPE_SCHED_ACT
-        | BPF_PROG_TYPE_SK_SKB
-        | BPF_PROG_TYPE_LWT_IN
-        | BPF_PROG_TYPE_LWT_OUT
-        | BPF_PROG_TYPE_LWT_XMIT => Some(PacketCtxLayout {
-            data_off: SKB_PACKET_DATA_OFFSET,
-            data_end_off: SKB_PACKET_DATA_END_OFFSET,
-        }),
-        _ => None,
+fn should_reset_tracked_packet_state_at_block(prog: &BBProgram, block: BlockId) -> bool {
+    if block.0 == 0 {
+        return false;
     }
+    let preds = prog.predecessors(block);
+    if preds.len() != 1 {
+        return true;
+    }
+    let pred = preds[0];
+    if pred.0 + 1 != block.0 {
+        return true;
+    }
+    !matches!(
+        prog.blocks[pred.0].terminator,
+        crate::analysis::Terminator::Fallthrough { next } if next == block
+    ) && !matches!(
+        prog.blocks[pred.0].terminator,
+        crate::analysis::Terminator::CondBranch { fallthrough, .. } if fallthrough == block
+    )
 }
 
 fn initial_packet_regs() -> [TrackedValue; 11] {
@@ -614,28 +618,24 @@ fn memory_base_reg(insn: &BpfInsn) -> Option<u8> {
     }
 }
 
-fn choose_prefetch_insert_pc(
-    program: &BpfProgram,
-    cfg: &CFGResult,
+fn choose_prefetch_insert_site(
+    prog: &BBProgram,
+    site_pcs: &BTreeMap<InsnSite, usize>,
     site: PrefetchSite,
-) -> Result<usize, String> {
+) -> Result<(usize, InsnSite), String> {
     let target_pc = site.target_pc;
-    if target_pc >= program.insns.len() || target_pc >= cfg.insn_to_block.len() {
-        return Err("prefetch target pc is outside the instruction stream".into());
-    }
-
-    let (subprog_start, subprog_end) = subprog_bounds(cfg, program.insns.len(), target_pc)
-        .ok_or_else(|| "prefetch target pc is outside all subprograms".to_string())?;
-    let block = &cfg.blocks[cfg.insn_to_block[target_pc]];
-    if block.start < subprog_start || block.end > subprog_end {
+    let block = site.target_site.block;
+    let (block_start, block_end) = block_slot_bounds(prog, block).map_err(|err| err.to_string())?;
+    let frame = prog.blocks[block.0].frame;
+    let (subprog_start, subprog_end) = frame_bounds(prog, frame).map_err(|err| err.to_string())?;
+    if block_start < subprog_start || block_end > subprog_end {
         return Err(format!(
             "prefetch basic block crosses subprog boundary (block {}..{}, subprog {}..{})",
-            block.start, block.end, subprog_start, subprog_end
+            block_start, block_end, subprog_start, subprog_end
         ));
     }
 
-    let valid_start = block
-        .start
+    let valid_start = block_start
         .max(subprog_start)
         .max(target_pc.saturating_sub(MAX_PREFETCH_DISTANCE))
         .max(site.ptr_def_end_pc);
@@ -643,106 +643,151 @@ fn choose_prefetch_insert_pc(
         return Err("no valid prefetch insertion window".into());
     }
 
-    reject_control_flow_between(&program.insns, valid_start, target_pc)?;
-    reject_reg_write_between(&program.insns, site.ptr_reg, valid_start, target_pc)?;
+    reject_control_flow_between(prog, site_pcs, block, valid_start, target_pc)?;
+    reject_reg_write_between(prog, site_pcs, block, site.ptr_reg, valid_start, target_pc)?;
 
     let ideal = target_pc.saturating_sub(TARGET_PREFETCH_DISTANCE);
-    let Some(insert_pc) = nearest_instruction_boundary(
-        &program.insns,
-        block.start,
-        target_pc + 1,
-        valid_start,
-        target_pc,
-        ideal,
-    ) else {
+    let Some((insert_pc, insert_site)) =
+        nearest_instruction_boundary(prog, site_pcs, block, valid_start, target_pc, ideal)?
+    else {
         return Err("prefetch insertion window has no instruction boundary".into());
     };
-    Ok(insert_pc)
-}
-
-fn subprog_bounds(
-    cfg: &crate::analysis::CFGResult,
-    program_len: usize,
-    pc: usize,
-) -> Option<(usize, usize)> {
-    let idx = cfg
-        .subprogs
-        .iter()
-        .rposition(|subprog| subprog.start <= pc)?;
-    let start = cfg.subprogs[idx].start;
-    let end = cfg
-        .subprogs
-        .get(idx + 1)
-        .map(|subprog| subprog.start)
-        .unwrap_or(program_len);
-    (pc < end).then_some((start, end))
+    Ok((insert_pc, insert_site))
 }
 
 fn reject_control_flow_between(
-    insns: &[BpfInsn],
+    prog: &BBProgram,
+    site_pcs: &BTreeMap<InsnSite, usize>,
+    block: BlockId,
     start_pc: usize,
     end_pc: usize,
 ) -> Result<(), String> {
-    let mut pc = start_pc;
-    while pc < end_pc {
-        let insn = &insns[pc];
+    for (pc, site) in sites_in_block_pc_range(prog, site_pcs, block, start_pc, end_pc)? {
+        let Some(insn) = prog.insn_at(site) else {
+            continue;
+        };
         if insn.is_call() || insn.is_exit() || insn.is_jmp_class() || insn.is_ldimm64_pseudo_func()
         {
             return Err(format!(
                 "prefetch window contains control-flow instruction at pc {pc}"
             ));
         }
-        pc += insn_width(insn);
     }
     Ok(())
 }
 
 fn reject_reg_write_between(
-    insns: &[BpfInsn],
+    prog: &BBProgram,
+    site_pcs: &BTreeMap<InsnSite, usize>,
+    block: BlockId,
     reg: u8,
     start_pc: usize,
     end_pc: usize,
 ) -> Result<(), String> {
-    let mut pc = start_pc;
-    while pc < end_pc {
-        let insn = &insns[pc];
+    for (pc, site) in sites_in_block_pc_range(prog, site_pcs, block, start_pc, end_pc)? {
+        let Some(insn) = prog.insn_at(site) else {
+            continue;
+        };
         if reg_write_kind(insn, reg).is_some() {
             return Err(format!(
                 "r{reg} is redefined inside the prefetch window at pc {pc}"
             ));
         }
-        pc += insn_width(insn);
     }
     Ok(())
 }
 
 fn nearest_instruction_boundary(
-    insns: &[BpfInsn],
-    scan_start: usize,
-    scan_end: usize,
+    prog: &BBProgram,
+    site_pcs: &BTreeMap<InsnSite, usize>,
+    block: BlockId,
     valid_start: usize,
     valid_end: usize,
     ideal: usize,
-) -> Option<usize> {
-    let mut pc = scan_start;
+) -> Result<Option<(usize, InsnSite)>, String> {
     let mut best = None;
 
-    while pc < scan_end {
+    for site in prog.sites_in_block(block) {
+        let pc = site_current_pc(site_pcs, site).map_err(|err| err.to_string())?;
         if pc >= valid_start && pc <= valid_end {
             let distance = pc.abs_diff(ideal);
             let replace = best
-                .map(|(best_distance, best_pc)| {
+                .map(|(best_distance, best_pc, _)| {
                     distance < best_distance || (distance == best_distance && pc < best_pc)
                 })
                 .unwrap_or(true);
             if replace {
-                best = Some((distance, pc));
+                best = Some((distance, pc, site));
             }
         }
-        pc += insn_width(&insns[pc]);
     }
 
-    best.map(|(_, pc)| pc)
+    Ok(best.map(|(_, pc, site)| (pc, site)))
+}
+
+fn sites_in_frame_pc_range(
+    prog: &BBProgram,
+    site_pcs: &BTreeMap<InsnSite, usize>,
+    frame: FrameId,
+    start_pc: usize,
+    end_pc: usize,
+) -> anyhow::Result<Vec<(usize, InsnSite)>> {
+    let mut sites = Vec::new();
+    for block in prog.blocks().filter(|block| block.frame == frame) {
+        for site in prog.sites_in_block_with_terminator(block.id) {
+            let pc = site_current_pc(site_pcs, site)?;
+            if pc >= start_pc && pc < end_pc {
+                sites.push((pc, site));
+            }
+        }
+    }
+    sites.sort_by_key(|(pc, _)| *pc);
+    Ok(sites)
+}
+
+fn sites_in_block_pc_range(
+    prog: &BBProgram,
+    site_pcs: &BTreeMap<InsnSite, usize>,
+    block: BlockId,
+    start_pc: usize,
+    end_pc: usize,
+) -> Result<Vec<(usize, InsnSite)>, String> {
+    let mut sites = Vec::new();
+    for site in prog.sites_in_block_with_terminator(block) {
+        let pc = site_current_pc(site_pcs, site).map_err(|err| err.to_string())?;
+        if pc >= start_pc && pc < end_pc {
+            sites.push((pc, site));
+        }
+    }
+    sites.sort_by_key(|(pc, _)| *pc);
+    Ok(sites)
+}
+
+fn frame_bounds(prog: &BBProgram, frame: FrameId) -> anyhow::Result<(usize, usize)> {
+    let mut start = usize::MAX;
+    let mut end = 0usize;
+    for block in prog.blocks().filter(|block| block.frame == frame) {
+        let (block_start, block_end) = block_slot_bounds(prog, block.id)?;
+        start = start.min(block_start);
+        end = end.max(block_end);
+    }
+    if start == usize::MAX {
+        anyhow::bail!("frame {:?} has no blocks", frame);
+    }
+    Ok((start, end))
+}
+
+fn block_slot_bounds(prog: &BBProgram, block: BlockId) -> anyhow::Result<(usize, usize)> {
+    let start = prog.current_block_start_pc(block)?;
+    let block_ref = &prog.blocks[block.0];
+    let mut end = start;
+    for site in prog.sites_in_block(block) {
+        end += prog.insn_slot_width(site)?;
+    }
+    if block_ref.terminator.raw_insn().is_some() {
+        end += 1;
+    }
+    Ok((start, end))
 }
 
 fn reg_write_kind(insn: &BpfInsn, reg: u8) -> Option<RegWriteKind> {

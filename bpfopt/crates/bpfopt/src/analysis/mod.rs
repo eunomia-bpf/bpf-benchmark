@@ -1,29 +1,37 @@
 // SPDX-License-Identifier: MIT
 //! Concrete analysis implementations for the pass framework.
 
-mod branch_target;
-#[cfg(test)]
-mod branch_target_tests;
-mod cfg;
-#[cfg(test)]
-mod cfg_tests;
-mod liveness;
-#[cfg(test)]
-mod liveness_tests;
-mod map_refs;
-#[cfg(test)]
-mod map_refs_tests;
-mod site_scan;
-#[cfg(test)]
-mod site_scan_tests;
+mod bbprogram;
+mod bbprogram_api;
+mod bbprogram_btf;
+mod bbprogram_helpers;
+pub mod bbprogram_lift;
+pub mod bbprogram_lower;
+mod bbprogram_use_def;
 
-pub use branch_target::BranchTargetAnalysis;
-pub use cfg::{subprog_bounds, subprog_ranges, CFGAnalysis};
-pub use liveness::{insn_use_def_set, LivenessAnalysis, RegUseDefSet};
-pub use map_refs::{MapBinding, MapRefsAnalysis, MapRefsResult};
-pub use site_scan::{iter_sites, Site};
+pub use bbprogram::{
+    BBMapBinding, BBProgram, Block, BlockBodyLinearView, BlockId, BtfMetadataMap, FrameId,
+    InsnSite, ProgramLinearView, Terminator, VerifierOracle,
+};
+pub use bbprogram_api::DiamondPattern;
+pub use bbprogram_btf::BtfRecordsView;
+pub(crate) use bbprogram_helpers::{
+    advance_reg_state, annotations_from_profile, block_slot_offset, packet_ctx_layout,
+    read_json_file, site_current_pc, PacketCtxLayout, PacketCtxLayoutScope, SimpleRegValue,
+};
+pub use bbprogram_lift::{lift, lift_with_kinsn_registry};
+pub use bbprogram_lower::lower;
+pub use bbprogram_use_def::{insn_use_def_set, DefSite, RegUseDefSet, UseDefGraph, UseSite};
 
-// Result types are used by tests and analysis cache consumers.
-pub use branch_target::BranchTargetResult;
-pub use cfg::CFGResult;
-pub use liveness::LivenessResult;
+#[cfg(test)]
+mod bbprogram_branch_target_tests;
+#[cfg(test)]
+mod bbprogram_cfg_tests;
+#[cfg(test)]
+mod bbprogram_liveness_tests;
+#[cfg(test)]
+mod bbprogram_map_refs_tests;
+#[cfg(test)]
+mod bbprogram_site_scan_tests;
+#[cfg(test)]
+mod lower_tests;

@@ -5,12 +5,12 @@
 //! and the BpfPass implementation are all here.
 
 use anyhow::{bail, Context};
+use std::collections::BTreeSet;
+use std::ops::Range;
 
-use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
+use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
 use crate::insn::*;
 use crate::pass::*;
-
-use crate::rewrite::{BtfRemapPolicy, RewritePlan};
 
 // ═══════════════════════════════════════════════════════════════════
 // Pattern matching (absorbed from matcher.rs)
@@ -399,10 +399,9 @@ fn base_reg_is_btf_ptr_from_states(
             continue;
         }
         if let Some(reg_state) = state.regs.get(&reg) {
-            let is_newer = best_pc.map_or(true, |bp| state.pc > bp);
-            let is_same_pc_btf = best_pc.map_or(false, |bp| {
-                state.pc == bp && is_btf_struct_ptr_type(&reg_state.reg_type)
-            });
+            let is_newer = best_pc.is_none_or(|bp| state.pc > bp);
+            let is_same_pc_btf = best_pc
+                .is_some_and(|bp| state.pc == bp && is_btf_struct_ptr_type(&reg_state.reg_type));
             if is_newer || is_same_pc_btf {
                 best_pc = Some(state.pc);
                 best_type = Some(reg_state.reg_type.clone());
@@ -483,30 +482,54 @@ fn is_likely_packet_ptr(reg: i32, before_pc: usize, insns: &[BpfInsn]) -> bool {
 /// of the kernel JIT surplus. No kinsn support needed -- pure BPF replacement.
 pub struct WideMemPass;
 
+#[derive(Clone, Debug)]
+struct SafeWideMemSite {
+    block: BlockId,
+    range: Range<usize>,
+    site: RewriteSite,
+}
+
 impl BpfPass for WideMemPass {
     fn name(&self) -> &str {
         "wide_mem"
     }
-    fn run(
-        &self,
-        program: &mut BpfProgram,
-        analyses: &mut AnalysisCache,
-        ctx: &PassContext,
-    ) -> anyhow::Result<PassResult> {
-        let bt = analyses.get::<BranchTargetAnalysis>(program);
+    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        run_on_bbprogram(program, ctx)
+    }
+}
 
-        let liveness = analyses.get::<LivenessAnalysis>(program);
+pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+    if prog.blocks().all(|block| block.insns.is_empty()) {
+        return Ok(PassResult::unchanged());
+    }
 
-        // Scan for wide_mem sites.
-        let raw_sites = scan_wide_mem(&program.insns);
+    let branch_targets = prog.branch_target_pcs()?;
+    let verifier_states = prog.oracle.as_deref().unwrap_or(&[]);
 
-        // Filter: skip sites with interior branch targets or live scratch regs.
-        let mut safe_sites = Vec::new();
-        let mut skipped = Vec::new();
+    let mut safe_sites = Vec::new();
+    let mut skipped = Vec::new();
+    let mut reported_starts = BTreeSet::new();
 
-        for site in &raw_sites {
+    for block in prog.blocks().map(|block| block.id).collect::<Vec<_>>() {
+        let view = prog.block_body_linear_view(block)?;
+        for mut site in scan_wide_mem(&view.insns) {
+            let start_slot = site.start_pc;
+            let start_pc = view.absolute_pc(start_slot)?;
+            site.start_pc = start_pc;
+            reported_starts.insert(site.start_pc);
+            let range = match view.range_for_slots(start_slot, site.old_len) {
+                Ok(range) => range,
+                Err(_) => {
+                    skipped.push(SkipReason {
+                        pc: site.start_pc,
+                        reason: "interior branch target".into(),
+                    });
+                    continue;
+                }
+            };
+
             let has_interior_target = (site.start_pc + 1..site.start_pc + site.old_len)
-                .any(|pc| pc < bt.is_target.len() && bt.is_target[pc]);
+                .any(|pc| branch_targets.contains(&pc));
 
             if has_interior_target {
                 skipped.push(SkipReason {
@@ -519,28 +542,27 @@ impl BpfPass for WideMemPass {
             let dst_reg = u8::try_from(site.required_binding("dst_reg")?)
                 .context("wide_mem dst_reg binding does not fit u8")?;
             let mut scratch_regs = std::collections::HashSet::new();
-            let site_end = site.start_pc + site.old_len;
-            for pc in site.start_pc..site_end {
-                if pc < program.insns.len() {
-                    let insn = &program.insns[pc];
-                    let class = insn.class();
-                    if class == BPF_ALU64 || class == BPF_ALU || class == BPF_LDX {
-                        let dreg = insn.dst_reg();
-                        if dreg != dst_reg {
-                            scratch_regs.insert(dreg);
-                        }
+            let site_end = start_slot + site.old_len;
+            for pc in start_slot..site_end {
+                let Some(insn) = view.insns.get(pc) else {
+                    continue;
+                };
+                let class = insn.class();
+                if class == BPF_ALU64 || class == BPF_ALU || class == BPF_LDX {
+                    let dreg = insn.dst_reg();
+                    if dreg != dst_reg {
+                        scratch_regs.insert(dreg);
                     }
                 }
             }
 
-            let last_insn_pc = if site_end > 0 { site_end - 1 } else { 0 };
-            let has_live_scratch = if last_insn_pc < liveness.live_out.len() {
-                scratch_regs
-                    .iter()
-                    .any(|r| liveness.live_out[last_insn_pc].contains(r))
+            let last_insn_pc = if site.old_len > 0 {
+                site.start_pc + site.old_len - 1
             } else {
-                false
+                site.start_pc
             };
+            let live_after = prog.live_out_current_pc(last_insn_pc)?;
+            let has_live_scratch = scratch_regs.iter().any(|r| live_after.contains(r));
 
             if has_live_scratch {
                 skipped.push(SkipReason {
@@ -550,7 +572,6 @@ impl BpfPass for WideMemPass {
                 continue;
             }
 
-            // Skip unsupported widths (only 2, 4, 8 can be emitted as a single wide load).
             let width = site.required_binding("width")?;
             if width != 2 && width != 4 && width != 8 {
                 skipped.push(SkipReason {
@@ -560,7 +581,7 @@ impl BpfPass for WideMemPass {
                 continue;
             }
 
-            if let Some(reason) = wide_load_alignment_skip_reason(site)? {
+            if let Some(reason) = wide_load_alignment_skip_reason(&site)? {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
                     reason,
@@ -568,31 +589,11 @@ impl BpfPass for WideMemPass {
                 continue;
             }
 
-            // Skip sites that may use packet pointers in XDP/TC programs.
-            //
-            // The BPF verifier tracks packet pointer ranges specially. Byte-by-byte
-            // loads (BPF_B) are always accepted because each only requires 1 byte of
-            // range. Wide loads (BPF_H/W/DW) require the verifier to prove a larger
-            // contiguous range is within [data, data_end), and may also require
-            // natural alignment. The verifier may reject the wider access even when
-            // individual byte accesses were valid.
-            //
-            // In XDP/TC programs, packet pointers (loaded from ctx->data /
-            // ctx->data_end) use verifier range tracking that may reject wide
-            // loads even when individual byte loads succeeded.  Skip sites
-            // whose base register likely holds a packet pointer.
-            //
-            // Heuristic: a register is a likely packet pointer if it was loaded
-            // from R1 (ctx) via LDX_MEM, e.g. `r6 = *(u64 *)(r1 + 0)`.  R10
-            // (stack) and registers derived from map lookups or other sources
-            // are safe for wide loads.
             if is_packet_unsafe_prog_type(ctx.prog_type) {
                 let base_reg = site.required_binding("base_reg")?;
                 let base_reg_i32 = i32::try_from(base_reg)
                     .context("wide_mem base_reg binding does not fit i32")?;
-                if base_reg != 10
-                    && is_likely_packet_ptr(base_reg_i32, site.start_pc, &program.insns)
-                {
+                if base_reg != 10 && is_likely_packet_ptr(base_reg_i32, start_slot, &view.insns) {
                     skipped.push(SkipReason {
                         pc: site.start_pc,
                         reason: format!(
@@ -604,62 +605,125 @@ impl BpfPass for WideMemPass {
                 }
             }
 
-            // Skip sites where the base register is a BTF struct pointer.
-            //
-            // The BPF verifier enforces that loads from BTF struct pointers
-            // (trusted_ptr_<struct>, ptr_to_btf_id, etc.) are contained within a
-            // single struct member.  Individual byte loads (BPF_B) always fit within
-            // any member ≥ 1 byte, but a merged wide load (BPF_H/W/DW) can span
-            // consecutive members, causing the verifier to reject the program with
-            // EACCES.  Example: cilium prog 141 loading `bpf_prog.pages` (u32 at
-            // offset 0) and the adjacent u32 cannot be merged into a u64 load
-            // because that crosses the `pages` field boundary.
-            //
-            // When verifier states are available (provided via log_level=2 output
-            // from a prior BPF_PROG_REJIT call), check the base register type at
-            // the site's start PC.  If it is a BTF struct pointer, skip the merge.
-            // When no states are available, fall through to allow the merge (the
-            // verifier itself will reject if needed).
-            {
-                let base_reg = u8::try_from(site.required_binding("base_reg")?)
-                    .context("wide_mem base_reg binding does not fit u8")?;
-                if base_reg_is_btf_ptr_from_states(
-                    base_reg,
-                    site.start_pc,
-                    program.verifier_states.as_ref(),
-                ) {
-                    skipped.push(SkipReason {
-                        pc: site.start_pc,
-                        reason: format!(
-                            "base register r{} is a BTF struct pointer; \
+            let base_reg = u8::try_from(site.required_binding("base_reg")?)
+                .context("wide_mem base_reg binding does not fit u8")?;
+            if base_reg_is_btf_ptr_from_states(base_reg, site.start_pc, verifier_states) {
+                skipped.push(SkipReason {
+                    pc: site.start_pc,
+                    reason: format!(
+                        "base register r{} is a BTF struct pointer; \
                              wide load may cross field boundary",
-                            base_reg
-                        ),
-                    });
-                    continue;
-                }
+                        base_reg
+                    ),
+                });
+                continue;
             }
 
-            safe_sites.push(site.clone());
+            safe_sites.push(SafeWideMemSite { block, range, site });
         }
+    }
+    add_cross_block_wide_mem_skips(prog, &branch_targets, &mut reported_starts, &mut skipped)?;
 
-        if safe_sites.is_empty() {
-            return Ok(PassResult {
-                sites_skipped: skipped,
-                ..PassResult::unchanged()
+    if safe_sites.is_empty() {
+        return Ok(PassResult {
+            sites_skipped: skipped,
+            ..PassResult::unchanged()
+        });
+    }
+
+    for site in safe_sites.iter().rev() {
+        prog.replace_range(site.block, site.range.clone(), emit_wide_mem(&site.site)?)?;
+    }
+
+    Ok(PassResult {
+        sites_applied: safe_sites.len(),
+        sites_skipped: skipped,
+        ..Default::default()
+    })
+}
+
+fn add_cross_block_wide_mem_skips(
+    prog: &BBProgram,
+    branch_targets: &BTreeSet<usize>,
+    reported_starts: &mut BTreeSet<usize>,
+    skipped: &mut Vec<SkipReason>,
+) -> anyhow::Result<()> {
+    let site_pcs = prog.current_site_pcs()?;
+    for block in prog.blocks() {
+        for idx in 0..block.insns.len() {
+            let site = InsnSite {
+                block: block.id,
+                idx,
+            };
+            let Some(&start_pc) = site_pcs.get(&site) else {
+                continue;
+            };
+            if reported_starts.contains(&start_pc) {
+                continue;
+            }
+            let first_block_remaining = block.insns.len() - idx;
+            let window = collect_wide_mem_window(prog, block.id, idx, branch_targets)?;
+            if !window.crossed_branch_target {
+                continue;
+            }
+            let Some(candidate) = try_match_wide_mem_at(&window.insns, 0) else {
+                continue;
+            };
+            if candidate.old_len <= first_block_remaining {
+                continue;
+            }
+            reported_starts.insert(start_pc);
+            skipped.push(SkipReason {
+                pc: start_pc,
+                reason: "interior branch target".into(),
             });
         }
-
-        let mut plan = RewritePlan::new();
-        for site in &safe_sites {
-            plan.replace_range(site.start_pc, site.old_len, emit_wide_mem(site)?)?;
-        }
-
-        let mut result = plan.commit(program, BtfRemapPolicy::Remap)?;
-        result.sites_applied = safe_sites.len();
-        result.sites_skipped = skipped;
-        Ok(result)
     }
+    Ok(())
+}
+
+struct WideMemWindow {
+    insns: Vec<BpfInsn>,
+    crossed_branch_target: bool,
+}
+
+fn collect_wide_mem_window(
+    prog: &BBProgram,
+    start_block: BlockId,
+    start_idx: usize,
+    branch_targets: &BTreeSet<usize>,
+) -> anyhow::Result<WideMemWindow> {
+    const MAX_WIDE_MEM_LEN: usize = 22;
+
+    let mut insns = Vec::with_capacity(MAX_WIDE_MEM_LEN);
+    let mut crossed_branch_target = false;
+    let mut block = start_block;
+    let mut idx = start_idx;
+
+    while insns.len() < MAX_WIDE_MEM_LEN {
+        let block_ref = prog.block(block)?;
+        while idx < block_ref.insns.len() && insns.len() < MAX_WIDE_MEM_LEN {
+            insns.push(block_ref.insns[idx]);
+            idx += 1;
+        }
+        if insns.len() >= MAX_WIDE_MEM_LEN {
+            break;
+        }
+        match block_ref.terminator {
+            Terminator::Fallthrough { next } if next.0 == block.0 + 1 => {
+                let next_pc = prog.current_block_start_pc(next)?;
+                crossed_branch_target |= branch_targets.contains(&next_pc);
+                block = next;
+                idx = 0;
+            }
+            _ => break,
+        }
+    }
+
+    Ok(WideMemWindow {
+        insns,
+        crossed_branch_target,
+    })
 }
 
 // ═══════════════════════════════════════════════════════════════════

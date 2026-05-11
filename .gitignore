@@ -197,6 +197,7 @@ docs/tmp/*.sh
 
 # Corpus run guest-inputs snapshots (build artifacts copied into VM, ~600MB+)
 corpus/results/*/guest-inputs/
+
 runner/corpus/results/*/guest-inputs/
 
 # Preserved failure workdirs (raw bytecode + verifier logs from REJIT failures)

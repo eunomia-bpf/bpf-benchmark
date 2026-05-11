@@ -1,22 +1,17 @@
 // SPDX-License-Identifier: MIT
 //! skb_load_bytes specialization pass.
 
-use crate::analysis::{iter_sites, BranchTargetAnalysis, BranchTargetResult};
+use std::collections::BTreeSet;
+use std::ops::Range;
+
+use crate::analysis::{
+    advance_reg_state as advance_simple_reg_state, packet_ctx_layout, BBProgram, BlockId,
+    PacketCtxLayout, PacketCtxLayoutScope, SimpleRegValue,
+};
 use crate::insn::*;
 use crate::pass::*;
 
-use crate::rewrite::{BtfRemapPolicy, RewritePlan};
-
 const BPF_FUNC_SKB_LOAD_BYTES: i32 = libbpf_sys::BPF_FUNC_skb_load_bytes as i32;
-
-const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
-const BPF_PROG_TYPE_SCHED_ACT: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_ACT;
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-struct PacketCtxLayout {
-    data_off: i16,
-    data_end_off: i16,
-}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum RegValue {
@@ -26,6 +21,35 @@ enum RegValue {
     FpPlusConst(i32),
 }
 
+impl SimpleRegValue for RegValue {
+    fn unknown() -> Self {
+        Self::Unknown
+    }
+
+    fn const64(value: i64) -> Self {
+        Self::Const(value)
+    }
+
+    fn const32(value: u32) -> Self {
+        Self::Const(value as i64)
+    }
+
+    fn mov32(value: Self) -> Self {
+        mov32_value(value)
+    }
+
+    fn alu64_imm(value: Self, op: u8, imm: i32) -> Self {
+        match apply_alu64_imm(value, op, imm) {
+            Some(value) => value,
+            None => Self::Unknown,
+        }
+    }
+
+    fn alu32_add_sub(value: Self, imm: i32, is_add: bool) -> Self {
+        alu32_add_sub(value, imm, is_add)
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct RewriteSite {
     call_pc: usize,
@@ -33,9 +57,16 @@ struct RewriteSite {
     len: i32,
 }
 
+#[derive(Clone, Debug)]
+struct AppliedRewriteSite {
+    block: BlockId,
+    range: Range<usize>,
+    site: RewriteSite,
+}
+
 #[derive(Default)]
 struct ScanResult {
-    sites: Vec<RewriteSite>,
+    sites: Vec<AppliedRewriteSite>,
     skips: Vec<SkipReason>,
 }
 
@@ -46,88 +77,92 @@ impl BpfPass for SkbLoadBytesSpecPass {
     fn name(&self) -> &str {
         "skb_load_bytes_spec"
     }
-    fn run(
-        &self,
-        program: &mut BpfProgram,
-        analyses: &mut AnalysisCache,
-        ctx: &PassContext,
-    ) -> anyhow::Result<PassResult> {
-        if program.insns.is_empty() {
-            return Ok(PassResult::unchanged());
-        }
-
-        let Some(layout) = packet_ctx_layout(ctx.prog_type) else {
-            return Ok(PassResult::unchanged());
-        };
-
-        let bt = analyses.get::<BranchTargetAnalysis>(program);
-        let scan = scan_sites(&program.insns, &bt);
-        if scan.sites.is_empty() {
-            return Ok(PassResult {
-                sites_skipped: scan.skips,
-                ..PassResult::unchanged()
-            });
-        }
-
-        let mut plan = RewritePlan::new();
-        for site in &scan.sites {
-            plan.replace_range(site.call_pc, 1, emit_replacement(*site, layout))?;
-        }
-
-        let mut result = plan.commit(program, BtfRemapPolicy::NoRemap)?;
-        result.sites_applied = scan.sites.len();
-        result.sites_skipped = scan.skips;
-        Ok(result)
+    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        run_on_bbprogram(program, ctx.prog_type)
     }
 }
 
-fn packet_ctx_layout(prog_type: u32) -> Option<PacketCtxLayout> {
-    match prog_type {
-        BPF_PROG_TYPE_SCHED_CLS | BPF_PROG_TYPE_SCHED_ACT => Some(PacketCtxLayout {
-            data_off: SKB_PACKET_DATA_OFFSET,
-            data_end_off: SKB_PACKET_DATA_END_OFFSET,
-        }),
-        _ => None,
+pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<PassResult> {
+    let Some(layout) = packet_ctx_layout(prog_type, PacketCtxLayoutScope::SkbHelper) else {
+        return Ok(PassResult::unchanged());
+    };
+    let branch_targets = prog.branch_target_pcs()?;
+    let scan = scan_sites(prog, &branch_targets)?;
+    if scan.sites.is_empty() {
+        return Ok(PassResult {
+            sites_skipped: scan.skips,
+            ..PassResult::unchanged()
+        });
     }
+    apply_skb_load_bytes_sites(prog, &scan.sites, layout)?;
+    Ok(PassResult {
+        sites_applied: scan.sites.len(),
+        sites_skipped: scan.skips,
+        ..PassResult::unchanged()
+    })
 }
 
-fn scan_sites(insns: &[BpfInsn], bt: &BranchTargetResult) -> ScanResult {
+fn apply_skb_load_bytes_sites(
+    prog: &mut BBProgram,
+    sites: &[AppliedRewriteSite],
+    layout: PacketCtxLayout,
+) -> anyhow::Result<()> {
+    for site in sites.iter().rev() {
+        prog.replace_range(
+            site.block,
+            site.range.clone(),
+            emit_replacement(site.site, layout),
+        )?;
+    }
+    Ok(())
+}
+
+fn scan_sites(prog: &BBProgram, branch_targets: &BTreeSet<usize>) -> anyhow::Result<ScanResult> {
     let mut scan = ScanResult::default();
     let mut regs = initial_reg_state();
 
-    for site in iter_sites(insns, |insns, pc| Some(insn_width(&insns[pc]))) {
-        let pc = site.pc;
-        if pc > 0 && bt.is_target.get(pc).copied().unwrap_or(false) {
-            regs = initial_reg_state();
-        }
+    for block in prog.blocks().map(|block| block.id).collect::<Vec<_>>() {
+        let view = prog.block_body_linear_view(block)?;
+        let mut rel_pc = 0usize;
+        while rel_pc < view.insns.len() {
+            let pc = view.absolute_pc(rel_pc)?;
+            if pc > 0 && branch_targets.contains(&pc) {
+                regs = initial_reg_state();
+            }
 
-        let insn = &insns[pc];
-        if insn.is_call() && insn.imm == BPF_FUNC_SKB_LOAD_BYTES {
-            if insn.src_reg() != 0 {
-                scan.skips.push(SkipReason {
-                    pc,
-                    reason: "helper is not regular call #26".into(),
-                });
-            } else {
-                match classify_site(pc, bt, &regs) {
-                    Ok(site) => scan.sites.push(site),
-                    Err(reason) => scan.skips.push(SkipReason { pc, reason }),
+            let insn = &view.insns[rel_pc];
+            if insn.is_call() && insn.imm == BPF_FUNC_SKB_LOAD_BYTES {
+                if insn.src_reg() != 0 {
+                    scan.skips.push(SkipReason {
+                        pc,
+                        reason: "helper is not regular call #26".into(),
+                    });
+                } else {
+                    match classify_site(pc, branch_targets, &regs) {
+                        Ok(site) => scan.sites.push(AppliedRewriteSite {
+                            block,
+                            range: view.range_for_slots(rel_pc, insn_width(insn))?,
+                            site,
+                        }),
+                        Err(reason) => scan.skips.push(SkipReason { pc, reason }),
+                    }
                 }
             }
-        }
 
-        advance_reg_state(insns, pc, &mut regs);
+            advance_simple_reg_state(&view.insns[rel_pc], view.insns.get(rel_pc + 1), &mut regs)?;
+            rel_pc += insn_width(insn);
+        }
     }
 
-    scan
+    Ok(scan)
 }
 
 fn classify_site(
     call_pc: usize,
-    bt: &BranchTargetResult,
+    branch_targets: &BTreeSet<usize>,
     regs: &[RegValue; 11],
 ) -> Result<RewriteSite, String> {
-    if bt.is_target.get(call_pc).copied().unwrap_or(false) {
+    if branch_targets.contains(&call_pc) {
         return Err("call pc is a branch target".into());
     }
     if regs[1] != RegValue::Ctx {
@@ -212,57 +247,6 @@ fn initial_reg_state() -> [RegValue; 11] {
     regs
 }
 
-fn advance_reg_state(insns: &[BpfInsn], pc: usize, regs: &mut [RegValue; 11]) {
-    let insn = &insns[pc];
-
-    if insn.is_call() {
-        for reg in regs.iter_mut().take(6) {
-            *reg = RegValue::Unknown;
-        }
-        return;
-    }
-
-    if insn.is_ldimm64() {
-        let next = insns.get(pc + 1).copied();
-        regs[insn.dst_reg() as usize] = next
-            .map(|hi| combine_ldimm64(insn, &hi))
-            .map(RegValue::Const)
-            .unwrap_or(RegValue::Unknown);
-        return;
-    }
-
-    match insn.class() {
-        BPF_ALU64 => advance_alu64_state(insn, regs),
-        BPF_ALU => advance_alu32_state(insn, regs),
-        BPF_LDX | BPF_LD => regs[insn.dst_reg() as usize] = RegValue::Unknown,
-        _ => {}
-    }
-}
-
-fn advance_alu64_state(insn: &BpfInsn, regs: &mut [RegValue; 11]) {
-    let dst = insn.dst_reg() as usize;
-    match (bpf_op(insn.code), bpf_src(insn.code)) {
-        (BPF_MOV, BPF_X) => regs[dst] = regs[insn.src_reg() as usize],
-        (BPF_MOV, BPF_K) => regs[dst] = RegValue::Const(insn.imm as i64),
-        (BPF_ADD | BPF_SUB, BPF_K) => {
-            regs[dst] = apply_alu64_imm(regs[dst], bpf_op(insn.code), insn.imm)
-                .unwrap_or(RegValue::Unknown);
-        }
-        _ => regs[dst] = RegValue::Unknown,
-    }
-}
-
-fn advance_alu32_state(insn: &BpfInsn, regs: &mut [RegValue; 11]) {
-    let dst = insn.dst_reg() as usize;
-    match (bpf_op(insn.code), bpf_src(insn.code)) {
-        (BPF_MOV, BPF_X) => regs[dst] = mov32_value(regs[insn.src_reg() as usize]),
-        (BPF_MOV, BPF_K) => regs[dst] = RegValue::Const(insn.imm as u32 as i64),
-        (BPF_ADD, BPF_K) => regs[dst] = alu32_add_sub(regs[dst], insn.imm, true),
-        (BPF_SUB, BPF_K) => regs[dst] = alu32_add_sub(regs[dst], insn.imm, false),
-        _ => regs[dst] = RegValue::Unknown,
-    }
-}
-
 fn apply_alu64_imm(value: RegValue, op: u8, imm: i32) -> Option<RegValue> {
     match value {
         RegValue::Const(current) => {
@@ -310,12 +294,6 @@ fn alu32_add_sub(value: RegValue, imm: i32, is_add: bool) -> RegValue {
         }
         _ => RegValue::Unknown,
     }
-}
-
-fn combine_ldimm64(lo: &BpfInsn, hi: &BpfInsn) -> i64 {
-    let low = lo.imm as u32 as u64;
-    let high = hi.imm as u32 as u64;
-    i64::from_le_bytes((low | (high << 32)).to_le_bytes())
 }
 
 fn extract_nonnegative_i32(value: RegValue) -> Option<i32> {

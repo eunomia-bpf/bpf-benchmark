@@ -4,62 +4,40 @@
 use anyhow::Result;
 
 mod bounds_check_merge;
-#[cfg(test)]
-mod bounds_check_merge_tests;
 mod branch_flip;
-#[cfg(test)]
-mod branch_flip_tests;
 mod bulk_memory;
-#[cfg(test)]
-mod bulk_memory_tests;
 mod ccmp;
-#[cfg(test)]
-mod ccmp_tests;
 mod cond_select;
-#[cfg(test)]
-mod cond_select_tests;
 mod const_prop;
-#[cfg(test)]
-mod const_prop_tests;
 mod dce;
-#[cfg(test)]
-mod dce_tests;
 mod endian;
-#[cfg(test)]
-mod endian_tests;
 mod extract;
-#[cfg(test)]
-mod extract_tests;
 pub mod map_inline;
 mod noop;
 mod prefetch;
-#[cfg(test)]
-mod prefetch_tests;
 mod rotate;
-#[cfg(test)]
-mod rotate_tests;
 mod skb_load_bytes;
-#[cfg(test)]
-mod skb_load_bytes_tests;
 mod wide_mem;
-#[cfg(test)]
-mod wide_mem_tests;
 
-pub use bounds_check_merge::BoundsCheckMergePass;
-pub use branch_flip::BranchFlipPass;
-pub use bulk_memory::BulkMemoryPass;
-pub use ccmp::CcmpPass;
-pub use cond_select::CondSelectPass;
-pub use const_prop::ConstPropPass;
-pub use dce::DcePass;
-pub use endian::EndianFusionPass;
-pub use extract::ExtractPass;
+pub use bounds_check_merge::{
+    run_on_bbprogram as run_bounds_check_merge_on_bbprogram, BoundsCheckMergePass,
+};
+pub use branch_flip::{run_on_bbprogram as run_branch_flip_on_bbprogram, BranchFlipPass};
+pub use bulk_memory::{run_on_bbprogram as run_bulk_memory_on_bbprogram, BulkMemoryPass};
+pub use ccmp::{run_on_bbprogram as run_ccmp_on_bbprogram, CcmpPass};
+pub use cond_select::{run_on_bbprogram as run_cond_select_on_bbprogram, CondSelectPass};
+pub use const_prop::{run_on_bbprogram as run_const_prop_on_bbprogram, ConstPropPass};
+pub use dce::{run_on_bbprogram as run_dce_on_bbprogram, DcePass};
+pub use endian::{run_on_bbprogram as run_endian_fusion_on_bbprogram, EndianFusionPass};
+pub use extract::{run_on_bbprogram as run_extract_on_bbprogram, ExtractPass};
 pub use map_inline::{MapInfo, MapInfoAnalysis, MapInfoResult, MapInlinePass, MapReference};
-pub use noop::NoopPass;
-pub use prefetch::PrefetchPass;
-pub use rotate::RotatePass;
-pub use skb_load_bytes::SkbLoadBytesSpecPass;
-pub use wide_mem::WideMemPass;
+pub use noop::{run_on_bbprogram as run_noop_on_bbprogram, NoopPass};
+pub use prefetch::{run_on_bbprogram as run_prefetch_on_bbprogram, PrefetchPass};
+pub use rotate::{run_on_bbprogram as run_rotate_on_bbprogram, RotatePass};
+pub use skb_load_bytes::{
+    run_on_bbprogram as run_skb_load_bytes_spec_on_bbprogram, SkbLoadBytesSpecPass,
+};
+pub use wide_mem::{run_on_bbprogram as run_wide_mem_on_bbprogram, WideMemPass};
 
 #[cfg(test)]
 use crate::pass::PassManager;
@@ -211,6 +189,29 @@ pub fn build_custom_pipeline(names: &[String]) -> Result<PassManager> {
 }
 
 #[cfg(test)]
+pub struct BBProgramPipeline {
+    pub passes: Vec<Box<dyn BpfPass>>,
+}
+
+#[cfg(test)]
+impl std::fmt::Debug for BBProgramPipeline {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("BBProgramPipeline")
+            .field("len", &self.passes.len())
+            .finish()
+    }
+}
+
+#[cfg(test)]
+pub fn build_custom_bbprogram_pipeline(names: &[String]) -> Result<BBProgramPipeline> {
+    let passes = resolve_requested_passes(names)?
+        .into_iter()
+        .map(make_test_pass)
+        .collect();
+    Ok(BBProgramPipeline { passes })
+}
+
+#[cfg(test)]
 fn make_test_pass(entry: &PassRegistryEntry) -> Box<dyn BpfPass> {
     match entry.name {
         "map_inline" => Box::new(MapInlinePass),
@@ -223,8 +224,33 @@ fn make_test_pass(entry: &PassRegistryEntry) -> Box<dyn BpfPass> {
     }
 }
 
-// ── Cross-pass integration tests ────────────────────────────────────
-
 #[cfg(test)]
-#[path = "mod_tests.rs"]
-mod tests;
+mod bounds_check_merge_tests;
+#[cfg(test)]
+mod branch_flip_tests;
+#[cfg(test)]
+mod bulk_memory_tests;
+#[cfg(test)]
+mod ccmp_tests;
+#[cfg(test)]
+mod cond_select_tests;
+#[cfg(test)]
+mod const_prop_tests;
+#[cfg(test)]
+mod dce_tests;
+#[cfg(test)]
+mod endian_tests;
+#[cfg(test)]
+mod extract_tests;
+#[cfg(test)]
+mod map_inline_tests;
+#[cfg(test)]
+mod mod_tests;
+#[cfg(test)]
+mod prefetch_tests;
+#[cfg(test)]
+mod rotate_tests;
+#[cfg(test)]
+mod skb_load_bytes_tests;
+#[cfg(test)]
+mod wide_mem_tests;

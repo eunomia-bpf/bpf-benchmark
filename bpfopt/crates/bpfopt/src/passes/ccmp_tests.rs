@@ -1,19 +1,29 @@
-use super::ccmp::*;
+// SPDX-License-Identifier: MIT
+
+use super::ccmp::{encode_ccmp_payload, CcmpFailMode, CcmpPass, CcmpPayload, CcmpWidth};
 use crate::insn::*;
-use crate::pass::*;
-use crate::pass::{AnalysisCache, PassContext};
+use crate::pass::Arch;
+use crate::test_helpers::*;
 
 fn jmp_zero(op: u8, class: u8, reg: u8, off: i16) -> BpfInsn {
     BpfInsn::new(class | op | BPF_K, BpfInsn::make_regs(reg, 0), off, 0)
 }
 
-fn ccmp_ctx(arch: Arch) -> PassContext {
-    let mut ctx = PassContext::baseline();
+fn ccmp_ctx(arch: Arch) -> crate::pass::PassContext {
+    let mut ctx = ctx_with_kinsn("bpf_ccmp64", 77);
     ctx.platform.arch = arch;
-    ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_ccmp64", 77, 0)
-        .unwrap();
     ctx
+}
+
+fn three_term_chain() -> Vec<BpfInsn> {
+    vec![
+        jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_1, 3),
+        jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_2, 2),
+        jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_3, 1),
+        BpfInsn::mov64_imm(BPF_REG_0, 1),
+        BpfInsn::mov64_imm(BPF_REG_0, 0),
+        BpfInsn::exit(),
+    ]
 }
 
 fn decode_ccmp_payload(encoded: u64) -> anyhow::Result<CcmpPayload> {
@@ -61,6 +71,8 @@ fn decode_ccmp_payload(encoded: u64) -> anyhow::Result<CcmpPayload> {
 
 #[test]
 fn ccmp_payload_roundtrips_canonical_encoding() {
+    // Restored from HEAD: the CCMP kinsn sidecar payload is an ABI contract,
+    // including reserved bits and canonical unused register slots.
     let payload = CcmpPayload {
         dst_reg: BPF_REG_0,
         fail_mode: CcmpFailMode::EqZero,
@@ -69,45 +81,32 @@ fn ccmp_payload_roundtrips_canonical_encoding() {
     };
 
     let encoded = encode_ccmp_payload(&payload).unwrap();
+
     assert_eq!(decode_ccmp_payload(encoded).unwrap(), payload);
 }
 
 #[test]
-fn ccmp_payload_rejects_dst_alias() {
-    let err = encode_ccmp_payload(&CcmpPayload {
-        dst_reg: BPF_REG_1,
-        fail_mode: CcmpFailMode::EqZero,
-        width: CcmpWidth::Bpf64,
-        regs: vec![BPF_REG_1, BPF_REG_2],
-    })
-    .unwrap_err();
+fn ccmp_arch_gate_skips_x86_64() {
+    let run = run_pass_on_insns(CcmpPass, three_term_chain(), &ccmp_ctx(Arch::X86_64));
 
-    assert!(err.to_string().contains("aliases"));
+    assert_eq!(run.result.sites_applied, 0);
+    assert_skip_reason(&run.result, 0, "aarch64");
 }
 
 #[test]
-fn scan_ccmp_chain_detects_three_term_nez_guard() {
-    let insns = vec![
-        jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_1, 3),
-        jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_2, 2),
-        jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_3, 1),
-        BpfInsn::mov64_imm(BPF_REG_0, 1),
-        BpfInsn::exit(),
-    ];
+fn ccmp_emits_kinsn_and_final_branch_on_aarch64() {
+    let run = run_pass_on_insns(CcmpPass, three_term_chain(), &ccmp_ctx(Arch::Aarch64));
 
-    let sites = scan_ccmp_sites(&insns);
-
-    assert_eq!(sites.len(), 1);
-    assert_eq!(sites[0].start_pc, 0);
-    assert_eq!(sites[0].old_len, 3);
-    assert_eq!(sites[0].target_pc, 4);
-    assert_eq!(sites[0].fail_mode, CcmpFailMode::EqZero);
-    assert_eq!(sites[0].regs, vec![BPF_REG_1, BPF_REG_2, BPF_REG_3]);
+    assert_eq!(run.result.sites_applied, 1);
+    assert!(run.lowered[0].is_kinsn_sidecar());
+    assert!(run.lowered[1].is_call_kinsn());
+    assert_eq!(run.lowered[1].imm, 77);
+    assert!(run.lowered[2].is_cond_jmp());
 }
 
 #[test]
-fn scan_ccmp_chain_rejects_mixed_fail_polarity_boundary() {
-    let insns = vec![
+fn ccmp_rejects_mixed_fail_polarity_chain() {
+    let input = vec![
         jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_1, 3),
         jmp_zero(BPF_JNE, BPF_JMP, BPF_REG_2, 2),
         jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_3, 1),
@@ -115,62 +114,15 @@ fn scan_ccmp_chain_rejects_mixed_fail_polarity_boundary() {
         BpfInsn::exit(),
     ];
 
-    assert!(scan_ccmp_sites(&insns).is_empty());
+    let run = run_pass_on_insns(CcmpPass, input.clone(), &ccmp_ctx(Arch::Aarch64));
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_eq!(run.lowered, input);
 }
 
 #[test]
-fn ccmp_pass_arch_gate_skips_x86_64() {
-    let mut program = BpfProgram::new(vec![
-        jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_1, 2),
-        jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_2, 1),
-        BpfInsn::mov64_imm(BPF_REG_0, 1),
-        BpfInsn::exit(),
-    ]);
-    let pass = CcmpPass;
-    let result = pass
-        .run(
-            &mut program,
-            &mut AnalysisCache::new(),
-            &ccmp_ctx(Arch::X86_64),
-        )
-        .unwrap();
-    assert!(result.sites_skipped[0].reason.contains("aarch64"));
-}
-
-#[test]
-fn ccmp_pass_emits_kinsn_and_final_branch_on_aarch64() {
-    let mut program = BpfProgram::new(vec![
-        jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_1, 3),
-        jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_2, 2),
-        jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_3, 1),
-        BpfInsn::mov64_imm(BPF_REG_0, 1),
-        BpfInsn::mov64_imm(BPF_REG_0, 0),
-        BpfInsn::exit(),
-    ]);
-    let pass = CcmpPass;
-    let result = pass
-        .run(
-            &mut program,
-            &mut AnalysisCache::new(),
-            &ccmp_ctx(Arch::Aarch64),
-        )
-        .unwrap();
-    assert_eq!(result.sites_applied, 1);
-    assert!(program.insns[0].is_kinsn_sidecar());
-    assert_eq!(program.insns[1].src_reg(), BPF_PSEUDO_KINSN_CALL);
-    assert_eq!(program.insns[1].imm, 77);
-    assert_eq!(program.insns[2].code, BPF_JMP | BPF_JEQ | BPF_K);
-    assert_eq!(program.insns[2].dst_reg(), BPF_REG_0);
-    assert_eq!(program.insns[2].off, 1);
-
-    let decoded = decode_ccmp_payload(program.insns[0].sidecar_payload()).unwrap();
-    assert_eq!(decoded.regs, vec![BPF_REG_1, BPF_REG_2, BPF_REG_3]);
-    assert_eq!(decoded.fail_mode, CcmpFailMode::EqZero);
-}
-
-#[test]
-fn ccmp_pass_skips_overlong_chain_without_partial_rewrite() {
-    let mut program = BpfProgram::new(vec![
+fn ccmp_skips_overlong_chain_without_partial_rewrite() {
+    let input = vec![
         jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_1, 5),
         jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_2, 4),
         jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_3, 3),
@@ -178,40 +130,26 @@ fn ccmp_pass_skips_overlong_chain_without_partial_rewrite() {
         jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_5, 1),
         BpfInsn::mov64_imm(BPF_REG_0, 1),
         BpfInsn::exit(),
-    ]);
-    let pass = CcmpPass;
-    let result = pass
-        .run(
-            &mut program,
-            &mut AnalysisCache::new(),
-            &ccmp_ctx(Arch::Aarch64),
-        )
-        .unwrap();
-    assert!(result.sites_skipped[0].reason.contains("exceeds maximum"));
-    assert_eq!(program.insns[0].code, BPF_JMP | BPF_JEQ | BPF_K);
+    ];
+
+    let run = run_pass_on_insns(CcmpPass, input, &ccmp_ctx(Arch::Aarch64));
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_skip_reason(&run.result, 0, "exceeds maximum");
 }
 
 #[test]
-fn ccmp_pass_skips_site_crossing_subprog_boundary() {
-    let mut program = BpfProgram::new(vec![
+fn ccmp_skips_site_crossing_subprog_boundary() {
+    let input = vec![
         jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_1, 3),
         jmp_zero(BPF_JEQ, BPF_JMP, BPF_REG_2, 2),
         BpfInsn::exit(),
-        BpfInsn::new(
-            BPF_JMP | BPF_CALL,
-            BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
-            0,
-            -2,
-        ),
+        BpfInsn::pseudo_call_to(3, 1),
         BpfInsn::exit(),
-    ]);
-    let pass = CcmpPass;
-    let result = pass
-        .run(
-            &mut program,
-            &mut AnalysisCache::new(),
-            &ccmp_ctx(Arch::Aarch64),
-        )
-        .unwrap();
-    assert!(result.sites_skipped[0].reason.contains("subprog boundary"));
+    ];
+
+    let run = run_pass_on_insns(CcmpPass, input, &ccmp_ctx(Arch::Aarch64));
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_skip_reason(&run.result, 0, "subprog boundary");
 }

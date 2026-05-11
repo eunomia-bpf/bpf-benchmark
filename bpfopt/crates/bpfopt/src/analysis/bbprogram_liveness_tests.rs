@@ -1,0 +1,90 @@
+// SPDX-License-Identifier: MIT
+
+use crate::analysis::BlockId;
+use crate::insn::*;
+use crate::test_helpers::*;
+
+#[test]
+fn bbprogram_live_in_marks_register_used_before_local_def() {
+    let insns = vec![
+        BpfInsn::alu64_reg(BPF_ADD, BPF_REG_2, BPF_REG_1),
+        BpfInsn::mov64_imm(BPF_REG_0, 0),
+        BpfInsn::exit(),
+    ];
+    let prog = lift_test_program(&insns, &pass_ctx());
+
+    assert!(prog.live_in(BlockId(0)).contains(&BPF_REG_1));
+    assert!(prog.live_in(BlockId(0)).contains(&BPF_REG_2));
+}
+
+#[test]
+fn bbprogram_live_out_propagates_across_branch_successors() {
+    let insns = vec![
+        BpfInsn::jeq_imm(BPF_REG_1, 0, 1),
+        BpfInsn::alu64_reg(BPF_ADD, BPF_REG_2, BPF_REG_3),
+        BpfInsn::alu64_reg(BPF_ADD, BPF_REG_4, BPF_REG_2),
+        BpfInsn::exit(),
+    ];
+    let prog = lift_test_program(&insns, &pass_ctx());
+
+    assert!(prog.live_out(BlockId(0)).contains(&BPF_REG_2));
+    assert!(prog.live_in(BlockId(1)).contains(&BPF_REG_3));
+}
+
+#[test]
+fn bbprogram_liveness_models_helper_call_clobbers() {
+    let insns = vec![
+        BpfInsn::mov64_imm(BPF_REG_1, 7),
+        BpfInsn::helper_call(1),
+        BpfInsn::alu64_reg(BPF_ADD, BPF_REG_6, BPF_REG_1),
+        BpfInsn::exit(),
+    ];
+    let prog = lift_test_program(&insns, &pass_ctx());
+
+    assert!(!prog.live_out(BlockId(0)).contains(&BPF_REG_1));
+    assert!(prog.live_in(BlockId(0)).contains(&BPF_REG_6));
+}
+
+#[test]
+fn bbprogram_liveness_includes_kinsn_implicit_register_uses() {
+    // P1-F support: kinsn call operands are encoded in the sidecar, not in the
+    // raw call register fields, and must be visible to DCE/liveness.
+    let btf_id = 0x1234;
+    let payload = BpfInsn::pack_u4(BPF_REG_6, 0)
+        | BpfInsn::pack_u4(BPF_REG_6, 4)
+        | BpfInsn::pack_u4(BPF_REG_0, 8)
+        | BpfInsn::pack_u4(BPF_REG_1, 12);
+    let ctx = ctx_with_kinsn("bpf_select64", btf_id);
+    let insns = vec![
+        BpfInsn::mov64_imm(BPF_REG_6, 0),
+        BpfInsn::mov64_imm(BPF_REG_0, 1),
+        BpfInsn::mov64_imm(BPF_REG_1, 7),
+        BpfInsn::kinsn_sidecar(payload),
+        BpfInsn::call_kinsn_with_off(btf_id, 0),
+        BpfInsn::exit(),
+    ];
+    let prog = lift_test_program(&insns, &ctx);
+
+    assert!(prog.live_out(BlockId(0)).contains(&BPF_REG_6));
+    assert!(prog.live_out(BlockId(0)).contains(&BPF_REG_0));
+    assert!(prog.live_out(BlockId(0)).contains(&BPF_REG_1));
+}
+
+#[test]
+fn bbprogram_liveness_recomputes_after_delete_insn() {
+    let insns = vec![
+        BpfInsn::mov64_imm(BPF_REG_2, 1),
+        BpfInsn::alu64_reg(BPF_ADD, BPF_REG_3, BPF_REG_2),
+        BpfInsn::exit(),
+    ];
+    let mut prog = lift_test_program(&insns, &pass_ctx());
+    let def = prog
+        .reaching_defs(BlockId(0))
+        .defs_for(BPF_REG_2)
+        .next()
+        .expect("r2 def should exist");
+
+    prog.delete_insn(def).expect("delete should update use-def");
+
+    assert!(prog.live_in(BlockId(0)).contains(&BPF_REG_2));
+}

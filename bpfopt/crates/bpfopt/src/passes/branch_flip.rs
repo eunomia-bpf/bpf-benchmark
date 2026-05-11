@@ -2,20 +2,16 @@
 //! BRANCH_FLIP PGO-guided pass.
 
 use std::collections::HashMap;
-use std::fs;
 use std::path::{Path, PathBuf};
 
 use anyhow::{bail, Context, Result};
 use serde::Deserialize;
 
-use crate::analysis::{iter_sites, BranchTargetAnalysis};
+use crate::analysis::{
+    annotations_from_profile, read_json_file, BBProgram, BlockId, InsnSite, Terminator,
+};
 use crate::insn::*;
 use crate::pass::*;
-
-use crate::rewrite::{
-    commit_rewrite_output, fixup_all_branches as fixup_branches_inline, BtfRemapPolicy,
-    RewriteOutput,
-};
 
 /// BRANCH_FLIP: PGO-guided reorder of if/else bodies.
 ///
@@ -42,8 +38,8 @@ use crate::rewrite::{
 /// safety gates for unpredictable branches.
 ///
 /// Safety: skips sites where external branches target interior instructions,
-/// or where JSET is used (no simple inverse). Also adjusts internal branch
-/// offsets within relocated bodies via an address map.
+/// or where JSET is used (no simple inverse). The rewrite updates BBProgram
+/// terminators and block order; lower recomputes branch offsets.
 pub struct BranchFlipPass {
     /// Minimum taken rate to trigger a PGO-guided flip.
     pub min_bias: f64,
@@ -78,14 +74,15 @@ impl BpfPass for ProfiledBranchFlipPass {
         self.inner.name()
     }
 
-    fn run(
-        &self,
-        program: &mut BpfProgram,
-        analyses: &mut AnalysisCache,
-        ctx: &PassContext,
-    ) -> anyhow::Result<PassResult> {
-        program.inject_profiling(&self.profiling);
-        self.inner.run(program, analyses, ctx)
+    fn run(&self, program: &mut BBProgram, _ctx: &PassContext) -> anyhow::Result<PassResult> {
+        let annotations = annotations_from_profile(&self.profiling);
+        run_on_bbprogram(
+            program,
+            &annotations,
+            self.profiling.branch_miss_rate,
+            self.inner.min_bias,
+            self.inner.max_branch_miss_rate,
+        )
     }
 }
 
@@ -186,16 +183,17 @@ fn read_branch_flip_profile(path: &Path) -> Result<ProfilingData> {
     Ok(data)
 }
 
-fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Result<T> {
-    let data = fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
-    serde_json::from_slice(&data)
-        .with_context(|| format!("failed to parse {label} from {}", path.display()))
-}
-
 /// A detected branch-flip site.
+#[derive(Clone)]
 pub(super) struct BranchFlipSite {
     /// PC of the Jcc instruction.
     pub(super) pc: usize,
+    pred: BlockId,
+    then_first: BlockId,
+    then_last: BlockId,
+    else_first: BlockId,
+    else_last: BlockId,
+    join: BlockId,
     /// Number of instructions in the then-body (N-1, between Jcc and JA).
     pub(super) then_len: usize,
     /// Number of instructions in the else-body (M = ja.off).
@@ -213,210 +211,141 @@ impl BpfPass for BranchFlipPass {
     fn name(&self) -> &str {
         "branch_flip"
     }
-    fn run(
-        &self,
-        program: &mut BpfProgram,
-        analyses: &mut AnalysisCache,
-        _ctx: &PassContext,
-    ) -> anyhow::Result<PassResult> {
-        // Phase 0: check real program-level PMU branch miss rate. Missing PMU
-        // data is a profile collection failure, not an optimization skip.
-        let Some(program_miss_rate) = program.branch_miss_rate else {
-            anyhow::bail!("branch_flip requires real program-level branch_miss_rate data");
-        };
-        if !program_miss_rate.is_finite() || !(0.0..=1.0).contains(&program_miss_rate) {
-            anyhow::bail!(
-                "branch_flip program branch_miss_rate must be finite and within [0, 1], got {}",
-                program_miss_rate
-            );
-        }
-        if program_miss_rate > self.max_branch_miss_rate {
-            return Ok(PassResult::skipped(
-                SkipReason {
-                    pc: 0,
-                    reason: format!(
-                        "program branch_miss_rate {:.1}% exceeds threshold {:.1}% (unpredictable branches)",
-                        program_miss_rate * 100.0,
-                        self.max_branch_miss_rate * 100.0,
-                    ),
-                },
-            ));
-        }
-
-        let bt = analyses.get::<BranchTargetAnalysis>(program);
-
-        let n = program.insns.len();
-
-        // Phase 1: scan for all candidate sites.
-        let sites = scan_branch_flip_sites(&program.insns);
-
-        // Phase 2: filter sites and collect safe ones to apply.
-        let mut safe_sites: Vec<BranchFlipSite> = Vec::new();
-        let mut skipped = Vec::new();
-
-        for site in &sites {
-            let jcc = &program.insns[site.pc];
-            let own_target = jcc
-                .branch_target_pc(site.pc)
-                .ok_or_else(|| anyhow::anyhow!("branch_flip candidate has invalid target"))?;
-            let site_end = site.pc + site.total_len();
-
-            let Some(bp) = program.annotations[site.pc].branch_profile.as_ref() else {
-                anyhow::bail!(
-                    "branch_flip candidate at pc {} has no real per-site profile data",
-                    site.pc
-                );
-            };
-            let direction_total = validate_real_branch_profile(site.pc, bp)?;
-
-            let has_exterior_interior = (site.pc + 1..site_end).any(|pc_inner| {
-                pc_inner < bt.is_target.len() && bt.is_target[pc_inner] && pc_inner != own_target
-            });
-
-            if has_exterior_interior {
-                skipped.push(SkipReason {
-                    pc: site.pc,
-                    reason: "interior branch target from external source".into(),
-                });
-                continue;
-            }
-
-            // Safety check: JSET cannot be inverted.
-            if invert_jcc_op(bpf_op(jcc.code)).is_none() {
-                skipped.push(SkipReason {
-                    pc: site.pc,
-                    reason: "cannot invert condition opcode".into(),
-                });
-                continue;
-            }
-
-            if bp.miss_rate > self.max_branch_miss_rate {
-                skipped.push(SkipReason {
-                    pc: site.pc,
-                    reason: format!(
-                        "site branch_miss_rate {:.1}% exceeds threshold {:.1}% (unpredictable branch)",
-                        bp.miss_rate * 100.0,
-                        self.max_branch_miss_rate * 100.0,
-                    ),
-                });
-                continue;
-            }
-
-            let should_flip = bp.taken_count as f64 / (direction_total as f64) >= self.min_bias;
-
-            if !should_flip {
-                skipped.push(SkipReason {
-                    pc: site.pc,
-                    reason: "branch not biased enough".into(),
-                });
-                continue;
-            }
-            safe_sites.push(BranchFlipSite {
-                pc: site.pc,
-                then_len: site.then_len,
-                else_len: site.else_len,
-            });
-        }
-
-        if safe_sites.is_empty() {
-            return Ok(PassResult {
-                sites_skipped: skipped,
-                ..PassResult::unchanged()
-            });
-        }
-
-        // Phase 3: apply rewrites.
-        safe_sites.sort_by_key(|s| s.pc);
-
-        let mut new_insns: Vec<BpfInsn> = Vec::with_capacity(n);
-        let mut addr_map = vec![0usize; n + 1];
-        let mut pc = 0;
-        let mut site_idx = 0;
-        let mut applied = 0;
-
-        while pc < n {
-            let new_pc = new_insns.len();
-            addr_map[pc] = new_pc;
-
-            if site_idx < safe_sites.len() && pc == safe_sites[site_idx].pc {
-                let site = &safe_sites[site_idx];
-                let then_start = site.pc + 1;
-                let then_end = site.pc + 1 + site.then_len;
-                let ja_pc = then_end;
-                let else_start = ja_pc + 1;
-                let else_end = else_start + site.else_len;
-
-                // Emit inverted Jcc.
-                // New layout: [Jcc'] [else M insns] [JA] [then N-1 insns]
-                // Jcc' not-taken: fall through to else body (M insns) then JA
-                // Jcc' taken: skip else+JA to reach then body
-                // offset = else_len + 1 (skip M else insns + 1 JA insn)
-                let old_jcc = program.insns[site.pc];
-                let new_op = invert_jcc_op(bpf_op(old_jcc.code))
-                    .ok_or_else(|| anyhow::anyhow!("branch_flip cannot invert condition"))?;
-                let mut new_jcc = old_jcc;
-                new_jcc.code = (old_jcc.code & 0x0f) | new_op;
-                new_jcc.set_branch_target_delta(branch_delta(site.else_len + 1)?)?;
-                new_insns.push(new_jcc);
-
-                // Emit else body (was after JA, now first)
-                for (i, &insn) in program.insns[else_start..else_end].iter().enumerate() {
-                    addr_map[else_start + i] = new_insns.len();
-                    new_insns.push(insn);
-                }
-
-                // Emit JA that skips over then body
-                addr_map[ja_pc] = new_insns.len();
-                new_insns.push(BpfInsn::ja(checked_off16(
-                    site.then_len,
-                    "branch_flip then-body skip",
-                )?));
-
-                // Emit then body (was first, now second)
-                for (i, &insn) in program.insns[then_start..then_end].iter().enumerate() {
-                    addr_map[then_start + i] = new_insns.len();
-                    new_insns.push(insn);
-                }
-
-                pc = else_end;
-                site_idx += 1;
-                applied += 1;
-            } else {
-                new_insns.push(program.insns[pc]);
-                if program.insns[pc].is_ldimm64() && pc + 1 < n {
-                    pc += 1;
-                    addr_map[pc] = new_insns.len();
-                    new_insns.push(program.insns[pc]);
-                }
-                pc += 1;
-            }
-        }
-        addr_map[n] = new_insns.len();
-
-        // Phase 4: fix up internal branches (for instructions NOT part of rewritten sites).
-        fixup_branches_inline(&mut new_insns, &program.insns, &addr_map)?;
-
-        // Restore the manually-set JCC and JA offsets that fixup may have overwritten.
-        for site in &safe_sites {
-            let new_jcc_pc = addr_map[site.pc];
-            new_insns[new_jcc_pc].set_branch_target_delta(branch_delta(site.else_len + 1)?)?;
-            let old_ja_pc = site.pc + 1 + site.then_len;
-            let new_ja_pc = addr_map[old_ja_pc];
-            new_insns[new_ja_pc].set_branch_target_delta(branch_delta(site.then_len)?)?;
-        }
-
-        let mut result = commit_rewrite_output(
+    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        run_on_bbprogram(
             program,
-            RewriteOutput {
-                insns: new_insns,
-                addr_map,
-                sites_applied: applied,
-            },
-            BtfRemapPolicy::Remap,
-        )?;
-        result.sites_skipped = skipped;
-        Ok(result)
+            &ctx.annotations,
+            ctx.branch_miss_rate,
+            self.min_bias,
+            self.max_branch_miss_rate,
+        )
     }
+}
+
+pub fn run_on_bbprogram(
+    prog: &mut BBProgram,
+    annotations: &[InsnAnnotation],
+    branch_miss_rate: Option<f64>,
+    min_bias: f64,
+    max_branch_miss_rate: f64,
+) -> anyhow::Result<PassResult> {
+    // Phase 0: check real program-level PMU branch miss rate. Missing PMU
+    // data is a profile collection failure, not an optimization skip.
+    let Some(program_miss_rate) = branch_miss_rate else {
+        anyhow::bail!("branch_flip requires real program-level branch_miss_rate data");
+    };
+    if !program_miss_rate.is_finite() || !(0.0..=1.0).contains(&program_miss_rate) {
+        anyhow::bail!(
+            "branch_flip program branch_miss_rate must be finite and within [0, 1], got {}",
+            program_miss_rate
+        );
+    }
+    if program_miss_rate > max_branch_miss_rate {
+        return Ok(PassResult::skipped(SkipReason {
+            pc: 0,
+            reason: format!(
+                "program branch_miss_rate {:.1}% exceeds threshold {:.1}% (unpredictable branches)",
+                program_miss_rate * 100.0,
+                max_branch_miss_rate * 100.0,
+            ),
+        }));
+    }
+
+    let branch_targets = prog.branch_target_pcs()?;
+
+    // Phase 1: scan for all candidate sites.
+    let sites = scan_branch_flip_sites(prog)?;
+
+    // Phase 2: filter sites and collect safe ones to apply.
+    let mut safe_sites: Vec<BranchFlipSite> = Vec::new();
+    let mut skipped = Vec::new();
+
+    for site in &sites {
+        let own_target = prog.current_block_start_pc(site.else_first)?;
+        let site_end = site.pc + site.total_len();
+
+        let Some(bp) = annotations
+            .get(site.pc)
+            .and_then(|annotation| annotation.branch_profile.as_ref())
+        else {
+            anyhow::bail!(
+                "branch_flip candidate at pc {} has no real per-site profile data",
+                site.pc
+            );
+        };
+        let direction_total = validate_real_branch_profile(site.pc, bp)?;
+
+        let has_exterior_interior = (site.pc + 1..site_end)
+            .any(|pc_inner| branch_targets.contains(&pc_inner) && pc_inner != own_target);
+
+        if has_exterior_interior {
+            skipped.push(SkipReason {
+                pc: site.pc,
+                reason: "interior branch target from external source".into(),
+            });
+            continue;
+        }
+
+        // Safety check: JSET cannot be inverted.
+        let cond = match prog.block(site.pred)?.terminator {
+            Terminator::CondBranch { cond, .. } => cond,
+            term => anyhow::bail!(
+                "branch_flip site at pc {} expected conditional terminator, got {:?}",
+                site.pc,
+                term
+            ),
+        };
+        if invert_jcc_op(bpf_op(cond.code)).is_none() {
+            skipped.push(SkipReason {
+                pc: site.pc,
+                reason: "cannot invert condition opcode".into(),
+            });
+            continue;
+        }
+
+        if bp.miss_rate > max_branch_miss_rate {
+            skipped.push(SkipReason {
+                pc: site.pc,
+                reason: format!(
+                    "site branch_miss_rate {:.1}% exceeds threshold {:.1}% (unpredictable branch)",
+                    bp.miss_rate * 100.0,
+                    max_branch_miss_rate * 100.0,
+                ),
+            });
+            continue;
+        }
+
+        let should_flip = bp.taken_count as f64 / (direction_total as f64) >= min_bias;
+
+        if !should_flip {
+            skipped.push(SkipReason {
+                pc: site.pc,
+                reason: "branch not biased enough".into(),
+            });
+            continue;
+        }
+        validate_flipped_branch_deltas(site, cond)?;
+        safe_sites.push(site.clone());
+    }
+
+    if safe_sites.is_empty() {
+        return Ok(PassResult {
+            sites_skipped: skipped,
+            ..PassResult::unchanged()
+        });
+    }
+
+    // Phase 3: apply rewrites.
+    safe_sites.sort_by_key(|s| s.pc);
+    for site in &safe_sites {
+        apply_branch_flip_site(prog, site)?;
+    }
+
+    Ok(PassResult {
+        sites_applied: safe_sites.len(),
+        sites_skipped: skipped,
+        ..PassResult::unchanged()
+    })
 }
 
 fn validate_real_branch_profile(pc: usize, bp: &BranchProfile) -> anyhow::Result<u64> {
@@ -454,6 +383,126 @@ fn validate_real_branch_profile(pc: usize, bp: &BranchProfile) -> anyhow::Result
     Ok(direction_total)
 }
 
+fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow::Result<()> {
+    let pred = site.pred;
+    let then_first = site.then_first;
+    let then_last = site.then_last;
+    let else_first = site.else_first;
+    let else_last = site.else_last;
+
+    if pred.0 + 1 != then_first.0
+        || then_first.0 > then_last.0
+        || then_last.0 + 1 != else_first.0
+        || else_first.0 > else_last.0
+    {
+        anyhow::bail!(
+            "branch_flip site at pc {} is not a contiguous BBProgram diamond",
+            site.pc
+        );
+    }
+
+    let (cond, taken, fallthrough) = match prog.block(pred)?.terminator {
+        Terminator::CondBranch {
+            cond,
+            taken,
+            fallthrough,
+        } => (cond, taken, fallthrough),
+        term => anyhow::bail!(
+            "branch_flip site at pc {} expected conditional terminator, got {:?}",
+            site.pc,
+            term
+        ),
+    };
+    if taken != else_first || fallthrough != then_first {
+        anyhow::bail!(
+            "branch_flip site at pc {} has unexpected cond targets taken={:?} fallthrough={:?}",
+            site.pc,
+            taken,
+            fallthrough
+        );
+    }
+
+    let (ja, join) = match prog.block(then_last)?.terminator {
+        Terminator::Jump { insn, target } => (insn, target),
+        term => anyhow::bail!(
+            "branch_flip site at pc {} expected then-body JA terminator, got {:?}",
+            site.pc,
+            term
+        ),
+    };
+    if join != site.join {
+        anyhow::bail!(
+            "branch_flip site at pc {} expected join {:?}, got {:?}",
+            site.pc,
+            site.join,
+            join
+        );
+    }
+    match prog.block(else_last)?.terminator {
+        Terminator::Fallthrough { next } if next == join => {}
+        term => anyhow::bail!(
+            "branch_flip site at pc {} expected else-body fallthrough to {:?}, got {:?}",
+            site.pc,
+            join,
+            term
+        ),
+    }
+
+    let new_op = invert_jcc_op(bpf_op(cond.code))
+        .ok_or_else(|| anyhow::anyhow!("branch_flip cannot invert condition"))?;
+    let mut inverted = cond;
+    inverted.code = (cond.code & 0x0f) | new_op;
+    prog.replace_terminator(
+        pred,
+        Terminator::CondBranch {
+            cond: inverted,
+            taken: then_first,
+            fallthrough: else_first,
+        },
+    )?;
+    prog.replace_terminator(then_last, Terminator::Fallthrough { next: join })?;
+    prog.replace_terminator(
+        else_last,
+        Terminator::Jump {
+            insn: ja,
+            target: join,
+        },
+    )?;
+
+    let order = swapped_range_order(
+        prog.blocks.len(),
+        then_first..=then_last,
+        else_first..=else_last,
+    );
+    prog.permute_blocks(&order)
+}
+
+fn swapped_range_order(
+    block_count: usize,
+    first: std::ops::RangeInclusive<BlockId>,
+    second: std::ops::RangeInclusive<BlockId>,
+) -> Vec<BlockId> {
+    let first_start = first.start().0;
+    let first_end = first.end().0;
+    let second_start = second.start().0;
+    let second_end = second.end().0;
+    let mut order = Vec::with_capacity(block_count);
+    let mut block = 0usize;
+    while block < block_count {
+        if block == first_start {
+            order.extend((second_start..=second_end).map(BlockId));
+            order.extend((first_start..=first_end).map(BlockId));
+            block = second_end + 1;
+        } else if (first_start..=second_end).contains(&block) {
+            block += 1;
+        } else {
+            order.push(BlockId(block));
+            block += 1;
+        }
+    }
+    order
+}
+
 /// Scan for branch-flip candidate sites with correct if/else diamond shape.
 ///
 /// True diamond:
@@ -461,66 +510,154 @@ fn validate_real_branch_profile(pc: usize, bp: &BranchProfile) -> anyhow::Result
 ///   pc+1..pc+N-1: then body (N-1 insns)
 ///   pc+N:   JA +M
 ///   pc+N+1..pc+N+M: else body (M insns)
-pub(super) fn scan_branch_flip_sites(insns: &[BpfInsn]) -> Vec<BranchFlipSite> {
-    iter_sites(insns, |insns, pc| {
-        branch_flip_site_at(insns, pc).map(|site| site.then_len + site.else_len + 2)
-    })
-    .into_iter()
-    .filter_map(|site| branch_flip_site_at(insns, site.pc))
-    .collect()
+pub(super) fn scan_branch_flip_sites(prog: &BBProgram) -> anyhow::Result<Vec<BranchFlipSite>> {
+    let site_pcs = prog.current_site_pcs()?;
+    let mut sites = Vec::new();
+    let mut next_allowed_pc = 0usize;
+    for block in prog.blocks() {
+        let branch_site = InsnSite {
+            block: block.id,
+            idx: block.insns.len(),
+        };
+        let Some(&pc) = site_pcs.get(&branch_site) else {
+            continue;
+        };
+        if pc < next_allowed_pc {
+            continue;
+        }
+        if let Some(site) = branch_flip_site_at(prog, &site_pcs, block.id, pc)? {
+            next_allowed_pc = site.pc + site.total_len();
+            sites.push(site);
+        }
+    }
+    Ok(sites)
 }
 
-fn branch_flip_site_at(insns: &[BpfInsn], pc: usize) -> Option<BranchFlipSite> {
-    let n = insns.len();
-    let jcc = insns.get(pc)?;
-    if !jcc.is_cond_jmp() || jcc.off <= 1 {
-        return None;
+fn branch_flip_site_at(
+    prog: &BBProgram,
+    site_pcs: &std::collections::BTreeMap<InsnSite, usize>,
+    pred: BlockId,
+    pc: usize,
+) -> anyhow::Result<Option<BranchFlipSite>> {
+    let Terminator::CondBranch {
+        cond,
+        taken: else_first,
+        fallthrough: then_first,
+    } = prog.block(pred)?.terminator
+    else {
+        return Ok(None);
+    };
+    if !cond.is_cond_jmp() {
+        return Ok(None);
     }
-    let off = usize::try_from(jcc.off).expect("invariant: jcc.off > 1 fits usize");
-    // The Jcc target is pc + 1 + off = pc + N + 1 (else_start).
-    // JA is at pc + off (the last instruction of the then block + JA).
-    let ja_pc = pc + off;
-    if ja_pc >= n || !insns[ja_pc].is_ja() {
-        return None;
+    if prog.current_block_start_pc(then_first)? != pc + 1 {
+        return Ok(None);
     }
-    let then_len = off - 1; // N-1 instructions between Jcc and JA
-    let else_len = positive_branch_delta(&insns[ja_pc])?;
-    let site_end = ja_pc + 1 + else_len;
-    if site_end > n {
-        return None;
+    let Some((then_last, join, ja_pc)) = then_arm(prog, site_pcs, then_first, else_first)? else {
+        return Ok(None);
+    };
+    let Some((else_last, else_end_pc)) = else_arm(prog, site_pcs, else_first, join)? else {
+        return Ok(None);
+    };
+    if then_last.0 + 1 != else_first.0 {
+        return Ok(None);
     }
-    let valid = !has_straddling_ldimm64(insns, pc + 1, pc + 1 + then_len)
-        && !has_straddling_ldimm64(insns, ja_pc + 1, ja_pc + 1 + else_len);
-    valid.then_some(BranchFlipSite {
+    let then_len = ja_pc
+        .checked_sub(pc + 1)
+        .ok_or_else(|| anyhow::anyhow!("branch_flip then length underflows at pc {pc}"))?;
+    if then_len == 0 {
+        return Ok(None);
+    }
+    let else_start = ja_pc + 1;
+    if prog.current_block_start_pc(else_first)? != else_start {
+        return Ok(None);
+    }
+    let else_len = else_end_pc
+        .checked_sub(else_start)
+        .ok_or_else(|| anyhow::anyhow!("branch_flip else length underflows at pc {pc}"))?;
+    if else_len == 0 {
+        return Ok(None);
+    }
+    Ok(Some(BranchFlipSite {
         pc,
+        pred,
+        then_first,
+        then_last,
+        else_first,
+        else_last,
+        join,
         then_len,
         else_len,
-    })
+    }))
 }
 
-pub(super) fn checked_off16(delta: usize, label: &str) -> Result<i16> {
-    i16::try_from(delta).with_context(|| format!("{label} {delta} exceeds i16"))
-}
-
-fn branch_delta(delta: usize) -> Result<i64> {
-    i64::try_from(delta).context("branch_flip branch delta exceeds i64")
-}
-
-fn positive_branch_delta(insn: &BpfInsn) -> Option<usize> {
-    let delta = insn.branch_target_offset()?.delta()?;
-    (delta > 0)
-        .then(|| usize::try_from(delta).expect("invariant: positive BPF branch delta fits usize"))
-}
-
-fn has_straddling_ldimm64(insns: &[BpfInsn], range_start: usize, range_end: usize) -> bool {
-    if range_end == 0 || range_start >= range_end {
-        return false;
+fn then_arm(
+    prog: &BBProgram,
+    site_pcs: &std::collections::BTreeMap<InsnSite, usize>,
+    start: BlockId,
+    else_first: BlockId,
+) -> anyhow::Result<Option<(BlockId, BlockId, usize)>> {
+    let mut block = start;
+    loop {
+        if block.0 >= else_first.0 {
+            return Ok(None);
+        }
+        match prog.block(block)?.terminator {
+            Terminator::Fallthrough { next } if next.0 == block.0 + 1 => block = next,
+            Terminator::Jump { insn, target } => {
+                if !insn.is_ja() {
+                    return Ok(None);
+                }
+                let site = InsnSite {
+                    block,
+                    idx: prog.block(block)?.insns.len(),
+                };
+                let ja_pc = *site_pcs
+                    .get(&site)
+                    .ok_or_else(|| anyhow::anyhow!("missing current pc for {:?}", site))?;
+                return Ok(Some((block, target, ja_pc)));
+            }
+            _ => return Ok(None),
+        }
     }
-    let last = range_end - 1;
-    if last < insns.len() && insns[last].is_ldimm64() {
-        return true;
+}
+
+fn else_arm(
+    prog: &BBProgram,
+    _site_pcs: &std::collections::BTreeMap<InsnSite, usize>,
+    start: BlockId,
+    join: BlockId,
+) -> anyhow::Result<Option<(BlockId, usize)>> {
+    let mut block = start;
+    loop {
+        match prog.block(block)?.terminator {
+            Terminator::Fallthrough { next } if next == join => {
+                return Ok(Some((block, prog.current_block_start_pc(join)?)));
+            }
+            Terminator::Fallthrough { next } if next.0 == block.0 + 1 => block = next,
+            _ => return Ok(None),
+        }
     }
-    false
+}
+
+fn validate_flipped_branch_deltas(site: &BranchFlipSite, cond: BpfInsn) -> anyhow::Result<()> {
+    let mut inverted = cond;
+    inverted.set_branch_target_delta(i64::try_from(site.else_len + 1).map_err(|_| {
+        anyhow::anyhow!(
+            "branch_flip site at pc {} else length {} overflows branch delta",
+            site.pc,
+            site.else_len
+        )
+    })?)?;
+    let mut ja = BpfInsn::ja(0);
+    ja.set_branch_target_delta(i64::try_from(site.then_len).map_err(|_| {
+        anyhow::anyhow!(
+            "branch_flip site at pc {} then length {} overflows branch delta",
+            site.pc,
+            site.then_len
+        )
+    })?)?;
+    Ok(())
 }
 
 pub(super) fn invert_jcc_op(op: u8) -> Option<u8> {

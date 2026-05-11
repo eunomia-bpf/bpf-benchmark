@@ -6,13 +6,15 @@ use std::fs;
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
+use std::sync::Arc;
 
 use anyhow::{anyhow, bail, Context, Result};
+use bpfopt::analysis::{lift_with_kinsn_registry, lower, BBProgram};
 use bpfopt::insn::{BpfInsn, MapPseudo};
 use bpfopt::pass::{
-    Arch, BpfProgram, BtfInfoRecords, KinsnDescriptor, KinsnRegistry, PassContext, PassManager,
-    PassResult, PlatformCapabilities, RegState, ScalarRange, StackState, Tnum, VerifierInsn,
-    VerifierInsnKind, VerifierValueWidth,
+    Arch, BtfInfoRecords, KinsnDescriptor, KinsnRegistry, PassContext, PassManager, PassResult,
+    PlatformCapabilities, RegState, ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind,
+    VerifierValueWidth,
 };
 use bpfopt::passes::PASS_REGISTRY;
 #[cfg(test)]
@@ -294,14 +296,25 @@ fn run_single_pass(
 ) -> Result<()> {
     validate_required_side_inputs(common, &[pass_name])?;
 
-    let mut program = BpfProgram::new(read_bytecode(common.input.as_deref())?);
-    attach_program_inputs(&mut program, common)?;
+    let input = read_bytecode(common.input.as_deref())?;
     let mut ctx = build_pass_context(common)?;
     validate_required_kinsns(&ctx, &[pass_name])?;
     ctx.policy.enabled_passes = vec![pass_name.to_string()];
+    let mut program = lift_with_kinsn_registry(
+        &input,
+        (!ctx.verifier_states.is_empty()).then(|| Arc::clone(&ctx.verifier_states)),
+        Arc::new(ctx.kinsn_registry.clone()),
+    )?;
+    program.attach_side_inputs(
+        &input,
+        ctx.map_ids.clone(),
+        ctx.func_info.clone(),
+        ctx.line_info.clone(),
+    )?;
     let pipeline = build_pipeline(&[pass_name], pass_args)?;
     let result = pipeline.run(&mut program, &ctx)?;
-    write_bytecode(common.output.as_deref(), &program.insns)?;
+    let output = lower(&program)?;
+    write_bytecode(common.output.as_deref(), &output)?;
     write_btf_info_outputs(common, &program)?;
 
     if let Some(report_path) = common.report.as_deref() {
@@ -671,23 +684,6 @@ fn write_json<T: Serialize>(output: Option<&Path>, value: &T) -> Result<()> {
     Ok(())
 }
 
-fn attach_program_inputs(program: &mut BpfProgram, common: &CommonArgs) -> Result<()> {
-    if let Some(path) = common.verifier_states.as_deref() {
-        program.set_verifier_states(read_verifier_states(path)?);
-    }
-    program.func_info = read_btf_info_records(
-        common.func_info.as_deref(),
-        common.func_info_rec_size,
-        "func-info",
-    )?;
-    program.line_info = read_btf_info_records(
-        common.line_info.as_deref(),
-        common.line_info_rec_size,
-        "line-info",
-    )?;
-    Ok(())
-}
-
 fn read_btf_info_records(
     path: Option<&Path>,
     rec_size: Option<u32>,
@@ -703,21 +699,23 @@ fn read_btf_info_records(
     Ok(Some(BtfInfoRecords::new(label, rec_size, bytes)?))
 }
 
-fn write_btf_info_outputs(common: &CommonArgs, program: &BpfProgram) -> Result<()> {
+fn write_btf_info_outputs(common: &CommonArgs, program: &BBProgram) -> Result<()> {
     if let Some(path) = common.func_info.as_deref() {
         let bytes = program
-            .func_info
-            .as_ref()
-            .map(|records| records.bytes.as_slice())
-            .unwrap_or(&[]);
+            .remapped_func_info_records()?
+            .map(|records| records.bytes)
+            .ok_or_else(|| {
+                anyhow!("--func-info requested but remapped func_info records are unavailable")
+            })?;
         fs::write(path, bytes).with_context(|| format!("failed to write {}", path.display()))?;
     }
     if let Some(path) = common.line_info.as_deref() {
         let bytes = program
-            .line_info
-            .as_ref()
-            .map(|records| records.bytes.as_slice())
-            .unwrap_or(&[]);
+            .remapped_line_info_records()?
+            .map(|records| records.bytes)
+            .ok_or_else(|| {
+                anyhow!("--line-info requested but remapped line_info records are unavailable")
+            })?;
         fs::write(path, bytes).with_context(|| format!("failed to write {}", path.display()))?;
     }
     Ok(())
@@ -726,6 +724,20 @@ fn write_btf_info_outputs(common: &CommonArgs, program: &BpfProgram) -> Result<(
 fn build_pass_context(common: &CommonArgs) -> Result<PassContext> {
     let mut ctx = PassContext::baseline();
     ctx.platform = detect_platform();
+    ctx.map_ids = common.map_ids.clone();
+    if let Some(path) = common.verifier_states.as_deref() {
+        ctx.verifier_states = Arc::from(read_verifier_states(path)?);
+    }
+    ctx.func_info = read_btf_info_records(
+        common.func_info.as_deref(),
+        common.func_info_rec_size,
+        "func-info",
+    )?;
+    ctx.line_info = read_btf_info_records(
+        common.line_info.as_deref(),
+        common.line_info_rec_size,
+        "line-info",
+    )?;
 
     if let Some(platform) = common.platform.as_deref() {
         ctx.platform.arch = parse_arch(platform)?;
@@ -839,7 +851,7 @@ fn apply_features(platform: &mut PlatformCapabilities, features: &[String]) -> R
             "cmov" => platform.has_cmov = true,
             "movbe" => platform.has_movbe = true,
             "rorx" => platform.has_rorx = true,
-            _ => eprintln!("bpfopt: warning: ignoring unknown target feature: {feature}"),
+            _ => bail!("unknown target feature: {feature}"),
         }
     }
     Ok(())

@@ -1,16 +1,151 @@
 // SPDX-License-Identifier: MIT
 
 use std::collections::HashMap;
+use std::sync::Arc;
 
-use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
+use crate::analysis::{lift_with_kinsn_registry, lower, BBProgram};
 use crate::insn::BpfInsn;
 use crate::pass::{
-    BpfProgram, RegState, ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind,
-    VerifierValueWidth,
+    BpfPass, InsnAnnotation, MapInlineHint, MapMetadata, PassContext, PassResult, RegState,
+    ScalarRange, StackState, Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
 
+pub struct PassRun {
+    pub result: PassResult,
+    pub lowered: Vec<BpfInsn>,
+    pub prog: BBProgram,
+}
+
+pub fn lift_test_program(insns: &[BpfInsn], ctx: &PassContext) -> BBProgram {
+    let oracle = (!ctx.verifier_states.is_empty()).then(|| Arc::clone(&ctx.verifier_states));
+    let mut prog = lift_with_kinsn_registry(insns, oracle, Arc::new(ctx.kinsn_registry.clone()))
+        .expect("test bytecode should lift into BBProgram");
+    prog.attach_side_inputs(
+        insns,
+        ctx.map_ids.clone(),
+        ctx.func_info.clone(),
+        ctx.line_info.clone(),
+    )
+    .expect("test side inputs should attach to BBProgram");
+    prog
+}
+
+pub fn lower_test_program(prog: &BBProgram) -> Vec<BpfInsn> {
+    lower(prog).expect("test BBProgram should lower")
+}
+
+pub fn run_pass_on_insns<P: BpfPass>(pass: P, insns: Vec<BpfInsn>, ctx: &PassContext) -> PassRun {
+    let mut prog = lift_test_program(&insns, ctx);
+    // Test helpers run passes through the production BBProgram API.
+    let result = pass
+        .run(&mut prog, ctx)
+        .expect("future BBProgram-native pass should run");
+    let lowered = lower_test_program(&prog);
+    PassRun {
+        result,
+        lowered,
+        prog,
+    }
+}
+
+pub fn pass_error_on_insns<P: BpfPass>(pass: P, insns: Vec<BpfInsn>, ctx: &PassContext) -> String {
+    let mut prog = lift_test_program(&insns, ctx);
+    // Test helpers run passes through the production BBProgram API.
+    pass.run(&mut prog, ctx)
+        .expect_err("future BBProgram-native pass should reject this fixture")
+        .to_string()
+}
+
+pub fn run_pipeline_on_insns(
+    passes: Vec<Box<dyn BpfPass>>,
+    insns: Vec<BpfInsn>,
+    ctx: &PassContext,
+) -> (Vec<PassResult>, Vec<BpfInsn>, BBProgram) {
+    let mut prog = lift_test_program(&insns, ctx);
+    let mut results = Vec::new();
+    for pass in passes {
+        // Test helpers run passes through the production BBProgram API.
+        results.push(
+            pass.run(&mut prog, ctx)
+                .expect("future BBProgram-native pipeline pass should run"),
+        );
+    }
+    let lowered = lower_test_program(&prog);
+    (results, lowered, prog)
+}
+
+pub fn pass_ctx() -> PassContext {
+    PassContext::baseline()
+}
+
+pub fn ctx_with_kinsn(target: &str, btf_id: i32) -> PassContext {
+    let mut ctx = pass_ctx();
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name(target, btf_id, 0)
+        .expect("test kinsn target should register");
+    ctx
+}
+
+pub fn ctx_with_verifier_states(states: Vec<VerifierInsn>) -> PassContext {
+    let mut ctx = pass_ctx();
+    // Raw daemon verifier states stay on PassContext and are consumed once at lift.
+    ctx.verifier_states = Arc::from(states);
+    ctx
+}
+
+pub fn ctx_with_annotations(annotations: Vec<InsnAnnotation>) -> PassContext {
+    let mut ctx = pass_ctx();
+    // PassContext carries per-PC annotations for profile-guided passes.
+    ctx.annotations = annotations;
+    ctx
+}
+
+pub fn set_branch_miss_rate(ctx: &mut PassContext, miss_rate: f64) {
+    // BranchFlip program-level PMU side input lives on PassContext.
+    ctx.branch_miss_rate = Some(miss_rate);
+}
+
+pub fn add_inner_map(ctx: &mut PassContext, outer_map_id: u32, key: Vec<u8>, inner_map_id: u32) {
+    // Map-in-map side inputs live on PassContext.
+    ctx.map_inner_map_ids
+        .insert((outer_map_id, key), inner_map_id);
+}
+
+pub fn skip_map_snapshot(ctx: &mut PassContext, map_id: u32) {
+    // Skipped snapshot markers live on PassContext.
+    ctx.map_snapshots_skipped_by_size.insert(map_id);
+}
+
+pub fn set_map_ids(ctx: &mut PassContext, map_ids: Vec<u32>) {
+    // Canonical map-id binding side input lives on PassContext.
+    ctx.map_ids = map_ids;
+}
+
+pub fn set_map_inline_hints(ctx: &mut PassContext, hints: Vec<MapInlineHint>) {
+    // map_inline hints live on PassContext.
+    ctx.map_inline_hints = hints;
+}
+
+pub fn set_btf_records(
+    ctx: &mut PassContext,
+    func_info: Option<crate::pass::BtfInfoRecords>,
+    line_info: Option<crate::pass::BtfInfoRecords>,
+) {
+    // BTF metadata side inputs live on PassContext.
+    ctx.func_info = func_info;
+    ctx.line_info = line_info;
+}
+
 pub fn scalar_reg(value: u64) -> RegState {
-    let mut reg = RegState::new("scalar", VerifierValueWidth::Bits64);
+    scalar_reg_with_width(value, VerifierValueWidth::Bits64)
+}
+
+pub fn scalar32_reg(value: u64) -> RegState {
+    scalar_reg_with_width(value, VerifierValueWidth::Bits32)
+}
+
+pub fn scalar_reg_with_width(value: u64, value_width: VerifierValueWidth) -> RegState {
+    let mut reg = RegState::new("scalar", value_width);
     reg.precise = true;
     reg.exact_value = Some(value);
     reg.tnum = Some(Tnum { value, mask: 0 });
@@ -33,6 +168,10 @@ pub fn fp_reg(offset: i32) -> RegState {
     reg
 }
 
+pub fn pkt_reg() -> RegState {
+    RegState::new("pkt", VerifierValueWidth::Bits64)
+}
+
 pub fn verifier_delta_state(pc: usize, regs: HashMap<u8, RegState>) -> VerifierInsn {
     verifier_delta_state_with_stack(pc, regs, HashMap::new())
 }
@@ -42,11 +181,43 @@ pub fn verifier_delta_state_with_stack(
     regs: HashMap<u8, RegState>,
     stack: HashMap<i16, StackState>,
 ) -> VerifierInsn {
+    verifier_state(pc, 0, VerifierInsnKind::InsnDeltaState, regs, stack)
+}
+
+pub fn verifier_delta_state_in_frame(
+    pc: usize,
+    frame: usize,
+    regs: HashMap<u8, RegState>,
+) -> VerifierInsn {
+    verifier_state(
+        pc,
+        frame,
+        VerifierInsnKind::InsnDeltaState,
+        regs,
+        HashMap::new(),
+    )
+}
+
+pub fn verifier_full_state(pc: usize, regs: HashMap<u8, RegState>) -> VerifierInsn {
+    verifier_state(pc, 0, VerifierInsnKind::PcFullState, regs, HashMap::new())
+}
+
+pub fn verifier_edge_state(pc: usize, regs: HashMap<u8, RegState>) -> VerifierInsn {
+    verifier_state(pc, 0, VerifierInsnKind::EdgeFullState, regs, HashMap::new())
+}
+
+pub fn verifier_state(
+    pc: usize,
+    frame: usize,
+    kind: VerifierInsnKind,
+    regs: HashMap<u8, RegState>,
+    stack: HashMap<i16, StackState>,
+) -> VerifierInsn {
     VerifierInsn {
         pc,
-        frame: 0,
+        frame,
         from_pc: None,
-        kind: VerifierInsnKind::InsnDeltaState,
+        kind,
         speculative: false,
         regs,
         stack,
@@ -59,8 +230,9 @@ pub fn stack_snapshot_from_key(stack_off: i16, key: &[u8]) -> HashMap<i16, Stack
         let absolute_off = i32::from(stack_off) + idx as i32;
         let slot_index = ((-absolute_off - 1) / 8) + 1;
         let slot_start_i32 = -slot_index * 8;
-        let slot_start = i16::try_from(slot_start_i32).unwrap();
-        let byte_index = usize::try_from(absolute_off - slot_start_i32).unwrap();
+        let slot_start = i16::try_from(slot_start_i32).expect("stack slot start fits i16");
+        let byte_index =
+            usize::try_from(absolute_off - slot_start_i32).expect("byte index fits usize");
         let type_index = 7 - byte_index;
         let entry = slots.entry(slot_start).or_insert(([0u8; 8], [b'?'; 8]));
         entry.0[byte_index] = *byte;
@@ -73,7 +245,7 @@ pub fn stack_snapshot_from_key(stack_off: i16, key: &[u8]) -> HashMap<i16, Stack
             (
                 off,
                 StackState {
-                    slot_types: Some(String::from_utf8(types.to_vec()).unwrap()),
+                    slot_types: Some(String::from_utf8(types.to_vec()).expect("slot types utf8")),
                     value: Some(scalar_reg(u64::from_le_bytes(bytes))),
                 },
             )
@@ -81,28 +253,51 @@ pub fn stack_snapshot_from_key(stack_off: i16, key: &[u8]) -> HashMap<i16, Stack
         .collect()
 }
 
-pub fn install_map(
-    map_id: u32,
-    map_type: u32,
-    max_entries: u32,
-    values: HashMap<Vec<u8>, Vec<u8>>,
-) {
-    let info = BpfMapInfo {
+pub fn map_metadata(map_id: u32, map_type: u32, key_size: u32, value_size: u32) -> MapMetadata {
+    MapMetadata {
         map_type,
-        key_size: 4,
-        value_size: values.values().next().map(|value| value.len()).unwrap_or(0) as u32,
-        max_entries,
-    };
-
-    install_mock_map(map_id, MockMapState { info, values });
+        key_size,
+        value_size,
+        max_entries: 8,
+        map_id,
+        name: format!("map_{map_id}"),
+    }
 }
 
-pub fn install_array_map(map_id: u32, value: Vec<u8>) {
-    let mut values = HashMap::new();
-    values.insert(1u32.to_le_bytes().to_vec(), value);
-    install_map(map_id, libbpf_sys::BPF_MAP_TYPE_ARRAY, 8, values);
+pub fn branch_profile(taken: u64, not_taken: u64, miss_rate: f64) -> crate::pass::BranchProfile {
+    crate::pass::BranchProfile {
+        branch_count: taken + not_taken,
+        branch_misses: ((taken + not_taken) as f64 * miss_rate) as u64,
+        miss_rate,
+        taken_count: taken,
+        not_taken_count: not_taken,
+    }
 }
 
-pub fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
-    BpfProgram::new(insns)
+pub fn prefetch_profile(execution_count: u64, miss_rate: f64) -> crate::pass::PrefetchProfile {
+    crate::pass::PrefetchProfile {
+        execution_count,
+        cache_references: execution_count,
+        cache_misses: (execution_count as f64 * miss_rate) as u64,
+        miss_rate,
+    }
+}
+
+pub fn assert_skip_reason(result: &PassResult, pc: usize, reason: &str) {
+    assert!(
+        result
+            .sites_skipped
+            .iter()
+            .any(|skip| skip.pc == pc && skip.reason.contains(reason)),
+        "missing skip pc={pc} reason containing {reason:?}; got {:?}",
+        result.sites_skipped
+    );
+}
+
+pub fn assert_diagnostic(result: &PassResult, needle: &str) {
+    assert!(
+        result.diagnostics.iter().any(|diag| diag.contains(needle)),
+        "missing diagnostic containing {needle:?}; got {:?}",
+        result.diagnostics
+    );
 }

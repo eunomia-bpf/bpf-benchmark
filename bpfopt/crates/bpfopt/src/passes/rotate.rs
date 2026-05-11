@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 //! ROTATE optimization pass.
 
-use crate::analysis::{iter_sites, BranchTargetAnalysis, LivenessAnalysis};
+use std::ops::Range;
+
+use crate::analysis::{block_slot_offset, site_current_pc, BBProgram, BlockId, InsnSite};
 use crate::insn::*;
 use crate::pass::*;
-
-use crate::rewrite::{BtfRemapPolicy, RewritePlan};
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
         canonical_name: "bpf_rotate64",
@@ -72,37 +72,32 @@ impl BpfPass for RotatePass {
     fn name(&self) -> &str {
         "rotate"
     }
-    fn run(
-        &self,
-        program: &mut BpfProgram,
-        analyses: &mut AnalysisCache,
-        ctx: &PassContext,
-    ) -> anyhow::Result<PassResult> {
-        let bt = analyses.get::<BranchTargetAnalysis>(program);
-        let liveness = analyses.get::<LivenessAnalysis>(program);
+    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        run_on_bbprogram(program, ctx)
+    }
+}
 
-        let sites = scan_rotate_sites(&program.insns);
-        let mut safe_sites: Vec<SafeRotateSite> = Vec::new();
-        let mut skipped = Vec::new();
+pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+    let mut safe_sites: Vec<SafeRotateSite> = Vec::new();
+    let mut skipped = Vec::new();
+    let site_pcs = prog.current_site_pcs()?;
 
-        for site in sites {
-            // Safety check 1: interior branch target.
-            let has_interior = (site.start_pc + 1..site.start_pc + site.old_len)
-                .any(|pc| pc < bt.is_target.len() && bt.is_target[pc]);
-            if has_interior {
-                skipped.push(SkipReason {
-                    pc: site.start_pc,
-                    reason: "interior branch target".into(),
-                });
+    for block in prog.blocks().map(|block| block.id).collect::<Vec<_>>() {
+        for start in prog.sites_in_block(block).collect::<Vec<_>>() {
+            let Some(mut site) = rotate_site_at(prog, start)? else {
                 continue;
-            }
+            };
+            let replacement_start = InsnSite {
+                block,
+                idx: site.start_pc,
+            };
+            let start_slot = block_slot_offset(prog, replacement_start)?;
+            site.start_pc = site_current_pc(&site_pcs, replacement_start)?;
+            let range = replacement_start.idx..replacement_start.idx + site.old_len;
 
-            if let Some(reason) = kinsn_replacement_subprog_skip_reason(
-                &program.insns,
-                site.start_pc,
-                site.old_len,
-                2,
-            )? {
+            if let Some(reason) =
+                prog.kinsn_replacement_subprog_skip_reason(block, start_slot, site.old_len, 2)?
+            {
                 skipped.push(SkipReason {
                     pc: site.start_pc,
                     reason,
@@ -110,66 +105,80 @@ impl BpfPass for RotatePass {
                 continue;
             }
 
-            // Safety check 2: tmp_reg live-out check.
-            // The original code destroys tmp_reg via the shift. After rewrite,
-            // tmp_reg is not written at all. If tmp_reg is live after the site,
-            // the rewrite would change semantics.
-            let site_end = site.start_pc + site.old_len;
-            if site_end > 0 && site_end - 1 < liveness.live_out.len() {
-                let live_after = &liveness.live_out[site_end - 1];
-                if live_after.contains(&site.tmp_reg) {
-                    skipped.push(SkipReason {
-                        pc: site.start_pc,
-                        reason: format!("tmp_reg r{} is live after site", site.tmp_reg),
-                    });
-                    continue;
-                }
-
-                safe_sites.push(SafeRotateSite { site });
+            let last_site = InsnSite {
+                block,
+                idx: range.end - 1,
+            };
+            if prog
+                .live_out_site_checked(last_site)?
+                .contains(&site.tmp_reg)
+            {
+                skipped.push(SkipReason {
+                    pc: site.start_pc,
+                    reason: format!("tmp_reg r{} is live after site", site.tmp_reg),
+                });
                 continue;
             }
 
-            safe_sites.push(SafeRotateSite { site });
+            safe_sites.push(SafeRotateSite { block, range, site });
         }
-
-        if safe_sites.is_empty() {
-            return Ok(PassResult {
-                sites_skipped: skipped,
-                ..PassResult::unchanged()
-            });
-        }
-
-        let mut plan = RewritePlan::new();
-        for safe_site in &safe_sites {
-            let site = &safe_site.site;
-            let btf_id = ctx
-                .kinsn_registry
-                .btf_id_for_target_name(site.width.target_name())?;
-            let kfunc_off = ctx
-                .kinsn_registry
-                .call_off_for_target_name(site.width.target_name())?;
-            let shift_amount = u8::try_from(site.shift_amount).map_err(|_| {
-                anyhow::anyhow!(
-                    "rotate shift amount {} exceeds packed payload width",
-                    site.shift_amount
-                )
-            })?;
-            let payload = BpfInsn::pack_u4(site.dst_reg, 0)
-                | BpfInsn::pack_u4(site.val_reg, 4)
-                | BpfInsn::pack_u8(shift_amount, 8)
-                | BpfInsn::pack_u4(site.tmp_reg, 16);
-            plan.replace_range(
-                site.start_pc,
-                site.old_len,
-                emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
-            )?;
-        }
-
-        let mut result = plan.commit(program, BtfRemapPolicy::RemapKinsn(&ctx.kinsn_registry))?;
-        result.sites_applied = safe_sites.len();
-        result.sites_skipped = skipped;
-        Ok(result)
     }
+
+    if safe_sites.is_empty() {
+        return Ok(PassResult {
+            sites_skipped: skipped,
+            ..PassResult::unchanged()
+        });
+    }
+
+    for safe_site in safe_sites.iter().rev() {
+        let site = &safe_site.site;
+        let btf_id = ctx
+            .kinsn_registry
+            .btf_id_for_target_name(site.width.target_name())?;
+        let kfunc_off = ctx
+            .kinsn_registry
+            .call_off_for_target_name(site.width.target_name())?;
+        let shift_amount = u8::try_from(site.shift_amount).map_err(|_| {
+            anyhow::anyhow!(
+                "rotate shift amount {} exceeds packed payload width",
+                site.shift_amount
+            )
+        })?;
+        let payload = BpfInsn::pack_u4(site.dst_reg, 0)
+            | BpfInsn::pack_u4(site.val_reg, 4)
+            | BpfInsn::pack_u8(shift_amount, 8)
+            | BpfInsn::pack_u4(site.tmp_reg, 16);
+        prog.replace_range(
+            safe_site.block,
+            safe_site.range.clone(),
+            emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
+        )?;
+    }
+
+    Ok(PassResult {
+        sites_applied: safe_sites.len(),
+        sites_skipped: skipped,
+        ..Default::default()
+    })
+}
+
+fn rotate_site_at(prog: &BBProgram, site: InsnSite) -> anyhow::Result<Option<RotateSite>> {
+    let block = prog
+        .blocks
+        .get(site.block.0)
+        .ok_or_else(|| anyhow::anyhow!("invalid block id {:?}", site.block))?;
+    let idx = site.idx;
+    let Some(i0) = block.insns.get(idx) else {
+        return Ok(None);
+    };
+    let Some(i1) = block.insns.get(idx + 1) else {
+        return Ok(None);
+    };
+    let Some(i2) = block.insns.get(idx + 2) else {
+        return Ok(None);
+    };
+    Ok(try_match_rotate(&block.insns, i0, i1, i2, idx))
 }
 
 pub(super) struct RotateSite {
@@ -184,6 +193,8 @@ pub(super) struct RotateSite {
 
 /// A rotate site that has passed safety checks, ready for transformation.
 struct SafeRotateSite {
+    block: BlockId,
+    range: Range<usize>,
     site: RotateSite,
 }
 
@@ -214,30 +225,6 @@ impl RotateWidth {
             Self::W64 => "bpf_rotate64",
         }
     }
-}
-
-pub(super) fn scan_rotate_sites(insns: &[BpfInsn]) -> Vec<RotateSite> {
-    iter_sites(insns, |insns, pc| {
-        let site = try_match_rotate(
-            insns,
-            insns.get(pc)?,
-            insns.get(pc + 1)?,
-            insns.get(pc + 2)?,
-            pc,
-        )?;
-        Some(site.old_len)
-    })
-    .into_iter()
-    .filter_map(|site| {
-        try_match_rotate(
-            insns,
-            insns.get(site.pc)?,
-            insns.get(site.pc + 1)?,
-            insns.get(site.pc + 2)?,
-            site.pc,
-        )
-    })
-    .collect()
 }
 
 /// The rotate lowering is only sound when the provenance copy is the

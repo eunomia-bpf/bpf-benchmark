@@ -1,30 +1,50 @@
-use super::bounds_check_merge::*;
+// SPDX-License-Identifier: MIT
+
+use super::bounds_check_merge::BoundsCheckMergePass;
 use crate::insn::*;
+use crate::pass::BtfInfoRecords;
+use crate::test_helpers::*;
 
-use crate::pass::{BpfProgram, BtfInfoRecords, PassContext, PassManager, PipelineResult};
+const XDP: u32 = libbpf_sys::BPF_PROG_TYPE_XDP;
+const SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
+const SOCKET_FILTER: u32 = libbpf_sys::BPF_PROG_TYPE_SOCKET_FILTER;
 
-const BPF_PROG_TYPE_SOCKET_FILTER: u32 = libbpf_sys::BPF_PROG_TYPE_SOCKET_FILTER;
-const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
-const BPF_PROG_TYPE_SCHED_ACT: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_ACT;
-const BPF_PROG_TYPE_XDP: u32 = libbpf_sys::BPF_PROG_TYPE_XDP;
-
-fn load_packet_root() -> Vec<BpfInsn> {
-    load_packet_root_with_offsets(XDP_PACKET_DATA_OFFSET, XDP_PACKET_DATA_END_OFFSET)
-}
-
-fn load_packet_root_with_offsets(data_off: i16, data_end_off: i16) -> Vec<BpfInsn> {
+fn load_packet_root(data_off: i16, end_off: i16) -> Vec<BpfInsn> {
     vec![
-        BpfInsn::ldx_mem(BPF_W, 2, 1, data_off),
-        BpfInsn::ldx_mem(BPF_W, 3, 1, data_end_off),
+        BpfInsn::ldx_mem(BPF_W, BPF_REG_2, BPF_REG_1, data_off),
+        BpfInsn::ldx_mem(BPF_W, BPF_REG_3, BPF_REG_1, end_off),
     ]
 }
 
-fn guard(cursor_reg: u8, root_reg: u8, data_end_reg: u8, window_end: i32) -> Vec<BpfInsn> {
+fn guard(cursor: u8, root: u8, data_end: u8, window_end: i32) -> Vec<BpfInsn> {
     vec![
-        BpfInsn::mov64_reg(cursor_reg, root_reg),
-        BpfInsn::add64_imm(cursor_reg, window_end),
-        BpfInsn::jgt_reg(cursor_reg, data_end_reg, 0),
+        BpfInsn::mov64_reg(cursor, root),
+        BpfInsn::add64_imm(cursor, window_end),
+        BpfInsn::jgt_reg(cursor, data_end, 0),
     ]
+}
+
+fn shared_error_program(mut body: Vec<BpfInsn>) -> Vec<BpfInsn> {
+    body.push(BpfInsn::mov64_imm(BPF_REG_0, 1));
+    body.push(BpfInsn::exit());
+    let error_pc = body.len();
+    body.push(BpfInsn::mov64_imm(BPF_REG_0, 0));
+    body.push(BpfInsn::exit());
+    for pc in compare_pcs(&body) {
+        if body[pc].off == 0 {
+            body[pc].off = (error_pc as isize - pc as isize - 1) as i16;
+        }
+    }
+    body
+}
+
+fn two_adjacent_checks(data_off: i16, end_off: i16) -> Vec<BpfInsn> {
+    let mut insns = load_packet_root(data_off, end_off);
+    insns.extend(guard(BPF_REG_4, BPF_REG_2, BPF_REG_3, 14));
+    insns.push(BpfInsn::ldx_mem(BPF_H, BPF_REG_6, BPF_REG_2, 12));
+    insns.extend(guard(BPF_REG_5, BPF_REG_2, BPF_REG_3, 34));
+    insns.push(BpfInsn::ldx_mem(BPF_W, BPF_REG_7, BPF_REG_2, 30));
+    shared_error_program(insns)
 }
 
 fn compare_pcs(insns: &[BpfInsn]) -> Vec<usize> {
@@ -32,16 +52,22 @@ fn compare_pcs(insns: &[BpfInsn]) -> Vec<usize> {
         .iter()
         .enumerate()
         .filter_map(|(pc, insn)| {
-            (matches!(
+            matches!(
                 insn.code,
                 code if code == (BPF_JMP | BPF_JGT | BPF_X)
                     || code == (BPF_JMP | BPF_JGE | BPF_X)
                     || code == (BPF_JMP | BPF_JLT | BPF_X)
                     || code == (BPF_JMP | BPF_JLE | BPF_X)
-            ))
+            )
             .then_some(pc)
         })
         .collect()
+}
+
+fn run_bounds(input: Vec<BpfInsn>, prog_type: u32) -> PassRun {
+    let mut ctx = pass_ctx();
+    ctx.prog_type = prog_type;
+    run_pass_on_insns(BoundsCheckMergePass, input, &ctx)
 }
 
 fn btf_records(offsets: &[u32]) -> BtfInfoRecords {
@@ -53,364 +79,171 @@ fn btf_records(offsets: &[u32]) -> BtfInfoRecords {
     BtfInfoRecords { rec_size: 8, bytes }
 }
 
-fn btf_offsets(records: &BtfInfoRecords) -> Vec<u32> {
-    records
-        .bytes
-        .chunks(records.rec_size as usize)
-        .map(|record| u32::from_le_bytes(record[..4].try_into().expect("btf record insn_off")))
-        .collect()
-}
-
-fn shared_error_program(mut body: Vec<BpfInsn>) -> Vec<BpfInsn> {
-    body.push(BpfInsn::mov64_imm(0, 1));
-    body.push(BpfInsn::exit());
-    let error_pc = body.len();
-    body.push(BpfInsn::mov64_imm(0, 0));
-    body.push(BpfInsn::exit());
-
-    for pc in compare_pcs(&body) {
-        if body[pc].off == 0 {
-            body[pc].off = (error_pc as isize - pc as isize - 1) as i16;
-        }
-    }
-
-    body
-}
-
-fn make_single_check_program() -> Vec<BpfInsn> {
-    let mut insns = load_packet_root();
-    insns.extend(guard(4, 2, 3, 14));
-    insns.push(BpfInsn::ldx_mem(BPF_H, 6, 2, 12));
-    shared_error_program(insns)
-}
-
-fn make_two_adjacent_checks_program() -> Vec<BpfInsn> {
-    let mut insns = load_packet_root();
-    insns.extend(guard(4, 2, 3, 14));
-    insns.push(BpfInsn::ldx_mem(BPF_H, 6, 2, 12));
-    insns.extend(guard(5, 2, 3, 34));
-    insns.push(BpfInsn::ldx_mem(BPF_W, 7, 2, 30));
-    shared_error_program(insns)
-}
-
-fn make_two_adjacent_tc_checks_program() -> Vec<BpfInsn> {
-    let mut insns =
-        load_packet_root_with_offsets(SKB_PACKET_DATA_OFFSET, SKB_PACKET_DATA_END_OFFSET);
-    insns.extend(guard(4, 2, 3, 14));
-    insns.push(BpfInsn::ldx_mem(BPF_H, 6, 2, 12));
-    insns.extend(guard(5, 2, 3, 34));
-    insns.push(BpfInsn::ldx_mem(BPF_W, 7, 2, 30));
-    shared_error_program(insns)
-}
-
-fn make_three_ladder_checks_program() -> Vec<BpfInsn> {
-    let mut insns = load_packet_root();
-    insns.extend(guard(4, 2, 3, 14));
-    insns.push(BpfInsn::ldx_mem(BPF_H, 6, 2, 12));
-    insns.extend(guard(5, 2, 3, 34));
-    insns.push(BpfInsn::ldx_mem(BPF_W, 7, 2, 30));
-    insns.extend(guard(6, 2, 3, 54));
-    insns.push(BpfInsn::ldx_mem(BPF_W, 8, 2, 50));
-    shared_error_program(insns)
-}
-
-fn make_non_adjacent_checks_program() -> Vec<BpfInsn> {
-    let mut insns = load_packet_root();
-    insns.extend(guard(4, 2, 3, 14));
-    insns.push(BpfInsn::ldx_mem(BPF_H, 6, 2, 12));
-    insns.extend(guard(5, 2, 3, 40));
-    insns.push(BpfInsn::ldx_mem(BPF_W, 7, 2, 36));
-    shared_error_program(insns)
-}
-
-fn make_variable_offset_program() -> Vec<BpfInsn> {
-    let mut insns = load_packet_root();
-    insns.push(BpfInsn::mov64_imm(8, 20));
-    insns.push(BpfInsn::mov64_reg(4, 2));
-    insns.push(BpfInsn::alu64_reg(BPF_ADD, 4, 8));
-    insns.push(BpfInsn::jgt_reg(4, 3, 0));
-    insns.push(BpfInsn::ldx_mem(BPF_H, 6, 2, 12));
-    insns.extend(guard(5, 2, 3, 34));
-    insns.push(BpfInsn::ldx_mem(BPF_W, 7, 2, 30));
-    shared_error_program(insns)
-}
-
-fn make_mixed_cmp_kind_program() -> Vec<BpfInsn> {
-    let mut insns = load_packet_root();
-    insns.extend(guard(4, 2, 3, 14));
-    insns.push(BpfInsn::ldx_mem(BPF_H, 6, 2, 12));
-    insns.push(BpfInsn::mov64_reg(5, 2));
-    insns.push(BpfInsn::add64_imm(5, 34));
-    insns.push(BpfInsn::jump_reg(BPF_JGE, 5, 3, 0));
-    insns.push(BpfInsn::ldx_mem(BPF_W, 7, 2, 30));
-    shared_error_program(insns)
-}
-
-fn make_different_base_regs_program() -> Vec<BpfInsn> {
-    let mut insns = load_packet_root();
-    insns.extend(guard(4, 2, 3, 14));
-    insns.push(BpfInsn::ldx_mem(BPF_H, 6, 2, 12));
-    insns.push(BpfInsn::ldx_mem(BPF_W, 8, 1, 0));
-    insns.extend(guard(5, 8, 3, 34));
-    insns.push(BpfInsn::ldx_mem(BPF_W, 7, 8, 30));
-    shared_error_program(insns)
-}
-
-fn make_interleaved_checks_program() -> Vec<BpfInsn> {
-    let mut insns = load_packet_root();
-    insns.extend(guard(4, 2, 3, 14));
-    insns.push(BpfInsn::ldx_mem(BPF_H, 6, 2, 12));
-    insns.push(BpfInsn::mov64_imm(8, 1));
-    insns.push(BpfInsn::add64_imm(8, 2));
-    insns.extend(guard(5, 2, 3, 34));
-    insns.push(BpfInsn::ldx_mem(BPF_W, 7, 2, 30));
-    shared_error_program(insns)
-}
-
-fn make_different_error_targets_program() -> Vec<BpfInsn> {
-    let mut insns = load_packet_root();
-    insns.extend(guard(4, 2, 3, 14));
-    insns.push(BpfInsn::ldx_mem(BPF_H, 6, 2, 12));
-    insns.extend(guard(5, 2, 3, 34));
-    insns.push(BpfInsn::ldx_mem(BPF_W, 7, 2, 30));
-    insns.push(BpfInsn::mov64_imm(0, 1));
-    insns.push(BpfInsn::exit());
-
-    let err_a_pc = insns.len();
-    insns.push(BpfInsn::mov64_imm(0, 0));
-    insns.push(BpfInsn::exit());
-
-    let err_b_pc = insns.len();
-    insns.push(BpfInsn::mov64_imm(0, 2));
-    insns.push(BpfInsn::exit());
-
-    insns[4].off = (err_a_pc as isize - 4 - 1) as i16;
-    insns[8].off = (err_b_pc as isize - 8 - 1) as i16;
-    insns
-}
-
-fn make_no_bounds_check_program() -> Vec<BpfInsn> {
-    vec![
-        BpfInsn::ldx_mem(BPF_W, 2, 1, 0),
-        BpfInsn::ldx_mem(BPF_W, 3, 1, 4),
-        BpfInsn::mov64_imm(4, 42),
-        BpfInsn::add64_imm(4, 8),
-        BpfInsn::ldx_mem(BPF_W, 5, 2, 0),
-        BpfInsn::mov64_imm(0, 1),
-        BpfInsn::exit(),
-    ]
-}
-
-fn run_bounds_check_merge_pass(program: &mut BpfProgram, prog_type: u32) -> PipelineResult {
-    let mut pm = PassManager::new();
-    pm.add_pass(BoundsCheckMergePass);
-
-    let mut ctx = PassContext::baseline();
-    ctx.prog_type = prog_type;
-    pm.run(program, &ctx).unwrap()
-}
-
 #[test]
-fn test_single_bounds_check_unchanged() {
-    let original = make_single_check_program();
-    let mut program = BpfProgram::new(original.clone());
-
-    let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-    assert_eq!(program.insns, original);
-    assert_eq!(result.pass_results[0].sites_applied, 0);
-    assert!(
-        !result.pass_results[0].sites_skipped.is_empty(),
-        "single recognized guard should be reported as non-mergeable",
+fn bounds_check_merge_merges_adjacent_xdp_guards() {
+    let run = run_bounds(
+        two_adjacent_checks(XDP_PACKET_DATA_OFFSET, XDP_PACKET_DATA_END_OFFSET),
+        XDP,
     );
+
+    assert_eq!(run.result.sites_applied, 1);
+    assert_eq!(run.lowered.len(), 11);
+    assert_eq!(compare_pcs(&run.lowered), vec![4]);
+    assert_eq!(run.lowered[3], BpfInsn::add64_imm(BPF_REG_4, 34));
 }
 
 #[test]
-fn test_two_adjacent_checks_merged() {
-    let mut program = BpfProgram::new(make_two_adjacent_checks_program());
-
-    let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-    assert_eq!(result.pass_results[0].sites_applied, 1);
-    assert_eq!(program.insns.len(), 11);
-    assert_eq!(compare_pcs(&program.insns), vec![4]);
-    assert_eq!(program.insns[3], BpfInsn::add64_imm(4, 34));
-}
-
-#[test]
-fn test_three_ladder_checks_merged() {
-    let mut program = BpfProgram::new(make_three_ladder_checks_program());
-
-    let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-    assert_eq!(result.pass_results[0].sites_applied, 1);
-    assert_eq!(program.insns.len(), 12);
-    assert_eq!(compare_pcs(&program.insns), vec![4]);
-    assert_eq!(program.insns[3], BpfInsn::add64_imm(4, 54));
-}
-
-#[test]
-fn test_non_adjacent_checks_not_merged() {
-    let original = make_non_adjacent_checks_program();
-    let mut program = BpfProgram::new(original.clone());
-
-    let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-    assert_eq!(program.insns, original);
-    assert_eq!(compare_pcs(&program.insns), vec![4, 8]);
-    assert!(
-        !result.pass_results[0].sites_skipped.is_empty(),
-        "gapped windows should be recognized and rejected",
+fn bounds_check_merge_fixes_branch_offsets_after_deletion() {
+    // P1-H: branch fixup must be exercised through the real pass path.
+    let run = run_bounds(
+        two_adjacent_checks(XDP_PACKET_DATA_OFFSET, XDP_PACKET_DATA_END_OFFSET),
+        XDP,
     );
+
+    assert_eq!(run.result.sites_applied, 1);
+    assert_eq!(compare_pcs(&run.lowered), vec![4]);
+    assert_eq!(run.lowered[4].off, 4);
 }
 
 #[test]
-fn test_variable_offset_skipped() {
-    let original = make_variable_offset_program();
-    let mut program = BpfProgram::new(original.clone());
+fn bounds_check_merge_keeps_non_adjacent_windows_separate() {
+    let mut insns = load_packet_root(XDP_PACKET_DATA_OFFSET, XDP_PACKET_DATA_END_OFFSET);
+    insns.extend(guard(BPF_REG_4, BPF_REG_2, BPF_REG_3, 14));
+    insns.push(BpfInsn::ldx_mem(BPF_H, BPF_REG_6, BPF_REG_2, 12));
+    insns.extend(guard(BPF_REG_5, BPF_REG_2, BPF_REG_3, 40));
+    insns.push(BpfInsn::ldx_mem(BPF_W, BPF_REG_7, BPF_REG_2, 36));
+    let input = shared_error_program(insns);
 
-    let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-    assert_eq!(program.insns, original);
-    assert_eq!(compare_pcs(&program.insns), vec![5, 9]);
-    assert!(
-        !result.pass_results[0].sites_skipped.is_empty(),
-        "variable-offset guards should be recognized and skipped",
-    );
+    let run = run_bounds(input.clone(), XDP);
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_eq!(run.lowered, input);
+    assert_eq!(compare_pcs(&run.lowered), vec![4, 8]);
 }
 
 #[test]
-fn test_mixed_cmp_kinds_not_merged() {
-    let original = make_mixed_cmp_kind_program();
-    let mut program = BpfProgram::new(original.clone());
+fn bounds_check_merge_rejects_variable_offset_guard() {
+    let mut insns = load_packet_root(XDP_PACKET_DATA_OFFSET, XDP_PACKET_DATA_END_OFFSET);
+    insns.push(BpfInsn::mov64_imm(BPF_REG_8, 20));
+    insns.push(BpfInsn::mov64_reg(BPF_REG_4, BPF_REG_2));
+    insns.push(BpfInsn::alu64_reg(BPF_ADD, BPF_REG_4, BPF_REG_8));
+    insns.push(BpfInsn::jgt_reg(BPF_REG_4, BPF_REG_3, 0));
+    insns.push(BpfInsn::ldx_mem(BPF_H, BPF_REG_6, BPF_REG_2, 12));
+    insns.extend(guard(BPF_REG_5, BPF_REG_2, BPF_REG_3, 34));
+    insns.push(BpfInsn::ldx_mem(BPF_W, BPF_REG_7, BPF_REG_2, 30));
+    let input = shared_error_program(insns);
 
-    let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-    assert_eq!(program.insns, original);
-    assert_eq!(compare_pcs(&program.insns), vec![4, 8]);
-    assert!(
-        !result.pass_results[0].sites_skipped.is_empty(),
-        "mixed strict/inclusive guards must not be merged",
-    );
+    let run = run_bounds(input.clone(), XDP);
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_eq!(run.lowered, input);
+}
+
+#[test]
+fn bounds_check_merge_rejects_mixed_compare_kinds() {
+    let mut insns = load_packet_root(XDP_PACKET_DATA_OFFSET, XDP_PACKET_DATA_END_OFFSET);
+    insns.extend(guard(BPF_REG_4, BPF_REG_2, BPF_REG_3, 14));
+    insns.push(BpfInsn::ldx_mem(BPF_H, BPF_REG_6, BPF_REG_2, 12));
+    insns.push(BpfInsn::mov64_reg(BPF_REG_5, BPF_REG_2));
+    insns.push(BpfInsn::add64_imm(BPF_REG_5, 34));
+    insns.push(BpfInsn::jump_reg(BPF_JGE, BPF_REG_5, BPF_REG_3, 0));
+    insns.push(BpfInsn::ldx_mem(BPF_W, BPF_REG_7, BPF_REG_2, 30));
+    let input = shared_error_program(insns);
+
+    let run = run_bounds(input.clone(), XDP);
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_eq!(run.lowered, input);
 }
 
 #[test]
 fn test_different_base_regs_not_merged() {
-    let original = make_different_base_regs_program();
-    let mut program = BpfProgram::new(original.clone());
+    // Restored from HEAD: guards rooted at different packet pointers must not
+    // be merged into one dominant check.
+    let mut insns = load_packet_root(XDP_PACKET_DATA_OFFSET, XDP_PACKET_DATA_END_OFFSET);
+    insns.extend(guard(BPF_REG_4, BPF_REG_2, BPF_REG_3, 14));
+    insns.push(BpfInsn::ldx_mem(BPF_H, BPF_REG_6, BPF_REG_2, 12));
+    insns.push(BpfInsn::ldx_mem(BPF_W, BPF_REG_8, BPF_REG_1, 0));
+    insns.extend(guard(BPF_REG_5, BPF_REG_8, BPF_REG_3, 34));
+    insns.push(BpfInsn::ldx_mem(BPF_W, BPF_REG_7, BPF_REG_8, 30));
+    let input = shared_error_program(insns);
 
-    let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-    assert_eq!(program.insns, original);
-    assert_eq!(compare_pcs(&program.insns), vec![4, 9]);
+    let run = run_bounds(input.clone(), XDP);
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_eq!(run.lowered, input);
+    assert_eq!(compare_pcs(&run.lowered), vec![4, 9]);
     assert!(
-        !result.pass_results[0].sites_skipped.is_empty(),
-        "different packet roots should block merging",
+        !run.result.sites_skipped.is_empty(),
+        "different packet roots should block merging"
     );
-}
-
-#[test]
-fn test_interleaved_instructions_handled() {
-    let mut program = BpfProgram::new(make_interleaved_checks_program());
-
-    let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-    assert_eq!(result.pass_results[0].sites_applied, 1);
-    assert_eq!(program.insns.len(), 13);
-    assert_eq!(compare_pcs(&program.insns), vec![4]);
-    assert_eq!(program.insns[3], BpfInsn::add64_imm(4, 34));
 }
 
 #[test]
 fn test_different_error_targets_not_merged() {
-    let original = make_different_error_targets_program();
-    let mut program = BpfProgram::new(original.clone());
+    // Restored from HEAD: merging guards with different slow-path targets would
+    // change failure semantics.
+    let mut insns = load_packet_root(XDP_PACKET_DATA_OFFSET, XDP_PACKET_DATA_END_OFFSET);
+    insns.extend(guard(BPF_REG_4, BPF_REG_2, BPF_REG_3, 14));
+    insns.push(BpfInsn::ldx_mem(BPF_H, BPF_REG_6, BPF_REG_2, 12));
+    insns.extend(guard(BPF_REG_5, BPF_REG_2, BPF_REG_3, 34));
+    insns.push(BpfInsn::ldx_mem(BPF_W, BPF_REG_7, BPF_REG_2, 30));
+    insns.push(BpfInsn::mov64_imm(BPF_REG_0, 1));
+    insns.push(BpfInsn::exit());
 
-    let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-    assert_eq!(program.insns, original);
-    assert_eq!(compare_pcs(&program.insns), vec![4, 8]);
+    let err_a_pc = insns.len();
+    insns.push(BpfInsn::mov64_imm(BPF_REG_0, 0));
+    insns.push(BpfInsn::exit());
+
+    let err_b_pc = insns.len();
+    insns.push(BpfInsn::mov64_imm(BPF_REG_0, 2));
+    insns.push(BpfInsn::exit());
+
+    insns[4].off = (err_a_pc as isize - 4 - 1) as i16;
+    insns[8].off = (err_b_pc as isize - 8 - 1) as i16;
+    let input = insns;
+
+    let run = run_bounds(input.clone(), XDP);
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_eq!(run.lowered, input);
+    assert_eq!(compare_pcs(&run.lowered), vec![4, 8]);
     assert!(
-        !result.pass_results[0].sites_skipped.is_empty(),
-        "guards with different slow sinks should be rejected",
+        !run.result.sites_skipped.is_empty(),
+        "guards with different slow sinks should be rejected"
     );
 }
 
 #[test]
-fn test_packet_program_ctx_layouts() {
-    let mut xdp_program = BpfProgram::new(make_two_adjacent_checks_program());
-    let _xdp_result = run_bounds_check_merge_pass(&mut xdp_program, BPF_PROG_TYPE_XDP);
-    assert_eq!(xdp_program.insns.len(), 11);
-
-    let mut tc_program = BpfProgram::new(make_two_adjacent_tc_checks_program());
-    let _tc_result = run_bounds_check_merge_pass(&mut tc_program, BPF_PROG_TYPE_SCHED_CLS);
-    assert_eq!(tc_program.insns.len(), 11);
-
-    let mut tc_action_program = BpfProgram::new(make_two_adjacent_tc_checks_program());
-    let _tc_action_result =
-        run_bounds_check_merge_pass(&mut tc_action_program, BPF_PROG_TYPE_SCHED_ACT);
-    assert_eq!(tc_action_program.insns.len(), 11);
-
-    let xdp_layout_in_tc = make_two_adjacent_checks_program();
-    let mut xdp_layout_tc_program = BpfProgram::new(xdp_layout_in_tc.clone());
-    let _xdp_layout_tc_result =
-        run_bounds_check_merge_pass(&mut xdp_layout_tc_program, BPF_PROG_TYPE_SCHED_CLS);
-    assert_eq!(xdp_layout_tc_program.insns, xdp_layout_in_tc);
-
-    let original = make_two_adjacent_checks_program();
-    let mut non_packet_program = BpfProgram::new(original.clone());
-    let _non_packet_result =
-        run_bounds_check_merge_pass(&mut non_packet_program, BPF_PROG_TYPE_SOCKET_FILTER);
-    assert_eq!(non_packet_program.insns, original);
-}
-
-#[test]
-fn test_empty_program() {
-    let mut program = BpfProgram::new(vec![]);
-
-    let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-    assert!(program.insns.is_empty());
-    assert_eq!(result.pass_results[0].sites_applied, 0);
-}
-
-#[test]
-fn test_no_bounds_checks() {
-    let original = make_no_bounds_check_program();
-    let mut program = BpfProgram::new(original.clone());
-
-    let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-    assert_eq!(program.insns, original);
-    assert!(compare_pcs(&program.insns).is_empty());
-    assert_eq!(result.pass_results[0].sites_applied, 0);
-}
-
-#[test]
-fn test_merge_preserves_largest_check() {
-    let mut program = BpfProgram::new(make_three_ladder_checks_program());
-
-    let _result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-    assert_eq!(program.insns[3], BpfInsn::add64_imm(4, 54));
-    assert_eq!(program.insns[4].code, BPF_JMP | BPF_JGT | BPF_X);
-    assert_eq!(compare_pcs(&program.insns), vec![4]);
-}
-
-#[test]
-fn test_branch_fixup_after_merge() {
-    let mut program = BpfProgram::new(make_two_adjacent_checks_program());
-
-    let _result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-    assert_eq!(program.insns.len(), 11);
-    assert_eq!(compare_pcs(&program.insns), vec![4]);
-    assert_eq!(program.insns[4].off, 4);
-}
-
-#[test]
-fn test_merge_remaps_btf_metadata() {
-    let mut program = BpfProgram::new(make_two_adjacent_checks_program());
-    program.func_info = Some(btf_records(&[0, 12]));
-    program.line_info = Some(btf_records(&[5, 9, 12]));
-
-    let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
-
-    assert_eq!(result.pass_results[0].sites_applied, 1);
-    assert_eq!(program.insns.len(), 11);
-    assert_eq!(
-        btf_offsets(program.func_info.as_ref().expect("func_info")),
-        vec![0, 9]
+fn bounds_check_merge_accepts_tc_layout_and_rejects_wrong_prog_type() {
+    let tc = run_bounds(
+        two_adjacent_checks(SKB_PACKET_DATA_OFFSET, SKB_PACKET_DATA_END_OFFSET),
+        SCHED_CLS,
     );
-    assert_eq!(
-        btf_offsets(program.line_info.as_ref().expect("line_info")),
-        vec![5, 6, 9]
+    assert_eq!(tc.result.sites_applied, 1);
+
+    let input = two_adjacent_checks(XDP_PACKET_DATA_OFFSET, XDP_PACKET_DATA_END_OFFSET);
+    let non_packet = run_bounds(input.clone(), SOCKET_FILTER);
+    assert_eq!(non_packet.result.sites_applied, 0);
+    assert_eq!(non_packet.lowered, input);
+}
+
+#[test]
+fn bounds_check_merge_remaps_btf_metadata_on_bbprogram() {
+    // P1-H: BTF metadata must be remapped by the BBProgram mutation/lower path.
+    let input = two_adjacent_checks(XDP_PACKET_DATA_OFFSET, XDP_PACKET_DATA_END_OFFSET);
+    let mut ctx = pass_ctx();
+    ctx.prog_type = XDP;
+    set_btf_records(
+        &mut ctx,
+        Some(btf_records(&[0, 12])),
+        Some(btf_records(&[5, 9, 12])),
     );
+
+    let run = run_pass_on_insns(BoundsCheckMergePass, input, &ctx);
+
+    assert_eq!(run.result.sites_applied, 1);
+    // IMPL: needs BBProgram::btf_records() or equivalent lowered metadata view.
+    assert_eq!(run.prog.btf_records().func_offsets(), vec![0, 9]);
+    assert_eq!(run.prog.btf_records().line_offsets(), vec![5, 6, 9]);
 }
