@@ -1,6 +1,5 @@
-// SPDX-License-Identifier: MIT
-//! BRANCH_FLIP PGO-guided pass.
 
+// SPDX-License-Identifier: MIT
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
@@ -8,46 +7,13 @@ use anyhow::{bail, Context, Result};
 use serde::Deserialize;
 
 use crate::analysis::{
-    annotations_from_profile, read_json_file, BBProgram, BlockId, InsnSite, Terminator,
+    annotations_from_profile, block_start_slot, control_flow_target_sites, read_json_file, site_pc,
+    BBProgram, BlockId, InsnSite, Terminator,
 };
 use crate::insn::*;
 use crate::pass::*;
-
-/// BRANCH_FLIP: PGO-guided reorder of if/else bodies.
-///
-/// True if/else diamond in BPF bytecode:
-///   pc:             Jcc +N          // conditional jump; if taken, go to else_start
-///   pc+1..pc+N:     [then body: N-1 insns]
-///   pc+N:           JA +M           // unconditional jump over else-body
-///   pc+N+1..pc+N+M: [else body: M insns]
-///
-/// Where:
-///   - `N = jcc.off` (the Jcc offset)
-///   - then_len = N - 1 (instructions between Jcc and JA, exclusive)
-///   - else_start = pc + N + 1
-///   - else_len = M = ja.off
-///
-/// After flip (inverted condition, bodies swapped):
-///   pc:             J!cc +M         // inverted, jump over else-body (now first)
-///   pc+1..pc+M:     [else body: M insns]
-///   pc+M+1:         JA +(N-1)       // jump over then-body (now second)
-///   pc+M+2..pc+M+N: [then body: N-1 insns]
-///
-/// **PGO-guided mode**: branch_flip requires real per-site `BranchProfile`
-/// data. Program-level PMU data and each candidate site's PMU miss rate are
-/// safety gates for unpredictable branches.
-///
-/// Safety: skips sites where external branches target interior instructions,
-/// or where JSET is used (no simple inverse). The rewrite updates BBProgram
-/// terminators and block order; lower recomputes branch offsets.
 pub struct BranchFlipPass {
-    /// Minimum taken rate to trigger a PGO-guided flip.
     pub min_bias: f64,
-    /// Maximum branch miss rate (from PMU) to allow branch flipping.
-    /// If the program's branch miss rate exceeds this threshold, branches are
-    /// considered unpredictable and flipping is skipped to avoid CMOV-like
-    /// regression on misprediction-heavy workloads.
-    /// Default: 0.05 (5%).
     pub max_branch_miss_rate: f64,
 }
 
@@ -182,11 +148,8 @@ fn read_branch_flip_profile(path: &Path) -> Result<ProfilingData> {
     }
     Ok(data)
 }
-
-/// A detected branch-flip site.
 #[derive(Clone)]
 pub(super) struct BranchFlipSite {
-    /// PC of the Jcc instruction.
     pub(super) pc: usize,
     pred: BlockId,
     then_first: BlockId,
@@ -194,14 +157,11 @@ pub(super) struct BranchFlipSite {
     else_first: BlockId,
     else_last: BlockId,
     join: BlockId,
-    /// Number of instructions in the then-body (N-1, between Jcc and JA).
     pub(super) then_len: usize,
-    /// Number of instructions in the else-body (M = ja.off).
     pub(super) else_len: usize,
 }
 
 impl BranchFlipSite {
-    /// Total number of instructions in the site (Jcc + then + JA + else).
     pub(super) fn total_len(&self) -> usize {
         1 + self.then_len + 1 + self.else_len
     }
@@ -229,8 +189,6 @@ pub fn run_on_bbprogram(
     min_bias: f64,
     max_branch_miss_rate: f64,
 ) -> anyhow::Result<PassResult> {
-    // Phase 0: check real program-level PMU branch miss rate. Missing PMU
-    // data is a profile collection failure, not an optimization skip.
     let Some(program_miss_rate) = branch_miss_rate else {
         anyhow::bail!("branch_flip requires real program-level branch_miss_rate data");
     };
@@ -251,19 +209,13 @@ pub fn run_on_bbprogram(
         }));
     }
 
-    let branch_targets = prog.branch_target_pcs()?;
-    let site_pcs = prog.current_site_pcs()?;
-
-    // Phase 1: scan for all candidate sites.
+    let branch_targets = control_flow_target_sites(prog)?;
     let sites = scan_branch_flip_sites(prog)?;
-
-    // Phase 2: filter sites and collect safe ones to apply.
     let mut safe_sites: Vec<BranchFlipSite> = Vec::new();
     let mut skipped = Vec::new();
 
     for site in &sites {
-        let own_target = prog.current_block_start_pc(site.else_first)?;
-        let site_end = site.pc + site.total_len();
+        let own_target = prog.first_site_in_block(site.else_first)?;
 
         let Some(bp) = annotations
             .get(site.pc)
@@ -276,11 +228,34 @@ pub fn run_on_bbprogram(
         };
         let direction_total = validate_real_branch_profile(site.pc, bp)?;
 
-        let frame = prog.block(site.pred)?.frame;
-        let has_exterior_interior = prog
-            .sites_in_frame_pc_range(&site_pcs, frame, site.pc + 1, site_end)?
-            .into_iter()
-            .any(|(pc_inner, _)| branch_targets.contains(&pc_inner) && pc_inner != own_target);
+        let frame = prog.block_frame(site.pred)?;
+        let mut has_exterior_interior = false;
+        let cond_site = prog.terminator_site(site.pred)?.ok_or_else(|| {
+            anyhow::anyhow!(
+                "branch_flip predecessor {:?} has no terminator site",
+                site.pred
+            )
+        })?;
+        let cond_pc = site_pc(prog, cond_site)?;
+        let window_end = cond_pc
+            .checked_add(site.total_len())
+            .ok_or_else(|| anyhow::anyhow!("branch_flip site at pc {} overflows", site.pc))?;
+        for block in prog.subprog_blocks(frame) {
+            for candidate in prog.sites_in_block_with_terminator(block)? {
+                let candidate_pc = site_pc(prog, candidate)?;
+                if candidate_pc <= cond_pc || candidate_pc >= window_end {
+                    continue;
+                }
+                if !branch_targets.contains(&candidate) || Some(candidate) == own_target {
+                    continue;
+                }
+                has_exterior_interior = true;
+                break;
+            }
+            if has_exterior_interior {
+                break;
+            }
+        }
 
         if has_exterior_interior {
             skipped.push(SkipReason {
@@ -289,9 +264,7 @@ pub fn run_on_bbprogram(
             });
             continue;
         }
-
-        // Safety check: JSET cannot be inverted.
-        let cond = match prog.block(site.pred)?.terminator {
+        let cond = match prog.terminator(site.pred)? {
             Terminator::CondBranch { cond, .. } => cond,
             term => anyhow::bail!(
                 "branch_flip site at pc {} expected conditional terminator, got {:?}",
@@ -338,8 +311,6 @@ pub fn run_on_bbprogram(
             ..PassResult::unchanged()
         });
     }
-
-    // Phase 3: apply rewrites.
     safe_sites.sort_by_key(|s| s.pc);
     for site in &safe_sites {
         apply_branch_flip_site(prog, site)?;
@@ -405,7 +376,7 @@ fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow
         );
     }
 
-    let (cond, taken, fallthrough) = match prog.block(pred)?.terminator {
+    let (cond, taken, fallthrough) = match prog.terminator(pred)? {
         Terminator::CondBranch {
             cond,
             taken,
@@ -426,7 +397,7 @@ fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow
         );
     }
 
-    let (ja, join) = match prog.block(then_last)?.terminator {
+    let (ja, join) = match prog.terminator(then_last)? {
         Terminator::Jump { insn, target } => (insn, target),
         term => anyhow::bail!(
             "branch_flip site at pc {} expected then-body JA terminator, got {:?}",
@@ -442,7 +413,7 @@ fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow
             join
         );
     }
-    match prog.block(else_last)?.terminator {
+    match prog.terminator(else_last)? {
         Terminator::Fallthrough { next } if next == join => {}
         term => anyhow::bail!(
             "branch_flip site at pc {} expected else-body fallthrough to {:?}, got {:?}",
@@ -474,7 +445,7 @@ fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow
     )?;
 
     let order = swapped_range_order(
-        prog.blocks.len(),
+        prog.block_count(),
         then_first..=then_last,
         else_first..=else_last,
     );
@@ -506,30 +477,18 @@ fn swapped_range_order(
     }
     order
 }
-
-/// Scan for branch-flip candidate sites with correct if/else diamond shape.
-///
-/// True diamond:
-///   pc:     Jcc +N          // N = jcc.off
-///   pc+1..pc+N-1: then body (N-1 insns)
-///   pc+N:   JA +M
-///   pc+N+1..pc+N+M: else body (M insns)
 pub(super) fn scan_branch_flip_sites(prog: &BBProgram) -> anyhow::Result<Vec<BranchFlipSite>> {
-    let site_pcs = prog.current_site_pcs()?;
     let mut sites = Vec::new();
     let mut next_allowed_pc = 0usize;
     for block in prog.blocks() {
-        let branch_site = InsnSite {
-            block: block.id,
-            idx: block.insns.len(),
-        };
-        let Some(&pc) = site_pcs.get(&branch_site) else {
+        let Some(branch_site) = prog.terminator_site(block.id)? else {
             continue;
         };
+        let pc = site_pc(prog, branch_site)?;
         if pc < next_allowed_pc {
             continue;
         }
-        if let Some(site) = branch_flip_site_at(prog, &site_pcs, block.id, pc)? {
+        if let Some(site) = branch_flip_site_at(prog, block.id, pc)? {
             next_allowed_pc = site.pc + site.total_len();
             sites.push(site);
         }
@@ -539,7 +498,6 @@ pub(super) fn scan_branch_flip_sites(prog: &BBProgram) -> anyhow::Result<Vec<Bra
 
 fn branch_flip_site_at(
     prog: &BBProgram,
-    site_pcs: &std::collections::BTreeMap<InsnSite, usize>,
     pred: BlockId,
     pc: usize,
 ) -> anyhow::Result<Option<BranchFlipSite>> {
@@ -547,20 +505,20 @@ fn branch_flip_site_at(
         cond,
         taken: else_first,
         fallthrough: then_first,
-    } = prog.block(pred)?.terminator
+    } = prog.terminator(pred)?
     else {
         return Ok(None);
     };
     if !cond.is_cond_jmp() {
         return Ok(None);
     }
-    if prog.current_block_start_pc(then_first)? != pc + 1 {
+    if block_start_slot(prog, then_first)? != pc + 1 {
         return Ok(None);
     }
-    let Some((then_last, join, ja_pc)) = then_arm(prog, site_pcs, then_first, else_first)? else {
+    let Some((then_last, join, ja_pc)) = then_arm(prog, then_first, else_first)? else {
         return Ok(None);
     };
-    let Some((else_last, else_end_pc)) = else_arm(prog, site_pcs, else_first, join)? else {
+    let Some((else_last, else_end_pc)) = else_arm(prog, else_first, join)? else {
         return Ok(None);
     };
     if then_last.0 + 1 != else_first.0 {
@@ -573,7 +531,7 @@ fn branch_flip_site_at(
         return Ok(None);
     }
     let else_start = ja_pc + 1;
-    if prog.current_block_start_pc(else_first)? != else_start {
+    if block_start_slot(prog, else_first)? != else_start {
         return Ok(None);
     }
     let else_len = else_end_pc
@@ -597,7 +555,6 @@ fn branch_flip_site_at(
 
 fn then_arm(
     prog: &BBProgram,
-    site_pcs: &std::collections::BTreeMap<InsnSite, usize>,
     start: BlockId,
     else_first: BlockId,
 ) -> anyhow::Result<Option<(BlockId, BlockId, usize)>> {
@@ -606,7 +563,7 @@ fn then_arm(
         if block.0 >= else_first.0 {
             return Ok(None);
         }
-        match prog.block(block)?.terminator {
+        match prog.terminator(block)? {
             Terminator::Fallthrough { next } if next.0 == block.0 + 1 => block = next,
             Terminator::Jump { insn, target } => {
                 if !insn.is_ja() {
@@ -614,11 +571,9 @@ fn then_arm(
                 }
                 let site = InsnSite {
                     block,
-                    idx: prog.block(block)?.insns.len(),
+                    idx: prog.block_body_len(block)?,
                 };
-                let ja_pc = *site_pcs
-                    .get(&site)
-                    .ok_or_else(|| anyhow::anyhow!("missing current pc for {:?}", site))?;
+                let ja_pc = site_pc(prog, site)?;
                 return Ok(Some((block, target, ja_pc)));
             }
             _ => return Ok(None),
@@ -628,15 +583,14 @@ fn then_arm(
 
 fn else_arm(
     prog: &BBProgram,
-    _site_pcs: &std::collections::BTreeMap<InsnSite, usize>,
     start: BlockId,
     join: BlockId,
 ) -> anyhow::Result<Option<(BlockId, usize)>> {
     let mut block = start;
     loop {
-        match prog.block(block)?.terminator {
+        match prog.terminator(block)? {
             Terminator::Fallthrough { next } if next == join => {
-                return Ok(Some((block, prog.current_block_start_pc(join)?)));
+                return Ok(Some((block, block_start_slot(prog, join)?)));
             }
             Terminator::Fallthrough { next } if next.0 == block.0 + 1 => block = next,
             _ => return Ok(None),

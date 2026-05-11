@@ -4,7 +4,6 @@
 //! Core abstractions:
 //! - `BBProgram`: basic-block IR used by production pass execution
 //! - `BpfPass`: transformation pass that may modify the program
-//! - `PassManager`: thin policy and reporting runner for explicit pass lists
 
 use std::collections::{HashMap, HashSet};
 use std::fmt;
@@ -13,7 +12,9 @@ use std::sync::Arc;
 use crate::analysis::BBProgram;
 use crate::insn::BpfInsn;
 #[cfg(test)]
-use crate::insn::MapPseudo;
+pub use crate::test_helpers::{
+    build_map_fd_bindings, BpfProgram, MapProvider, SnapshotMapProvider,
+};
 // MapInlineHint et al. live in passes/map_inline.rs (pass-local metadata) and are
 // re-exported here so existing `use crate::pass::*` consumers keep working.
 pub use crate::passes::map_inline::{MapInlineHint, MapInlineHintAnchor, MapInlineHintMode};
@@ -192,42 +193,6 @@ impl BtfInfoRecords {
 
 // ── Program IR ──────────────────────────────────────────────────────
 
-/// Linear BPF program view used by map snapshot helpers.
-#[cfg(test)]
-#[derive(Clone)]
-pub struct BpfProgram {
-    /// Instruction stream.
-    pub insns: Vec<BpfInsn>,
-    /// Map IDs referenced by this program, in the kernel's `used_maps` order.
-    /// This metadata lets analyses resolve pseudo-map references found in the
-    /// original bytecode back to live kernel map objects.
-    pub map_ids: Vec<u32>,
-    /// Stable `old_fd -> map_id` bindings captured from the original program
-    /// before any transform removes or reorders pseudo-map loads.
-    pub map_fd_bindings: HashMap<i32, u32>,
-    /// Parsed `log_level=2` verifier state snapshots for the original program.
-    pub verifier_states: Arc<[VerifierInsn]>,
-    /// Pre-loaded map value snapshot: (map_id, key_bytes) -> value_bytes.
-    /// Used by offline snapshot callers and unit tests.
-    pub map_values: HashMap<(u32, Vec<u8>), Vec<u8>>,
-    /// Compressed map value overlays: map_id -> lookup model.
-    /// These are operator-provided side inputs for maps whose full live
-    /// snapshot is intentionally omitted by size.
-    pub map_value_overlays: HashMap<u32, CompressedMapValues>,
-    /// Map-in-map outer entries: (outer_map_id, outer_key_bytes) -> inner map id.
-    pub map_inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
-    /// Map IDs whose bpftool dump snapshot was intentionally omitted by size.
-    pub map_snapshots_skipped_by_size: HashSet<u32>,
-    /// Explicit map_inline key hints supplied through the pass-local CLI.
-    pub map_inline_hints: Vec<MapInlineHint>,
-    /// Pre-loaded map metadata: map_id -> MapMetadata.
-    /// Used by offline snapshot callers and unit tests.
-    pub map_metadata: HashMap<u32, MapMetadata>,
-    /// Map metadata/value resolver. Offline callers use the default snapshot
-    /// provider; tests can install a mock provider.
-    pub map_provider: Arc<dyn MapProvider>,
-}
-
 /// Pre-loaded map metadata used by snapshot/offline map providers.
 ///
 /// The pass resolves layout/type information from this metadata. Mutability
@@ -272,30 +237,6 @@ impl CompressedMapValues {
     }
 }
 
-/// Provider for resolving map metadata and values.
-#[cfg(test)]
-pub trait MapProvider: Send + Sync + std::fmt::Debug {
-    fn map_info(
-        &self,
-        program: &BpfProgram,
-        map_id: u32,
-    ) -> std::result::Result<Option<crate::passes::MapInfo>, String>;
-
-    fn lookup_value_size(
-        &self,
-        program: &BpfProgram,
-        info: &crate::passes::MapInfo,
-    ) -> std::result::Result<usize, String>;
-
-    fn lookup_elem(
-        &self,
-        program: &BpfProgram,
-        map_id: u32,
-        key: &[u8],
-        value_size: usize,
-    ) -> std::result::Result<Vec<u8>, MapLookupError>;
-}
-
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum MapLookupError {
     MissingKey { map_id: u32, key: Vec<u8> },
@@ -324,107 +265,6 @@ impl fmt::Display for MapLookupError {
 
 impl std::error::Error for MapLookupError {}
 
-/// Snapshot-backed map provider used by offline snapshots.
-#[cfg(test)]
-#[derive(Clone, Debug, Default)]
-pub struct SnapshotMapProvider;
-
-#[cfg(test)]
-impl MapProvider for SnapshotMapProvider {
-    fn map_info(
-        &self,
-        program: &BpfProgram,
-        map_id: u32,
-    ) -> std::result::Result<Option<crate::passes::MapInfo>, String> {
-        let Some(metadata) = program.map_metadata.get(&map_id) else {
-            return Err(format!(
-                "map_values snapshot has no metadata for map {}",
-                map_id
-            ));
-        };
-        Ok(Some(crate::passes::MapInfo {
-            map_type: metadata.map_type,
-            key_size: metadata.key_size,
-            value_size: metadata.value_size,
-            max_entries: metadata.max_entries,
-            map_id: metadata.map_id,
-        }))
-    }
-
-    fn lookup_value_size(
-        &self,
-        program: &BpfProgram,
-        info: &crate::passes::MapInfo,
-    ) -> std::result::Result<usize, String> {
-        if let Some(overlay) = program.map_value_overlays.get(&info.map_id) {
-            return Ok(overlay.value_size);
-        }
-        if let Some(value_size) = program
-            .map_values
-            .iter()
-            .find_map(|((map_id, _), value)| (*map_id == info.map_id).then_some(value.len()))
-        {
-            return Ok(value_size);
-        }
-
-        Ok(info.value_size as usize)
-    }
-
-    fn lookup_elem(
-        &self,
-        program: &BpfProgram,
-        map_id: u32,
-        key: &[u8],
-        value_size: usize,
-    ) -> std::result::Result<Vec<u8>, MapLookupError> {
-        if let Some(overlay) = program.map_value_overlays.get(&map_id) {
-            return match overlay.lookup(key) {
-                Some(value) => {
-                    if value.len() != value_size {
-                        Err(MapLookupError::Failed(format!(
-                            "compressed map {} returned value size {}, expected {}",
-                            map_id,
-                            value.len(),
-                            value_size
-                        )))
-                    } else {
-                        Ok(value)
-                    }
-                }
-                None => Err(MapLookupError::MissingKey {
-                    map_id,
-                    key: key.to_vec(),
-                }),
-            };
-        }
-        if program.map_snapshots_skipped_by_size.contains(&map_id) {
-            return Err(MapLookupError::SkippedBySize { map_id });
-        }
-        if let Some(value) = program.map_values.get(&(map_id, key.to_vec())) {
-            if value.len() != value_size {
-                return Err(MapLookupError::Failed(format!(
-                    "snapshot map {} returned value size {}, expected {}",
-                    map_id,
-                    value.len(),
-                    value_size
-                )));
-            }
-            return Ok(value.clone());
-        }
-
-        if !program.map_metadata.contains_key(&map_id) {
-            return Err(MapLookupError::Failed(format!(
-                "map_values snapshot has no metadata for map {}",
-                map_id
-            )));
-        }
-        Err(MapLookupError::MissingKey {
-            map_id,
-            key: key.to_vec(),
-        })
-    }
-}
-
 fn hex_bytes(bytes: &[u8]) -> String {
     const HEX: &[u8; 16] = b"0123456789abcdef";
     let mut out = String::with_capacity(bytes.len() * 2);
@@ -433,61 +273,6 @@ fn hex_bytes(bytes: &[u8]) -> String {
         out.push(HEX[(byte & 0x0f) as usize] as char);
     }
     out
-}
-
-#[cfg(test)]
-impl BpfProgram {
-    /// Create from raw instructions.
-    pub fn new(insns: Vec<BpfInsn>) -> Self {
-        Self {
-            insns,
-            map_ids: Vec::new(),
-            map_fd_bindings: HashMap::new(),
-            verifier_states: Arc::from([]),
-            map_values: HashMap::new(),
-            map_value_overlays: HashMap::new(),
-            map_inner_map_ids: HashMap::new(),
-            map_snapshots_skipped_by_size: HashSet::new(),
-            map_inline_hints: Vec::new(),
-            map_metadata: HashMap::new(),
-            map_provider: Arc::new(SnapshotMapProvider),
-        }
-    }
-
-    /// Attach live-kernel map IDs to this program.
-    pub fn set_map_ids(&mut self, map_ids: Vec<u32>) {
-        self.map_fd_bindings = build_map_fd_bindings(&self.insns, &map_ids);
-        self.map_ids = map_ids;
-    }
-}
-
-#[cfg(test)]
-pub fn build_map_fd_bindings(insns: &[BpfInsn], map_ids: &[u32]) -> HashMap<i32, u32> {
-    let mut old_fd_to_map_id = HashMap::new();
-    let mut unique_old_fds = Vec::new();
-
-    let mut pc = 0usize;
-    while pc < insns.len() {
-        let insn = insns[pc];
-        if insn.is_ldimm64() {
-            if insn.map_pseudo().is_some_and(MapPseudo::uses_fd)
-                && !unique_old_fds.contains(&insn.imm)
-            {
-                unique_old_fds.push(insn.imm);
-            }
-            pc += 2;
-            continue;
-        }
-        pc += 1;
-    }
-
-    for (index, old_fd) in unique_old_fds.into_iter().enumerate() {
-        if let Some(&map_id) = map_ids.get(index) {
-            old_fd_to_map_id.insert(old_fd, map_id);
-        }
-    }
-
-    old_fd_to_map_id
 }
 
 // ── BpfPass trait ───────────────────────────────────────────────────
@@ -826,103 +611,6 @@ pub struct PolicyConfig {
     pub enabled_passes: Vec<String>,
 }
 
-// ── PassManager ─────────────────────────────────────────────────────
-
-/// Pipeline execution result.
-#[derive(Clone, Debug)]
-pub struct PipelineResult {
-    pub pass_names: Vec<String>,
-    pub pass_results: Vec<PassResult>,
-}
-
-/// Thin runner for an explicit pass pipeline.
-pub struct PassManager {
-    passes: Vec<Box<dyn BpfPass>>,
-}
-
-impl Default for PassManager {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl PassManager {
-    pub fn new() -> Self {
-        Self { passes: Vec::new() }
-    }
-
-    /// Add a pass to the end of the pipeline.
-    #[cfg(test)]
-    pub fn add_pass<P: BpfPass + 'static>(&mut self, pass: P) {
-        self.passes.push(Box::new(pass));
-    }
-
-    /// Add a pre-boxed pass to the end of the pipeline.
-    pub fn add_pass_boxed(&mut self, pass: Box<dyn BpfPass>) {
-        self.passes.push(pass);
-    }
-
-    /// Return the names of all registered passes in pipeline order.
-    #[cfg(test)]
-    pub fn pass_names(&self) -> Vec<&str> {
-        self.passes.iter().map(|p| p.name()).collect()
-    }
-
-    /// Return whether a pass is enabled by the current policy.
-    fn pass_allowed(&self, pass: &dyn BpfPass, ctx: &PassContext) -> anyhow::Result<bool> {
-        let available_passes = self.available_pass_names();
-        validate_policy_pass_names(
-            "enabled_passes",
-            &ctx.policy.enabled_passes,
-            &available_passes,
-        )?;
-
-        if ctx.policy.enabled_passes.is_empty() {
-            return Ok(true);
-        }
-
-        Ok(ctx
-            .policy
-            .enabled_passes
-            .iter()
-            .any(|name| name == pass.name()))
-    }
-
-    fn available_pass_names(&self) -> HashSet<&str> {
-        self.passes
-            .iter()
-            .map(|pass| pass.name())
-            .chain(crate::passes::PASS_REGISTRY.iter().map(|entry| entry.name))
-            .collect::<HashSet<_>>()
-    }
-
-    /// Execute the entire pipeline.
-    ///
-    pub fn run(
-        &self,
-        program: &mut BBProgram,
-        ctx: &PassContext,
-    ) -> anyhow::Result<PipelineResult> {
-        let mut pass_names = Vec::new();
-        let mut pass_results = Vec::new();
-        for pass in &self.passes {
-            let pass = pass.as_ref();
-            if !self.pass_allowed(pass, ctx)? {
-                continue;
-            }
-
-            let result = run_pass_once(pass, program, ctx)?;
-            pass_names.push(pass.name().to_string());
-            pass_results.push(result);
-        }
-
-        Ok(PipelineResult {
-            pass_names,
-            pass_results,
-        })
-    }
-}
-
 pub fn run_pass_once(
     pass: &dyn BpfPass,
     program: &mut BBProgram,
@@ -963,27 +651,6 @@ fn required_kinsn_skip(pass_name: &str, ctx: &PassContext) -> Option<SkipReason>
         pc: 0,
         reason: format!("missing required kinsn target(s): {}", missing.join(", ")),
     })
-}
-
-fn validate_policy_pass_names(
-    field: &str,
-    configured: &[String],
-    available_passes: &HashSet<&str>,
-) -> anyhow::Result<()> {
-    let mut unknown = configured
-        .iter()
-        .filter(|name| !available_passes.contains(name.as_str()))
-        .cloned()
-        .collect::<Vec<_>>();
-    unknown.sort();
-    unknown.dedup();
-    if unknown.is_empty() {
-        return Ok(());
-    }
-    anyhow::bail!(
-        "invalid {field}: unknown pass name(s): {}",
-        unknown.join(", ")
-    );
 }
 
 // ── Helper: default PassContext for testing ──────────────────────────

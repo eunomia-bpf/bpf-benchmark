@@ -1,103 +1,67 @@
 // SPDX-License-Identifier: MIT
-//! WIDE_MEM optimization pass.
-//!
-//! Self-contained: pattern matching (was matcher.rs), emission (was emit.rs),
-//! and the BpfPass implementation are all here.
-
 use anyhow::{bail, Context};
 use std::collections::BTreeSet;
 use std::ops::Range;
-
-use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
+use crate::analysis::{
+    control_flow_target_sites, site_pc, BBProgram, BlockId, InsnSite, Terminator,
+};
 use crate::insn::*;
 use crate::pass::*;
-
-// ═══════════════════════════════════════════════════════════════════
-// Pattern matching (absorbed from matcher.rs)
-// ═══════════════════════════════════════════════════════════════════
-
-/// A named binding captured from a matched pattern.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(super) struct Binding {
     pub(super) name: &'static str,
     pub(super) value: i64,
 }
-
-/// A single rewrite site found by the daemon.
 #[derive(Clone, Debug)]
-
 pub(super) struct RewriteSite {
-    /// Index of the first instruction in the matched pattern.
-    pub(super) start_pc: usize,
-    /// Number of original instructions consumed by this pattern.
+    pub(super) start_idx: usize,
     pub(super) old_len: usize,
-    /// Captured bindings (register numbers, offsets, widths, etc.).
     pub(super) bindings: Vec<Binding>,
 }
-
 impl RewriteSite {
-    /// Get a binding value by name, or None.
     pub(super) fn get_binding(&self, name: &str) -> Option<i64> {
         self.bindings
             .iter()
             .find(|b| b.name == name)
             .map(|b| b.value)
     }
-
     fn required_binding(&self, name: &str) -> anyhow::Result<i64> {
         self.get_binding(name)
             .ok_or_else(|| anyhow::anyhow!("wide_mem site missing required {name} binding"))
     }
 }
-
-/// Scan for WIDE_MEM (byte-ladder) patterns.
-///
-/// Supports two orderings that clang may produce:
-///
-/// **Variant A -- low-byte-first (canonical LE):**
-///   Total: 1 + 3*(W-1) insns.
-///
-/// **Variant B -- high-byte-first (clang reorder):**
-///   Total: 3*W - 2 insns (for W>=2).
 pub(super) fn scan_wide_mem(insns: &[BpfInsn]) -> Vec<RewriteSite> {
     let mut sites = Vec::new();
     let n = insns.len();
     if n < 4 {
         return sites;
     }
-
-    let mut pc = 0;
-    while pc < n {
-        if let Some(site) = try_match_wide_mem_at(insns, pc) {
+    let mut idx = 0;
+    while idx < n {
+        if let Some(site) = try_match_wide_mem_at(insns, idx) {
             let site_len = site.old_len;
             sites.push(site);
-            pc += site_len;
+            idx += site_len;
         } else {
-            pc += 1;
+            idx += 1;
         }
     }
-
     sites
 }
-
-fn try_match_wide_mem_at(insns: &[BpfInsn], pc: usize) -> Option<RewriteSite> {
+fn try_match_wide_mem_at(insns: &[BpfInsn], idx: usize) -> Option<RewriteSite> {
     let n = insns.len();
-
-    let first = &insns[pc];
+    let first = &insns[idx];
     if !first.is_ldx_mem() || bpf_size(first.code) != BPF_B {
         return None;
     }
-
     let dst = first.dst_reg();
     let base = first.src_reg();
     let first_off = first.off as i64;
-
     for width in (2u32..=8).rev() {
-        // Variant A: low-byte-first
         let len_a = 1 + 3 * (width as usize - 1);
-        if pc + len_a <= n && match_wide_mem_low_first(insns, pc, dst, base, first_off, width) {
+        if idx + len_a <= n && match_wide_mem_low_first(insns, idx, dst, base, first_off, width) {
             return Some(RewriteSite {
-                start_pc: pc,
+                start_idx: idx,
                 old_len: len_a,
                 bindings: vec![
                     Binding {
@@ -119,15 +83,13 @@ fn try_match_wide_mem_at(insns: &[BpfInsn], pc: usize) -> Option<RewriteSite> {
                 ],
             });
         }
-
-        // Variant B: high-byte-first
         let len_b = 3 * width as usize - 2;
-        if pc + len_b <= n {
+        if idx + len_b <= n {
             if let Some(base_off) =
-                match_wide_mem_high_first(insns, pc, dst, base, first_off, width)
+                match_wide_mem_high_first(insns, idx, dst, base, first_off, width)
             {
                 return Some(RewriteSite {
-                    start_pc: pc,
+                    start_idx: idx,
                     old_len: len_b,
                     bindings: vec![
                         Binding {
@@ -151,25 +113,21 @@ fn try_match_wide_mem_at(insns: &[BpfInsn], pc: usize) -> Option<RewriteSite> {
             }
         }
     }
-
     None
 }
-
 fn match_wide_mem_low_first(
     insns: &[BpfInsn],
-    pc: usize,
+    start_idx: usize,
     dst: u8,
     base: u8,
     base_off: i64,
     width: u32,
 ) -> bool {
     for i in 1..width {
-        let idx = pc + 3 * (i as usize - 1) + 1;
-
+        let idx = start_idx + 3 * (i as usize - 1) + 1;
         let load = &insns[idx];
         let shift = &insns[idx + 1];
         let or = &insns[idx + 2];
-
         if !load.is_ldx_mem() || bpf_size(load.code) != BPF_B {
             return false;
         }
@@ -183,7 +141,6 @@ fn match_wide_mem_low_first(
         if tmp == dst {
             return false;
         }
-
         if shift.code != (BPF_ALU64 | BPF_LSH | BPF_K) {
             return false;
         }
@@ -193,7 +150,6 @@ fn match_wide_mem_low_first(
         if shift.imm != (8 * i) as i32 {
             return false;
         }
-
         if or.code != (BPF_ALU64 | BPF_OR | BPF_X) {
             return false;
         }
@@ -201,19 +157,17 @@ fn match_wide_mem_low_first(
             return false;
         }
     }
-
     true
 }
-
 fn match_wide_mem_high_first(
     insns: &[BpfInsn],
-    pc: usize,
+    start_idx: usize,
     dst: u8,
     base: u8,
     first_off: i64,
     width: u32,
 ) -> Option<i64> {
-    let shift0 = &insns[pc + 1];
+    let shift0 = &insns[start_idx + 1];
     if shift0.code != (BPF_ALU64 | BPF_LSH | BPF_K) {
         return None;
     }
@@ -223,8 +177,7 @@ fn match_wide_mem_high_first(
     if shift0.imm != 8 {
         return None;
     }
-
-    let load0 = &insns[pc + 2];
+    let load0 = &insns[start_idx + 2];
     if !load0.is_ldx_mem() || bpf_size(load0.code) != BPF_B {
         return None;
     }
@@ -239,22 +192,18 @@ fn match_wide_mem_high_first(
     if tmp0 == dst {
         return None;
     }
-
-    let or0 = &insns[pc + 3];
+    let or0 = &insns[start_idx + 3];
     if or0.code != (BPF_ALU64 | BPF_OR | BPF_X) {
         return None;
     }
     if or0.dst_reg() != dst || or0.src_reg() != tmp0 {
         return None;
     }
-
     for i in 2..width {
-        let idx = pc + 3 * i as usize - 2;
-
+        let idx = start_idx + 3 * i as usize - 2;
         let load = &insns[idx];
         let shift = &insns[idx + 1];
         let or = &insns[idx + 2];
-
         if !load.is_ldx_mem() || bpf_size(load.code) != BPF_B {
             return None;
         }
@@ -268,7 +217,6 @@ fn match_wide_mem_high_first(
         if tmp == dst {
             return None;
         }
-
         if shift.code != (BPF_ALU64 | BPF_LSH | BPF_K) {
             return None;
         }
@@ -278,7 +226,6 @@ fn match_wide_mem_high_first(
         if shift.imm != (8 * i) as i32 {
             return None;
         }
-
         if or.code != (BPF_ALU64 | BPF_OR | BPF_X) {
             return None;
         }
@@ -286,15 +233,8 @@ fn match_wide_mem_high_first(
             return None;
         }
     }
-
     Some(base_off)
 }
-
-// ═══════════════════════════════════════════════════════════════════
-// Emission (absorbed from emit.rs)
-// ═══════════════════════════════════════════════════════════════════
-
-/// Emit replacement instructions for a single WIDE_MEM rewrite site.
 pub(super) fn emit_wide_mem(site: &RewriteSite) -> anyhow::Result<Vec<BpfInsn>> {
     let dst = u8::try_from(site.required_binding("dst_reg")?)
         .context("wide_mem dst_reg binding does not fit u8")?;
@@ -303,141 +243,41 @@ pub(super) fn emit_wide_mem(site: &RewriteSite) -> anyhow::Result<Vec<BpfInsn>> 
     let off = i16::try_from(site.required_binding("base_off")?)
         .context("wide_mem base_off binding does not fit i16")?;
     let width = site.required_binding("width")?;
-
     let size = match width {
         2 => BPF_H,
         4 => BPF_W,
         8 => BPF_DW,
         _ => bail!("WIDE_MEM: unsupported width {} (supports 2, 4, 8)", width),
     };
-
     Ok(vec![BpfInsn::ldx_mem(size, dst, base, off)])
 }
-
 fn wide_load_alignment_skip_reason(site: &RewriteSite) -> anyhow::Result<Option<String>> {
     let width = site.required_binding("width")?;
     let base_off = site.required_binding("base_off")?;
-
     if matches!(width, 2 | 4 | 8) && base_off.rem_euclid(width) != 0 {
         return Ok(Some(format!(
             "wide load offset {base_off} is not naturally aligned for width {width}"
         )));
     }
-
     Ok(None)
 }
-
-// ═══════════════════════════════════════════════════════════════════
-// BTF struct pointer safety
-// ═══════════════════════════════════════════════════════════════════
-
-/// Returns `true` if a verifier `reg_type` string indicates a BTF struct
-/// pointer type whose field boundaries the verifier enforces.
-///
-/// The BPF verifier ensures that loads from BTF struct pointers are contained
-/// within a single struct member.  Byte-by-byte loads (BPF_B) each consume one
-/// byte and always fit within any member ≥ 1 byte.  A wider merged load
-/// (BPF_H/W/DW) may span multiple consecutive members, which the verifier
-/// rejects with EACCES even though every individual byte load was accepted.
-///
-/// This check identifies reg_type strings that the verifier treats as BTF struct
-/// pointers.  Safe types for wide loads (scalar, fp, map_value, pkt, ctx, mem,
-/// buf, ringbuf_mem, map_key, pkt_meta) are not matched.
 fn is_btf_struct_ptr_type(reg_type: &str) -> bool {
-    // Kernel verifier emits btf pointer registers as:
-    //   "ptr_to_btf_id"         – generic trusted BTF pointer (older kernels)
-    //   "trusted_ptr_<struct>"  – typed trusted pointer (newer kernels)
-    //   "percpu_ptr_<struct>"   – per-CPU pointer
-    //   "rdonly_untrusted_mem"  – read-only trusted pointer (sz > 0)
-    //   "untrusted_ptr_<struct>"
-    // None of these are whitelisted below, so they all fall through to `true`.
-    //
-    // Whitelisted (safe for wide loads): these types do NOT enforce field
-    // boundaries.
     let safe = matches!(
         reg_type,
         "scalar" | "fp" | "map_value" | "map_key" | "pkt" | "pkt_meta"
             | "ctx" | "mem" | "buf" | "ringbuf_mem" | "iter"
     )
-    // Additionally handle types that start with known-safe prefixes (e.g.,
-    // "scalar" with parenthesized attributes is still a scalar).
         || reg_type.starts_with("scalar")
         || reg_type.starts_with("fp");
     !safe
 }
-
-// ── Per-PC register type oracle ──────────────────────────────────────
-
-/// Returns `true` if the verifier states show that `reg` at or before `pc`
-/// holds a BTF struct pointer whose field boundaries are enforced.
-///
-/// Scans verifier state entries whose PC ≤ `pc` to find the most recent type
-/// assignment for the register.  If the verifier shows a BTF struct pointer,
-/// wide loads are unsafe.
-///
-/// Returns `false` when the register is not mentioned at or before `pc`, or when
-/// the register has a safe type (scalar, fp, map_value, pkt, etc.).
-fn base_reg_is_btf_ptr_from_states(
-    reg: u8,
-    site_pc: usize,
-    verifier_states: &[VerifierInsn],
-) -> bool {
-    if verifier_states.is_empty() {
-        return false;
-    }
-
-    // Walk all verifier state entries at or before site_pc and look for a
-    // mention of `reg`.  We take the one with the highest PC (closest to the
-    // site) as the definitive type; ties are broken conservatively (BTF wins).
-    let mut best_pc: Option<usize> = None;
-    let mut best_type: Option<String> = None;
-
-    for state in verifier_states {
-        if state.pc > site_pc {
-            continue;
-        }
-        if let Some(reg_state) = state.regs.get(&reg) {
-            let is_newer = best_pc.is_none_or(|bp| state.pc > bp);
-            let is_same_pc_btf = best_pc
-                .is_some_and(|bp| state.pc == bp && is_btf_struct_ptr_type(&reg_state.reg_type));
-            if is_newer || is_same_pc_btf {
-                best_pc = Some(state.pc);
-                best_type = Some(reg_state.reg_type.clone());
-            }
-        }
-    }
-
-    best_type.as_deref().is_some_and(is_btf_struct_ptr_type)
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// BpfPass implementation
-// ═══════════════════════════════════════════════════════════════════
-
-// ── Packet-pointer safety constants ─────────────────────────────────
-
-/// BPF_PROG_TYPE_SCHED_CLS (TC classifier).
 const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
-/// BPF_PROG_TYPE_SCHED_ACT (TC action).
 const BPF_PROG_TYPE_SCHED_ACT: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_ACT;
-/// BPF_PROG_TYPE_XDP.
 const BPF_PROG_TYPE_XDP: u32 = libbpf_sys::BPF_PROG_TYPE_XDP;
-/// BPF_PROG_TYPE_LWT_IN.
 const BPF_PROG_TYPE_LWT_IN: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_IN;
-/// BPF_PROG_TYPE_LWT_OUT.
 const BPF_PROG_TYPE_LWT_OUT: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_OUT;
-/// BPF_PROG_TYPE_LWT_XMIT.
 const BPF_PROG_TYPE_LWT_XMIT: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_XMIT;
-/// BPF_PROG_TYPE_SK_SKB.
 const BPF_PROG_TYPE_SK_SKB: u32 = libbpf_sys::BPF_PROG_TYPE_SK_SKB;
-
-/// Returns `true` if the given BPF program type may expose packet pointers
-/// whose wide-load safety cannot be statically guaranteed.
-///
-/// These program types receive a context containing `data`/`data_end` packet
-/// pointers. The BPF verifier applies special range and alignment tracking to
-/// packet pointer dereferences that may reject wider loads even when
-/// individual byte loads were valid.
 fn is_packet_unsafe_prog_type(prog_type: u32) -> bool {
     matches!(
         prog_type,
@@ -450,11 +290,6 @@ fn is_packet_unsafe_prog_type(prog_type: u32) -> bool {
             | BPF_PROG_TYPE_SK_SKB
     )
 }
-
-/// Backward-scan heuristic: returns `true` if `reg` was likely loaded from
-/// R1 (ctx) via `LDX_MEM`, making it a probable packet pointer
-/// (ctx->data / ctx->data_end).  Scans up to `LOOKBACK` instructions before
-/// `before_pc`.
 fn is_likely_packet_ptr(reg: i32, before_pc: usize, insns: &[BpfInsn]) -> bool {
     const LOOKBACK: usize = 32;
     let start = before_pc.saturating_sub(LOOKBACK);
@@ -462,31 +297,20 @@ fn is_likely_packet_ptr(reg: i32, before_pc: usize, insns: &[BpfInsn]) -> bool {
         let insn = &insns[i];
         if insn.dst_reg() as i32 == reg {
             if insn.is_ldx_mem() {
-                // reg = *(type *)(src + off).  Packet ptr if src is R1 (ctx).
                 return insn.src_reg() == 1;
             }
-            // Any other write to reg: not a ctx-derived pointer.
             return false;
         }
     }
-    // Couldn't determine provenance; be conservative and skip.
     true
 }
-
-/// WIDE_MEM optimization pass: merges byte-load + shift + OR sequences
-/// into a single wide load instruction.
-///
-/// This is the most important BpfReJIT optimization, accounting for ~50.7%
-/// of the kernel JIT surplus. No kinsn support needed -- pure BPF replacement.
 pub struct WideMemPass;
-
 #[derive(Clone, Debug)]
 struct SafeWideMemSite {
     block: BlockId,
     range: Range<usize>,
     site: RewriteSite,
 }
-
 impl BpfPass for WideMemPass {
     fn name(&self) -> &str {
         "wide_mem"
@@ -495,20 +319,22 @@ impl BpfPass for WideMemPass {
         run_on_bbprogram(program, ctx)
     }
 }
-
 pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
-    if prog.blocks().all(|block| block.insns.is_empty()) {
+    let block_ids = prog.block_ids().collect::<Vec<_>>();
+    if block_ids
+        .iter()
+        .copied()
+        .try_fold(true, |all_empty, block| {
+            Ok::<_, anyhow::Error>(all_empty && prog.block_is_body_empty(block)?)
+        })?
+    {
         return Ok(PassResult::unchanged());
     }
-
-    let branch_targets = prog.branch_target_pcs()?;
-    let verifier_states = prog.oracle.as_deref();
-
+    let branch_targets = control_flow_target_sites(prog)?;
     let mut safe_sites = Vec::new();
     let mut skipped = Vec::new();
     let mut reported_starts = BTreeSet::new();
-
-    for block in prog.blocks().map(|block| block.id).collect::<Vec<_>>() {
+    for block in block_ids {
         let block_sites = prog.sites_in_block(block)?;
         let block_insns = block_sites
             .iter()
@@ -518,15 +344,14 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                     .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))
             })
             .collect::<anyhow::Result<Vec<_>>>()?;
-        for mut site in scan_wide_mem(&block_insns) {
-            let start_idx = site.start_pc;
+        for site in scan_wide_mem(&block_insns) {
+            let start_idx = site.start_idx;
             let start_site = block_sites
                 .get(start_idx)
                 .copied()
                 .ok_or_else(|| anyhow::anyhow!("wide_mem start index {start_idx} missing"))?;
-            let start_pc = prog.site_current_pc(start_site)?;
-            site.start_pc = start_pc;
-            reported_starts.insert(site.start_pc);
+            let report_pc = site_pc(prog, start_site)?;
+            reported_starts.insert(start_site);
             let end_idx = start_idx + site.old_len;
             if end_idx > block_sites.len() {
                 anyhow::bail!(
@@ -536,18 +361,16 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                 );
             }
             let range = start_site.idx..start_site.idx + site.old_len;
-
-            let has_interior_target = (site.start_pc + 1..site.start_pc + site.old_len)
-                .any(|pc| branch_targets.contains(&pc));
-
+            let has_interior_target = block_sites[start_idx + 1..end_idx]
+                .iter()
+                .any(|candidate| branch_targets.contains(candidate));
             if has_interior_target {
                 skipped.push(SkipReason {
-                    pc: site.start_pc,
+                    pc: report_pc,
                     reason: "interior branch target".into(),
                 });
                 continue;
             }
-
             let dst_reg = u8::try_from(site.required_binding("dst_reg")?)
                 .context("wide_mem dst_reg binding does not fit u8")?;
             let mut scratch_regs = std::collections::HashSet::new();
@@ -560,47 +383,38 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                     }
                 }
             }
-
-            let last_insn_pc = if site.old_len > 0 {
-                site.start_pc + site.old_len - 1
-            } else {
-                site.start_pc
-            };
-            let live_after = prog.live_out_current_pc(last_insn_pc)?;
+            let last_site = block_sites[end_idx - 1];
+            let live_after = prog.live_out_site_checked(last_site)?;
             let has_live_scratch = scratch_regs.iter().any(|r| live_after.contains(r));
-
             if has_live_scratch {
                 skipped.push(SkipReason {
-                    pc: site.start_pc,
+                    pc: report_pc,
                     reason: "scratch register live after site".into(),
                 });
                 continue;
             }
-
             let width = site.required_binding("width")?;
             if width != 2 && width != 4 && width != 8 {
                 skipped.push(SkipReason {
-                    pc: site.start_pc,
+                    pc: report_pc,
                     reason: format!("unsupported width {} (supports 2, 4, 8)", width),
                 });
                 continue;
             }
-
             if let Some(reason) = wide_load_alignment_skip_reason(&site)? {
                 skipped.push(SkipReason {
-                    pc: site.start_pc,
+                    pc: report_pc,
                     reason,
                 });
                 continue;
             }
-
             if is_packet_unsafe_prog_type(ctx.prog_type) {
                 let base_reg = site.required_binding("base_reg")?;
                 let base_reg_i32 = i32::try_from(base_reg)
                     .context("wide_mem base_reg binding does not fit i32")?;
                 if base_reg != 10 && is_likely_packet_ptr(base_reg_i32, start_idx, &block_insns) {
                     skipped.push(SkipReason {
-                        pc: site.start_pc,
+                        pc: report_pc,
                         reason: format!(
                             "likely packet pointer r{} in XDP/TC prog (prog_type={})",
                             base_reg, ctx.prog_type
@@ -609,14 +423,14 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                     continue;
                 }
             }
-
             let base_reg = u8::try_from(site.required_binding("base_reg")?)
                 .context("wide_mem base_reg binding does not fit u8")?;
-            if verifier_states.is_some_and(|states| {
-                base_reg_is_btf_ptr_from_states(base_reg, site.start_pc, states)
-            }) {
+            if prog
+                .oracle_at(start_site, base_reg)?
+                .is_some_and(|state| is_btf_struct_ptr_type(&state.reg_type))
+            {
                 skipped.push(SkipReason {
-                    pc: site.start_pc,
+                    pc: report_pc,
                     reason: format!(
                         "base register r{} is a BTF struct pointer; \
                              wide load may cross field boundary",
@@ -625,51 +439,41 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                 });
                 continue;
             }
-
             safe_sites.push(SafeWideMemSite { block, range, site });
         }
     }
     add_cross_block_wide_mem_skips(prog, &branch_targets, &mut reported_starts, &mut skipped)?;
-
     if safe_sites.is_empty() {
         return Ok(PassResult {
             sites_skipped: skipped,
             ..PassResult::unchanged()
         });
     }
-
     for site in safe_sites.iter().rev() {
         prog.replace_range(site.block, site.range.clone(), emit_wide_mem(&site.site)?)?;
     }
-
     Ok(PassResult {
         sites_applied: safe_sites.len(),
         sites_skipped: skipped,
         ..Default::default()
     })
 }
-
 fn add_cross_block_wide_mem_skips(
     prog: &BBProgram,
-    branch_targets: &BTreeSet<usize>,
-    reported_starts: &mut BTreeSet<usize>,
+    branch_targets: &BTreeSet<InsnSite>,
+    reported_starts: &mut BTreeSet<InsnSite>,
     skipped: &mut Vec<SkipReason>,
 ) -> anyhow::Result<()> {
-    let site_pcs = prog.current_site_pcs()?;
-    for block in prog.blocks() {
-        for idx in 0..block.insns.len() {
-            let site = InsnSite {
-                block: block.id,
-                idx,
-            };
-            let start_pc = *site_pcs
-                .get(&site)
-                .ok_or_else(|| anyhow::anyhow!("missing current pc for {:?}", site))?;
-            if reported_starts.contains(&start_pc) {
+    for block in prog.block_ids().collect::<Vec<_>>() {
+        let block_len = prog.block_body_len(block)?;
+        for idx in 0..block_len {
+            let site = InsnSite { block, idx };
+            let report_pc = site_pc(prog, site)?;
+            if reported_starts.contains(&site) {
                 continue;
             }
-            let first_block_remaining = block.insns.len() - idx;
-            let window = collect_wide_mem_window(prog, block.id, idx, branch_targets)?;
+            let first_block_remaining = block_len - idx;
+            let window = collect_wide_mem_window(prog, block, idx, branch_targets)?;
             if !window.crossed_branch_target {
                 continue;
             }
@@ -679,60 +483,57 @@ fn add_cross_block_wide_mem_skips(
             if candidate.old_len <= first_block_remaining {
                 continue;
             }
-            reported_starts.insert(start_pc);
+            reported_starts.insert(site);
             skipped.push(SkipReason {
-                pc: start_pc,
+                pc: report_pc,
                 reason: "interior branch target".into(),
             });
         }
     }
     Ok(())
 }
-
 struct WideMemWindow {
     insns: Vec<BpfInsn>,
     crossed_branch_target: bool,
 }
-
 fn collect_wide_mem_window(
     prog: &BBProgram,
     start_block: BlockId,
     start_idx: usize,
-    branch_targets: &BTreeSet<usize>,
+    branch_targets: &BTreeSet<InsnSite>,
 ) -> anyhow::Result<WideMemWindow> {
     const MAX_WIDE_MEM_LEN: usize = 22;
-
     let mut insns = Vec::with_capacity(MAX_WIDE_MEM_LEN);
     let mut crossed_branch_target = false;
     let mut block = start_block;
     let mut idx = start_idx;
-
     while insns.len() < MAX_WIDE_MEM_LEN {
-        let block_ref = prog.block(block)?;
-        while idx < block_ref.insns.len() && insns.len() < MAX_WIDE_MEM_LEN {
-            insns.push(block_ref.insns[idx]);
+        let block_len = prog.block_body_len(block)?;
+        while idx < block_len && insns.len() < MAX_WIDE_MEM_LEN {
+            let site = InsnSite { block, idx };
+            insns.push(
+                *prog
+                    .insn_at(site)
+                    .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?,
+            );
             idx += 1;
         }
         if insns.len() >= MAX_WIDE_MEM_LEN {
             break;
         }
-        match block_ref.terminator {
+        match prog.terminator(block)? {
             Terminator::Fallthrough { next } if next.0 == block.0 + 1 => {
-                let next_pc = prog.current_block_start_pc(next)?;
-                crossed_branch_target |= branch_targets.contains(&next_pc);
+                if let Some(site) = prog.first_site_in_block(next)? {
+                    crossed_branch_target |= branch_targets.contains(&site);
+                }
                 block = next;
                 idx = 0;
             }
             _ => break,
         }
     }
-
     Ok(WideMemWindow {
         insns,
         crossed_branch_target,
     })
 }
-
-// ═══════════════════════════════════════════════════════════════════
-// Tests
-// ═══════════════════════════════════════════════════════════════════

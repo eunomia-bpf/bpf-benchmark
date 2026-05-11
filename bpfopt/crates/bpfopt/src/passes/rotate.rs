@@ -1,9 +1,8 @@
-// SPDX-License-Identifier: MIT
-//! ROTATE optimization pass.
 
+// SPDX-License-Identifier: MIT
 use std::ops::Range;
 
-use crate::analysis::{block_slot_offset, BBProgram, BlockId, InsnSite};
+use crate::analysis::{admit_kinsn_site_window, site_pc, BBProgram, BlockId, InsnSite};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
@@ -62,10 +61,6 @@ fn rotate_register_uses(payload: u64) -> RegSet {
         .into_iter()
         .collect()
 }
-
-/// ROTATE optimization pass: replaces shift+OR rotate patterns with
-/// bpf_rotate64()/bpf_rotate32() kfunc calls. JIT inlines each kfunc as a
-/// native rotate.
 pub struct RotatePass;
 
 impl BpfPass for RotatePass {
@@ -83,43 +78,40 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
 
     for block in prog.block_ids().collect::<Vec<_>>() {
         for start in prog.sites_in_block(block)? {
-            let Some(mut site) = rotate_site_at(prog, start)? else {
+            let Some(site) = rotate_site_at(prog, start)? else {
                 continue;
             };
             let replacement_start = InsnSite {
                 block,
-                idx: site.start_pc,
+                idx: site.start_idx,
             };
-            let start_slot = block_slot_offset(prog, replacement_start)?;
-            site.start_pc = prog.report_pc(replacement_start)?;
-            let range = replacement_start.idx..replacement_start.idx + site.old_len;
-
-            if let Some(reason) =
-                prog.kinsn_replacement_subprog_skip_reason(block, start_slot, site.old_len, 2)?
-            {
-                skipped.push(SkipReason {
-                    pc: site.start_pc,
-                    reason,
-                });
+            let Some(admission) =
+                admit_kinsn_site_window(prog, replacement_start, site.old_len, 2, &mut skipped)?
+            else {
                 continue;
-            }
+            };
+            let report_pc = site_pc(prog, replacement_start)?;
 
             let last_site = InsnSite {
                 block,
-                idx: range.end - 1,
+                idx: admission.range.end - 1,
             };
             if prog
                 .live_out_site_checked(last_site)?
                 .contains(&site.tmp_reg)
             {
                 skipped.push(SkipReason {
-                    pc: site.start_pc,
+                    pc: report_pc,
                     reason: format!("tmp_reg r{} is live after site", site.tmp_reg),
                 });
                 continue;
             }
 
-            safe_sites.push(SafeRotateSite { block, range, site });
+            safe_sites.push(SafeRotateSite {
+                block: admission.block,
+                range: admission.range,
+                site,
+            });
         }
     }
 
@@ -176,7 +168,7 @@ fn rotate_site_at(prog: &BBProgram, site: InsnSite) -> anyhow::Result<Option<Rot
 }
 
 pub(super) struct RotateSite {
-    pub(super) start_pc: usize,
+    pub(super) start_idx: usize,
     pub(super) old_len: usize,
     pub(super) dst_reg: u8,
     pub(super) val_reg: u8,
@@ -184,8 +176,6 @@ pub(super) struct RotateSite {
     pub(super) shift_amount: u32,
     pub(super) width: RotateWidth,
 }
-
-/// A rotate site that has passed safety checks, ready for transformation.
 struct SafeRotateSite {
     block: BlockId,
     range: Range<usize>,
@@ -220,29 +210,24 @@ impl RotateWidth {
         }
     }
 }
-
-/// The rotate lowering is only sound when the provenance copy is the
-/// instruction immediately preceding the shift pair. If arbitrary instructions
-/// are allowed between the MOV and the rotate idiom, rewriting the whole
-/// window into sidecar+call would silently drop those side effects.
 fn find_provenance_mov(
     insns: &[BpfInsn],
-    shift_pc: usize,
+    shift_idx: usize,
     tmp: u8,
     dst: u8,
     width: RotateWidth,
 ) -> Option<usize> {
-    if shift_pc == 0 {
+    if shift_idx == 0 {
         return None;
     }
 
-    let mov_pc = shift_pc - 1;
-    let insn = &insns[mov_pc];
+    let mov_idx = shift_idx - 1;
+    let insn = &insns[mov_idx];
     if insn.dst_reg() != tmp || insn.src_reg() != dst {
         return None;
     }
 
-    is_reg_mov_for_width(insn, width).then_some(mov_pc)
+    is_reg_mov_for_width(insn, width).then_some(mov_idx)
 }
 
 fn is_reg_mov_for_width(insn: &BpfInsn, width: RotateWidth) -> bool {
@@ -256,38 +241,31 @@ fn try_match_rotate(
     i0: &BpfInsn,
     i1: &BpfInsn,
     i2: &BpfInsn,
-    pc: usize,
+    idx: usize,
 ) -> Option<RotateSite> {
-    try_match_split_copy_rotate(insns, pc)
-        .or_else(|| try_match_rotate_width(insns, i0, i1, i2, pc, RotateWidth::W64))
-        .or_else(|| try_match_rotate_width(insns, i0, i1, i2, pc, RotateWidth::W32))
+    try_match_split_copy_rotate(insns, idx)
+        .or_else(|| try_match_rotate_width(insns, i0, i1, i2, idx, RotateWidth::W64))
+        .or_else(|| try_match_rotate_width(insns, i0, i1, i2, idx, RotateWidth::W32))
 }
-
-/// Clang often lowers 32-bit hash rotates with two explicit copies:
-///
-///   MOV tmp, val; RSH tmp, W-k; MOV dst, val; LSH dst, k; OR dst, tmp
-///
-/// This is the shape seen in Cilium's Jenkins hash paths. The older matcher
-/// only saw adjacent `shift; shift; OR` triples and missed this form.
-fn try_match_split_copy_rotate(insns: &[BpfInsn], pc: usize) -> Option<RotateSite> {
-    try_match_split_copy_rotate_width(insns, pc, RotateWidth::W64)
-        .or_else(|| try_match_split_copy_rotate_width(insns, pc, RotateWidth::W32))
+fn try_match_split_copy_rotate(insns: &[BpfInsn], idx: usize) -> Option<RotateSite> {
+    try_match_split_copy_rotate_width(insns, idx, RotateWidth::W64)
+        .or_else(|| try_match_split_copy_rotate_width(insns, idx, RotateWidth::W32))
 }
 
 fn try_match_split_copy_rotate_width(
     insns: &[BpfInsn],
-    pc: usize,
+    idx: usize,
     width: RotateWidth,
 ) -> Option<RotateSite> {
-    if pc + 4 >= insns.len() {
+    if idx + 4 >= insns.len() {
         return None;
     }
 
-    let mov0 = &insns[pc];
-    let shift0 = &insns[pc + 1];
-    let mov1 = &insns[pc + 2];
-    let shift1 = &insns[pc + 3];
-    let or_insn = &insns[pc + 4];
+    let mov0 = &insns[idx];
+    let shift0 = &insns[idx + 1];
+    let mov1 = &insns[idx + 2];
+    let shift1 = &insns[idx + 3];
+    let or_insn = &insns[idx + 4];
 
     if !is_reg_mov_for_width(mov0, width) || !is_reg_mov_for_width(mov1, width) {
         return None;
@@ -333,7 +311,7 @@ fn try_match_split_copy_rotate_width(
         return None;
     }
 
-    rotate_site(pc, 5, or_dst, val_reg, or_src, lsh_amount, width)
+    rotate_site(idx, 5, or_dst, val_reg, or_src, lsh_amount, width)
 }
 
 fn try_match_rotate_width(
@@ -341,7 +319,7 @@ fn try_match_rotate_width(
     i0: &BpfInsn,
     i1: &BpfInsn,
     i2: &BpfInsn,
-    pc: usize,
+    idx: usize,
     width: RotateWidth,
 ) -> Option<RotateSite> {
     let alu_class = width.alu_class();
@@ -349,13 +327,6 @@ fn try_match_rotate_width(
     if !is_or {
         return None;
     }
-
-    // Pattern A: RSH_IMM(rA, S_rsh) ; LSH_IMM(rB, S_lsh) ; OR_REG(or_dst, or_src)
-    // where S_rsh + S_lsh equals the operation width.
-    //
-    // The two registers rA, rB hold copies of the same original value.
-    // One was copied from the other via `MOV tmp, orig` before the shifts.
-    // Either register could be the original or the copy — we try both.
     let is_rsh = i0.code == (alu_class | BPF_RSH | BPF_K);
     let is_lsh = i1.code == (alu_class | BPF_LSH | BPF_K);
 
@@ -369,19 +340,15 @@ fn try_match_rotate_width(
             if rsh_reg != lsh_reg {
                 let or_dst = i2.dst_reg();
                 let or_src = i2.src_reg();
-
-                // The OR must combine exactly these two registers.
                 let or_uses_both = (or_dst == rsh_reg && or_src == lsh_reg)
                     || (or_dst == lsh_reg && or_src == rsh_reg);
                 if or_uses_both {
                     let result_reg = or_dst;
-                    // Try both provenance directions:
-                    // Case 1: rsh_reg is the copy (tmp), lsh_reg is the original (dst)
-                    //   => MOV rsh_reg, lsh_reg
-                    if let Some(mov_pc) = find_provenance_mov(insns, pc, rsh_reg, lsh_reg, width) {
+                    if let Some(mov_idx) = find_provenance_mov(insns, idx, rsh_reg, lsh_reg, width)
+                    {
                         return rotate_site(
-                            mov_pc,
-                            (pc + 3) - mov_pc,
+                            mov_idx,
+                            (idx + 3) - mov_idx,
                             result_reg,
                             lsh_reg,
                             rsh_reg,
@@ -389,12 +356,11 @@ fn try_match_rotate_width(
                             width,
                         );
                     }
-                    // Case 2: lsh_reg is the copy (tmp), rsh_reg is the original (dst)
-                    //   => MOV lsh_reg, rsh_reg
-                    if let Some(mov_pc) = find_provenance_mov(insns, pc, lsh_reg, rsh_reg, width) {
+                    if let Some(mov_idx) = find_provenance_mov(insns, idx, lsh_reg, rsh_reg, width)
+                    {
                         return rotate_site(
-                            mov_pc,
-                            (pc + 3) - mov_pc,
+                            mov_idx,
+                            (idx + 3) - mov_idx,
                             result_reg,
                             rsh_reg,
                             lsh_reg,
@@ -406,8 +372,6 @@ fn try_match_rotate_width(
             }
         }
     }
-
-    // Pattern B: LSH_IMM(rA, S_lsh) ; RSH_IMM(rB, S_rsh) ; OR_REG(or_dst, or_src)
     let is_lsh_first = i0.code == (alu_class | BPF_LSH | BPF_K);
     let is_rsh_second = i1.code == (alu_class | BPF_RSH | BPF_K);
 
@@ -426,11 +390,11 @@ fn try_match_rotate_width(
                     || (or_dst == rsh_reg && or_src == lsh_reg);
                 if or_uses_both {
                     let result_reg = or_dst;
-                    // Try both provenance directions:
-                    if let Some(mov_pc) = find_provenance_mov(insns, pc, rsh_reg, lsh_reg, width) {
+                    if let Some(mov_idx) = find_provenance_mov(insns, idx, rsh_reg, lsh_reg, width)
+                    {
                         return rotate_site(
-                            mov_pc,
-                            (pc + 3) - mov_pc,
+                            mov_idx,
+                            (idx + 3) - mov_idx,
                             result_reg,
                             lsh_reg,
                             rsh_reg,
@@ -438,10 +402,11 @@ fn try_match_rotate_width(
                             width,
                         );
                     }
-                    if let Some(mov_pc) = find_provenance_mov(insns, pc, lsh_reg, rsh_reg, width) {
+                    if let Some(mov_idx) = find_provenance_mov(insns, idx, lsh_reg, rsh_reg, width)
+                    {
                         return rotate_site(
-                            mov_pc,
-                            (pc + 3) - mov_pc,
+                            mov_idx,
+                            (idx + 3) - mov_idx,
                             result_reg,
                             rsh_reg,
                             lsh_reg,
@@ -458,7 +423,7 @@ fn try_match_rotate_width(
 }
 
 fn rotate_site(
-    start_pc: usize,
+    start_idx: usize,
     old_len: usize,
     dst_reg: u8,
     val_reg: u8,
@@ -466,10 +431,8 @@ fn rotate_site(
     shift_amount: u32,
     width: RotateWidth,
 ) -> Option<RotateSite> {
-    // The packed rotate kinsn uses tmp_reg as verifier proof scratch. It cannot
-    // encode sites where the scratch is also the result or source register.
     (dst_reg != tmp_reg && val_reg != tmp_reg).then_some(RotateSite {
-        start_pc,
+        start_idx,
         old_len,
         dst_reg,
         val_reg,

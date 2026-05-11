@@ -5,8 +5,8 @@ use std::collections::BTreeSet;
 use std::ops::Range;
 
 use crate::analysis::{
-    advance_reg_state as advance_simple_reg_state, packet_ctx_layout, BBProgram, BlockId,
-    PacketCtxLayout, PacketCtxLayoutScope, SimpleRegValue,
+    advance_reg_state as advance_simple_reg_state, control_flow_target_sites, packet_ctx_layout,
+    site_pc, BBProgram, BlockId, InsnSite, PacketCtxLayout, PacketCtxLayoutScope, SimpleRegValue,
 };
 use crate::insn::*;
 use crate::pass::*;
@@ -86,7 +86,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<
     let Some(layout) = packet_ctx_layout(prog_type, PacketCtxLayoutScope::SkbHelper) else {
         return Ok(PassResult::unchanged());
     };
-    let branch_targets = prog.branch_target_pcs()?;
+    let branch_targets = control_flow_target_sites(prog)?;
     let scan = scan_sites(prog, &branch_targets)?;
     if scan.sites.is_empty() {
         return Ok(PassResult {
@@ -117,18 +117,18 @@ fn apply_skb_load_bytes_sites(
     Ok(())
 }
 
-fn scan_sites(prog: &BBProgram, branch_targets: &BTreeSet<usize>) -> anyhow::Result<ScanResult> {
+fn scan_sites(prog: &BBProgram, branch_targets: &BTreeSet<InsnSite>) -> anyhow::Result<ScanResult> {
     let mut scan = ScanResult::default();
     let mut regs = initial_reg_state();
 
-    for block in prog.blocks().map(|block| block.id).collect::<Vec<_>>() {
+    for block in prog.block_ids().collect::<Vec<_>>() {
         if prog.should_reset_linear_state_at_block(block)? {
             regs = initial_reg_state();
         }
         let sites = prog.sites_in_block(block)?;
         for (index, site) in sites.iter().copied().enumerate() {
-            let pc = prog.site_current_pc(site)?;
-            if index == 0 && pc > 0 && prog.branch_target_pcs()?.contains(&pc) {
+            let pc = site_pc(prog, site)?;
+            if index == 0 && pc > 0 && branch_targets.contains(&site) {
                 regs = initial_reg_state();
             }
 
@@ -142,7 +142,7 @@ fn scan_sites(prog: &BBProgram, branch_targets: &BTreeSet<usize>) -> anyhow::Res
                         reason: "helper is not regular call #26".into(),
                     });
                 } else {
-                    match classify_site(pc, branch_targets, &regs) {
+                    match classify_site(pc, branch_targets.contains(&site), &regs) {
                         Ok(rewrite_site) => scan.sites.push(AppliedRewriteSite {
                             block,
                             range: site.idx..site.idx + 1,
@@ -154,7 +154,7 @@ fn scan_sites(prog: &BBProgram, branch_targets: &BTreeSet<usize>) -> anyhow::Res
             }
 
             let ldimm64_hi = if insn.is_ldimm64() {
-                Some(prog.ldimm64_second_slots.get(&site).ok_or_else(|| {
+                Some(prog.ldimm64_second_slot(site).ok_or_else(|| {
                     anyhow::anyhow!("LD_IMM64 at {:?} is missing high half", site)
                 })?)
             } else {
@@ -169,10 +169,10 @@ fn scan_sites(prog: &BBProgram, branch_targets: &BTreeSet<usize>) -> anyhow::Res
 
 fn classify_site(
     call_pc: usize,
-    branch_targets: &BTreeSet<usize>,
+    is_branch_target: bool,
     regs: &[RegValue; 11],
 ) -> Result<RewriteSite, String> {
-    if branch_targets.contains(&call_pc) {
+    if is_branch_target {
         return Err("call pc is a branch target".into());
     }
     if regs[1] != RegValue::Ctx {

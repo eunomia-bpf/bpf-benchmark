@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 //! Shared BBProgram and pass helpers used by production passes.
 
-use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
 
@@ -9,9 +8,9 @@ use anyhow::{Context, Result};
 use serde::de::DeserializeOwned;
 
 use crate::analysis::bbprogram_use_def::insn_use_def_set;
-use crate::analysis::{BBProgram, InsnSite};
+use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
 use crate::insn::*;
-use crate::pass::{InsnAnnotation, ProfilingData};
+use crate::pass::{InsnAnnotation, ProfilingData, SkipReason};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct PacketCtxLayout {
@@ -36,14 +35,75 @@ pub(crate) fn block_slot_offset(prog: &BBProgram, site: InsnSite) -> anyhow::Res
     Ok(slot)
 }
 
-pub(crate) fn site_current_pc(
-    site_pcs: &BTreeMap<InsnSite, usize>,
-    site: InsnSite,
-) -> anyhow::Result<usize> {
-    site_pcs
-        .get(&site)
-        .copied()
-        .ok_or_else(|| anyhow::anyhow!("current pc missing for {:?}", site))
+pub(crate) fn site_pc(prog: &BBProgram, site: InsnSite) -> anyhow::Result<usize> {
+    let (block_start, _) = prog.block_slot_bounds(site.block)?;
+    Ok(block_start + block_slot_offset(prog, site)?)
+}
+
+pub(crate) fn block_start_slot(prog: &BBProgram, block: BlockId) -> anyhow::Result<usize> {
+    Ok(prog.block_slot_bounds(block)?.0)
+}
+
+pub(crate) fn program_sites(prog: &BBProgram) -> anyhow::Result<Vec<InsnSite>> {
+    let mut sites = Vec::new();
+    for block in prog.block_ids().collect::<Vec<_>>() {
+        sites.extend(prog.sites_in_block_with_terminator(block)?);
+    }
+    Ok(sites)
+}
+
+pub(crate) fn control_flow_target_sites(
+    prog: &BBProgram,
+) -> anyhow::Result<std::collections::BTreeSet<InsnSite>> {
+    let mut targets = std::collections::BTreeSet::new();
+    for block in prog.blocks() {
+        let target = match prog.terminator(block.id)? {
+            Terminator::Jump { target, .. } => Some(target),
+            Terminator::CondBranch { taken, .. } => Some(taken),
+            Terminator::Call { callee, .. } => Some(callee),
+            Terminator::Fallthrough { .. } | Terminator::Exit { .. } | Terminator::End => None,
+        };
+        if let Some(target) = target {
+            if let Some(site) = prog.first_site_in_block(target)? {
+                targets.insert(site);
+            }
+        }
+    }
+    for &target in prog.pc_relative_ldimm64_targets.values() {
+        if let Some(site) = prog.first_site_in_block(target)? {
+            targets.insert(site);
+        }
+    }
+    Ok(targets)
+}
+
+pub(crate) struct AdmittedKinsnWindow {
+    pub block: BlockId,
+    pub range: std::ops::Range<usize>,
+}
+
+pub(crate) fn admit_kinsn_site_window(
+    prog: &BBProgram,
+    start: InsnSite,
+    old_len: usize,
+    replacement_len: usize,
+    skipped: &mut Vec<SkipReason>,
+) -> anyhow::Result<Option<AdmittedKinsnWindow>> {
+    let start_slot = block_slot_offset(prog, start)?;
+    if let Some(reason) = prog.kinsn_replacement_subprog_skip_reason(
+        start.block,
+        start_slot,
+        old_len,
+        replacement_len,
+    )? {
+        let pc = site_pc(prog, start)?;
+        skipped.push(SkipReason { pc, reason });
+        return Ok(None);
+    }
+    Ok(Some(AdmittedKinsnWindow {
+        block: start.block,
+        range: start.idx..start.idx + old_len,
+    }))
 }
 
 pub(crate) fn packet_ctx_layout(

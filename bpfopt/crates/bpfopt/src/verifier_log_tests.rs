@@ -1,5 +1,41 @@
 use super::*;
 
+fn extract_failure_pc(verifier_log: &str) -> Option<usize> {
+    let lines: Vec<&str> = verifier_log.lines().collect();
+    if lines.is_empty() {
+        return None;
+    }
+    let error_patterns = [
+        "invalid",
+        "type=",
+        "expected",
+        "not allowed",
+        "permission denied",
+        "R0 !read_ok",
+        "unreachable",
+        "back-edge",
+        "loop detected",
+        "BPF_EXIT without",
+        "jump out of range",
+        "misaligned",
+    ];
+    let mut last_state_pc: Option<usize> = None;
+    for line in &lines {
+        let trimmed = line.trim();
+        if let Some(vi) = parse_state_line(trimmed) {
+            last_state_pc = Some(vi.pc);
+            continue;
+        }
+        let lower = trimmed.to_lowercase();
+        if error_patterns.iter().any(|pat| lower.contains(pat)) {
+            if let Some(pc) = last_state_pc {
+                return Some(pc);
+            }
+        }
+    }
+    last_state_pc
+}
+
 #[test]
 fn parses_real_style_branch_and_insn_states() {
     let log = r#"

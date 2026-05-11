@@ -3,7 +3,58 @@
 use super::*;
 use crate::insn::*;
 use crate::test_helpers::*;
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashSet};
+
+struct BBProgramPipeline {
+    passes: Vec<Box<dyn BpfPass>>,
+}
+
+impl std::fmt::Debug for BBProgramPipeline {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("BBProgramPipeline")
+            .field("len", &self.passes.len())
+            .finish()
+    }
+}
+
+fn build_custom_bbprogram_pipeline(names: &[String]) -> Result<BBProgramPipeline> {
+    let passes = resolve_requested_passes(names)?
+        .into_iter()
+        .map(make_test_pass)
+        .collect();
+    Ok(BBProgramPipeline { passes })
+}
+
+fn resolve_requested_passes(names: &[String]) -> Result<Vec<&'static PassRegistryEntry>> {
+    let requested: HashSet<&str> = names.iter().map(|s| s.as_str()).collect();
+    let mut unknown = Vec::new();
+    for name in &requested {
+        let known = PASS_REGISTRY.iter().any(|entry| entry.name == *name);
+        if !known {
+            unknown.push((*name).to_string());
+        }
+    }
+    if !unknown.is_empty() {
+        unknown.sort();
+        anyhow::bail!("unknown pass name(s): {}", unknown.join(", "));
+    }
+    Ok(PASS_REGISTRY
+        .iter()
+        .filter(|entry| requested.contains(entry.name))
+        .collect())
+}
+
+fn make_test_pass(entry: &PassRegistryEntry) -> Box<dyn BpfPass> {
+    match entry.name {
+        "map_inline" => Box::new(MapInlinePass),
+        "branch_flip" => Box::new(BranchFlipPass {
+            min_bias: 0.7,
+            max_branch_miss_rate: 0.05,
+        }),
+        "prefetch" => Box::new(PrefetchPass),
+        _ => (entry.make)(&[]).expect("no-arg test pass construction should succeed"),
+    }
+}
 
 #[test]
 fn pass_registry_declares_every_default_cli_pass() {

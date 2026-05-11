@@ -108,13 +108,7 @@ fn test_pass_manager_invalidates_verifier_states_after_transform() {
     )]);
     let mut prog = lift_test_program(&input, &ctx);
 
-    assert_eq!(
-        prog.oracle
-            .as_deref()
-            .expect("oracle should be lifted")
-            .len(),
-        1
-    );
+    assert_eq!(prog.oracle().expect("oracle should be lifted").len(), 1);
 
     prog.delete_insn(DefSite {
         block: BlockId(0),
@@ -124,9 +118,7 @@ fn test_pass_manager_invalidates_verifier_states_after_transform() {
     .expect("delete should invalidate oracle");
 
     assert!(
-        prog.oracle
-            .as_deref()
-            .is_none_or(|states| states.is_empty()),
+        prog.oracle().is_none_or(|states| states.is_empty()),
         "BBProgram mutation must clear stale verifier/oracle facts"
     );
 }
@@ -158,8 +150,8 @@ fn pipeline_pass_context_carries_verifier_states_between_passes() {
 
     assert_eq!(results.len(), 2);
     assert!(
-        prog.oracle.is_some(),
-        "lift must consume PassContext verifier_states into BBProgram.oracle"
+        prog.oracle().is_none(),
+        "mutating passes must invalidate consumed verifier states"
     );
     assert!(lowered.contains(&BpfInsn::mov64_imm(BPF_REG_1, 20)));
 }

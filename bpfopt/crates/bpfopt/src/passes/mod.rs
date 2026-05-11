@@ -39,8 +39,6 @@ pub use skb_load_bytes::{
 };
 pub use wide_mem::{run_on_bbprogram as run_wide_mem_on_bbprogram, WideMemPass};
 
-#[cfg(test)]
-use crate::pass::PassManager;
 use crate::pass::{BpfPass, KinsnDescriptor};
 
 // ── Pass registry ───────────────────────────────────────────────────
@@ -147,82 +145,6 @@ fn reject_pass_args(pass_name: &str, args: &[String]) -> Result<()> {
     pass_entry_with_args!("branch_flip", "Flip branch polarity using PGO data to improve branch prediction", BranchFlipPass::from_cli_args, META_NONE),
     pass_entry_with_args!("prefetch", "Insert packet and map-value prefetch kinsn calls", PrefetchPass::from_cli_args, META_PREFETCH),
 ];
-
-// ── Pipeline constructors ───────────────────────────────────────────
-
-#[cfg(test)]
-fn resolve_requested_passes(names: &[String]) -> Result<Vec<&'static PassRegistryEntry>> {
-    let requested: std::collections::HashSet<&str> = names.iter().map(|s| s.as_str()).collect();
-    let mut unknown = Vec::new();
-
-    for name in &requested {
-        let known = PASS_REGISTRY.iter().any(|entry| entry.name == *name);
-        if !known {
-            unknown.push((*name).to_string());
-        }
-    }
-
-    if !unknown.is_empty() {
-        unknown.sort();
-        anyhow::bail!("unknown pass name(s): {}", unknown.join(", "));
-    }
-
-    Ok(PASS_REGISTRY
-        .iter()
-        .filter(|entry| requested.contains(entry.name))
-        .collect())
-}
-
-/// Build a pipeline containing only the named passes, in canonical order.
-///
-/// Pass names are matched against `PASS_REGISTRY` entries by canonical name.
-/// Unknown names are rejected.
-#[cfg(test)]
-pub fn build_custom_pipeline(names: &[String]) -> Result<PassManager> {
-    let mut pm = PassManager::new();
-
-    for entry in resolve_requested_passes(names)? {
-        pm.add_pass_boxed(make_test_pass(entry));
-    }
-
-    Ok(pm)
-}
-
-#[cfg(test)]
-pub struct BBProgramPipeline {
-    pub passes: Vec<Box<dyn BpfPass>>,
-}
-
-#[cfg(test)]
-impl std::fmt::Debug for BBProgramPipeline {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("BBProgramPipeline")
-            .field("len", &self.passes.len())
-            .finish()
-    }
-}
-
-#[cfg(test)]
-pub fn build_custom_bbprogram_pipeline(names: &[String]) -> Result<BBProgramPipeline> {
-    let passes = resolve_requested_passes(names)?
-        .into_iter()
-        .map(make_test_pass)
-        .collect();
-    Ok(BBProgramPipeline { passes })
-}
-
-#[cfg(test)]
-fn make_test_pass(entry: &PassRegistryEntry) -> Box<dyn BpfPass> {
-    match entry.name {
-        "map_inline" => Box::new(MapInlinePass),
-        "branch_flip" => Box::new(BranchFlipPass {
-            min_bias: 0.7,
-            max_branch_miss_rate: 0.05,
-        }),
-        "prefetch" => Box::new(PrefetchPass),
-        _ => (entry.make)(&[]).expect("no-arg test pass construction should succeed"),
-    }
-}
 
 #[cfg(test)]
 mod bounds_check_merge_tests;

@@ -27,15 +27,15 @@ pub fn run_on_bbprogram(prog: &mut BBProgram) -> anyhow::Result<PassResult> {
 
     loop {
         let mut dead_defs = BTreeSet::new();
-        for &def in prog.use_def.defs.keys() {
-            if prog.use_def.uses_for(def).is_empty() && is_removable_dead_def(prog, def)? {
+        for def in prog.def_sites() {
+            if prog.uses_for_def(def).is_empty() && is_removable_dead_def(prog, def)? {
                 dead_defs.insert(def);
             }
         }
         if dead_defs.is_empty() {
             break;
         }
-        if would_empty_all_bodies(prog, &dead_defs) {
+        if would_empty_all_bodies(prog, &dead_defs)? {
             break;
         }
         for def in dead_defs.into_iter().rev() {
@@ -55,19 +55,21 @@ pub fn run_on_bbprogram(prog: &mut BBProgram) -> anyhow::Result<PassResult> {
     })
 }
 
-fn would_empty_all_bodies(prog: &BBProgram, dead_defs: &BTreeSet<DefSite>) -> bool {
+fn would_empty_all_bodies(prog: &BBProgram, dead_defs: &BTreeSet<DefSite>) -> anyhow::Result<bool> {
     let removable_sites = dead_defs
         .iter()
         .map(|def| def.site())
         .collect::<BTreeSet<_>>();
-    prog.blocks().all(|block| {
-        block.insns.iter().enumerate().all(|(idx, _)| {
-            removable_sites.contains(&crate::analysis::InsnSite {
-                block: block.id,
-                idx,
-            })
-        })
-    })
+    for block in prog.block_ids() {
+        if !prog
+            .sites_in_block(block)?
+            .into_iter()
+            .all(|site| removable_sites.contains(&site))
+        {
+            return Ok(false);
+        }
+    }
+    Ok(true)
 }
 
 fn is_removable_dead_def(prog: &BBProgram, def: DefSite) -> anyhow::Result<bool> {

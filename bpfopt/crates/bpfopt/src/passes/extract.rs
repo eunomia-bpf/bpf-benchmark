@@ -1,9 +1,8 @@
-// SPDX-License-Identifier: MIT
-//! EXTRACT optimization pass.
 
+// SPDX-License-Identifier: MIT
 use std::ops::Range;
 
-use crate::analysis::{block_slot_offset, BBProgram, BlockId, InsnSite};
+use crate::analysis::{admit_kinsn_site_window, site_pc, BBProgram, BlockId, InsnSite, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
@@ -30,47 +29,23 @@ fn extract_proof_len(payload: u64) -> anyhow::Result<usize> {
 fn extract_register_uses(payload: u64) -> RegSet {
     [kinsn_payload_reg(payload, 0)].into_iter().collect()
 }
-
-/// EXTRACT optimization pass: replaces RSH+AND bitfield extraction patterns
-/// with bpf_extract64() kfunc calls.
-///
-/// Pattern:
-///   RSH64_IMM dst, shift
-///   AND64_IMM dst, mask
-///
-/// Where `mask` is a contiguous bitmask (all 1s), i.e. `(1 << len) - 1`.
-///
-/// Replacement:
-///   r1 = dst (value)
-///   r2 = start (shift amount)
-///   r3 = len (popcount of mask)
-///   call bpf_extract64
-///   dst = r0
 pub struct ExtractPass;
 
 pub(super) struct ExtractSite {
-    pub(super) start_pc: usize,
     pub(super) old_len: usize,
     pub(super) dst_reg: u8,
     pub(super) shift_amount: u32,
     pub(super) bit_len: u32,
 }
-
-/// An extract site that has passed safety checks, ready for transformation.
 struct SafeExtractSite {
     block: BlockId,
     range: Range<usize>,
     site: ExtractSite,
 }
-
-/// Check if a value is a contiguous bitmask of 1s starting from bit 0.
-/// Returns the number of set bits (popcount) if valid, or None.
 pub(super) fn contiguous_mask_len(mask: u64) -> Option<u32> {
     if mask == 0 {
         return None;
     }
-    // A contiguous mask from bit 0 has the form (1 << n) - 1.
-    // Check: mask & (mask + 1) == 0
     if mask & (mask.wrapping_add(1)) == 0 {
         Some(mask.count_ones())
     } else {
@@ -78,13 +53,13 @@ pub(super) fn contiguous_mask_len(mask: u64) -> Option<u32> {
     }
 }
 
-fn extract_site_at(insns: &[BpfInsn], pc: usize) -> Option<ExtractSite> {
-    let i0 = insns.get(pc)?;
-    let i1 = insns.get(pc + 1)?;
-    extract_site_from_pair(i0, i1, pc)
+fn extract_site_at(insns: &[BpfInsn], idx: usize) -> Option<ExtractSite> {
+    let i0 = insns.get(idx)?;
+    let i1 = insns.get(idx + 1)?;
+    extract_site_from_pair(i0, i1)
 }
 
-fn extract_site_from_pair(i0: &BpfInsn, i1: &BpfInsn, start_pc: usize) -> Option<ExtractSite> {
+fn extract_site_from_pair(i0: &BpfInsn, i1: &BpfInsn) -> Option<ExtractSite> {
     let is_rsh = i0.code == (BPF_ALU64 | BPF_RSH | BPF_K);
     let is_and = i1.code == (BPF_ALU64 | BPF_AND | BPF_K);
     if !is_rsh || !is_and || i0.dst_reg() != i1.dst_reg() {
@@ -94,7 +69,6 @@ fn extract_site_from_pair(i0: &BpfInsn, i1: &BpfInsn, start_pc: usize) -> Option
     let mask = i1.imm as i64 as u64;
     let bit_len = contiguous_mask_len(mask)?;
     (shift + bit_len <= 64).then_some(ExtractSite {
-        start_pc,
         old_len: 2,
         dst_reg: i0.dst_reg(),
         shift_amount: shift,
@@ -124,24 +98,20 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                 continue;
             }
 
-            let Some(mut site) = extract_site_at(&insns, start.idx) else {
+            let Some(site) = extract_site_at(&insns, start.idx) else {
                 continue;
             };
-            let start_slot = block_slot_offset(prog, start)?;
-            site.start_pc = prog.report_pc(start)?;
-            let range = start.idx..start.idx + site.old_len;
-
-            if let Some(reason) =
-                prog.kinsn_replacement_subprog_skip_reason(block, start_slot, site.old_len, 2)?
-            {
-                skipped.push(SkipReason {
-                    pc: site.start_pc,
-                    reason,
-                });
+            let Some(admission) =
+                admit_kinsn_site_window(prog, start, site.old_len, 2, &mut skipped)?
+            else {
                 continue;
-            }
+            };
 
-            safe_sites.push(SafeExtractSite { block, range, site });
+            safe_sites.push(SafeExtractSite {
+                block: admission.block,
+                range: admission.range,
+                site,
+            });
         }
     }
 
@@ -194,20 +164,24 @@ fn cross_block_extract_skip(
     let i0 = prog
         .insn_at(start)
         .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", start))?;
-    let start_pc = prog.report_pc(start)?;
-    let Some(next) = prog.next_site_in_linear_order(start)? else {
-        return Ok(None);
-    };
-    if next.block == start.block {
+    if start.idx + 1 < prog.block_body_len(start.block)? {
         return Ok(None);
     }
+    let report_pc = site_pc(prog, start)?;
+    let next_block = match prog.terminator(start.block)? {
+        Terminator::Fallthrough { next } => next,
+        _ => return Ok(None),
+    };
+    let successors = prog.successors(start.block);
+    if successors.len() != 1 || successors[0] != next_block {
+        anyhow::bail!("fallthrough block {:?} has inconsistent successors", start.block);
+    }
+    let Some(next) = prog.first_site_in_block(next_block)? else { return Ok(None); };
     let i1 = prog
         .insn_at(next)
         .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", next))?;
-    Ok(
-        extract_site_from_pair(i0, i1, start_pc).map(|_| SkipReason {
-            pc: start_pc,
-            reason: "interior branch target".into(),
-        }),
-    )
+    Ok(extract_site_from_pair(i0, i1).map(|_| SkipReason {
+        pc: report_pc,
+        reason: "interior branch target".into(),
+    }))
 }

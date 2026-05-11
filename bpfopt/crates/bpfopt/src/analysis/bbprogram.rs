@@ -1,41 +1,35 @@
 // SPDX-License-Identifier: MIT
 //! Basic-block program representation for bpfopt pass execution.
-
-use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::ops::Range;
-use std::sync::Arc;
-
-use crate::analysis::bbprogram_btf::{remap_btf_records_view, BtfRecordKind, BtfRecordsView};
+use crate::analysis::bbprogram_btf::BtfRecordKind;
+#[cfg(test)]
+use crate::analysis::bbprogram_btf::{remap_btf_records_view, BtfRemapView};
 use crate::analysis::bbprogram_lower::remap_btf_records_for_lowering;
 use crate::analysis::{DefSite, UseDefGraph};
 use crate::insn::{insn_width, BpfInsn, MapPseudo};
-use crate::pass::{BtfInfoRecords, KinsnRegistry, RegSet, VerifierInsn};
-
+use crate::pass::{BtfInfoRecords, KinsnRegistry, RegSet, RegState, VerifierInsn};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::ops::Range;
+use std::sync::Arc;
 pub type VerifierOracle = Arc<[VerifierInsn]>;
 pub type BtfMetadataMap = BTreeMap<InsnSite, usize>;
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BlockId(pub usize);
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FrameId(pub usize);
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct InsnSite {
     pub block: BlockId,
     pub idx: usize,
 }
-
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BBMapBinding {
     pub old_fd: i32,
     pub map_id: u32,
 }
-
 #[derive(Clone, Debug)]
 pub struct BBProgram {
     pub(super) blocks: Vec<Block>,
-    pub entry: BlockId,
+    pub(crate) entry: BlockId,
     pub(super) use_def: UseDefGraph,
     pub(super) oracle: Option<VerifierOracle>,
     pub(super) btf: BtfMetadataMap,
@@ -49,7 +43,6 @@ pub struct BBProgram {
     pub(crate) predecessors: Vec<Vec<BlockId>>,
     pub(crate) successors: Vec<Vec<BlockId>>,
 }
-
 #[derive(Clone, Debug)]
 pub struct Block {
     pub id: BlockId,
@@ -57,7 +50,6 @@ pub struct Block {
     pub(super) terminator: Terminator,
     pub frame: FrameId,
 }
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Terminator {
     Fallthrough {
@@ -82,7 +74,6 @@ pub enum Terminator {
     },
     End,
 }
-
 impl BBProgram {
     pub(crate) fn new(
         blocks: Vec<Block>,
@@ -113,45 +104,41 @@ impl BBProgram {
         prog.rebuild_use_def()?;
         Ok(prog)
     }
-
     pub fn blocks(&self) -> impl Iterator<Item = &Block> {
         self.blocks.iter()
     }
-
+    pub fn entry(&self) -> BlockId {
+        self.entry
+    }
     pub fn is_empty(&self) -> bool {
         self.blocks.is_empty()
     }
-
     pub fn block_count(&self) -> usize {
         self.blocks.len()
     }
-
     pub fn block_ids(&self) -> impl Iterator<Item = BlockId> + '_ {
         self.blocks.iter().map(|block| block.id)
     }
-
     pub fn block_body_len(&self, block: BlockId) -> anyhow::Result<usize> {
         Ok(self.block(block)?.insns.len())
     }
-
     pub fn block_is_body_empty(&self, block: BlockId) -> anyhow::Result<bool> {
         Ok(self.block(block)?.insns.is_empty())
     }
-
     pub fn block_frame(&self, block: BlockId) -> anyhow::Result<FrameId> {
         Ok(self.block(block)?.frame)
     }
-
     pub fn terminator(&self, block: BlockId) -> anyhow::Result<Terminator> {
         Ok(self.block(block)?.terminator)
     }
-
     pub fn block_single_body_insn(&self, block: BlockId) -> anyhow::Result<Option<&BpfInsn>> {
         let block = self.block(block)?;
         Ok((block.insns.len() == 1).then(|| &block.insns[0]))
     }
-
-    pub fn block_body_insns(&self, block: BlockId) -> anyhow::Result<impl Iterator<Item = (InsnSite, &BpfInsn)> + '_> {
+    pub fn block_body_insns(
+        &self,
+        block: BlockId,
+    ) -> anyhow::Result<impl Iterator<Item = (InsnSite, &BpfInsn)> + '_> {
         self.block(block)?;
         Ok(self.blocks[block.0]
             .insns
@@ -159,11 +146,9 @@ impl BBProgram {
             .enumerate()
             .map(move |(idx, insn)| (InsnSite { block, idx }, insn)))
     }
-
     pub fn copied_body_insns(&self, block: BlockId) -> anyhow::Result<Vec<BpfInsn>> {
         Ok(self.block(block)?.insns.clone())
     }
-
     pub fn body_insn_window(
         &self,
         block: BlockId,
@@ -188,15 +173,12 @@ impl BBProgram {
             })?
             .to_vec())
     }
-
     pub fn predecessors(&self, block: BlockId) -> &[BlockId] {
         &self.predecessors[block.0]
     }
-
     pub fn successors(&self, block: BlockId) -> &[BlockId] {
         &self.successors[block.0]
     }
-
     pub fn should_reset_linear_state_at_block(&self, block: BlockId) -> anyhow::Result<bool> {
         self.block(block)?;
         if block.0 == 0 {
@@ -216,17 +198,14 @@ impl BBProgram {
                 && !matches!(term, Terminator::CondBranch { fallthrough, .. } if fallthrough == block),
         )
     }
-
     pub fn dominance(&self) -> Dominance {
         Dominance::compute(self)
     }
-
     #[cfg(test)]
     pub fn live_in(&self, block: BlockId) -> RegSet {
         self.live_in_checked(block)
             .unwrap_or_else(|err| panic!("invalid live_in query for {:?}: {err}", block))
     }
-
     pub fn live_in_checked(&self, block: BlockId) -> anyhow::Result<RegSet> {
         self.block(block)?;
         compute_liveness(self)
@@ -234,13 +213,11 @@ impl BBProgram {
             .remove(&block)
             .ok_or_else(|| anyhow::anyhow!("liveness missing live_in for {:?}", block))
     }
-
     #[cfg(test)]
     pub fn live_out(&self, block: BlockId) -> RegSet {
         self.live_out_checked(block)
             .unwrap_or_else(|err| panic!("invalid live_out query for {:?}: {err}", block))
     }
-
     pub fn live_out_checked(&self, block: BlockId) -> anyhow::Result<RegSet> {
         self.block(block)?;
         compute_liveness(self)
@@ -248,13 +225,11 @@ impl BBProgram {
             .remove(&block)
             .ok_or_else(|| anyhow::anyhow!("liveness missing live_out for {:?}", block))
     }
-
     #[cfg(test)]
     pub fn live_out_site(&self, site: InsnSite) -> RegSet {
         self.live_out_site_checked(site)
             .unwrap_or_else(|err| panic!("invalid live_out_site query for {:?}: {err}", site))
     }
-
     pub fn live_out_site_checked(&self, site: InsnSite) -> anyhow::Result<RegSet> {
         self.insn_at(site)
             .ok_or_else(|| anyhow::anyhow!("invalid instruction site {:?}", site))?;
@@ -263,15 +238,6 @@ impl BBProgram {
             .remove(&site)
             .ok_or_else(|| anyhow::anyhow!("site liveness missing live_out for {:?}", site))
     }
-
-    pub fn live_out_current_pc(&self, pc: usize) -> anyhow::Result<RegSet> {
-        let site_pcs = current_site_pcs(self)?;
-        let site = self
-            .site_at_current_pc(&site_pcs, pc)?
-            .ok_or_else(|| anyhow::anyhow!("current pc {pc} is not present in BBProgram"))?;
-        self.live_out_site_checked(site)
-    }
-
     pub fn reaching_defs(&self, block: BlockId) -> ReachingDefs {
         let defs = self
             .use_def
@@ -284,104 +250,59 @@ impl BBProgram {
             });
         ReachingDefs { defs }
     }
-
     pub fn map_bindings(&self) -> &[BBMapBinding] {
         &self.map_bindings
     }
-
     pub fn map_fd_bindings(&self) -> HashMap<i32, u32> {
         self.map_bindings
             .iter()
             .map(|binding| (binding.old_fd, binding.map_id))
             .collect()
     }
-
     pub fn oracle(&self) -> Option<&[VerifierInsn]> {
         self.oracle.as_deref()
     }
-
+    pub fn oracle_at(&self, site: InsnSite, reg: u8) -> anyhow::Result<Option<&RegState>> {
+        let pc = *self
+            .current_site_pcs()?
+            .get(&site)
+            .ok_or_else(|| anyhow::anyhow!("site {:?} is not in current program order", site))?;
+        Ok(self.oracle.as_deref().and_then(|states| {
+            states
+                .iter()
+                .filter(|state| state.pc <= pc)
+                .filter_map(|state| state.regs.get(&reg).map(|reg_state| (state.pc, reg_state)))
+                .max_by_key(|(state_pc, _)| *state_pc)
+                .map(|(_, reg_state)| reg_state)
+        }))
+    }
     pub fn kinsn_registry(&self) -> &KinsnRegistry {
         &self.kinsn_reg
     }
-
     pub fn def_sites(&self) -> impl Iterator<Item = DefSite> + '_ {
         self.use_def.defs().copied()
     }
-
     pub fn uses_for_def(&self, def: DefSite) -> &[crate::analysis::UseSite] {
         self.use_def.uses_for(def)
     }
-
-    pub fn current_site_position(&self, site: InsnSite) -> anyhow::Result<usize> {
-        self.current_sites()?
-            .into_iter()
-            .position(|candidate| candidate == site)
-            .ok_or_else(|| anyhow::anyhow!("site {:?} is not in current program order", site))
-    }
-
-    pub fn current_sites_after_in_frame(
-        &self,
-        site: InsnSite,
-    ) -> anyhow::Result<Vec<InsnSite>> {
-        let frame = self.block_frame(site.block)?;
-        let sites = self.current_sites()?;
-        let pos = sites
-            .iter()
-            .position(|candidate| *candidate == site)
-            .ok_or_else(|| anyhow::anyhow!("site {:?} is not in current program order", site))?;
-        sites
-            .into_iter()
-            .skip(pos + 1)
-            .filter_map(|candidate| {
-                self.block_frame(candidate.block)
-                    .map(|candidate_frame| (candidate_frame == frame).then_some(candidate))
-                    .transpose()
-            })
-            .collect()
-    }
-
-    pub fn current_sites_before_in_frame_rev(
-        &self,
-        site: InsnSite,
-    ) -> anyhow::Result<Vec<InsnSite>> {
-        let frame = self.block_frame(site.block)?;
-        let sites = self.current_sites()?;
-        let pos = sites
-            .iter()
-            .position(|candidate| *candidate == site)
-            .ok_or_else(|| anyhow::anyhow!("site {:?} is not in current program order", site))?;
-        sites
-            .into_iter()
-            .take(pos)
-            .rev()
-            .filter_map(|candidate| {
-                self.block_frame(candidate.block)
-                    .map(|candidate_frame| (candidate_frame == frame).then_some(candidate))
-                    .transpose()
-            })
-            .collect()
-    }
-
     pub fn subprog_blocks(&self, frame: FrameId) -> impl Iterator<Item = BlockId> + '_ {
         self.blocks
             .iter()
             .filter(move |block| block.frame == frame)
             .map(|block| block.id)
     }
-
     #[cfg(test)]
-    pub fn btf_records(&self) -> BtfRecordsView {
+    pub fn btf_records(&self) -> BtfRemapView {
         self.btf_records_checked()
             .unwrap_or_else(|err| panic!("BBProgram BTF remap should be valid: {err}"))
     }
-
-    pub fn btf_records_checked(&self) -> anyhow::Result<BtfRecordsView> {
-        Ok(BtfRecordsView {
+    #[cfg(test)]
+    pub fn btf_records_checked(&self) -> anyhow::Result<BtfRemapView> {
+        Ok(BtfRemapView {
             func: remap_btf_records_view(self, self.func_info.as_ref(), BtfRecordKind::Func)?,
             line: remap_btf_records_view(self, self.line_info.as_ref(), BtfRecordKind::Line)?,
         })
     }
-
     pub fn unreachable_blocks(&self) -> Vec<BlockId> {
         if self.blocks.is_empty() {
             return Vec::new();
@@ -401,7 +322,6 @@ impl BBProgram {
             .filter(|&block| !self.is_lexical_dead_tail(block, &reachable))
             .collect()
     }
-
     fn is_lexical_dead_tail(&self, block: BlockId, reachable: &BTreeSet<BlockId>) -> bool {
         let mut idx = block.0;
         while idx > 0 {
@@ -419,111 +339,37 @@ impl BBProgram {
         }
         false
     }
-
     pub fn sites_in_block(&self, block: BlockId) -> anyhow::Result<Vec<InsnSite>> {
         let len = self.block(block)?.insns.len();
         Ok((0..len).map(move |idx| InsnSite { block, idx }).collect())
     }
-
     pub fn sites_in_block_with_terminator(&self, block: BlockId) -> anyhow::Result<Vec<InsnSite>> {
         self.logical_sites_in_block(block)
     }
-
     pub(super) fn current_site_pcs(&self) -> anyhow::Result<BTreeMap<InsnSite, usize>> {
         current_site_pcs(self)
     }
-
-    pub fn current_sites(&self) -> anyhow::Result<Vec<InsnSite>> {
-        let mut sites = self
-            .current_site_pcs()?
-            .into_iter()
-            .map(|(site, pc)| (pc, site))
-            .collect::<Vec<_>>();
-        sites.sort_by_key(|(pc, _)| *pc);
-        Ok(sites.into_iter().map(|(_, site)| site).collect())
-    }
-
-    pub fn report_pc(&self, site: InsnSite) -> anyhow::Result<usize> {
-        current_site_pcs(self)?
+    pub fn original_pc(&self, site: InsnSite) -> anyhow::Result<usize> {
+        self.btf
             .get(&site)
             .copied()
-            .ok_or_else(|| anyhow::anyhow!("current pc missing for {:?}", site))
+            .ok_or_else(|| anyhow::anyhow!("site {:?} has no original-PC mapping", site))
     }
-
-    pub(super) fn branch_target_pcs(&self) -> anyhow::Result<BTreeSet<usize>> {
-        let block_start_pcs = current_block_start_pcs(self)?;
-        let mut targets = BTreeSet::new();
-        for block in self.blocks() {
-            match block.terminator {
-                Terminator::Jump { target, .. } => {
-                    targets.insert(block_start_pcs[target.0]);
-                }
-                Terminator::CondBranch { taken, .. } => {
-                    targets.insert(block_start_pcs[taken.0]);
-                }
-                Terminator::Call { callee, .. } => {
-                    targets.insert(block_start_pcs[callee.0]);
-                }
-                Terminator::Fallthrough { .. } | Terminator::Exit { .. } | Terminator::End => {}
-            }
-        }
-        for target in self.pc_relative_ldimm64_targets.values() {
-            targets.insert(block_start_pcs[target.0]);
-        }
-        Ok(targets)
+    pub fn site_from_original_pc(&self, pc: usize) -> Option<InsnSite> {
+        self.btf
+            .iter()
+            .find_map(|(&site, &original_pc)| (original_pc == pc).then_some(site))
     }
-
-    pub fn branch_target_sites(&self) -> anyhow::Result<BTreeSet<InsnSite>> {
-        let mut targets = BTreeSet::new();
-        for block in self.blocks() {
-            let target = match block.terminator {
-                Terminator::Jump { target, .. } => Some(target),
-                Terminator::CondBranch { taken, .. } => Some(taken),
-                Terminator::Call { callee, .. } => Some(callee),
-                Terminator::Fallthrough { .. } | Terminator::Exit { .. } | Terminator::End => None,
-            };
-            if let Some(target) = target {
-                if let Some(site) = self.first_site_in_block(target)? {
-                    targets.insert(site);
-                }
-            }
-        }
-        for &target in self.pc_relative_ldimm64_targets.values() {
-            if let Some(site) = self.first_site_in_block(target)? {
-                targets.insert(site);
-            }
-        }
-        Ok(targets)
-    }
-
     pub fn first_site_in_block(&self, block: BlockId) -> anyhow::Result<Option<InsnSite>> {
         Ok(self.logical_sites_in_block(block)?.into_iter().next())
     }
-
-    pub fn next_site_in_linear_order(&self, site: InsnSite) -> anyhow::Result<Option<InsnSite>> {
-        let sites = self.current_sites()?;
-        let pos = sites
-            .iter()
-            .position(|candidate| *candidate == site)
-            .ok_or_else(|| anyhow::anyhow!("site {:?} is not in current program order", site))?;
-        Ok(sites.get(pos + 1).copied())
+    pub fn terminator_site(&self, block: BlockId) -> anyhow::Result<Option<InsnSite>> {
+        let block_ref = self.block(block)?;
+        Ok(block_ref.terminator.raw_insn().map(|_| InsnSite {
+            block,
+            idx: block_ref.insns.len(),
+        }))
     }
-
-    pub fn sites_in_linear_pc_range(
-        &self,
-        start_pc: usize,
-        end_pc: usize,
-    ) -> anyhow::Result<Vec<(usize, InsnSite)>> {
-        let site_pcs = current_site_pcs(self)?;
-        let mut sites = site_pcs
-            .into_iter()
-            .filter(|(_, pc)| *pc >= start_pc && *pc < end_pc)
-            .map(|(site, pc)| (pc, site))
-            .collect::<Vec<_>>();
-        sites.sort_by_key(|(pc, _)| *pc);
-        Ok(sites)
-    }
-
     pub fn sites_in_block_slot_range(
         &self,
         block: BlockId,
@@ -539,7 +385,6 @@ impl BBProgram {
         }
         Ok(sites)
     }
-
     pub fn insn_at(&self, site: InsnSite) -> Option<&BpfInsn> {
         let block = self.blocks.get(site.block.0)?;
         if site.idx < block.insns.len() {
@@ -549,16 +394,17 @@ impl BBProgram {
             .then(|| block.terminator.raw_insn())
             .flatten()
     }
-
+    pub fn insn(&self, site: InsnSite) -> anyhow::Result<&BpfInsn> {
+        self.insn_at(site)
+            .ok_or_else(|| anyhow::anyhow!("no instruction at BBProgram site {:?}", site))
+    }
     pub fn ldimm64_second_slot(&self, site: InsnSite) -> Option<&BpfInsn> {
         self.ldimm64_second_slots.get(&site)
     }
-
     pub fn block_start_pc(&self, block: BlockId) -> anyhow::Result<usize> {
         self.block(block)?;
         Ok(current_block_start_pcs(self)?[block.0])
     }
-
     pub fn kinsn_replacement_subprog_skip_reason(
         &self,
         block: BlockId,
@@ -587,7 +433,6 @@ impl BBProgram {
         let replacement_end = frame_start_slot
             .checked_add(replacement_len)
             .ok_or_else(|| anyhow::anyhow!("kinsn replacement new range overflows"))?;
-
         let mut frame_start_slot_abs = usize::MAX;
         let mut frame_end_slot_abs = 0usize;
         for frame_block in self.blocks().filter(|candidate| candidate.frame == frame) {
@@ -599,7 +444,6 @@ impl BBProgram {
         if frame_start_slot_abs == usize::MAX {
             anyhow::bail!("frame {:?} for block {:?} has no blocks", frame, block);
         }
-
         if old_end > frame_end_slot_abs {
             return Ok(Some(format!(
                 "kinsn site crosses subprog boundary (site {frame_start_slot}..{old_end}, subprog {frame_start_slot_abs}..{frame_end_slot_abs})"
@@ -612,7 +456,6 @@ impl BBProgram {
         }
         Ok(None)
     }
-
     pub fn block_slot_len(&self, block: BlockId) -> anyhow::Result<usize> {
         let block_ref = self.block(block)?;
         let mut len = 0usize;
@@ -624,13 +467,11 @@ impl BBProgram {
         }
         Ok(len)
     }
-
     pub fn block_slot_bounds(&self, block: BlockId) -> anyhow::Result<(usize, usize)> {
         let start = self.block_start_pc(block)?;
         let len = self.block_slot_len(block)?;
         Ok((start, start + len))
     }
-
     pub fn frame_relative_slot(&self, block: BlockId, slot: usize) -> anyhow::Result<usize> {
         let frame = self.block(block)?.frame;
         let mut offset = 0usize;
@@ -646,7 +487,6 @@ impl BBProgram {
         }
         anyhow::bail!("block {:?} is missing from its frame", block)
     }
-
     pub fn remap_block_after_insert(
         block: BlockId,
         split_head: BlockId,
@@ -660,7 +500,6 @@ impl BBProgram {
             block
         }
     }
-
     pub fn remap_block_after_remove(
         block: BlockId,
         removed: &[BlockId],
@@ -671,7 +510,6 @@ impl BBProgram {
         let shift = removed.iter().filter(|removed| removed.0 < block.0).count();
         Ok(BlockId(block.0 - shift))
     }
-
     pub fn frame_slot_bounds(&self, frame: FrameId) -> anyhow::Result<(usize, usize)> {
         let mut start = usize::MAX;
         let mut end = 0usize;
@@ -685,14 +523,12 @@ impl BBProgram {
         }
         Ok((start, end))
     }
-
     pub fn program_slot_len(&self) -> anyhow::Result<usize> {
         self.blocks().try_fold(
             0usize,
             |len, block| Ok(len + self.block_slot_len(block.id)?),
         )
     }
-
     pub fn block_range_for_slots(
         &self,
         block: BlockId,
@@ -721,7 +557,6 @@ impl BBProgram {
         }
         Ok(start.idx..end.idx + 1)
     }
-
     pub fn site_for_block_slot(&self, block: BlockId, slot: usize) -> anyhow::Result<InsnSite> {
         let block_ref = self.block(block)?;
         let mut current = 0usize;
@@ -739,82 +574,10 @@ impl BBProgram {
             slot
         )
     }
-
-    pub fn absolute_pc_for_block_slot(&self, block: BlockId, slot: usize) -> anyhow::Result<usize> {
-        self.block_start_pc(block)?
-            .checked_add(slot)
-            .ok_or_else(|| anyhow::anyhow!("absolute pc for slot {slot} overflows"))
-    }
-
     pub fn is_terminator_site(&self, site: InsnSite) -> anyhow::Result<bool> {
         let block = self.block(site.block)?;
         Ok(site.idx == block.insns.len() && block.terminator.raw_insn().is_some())
     }
-
-    pub fn sites_in_block_pc_range(
-        &self,
-        site_pcs: &BTreeMap<InsnSite, usize>,
-        block: BlockId,
-        start_pc: usize,
-        end_pc: usize,
-    ) -> anyhow::Result<Vec<(usize, InsnSite)>> {
-        let mut sites = Vec::new();
-        for site in self.sites_in_block_with_terminator(block)? {
-            let pc = site_pcs
-                .get(&site)
-                .copied()
-                .ok_or_else(|| anyhow::anyhow!("current pc missing for {:?}", site))?;
-            if pc >= start_pc && pc < end_pc {
-                sites.push((pc, site));
-            }
-        }
-        sites.sort_by_key(|(pc, _)| *pc);
-        Ok(sites)
-    }
-
-    pub fn sites_in_frame_pc_range(
-        &self,
-        site_pcs: &BTreeMap<InsnSite, usize>,
-        frame: FrameId,
-        start_pc: usize,
-        end_pc: usize,
-    ) -> anyhow::Result<Vec<(usize, InsnSite)>> {
-        let mut sites = Vec::new();
-        for block in self.blocks().filter(|block| block.frame == frame) {
-            sites.extend(self.sites_in_block_pc_range(site_pcs, block.id, start_pc, end_pc)?);
-        }
-        sites.sort_by_key(|(pc, _)| *pc);
-        Ok(sites)
-    }
-
-    pub fn site_at_current_pc(
-        &self,
-        site_pcs: &BTreeMap<InsnSite, usize>,
-        pc: usize,
-    ) -> anyhow::Result<Option<InsnSite>> {
-        let mut matches = site_pcs
-            .iter()
-            .filter_map(|(&site, &site_pc)| (site_pc == pc).then_some(site));
-        let Some(site) = matches.next() else {
-            return Ok(None);
-        };
-        if matches.next().is_some() {
-            anyhow::bail!("current pc {pc} maps to multiple instruction sites");
-        }
-        Ok(Some(site))
-    }
-
-    pub fn site_for_original_pc(&self, pc: usize) -> anyhow::Result<InsnSite> {
-        self.btf
-            .iter()
-            .find_map(|(&site, &orig_pc)| (orig_pc == pc).then_some(site))
-            .ok_or_else(|| anyhow::anyhow!("original pc {pc} is not present in BBProgram"))
-    }
-
-    pub fn block_for_original_pc(&self, pc: usize) -> anyhow::Result<BlockId> {
-        Ok(self.site_for_original_pc(pc)?.block)
-    }
-
     pub fn insn_slot_width(&self, site: InsnSite) -> anyhow::Result<usize> {
         let insn = self
             .insn_at(site)
@@ -828,11 +591,9 @@ impl BBProgram {
             Ok(1)
         }
     }
-
     pub(crate) fn rebuild_cfg_edges(&mut self) -> anyhow::Result<()> {
         self.successors = vec![Vec::new(); self.blocks.len()];
         self.predecessors = vec![Vec::new(); self.blocks.len()];
-
         for block in &self.blocks {
             let from = block.id;
             for succ in block.terminator.successors() {
@@ -847,7 +608,6 @@ impl BBProgram {
                 self.predecessors[succ.0].push(from);
             }
         }
-
         for edges in &mut self.successors {
             edges.sort_unstable();
             edges.dedup();
@@ -858,12 +618,10 @@ impl BBProgram {
         }
         Ok(())
     }
-
     pub(crate) fn rebuild_use_def(&mut self) -> anyhow::Result<()> {
         self.use_def = UseDefGraph::build(self)?;
         Ok(())
     }
-
     pub fn attach_side_inputs(
         &mut self,
         insns: &[BpfInsn],
@@ -877,46 +635,37 @@ impl BBProgram {
         self.line_info = line_info;
         Ok(())
     }
-
     pub(crate) fn invalidate_oracle(&mut self) {
         self.oracle = None;
     }
-
     pub fn reset_btf_to_current_pcs(&mut self) -> anyhow::Result<()> {
         self.btf = current_site_pcs(self)?;
         Ok(())
     }
-
     pub(crate) fn rebuild_use_def_after_mutation(&mut self) -> anyhow::Result<()> {
         self.rebuild_use_def()?;
         self.invalidate_oracle();
         Ok(())
     }
-
     pub fn remapped_func_info_records(&self) -> anyhow::Result<Option<BtfInfoRecords>> {
         remap_btf_records_for_lowering(self, self.func_info.as_ref(), BtfRecordKind::Func)
     }
-
     pub fn remapped_line_info_records(&self) -> anyhow::Result<Option<BtfInfoRecords>> {
         remap_btf_records_for_lowering(self, self.line_info.as_ref(), BtfRecordKind::Line)
     }
-
-    pub(crate) fn block(&self, block: BlockId) -> anyhow::Result<&Block> {
+    pub(super) fn block(&self, block: BlockId) -> anyhow::Result<&Block> {
         self.blocks
             .get(block.0)
             .ok_or_else(|| anyhow::anyhow!("invalid block id {:?}", block))
     }
-
-    pub(crate) fn block_mut(&mut self, block: BlockId) -> anyhow::Result<&mut Block> {
+    pub(super) fn block_mut(&mut self, block: BlockId) -> anyhow::Result<&mut Block> {
         self.blocks
             .get_mut(block.0)
             .ok_or_else(|| anyhow::anyhow!("invalid block id {:?}", block))
     }
-
-    pub(crate) fn logical_sites_in_block(&self, block: BlockId) -> anyhow::Result<Vec<InsnSite>> {
+    pub(super) fn logical_sites_in_block(&self, block: BlockId) -> anyhow::Result<Vec<InsnSite>> {
         Ok(logical_sites_for_block(self.block(block)?))
     }
-
     pub(crate) fn dataflow_successors(&self, block: BlockId) -> anyhow::Result<Vec<BlockId>> {
         let block_ref = self
             .blocks
@@ -924,7 +673,6 @@ impl BBProgram {
             .ok_or_else(|| anyhow::anyhow!("invalid block id {:?}", block))?;
         Ok(block_ref.terminator.dataflow_successors())
     }
-
     pub(crate) fn shift_metadata_after_insert<T>(
         map: &mut BTreeMap<InsnSite, T>,
         block: BlockId,
@@ -942,7 +690,6 @@ impl BBProgram {
             })
             .collect();
     }
-
     pub(crate) fn shift_metadata_after_delete<T>(
         map: &mut BTreeMap<InsnSite, T>,
         block: BlockId,
@@ -966,12 +713,10 @@ impl BBProgram {
             .collect();
     }
 }
-
 fn collect_map_bindings(insns: &[BpfInsn], map_ids: &[u32]) -> anyhow::Result<Vec<BBMapBinding>> {
     let mut bindings = Vec::new();
     let mut fd_order = Vec::<i32>::new();
     let mut pc = 0usize;
-
     while pc < insns.len() {
         let insn = insns[pc];
         if let Some(kind) = insn.map_pseudo_kind() {
@@ -985,10 +730,8 @@ fn collect_map_bindings(insns: &[BpfInsn], map_ids: &[u32]) -> anyhow::Result<Ve
         }
         pc += insn_width(&insn);
     }
-
     Ok(bindings)
 }
-
 fn resolve_map_id(
     kind: MapPseudo,
     imm: i32,
@@ -1000,7 +743,6 @@ fn resolve_map_id(
             .map_err(|_| anyhow::anyhow!("negative canonical map index {imm}"))?;
         return Ok(map_ids.get(index).copied());
     }
-
     if !fd_order.contains(&imm) {
         fd_order.push(imm);
     }
@@ -1010,7 +752,6 @@ fn resolve_map_id(
         .ok_or_else(|| anyhow::anyhow!("failed to resolve map fd order for fd {imm}"))?;
     Ok(map_ids.get(index).copied())
 }
-
 impl Terminator {
     pub fn raw_insn(&self) -> Option<&BpfInsn> {
         match self {
@@ -1021,7 +762,6 @@ impl Terminator {
             Self::Fallthrough { .. } | Self::End => None,
         }
     }
-
     pub fn successors(&self) -> Vec<BlockId> {
         match *self {
             Self::Fallthrough { next } | Self::Jump { target: next, .. } => vec![next],
@@ -1046,7 +786,6 @@ impl Terminator {
             Self::Exit { .. } | Self::End => Vec::new(),
         }
     }
-
     pub(crate) fn dataflow_successors(&self) -> Vec<BlockId> {
         match *self {
             Self::Fallthrough { next } | Self::Jump { target: next, .. } => vec![next],
@@ -1064,19 +803,16 @@ impl Terminator {
         }
     }
 }
-
 pub(crate) fn range_len(range: &Range<usize>) -> anyhow::Result<usize> {
     range
         .end
         .checked_sub(range.start)
         .ok_or_else(|| anyhow::anyhow!("invalid descending range {:?}", range))
 }
-
 #[derive(Clone, Debug)]
 pub struct Dominance {
     dominators: Vec<BTreeSet<BlockId>>,
 }
-
 impl Dominance {
     fn compute(prog: &BBProgram) -> Self {
         let all = prog
@@ -1088,7 +824,6 @@ impl Dominance {
         if prog.entry.0 < dominators.len() {
             dominators[prog.entry.0] = BTreeSet::from([prog.entry]);
         }
-
         let mut changed = true;
         while changed {
             changed = false;
@@ -1116,22 +851,18 @@ impl Dominance {
                 }
             }
         }
-
         Self { dominators }
     }
-
     pub fn dominates(&self, dominator: BlockId, block: BlockId) -> bool {
         self.dominators
             .get(block.0)
             .is_some_and(|set| set.contains(&dominator))
     }
 }
-
 #[derive(Clone, Debug, Default)]
 pub struct ReachingDefs {
     defs: BTreeMap<u8, Vec<DefSite>>,
 }
-
 impl ReachingDefs {
     pub fn defs_for(&self, reg: u8) -> impl Iterator<Item = DefSite> + '_ {
         self.defs
@@ -1140,7 +871,6 @@ impl ReachingDefs {
             .flat_map(|defs| defs.iter().copied())
     }
 }
-
 fn current_site_pcs(prog: &BBProgram) -> anyhow::Result<BTreeMap<InsnSite, usize>> {
     let mut pcs = BTreeMap::new();
     let mut pc = 0usize;
@@ -1166,7 +896,6 @@ fn current_site_pcs(prog: &BBProgram) -> anyhow::Result<BTreeMap<InsnSite, usize
     }
     Ok(pcs)
 }
-
 fn current_block_start_pcs(prog: &BBProgram) -> anyhow::Result<Vec<usize>> {
     let mut block_start_pc = vec![0usize; prog.blocks.len()];
     let mut pc = 0usize;
@@ -1184,7 +913,6 @@ fn current_block_start_pcs(prog: &BBProgram) -> anyhow::Result<Vec<usize>> {
     }
     Ok(block_start_pc)
 }
-
 fn logical_sites_for_block(block: &Block) -> Vec<InsnSite> {
     let mut sites = (0..block.insns.len())
         .map(|idx| InsnSite {
@@ -1200,23 +928,19 @@ fn logical_sites_for_block(block: &Block) -> Vec<InsnSite> {
     }
     sites
 }
-
 #[derive(Clone, Debug, Default)]
 struct LivenessSets {
     live_in: HashMap<BlockId, RegSet>,
     live_out: HashMap<BlockId, RegSet>,
 }
-
 #[derive(Clone, Debug, Default)]
 struct SiteLivenessSets {
     live_out: HashMap<InsnSite, RegSet>,
 }
-
 fn compute_liveness(prog: &BBProgram) -> LivenessSets {
     let mut use_sets = HashMap::<BlockId, RegSet>::new();
     let mut def_sets = HashMap::<BlockId, RegSet>::new();
     let mut kinsn_uses = HashMap::<BlockId, RegSet>::new();
-
     for block in prog.blocks() {
         let mut uses = RegSet::new();
         let mut defs = RegSet::new();
@@ -1250,14 +974,12 @@ fn compute_liveness(prog: &BBProgram) -> LivenessSets {
         def_sets.insert(block.id, defs);
         kinsn_uses.insert(block.id, implicit);
     }
-
     let mut live_in = HashMap::<BlockId, RegSet>::new();
     let mut live_out = HashMap::<BlockId, RegSet>::new();
     for block in prog.blocks() {
         live_in.insert(block.id, RegSet::new());
         live_out.insert(block.id, RegSet::new());
     }
-
     let mut changed = true;
     while changed {
         changed = false;
@@ -1284,15 +1006,12 @@ fn compute_liveness(prog: &BBProgram) -> LivenessSets {
             }
         }
     }
-
     LivenessSets { live_in, live_out }
 }
-
 fn compute_site_liveness(prog: &BBProgram) -> anyhow::Result<SiteLivenessSets> {
     let mut sites = Vec::new();
     let mut use_sets = HashMap::<InsnSite, RegSet>::new();
     let mut def_sets = HashMap::<InsnSite, RegSet>::new();
-
     for block in prog.blocks() {
         for site in logical_sites_for_block(block) {
             sites.push(site);
@@ -1316,14 +1035,12 @@ fn compute_site_liveness(prog: &BBProgram) -> anyhow::Result<SiteLivenessSets> {
             );
         }
     }
-
     let mut live_in = sites
         .iter()
         .copied()
         .map(|site| (site, RegSet::new()))
         .collect::<HashMap<_, _>>();
     let mut live_out = live_in.clone();
-
     let mut changed = true;
     while changed {
         changed = false;
@@ -1346,10 +1063,8 @@ fn compute_site_liveness(prog: &BBProgram) -> anyhow::Result<SiteLivenessSets> {
             }
         }
     }
-
     Ok(SiteLivenessSets { live_out })
 }
-
 fn site_successors(prog: &BBProgram, site: InsnSite) -> anyhow::Result<Vec<InsnSite>> {
     let block = prog.block(site.block)?;
     if site.idx < block.insns.len() {
@@ -1372,7 +1087,6 @@ fn site_successors(prog: &BBProgram, site: InsnSite) -> anyhow::Result<Vec<InsnS
     }
     Ok(successors)
 }
-
 fn first_logical_sites(
     prog: &BBProgram,
     block: BlockId,
@@ -1391,4 +1105,222 @@ fn first_logical_sites(
         successors.extend(first_logical_sites(prog, succ, visited)?);
     }
     Ok(successors)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::insn::*;
+    use crate::test_helpers::*;
+
+    #[test]
+    fn bbprogram_ja32_successor_uses_imm_target() {
+        let insns = vec![
+            BpfInsn::new(BPF_JMP32 | BPF_JA, 0, 0, 2),
+            BpfInsn::mov64_imm(BPF_REG_0, 0),
+            BpfInsn::exit(),
+            BpfInsn::mov64_imm(BPF_REG_0, 1),
+            BpfInsn::exit(),
+        ];
+        let prog = lift_test_program(&insns, &pass_ctx());
+
+        assert!(prog.successors(BlockId(0)).contains(&BlockId(2)));
+        assert!(matches!(
+            prog.blocks().next().unwrap().terminator,
+            Terminator::Jump {
+                target: BlockId(2),
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn bbprogram_cond_branch_exposes_taken_and_fallthrough_edges() {
+        let insns = vec![
+            BpfInsn::jeq_imm(BPF_REG_1, 0, 1),
+            BpfInsn::mov64_imm(BPF_REG_0, 0),
+            BpfInsn::mov64_imm(BPF_REG_0, 1),
+            BpfInsn::exit(),
+        ];
+        let prog = lift_test_program(&insns, &pass_ctx());
+
+        assert_eq!(prog.successors(BlockId(0)), &[BlockId(1), BlockId(2)]);
+        assert!(matches!(
+            prog.blocks().next().unwrap().terminator,
+            Terminator::CondBranch {
+                taken: BlockId(2),
+                fallthrough: BlockId(1),
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn bbprogram_pseudo_call_records_callee_and_return_blocks() {
+        let insns = vec![
+            BpfInsn::pseudo_call_to(0, 3),
+            BpfInsn::mov64_imm(BPF_REG_0, 0),
+            BpfInsn::exit(),
+            BpfInsn::mov64_imm(BPF_REG_0, 1),
+            BpfInsn::exit(),
+        ];
+        let prog = lift_test_program(&insns, &pass_ctx());
+
+        assert!(matches!(
+            prog.blocks().next().unwrap().terminator,
+            Terminator::Call {
+                callee: BlockId(2),
+                return_to: BlockId(1),
+                ..
+            }
+        ));
+        assert_eq!(prog.successors(BlockId(0)), &[BlockId(1), BlockId(2)]);
+    }
+
+    #[test]
+    fn bbprogram_predecessors_are_derived_from_symbolic_successors() {
+        let insns = vec![
+            BpfInsn::jeq_imm(BPF_REG_1, 0, 1),
+            BpfInsn::mov64_imm(BPF_REG_0, 0),
+            BpfInsn::mov64_imm(BPF_REG_0, 1),
+            BpfInsn::exit(),
+        ];
+        let prog = lift_test_program(&insns, &pass_ctx());
+
+        assert_eq!(prog.successors(BlockId(0)), &[BlockId(1), BlockId(2)]);
+        assert_eq!(prog.predecessors(BlockId(1)), &[BlockId(0)]);
+        assert_eq!(prog.predecessors(BlockId(2)), &[BlockId(0), BlockId(1)]);
+        let dom = prog.dominance();
+        assert!(dom.dominates(BlockId(0), BlockId(1)));
+        assert!(dom.dominates(BlockId(0), BlockId(2)));
+    }
+
+    #[test]
+    fn bbprogram_cfg_edges_use_ja32_imm_target() {
+        let insns = vec![
+            BpfInsn::new(BPF_JMP32 | BPF_JA, 0, 0, 2),
+            BpfInsn::mov64_imm(BPF_REG_0, 0),
+            BpfInsn::exit(),
+            BpfInsn::mov64_imm(BPF_REG_0, 1),
+            BpfInsn::exit(),
+        ];
+        let prog = lift_test_program(&insns, &pass_ctx());
+
+        assert_eq!(prog.successors(BlockId(0)), &[BlockId(2)]);
+        assert_eq!(prog.predecessors(BlockId(2)), &[BlockId(0)]);
+    }
+
+    #[test]
+    fn bbprogram_subprog_blocks_cover_callback_body_range() {
+        let insns = vec![
+            BpfInsn::pseudo_call_to(0, 3),
+            BpfInsn::mov64_imm(BPF_REG_0, 0),
+            BpfInsn::exit(),
+            BpfInsn::mov64_imm(BPF_REG_1, 1),
+            BpfInsn::mov64_imm(BPF_REG_0, 1),
+            BpfInsn::exit(),
+        ];
+        let prog = lift_test_program(&insns, &pass_ctx());
+
+        let callback_blocks = prog.subprog_blocks(FrameId(1)).collect::<Vec<_>>();
+        assert_eq!(callback_blocks, vec![BlockId(2)]);
+    }
+
+    #[test]
+    fn bbprogram_map_bindings_preserve_loader_fd_order() {
+        let a = BpfInsn::ld_imm64(BPF_REG_1, BPF_PSEUDO_MAP_FD, 11);
+        let b = BpfInsn::ld_imm64(BPF_REG_2, BPF_PSEUDO_MAP_FD, 22);
+        let mut ctx = pass_ctx();
+        set_map_ids(&mut ctx, vec![101, 202]);
+        let prog = lift_test_program(&[a[0], a[1], b[0], b[1], BpfInsn::exit()], &ctx);
+
+        let bindings = prog.map_bindings();
+        assert_eq!(bindings[0].old_fd, 11);
+        assert_eq!(bindings[0].map_id, 101);
+        assert_eq!(bindings[1].old_fd, 22);
+        assert_eq!(bindings[1].map_id, 202);
+    }
+
+    #[test]
+    fn bbprogram_map_bindings_survive_dead_pseudo_load_deletion() {
+        let a = BpfInsn::ld_imm64(BPF_REG_1, BPF_PSEUDO_MAP_FD, 11);
+        let b = BpfInsn::ld_imm64(BPF_REG_2, BPF_PSEUDO_MAP_FD, 22);
+        let mut ctx = pass_ctx();
+        set_map_ids(&mut ctx, vec![101, 202]);
+        let mut prog = lift_test_program(&[a[0], a[1], b[0], b[1], BpfInsn::exit()], &ctx);
+        let def = prog
+            .reaching_defs(BlockId(0))
+            .defs_for(BPF_REG_1)
+            .next()
+            .expect("map fd r1 def should exist");
+
+        prog.delete_insn(def)
+            .expect("delete should keep stable binding");
+
+        let bindings = prog.map_bindings();
+        assert_eq!(bindings[0].old_fd, 11);
+        assert_eq!(bindings[0].map_id, 101);
+        assert_eq!(bindings[1].old_fd, 22);
+        assert_eq!(bindings[1].map_id, 202);
+    }
+
+    #[test]
+    fn bbprogram_sites_in_block_treats_ldimm64_as_one_logical_site() {
+        let wide = BpfInsn::ld_imm64(BPF_REG_1, 0, 0x1_0000_0000);
+        let prog = lift_test_program(&[wide[0], wide[1], BpfInsn::exit()], &pass_ctx());
+
+        let sites = prog
+            .sites_in_block(BlockId(0))
+            .expect("valid block should enumerate body sites");
+        assert_eq!(
+            sites,
+            vec![InsnSite {
+                block: BlockId(0),
+                idx: 0
+            }]
+        );
+    }
+
+    #[test]
+    fn bbprogram_sites_in_block_excludes_terminator_from_body_iteration() {
+        let prog = lift_test_program(
+            &[
+                BpfInsn::mov64_imm(BPF_REG_0, 0),
+                BpfInsn::jeq_imm(BPF_REG_0, 0, 1),
+                BpfInsn::mov64_imm(BPF_REG_0, 1),
+                BpfInsn::exit(),
+            ],
+            &pass_ctx(),
+        );
+
+        let sites = prog
+            .sites_in_block(BlockId(0))
+            .expect("valid block should enumerate body sites");
+        assert_eq!(
+            sites,
+            vec![InsnSite {
+                block: BlockId(0),
+                idx: 0
+            }]
+        );
+    }
+
+    #[test]
+    fn bbprogram_sites_can_include_terminators_when_requested() {
+        let prog = lift_test_program(
+            &[BpfInsn::jeq_imm(BPF_REG_0, 0, 1), BpfInsn::exit()],
+            &pass_ctx(),
+        );
+
+        let sites = prog
+            .sites_in_block_with_terminator(BlockId(0))
+            .expect("valid block should enumerate logical sites");
+        assert_eq!(
+            sites,
+            vec![InsnSite {
+                block: BlockId(0),
+                idx: 0
+            }]
+        );
+    }
 }

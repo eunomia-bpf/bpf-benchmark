@@ -1,6 +1,83 @@
 use super::*;
-use crate::insn::{BpfInsn, MapPseudo, BPF_DW, BPF_IMM, BPF_LD};
+use crate::analysis::BlockId;
+use crate::insn::{insn_width, BpfInsn, MapPseudo, BPF_DW, BPF_IMM, BPF_LD};
 use crate::pass::BpfProgram;
+use std::collections::HashMap;
+
+const BPF_MAP_TYPE_PERCPU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_PERCPU_HASH;
+const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
+
+impl MapInfoAnalysis {
+    fn run(program: &BpfProgram) -> MapInfoAnalysisResult<MapInfoResult> {
+        analyze_map_info_from_bpf_program(program)
+    }
+}
+
+fn analyze_map_info_from_bpf_program(program: &BpfProgram) -> MapInfoAnalysisResult<MapInfoResult> {
+    let provider = program.map_provider.clone();
+    let map_refs = collect_map_bindings(&program.insns, &program.map_ids, &program.map_fd_bindings);
+    collect_map_references_from_bindings(program.map_ids.len(), map_refs, move |map_id| {
+        provider.map_info(program, map_id)
+    })
+}
+
+fn collect_map_references<F>(
+    insns: &[BpfInsn],
+    map_ids: &[u32],
+    resolver: F,
+) -> MapInfoAnalysisResult<MapInfoResult>
+where
+    F: FnMut(u32) -> MapInfoAnalysisResult<Option<MapInfo>>,
+{
+    collect_map_references_with_bindings(insns, map_ids, &HashMap::new(), resolver)
+}
+
+fn collect_map_references_with_bindings<F>(
+    insns: &[BpfInsn],
+    map_ids: &[u32],
+    map_fd_bindings: &HashMap<i32, u32>,
+    resolver: F,
+) -> MapInfoAnalysisResult<MapInfoResult>
+where
+    F: FnMut(u32) -> MapInfoAnalysisResult<Option<MapInfo>>,
+{
+    let mut program = BpfProgram::new(insns.to_vec());
+    program.map_ids = map_ids.to_vec();
+    program.map_fd_bindings = map_fd_bindings.clone();
+    let map_refs = collect_map_bindings(&program.insns, &program.map_ids, &program.map_fd_bindings);
+    collect_map_references_from_bindings(map_ids.len(), map_refs, resolver)
+}
+
+fn collect_map_bindings(
+    insns: &[BpfInsn],
+    map_ids: &[u32],
+    fd_bindings: &HashMap<i32, u32>,
+) -> Vec<MapBinding> {
+    let mut bindings = Vec::new();
+    let mut fd_order = Vec::<i32>::new();
+    let mut pc = 0usize;
+    while pc < insns.len() {
+        let insn = insns[pc];
+        if let Some(kind) = insn.map_pseudo_kind() {
+            let (map_idx, map_id) =
+                resolve_map_ref(kind, insn.imm, map_ids, fd_bindings, &mut fd_order);
+            bindings.push(MapBinding {
+                site: InsnSite {
+                    block: BlockId(0),
+                    idx: bindings.len(),
+                },
+                pc_load: pc,
+                kind,
+                dst_reg: insn.dst_reg(),
+                imm: insn.imm,
+                map_idx,
+                map_id,
+            });
+        }
+        pc += insn_width(&insn);
+    }
+    bindings
+}
 
 fn make_ld_imm64(dst: u8, src: u8, imm_lo: i32) -> [BpfInsn; 2] {
     [

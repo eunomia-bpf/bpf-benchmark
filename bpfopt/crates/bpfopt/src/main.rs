@@ -435,10 +435,13 @@ fn parse_bytecode(bytes: &[u8]) -> Result<Vec<BpfInsn>> {
             bytes.len()
         );
     }
-    Ok(bytes
+    bytes
         .chunks_exact(8)
-        .map(|chunk| BpfInsn::from_raw_bytes(chunk.try_into().expect("chunk is 8 bytes")))
-        .collect())
+        .map(|chunk| {
+            let chunk_array: [u8; 8] = chunk.try_into()?;
+            Ok(BpfInsn::from_raw_bytes(chunk_array))
+        })
+        .collect()
 }
 
 // Snapshot initialization canonicalizes loader-owned map references before the

@@ -3,28 +3,16 @@
 
 use std::collections::{BTreeMap, HashMap};
 
-#[cfg(test)]
-use crate::analysis::BlockId;
-use crate::analysis::{BBProgram, InsnSite};
-#[cfg(test)]
-use crate::insn::insn_width;
-#[cfg(test)]
-use crate::insn::BpfInsn;
+use crate::analysis::{program_sites, site_pc, BBProgram, InsnSite};
 use crate::insn::MapPseudo;
-#[cfg(test)]
-use crate::pass::BpfProgram;
 use crate::pass::PassContext;
 
 const BPF_MAP_TYPE_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_HASH;
 const BPF_MAP_TYPE_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_ARRAY;
 const BPF_MAP_TYPE_ARRAY_OF_MAPS: u32 = libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS;
-#[cfg(test)]
-const BPF_MAP_TYPE_PERCPU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_PERCPU_HASH;
 const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
 const BPF_MAP_TYPE_HASH_OF_MAPS: u32 = libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS;
 const BPF_MAP_TYPE_LRU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_LRU_HASH;
-#[cfg(test)]
-const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
 
 /// Runtime metadata for a live kernel map referenced by the program.
 ///
@@ -127,13 +115,6 @@ struct MapBinding {
     map_id: Option<u32>,
 }
 
-impl MapInfoAnalysis {
-    #[cfg(test)]
-    pub fn run(program: &BpfProgram) -> MapInfoAnalysisResult<MapInfoResult> {
-        analyze_map_info_from_bpf_program(program)
-    }
-}
-
 pub(super) fn analyze_map_info(
     program: &BBProgram,
     ctx: &PassContext,
@@ -161,48 +142,6 @@ pub(super) fn analyze_map_info(
     })
 }
 
-#[cfg(test)]
-fn analyze_map_info_from_bpf_program(program: &BpfProgram) -> MapInfoAnalysisResult<MapInfoResult> {
-    let provider = program.map_provider.clone();
-    let map_refs = collect_map_bindings(&program.insns, &program.map_ids, &program.map_fd_bindings);
-    collect_map_references_from_bindings(program.map_ids.len(), map_refs, move |map_id| {
-        provider.map_info(program, map_id)
-    })
-}
-
-/// Scan the instruction stream and resolve each unique map reference.
-#[cfg(test)]
-pub fn collect_map_references<F>(
-    insns: &[BpfInsn],
-    map_ids: &[u32],
-    resolver: F,
-) -> MapInfoAnalysisResult<MapInfoResult>
-where
-    F: FnMut(u32) -> MapInfoAnalysisResult<Option<MapInfo>>,
-{
-    collect_map_references_with_bindings(insns, map_ids, &HashMap::new(), resolver)
-}
-
-/// Scan the instruction stream and resolve each unique map reference. FD-form
-/// references use a stable `old_fd -> map_id` binding table when available;
-/// IDX-form references already carry canonical map indexes.
-#[cfg(test)]
-pub fn collect_map_references_with_bindings<F>(
-    insns: &[BpfInsn],
-    map_ids: &[u32],
-    map_fd_bindings: &HashMap<i32, u32>,
-    resolver: F,
-) -> MapInfoAnalysisResult<MapInfoResult>
-where
-    F: FnMut(u32) -> MapInfoAnalysisResult<Option<MapInfo>>,
-{
-    let mut program = BpfProgram::new(insns.to_vec());
-    program.map_ids = map_ids.to_vec();
-    program.map_fd_bindings = map_fd_bindings.clone();
-    let map_refs = collect_map_bindings(&program.insns, &program.map_ids, &program.map_fd_bindings);
-    collect_map_references_from_bindings(map_ids.len(), map_refs, resolver)
-}
-
 fn collect_map_bindings_from_sites(
     program: &BBProgram,
     map_ids: &[u32],
@@ -210,17 +149,13 @@ fn collect_map_bindings_from_sites(
 ) -> MapInfoAnalysisResult<Vec<MapBinding>> {
     let mut bindings = Vec::new();
     let mut fd_order = Vec::<i32>::new();
-    let site_pcs = program.current_site_pcs().map_err(|err| err.to_string())?;
 
-    for site in program.current_sites().map_err(|err| err.to_string())? {
+    for site in program_sites(program).map_err(|err| err.to_string())? {
         let Some(insn) = program.insn_at(site) else {
             continue;
         };
         if let Some(kind) = insn.map_pseudo_kind() {
-            let pc = site_pcs
-                .get(&site)
-                .copied()
-                .ok_or_else(|| format!("current pc missing for map reference site {:?}", site))?;
+            let pc = site_pc(program, site).map_err(|err| err.to_string())?;
             let (map_idx, map_id) =
                 resolve_map_ref(kind, insn.imm, map_ids, fd_bindings, &mut fd_order);
             bindings.push(MapBinding {
@@ -236,40 +171,6 @@ fn collect_map_bindings_from_sites(
     }
 
     Ok(bindings)
-}
-
-#[cfg(test)]
-fn collect_map_bindings(
-    insns: &[BpfInsn],
-    map_ids: &[u32],
-    fd_bindings: &HashMap<i32, u32>,
-) -> Vec<MapBinding> {
-    let mut bindings = Vec::new();
-    let mut fd_order = Vec::<i32>::new();
-    let mut pc = 0usize;
-
-    while pc < insns.len() {
-        let insn = insns[pc];
-        if let Some(kind) = insn.map_pseudo_kind() {
-            let (map_idx, map_id) =
-                resolve_map_ref(kind, insn.imm, map_ids, fd_bindings, &mut fd_order);
-            bindings.push(MapBinding {
-                site: InsnSite {
-                    block: BlockId(0),
-                    idx: bindings.len(),
-                },
-                pc_load: pc,
-                kind,
-                dst_reg: insn.dst_reg(),
-                imm: insn.imm,
-                map_idx,
-                map_id,
-            });
-        }
-        pc += insn_width(&insn);
-    }
-
-    bindings
 }
 
 fn resolve_map_ref(

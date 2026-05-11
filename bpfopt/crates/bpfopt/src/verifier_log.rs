@@ -10,11 +10,8 @@
 //! optimization analyses (constant propagation, range checks, liveness, etc.).
 //!
 //! Used to turn raw verifier logs into structured verifier-state JSON.
-
-use std::collections::{BTreeMap, HashMap};
-
 use serde::{Deserialize, Serialize};
-
+use std::collections::{BTreeMap, HashMap};
 #[allow(clippy::enum_variant_names)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum VerifierInsnKind {
@@ -23,20 +20,17 @@ pub enum VerifierInsnKind {
     BranchDeltaState,
     InsnDeltaState,
 }
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum VerifierValueWidth {
     Unknown,
     Bits32,
     Bits64,
 }
-
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct Tnum {
     pub value: u64,
     pub mask: u64,
 }
-
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct ScalarRange {
     pub smin: Option<i64>,
@@ -48,7 +42,6 @@ pub struct ScalarRange {
     pub umin32: Option<u32>,
     pub umax32: Option<u32>,
 }
-
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct VerifierInsn {
     pub pc: usize,
@@ -59,7 +52,6 @@ pub struct VerifierInsn {
     pub regs: HashMap<u8, RegState>,
     pub stack: HashMap<i16, StackState>,
 }
-
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RegState {
     pub reg_type: String,
@@ -71,7 +63,6 @@ pub struct RegState {
     pub offset: Option<i32>,
     pub id: Option<u32>,
 }
-
 impl RegState {
     pub fn new(reg_type: impl Into<String>, value_width: VerifierValueWidth) -> Self {
         Self {
@@ -85,39 +76,32 @@ impl RegState {
             id: None,
         }
     }
-
     pub fn exact_u64(&self) -> Option<u64> {
         if self.reg_type != "scalar" {
             return None;
         }
-
         match self.value_width {
             VerifierValueWidth::Bits32 => None,
             VerifierValueWidth::Bits64 | VerifierValueWidth::Unknown => self.exact_value,
         }
     }
-
     pub fn exact_u32(&self) -> Option<u32> {
         if self.reg_type != "scalar" {
             return None;
         }
-
         self.exact_value.map(|value| value as u32)
     }
 }
-
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct StackState {
     pub slot_types: Option<String>,
     pub value: Option<RegState>,
 }
-
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct VerifierStatesJson {
     #[serde(default)]
     pub insns: Vec<VerifierInsnJson>,
 }
-
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct VerifierInsnJson {
     pub pc: usize,
@@ -130,7 +114,6 @@ pub struct VerifierInsnJson {
     #[serde(default)]
     pub regs: BTreeMap<String, VerifierRegJson>,
 }
-
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct VerifierStackJson {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -138,7 +121,6 @@ pub struct VerifierStackJson {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub value: Option<VerifierRegJson>,
 }
-
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct VerifierRegJson {
     #[serde(rename = "type", default = "default_reg_type")]
@@ -156,24 +138,19 @@ pub struct VerifierRegJson {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tnum: Option<String>,
 }
-
 fn default_reg_type() -> String {
     "scalar".to_string()
 }
-
 fn is_zero_usize(value: &usize) -> bool {
     *value == 0
 }
-
 pub fn parse_verifier_log(log: &str) -> Vec<VerifierInsn> {
     log.lines().filter_map(parse_state_line).collect()
 }
-
 pub fn verifier_states_from_log(log: &str) -> VerifierStatesJson {
     let parsed = parse_verifier_log(log);
     convert_verifier_states(&parsed)
 }
-
 fn convert_verifier_states(states: &[VerifierInsn]) -> VerifierStatesJson {
     let insns = states
         .iter()
@@ -182,7 +159,6 @@ fn convert_verifier_states(states: &[VerifierInsn]) -> VerifierStatesJson {
         .collect();
     VerifierStatesJson { insns }
 }
-
 fn convert_verifier_state(state: &VerifierInsn) -> Option<VerifierInsnJson> {
     let regs = state
         .regs
@@ -204,7 +180,6 @@ fn convert_verifier_state(state: &VerifierInsn) -> Option<VerifierInsnJson> {
         regs,
     })
 }
-
 fn verifier_insn_kind_json(kind: VerifierInsnKind) -> Option<String> {
     match kind {
         VerifierInsnKind::InsnDeltaState => None,
@@ -213,7 +188,6 @@ fn verifier_insn_kind_json(kind: VerifierInsnKind) -> Option<String> {
         VerifierInsnKind::BranchDeltaState => Some("branch_delta_state".to_string()),
     }
 }
-
 fn convert_stack_state(state: &StackState) -> Option<VerifierStackJson> {
     let value = state.value.as_ref().and_then(convert_reg_state);
     (state.slot_types.is_some() || value.is_some()).then_some(VerifierStackJson {
@@ -221,7 +195,6 @@ fn convert_stack_state(state: &StackState) -> Option<VerifierStackJson> {
         value,
     })
 }
-
 fn convert_reg_state(reg: &RegState) -> Option<VerifierRegJson> {
     let const_val = reg
         .exact_u64()
@@ -239,7 +212,6 @@ fn convert_reg_state(reg: &RegState) -> Option<VerifierRegJson> {
     let tnum = reg
         .tnum
         .map(|tnum| format!("0x{:x}/0x{:x}", tnum.value, tnum.mask));
-
     (reg.precise
         || reg.offset.is_some()
         || const_val.is_some()
@@ -256,75 +228,14 @@ fn convert_reg_state(reg: &RegState) -> Option<VerifierRegJson> {
         tnum,
     })
 }
-
-/// Extract the PC of the verifier failure from a REJIT error message.
-///
-/// Heuristics (in priority order):
-/// 1. Look for error lines like `R2 type=scalar expected=packet_ptr` at the end
-///    — they follow a state snapshot whose PC is the failure point.
-/// 2. Look for lines with `invalid` or `type=` that aren't state lines — extract
-///    the PC from the preceding state line.
-/// 3. Fall back to the last PC seen in any state snapshot (the verifier typically
-///    reports the state just before the error).
-///
-/// Returns `None` if no meaningful PC can be extracted.
-#[cfg(test)]
-pub fn extract_failure_pc(verifier_log: &str) -> Option<usize> {
-    let lines: Vec<&str> = verifier_log.lines().collect();
-    if lines.is_empty() {
-        return None;
-    }
-
-    // Strategy 1: Look for common verifier error patterns and take the PC from
-    // the preceding state line.
-    let error_patterns = [
-        "invalid",
-        "type=",
-        "expected",
-        "not allowed",
-        "permission denied",
-        "R0 !read_ok",
-        "unreachable",
-        "back-edge",
-        "loop detected",
-        "BPF_EXIT without",
-        "jump out of range",
-        "misaligned",
-    ];
-
-    let mut last_state_pc: Option<usize> = None;
-    for line in &lines {
-        let trimmed = line.trim();
-        // Try to parse as a state line to track the latest PC.
-        if let Some(vi) = parse_state_line(trimmed) {
-            last_state_pc = Some(vi.pc);
-            continue;
-        }
-        // Check if this is an error line.
-        let lower = trimmed.to_lowercase();
-        if error_patterns.iter().any(|pat| lower.contains(pat)) {
-            // If we have a preceding state PC, that's our failure point.
-            if let Some(pc) = last_state_pc {
-                return Some(pc);
-            }
-        }
-    }
-
-    // Strategy 2: Return the last state PC seen (the verifier typically emits
-    // the failing state last before the error summary).
-    last_state_pc
-}
-
 fn parse_state_line(line: &str) -> Option<VerifierInsn> {
     let trimmed = line.trim();
     if trimmed.is_empty() {
         return None;
     }
-
     let (pc, from_pc, kind, speculative, state_text) =
         parse_from_state_line(trimmed).or_else(|| parse_pc_state_line(trimmed))?;
     let (frame, state_text) = strip_frame_prefix(state_text);
-
     let mut regs = HashMap::new();
     let mut stack = HashMap::new();
     let tokens = split_top_level_tokens(state_text);
@@ -336,7 +247,6 @@ fn parse_state_line(line: &str) -> Option<VerifierInsn> {
             idx += 1;
             continue;
         }
-
         if let Some((off, mut state)) = parse_stack_token(token) {
             if state.value.is_none()
                 && idx + 1 < tokens.len()
@@ -354,14 +264,11 @@ fn parse_state_line(line: &str) -> Option<VerifierInsn> {
             idx += 1;
             continue;
         }
-
         idx += 1;
     }
-
     if regs.is_empty() && stack.is_empty() {
         return None;
     }
-
     Some(VerifierInsn {
         pc,
         frame,
@@ -372,19 +279,16 @@ fn parse_state_line(line: &str) -> Option<VerifierInsn> {
         stack,
     })
 }
-
 fn parse_from_state_line(
     line: &str,
 ) -> Option<(usize, Option<usize>, VerifierInsnKind, bool, &str)> {
     let rest = line.strip_prefix("from ")?;
     let (from_text, rest) = rest.split_once(" to ")?;
     let from_pc = parse_optional(from_text.trim())?;
-
     let digits_len = rest.chars().take_while(|ch| ch.is_ascii_digit()).count();
     if digits_len == 0 {
         return None;
     }
-
     let pc = parse_optional(&rest[..digits_len])?;
     let mut tail = &rest[digits_len..];
     let speculative = if let Some(stripped) = tail.strip_prefix(" (speculative execution)") {
@@ -393,7 +297,6 @@ fn parse_from_state_line(
     } else {
         false
     };
-
     let state_text = tail.strip_prefix(':')?.trim();
     is_state_text(state_text).then_some((
         pc,
@@ -403,7 +306,6 @@ fn parse_from_state_line(
         state_text,
     ))
 }
-
 fn parse_pc_state_line(line: &str) -> Option<(usize, Option<usize>, VerifierInsnKind, bool, &str)> {
     let colon = line.find(':')?;
     let pc = parse_optional(line[..colon].trim())?;
@@ -411,11 +313,9 @@ fn parse_pc_state_line(line: &str) -> Option<(usize, Option<usize>, VerifierInsn
     if tail.is_empty() {
         return None;
     }
-
     if is_state_text(tail) {
         return Some((pc, None, VerifierInsnKind::PcFullState, false, tail));
     }
-
     let semicolon = find_top_level_char(tail, ';')?;
     let insn_text = tail[..semicolon].trim();
     let state_text = tail[semicolon + 1..].trim();
@@ -426,25 +326,20 @@ fn parse_pc_state_line(line: &str) -> Option<(usize, Option<usize>, VerifierInsn
     };
     is_state_text(state_text).then_some((pc, None, kind, false, state_text))
 }
-
 fn is_state_text(text: &str) -> bool {
     text.starts_with('R') || text.starts_with("frame")
 }
-
 fn is_conditional_branch_text(text: &str) -> bool {
     text.contains(" if ") && text.contains(" goto ")
 }
-
 fn strip_frame_prefix(text: &str) -> (usize, &str) {
     let Some(rest) = text.strip_prefix("frame") else {
         return (0, text);
     };
-
     let digits_len = rest.chars().take_while(|ch| ch.is_ascii_digit()).count();
     if digits_len == 0 {
         return (0, text);
     }
-
     let frame = parse_optional(&rest[..digits_len]);
     let tail = rest[digits_len..].trim_start();
     match (frame, tail.strip_prefix(':')) {
@@ -452,12 +347,10 @@ fn strip_frame_prefix(text: &str) -> (usize, &str) {
         _ => (0, text),
     }
 }
-
 fn split_top_level_tokens(text: &str) -> Vec<&str> {
     let mut tokens = Vec::new();
     let mut start = None;
     let mut depth = 0i32;
-
     for (idx, ch) in text.char_indices() {
         match ch {
             '(' => {
@@ -481,28 +374,23 @@ fn split_top_level_tokens(text: &str) -> Vec<&str> {
             }
         }
     }
-
     if let Some(token_start) = start {
         tokens.push(&text[token_start..]);
     }
-
     tokens
 }
-
 fn parse_reg_token(token: &str) -> Option<(u8, RegState)> {
     let (lhs, rhs) = token.split_once('=')?;
     let (regno, value_width) = parse_reg_name(lhs)?;
     let state = parse_reg_state(rhs.trim(), value_width);
     Some((regno, state))
 }
-
 fn parse_stack_token(token: &str) -> Option<(i16, StackState)> {
     let (lhs, rhs) = token.split_once('=')?;
     let off = parse_stack_name(lhs)?;
     let state = parse_stack_state(rhs.trim());
     Some((off, state))
 }
-
 fn parse_reg_name(name: &str) -> Option<(u8, VerifierValueWidth)> {
     let name = name.strip_prefix('R')?;
     let (name, value_width) = if let Some(name) = name.strip_suffix("_w") {
@@ -512,18 +400,15 @@ fn parse_reg_name(name: &str) -> Option<(u8, VerifierValueWidth)> {
     };
     Some((parse_optional(name)?, value_width))
 }
-
 fn parse_stack_name(name: &str) -> Option<i16> {
     let name = name.strip_prefix("fp")?;
     result_to_option(parse_i32(name)?.try_into())
 }
-
 fn parse_reg_state(raw: &str, value_width: VerifierValueWidth) -> RegState {
     let (precise, value) = match raw.strip_prefix('P') {
         Some(rest) => (true, rest),
         None => (false, raw),
     };
-
     if let Some(exact) = parse_scalar_exact_value(value) {
         let mut state = RegState::new("scalar", value_width);
         state.precise = precise;
@@ -531,7 +416,6 @@ fn parse_reg_state(raw: &str, value_width: VerifierValueWidth) -> RegState {
         apply_exact_value_to_range(&mut state.range, exact, value_width);
         return state;
     }
-
     if let Some(rest) = value.strip_prefix("fp") {
         let mut state = RegState::new("fp", value_width);
         state.precise = precise;
@@ -540,7 +424,6 @@ fn parse_reg_state(raw: &str, value_width: VerifierValueWidth) -> RegState {
         }
         return state;
     }
-
     if let Some(open) = value.find('(') {
         let close = match value.rfind(')') {
             Some(close) => close,
@@ -553,19 +436,16 @@ fn parse_reg_state(raw: &str, value_width: VerifierValueWidth) -> RegState {
         infer_exact_value(&mut state);
         return state;
     }
-
     let mut state = RegState::new(normalize_reg_type(value), value_width);
     state.precise = precise;
     state
 }
-
 fn normalize_reg_type(reg_type: &str) -> String {
     match reg_type {
         "inv" => "scalar".to_string(),
         other => other.to_string(),
     }
 }
-
 fn parse_stack_state(raw: &str) -> StackState {
     if raw.is_empty() {
         return StackState {
@@ -573,7 +453,6 @@ fn parse_stack_state(raw: &str) -> StackState {
             value: None,
         };
     }
-
     for split in raw.char_indices().skip(1).map(|(idx, _)| idx) {
         let prefix = &raw[..split];
         let rest = raw[split..].trim();
@@ -587,34 +466,29 @@ fn parse_stack_state(raw: &str) -> StackState {
             };
         }
     }
-
     if raw.len() == 8 && raw.chars().all(is_stack_slot_type_char) {
         return StackState {
             slot_types: Some(raw.to_string()),
             value: None,
         };
     }
-
     if looks_like_reg_state(raw) {
         return StackState {
             slot_types: None,
             value: Some(parse_reg_state(raw, VerifierValueWidth::Unknown)),
         };
     }
-
     if raw.chars().all(is_stack_slot_type_char) {
         return StackState {
             slot_types: Some(raw.to_string()),
             value: None,
         };
     }
-
     StackState {
         slot_types: None,
         value: Some(parse_reg_state(raw, VerifierValueWidth::Unknown)),
     }
 }
-
 fn looks_like_reg_state(raw: &str) -> bool {
     if raw.is_empty() {
         return false;
@@ -628,11 +502,9 @@ fn looks_like_reg_state(raw: &str) -> bool {
                 .chars()
                 .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, '_' | '+' | '-')))
 }
-
 fn is_stack_slot_type_char(ch: char) -> bool {
     matches!(ch, '?' | 'r' | 'm' | '0' | 'd' | 'i' | 'f')
 }
-
 fn parse_reg_attributes(attrs: &str, state: &mut RegState) {
     for segment in split_top_level_segments(attrs, ',') {
         let parts: Vec<_> = segment
@@ -640,11 +512,9 @@ fn parse_reg_attributes(attrs: &str, state: &mut RegState) {
             .map(str::trim)
             .filter(|part| !part.is_empty())
             .collect();
-
         if parts.len() < 2 {
             continue;
         }
-
         let value = parts[parts.len() - 1];
         for key in &parts[..parts.len() - 1] {
             match *key {
@@ -664,19 +534,16 @@ fn parse_reg_attributes(attrs: &str, state: &mut RegState) {
         }
     }
 }
-
 fn apply_exact_value_to_range(
     range: &mut ScalarRange,
     exact: u64,
     value_width: VerifierValueWidth,
 ) {
     let exact32 = exact as u32;
-
     range.umin32 = Some(exact32);
     range.umax32 = Some(exact32);
     range.smin32 = Some(exact32 as i32);
     range.smax32 = Some(exact32 as i32);
-
     if value_width != VerifierValueWidth::Bits32 {
         range.umin = Some(exact);
         range.umax = Some(exact);
@@ -684,26 +551,22 @@ fn apply_exact_value_to_range(
         range.smax = Some(exact as i64);
     }
 }
-
 fn infer_exact_value(state: &mut RegState) {
     if state.reg_type != "scalar" || state.exact_value.is_some() {
         return;
     }
-
     if let Some(tnum) = state.tnum {
         if tnum.mask == 0 {
             state.exact_value = Some(tnum.value);
             return;
         }
     }
-
     if let (Some(umin), Some(umax)) = (state.range.umin, state.range.umax) {
         if umin == umax {
             state.exact_value = Some(umin);
             return;
         }
     }
-
     if let (Some(umin32), Some(umax32)) = (state.range.umin32, state.range.umax32) {
         if umin32 == umax32 {
             state.exact_value = Some(u64::from(umin32));
@@ -713,12 +576,10 @@ fn infer_exact_value(state: &mut RegState) {
         }
     }
 }
-
 fn split_top_level_segments(text: &str, separator: char) -> Vec<&str> {
     let mut segments = Vec::new();
     let mut start = 0usize;
     let mut depth = 0i32;
-
     for (idx, ch) in text.char_indices() {
         match ch {
             '(' => depth += 1,
@@ -733,18 +594,14 @@ fn split_top_level_segments(text: &str, separator: char) -> Vec<&str> {
             _ => {}
         }
     }
-
     let segment = text[start..].trim();
     if !segment.is_empty() {
         segments.push(segment);
     }
-
     segments
 }
-
 fn find_top_level_char(text: &str, needle: char) -> Option<usize> {
     let mut depth = 0i32;
-
     for (idx, ch) in text.char_indices() {
         match ch {
             '(' => depth += 1,
@@ -753,53 +610,43 @@ fn find_top_level_char(text: &str, needle: char) -> Option<usize> {
             _ => {}
         }
     }
-
     None
 }
-
 fn parse_i32(text: &str) -> Option<i32> {
     result_to_option(parse_signed_value(text)?.try_into())
 }
-
 fn parse_u32(text: &str) -> Option<u32> {
     result_to_option(parse_unsigned_u64(text)?.try_into())
 }
-
 fn parse_signed_i32(text: &str) -> Option<i32> {
     result_to_option(parse_signed_value(text)?.try_into())
 }
-
 fn parse_unsigned_u32(text: &str) -> Option<u32> {
     result_to_option(parse_unsigned_u64(text)?.try_into())
 }
-
 fn parse_optional<T: std::str::FromStr>(text: &str) -> Option<T> {
     let Ok(value) = text.parse() else {
         return None;
     };
     Some(value)
 }
-
 fn result_to_option<T, E>(result: Result<T, E>) -> Option<T> {
     let Ok(value) = result else {
         return None;
     };
     Some(value)
 }
-
 fn parse_hex_u64(text: &str) -> Option<u64> {
     let Ok(value) = u64::from_str_radix(text, 16) else {
         return None;
     };
     Some(value)
 }
-
 fn parse_signed_value(text: &str) -> Option<i64> {
     let value = text.trim();
     if value.is_empty() {
         return None;
     }
-
     if let Some(rest) = value
         .strip_prefix("-0x")
         .or_else(|| value.strip_prefix("-0X"))
@@ -807,7 +654,6 @@ fn parse_signed_value(text: &str) -> Option<i64> {
         let magnitude = parse_hex_u64(rest)? as i128;
         return result_to_option(i64::try_from(-magnitude));
     }
-
     if let Some(rest) = value
         .strip_prefix("+0x")
         .or_else(|| value.strip_prefix("+0X"))
@@ -815,7 +661,6 @@ fn parse_signed_value(text: &str) -> Option<i64> {
         let magnitude = parse_hex_u64(rest)?;
         return Some(magnitude as i64);
     }
-
     if let Some(rest) = value
         .strip_prefix("0x")
         .or_else(|| value.strip_prefix("0X"))
@@ -823,37 +668,30 @@ fn parse_signed_value(text: &str) -> Option<i64> {
         let magnitude = parse_hex_u64(rest)?;
         return Some(magnitude as i64);
     }
-
     parse_optional(value)
 }
-
 fn parse_unsigned_value(text: &str) -> Option<u64> {
     let value = text.trim();
     if value.is_empty() || value.starts_with('-') {
         return None;
     }
-
     if let Some(rest) = value.strip_prefix('+') {
         parse_unsigned_u64(rest)
     } else {
         parse_unsigned_u64(value)
     }
 }
-
 fn parse_unsigned_u64(text: &str) -> Option<u64> {
     if let Some(rest) = text.strip_prefix("0x").or_else(|| text.strip_prefix("0X")) {
         return parse_hex_u64(rest);
     }
-
     parse_optional(text)
 }
-
 fn parse_scalar_exact_value(text: &str) -> Option<u64> {
     let value = text.trim();
     if value.is_empty() || value.contains('(') {
         return None;
     }
-
     if let Some(rest) = value
         .strip_prefix("-0x")
         .or_else(|| value.strip_prefix("-0X"))
@@ -861,19 +699,15 @@ fn parse_scalar_exact_value(text: &str) -> Option<u64> {
         let magnitude = parse_hex_u64(rest)?;
         return Some(0u64.wrapping_sub(magnitude));
     }
-
     if let Some(rest) = value.strip_prefix('-') {
         let magnitude = parse_optional(rest)?;
         return Some(0u64.wrapping_sub(magnitude));
     }
-
     if let Some(rest) = value.strip_prefix('+') {
         return parse_unsigned_u64(rest);
     }
-
     parse_unsigned_u64(value)
 }
-
 fn parse_tnum(text: &str) -> Option<Tnum> {
     let value = text.trim();
     let inner = value.strip_prefix('(')?.strip_suffix(')')?;
@@ -883,7 +717,6 @@ fn parse_tnum(text: &str) -> Option<Tnum> {
         mask: parse_unsigned_u64(mask.trim())?,
     })
 }
-
 #[cfg(test)]
 #[path = "verifier_log_tests.rs"]
 mod tests;

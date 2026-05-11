@@ -1,9 +1,8 @@
-// SPDX-License-Identifier: MIT
-//! ENDIAN_FUSION optimization pass.
 
+// SPDX-License-Identifier: MIT
 use std::ops::Range;
 
-use crate::analysis::{block_slot_offset, BBProgram, BlockId, InsnSite};
+use crate::analysis::{admit_kinsn_site_window, site_pc, BBProgram, BlockId, InsnSite, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
@@ -26,23 +25,6 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
         register_uses: endian_register_uses,
     },
 ];
-
-/// ENDIAN_FUSION optimization pass: replaces LDX_MEM + ENDIAN_TO_BE patterns
-/// with bpf_endian_loadXX() kfunc calls (lowered to MOVBE on x86 or
-/// LDR+REV on ARM64 by the JIT).
-///
-/// Pattern:
-///   LDX_MEM(BPF_W, dst, src, off)     ; 32-bit load
-///   END_TO_BE(dst, 32)                 ; byte-swap to big-endian
-///
-/// Also matches BPF_H (16-bit) and BPF_DW (64-bit) variants.
-///
-/// Replacement:
-///   sidecar(dst, src, off) + call
-///
-/// The payload carries the original memory offset directly. When a target
-/// cannot natively encode a given offset in its packed endian JIT path, the
-/// pass materializes the effective address around a zero-offset packed call.
 pub struct EndianFusionPass;
 
 const BPF_TO_LE: u8 = 0x00;
@@ -63,20 +45,13 @@ fn endian_register_uses(payload: u64) -> RegSet {
         .into_iter()
         .collect()
 }
-
-/// An endian fusion site: a LDX_MEM followed by a byte-swap
-/// on the same destination register, with matching or safely narrowed sizes.
 pub(super) struct EndianFusionSite {
-    pub(super) start_pc: usize,
     pub(super) old_len: usize,
     pub(super) dst_reg: u8,
     pub(super) src_reg: u8,
     pub(super) offset: i16,
-    /// BPF size code: BPF_H (16), BPF_W (32), or BPF_DW (64).
     pub(super) size: u8,
 }
-
-/// An endian fusion site that has passed safety checks, ready for transformation.
 struct SafeEndianFusionSite {
     block: BlockId,
     range: Range<usize>,
@@ -84,8 +59,8 @@ struct SafeEndianFusionSite {
     site: EndianFusionSite,
 }
 
-fn scan_endian_site(insns: &[BpfInsn], pc: usize) -> Option<EndianFusionSite> {
-    let load = &insns[pc];
+fn scan_endian_site(insns: &[BpfInsn], idx: usize) -> Option<EndianFusionSite> {
+    let load = &insns[idx];
     if !load.is_ldx_mem() {
         return None;
     }
@@ -93,12 +68,12 @@ fn scan_endian_site(insns: &[BpfInsn], pc: usize) -> Option<EndianFusionSite> {
     let load_size = bpf_size(load.code);
     let dst = load.dst_reg();
 
-    if let Some(endian) = insns.get(pc + 1) {
+    if let Some(endian) = insns.get(idx + 1) {
         if endian.dst_reg() == dst {
             if let Some(fused_size) =
                 endian_swap_size(endian).and_then(|size| fusion_size(load_size, size))
             {
-                return Some(endian_site(load, pc, 2, fused_size));
+                return Some(endian_site(load, 2, fused_size));
             }
         }
     }
@@ -107,12 +82,12 @@ fn scan_endian_site(insns: &[BpfInsn], pc: usize) -> Option<EndianFusionSite> {
         return None;
     }
 
-    let end = insns.len().min(pc + MAX_NARROW_SCAN + 1);
-    for (scan_pc, insn) in insns.iter().enumerate().take(end).skip(pc + 1) {
+    let end = insns.len().min(idx + MAX_NARROW_SCAN + 1);
+    for (scan_idx, insn) in insns.iter().enumerate().take(end).skip(idx + 1) {
         if insn.dst_reg() == dst {
             if let Some(size) = endian_swap_size(insn) {
                 if is_narrowing(load_size, size) {
-                    return Some(endian_site(load, pc, scan_pc - pc + 1, size));
+                    return Some(endian_site(load, scan_idx - idx + 1, size));
                 }
             }
         }
@@ -124,9 +99,8 @@ fn scan_endian_site(insns: &[BpfInsn], pc: usize) -> Option<EndianFusionSite> {
     None
 }
 
-fn endian_site(load: &BpfInsn, start_pc: usize, old_len: usize, size: u8) -> EndianFusionSite {
+fn endian_site(load: &BpfInsn, old_len: usize, size: u8) -> EndianFusionSite {
     EndianFusionSite {
-        start_pc,
         old_len,
         dst_reg: load.dst_reg(),
         src_reg: load.src_reg(),
@@ -191,7 +165,7 @@ fn find_blocked_narrow_sites(prog: &BBProgram) -> anyhow::Result<Vec<SkipReason>
                 {
                     if read_before_endian {
                         skips.push(SkipReason {
-                            pc: prog.report_pc(InsnSite {
+                            pc: site_pc(prog, InsnSite {
                                 block,
                                 idx: load_idx,
                             })?,
@@ -240,8 +214,6 @@ fn writes_reg(insn: &BpfInsn, reg: u8) -> bool {
     }
     matches!(insn.class(), BPF_ALU64 | BPF_ALU | BPF_LDX | BPF_LD) && insn.dst_reg() == reg
 }
-
-/// Select the appropriate BTF ID for a given load size.
 fn btf_id_for_size(ctx: &PassContext, size: u8) -> anyhow::Result<i32> {
     let name = kfunc_name_for_size(size)
         .ok_or_else(|| anyhow::anyhow!("unsupported endian fusion size {size}"))?;
@@ -307,9 +279,6 @@ fn emit_endian_fusion_call(
         ));
         return out;
     }
-
-    // Preserve packed transport even when the target cannot directly encode
-    // the original offset in its native JIT path.
     let base_reg = if offset == 0 {
         src_reg
     } else if src_reg != dst_reg && src_reg != 10 {
@@ -378,13 +347,9 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                 continue;
             }
 
-            let Some(mut site) = scan_endian_site(&insns, start.idx) else {
+            let Some(site) = scan_endian_site(&insns, start.idx) else {
                 continue;
             };
-            let start_slot = block_slot_offset(prog, start)?;
-            site.start_pc = prog.report_pc(start)?;
-            let range = start.idx..start.idx + site.old_len;
-
             let replacement_len = endian_fusion_replacement_len(
                 site.dst_reg,
                 site.src_reg,
@@ -392,27 +357,17 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                 ctx.platform.arch,
                 site.size,
             ) + site.old_len.saturating_sub(2);
-            if let Some(reason) = prog.kinsn_replacement_subprog_skip_reason(
-                block,
-                start_slot,
-                site.old_len,
-                replacement_len,
-            )? {
-                skipped.push(SkipReason {
-                    pc: site.start_pc,
-                    reason,
-                });
+            let Some(admission) =
+                admit_kinsn_site_window(prog, start, site.old_len, replacement_len, &mut skipped)?
+            else {
                 continue;
-            }
+            };
 
-            let preserved = prog.body_insn_window(
-                block,
-                start.idx + 1,
-                site.old_len.saturating_sub(2),
-            )?;
+            let preserved =
+                prog.body_insn_window(block, start.idx + 1, site.old_len.saturating_sub(2))?;
             safe_sites.push(SafeEndianFusionSite {
                 block,
-                range,
+                range: admission.range,
                 preserved,
                 site,
             });
@@ -462,13 +417,19 @@ fn cross_block_endian_skip(
     if !load.is_ldx_mem() {
         return Ok(None);
     }
-    let start_pc = prog.report_pc(start)?;
-    let Some(next) = prog.next_site_in_linear_order(start)? else {
-        return Ok(None);
-    };
-    if next.block == start.block {
+    if start.idx + 1 < prog.block_body_len(start.block)? {
         return Ok(None);
     }
+    let report_pc = site_pc(prog, start)?;
+    let next_block = match prog.terminator(start.block)? {
+        Terminator::Fallthrough { next } => next,
+        _ => return Ok(None),
+    };
+    let successors = prog.successors(start.block);
+    if successors.len() != 1 || successors[0] != next_block {
+        anyhow::bail!("fallthrough block {:?} has inconsistent successors", start.block);
+    }
+    let Some(next) = prog.first_site_in_block(next_block)? else { return Ok(None); };
     let endian = prog
         .insn_at(next)
         .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", next))?;
@@ -478,7 +439,7 @@ fn cross_block_endian_skip(
             .and_then(|size| fusion_size(load_size, size))
             .is_some();
     Ok(matches_cross_block.then_some(SkipReason {
-        pc: start_pc,
+        pc: report_pc,
         reason: "interior branch target".into(),
     }))
 }

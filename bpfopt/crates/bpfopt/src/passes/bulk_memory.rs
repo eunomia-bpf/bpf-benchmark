@@ -1,21 +1,17 @@
 // SPDX-License-Identifier: MIT
-//! Bulk-memory optimization pass.
-
-use std::collections::{HashMap, HashSet};
-use std::ops::Range;
-
 use crate::analysis::{
-    advance_reg_state as advance_simple_reg_state, block_slot_offset, insn_use_def_set,
-    BBProgram, BlockId, InsnSite, SimpleRegValue,
+    admit_kinsn_site_window, advance_reg_state as advance_simple_reg_state, insn_use_def_set,
+    site_pc, BBProgram, BlockId, InsnSite, SimpleRegValue,
 };
 use crate::insn::*;
 use crate::pass::*;
+use std::collections::{HashMap, HashSet};
+use std::ops::Range;
 const MEMCPY_TARGET: &str = "bpf_bulk_memcpy";
 const MEMSET_TARGET: &str = "bpf_bulk_memset";
 const MIN_BULK_BYTES: usize = 32;
 const CHUNK_MAX_BYTES: usize = 128;
 const STACK_PTR_REG: u8 = 10;
-
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
         canonical_name: MEMCPY_TARGET,
@@ -30,20 +26,16 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
         register_uses: memset_bulk_register_uses,
     },
 ];
-
 fn decode_memcpy_bulk_proof(payload: &[u8]) -> ProofRegion {
     ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(memcpy_bulk_proof_len))
 }
-
 fn decode_memset_bulk_proof(payload: &[u8]) -> ProofRegion {
     ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(memset_bulk_proof_len))
 }
-
 fn bulk_offset_range_valid(offset: i16, len: usize) -> bool {
     let end = i32::from(offset) + len as i32 - 1;
     end >= i32::from(i16::MIN) && end <= i32::from(i16::MAX)
 }
-
 fn memcpy_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
     let dst_base = kinsn_payload_reg(payload, 0);
     let src_base = kinsn_payload_reg(payload, 4);
@@ -51,7 +43,6 @@ fn memcpy_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
     let src_off = kinsn_payload_s16(payload, 24);
     let len = usize::from(kinsn_payload_u8(payload, 40)) + 1;
     let tmp_reg = kinsn_payload_reg(payload, 48);
-
     if payload >> 52 != 0 {
         anyhow::bail!("memcpy bulk payload has non-zero reserved bits");
     }
@@ -69,7 +60,6 @@ fn memcpy_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
     }
     Ok(len * 2)
 }
-
 fn memset_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
     let dst_base = kinsn_payload_reg(payload, 0);
     let val_reg = kinsn_payload_reg(payload, 4);
@@ -80,7 +70,6 @@ fn memset_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
     let zero_fill = (BpfInsn::unpack_u4(payload, 35) & 0x1) != 0;
     let fill_imm8 = kinsn_payload_u8(payload, 36);
     let width_bytes = 1usize << width_class;
-
     if payload >> 44 != 0 {
         anyhow::bail!("memset bulk payload has non-zero reserved bits");
     }
@@ -102,13 +91,11 @@ fn memset_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
     }
     Ok(len)
 }
-
 fn memcpy_bulk_register_uses(payload: u64) -> RegSet {
     [kinsn_payload_reg(payload, 0), kinsn_payload_reg(payload, 4)]
         .into_iter()
         .collect()
 }
-
 fn memset_bulk_register_uses(payload: u64) -> RegSet {
     let mut uses: RegSet = [kinsn_payload_reg(payload, 0)].into_iter().collect();
     if (BpfInsn::unpack_u4(payload, 34) & 0x1) != 0 {
@@ -116,46 +103,37 @@ fn memset_bulk_register_uses(payload: u64) -> RegSet {
     }
     uses
 }
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum RegValue {
     Unknown,
     Const(u64),
 }
-
 impl SimpleRegValue for RegValue {
     fn unknown() -> Self {
         Self::Unknown
     }
-
     fn const64(value: i64) -> Self {
         Self::Const(value as u64)
     }
-
     fn const32(value: u32) -> Self {
         Self::Const(u64::from(value))
     }
-
     fn mov32(value: Self) -> Self {
         match value {
             Self::Const(value) => Self::Const(u64::from(value as u32)),
             Self::Unknown => Self::Unknown,
         }
     }
-
     fn xor_self() -> Self {
         Self::Const(0)
     }
-
     fn alu64_imm(_value: Self, _op: u8, _imm: i32) -> Self {
         Self::Unknown
     }
-
     fn alu32_add_sub(_value: Self, _imm: i32, _is_add: bool) -> Self {
         Self::Unknown
     }
 }
-
 #[derive(Clone, Debug)]
 enum BulkSiteKind {
     Memcpy {
@@ -174,14 +152,11 @@ enum BulkSiteKind {
         chunk_sizes: Vec<usize>,
     },
 }
-
 #[derive(Clone, Debug)]
 struct BulkSite {
-    start_pc: usize,
     old_len: usize,
     kind: BulkSiteKind,
 }
-
 impl BulkSite {
     fn replacement_len(&self) -> usize {
         match &self.kind {
@@ -191,27 +166,22 @@ impl BulkSite {
         }
     }
 }
-
 #[derive(Clone, Debug)]
 struct AppliedBulkSite {
     block: BlockId,
-    start_slot: usize,
     range: Range<usize>,
     site: BulkSite,
 }
-
 #[derive(Default)]
 struct ScanResult {
     sites: Vec<AppliedBulkSite>,
     skips: Vec<SkipReason>,
 }
-
 enum MatchOutcome {
     Apply(BulkSite),
     Skip { reason: String, advance: usize },
     NoMatch,
 }
-
 #[derive(Clone, Copy)]
 struct MemcpyLane {
     width: u8,
@@ -221,7 +191,6 @@ struct MemcpyLane {
     dst_base: u8,
     dst_off: i16,
 }
-
 #[derive(Clone, Copy)]
 struct MemsetLane {
     width: u8,
@@ -229,10 +198,7 @@ struct MemsetLane {
     off: i16,
     fill_byte: u8,
 }
-
-/// Recognize large scalarized memcpy/memset runs and lower them to bulk kinsn calls.
 pub struct BulkMemoryPass;
-
 impl BpfPass for BulkMemoryPass {
     fn name(&self) -> &str {
         "bulk_memory"
@@ -241,7 +207,6 @@ impl BpfPass for BulkMemoryPass {
         run_on_bbprogram(program, ctx)
     }
 }
-
 pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
     let block_ids = prog.block_ids().collect::<Vec<_>>();
     if block_ids
@@ -253,35 +218,33 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     {
         return Ok(PassResult::unchanged());
     }
-
     let scan = scan_sites(prog)?;
     let mut skipped = scan.skips;
-
     let mut safe_sites = Vec::new();
     for site in scan.sites {
-        if let Some(reason) = prog.kinsn_replacement_subprog_skip_reason(
-            site.block,
-            site.start_slot,
+        let start = InsnSite {
+            block: site.block,
+            idx: site.range.start,
+        };
+        if admit_kinsn_site_window(
+            prog,
+            start,
             site.site.old_len,
             site.site.replacement_len(),
-        )? {
-            skipped.push(SkipReason {
-                pc: site.site.start_pc,
-                reason,
-            });
+            &mut skipped,
+        )?
+        .is_none()
+        {
             continue;
         }
-
         safe_sites.push(site);
     }
-
     if safe_sites.is_empty() {
         return Ok(PassResult {
             sites_skipped: skipped,
             ..PassResult::unchanged()
         });
     }
-
     for site in safe_sites.iter().rev() {
         prog.replace_range(
             site.block,
@@ -289,46 +252,40 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             emit_site_replacement(&site.site, &ctx.kinsn_registry)?,
         )?;
     }
-
     Ok(PassResult {
         sites_applied: safe_sites.len(),
         sites_skipped: skipped,
         ..Default::default()
     })
 }
-
 fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
     let mut scan = ScanResult::default();
     let mut regs = [RegValue::Unknown; 11];
-
     for block in prog.block_ids().collect::<Vec<_>>() {
         if prog.should_reset_linear_state_at_block(block)? {
             regs = [RegValue::Unknown; 11];
         }
-
         let insns = prog.copied_body_insns(block)?;
         let mut live_out = HashMap::new();
         for site in prog.sites_in_block(block)? {
             live_out.insert(site, prog.live_out_site_checked(site)?);
         }
-
         let mut idx = 0usize;
         while idx < insns.len() {
             let start = InsnSite { block, idx };
-            let abs_pc = prog.report_pc(start)?;
-
+            let report_pc = site_pc(prog, start)?;
             match try_match_memcpy_run_at(&insns, block, idx, &live_out)? {
-                MatchOutcome::Apply(mut site) => {
+                MatchOutcome::Apply(site) => {
                     if let BulkSiteKind::Memcpy {
                         src_base, dst_base, ..
                     } = &site.kind
                     {
                         if src_base != dst_base {
-                            let src_stack = is_likely_stack_ptr(*src_base, idx, insns);
-                            let dst_stack = is_likely_stack_ptr(*dst_base, idx, insns);
+                            let src_stack = is_likely_stack_ptr(*src_base, idx, &insns);
+                            let dst_stack = is_likely_stack_ptr(*dst_base, idx, &insns);
                             if src_stack == dst_stack {
                                 scan.skips.push(SkipReason {
-                                    pc: abs_pc,
+                                    pc: report_pc,
                                     reason: format!(
                                         "different-base memcpy alias not provably safe (src r{src_base}, dst r{dst_base})"
                                     ),
@@ -340,11 +297,9 @@ fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
                         }
                     }
                     let old_len = site.old_len;
-                    site.start_pc = abs_pc;
                     advance_reg_state_range(prog, block, idx, old_len, &mut regs)?;
                     scan.sites.push(AppliedBulkSite {
                         block,
-                        start_slot: block_slot_offset(prog, start)?,
                         range: idx..idx + old_len,
                         site,
                     });
@@ -354,57 +309,51 @@ fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
                 MatchOutcome::Skip { reason, advance } => {
                     let advance = advance.max(1);
                     advance_reg_state_range(prog, block, idx, advance, &mut regs)?;
-                    scan.skips.push(SkipReason { pc: abs_pc, reason });
+                    scan.skips.push(SkipReason {
+                        pc: report_pc,
+                        reason,
+                    });
                     idx += advance;
                     continue;
                 }
                 MatchOutcome::NoMatch => {}
             }
-
-            if let Some(mut site) = try_match_memset_run_at(insns, idx, &regs)? {
+            if let Some(site) = try_match_memset_run_at(&insns, idx, &regs)? {
                 let old_len = site.old_len;
-                site.start_pc = abs_pc;
                 advance_reg_state_range(prog, block, idx, old_len, &mut regs)?;
                 scan.sites.push(AppliedBulkSite {
                     block,
-                    start_slot: block_slot_offset(prog, start)?,
                     range: idx..idx + old_len,
                     site,
                 });
                 idx += old_len;
                 continue;
             }
-
             advance_reg_state_at_site(prog, start, &mut regs)?;
             idx += 1;
         }
     }
-
     Ok(scan)
 }
-
 fn try_match_memcpy_run_at(
     insns: &[BpfInsn],
     block: BlockId,
-    pc: usize,
+    idx: usize,
     live_out: &HashMap<InsnSite, RegSet>,
 ) -> anyhow::Result<MatchOutcome> {
-    let Some(first) = memcpy_lane_at(insns, pc) else {
+    let Some(first) = memcpy_lane_at(insns, idx) else {
         return Ok(MatchOutcome::NoMatch);
     };
-
     let lane_bytes = width_bytes(first.width)?;
-    let mut cursor = pc + 2;
+    let mut cursor = idx + 2;
     let mut pair_count = 1usize;
     let mut tmp_regs = vec![first.tmp_reg];
     let mut next_src_off = first.src_off as i32 + lane_bytes as i32;
     let mut next_dst_off = first.dst_off as i32 + lane_bytes as i32;
-
     while cursor + 1 < insns.len() {
         let Some(lane) = memcpy_lane_at(insns, cursor) else {
             break;
         };
-
         if lane.width != first.width
             || lane.src_base != first.src_base
             || lane.dst_base != first.dst_base
@@ -413,27 +362,24 @@ fn try_match_memcpy_run_at(
         {
             break;
         }
-
         pair_count += 1;
         tmp_regs.push(lane.tmp_reg);
         next_src_off += lane_bytes as i32;
         next_dst_off += lane_bytes as i32;
         cursor += 2;
     }
-
     let raw_len = pair_count * 2;
     let raw_bytes = pair_count * lane_bytes;
     let chunk_sizes = uniform_chunk_sizes(raw_bytes);
     if chunk_sizes.is_empty() {
         return Ok(MatchOutcome::NoMatch);
     }
-
     let consumed_bytes: usize = chunk_sizes.iter().sum();
     let consumed_pairs = consumed_bytes / lane_bytes;
     let old_len = consumed_pairs * 2;
     let last_site = InsnSite {
         block,
-        idx: pc + old_len - 1,
+        idx: idx + old_len - 1,
     };
     if first.src_base == first.dst_base && ranges_overlap(first.src_off, first.dst_off, raw_bytes) {
         return Ok(MatchOutcome::Skip {
@@ -441,7 +387,6 @@ fn try_match_memcpy_run_at(
             advance: raw_len,
         });
     }
-
     let live_after = live_out
         .get(&last_site)
         .ok_or_else(|| anyhow::anyhow!("bulk_memory missing live_out for {:?}", last_site))?;
@@ -454,9 +399,7 @@ fn try_match_memcpy_run_at(
             });
         }
     }
-
     Ok(MatchOutcome::Apply(BulkSite {
-        start_pc: pc,
         old_len,
         kind: BulkSiteKind::Memcpy {
             dst_base: first.dst_base,
@@ -468,36 +411,31 @@ fn try_match_memcpy_run_at(
         },
     }))
 }
-
 fn try_match_memset_run_at(
     insns: &[BpfInsn],
-    pc: usize,
+    idx: usize,
     regs: &[RegValue; 11],
 ) -> anyhow::Result<Option<BulkSite>> {
-    let Some(first) = memset_lane_at(insns, pc, regs)? else {
+    let Some(first) = memset_lane_at(insns, idx, regs)? else {
         return Ok(None);
     };
-    let mut cursor = pc + 1;
+    let mut cursor = idx + 1;
     let mut widths = vec![first.width];
     let mut next_off = first.off as i32 + width_bytes(first.width)? as i32;
-
     while cursor < insns.len() {
         let Some(lane) = memset_lane_at(insns, cursor, regs)? else {
             break;
         };
-
         if lane.base != first.base
             || lane.fill_byte != first.fill_byte
             || lane.off as i32 != next_off
         {
             break;
         }
-
         widths.push(lane.width);
         next_off += width_bytes(lane.width)? as i32;
         cursor += 1;
     }
-
     let lane_bytes = widths
         .iter()
         .map(|&width| width_bytes(width))
@@ -506,7 +444,6 @@ fn try_match_memset_run_at(
     if chunk_sizes.is_empty() {
         return Ok(None);
     }
-
     let consumed_widths = &widths[..consumed_lanes];
     let payload_width = if consumed_widths
         .iter()
@@ -516,9 +453,7 @@ fn try_match_memset_run_at(
     } else {
         BPF_B
     };
-
     Ok(Some(BulkSite {
-        start_pc: pc,
         old_len: consumed_lanes,
         kind: BulkSiteKind::Memset {
             base: first.base,
@@ -529,12 +464,10 @@ fn try_match_memset_run_at(
         },
     }))
 }
-
-fn memcpy_lane_at(insns: &[BpfInsn], pc: usize) -> Option<MemcpyLane> {
-    let load = insns.get(pc)?;
-    let store = insns.get(pc + 1)?;
+fn memcpy_lane_at(insns: &[BpfInsn], idx: usize) -> Option<MemcpyLane> {
+    let load = insns.get(idx)?;
+    let store = insns.get(idx + 1)?;
     let width = bpf_size(load.code);
-
     if !load.is_ldx_mem() || !is_supported_width(width) {
         return None;
     }
@@ -548,7 +481,6 @@ fn memcpy_lane_at(insns: &[BpfInsn], pc: usize) -> Option<MemcpyLane> {
     if load.dst_reg() == load.src_reg() || load.dst_reg() == store.dst_reg() {
         return None;
     }
-
     Some(MemcpyLane {
         width,
         tmp_reg: load.dst_reg(),
@@ -558,20 +490,18 @@ fn memcpy_lane_at(insns: &[BpfInsn], pc: usize) -> Option<MemcpyLane> {
         dst_off: store.off,
     })
 }
-
 fn memset_lane_at(
     insns: &[BpfInsn],
-    pc: usize,
+    idx: usize,
     regs: &[RegValue; 11],
 ) -> anyhow::Result<Option<MemsetLane>> {
-    let Some(insn) = insns.get(pc) else {
+    let Some(insn) = insns.get(idx) else {
         return Ok(None);
     };
     let width = bpf_size(insn.code);
     if !is_supported_width(width) || bpf_mode(insn.code) != BPF_MEM {
         return Ok(None);
     }
-
     let fill_byte = match insn.class() {
         BPF_ST => match fill_byte_from_imm(width, insn.imm)? {
             Some(fill) => fill,
@@ -593,7 +523,6 @@ fn memset_lane_at(
         fill_byte,
     }))
 }
-
 fn emit_site_replacement(
     site: &BulkSite,
     kinsn_registry: &KinsnRegistry,
@@ -659,7 +588,6 @@ fn emit_site_replacement(
         }
     }
 }
-
 fn pack_memcpy_payload(
     dst_base: u8,
     src_base: u8,
@@ -675,7 +603,6 @@ fn pack_memcpy_payload(
         | BpfInsn::pack_u8(len - 1, 40)
         | BpfInsn::pack_u4(temp_reg, 48)
 }
-
 fn pack_memset_payload(
     base: u8,
     dst_off: i16,
@@ -691,7 +618,6 @@ fn pack_memset_payload(
         | BpfInsn::pack_u4(zero_fill as u8, 35)
         | BpfInsn::pack_u8(fill_byte, 36))
 }
-
 fn width_class(size: u8) -> anyhow::Result<u8> {
     Ok(match size {
         BPF_B => 0,
@@ -701,12 +627,10 @@ fn width_class(size: u8) -> anyhow::Result<u8> {
         _ => anyhow::bail!("bulk_memory unsupported width opcode {size:#x}"),
     })
 }
-
 fn uniform_chunk_sizes(total_bytes: usize) -> Vec<usize> {
     if total_bytes < MIN_BULK_BYTES {
         return Vec::new();
     }
-
     let full_chunks = total_bytes / CHUNK_MAX_BYTES;
     let tail = total_bytes % CHUNK_MAX_BYTES;
     let mut chunks = vec![CHUNK_MAX_BYTES; full_chunks];
@@ -717,13 +641,11 @@ fn uniform_chunk_sizes(total_bytes: usize) -> Vec<usize> {
     }
     chunks
 }
-
 fn greedy_store_chunk_sizes(lane_bytes: &[usize]) -> (Vec<usize>, usize) {
     let mut chunks = Vec::new();
     let mut chunk_lanes = Vec::new();
     let mut current_bytes = 0usize;
     let mut current_lanes = 0usize;
-
     for &lane_bytes in lane_bytes {
         if current_bytes > 0 && current_bytes + lane_bytes > CHUNK_MAX_BYTES {
             chunks.push(current_bytes);
@@ -731,24 +653,19 @@ fn greedy_store_chunk_sizes(lane_bytes: &[usize]) -> (Vec<usize>, usize) {
             current_bytes = 0;
             current_lanes = 0;
         }
-
         current_bytes += lane_bytes;
         current_lanes += 1;
     }
-
     if current_lanes > 0 {
         chunks.push(current_bytes);
         chunk_lanes.push(current_lanes);
     }
-
     if chunks.last().is_some_and(|&last| last < MIN_BULK_BYTES) {
         chunks.pop();
         chunk_lanes.pop();
     }
-
     (chunks, chunk_lanes.into_iter().sum())
 }
-
 fn fill_byte_from_imm(width: u8, imm: i32) -> anyhow::Result<Option<u8>> {
     let value = match width {
         BPF_B => imm as u8 as u64,
@@ -759,7 +676,6 @@ fn fill_byte_from_imm(width: u8, imm: i32) -> anyhow::Result<Option<u8>> {
     };
     fill_byte_from_const(width, value)
 }
-
 fn fill_byte_from_const(width: u8, value: u64) -> anyhow::Result<Option<u8>> {
     let lane_bytes = width_bytes(width)?;
     let fill = value as u8;
@@ -770,18 +686,15 @@ fn fill_byte_from_const(width: u8, value: u64) -> anyhow::Result<Option<u8>> {
     }
     Ok(Some(fill))
 }
-
 fn ranges_overlap(src_off: i16, dst_off: i16, len: usize) -> bool {
     let src_start = src_off as i32;
     let dst_start = dst_off as i32;
     let len = len as i32;
     src_start < dst_start + len && dst_start < src_start + len
 }
-
 fn is_supported_width(width: u8) -> bool {
     matches!(width, BPF_B | BPF_H | BPF_W | BPF_DW)
 }
-
 fn width_bytes(width: u8) -> anyhow::Result<usize> {
     Ok(match width {
         BPF_B => 1,
@@ -791,25 +704,21 @@ fn width_bytes(width: u8) -> anyhow::Result<usize> {
         _ => anyhow::bail!("bulk_memory unsupported width opcode {width:#x}"),
     })
 }
-
 fn is_likely_stack_ptr(reg: u8, before_pc: usize, insns: &[BpfInsn]) -> bool {
     if reg == STACK_PTR_REG {
         return true;
     }
-
     const LOOKBACK: usize = 32;
     let start = before_pc.saturating_sub(LOOKBACK);
     let mut target_reg = reg;
     let mut cursor = before_pc;
-
     for _ in 0..LOOKBACK {
         let mut found_def = false;
-        for pc in (start..cursor).rev() {
-            let insn = &insns[pc];
+        for def_idx in (start..cursor).rev() {
+            let insn = &insns[def_idx];
             if !insn_use_def_set(insn).defs.contains(&target_reg) {
                 continue;
             }
-
             found_def = true;
             if insn.class() == BPF_ALU64
                 && insn.dst_reg() == target_reg
@@ -821,30 +730,25 @@ fn is_likely_stack_ptr(reg: u8, before_pc: usize, insns: &[BpfInsn]) -> bool {
                     return true;
                 }
                 target_reg = src_reg;
-                cursor = pc;
+                cursor = def_idx;
                 break;
             }
-
             if insn.class() == BPF_ALU64
                 && insn.dst_reg() == target_reg
                 && bpf_src(insn.code) == BPF_K
                 && matches!(bpf_op(insn.code), BPF_ADD | BPF_SUB)
             {
-                cursor = pc;
+                cursor = def_idx;
                 break;
             }
-
             return false;
         }
-
         if !found_def {
             return false;
         }
     }
-
     false
 }
-
 fn advance_reg_state_range(
     prog: &BBProgram,
     block: BlockId,
@@ -855,7 +759,7 @@ fn advance_reg_state_range(
     let end_idx = start_idx.checked_add(len).ok_or_else(|| {
         anyhow::anyhow!("bulk_memory range start {start_idx} + len {len} overflows")
     })?;
-    let block_len = prog.block(block)?.insns.len();
+    let block_len = prog.block_body_len(block)?;
     if end_idx > block_len {
         anyhow::bail!(
             "bulk_memory range {}..{} exceeds block {:?} body length {}",
@@ -870,7 +774,6 @@ fn advance_reg_state_range(
     }
     Ok(())
 }
-
 fn advance_reg_state_at_site(
     prog: &BBProgram,
     site: InsnSite,
@@ -881,7 +784,7 @@ fn advance_reg_state_at_site(
         .ok_or_else(|| anyhow::anyhow!("invalid instruction site {:?}", site))?;
     let ldimm64_hi =
         if insn.is_ldimm64() {
-            Some(prog.ldimm64_second_slots.get(&site).ok_or_else(|| {
+            Some(prog.ldimm64_second_slot(site).ok_or_else(|| {
                 anyhow::anyhow!("LD_IMM64 at {:?} is missing its second slot", site)
             })?)
         } else {

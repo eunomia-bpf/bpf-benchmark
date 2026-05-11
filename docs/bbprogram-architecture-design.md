@@ -359,10 +359,12 @@ lowers. There is no `Vec<bpf_insn>`-based mutation path in the lib crate.
 4. **No `bbprogram/` directory**: all BBProgram modules live in
    `analysis/bbprogram_*.rs`.
 
-5. **No benchmark-framework changes**: `corpus/`, `runner/`, `e2e/`,
-   `micro/`, `daemon/` untouched. The daemon socket protocol and per-pass
-   CLI invocation contract are unchanged. `runner/config/passes/dce/default.yaml`
-   etc. are NOT edited.
+5. **No benchmark-framework changes except the accepted dce target side-input**:
+   `corpus/`, `runner/`, `e2e/`, `micro/`, `daemon/` remain untouched for the
+   BBProgram migration. The accepted exception is
+   `runner/config/passes/dce/default.yaml` passing `--target ${TARGET}` so dce
+   can use `target.json` for kinsn-aware liveness. The daemon socket protocol
+   and per-pass CLI invocation contract are otherwise unchanged.
 
 6. **Significant code-volume reduction**: total `bpfopt/crates/bpfopt/src/`
    line count after sub-step 12 must be at least **2500 LOC less** than at

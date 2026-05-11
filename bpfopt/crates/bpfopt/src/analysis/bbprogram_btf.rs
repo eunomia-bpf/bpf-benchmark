@@ -6,19 +6,22 @@ use std::collections::BTreeMap;
 use crate::analysis::bbprogram::BBProgram;
 use crate::pass::BtfInfoRecords;
 
+#[cfg(test)]
 #[derive(Clone, Debug, Default)]
-pub struct BtfRecordsView {
+pub struct BtfRemapView {
     pub(crate) func: Vec<BtfRecordView>,
     pub(crate) line: Vec<BtfRecordView>,
 }
 
+#[cfg(test)]
 #[derive(Clone, Debug)]
 pub(crate) struct BtfRecordView {
     offset: u32,
     type_id: Option<u32>,
 }
 
-impl BtfRecordsView {
+#[cfg(test)]
+impl BtfRemapView {
     pub fn func_offsets(&self) -> Vec<u32> {
         self.func.iter().map(|record| record.offset).collect()
     }
@@ -41,6 +44,22 @@ pub(crate) enum BtfRecordKind {
     Line,
 }
 
+pub(crate) enum BtfRecordRemap {
+    Keep { new_pc: usize },
+    DeletedOriginalInstruction,
+}
+
+pub(crate) fn remap_btf_record_pc(
+    old_to_new: &BTreeMap<usize, usize>,
+    old_pc: usize,
+) -> BtfRecordRemap {
+    match old_to_new.get(&old_pc).copied() {
+        Some(new_pc) => BtfRecordRemap::Keep { new_pc },
+        None => BtfRecordRemap::DeletedOriginalInstruction,
+    }
+}
+
+#[cfg(test)]
 pub(crate) fn remap_btf_records_view(
     prog: &BBProgram,
     records: Option<&BtfInfoRecords>,
@@ -60,8 +79,9 @@ pub(crate) fn remap_btf_records_view(
     let mut previous = None;
     for record in records.bytes.chunks(rec_size) {
         let old_pc = read_u32_field(record, 0, "insn_off")?;
-        let Some(&new_pc) = old_to_new.get(&(old_pc as usize)) else {
-            continue;
+        let new_pc = match remap_btf_record_pc(&old_to_new, old_pc as usize) {
+            BtfRecordRemap::Keep { new_pc } => new_pc,
+            BtfRecordRemap::DeletedOriginalInstruction => continue,
         };
         if previous.is_some_and(|prev| new_pc <= prev) {
             if kind == BtfRecordKind::Line && previous == Some(new_pc) {

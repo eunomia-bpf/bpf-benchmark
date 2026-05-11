@@ -2,7 +2,8 @@
 //! Lower BBProgram back to linear BPF bytecode.
 
 use crate::analysis::bbprogram_btf::{
-    old_pc_to_current_pc, read_u32_field, validate_btf_records, BtfRecordKind,
+    old_pc_to_current_pc, read_u32_field, remap_btf_record_pc, validate_btf_records, BtfRecordKind,
+    BtfRecordRemap,
 };
 use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
 use crate::insn::BpfInsn;
@@ -70,10 +71,13 @@ pub(crate) fn remap_btf_records_for_lowering(
     let mut previous = None;
     for record in records.bytes.chunks(rec_size) {
         let old_pc = read_u32_field(record, 0, "insn_off")?;
-        // Records for instructions removed by BBProgram rewrites have no
-        // lowered offset and are dropped; malformed surviving order still bails.
-        let Some(&new_pc) = old_to_new.get(&(old_pc as usize)) else {
-            continue;
+        let new_pc = match remap_btf_record_pc(&old_to_new, old_pc as usize) {
+            BtfRecordRemap::Keep { new_pc } => new_pc,
+            BtfRecordRemap::DeletedOriginalInstruction => {
+                // Deleting an instruction explicitly deletes its attached BTF
+                // record; surviving records still must preserve strict order.
+                continue;
+            }
         };
         if previous.is_some_and(|prev| new_pc <= prev) {
             if kind == BtfRecordKind::Line && previous == Some(new_pc) {
@@ -209,4 +213,41 @@ fn pc_delta(from_pc: usize, target_pc: usize) -> anyhow::Result<i64> {
     i64::try_from(delta).map_err(|_| {
         anyhow::anyhow!("pc-relative delta from pc {from_pc} to {target_pc} does not fit i64")
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::insn::*;
+
+    #[test]
+    fn fixup_all_branches_rewrites_ja32_imm_after_growth() {
+        let mut insn = BpfInsn::new(BPF_JMP32 | BPF_JA, 0, 0, 1);
+
+        insn.set_branch_target_delta(42).unwrap();
+
+        assert_eq!(insn.off, 0);
+        assert_eq!(insn.imm, 42);
+    }
+
+    #[test]
+    fn fixup_all_branches_rejects_i16_overflow() {
+        let mut insn = BpfInsn::ja(0);
+
+        let err = insn
+            .set_branch_target_delta(i64::from(i16::MAX) + 1)
+            .unwrap_err();
+
+        assert!(err.to_string().contains("exceeds i16"));
+    }
+
+    #[test]
+    fn fixup_all_branches_rejects_ja32_i32_overflow() {
+        let mut insn = BpfInsn::new(BPF_JMP32 | BPF_JA, 0, 0, 0);
+
+        let err = insn
+            .set_branch_target_delta(i64::from(i32::MAX) + 1)
+            .unwrap_err();
+
+        assert!(err.to_string().contains("exceeds i32"));
+    }
 }
