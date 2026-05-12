@@ -19,8 +19,7 @@ use crate::insn::{
 pub(crate) use crate::verifier_log::{RegState, ScalarRange, StackState, Tnum, VerifierValueWidth};
 pub(crate) use crate::verifier_log::{VerifierInsn, VerifierInsnKind};
 use clap::Args;
-use serde::ser::SerializeStruct;
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 
 pub type RegSet = HashSet<u8>;
 
@@ -44,17 +43,6 @@ pub enum RegKind {
 pub struct KinsnDescriptor {
     pub name: &'static str,
     pub register_uses: fn(payload: u64) -> RegSet,
-}
-
-impl Serialize for KinsnDescriptor {
-    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut state = serializer.serialize_struct("KinsnDescriptor", 1)?;
-        state.serialize_field("name", self.name)?;
-        state.end()
-    }
 }
 
 pub(crate) fn kinsn_payload_reg(payload: u64, shift: u8) -> u8 {
@@ -141,62 +129,52 @@ impl BtfInfoRecords {
     }
 }
 
-/// Framework-global CLI args shared by every pass invocation.
+/// CLI args shared by normal `--pass` invocations.
 ///
 /// IMPORTANT: only put a flag here when *every* bpfopt run conceivably
-/// needs it (input/output/report paths, target arch, prog type, BTF
-/// remapping inputs, kinsn target metadata, verifier-states JSON).
+/// needs it (input/output/report paths, target arch, prog type, kinsn
+/// capability metadata, verifier-states JSON, BTF remapping inputs).
 /// Per-pass tuning (e.g. map_inline's `--inline-hint`, branch_flip's
 /// `--profile`, prefetch's `--profile`) goes in the pass's own
 /// `<Pass>CliArgs` struct and is parsed AFTER `--`. Adding a pass-specific
-/// flag here pollutes the global namespace and breaks the pass-local
-/// args trait.
+/// flag here pollutes the pass invocation namespace.
 #[derive(Args, Clone, Debug, Default)]
 pub struct CommonArgs {
     /// Input bytecode file. Defaults to stdin.
-    #[arg(long, global = true, value_name = "FILE")]
+    #[arg(long, value_name = "FILE")]
     pub input: Option<PathBuf>,
     /// Output bytecode or JSON file. Defaults to stdout.
-    #[arg(long, global = true, value_name = "FILE")]
+    #[arg(long, value_name = "FILE")]
     pub output: Option<PathBuf>,
-    /// Canonicalize map references from loader FD form to stable map-index form.
-    #[arg(long, global = true)]
-    pub canonicalize_map_refs: bool,
-    /// Program map IDs in kernel used_maps order, comma-separated.
-    #[arg(long, global = true, value_name = "IDS", value_delimiter = ',')]
-    pub map_ids: Vec<u32>,
     /// Pass report JSON output file.
-    #[arg(long, global = true, value_name = "FILE")]
+    #[arg(long, value_name = "FILE")]
     pub report: Option<PathBuf>,
     /// Target architecture: x86_64 or aarch64.
-    #[arg(long, global = true, value_name = "ARCH")]
+    #[arg(long, value_name = "ARCH")]
     pub platform: Option<String>,
     /// BPF program type, such as xdp, sched_cls, tracing, or a numeric type.
-    #[arg(long, global = true, value_name = "TYPE")]
+    #[arg(long, value_name = "TYPE")]
     pub prog_type: Option<String>,
     /// Available kinsns, comma-separated. Entries may be name or name:btf_id.
-    #[arg(long, global = true, value_name = "LIST", value_delimiter = ',')]
+    #[arg(long, value_name = "LIST", value_delimiter = ',')]
     pub kinsns: Vec<String>,
-    /// Target platform JSON file.
-    #[arg(long, global = true, value_name = "FILE")]
+    /// Kinsn capability JSON file.
+    #[arg(long, value_name = "FILE")]
     pub target: Option<PathBuf>,
-    /// Output target platform JSON file after canonicalization-time rewrites.
-    #[arg(long, global = true, value_name = "FILE")]
-    pub target_output: Option<PathBuf>,
     /// Verifier states JSON file.
-    #[arg(long, global = true, value_name = "FILE")]
+    #[arg(long, value_name = "FILE")]
     pub verifier_states: Option<PathBuf>,
     /// Raw func_info records to remap in place when instruction offsets change.
-    #[arg(long, global = true, value_name = "FILE")]
+    #[arg(long, value_name = "FILE")]
     pub func_info: Option<PathBuf>,
     /// Byte size of one func_info record.
-    #[arg(long, global = true, value_name = "BYTES")]
+    #[arg(long, value_name = "BYTES")]
     pub func_info_rec_size: Option<u32>,
     /// Raw line_info records to remap in place when instruction offsets change.
-    #[arg(long, global = true, value_name = "FILE")]
+    #[arg(long, value_name = "FILE")]
     pub line_info: Option<PathBuf>,
     /// Byte size of one line_info record.
-    #[arg(long, global = true, value_name = "BYTES")]
+    #[arg(long, value_name = "BYTES")]
     pub line_info_rec_size: Option<u32>,
 }
 
@@ -220,12 +198,12 @@ pub struct KinsnJson {
 
 // ── Program IR ──────────────────────────────────────────────────────
 
-/// Pre-loaded map metadata used by snapshot/offline map providers.
+/// Pre-loaded map info used by snapshot/offline map providers.
 ///
-/// The pass resolves layout/type information from this metadata. Mutability
+/// The pass resolves layout/type information from this data. Mutability
 /// is derived from bytecode-level writer helpers and map type rules.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct MapMetadata {
+pub struct MapInfo {
     pub map_type: u32,
     pub key_size: u32,
     pub value_size: u32,
@@ -420,7 +398,7 @@ pub trait BpfPass: Send + Sync {
 /// These values are invariant for the duration of a pipeline execution.
 #[derive(Clone, Debug)]
 pub struct PassContext {
-    /// Available kinsn targets and static metadata.
+    /// Available kinsn targets and static descriptors.
     pub kinsn_registry: KinsnRegistry,
     /// CPU capabilities (detected at startup, checked by kinsn passes).
     pub platform: PlatformCapabilities,
@@ -437,8 +415,8 @@ pub struct PassContext {
     pub branch_miss_rate: Option<f64>,
     /// Program map IDs in kernel `used_maps` order.
     pub map_ids: Vec<u32>,
-    /// Pre-loaded map metadata side inputs.
-    pub map_metadata: HashMap<u32, MapMetadata>,
+    /// Pre-loaded map info side inputs.
+    pub map_info: HashMap<u32, MapInfo>,
     /// Pre-loaded map value snapshots.
     pub map_values: HashMap<(u32, Vec<u8>), Vec<u8>>,
     /// Compressed map value overlays.
@@ -489,7 +467,7 @@ impl KinsnRegistry {
             by_call: HashMap::new(),
         };
         for pass in crate::passes::PASS_REGISTRY {
-            for descriptor in pass.metadata.kinsn_targets {
+            for descriptor in pass.requirements.kinsn_targets {
                 let previous = registry.by_name.insert(
                     descriptor.name,
                     RegistryEntry {
@@ -850,7 +828,7 @@ impl PassContext {
             annotations: Vec::new(),
             branch_miss_rate: None,
             map_ids: Vec::new(),
-            map_metadata: HashMap::new(),
+            map_info: HashMap::new(),
             map_values: HashMap::new(),
             map_value_overlays: HashMap::new(),
             map_inner_map_ids: HashMap::new(),

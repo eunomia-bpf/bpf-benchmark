@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use crate::analysis::{lift_with_pass_context, lower, BBProgram};
 use crate::insn::BpfInsn;
 use crate::pass::{
-    BpfPass, MapMetadata, PassContext, PassResult, RegState, ScalarRange, SkipReason, StackState,
+    BpfPass, MapInfo, PassContext, PassResult, RegState, ScalarRange, SkipReason, StackState,
     Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
 
@@ -221,8 +221,8 @@ pub fn stack_snapshot_from_key(stack_off: i16, key: &[u8]) -> HashMap<i16, Stack
         .collect()
 }
 
-pub fn map_metadata(map_id: u32, map_type: u32, key_size: u32, value_size: u32) -> MapMetadata {
-    MapMetadata {
+pub fn map_info(map_id: u32, map_type: u32, key_size: u32, value_size: u32) -> MapInfo {
+    MapInfo {
         map_type,
         key_size,
         value_size,

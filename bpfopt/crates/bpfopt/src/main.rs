@@ -4,18 +4,18 @@
 use std::collections::BTreeMap;
 use std::fs;
 use std::io::{self, Read, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use anyhow::{anyhow, bail, Context, Result};
 use bpfopt::analysis::{lift_with_pass_context, lower, BBProgram};
 use bpfopt::insn::BpfInsn;
 use bpfopt::pass::{
-    hex_bytes, report_site_pc, run_pass_once, Arch, BtfInfoRecords, CommonArgs, KinsnDescriptor,
-    KinsnRegistry, PassContext, PassResult, PlatformCapabilities, TargetJson,
+    hex_bytes, report_site_pc, run_pass_once, Arch, BtfInfoRecords, CommonArgs, KinsnRegistry,
+    PassContext, PassResult, PlatformCapabilities, TargetJson,
 };
 use bpfopt::passes::PASS_REGISTRY;
-use clap::{Args, Parser, Subcommand};
+use clap::Parser;
 use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
@@ -26,25 +26,18 @@ struct Cli {
     /// Single pass to run. bpfopt intentionally has no built-in pass pipeline.
     #[arg(long, value_name = "NAME")]
     pass: Option<String>,
-    #[command(subcommand)]
-    command: Option<Command>,
+    /// Canonicalize map references from loader FD form to stable map-index form.
+    #[arg(long)]
+    canonicalize_map_refs: bool,
+    /// Program map IDs in kernel used_maps order, comma-separated.
+    #[arg(long, value_name = "IDS", value_delimiter = ',')]
+    map_ids: Vec<u32>,
+    /// Output target platform JSON file after canonicalization-time rewrites.
+    #[arg(long, value_name = "FILE")]
+    target_output: Option<PathBuf>,
     /// Pass-local args. Must follow `--` and are parsed by the selected pass.
     #[arg(last = true, num_args = 0.., allow_hyphen_values = true)]
     pass_args: Vec<String>,
-}
-
-#[derive(Subcommand)]
-enum Command {
-    /// List available optimization passes.
-    #[command(name = "list-passes")]
-    ListPasses(ListPassesArgs),
-}
-
-#[derive(Args)]
-struct ListPassesArgs {
-    /// Emit machine-readable pass metadata.
-    #[arg(long)]
-    json: bool,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -77,18 +70,6 @@ struct SkippedSiteReport {
     reason: String,
 }
 
-#[derive(Clone, Debug, Serialize)]
-struct ListPassEntry {
-    name: &'static str,
-    description: &'static str,
-    needs_target: bool,
-    needs_verifier_states: bool,
-    produces_verifier_states: bool,
-    needs_map_values: bool,
-    #[serde(rename = "kinsns_used")]
-    kinsn_targets: &'static [KinsnDescriptor],
-}
-
 fn main() -> ExitCode {
     match run_main() {
         Ok(()) => ExitCode::SUCCESS,
@@ -102,85 +83,53 @@ fn main() -> ExitCode {
 fn run_main() -> Result<()> {
     let cli = Cli::parse();
 
-    if cli.common.canonicalize_map_refs {
-        if cli.pass.is_some() || cli.command.is_some() {
-            bail!("--canonicalize-map-refs cannot be combined with --pass or subcommands");
+    if cli.canonicalize_map_refs {
+        if cli.pass.is_some() {
+            bail!("--canonicalize-map-refs cannot be combined with --pass");
         }
         if !cli.pass_args.is_empty() {
             bail!("pass-local args require --pass <name>");
         }
-        return run_canonicalize_map_refs(&cli.common);
+        return run_canonicalize_map_refs(&cli.common, &cli.map_ids, cli.target_output.as_deref());
     }
-    if cli.common.target_output.is_some() {
+    if !cli.map_ids.is_empty() {
+        bail!("--map-ids requires --canonicalize-map-refs or a pass-local use after --");
+    }
+    if cli.target_output.is_some() {
         bail!("--target-output requires --canonicalize-map-refs");
     }
 
-    match cli.command {
-        Some(Command::ListPasses(args)) => {
-            if cli.pass.is_some() {
-                bail!("--pass cannot be used with list-passes");
-            }
-            if !cli.pass_args.is_empty() {
-                bail!("pass-local args require --pass <name>");
-            }
-            list_passes(&cli.common, &args)
-        }
-        None => {
-            let pass = cli
-                .pass
-                .as_deref()
-                .ok_or_else(|| anyhow!("bpfopt requires --pass <name> or list-passes"))?;
-            run_single_pass(&cli.common, lookup_pass_name(pass)?, &cli.pass_args)
-        }
-    }
+    let pass = cli
+        .pass
+        .as_deref()
+        .ok_or_else(|| anyhow!("bpfopt requires --pass <name>"))?;
+    run_single_pass(&cli.common, lookup_pass_name(pass)?, &cli.pass_args)
 }
 
-fn run_canonicalize_map_refs(common: &CommonArgs) -> Result<()> {
+fn run_canonicalize_map_refs(
+    common: &CommonArgs,
+    map_ids: &[u32],
+    target_output: Option<&Path>,
+) -> Result<()> {
     if common.report.is_some() {
         bail!("--canonicalize-map-refs does not produce --report");
     }
-    match (common.target.as_deref(), common.target_output.as_deref()) {
+    match (common.target.as_deref(), target_output) {
         (Some(_), Some(_)) | (None, None) => {}
         (Some(_), None) => bail!("--canonicalize-map-refs --target requires --target-output"),
         (None, Some(_)) => bail!("--target-output requires --target"),
     }
     let mut insns = read_bytecode(common.input.as_deref())?;
-    bpfopt::analysis::canonicalize_map_refs_to_idx(&mut insns, None, &common.map_ids)?;
-    if let (Some(target), Some(target_output)) =
-        (common.target.as_deref(), common.target_output.as_deref())
-    {
+    bpfopt::analysis::canonicalize_map_refs_to_idx(&mut insns, None, map_ids)?;
+    if let (Some(target), Some(target_output)) = (common.target.as_deref(), target_output) {
         let mut target_json: TargetJson = read_json_file(target, "target.json")?;
         bpfopt::analysis::shift_target_module_call_offsets_for_map_prefix(
             &mut target_json,
-            common.map_ids.len(),
+            map_ids.len(),
         )?;
         write_json(Some(target_output), &target_json)?;
     }
     write_bytecode(common.output.as_deref(), &insns)
-}
-
-fn list_passes(common: &CommonArgs, args: &ListPassesArgs) -> Result<()> {
-    if args.json {
-        let entries = PASS_REGISTRY
-            .iter()
-            .map(|entry| ListPassEntry {
-                name: entry.name,
-                description: entry.description,
-                needs_target: entry.metadata.needs_target(),
-                needs_verifier_states: entry.metadata.needs_verifier_states(),
-                produces_verifier_states: entry.metadata.produces_verifier_states(),
-                needs_map_values: entry.metadata.needs_map_values(),
-                kinsn_targets: entry.metadata.kinsn_targets,
-            })
-            .collect::<Vec<_>>();
-        write_json(common.output.as_deref(), &entries)
-    } else {
-        let mut out = open_binary_output(common.output.as_deref())?;
-        for entry in PASS_REGISTRY {
-            writeln!(out, "{}", entry.name)?;
-        }
-        Ok(())
-    }
 }
 
 fn run_single_pass(
@@ -193,7 +142,7 @@ fn run_single_pass(
     let input = read_bytecode(common.input.as_deref())?;
     let mut ctx = build_pass_context(common)?;
     let pass_constructor_args: &[String] = if pass_name == "map_inline" {
-        bpfopt::passes::map_inline::attach_cli_side_input(common, &mut ctx, pass_args)?;
+        bpfopt::passes::map_inline::attach_cli_side_input(&mut ctx, pass_args)?;
         &[]
     } else {
         pass_args
@@ -231,10 +180,10 @@ fn lookup_pass_name(input: &str) -> Result<&'static str> {
 fn validate_required_side_inputs(common: &CommonArgs, pass_names: &[&str]) -> Result<()> {
     for &pass_name in pass_names {
         let entry = registry_entry(pass_name)?;
-        if entry.metadata.needs_target() && common.target.is_none() && common.kinsns.is_empty() {
-            bail!("{pass_name} requires --target or --kinsns");
+        if entry.requirements.needs_kinsns() && common.target.is_none() && common.kinsns.is_empty() {
+            bail!("{pass_name} requires --target kinsn capabilities or --kinsns");
         }
-        if entry.metadata.needs_verifier_states() && common.verifier_states.is_none() {
+        if entry.requirements.needs_verifier_states() && common.verifier_states.is_none() {
             bail!("{pass_name} requires --verifier-states");
         }
     }
@@ -244,12 +193,12 @@ fn validate_required_side_inputs(common: &CommonArgs, pass_names: &[&str]) -> Re
 fn validate_required_kinsns(ctx: &PassContext, pass_names: &[&str]) -> Result<()> {
     for &pass_name in pass_names {
         let entry = registry_entry(pass_name)?;
-        if !entry.metadata.needs_target()
+        if !entry.requirements.needs_kinsns()
             || (pass_name == "ccmp" && ctx.platform.arch != Arch::Aarch64)
         {
             continue;
         }
-        let target_names = entry.metadata.required_kinsns.iter().copied();
+        let target_names = entry.requirements.required_kinsns.iter().copied();
         require_all_kinsns(ctx, target_names, pass_name)?;
     }
     Ok(())
@@ -372,7 +321,6 @@ fn write_btf_info_outputs(common: &CommonArgs, program: &BBProgram) -> Result<()
 fn build_pass_context(common: &CommonArgs) -> Result<PassContext> {
     let mut ctx = PassContext::try_baseline()?;
     ctx.platform = detect_platform();
-    ctx.map_ids = common.map_ids.clone();
     if let Some(path) = common.verifier_states.as_deref() {
         let log = fs::read_to_string(path)
             .with_context(|| format!("failed to read verifier states from {}", path.display()))?;

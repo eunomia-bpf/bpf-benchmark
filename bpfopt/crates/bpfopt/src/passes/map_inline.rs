@@ -10,7 +10,6 @@ use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, VecDeque};
 use std::fs;
 use std::path::{Path, PathBuf};
 
-pub use crate::pass::MapMetadata as MapInfo;
 const R2_SETUP_LOOKBACK_LIMIT: usize = 8;
 const REG_RESOLUTION_LIMIT: usize = 64;
 const CONST_STACK_VALUE_LOOKBACK_LIMIT: usize = 256;
@@ -35,7 +34,7 @@ pub struct MapInlinePass;
 #[derive(Debug)]
 struct MapInlineSideInput<'a> {
     map_ids: &'a [u32],
-    metadata: &'a HashMap<u32, MapInfo>,
+    map_info: &'a HashMap<u32, MapInfo>,
     values: &'a HashMap<(u32, Vec<u8>), Vec<u8>>,
     compressed_values: &'a HashMap<u32, CompressedMapValues>,
     inner_map_ids: &'a HashMap<(u32, Vec<u8>), u32>,
@@ -68,7 +67,7 @@ fn map_inline_side_input<'a>(
     validate_map_inline_hint_specs(&ctx.map_inline_hints)?;
     Ok(MapInlineSideInput {
         map_ids: &ctx.map_ids,
-        metadata: &ctx.map_metadata,
+        map_info: &ctx.map_info,
         values: &ctx.map_values,
         compressed_values: &ctx.map_value_overlays,
         inner_map_ids: &ctx.map_inner_map_ids,
@@ -79,7 +78,7 @@ fn map_inline_side_input<'a>(
 
 fn has_map_inline_side_input(ctx: &PassContext) -> bool {
     !ctx.map_ids.is_empty()
-        || !ctx.map_metadata.is_empty()
+        || !ctx.map_info.is_empty()
         || !ctx.map_values.is_empty()
         || !ctx.map_value_overlays.is_empty()
         || !ctx.map_inner_map_ids.is_empty()
@@ -177,7 +176,7 @@ fn lookup_elem(
         }
         return Ok(value.clone());
     }
-    if !side_input.metadata.contains_key(&map_id) {
+    if !side_input.map_info.contains_key(&map_id) {
         return Err(MapLookupError::Failed(format!(
             "map_values snapshot has no metadata for map {}",
             map_id
@@ -506,7 +505,7 @@ fn collect_kernel_mutable_maps(
 ) -> anyhow::Result<KernelMutableMaps> {
     let mut ids = HashSet::new();
     let mut reasons = HashMap::new();
-    for metadata in side_input.metadata.values() {
+    for metadata in side_input.map_info.values() {
         if lru_lookup_mutates_map(metadata.map_type) {
             ids.insert(metadata.map_id);
             reasons.insert(
@@ -659,7 +658,7 @@ fn resolve_direct_inline_hint(
         MapInlineHintAnchor::MapName(name) => {
             let mut map_ids = HashSet::new();
             for info in unique_maps(map_info) {
-                let metadata = side_input.metadata.get(&info.map_id).ok_or_else(|| {
+                let metadata = side_input.map_info.get(&info.map_id).ok_or_else(|| {
                     anyhow::anyhow!(
                         "map_values snapshot has no metadata for used map {} while resolving inline hint map_name anchor {name:?}",
                         info.map_id
@@ -1021,7 +1020,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
         .any(|site| prog.insn_at(site).is_some_and(is_map_writer_helper_call))
         && !side_input.hints.is_empty()
         && !side_input.inner_map_ids.is_empty()
-        && side_input.metadata.values().any(MapMetadata::is_map_in_map)
+        && side_input.map_info.values().any(MapInfo::is_map_in_map)
     {
         anyhow::bail!("kernel-mutable inner map");
     }
@@ -1085,7 +1084,7 @@ fn run_map_inline_round(
             .map_ids
             .first()
             .copied()
-            .or_else(|| side_input.metadata.keys().next().copied())
+            .or_else(|| side_input.map_info.keys().next().copied())
             .map_or_else(
                 || "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on unknown map".to_string(),
                 |map_id| format!("map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id={map_id}"),
@@ -1994,7 +1993,7 @@ fn resolve_snapshot_map_value(
         if map_snapshot_skipped_by_size(side_input, map_id)? {
             return Ok(None);
         }
-        let Some(info) = side_input.metadata.get(&map_id).cloned() else {
+        let Some(info) = side_input.map_info.get(&map_id).cloned() else {
             return Ok(None);
         };
         if kernel_mutable_reason_for_map(kernel_mutable_maps, &info).is_some() {
@@ -2624,16 +2623,12 @@ fn kill_defined_alias_regs(alias_regs: &mut HashMap<u8, i16>, insn: &BpfInsn) {
     alias_regs.retain(|reg, _| !use_def.defs.contains(reg));
 }
 
-pub fn attach_cli_side_input(
-    common: &CommonArgs,
-    ctx: &mut PassContext,
-    pass_args: &[String],
-) -> Result<()> {
+pub fn attach_cli_side_input(ctx: &mut PassContext, pass_args: &[String]) -> Result<()> {
     let cli = MapInlineCliArgs::parse(pass_args)?;
-    let map_ids = cli.resolve_map_ids(common)?;
+    let map_ids = cli.map_ids()?;
     let snapshot = read_map_values(&cli.map_values, &map_ids)?;
     ctx.map_ids = map_ids;
-    ctx.map_metadata = snapshot.metadata;
+    ctx.map_info = snapshot.map_info;
     ctx.map_values = snapshot.values;
     ctx.map_value_overlays = snapshot.compressed_values;
     ctx.map_inner_map_ids = snapshot.inner_map_ids;
@@ -2689,22 +2684,11 @@ impl MapInlineCliArgs {
         })
     }
 
-    fn resolve_map_ids(&self, common: &CommonArgs) -> Result<Vec<u32>> {
-        let pass_local = match self.map_ids.as_deref() {
-            Some(value) => Some(parse_map_ids_arg(value)?),
-            None => None,
-        };
-        match (pass_local, common.map_ids.is_empty()) {
-            (Some(map_ids), true) => Ok(map_ids),
-            (Some(map_ids), false) => {
-                if map_ids != common.map_ids {
-                    bail!("map_inline pass-local --map-ids differs from global --map-ids");
-                }
-                Ok(map_ids)
-            }
-            (None, false) => Ok(common.map_ids.clone()),
-            (None, true) => bail!("map_inline requires --map-ids"),
-        }
+    fn map_ids(&self) -> Result<Vec<u32>> {
+        self.map_ids
+            .as_deref()
+            .ok_or_else(|| anyhow!("map_inline requires --map-ids"))
+            .and_then(parse_map_ids_arg)
     }
 }
 
@@ -2776,7 +2760,7 @@ fn hex_nibble(byte: u8) -> Option<u8> {
 
 #[derive(Clone)]
 struct MapSnapshot {
-    metadata: HashMap<u32, MapMetadata>,
+    map_info: HashMap<u32, MapInfo>,
     values: HashMap<(u32, Vec<u8>), Vec<u8>>,
     compressed_values: HashMap<u32, CompressedMapValues>,
     inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
@@ -2882,7 +2866,7 @@ fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
     for &map_id in map_ids.iter().filter(|&&map_id| map_id != 0) {
         let show = read_bpftool_map_show(path, map_id)?;
         let map_type = parse_map_type(&show.map_type)?;
-        let map_metadata = MapMetadata {
+        let map_info = MapInfo {
             map_type,
             key_size: show.bytes_key,
             value_size: show.bytes_value,
@@ -2891,17 +2875,17 @@ fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
             name: show.name,
         };
         if needs_bpftool_map_dump(map_type) {
-            match read_bpftool_map_dump(path, show.id, &map_metadata)? {
+            match read_bpftool_map_dump(path, show.id, &map_info)? {
                 BpftoolMapDumpSnapshot::Entries(entries) => {
                     if entries.is_empty()
-                        && map_metadata.map_type == libbpf_sys::BPF_MAP_TYPE_LPM_TRIE
+                        && map_info.map_type == libbpf_sys::BPF_MAP_TYPE_LPM_TRIE
                     {
                         empty_lpm_trie_maps.insert(show.id);
                     }
                     for entry in entries {
                         let key = decode_bpftool_hex_bytes(&entry.key)
                             .with_context(|| format!("invalid key bytes for map {}", show.id))?;
-                        let value = decode_bpftool_entry_value(&entry, &map_metadata)
+                        let value = decode_bpftool_entry_value(&entry, &map_info)
                             .with_context(|| format!("invalid value bytes for map {}", show.id))?;
                         values.insert((show.id, key.clone()), value);
                         if let Some(inner_map_id) = entry.inner_map_id {
@@ -2925,16 +2909,16 @@ fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
             read_inner_map_ids_supplement(
                 path,
                 show.id,
-                map_metadata.key_size as usize,
+                map_info.key_size as usize,
                 &mut inner_map_ids,
             )?;
         }
-        metadata.insert(show.id, map_metadata);
+        metadata.insert(show.id, map_info);
     }
     read_optional_compressed_overlay_file(path, &metadata, &values, &mut compressed_values)?;
     synthesize_empty_lpm_trie_overlays(&empty_lpm_trie_maps, &metadata, &mut compressed_values)?;
     Ok(MapSnapshot {
-        metadata,
+        map_info: metadata,
         values,
         compressed_values,
         inner_map_ids,
@@ -2959,7 +2943,7 @@ fn read_bpftool_map_show(path: &Path, map_id: u32) -> Result<BpftoolMapShowJson>
 fn read_bpftool_map_dump(
     path: &Path,
     map_id: u32,
-    metadata: &MapMetadata,
+    metadata: &MapInfo,
 ) -> Result<BpftoolMapDumpSnapshot> {
     let dump_path = path.join(format!("map-{map_id}.dump.json"));
     let data =
@@ -3083,7 +3067,7 @@ fn read_inner_map_ids_supplement(
 
 fn read_optional_compressed_overlay_file(
     path: &Path,
-    metadata: &HashMap<u32, MapMetadata>,
+    metadata: &HashMap<u32, MapInfo>,
     raw_values: &HashMap<(u32, Vec<u8>), Vec<u8>>,
     compressed_values: &mut HashMap<u32, CompressedMapValues>,
 ) -> Result<()> {
@@ -3106,7 +3090,7 @@ fn read_optional_compressed_overlay_file(
         let map_id = map_id_text
             .parse::<u32>()
             .with_context(|| format!("invalid compressed overlay map id {map_id_text:?}"))?;
-        let map_metadata = metadata.get(&map_id).ok_or_else(|| {
+        let map_info = metadata.get(&map_id).ok_or_else(|| {
             anyhow!(
                 "compressed overlay references map {} not present in --map-ids metadata",
                 map_id
@@ -3118,7 +3102,7 @@ fn read_optional_compressed_overlay_file(
         {
             bail!("map {map_id} has both raw entries and compression overlay");
         }
-        let compressed = parse_compressed_map_values_json(map_id, map_metadata, overlay)
+        let compressed = parse_compressed_map_values_json(map_id, map_info, overlay)
             .map_err(|err| anyhow!("invalid compressed overlay for map {map_id}: {err}"))?;
         if compressed_values.insert(map_id, compressed).is_some() {
             bail!("map {map_id} has duplicate compression overlays");
@@ -3129,20 +3113,20 @@ fn read_optional_compressed_overlay_file(
 
 fn synthesize_empty_lpm_trie_overlays(
     empty_lpm_trie_maps: &HashSet<u32>,
-    metadata: &HashMap<u32, MapMetadata>,
+    metadata: &HashMap<u32, MapInfo>,
     compressed_values: &mut HashMap<u32, CompressedMapValues>,
 ) -> Result<()> {
     for map_id in empty_lpm_trie_maps {
         if compressed_values.contains_key(map_id) {
             continue;
         }
-        let map_metadata = metadata
+        let map_info = metadata
             .get(map_id)
             .ok_or_else(|| anyhow!("empty LPM_TRIE map {} missing map_values metadata", map_id))?;
         compressed_values.insert(
             *map_id,
             CompressedMapValues {
-                value_size: map_metadata.value_size as usize,
+                value_size: map_info.value_size as usize,
                 kind: CompressedMapValuesKind::Enumerated {
                     entries: HashMap::new(),
                 },
@@ -3154,7 +3138,7 @@ fn synthesize_empty_lpm_trie_overlays(
 
 fn parse_compressed_map_values_json(
     map_id: u32,
-    metadata: &MapMetadata,
+    metadata: &MapInfo,
     value: serde_json::Value,
 ) -> Result<CompressedMapValues> {
     let overlay: CompressedMapValuesJson = serde_json::from_value(value)
@@ -3280,7 +3264,7 @@ fn decode_fixed_hex_bytes(map_id: u32, label: &str, hex: &str, byte_len: usize) 
 
 fn decode_bpftool_entry_value(
     entry: &BpftoolMapEntryJson,
-    metadata: &MapMetadata,
+    metadata: &MapInfo,
 ) -> Result<Vec<u8>> {
     if !entry.values.is_empty() {
         return decode_bpftool_percpu_values(&entry.values, metadata.value_size as usize);
@@ -3421,7 +3405,7 @@ fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Res
         .with_context(|| format!("failed to parse {label} from {}", path.display()))
 }
 
-impl MapMetadata {
+impl MapInfo {
     pub fn supports_direct_value_access(&self) -> bool {
         matches!(
             self.map_type,

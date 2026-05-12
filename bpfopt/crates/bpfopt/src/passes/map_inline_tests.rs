@@ -3,7 +3,7 @@
 use super::map_inline::MapInlinePass;
 use super::{ConstPropPass, DcePass};
 use crate::insn::*;
-use crate::pass::{CompressedMapValues, CompressedMapValuesKind, MapMetadata, PassContext};
+use crate::pass::{CompressedMapValues, CompressedMapValuesKind, MapInfo, PassContext};
 use crate::pass::{MapInlineHintAnchorSpec, MapInlineHintModeSpec, MapInlineHintSpec};
 use crate::test_helpers::*;
 use std::collections::HashMap;
@@ -59,9 +59,9 @@ fn ctx_for_array_lookup(map_id: u32, value: Vec<u8>) -> PassContext {
         stack_snapshot_from_key(-4, &1u32.to_le_bytes()),
     )]);
     set_map_ids(&mut ctx, vec![map_id]);
-    ctx.map_metadata.insert(
+    ctx.map_info.insert(
         map_id,
-        MapMetadata {
+        MapInfo {
             map_type: libbpf_sys::BPF_MAP_TYPE_ARRAY,
             key_size: 4,
             value_size: value.len() as u32,
@@ -95,9 +95,9 @@ fn map_inline_consumes_hint_when_verifier_state_unavailable() {
     let value = 7u32.to_le_bytes().to_vec();
     let mut ctx = PassContext::baseline();
     ctx.map_ids = vec![111];
-    ctx.map_metadata.insert(
+    ctx.map_info.insert(
         111,
-        MapMetadata {
+        MapInfo {
             map_type: libbpf_sys::BPF_MAP_TYPE_ARRAY,
             key_size: 4,
             value_size: value.len() as u32,
@@ -125,9 +125,9 @@ fn map_inline_rejects_hint_with_wrong_key_size() {
     let value = 7u32.to_le_bytes().to_vec();
     let mut ctx = PassContext::baseline();
     ctx.map_ids = vec![111];
-    ctx.map_metadata.insert(
+    ctx.map_info.insert(
         111,
-        MapMetadata {
+        MapInfo {
             map_type: libbpf_sys::BPF_MAP_TYPE_ARRAY,
             key_size: 4,
             value_size: value.len() as u32,
@@ -154,9 +154,9 @@ fn map_inline_rejects_hint_pointing_at_non_lookup_call() {
     let value = 7u32.to_le_bytes().to_vec();
     let mut ctx = PassContext::baseline();
     ctx.map_ids = vec![111];
-    ctx.map_metadata.insert(
+    ctx.map_info.insert(
         111,
-        MapMetadata {
+        MapInfo {
             map_type: libbpf_sys::BPF_MAP_TYPE_ARRAY,
             key_size: 4,
             value_size: value.len() as u32,
@@ -183,9 +183,9 @@ fn map_inline_soft_hint_inlines_load_but_keeps_lookup_and_null_check() {
     let value = 7u32.to_le_bytes().to_vec();
     let mut ctx = PassContext::baseline();
     ctx.map_ids = vec![111];
-    ctx.map_metadata.insert(
+    ctx.map_info.insert(
         111,
-        MapMetadata {
+        MapInfo {
             map_type: libbpf_sys::BPF_MAP_TYPE_HASH,
             key_size: 4,
             value_size: value.len() as u32,
@@ -223,9 +223,9 @@ fn map_inline_hard_hash_hint_keeps_lookup_and_null_check() {
     let value = 7u32.to_le_bytes().to_vec();
     let mut ctx = PassContext::baseline();
     ctx.map_ids = vec![111];
-    ctx.map_metadata.insert(
+    ctx.map_info.insert(
         111,
-        MapMetadata {
+        MapInfo {
             map_type: libbpf_sys::BPF_MAP_TYPE_HASH,
             key_size: 4,
             value_size: value.len() as u32,
@@ -262,9 +262,9 @@ fn map_inline_hard_hash_hint_keeps_lookup_and_null_check() {
 fn map_inline_soft_hint_skips_when_snapshot_key_is_absent() {
     let mut ctx = PassContext::baseline();
     ctx.map_ids = vec![111];
-    ctx.map_metadata.insert(
+    ctx.map_info.insert(
         111,
-        MapMetadata {
+        MapInfo {
             map_type: libbpf_sys::BPF_MAP_TYPE_HASH,
             key_size: 4,
             value_size: 4,
@@ -324,9 +324,9 @@ fn map_inline_pseudo_map_value_feeds_const_prop_and_dce_without_branch_cleanup()
     let value = vec![1, 0, 0, 0];
     let mut ctx = PassContext::baseline();
     ctx.map_ids = vec![903];
-    ctx.map_metadata.insert(
+    ctx.map_info.insert(
         903,
-        MapMetadata {
+        MapInfo {
             map_type: libbpf_sys::BPF_MAP_TYPE_ARRAY,
             key_size: 4,
             value_size: value.len() as u32,
@@ -368,9 +368,9 @@ fn map_inline_missing_snapshot_key_errors_for_array_hard_requirement() {
         stack_snapshot_from_key(-4, &1u32.to_le_bytes()),
     )]);
     set_map_ids(&mut ctx, vec![111]);
-    ctx.map_metadata.insert(
+    ctx.map_info.insert(
         111,
-        MapMetadata {
+        MapInfo {
             map_type: libbpf_sys::BPF_MAP_TYPE_ARRAY,
             key_size: 4,
             value_size: 4,
@@ -393,9 +393,9 @@ fn map_inline_skipped_snapshot_records_site_skip_for_array_lookup() {
         stack_snapshot_from_key(-4, &1u32.to_le_bytes()),
     )]);
     set_map_ids(&mut ctx, vec![111]);
-    ctx.map_metadata.insert(
+    ctx.map_info.insert(
         111,
-        MapMetadata {
+        MapInfo {
             map_type: libbpf_sys::BPF_MAP_TYPE_ARRAY,
             key_size: 4,
             value_size: 4,
@@ -420,9 +420,9 @@ fn map_inline_uses_compressed_uniform_overlay() {
         stack_snapshot_from_key(-4, &1u32.to_le_bytes()),
     )]);
     set_map_ids(&mut ctx, vec![111]);
-    ctx.map_metadata.insert(
+    ctx.map_info.insert(
         111,
-        MapMetadata {
+        MapInfo {
             map_type: libbpf_sys::BPF_MAP_TYPE_ARRAY,
             key_size: 4,
             value_size: 4,
@@ -448,9 +448,9 @@ fn map_inline_uses_compressed_uniform_overlay() {
 #[test]
 fn map_inline_skips_percpu_map_without_scalarizing_value() {
     let mut ctx = ctx_for_array_lookup(111, 7u32.to_le_bytes().to_vec());
-    ctx.map_metadata.insert(
+    ctx.map_info.insert(
         111,
-        MapMetadata {
+        MapInfo {
             map_type: libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY,
             key_size: 4,
             value_size: 4,
@@ -472,9 +472,9 @@ fn map_inline_pass_inlines_uniform_percpu_array_maps() {
     // slot carries the same scalar value.
     let blob = make_percpu_blob(&7u32.to_le_bytes(), 2);
     let mut ctx = ctx_for_array_lookup(112, blob);
-    ctx.map_metadata.insert(
+    ctx.map_info.insert(
         112,
-        MapMetadata {
+        MapInfo {
             map_type: libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY,
             key_size: 4,
             value_size: 4,
@@ -518,9 +518,9 @@ fn map_inline_route_a_rejects_missing_outer_entry_for_hint() {
         mode: MapInlineHintModeSpec::Hard,
         key: 1u32.to_le_bytes().to_vec(),
     }];
-    ctx.map_metadata.insert(
+    ctx.map_info.insert(
         111,
-        crate::test_helpers::map_metadata(111, libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4),
+        crate::test_helpers::map_info(111, libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4),
     );
 
     let err = pass_error_on_insns(MapInlinePass, lookup_program(42), &ctx);
@@ -539,9 +539,9 @@ fn map_inline_soft_hint_requires_immediate_null_check_when_hard_fold_coexists() 
     let value = 7u32.to_le_bytes().to_vec();
     let mut ctx = PassContext::baseline();
     ctx.map_ids = vec![111];
-    ctx.map_metadata.insert(
+    ctx.map_info.insert(
         111,
-        MapMetadata {
+        MapInfo {
             map_type: libbpf_sys::BPF_MAP_TYPE_ARRAY,
             key_size: 4,
             value_size: value.len() as u32,
@@ -586,13 +586,13 @@ fn map_inline_route_a_rejects_kernel_mutable_inner_hint() {
         BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, UPDATE),
     );
     let mut ctx = ctx_for_array_lookup(111, 7u32.to_le_bytes().to_vec());
-    ctx.map_metadata.insert(
+    ctx.map_info.insert(
         111,
-        crate::test_helpers::map_metadata(111, libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4),
+        crate::test_helpers::map_info(111, libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4),
     );
-    ctx.map_metadata.insert(
+    ctx.map_info.insert(
         222,
-        MapMetadata {
+        MapInfo {
             map_type: libbpf_sys::BPF_MAP_TYPE_HASH,
             key_size: 4,
             value_size: 4,

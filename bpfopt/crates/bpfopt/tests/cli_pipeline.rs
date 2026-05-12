@@ -233,29 +233,6 @@ fn run_bpfopt(args: &[&str], stdin_bytes: &[u8]) -> Output {
 }
 
 #[test]
-fn list_passes_outputs_canonical_names_including_experimental_passes() {
-    let output = Command::new(bpfopt_bin())
-        .arg("list-passes")
-        .output()
-        .expect("run list-passes");
-
-    assert!(
-        output.status.success(),
-        "stderr={}",
-        String::from_utf8_lossy(&output.stderr)
-    );
-    let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
-    let passes = stdout.lines().collect::<Vec<_>>();
-
-    assert_eq!(passes.len(), 15);
-    assert!(passes.contains(&"wide_mem"));
-    assert!(passes.contains(&"skb_load_bytes_spec"));
-    assert!(passes.contains(&"ccmp"));
-    assert!(passes.contains(&"branch_flip"));
-    assert!(passes.contains(&"prefetch"));
-}
-
-#[test]
 fn wide_mem_accepts_stdin_and_writes_instruction_aligned_stdout() {
     let input = minimal_program_bytes();
     let output = run_bpfopt(&["--pass", "wide_mem", "--"], &input);
@@ -333,7 +310,7 @@ fn single_kinsn_pass_without_target_fails_before_running() {
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(
-        stderr.contains("rotate requires --target or --kinsns"),
+        stderr.contains("rotate requires --target kinsn capabilities or --kinsns"),
         "stderr={stderr}"
     );
     assert!(output.stdout.is_empty());

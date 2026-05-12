@@ -61,9 +61,9 @@ struct PrepareArgs {
     /// Output workdir.
     #[arg(long, value_name = "DIR")]
     out: PathBuf,
-    /// Optional map seed JSON applied after object load and before snapshot dump.
+    /// Optional map update JSON applied after object load and before snapshot dump.
     #[arg(long, value_name = "FILE")]
-    map_seed: Option<PathBuf>,
+    map_updates: Option<PathBuf>,
     /// bpfopt binary. Defaults to BPFOPT, target sibling, then PATH.
     #[arg(long, value_name = "FILE")]
     bpfopt: Option<PathBuf>,
@@ -166,21 +166,21 @@ struct PerCpuValueJson {
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct SeedFile {
-    maps: Vec<SeedMap>,
+struct MapUpdatesFile {
+    maps: Vec<MapUpdateTarget>,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct SeedMap {
+struct MapUpdateTarget {
     name: Option<String>,
     id: Option<u32>,
-    entries: Vec<SeedEntry>,
+    entries: Vec<MapUpdateEntry>,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct SeedEntry {
+struct MapUpdateEntry {
     key_hex: String,
     value_hex: String,
 }
@@ -257,8 +257,8 @@ fn prepare(args: PrepareArgs) -> Result<()> {
         );
     }
 
-    if let Some(seed) = args.map_seed.as_deref() {
-        apply_seed_file(&obj, seed)?;
+    if let Some(updates) = args.map_updates.as_deref() {
+        apply_map_updates_file(&obj, updates)?;
     }
 
     let prog_fd = program_fd(selected.ptr)?;
@@ -318,9 +318,6 @@ fn run_bpfopt(args: RunArgs) -> Result<()> {
         .arg(&report)
         .arg("--prog-type")
         .arg(metadata.program.prog_type.to_string());
-    if !map_ids.is_empty() {
-        cmd.arg("--map-ids").arg(join_u32_csv(&map_ids));
-    }
     if let Some(verifier_states) = verifier_states_path(&workdir)? {
         cmd.arg("--verifier-states").arg(verifier_states);
     }
@@ -330,7 +327,15 @@ fn run_bpfopt(args: RunArgs) -> Result<()> {
     if args.pass == "map_inline" || !args.pass_args.is_empty() {
         cmd.arg("--");
         if args.pass == "map_inline" {
-            cmd.arg("--map-values").arg(workdir.join(MAP_VALUES_DIR));
+            let map_ids_arg = if map_ids.is_empty() {
+                String::from("0")
+            } else {
+                join_u32_csv(&map_ids)
+            };
+            cmd.arg("--map-values")
+                .arg(workdir.join(MAP_VALUES_DIR))
+                .arg("--map-ids")
+                .arg(map_ids_arg);
         }
         cmd.args(args.pass_args);
     }
@@ -584,18 +589,18 @@ fn map_info(fd: i32) -> Result<libbpf_sys::bpf_map_info> {
     Ok(info)
 }
 
-fn apply_seed_file(obj: &BpfObject, path: &Path) -> Result<()> {
-    let seed = read_json::<SeedFile>(path)?;
-    for seed_map in seed.maps {
-        let map = find_seed_map(obj, &seed_map)?;
-        for entry in &seed_map.entries {
+fn apply_map_updates_file(obj: &BpfObject, path: &Path) -> Result<()> {
+    let updates = read_json::<MapUpdatesFile>(path)?;
+    for target in updates.maps {
+        let map = find_map_update_target(obj, &target)?;
+        for entry in &target.entries {
             let key = decode_hex(&entry.key_hex)
                 .with_context(|| format!("invalid key_hex for map {}", map.name))?;
             let value = decode_hex(&entry.value_hex)
                 .with_context(|| format!("invalid value_hex for map {}", map.name))?;
             if key.len() != map.info.key_size as usize {
                 bail!(
-                    "seed key for map {} has {} byte(s), expected {}",
+                    "map update key for map {} has {} byte(s), expected {}",
                     map.name,
                     key.len(),
                     map.info.key_size
@@ -603,7 +608,7 @@ fn apply_seed_file(obj: &BpfObject, path: &Path) -> Result<()> {
             }
             if value.len() != map.info.value_size as usize {
                 bail!(
-                    "seed value for map {} has {} byte(s), expected {}",
+                    "map update value for map {} has {} byte(s), expected {}",
                     map.name,
                     value.len(),
                     map.info.value_size
@@ -618,26 +623,26 @@ fn apply_seed_file(obj: &BpfObject, path: &Path) -> Result<()> {
                         libbpf_sys::BPF_ANY as u64,
                     )
                 },
-                "failed to seed map entry",
+                "failed to update map entry",
             )?;
         }
     }
     Ok(())
 }
 
-fn find_seed_map(obj: &BpfObject, seed: &SeedMap) -> Result<MapRef> {
-    match (&seed.name, seed.id) {
+fn find_map_update_target(obj: &BpfObject, target: &MapUpdateTarget) -> Result<MapRef> {
+    match (&target.name, target.id) {
         (Some(_), Some(_)) | (None, None) => {
-            bail!("each seed map must specify exactly one of name or id")
+            bail!("each map update target must specify exactly one of name or id")
         }
         (Some(name), None) => maps(obj)?
             .into_iter()
             .find(|map| &map.name == name)
-            .ok_or_else(|| anyhow!("seed map {name:?} not found")),
+            .ok_or_else(|| anyhow!("map update target {name:?} not found")),
         (None, Some(id)) => maps(obj)?
             .into_iter()
             .find(|map| map.info.id == id)
-            .ok_or_else(|| anyhow!("seed map id {id} not found")),
+            .ok_or_else(|| anyhow!("map update target id {id} not found")),
     }
 }
 

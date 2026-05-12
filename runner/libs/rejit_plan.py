@@ -3,8 +3,7 @@
 Each pass declares its daemon step in `runner/config/passes/<pass>/default.yaml`;
 optional per-app overrides live at `runner/config/passes/<pass>/<app>.yaml`
 with a `programs` map keyed by prog_name (and `default` fallback). YAML is the
-single source of truth — runner never queries `bpfopt list-passes`. Drift
-between yaml and bpfopt CLI is caught offline by `analysis/validate_pass_configs.py`.
+single source of truth; runner never queries bpfopt for pass metadata.
 
 Lookup (no merge — first match wins):
   1. <pass>/<app>.yaml -> programs[<prog_name>]
