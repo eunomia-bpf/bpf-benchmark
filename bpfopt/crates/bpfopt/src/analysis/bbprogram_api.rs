@@ -142,13 +142,6 @@ impl BBProgram {
         Ok(())
     }
 
-    pub fn delete_cond_branch_at_site(&mut self, site: InsnSite) -> anyhow::Result<()> {
-        if !self.is_terminator_site(site)? {
-            anyhow::bail!("site {:?} is not a conditional-branch terminator", site);
-        }
-        self.delete_cond_branch(site.block)
-    }
-
     fn delete_cond_branch_in_place(&mut self, block: BlockId) -> anyhow::Result<()> {
         let fallthrough = match self.block(block)?.terminator {
             Terminator::CondBranch { fallthrough, .. } => fallthrough,
@@ -389,10 +382,6 @@ impl BBProgram {
         let split = next.split_block_in_place(at)?;
         *self = next;
         Ok(split)
-    }
-
-    pub fn split_block_at_site(&mut self, at: InsnSite) -> anyhow::Result<(BlockId, BlockId)> {
-        self.split_block(at)
     }
 
     fn split_block_in_place(&mut self, at: InsnSite) -> anyhow::Result<(BlockId, BlockId)> {

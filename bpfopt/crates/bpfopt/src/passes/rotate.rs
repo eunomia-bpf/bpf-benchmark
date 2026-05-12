@@ -70,44 +70,34 @@ impl BpfPass for RotatePass {
 }
 
 pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
-    let mut safe_sites: Vec<SafeRotateSite> = Vec::new();
+    let mut safe_sites: Vec<(InsnSite, RotateSite)> = Vec::new();
     let mut skipped = Vec::new();
 
-    for block in prog.block_ids().collect::<Vec<_>>() {
-        let block_sites = prog.sites_in_block(block)?;
-        let block_insns = prog.copied_body_insns(block)?;
-        for (start_idx, _) in block_sites.iter().enumerate() {
-            let Some(site) = rotate_site_at(&block_insns, start_idx) else {
-                continue;
-            };
-            let replacement_start = block_sites
-                .get(site.start_idx)
-                .copied()
-                .ok_or_else(|| anyhow::anyhow!("rotate start index {} missing", site.start_idx))?;
-            let Some(admission_window) =
-                prog.rep_admit_kinsn_site_window(replacement_start, site.old_len, 2, &mut skipped)?
-            else {
-                continue;
-            };
+    let raw_sites = prog.scan_block_starts(5, |window| {
+        Ok(rotate_site_at(window.insns, window.start_idx)
+            .map(|site| window.hit(site.start_idx, site.old_len, site)))
+    })?;
+    for hit in raw_sites {
+        let Some(admission_window) =
+            prog.rep_admit_kinsn_site_window(hit.start, hit.old_len, 2, &mut skipped)?
+        else {
+            continue;
+        };
 
-            let replacement_start = admission_window.start_site();
-            let last_site = admission_window.end_site();
-            if prog
-                .live_out_site_checked(last_site)?
-                .contains(&site.tmp_reg)
-            {
-                skipped.push(SiteSkipReason {
-                    site: replacement_start,
-                    reason: format!("tmp_reg r{} is live after site", site.tmp_reg),
-                });
-                continue;
-            }
-
-            safe_sites.push(SafeRotateSite {
-                start: replacement_start,
-                site,
+        let replacement_start = admission_window.start_site();
+        let last_site = admission_window.end_site();
+        if prog
+            .live_out_site_checked(last_site)?
+            .contains(&hit.value.tmp_reg)
+        {
+            skipped.push(SiteSkipReason {
+                site: replacement_start,
+                reason: format!("tmp_reg r{} is live after site", hit.value.tmp_reg),
             });
+            continue;
         }
+
+        safe_sites.push((replacement_start, hit.value));
     }
 
     if safe_sites.is_empty() {
@@ -117,8 +107,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
         });
     }
 
-    for safe_site in safe_sites.iter().rev() {
-        let site = &safe_site.site;
+    for (start, site) in safe_sites.iter().rev() {
         let btf_id = ctx
             .kinsn_registry
             .btf_id_for_target_name(site.width.target_name())?;
@@ -136,7 +125,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             | BpfInsn::pack_u8(shift_amount, 8)
             | BpfInsn::pack_u4(site.tmp_reg, 16);
         prog.replace_range_at(
-            safe_site.start,
+            *start,
             site.old_len,
             emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
         )?;
@@ -169,11 +158,6 @@ pub(super) struct RotateSite {
     pub(super) shift_amount: u32,
     pub(super) width: RotateWidth,
 }
-struct SafeRotateSite {
-    start: InsnSite,
-    site: RotateSite,
-}
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum RotateWidth {
     W32,
@@ -223,8 +207,8 @@ fn find_provenance_mov(
 }
 
 fn is_reg_mov_for_width(insn: &BpfInsn, width: RotateWidth) -> bool {
-    let mov64 = insn.code == (BPF_ALU64 | BPF_MOV | BPF_X);
-    let mov32 = insn.code == (BPF_ALU | BPF_MOV | BPF_X);
+    let mov64 = insn.is_alu_reg(BPF_ALU64, BPF_MOV);
+    let mov32 = insn.is_alu_reg(BPF_ALU, BPF_MOV);
     mov64 || (width == RotateWidth::W32 && mov32)
 }
 
@@ -275,10 +259,10 @@ fn try_match_split_copy_rotate_width(
     }
 
     let alu_class = width.alu_class();
-    let shift0_is_lsh = shift0.code == (alu_class | BPF_LSH | BPF_K);
-    let shift0_is_rsh = shift0.code == (alu_class | BPF_RSH | BPF_K);
-    let shift1_is_lsh = shift1.code == (alu_class | BPF_LSH | BPF_K);
-    let shift1_is_rsh = shift1.code == (alu_class | BPF_RSH | BPF_K);
+    let shift0_is_lsh = shift0.is_alu_imm(alu_class, BPF_LSH);
+    let shift0_is_rsh = shift0.is_alu_imm(alu_class, BPF_RSH);
+    let shift1_is_lsh = shift1.is_alu_imm(alu_class, BPF_LSH);
+    let shift1_is_rsh = shift1.is_alu_imm(alu_class, BPF_RSH);
 
     let (lsh_amount, rsh_amount) = if shift0_is_lsh && shift1_is_rsh {
         (shift0.imm as u32, shift1.imm as u32)
@@ -292,7 +276,7 @@ fn try_match_split_copy_rotate_width(
         return None;
     }
 
-    if or_insn.code != (alu_class | BPF_OR | BPF_X) {
+    if !or_insn.is_alu_reg(alu_class, BPF_OR) {
         return None;
     }
 
@@ -315,102 +299,53 @@ fn try_match_rotate_width(
     width: RotateWidth,
 ) -> Option<RotateSite> {
     let alu_class = width.alu_class();
-    let is_or = i2.code == (alu_class | BPF_OR | BPF_X);
-    if !is_or {
+    if !i2.is_alu_reg(alu_class, BPF_OR) {
         return None;
     }
-    let is_rsh = i0.code == (alu_class | BPF_RSH | BPF_K);
-    let is_lsh = i1.code == (alu_class | BPF_LSH | BPF_K);
-
-    if is_rsh && is_lsh {
-        let rsh_amount = i0.imm as u32;
-        let lsh_amount = i1.imm as u32;
-
-        if rsh_amount + lsh_amount == width.bits() {
-            let rsh_reg = i0.dst_reg();
-            let lsh_reg = i1.dst_reg();
-            if rsh_reg != lsh_reg {
-                let or_dst = i2.dst_reg();
-                let or_src = i2.src_reg();
-                let or_uses_both = (or_dst == rsh_reg && or_src == lsh_reg)
-                    || (or_dst == lsh_reg && or_src == rsh_reg);
-                if or_uses_both {
-                    let result_reg = or_dst;
-                    if let Some(mov_idx) = find_provenance_mov(insns, idx, rsh_reg, lsh_reg, width)
-                    {
-                        return rotate_site(
-                            mov_idx,
-                            (idx + 3) - mov_idx,
-                            result_reg,
-                            lsh_reg,
-                            rsh_reg,
-                            lsh_amount,
-                            width,
-                        );
-                    }
-                    if let Some(mov_idx) = find_provenance_mov(insns, idx, lsh_reg, rsh_reg, width)
-                    {
-                        return rotate_site(
-                            mov_idx,
-                            (idx + 3) - mov_idx,
-                            result_reg,
-                            rsh_reg,
-                            lsh_reg,
-                            lsh_amount,
-                            width,
-                        );
-                    }
-                }
-            }
-        }
+    let (lsh_amount, rsh_amount, lsh_reg, rsh_reg) = shift_pair(i0, i1, alu_class)?;
+    if lsh_amount + rsh_amount != width.bits() || lsh_reg == rsh_reg {
+        return None;
     }
-    let is_lsh_first = i0.code == (alu_class | BPF_LSH | BPF_K);
-    let is_rsh_second = i1.code == (alu_class | BPF_RSH | BPF_K);
-
-    if is_lsh_first && is_rsh_second {
-        let lsh_amount = i0.imm as u32;
-        let rsh_amount = i1.imm as u32;
-
-        if lsh_amount + rsh_amount == width.bits() {
-            let lsh_reg = i0.dst_reg();
-            let rsh_reg = i1.dst_reg();
-            if lsh_reg != rsh_reg {
-                let or_dst = i2.dst_reg();
-                let or_src = i2.src_reg();
-
-                let or_uses_both = (or_dst == lsh_reg && or_src == rsh_reg)
-                    || (or_dst == rsh_reg && or_src == lsh_reg);
-                if or_uses_both {
-                    let result_reg = or_dst;
-                    if let Some(mov_idx) = find_provenance_mov(insns, idx, rsh_reg, lsh_reg, width)
-                    {
-                        return rotate_site(
-                            mov_idx,
-                            (idx + 3) - mov_idx,
-                            result_reg,
-                            lsh_reg,
-                            rsh_reg,
-                            lsh_amount,
-                            width,
-                        );
-                    }
-                    if let Some(mov_idx) = find_provenance_mov(insns, idx, lsh_reg, rsh_reg, width)
-                    {
-                        return rotate_site(
-                            mov_idx,
-                            (idx + 3) - mov_idx,
-                            result_reg,
-                            rsh_reg,
-                            lsh_reg,
-                            lsh_amount,
-                            width,
-                        );
-                    }
-                }
-            }
-        }
+    let or_dst = i2.dst_reg();
+    let or_src = i2.src_reg();
+    let or_uses_both =
+        (or_dst == lsh_reg && or_src == rsh_reg) || (or_dst == rsh_reg && or_src == lsh_reg);
+    if !or_uses_both {
+        return None;
+    }
+    if let Some(mov_idx) = find_provenance_mov(insns, idx, rsh_reg, lsh_reg, width) {
+        return rotate_site(
+            mov_idx,
+            (idx + 3) - mov_idx,
+            or_dst,
+            lsh_reg,
+            rsh_reg,
+            lsh_amount,
+            width,
+        );
+    }
+    if let Some(mov_idx) = find_provenance_mov(insns, idx, lsh_reg, rsh_reg, width) {
+        return rotate_site(
+            mov_idx,
+            (idx + 3) - mov_idx,
+            or_dst,
+            rsh_reg,
+            lsh_reg,
+            lsh_amount,
+            width,
+        );
     }
 
+    None
+}
+
+fn shift_pair(i0: &BpfInsn, i1: &BpfInsn, alu_class: u8) -> Option<(u32, u32, u8, u8)> {
+    if i0.is_alu_imm(alu_class, BPF_RSH) && i1.is_alu_imm(alu_class, BPF_LSH) {
+        return Some((i1.imm as u32, i0.imm as u32, i1.dst_reg(), i0.dst_reg()));
+    }
+    if i0.is_alu_imm(alu_class, BPF_LSH) && i1.is_alu_imm(alu_class, BPF_RSH) {
+        return Some((i0.imm as u32, i1.imm as u32, i0.dst_reg(), i1.dst_reg()));
+    }
     None
 }
 

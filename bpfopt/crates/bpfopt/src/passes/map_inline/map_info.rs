@@ -149,7 +149,7 @@ fn collect_map_bindings_from_sites(
         let Some(insn) = program.insn_at(site) else {
             continue;
         };
-        if let Some(kind) = insn.map_pseudo_kind() {
+        if let Some(kind) = insn.map_pseudo() {
             let (map_ordinal, map_id) =
                 resolve_map_ref(kind, insn.imm, map_ids, fd_bindings, &mut fd_order);
             bindings.push(MapBinding {

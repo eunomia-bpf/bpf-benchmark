@@ -11,9 +11,9 @@ use anyhow::{anyhow, bail, Context, Result};
 use bpfopt::analysis::{lift_with_pass_context, lower, BBProgram};
 use bpfopt::insn::{BpfInsn, MapPseudo};
 use bpfopt::pass::{
-    run_pass_once, Arch, BpfPass, BtfInfoRecords, CompressedMapValues, CompressedMapValuesKind,
-    KinsnDescriptor, KinsnRegistry, MapInlineHintAnchorSpec, MapInlineHintModeSpec,
-    MapInlineHintSpec, MapMetadata, PassAction, PassContext, PassManager, PassReportSite,
+    finalize_pass_reports, run_pass_once, Arch, BpfPass, BtfInfoRecords, CompressedMapValues,
+    CompressedMapValuesKind, KinsnDescriptor, KinsnRegistry, MapInlineHintAnchorSpec,
+    MapInlineHintModeSpec, MapInlineHintSpec, MapMetadata, PassAction, PassContext, PassReportSite,
     PassResult, PlatformCapabilities,
 };
 use bpfopt::passes::PASS_REGISTRY;
@@ -1845,7 +1845,7 @@ fn site_skip_reports(
             message: skip.reason.clone(),
         })
         .collect::<Vec<_>>();
-    PassManager::finalize_reports(reports, program)?
+    finalize_pass_reports(reports, program)?
         .into_iter()
         .map(|report| {
             if report.action != PassAction::Skipped {
@@ -1871,7 +1871,7 @@ fn site_diagnostic_reports(
             message: diagnostic.message.clone(),
         })
         .collect::<Vec<_>>();
-    PassManager::finalize_reports(reports, program)?
+    finalize_pass_reports(reports, program)?
         .into_iter()
         .map(|report| {
             if report.action != PassAction::Diagnostic {

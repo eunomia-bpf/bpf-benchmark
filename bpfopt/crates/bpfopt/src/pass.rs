@@ -25,13 +25,6 @@ use serde::{Serialize, Serializer};
 pub type RegSet = HashSet<u8>;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct MapPtr {
-    pub id: Option<u32>,
-    pub offset: Option<i32>,
-    pub is_value: bool,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RegKind {
     Scalar,
     FramePointer,
@@ -191,12 +184,6 @@ pub(crate) struct PrefetchProfile {
     pub miss_rate: f64,
 }
 pub(crate) type PmuRecord = InsnAnnotation;
-
-#[derive(Clone, Debug, Default)]
-pub(crate) struct ProfilingData {
-    pub branch_profiles: HashMap<usize, BranchProfile>,
-    pub prefetch_profiles: HashMap<usize, PrefetchProfile>,
-}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MapInlineHintModeSpec {
@@ -406,8 +393,6 @@ pub struct PassReportPc {
     pub action: PassAction,
     pub message: String,
 }
-
-pub struct PassManager;
 
 /// One specialized map value snapshot emitted by `MapInlinePass`.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -725,25 +710,23 @@ pub fn run_pass_once(
     Ok(result)
 }
 
-impl PassManager {
-    pub fn finalize_reports(
-        reports: Vec<PassReportSite>,
-        prog: &BBProgram,
-    ) -> anyhow::Result<Vec<PassReportPc>> {
-        reports
-            .into_iter()
-            .map(|report| {
-                let pc = prog.site_current_pc(report.site)?;
-                Ok(PassReportPc {
-                    pc: u64::try_from(pc).map_err(|_| {
-                        anyhow::anyhow!("report PC {pc} for {:?} does not fit u64", report.site)
-                    })?,
-                    action: report.action,
-                    message: report.message,
-                })
+pub fn finalize_pass_reports(
+    reports: Vec<PassReportSite>,
+    prog: &BBProgram,
+) -> anyhow::Result<Vec<PassReportPc>> {
+    reports
+        .into_iter()
+        .map(|report| {
+            let pc = prog.site_current_pc(report.site)?;
+            Ok(PassReportPc {
+                pc: u64::try_from(pc).map_err(|_| {
+                    anyhow::anyhow!("report PC {pc} for {:?} does not fit u64", report.site)
+                })?,
+                action: report.action,
+                message: report.message,
             })
-            .collect()
-    }
+        })
+        .collect()
 }
 
 fn program_instruction_slots(program: &BBProgram) -> anyhow::Result<usize> {

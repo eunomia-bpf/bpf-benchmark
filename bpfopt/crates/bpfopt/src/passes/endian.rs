@@ -39,71 +39,47 @@ fn endian_register_uses(payload: u64) -> RegSet {
         .collect()
 }
 pub(super) struct EndianFusionSite {
-    pub(super) old_len: usize,
     pub(super) dst_reg: u8,
     pub(super) src_reg: u8,
     pub(super) offset: i16,
     pub(super) size: u8,
 }
-struct SafeEndianFusionSite {
-    start: InsnSite,
-    preserved: Vec<BpfInsn>,
-    site: EndianFusionSite,
-}
-fn scan_endian_site_at(
-    prog: &BBProgram,
-    start: InsnSite,
-) -> anyhow::Result<Option<EndianFusionSite>> {
-    let load = prog
-        .insn_at(start)
-        .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", start))?;
+fn scan_endian_site_in_window(insns: &[BpfInsn]) -> Option<(usize, EndianFusionSite)> {
+    let load = insns.first()?;
     if !load.is_ldx_mem() {
-        return Ok(None);
+        return None;
     }
     let load_size = bpf_size(load.code);
     let dst = load.dst_reg();
-    if let Some(next) = next_body_site_in_block(prog, start)? {
-        let endian = prog
-            .insn_at(next)
-            .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", next))?;
+    if let Some(endian) = insns.get(1) {
         if endian.dst_reg() == dst {
             if let Some(fused_size) =
                 endian_swap_size(endian).and_then(|size| fusion_size(load_size, size))
             {
-                return Ok(Some(endian_site(load, 2, fused_size)));
+                return Some((2, endian_site(load, fused_size)));
             }
         }
     }
     if !matches!(load_size, BPF_W | BPF_DW) {
-        return Ok(None);
+        return None;
     }
-    let mut old_len = 1usize;
-    let mut cursor = start;
-    while old_len <= MAX_NARROW_SCAN {
-        let Some(next) = next_body_site_in_block(prog, cursor)? else {
-            break;
-        };
-        old_len += 1;
-        let insn = prog
-            .insn_at(next)
-            .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", next))?;
+    for (scanned, insn) in insns.iter().skip(1).take(MAX_NARROW_SCAN).enumerate() {
+        let old_len = scanned + 2;
         if insn.dst_reg() == dst {
             if let Some(size) = endian_swap_size(insn) {
                 if is_narrowing(load_size, size) {
-                    return Ok(Some(endian_site(load, old_len, size)));
+                    return Some((old_len, endian_site(load, size)));
                 }
             }
         }
         if blocks_narrow_window(insn, dst) {
             break;
         }
-        cursor = next;
     }
-    Ok(None)
+    None
 }
-fn endian_site(load: &BpfInsn, old_len: usize, size: u8) -> EndianFusionSite {
+fn endian_site(load: &BpfInsn, size: u8) -> EndianFusionSite {
     EndianFusionSite {
-        old_len,
         dst_reg: load.dst_reg(),
         src_reg: load.src_reg(),
         offset: load.off,
@@ -144,26 +120,15 @@ fn is_narrowing(load_size: u8, endian_size: u8) -> bool {
 fn find_blocked_narrow_sites(prog: &BBProgram) -> anyhow::Result<Vec<SiteSkipReason>> {
     let mut skips = Vec::new();
     for block in prog.block_ids().collect::<Vec<_>>() {
-        for load_site in prog.sites_in_block(block)? {
-            let load = prog
-                .insn_at(load_site)
-                .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", load_site))?;
-            if !load.is_ldx_mem() || !matches!(bpf_size(load.code), BPF_W | BPF_DW) {
+        let body = prog.block_body_view(block)?;
+        for (start_idx, (&load_site, load)) in body.sites.iter().zip(body.insns).enumerate() {
+            if !(load.is_ldx_mem_size(BPF_W) || load.is_ldx_mem_size(BPF_DW)) {
                 continue;
             }
             let load_size = bpf_size(load.code);
             let dst = load.dst_reg();
             let mut read_before_endian = false;
-            let mut scanned = 0usize;
-            let mut cursor = load_site;
-            while scanned < MAX_NARROW_SCAN {
-                let Some(next) = next_body_site_in_block(prog, cursor)? else {
-                    break;
-                };
-                scanned += 1;
-                let insn = prog
-                    .insn_at(next)
-                    .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", next))?;
+            for insn in body.insns.iter().skip(start_idx + 1).take(MAX_NARROW_SCAN) {
                 if insn.dst_reg() == dst
                     && endian_swap_size(insn).is_some_and(|size| is_narrowing(load_size, size))
                 {
@@ -179,7 +144,6 @@ fn find_blocked_narrow_sites(prog: &BBProgram) -> anyhow::Result<Vec<SiteSkipRea
                     break;
                 }
                 read_before_endian |= reads_reg(insn, dst);
-                cursor = next;
             }
         }
     }
@@ -315,38 +279,37 @@ impl BpfPass for EndianFusionPass {
     }
 }
 pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
-    let mut safe_sites: Vec<SafeEndianFusionSite> = Vec::new();
+    let mut safe_sites: Vec<(InsnSite, usize, Vec<BpfInsn>, EndianFusionSite)> = Vec::new();
     let mut skipped = Vec::new();
     skipped.extend(find_blocked_narrow_sites(prog)?);
     for block in prog.block_ids().collect::<Vec<_>>() {
         for start in prog.sites_in_block(block)? {
             if let Some(skip) = cross_block_endian_skip(prog, start)? {
                 skipped.push(skip);
-                continue;
             }
-            let Some(site) = scan_endian_site_at(prog, start)? else {
-                continue;
-            };
-            let replacement_len = endian_fusion_replacement_len(
-                site.dst_reg,
-                site.src_reg,
-                site.offset,
-                ctx.platform.arch,
-                site.size,
-            ) + site.old_len.saturating_sub(2);
-            if prog
-                .rep_admit_kinsn_site_window(start, site.old_len, replacement_len, &mut skipped)?
-                .is_none()
-            {
-                continue;
-            }
-            let preserved = preserved_body_insns(prog, start, site.old_len.saturating_sub(2))?;
-            safe_sites.push(SafeEndianFusionSite {
-                start,
-                preserved,
-                site,
-            });
         }
+    }
+    let raw_sites = prog.scan_block_starts(MAX_NARROW_SCAN + 1, |window| {
+        Ok(scan_endian_site_in_window(window.lookahead)
+            .map(|(old_len, site)| window.hit(window.start_idx, old_len, site)))
+    })?;
+    for hit in raw_sites {
+        let site = hit.value;
+        let replacement_len = endian_fusion_replacement_len(
+            site.dst_reg,
+            site.src_reg,
+            site.offset,
+            ctx.platform.arch,
+            site.size,
+        ) + hit.old_len.saturating_sub(2);
+        if prog
+            .rep_admit_kinsn_site_window(hit.start, hit.old_len, replacement_len, &mut skipped)?
+            .is_none()
+        {
+            continue;
+        }
+        let preserved = preserved_body_insns(prog, hit.start, hit.old_len.saturating_sub(2))?;
+        safe_sites.push((hit.start, hit.old_len, preserved, site));
     }
     if safe_sites.is_empty() {
         return Ok(PassResult {
@@ -354,8 +317,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             ..PassResult::unchanged()
         });
     }
-    for safe_site in safe_sites.iter().rev() {
-        let site = &safe_site.site;
+    for (start, old_len, preserved, site) in safe_sites.iter().rev() {
         let kfunc_name = kfunc_name_for_size(site.size)
             .ok_or_else(|| anyhow::anyhow!("unsupported endian fusion size {}", site.size))?;
         let btf_id = ctx.kinsn_registry.btf_id_for_target_name(kfunc_name)?;
@@ -369,8 +331,8 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             ctx.platform.arch,
             site.size,
         );
-        replacement.extend_from_slice(&safe_site.preserved);
-        prog.replace_range_at(safe_site.start, site.old_len, replacement)?;
+        replacement.extend_from_slice(preserved);
+        prog.replace_range_at(*start, *old_len, replacement)?;
     }
     Ok(PassResult {
         sites_applied: safe_sites.len(),
@@ -383,19 +345,24 @@ fn preserved_body_insns(
     start: InsnSite,
     len: usize,
 ) -> anyhow::Result<Vec<BpfInsn>> {
-    let mut preserved = Vec::with_capacity(len);
-    let mut cursor = start;
-    for _ in 0..len {
-        let Some(next) = next_body_site_in_block(prog, cursor)? else {
-            anyhow::bail!(
+    let body = prog.block_body_view(prog.site_block(start))?;
+    let preserve_start = start
+        .idx
+        .checked_add(1)
+        .ok_or_else(|| anyhow::anyhow!("endian fusion preserve start overflows"))?;
+    let preserve_end = preserve_start
+        .checked_add(len)
+        .ok_or_else(|| anyhow::anyhow!("endian fusion preserve end overflows"))?;
+    Ok(body
+        .insns
+        .get(preserve_start..preserve_end)
+        .ok_or_else(|| {
+            anyhow::anyhow!(
                 "endian fusion preserved window from {:?} exceeds block body",
                 start
-            );
-        };
-        preserved.push(*prog.insn(next)?);
-        cursor = next;
-    }
-    Ok(preserved)
+            )
+        })?
+        .to_vec())
 }
 fn cross_block_endian_skip(
     prog: &BBProgram,
@@ -407,7 +374,8 @@ fn cross_block_endian_skip(
     if !load.is_ldx_mem() {
         return Ok(None);
     }
-    if next_body_site_in_block(prog, start)?.is_some() {
+    let body = prog.block_body_view(prog.site_block(start))?;
+    if start.idx + 1 < body.sites.len() {
         return Ok(None);
     }
     let start_block = prog.site_block(start);
@@ -437,11 +405,4 @@ fn cross_block_endian_skip(
         site: start,
         reason: "interior branch target".into(),
     }))
-}
-
-fn next_body_site_in_block(prog: &BBProgram, site: InsnSite) -> anyhow::Result<Option<InsnSite>> {
-    Ok(prog
-        .sites_in_block(prog.site_block(site))?
-        .windows(2)
-        .find_map(|window| (window[0] == site).then_some(window[1])))
 }

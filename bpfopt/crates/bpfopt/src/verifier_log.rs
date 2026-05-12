@@ -144,7 +144,7 @@ fn default_reg_type() -> String {
 fn is_zero_usize(value: &usize) -> bool {
     *value == 0
 }
-pub(crate) fn parse_verifier_log(log: &str) -> Vec<VerifierInsn> {
+fn parse_verifier_log(log: &str) -> Vec<VerifierInsn> {
     log.lines().filter_map(parse_state_line).collect()
 }
 pub fn verifier_states_from_log(log: &str) -> VerifierStatesJson {

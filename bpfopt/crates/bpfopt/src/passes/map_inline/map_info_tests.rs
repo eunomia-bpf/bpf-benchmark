@@ -58,7 +58,7 @@ fn collect_map_bindings(
     let mut pc = 0usize;
     while pc < insns.len() {
         let insn = insns[pc];
-        if let Some(kind) = insn.map_pseudo_kind() {
+        if let Some(kind) = insn.map_pseudo() {
             let (map_ordinal, map_id) =
                 resolve_map_ref(kind, insn.imm, map_ids, fd_bindings, &mut fd_order);
             bindings.push(MapBinding {

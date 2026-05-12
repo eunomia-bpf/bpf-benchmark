@@ -175,9 +175,6 @@ impl MapPseudo {
     pub fn uses_index(self) -> bool {
         matches!(self, Self::Idx | Self::IdxValue)
     }
-    pub fn has_value_offset(self) -> bool {
-        matches!(self, Self::FdValue | Self::IdxValue)
-    }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum BranchOff {
@@ -398,14 +395,6 @@ impl BpfInsn {
             .then(|| MapPseudo::from_src_reg(self.src_reg()))
             .flatten()
     }
-    #[inline]
-    pub fn is_map_pseudo(&self) -> bool {
-        self.map_pseudo().is_some()
-    }
-    #[inline]
-    pub fn map_pseudo_kind(&self) -> Option<MapPseudo> {
-        self.map_pseudo()
-    }
     /// True for LDX_MEM of any size.
     #[inline]
     pub fn is_ldx_mem(&self) -> bool {
@@ -443,24 +432,6 @@ impl BpfInsn {
     /// `mov32 dst, imm`
     pub fn mov32_imm(dst: u8, imm: i32) -> Self {
         Self::new(BPF_ALU | BPF_MOV | BPF_K, Self::make_regs(dst, 0), 0, imm)
-    }
-    /// `call kfunc` (src_reg = BPF_PSEUDO_KFUNC_CALL = 2)
-    ///
-    /// `off = 0` means vmlinux BTF. For module kfuncs, `off` is the 1-based
-    /// slot in the load/REJIT `fd_array`.
-    #[cfg(test)]
-    pub fn call_kfunc_with_off(btf_id: i32, off: i16) -> Self {
-        Self::new(
-            BPF_JMP | BPF_CALL,
-            Self::make_regs(0, BPF_PSEUDO_KFUNC_CALL),
-            off,
-            btf_id,
-        )
-    }
-    /// `call kfunc` against vmlinux BTF.
-    #[cfg(test)]
-    pub fn call_kfunc(btf_id: i32) -> Self {
-        Self::call_kfunc_with_off(btf_id, 0)
     }
     /// `call kinsn` (src_reg = BPF_PSEUDO_KINSN_CALL = 4)
     ///
@@ -616,6 +587,24 @@ impl BpfInsn {
     #[inline]
     pub fn is_kinsn_sidecar(&self) -> bool {
         self.code == (BPF_ALU64 | BPF_MOV | BPF_K) && self.src_reg() == BPF_PSEUDO_KINSN_SIDECAR
+    }
+    #[inline]
+    pub fn is_alu_imm(&self, class: u8, op: u8) -> bool {
+        matches!(class, BPF_ALU | BPF_ALU64)
+            && bpf_class(self.code) == class
+            && bpf_op(self.code) == op
+            && bpf_src(self.code) == BPF_K
+    }
+    #[inline]
+    pub fn is_alu_reg(&self, class: u8, op: u8) -> bool {
+        matches!(class, BPF_ALU | BPF_ALU64)
+            && bpf_class(self.code) == class
+            && bpf_op(self.code) == op
+            && bpf_src(self.code) == BPF_X
+    }
+    #[inline]
+    pub fn is_ldx_mem_size(&self, size: u8) -> bool {
+        self.is_ldx_mem() && bpf_size(self.code) == size
     }
 }
 /// Returns the instruction width in slots: 2 for LD_IMM64, 1 for all others.

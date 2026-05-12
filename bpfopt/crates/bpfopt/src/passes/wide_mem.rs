@@ -4,51 +4,20 @@ use crate::insn::*;
 use crate::pass::*;
 use anyhow::{bail, Context};
 use std::collections::BTreeSet;
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(super) struct Binding {
-    pub(super) name: &'static str,
-    pub(super) value: i64,
-}
+const MAX_WIDE_MEM_LEN: usize = 22;
 #[derive(Clone, Debug)]
 pub(super) struct RewriteSite {
     pub(super) start_idx: usize,
     pub(super) old_len: usize,
-    pub(super) bindings: Vec<Binding>,
-}
-impl RewriteSite {
-    pub(super) fn get_binding(&self, name: &str) -> Option<i64> {
-        self.bindings
-            .iter()
-            .find(|b| b.name == name)
-            .map(|b| b.value)
-    }
-    fn required_binding(&self, name: &str) -> anyhow::Result<i64> {
-        self.get_binding(name)
-            .ok_or_else(|| anyhow::anyhow!("wide_mem site missing required {name} binding"))
-    }
-}
-pub(super) fn scan_wide_mem(insns: &[BpfInsn]) -> Vec<RewriteSite> {
-    let mut sites = Vec::new();
-    let n = insns.len();
-    if n < 4 {
-        return sites;
-    }
-    let mut idx = 0;
-    while idx < n {
-        if let Some(site) = try_match_wide_mem_at(insns, idx) {
-            let site_len = site.old_len;
-            sites.push(site);
-            idx += site_len;
-        } else {
-            idx += 1;
-        }
-    }
-    sites
+    dst_reg: u8,
+    base_reg: u8,
+    base_off: i64,
+    width: u32,
 }
 fn try_match_wide_mem_at(insns: &[BpfInsn], idx: usize) -> Option<RewriteSite> {
     let n = insns.len();
     let first = &insns[idx];
-    if !first.is_ldx_mem() || bpf_size(first.code) != BPF_B {
+    if !first.is_ldx_mem_size(BPF_B) {
         return None;
     }
     let dst = first.dst_reg();
@@ -57,60 +26,35 @@ fn try_match_wide_mem_at(insns: &[BpfInsn], idx: usize) -> Option<RewriteSite> {
     for width in (2u32..=8).rev() {
         let len_a = 1 + 3 * (width as usize - 1);
         if idx + len_a <= n && match_wide_mem_low_first(insns, idx, dst, base, first_off, width) {
-            return Some(RewriteSite {
-                start_idx: idx,
-                old_len: len_a,
-                bindings: vec![
-                    Binding {
-                        name: "dst_reg",
-                        value: dst as i64,
-                    },
-                    Binding {
-                        name: "base_reg",
-                        value: base as i64,
-                    },
-                    Binding {
-                        name: "base_off",
-                        value: first_off,
-                    },
-                    Binding {
-                        name: "width",
-                        value: width as i64,
-                    },
-                ],
-            });
+            return Some(wide_mem_site(idx, len_a, dst, base, first_off, width));
         }
         let len_b = 3 * width as usize - 2;
         if idx + len_b <= n {
             if let Some(base_off) =
                 match_wide_mem_high_first(insns, idx, dst, base, first_off, width)
             {
-                return Some(RewriteSite {
-                    start_idx: idx,
-                    old_len: len_b,
-                    bindings: vec![
-                        Binding {
-                            name: "dst_reg",
-                            value: dst as i64,
-                        },
-                        Binding {
-                            name: "base_reg",
-                            value: base as i64,
-                        },
-                        Binding {
-                            name: "base_off",
-                            value: base_off,
-                        },
-                        Binding {
-                            name: "width",
-                            value: width as i64,
-                        },
-                    ],
-                });
+                return Some(wide_mem_site(idx, len_b, dst, base, base_off, width));
             }
         }
     }
     None
+}
+fn wide_mem_site(
+    start_idx: usize,
+    old_len: usize,
+    dst: u8,
+    base: u8,
+    base_off: i64,
+    width: u32,
+) -> RewriteSite {
+    RewriteSite {
+        start_idx,
+        old_len,
+        dst_reg: dst,
+        base_reg: base,
+        base_off,
+        width,
+    }
 }
 fn match_wide_mem_low_first(
     insns: &[BpfInsn],
@@ -125,34 +69,12 @@ fn match_wide_mem_low_first(
         let load = &insns[idx];
         let shift = &insns[idx + 1];
         let or = &insns[idx + 2];
-        if !load.is_ldx_mem() || bpf_size(load.code) != BPF_B {
+        let Some(tmp) = byte_load_tmp(load, base, base_off + i as i64, dst) else {
             return false;
-        }
-        if load.src_reg() != base {
+        };
+        if !shifted_or_lane(shift, or, dst, tmp, (8 * i) as i32) {
             return false;
-        }
-        if load.off as i64 != base_off + i as i64 {
-            return false;
-        }
-        let tmp = load.dst_reg();
-        if tmp == dst {
-            return false;
-        }
-        if shift.code != (BPF_ALU64 | BPF_LSH | BPF_K) {
-            return false;
-        }
-        if shift.dst_reg() != tmp {
-            return false;
-        }
-        if shift.imm != (8 * i) as i32 {
-            return false;
-        }
-        if or.code != (BPF_ALU64 | BPF_OR | BPF_X) {
-            return false;
-        }
-        if or.dst_reg() != dst || or.src_reg() != tmp {
-            return false;
-        }
+        };
     }
     true
 }
@@ -165,7 +87,7 @@ fn match_wide_mem_high_first(
     width: u32,
 ) -> Option<i64> {
     let shift0 = &insns[start_idx + 1];
-    if shift0.code != (BPF_ALU64 | BPF_LSH | BPF_K) {
+    if !shift0.is_alu_imm(BPF_ALU64, BPF_LSH) {
         return None;
     }
     if shift0.dst_reg() != dst {
@@ -175,25 +97,13 @@ fn match_wide_mem_high_first(
         return None;
     }
     let load0 = &insns[start_idx + 2];
-    if !load0.is_ldx_mem() || bpf_size(load0.code) != BPF_B {
-        return None;
-    }
-    if load0.src_reg() != base {
-        return None;
-    }
     let base_off = load0.off as i64;
     if first_off != base_off + 1 {
         return None;
     }
-    let tmp0 = load0.dst_reg();
-    if tmp0 == dst {
-        return None;
-    }
+    let tmp0 = byte_load_tmp(load0, base, base_off, dst)?;
     let or0 = &insns[start_idx + 3];
-    if or0.code != (BPF_ALU64 | BPF_OR | BPF_X) {
-        return None;
-    }
-    if or0.dst_reg() != dst || or0.src_reg() != tmp0 {
+    if !or_uses_tmp(or0, dst, tmp0) {
         return None;
     }
     for i in 2..width {
@@ -201,62 +111,59 @@ fn match_wide_mem_high_first(
         let load = &insns[idx];
         let shift = &insns[idx + 1];
         let or = &insns[idx + 2];
-        if !load.is_ldx_mem() || bpf_size(load.code) != BPF_B {
-            return None;
-        }
-        if load.src_reg() != base {
-            return None;
-        }
-        if load.off as i64 != base_off + i as i64 {
-            return None;
-        }
-        let tmp = load.dst_reg();
-        if tmp == dst {
-            return None;
-        }
-        if shift.code != (BPF_ALU64 | BPF_LSH | BPF_K) {
-            return None;
-        }
-        if shift.dst_reg() != tmp {
-            return None;
-        }
-        if shift.imm != (8 * i) as i32 {
-            return None;
-        }
-        if or.code != (BPF_ALU64 | BPF_OR | BPF_X) {
-            return None;
-        }
-        if or.dst_reg() != dst || or.src_reg() != tmp {
+        let tmp = byte_load_tmp(load, base, base_off + i as i64, dst)?;
+        if !shifted_or_lane(shift, or, dst, tmp, (8 * i) as i32) {
             return None;
         }
     }
     Some(base_off)
 }
+
+fn byte_load_tmp(load: &BpfInsn, base: u8, off: i64, forbidden: u8) -> Option<u8> {
+    if load.is_ldx_mem_size(BPF_B) && load.src_reg() == base && load.off as i64 == off {
+        let tmp = load.dst_reg();
+        return (tmp != forbidden).then_some(tmp);
+    }
+    None
+}
+
+fn shifted_or_lane(shift: &BpfInsn, or: &BpfInsn, dst: u8, tmp: u8, amount: i32) -> bool {
+    shift.is_alu_imm(BPF_ALU64, BPF_LSH)
+        && shift.dst_reg() == tmp
+        && shift.imm == amount
+        && or_uses_tmp(or, dst, tmp)
+}
+
+fn or_uses_tmp(or: &BpfInsn, dst: u8, tmp: u8) -> bool {
+    or.is_alu_reg(BPF_ALU64, BPF_OR) && or.dst_reg() == dst && or.src_reg() == tmp
+}
 pub(super) fn emit_wide_mem(site: &RewriteSite) -> anyhow::Result<Vec<BpfInsn>> {
-    let dst = u8::try_from(site.required_binding("dst_reg")?)
-        .context("wide_mem dst_reg binding does not fit u8")?;
-    let base = u8::try_from(site.required_binding("base_reg")?)
-        .context("wide_mem base_reg binding does not fit u8")?;
-    let off = i16::try_from(site.required_binding("base_off")?)
-        .context("wide_mem base_off binding does not fit i16")?;
-    let width = site.required_binding("width")?;
-    let size = match width {
+    let off = i16::try_from(site.base_off).context("wide_mem base_off binding does not fit i16")?;
+    let size = match site.width {
         2 => BPF_H,
         4 => BPF_W,
         8 => BPF_DW,
-        _ => bail!("WIDE_MEM: unsupported width {} (supports 2, 4, 8)", width),
+        _ => bail!(
+            "WIDE_MEM: unsupported width {} (supports 2, 4, 8)",
+            site.width
+        ),
     };
-    Ok(vec![BpfInsn::ldx_mem(size, dst, base, off)])
+    Ok(vec![BpfInsn::ldx_mem(
+        size,
+        site.dst_reg,
+        site.base_reg,
+        off,
+    )])
 }
-fn wide_load_alignment_skip_reason(site: &RewriteSite) -> anyhow::Result<Option<String>> {
-    let width = site.required_binding("width")?;
-    let base_off = site.required_binding("base_off")?;
-    if matches!(width, 2 | 4 | 8) && base_off.rem_euclid(width) != 0 {
-        return Ok(Some(format!(
-            "wide load offset {base_off} is not naturally aligned for width {width}"
-        )));
+fn wide_load_alignment_skip_reason(site: &RewriteSite) -> Option<String> {
+    let width = i64::from(site.width);
+    if matches!(site.width, 2 | 4 | 8) && site.base_off.rem_euclid(width) != 0 {
+        return Some(format!(
+            "wide load offset {} is not naturally aligned for width {}",
+            site.base_off, site.width
+        ));
     }
-    Ok(None)
+    None
 }
 fn skip_site(site: InsnSite, reason: impl Into<String>) -> SiteSkipReason {
     SiteSkipReason {
@@ -264,23 +171,16 @@ fn skip_site(site: InsnSite, reason: impl Into<String>) -> SiteSkipReason {
         reason: reason.into(),
     }
 }
-const BPF_PROG_TYPE_SCHED_CLS: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_CLS;
-const BPF_PROG_TYPE_SCHED_ACT: u32 = libbpf_sys::BPF_PROG_TYPE_SCHED_ACT;
-const BPF_PROG_TYPE_XDP: u32 = libbpf_sys::BPF_PROG_TYPE_XDP;
-const BPF_PROG_TYPE_LWT_IN: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_IN;
-const BPF_PROG_TYPE_LWT_OUT: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_OUT;
-const BPF_PROG_TYPE_LWT_XMIT: u32 = libbpf_sys::BPF_PROG_TYPE_LWT_XMIT;
-const BPF_PROG_TYPE_SK_SKB: u32 = libbpf_sys::BPF_PROG_TYPE_SK_SKB;
 fn is_packet_unsafe_prog_type(prog_type: u32) -> bool {
     matches!(
         prog_type,
-        BPF_PROG_TYPE_SCHED_CLS
-            | BPF_PROG_TYPE_SCHED_ACT
-            | BPF_PROG_TYPE_XDP
-            | BPF_PROG_TYPE_LWT_IN
-            | BPF_PROG_TYPE_LWT_OUT
-            | BPF_PROG_TYPE_LWT_XMIT
-            | BPF_PROG_TYPE_SK_SKB
+        libbpf_sys::BPF_PROG_TYPE_SCHED_CLS
+            | libbpf_sys::BPF_PROG_TYPE_SCHED_ACT
+            | libbpf_sys::BPF_PROG_TYPE_XDP
+            | libbpf_sys::BPF_PROG_TYPE_LWT_IN
+            | libbpf_sys::BPF_PROG_TYPE_LWT_OUT
+            | libbpf_sys::BPF_PROG_TYPE_LWT_XMIT
+            | libbpf_sys::BPF_PROG_TYPE_SK_SKB
     )
 }
 fn is_likely_packet_ptr(reg: i32, before_insn_count: usize, insns: &[BpfInsn]) -> bool {
@@ -298,11 +198,6 @@ fn is_likely_packet_ptr(reg: i32, before_insn_count: usize, insns: &[BpfInsn]) -
     true
 }
 pub struct WideMemPass;
-#[derive(Clone, Debug)]
-struct SafeWideMemSite {
-    start: InsnSite,
-    site: RewriteSite,
-}
 impl BpfPass for WideMemPass {
     fn name(&self) -> &str {
         "wide_mem"
@@ -312,117 +207,88 @@ impl BpfPass for WideMemPass {
     }
 }
 pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
-    let block_ids = prog.block_ids().collect::<Vec<_>>();
-    if block_ids
-        .iter()
-        .copied()
-        .try_fold(true, |all_empty, block| {
-            Ok::<_, anyhow::Error>(all_empty && prog.block_is_body_empty(block)?)
-        })?
-    {
-        return Ok(PassResult::unchanged());
-    }
     let branch_targets = prog.branch_target_entry_sites()?;
     let mut safe_sites = Vec::new();
     let mut skipped = Vec::new();
     let mut reported_starts = BTreeSet::new();
-    for block in block_ids {
-        let block_sites = prog.sites_in_block(block)?;
-        let block_insns = block_sites
+    let raw_sites = prog.scan_block_starts(MAX_WIDE_MEM_LEN, |window| {
+        Ok(try_match_wide_mem_at(window.insns, window.start_idx)
+            .map(|site| window.hit(site.start_idx, site.old_len, site)))
+    })?;
+    let mut last_hit_end = None;
+    for hit in raw_sites {
+        let hit_end = hit.start_idx + hit.old_len;
+        if last_hit_end.is_some_and(|(block, end)| block == hit.block && hit.start_idx < end) {
+            continue;
+        }
+        last_hit_end = Some((hit.block, hit_end));
+        let body = prog.block_body_view(hit.block)?;
+        let start_idx = hit.start_idx;
+        let start_site = hit.start;
+        let site = hit.value;
+        reported_starts.insert(start_site);
+        if hit_end > body.sites.len() {
+            anyhow::bail!(
+                "wide_mem site at {:?} spans beyond block {:?} body",
+                start_site,
+                hit.block
+            );
+        }
+        let has_interior_target = body.sites[start_idx + 1..hit_end]
             .iter()
-            .map(|&site| {
-                prog.insn_at(site)
-                    .copied()
-                    .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))
-            })
-            .collect::<anyhow::Result<Vec<_>>>()?;
-        for site in scan_wide_mem(&block_insns) {
-            let start_idx = site.start_idx;
-            let start_site = block_sites
-                .get(start_idx)
-                .copied()
-                .ok_or_else(|| anyhow::anyhow!("wide_mem start index {start_idx} missing"))?;
-            reported_starts.insert(start_site);
-            let end_idx = start_idx + site.old_len;
-            if end_idx > block_sites.len() {
-                anyhow::bail!(
-                    "wide_mem site at {:?} spans beyond block {:?} body",
-                    start_site,
-                    block
-                );
-            }
-            let has_interior_target = block_sites[start_idx + 1..end_idx]
-                .iter()
-                .any(|candidate| branch_targets.contains(candidate));
-            if has_interior_target {
-                skipped.push(skip_site(start_site, "interior branch target"));
-                continue;
-            }
-            let dst_reg = u8::try_from(site.required_binding("dst_reg")?)
-                .context("wide_mem dst_reg binding does not fit u8")?;
-            let mut scratch_regs = std::collections::HashSet::new();
-            for insn in &block_insns[start_idx..end_idx] {
-                let class = insn.class();
-                if class == BPF_ALU64 || class == BPF_ALU || class == BPF_LDX {
-                    let dreg = insn.dst_reg();
-                    if dreg != dst_reg {
-                        scratch_regs.insert(dreg);
-                    }
-                }
-            }
-            let last_site = block_sites[end_idx - 1];
-            let live_after = prog.live_out_site_checked(last_site)?;
-            let has_live_scratch = scratch_regs.iter().any(|r| live_after.contains(r));
-            if has_live_scratch {
-                skipped.push(skip_site(start_site, "scratch register live after site"));
-                continue;
-            }
-            let width = site.required_binding("width")?;
-            if width != 2 && width != 4 && width != 8 {
-                skipped.push(skip_site(
-                    start_site,
-                    format!("unsupported width {} (supports 2, 4, 8)", width),
-                ));
-                continue;
-            }
-            if let Some(reason) = wide_load_alignment_skip_reason(&site)? {
-                skipped.push(skip_site(start_site, reason));
-                continue;
-            }
-            if is_packet_unsafe_prog_type(ctx.prog_type) {
-                let base_reg = site.required_binding("base_reg")?;
-                let base_reg_i32 = i32::try_from(base_reg)
-                    .context("wide_mem base_reg binding does not fit i32")?;
-                if base_reg != 10 && is_likely_packet_ptr(base_reg_i32, start_idx, &block_insns) {
-                    skipped.push(skip_site(
-                        start_site,
-                        format!(
-                            "likely packet pointer r{} in XDP/TC prog (prog_type={})",
-                            base_reg, ctx.prog_type
-                        ),
-                    ));
-                    continue;
-                }
-            }
-            let base_reg = u8::try_from(site.required_binding("base_reg")?)
-                .context("wide_mem base_reg binding does not fit u8")?;
-            if prog.reg_kind(start_site, base_reg).is_some_and(|kind| {
-                matches!(kind, RegKind::BtfStructPointer | RegKind::OtherPointer)
-            }) {
+            .any(|candidate| branch_targets.contains(candidate));
+        if has_interior_target {
+            skipped.push(skip_site(start_site, "interior branch target"));
+            continue;
+        }
+        let live_after = prog.live_out_site_checked(body.sites[hit_end - 1])?;
+        let has_live_scratch = body.insns[start_idx..hit_end].iter().any(|insn| {
+            matches!(insn.class(), BPF_ALU64 | BPF_ALU | BPF_LDX)
+                && insn.dst_reg() != site.dst_reg
+                && live_after.contains(&insn.dst_reg())
+        });
+        if has_live_scratch {
+            skipped.push(skip_site(start_site, "scratch register live after site"));
+            continue;
+        }
+        if !matches!(site.width, 2 | 4 | 8) {
+            skipped.push(skip_site(
+                start_site,
+                format!("unsupported width {} (supports 2, 4, 8)", site.width),
+            ));
+            continue;
+        }
+        if let Some(reason) = wide_load_alignment_skip_reason(&site) {
+            skipped.push(skip_site(start_site, reason));
+            continue;
+        }
+        if is_packet_unsafe_prog_type(ctx.prog_type) {
+            let base_reg = i32::from(site.base_reg);
+            if site.base_reg != 10 && is_likely_packet_ptr(base_reg, start_idx, body.insns) {
                 skipped.push(skip_site(
                     start_site,
                     format!(
-                    "base register r{} is a BTF struct pointer; wide load may cross field boundary",
-                    base_reg
-                ),
+                        "likely packet pointer r{} in XDP/TC prog (prog_type={})",
+                        site.base_reg, ctx.prog_type
+                    ),
                 ));
                 continue;
             }
-            safe_sites.push(SafeWideMemSite {
-                start: start_site,
-                site,
-            });
         }
+        if prog
+            .reg_kind(start_site, site.base_reg)
+            .is_some_and(|kind| matches!(kind, RegKind::BtfStructPointer | RegKind::OtherPointer))
+        {
+            skipped.push(skip_site(
+                start_site,
+                format!(
+                    "base register r{} is a BTF struct pointer; wide load may cross field boundary",
+                    site.base_reg
+                ),
+            ));
+            continue;
+        }
+        safe_sites.push((start_site, site));
     }
     add_cross_block_wide_mem_skips(prog, &branch_targets, &mut reported_starts, &mut skipped)?;
     if safe_sites.is_empty() {
@@ -431,8 +297,8 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             ..PassResult::unchanged()
         });
     }
-    for site in safe_sites.iter().rev() {
-        prog.replace_range_at(site.start, site.site.old_len, emit_wide_mem(&site.site)?)?;
+    for (start, site) in safe_sites.iter().rev() {
+        prog.replace_range_at(*start, site.old_len, emit_wide_mem(site)?)?;
     }
     Ok(PassResult {
         sites_applied: safe_sites.len(),
@@ -479,7 +345,6 @@ fn collect_wide_mem_window(
     start_idx: usize,
     branch_targets: &BTreeSet<InsnSite>,
 ) -> anyhow::Result<WideMemWindow> {
-    const MAX_WIDE_MEM_LEN: usize = 22;
     let mut insns = Vec::with_capacity(MAX_WIDE_MEM_LEN);
     let mut crossed_branch_target = false;
     let mut block = start_block;

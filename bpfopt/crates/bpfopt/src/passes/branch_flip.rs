@@ -113,7 +113,8 @@ pub fn run_on_bbprogram(
         validate_real_branch_profile(site.cond_site, branch_count, site_miss_rate, taken_rate)?;
 
         if has_exterior_interior_target(prog, &branch_targets, site)? {
-            skipped.push(prog.bf_skip_reason(
+            skipped.push(bf_skip_reason(
+                prog,
                 site.cond_site,
                 "interior branch target from external source".into(),
             )?);
@@ -128,14 +129,17 @@ pub fn run_on_bbprogram(
             ),
         };
         if invert_jcc_op(bpf_op(cond.code)).is_none() {
-            skipped.push(
-                prog.bf_skip_reason(site.cond_site, "cannot invert condition opcode".into())?,
-            );
+            skipped.push(bf_skip_reason(
+                prog,
+                site.cond_site,
+                "cannot invert condition opcode".into(),
+            )?);
             continue;
         }
 
         if f64::from(site_miss_rate) > max_branch_miss_rate {
-            skipped.push(prog.bf_skip_reason(
+            skipped.push(bf_skip_reason(
+                prog,
                 site.cond_site,
                 format!(
                     "site branch_miss_rate {:.1}% exceeds threshold {:.1}% (unpredictable branch)",
@@ -149,10 +153,15 @@ pub fn run_on_bbprogram(
         let should_flip = f64::from(taken_rate) >= min_bias;
 
         if !should_flip {
-            skipped.push(prog.bf_skip_reason(site.cond_site, "branch not biased enough".into())?);
+            skipped.push(bf_skip_reason(
+                prog,
+                site.cond_site,
+                "branch not biased enough".into(),
+            )?);
             continue;
         }
-        prog.bf_validate_flipped_branch_deltas(
+        bf_validate_flipped_branch_deltas(
+            prog,
             site.cond_site,
             site.then_first,
             site.then_last,
@@ -210,6 +219,100 @@ fn validate_real_branch_profile(
     Ok(())
 }
 
+fn bf_skip_reason(
+    prog: &BBProgram,
+    site: InsnSite,
+    reason: String,
+) -> anyhow::Result<SiteSkipReason> {
+    prog.insn(site)?;
+    Ok(SiteSkipReason { site, reason })
+}
+
+fn bf_blocks_are_adjacent(prog: &BBProgram, left: BlockId, right: BlockId) -> anyhow::Result<bool> {
+    prog.block_frame(left)?;
+    prog.block_frame(right)?;
+    Ok(left.0 + 1 == right.0)
+}
+
+fn bf_block_range_has_body_site(
+    prog: &BBProgram,
+    first: BlockId,
+    last: BlockId,
+) -> anyhow::Result<bool> {
+    if first.0 > last.0 {
+        anyhow::bail!(
+            "branch_flip block range {:?}..={:?} is inverted",
+            first,
+            last
+        );
+    }
+    for block in first.0..=last.0 {
+        if !prog.sites_in_block(BlockId(block))?.is_empty() {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+fn bf_validate_flipped_branch_deltas(
+    prog: &BBProgram,
+    report_site: InsnSite,
+    then_first: BlockId,
+    then_last: BlockId,
+    else_first: BlockId,
+    else_last: BlockId,
+    cond: BpfInsn,
+) -> anyhow::Result<()> {
+    let then_len = bf_block_range_body_slot_len(prog, then_first, then_last)?;
+    let else_len = bf_block_range_body_slot_len(prog, else_first, else_last)?;
+    let cond_delta = else_len.checked_add(1).ok_or_else(|| {
+        anyhow::anyhow!(
+            "branch_flip site {:?} else arm overflows branch delta",
+            report_site
+        )
+    })?;
+    let mut inverted = cond;
+    inverted.set_branch_target_delta(i64::try_from(cond_delta).map_err(|_| {
+        anyhow::anyhow!(
+            "branch_flip site {:?} else arm length {} overflows branch delta",
+            report_site,
+            else_len
+        )
+    })?)?;
+    let mut ja = BpfInsn::ja(0);
+    ja.set_branch_target_delta(i64::try_from(then_len).map_err(|_| {
+        anyhow::anyhow!(
+            "branch_flip site {:?} then arm length {} overflows branch delta",
+            report_site,
+            then_len
+        )
+    })?)?;
+    Ok(())
+}
+
+fn bf_block_range_body_slot_len(
+    prog: &BBProgram,
+    first: BlockId,
+    last: BlockId,
+) -> anyhow::Result<usize> {
+    if first.0 > last.0 {
+        anyhow::bail!(
+            "branch_flip block range {:?}..={:?} is inverted",
+            first,
+            last
+        );
+    }
+    let mut len = 0usize;
+    for block in first.0..=last.0 {
+        for site in prog.sites_in_block(BlockId(block))? {
+            len = len
+                .checked_add(prog.insn_slot_width(site)?)
+                .ok_or_else(|| anyhow::anyhow!("branch_flip arm slot length overflows"))?;
+        }
+    }
+    Ok(len)
+}
+
 fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow::Result<()> {
     let pred = site.pred;
     let then_first = site.then_first;
@@ -217,9 +320,9 @@ fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow
     let else_first = site.else_first;
     let else_last = site.else_last;
 
-    if !prog.bf_blocks_are_adjacent(pred, then_first)?
+    if !bf_blocks_are_adjacent(prog, pred, then_first)?
         || then_first > then_last
-        || !prog.bf_blocks_are_adjacent(then_last, else_first)?
+        || !bf_blocks_are_adjacent(prog, then_last, else_first)?
         || else_first > else_last
     {
         anyhow::bail!(
@@ -308,7 +411,7 @@ fn swapped_range_order(
     if first.is_empty() || second.is_empty() {
         anyhow::bail!("branch_flip cannot swap an empty block range");
     }
-    let mut order = Vec::with_capacity(prog.block_count());
+    let mut order = Vec::with_capacity(prog.block_ids().count());
     let mut emitted_swap = false;
     for block in prog.block_ids() {
         if first.contains(&block) || second.contains(&block) {
@@ -353,7 +456,7 @@ fn branch_flip_site_at(prog: &BBProgram, pred: BlockId) -> anyhow::Result<Option
     if !cond.is_cond_jmp() {
         return Ok(None);
     }
-    if !prog.bf_blocks_are_adjacent(pred, then_first)? {
+    if !bf_blocks_are_adjacent(prog, pred, then_first)? {
         return Ok(None);
     }
     let Some((then_blocks, then_last, join)) = then_arm(prog, then_first, else_first)? else {
@@ -362,16 +465,16 @@ fn branch_flip_site_at(prog: &BBProgram, pred: BlockId) -> anyhow::Result<Option
     let Some((else_blocks, else_last)) = else_arm(prog, else_first, join)? else {
         return Ok(None);
     };
-    if !prog.bf_blocks_are_adjacent(then_last, else_first)? {
+    if !bf_blocks_are_adjacent(prog, then_last, else_first)? {
         return Ok(None);
     }
-    if !prog.bf_block_range_has_body_site(then_first, then_last)? {
+    if !bf_block_range_has_body_site(prog, then_first, then_last)? {
         return Ok(None);
     }
-    if !prog.bf_blocks_are_adjacent(else_last, join)? {
+    if !bf_blocks_are_adjacent(prog, else_last, join)? {
         return Ok(None);
     }
-    if !prog.bf_block_range_has_body_site(else_first, else_last)? {
+    if !bf_block_range_has_body_site(prog, else_first, else_last)? {
         return Ok(None);
     }
     let Some(cond_site) = prog.terminator_site(pred)? else {
@@ -403,7 +506,7 @@ fn then_arm(
         }
         blocks.push(block);
         match prog.terminator(block)? {
-            Terminator::Fallthrough { next } if prog.bf_blocks_are_adjacent(block, next)? => {
+            Terminator::Fallthrough { next } if bf_blocks_are_adjacent(prog, block, next)? => {
                 block = next
             }
             Terminator::Jump { insn, target } => {
@@ -433,7 +536,7 @@ fn else_arm(
             Terminator::Fallthrough { next } if next == join => {
                 return Ok(Some((blocks, block)));
             }
-            Terminator::Fallthrough { next } if prog.bf_blocks_are_adjacent(block, next)? => {
+            Terminator::Fallthrough { next } if bf_blocks_are_adjacent(prog, block, next)? => {
                 block = next
             }
             _ => return Ok(None),

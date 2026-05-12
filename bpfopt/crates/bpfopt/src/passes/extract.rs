@@ -25,32 +25,24 @@ fn extract_register_uses(payload: u64) -> RegSet {
 }
 pub struct ExtractPass;
 pub(super) struct ExtractSite {
-    pub(super) old_len: usize,
     pub(super) dst_reg: u8,
     pub(super) shift_amount: u32,
     pub(super) bit_len: u32,
 }
 pub(super) fn contiguous_mask_len(mask: u64) -> Option<u32> {
-    if mask == 0 {
-        return None;
-    }
-    if mask & (mask.wrapping_add(1)) == 0 {
-        Some(mask.count_ones())
-    } else {
-        None
-    }
+    (mask != 0 && mask & mask.wrapping_add(1) == 0).then_some(mask.count_ones())
 }
 fn extract_site_from_pair(i0: &BpfInsn, i1: &BpfInsn) -> Option<ExtractSite> {
-    let is_rsh = i0.code == (BPF_ALU64 | BPF_RSH | BPF_K);
-    let is_and = i1.code == (BPF_ALU64 | BPF_AND | BPF_K);
-    if !is_rsh || !is_and || i0.dst_reg() != i1.dst_reg() {
+    if !i0.is_alu_imm(BPF_ALU64, BPF_RSH)
+        || !i1.is_alu_imm(BPF_ALU64, BPF_AND)
+        || i0.dst_reg() != i1.dst_reg()
+    {
         return None;
     }
     let shift = i0.imm as u32;
     let mask = i1.imm as i64 as u64;
     let bit_len = contiguous_mask_len(mask)?;
     (shift + bit_len <= 64).then_some(ExtractSite {
-        old_len: 2,
         dst_reg: i0.dst_reg(),
         shift_amount: shift,
         bit_len,
@@ -74,27 +66,24 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                 skipped.push(skip);
             };
         }
-        let block_sites = prog.sites_in_block(block)?;
-        for window in block_sites.windows(2) {
-            let start = window[0];
-            let next = window[1];
-            let i0 = prog
-                .insn_at(start)
-                .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", start))?;
-            let i1 = prog
-                .insn_at(next)
-                .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", next))?;
-            let Some(site) = extract_site_from_pair(i0, i1) else {
-                continue;
-            };
-            if prog
-                .rep_admit_kinsn_site_window(start, site.old_len, 2, &mut skipped)?
-                .is_none()
-            {
-                continue;
-            }
-            safe_sites.push((start, site));
+    }
+    let raw_sites = prog.scan_block_starts(2, |window| {
+        if window.lookahead.len() < 2 {
+            return Ok(None);
         }
+        Ok(
+            extract_site_from_pair(&window.lookahead[0], &window.lookahead[1])
+                .map(|site| window.hit(window.start_idx, 2, site)),
+        )
+    })?;
+    for hit in raw_sites {
+        if prog
+            .rep_admit_kinsn_site_window(hit.start, hit.old_len, 2, &mut skipped)?
+            .is_none()
+        {
+            continue;
+        }
+        safe_sites.push((hit.start, hit.value));
     }
     if safe_sites.is_empty() {
         return Ok(PassResult {
@@ -123,7 +112,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             | BpfInsn::pack_u8(bit_len, 16);
         prog.replace_range_at(
             *start,
-            site.old_len,
+            2,
             emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
         )?;
     }
@@ -140,7 +129,8 @@ fn cross_block_extract_skip(
     let i0 = prog
         .insn_at(start)
         .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", start))?;
-    if next_body_site_in_block(prog, start)?.is_some() {
+    let body = prog.block_body_view(prog.site_block(start))?;
+    if start.idx + 1 < body.sites.len() {
         return Ok(None);
     }
     let start_block = prog.site_block(start);
@@ -165,11 +155,4 @@ fn cross_block_extract_skip(
         site: start,
         reason: "interior branch target".into(),
     }))
-}
-
-fn next_body_site_in_block(prog: &BBProgram, site: InsnSite) -> anyhow::Result<Option<InsnSite>> {
-    Ok(prog
-        .sites_in_block(prog.site_block(site))?
-        .windows(2)
-        .find_map(|window| (window[0] == site).then_some(window[1])))
 }

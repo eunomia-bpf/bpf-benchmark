@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{insn_use_def_set, BBProgram, BlockId, InsnSite};
+use crate::analysis::{insn_use_def_set, BBProgram, InsnSite};
 use crate::insn::{advance_reg_state as advance_simple_reg_state, SimpleRegValue, *};
 use crate::pass::*;
 use std::collections::{HashMap, HashSet};
@@ -30,7 +30,7 @@ fn decode_memset_bulk_proof(payload: &[u8]) -> ProofRegion {
 }
 fn bulk_offset_range_valid(offset: i16, len: usize) -> bool {
     let end = i32::from(offset) + len as i32 - 1;
-    end >= i32::from(i16::MIN) && end <= i32::from(i16::MAX)
+    (i32::from(i16::MIN)..=i32::from(i16::MAX)).contains(&end)
 }
 fn memcpy_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
     let dst_base = kinsn_payload_reg(payload, 0);
@@ -162,19 +162,14 @@ impl BulkSite {
         }
     }
 }
-#[derive(Clone, Debug)]
-struct AppliedBulkSite {
-    start: InsnSite,
-    site: BulkSite,
-}
 #[derive(Default)]
 struct ScanResult {
-    sites: Vec<AppliedBulkSite>,
+    sites: Vec<(InsnSite, BulkSite)>,
     skips: Vec<SiteSkipReason>,
 }
 enum MatchOutcome {
     Apply(BulkSite),
-    Skip { reason: String, advance: usize },
+    Skip(String, usize),
     NoMatch,
 }
 #[derive(Clone, Copy)]
@@ -203,32 +198,17 @@ impl BpfPass for BulkMemoryPass {
     }
 }
 pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
-    let block_ids = prog.block_ids().collect::<Vec<_>>();
-    if block_ids
-        .iter()
-        .copied()
-        .try_fold(true, |all_empty, block| {
-            Ok::<_, anyhow::Error>(all_empty && prog.block_is_body_empty(block)?)
-        })?
-    {
-        return Ok(PassResult::unchanged());
-    }
     let scan = scan_sites(prog)?;
     let mut skipped = scan.skips;
     let mut safe_sites = Vec::new();
-    for site in scan.sites {
+    for (start, site) in scan.sites {
         if prog
-            .rep_admit_kinsn_site_window(
-                site.start,
-                site.site.old_len,
-                site.site.replacement_len(),
-                &mut skipped,
-            )?
+            .rep_admit_kinsn_site_window(start, site.old_len, site.replacement_len(), &mut skipped)?
             .is_none()
         {
             continue;
         }
-        safe_sites.push(site);
+        safe_sites.push((start, site));
     }
     if safe_sites.is_empty() {
         return Ok(PassResult {
@@ -236,11 +216,11 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             ..PassResult::unchanged()
         });
     }
-    for site in safe_sites.iter().rev() {
+    for (start, site) in safe_sites.iter().rev() {
         prog.replace_range_at(
-            site.start,
-            site.site.old_len,
-            emit_site_replacement(&site.site, &ctx.kinsn_registry)?,
+            *start,
+            site.old_len,
+            emit_site_replacement(site, &ctx.kinsn_registry)?,
         )?;
     }
     Ok(PassResult {
@@ -256,49 +236,34 @@ fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
         if prog.should_reset_linear_state_at_block(block)? {
             regs = [RegValue::Unknown; 11];
         }
-        let insns = prog.copied_body_insns(block)?;
-        let block_sites = prog.sites_in_block(block)?;
+        let body = prog.block_body_view(block)?;
         let mut live_out = HashMap::new();
-        for &site in &block_sites {
+        for &site in &body.sites {
             live_out.insert(site, prog.live_out_site_checked(site)?);
         }
         let mut idx = 0usize;
-        while idx < insns.len() {
-            let start = block_sites
-                .get(idx)
-                .copied()
-                .ok_or_else(|| anyhow::anyhow!("bulk_memory start index {idx} missing"))?;
-            match try_match_memcpy_run_at(&insns, &block_sites, idx, &live_out)? {
+        while idx < body.insns.len() {
+            let start = body.sites[idx];
+            match try_match_memcpy_run_at(body.insns, &body.sites, idx, &live_out)? {
                 MatchOutcome::Apply(site) => {
-                    if let BulkSiteKind::Memcpy {
-                        src_base, dst_base, ..
-                    } = &site.kind
-                    {
-                        if src_base != dst_base {
-                            let src_stack = is_likely_stack_ptr(*src_base, idx, &insns);
-                            let dst_stack = is_likely_stack_ptr(*dst_base, idx, &insns);
-                            if src_stack == dst_stack {
-                                scan.skips.push(SiteSkipReason {
-                                    site: start,
-                                    reason: format!(
-                                        "different-base memcpy alias not provably safe (src r{src_base}, dst r{dst_base})"
-                                    ),
-                                });
-                                advance_reg_state_range(prog, block, idx, site.old_len, &mut regs)?;
-                                idx += site.old_len;
-                                continue;
-                            }
-                        }
+                    if let Some(reason) = memcpy_alias_skip_reason(&site, idx, body.insns) {
+                        scan.skips.push(SiteSkipReason {
+                            site: start,
+                            reason,
+                        });
+                        advance_reg_state_range(prog, &body.sites, idx, site.old_len, &mut regs)?;
+                        idx += site.old_len;
+                        continue;
                     }
                     let old_len = site.old_len;
-                    advance_reg_state_range(prog, block, idx, old_len, &mut regs)?;
-                    scan.sites.push(AppliedBulkSite { start, site });
+                    advance_reg_state_range(prog, &body.sites, idx, old_len, &mut regs)?;
+                    scan.sites.push((start, site));
                     idx += old_len;
                     continue;
                 }
-                MatchOutcome::Skip { reason, advance } => {
+                MatchOutcome::Skip(reason, advance) => {
                     let advance = advance.max(1);
-                    advance_reg_state_range(prog, block, idx, advance, &mut regs)?;
+                    advance_reg_state_range(prog, &body.sites, idx, advance, &mut regs)?;
                     scan.skips.push(SiteSkipReason {
                         site: start,
                         reason,
@@ -308,10 +273,10 @@ fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
                 }
                 MatchOutcome::NoMatch => {}
             }
-            if let Some(site) = try_match_memset_run_at(&insns, idx, &regs)? {
+            if let Some(site) = try_match_memset_run_at(body.insns, idx, &regs)? {
                 let old_len = site.old_len;
-                advance_reg_state_range(prog, block, idx, old_len, &mut regs)?;
-                scan.sites.push(AppliedBulkSite { start, site });
+                advance_reg_state_range(prog, &body.sites, idx, old_len, &mut regs)?;
+                scan.sites.push((start, site));
                 idx += old_len;
                 continue;
             }
@@ -320,6 +285,24 @@ fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
         }
     }
     Ok(scan)
+}
+fn memcpy_alias_skip_reason(site: &BulkSite, idx: usize, insns: &[BpfInsn]) -> Option<String> {
+    let BulkSiteKind::Memcpy {
+        src_base, dst_base, ..
+    } = &site.kind
+    else {
+        return None;
+    };
+    if src_base == dst_base {
+        return None;
+    }
+    (is_likely_stack_ptr(*src_base, idx, insns) == is_likely_stack_ptr(*dst_base, idx, insns)).then(
+        || {
+            format!(
+                "different-base memcpy alias not provably safe (src r{src_base}, dst r{dst_base})"
+            )
+        },
+    )
 }
 fn try_match_memcpy_run_at(
     insns: &[BpfInsn],
@@ -369,10 +352,10 @@ fn try_match_memcpy_run_at(
         .copied()
         .ok_or_else(|| anyhow::anyhow!("bulk_memory last index {last_idx} missing"))?;
     if first.src_base == first.dst_base && ranges_overlap(first.src_off, first.dst_off, raw_bytes) {
-        return Ok(MatchOutcome::Skip {
-            reason: "alias overlap in same-base memcpy run".into(),
-            advance: raw_len,
-        });
+        return Ok(MatchOutcome::Skip(
+            "alias overlap in same-base memcpy run".into(),
+            raw_len,
+        ));
     }
     let live_after = live_out
         .get(&last_site)
@@ -380,10 +363,10 @@ fn try_match_memcpy_run_at(
     let mut seen = HashSet::new();
     for tmp_reg in tmp_regs.iter().take(consumed_pairs).copied() {
         if seen.insert(tmp_reg) && live_after.contains(&tmp_reg) {
-            return Ok(MatchOutcome::Skip {
-                reason: format!("temp tmp_reg r{tmp_reg} is live after site"),
-                advance: raw_len,
-            });
+            return Ok(MatchOutcome::Skip(
+                format!("temp tmp_reg r{tmp_reg} is live after site"),
+                raw_len,
+            ));
         }
     }
     Ok(MatchOutcome::Apply(BulkSite {
@@ -455,7 +438,7 @@ fn memcpy_lane_at(insns: &[BpfInsn], idx: usize) -> Option<MemcpyLane> {
     let load = insns.get(idx)?;
     let store = insns.get(idx + 1)?;
     let width = bpf_size(load.code);
-    if !load.is_ldx_mem() || !is_supported_width(width) {
+    if !is_supported_width(width) || !load.is_ldx_mem_size(width) {
         return None;
     }
     if store.class() != BPF_STX || bpf_mode(store.code) != BPF_MEM || bpf_size(store.code) != width
@@ -666,12 +649,9 @@ fn fill_byte_from_imm(width: u8, imm: i32) -> anyhow::Result<Option<u8>> {
 fn fill_byte_from_const(width: u8, value: u64) -> anyhow::Result<Option<u8>> {
     let lane_bytes = width_bytes(width)?;
     let fill = value as u8;
-    for byte_idx in 0..lane_bytes {
-        if ((value >> (byte_idx * 8)) & 0xff) as u8 != fill {
-            return Ok(None);
-        }
-    }
-    Ok(Some(fill))
+    Ok((0..lane_bytes)
+        .all(|byte_idx| ((value >> (byte_idx * 8)) & 0xff) as u8 == fill)
+        .then_some(fill))
 }
 fn ranges_overlap(src_off: i16, dst_off: i16, len: usize) -> bool {
     let src_start = src_off as i32;
@@ -707,11 +687,7 @@ fn is_likely_stack_ptr(reg: u8, before_insn_count: usize, insns: &[BpfInsn]) -> 
                 continue;
             }
             found_def = true;
-            if insn.class() == BPF_ALU64
-                && insn.dst_reg() == target_reg
-                && bpf_src(insn.code) == BPF_X
-                && bpf_op(insn.code) == BPF_MOV
-            {
+            if insn.is_alu_reg(BPF_ALU64, BPF_MOV) && insn.dst_reg() == target_reg {
                 let src_reg = insn.src_reg();
                 if src_reg == STACK_PTR_REG {
                     return true;
@@ -720,10 +696,8 @@ fn is_likely_stack_ptr(reg: u8, before_insn_count: usize, insns: &[BpfInsn]) -> 
                 cursor = def_idx;
                 break;
             }
-            if insn.class() == BPF_ALU64
-                && insn.dst_reg() == target_reg
-                && bpf_src(insn.code) == BPF_K
-                && matches!(bpf_op(insn.code), BPF_ADD | BPF_SUB)
+            if insn.dst_reg() == target_reg
+                && (insn.is_alu_imm(BPF_ALU64, BPF_ADD) || insn.is_alu_imm(BPF_ALU64, BPF_SUB))
             {
                 cursor = def_idx;
                 break;
@@ -738,7 +712,7 @@ fn is_likely_stack_ptr(reg: u8, before_insn_count: usize, insns: &[BpfInsn]) -> 
 }
 fn advance_reg_state_range(
     prog: &BBProgram,
-    block: BlockId,
+    sites: &[InsnSite],
     start_idx: usize,
     len: usize,
     regs: &mut [RegValue; 11],
@@ -746,21 +720,15 @@ fn advance_reg_state_range(
     let end_idx = start_idx.checked_add(len).ok_or_else(|| {
         anyhow::anyhow!("bulk_memory range start {start_idx} + len {len} overflows")
     })?;
-    let block_len = prog.sites_in_block(block)?.len();
-    if end_idx > block_len {
+    if end_idx > sites.len() {
         anyhow::bail!(
-            "bulk_memory range {}..{} exceeds block {:?} body length {}",
+            "bulk_memory range {}..{} exceeds body length {}",
             start_idx,
             end_idx,
-            block,
-            block_len
+            sites.len()
         );
     }
-    let block_sites = prog.sites_in_block(block)?;
-    for site in block_sites
-        .get(start_idx..end_idx)
-        .ok_or_else(|| anyhow::anyhow!("bulk_memory site range missing"))?
-    {
+    for site in &sites[start_idx..end_idx] {
         advance_reg_state_at_site(prog, *site, regs)?;
     }
     Ok(())

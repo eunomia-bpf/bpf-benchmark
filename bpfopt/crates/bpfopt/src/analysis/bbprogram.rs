@@ -7,11 +7,10 @@ use crate::analysis::bbprogram_lower::remap_btf_records_for_lowering;
 use crate::analysis::{DefSite, UseDefGraph};
 use crate::insn::{insn_width, BpfInsn, MapPseudo};
 use crate::pass::{
-    BtfInfoRecords, InsnAnnotation, KinsnRegistry, MapPtr, PmuRecord, PrefetchHint,
-    PrefetchProfile, ProfilingData, RegKind, RegSet,
+    BtfInfoRecords, InsnAnnotation, KinsnRegistry, PmuRecord, PrefetchHint, RegKind, RegSet,
 };
 use crate::passes::map_inline::MapInlineSideInput;
-use crate::verifier_log::{RegState, VerifierInsn, VerifierInsnKind};
+use crate::verifier_log::{RegState, StackState, VerifierInsn, VerifierInsnKind};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::ops::Range;
 use std::sync::Arc;
@@ -76,6 +75,44 @@ impl KinsnAdmissionWindow {
         self.end
     }
 }
+#[derive(Debug)]
+pub(crate) struct BlockBodyView<'a> {
+    pub(crate) block: BlockId,
+    pub(crate) sites: Vec<InsnSite>,
+    pub(crate) insns: &'a [BpfInsn],
+}
+#[derive(Debug)]
+pub(crate) struct BlockStartWindow<'a> {
+    pub(crate) block: BlockId,
+    pub(crate) start_idx: usize,
+    pub(crate) start_site: InsnSite,
+    pub(crate) sites: &'a [InsnSite],
+    pub(crate) insns: &'a [BpfInsn],
+    pub(crate) lookahead: &'a [BpfInsn],
+}
+impl BlockStartWindow<'_> {
+    pub(crate) fn hit<T>(&self, start_idx: usize, old_len: usize, value: T) -> LocalWindowHit<T> {
+        LocalWindowHit {
+            start_idx,
+            old_len,
+            value,
+        }
+    }
+}
+#[derive(Debug)]
+pub(crate) struct LocalWindowHit<T> {
+    pub(crate) start_idx: usize,
+    pub(crate) old_len: usize,
+    pub(crate) value: T,
+}
+#[derive(Debug)]
+pub(crate) struct WindowHit<T> {
+    pub(crate) block: BlockId,
+    pub(crate) start_idx: usize,
+    pub(crate) start: InsnSite,
+    pub(crate) old_len: usize,
+    pub(crate) value: T,
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Terminator {
     Fallthrough {
@@ -134,23 +171,14 @@ impl BBProgram {
     pub fn blocks(&self) -> impl Iterator<Item = &Block> {
         self.blocks.iter()
     }
-    pub fn entry(&self) -> BlockId {
-        self.entry
-    }
     pub fn is_empty(&self) -> bool {
         self.blocks.is_empty()
-    }
-    pub fn block_count(&self) -> usize {
-        self.blocks.len()
     }
     pub fn block_ids(&self) -> impl Iterator<Item = BlockId> + '_ {
         self.blocks.iter().map(|block| block.id)
     }
     pub fn all_sites(&self) -> impl Iterator<Item = InsnSite> + '_ {
         self.blocks.iter().flat_map(logical_sites_for_block)
-    }
-    pub fn block_body_len(&self, block: BlockId) -> anyhow::Result<usize> {
-        Ok(self.block(block)?.insns.len())
     }
     pub fn block_is_body_empty(&self, block: BlockId) -> anyhow::Result<bool> {
         Ok(self.block(block)?.insns.is_empty())
@@ -177,43 +205,8 @@ impl BBProgram {
         let block = self.block(block)?;
         Ok((block.insns.len() == 1).then(|| &block.insns[0]))
     }
-    pub fn block_body_insns(
-        &self,
-        block: BlockId,
-    ) -> anyhow::Result<impl Iterator<Item = (InsnSite, &BpfInsn)> + '_> {
-        self.block(block)?;
-        Ok(self.blocks[block.0]
-            .insns
-            .iter()
-            .enumerate()
-            .map(move |(idx, insn)| (InsnSite { block, idx }, insn)))
-    }
     pub fn copied_body_insns(&self, block: BlockId) -> anyhow::Result<Vec<BpfInsn>> {
         Ok(self.block(block)?.insns.clone())
-    }
-    pub fn body_insn_window(
-        &self,
-        block: BlockId,
-        start: usize,
-        len: usize,
-    ) -> anyhow::Result<Vec<BpfInsn>> {
-        let block_ref = self.block(block)?;
-        let end = start
-            .checked_add(len)
-            .ok_or_else(|| anyhow::anyhow!("instruction window at {start} overflows"))?;
-        Ok(block_ref
-            .insns
-            .get(start..end)
-            .ok_or_else(|| {
-                anyhow::anyhow!(
-                    "instruction window {}..{} exceeds block {:?} body length {}",
-                    start,
-                    end,
-                    block,
-                    block_ref.insns.len()
-                )
-            })?
-            .to_vec())
     }
     pub fn predecessors(&self, block: BlockId) -> &[BlockId] {
         &self.predecessors[block.0]
@@ -240,6 +233,7 @@ impl BBProgram {
                 && !matches!(term, Terminator::CondBranch { fallthrough, .. } if fallthrough == block),
         )
     }
+    #[cfg(test)]
     pub fn dominance(&self) -> Dominance {
         Dominance::compute(self)
     }
@@ -248,6 +242,7 @@ impl BBProgram {
         self.live_in_checked(block)
             .unwrap_or_else(|err| panic!("invalid live_in query for {:?}: {err}", block))
     }
+    #[cfg(test)]
     pub fn live_in_checked(&self, block: BlockId) -> anyhow::Result<RegSet> {
         self.block(block)?;
         compute_liveness(self)
@@ -260,6 +255,7 @@ impl BBProgram {
         self.live_out_checked(block)
             .unwrap_or_else(|err| panic!("invalid live_out query for {:?}: {err}", block))
     }
+    #[cfg(test)]
     pub fn live_out_checked(&self, block: BlockId) -> anyhow::Result<RegSet> {
         self.block(block)?;
         compute_liveness(self)
@@ -280,6 +276,7 @@ impl BBProgram {
             .remove(&site)
             .ok_or_else(|| anyhow::anyhow!("site liveness missing live_out for {:?}", site))
     }
+    #[cfg(test)]
     pub fn reaching_defs(&self, block: BlockId) -> ReachingDefs {
         let defs = self
             .use_def
@@ -305,7 +302,7 @@ impl BBProgram {
     pub(crate) fn oracle(&self) -> Option<&VerifierOracle> {
         self.oracle.as_ref()
     }
-    pub(crate) fn verifier_states_at(&self, site: InsnSite) -> Option<&[VerifierInsn]> {
+    fn verifier_states_at(&self, site: InsnSite) -> Option<&[VerifierInsn]> {
         self.oracle.as_ref()?.get(&site).map(AsRef::as_ref)
     }
     pub fn reg_known_constant(&self, site: InsnSite, reg: u8) -> Option<i64> {
@@ -318,26 +315,6 @@ impl BBProgram {
         }
         Some(first as i64)
     }
-    pub fn reg_known_map_ptr(&self, site: InsnSite, reg: u8) -> Option<MapPtr> {
-        let mut states = self.verifier_reg_states(site, reg)?;
-        let first = map_ptr_from_reg_state(states.next()?)?;
-        for state in states {
-            if map_ptr_from_reg_state(state)? != first {
-                return None;
-            }
-        }
-        Some(first)
-    }
-    pub fn reg_proven_bounds(&self, site: InsnSite, reg: u8) -> Option<(i64, i64)> {
-        let mut states = self.verifier_reg_states(site, reg)?;
-        let first = proven_bounds_from_reg_state(states.next()?)?;
-        for state in states {
-            if proven_bounds_from_reg_state(state)? != first {
-                return None;
-            }
-        }
-        Some(first)
-    }
     pub fn reg_kind(&self, site: InsnSite, reg: u8) -> Option<RegKind> {
         let mut states = self.verifier_reg_states(site, reg)?;
         let first = reg_kind_from_verifier_type(&states.next()?.reg_type);
@@ -347,6 +324,35 @@ impl BBProgram {
             }
         }
         Some(first)
+    }
+    /// Returns the known constant bytes at the stack region the register
+    /// points to, if the verifier proved them. Width is `key_width` bytes.
+    pub fn reg_known_stack_bytes(
+        &self,
+        site: InsnSite,
+        reg: u8,
+        key_width: usize,
+    ) -> Option<Vec<u8>> {
+        let states = self.verifier_states_at(site)?;
+        if states.is_empty()
+            || states
+                .iter()
+                .any(|state| state.kind == VerifierInsnKind::EdgeFullState)
+        {
+            return None;
+        }
+        let mut first = None;
+        for state in states {
+            let reg_state = state.regs.get(&reg)?;
+            let stack_off = fp_stack_offset_from_reg_state(reg_state)?;
+            let bytes = known_stack_bytes_from_state(state, stack_off, key_width)?;
+            match &first {
+                Some(existing) if existing != &bytes => return None,
+                Some(_) => {}
+                None => first = Some(bytes),
+            }
+        }
+        first
     }
     pub fn site_is_dead_code(&self, site: InsnSite) -> bool {
         self.verifier_states_at(site).is_some_and(|states| {
@@ -410,65 +416,17 @@ impl BBProgram {
         &mut self,
         annotations: &[InsnAnnotation],
     ) -> anyhow::Result<()> {
-        let mut profile = ProfilingData::default();
-        for (pc, annotation) in annotations.iter().enumerate() {
-            if let Some(branch_profile) = &annotation.branch_profile {
-                profile.branch_profiles.insert(pc, branch_profile.clone());
-            }
-            if let Some(prefetch_profile) = &annotation.prefetch_profile {
-                profile
-                    .prefetch_profiles
-                    .insert(pc, prefetch_profile.clone());
-            }
-        }
-        self.attach_profile_data(&profile)
-    }
-    pub(crate) fn attach_prefetch_profile_from_original_pcs(
-        &mut self,
-        profiles: &HashMap<usize, PrefetchProfile>,
-    ) -> anyhow::Result<()> {
-        let records = profiles
-            .iter()
-            .map(|(&pc, profile)| {
-                (
-                    pc,
-                    PmuRecord {
-                        prefetch_profile: Some(profile.clone()),
-                        ..Default::default()
-                    },
-                )
-            })
-            .collect::<HashMap<_, _>>();
-        self.attach_pmu_records_from_original_pcs(&records)
-    }
-    pub(crate) fn attach_profile_data(&mut self, profile: &ProfilingData) -> anyhow::Result<()> {
-        if profile.branch_profiles.is_empty() {
-            return self.attach_prefetch_profile_from_original_pcs(&profile.prefetch_profiles);
-        }
-        let mut records = HashMap::<usize, PmuRecord>::new();
-        for (&pc, branch_profile) in &profile.branch_profiles {
-            records.entry(pc).or_default().branch_profile = Some(branch_profile.clone());
-        }
-        for (&pc, prefetch_profile) in &profile.prefetch_profiles {
-            records.entry(pc).or_default().prefetch_profile = Some(prefetch_profile.clone());
-        }
-        self.attach_pmu_records_from_original_pcs(&records)
-    }
-    fn attach_pmu_records_from_original_pcs(
-        &mut self,
-        profiles: &HashMap<usize, PmuRecord>,
-    ) -> anyhow::Result<()> {
         self.pmu_profile.clear();
-        for (&pc, profile) in profiles {
+        for (pc, annotation) in annotations.iter().enumerate() {
+            if annotation.branch_profile.is_none() && annotation.prefetch_profile.is_none() {
+                continue;
+            }
             let site = self
                 .original_pc_to_site(pc)
                 .ok_or_else(|| anyhow::anyhow!("profile pc {pc} is not present in BBProgram"))?;
-            self.pmu_profile.insert(site, profile.clone());
+            self.pmu_profile.insert(site, annotation.clone());
         }
         Ok(())
-    }
-    pub fn kinsn_registry(&self) -> &KinsnRegistry {
-        &self.kinsn_reg
     }
     pub fn def_sites(&self) -> impl Iterator<Item = DefSite> + '_ {
         self.use_def.defs().copied()
@@ -582,10 +540,6 @@ impl BBProgram {
     pub fn first_site_in_block(&self, block: BlockId) -> anyhow::Result<Option<InsnSite>> {
         Ok(self.logical_sites_in_block(block)?.into_iter().next())
     }
-    pub fn block_entry_site(&self, block: BlockId) -> anyhow::Result<InsnSite> {
-        self.first_site_in_block(block)?
-            .ok_or_else(|| anyhow::anyhow!("block {:?} has no entry instruction site", block))
-    }
     pub fn terminator_site(&self, block: BlockId) -> anyhow::Result<Option<InsnSite>> {
         let block_ref = self.block(block)?;
         Ok(block_ref.terminator.raw_insn().map(|_| InsnSite {
@@ -646,7 +600,8 @@ impl BBProgram {
             .filter_map(|(site, value)| remap(site).map(|site| (site, value)))
             .collect();
     }
-    pub(crate) fn block_start_pc(&self, block: BlockId) -> anyhow::Result<usize> {
+    #[cfg(test)]
+    fn block_start_pc(&self, block: BlockId) -> anyhow::Result<usize> {
         self.block(block)?;
         Ok(current_block_start_pcs(self)?[block.0])
     }
@@ -768,7 +723,7 @@ impl BBProgram {
         }
         Ok(())
     }
-    pub(crate) fn rebuild_use_def(&mut self) -> anyhow::Result<()> {
+    fn rebuild_use_def(&mut self) -> anyhow::Result<()> {
         self.use_def = UseDefGraph::build(self)?;
         Ok(())
     }
@@ -858,6 +813,88 @@ impl BBProgram {
             })
             .collect();
     }
+    pub(crate) fn block_body_view(&self, block: BlockId) -> anyhow::Result<BlockBodyView<'_>> {
+        let block_ref = self.block(block)?;
+        Ok(BlockBodyView {
+            block,
+            sites: (0..block_ref.insns.len())
+                .map(|idx| InsnSite { block, idx })
+                .collect(),
+            insns: &block_ref.insns,
+        })
+    }
+    pub(crate) fn scan_block_starts<F, T>(
+        &self,
+        max_lookahead: usize,
+        mut f: F,
+    ) -> anyhow::Result<Vec<WindowHit<T>>>
+    where
+        F: FnMut(BlockStartWindow<'_>) -> anyhow::Result<Option<LocalWindowHit<T>>>,
+    {
+        let mut hits = Vec::new();
+        for block in self.block_ids() {
+            let body = self.block_body_view(block)?;
+            for (start_idx, &start_site) in body.sites.iter().enumerate() {
+                let lookahead_end = start_idx
+                    .checked_add(max_lookahead)
+                    .map(|end| end.min(body.insns.len()))
+                    .ok_or_else(|| anyhow::anyhow!("lookahead at {start_idx} overflows"))?;
+                let window = BlockStartWindow {
+                    block: body.block,
+                    start_idx,
+                    start_site,
+                    sites: &body.sites,
+                    insns: body.insns,
+                    lookahead: &body.insns[start_idx..lookahead_end],
+                };
+                if window.sites.get(window.start_idx).copied() != Some(window.start_site) {
+                    anyhow::bail!("inconsistent start window in {:?}", window.block);
+                }
+                let Some(local) = f(window)? else {
+                    continue;
+                };
+                if local.old_len == 0 {
+                    anyhow::bail!(
+                        "window match in {:?} at index {} has zero old length",
+                        body.block,
+                        local.start_idx
+                    );
+                }
+                let Some(&start) = body.sites.get(local.start_idx) else {
+                    anyhow::bail!(
+                        "window match start index {} exceeds {:?} body length {}",
+                        local.start_idx,
+                        body.block,
+                        body.sites.len()
+                    );
+                };
+                let end_idx = local.start_idx.checked_add(local.old_len).ok_or_else(|| {
+                    anyhow::anyhow!(
+                        "window match range {} + {} overflows",
+                        local.start_idx,
+                        local.old_len
+                    )
+                })?;
+                if end_idx > body.sites.len() {
+                    anyhow::bail!(
+                        "window match range {}..{} exceeds {:?} body length {}",
+                        local.start_idx,
+                        end_idx,
+                        body.block,
+                        body.sites.len()
+                    );
+                }
+                hits.push(WindowHit {
+                    block: body.block,
+                    start_idx: local.start_idx,
+                    start,
+                    old_len: local.old_len,
+                    value: local.value,
+                });
+            }
+        }
+        Ok(hits)
+    }
 }
 fn collect_map_bindings(insns: &[BpfInsn], map_ids: &[u32]) -> anyhow::Result<Vec<BBMapBinding>> {
     let mut bindings = Vec::new();
@@ -865,7 +902,7 @@ fn collect_map_bindings(insns: &[BpfInsn], map_ids: &[u32]) -> anyhow::Result<Ve
     let mut pc = 0usize;
     while pc < insns.len() {
         let insn = insns[pc];
-        if let Some(kind) = insn.map_pseudo_kind() {
+        if let Some(kind) = insn.map_pseudo() {
             let map_id = resolve_map_id(kind, insn.imm, map_ids, &mut fd_order)?;
             if let Some(map_id) = map_id {
                 bindings.push(BBMapBinding {
@@ -903,39 +940,69 @@ fn reg_exact_value(state: &RegState) -> Option<u64> {
         .exact_u64()
         .or_else(|| state.exact_u32().map(u64::from))
 }
-fn map_ptr_from_reg_state(state: &RegState) -> Option<MapPtr> {
-    let kind = reg_kind_from_verifier_type(&state.reg_type);
-    matches!(kind, RegKind::MapPointer | RegKind::MapValue).then_some(MapPtr {
-        id: state.id,
-        offset: state.offset,
-        is_value: kind == RegKind::MapValue,
-    })
+fn fp_stack_offset_from_reg_state(state: &RegState) -> Option<i32> {
+    if state.reg_type != "fp" {
+        return None;
+    }
+    match state.offset {
+        Some(offset) => Some(offset),
+        None => Some(0),
+    }
 }
-fn proven_bounds_from_reg_state(state: &RegState) -> Option<(i64, i64)> {
-    if let Some(value) = reg_exact_value(state) {
-        let value = value as i64;
-        return Some((value, value));
-    }
-    if let (Some(min), Some(max)) = (state.range.smin, state.range.smax) {
-        return Some((min, max));
-    }
-    // Unsigned bounds above i64::MAX are not representable in this signed
-    // query, so they are not proven signed bounds.
-    let min = match state.range.umin {
-        Some(value) => match i64::try_from(value) {
-            Ok(value) => value,
+fn known_stack_bytes_from_state(
+    state: &VerifierInsn,
+    stack_off: i32,
+    width: usize,
+) -> Option<Vec<u8>> {
+    let mut bytes = Vec::with_capacity(width);
+    for idx in 0..width {
+        let idx = match i32::try_from(idx) {
+            Ok(idx) => idx,
             Err(_) => return None,
-        },
-        None => return None,
+        };
+        bytes.push(known_stack_byte_from_state(
+            state,
+            stack_off.checked_add(idx)?,
+        )?);
+    }
+    Some(bytes)
+}
+fn known_stack_byte_from_state(state: &VerifierInsn, absolute_off: i32) -> Option<u8> {
+    let slot_start = verifier_stack_slot_start(absolute_off)?;
+    let byte_index = match usize::try_from(absolute_off - i32::from(slot_start)) {
+        Ok(byte_index) => byte_index,
+        Err(_) => return None,
     };
-    let max = match state.range.umax {
-        Some(value) => match i64::try_from(value) {
-            Ok(value) => value,
-            Err(_) => return None,
-        },
-        None => return None,
+    if byte_index >= 8 {
+        return None;
+    }
+    let stack = state.stack.get(&slot_start)?;
+    match verifier_stack_slot_type(stack, byte_index) {
+        Some(b'0') => Some(0),
+        Some(b'r') | None => verifier_stack_slot_exact_bytes(stack).map(|bytes| bytes[byte_index]),
+        Some(_) => None,
+    }
+}
+fn verifier_stack_slot_start(absolute_off: i32) -> Option<i16> {
+    if absolute_off >= 0 {
+        return None;
+    }
+    let slot_index = ((-absolute_off - 1) / 8) + 1;
+    let Ok(slot_start) = i16::try_from(-slot_index * 8) else {
+        return None;
     };
-    Some((min, max))
+    Some(slot_start)
+}
+fn verifier_stack_slot_type(stack: &StackState, byte_index: usize) -> Option<u8> {
+    let slot_types = stack.slot_types.as_ref()?;
+    if byte_index >= 8 {
+        return None;
+    }
+    slot_types.as_bytes().get(7 - byte_index).copied()
+}
+fn verifier_stack_slot_exact_bytes(stack: &StackState) -> Option<[u8; 8]> {
+    let value = reg_exact_value(stack.value.as_ref()?)?;
+    Some(value.to_le_bytes())
 }
 fn reg_kind_from_verifier_type(reg_type: &str) -> RegKind {
     match reg_type {
@@ -1013,9 +1080,11 @@ pub(crate) fn range_len(range: &Range<usize>) -> anyhow::Result<usize> {
         .ok_or_else(|| anyhow::anyhow!("invalid descending range {:?}", range))
 }
 #[derive(Clone, Debug)]
+#[cfg(test)]
 pub struct Dominance {
     dominators: Vec<BTreeSet<BlockId>>,
 }
+#[cfg(test)]
 impl Dominance {
     fn compute(prog: &BBProgram) -> Self {
         let all = prog
@@ -1063,9 +1132,11 @@ impl Dominance {
     }
 }
 #[derive(Clone, Debug, Default)]
+#[cfg(test)]
 pub struct ReachingDefs {
     defs: BTreeMap<u8, Vec<DefSite>>,
 }
+#[cfg(test)]
 impl ReachingDefs {
     pub fn defs_for(&self, reg: u8) -> impl Iterator<Item = DefSite> + '_ {
         self.defs
@@ -1099,6 +1170,7 @@ fn current_site_pcs(prog: &BBProgram) -> anyhow::Result<BTreeMap<InsnSite, usize
     }
     Ok(pcs)
 }
+#[cfg(test)]
 fn current_block_start_pcs(prog: &BBProgram) -> anyhow::Result<Vec<usize>> {
     let mut block_start_pc = vec![0usize; prog.blocks.len()];
     let mut pc = 0usize;
@@ -1131,6 +1203,7 @@ fn block_logical_slot_len(prog: &BBProgram, block: BlockId) -> anyhow::Result<us
     }
     Ok(len)
 }
+#[cfg(test)]
 fn block_logical_slot_bounds(prog: &BBProgram, block: BlockId) -> anyhow::Result<(usize, usize)> {
     let start = prog.block_start_pc(block)?;
     let len = block_logical_slot_len(prog, block)?;
@@ -1154,19 +1227,6 @@ fn frame_relative_logical_slot(
             .ok_or_else(|| anyhow::anyhow!("frame-relative block offset overflows"))?;
     }
     anyhow::bail!("block {:?} is missing from its frame", block)
-}
-fn frame_logical_slot_bounds(prog: &BBProgram, frame: FrameId) -> anyhow::Result<(usize, usize)> {
-    let mut start = usize::MAX;
-    let mut end = 0usize;
-    for block in prog.blocks().filter(|block| block.frame == frame) {
-        let (block_start, block_end) = block_logical_slot_bounds(prog, block.id)?;
-        start = start.min(block_start);
-        end = end.max(block_end);
-    }
-    if start == usize::MAX {
-        anyhow::bail!("frame {:?} has no blocks", frame);
-    }
-    Ok((start, end))
 }
 fn site_offset_in_block_slots(prog: &BBProgram, site: InsnSite) -> anyhow::Result<usize> {
     prog.block(site.block)?;
@@ -1196,6 +1256,7 @@ fn logical_sites_for_block(block: &Block) -> Vec<InsnSite> {
     }
     sites
 }
+#[cfg(test)]
 #[derive(Clone, Debug, Default)]
 struct LivenessSets {
     live_in: HashMap<BlockId, RegSet>,
@@ -1205,6 +1266,7 @@ struct LivenessSets {
 struct SiteLivenessSets {
     live_out: HashMap<InsnSite, RegSet>,
 }
+#[cfg(test)]
 fn compute_liveness(prog: &BBProgram) -> LivenessSets {
     let mut use_sets = HashMap::<BlockId, RegSet>::new();
     let mut def_sets = HashMap::<BlockId, RegSet>::new();
@@ -1375,217 +1437,7 @@ fn first_logical_sites(
     Ok(successors)
 }
 impl BBProgram {
-    pub(crate) fn bf_skip_reason(
-        &self,
-        site: InsnSite,
-        reason: String,
-    ) -> anyhow::Result<crate::pass::SiteSkipReason> {
-        self.insn(site)?;
-        Ok(crate::pass::SiteSkipReason { site, reason })
-    }
-
-    pub(crate) fn bf_blocks_are_adjacent(
-        &self,
-        left: BlockId,
-        right: BlockId,
-    ) -> anyhow::Result<bool> {
-        self.block(left)?;
-        self.block(right)?;
-        Ok(left.0 + 1 == right.0)
-    }
-
-    pub(crate) fn bf_block_range_has_body_site(
-        &self,
-        first: BlockId,
-        last: BlockId,
-    ) -> anyhow::Result<bool> {
-        if first.0 > last.0 {
-            anyhow::bail!(
-                "branch_flip block range {:?}..={:?} is inverted",
-                first,
-                last
-            );
-        }
-        for block in first.0..=last.0 {
-            if !self.sites_in_block(BlockId(block))?.is_empty() {
-                return Ok(true);
-            }
-        }
-        Ok(false)
-    }
-
-    pub(crate) fn bf_validate_flipped_branch_deltas(
-        &self,
-        report_site: InsnSite,
-        then_first: BlockId,
-        then_last: BlockId,
-        else_first: BlockId,
-        else_last: BlockId,
-        cond: BpfInsn,
-    ) -> anyhow::Result<()> {
-        let then_len = self.bf_block_range_body_slot_len(then_first, then_last)?;
-        let else_len = self.bf_block_range_body_slot_len(else_first, else_last)?;
-        let cond_delta = else_len.checked_add(1).ok_or_else(|| {
-            anyhow::anyhow!(
-                "branch_flip site {:?} else arm overflows branch delta",
-                report_site
-            )
-        })?;
-        let mut inverted = cond;
-        inverted.set_branch_target_delta(i64::try_from(cond_delta).map_err(|_| {
-            anyhow::anyhow!(
-                "branch_flip site {:?} else arm length {} overflows branch delta",
-                report_site,
-                else_len
-            )
-        })?)?;
-        let mut ja = BpfInsn::ja(0);
-        ja.set_branch_target_delta(i64::try_from(then_len).map_err(|_| {
-            anyhow::anyhow!(
-                "branch_flip site {:?} then arm length {} overflows branch delta",
-                report_site,
-                then_len
-            )
-        })?)?;
-        Ok(())
-    }
-
-    fn bf_block_range_body_slot_len(&self, first: BlockId, last: BlockId) -> anyhow::Result<usize> {
-        if first.0 > last.0 {
-            anyhow::bail!(
-                "branch_flip block range {:?}..={:?} is inverted",
-                first,
-                last
-            );
-        }
-        let mut len = 0usize;
-        for block in first.0..=last.0 {
-            for site in self.sites_in_block(BlockId(block))? {
-                len = len
-                    .checked_add(self.insn_slot_width(site)?)
-                    .ok_or_else(|| anyhow::anyhow!("branch_flip arm slot length overflows"))?;
-            }
-        }
-        Ok(len)
-    }
-
-    pub(crate) fn pf_skip_reason(
-        &self,
-        site: InsnSite,
-        reason: String,
-    ) -> anyhow::Result<crate::pass::SiteSkipReason> {
-        self.insn(site)?;
-        Ok(crate::pass::SiteSkipReason { site, reason })
-    }
-
-    pub(crate) fn pf_sites_after_in_frame(
-        &self,
-        anchor: InsnSite,
-        max_slots: usize,
-    ) -> anyhow::Result<Vec<InsnSite>> {
-        self.insn(anchor)?;
-        let frame = self.block_frame(anchor.block)?;
-        let scan_start = self.pf_site_end_slot(anchor)?;
-        let scan_end = scan_start
-            .checked_add(max_slots)
-            .ok_or_else(|| anyhow::anyhow!("prefetch scan after {:?} overflows", anchor))?;
-        let mut sites = Vec::new();
-        for block in self.subprog_blocks(frame) {
-            for site in self.sites_in_block_with_terminator(block)? {
-                let site_start = self.pf_site_start_slot(site)?;
-                if site_start < scan_start {
-                    continue;
-                }
-                if site_start >= scan_end {
-                    return Ok(sites);
-                }
-                sites.push(site);
-            }
-        }
-        Ok(sites)
-    }
-
-    pub(crate) fn pf_prefetch_window_sites(
-        &self,
-        ptr_def: InsnSite,
-        target: InsnSite,
-        max_slots: usize,
-    ) -> anyhow::Result<Vec<InsnSite>> {
-        self.insn(ptr_def)?;
-        self.insn(target)?;
-        let frame = self.block_frame(target.block)?;
-        if self.block_frame(ptr_def.block)? != frame {
-            anyhow::bail!(
-                "prefetch pointer definition {:?} and target {:?} are in different frames",
-                ptr_def,
-                target
-            );
-        }
-        let (block_start, block_end) = block_logical_slot_bounds(self, target.block)?;
-        let (frame_start, frame_end) = frame_logical_slot_bounds(self, frame)?;
-        if block_start < frame_start || block_end > frame_end {
-            anyhow::bail!(
-                "prefetch block {:?} crosses frame {:?}: block {}..{}, frame {}..{}",
-                target.block,
-                frame,
-                block_start,
-                block_end,
-                frame_start,
-                frame_end
-            );
-        }
-        let target_start = self.pf_site_start_slot(target)?;
-        let ptr_def_end = self.pf_site_end_slot(ptr_def)?;
-        let valid_start = block_start
-            .max(target_start.saturating_sub(max_slots))
-            .max(ptr_def_end);
-        if valid_start > target_start {
-            return Ok(Vec::new());
-        }
-        let mut sites = Vec::new();
-        for site in self.sites_in_block(target.block)? {
-            let site_start = self.pf_site_start_slot(site)?;
-            if site_start >= valid_start && site_start <= target_start {
-                sites.push(site);
-            }
-        }
-        Ok(sites)
-    }
-
-    pub(crate) fn pf_nearest_prefetch_insert_site(
-        &self,
-        sites: &[InsnSite],
-        target: InsnSite,
-        ideal_distance: usize,
-    ) -> anyhow::Result<Option<InsnSite>> {
-        let ideal = self
-            .pf_site_start_slot(target)?
-            .saturating_sub(ideal_distance);
-        let mut best = None;
-        for &site in sites {
-            let site_start = self.pf_site_start_slot(site)?;
-            let distance = site_start.abs_diff(ideal);
-            if best.is_none_or(|(best_distance, best_start, _)| {
-                distance < best_distance || (distance == best_distance && site_start < best_start)
-            }) {
-                best = Some((distance, site_start, site));
-            }
-        }
-        Ok(best.map(|(_, _, site)| site))
-    }
-
-    fn pf_site_start_slot(&self, site: InsnSite) -> anyhow::Result<usize> {
-        self.rep_site_slot(site)
-    }
-
-    fn pf_site_end_slot(&self, site: InsnSite) -> anyhow::Result<usize> {
-        self.pf_site_start_slot(site)?
-            .checked_add(self.insn_slot_width(site)?)
-            .ok_or_else(|| anyhow::anyhow!("prefetch site {:?} end slot overflows", site))
-    }
-}
-
-impl BBProgram {
+    #[cfg(test)]
     pub(crate) fn rep_site_slot(&self, site: InsnSite) -> anyhow::Result<usize> {
         let offset = site_offset_in_block_slots(self, site)?;
         Ok(block_logical_slot_bounds(self, site.block)?.0 + offset)
@@ -1625,44 +1477,6 @@ impl BBProgram {
                 idx: end_idx,
             },
         }))
-    }
-}
-
-impl BBProgram {
-    pub(crate) fn bcm_sites_between(
-        &self,
-        start: InsnSite,
-        end: InsnSite,
-    ) -> anyhow::Result<Option<Vec<InsnSite>>> {
-        let frame = self.block_frame(start.block)?;
-        if self.block_frame(end.block)? != frame || !self.is_terminator_site(start)? {
-            return Ok(None);
-        }
-
-        let Terminator::CondBranch { fallthrough, .. } = self.terminator(start.block)? else {
-            return Ok(None);
-        };
-
-        let mut sites = Vec::new();
-        let mut cursor = fallthrough;
-        let mut visited = BTreeSet::new();
-        loop {
-            if !visited.insert(cursor) || self.block_frame(cursor)? != frame {
-                return Ok(None);
-            }
-
-            for site in self.sites_in_block_with_terminator(cursor)? {
-                if cursor == end.block && site == end {
-                    return Ok(Some(sites));
-                }
-                sites.push(site);
-            }
-
-            let Terminator::Fallthrough { next } = self.terminator(cursor)? else {
-                return Ok(None);
-            };
-            cursor = next;
-        }
     }
 }
 
@@ -1858,5 +1672,85 @@ mod tests {
                 idx: 0
             }]
         );
+    }
+    #[test]
+    fn scan_block_starts_skips_empty_body_blocks() {
+        let prog = lift_test_program(&[BpfInsn::exit()], &pass_ctx());
+        let mut called = false;
+        let hits: Vec<WindowHit<()>> = prog
+            .scan_block_starts(2, |_| {
+                called = true;
+                Ok(None)
+            })
+            .expect("empty-body scan should succeed");
+        assert!(hits.is_empty());
+        assert!(!called);
+    }
+    #[test]
+    fn scan_block_starts_exposes_truncated_lookahead() {
+        let prog = lift_test_program(
+            &[BpfInsn::mov64_imm(BPF_REG_0, 7), BpfInsn::exit()],
+            &pass_ctx(),
+        );
+        let hits = prog
+            .scan_block_starts(4, |window| {
+                assert_eq!(window.block, BlockId(0));
+                assert_eq!(window.start_idx, 0);
+                assert_eq!(window.start_site, InsnSite::for_test(BlockId(0), 0));
+                assert_eq!(window.sites.len(), 1);
+                assert_eq!(window.lookahead.len(), 1);
+                Ok(Some(LocalWindowHit {
+                    start_idx: window.start_idx,
+                    old_len: 1,
+                    value: window.lookahead[0].imm,
+                }))
+            })
+            .expect("truncated lookahead scan should succeed");
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].start, InsnSite::for_test(BlockId(0), 0));
+        assert_eq!(hits[0].old_len, 1);
+        assert_eq!(hits[0].value, 7);
+    }
+    #[test]
+    fn scan_block_starts_accepts_replacement_start_before_scan_index() {
+        let prog = lift_test_program(
+            &[
+                BpfInsn::mov64_imm(BPF_REG_0, 1),
+                BpfInsn::mov64_imm(BPF_REG_1, 2),
+                BpfInsn::mov64_imm(BPF_REG_2, 3),
+                BpfInsn::exit(),
+            ],
+            &pass_ctx(),
+        );
+        let hits = prog
+            .scan_block_starts(2, |window| {
+                Ok((window.start_idx == 2).then_some(LocalWindowHit {
+                    start_idx: 1,
+                    old_len: 2,
+                    value: window.start_site,
+                }))
+            })
+            .expect("backward-start scan should succeed");
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].start_idx, 1);
+        assert_eq!(hits[0].start, InsnSite::for_test(BlockId(0), 1));
+        assert_eq!(hits[0].value, InsnSite::for_test(BlockId(0), 2));
+    }
+    #[test]
+    fn scan_block_starts_rejects_out_of_range_local_start() {
+        let prog = lift_test_program(
+            &[BpfInsn::mov64_imm(BPF_REG_0, 7), BpfInsn::exit()],
+            &pass_ctx(),
+        );
+        let err = prog
+            .scan_block_starts(1, |_| {
+                Ok(Some(LocalWindowHit {
+                    start_idx: 1,
+                    old_len: 1,
+                    value: (),
+                }))
+            })
+            .expect_err("out-of-range local start should fail");
+        assert!(err.to_string().contains("window match start index 1"));
     }
 }

@@ -413,7 +413,7 @@ fn can_extend_ladder(
     {
         return Ok(false);
     }
-    let Some(interleaves) = prog.bcm_sites_between(prev.compare, next.mov)? else {
+    let Some(interleaves) = bcm_sites_between(prog, prev.compare, next.mov)? else {
         return Ok(false);
     };
     for site in interleaves {
@@ -423,6 +423,42 @@ fn can_extend_ladder(
     }
 
     Ok(!target_sites.contains(&next.compare))
+}
+
+fn bcm_sites_between(
+    prog: &BBProgram,
+    start: InsnSite,
+    end: InsnSite,
+) -> anyhow::Result<Option<Vec<InsnSite>>> {
+    let frame = prog.block_frame(start.block)?;
+    if prog.block_frame(end.block)? != frame || !prog.is_terminator_site(start)? {
+        return Ok(None);
+    }
+
+    let Terminator::CondBranch { fallthrough, .. } = prog.terminator(start.block)? else {
+        return Ok(None);
+    };
+
+    let mut sites = Vec::new();
+    let mut cursor = fallthrough;
+    let mut visited = BTreeSet::new();
+    loop {
+        if !visited.insert(cursor) || prog.block_frame(cursor)? != frame {
+            return Ok(None);
+        }
+
+        for site in prog.sites_in_block_with_terminator(cursor)? {
+            if cursor == end.block && site == end {
+                return Ok(Some(sites));
+            }
+            sites.push(site);
+        }
+
+        let Terminator::Fallthrough { next } = prog.terminator(cursor)? else {
+            return Ok(None);
+        };
+        cursor = next;
+    }
 }
 
 fn is_merge_safe_interleave(

@@ -4,8 +4,8 @@
 mod bbprogram;
 mod bbprogram_api;
 mod bbprogram_btf;
-pub mod bbprogram_lift;
-pub mod bbprogram_lower;
+pub(crate) mod bbprogram_lift;
+pub(crate) mod bbprogram_lower;
 mod bbprogram_use_def;
 
 pub use bbprogram::{
