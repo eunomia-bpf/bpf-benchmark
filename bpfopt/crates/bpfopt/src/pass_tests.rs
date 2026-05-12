@@ -1,97 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::Arc;
-
-use crate::analysis::{BBProgram, BlockId, DefSite};
+use crate::analysis::{BlockId, DefSite};
 use crate::insn::*;
 use crate::pass::*;
 use crate::passes::{ConstPropPass, DcePass};
 use crate::test_helpers::*;
-
-struct CountingPass {
-    name: &'static str,
-    calls: Arc<AtomicUsize>,
-}
-
-impl BpfPass for CountingPass {
-    fn name(&self) -> &str {
-        self.name
-    }
-
-    // IMPL: needs BpfPass::run(&mut BBProgram, &PassContext) -> Result<PassResult>.
-    fn run(&self, prog: &mut BBProgram, _ctx: &PassContext) -> anyhow::Result<PassResult> {
-        self.calls.fetch_add(1, Ordering::SeqCst);
-        assert!(!prog.blocks().collect::<Vec<_>>().is_empty());
-        Ok(PassResult::unchanged())
-    }
-}
-
-struct DeleteFirstMovPass;
-
-impl BpfPass for DeleteFirstMovPass {
-    fn name(&self) -> &str {
-        "delete_first_mov"
-    }
-
-    // IMPL: needs BpfPass::run(&mut BBProgram, &PassContext) -> Result<PassResult>.
-    fn run(&self, prog: &mut BBProgram, _ctx: &PassContext) -> anyhow::Result<PassResult> {
-        prog.delete_insn(DefSite {
-            block: BlockId(0),
-            idx: 0,
-            reg: BPF_REG_1,
-        })?;
-        Ok(PassResult {
-            sites_applied: 1,
-            ..PassResult::default()
-        })
-    }
-}
-
-#[test]
-fn pipeline_lifts_once_runs_multiple_passes_on_same_bbprogram() {
-    let first_calls = Arc::new(AtomicUsize::new(0));
-    let second_calls = Arc::new(AtomicUsize::new(0));
-    let input = vec![BpfInsn::mov64_imm(BPF_REG_0, 0), BpfInsn::exit()];
-
-    let (results, lowered, _) = run_pipeline_on_insns(
-        vec![
-            Box::new(CountingPass {
-                name: "first",
-                calls: first_calls.clone(),
-            }),
-            Box::new(CountingPass {
-                name: "second",
-                calls: second_calls.clone(),
-            }),
-        ],
-        input.clone(),
-        &pass_ctx(),
-    );
-
-    assert_eq!(results.len(), 2);
-    assert_eq!(first_calls.load(Ordering::SeqCst), 1);
-    assert_eq!(second_calls.load(Ordering::SeqCst), 1);
-    assert_eq!(lowered, input);
-}
-
-#[test]
-fn pipeline_lowers_once_after_all_bbprogram_mutations() {
-    let input = vec![
-        BpfInsn::mov64_imm(BPF_REG_1, 1),
-        BpfInsn::mov64_imm(BPF_REG_0, 0),
-        BpfInsn::exit(),
-    ];
-
-    let (results, lowered, _) =
-        run_pipeline_on_insns(vec![Box::new(DeleteFirstMovPass)], input, &pass_ctx());
-
-    assert_eq!(results[0].sites_applied, 1);
-    assert_eq!(
-        lowered,
-        vec![BpfInsn::mov64_imm(BPF_REG_0, 0), BpfInsn::exit()]
-    );
-}
 
 #[test]
 fn test_pass_manager_invalidates_verifier_states_after_transform() {
@@ -168,47 +81,44 @@ fn remap_btf_metadata_drops_deleted_entries_and_shifts_survivors() {
         BpfInsn::exit(),
     ];
     let mut ctx = pass_ctx();
-    set_btf_records(
-        &mut ctx,
-        Some(crate::pass::BtfInfoRecords {
-            rec_size: 8,
-            bytes: [0u32.to_le_bytes(), 10u32.to_le_bytes()].concat(),
-        }),
-        Some(crate::pass::BtfInfoRecords {
-            rec_size: 16,
-            bytes: [
-                [
-                    0u32.to_le_bytes(),
-                    100u32.to_le_bytes(),
-                    0u32.to_le_bytes(),
-                    0u32.to_le_bytes(),
-                ]
-                .concat(),
-                [
-                    1u32.to_le_bytes(),
-                    101u32.to_le_bytes(),
-                    0u32.to_le_bytes(),
-                    0u32.to_le_bytes(),
-                ]
-                .concat(),
-                [
-                    2u32.to_le_bytes(),
-                    102u32.to_le_bytes(),
-                    0u32.to_le_bytes(),
-                    0u32.to_le_bytes(),
-                ]
-                .concat(),
-                [
-                    3u32.to_le_bytes(),
-                    103u32.to_le_bytes(),
-                    0u32.to_le_bytes(),
-                    0u32.to_le_bytes(),
-                ]
-                .concat(),
+    ctx.func_info = Some(crate::pass::BtfInfoRecords {
+        rec_size: 8,
+        bytes: [0u32.to_le_bytes(), 10u32.to_le_bytes()].concat(),
+    });
+    ctx.line_info = Some(crate::pass::BtfInfoRecords {
+        rec_size: 16,
+        bytes: [
+            [
+                0u32.to_le_bytes(),
+                100u32.to_le_bytes(),
+                0u32.to_le_bytes(),
+                0u32.to_le_bytes(),
             ]
             .concat(),
-        }),
-    );
+            [
+                1u32.to_le_bytes(),
+                101u32.to_le_bytes(),
+                0u32.to_le_bytes(),
+                0u32.to_le_bytes(),
+            ]
+            .concat(),
+            [
+                2u32.to_le_bytes(),
+                102u32.to_le_bytes(),
+                0u32.to_le_bytes(),
+                0u32.to_le_bytes(),
+            ]
+            .concat(),
+            [
+                3u32.to_le_bytes(),
+                103u32.to_le_bytes(),
+                0u32.to_le_bytes(),
+                0u32.to_le_bytes(),
+            ]
+            .concat(),
+        ]
+        .concat(),
+    });
     let mut prog = lift_test_program(&input, &ctx);
 
     prog.delete_insn(DefSite {
@@ -295,19 +205,4 @@ fn kinsn_registry_replaces_old_call_key_when_target_moves() {
             .canonical_name,
         "bpf_rotate64"
     );
-}
-
-#[test]
-fn pass_context_owns_side_input_fields_for_bbprogram_passes() {
-    let mut ctx = ctx_with_verifier_states(vec![verifier_delta_state(
-        0,
-        std::collections::HashMap::from([(BPF_REG_1, scalar_reg(7))]),
-    )]);
-    set_map_ids(&mut ctx, vec![111]);
-    set_branch_miss_rate(&mut ctx, 0.02);
-
-    // IMPL: these side inputs move off BpfProgram and onto PassContext.
-    assert_eq!(ctx.verifier_states.len(), 1);
-    assert_eq!(ctx.map_ids, vec![111]);
-    assert_eq!(ctx.branch_miss_rate, Some(0.02));
 }

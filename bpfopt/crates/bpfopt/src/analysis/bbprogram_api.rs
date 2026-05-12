@@ -4,7 +4,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::ops::Range;
 
-use crate::analysis::bbprogram::range_len;
 use crate::analysis::{BBProgram, Block, BlockId, DefSite, InsnSite, Terminator};
 use crate::insn::{insn_width, BpfInsn};
 
@@ -25,7 +24,10 @@ impl BBProgram {
     }
 
     fn delete_insn_in_place(&mut self, site: DefSite) -> anyhow::Result<usize> {
-        let site = site.site();
+        let site = InsnSite {
+            block: site.block,
+            idx: site.idx,
+        };
         let removed_slots = self.insn_slot_width(site)?;
         {
             let block = self.block_mut(site.block)?;
@@ -85,7 +87,10 @@ impl BBProgram {
         range: Range<usize>,
         replacement: Vec<BpfInsn>,
     ) -> anyhow::Result<()> {
-        let old_len = range_len(&range)?;
+        let old_len = range
+            .end
+            .checked_sub(range.start)
+            .ok_or_else(|| anyhow::anyhow!("invalid descending range {:?}", range))?;
         let (new_insns, new_second_slots) = logical_replacement(replacement)?;
         {
             let block_ref = self.block(block)?;
@@ -503,14 +508,18 @@ impl BBProgram {
             predecessor.insns.extend_from_slice(&join_body);
             predecessor.terminator = join_terminator;
         } else {
-            let replacement_terminator = common_branch_terminator(self, pattern)?;
+            let true_term = self.block(pattern.true_branch)?.terminator;
+            let false_term = self.block(pattern.false_branch)?.terminator;
+            if true_term != false_term {
+                anyhow::bail!("diamond branches do not share a terminator");
+            }
             let remap_site = |site: InsnSite| -> Option<InsnSite> {
                 (!remove.contains(&site.block)).then_some(site)
             };
             self.remap_metadata_sites(remap_site);
             let predecessor = self.block_mut(pattern.predecessor)?;
             predecessor.insns = replacement;
-            predecessor.terminator = replacement_terminator;
+            predecessor.terminator = true_term;
         }
         for (idx, second) in new_second_slots {
             self.insert_ldimm64_second_slot(
@@ -833,16 +842,4 @@ fn validate_diamond(prog: &BBProgram, pattern: DiamondPattern) -> anyhow::Result
 
 fn branch_reaches_join(prog: &BBProgram, branch: BlockId, join: BlockId) -> bool {
     branch == join || prog.successors(branch) == [join]
-}
-
-fn common_branch_terminator(
-    prog: &BBProgram,
-    pattern: DiamondPattern,
-) -> anyhow::Result<Terminator> {
-    let true_term = prog.block(pattern.true_branch)?.terminator;
-    let false_term = prog.block(pattern.false_branch)?.terminator;
-    if true_term != false_term {
-        anyhow::bail!("diamond branches do not share a terminator");
-    }
-    Ok(true_term)
 }

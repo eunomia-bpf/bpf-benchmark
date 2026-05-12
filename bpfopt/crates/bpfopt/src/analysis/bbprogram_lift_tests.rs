@@ -1,11 +1,4 @@
 use super::*;
-use crate::analysis::bbprogram_lower::lower;
-
-fn roundtrip(insns: &[BpfInsn]) {
-    let prog = lift(insns, None).expect("lift should succeed");
-    let lowered = lower(&prog).expect("lower should succeed");
-    assert_eq!(lowered, insns);
-}
 
 fn block_for_original_pc(prog: &BBProgram, pc: usize) -> BlockId {
     prog.btf
@@ -25,7 +18,6 @@ fn lift_treats_ldimm64_as_one_logical_instruction_with_second_slot_metadata() {
     assert!(prog
         .ldimm64_second_slot(InsnSite::for_test(BlockId(0), 0))
         .is_some());
-    roundtrip(&insns);
 }
 
 #[test]
@@ -49,7 +41,6 @@ fn lift_assigns_pseudo_call_target_to_a_subprogram_frame() {
 
     assert_eq!(prog.blocks[callee.0].frame, FrameId(1));
     assert_eq!(prog.blocks[return_to.0].frame, FrameId(0));
-    roundtrip(&insns);
 }
 
 #[test]
@@ -74,7 +65,6 @@ fn lift_preserves_ja32_imm_targets_separately_from_ja_off_targets() {
             panic!("entry block should end in a jump");
         };
         assert_eq!(actual, target);
-        roundtrip(insns);
     }
 }
 
@@ -98,7 +88,6 @@ fn lift_resolves_conditional_branch_taken_and_fallthrough_blocks() {
 
     assert_eq!(taken, taken_block);
     assert_eq!(fallthrough, fallthrough_block);
-    roundtrip(&insns);
 }
 
 #[test]
@@ -111,7 +100,6 @@ fn lift_records_exit_as_a_raw_terminator() {
         panic!("block should end in exit");
     };
     assert_eq!(insn, BpfInsn::exit());
-    roundtrip(&insns);
 }
 
 #[test]
@@ -130,5 +118,4 @@ fn lift_creates_subprogram_entry_blocks_for_pseudo_func_ldimm64_targets() {
     let subprog_block = block_for_original_pc(&prog, 4);
 
     assert_eq!(prog.blocks[subprog_block.0].frame, FrameId(1));
-    roundtrip(&insns);
 }

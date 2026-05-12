@@ -65,13 +65,6 @@ fn kinsn_target(entries: &[(&str, i32, i16)]) -> TargetJson {
     }
 }
 
-fn registered_call_name(registry: &KinsnRegistry, btf_id: i32, call_off: i16) -> &'static str {
-    registry
-        .lookup_by_kinsn_call(btf_id, call_off)
-        .unwrap()
-        .canonical_name
-}
-
 #[test]
 fn canonicalize_map_refs_rewrites_fd_pseudos_in_first_seen_order() {
     let mut insns = Vec::new();
@@ -186,10 +179,19 @@ fn target_json_disambiguates_module_local_btf_ids_by_call_offset() {
     let registry = kinsn_registry_from_target(&target).unwrap();
 
     assert_eq!(
-        registered_call_name(&registry, 128703, 1),
+        registry
+            .lookup_by_kinsn_call(128703, 1)
+            .unwrap()
+            .canonical_name,
         "bpf_endian_load16"
     );
-    assert_eq!(registered_call_name(&registry, 128703, 2), "bpf_rotate64");
+    assert_eq!(
+        registry
+            .lookup_by_kinsn_call(128703, 2)
+            .unwrap()
+            .canonical_name,
+        "bpf_rotate64"
+    );
 }
 
 #[test]
@@ -201,10 +203,19 @@ fn target_json_allows_shared_btf_id_when_zero_call_offset_is_first() {
     let registry = kinsn_registry_from_target(&target).unwrap();
 
     assert_eq!(
-        registered_call_name(&registry, 128703, 0),
+        registry
+            .lookup_by_kinsn_call(128703, 0)
+            .unwrap()
+            .canonical_name,
         "bpf_endian_load16"
     );
-    assert_eq!(registered_call_name(&registry, 128703, 2), "bpf_rotate64");
+    assert_eq!(
+        registry
+            .lookup_by_kinsn_call(128703, 2)
+            .unwrap()
+            .canonical_name,
+        "bpf_rotate64"
+    );
 }
 
 #[test]

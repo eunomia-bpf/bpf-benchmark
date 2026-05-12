@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{BBProgram, BlockId, FrameId, InsnSite};
+use crate::analysis::{BBProgram, BlockId, InsnSite, SlotDistance};
 use crate::insn::*;
 use crate::pass::*;
-use anyhow::{bail, Result};
 pub(super) const HELPER_MAP_LOOKUP_ELEM: i32 = libbpf_sys::BPF_FUNC_map_lookup_elem as i32;
 const HELPER_XDP_ADJUST_HEAD: i32 = libbpf_sys::BPF_FUNC_xdp_adjust_head as i32;
 const PREFETCH_TARGET_NAME: &str = "bpf_prefetch";
@@ -32,16 +31,6 @@ fn prefetch_register_uses(payload: u64) -> RegSet {
     [kinsn_payload_reg(payload, 0)].into_iter().collect()
 }
 pub struct PrefetchPass;
-impl PrefetchPass {
-    pub fn from_cli_args(args: &[String]) -> Result<Box<dyn BpfPass>> {
-        if let Some(arg) = args.first() {
-            bail!(
-                "prefetch pass-local profile arguments moved to BBProgram side inputs; unexpected arg: {arg}"
-            );
-        }
-        Ok(Box::new(PrefetchPass))
-    }
-}
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum PrefetchKind {
     MapValue,
@@ -99,9 +88,6 @@ impl InsertReject {
         }
     }
 }
-fn skip_at(prog: &BBProgram, site: InsnSite, reason: String) -> anyhow::Result<SiteSkipReason> {
-    pf_skip_reason(prog, site, reason)
-}
 pub(super) fn prefetch_payload(ptr_reg: u8) -> anyhow::Result<u64> {
     if ptr_reg > BPF_REG_10 {
         anyhow::bail!("prefetch ptr register {ptr_reg} is outside BPF_REG_0..BPF_REG_10");
@@ -126,14 +112,14 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
         let score = match prefetch_score_for_site(prog, site)? {
             PrefetchAdmission::Admit(score) => score,
             PrefetchAdmission::Skip(reason) => {
-                skipped.push(skip_at(prog, site.target, reason)?);
+                skipped.push(pf_skip_reason(prog, site.target, reason)?);
                 continue;
             }
         };
         let insert_site = match choose_prefetch_insert_site(prog, site)? {
             Ok(insert) => insert,
             Err(reason) => {
-                skipped.push(skip_at(prog, site.target, reason.message())?);
+                skipped.push(pf_skip_reason(prog, site.target, reason.message())?);
                 continue;
             }
         };
@@ -411,7 +397,7 @@ fn memory_base_reg(insn: &BpfInsn) -> Option<u8> {
 fn choose_prefetch_insert_site(
     prog: &BBProgram,
     site: PrefetchSite,
-) -> anyhow::Result<Result<InsnSite, InsertReject>> {
+) -> anyhow::Result<std::result::Result<InsnSite, InsertReject>> {
     let window = pf_prefetch_window_sites(prog, site.ptr_def, site.target, MAX_PREFETCH_DISTANCE)?;
     if window.is_empty() {
         return Ok(Err(InsertReject::Plain(
@@ -449,15 +435,15 @@ fn pf_sites_after_in_frame(
     max_slots: usize,
 ) -> anyhow::Result<Vec<InsnSite>> {
     prog.insn(anchor)?;
-    let frame = prog.block_frame(anchor.block)?;
-    let scan_start = pf_site_end_slot(prog, anchor)?;
+    let frame = prog.site_frame(anchor)?;
+    let scan_start = pf_site_end_offset(prog, anchor)?;
     let scan_end = scan_start
-        .checked_add(max_slots)
+        .checked_add(SlotDistance::from_slots(max_slots))
         .ok_or_else(|| anyhow::anyhow!("prefetch scan after {:?} overflows", anchor))?;
     let mut sites = Vec::new();
     for block in prog.subprog_blocks(frame) {
         for site in prog.sites_in_block_with_terminator(block)? {
-            let site_start = pf_site_start_slot(prog, site)?;
+            let site_start = prog.site_layout_offset(site)?;
             if site_start < scan_start {
                 continue;
             }
@@ -478,38 +464,27 @@ fn pf_prefetch_window_sites(
 ) -> anyhow::Result<Vec<InsnSite>> {
     prog.insn(ptr_def)?;
     prog.insn(target)?;
-    let frame = prog.block_frame(target.block)?;
-    if prog.block_frame(ptr_def.block)? != frame {
+    let target_block = prog.site_block(target);
+    let frame = prog.site_frame(target)?;
+    if prog.site_frame(ptr_def)? != frame {
         anyhow::bail!(
             "prefetch pointer definition {:?} and target {:?} are in different frames",
             ptr_def,
             target
         );
     }
-    let (block_start, block_end) = block_slot_bounds(prog, target.block)?;
-    let (frame_start, frame_end) = frame_slot_bounds(prog, frame)?;
-    if block_start < frame_start || block_end > frame_end {
-        anyhow::bail!(
-            "prefetch block {:?} crosses frame {:?}: block {}..{}, frame {}..{}",
-            target.block,
-            frame,
-            block_start,
-            block_end,
-            frame_start,
-            frame_end
-        );
-    }
-    let target_start = pf_site_start_slot(prog, target)?;
-    let ptr_def_end = pf_site_end_slot(prog, ptr_def)?;
+    let block_start = first_block_layout_offset(prog, target_block)?;
+    let target_start = prog.site_layout_offset(target)?;
+    let ptr_def_end = pf_site_end_offset(prog, ptr_def)?;
     let valid_start = block_start
-        .max(target_start.saturating_sub(max_slots))
+        .max(target_start.saturating_sub(SlotDistance::from_slots(max_slots)))
         .max(ptr_def_end);
     if valid_start > target_start {
         return Ok(Vec::new());
     }
     let mut sites = Vec::new();
-    for site in prog.sites_in_block(target.block)? {
-        let site_start = pf_site_start_slot(prog, site)?;
+    for site in prog.sites_in_block(target_block)? {
+        let site_start = prog.site_layout_offset(site)?;
         if site_start >= valid_start && site_start <= target_start {
             sites.push(site);
         }
@@ -523,10 +498,12 @@ fn pf_nearest_prefetch_insert_site(
     target: InsnSite,
     ideal_distance: usize,
 ) -> anyhow::Result<Option<InsnSite>> {
-    let ideal = pf_site_start_slot(prog, target)?.saturating_sub(ideal_distance);
-    let mut best = None;
+    let ideal = prog
+        .site_layout_offset(target)?
+        .saturating_sub(SlotDistance::from_slots(ideal_distance));
+    let mut best: Option<(SlotDistance, SlotDistance, InsnSite)> = None;
     for &site in sites {
-        let site_start = pf_site_start_slot(prog, site)?;
+        let site_start = prog.site_layout_offset(site)?;
         let distance = site_start.abs_diff(ideal);
         if best.is_none_or(|(best_distance, best_start, _)| {
             distance < best_distance || (distance == best_distance && site_start < best_start)
@@ -537,44 +514,20 @@ fn pf_nearest_prefetch_insert_site(
     Ok(best.map(|(_, _, site)| site))
 }
 
-fn pf_site_start_slot(prog: &BBProgram, site: InsnSite) -> anyhow::Result<usize> {
-    prog.site_current_pc(site)
+/// End-of-site layout offset = site_layout_offset(site) + site_slot_width(site).
+fn pf_site_end_offset(prog: &BBProgram, site: InsnSite) -> anyhow::Result<SlotDistance> {
+    prog.site_layout_offset(site)?
+        .checked_add(prog.site_slot_width(site)?)
+        .ok_or_else(|| anyhow::anyhow!("prefetch site {:?} end offset overflows", site))
 }
 
-fn pf_site_end_slot(prog: &BBProgram, site: InsnSite) -> anyhow::Result<usize> {
-    pf_site_start_slot(prog, site)?
-        .checked_add(prog.insn_slot_width(site)?)
-        .ok_or_else(|| anyhow::anyhow!("prefetch site {:?} end slot overflows", site))
-}
-
-fn block_slot_bounds(prog: &BBProgram, block: BlockId) -> anyhow::Result<(usize, usize)> {
-    let mut pc = 0usize;
-    for candidate in prog.block_ids() {
-        let start = pc;
-        for site in prog.sites_in_block_with_terminator(candidate)? {
-            pc = pc
-                .checked_add(prog.insn_slot_width(site)?)
-                .ok_or_else(|| anyhow::anyhow!("prefetch block slot bounds overflow"))?;
-        }
-        if candidate == block {
-            return Ok((start, pc));
-        }
+/// Layout offset of the first body site in `block`, used to clamp prefetch
+/// candidates to the current block.
+fn first_block_layout_offset(prog: &BBProgram, block: BlockId) -> anyhow::Result<SlotDistance> {
+    match prog.sites_in_block_with_terminator(block)?.first() {
+        Some(&first) => prog.site_layout_offset(first),
+        None => Ok(SlotDistance::ZERO),
     }
-    anyhow::bail!("invalid block id {:?}", block)
-}
-
-fn frame_slot_bounds(prog: &BBProgram, frame: FrameId) -> anyhow::Result<(usize, usize)> {
-    let mut start = usize::MAX;
-    let mut end = 0usize;
-    for block in prog.subprog_blocks(frame) {
-        let (block_start, block_end) = block_slot_bounds(prog, block)?;
-        start = start.min(block_start);
-        end = end.max(block_end);
-    }
-    if start == usize::MAX {
-        anyhow::bail!("frame {:?} has no blocks", frame);
-    }
-    Ok((start, end))
 }
 
 fn reject_control_flow_between(

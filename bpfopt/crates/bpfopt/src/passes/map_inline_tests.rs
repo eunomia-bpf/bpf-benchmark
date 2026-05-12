@@ -81,14 +81,11 @@ fn map_inline_consumes_hint_when_verifier_state_unavailable() {
     );
     ctx.map_values
         .insert((111, 1u32.to_le_bytes().to_vec()), value);
-    set_map_inline_hints(
-        &mut ctx,
-        vec![MapInlineHintSpec {
-            anchor: MapInlineHintAnchorSpec::Pc(5),
-            mode: MapInlineHintModeSpec::Hard,
-            key: 1u32.to_le_bytes().to_vec(),
-        }],
-    );
+    ctx.map_inline_hints = vec![MapInlineHintSpec {
+        anchor: MapInlineHintAnchorSpec::Pc(5),
+        mode: MapInlineHintModeSpec::Hard,
+        key: 1u32.to_le_bytes().to_vec(),
+    }];
 
     let run = run_pass_on_insns(MapInlinePass, lookup_program(42), &ctx);
 
@@ -114,14 +111,11 @@ fn map_inline_rejects_hint_with_wrong_key_size() {
     );
     ctx.map_values
         .insert((111, 1u32.to_le_bytes().to_vec()), value);
-    set_map_inline_hints(
-        &mut ctx,
-        vec![MapInlineHintSpec {
-            anchor: MapInlineHintAnchorSpec::Pc(5),
-            mode: MapInlineHintModeSpec::Hard,
-            key: vec![1, 2],
-        }],
-    );
+    ctx.map_inline_hints = vec![MapInlineHintSpec {
+        anchor: MapInlineHintAnchorSpec::Pc(5),
+        mode: MapInlineHintModeSpec::Hard,
+        key: vec![1, 2],
+    }];
 
     let err = pass_error_on_insns(MapInlinePass, lookup_program(42), &ctx);
 
@@ -146,14 +140,11 @@ fn map_inline_rejects_hint_pointing_at_non_lookup_call() {
     );
     ctx.map_values
         .insert((111, 1u32.to_le_bytes().to_vec()), value);
-    set_map_inline_hints(
-        &mut ctx,
-        vec![MapInlineHintSpec {
-            anchor: MapInlineHintAnchorSpec::Pc(6),
-            mode: MapInlineHintModeSpec::Hard,
-            key: 1u32.to_le_bytes().to_vec(),
-        }],
-    );
+    ctx.map_inline_hints = vec![MapInlineHintSpec {
+        anchor: MapInlineHintAnchorSpec::Pc(6),
+        mode: MapInlineHintModeSpec::Hard,
+        key: 1u32.to_le_bytes().to_vec(),
+    }];
 
     let err = pass_error_on_insns(MapInlinePass, lookup_program(42), &ctx);
 
@@ -279,7 +270,7 @@ fn map_inline_skipped_snapshot_errors_for_hard_array_lookup() {
             name: format!("array_{}", 111),
         },
     );
-    skip_map_snapshot(&mut ctx, 111);
+    ctx.map_snapshots_skipped_by_size.insert(111);
 
     let err = pass_error_on_insns(MapInlinePass, lookup_program(42), &ctx);
 
@@ -384,14 +375,11 @@ fn map_inline_skips_kernel_mutable_map() {
 #[test]
 fn map_inline_route_a_rejects_missing_outer_entry_for_hint() {
     let mut ctx = ctx_for_array_lookup(111, 7u32.to_le_bytes().to_vec());
-    set_map_inline_hints(
-        &mut ctx,
-        vec![MapInlineHintSpec {
-            anchor: MapInlineHintAnchorSpec::Pc(5),
-            mode: MapInlineHintModeSpec::Hard,
-            key: 1u32.to_le_bytes().to_vec(),
-        }],
-    );
+    ctx.map_inline_hints = vec![MapInlineHintSpec {
+        anchor: MapInlineHintAnchorSpec::Pc(5),
+        mode: MapInlineHintModeSpec::Hard,
+        key: 1u32.to_le_bytes().to_vec(),
+    }];
     ctx.map_metadata.insert(
         111,
         crate::test_helpers::map_metadata(111, libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4),
@@ -426,21 +414,18 @@ fn map_inline_soft_hint_requires_immediate_null_check_when_hard_fold_coexists() 
     );
     ctx.map_values
         .insert((111, 1u32.to_le_bytes().to_vec()), value);
-    set_map_inline_hints(
-        &mut ctx,
-        vec![
-            MapInlineHintSpec {
-                anchor: MapInlineHintAnchorSpec::Pc(5),
-                mode: MapInlineHintModeSpec::Hard,
-                key: 1u32.to_le_bytes().to_vec(),
-            },
-            MapInlineHintSpec {
-                anchor: MapInlineHintAnchorSpec::Pc(13),
-                mode: MapInlineHintModeSpec::Soft,
-                key: 1u32.to_le_bytes().to_vec(),
-            },
-        ],
-    );
+    ctx.map_inline_hints = vec![
+        MapInlineHintSpec {
+            anchor: MapInlineHintAnchorSpec::Pc(5),
+            mode: MapInlineHintModeSpec::Hard,
+            key: 1u32.to_le_bytes().to_vec(),
+        },
+        MapInlineHintSpec {
+            anchor: MapInlineHintAnchorSpec::Pc(13),
+            mode: MapInlineHintModeSpec::Soft,
+            key: 1u32.to_le_bytes().to_vec(),
+        },
+    ];
 
     let run = run_pass_on_insns(MapInlinePass, input, &ctx);
 
@@ -477,15 +462,13 @@ fn map_inline_route_a_rejects_kernel_mutable_inner_hint() {
             name: format!("hash_{}", 222),
         },
     );
-    add_inner_map(&mut ctx, 111, 1u32.to_le_bytes().to_vec(), 222);
-    set_map_inline_hints(
-        &mut ctx,
-        vec![MapInlineHintSpec {
-            anchor: MapInlineHintAnchorSpec::Pc(6),
-            mode: MapInlineHintModeSpec::Hard,
-            key: 1u32.to_le_bytes().to_vec(),
-        }],
-    );
+    ctx.map_inner_map_ids
+        .insert((111, 1u32.to_le_bytes().to_vec()), 222);
+    ctx.map_inline_hints = vec![MapInlineHintSpec {
+        anchor: MapInlineHintAnchorSpec::Pc(6),
+        mode: MapInlineHintModeSpec::Hard,
+        key: 1u32.to_le_bytes().to_vec(),
+    }];
 
     let err = pass_error_on_insns(MapInlinePass, input, &ctx);
 
@@ -495,15 +478,13 @@ fn map_inline_route_a_rejects_kernel_mutable_inner_hint() {
 #[test]
 fn map_inline_route_a_rejects_orphan_inner_hint() {
     let mut ctx = ctx_for_array_lookup(111, 7u32.to_le_bytes().to_vec());
-    add_inner_map(&mut ctx, 222, 1u32.to_le_bytes().to_vec(), 333);
-    set_map_inline_hints(
-        &mut ctx,
-        vec![MapInlineHintSpec {
-            anchor: MapInlineHintAnchorSpec::MapName("inner".to_string()),
-            mode: MapInlineHintModeSpec::Hard,
-            key: 1u32.to_le_bytes().to_vec(),
-        }],
-    );
+    ctx.map_inner_map_ids
+        .insert((222, 1u32.to_le_bytes().to_vec()), 333);
+    ctx.map_inline_hints = vec![MapInlineHintSpec {
+        anchor: MapInlineHintAnchorSpec::MapName("inner".to_string()),
+        mode: MapInlineHintModeSpec::Hard,
+        key: 1u32.to_le_bytes().to_vec(),
+    }];
 
     let err = pass_error_on_insns(MapInlinePass, lookup_program(42), &ctx);
 

@@ -1,200 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-use std::collections::{HashMap, HashSet};
-use std::sync::Arc;
+use std::collections::HashMap;
 
 use crate::analysis::{lift_with_pass_context, lower, BBProgram};
-use crate::insn::{BpfInsn, MapPseudo};
+use crate::insn::BpfInsn;
 use crate::pass::{
-    BpfPass, CompressedMapValues, InsnAnnotation, MapInlineHintSpec, MapLookupError, MapMetadata,
-    PassContext, PassResult, RegState, ScalarRange, SkipReason, StackState, Tnum, VerifierInsn,
-    VerifierInsnKind, VerifierValueWidth,
+    BpfPass, MapMetadata, PassContext, PassResult, RegState, ScalarRange, SkipReason, StackState,
+    Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
-use crate::passes::MapInfo;
-
-#[derive(Clone)]
-pub struct BpfProgram {
-    pub insns: Vec<BpfInsn>,
-    pub map_ids: Vec<u32>,
-    pub map_fd_bindings: HashMap<i32, u32>,
-    pub map_values: HashMap<(u32, Vec<u8>), Vec<u8>>,
-    pub map_value_overlays: HashMap<u32, CompressedMapValues>,
-    pub map_inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
-    pub map_snapshots_skipped_by_size: HashSet<u32>,
-    pub map_inline_hints: Vec<MapInlineHintSpec>,
-    pub map_metadata: HashMap<u32, MapMetadata>,
-    pub map_provider: Arc<dyn MapProvider>,
-}
-
-pub trait MapProvider: Send + Sync + std::fmt::Debug {
-    fn map_info(
-        &self,
-        program: &BpfProgram,
-        map_id: u32,
-    ) -> std::result::Result<Option<MapInfo>, String>;
-
-    fn lookup_value_size(
-        &self,
-        program: &BpfProgram,
-        info: &MapInfo,
-    ) -> std::result::Result<usize, String>;
-
-    fn lookup_elem(
-        &self,
-        program: &BpfProgram,
-        map_id: u32,
-        key: &[u8],
-        value_size: usize,
-    ) -> std::result::Result<Vec<u8>, MapLookupError>;
-}
-
-#[derive(Clone, Debug, Default)]
-pub struct SnapshotMapProvider;
-
-impl MapProvider for SnapshotMapProvider {
-    fn map_info(
-        &self,
-        program: &BpfProgram,
-        map_id: u32,
-    ) -> std::result::Result<Option<MapInfo>, String> {
-        let Some(metadata) = program.map_metadata.get(&map_id) else {
-            return Err(format!(
-                "map_values snapshot has no metadata for map {}",
-                map_id
-            ));
-        };
-        Ok(Some(MapInfo {
-            map_type: metadata.map_type,
-            key_size: metadata.key_size,
-            value_size: metadata.value_size,
-            max_entries: metadata.max_entries,
-            map_id: metadata.map_id,
-        }))
-    }
-
-    fn lookup_value_size(
-        &self,
-        program: &BpfProgram,
-        info: &MapInfo,
-    ) -> std::result::Result<usize, String> {
-        if let Some(overlay) = program.map_value_overlays.get(&info.map_id) {
-            return Ok(overlay.value_size);
-        }
-        if let Some(value_size) = program
-            .map_values
-            .iter()
-            .find_map(|((map_id, _), value)| (*map_id == info.map_id).then_some(value.len()))
-        {
-            return Ok(value_size);
-        }
-
-        Ok(info.value_size as usize)
-    }
-
-    fn lookup_elem(
-        &self,
-        program: &BpfProgram,
-        map_id: u32,
-        key: &[u8],
-        value_size: usize,
-    ) -> std::result::Result<Vec<u8>, MapLookupError> {
-        if let Some(overlay) = program.map_value_overlays.get(&map_id) {
-            return match overlay.lookup(key) {
-                Some(value) => {
-                    if value.len() != value_size {
-                        Err(MapLookupError::Failed(format!(
-                            "compressed map {} returned value size {}, expected {}",
-                            map_id,
-                            value.len(),
-                            value_size
-                        )))
-                    } else {
-                        Ok(value)
-                    }
-                }
-                None => Err(MapLookupError::MissingKey {
-                    map_id,
-                    key: key.to_vec(),
-                }),
-            };
-        }
-        if program.map_snapshots_skipped_by_size.contains(&map_id) {
-            return Err(MapLookupError::SkippedBySize { map_id });
-        }
-        if let Some(value) = program.map_values.get(&(map_id, key.to_vec())) {
-            if value.len() != value_size {
-                return Err(MapLookupError::Failed(format!(
-                    "snapshot map {} returned value size {}, expected {}",
-                    map_id,
-                    value.len(),
-                    value_size
-                )));
-            }
-            return Ok(value.clone());
-        }
-
-        if !program.map_metadata.contains_key(&map_id) {
-            return Err(MapLookupError::Failed(format!(
-                "map_values snapshot has no metadata for map {}",
-                map_id
-            )));
-        }
-        Err(MapLookupError::MissingKey {
-            map_id,
-            key: key.to_vec(),
-        })
-    }
-}
-
-impl BpfProgram {
-    pub fn new(insns: Vec<BpfInsn>) -> Self {
-        Self {
-            insns,
-            map_ids: Vec::new(),
-            map_fd_bindings: HashMap::new(),
-            map_values: HashMap::new(),
-            map_value_overlays: HashMap::new(),
-            map_inner_map_ids: HashMap::new(),
-            map_snapshots_skipped_by_size: HashSet::new(),
-            map_inline_hints: Vec::new(),
-            map_metadata: HashMap::new(),
-            map_provider: Arc::new(SnapshotMapProvider),
-        }
-    }
-
-    pub fn set_map_ids(&mut self, map_ids: Vec<u32>) {
-        self.map_fd_bindings = build_map_fd_bindings(&self.insns, &map_ids);
-        self.map_ids = map_ids;
-    }
-}
-
-pub fn build_map_fd_bindings(insns: &[BpfInsn], map_ids: &[u32]) -> HashMap<i32, u32> {
-    let mut old_fd_to_map_id = HashMap::new();
-    let mut unique_old_fds = Vec::new();
-
-    let mut pc = 0usize;
-    while pc < insns.len() {
-        let insn = insns[pc];
-        if insn.is_ldimm64() {
-            if insn.map_pseudo().is_some_and(MapPseudo::uses_fd)
-                && !unique_old_fds.contains(&insn.imm)
-            {
-                unique_old_fds.push(insn.imm);
-            }
-            pc += 2;
-            continue;
-        }
-        pc += 1;
-    }
-
-    for (index, old_fd) in unique_old_fds.into_iter().enumerate() {
-        if let Some(&map_id) = map_ids.get(index) {
-            old_fd_to_map_id.insert(old_fd, map_id);
-        }
-    }
-
-    old_fd_to_map_id
-}
 
 pub struct PassRun {
     pub result: PassResult,
@@ -282,51 +95,13 @@ pub fn ctx_with_kinsn(target: &str, btf_id: i32) -> PassContext {
 pub fn ctx_with_verifier_states(states: Vec<VerifierInsn>) -> PassContext {
     let mut ctx = pass_ctx();
     // Raw daemon verifier states stay on PassContext and are consumed once at lift.
-    ctx.verifier_states = Arc::from(states);
+    ctx.set_verifier_states_test(states);
     ctx
-}
-
-pub fn ctx_with_annotations(annotations: Vec<InsnAnnotation>) -> PassContext {
-    let mut ctx = pass_ctx();
-    // PassContext carries per-PC annotations for profile-guided passes.
-    ctx.annotations = annotations;
-    ctx
-}
-
-pub fn set_branch_miss_rate(ctx: &mut PassContext, miss_rate: f64) {
-    // BranchFlip program-level PMU side input lives on PassContext.
-    ctx.branch_miss_rate = Some(miss_rate);
-}
-
-pub fn add_inner_map(ctx: &mut PassContext, outer_map_id: u32, key: Vec<u8>, inner_map_id: u32) {
-    // Map-in-map side inputs live on PassContext.
-    ctx.map_inner_map_ids
-        .insert((outer_map_id, key), inner_map_id);
-}
-
-pub fn skip_map_snapshot(ctx: &mut PassContext, map_id: u32) {
-    // Skipped snapshot markers live on PassContext.
-    ctx.map_snapshots_skipped_by_size.insert(map_id);
 }
 
 pub fn set_map_ids(ctx: &mut PassContext, map_ids: Vec<u32>) {
     // Canonical map-id binding side input lives on PassContext.
     ctx.map_ids = map_ids;
-}
-
-pub fn set_map_inline_hints(ctx: &mut PassContext, hints: Vec<MapInlineHintSpec>) {
-    // map_inline hints live on PassContext.
-    ctx.map_inline_hints = hints;
-}
-
-pub fn set_btf_records(
-    ctx: &mut PassContext,
-    func_info: Option<crate::pass::BtfInfoRecords>,
-    line_info: Option<crate::pass::BtfInfoRecords>,
-) {
-    // BTF metadata side inputs live on PassContext.
-    ctx.func_info = func_info;
-    ctx.line_info = line_info;
 }
 
 pub fn scalar_reg(value: u64) -> RegState {

@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 use std::collections::BTreeSet;
 
-use anyhow::{bail, Result};
-
 use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
 use crate::insn::*;
 use crate::pass::*;
@@ -11,19 +9,6 @@ pub struct BranchFlipPass {
     pub max_branch_miss_rate: f64,
 }
 
-impl BranchFlipPass {
-    pub fn from_cli_args(args: &[String]) -> Result<Box<dyn BpfPass>> {
-        if let Some(arg) = args.first() {
-            bail!(
-                "branch_flip pass-local profile arguments moved to BBProgram side inputs; unexpected arg: {arg}"
-            );
-        }
-        Ok(Box::new(BranchFlipPass {
-            min_bias: 0.7,
-            max_branch_miss_rate: 0.05,
-        }))
-    }
-}
 #[derive(Clone)]
 pub(super) struct BranchFlipSite {
     cond_site: InsnSite,
@@ -231,6 +216,9 @@ fn bf_skip_reason(
 fn bf_blocks_are_adjacent(prog: &BBProgram, left: BlockId, right: BlockId) -> anyhow::Result<bool> {
     prog.block_frame(left)?;
     prog.block_frame(right)?;
+    // BlockId is a positional index into the lifted blocks vec; adjacency in
+    // layout order is direct arithmetic on that index. This is structural, not
+    // PC arithmetic — no lowering output is computed.
     Ok(left.0 + 1 == right.0)
 }
 
@@ -239,15 +227,15 @@ fn bf_block_range_has_body_site(
     first: BlockId,
     last: BlockId,
 ) -> anyhow::Result<bool> {
-    if first.0 > last.0 {
+    if first > last {
         anyhow::bail!(
             "branch_flip block range {:?}..={:?} is inverted",
             first,
             last
         );
     }
-    for block in first.0..=last.0 {
-        if !prog.sites_in_block(BlockId(block))?.is_empty() {
+    for block_idx in first.0..=last.0 {
+        if !prog.sites_in_block(BlockId(block_idx))?.is_empty() {
             return Ok(true);
         }
     }
@@ -263,8 +251,8 @@ fn bf_validate_flipped_branch_deltas(
     else_last: BlockId,
     cond: BpfInsn,
 ) -> anyhow::Result<()> {
-    let then_len = bf_block_range_body_slot_len(prog, then_first, then_last)?;
-    let else_len = bf_block_range_body_slot_len(prog, else_first, else_last)?;
+    let then_len = prog.block_range_slot_count(then_first, then_last)?.slots();
+    let else_len = prog.block_range_slot_count(else_first, else_last)?.slots();
     let cond_delta = else_len.checked_add(1).ok_or_else(|| {
         anyhow::anyhow!(
             "branch_flip site {:?} else arm overflows branch delta",
@@ -288,29 +276,6 @@ fn bf_validate_flipped_branch_deltas(
         )
     })?)?;
     Ok(())
-}
-
-fn bf_block_range_body_slot_len(
-    prog: &BBProgram,
-    first: BlockId,
-    last: BlockId,
-) -> anyhow::Result<usize> {
-    if first.0 > last.0 {
-        anyhow::bail!(
-            "branch_flip block range {:?}..={:?} is inverted",
-            first,
-            last
-        );
-    }
-    let mut len = 0usize;
-    for block in first.0..=last.0 {
-        for site in prog.sites_in_block(BlockId(block))? {
-            len = len
-                .checked_add(prog.insn_slot_width(site)?)
-                .ok_or_else(|| anyhow::anyhow!("branch_flip arm slot length overflows"))?;
-        }
-    }
-    Ok(len)
 }
 
 fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow::Result<()> {

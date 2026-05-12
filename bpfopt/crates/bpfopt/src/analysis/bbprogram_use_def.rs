@@ -21,24 +21,6 @@ pub struct UseSite {
     pub reg: u8,
 }
 
-impl DefSite {
-    pub fn site(self) -> InsnSite {
-        InsnSite {
-            block: self.block,
-            idx: self.idx,
-        }
-    }
-}
-
-impl UseSite {
-    pub fn site(self) -> InsnSite {
-        InsnSite {
-            block: self.block,
-            idx: self.idx,
-        }
-    }
-}
-
 #[derive(Clone, Debug, Default)]
 pub struct UseDefGraph {
     pub(super) defs: BTreeMap<DefSite, Vec<UseSite>>,
@@ -99,10 +81,6 @@ impl UseDefGraph {
 
     pub fn defs(&self) -> impl Iterator<Item = &DefSite> {
         self.defs.keys()
-    }
-
-    pub fn uses(&self) -> impl Iterator<Item = &UseSite> {
-        self.uses.keys()
     }
 }
 

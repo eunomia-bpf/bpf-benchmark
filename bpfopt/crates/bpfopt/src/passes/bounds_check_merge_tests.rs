@@ -234,11 +234,8 @@ fn bounds_check_merge_remaps_btf_metadata_on_bbprogram() {
     let input = two_adjacent_checks(XDP_PACKET_DATA_OFFSET, XDP_PACKET_DATA_END_OFFSET);
     let mut ctx = pass_ctx();
     ctx.prog_type = XDP;
-    set_btf_records(
-        &mut ctx,
-        Some(btf_records(&[0, 12])),
-        Some(btf_records(&[5, 9, 12])),
-    );
+    ctx.func_info = Some(btf_records(&[0, 12]));
+    ctx.line_info = Some(btf_records(&[5, 9, 12]));
 
     let run = run_pass_on_insns(BoundsCheckMergePass, input, &ctx);
 

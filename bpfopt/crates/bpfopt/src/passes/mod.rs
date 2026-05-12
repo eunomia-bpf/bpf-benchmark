@@ -19,25 +19,21 @@ mod rotate;
 mod skb_load_bytes;
 mod wide_mem;
 
-pub use bounds_check_merge::{
-    run_on_bbprogram as run_bounds_check_merge_on_bbprogram, BoundsCheckMergePass,
-};
-pub use branch_flip::{run_on_bbprogram as run_branch_flip_on_bbprogram, BranchFlipPass};
-pub use bulk_memory::{run_on_bbprogram as run_bulk_memory_on_bbprogram, BulkMemoryPass};
-pub use ccmp::{run_on_bbprogram as run_ccmp_on_bbprogram, CcmpPass};
-pub use cond_select::{run_on_bbprogram as run_cond_select_on_bbprogram, CondSelectPass};
-pub use const_prop::{run_on_bbprogram as run_const_prop_on_bbprogram, ConstPropPass};
-pub use dce::{run_on_bbprogram as run_dce_on_bbprogram, DcePass};
-pub use endian::{run_on_bbprogram as run_endian_fusion_on_bbprogram, EndianFusionPass};
-pub use extract::{run_on_bbprogram as run_extract_on_bbprogram, ExtractPass};
-pub use map_inline::{MapInfo, MapInfoAnalysis, MapInfoResult, MapInlinePass, MapReference};
+pub use bounds_check_merge::BoundsCheckMergePass;
+pub use branch_flip::BranchFlipPass;
+pub use bulk_memory::BulkMemoryPass;
+pub use ccmp::CcmpPass;
+pub use cond_select::CondSelectPass;
+pub use const_prop::ConstPropPass;
+pub use dce::DcePass;
+pub use endian::EndianFusionPass;
+pub use extract::ExtractPass;
+pub use map_inline::{MapInfo, MapInfoResult, MapInlinePass, MapReference};
 pub use noop::NoopPass;
-pub use prefetch::{run_on_bbprogram as run_prefetch_on_bbprogram, PrefetchPass};
-pub use rotate::{run_on_bbprogram as run_rotate_on_bbprogram, RotatePass};
-pub use skb_load_bytes::{
-    run_on_bbprogram as run_skb_load_bytes_spec_on_bbprogram, SkbLoadBytesSpecPass,
-};
-pub use wide_mem::{run_on_bbprogram as run_wide_mem_on_bbprogram, WideMemPass};
+pub use prefetch::PrefetchPass;
+pub use rotate::RotatePass;
+pub use skb_load_bytes::SkbLoadBytesSpecPass;
+pub use wide_mem::WideMemPass;
 
 use crate::pass::{BpfPass, KinsnDescriptor};
 
@@ -120,17 +116,11 @@ fn reject_pass_args(pass_name: &str, args: &[String]) -> Result<()> {
     };
 }
 
-#[rustfmt::skip] macro_rules! pass_entry_with_args {
-    ($name:literal, $description:literal, $make:expr, $metadata:expr) => {
-        PassRegistryEntry { name: $name, description: $description, make: $make, metadata: $metadata }
-    };
-}
-
 /// Canonical pass ordering and metadata. Pipeline builders iterate this array in
 /// order, guaranteeing consistent pass sequencing regardless of selected names.
 #[rustfmt::skip] pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
     pass_entry!("noop", "Identity pass — measures ReJIT pipeline overhead with no transform", NoopPass, META_PRODUCES_STATES),
-    pass_entry_with_args!("map_inline", "Inline stable map lookups and pseudo-map-value loads", MapInlinePass::from_cli_args, META_MAP_INLINE),
+    PassRegistryEntry { name: "map_inline", description: "Inline stable map lookups and pseudo-map-value loads", make: MapInlinePass::from_cli_args, metadata: META_MAP_INLINE },
     pass_entry!("const_prop", "Fold register constants into MOV/LD_IMM64/JA rewrites", ConstPropPass, META_NEEDS_AND_PRODUCES_STATES),
     pass_entry!("dce", "Remove CFG-unreachable blocks and NOPs after simplification", DcePass, META_NONE),
     pass_entry!("skb_load_bytes_spec", "Specialize eligible skb_load_bytes helper sites into direct packet access", SkbLoadBytesSpecPass, META_NONE),
@@ -142,8 +132,8 @@ fn reject_pass_args(pass_name: &str, args: &[String]) -> Result<()> {
     pass_entry!("ccmp", "Fold ARM64 zero-test compare chains into CCMP kfunc calls", CcmpPass, META_CCMP),
     pass_entry!("extract", "Replace shift+mask with bit field extract kfunc (BEXTR)", ExtractPass, META_EXTRACT),
     pass_entry!("endian_fusion", "Fuse endian swap patterns into endian load kfunc (MOVBE)", EndianFusionPass, META_ENDIAN),
-    pass_entry_with_args!("branch_flip", "Flip branch polarity using PGO data to improve branch prediction", BranchFlipPass::from_cli_args, META_NONE),
-    pass_entry_with_args!("prefetch", "Insert packet and map-value prefetch kinsn calls", PrefetchPass::from_cli_args, META_PREFETCH),
+    pass_entry!("branch_flip", "Flip branch polarity using PGO data to improve branch prediction", BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 }, META_NONE),
+    pass_entry!("prefetch", "Insert packet and map-value prefetch kinsn calls", PrefetchPass, META_PREFETCH),
 ];
 
 #[cfg(test)]

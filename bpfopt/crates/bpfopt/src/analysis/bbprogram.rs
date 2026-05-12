@@ -9,10 +9,8 @@ use crate::insn::{insn_width, BpfInsn, MapPseudo};
 use crate::pass::{
     BtfInfoRecords, InsnAnnotation, KinsnRegistry, PmuRecord, PrefetchHint, RegKind, RegSet,
 };
-use crate::passes::map_inline::MapInlineSideInput;
 use crate::verifier_log::{RegState, StackState, VerifierInsn, VerifierInsnKind};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::ops::Range;
 use std::sync::Arc;
 pub(crate) type VerifierOracle = BTreeMap<InsnSite, Arc<[VerifierInsn]>>;
 pub(crate) type BtfMetadataMap = BTreeMap<InsnSite, usize>;
@@ -29,6 +27,40 @@ pub struct InsnSite {
 impl InsnSite {
     pub(crate) fn for_test(block: BlockId, idx: usize) -> Self {
         Self { block, idx }
+    }
+}
+/// Opaque "instruction slot distance" — the number of machine instruction
+/// slots between layout-positioned BPF sites. Layout-aware passes (prefetch,
+/// branch_flip) query this when they need physical instruction layout
+/// distance for prefetch latency tuning or JA imm16 range checks. The wrapper
+/// keeps passes from doing arbitrary `usize` arithmetic on raw slot counts.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct SlotDistance(usize);
+impl SlotDistance {
+    pub const ZERO: Self = Self(0);
+    /// Construct a layout distance from a slot count (used by callers that
+    /// receive a user-supplied window size, e.g. `max_slots`).
+    pub fn from_slots(slots: usize) -> Self {
+        Self(slots)
+    }
+    /// Slot count. Only useful for comparison or saturating arithmetic with
+    /// another SlotDistance — never for indexing instructions.
+    pub fn slots(self) -> usize {
+        self.0
+    }
+    /// Does this distance fit in the BPF JA imm16 range (-32768..=32767)?
+    pub fn fits_jmp_imm16(self) -> bool {
+        self.0 <= i16::MAX as usize
+    }
+    pub fn saturating_sub(self, other: Self) -> Self {
+        Self(self.0.saturating_sub(other.0))
+    }
+    pub fn checked_add(self, other: Self) -> Option<Self> {
+        self.0.checked_add(other.0).map(Self)
+    }
+    /// Absolute slot distance |self - other|.
+    pub fn abs_diff(self, other: Self) -> Self {
+        Self(self.0.abs_diff(other.0))
     }
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -49,7 +81,6 @@ pub struct BBProgram {
     pub(crate) func_info: Option<BtfInfoRecords>,
     pub(crate) line_info: Option<BtfInfoRecords>,
     ldimm64_second_slots: BTreeMap<InsnSite, BpfInsn>,
-    map_inline_side_input: Option<MapInlineSideInput>,
     pub(crate) pc_relative_ldimm64_targets: BTreeMap<InsnSite, BlockId>,
     pub(crate) predecessors: Vec<Vec<BlockId>>,
     pub(crate) successors: Vec<Vec<BlockId>>,
@@ -159,7 +190,6 @@ impl BBProgram {
             func_info: None,
             line_info: None,
             ldimm64_second_slots,
-            map_inline_side_input: None,
             pc_relative_ldimm64_targets,
             predecessors: Vec::new(),
             successors: Vec::new(),
@@ -179,9 +209,6 @@ impl BBProgram {
     }
     pub fn all_sites(&self) -> impl Iterator<Item = InsnSite> + '_ {
         self.blocks.iter().flat_map(logical_sites_for_block)
-    }
-    pub fn block_is_body_empty(&self, block: BlockId) -> anyhow::Result<bool> {
-        Ok(self.block(block)?.insns.is_empty())
     }
     pub fn block_frame(&self, block: BlockId) -> anyhow::Result<FrameId> {
         Ok(self.block(block)?.frame)
@@ -204,9 +231,6 @@ impl BBProgram {
     pub fn block_single_body_insn(&self, block: BlockId) -> anyhow::Result<Option<&BpfInsn>> {
         let block = self.block(block)?;
         Ok((block.insns.len() == 1).then(|| &block.insns[0]))
-    }
-    pub fn copied_body_insns(&self, block: BlockId) -> anyhow::Result<Vec<BpfInsn>> {
-        Ok(self.block(block)?.insns.clone())
     }
     pub fn predecessors(&self, block: BlockId) -> &[BlockId] {
         &self.predecessors[block.0]
@@ -515,6 +539,41 @@ impl BBProgram {
             .copied()
             .ok_or_else(|| anyhow::anyhow!("site {:?} is not in current program order", site))
     }
+    /// LAYOUT QUERY: site's slot offset in the current program layout.
+    /// Returns an opaque `SlotDistance` token; passes may only compare/saturate, not arbitrary arithmetic.
+    pub fn site_layout_offset(&self, site: InsnSite) -> anyhow::Result<SlotDistance> {
+        self.site_current_pc(site).map(SlotDistance)
+    }
+    /// LAYOUT QUERY: how many machine slots a single instruction occupies
+    /// (LD_IMM64 = 2, everything else = 1).
+    pub fn site_slot_width(&self, site: InsnSite) -> anyhow::Result<SlotDistance> {
+        self.insn_slot_width(site).map(SlotDistance)
+    }
+    /// LAYOUT QUERY: total slot count across the contiguous block range
+    /// `[first.. =last]` in BlockId order. Used by branch_flip to validate
+    /// reflected arm fits within JA imm16 range.
+    pub fn block_range_slot_count(
+        &self,
+        first: BlockId,
+        last: BlockId,
+    ) -> anyhow::Result<SlotDistance> {
+        if first.0 > last.0 {
+            anyhow::bail!(
+                "block_range_slot_count: range {:?}..={:?} is inverted",
+                first,
+                last
+            );
+        }
+        let mut len = 0usize;
+        for block in first.0..=last.0 {
+            for site in self.sites_in_block(BlockId(block))? {
+                len = len
+                    .checked_add(self.insn_slot_width(site)?)
+                    .ok_or_else(|| anyhow::anyhow!("block range slot count overflows"))?;
+            }
+        }
+        Ok(SlotDistance(len))
+    }
     pub fn branch_target_entry_sites(&self) -> anyhow::Result<BTreeSet<InsnSite>> {
         let mut targets = BTreeSet::new();
         for block in self.blocks() {
@@ -562,12 +621,6 @@ impl BBProgram {
     }
     pub(crate) fn ldimm64_second_slot(&self, site: InsnSite) -> Option<&BpfInsn> {
         self.ldimm64_second_slots.get(&site)
-    }
-    pub fn map_inline_side_input(&self) -> Option<&MapInlineSideInput> {
-        self.map_inline_side_input.as_ref()
-    }
-    pub(super) fn attach_map_inline_side_input(&mut self, side_input: MapInlineSideInput) {
-        self.map_inline_side_input = Some(side_input);
     }
     pub(super) fn remove_ldimm64_second_slot(&mut self, site: InsnSite) {
         self.ldimm64_second_slots.remove(&site);
@@ -1072,12 +1125,6 @@ impl Terminator {
             Self::Exit { .. } | Self::End => Vec::new(),
         }
     }
-}
-pub(crate) fn range_len(range: &Range<usize>) -> anyhow::Result<usize> {
-    range
-        .end
-        .checked_sub(range.start)
-        .ok_or_else(|| anyhow::anyhow!("invalid descending range {:?}", range))
 }
 #[derive(Clone, Debug)]
 #[cfg(test)]

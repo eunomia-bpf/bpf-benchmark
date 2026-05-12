@@ -49,7 +49,8 @@ fn prefetch_uses_alias_register_for_map_value_deref() {
 fn prefetch_profile_filters_cold_map_value_site() {
     let mut annotations = vec![InsnAnnotation::default(); 4];
     annotations[2].prefetch_profile = Some(prefetch_profile(100, 0.0));
-    let ctx = ctx_with_annotations(annotations);
+    let mut ctx = pass_ctx();
+    ctx.annotations = annotations;
 
     let run = run_pass_on_insns(PrefetchPass, map_lookup_program(), &ctx);
 

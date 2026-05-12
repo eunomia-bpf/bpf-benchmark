@@ -3,8 +3,11 @@
 
 use std::collections::{BTreeMap, HashMap};
 
+use anyhow::{anyhow, Result};
+
 use crate::analysis::{BBProgram, InsnSite};
 use crate::insn::MapPseudo;
+use crate::pass::MapMetadata;
 
 const BPF_MAP_TYPE_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_HASH;
 const BPF_MAP_TYPE_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_ARRAY;
@@ -13,20 +16,9 @@ const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
 const BPF_MAP_TYPE_HASH_OF_MAPS: u32 = libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS;
 const BPF_MAP_TYPE_LRU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_LRU_HASH;
 
-/// Runtime metadata for a live kernel map referenced by the program.
-///
-/// `map_inline` uses this metadata for map layout and type checks. BPF-side
-/// mutability is derived separately from writer helper calls and map type.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct MapInfo {
-    pub map_type: u32,
-    pub key_size: u32,
-    pub value_size: u32,
-    pub max_entries: u32,
-    pub map_id: u32,
-}
+pub use crate::pass::MapMetadata as MapInfo;
 
-impl MapInfo {
+impl MapMetadata {
     /// Returns whether this map type supports direct value access (i.e. the
     /// kernel allows reading element values by ID). Map types like
     /// `PERF_EVENT_ARRAY`, `PROG_ARRAY`, `RINGBUF`, `STACK_TRACE`, and
@@ -97,10 +89,8 @@ impl MapInfoResult {
     }
 }
 
-/// Analysis that resolves pseudo-map references back to live maps.
-pub struct MapInfoAnalysis;
-
-type MapInfoAnalysisResult<T> = std::result::Result<T, String>;
+#[cfg(test)]
+use anyhow::Result as MapInfoResultOrError;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct MapBinding {
@@ -112,28 +102,24 @@ struct MapBinding {
     map_id: Option<u32>,
 }
 
-pub(super) fn analyze_map_info(program: &BBProgram) -> MapInfoAnalysisResult<MapInfoResult> {
-    let side_input = super::map_inline_side_input(program).map_err(|err| err.to_string())?;
+pub(super) fn analyze_map_info(
+    program: &BBProgram,
+    side_input: &super::MapInlineSideInput<'_>,
+) -> Result<MapInfoResult> {
     let fd_bindings = program
         .map_bindings()
         .iter()
         .map(|binding| (binding.old_fd, binding.map_id))
         .collect::<HashMap<_, _>>();
-    let map_refs = collect_map_bindings_from_sites(program, &side_input.map_ids, &fd_bindings)?;
+    let map_refs = collect_map_bindings_from_sites(program, side_input.map_ids, &fd_bindings)?;
     collect_map_references_from_bindings(side_input.map_ids.len(), map_refs, |map_id| {
         let Some(metadata) = side_input.metadata.get(&map_id) else {
-            return Err(format!(
+            return Err(anyhow!(
                 "map_values snapshot has no metadata for map {}",
                 map_id
             ));
         };
-        Ok(Some(MapInfo {
-            map_type: metadata.map_type,
-            key_size: metadata.key_size,
-            value_size: metadata.value_size,
-            max_entries: metadata.max_entries,
-            map_id: metadata.map_id,
-        }))
+        Ok(Some(metadata.clone()))
     })
 }
 
@@ -141,7 +127,7 @@ fn collect_map_bindings_from_sites(
     program: &BBProgram,
     map_ids: &[u32],
     fd_bindings: &HashMap<i32, u32>,
-) -> MapInfoAnalysisResult<Vec<MapBinding>> {
+) -> Result<Vec<MapBinding>> {
     let mut bindings = Vec::new();
     let mut fd_order = Vec::<i32>::new();
 
@@ -195,9 +181,9 @@ fn collect_map_references_from_bindings<F>(
     map_id_count: usize,
     map_refs: Vec<MapBinding>,
     mut resolver: F,
-) -> MapInfoAnalysisResult<MapInfoResult>
+) -> Result<MapInfoResult>
 where
-    F: FnMut(u32) -> MapInfoAnalysisResult<Option<MapInfo>>,
+    F: FnMut(u32) -> Result<Option<MapInfo>>,
 {
     let mut references = Vec::new();
     let mut resolved_by_index: BTreeMap<usize, Option<MapInfo>> = BTreeMap::new();
@@ -207,16 +193,19 @@ where
             continue;
         };
         let map_ordinal = binding.map_ordinal.ok_or_else(|| {
-            format!(
+            anyhow!(
                 "negative pseudo-map index {} at site {:?}",
-                binding.imm, binding.site
+                binding.imm,
+                binding.site
             )
         })?;
         let map_id = if kind == MapPseudo::Idx {
             Some(binding.map_id.ok_or_else(|| {
-                format!(
+                anyhow!(
                     "pseudo-map index {} at site {:?} out of range for {} map ids",
-                    map_ordinal, binding.site, map_id_count
+                    map_ordinal,
+                    binding.site,
+                    map_id_count
                 )
             })?)
         } else {

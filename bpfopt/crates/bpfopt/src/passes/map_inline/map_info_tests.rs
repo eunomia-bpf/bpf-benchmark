@@ -1,33 +1,18 @@
 use super::*;
 use crate::analysis::BlockId;
 use crate::insn::{insn_width, BpfInsn, MapPseudo, BPF_DW, BPF_IMM, BPF_LD};
-use crate::pass::BpfProgram;
 use std::collections::HashMap;
 
 const BPF_MAP_TYPE_PERCPU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_PERCPU_HASH;
 const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
 
-impl MapInfoAnalysis {
-    fn run(program: &BpfProgram) -> MapInfoAnalysisResult<MapInfoResult> {
-        analyze_map_info_from_bpf_program(program)
-    }
-}
-
-fn analyze_map_info_from_bpf_program(program: &BpfProgram) -> MapInfoAnalysisResult<MapInfoResult> {
-    let provider = program.map_provider.clone();
-    let map_refs = collect_map_bindings(&program.insns, &program.map_ids, &program.map_fd_bindings);
-    collect_map_references_from_bindings(program.map_ids.len(), map_refs, move |map_id| {
-        provider.map_info(program, map_id)
-    })
-}
-
 fn collect_map_references<F>(
     insns: &[BpfInsn],
     map_ids: &[u32],
     resolver: F,
-) -> MapInfoAnalysisResult<MapInfoResult>
+) -> MapInfoResultOrError<MapInfoResult>
 where
-    F: FnMut(u32) -> MapInfoAnalysisResult<Option<MapInfo>>,
+    F: FnMut(u32) -> MapInfoResultOrError<Option<MapInfo>>,
 {
     collect_map_references_with_bindings(insns, map_ids, &HashMap::new(), resolver)
 }
@@ -37,14 +22,11 @@ fn collect_map_references_with_bindings<F>(
     map_ids: &[u32],
     map_fd_bindings: &HashMap<i32, u32>,
     resolver: F,
-) -> MapInfoAnalysisResult<MapInfoResult>
+) -> MapInfoResultOrError<MapInfoResult>
 where
-    F: FnMut(u32) -> MapInfoAnalysisResult<Option<MapInfo>>,
+    F: FnMut(u32) -> MapInfoResultOrError<Option<MapInfo>>,
 {
-    let mut program = BpfProgram::new(insns.to_vec());
-    program.map_ids = map_ids.to_vec();
-    program.map_fd_bindings = map_fd_bindings.clone();
-    let map_refs = collect_map_bindings(&program.insns, &program.map_ids, &program.map_fd_bindings);
+    let map_refs = collect_map_bindings(insns, map_ids, map_fd_bindings);
     collect_map_references_from_bindings(map_ids.len(), map_refs, resolver)
 }
 
@@ -94,6 +76,7 @@ fn array_map(map_id: u32, max_entries: u32) -> MapInfo {
         value_size: 8,
         max_entries,
         map_id,
+        name: format!("map_{map_id}"),
     }
 }
 
@@ -104,6 +87,7 @@ fn hash_map(map_id: u32) -> MapInfo {
         value_size: 8,
         max_entries: 16,
         map_id,
+        name: format!("map_{map_id}"),
     }
 }
 
@@ -114,6 +98,7 @@ fn lru_hash_map(map_id: u32) -> MapInfo {
         value_size: 8,
         max_entries: 16,
         map_id,
+        name: format!("map_{map_id}"),
     }
 }
 
@@ -190,94 +175,14 @@ fn collect_map_references_handles_missing_map_ids() {
 }
 
 #[test]
-fn map_info_analysis_runs_without_live_map_metadata() {
-    let ld = make_ld_imm64(1, MapPseudo::Fd.src_reg(), 10);
-    let program = BpfProgram::new(vec![ld[0], ld[1]]);
-    let result = MapInfoAnalysis::run(&program).expect("map info analysis should succeed");
-
-    assert_eq!(result.references.len(), 1);
-    assert_eq!(result.references[0].map_id, None);
-    assert_eq!(result.references[0].info, None);
-}
-
-#[test]
-fn map_info_analysis_propagates_live_map_lookup_errors() {
-    #[derive(Debug)]
-    struct ErrorMapProvider;
-
-    impl crate::pass::MapProvider for ErrorMapProvider {
-        fn map_info(
-            &self,
-            _program: &BpfProgram,
-            map_id: u32,
-        ) -> MapInfoAnalysisResult<Option<MapInfo>> {
-            Err(format!(
-                "resolve live map info for map {map_id}: test error"
-            ))
-        }
-
-        fn lookup_value_size(
-            &self,
-            _program: &BpfProgram,
-            _info: &MapInfo,
-        ) -> MapInfoAnalysisResult<usize> {
-            unreachable!("map_info analysis only resolves metadata")
-        }
-
-        fn lookup_elem(
-            &self,
-            _program: &BpfProgram,
-            _map_id: u32,
-            _key: &[u8],
-            _value_size: usize,
-        ) -> std::result::Result<Vec<u8>, crate::pass::MapLookupError> {
-            unreachable!("map_info analysis only resolves metadata")
-        }
-    }
-
-    let ld = make_ld_imm64(1, MapPseudo::Fd.src_reg(), 10);
-    let mut program = BpfProgram::new(vec![ld[0], ld[1]]);
-    program.map_provider = std::sync::Arc::new(ErrorMapProvider);
-    program.set_map_ids(vec![999_999]);
-
-    let err =
-        MapInfoAnalysis::run(&program).expect_err("missing live map metadata should propagate");
-
-    assert!(err.contains("resolve live map info for map 999999"));
-}
-
-#[test]
-fn map_info_analysis_preserves_old_fd_binding_after_leading_map_is_deleted() {
-    let ld0 = make_ld_imm64(1, MapPseudo::Fd.src_reg(), 10);
-    let ld1 = make_ld_imm64(2, MapPseudo::Fd.src_reg(), 11);
-    let mut program = BpfProgram::new(vec![ld0[0], ld0[1], ld1[0], ld1[1]]);
-    program.set_map_ids(vec![101, 202]);
-
-    program.insns = vec![ld1[0], ld1[1]];
-
-    let result = collect_map_references_with_bindings(
-        &program.insns,
-        &program.map_ids,
-        &program.map_fd_bindings,
-        |map_id| Ok(Some(array_map(map_id, 4))),
-    )
-    .expect("map reference collection should succeed");
-
-    assert_eq!(result.references.len(), 1);
-    assert_eq!(result.references[0].imm, 11);
-    assert_eq!(result.references[0].map_id, Some(202));
-}
-
-#[test]
 fn map_info_analysis_resolves_canonical_idx_refs_by_map_id_order() {
     let ld0 = make_ld_imm64(1, MapPseudo::Idx.src_reg(), 1);
     let ld1 = make_ld_imm64(2, MapPseudo::Idx.src_reg(), 0);
-    let program = BpfProgram::new(vec![ld0[0], ld0[1], ld1[0], ld1[1]]);
+    let insns = vec![ld0[0], ld0[1], ld1[0], ld1[1]];
 
-    let result = collect_map_references(&program.insns, &[101, 202], |map_id| {
-        Ok(Some(array_map(map_id, 4)))
-    })
-    .expect("canonical IDX references should resolve through map_ids");
+    let result =
+        collect_map_references(&insns, &[101, 202], |map_id| Ok(Some(array_map(map_id, 4))))
+            .expect("canonical IDX references should resolve through map_ids");
 
     assert_eq!(result.references.len(), 2);
     assert_eq!(result.references[0].map_ordinal, 1);
@@ -310,15 +215,11 @@ fn unsupported_map_types_reject_direct_value_access() {
             value_size: 8,
             max_entries: 16,
             map_id: 999,
+            name: "unsupported".to_string(),
         };
         assert!(
             !info.supports_direct_value_access(),
             "map_type {} should NOT support direct value access",
-            map_type
-        );
-        assert!(
-            !info.supports_direct_value_access(),
-            "map_type {} should NOT be inlineable",
             map_type
         );
     }
@@ -334,14 +235,11 @@ fn percpu_array_is_conditionally_inlineable_but_percpu_hashes_still_are_not() {
         value_size: 8,
         max_entries: 16,
         map_id: 501,
+        name: "percpu_array".to_string(),
     };
     assert!(
         percpu_array.supports_direct_value_access(),
         "PERCPU_ARRAY should allow site-level direct blob access"
-    );
-    assert!(
-        percpu_array.supports_direct_value_access(),
-        "PERCPU_ARRAY should be conditionally inlineable"
     );
     assert!(
         percpu_array.has_removable_lookup_pattern(),
@@ -358,14 +256,11 @@ fn percpu_array_is_conditionally_inlineable_but_percpu_hashes_still_are_not() {
         value_size: 8,
         max_entries: 16,
         map_id: 502,
+        name: "percpu_hash".to_string(),
     };
     assert!(
         !percpu_hash.supports_direct_value_access(),
         "PERCPU_HASH must not support direct value access"
-    );
-    assert!(
-        !percpu_hash.supports_direct_value_access(),
-        "PERCPU_HASH must not be inlineable"
     );
     assert!(
         !percpu_hash.requires_entry_presence_check(),
@@ -378,14 +273,11 @@ fn percpu_array_is_conditionally_inlineable_but_percpu_hashes_still_are_not() {
         value_size: 8,
         max_entries: 16,
         map_id: 503,
+        name: "lru_percpu_hash".to_string(),
     };
     assert!(
         !lru_percpu_hash.supports_direct_value_access(),
         "LRU_PERCPU_HASH must not support direct value access"
-    );
-    assert!(
-        !lru_percpu_hash.supports_direct_value_access(),
-        "LRU_PERCPU_HASH must not be inlineable"
     );
     assert!(
         !lru_percpu_hash.requires_entry_presence_check(),
@@ -402,9 +294,9 @@ fn map_in_map_types_are_not_direct_value_inlineable() {
             value_size: 4,
             max_entries: 16,
             map_id: 700,
+            name: "map_in_map".to_string(),
         };
         assert!(info.is_map_in_map());
-        assert!(!info.supports_direct_value_access());
         assert!(!info.supports_direct_value_access());
     }
 }

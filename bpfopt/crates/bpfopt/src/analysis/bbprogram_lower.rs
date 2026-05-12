@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: MIT
 //! Lower BBProgram back to linear BPF bytecode.
 
-use crate::analysis::bbprogram_btf::{
-    old_pc_to_current_pc, read_u32_field, remap_btf_record_pc, validate_btf_records, BtfRecordKind,
-    BtfRecordRemap,
-};
+use crate::analysis::bbprogram_btf::{remap_btf_records, BtfRecordKind};
 use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
 use crate::insn::BpfInsn;
 use crate::pass::BtfInfoRecords;
@@ -63,36 +60,15 @@ pub(crate) fn remap_btf_records_for_lowering(
     if records.bytes.is_empty() {
         return Ok(Some(records.clone()));
     }
-    validate_btf_records(records)?;
 
     let rec_size = records.rec_size as usize;
-    let old_to_new = old_pc_to_current_pc(prog)?;
     let mut out = Vec::with_capacity(records.bytes.len());
-    let mut previous = None;
-    for record in records.bytes.chunks(rec_size) {
-        let old_pc = read_u32_field(record, 0, "insn_off")?;
-        let new_pc = match remap_btf_record_pc(&old_to_new, old_pc as usize) {
-            BtfRecordRemap::Keep { new_pc } => new_pc,
-            BtfRecordRemap::DeletedOriginalInstruction => {
-                // Deleting an instruction explicitly deletes its attached BTF
-                // record; surviving records still must preserve strict order.
-                continue;
-            }
-        };
-        if previous.is_some_and(|prev| new_pc <= prev) {
-            if kind == BtfRecordKind::Line && previous == Some(new_pc) {
-                continue;
-            }
-            anyhow::bail!("BTF remap produced non-increasing insn_off");
-        }
-        let new_pc: u32 = new_pc
-            .try_into()
-            .map_err(|_| anyhow::anyhow!("BTF remapped insn_off does not fit u32"))?;
+    remap_btf_records(prog, records, kind, |record, new_pc| {
         out.extend_from_slice(record);
         let start = out.len() - rec_size;
         out[start..start + 4].copy_from_slice(&new_pc.to_le_bytes());
-        previous = Some(new_pc as usize);
-    }
+        Ok(())
+    })?;
 
     Ok(Some(BtfInfoRecords {
         rec_size: records.rec_size,

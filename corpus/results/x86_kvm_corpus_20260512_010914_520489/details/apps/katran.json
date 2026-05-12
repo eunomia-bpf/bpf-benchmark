@@ -1,0 +1,226 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "530": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 530,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 658368,
+        "run_time_ns_delta": 103704963,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d10s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 10.102140363000046,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 10s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   253.81us  170.51us   6.86ms   85.32%\n    Req/Sec     8.19k   421.87     9.74k    73.27%\n  Latency Distribution\n     50%  213.00us\n     75%  316.00us\n     90%  457.00us\n     99%  826.00us\n  329162 requests in 10.10s, 51.17MB read\nRequests/sec:  32590.36\nTransfer/sec:      5.07MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "530": {
+        "bytes_jited": 13589,
+        "bytes_xlated": 23800,
+        "id": 530,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 639802,
+        "run_time_ns_delta": 101962055,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d10s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 10.102090160999978,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 10s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   259.70us  164.39us   2.78ms   78.48%\n    Req/Sec     7.96k   484.31     9.18k    69.31%\n  Latency Distribution\n     50%  219.00us\n     75%  332.00us\n     90%  468.00us\n     99%  830.00us\n  319879 requests in 10.10s, 49.72MB read\nRequests/sec:  31671.71\nTransfer/sec:      4.92MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "530": {
+        "passes": [
+          {
+            "bpfopt_ms": 205,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2530,
+              "insn_count_before": 2542,
+              "insn_delta": -12,
+              "pass": "wide_mem",
+              "sites_applied": 4,
+              "sites_matched": 4,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 90,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 31,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2530,
+              "insn_count_before": 2530,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 84,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 772,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2537,
+              "insn_count_before": 2530,
+              "insn_delta": 7,
+              "pass": "cond_select",
+              "sites_applied": 7,
+              "sites_matched": 7,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 90,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_ms": 24,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2537,
+              "insn_count_before": 2537,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 87,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_ms": 145,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2537,
+              "insn_count_before": 2537,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 6,
+              "sites_matched": 6,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 88,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": null,
+            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-374/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-374/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-374/report_step5.json --prog-type xdp\nsubprocess output:\nerror: kinsn call btf_id 128704 call_off 15 is not present in the kinsn registry",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 530,
+        "program": {
+          "final_insn_count": 2537,
+          "orig_insn_count": 2542,
+          "prog_id": 530,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}

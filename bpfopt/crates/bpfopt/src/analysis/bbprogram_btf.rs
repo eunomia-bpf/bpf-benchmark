@@ -44,21 +44,6 @@ pub(crate) enum BtfRecordKind {
     Line,
 }
 
-pub(crate) enum BtfRecordRemap {
-    Keep { new_pc: usize },
-    DeletedOriginalInstruction,
-}
-
-pub(crate) fn remap_btf_record_pc(
-    old_to_new: &BTreeMap<usize, usize>,
-    old_pc: usize,
-) -> BtfRecordRemap {
-    match old_to_new.get(&old_pc).copied() {
-        Some(new_pc) => BtfRecordRemap::Keep { new_pc },
-        None => BtfRecordRemap::DeletedOriginalInstruction,
-    }
-}
-
 #[cfg(test)]
 pub(crate) fn remap_btf_records_view(
     prog: &BBProgram,
@@ -71,17 +56,40 @@ pub(crate) fn remap_btf_records_view(
     if records.bytes.is_empty() {
         return Ok(Vec::new());
     }
+
+    let rec_size = records.rec_size as usize;
+    let mut out = Vec::new();
+    remap_btf_records(prog, records, kind, |record, new_pc| {
+        let type_id = (rec_size >= 8)
+            .then(|| read_u32_field(record, 4, "type_id"))
+            .transpose()?;
+        out.push(BtfRecordView {
+            offset: new_pc,
+            type_id,
+        });
+        Ok(())
+    })?;
+    Ok(out)
+}
+
+pub(crate) fn remap_btf_records<F>(
+    prog: &BBProgram,
+    records: &BtfInfoRecords,
+    kind: BtfRecordKind,
+    mut emit: F,
+) -> anyhow::Result<()>
+where
+    F: FnMut(&[u8], u32) -> anyhow::Result<()>,
+{
     validate_btf_records(records)?;
 
     let rec_size = records.rec_size as usize;
     let old_to_new = old_pc_to_current_pc(prog)?;
-    let mut out = Vec::new();
     let mut previous = None;
     for record in records.bytes.chunks(rec_size) {
-        let old_pc = read_u32_field(record, 0, "insn_off")?;
-        let new_pc = match remap_btf_record_pc(&old_to_new, old_pc as usize) {
-            BtfRecordRemap::Keep { new_pc } => new_pc,
-            BtfRecordRemap::DeletedOriginalInstruction => continue,
+        let old_pc = read_u32_field(record, 0, "insn_off")? as usize;
+        let Some(new_pc) = old_to_new.get(&old_pc).copied() else {
+            continue;
         };
         if previous.is_some_and(|prev| new_pc <= prev) {
             if kind == BtfRecordKind::Line && previous == Some(new_pc) {
@@ -89,18 +97,15 @@ pub(crate) fn remap_btf_records_view(
             }
             anyhow::bail!("BTF remap produced non-increasing insn_off");
         }
-        let type_id = (rec_size >= 8)
-            .then(|| read_u32_field(record, 4, "type_id"))
-            .transpose()?;
-        out.push(BtfRecordView {
-            offset: new_pc
+        emit(
+            record,
+            new_pc
                 .try_into()
                 .map_err(|_| anyhow::anyhow!("BTF remapped insn_off does not fit u32"))?,
-            type_id,
-        });
+        )?;
         previous = Some(new_pc);
     }
-    Ok(out)
+    Ok(())
 }
 
 pub(crate) fn validate_btf_records(records: &BtfInfoRecords) -> anyhow::Result<()> {

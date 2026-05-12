@@ -72,7 +72,7 @@ fn scan_endian_site_in_window(insns: &[BpfInsn]) -> Option<(usize, EndianFusionS
                 }
             }
         }
-        if blocks_narrow_window(insn, dst) {
+        if is_window_barrier(insn) || reads_reg(insn, dst) || writes_reg(insn, dst) {
             break;
         }
     }
@@ -148,9 +148,6 @@ fn find_blocked_narrow_sites(prog: &BBProgram) -> anyhow::Result<Vec<SiteSkipRea
         }
     }
     Ok(skips)
-}
-fn blocks_narrow_window(insn: &BpfInsn, reg: u8) -> bool {
-    is_window_barrier(insn) || reads_reg(insn, reg) || writes_reg(insn, reg)
 }
 fn is_window_barrier(insn: &BpfInsn) -> bool {
     insn.is_ldimm64() || insn.is_jmp_class()

@@ -8,13 +8,13 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use anyhow::{anyhow, bail, Context, Result};
-use bpfopt::analysis::{lift_with_pass_context, lower, BBProgram};
+use bpfopt::analysis::{lift_with_pass_context, lower, validate_map_inline_hint_specs, BBProgram};
 use bpfopt::insn::{BpfInsn, MapPseudo};
 use bpfopt::pass::{
-    finalize_pass_reports, run_pass_once, Arch, BpfPass, BtfInfoRecords, CompressedMapValues,
+    hex_bytes, report_site_pc, run_pass_once, Arch, BtfInfoRecords, CompressedMapValues,
     CompressedMapValuesKind, KinsnDescriptor, KinsnRegistry, MapInlineHintAnchorSpec,
-    MapInlineHintModeSpec, MapInlineHintSpec, MapMetadata, PassAction, PassContext, PassReportSite,
-    PassResult, PlatformCapabilities,
+    MapInlineHintModeSpec, MapInlineHintSpec, MapMetadata, PassContext, PassResult,
+    PlatformCapabilities,
 };
 use bpfopt::passes::PASS_REGISTRY;
 use bpfopt::verifier_log::{verifier_states_from_log, VerifierStatesJson};
@@ -261,7 +261,7 @@ fn run_canonicalize_map_refs(common: &CommonArgs) -> Result<()> {
     if let (Some(target), Some(target_output)) =
         (common.target.as_deref(), common.target_output.as_deref())
     {
-        let mut target_json = read_target(target)?;
+        let mut target_json: TargetJson = read_json_file(target, "target.json")?;
         shift_target_module_call_offsets_for_map_prefix(&mut target_json, common.map_ids.len())?;
         write_json(Some(target_output), &target_json)?;
     }
@@ -285,7 +285,7 @@ fn list_passes(common: &CommonArgs, args: &ListPassesArgs) -> Result<()> {
             .collect::<Vec<_>>();
         write_json(common.output.as_deref(), &entries)
     } else {
-        let mut out = open_text_output(common.output.as_deref())?;
+        let mut out = open_binary_output(common.output.as_deref())?;
         for entry in PASS_REGISTRY {
             writeln!(out, "{}", cli_name_for_pass(entry.name))?;
         }
@@ -316,7 +316,8 @@ fn run_single_pass(
     } else {
         None
     };
-    let pass = build_pass(pass_name, pass_constructor_args)?;
+    let entry = registry_entry(pass_name)?;
+    let pass = (entry.make)(pass_constructor_args)?;
     let result = run_pass_once(pass.as_ref(), &mut program, &ctx)?;
     let output = lower(&program)?;
     write_bytecode(common.output.as_deref(), &output)?;
@@ -334,11 +335,6 @@ fn run_single_pass(
     }
 
     Ok(())
-}
-
-fn build_pass(name: &str, pass_args: &[String]) -> Result<Box<dyn BpfPass>> {
-    let entry = registry_entry(name)?;
-    (entry.make)(pass_args)
 }
 
 fn registry_entry(name: &str) -> Result<&'static bpfopt::passes::PassRegistryEntry> {
@@ -679,12 +675,8 @@ fn open_binary_output(output: Option<&Path>) -> Result<Box<dyn Write>> {
     }
 }
 
-fn open_text_output(output: Option<&Path>) -> Result<Box<dyn Write>> {
-    open_binary_output(output)
-}
-
 fn write_json<T: Serialize>(output: Option<&Path>, value: &T) -> Result<()> {
-    let mut out = open_text_output(output)?;
+    let mut out = open_binary_output(output)?;
     serde_json::to_writer_pretty(&mut out, value)?;
     writeln!(out)?;
     Ok(())
@@ -753,7 +745,7 @@ fn build_pass_context(common: &CommonArgs) -> Result<PassContext> {
     }
 
     if let Some(path) = common.target.as_deref() {
-        let target = read_target(path)?;
+        let target: TargetJson = read_json_file(path, "target.json")?;
         if let Some(arch) = target.arch.as_deref() {
             ctx.platform.arch = parse_arch(arch)?;
         }
@@ -825,7 +817,7 @@ impl MapInlineCliArgs {
                 other => bail!("map_inline unknown pass-local arg: {other}"),
             }
         }
-        validate_inline_hint_anchor_modes(&inline_hints)?;
+        validate_map_inline_hint_specs(&inline_hints)?;
         Ok(Self {
             map_values: map_values.ok_or_else(|| anyhow!("map_inline requires --map-values"))?,
             map_ids,
@@ -915,40 +907,6 @@ fn hex_nibble(byte: u8) -> Option<u8> {
         b'a'..=b'f' => Some(byte - b'a' + 10),
         b'A'..=b'F' => Some(byte - b'A' + 10),
         _ => None,
-    }
-}
-
-fn validate_inline_hint_anchor_modes(hints: &[MapInlineHintSpec]) -> Result<()> {
-    let mut anchors = BTreeMap::<MapInlineHintAnchorSpec, (MapInlineHintModeSpec, usize)>::new();
-    for hint in hints {
-        match anchors.get_mut(&hint.anchor) {
-            Some((mode, count)) => {
-                if *mode != hint.mode {
-                    bail!(
-                        "inline hint anchor {} mixes soft and hard folds",
-                        format_hint_anchor(&hint.anchor)
-                    );
-                }
-                if hint.mode == MapInlineHintModeSpec::Hard {
-                    bail!(
-                        "inline hint anchor {} has multiple hard folds",
-                        format_hint_anchor(&hint.anchor)
-                    );
-                }
-                *count += 1;
-            }
-            None => {
-                anchors.insert(hint.anchor.clone(), (hint.mode, 1));
-            }
-        }
-    }
-    Ok(())
-}
-
-fn format_hint_anchor(anchor: &MapInlineHintAnchorSpec) -> String {
-    match anchor {
-        MapInlineHintAnchorSpec::Pc(pc) => pc.to_string(),
-        MapInlineHintAnchorSpec::MapName(name) => name.clone(),
     }
 }
 
@@ -1121,7 +1079,7 @@ fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
 }
 
 fn read_bpftool_map_show(path: &Path, map_id: u32) -> Result<BpftoolMapShowJson> {
-    let show_path = bpftool_map_show_path(path, map_id);
+    let show_path = path.join(format!("map-{map_id}.show.json"));
     let show: BpftoolMapShowJson = read_json_file(&show_path, "bpftool map show JSON")?;
     if show.id != map_id {
         bail!(
@@ -1139,7 +1097,7 @@ fn read_bpftool_map_dump(
     map_id: u32,
     metadata: &MapMetadata,
 ) -> Result<BpftoolMapDumpSnapshot> {
-    let dump_path = bpftool_map_dump_path(path, map_id);
+    let dump_path = path.join(format!("map-{map_id}.dump.json"));
     let data =
         fs::read(&dump_path).with_context(|| format!("failed to read {}", dump_path.display()))?;
     let Some(first) = data
@@ -1207,7 +1165,7 @@ fn read_inner_map_ids_supplement(
     key_size: usize,
     inner_map_ids: &mut HashMap<(u32, Vec<u8>), u32>,
 ) -> Result<()> {
-    let supplement_path = bpftool_map_inner_map_ids_path(path, map_id);
+    let supplement_path = path.join(format!("map-{map_id}.inner_map_ids.json"));
     let data = match fs::read(&supplement_path) {
         Ok(data) => data,
         Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(()),
@@ -1486,18 +1444,6 @@ fn expected_hex_digits(byte_len: usize, label: &str) -> Result<usize> {
         .ok_or_else(|| anyhow!("{label} {byte_len} overflows hex length"))
 }
 
-fn bpftool_map_show_path(path: &Path, map_id: u32) -> PathBuf {
-    path.join(format!("map-{map_id}.show.json"))
-}
-
-fn bpftool_map_dump_path(path: &Path, map_id: u32) -> PathBuf {
-    path.join(format!("map-{map_id}.dump.json"))
-}
-
-fn bpftool_map_inner_map_ids_path(path: &Path, map_id: u32) -> PathBuf {
-    path.join(format!("map-{map_id}.inner_map_ids.json"))
-}
-
 fn decode_bpftool_entry_value(
     entry: &BpftoolMapEntryJson,
     metadata: &MapMetadata,
@@ -1520,7 +1466,7 @@ fn decode_bpftool_percpu_values(
     values: &[BpftoolPerCpuValueJson],
     value_size: usize,
 ) -> Result<Vec<u8>> {
-    let stride = round_up_8(value_size);
+    let stride = (value_size + 7) & !7;
     let mut out = Vec::with_capacity(values.len().saturating_mul(stride));
     for value in values {
         let bytes = decode_bpftool_hex_bytes(&value.value)?;
@@ -1535,10 +1481,6 @@ fn decode_bpftool_percpu_values(
         out.resize(out.len() + (stride - value_size), 0);
     }
     Ok(out)
-}
-
-fn round_up_8(value: usize) -> usize {
-    (value + 7) & !7
 }
 
 fn decode_bpftool_hex_bytes(input: &[String]) -> Result<Vec<u8>> {
@@ -1738,10 +1680,6 @@ fn apply_features(platform: &mut PlatformCapabilities, features: &[String]) -> R
     Ok(())
 }
 
-fn read_target(path: &Path) -> Result<TargetJson> {
-    read_json_file(path, "target.json")
-}
-
 fn kinsn_registry_from_target(target: &TargetJson) -> Result<KinsnRegistry> {
     let mut registry = KinsnRegistry::unavailable()?;
     for (name, spec) in &target.kinsns {
@@ -1837,23 +1775,12 @@ fn site_skip_reports(
     program: &BBProgram,
     skips: &[bpfopt::pass::SiteSkipReason],
 ) -> Result<Vec<SkippedSiteReport>> {
-    let reports = skips
+    skips
         .iter()
-        .map(|skip| PassReportSite {
-            site: skip.site,
-            action: PassAction::Skipped,
-            message: skip.reason.clone(),
-        })
-        .collect::<Vec<_>>();
-    finalize_pass_reports(reports, program)?
-        .into_iter()
-        .map(|report| {
-            if report.action != PassAction::Skipped {
-                bail!("internal report action mismatch for skipped site");
-            }
+        .map(|skip| {
             Ok(SkippedSiteReport {
-                pc: report.pc,
-                reason: report.message,
+                pc: report_site_pc(program, skip.site)?,
+                reason: skip.reason.clone(),
             })
         })
         .collect()
@@ -1863,21 +1790,14 @@ fn site_diagnostic_reports(
     program: &BBProgram,
     diagnostics: &[bpfopt::pass::SiteDiagnostic],
 ) -> Result<Vec<String>> {
-    let reports = diagnostics
+    diagnostics
         .iter()
-        .map(|diagnostic| PassReportSite {
-            site: diagnostic.site,
-            action: PassAction::Diagnostic,
-            message: diagnostic.message.clone(),
-        })
-        .collect::<Vec<_>>();
-    finalize_pass_reports(reports, program)?
-        .into_iter()
-        .map(|report| {
-            if report.action != PassAction::Diagnostic {
-                bail!("internal report action mismatch for diagnostic site");
-            }
-            Ok(format!("site at PC={}: {}", report.pc, report.message))
+        .map(|diagnostic| {
+            Ok(format!(
+                "site at PC={}: {}",
+                report_site_pc(program, diagnostic.site)?,
+                diagnostic.message
+            ))
         })
         .collect()
 }
@@ -1888,16 +1808,6 @@ fn inlined_map_entry_report(record: &bpfopt::pass::MapInlineRecord) -> InlinedMa
         key_hex: hex_bytes(&record.key),
         value_hex: hex_bytes(&record.value),
     }
-}
-
-fn hex_bytes(bytes: &[u8]) -> String {
-    const HEX: &[u8; 16] = b"0123456789abcdef";
-    let mut out = String::with_capacity(bytes.len() * 2);
-    for byte in bytes {
-        out.push(HEX[(byte >> 4) as usize] as char);
-        out.push(HEX[(byte & 0x0f) as usize] as char);
-    }
-    out
 }
 
 #[cfg(test)]

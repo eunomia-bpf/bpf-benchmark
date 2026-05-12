@@ -11,10 +11,6 @@ use std::sync::Arc;
 
 use crate::analysis::{BBProgram, InsnSite};
 use crate::insn::BpfInsn;
-#[cfg(test)]
-pub use crate::test_helpers::{
-    build_map_fd_bindings, BpfProgram, MapProvider, SnapshotMapProvider,
-};
 use crate::verifier_log::{verifier_states_from_json, VerifierStatesJson};
 #[cfg(test)]
 pub(crate) use crate::verifier_log::{RegState, ScalarRange, StackState, Tnum, VerifierValueWidth};
@@ -232,7 +228,7 @@ impl BtfInfoRecords {
 ///
 /// The pass resolves layout/type information from this metadata. Mutability
 /// is derived from bytecode-level writer helpers and map type rules.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MapMetadata {
     pub map_type: u32,
     pub key_size: u32,
@@ -300,7 +296,7 @@ impl fmt::Display for MapLookupError {
 
 impl std::error::Error for MapLookupError {}
 
-fn hex_bytes(bytes: &[u8]) -> String {
+pub fn hex_bytes(bytes: &[u8]) -> String {
     const HEX: &[u8; 16] = b"0123456789abcdef";
     let mut out = String::with_capacity(bytes.len() * 2);
     for byte in bytes {
@@ -374,26 +370,6 @@ pub struct SiteDiagnostic {
     pub message: String,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
-pub enum PassAction {
-    Skipped,
-    Diagnostic,
-}
-
-#[derive(Clone, Debug)]
-pub struct PassReportSite {
-    pub site: InsnSite,
-    pub action: PassAction,
-    pub message: String,
-}
-
-#[derive(Clone, Debug, Serialize)]
-pub struct PassReportPc {
-    pub pc: u64,
-    pub action: PassAction,
-    pub message: String,
-}
-
 /// One specialized map value snapshot emitted by `MapInlinePass`.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct MapInlineRecord {
@@ -402,26 +378,12 @@ pub struct MapInlineRecord {
     pub value: Vec<u8>,
 }
 
-/// High-level pass classification used by diagnostics and tests.
-#[cfg(test)]
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum PassCategory {
-    Optimization,
-    Observability,
-}
-
 /// Transform pass trait.
 ///
 /// Each optimization is a pass: scan the program, find rewrite sites, apply transforms.
 pub trait BpfPass: Send + Sync {
     /// Pass name.
     fn name(&self) -> &str;
-
-    /// High-level classification for this pass.
-    #[cfg(test)]
-    fn category(&self) -> PassCategory {
-        PassCategory::Optimization
-    }
 
     /// Execute the pass.
     ///
@@ -441,14 +403,13 @@ pub struct PassContext {
     pub kinsn_registry: KinsnRegistry,
     /// CPU capabilities (detected at startup, checked by kinsn passes).
     pub platform: PlatformCapabilities,
-    /// Policy configuration (which passes are enabled, parameters, etc.).
-    pub policy: PolicyConfig,
     /// BPF program type (from `bpf_prog_info.type`).
     /// Used by passes to apply program-type-specific safety filters.
     /// 0 = unspecified (conservative behavior applies).
     pub prog_type: u32,
     /// Parsed verifier state snapshots consumed at the BBProgram lift boundary.
-    pub(crate) verifier_states: Arc<[VerifierInsn]>,
+    /// Private; lift accesses via `verifier_states_arc()`, tests via `set_verifier_states_test`.
+    verifier_states: Arc<[VerifierInsn]>,
     /// Per-original-PC annotations used by profile-guided passes.
     pub annotations: Vec<InsnAnnotation>,
     /// Program-level branch miss rate from real PMU data.
@@ -680,14 +641,6 @@ pub enum Arch {
     Aarch64,
 }
 
-/// Optimization policy configuration.
-#[derive(Clone, Debug, Default)]
-pub struct PolicyConfig {
-    /// Enabled pass name list. Empty means "allow all registered passes"; the
-    /// bpfopt CLI supplies exactly one name for single-pass execution.
-    pub enabled_passes: Vec<String>,
-}
-
 pub fn run_pass_once(
     pass: &dyn BpfPass,
     program: &mut BBProgram,
@@ -710,23 +663,9 @@ pub fn run_pass_once(
     Ok(result)
 }
 
-pub fn finalize_pass_reports(
-    reports: Vec<PassReportSite>,
-    prog: &BBProgram,
-) -> anyhow::Result<Vec<PassReportPc>> {
-    reports
-        .into_iter()
-        .map(|report| {
-            let pc = prog.site_current_pc(report.site)?;
-            Ok(PassReportPc {
-                pc: u64::try_from(pc).map_err(|_| {
-                    anyhow::anyhow!("report PC {pc} for {:?} does not fit u64", report.site)
-                })?,
-                action: report.action,
-                message: report.message,
-            })
-        })
-        .collect()
+pub fn report_site_pc(program: &BBProgram, site: InsnSite) -> anyhow::Result<u64> {
+    let pc = program.site_current_pc(site)?;
+    u64::try_from(pc).map_err(|_| anyhow::anyhow!("report PC {pc} for {site:?} does not fit u64"))
 }
 
 fn program_instruction_slots(program: &BBProgram) -> anyhow::Result<usize> {
@@ -790,11 +729,22 @@ impl PassContext {
         !self.verifier_states.is_empty()
     }
 
+    /// Lift-time accessor: only `bbprogram_lift` reads raw verifier states here
+    /// to seed the BBProgram oracle. After lift, passes consume typed
+    /// `BBProgram::reg_*` queries instead of touching raw verifier data.
+    pub(crate) fn verifier_states_arc(&self) -> Arc<[VerifierInsn]> {
+        Arc::clone(&self.verifier_states)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn set_verifier_states_test(&mut self, states: Vec<VerifierInsn>) {
+        self.verifier_states = Arc::from(states);
+    }
+
     pub fn try_baseline() -> anyhow::Result<Self> {
         Ok(Self {
             kinsn_registry: KinsnRegistry::unavailable()?,
             platform: PlatformCapabilities::default(),
-            policy: PolicyConfig::default(),
             prog_type: 0,
             verifier_states: Arc::from([]),
             annotations: Vec::new(),

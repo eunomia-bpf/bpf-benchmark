@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Dead register definition elimination on BBProgram.
 
-use crate::analysis::{BBProgram, DefSite};
+use crate::analysis::{BBProgram, DefSite, InsnSite};
 use crate::insn::*;
 use crate::pass::{BpfPass, PassContext, PassResult};
 use std::collections::BTreeSet;
@@ -58,7 +58,10 @@ pub fn run_on_bbprogram(prog: &mut BBProgram) -> anyhow::Result<PassResult> {
 fn would_empty_all_bodies(prog: &BBProgram, dead_defs: &BTreeSet<DefSite>) -> anyhow::Result<bool> {
     let removable_sites = dead_defs
         .iter()
-        .map(|def| def.site())
+        .map(|def| InsnSite {
+            block: def.block,
+            idx: def.idx,
+        })
         .collect::<BTreeSet<_>>();
     for block in prog.block_ids() {
         if !prog
@@ -73,7 +76,11 @@ fn would_empty_all_bodies(prog: &BBProgram, dead_defs: &BTreeSet<DefSite>) -> an
 }
 
 fn is_removable_dead_def(prog: &BBProgram, def: DefSite) -> anyhow::Result<bool> {
-    let Some(insn) = prog.insn_at(def.site()) else {
+    let site = InsnSite {
+        block: def.block,
+        idx: def.idx,
+    };
+    let Some(insn) = prog.insn_at(site) else {
         anyhow::bail!("dead-def candidate {:?} has no instruction", def);
     };
     let is_self_move = matches!(insn.class(), BPF_ALU | BPF_ALU64)

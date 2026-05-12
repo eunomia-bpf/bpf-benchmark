@@ -372,15 +372,21 @@ fn cursor_dead_after_compare(
     compare_site: InsnSite,
     cursor_reg: u8,
 ) -> bool {
-    let Some(def) = prog
-        .def_sites()
-        .find(|def| def.site() == add_site && def.reg == cursor_reg)
-    else {
+    let Some(def) = prog.def_sites().find(|def| {
+        InsnSite {
+            block: def.block,
+            idx: def.idx,
+        } == add_site
+            && def.reg == cursor_reg
+    }) else {
         return false;
     };
-    prog.uses_for_def(def)
-        .iter()
-        .all(|use_site| use_site.site() == compare_site)
+    prog.uses_for_def(def).iter().all(|use_site| {
+        InsnSite {
+            block: use_site.block,
+            idx: use_site.idx,
+        } == compare_site
+    })
 }
 
 fn normalize_slow_guard(insn: &BpfInsn) -> Option<(u8, u8, GuardCmpKind)> {
@@ -448,7 +454,7 @@ fn bcm_sites_between(
         }
 
         for site in prog.sites_in_block_with_terminator(cursor)? {
-            if cursor == end.block && site == end {
+            if cursor == prog.site_block(end) && site == end {
                 return Ok(Some(sites));
             }
             sites.push(site);

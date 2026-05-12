@@ -41,9 +41,8 @@ enum AluFoldDecision {
     Skip(SiteSkipReason),
     None,
 }
-type ConstPropReplacement = (InsnSite, Vec<BpfInsn>);
 struct RewriteOutputs<'a> {
-    replacements: &'a mut Vec<ConstPropReplacement>,
+    replacements: &'a mut Vec<(InsnSite, Vec<BpfInsn>)>,
     sites_skipped: &'a mut Vec<SiteSkipReason>,
 }
 pub struct ConstPropPass;

@@ -257,14 +257,6 @@ impl BpfInsn {
         &self.0
     }
     #[inline]
-    pub fn code(&self) -> u8 {
-        self.code
-    }
-    #[inline]
-    pub fn regs(&self) -> u8 {
-        Self::make_regs(self.dst_reg(), self.src_reg())
-    }
-    #[inline]
     pub fn dst_reg(&self) -> u8 {
         libbpf_sys::bpf_insn::dst_reg(&self.0)
     }
@@ -288,7 +280,7 @@ impl BpfInsn {
     pub fn raw_bytes(&self) -> [u8; 8] {
         let mut bytes = [0u8; 8];
         bytes[0] = self.code;
-        bytes[1] = self.regs();
+        bytes[1] = Self::make_regs(self.dst_reg(), self.src_reg());
         bytes[2..4].copy_from_slice(&self.off.to_le_bytes());
         bytes[4..8].copy_from_slice(&self.imm.to_le_bytes());
         bytes
