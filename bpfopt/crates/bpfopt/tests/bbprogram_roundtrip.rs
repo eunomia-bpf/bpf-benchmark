@@ -4,8 +4,9 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
-use bpfopt::analysis::{lift, lower};
+use bpfopt::analysis::{lift_with_pass_context, lower};
 use bpfopt::insn::BpfInsn;
+use bpfopt::pass::PassContext;
 
 #[test]
 fn testbin_programs_roundtrip_byte_identical() -> Result<()> {
@@ -15,7 +16,9 @@ fn testbin_programs_roundtrip_byte_identical() -> Result<()> {
     for path in &paths {
         let bytes = fs::read(path).with_context(|| format!("read {}", path.display()))?;
         let insns = decode_insns(&bytes).with_context(|| format!("decode {}", path.display()))?;
-        let prog = lift(&insns, None).with_context(|| format!("lift {}", path.display()))?;
+        let ctx = PassContext::try_baseline().context("build baseline pass context")?;
+        let prog = lift_with_pass_context(&insns, &ctx)
+            .with_context(|| format!("lift {}", path.display()))?;
         let lowered = lower(&prog).with_context(|| format!("lower {}", path.display()))?;
         if lowered != insns {
             panic!("{}", roundtrip_diff(path, &insns, &lowered));

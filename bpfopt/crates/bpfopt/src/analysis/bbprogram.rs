@@ -8,8 +8,10 @@ use crate::analysis::{DefSite, UseDefGraph};
 use crate::insn::{insn_width, BpfInsn, MapPseudo};
 use crate::pass::{
     BtfInfoRecords, InsnAnnotation, KinsnRegistry, MapPtr, PmuRecord, PrefetchHint,
-    PrefetchProfile, ProfilingData, RegKind, RegSet, VerifierInsn,
+    PrefetchProfile, ProfilingData, RegKind, RegSet,
 };
+use crate::passes::map_inline::MapInlineSideInput;
+use crate::verifier_log::{RegState, VerifierInsn, VerifierInsnKind};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::ops::Range;
 use std::sync::Arc;
@@ -47,7 +49,8 @@ pub struct BBProgram {
     pub(crate) map_bindings: Vec<BBMapBinding>,
     pub(crate) func_info: Option<BtfInfoRecords>,
     pub(crate) line_info: Option<BtfInfoRecords>,
-    pub(crate) ldimm64_second_slots: BTreeMap<InsnSite, BpfInsn>,
+    ldimm64_second_slots: BTreeMap<InsnSite, BpfInsn>,
+    map_inline_side_input: Option<MapInlineSideInput>,
     pub(crate) pc_relative_ldimm64_targets: BTreeMap<InsnSite, BlockId>,
     pub(crate) predecessors: Vec<Vec<BlockId>>,
     pub(crate) successors: Vec<Vec<BlockId>>,
@@ -58,6 +61,20 @@ pub struct Block {
     pub(super) insns: Vec<BpfInsn>,
     pub(super) terminator: Terminator,
     pub frame: FrameId,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct KinsnAdmissionWindow {
+    start: InsnSite,
+    end: InsnSite,
+}
+impl KinsnAdmissionWindow {
+    pub fn start_site(&self) -> InsnSite {
+        self.start
+    }
+
+    pub fn end_site(&self) -> InsnSite {
+        self.end
+    }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Terminator {
@@ -105,6 +122,7 @@ impl BBProgram {
             func_info: None,
             line_info: None,
             ldimm64_second_slots,
+            map_inline_side_input: None,
             pc_relative_ldimm64_targets,
             predecessors: Vec::new(),
             successors: Vec::new(),
@@ -140,8 +158,20 @@ impl BBProgram {
     pub fn block_frame(&self, block: BlockId) -> anyhow::Result<FrameId> {
         Ok(self.block(block)?.frame)
     }
+    pub fn site_block(&self, site: InsnSite) -> BlockId {
+        site.block
+    }
+    pub fn site_frame(&self, site: InsnSite) -> anyhow::Result<FrameId> {
+        self.block_frame(site.block)
+    }
+    pub fn same_block(&self, a: InsnSite, b: InsnSite) -> bool {
+        a.block == b.block
+    }
     pub fn terminator(&self, block: BlockId) -> anyhow::Result<Terminator> {
         Ok(self.block(block)?.terminator)
+    }
+    pub fn terminator_at_site(&self, site: InsnSite) -> anyhow::Result<Terminator> {
+        self.terminator(self.site_block(site))
     }
     pub fn block_single_body_insn(&self, block: BlockId) -> anyhow::Result<Option<&BpfInsn>> {
         let block = self.block(block)?;
@@ -279,46 +309,67 @@ impl BBProgram {
         self.oracle.as_ref()?.get(&site).map(AsRef::as_ref)
     }
     pub fn reg_known_constant(&self, site: InsnSite, reg: u8) -> Option<i64> {
-        let state = self.verifier_reg_state(site, reg)?;
-        let value = state
-            .exact_u64()
-            .or_else(|| state.exact_u32().map(u64::from))?;
-        Some(value as i64)
+        let mut states = self.verifier_reg_states(site, reg)?;
+        let first = reg_exact_value(states.next()?)?;
+        for state in states {
+            if reg_exact_value(state)? != first {
+                return None;
+            }
+        }
+        Some(first as i64)
     }
     pub fn reg_known_map_ptr(&self, site: InsnSite, reg: u8) -> Option<MapPtr> {
-        let state = self.verifier_reg_state(site, reg)?;
-        let kind = reg_kind_from_verifier_type(&state.reg_type);
-        matches!(kind, RegKind::MapPointer | RegKind::MapValue).then_some(MapPtr {
-            id: state.id,
-            offset: state.offset,
-            is_value: kind == RegKind::MapValue,
-        })
+        let mut states = self.verifier_reg_states(site, reg)?;
+        let first = map_ptr_from_reg_state(states.next()?)?;
+        for state in states {
+            if map_ptr_from_reg_state(state)? != first {
+                return None;
+            }
+        }
+        Some(first)
     }
     pub fn reg_proven_bounds(&self, site: InsnSite, reg: u8) -> Option<(i64, i64)> {
-        let state = self.verifier_reg_state(site, reg)?;
-        if let Some(value) = state
-            .exact_u64()
-            .or_else(|| state.exact_u32().map(u64::from))
-        {
-            let value = value as i64;
-            return Some((value, value));
+        let mut states = self.verifier_reg_states(site, reg)?;
+        let first = proven_bounds_from_reg_state(states.next()?)?;
+        for state in states {
+            if proven_bounds_from_reg_state(state)? != first {
+                return None;
+            }
         }
-        if let (Some(min), Some(max)) = (state.range.smin, state.range.smax) {
-            return Some((min, max));
-        }
-        let min = i64::try_from(state.range.umin?).ok()?;
-        let max = i64::try_from(state.range.umax?).ok()?;
-        Some((min, max))
+        Some(first)
     }
     pub fn reg_kind(&self, site: InsnSite, reg: u8) -> Option<RegKind> {
-        Some(reg_kind_from_verifier_type(
-            &self.verifier_reg_state(site, reg)?.reg_type,
-        ))
+        let mut states = self.verifier_reg_states(site, reg)?;
+        let first = reg_kind_from_verifier_type(&states.next()?.reg_type);
+        for state in states {
+            if reg_kind_from_verifier_type(&state.reg_type) != first {
+                return None;
+            }
+        }
+        Some(first)
     }
     pub fn site_is_dead_code(&self, site: InsnSite) -> bool {
         self.verifier_states_at(site).is_some_and(|states| {
             !states.is_empty() && states.iter().all(|state| state.speculative)
         })
+    }
+    fn verifier_reg_states(
+        &self,
+        site: InsnSite,
+        reg: u8,
+    ) -> Option<impl Iterator<Item = &RegState>> {
+        let states = self.verifier_states_at(site)?;
+        if states.is_empty()
+            || states
+                .iter()
+                .any(|state| state.kind == VerifierInsnKind::EdgeFullState)
+        {
+            return None;
+        }
+        if states.iter().any(|state| !state.regs.contains_key(&reg)) {
+            return None;
+        }
+        Some(states.iter().filter_map(move |state| state.regs.get(&reg)))
     }
     pub fn branch_taken_rate(&self, site: InsnSite) -> Option<f32> {
         let profile = self.pmu_profile.get(&site)?.branch_profile.as_ref()?;
@@ -558,6 +609,43 @@ impl BBProgram {
     pub(crate) fn ldimm64_second_slot(&self, site: InsnSite) -> Option<&BpfInsn> {
         self.ldimm64_second_slots.get(&site)
     }
+    pub fn map_inline_side_input(&self) -> Option<&MapInlineSideInput> {
+        self.map_inline_side_input.as_ref()
+    }
+    pub(super) fn attach_map_inline_side_input(&mut self, side_input: MapInlineSideInput) {
+        self.map_inline_side_input = Some(side_input);
+    }
+    pub(super) fn remove_ldimm64_second_slot(&mut self, site: InsnSite) {
+        self.ldimm64_second_slots.remove(&site);
+    }
+    pub(super) fn insert_ldimm64_second_slot(&mut self, site: InsnSite, second: BpfInsn) {
+        self.ldimm64_second_slots.insert(site, second);
+    }
+    pub(super) fn shift_ldimm64_second_slots_after_insert(
+        &mut self,
+        block: BlockId,
+        at: usize,
+        delta: usize,
+    ) {
+        Self::shift_metadata_after_insert(&mut self.ldimm64_second_slots, block, at, delta);
+    }
+    pub(super) fn shift_ldimm64_second_slots_after_delete(
+        &mut self,
+        block: BlockId,
+        at: usize,
+        deleted: usize,
+    ) {
+        Self::shift_metadata_after_delete(&mut self.ldimm64_second_slots, block, at, deleted);
+    }
+    pub(super) fn remap_ldimm64_second_slots<F>(&mut self, remap: &mut F)
+    where
+        F: FnMut(InsnSite) -> Option<InsnSite>,
+    {
+        self.ldimm64_second_slots = std::mem::take(&mut self.ldimm64_second_slots)
+            .into_iter()
+            .filter_map(|(site, value)| remap(site).map(|site| (site, value)))
+            .collect();
+    }
     pub(crate) fn block_start_pc(&self, block: BlockId) -> anyhow::Result<usize> {
         self.block(block)?;
         Ok(current_block_start_pcs(self)?[block.0])
@@ -700,10 +788,6 @@ impl BBProgram {
         self.oracle = None;
         self.pmu_profile.clear();
     }
-    pub(crate) fn reset_btf_to_current_pcs(&mut self) -> anyhow::Result<()> {
-        self.btf = current_site_pcs(self)?;
-        Ok(())
-    }
     pub(crate) fn rebuild_use_def_after_mutation(&mut self) -> anyhow::Result<()> {
         self.rebuild_use_def()?;
         self.invalidate_oracle();
@@ -814,10 +898,44 @@ fn resolve_map_id(
         .ok_or_else(|| anyhow::anyhow!("failed to resolve map fd order for fd {imm}"))?;
     Ok(map_ids.get(index).copied())
 }
-impl BBProgram {
-    fn verifier_reg_state(&self, site: InsnSite, reg: u8) -> Option<&crate::pass::RegState> {
-        self.verifier_states_at(site)?.first()?.regs.get(&reg)
+fn reg_exact_value(state: &RegState) -> Option<u64> {
+    state
+        .exact_u64()
+        .or_else(|| state.exact_u32().map(u64::from))
+}
+fn map_ptr_from_reg_state(state: &RegState) -> Option<MapPtr> {
+    let kind = reg_kind_from_verifier_type(&state.reg_type);
+    matches!(kind, RegKind::MapPointer | RegKind::MapValue).then_some(MapPtr {
+        id: state.id,
+        offset: state.offset,
+        is_value: kind == RegKind::MapValue,
+    })
+}
+fn proven_bounds_from_reg_state(state: &RegState) -> Option<(i64, i64)> {
+    if let Some(value) = reg_exact_value(state) {
+        let value = value as i64;
+        return Some((value, value));
     }
+    if let (Some(min), Some(max)) = (state.range.smin, state.range.smax) {
+        return Some((min, max));
+    }
+    // Unsigned bounds above i64::MAX are not representable in this signed
+    // query, so they are not proven signed bounds.
+    let min = match state.range.umin {
+        Some(value) => match i64::try_from(value) {
+            Ok(value) => value,
+            Err(_) => return None,
+        },
+        None => return None,
+    };
+    let max = match state.range.umax {
+        Some(value) => match i64::try_from(value) {
+            Ok(value) => value,
+            Err(_) => return None,
+        },
+        None => return None,
+    };
+    Some((min, max))
 }
 fn reg_kind_from_verifier_type(reg_type: &str) -> RegKind {
     match reg_type {
@@ -1479,7 +1597,7 @@ impl BBProgram {
         old_len: usize,
         replacement_len: usize,
         skipped: &mut Vec<crate::pass::SiteSkipReason>,
-    ) -> anyhow::Result<Option<(BlockId, Range<usize>)>> {
+    ) -> anyhow::Result<Option<KinsnAdmissionWindow>> {
         let start_slot = site_offset_in_block_slots(self, start)?;
         if let Some(reason) = self.kinsn_replacement_subprog_skip_reason(
             start.block,
@@ -1493,11 +1611,20 @@ impl BBProgram {
             });
             return Ok(None);
         }
-        let end = start
+        let end_exclusive = start
             .idx
             .checked_add(old_len)
             .ok_or_else(|| anyhow::anyhow!("kinsn replacement site window overflows"))?;
-        Ok(Some((start.block, start.idx..end)))
+        let end_idx = end_exclusive
+            .checked_sub(1)
+            .ok_or_else(|| anyhow::anyhow!("kinsn replacement site window is empty"))?;
+        Ok(Some(KinsnAdmissionWindow {
+            start,
+            end: InsnSite {
+                block: start.block,
+                idx: end_idx,
+            },
+        }))
     }
 }
 

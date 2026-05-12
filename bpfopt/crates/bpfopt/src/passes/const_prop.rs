@@ -175,7 +175,6 @@ fn simulate_block(
 ) -> anyhow::Result<RegConstState> {
     let collect_rewrites = rewrite_outputs.is_some();
     for site in prog.sites_in_block_with_terminator(block)? {
-        apply_program_facts(prog, site, &mut state);
         let insn = *prog
             .insn_at(site)
             .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
@@ -298,7 +297,7 @@ fn fold_alu_instruction(
             reason: VERIFIER_POST_STATE_POINTER_TYPE.to_string(),
         });
     }
-    if prog.reg_known_map_ptr(site, insn.dst_reg()).is_some() {
+    if verifier_reg_may_be_pointer(prog, site, insn.dst_reg()) {
         return AluFoldDecision::Skip(SiteSkipReason {
             site,
             reason: VERIFIER_POST_STATE_POINTER_TYPE.to_string(),
@@ -342,8 +341,7 @@ fn program_proves_scalar_exact(
 fn apply_program_facts(prog: &BBProgram, site: InsnSite, state: &mut RegConstState) {
     for reg in 0..REG_COUNT {
         let reg = reg as u8;
-        let _ = prog.reg_kind(site, reg);
-        let fact = if prog.reg_known_map_ptr(site, reg).is_some() {
+        let fact = if verifier_reg_may_be_pointer(prog, site, reg) {
             Some(RegConstFact::pointer())
         } else {
             prog.reg_known_constant(site, reg)
@@ -357,6 +355,23 @@ fn apply_program_facts(prog: &BBProgram, site: InsnSite, state: &mut RegConstSta
             set_reg_program_fact(state, reg, fact);
         }
     }
+}
+fn verifier_reg_may_be_pointer(prog: &BBProgram, site: InsnSite, reg: u8) -> bool {
+    matches!(
+        prog.reg_kind(site, reg),
+        Some(
+            RegKind::FramePointer
+                | RegKind::Context
+                | RegKind::PacketPointer
+                | RegKind::PacketMetaPointer
+                | RegKind::MapPointer
+                | RegKind::MapValue
+                | RegKind::MapKey
+                | RegKind::Memory
+                | RegKind::BtfStructPointer
+                | RegKind::OtherPointer
+        )
+    )
 }
 fn evaluate_alu_result(insn: &BpfInsn, state: &RegConstState) -> Option<u64> {
     let is_32 = insn.class() == BPF_ALU;
@@ -475,8 +490,7 @@ fn decode_ldimm64_site(prog: &BBProgram, site: InsnSite) -> anyhow::Result<u64> 
         .insn_at(site)
         .ok_or_else(|| anyhow::anyhow!("missing LD_IMM64 first slot at {:?}", site))?;
     let second = prog
-        .ldimm64_second_slots
-        .get(&site)
+        .ldimm64_second_slot(site)
         .ok_or_else(|| anyhow::anyhow!("missing LD_IMM64 second slot at {:?}", site))?;
     Ok(decode_ldimm64_value(first, second))
 }

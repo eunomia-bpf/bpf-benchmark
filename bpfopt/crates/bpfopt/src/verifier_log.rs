@@ -14,25 +14,25 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap};
 #[allow(clippy::enum_variant_names)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum VerifierInsnKind {
+pub(crate) enum VerifierInsnKind {
     EdgeFullState,
     PcFullState,
     BranchDeltaState,
     InsnDeltaState,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum VerifierValueWidth {
+pub(crate) enum VerifierValueWidth {
     Unknown,
     Bits32,
     Bits64,
 }
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub struct Tnum {
+pub(crate) struct Tnum {
     pub value: u64,
     pub mask: u64,
 }
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub struct ScalarRange {
+pub(crate) struct ScalarRange {
     pub smin: Option<i64>,
     pub smax: Option<i64>,
     pub umin: Option<u64>,
@@ -43,7 +43,7 @@ pub struct ScalarRange {
     pub umax32: Option<u32>,
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct VerifierInsn {
+pub(crate) struct VerifierInsn {
     pub pc: usize,
     pub frame: usize,
     pub from_pc: Option<usize>,
@@ -53,7 +53,7 @@ pub struct VerifierInsn {
     pub stack: HashMap<i16, StackState>,
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct RegState {
+pub(crate) struct RegState {
     pub reg_type: String,
     pub value_width: VerifierValueWidth,
     pub precise: bool,
@@ -93,7 +93,7 @@ impl RegState {
     }
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct StackState {
+pub(crate) struct StackState {
     pub slot_types: Option<String>,
     pub value: Option<RegState>,
 }
@@ -144,12 +144,143 @@ fn default_reg_type() -> String {
 fn is_zero_usize(value: &usize) -> bool {
     *value == 0
 }
-pub fn parse_verifier_log(log: &str) -> Vec<VerifierInsn> {
+pub(crate) fn parse_verifier_log(log: &str) -> Vec<VerifierInsn> {
     log.lines().filter_map(parse_state_line).collect()
 }
 pub fn verifier_states_from_log(log: &str) -> VerifierStatesJson {
     let parsed = parse_verifier_log(log);
     convert_verifier_states(&parsed)
+}
+pub(crate) fn verifier_states_from_json(
+    states: VerifierStatesJson,
+) -> anyhow::Result<Vec<VerifierInsn>> {
+    states
+        .insns
+        .into_iter()
+        .map(|insn| {
+            let regs = insn
+                .regs
+                .into_iter()
+                .map(|(reg, state)| Ok((json_reg_name(&reg)?, json_reg_state(state)?)))
+                .collect::<anyhow::Result<HashMap<_, _>>>()?;
+            let stack = insn
+                .stack
+                .into_iter()
+                .map(|(off, state)| Ok((json_stack_name(&off)?, json_stack_state(state)?)))
+                .collect::<anyhow::Result<HashMap<_, _>>>()?;
+            Ok(VerifierInsn {
+                pc: insn.pc,
+                frame: insn.frame,
+                from_pc: None,
+                kind: json_verifier_insn_kind(insn.kind.as_deref())?,
+                speculative: false,
+                regs,
+                stack,
+            })
+        })
+        .collect()
+}
+fn json_verifier_insn_kind(kind: Option<&str>) -> anyhow::Result<VerifierInsnKind> {
+    let mut kind_value = "insn_delta_state";
+    if let Some(kind) = kind {
+        kind_value = kind;
+    }
+    match kind_value {
+        "edge_full_state" => Ok(VerifierInsnKind::EdgeFullState),
+        "pc_full_state" => Ok(VerifierInsnKind::PcFullState),
+        "branch_delta_state" => Ok(VerifierInsnKind::BranchDeltaState),
+        "insn_delta_state" => Ok(VerifierInsnKind::InsnDeltaState),
+        other => anyhow::bail!("invalid verifier state kind: {other}"),
+    }
+}
+fn json_reg_name(reg: &str) -> anyhow::Result<u8> {
+    let reg = match reg.strip_prefix('r').or_else(|| reg.strip_prefix('R')) {
+        Some(stripped) => stripped,
+        None => reg,
+    };
+    let value = reg
+        .parse::<u8>()
+        .map_err(|err| anyhow::anyhow!("invalid register name {reg}: {err}"))?;
+    if value > 10 {
+        anyhow::bail!("invalid BPF register r{value}");
+    }
+    Ok(value)
+}
+fn json_stack_name(off: &str) -> anyhow::Result<i16> {
+    let off = match off.strip_prefix("fp").or_else(|| off.strip_prefix("FP")) {
+        Some(stripped) => stripped,
+        None => off,
+    };
+    let value = off
+        .parse::<i16>()
+        .map_err(|err| anyhow::anyhow!("invalid stack slot name {off}: {err}"))?;
+    if value >= 0 || value % 8 != 0 {
+        anyhow::bail!("invalid BPF stack slot fp{value}");
+    }
+    Ok(value)
+}
+fn json_stack_state(state: VerifierStackJson) -> anyhow::Result<StackState> {
+    if let Some(slot_types) = &state.slot_types {
+        if slot_types.is_empty()
+            || slot_types.len() > 8
+            || !slot_types
+                .chars()
+                .all(|ch| matches!(ch, '?' | 'r' | 'm' | '0' | 'd' | 'i' | 'f'))
+        {
+            anyhow::bail!("invalid verifier stack slot type string: {slot_types}");
+        }
+    }
+    Ok(StackState {
+        slot_types: state.slot_types,
+        value: state.value.map(json_reg_state).transpose()?,
+    })
+}
+fn json_reg_state(state: VerifierRegJson) -> anyhow::Result<RegState> {
+    let exact_value = state.const_val.map(|value| value as u64);
+    let tnum = state.tnum.as_deref().map(json_tnum).transpose()?;
+    let mut precise = false;
+    if let Some(state_precise) = state.precise {
+        precise = state_precise;
+    }
+    Ok(RegState {
+        reg_type: state.reg_type,
+        value_width: VerifierValueWidth::Unknown,
+        precise,
+        exact_value,
+        tnum,
+        range: ScalarRange {
+            smin: state.min,
+            smax: state.max,
+            umin: state.min.and_then(nonnegative_i64_to_u64),
+            umax: state.max.and_then(nonnegative_i64_to_u64),
+            ..ScalarRange::default()
+        },
+        offset: state.offset,
+        id: None,
+    })
+}
+fn nonnegative_i64_to_u64(value: i64) -> Option<u64> {
+    let Ok(value) = u64::try_from(value) else {
+        return None;
+    };
+    Some(value)
+}
+fn json_tnum(input: &str) -> anyhow::Result<Tnum> {
+    let (value, mask) = input
+        .split_once('/')
+        .ok_or_else(|| anyhow::anyhow!("invalid tnum {input}: expected value/mask"))?;
+    Ok(Tnum {
+        value: json_u64_auto_radix(value)?,
+        mask: json_u64_auto_radix(mask)?,
+    })
+}
+fn json_u64_auto_radix(input: &str) -> anyhow::Result<u64> {
+    let input = input.trim();
+    if let Some(hex) = input.strip_prefix("0x") {
+        Ok(u64::from_str_radix(hex, 16)?)
+    } else {
+        Ok(input.parse::<u64>()?)
+    }
 }
 fn convert_verifier_states(states: &[VerifierInsn]) -> VerifierStatesJson {
     let insns = states

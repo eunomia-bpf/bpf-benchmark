@@ -22,10 +22,9 @@ fn lift_treats_ldimm64_as_one_logical_instruction_with_second_slot_metadata() {
     let prog = lift(&insns, None).expect("lift should keep LD_IMM64 metadata");
 
     assert_eq!(prog.blocks[0].insns.len(), 2);
-    assert!(prog.ldimm64_second_slots.contains_key(&InsnSite {
-        block: BlockId(0),
-        idx: 0
-    }));
+    assert!(prog
+        .ldimm64_second_slot(InsnSite::for_test(BlockId(0), 0))
+        .is_some());
     roundtrip(&insns);
 }
 

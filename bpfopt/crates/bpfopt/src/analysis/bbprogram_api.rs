@@ -35,7 +35,7 @@ impl BBProgram {
             block.insns.remove(site.idx);
         }
         Self::shift_metadata_after_delete(&mut self.btf, site.block, site.idx, 1);
-        Self::shift_metadata_after_delete(&mut self.ldimm64_second_slots, site.block, site.idx, 1);
+        self.shift_ldimm64_second_slots_after_delete(site.block, site.idx, 1);
         Self::shift_metadata_after_delete(
             &mut self.pc_relative_ldimm64_targets,
             site.block,
@@ -105,12 +105,7 @@ impl BBProgram {
         }
 
         Self::shift_metadata_after_delete(&mut self.btf, block, range.start, old_len);
-        Self::shift_metadata_after_delete(
-            &mut self.ldimm64_second_slots,
-            block,
-            range.start,
-            old_len,
-        );
+        self.shift_ldimm64_second_slots_after_delete(block, range.start, old_len);
         Self::shift_metadata_after_delete(
             &mut self.pc_relative_ldimm64_targets,
             block,
@@ -119,12 +114,7 @@ impl BBProgram {
         );
         if !new_insns.is_empty() {
             Self::shift_metadata_after_insert(&mut self.btf, block, range.start, new_insns.len());
-            Self::shift_metadata_after_insert(
-                &mut self.ldimm64_second_slots,
-                block,
-                range.start,
-                new_insns.len(),
-            );
+            self.shift_ldimm64_second_slots_after_insert(block, range.start, new_insns.len());
             Self::shift_metadata_after_insert(
                 &mut self.pc_relative_ldimm64_targets,
                 block,
@@ -133,7 +123,7 @@ impl BBProgram {
             );
         }
         for (idx, second) in new_second_slots {
-            self.ldimm64_second_slots.insert(
+            self.insert_ldimm64_second_slot(
                 InsnSite {
                     block,
                     idx: range.start + idx,
@@ -152,6 +142,13 @@ impl BBProgram {
         Ok(())
     }
 
+    pub fn delete_cond_branch_at_site(&mut self, site: InsnSite) -> anyhow::Result<()> {
+        if !self.is_terminator_site(site)? {
+            anyhow::bail!("site {:?} is not a conditional-branch terminator", site);
+        }
+        self.delete_cond_branch(site.block)
+    }
+
     fn delete_cond_branch_in_place(&mut self, block: BlockId) -> anyhow::Result<()> {
         let fallthrough = match self.block(block)?.terminator {
             Terminator::CondBranch { fallthrough, .. } => fallthrough,
@@ -166,7 +163,7 @@ impl BBProgram {
             idx: self.block(block)?.insns.len(),
         };
         self.btf.remove(&site);
-        self.ldimm64_second_slots.remove(&site);
+        self.remove_ldimm64_second_slot(site);
         self.pc_relative_ldimm64_targets.remove(&site);
         self.block_mut(block)?.terminator = Terminator::Fallthrough { next: fallthrough };
         self.rebuild_cfg_edges()?;
@@ -184,6 +181,17 @@ impl BBProgram {
         Ok(())
     }
 
+    pub fn replace_terminator_at_site(
+        &mut self,
+        site: InsnSite,
+        terminator: Terminator,
+    ) -> anyhow::Result<()> {
+        if !self.is_terminator_site(site)? {
+            anyhow::bail!("site {:?} is not a terminator", site);
+        }
+        self.replace_terminator(site.block, terminator)
+    }
+
     fn replace_terminator_in_place(
         &mut self,
         block: BlockId,
@@ -194,7 +202,7 @@ impl BBProgram {
             idx: self.block(block)?.insns.len(),
         };
         self.btf.remove(&site);
-        self.ldimm64_second_slots.remove(&site);
+        self.remove_ldimm64_second_slot(site);
         self.pc_relative_ldimm64_targets.remove(&site);
         self.block_mut(block)?.terminator = terminator;
         self.rebuild_cfg_edges()?;
@@ -383,6 +391,10 @@ impl BBProgram {
         Ok(split)
     }
 
+    pub fn split_block_at_site(&mut self, at: InsnSite) -> anyhow::Result<(BlockId, BlockId)> {
+        self.split_block(at)
+    }
+
     fn split_block_in_place(&mut self, at: InsnSite) -> anyhow::Result<(BlockId, BlockId)> {
         let old_len = self.block(at.block)?.insns.len();
         if at.idx > old_len {
@@ -512,7 +524,7 @@ impl BBProgram {
             predecessor.terminator = replacement_terminator;
         }
         for (idx, second) in new_second_slots {
-            self.ldimm64_second_slots.insert(
+            self.insert_ldimm64_second_slot(
                 InsnSite {
                     block: pattern.predecessor,
                     idx,
@@ -582,8 +594,7 @@ impl BBProgram {
         F: FnMut(InsnSite) -> Option<InsnSite>,
     {
         self.btf = remap_site_map(std::mem::take(&mut self.btf), &mut remap);
-        self.ldimm64_second_slots =
-            remap_site_map(std::mem::take(&mut self.ldimm64_second_slots), &mut remap);
+        self.remap_ldimm64_second_slots(&mut remap);
         self.pc_relative_ldimm64_targets = remap_site_map(
             std::mem::take(&mut self.pc_relative_ldimm64_targets),
             &mut remap,

@@ -15,13 +15,10 @@ use crate::insn::BpfInsn;
 pub use crate::test_helpers::{
     build_map_fd_bindings, BpfProgram, MapProvider, SnapshotMapProvider,
 };
-// MapInlineHint et al. live in passes/map_inline.rs (pass-local metadata) and are
-// re-exported here so existing `use crate::pass::*` consumers keep working.
-pub use crate::passes::map_inline::{MapInlineHint, MapInlineHintAnchor, MapInlineHintMode};
-pub(crate) use crate::verifier_log::VerifierInsn;
-pub use crate::verifier_log::{
-    RegState, ScalarRange, StackState, Tnum, VerifierInsnKind, VerifierValueWidth,
-};
+use crate::verifier_log::{verifier_states_from_json, VerifierStatesJson};
+#[cfg(test)]
+pub(crate) use crate::verifier_log::{RegState, ScalarRange, StackState, Tnum, VerifierValueWidth};
+pub(crate) use crate::verifier_log::{VerifierInsn, VerifierInsnKind};
 use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
 
@@ -201,6 +198,25 @@ pub(crate) struct ProfilingData {
     pub prefetch_profiles: HashMap<usize, PrefetchProfile>,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MapInlineHintModeSpec {
+    Soft,
+    Hard,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum MapInlineHintAnchorSpec {
+    Pc(usize),
+    MapName(String),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MapInlineHintSpec {
+    pub anchor: MapInlineHintAnchorSpec,
+    pub mode: MapInlineHintModeSpec,
+    pub key: Vec<u8>,
+}
+
 /// Raw BTF func_info or line_info records whose first u32 is `insn_off`.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BtfInfoRecords {
@@ -314,8 +330,6 @@ fn hex_bytes(bytes: &[u8]) -> String {
 pub struct PassResult {
     /// Number of sites applied.
     pub sites_applied: usize,
-    /// Sites that were skipped (with reasons).
-    pub sites_skipped: Vec<SkipReason>,
     /// Sites that were skipped by BBProgram-native passes before report PC
     /// materialization.
     pub site_skipped: Vec<SiteSkipReason>,
@@ -330,6 +344,18 @@ pub struct PassResult {
     pub insns_before: usize,
     /// Instruction count after this pass ran.
     pub insns_after: usize,
+    /// Test-only PC-keyed skip mirror, materialized by test helpers before
+    /// the BBProgram is mutated. Production code uses `site_skipped`.
+    #[cfg(test)]
+    pub sites_skipped: Vec<SkipReason>,
+}
+
+/// Test-only PC-keyed skip record used by test assertions. Not in production.
+#[cfg(test)]
+#[derive(Clone, Debug)]
+pub struct SkipReason {
+    pub pc: usize,
+    pub reason: String,
 }
 
 impl PassResult {
@@ -341,25 +367,12 @@ impl PassResult {
         }
     }
 
-    pub fn skipped(reason: SkipReason) -> Self {
-        Self {
-            sites_skipped: vec![reason],
-            ..Self::unchanged()
-        }
-    }
-
     pub fn skipped_site(reason: SiteSkipReason) -> Self {
         Self {
             site_skipped: vec![reason],
             ..Self::unchanged()
         }
     }
-}
-
-#[derive(Clone, Debug)]
-pub struct SkipReason {
-    pub pc: usize,
-    pub reason: String,
 }
 
 #[derive(Clone, Debug)]
@@ -450,7 +463,7 @@ pub struct PassContext {
     /// 0 = unspecified (conservative behavior applies).
     pub prog_type: u32,
     /// Parsed verifier state snapshots consumed at the BBProgram lift boundary.
-    pub verifier_states: Arc<[VerifierInsn]>,
+    pub(crate) verifier_states: Arc<[VerifierInsn]>,
     /// Per-original-PC annotations used by profile-guided passes.
     pub annotations: Vec<InsnAnnotation>,
     /// Program-level branch miss rate from real PMU data.
@@ -467,8 +480,8 @@ pub struct PassContext {
     pub map_inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
     /// Map snapshots intentionally skipped by size.
     pub map_snapshots_skipped_by_size: HashSet<u32>,
-    /// Explicit map_inline key hints.
-    pub map_inline_hints: Vec<MapInlineHint>,
+    /// Explicit map_inline key hints keyed by original CLI anchors.
+    pub map_inline_hints: Vec<MapInlineHintSpec>,
     /// Raw func_info records for BBProgram/lower remapping.
     pub func_info: Option<BtfInfoRecords>,
     /// Raw line_info records for BBProgram/lower remapping.
@@ -785,6 +798,15 @@ pub fn first_report_site(program: &BBProgram) -> anyhow::Result<InsnSite> {
 // ── Helper: default PassContext for testing ──────────────────────────
 
 impl PassContext {
+    pub fn set_verifier_states_json(&mut self, states: VerifierStatesJson) -> anyhow::Result<()> {
+        self.verifier_states = Arc::from(verifier_states_from_json(states)?);
+        Ok(())
+    }
+
+    pub fn has_verifier_states(&self) -> bool {
+        !self.verifier_states.is_empty()
+    }
+
     pub fn try_baseline() -> anyhow::Result<Self> {
         Ok(Self {
             kinsn_registry: KinsnRegistry::unavailable()?,

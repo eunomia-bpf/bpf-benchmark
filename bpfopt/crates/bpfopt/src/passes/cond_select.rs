@@ -225,16 +225,16 @@ fn pattern_a_for_site(
             site.start_site
         );
     }
-    if !prog.sites_in_block(jcc_site.block)?.is_empty() {
+    if !prog.sites_in_block(prog.site_block(jcc_site))?.is_empty() {
         let (_, tail) = prog.split_block(jcc_site)?;
         jcc_site = prog
             .terminator_site(tail)?
             .ok_or_else(|| anyhow::anyhow!("split tail {:?} has no terminator site", tail))?;
     }
-    let predecessor = jcc_site.block;
+    let predecessor = prog.site_block(jcc_site);
     let Terminator::CondBranch {
         taken, fallthrough, ..
-    } = prog.terminator(predecessor)?
+    } = prog.terminator_at_site(jcc_site)?
     else {
         anyhow::bail!(
             "pattern A predecessor {:?} is not a conditional branch",
@@ -255,18 +255,25 @@ fn pattern_c_for_site(
     site: &CondSelectSite,
 ) -> anyhow::Result<DiamondPattern> {
     let start_site = site.start_site;
+    let start_block = prog.site_block(start_site);
     let first_site = prog
-        .sites_in_block_with_terminator(start_site.block)?
+        .sites_in_block_with_terminator(start_block)?
         .first()
         .copied();
     let predecessor = if first_site == Some(start_site) {
-        start_site.block
+        start_block
     } else {
         prog.split_block(start_site)?.1
     };
+    let branch_site = prog.terminator_site(predecessor)?.ok_or_else(|| {
+        anyhow::anyhow!(
+            "pattern C predecessor {:?} has no terminator site",
+            predecessor
+        )
+    })?;
     let Terminator::CondBranch {
         taken, fallthrough, ..
-    } = prog.terminator(predecessor)?
+    } = prog.terminator_at_site(branch_site)?
     else {
         anyhow::bail!(
             "pattern C predecessor {:?} is not a conditional branch",

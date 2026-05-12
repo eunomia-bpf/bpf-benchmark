@@ -8,13 +8,23 @@ use crate::analysis::{
     BBProgram, Block, BlockId, BtfMetadataMap, FrameId, InsnSite, Terminator, VerifierOracle,
 };
 use crate::insn::*;
-use crate::pass::{BtfInfoRecords, InsnAnnotation, KinsnRegistry, VerifierInsn, VerifierInsnKind};
+use crate::pass::{
+    BtfInfoRecords, InsnAnnotation, KinsnRegistry, MapInlineHintAnchorSpec, MapInlineHintModeSpec,
+    MapInlineHintSpec, PassContext, VerifierInsn, VerifierInsnKind,
+};
+use crate::passes::map_inline::{
+    MapInlineHint, MapInlineHintAnchor, MapInlineHintMode, MapInlineSideInput,
+};
 
-pub fn lift(insns: &[BpfInsn], oracle: Option<Arc<[VerifierInsn]>>) -> anyhow::Result<BBProgram> {
+#[cfg(test)]
+pub(crate) fn lift(
+    insns: &[BpfInsn],
+    oracle: Option<Arc<[VerifierInsn]>>,
+) -> anyhow::Result<BBProgram> {
     lift_with_kinsn_registry(insns, oracle, Arc::new(KinsnRegistry::unavailable()?))
 }
 
-pub fn lift_with_kinsn_registry(
+pub(crate) fn lift_with_kinsn_registry(
     insns: &[BpfInsn],
     oracle: Option<Arc<[VerifierInsn]>>,
     kinsn_reg: Arc<KinsnRegistry>,
@@ -127,7 +137,22 @@ pub fn lift_with_kinsn_registry(
     )
 }
 
-pub fn lift_with_kinsn_registry_and_side_inputs(
+pub fn lift_with_pass_context(insns: &[BpfInsn], ctx: &PassContext) -> anyhow::Result<BBProgram> {
+    lift_with_side_inputs(
+        insns,
+        ctx.has_verifier_states()
+            .then(|| Arc::clone(&ctx.verifier_states)),
+        Arc::new(ctx.kinsn_registry.clone()),
+        ctx.map_ids.clone(),
+        ctx.func_info.clone(),
+        ctx.line_info.clone(),
+        &ctx.annotations,
+        Some(ctx),
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn lift_with_side_inputs(
     insns: &[BpfInsn],
     oracle: Option<Arc<[VerifierInsn]>>,
     kinsn_reg: Arc<KinsnRegistry>,
@@ -135,11 +160,116 @@ pub fn lift_with_kinsn_registry_and_side_inputs(
     func_info: Option<BtfInfoRecords>,
     line_info: Option<BtfInfoRecords>,
     annotations: &[InsnAnnotation],
+    map_inline_ctx: Option<&PassContext>,
 ) -> anyhow::Result<BBProgram> {
     let mut prog = lift_with_kinsn_registry(insns, oracle, kinsn_reg)?;
     prog.attach_side_inputs(insns, map_ids, func_info, line_info)?;
     prog.attach_profile_from_annotations(annotations)?;
+    if let Some(ctx) = map_inline_ctx {
+        if has_map_inline_side_input(ctx) {
+            let side_input = resolve_map_inline_side_input(&prog, ctx)?;
+            prog.attach_map_inline_side_input(side_input);
+        }
+    }
     Ok(prog)
+}
+
+fn has_map_inline_side_input(ctx: &PassContext) -> bool {
+    !ctx.map_ids.is_empty()
+        || !ctx.map_metadata.is_empty()
+        || !ctx.map_values.is_empty()
+        || !ctx.map_value_overlays.is_empty()
+        || !ctx.map_inner_map_ids.is_empty()
+        || !ctx.map_snapshots_skipped_by_size.is_empty()
+        || !ctx.map_inline_hints.is_empty()
+}
+
+fn resolve_map_inline_side_input(
+    prog: &BBProgram,
+    ctx: &PassContext,
+) -> anyhow::Result<MapInlineSideInput> {
+    validate_map_inline_hint_specs(&ctx.map_inline_hints)?;
+    Ok(MapInlineSideInput {
+        map_ids: ctx.map_ids.clone(),
+        metadata: ctx.map_metadata.clone(),
+        values: ctx.map_values.clone(),
+        compressed_values: ctx.map_value_overlays.clone(),
+        inner_map_ids: ctx.map_inner_map_ids.clone(),
+        maps_skipped_by_size: ctx.map_snapshots_skipped_by_size.clone(),
+        hints: resolve_map_inline_hints(prog, &ctx.map_inline_hints)?,
+    })
+}
+
+fn validate_map_inline_hint_specs(hints: &[MapInlineHintSpec]) -> anyhow::Result<()> {
+    let mut anchors = BTreeMap::<MapInlineHintAnchorSpec, (MapInlineHintModeSpec, usize)>::new();
+    for hint in hints {
+        match anchors.get_mut(&hint.anchor) {
+            Some((mode, count)) => {
+                if *mode != hint.mode {
+                    anyhow::bail!(
+                        "inline hint anchor {} mixes soft and hard folds",
+                        format_hint_anchor_spec(&hint.anchor)
+                    );
+                }
+                if hint.mode == MapInlineHintModeSpec::Hard {
+                    anyhow::bail!(
+                        "inline hint anchor {} has multiple hard folds",
+                        format_hint_anchor_spec(&hint.anchor)
+                    );
+                }
+                *count += 1;
+            }
+            None => {
+                anchors.insert(hint.anchor.clone(), (hint.mode, 1));
+            }
+        }
+    }
+    Ok(())
+}
+
+fn resolve_map_inline_hints(
+    prog: &BBProgram,
+    hints: &[MapInlineHintSpec],
+) -> anyhow::Result<Vec<MapInlineHint>> {
+    hints
+        .iter()
+        .map(|hint| {
+            Ok(MapInlineHint {
+                anchor: resolve_map_inline_hint_anchor(prog, &hint.anchor)?,
+                mode: map_inline_hint_mode(hint.mode),
+                key: hint.key.clone(),
+            })
+        })
+        .collect()
+}
+
+fn resolve_map_inline_hint_anchor(
+    prog: &BBProgram,
+    anchor: &MapInlineHintAnchorSpec,
+) -> anyhow::Result<MapInlineHintAnchor> {
+    match anchor {
+        MapInlineHintAnchorSpec::Pc(pc) => {
+            let site = prog.original_pc_to_site(*pc).ok_or_else(|| {
+                anyhow::anyhow!("map_inline hint pc {pc} is not present in BBProgram")
+            })?;
+            Ok(MapInlineHintAnchor::Site(site))
+        }
+        MapInlineHintAnchorSpec::MapName(name) => Ok(MapInlineHintAnchor::MapName(name.clone())),
+    }
+}
+
+fn map_inline_hint_mode(mode: MapInlineHintModeSpec) -> MapInlineHintMode {
+    match mode {
+        MapInlineHintModeSpec::Soft => MapInlineHintMode::Soft,
+        MapInlineHintModeSpec::Hard => MapInlineHintMode::Hard,
+    }
+}
+
+fn format_hint_anchor_spec(anchor: &MapInlineHintAnchorSpec) -> String {
+    match anchor {
+        MapInlineHintAnchorSpec::Pc(pc) => pc.to_string(),
+        MapInlineHintAnchorSpec::MapName(name) => name.clone(),
+    }
 }
 
 fn lift_oracle(

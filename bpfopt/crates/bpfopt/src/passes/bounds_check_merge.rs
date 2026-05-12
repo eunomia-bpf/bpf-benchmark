@@ -143,7 +143,7 @@ fn apply_rewrites(
 
         for &site in skip_sites {
             if prog.is_terminator_site(site)? {
-                deleted_branches.insert(site.block);
+                deleted_branches.insert(prog.site_block(site));
             } else {
                 deleted_sites.insert(site);
             }
@@ -153,7 +153,7 @@ fn apply_rewrites(
     let mut deletions_by_block: BTreeMap<BlockId, Vec<InsnSite>> = BTreeMap::new();
     for site in &deleted_sites {
         deletions_by_block
-            .entry(site.block)
+            .entry(prog.site_block(*site))
             .or_default()
             .push(*site);
     }
@@ -276,8 +276,11 @@ fn detect_guard_site(
         return Ok(None);
     }
 
-    let slow_target = match prog.terminator(site.block)? {
-        Terminator::CondBranch { taken, .. } if prog.is_terminator_site(site)? => taken,
+    if !prog.is_terminator_site(site)? {
+        return Ok(None);
+    }
+    let slow_target = match prog.terminator_at_site(site)? {
+        Terminator::CondBranch { taken, .. } => taken,
         _ => return Ok(None),
     };
     let cursor_dead = cursor_dead_after_compare(prog, add_site, site, cursor_reg);

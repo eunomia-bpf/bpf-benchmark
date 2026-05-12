@@ -1,5 +1,5 @@
 use super::*;
-use bpfopt::analysis::lift_with_kinsn_registry;
+use bpfopt::analysis::lift_with_pass_context;
 use bpfopt::insn::{MapPseudo, BPF_DW, BPF_IMM, BPF_LD};
 
 fn minimal_program_bytes() -> Vec<u8> {
@@ -292,12 +292,7 @@ fn pass_report_serializes_inlined_map_entries_as_hex() {
     };
 
     let insns = parse_bytecode(&minimal_program_bytes()).unwrap();
-    let program = lift_with_kinsn_registry(
-        &insns,
-        None,
-        Arc::new(KinsnRegistry::unavailable().unwrap()),
-    )
-    .unwrap();
+    let program = lift_with_pass_context(&insns, &PassContext::try_baseline().unwrap()).unwrap();
     let report =
         serde_json::to_value(pass_report("map_inline", &program, &result).unwrap()).unwrap();
 
@@ -306,78 +301,5 @@ fn pass_report_serializes_inlined_map_entries_as_hex() {
     assert_eq!(report["inlined_map_entries"][0]["value_hex"], "2a000000");
 }
 
-#[test]
-fn verifier_states_json_builds_const_prop_delta_states() {
-    let state = VerifierInsnJson {
-        pc: 5,
-        frame: 0,
-        kind: None,
-        stack: BTreeMap::new(),
-        regs: std::collections::BTreeMap::from([(
-            "r1".to_string(),
-            VerifierRegJson {
-                reg_type: "scalar".to_string(),
-                precise: Some(false),
-                offset: None,
-                const_val: Some(42),
-                min: None,
-                max: None,
-                tnum: Some("0x2a/0x0".to_string()),
-            },
-        )]),
-    };
-
-    let regs = state
-        .regs
-        .into_iter()
-        .map(|(reg, state)| Ok((parse_reg_name(&reg)?, verifier_reg_state(state)?)))
-        .collect::<Result<HashMap<_, _>>>()
-        .unwrap();
-
-    assert_eq!(regs[&1].exact_value, Some(42));
-    assert!(!regs[&1].precise);
-    assert_eq!(regs[&1].tnum.unwrap().value, 42);
-}
-
-#[test]
-fn verifier_states_log_builds_stack_states() {
-    let path = std::env::temp_dir().join(format!(
-        "bpfopt-verifier-states-{}-{}.log",
-        std::process::id(),
-        std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
-            .as_nanos()
-    ));
-    fs::write(&path, "9: R2=fp-16 fp-16=rrrrrrrr P42\n").unwrap();
-
-    let states = read_verifier_states(&path).unwrap();
-    assert_eq!(states.len(), 1);
-    assert_eq!(states[0].regs[&2].offset, Some(-16));
-    let stack = states[0].stack.get(&-16).unwrap();
-    assert_eq!(stack.slot_types.as_deref(), Some("rrrrrrrr"));
-    let value = stack.value.as_ref().unwrap();
-    assert_eq!(value.exact_value, Some(42));
-    assert!(value.precise);
-    fs::remove_file(path).unwrap();
-}
-
-#[test]
-fn verifier_states_log_preserves_full_state_kind() {
-    let path = std::env::temp_dir().join(format!(
-        "bpfopt-verifier-kind-{}-{}.log",
-        std::process::id(),
-        std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
-            .as_nanos()
-    ));
-    fs::write(&path, "from 8 to 11: R2=fp-4 fp-8=rrrr???? P4294967296\n").unwrap();
-
-    let states = read_verifier_states(&path).unwrap();
-    assert_eq!(states.len(), 1);
-    assert_eq!(states[0].kind, VerifierInsnKind::EdgeFullState);
-    assert_eq!(states[0].regs[&2].reg_type, "fp");
-    assert!(states[0].stack.contains_key(&-8));
-    fs::remove_file(path).unwrap();
-}
+// (verifier-log parsing tests live in bpfopt/crates/bpfopt/src/verifier_log_tests.rs,
+// which has direct access to crate-internal helpers.)

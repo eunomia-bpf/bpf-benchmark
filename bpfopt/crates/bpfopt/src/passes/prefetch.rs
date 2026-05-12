@@ -62,6 +62,11 @@ struct PrefetchCandidate {
     ptr_reg: u8,
     score: u64,
 }
+
+enum PrefetchAdmission {
+    Admit(u64),
+    Skip(String),
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum TrackedValue {
     Unknown,
@@ -119,13 +124,9 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     let mut skipped = Vec::new();
     for site in scan_prefetch_sites(prog, ctx.prog_type)? {
         let score = match prefetch_score_for_site(prog, site)? {
-            Some(score) => score,
-            None => {
-                skipped.push(skip_at(
-                    prog,
-                    site.target,
-                    "prefetch site execution_count is zero".into(),
-                )?);
+            PrefetchAdmission::Admit(score) => score,
+            PrefetchAdmission::Skip(reason) => {
+                skipped.push(skip_at(prog, site.target, reason)?);
                 continue;
             }
         };
@@ -177,13 +178,20 @@ fn scan_prefetch_sites(prog: &BBProgram, prog_type: u32) -> anyhow::Result<Vec<P
     }
     Ok(sites)
 }
-fn prefetch_score_for_site(prog: &BBProgram, site: PrefetchSite) -> anyhow::Result<Option<u64>> {
-    let has_profile_hint = prog
+fn prefetch_score_for_site(
+    prog: &BBProgram,
+    site: PrefetchSite,
+) -> anyhow::Result<PrefetchAdmission> {
+    let profile_hint = prog
         .prefetch_hint(site.target)
-        .or_else(|| prog.prefetch_hint(site.anchor))
-        .is_some();
-    if !has_profile_hint {
-        return Ok(Some(default_site_score(site)));
+        .or_else(|| prog.prefetch_hint(site.anchor));
+    let Some(profile_hint) = profile_hint else {
+        return Ok(PrefetchAdmission::Admit(default_site_score(site)));
+    };
+    if profile_hint.cache_misses == 0 {
+        return Ok(PrefetchAdmission::Skip(
+            "prefetch site has no observed cache misses".into(),
+        ));
     }
     let hotness = prog
         .site_hotness(site.target)
@@ -194,7 +202,12 @@ fn prefetch_score_for_site(prog: &BBProgram, site: PrefetchSite) -> anyhow::Resu
                 site.target
             )
         })?;
-    Ok((hotness != 0).then_some(hotness))
+    if hotness == 0 {
+        return Ok(PrefetchAdmission::Skip(
+            "prefetch site execution_count is zero".into(),
+        ));
+    }
+    Ok(PrefetchAdmission::Admit(hotness))
 }
 fn default_site_score(site: PrefetchSite) -> u64 {
     match site.kind {

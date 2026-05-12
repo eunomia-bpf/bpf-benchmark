@@ -84,20 +84,14 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                 .get(site.start_idx)
                 .copied()
                 .ok_or_else(|| anyhow::anyhow!("rotate start index {} missing", site.start_idx))?;
-            let Some((_, admission_range)) =
+            let Some(admission_window) =
                 prog.rep_admit_kinsn_site_window(replacement_start, site.old_len, 2, &mut skipped)?
             else {
                 continue;
             };
 
-            let last_idx = admission_range
-                .end
-                .checked_sub(1)
-                .ok_or_else(|| anyhow::anyhow!("rotate admission range is empty"))?;
-            let last_site = block_sites
-                .get(last_idx)
-                .copied()
-                .ok_or_else(|| anyhow::anyhow!("rotate last index {last_idx} missing"))?;
+            let replacement_start = admission_window.start_site();
+            let last_site = admission_window.end_site();
             if prog
                 .live_out_site_checked(last_site)?
                 .contains(&site.tmp_reg)

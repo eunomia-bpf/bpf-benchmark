@@ -5,7 +5,6 @@ use std::collections::{BTreeMap, HashMap};
 
 use crate::analysis::{BBProgram, InsnSite};
 use crate::insn::MapPseudo;
-use crate::pass::PassContext;
 
 const BPF_MAP_TYPE_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_HASH;
 const BPF_MAP_TYPE_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_ARRAY;
@@ -75,7 +74,6 @@ impl MapInfo {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MapReference {
     pub site: InsnSite,
-    pub slot: usize,
     pub dst_reg: u8,
     pub imm: i32,
     pub map_ordinal: usize,
@@ -107,7 +105,6 @@ type MapInfoAnalysisResult<T> = std::result::Result<T, String>;
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct MapBinding {
     site: InsnSite,
-    pc_load: usize,
     kind: MapPseudo,
     dst_reg: u8,
     imm: i32,
@@ -115,18 +112,16 @@ struct MapBinding {
     map_id: Option<u32>,
 }
 
-pub(super) fn analyze_map_info(
-    program: &BBProgram,
-    ctx: &PassContext,
-) -> MapInfoAnalysisResult<MapInfoResult> {
+pub(super) fn analyze_map_info(program: &BBProgram) -> MapInfoAnalysisResult<MapInfoResult> {
+    let side_input = super::map_inline_side_input(program).map_err(|err| err.to_string())?;
     let fd_bindings = program
         .map_bindings()
         .iter()
         .map(|binding| (binding.old_fd, binding.map_id))
         .collect::<HashMap<_, _>>();
-    let map_refs = collect_map_bindings_from_sites(program, &ctx.map_ids, &fd_bindings)?;
-    collect_map_references_from_bindings(ctx.map_ids.len(), map_refs, |map_id| {
-        let Some(metadata) = ctx.map_metadata.get(&map_id) else {
+    let map_refs = collect_map_bindings_from_sites(program, &side_input.map_ids, &fd_bindings)?;
+    collect_map_references_from_bindings(side_input.map_ids.len(), map_refs, |map_id| {
+        let Some(metadata) = side_input.metadata.get(&map_id) else {
             return Err(format!(
                 "map_values snapshot has no metadata for map {}",
                 map_id
@@ -155,12 +150,10 @@ fn collect_map_bindings_from_sites(
             continue;
         };
         if let Some(kind) = insn.map_pseudo_kind() {
-            let pc = program.rep_site_slot(site).map_err(|err| err.to_string())?;
             let (map_ordinal, map_id) =
                 resolve_map_ref(kind, insn.imm, map_ids, fd_bindings, &mut fd_order);
             bindings.push(MapBinding {
                 site,
-                pc_load: pc,
                 kind,
                 dst_reg: insn.dst_reg(),
                 imm: insn.imm,
@@ -215,15 +208,15 @@ where
         };
         let map_ordinal = binding.map_ordinal.ok_or_else(|| {
             format!(
-                "negative pseudo-map index {} at pc {}",
-                binding.imm, binding.pc_load
+                "negative pseudo-map index {} at site {:?}",
+                binding.imm, binding.site
             )
         })?;
         let map_id = if kind == MapPseudo::Idx {
             Some(binding.map_id.ok_or_else(|| {
                 format!(
-                    "pseudo-map index {} at pc {} out of range for {} map ids",
-                    map_ordinal, binding.pc_load, map_id_count
+                    "pseudo-map index {} at site {:?} out of range for {} map ids",
+                    map_ordinal, binding.site, map_id_count
                 )
             })?)
         } else {
@@ -243,7 +236,6 @@ where
 
         references.push(MapReference {
             site: binding.site,
-            slot: binding.pc_load,
             dst_reg: binding.dst_reg,
             imm: binding.imm,
             map_ordinal,

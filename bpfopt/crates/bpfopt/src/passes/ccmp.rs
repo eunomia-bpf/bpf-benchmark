@@ -304,7 +304,7 @@ fn ccmp_chain_blocks(
     let mut chain = site.blocks.clone();
     let mut target = site.target_block;
     let mut success = site.success_block;
-    let first = site.start_site.block;
+    let first = prog.site_block(site.start_site);
     if !prog.is_terminator_site(site.start_site)? {
         anyhow::bail!(
             "ccmp branch site {:?} is not a block terminator",

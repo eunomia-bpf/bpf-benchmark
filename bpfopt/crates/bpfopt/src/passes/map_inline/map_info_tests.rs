@@ -63,7 +63,6 @@ fn collect_map_bindings(
                 resolve_map_ref(kind, insn.imm, map_ids, fd_bindings, &mut fd_order);
             bindings.push(MapBinding {
                 site: InsnSite::for_test(BlockId(0), bindings.len()),
-                pc_load: pc,
                 kind,
                 dst_reg: insn.dst_reg(),
                 imm: insn.imm,

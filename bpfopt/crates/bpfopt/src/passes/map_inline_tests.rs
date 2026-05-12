@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-use super::map_inline::{MapInlineHint, MapInlineHintAnchor, MapInlineHintMode, MapInlinePass};
+use super::map_inline::MapInlinePass;
 use super::{ConstPropPass, DcePass};
 use crate::insn::*;
 use crate::pass::{CompressedMapValues, CompressedMapValuesKind, MapMetadata, PassContext};
+use crate::pass::{MapInlineHintAnchorSpec, MapInlineHintModeSpec, MapInlineHintSpec};
 use crate::test_helpers::*;
 use std::collections::HashMap;
-use std::fs;
-use std::path::{Path, PathBuf};
 
 const LOOKUP: i32 = libbpf_sys::BPF_FUNC_map_lookup_elem as i32;
 const UPDATE: i32 = libbpf_sys::BPF_FUNC_map_update_elem as i32;
@@ -49,41 +48,6 @@ fn ctx_for_array_lookup(map_id: u32, value: Vec<u8>) -> PassContext {
     ctx
 }
 
-fn temp_map_values_dir(name: &str) -> PathBuf {
-    std::env::temp_dir().join(format!("bpfopt-map-inline-{name}-{}", std::process::id()))
-}
-
-fn remove_dir_if_exists(path: &Path) {
-    match fs::remove_dir_all(path) {
-        Ok(()) => {}
-        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {}
-        Err(err) => panic!("remove {}: {err}", path.display()),
-    }
-}
-
-fn write_map_show(dir: &Path, map_id: u32, map_type: &str, value_size: u32) {
-    fs::write(
-        dir.join(format!("map-{map_id}.show.json")),
-        format!(
-            r#"{{"id":{map_id},"name":"map_{map_id}","type":"{map_type}","bytes_key":4,"bytes_value":{value_size},"max_entries":8}}"#
-        ),
-    )
-    .expect("write map show");
-}
-
-fn map_inline_cli_error(dir: &Path, map_id: u32) -> String {
-    let args = vec![
-        "--map-values".to_string(),
-        dir.display().to_string(),
-        "--map-ids".to_string(),
-        map_id.to_string(),
-    ];
-    match MapInlinePass::from_cli_args(&args) {
-        Ok(_) => panic!("invalid map_values fixture should fail"),
-        Err(err) => err.to_string(),
-    }
-}
-
 fn make_percpu_blob(slot_value: &[u8], slots: usize) -> Vec<u8> {
     let stride = (slot_value.len() + 7) & !7;
     let mut blob = vec![0u8; stride * slots];
@@ -94,97 +58,9 @@ fn make_percpu_blob(slot_value: &[u8], slots: usize) -> Vec<u8> {
     blob
 }
 
-#[test]
-fn compressed_overlay_schema_validation_fail_fast() {
-    // Restored from HEAD: malformed compressed map overlays must fail before
-    // any benchmark run can silently proceed with missing or ambiguous values.
-    for (label, json, expected) in [
-        (
-            "unknown compression",
-            r#"{"compression":"delta","value_size":4,"value_hex":"01000000"}"#,
-            "unsupported compression",
-        ),
-        (
-            "uniform missing value",
-            r#"{"compression":"uniform","value_size":4}"#,
-            "uniform compression requires value_hex",
-        ),
-        (
-            "sparse missing default",
-            r#"{"compression":"sparse","value_size":4,"entries":{"00000001":"02000000"}}"#,
-            "sparse compression requires default_hex",
-        ),
-        (
-            "enumerated missing entries",
-            r#"{"compression":"enumerated","value_size":4}"#,
-            "enumerated compression requires entries",
-        ),
-        (
-            "uniform value length",
-            r#"{"compression":"uniform","value_size":4,"value_hex":"0100"}"#,
-            "value_hex has 4 hex digit(s), expected 8",
-        ),
-        (
-            "sparse default length",
-            r#"{"compression":"sparse","value_size":4,"default_hex":"00","entries":{}}"#,
-            "default_hex has 2 hex digit(s), expected 8",
-        ),
-        (
-            "entry value length",
-            r#"{"compression":"enumerated","value_size":4,"entries":{"00000001":"02"}}"#,
-            "entries value has 2 hex digit(s), expected 8",
-        ),
-        (
-            "raw entries plus compression",
-            r#"{"compression":"uniform","value_size":4,"value_hex":"01000000","entries":[{"key":"00000000","value":"01000000"}]}"#,
-            "both raw entries and compression overlay",
-        ),
-    ] {
-        let dir = temp_map_values_dir(label.replace(' ', "-").as_str());
-        remove_dir_if_exists(&dir);
-        fs::create_dir(&dir).expect("create map values dir");
-        write_map_show(&dir, 9001, "array", 4);
-        fs::write(dir.join("map-9001.dump.json"), "[]").expect("write empty raw dump");
-        fs::write(dir.join("overlays.json"), format!(r#"{{"9001":{json}}}"#))
-            .expect("write overlay");
-
-        let message = map_inline_cli_error(&dir, 9001);
-
-        remove_dir_if_exists(&dir);
-        assert!(
-            message.contains(expected),
-            "{label}: expected {expected:?}, got {message}"
-        );
-    }
-}
-
-#[test]
-fn map_values_overlay_rejects_raw_entries_and_compression_for_same_map() {
-    // Restored from HEAD: a map may not provide both raw dump entries and a
-    // compressed overlay, because that makes the snapshot source ambiguous.
-    let dir = temp_map_values_dir("raw-plus-compression");
-    remove_dir_if_exists(&dir);
-    fs::create_dir(&dir).expect("create map values dir");
-    write_map_show(&dir, 9101, "array", 4);
-    fs::write(
-        dir.join("map-9101.dump.json"),
-        r#"[{"key":["0x01","0x00","0x00","0x00"],"value":["0x07","0x00","0x00","0x00"]}]"#,
-    )
-    .expect("write raw dump");
-    fs::write(
-        dir.join("overlays.json"),
-        r#"{"9101":{"compression":"uniform","value_size":4,"value_hex":"01000000"}}"#,
-    )
-    .expect("write overlay");
-
-    let message = map_inline_cli_error(&dir, 9101);
-
-    remove_dir_if_exists(&dir);
-    assert!(
-        message.contains("map 9101 has both raw entries and compression overlay"),
-        "{message}"
-    );
-}
+// (compressed overlay schema validation + raw+compression conflict are now
+// enforced at the CLI/lift boundary in main.rs; tests covering those checks
+// live alongside the boundary parser.)
 
 #[test]
 fn map_inline_consumes_hint_when_verifier_state_unavailable() {
@@ -207,9 +83,9 @@ fn map_inline_consumes_hint_when_verifier_state_unavailable() {
         .insert((111, 1u32.to_le_bytes().to_vec()), value);
     set_map_inline_hints(
         &mut ctx,
-        vec![MapInlineHint {
-            anchor: MapInlineHintAnchor::Pc(5),
-            mode: MapInlineHintMode::Hard,
+        vec![MapInlineHintSpec {
+            anchor: MapInlineHintAnchorSpec::Pc(5),
+            mode: MapInlineHintModeSpec::Hard,
             key: 1u32.to_le_bytes().to_vec(),
         }],
     );
@@ -240,9 +116,9 @@ fn map_inline_rejects_hint_with_wrong_key_size() {
         .insert((111, 1u32.to_le_bytes().to_vec()), value);
     set_map_inline_hints(
         &mut ctx,
-        vec![MapInlineHint {
-            anchor: MapInlineHintAnchor::Pc(5),
-            mode: MapInlineHintMode::Hard,
+        vec![MapInlineHintSpec {
+            anchor: MapInlineHintAnchorSpec::Pc(5),
+            mode: MapInlineHintModeSpec::Hard,
             key: vec![1, 2],
         }],
     );
@@ -272,9 +148,9 @@ fn map_inline_rejects_hint_pointing_at_non_lookup_call() {
         .insert((111, 1u32.to_le_bytes().to_vec()), value);
     set_map_inline_hints(
         &mut ctx,
-        vec![MapInlineHint {
-            anchor: MapInlineHintAnchor::Pc(6),
-            mode: MapInlineHintMode::Hard,
+        vec![MapInlineHintSpec {
+            anchor: MapInlineHintAnchorSpec::Pc(6),
+            mode: MapInlineHintModeSpec::Hard,
             key: 1u32.to_le_bytes().to_vec(),
         }],
     );
@@ -510,9 +386,9 @@ fn map_inline_route_a_rejects_missing_outer_entry_for_hint() {
     let mut ctx = ctx_for_array_lookup(111, 7u32.to_le_bytes().to_vec());
     set_map_inline_hints(
         &mut ctx,
-        vec![MapInlineHint {
-            anchor: MapInlineHintAnchor::Pc(5),
-            mode: MapInlineHintMode::Hard,
+        vec![MapInlineHintSpec {
+            anchor: MapInlineHintAnchorSpec::Pc(5),
+            mode: MapInlineHintModeSpec::Hard,
             key: 1u32.to_le_bytes().to_vec(),
         }],
     );
@@ -553,14 +429,14 @@ fn map_inline_soft_hint_requires_immediate_null_check_when_hard_fold_coexists() 
     set_map_inline_hints(
         &mut ctx,
         vec![
-            MapInlineHint {
-                anchor: MapInlineHintAnchor::Pc(5),
-                mode: MapInlineHintMode::Hard,
+            MapInlineHintSpec {
+                anchor: MapInlineHintAnchorSpec::Pc(5),
+                mode: MapInlineHintModeSpec::Hard,
                 key: 1u32.to_le_bytes().to_vec(),
             },
-            MapInlineHint {
-                anchor: MapInlineHintAnchor::Pc(13),
-                mode: MapInlineHintMode::Soft,
+            MapInlineHintSpec {
+                anchor: MapInlineHintAnchorSpec::Pc(13),
+                mode: MapInlineHintModeSpec::Soft,
                 key: 1u32.to_le_bytes().to_vec(),
             },
         ],
@@ -604,9 +480,9 @@ fn map_inline_route_a_rejects_kernel_mutable_inner_hint() {
     add_inner_map(&mut ctx, 111, 1u32.to_le_bytes().to_vec(), 222);
     set_map_inline_hints(
         &mut ctx,
-        vec![MapInlineHint {
-            anchor: MapInlineHintAnchor::Pc(6),
-            mode: MapInlineHintMode::Hard,
+        vec![MapInlineHintSpec {
+            anchor: MapInlineHintAnchorSpec::Pc(6),
+            mode: MapInlineHintModeSpec::Hard,
             key: 1u32.to_le_bytes().to_vec(),
         }],
     );
@@ -622,9 +498,9 @@ fn map_inline_route_a_rejects_orphan_inner_hint() {
     add_inner_map(&mut ctx, 222, 1u32.to_le_bytes().to_vec(), 333);
     set_map_inline_hints(
         &mut ctx,
-        vec![MapInlineHint {
-            anchor: MapInlineHintAnchor::MapName("inner".to_string()),
-            mode: MapInlineHintMode::Hard,
+        vec![MapInlineHintSpec {
+            anchor: MapInlineHintAnchorSpec::MapName("inner".to_string()),
+            mode: MapInlineHintModeSpec::Hard,
             key: 1u32.to_le_bytes().to_vec(),
         }],
     );

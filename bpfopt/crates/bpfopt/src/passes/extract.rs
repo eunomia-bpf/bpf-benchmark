@@ -143,15 +143,16 @@ fn cross_block_extract_skip(
     if next_body_site_in_block(prog, start)?.is_some() {
         return Ok(None);
     }
-    let next_block = match prog.terminator(start.block)? {
+    let start_block = prog.site_block(start);
+    let next_block = match prog.terminator_at_site(start)? {
         Terminator::Fallthrough { next } => next,
         _ => return Ok(None),
     };
-    let successors = prog.successors(start.block);
+    let successors = prog.successors(start_block);
     if successors.len() != 1 || successors[0] != next_block {
         anyhow::bail!(
             "fallthrough block {:?} has inconsistent successors",
-            start.block
+            start_block
         );
     }
     let Some(next) = prog.sites_in_block(next_block)?.first().copied() else {
@@ -168,7 +169,7 @@ fn cross_block_extract_skip(
 
 fn next_body_site_in_block(prog: &BBProgram, site: InsnSite) -> anyhow::Result<Option<InsnSite>> {
     Ok(prog
-        .sites_in_block(site.block)?
+        .sites_in_block(prog.site_block(site))?
         .windows(2)
         .find_map(|window| (window[0] == site).then_some(window[1])))
 }

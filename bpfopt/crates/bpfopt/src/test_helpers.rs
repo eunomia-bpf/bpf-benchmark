@@ -3,10 +3,10 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
-use crate::analysis::{lift_with_kinsn_registry_and_side_inputs, lower, BBProgram};
+use crate::analysis::{lift_with_pass_context, lower, BBProgram};
 use crate::insn::{BpfInsn, MapPseudo};
 use crate::pass::{
-    BpfPass, CompressedMapValues, InsnAnnotation, MapInlineHint, MapLookupError, MapMetadata,
+    BpfPass, CompressedMapValues, InsnAnnotation, MapInlineHintSpec, MapLookupError, MapMetadata,
     PassContext, PassResult, RegState, ScalarRange, SkipReason, StackState, Tnum, VerifierInsn,
     VerifierInsnKind, VerifierValueWidth,
 };
@@ -17,12 +17,11 @@ pub struct BpfProgram {
     pub insns: Vec<BpfInsn>,
     pub map_ids: Vec<u32>,
     pub map_fd_bindings: HashMap<i32, u32>,
-    pub verifier_states: Arc<[VerifierInsn]>,
     pub map_values: HashMap<(u32, Vec<u8>), Vec<u8>>,
     pub map_value_overlays: HashMap<u32, CompressedMapValues>,
     pub map_inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
     pub map_snapshots_skipped_by_size: HashSet<u32>,
-    pub map_inline_hints: Vec<MapInlineHint>,
+    pub map_inline_hints: Vec<MapInlineHintSpec>,
     pub map_metadata: HashMap<u32, MapMetadata>,
     pub map_provider: Arc<dyn MapProvider>,
 }
@@ -153,7 +152,6 @@ impl BpfProgram {
             insns,
             map_ids: Vec::new(),
             map_fd_bindings: HashMap::new(),
-            verifier_states: Arc::from([]),
             map_values: HashMap::new(),
             map_value_overlays: HashMap::new(),
             map_inner_map_ids: HashMap::new(),
@@ -205,17 +203,8 @@ pub struct PassRun {
 }
 
 pub fn lift_test_program(insns: &[BpfInsn], ctx: &PassContext) -> BBProgram {
-    let oracle = (!ctx.verifier_states.is_empty()).then(|| Arc::clone(&ctx.verifier_states));
-    lift_with_kinsn_registry_and_side_inputs(
-        insns,
-        oracle,
-        Arc::new(ctx.kinsn_registry.clone()),
-        ctx.map_ids.clone(),
-        ctx.func_info.clone(),
-        ctx.line_info.clone(),
-        &ctx.annotations,
-    )
-    .expect("test bytecode and side inputs should lift into BBProgram")
+    lift_with_pass_context(insns, ctx)
+        .expect("test bytecode and side inputs should lift into BBProgram")
 }
 
 pub fn lower_test_program(prog: &BBProgram) -> Vec<BpfInsn> {
@@ -325,7 +314,7 @@ pub fn set_map_ids(ctx: &mut PassContext, map_ids: Vec<u32>) {
     ctx.map_ids = map_ids;
 }
 
-pub fn set_map_inline_hints(ctx: &mut PassContext, hints: Vec<MapInlineHint>) {
+pub fn set_map_inline_hints(ctx: &mut PassContext, hints: Vec<MapInlineHintSpec>) {
     // map_inline hints live on PassContext.
     ctx.map_inline_hints = hints;
 }

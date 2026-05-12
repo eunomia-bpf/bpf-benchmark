@@ -33,7 +33,7 @@ pub fn lower(prog: &BBProgram) -> anyhow::Result<Vec<BpfInsn>> {
             }
             out.push(emitted);
             if insn.is_ldimm64() {
-                let second = prog.ldimm64_second_slots.get(&site).ok_or_else(|| {
+                let second = prog.ldimm64_second_slot(site).ok_or_else(|| {
                     anyhow::anyhow!("LD_IMM64 at {:?} is missing its second slot", site)
                 })?;
                 out.push(*second);
