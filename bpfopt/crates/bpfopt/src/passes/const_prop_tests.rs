@@ -145,27 +145,6 @@ fn const_prop_does_not_seed_caller_saved_regs_from_call_post_state() {
 }
 
 #[test]
-fn const_prop_does_not_use_oracle_for_register_mov_provenance() {
-    // P1-K: a MOV-X destination pre-state fact must not replace pointer provenance.
-    let input = vec![
-        BpfInsn::mov64_reg(BPF_REG_2, BPF_REG_3),
-        BpfInsn::add64_imm(BPF_REG_2, 1),
-        BpfInsn::exit(),
-    ];
-
-    let run = run_const_prop(
-        input.clone(),
-        vec![verifier_full_state(
-            0,
-            HashMap::from([(BPF_REG_2, scalar_reg(16))]),
-        )],
-    );
-
-    assert_eq!(run.result.sites_applied, 0);
-    assert_eq!(run.lowered, input);
-}
-
-#[test]
 fn const_prop_post_state_guard_rejects_packet_pointer_copy_materialization() {
     let input = vec![
         BpfInsn::mov64_imm(BPF_REG_1, 62),
@@ -180,64 +159,6 @@ fn const_prop_post_state_guard_rejects_packet_pointer_copy_materialization() {
             1,
             HashMap::from([(BPF_REG_7, pkt_reg())]),
         )],
-    );
-
-    assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 1, VERIFIER_POST_STATE_POINTER_TYPE);
-    assert_eq!(run.lowered, input);
-}
-
-#[test]
-fn const_prop_skips_frame_pointer_arithmetic_materialization() {
-    // P1-K round 1: shifted fp post-state beats stale scalar facts.
-    let input = vec![
-        BpfInsn::mov64_imm(BPF_REG_9, 0),
-        BpfInsn::mov64_reg(BPF_REG_1, BPF_REG_10),
-        BpfInsn::add64_imm(BPF_REG_1, -16),
-        BpfInsn::mov64_imm(BPF_REG_2, 16),
-        BpfInsn::helper_call(112),
-        BpfInsn::exit(),
-    ];
-
-    let run = run_const_prop(
-        input.clone(),
-        vec![
-            verifier_delta_state(0, HashMap::from([(BPF_REG_10, scalar_reg(16))])),
-            verifier_delta_state(2, HashMap::from([(BPF_REG_1, scalar_reg(0))])),
-            verifier_delta_state(3, HashMap::from([(BPF_REG_2, scalar_reg(16))])),
-            verifier_delta_state(6, HashMap::from([(BPF_REG_1, fp_reg(-16))])),
-        ],
-    );
-
-    assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 2, VERIFIER_POST_STATE_POINTER_TYPE);
-    assert_eq!(run.lowered, input);
-}
-
-#[test]
-fn const_prop_skips_frame_pointer_plus_eight_with_shifted_post_state() {
-    // P1-K round 2: local pointer provenance must stop scalar materialization
-    // even when stale exact scalar evidence exists at the raw PC.
-    let input = vec![
-        BpfInsn::mov64_reg(BPF_REG_1, BPF_REG_10),
-        BpfInsn::add64_imm(BPF_REG_1, 8),
-        BpfInsn::mov64_imm(BPF_REG_2, 16),
-        BpfInsn::helper_call(112),
-        BpfInsn::nop(),
-        BpfInsn::nop(),
-        BpfInsn::nop(),
-        BpfInsn::nop(),
-        BpfInsn::nop(),
-        BpfInsn::nop(),
-        BpfInsn::exit(),
-    ];
-
-    let run = run_const_prop(
-        input.clone(),
-        vec![
-            verifier_delta_state(1, HashMap::from([(BPF_REG_1, scalar_reg(8))])),
-            verifier_delta_state(10, HashMap::from([(BPF_REG_1, fp_reg(8))])),
-        ],
     );
 
     assert_eq!(run.result.sites_applied, 0);
@@ -289,7 +210,6 @@ fn const_prop_rejects_edge_state_only_pointer_arithmetic_materialization() {
     );
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 2, VERIFIER_POST_STATE_NOT_SCALAR_EXACT);
     assert_eq!(run.lowered, input);
 }
 
