@@ -5,12 +5,9 @@ use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     canonical_name: "bpf_extract64",
     aliases: &["extract64"],
-    decode_proof: decode_extract_proof,
+    proof_len: extract_proof_len,
     register_uses: extract_register_uses,
 }];
-fn decode_extract_proof(payload: &[u8]) -> ProofRegion {
-    ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(extract_proof_len))
-}
 fn extract_proof_len(payload: u64) -> anyhow::Result<usize> {
     validate_bpf_reg("extract dst", kinsn_payload_reg(payload, 0))?;
     let start = kinsn_payload_u8(payload, 8);
@@ -21,7 +18,7 @@ fn extract_proof_len(payload: u64) -> anyhow::Result<usize> {
     Ok(usize::from(start != 0) + 1)
 }
 fn extract_register_uses(payload: u64) -> RegSet {
-    [kinsn_payload_reg(payload, 0)].into_iter().collect()
+    regs_from_offsets(payload, &[0])
 }
 pub struct ExtractPass;
 pub(super) struct ExtractSite {
@@ -80,7 +77,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, _ctx: &PassContext) -> anyhow::Res
             }
             Ok(
                 extract_site_from_pair(&window.lookahead[0], &window.lookahead[1])
-                    .map(|site| window.hit(window.start_idx, 2, site)),
+                    .map(|site| (window.start_idx, 2, site)),
             )
         })?
         .into_iter()

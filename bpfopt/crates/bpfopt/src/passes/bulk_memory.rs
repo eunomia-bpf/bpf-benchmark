@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 use crate::analysis::{BBProgram, InsnSite};
-use crate::insn::{advance_reg_state as advance_simple_reg_state, SimpleRegValue, *};
+use crate::insn::*;
 use crate::pass::*;
 use std::collections::HashMap;
 
@@ -12,22 +12,16 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
         canonical_name: MEMCPY_TARGET,
         aliases: &["bulk_memcpy", "bpf_memcpy_bulk", "memcpy_bulk"],
-        decode_proof: decode_memcpy_bulk_proof,
+        proof_len: memcpy_bulk_proof_len,
         register_uses: memcpy_bulk_register_uses,
     },
     KinsnDescriptor {
         canonical_name: MEMSET_TARGET,
         aliases: &["bulk_memset", "bpf_memset_bulk", "memset_bulk"],
-        decode_proof: decode_memset_bulk_proof,
+        proof_len: memset_bulk_proof_len,
         register_uses: memset_bulk_register_uses,
     },
 ];
-fn decode_memcpy_bulk_proof(payload: &[u8]) -> ProofRegion {
-    ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(memcpy_bulk_proof_len))
-}
-fn decode_memset_bulk_proof(payload: &[u8]) -> ProofRegion {
-    ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(memset_bulk_proof_len))
-}
 fn validate_bulk_len(kind: &str, len: usize) -> anyhow::Result<()> {
     anyhow::ensure!(
         (1..=CHUNK_MAX_BYTES).contains(&len),
@@ -98,9 +92,7 @@ fn memset_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
     Ok(len)
 }
 fn memcpy_bulk_register_uses(payload: u64) -> RegSet {
-    [kinsn_payload_reg(payload, 0), kinsn_payload_reg(payload, 4)]
-        .into_iter()
-        .collect()
+    regs_from_offsets(payload, &[0, 4])
 }
 fn memset_bulk_register_uses(payload: u64) -> RegSet {
     let mut uses: RegSet = [kinsn_payload_reg(payload, 0)].into_iter().collect();
@@ -108,30 +100,6 @@ fn memset_bulk_register_uses(payload: u64) -> RegSet {
         uses.insert(kinsn_payload_reg(payload, 4));
     }
     uses
-}
-type RegValue = Option<u64>;
-impl SimpleRegValue for RegValue {
-    fn unknown() -> Self {
-        None
-    }
-    fn const64(value: i64) -> Self {
-        Some(value as u64)
-    }
-    fn const32(value: u32) -> Self {
-        Some(u64::from(value))
-    }
-    fn mov32(value: Self) -> Self {
-        value.map(|value| u64::from(value as u32))
-    }
-    fn xor_self() -> Self {
-        Some(0)
-    }
-    fn alu64_imm(_value: Self, _op: u8, _imm: i32) -> Self {
-        None
-    }
-    fn alu32_add_sub(_value: Self, _imm: i32, _is_add: bool) -> Self {
-        None
-    }
 }
 #[derive(Clone, Debug)]
 enum BulkSiteKind {
@@ -204,11 +172,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, _ctx: &PassContext) -> anyhow::Res
 }
 fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
     let mut scan = ScanResult::default();
-    let mut regs = [None; 11];
     for block in prog.block_ids().collect::<Vec<_>>() {
-        if prog.should_reset_linear_state_at_block(block)? {
-            regs = [None; 11];
-        }
         let body = prog.block_body_view(block)?;
         let mut live_out = HashMap::new();
         for &site in &body.sites {
@@ -224,19 +188,16 @@ fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
                             site: start,
                             reason,
                         });
-                        advance_reg_state_range(prog, &body.sites, idx, site.old_len, &mut regs)?;
                         idx += site.old_len;
                         continue;
                     }
                     let old_len = site.old_len;
-                    advance_reg_state_range(prog, &body.sites, idx, old_len, &mut regs)?;
                     scan.sites.push((start, site));
                     idx += old_len;
                     continue;
                 }
                 MatchOutcome::Skip(reason, advance) => {
                     let advance = advance.max(1);
-                    advance_reg_state_range(prog, &body.sites, idx, advance, &mut regs)?;
                     scan.skips.push(SiteSkipReason {
                         site: start,
                         reason,
@@ -246,14 +207,12 @@ fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
                 }
                 MatchOutcome::NoMatch => {}
             }
-            if let Some(site) = try_match_memset_run_at(body.insns, idx, &regs)? {
+            if let Some(site) = try_match_memset_run_at(prog, body.insns, &body.sites, idx)? {
                 let old_len = site.old_len;
-                advance_reg_state_range(prog, &body.sites, idx, old_len, &mut regs)?;
                 scan.sites.push((start, site));
                 idx += old_len;
                 continue;
             }
-            advance_reg_state_at_site(prog, start, &mut regs)?;
             idx += 1;
         }
     }
@@ -353,18 +312,19 @@ fn try_match_memcpy_run_at(
     }))
 }
 fn try_match_memset_run_at(
+    prog: &BBProgram,
     insns: &[BpfInsn],
+    sites: &[InsnSite],
     idx: usize,
-    regs: &[RegValue; 11],
 ) -> anyhow::Result<Option<BulkSite>> {
-    let Some(first) = memset_lane_at(insns, idx, regs)? else {
+    let Some(first) = memset_lane_at(prog, insns, sites, idx)? else {
         return Ok(None);
     };
     let mut cursor = idx + 1;
     let mut widths = vec![first.width];
     let mut next_off = first.off as i32 + width_bytes(first.width)? as i32;
     while cursor < insns.len() {
-        let Some(lane) = memset_lane_at(insns, cursor, regs)? else {
+        let Some(lane) = memset_lane_at(prog, insns, sites, cursor)? else {
             break;
         };
         if lane.base != first.base
@@ -429,9 +389,10 @@ fn memcpy_lane_at(insns: &[BpfInsn], idx: usize) -> Option<MemcpyLane> {
     })
 }
 fn memset_lane_at(
+    prog: &BBProgram,
     insns: &[BpfInsn],
+    sites: &[InsnSite],
     idx: usize,
-    regs: &[RegValue; 11],
 ) -> anyhow::Result<Option<MemsetLane>> {
     let Some(insn) = insns.get(idx) else {
         return Ok(None);
@@ -442,8 +403,11 @@ fn memset_lane_at(
     }
     let fill_byte = match insn.class() {
         BPF_ST => fill_byte_from_imm(width, insn.imm)?,
-        BPF_STX => match regs[insn.src_reg() as usize] {
-            Some(value) => fill_byte_from_const(width, value)?,
+        BPF_STX => match prog
+            .reg_fact_at(sites[idx], insn.src_reg())?
+            .as_const()
+        {
+            Some(value) => fill_byte_from_lane(width_bytes(width)?, value as u64),
             None => None,
         },
         _ => None,
@@ -549,7 +513,7 @@ fn pack_memset_payload(
     Ok(BpfInsn::pack_u4(base, 0)
         | BpfInsn::pack_u16(dst_off as u16, 8)
         | BpfInsn::pack_u8(len - 1, 24)
-        | BpfInsn::pack_u4(width_props(width)?.0, 32)
+        | BpfInsn::pack_u4(width_class(width)?, 32)
         | BpfInsn::pack_u4(zero_fill as u8, 35)
         | BpfInsn::pack_u8(fill_byte, 36))
 }
@@ -604,9 +568,6 @@ fn fill_byte_from_imm(width: u8, imm: i32) -> anyhow::Result<Option<u8>> {
     };
     Ok(fill_byte_from_lane(lane_bytes, value))
 }
-fn fill_byte_from_const(width: u8, value: u64) -> anyhow::Result<Option<u8>> {
-    Ok(fill_byte_from_lane(width_bytes(width)?, value))
-}
 fn fill_byte_from_lane(lane_bytes: usize, value: u64) -> Option<u8> {
     let fill = value as u8;
     (0..lane_bytes)
@@ -620,58 +581,15 @@ fn ranges_overlap(src_off: i16, dst_off: i16, len: usize) -> bool {
     src_start < dst_start + len && dst_start < src_start + len
 }
 fn is_supported_width(width: u8) -> bool {
-    width_props(width).is_ok()
+    BpfMemWidth::from_size_opcode(width).is_some()
 }
 fn width_bytes(width: u8) -> anyhow::Result<usize> {
-    Ok(width_props(width)?.1)
+    Ok(BpfMemWidth::from_size_opcode(width)
+        .ok_or_else(|| anyhow::anyhow!("bulk_memory unsupported width opcode {width:#x}"))?
+        .bytes())
 }
-fn width_props(width: u8) -> anyhow::Result<(u8, usize)> {
-    Ok(match width {
-        BPF_B => (0, 1),
-        BPF_H => (1, 2),
-        BPF_W => (2, 4),
-        BPF_DW => (3, 8),
-        _ => anyhow::bail!("bulk_memory unsupported width opcode {width:#x}"),
-    })
-}
-fn advance_reg_state_range(
-    prog: &BBProgram,
-    sites: &[InsnSite],
-    start_idx: usize,
-    len: usize,
-    regs: &mut [RegValue; 11],
-) -> anyhow::Result<()> {
-    let end_idx = start_idx.checked_add(len).ok_or_else(|| {
-        anyhow::anyhow!("bulk_memory range start {start_idx} + len {len} overflows")
-    })?;
-    let range = sites.get(start_idx..end_idx).ok_or_else(|| {
-        anyhow::anyhow!(
-            "bulk_memory range {}..{} exceeds body length {}",
-            start_idx,
-            end_idx,
-            sites.len()
-        )
-    })?;
-    for &site in range {
-        advance_reg_state_at_site(prog, site, regs)?;
-    }
-    Ok(())
-}
-fn advance_reg_state_at_site(
-    prog: &BBProgram,
-    site: InsnSite,
-    regs: &mut [RegValue; 11],
-) -> anyhow::Result<()> {
-    let insn = prog
-        .insn_at(site)
-        .ok_or_else(|| anyhow::anyhow!("invalid instruction site {:?}", site))?;
-    let ldimm64_hi =
-        if insn.is_ldimm64() {
-            Some(prog.ldimm64_second_slot(site).ok_or_else(|| {
-                anyhow::anyhow!("LD_IMM64 at {:?} is missing its second slot", site)
-            })?)
-        } else {
-            None
-        };
-    advance_simple_reg_state(insn, ldimm64_hi, regs)
+fn width_class(width: u8) -> anyhow::Result<u8> {
+    Ok(BpfMemWidth::from_size_opcode(width)
+        .ok_or_else(|| anyhow::anyhow!("bulk_memory unsupported width opcode {width:#x}"))?
+        as u8)
 }

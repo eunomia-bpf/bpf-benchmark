@@ -6,54 +6,33 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
         canonical_name: "bpf_endian_load16",
         aliases: &["endian_load16"],
-        decode_proof: decode_endian_proof,
+        proof_len: endian_proof_len,
         register_uses: endian_register_uses,
     },
     KinsnDescriptor {
         canonical_name: "bpf_endian_load32",
         aliases: &["endian_load32"],
-        decode_proof: decode_endian_proof,
+        proof_len: endian_proof_len,
         register_uses: endian_register_uses,
     },
     KinsnDescriptor {
         canonical_name: "bpf_endian_load64",
         aliases: &["endian_load64"],
-        decode_proof: decode_endian_proof,
+        proof_len: endian_proof_len,
         register_uses: endian_register_uses,
     },
 ];
 pub struct EndianFusionPass;
 const BPF_TO_LE: u8 = 0x00;
 const MAX_NARROW_SCAN: usize = 32;
-#[derive(Clone, Copy)]
-struct EndianWidth {
-    size: u8,
-    bits: i32,
-    target: &'static str,
-    aarch64_shift: i16,
-}
-const ENDIAN_WIDTHS: &[EndianWidth] = &[
-    EndianWidth {
-        size: BPF_H,
-        bits: 16,
-        target: "bpf_endian_load16",
-        aarch64_shift: 1,
-    },
-    EndianWidth {
-        size: BPF_W,
-        bits: 32,
-        target: "bpf_endian_load32",
-        aarch64_shift: 2,
-    },
-    EndianWidth {
-        size: BPF_DW,
-        bits: 64,
-        target: "bpf_endian_load64",
-        aarch64_shift: 3,
-    },
-];
-fn decode_endian_proof(payload: &[u8]) -> ProofRegion {
-    ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(endian_proof_len))
+
+fn endian_target(w: BpfMemWidth) -> Option<&'static str> {
+    match w {
+        BpfMemWidth::H => Some("bpf_endian_load16"),
+        BpfMemWidth::W => Some("bpf_endian_load32"),
+        BpfMemWidth::DW => Some("bpf_endian_load64"),
+        BpfMemWidth::B => None,
+    }
 }
 fn endian_proof_len(payload: u64) -> anyhow::Result<usize> {
     validate_bpf_reg("endian dst", kinsn_payload_reg(payload, 0))?;
@@ -61,9 +40,7 @@ fn endian_proof_len(payload: u64) -> anyhow::Result<usize> {
     Ok(2)
 }
 fn endian_register_uses(payload: u64) -> RegSet {
-    [kinsn_payload_reg(payload, 0), kinsn_payload_reg(payload, 4)]
-        .into_iter()
-        .collect()
+    regs_from_offsets(payload, &[0, 4])
 }
 pub(super) struct EndianFusionSite {
     pub(super) dst_reg: u8,
@@ -121,15 +98,13 @@ fn endian_swap_size(insn: &BpfInsn) -> Option<u8> {
     {
         return None;
     }
-    ENDIAN_WIDTHS
-        .iter()
-        .find(|width| width.bits == insn.imm)
-        .map(|width| width.size)
+    let width = BpfMemWidth::from_bytes((insn.imm / 8) as usize)?;
+    (endian_target(width).is_some()).then(|| width.size_opcode())
 }
 fn is_narrowing(load_size: u8, endian_size: u8) -> bool {
-    let load = endian_width(load_size);
-    let endian = endian_width(endian_size);
-    matches!((load, endian), (Some(load), Some(endian)) if load.aarch64_shift > endian.aarch64_shift)
+    let load = BpfMemWidth::from_size_opcode(load_size);
+    let endian = BpfMemWidth::from_size_opcode(endian_size);
+    matches!((load, endian), (Some(load), Some(endian)) if load.aarch64_shift() > endian.aarch64_shift())
 }
 fn find_blocked_narrow_sites(prog: &BBProgram) -> anyhow::Result<Vec<SiteSkipReason>> {
     let mut skips = Vec::new();
@@ -167,12 +142,6 @@ fn find_blocked_narrow_sites(prog: &BBProgram) -> anyhow::Result<Vec<SiteSkipRea
     }
     Ok(skips)
 }
-fn endian_width(size: u8) -> Option<EndianWidth> {
-    ENDIAN_WIDTHS
-        .iter()
-        .find(|width| width.size == size)
-        .copied()
-}
 pub(super) fn endian_payload(dst_reg: u8, base_reg: u8, offset: i16) -> u64 {
     BpfInsn::pack_u4(dst_reg, 0)
         | BpfInsn::pack_u4(base_reg, 4)
@@ -182,10 +151,13 @@ fn offset_is_directly_encodable(arch: Arch, size: u8, offset: i16) -> bool {
     match arch {
         Arch::X86_64 => true,
         Arch::Aarch64 => {
-            let shift = match endian_width(size) {
-                Some(width) => width.aarch64_shift,
-                None => return false,
+            let Some(width) = BpfMemWidth::from_size_opcode(size) else {
+                return false;
             };
+            if endian_target(width).is_none() {
+                return false;
+            }
+            let shift = width.aarch64_shift();
             (offset >= 0 && offset <= (0x0fff << shift) && (offset & ((1 << shift) - 1)) == 0)
                 || (-256..=255).contains(&offset)
         }
@@ -276,7 +248,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     }
     let raw_sites = prog.scan_block_starts(MAX_NARROW_SCAN + 1, |window| {
         Ok(scan_endian_site_in_window(window.lookahead)
-            .map(|(old_len, site)| window.hit(window.start_idx, old_len, site)))
+            .map(|(old_len, site)| (window.start_idx, old_len, site)))
     })?;
     if raw_sites.is_empty() {
         return Ok(PassResult::with_sites(0, skipped));
@@ -288,8 +260,8 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     let applied =
         apply_candidates_reverse(prog, &candidates, &mut skipped, |prog, start, payload| {
             let (site, old_len) = payload;
-            let kfunc_name = endian_width(site.size)
-                .map(|w| w.target)
+            let kfunc_name = BpfMemWidth::from_size_opcode(site.size)
+                .and_then(endian_target)
                 .ok_or_else(|| anyhow::anyhow!("unsupported endian fusion size {}", site.size))?;
             let (btf_id, kfunc_off) = prog.kinsn_call(kfunc_name)?;
             let preserved = preserved_body_insns(prog, start, old_len.saturating_sub(2))?;

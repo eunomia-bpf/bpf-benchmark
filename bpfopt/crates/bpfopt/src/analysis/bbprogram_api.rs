@@ -103,7 +103,7 @@ impl BBProgram {
         }
 
         if old_len > 0 && new_len > 0 {
-            if let Some(reason) = self.admission_skip_reason(start, old_len, new_len)? {
+            if let Some(reason) = self.admission_skip_reason(start, old_len)? {
                 skipped.push(SiteSkipReason {
                     site: start,
                     reason,
@@ -476,7 +476,13 @@ impl BBProgram {
         }
         for block in &mut self.blocks {
             if block.id != head {
-                block.terminator = remap_terminator_after_insert(block.terminator, tail);
+                block.terminator = remap_terminator(block.terminator, |mut b| {
+                    if b.0 >= tail.0 {
+                        b.0 += 1;
+                    }
+                    Ok(b)
+                })
+                .expect("block-shift closure never fails");
             }
         }
         if self.entry.0 >= tail.0 {
@@ -748,17 +754,17 @@ fn remap_block_id(block: BlockId, old_to_new: &[Option<BlockId>]) -> anyhow::Res
         .ok_or_else(|| anyhow::anyhow!("block {:?} was removed or is invalid", block))
 }
 
-fn remap_terminator_after_remove(
-    term: Terminator,
-    old_to_new: &[Option<BlockId>],
-) -> anyhow::Result<Terminator> {
+fn remap_terminator<F>(term: Terminator, mut remap: F) -> anyhow::Result<Terminator>
+where
+    F: FnMut(BlockId) -> anyhow::Result<BlockId>,
+{
     Ok(match term {
         Terminator::Fallthrough { next } => Terminator::Fallthrough {
-            next: remap_block_id(next, old_to_new)?,
+            next: remap(next)?,
         },
         Terminator::Jump { insn, target } => Terminator::Jump {
             insn,
-            target: remap_block_id(target, old_to_new)?,
+            target: remap(target)?,
         },
         Terminator::CondBranch {
             cond,
@@ -766,8 +772,8 @@ fn remap_terminator_after_remove(
             fallthrough,
         } => Terminator::CondBranch {
             cond,
-            taken: remap_block_id(taken, old_to_new)?,
-            fallthrough: remap_block_id(fallthrough, old_to_new)?,
+            taken: remap(taken)?,
+            fallthrough: remap(fallthrough)?,
         },
         Terminator::Call {
             call,
@@ -775,48 +781,19 @@ fn remap_terminator_after_remove(
             return_to,
         } => Terminator::Call {
             call,
-            callee: remap_block_id(callee, old_to_new)?,
-            return_to: remap_block_id(return_to, old_to_new)?,
+            callee: remap(callee)?,
+            return_to: remap(return_to)?,
         },
         Terminator::Exit { insn } => Terminator::Exit { insn },
         Terminator::End => Terminator::End,
     })
 }
 
-fn remap_terminator_after_insert(term: Terminator, inserted: BlockId) -> Terminator {
-    let remap = |mut block: BlockId| {
-        if block.0 >= inserted.0 {
-            block.0 += 1;
-        }
-        block
-    };
-    match term {
-        Terminator::Fallthrough { next } => Terminator::Fallthrough { next: remap(next) },
-        Terminator::Jump { insn, target } => Terminator::Jump {
-            insn,
-            target: remap(target),
-        },
-        Terminator::CondBranch {
-            cond,
-            taken,
-            fallthrough,
-        } => Terminator::CondBranch {
-            cond,
-            taken: remap(taken),
-            fallthrough: remap(fallthrough),
-        },
-        Terminator::Call {
-            call,
-            callee,
-            return_to,
-        } => Terminator::Call {
-            call,
-            callee: remap(callee),
-            return_to: remap(return_to),
-        },
-        Terminator::Exit { insn } => Terminator::Exit { insn },
-        Terminator::End => Terminator::End,
-    }
+fn remap_terminator_after_remove(
+    term: Terminator,
+    old_to_new: &[Option<BlockId>],
+) -> anyhow::Result<Terminator> {
+    remap_terminator(term, |b| remap_block_id(b, old_to_new))
 }
 
 fn validate_diamond(prog: &BBProgram, pattern: DiamondPattern) -> anyhow::Result<()> {

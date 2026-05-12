@@ -167,9 +167,7 @@ fn simulate_block(
 ) -> anyhow::Result<RegConstState> {
     let collect_rewrites = rewrite_outputs.is_some();
     for site in prog.sites_in_block_with_terminator(block)? {
-        let insn = *prog
-            .insn_at(site)
-            .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
+        let insn = *prog.insn(site)?;
         let ldimm64_value = insn
             .is_ldimm64()
             .then(|| decode_ldimm64_site(prog, site))
@@ -345,7 +343,11 @@ fn evaluate_alu_result(insn: &BpfInsn, state: &RegConstState) -> Option<u64> {
     }
     let dst = reg_const(state, insn.dst_reg(), is_32)?;
     if op == BPF_NEG {
-        return Some(eval_neg_alu(dst, is_32));
+        return Some(if is_32 {
+            (-(dst as u32 as i32) as u32) as u64
+        } else {
+            (-(dst as i64)) as u64
+        });
     }
     let rhs = if bpf_src(insn.code) == BPF_X {
         reg_const(state, insn.src_reg(), is_32)?
@@ -353,13 +355,6 @@ fn evaluate_alu_result(insn: &BpfInsn, state: &RegConstState) -> Option<u64> {
         alu_imm_operand(insn)
     };
     eval_binary_alu_const(op, dst, rhs, is_32)
-}
-fn eval_neg_alu(lhs: u64, is_32: bool) -> u64 {
-    if is_32 {
-        (-(lhs as u32 as i32) as u32) as u64
-    } else {
-        (-(lhs as i64)) as u64
-    }
 }
 fn alu_inputs_may_be_pointer(insn: &BpfInsn, state: &RegConstState) -> bool {
     reg_may_be_pointer(state, insn.dst_reg())
@@ -403,20 +398,18 @@ fn set_reg_program_fact(state: &mut RegConstState, reg: u8, fact: RegConstFact) 
         *slot = fact;
     }
 }
-fn merge_reg_fact(lhs: RegConstFact, rhs: RegConstFact) -> RegConstFact {
-    RegConstFact {
-        exact64: merge_exact(lhs.exact64, rhs.exact64),
-        exact32: merge_exact(lhs.exact32, rhs.exact32),
-        may_pointer: lhs.may_pointer || rhs.may_pointer,
-    }
-}
-fn merge_exact<T: Copy + Eq>(lhs: Option<T>, rhs: Option<T>) -> Option<T> {
-    (lhs == rhs).then_some(lhs).flatten()
-}
 fn meet_states(lhs: &RegConstState, rhs: &RegConstState) -> RegConstState {
     let mut merged = unknown_state();
     for reg in 0..REG_COUNT {
-        merged[reg] = merge_reg_fact(lhs[reg], rhs[reg]);
+        merged[reg] = RegConstFact {
+            exact64: (lhs[reg].exact64 == rhs[reg].exact64)
+                .then_some(lhs[reg].exact64)
+                .flatten(),
+            exact32: (lhs[reg].exact32 == rhs[reg].exact32)
+                .then_some(lhs[reg].exact32)
+                .flatten(),
+            may_pointer: lhs[reg].may_pointer || rhs[reg].may_pointer,
+        };
     }
     merged
 }
@@ -426,9 +419,7 @@ fn unknown_state() -> RegConstState {
     state
 }
 fn decode_ldimm64_site(prog: &BBProgram, site: InsnSite) -> anyhow::Result<u64> {
-    let first = prog
-        .insn_at(site)
-        .ok_or_else(|| anyhow::anyhow!("missing LD_IMM64 first slot at {:?}", site))?;
+    let first = prog.insn(site)?;
     let second = prog
         .ldimm64_second_slot(site)
         .ok_or_else(|| anyhow::anyhow!("missing LD_IMM64 second slot at {:?}", site))?;

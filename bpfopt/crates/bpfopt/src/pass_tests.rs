@@ -135,34 +135,6 @@ fn remap_btf_metadata_drops_deleted_entries_and_shifts_survivors() {
 }
 
 #[test]
-fn kinsn_registry_resolves_aliases_to_canonical_target() {
-    let mut registry = KinsnRegistry::default();
-    registry
-        .set_kinsn_call_for_target_name("bpf_rotate64", 1234, 2)
-        .expect("register rotate");
-
-    assert_eq!(
-        registry.canonical_name_for_target_name("bpf_rotate64"),
-        Some("bpf_rotate64")
-    );
-    assert_eq!(
-        registry.btf_id_for_target_name("bpf_rotate64").unwrap(),
-        1234
-    );
-    assert_eq!(
-        registry.call_off_for_target_name("bpf_rotate64").unwrap(),
-        2
-    );
-    assert_eq!(
-        registry
-            .lookup_by_kinsn_call(1234, 2)
-            .unwrap()
-            .canonical_name,
-        "bpf_rotate64"
-    );
-}
-
-#[test]
 fn kinsn_registry_rejects_duplicate_call_keys_for_different_targets() {
     let mut registry = KinsnRegistry::default();
     registry

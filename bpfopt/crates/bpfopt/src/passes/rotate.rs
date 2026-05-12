@@ -6,30 +6,23 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
         canonical_name: "bpf_rotate64",
         aliases: &["rotate64"],
-        decode_proof: decode_rotate64_proof,
+        proof_len: rotate64_proof_len,
         register_uses: rotate_register_uses,
     },
     KinsnDescriptor {
         canonical_name: "bpf_rotate32",
         aliases: &["rotate32"],
-        decode_proof: decode_rotate32_proof,
+        proof_len: rotate32_proof_len,
         register_uses: rotate_register_uses,
     },
 ];
 
-fn decode_rotate64_proof(payload: &[u8]) -> ProofRegion {
-    decode_rotate_proof(payload, 63)
+fn rotate64_proof_len(payload: u64) -> anyhow::Result<usize> {
+    rotate_proof_len(payload, 63)
 }
 
-fn decode_rotate32_proof(payload: &[u8]) -> ProofRegion {
-    decode_rotate_proof(payload, 31)
-}
-
-fn decode_rotate_proof(payload: &[u8], shift_mask: u8) -> ProofRegion {
-    ProofRegion::from_result(
-        decode_packed_kinsn_payload(payload)
-            .and_then(|payload| rotate_proof_len(payload, shift_mask)),
-    )
+fn rotate32_proof_len(payload: u64) -> anyhow::Result<usize> {
+    rotate_proof_len(payload, 31)
 }
 
 fn rotate_proof_len(payload: u64, shift_mask: u8) -> anyhow::Result<usize> {
@@ -52,9 +45,7 @@ fn rotate_proof_len(payload: u64, shift_mask: u8) -> anyhow::Result<usize> {
 }
 
 fn rotate_register_uses(payload: u64) -> RegSet {
-    [kinsn_payload_reg(payload, 0), kinsn_payload_reg(payload, 4)]
-        .into_iter()
-        .collect()
+    regs_from_offsets(payload, &[0, 4])
 }
 pub struct RotatePass;
 
@@ -72,7 +63,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, _ctx: &PassContext) -> anyhow::Res
     let candidates: Vec<(InsnSite, RotateSite)> = prog
         .scan_block_starts(5, |window| {
             Ok(rotate_site_at(window.insns, window.start_idx)
-                .map(|site| window.hit(site.start_idx, site.old_len, site)))
+                .map(|site| (site.start_idx, site.old_len, site)))
         })?
         .into_iter()
         .map(|hit| (hit.start, hit.value))
@@ -86,7 +77,10 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, _ctx: &PassContext) -> anyhow::Res
     // window, since the kinsn replacement does not preserve tmp_reg.
     let mut applicable = Vec::with_capacity(candidates.len());
     for (start, site) in candidates {
-        if live_out_after_window(prog, start, site.old_len)?.contains(&site.tmp_reg) {
+        if prog
+            .live_out_after_window(start, site.old_len)?
+            .contains(&site.tmp_reg)
+        {
             skipped.push(SiteSkipReason::new(
                 start,
                 format!("tmp_reg r{} is live after site", site.tmp_reg),
@@ -116,34 +110,6 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, _ctx: &PassContext) -> anyhow::Res
         })?;
 
     Ok(PassResult::with_sites(applied, skipped))
-}
-
-fn live_out_after_window(prog: &BBProgram, start: InsnSite, len: usize) -> anyhow::Result<RegSet> {
-    if len == 0 {
-        anyhow::bail!("live_out_after_window len must be > 0 at {:?}", start);
-    }
-    let body = prog.block_body_view(start.block)?;
-    let end_idx = start
-        .idx
-        .checked_add(len)
-        .and_then(|value| value.checked_sub(1))
-        .ok_or_else(|| {
-            anyhow::anyhow!(
-                "live_out_after_window window at {:?} len {} overflows",
-                start,
-                len
-            )
-        })?;
-    if end_idx >= body.insns.len() {
-        anyhow::bail!(
-            "live_out_after_window end idx {end_idx} exceeds block body length {}",
-            body.insns.len()
-        );
-    }
-    prog.live_out_site_checked(InsnSite {
-        block: start.block,
-        idx: end_idx,
-    })
 }
 
 fn rotate_site_at(insns: &[BpfInsn], idx: usize) -> Option<RotateSite> {

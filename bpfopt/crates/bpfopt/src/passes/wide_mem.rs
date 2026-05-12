@@ -178,7 +178,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     let mut reported_starts = BTreeSet::new();
     let raw_sites = prog.scan_block_starts(MAX_WIDE_MEM_LEN, |window| {
         Ok(try_match_wide_mem_at(window.insns, window.start_idx)
-            .map(|site| window.hit(site.start_idx, site.old_len, site)))
+            .map(|site| (site.start_idx, site.old_len, site)))
     })?;
     let mut last_hit_end = None;
     for hit in raw_sites {
@@ -312,11 +312,7 @@ fn collect_wide_mem_window(
         let block_sites = prog.sites_in_block(block)?;
         while idx < block_sites.len() && insns.len() < MAX_WIDE_MEM_LEN {
             let site = block_sites[idx];
-            insns.push(
-                *prog
-                    .insn_at(site)
-                    .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?,
-            );
+            insns.push(*prog.insn(site)?);
             idx += 1;
         }
         if insns.len() >= MAX_WIDE_MEM_LEN {

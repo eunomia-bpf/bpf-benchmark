@@ -7,14 +7,6 @@ use crate::pass::*;
 const MAX_LADDER_WINDOW_GROWTH: i32 = 24;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum RegValue {
-    Unknown,
-    Scalar,
-    PacketData { root_id: u32, const_off: i32 },
-    PacketEnd { root_id: u32 },
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum GuardCmpKind {
     Strict,
     Inclusive,
@@ -27,7 +19,10 @@ struct GuardSite {
     compare: InsnSite,
     root_reg: u8,
     data_end_reg: u8,
-    root_id: u32,
+    /// Identity of the underlying packet pointer (ptr_def from BBProgram lift).
+    /// Replaces the old `root_id: u32` counter — two guards share a "root"
+    /// iff they observe the same `ptr_def` site.
+    root_ptr_def: InsnSite,
     window_end: i32,
     cmp_kind: GuardCmpKind,
     slow_target: BlockId,
@@ -53,15 +48,15 @@ impl BpfPass for BoundsCheckMergePass {
 }
 
 pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<PassResult> {
-    let Some(layout) = packet_ctx_layout(prog_type, PacketCtxLayoutScope::PacketAccess) else {
+    if packet_ctx_layout(prog_type, PacketCtxLayoutScope::PacketAccess).is_none() {
         return Ok(PassResult::unchanged());
-    };
+    }
     if prog.is_empty() {
         return Ok(PassResult::unchanged());
     }
 
     let target_sites = prog.branch_target_entry_sites()?;
-    let mut scan = scan_guard_sites(prog, &target_sites, layout)?;
+    let mut scan = scan_guard_sites(prog, &target_sites)?;
     if scan.guards.is_empty() {
         return Ok(PassResult::with_sites(0, scan.skips));
     }
@@ -127,9 +122,7 @@ fn apply_rewrites(
     let mut deleted_branches = BTreeSet::new();
 
     for (dominant_add, merged_end, skip_sites) in rewrites {
-        let mut widened = *prog
-            .insn_at(*dominant_add)
-            .ok_or_else(|| anyhow::anyhow!("missing dominant add at {:?}", dominant_add))?;
+        let mut widened = *prog.insn(*dominant_add)?;
         widened.imm = *merged_end;
         prog.try_replace_range_with_skips(*dominant_add, 1, 1, skipped, || {
             Ok(MakeReplacement::Use(vec![widened]))
@@ -154,46 +147,19 @@ fn apply_rewrites(
 fn scan_guard_sites(
     prog: &BBProgram,
     target_sites: &BTreeSet<InsnSite>,
-    layout: PacketCtxLayout,
 ) -> anyhow::Result<ScanResult> {
-    let mut states = vec![RegValue::Unknown; 11];
-    let mut next_root_id = 1u32;
-    let mut last_data_root = None;
     let mut result = ScanResult::default();
-
     for block in prog.blocks() {
-        if prog
-            .sites_in_block_with_terminator(block.id)?
-            .first()
-            .copied()
-            .is_some_and(|site| target_sites.contains(&site))
-        {
-            states.fill(RegValue::Unknown);
-            last_data_root = None;
-        }
-
         let block_sites = prog.sites_in_block_with_terminator(block.id)?;
         for (idx, site) in block_sites.iter().copied().enumerate() {
-            let Some(&insn) = prog.insn_at(site) else {
-                continue;
-            };
             let setup = (idx >= 2).then(|| (block_sites[idx - 2], block_sites[idx - 1]));
             if let Some(guard) =
-                detect_guard_candidate(site, prog, target_sites, setup, &states, &mut result.skips)?
+                detect_guard_candidate(site, prog, target_sites, setup, &mut result.skips)?
             {
                 result.guards.push(guard);
             }
-
-            apply_transfer(
-                insn,
-                &mut states,
-                &mut next_root_id,
-                &mut last_data_root,
-                layout,
-            );
         }
     }
-
     Ok(result)
 }
 
@@ -202,7 +168,6 @@ fn detect_guard_candidate(
     prog: &BBProgram,
     target_sites: &BTreeSet<InsnSite>,
     setup: Option<(InsnSite, InsnSite)>,
-    states: &[RegValue],
     skips: &mut Vec<SiteSkipReason>,
 ) -> anyhow::Result<Option<GuardSite>> {
     let Some(insn) = prog.insn_at(site) else {
@@ -214,12 +179,8 @@ fn detect_guard_candidate(
     let Some((mov_site, add_site)) = setup else {
         return Ok(None);
     };
-    let mov = prog
-        .insn_at(mov_site)
-        .ok_or_else(|| anyhow::anyhow!("missing guard setup mov at {:?}", mov_site))?;
-    let add = prog
-        .insn_at(add_site)
-        .ok_or_else(|| anyhow::anyhow!("missing guard setup add at {:?}", add_site))?;
+    let mov = prog.insn(mov_site)?;
+    let add = prog.insn(add_site)?;
     if mov.code != (BPF_ALU64 | BPF_MOV | BPF_X) || mov.dst_reg() != cursor_reg {
         return Ok(None);
     }
@@ -228,19 +189,17 @@ fn detect_guard_candidate(
     }
 
     let root_reg = mov.src_reg();
+    // At the compare site (entry state), root_reg and data_end_reg should
+    // still hold their packet types, and cursor_reg should be PacketData
+    // with const_off == window_end (for the BPF_ADD K case).
+    let root_state = prog.reg_fact_at(site, root_reg)?;
+    let data_end_state = prog.reg_fact_at(site, data_end_reg)?;
+    let cursor_state = prog.reg_fact_at(site, cursor_reg)?;
+
     if add.code == (BPF_ALU64 | BPF_ADD | BPF_X) {
-        if let (
-            Some(RegValue::PacketData {
-                root_id: left_root,
-                const_off: 0,
-            }),
-            Some(RegValue::PacketEnd {
-                root_id: right_root,
-            }),
-        ) = (
-            states.get(root_reg as usize).copied(),
-            states.get(data_end_reg as usize).copied(),
-        ) {
+        if let (Some((left_root, 0)), Some(right_root)) =
+            (root_state.as_packet_data(), data_end_state.as_packet_end())
+        {
             if left_root == right_root {
                 skips.push(SiteSkipReason {
                     site,
@@ -259,25 +218,19 @@ fn detect_guard_candidate(
         return Ok(None);
     }
 
-    let (
-        Some(RegValue::PacketData { root_id, const_off }),
-        Some(RegValue::PacketData {
-            root_id: root_base_id,
-            const_off: root_off,
-        }),
-        Some(RegValue::PacketEnd {
-            root_id: end_root_id,
-        }),
-    ) = (
-        states.get(cursor_reg as usize).copied(),
-        states.get(root_reg as usize).copied(),
-        states.get(data_end_reg as usize).copied(),
-    )
-    else {
+    let Some((cursor_ptr_def, cursor_off)) = cursor_state.as_packet_data() else {
         return Ok(None);
     };
-
-    if root_id != root_base_id || root_id != end_root_id || root_off != 0 || const_off != window_end
+    let Some((root_ptr_def, root_off)) = root_state.as_packet_data() else {
+        return Ok(None);
+    };
+    let Some(end_ptr_def) = data_end_state.as_packet_end() else {
+        return Ok(None);
+    };
+    if cursor_ptr_def != root_ptr_def
+        || cursor_ptr_def != end_ptr_def
+        || root_off != 0
+        || cursor_off != window_end
     {
         return Ok(None);
     }
@@ -303,7 +256,7 @@ fn detect_guard_candidate(
         compare: site,
         root_reg,
         data_end_reg,
-        root_id,
+        root_ptr_def: cursor_ptr_def,
         window_end,
         cmp_kind,
         slow_target,
@@ -355,7 +308,7 @@ fn can_extend_ladder(
     prog: &BBProgram,
     target_sites: &BTreeSet<InsnSite>,
 ) -> anyhow::Result<bool> {
-    if prev.root_id != next.root_id
+    if prev.root_ptr_def != next.root_ptr_def
         || prev.root_reg != next.root_reg
         || prev.data_end_reg != next.data_end_reg
         || prev.cmp_kind != next.cmp_kind
@@ -398,9 +351,7 @@ fn interleaves_are_merge_safe(
             if target_sites.contains(&site) {
                 return Ok(false);
             }
-            let insn = prog
-                .insn_at(site)
-                .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
+            let insn = prog.insn(site)?;
             if match insn.class() {
                 BPF_JMP | BPF_JMP32 => true,
                 BPF_ST | BPF_STX => insn.dst_reg() != 10,
@@ -447,66 +398,3 @@ fn build_ladder_rewrite(
     Some((dominant.add, merged_end, skip_sites))
 }
 
-fn apply_transfer(
-    insn: BpfInsn,
-    states: &mut [RegValue],
-    next_root_id: &mut u32,
-    last_data_root: &mut Option<u32>,
-    layout: PacketCtxLayout,
-) {
-    let dst = insn.dst_reg() as usize;
-    let src = insn.src_reg() as usize;
-
-    match insn.class() {
-        BPF_LDX => {
-            if insn.is_ldx_mem() && insn.src_reg() == 1 && insn.off == layout.data_off {
-                let root_id = *next_root_id;
-                *next_root_id += 1;
-                states[dst] = RegValue::PacketData {
-                    root_id,
-                    const_off: 0,
-                };
-                *last_data_root = Some(root_id);
-            } else if insn.is_ldx_mem() && insn.src_reg() == 1 && insn.off == layout.data_end_off {
-                let root_id = match *last_data_root {
-                    Some(root_id) => root_id,
-                    None => {
-                        let root_id = *next_root_id;
-                        *next_root_id += 1;
-                        root_id
-                    }
-                };
-                states[dst] = RegValue::PacketEnd { root_id };
-            } else {
-                states[dst] = RegValue::Scalar;
-            }
-        }
-        BPF_ALU64 | BPF_ALU => {
-            let op = bpf_op(insn.code);
-            match (op, bpf_src(insn.code)) {
-                (BPF_MOV, BPF_X) => {
-                    states[dst] = states.get(src).copied().unwrap_or(RegValue::Unknown)
-                }
-                (BPF_MOV, _) => states[dst] = RegValue::Scalar,
-                (BPF_ADD, BPF_K) => {
-                    states[dst] = match states.get(dst).copied() {
-                        Some(RegValue::PacketData { root_id, const_off }) => RegValue::PacketData {
-                            root_id,
-                            const_off: const_off + insn.imm,
-                        },
-                        _ => RegValue::Scalar,
-                    };
-                }
-                _ => states[dst] = RegValue::Unknown,
-            }
-        }
-        BPF_LD => states[dst] = RegValue::Scalar,
-        BPF_JMP | BPF_JMP32 => {
-            if insn.is_call() {
-                states.fill(RegValue::Unknown);
-                *last_data_root = None;
-            }
-        }
-        _ => {}
-    }
-}

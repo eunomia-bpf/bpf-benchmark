@@ -11,12 +11,9 @@ const MAP_VALUE_LOOKAHEAD: usize = 64;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     canonical_name: PREFETCH_TARGET_NAME,
     aliases: &["prefetch"],
-    decode_proof: decode_prefetch_proof,
+    proof_len: prefetch_proof_len,
     register_uses: prefetch_register_uses,
 }];
-fn decode_prefetch_proof(payload: &[u8]) -> ProofRegion {
-    ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(prefetch_proof_len))
-}
 fn prefetch_proof_len(payload: u64) -> anyhow::Result<usize> {
     validate_bpf_reg("prefetch ptr", kinsn_payload_reg(payload, 0))?;
     if BpfInsn::unpack_u4(payload, 4) != 0 {
@@ -28,7 +25,7 @@ fn prefetch_proof_len(payload: u64) -> anyhow::Result<usize> {
     Ok(1)
 }
 fn prefetch_register_uses(payload: u64) -> RegSet {
-    [kinsn_payload_reg(payload, 0)].into_iter().collect()
+    regs_from_offsets(payload, &[0])
 }
 pub struct PrefetchPass;
 #[derive(Clone, Copy, Debug)]
@@ -149,9 +146,7 @@ fn scan_map_value_prefetch_sites(prog: &BBProgram) -> anyhow::Result<Vec<Prefetc
     let mut sites = Vec::new();
     for block in prog.block_ids().collect::<Vec<_>>() {
         for site in prog.sites_in_block(block)? {
-            let insn = prog
-                .insn_at(site)
-                .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
+            let insn = prog.insn(site)?;
             if insn.is_call() && insn.src_reg() == 0 && insn.imm == HELPER_MAP_LOOKUP_ELEM {
                 if let Some(prefetch) = first_map_value_deref_after_lookup(prog, site)? {
                     sites.push(prefetch);
@@ -168,9 +163,7 @@ fn first_map_value_deref_after_lookup(
     let mut aliases = [None::<InsnSite>; 11];
     aliases[BPF_REG_0 as usize] = Some(call_site);
     for site in pf_sites_after_in_frame(prog, call_site, MAP_VALUE_LOOKAHEAD)? {
-        let insn = prog
-            .insn_at(site)
-            .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
+        let insn = prog.insn(site)?;
         if let Some(base_reg) = memory_base_reg(insn) {
             if let Some(ptr_def) = aliases[base_reg as usize] {
                 return Ok(Some(PrefetchSite {
@@ -236,9 +229,7 @@ fn scan_packet_prefetch_sites(
             regs = [TrackedValue::Unknown; 11];
         }
         for site in prog.sites_in_block_with_terminator(block)? {
-            let insn = prog
-                .insn_at(site)
-                .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
+            let insn = prog.insn(site)?;
             if let Some(base_reg) = memory_base_reg(insn) {
                 if let TrackedValue::PacketData { ptr_def } = regs[base_reg as usize] {
                     sites.push(PrefetchSite {
@@ -459,9 +450,7 @@ fn reject_control_flow_between(
     window: &[InsnSite],
 ) -> anyhow::Result<Option<String>> {
     for &site in window {
-        let insn = prog
-            .insn_at(site)
-            .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
+        let insn = prog.insn(site)?;
         if insn.is_call() || insn.is_exit() || insn.is_jmp_class() || insn.is_ldimm64_pseudo_func()
         {
             return Ok(Some(format!(
@@ -478,9 +467,7 @@ fn reject_reg_write_between(
     reg: u8,
 ) -> anyhow::Result<Option<String>> {
     for &site in window {
-        let insn = prog
-            .insn_at(site)
-            .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
+        let insn = prog.insn(site)?;
         if insn_use_def_set(insn).defs.contains(&reg) {
             return Ok(Some(format!(
                 "r{reg} is redefined inside the prefetch window at {:?}",

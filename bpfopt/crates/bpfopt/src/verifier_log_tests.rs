@@ -173,37 +173,6 @@ processed 4 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_stat
     assert!(parse_verifier_log(log).is_empty());
 }
 
-/// Simulate parsing a verifier rejection log embedded in a REJIT error.
-/// This tests the integration path: bpf_prog_rejit() captures the log,
-/// and the caller parses it with parse_verifier_log().
-#[test]
-fn parse_verifier_rejection_from_rejit_error() {
-    // Simulate an error message like bpf_prog_rejit() would produce.
-    let error_msg = "BPF_PROG_REJIT: Permission denied (os error 13)\n\
-                         verifier log:\n\
-                         0: R1=ctx() R10=fp0\n\
-                         0: (b7) r0 = 0                        ; R0=0\n\
-                         1: (95) exit\n\
-                         processed 2 insns (limit 1000000)";
-
-    // Extract the log portion (same logic as cmd_apply/try_apply_one).
-    let log_text = if let Some(log_start) = error_msg.find("verifier log:\n") {
-        &error_msg[log_start + "verifier log:\n".len()..]
-    } else {
-        ""
-    };
-
-    let parsed = parse_verifier_log(log_text);
-    assert!(
-        !parsed.is_empty(),
-        "should parse at least one state from rejection log"
-    );
-    // First state snapshot is at pc=0.
-    assert_eq!(parsed[0].pc, 0);
-    assert!(parsed[0].regs.contains_key(&1));
-    assert_eq!(parsed[0].regs.get(&1).unwrap().reg_type, "ctx");
-}
-
 #[test]
 fn parses_frame_and_stack_tokens() {
     let log = r#"

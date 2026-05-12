@@ -83,6 +83,60 @@ pub const XDP_PACKET_DATA_OFFSET: i16 = 0;
 pub const XDP_PACKET_DATA_END_OFFSET: i16 = 4;
 pub const SKB_PACKET_DATA_OFFSET: i16 = 76;
 pub const SKB_PACKET_DATA_END_OFFSET: i16 = 80;
+/// Single source of truth for BPF memory-access widths.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BpfMemWidth {
+    B = 0,
+    H = 1,
+    W = 2,
+    DW = 3,
+}
+
+impl BpfMemWidth {
+    pub const ALL: [Self; 4] = [Self::B, Self::H, Self::W, Self::DW];
+
+    pub fn from_size_opcode(size: u8) -> Option<Self> {
+        match size {
+            BPF_B => Some(Self::B),
+            BPF_H => Some(Self::H),
+            BPF_W => Some(Self::W),
+            BPF_DW => Some(Self::DW),
+            _ => None,
+        }
+    }
+
+    pub fn from_bytes(bytes: usize) -> Option<Self> {
+        match bytes {
+            1 => Some(Self::B),
+            2 => Some(Self::H),
+            4 => Some(Self::W),
+            8 => Some(Self::DW),
+            _ => None,
+        }
+    }
+
+    pub fn bytes(self) -> usize {
+        1usize << self as u8
+    }
+
+    pub fn bits(self) -> u32 {
+        (self.bytes() as u32) * 8
+    }
+
+    pub fn size_opcode(self) -> u8 {
+        match self {
+            Self::B => BPF_B,
+            Self::H => BPF_H,
+            Self::W => BPF_W,
+            Self::DW => BPF_DW,
+        }
+    }
+
+    pub fn aarch64_shift(self) -> i16 {
+        self as i16
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct PacketCtxLayout {
     pub data_off: i16,
@@ -601,67 +655,6 @@ pub fn insn_width(insn: &BpfInsn) -> usize {
 }
 pub fn decode_ldimm64_value(lo: &BpfInsn, hi: &BpfInsn) -> u64 {
     (lo.imm as u32 as u64) | ((hi.imm as u32 as u64) << 32)
-}
-pub(crate) trait SimpleRegValue: Copy {
-    fn unknown() -> Self;
-    fn const64(value: i64) -> Self;
-    fn const32(value: u32) -> Self;
-    fn mov32(value: Self) -> Self;
-    fn xor_self() -> Self {
-        Self::unknown()
-    }
-    fn alu64_imm(value: Self, op: u8, imm: i32) -> Self;
-    fn alu32_add_sub(value: Self, imm: i32, is_add: bool) -> Self;
-}
-pub(crate) fn advance_reg_state<V: SimpleRegValue>(
-    insn: &BpfInsn,
-    ldimm64_hi: Option<&BpfInsn>,
-    regs: &mut [V; 11],
-) -> anyhow::Result<()> {
-    if insn.is_call() {
-        for reg in BPF_REG_0..=BPF_REG_5 {
-            regs[reg as usize] = V::unknown();
-        }
-        return Ok(());
-    }
-
-    if insn.is_ldimm64() {
-        let hi =
-            ldimm64_hi.ok_or_else(|| anyhow::anyhow!("LD_IMM64 is missing its second slot"))?;
-        regs[insn.dst_reg() as usize] = V::const64(decode_ldimm64_value(insn, hi) as i64);
-        return Ok(());
-    }
-
-    match insn.class() {
-        BPF_ALU64 => advance_alu64_state(insn, regs),
-        BPF_ALU => advance_alu32_state(insn, regs),
-        BPF_LDX | BPF_LD => regs[insn.dst_reg() as usize] = V::unknown(),
-        _ => {}
-    }
-    Ok(())
-}
-fn advance_alu64_state<V: SimpleRegValue>(insn: &BpfInsn, regs: &mut [V; 11]) {
-    let dst = insn.dst_reg() as usize;
-    let next = match (bpf_op(insn.code), bpf_src(insn.code)) {
-        (BPF_MOV, BPF_K) => V::const64(insn.imm as i64),
-        (BPF_MOV, BPF_X) => regs[insn.src_reg() as usize],
-        (BPF_ADD | BPF_SUB, BPF_K) => V::alu64_imm(regs[dst], bpf_op(insn.code), insn.imm),
-        (BPF_XOR, BPF_X) if insn.dst_reg() == insn.src_reg() => V::xor_self(),
-        _ => V::unknown(),
-    };
-    regs[dst] = next;
-}
-fn advance_alu32_state<V: SimpleRegValue>(insn: &BpfInsn, regs: &mut [V; 11]) {
-    let dst = insn.dst_reg() as usize;
-    let next = match (bpf_op(insn.code), bpf_src(insn.code)) {
-        (BPF_MOV, BPF_K) => V::const32(insn.imm as u32),
-        (BPF_MOV, BPF_X) => V::mov32(regs[insn.src_reg() as usize]),
-        (BPF_ADD, BPF_K) => V::alu32_add_sub(regs[dst], insn.imm, true),
-        (BPF_SUB, BPF_K) => V::alu32_add_sub(regs[dst], insn.imm, false),
-        (BPF_XOR, BPF_X) if insn.dst_reg() == insn.src_reg() => V::xor_self(),
-        _ => V::unknown(),
-    };
-    regs[dst] = next;
 }
 pub fn emit_scalar_const_load(dst_reg: u8, value: u64, is_32: bool) -> Vec<BpfInsn> {
     if is_32 {

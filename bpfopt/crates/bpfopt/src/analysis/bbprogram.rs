@@ -11,7 +11,7 @@ use crate::pass::{
 };
 use crate::verifier_log::{RegState, StackState, VerifierInsn, VerifierInsnKind};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 pub(crate) type VerifierOracle = BTreeMap<InsnSite, Arc<[VerifierInsn]>>;
 pub(crate) type BtfMetadataMap = BTreeMap<InsnSite, usize>;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -68,7 +68,7 @@ pub struct BBMapBinding {
     pub old_fd: i32,
     pub map_id: u32,
 }
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct BBProgram {
     pub(super) blocks: Vec<Block>,
     pub(crate) entry: BlockId,
@@ -84,6 +84,33 @@ pub struct BBProgram {
     pub(crate) pc_relative_ldimm64_targets: BTreeMap<InsnSite, BlockId>,
     pub(crate) predecessors: Vec<Vec<BlockId>>,
     pub(crate) successors: Vec<Vec<BlockId>>,
+    pub(super) prog_type: u32,
+    site_liveness_cache: Mutex<Option<Arc<SiteLivenessSets>>>,
+    lifted_reg_facts_cache: Mutex<Option<Arc<LiftedRegFacts>>>,
+}
+
+impl Clone for BBProgram {
+    fn clone(&self) -> Self {
+        Self {
+            blocks: self.blocks.clone(),
+            entry: self.entry,
+            use_def: self.use_def.clone(),
+            oracle: self.oracle.clone(),
+            pmu_profile: self.pmu_profile.clone(),
+            btf: self.btf.clone(),
+            kinsn_reg: Arc::clone(&self.kinsn_reg),
+            map_bindings: self.map_bindings.clone(),
+            func_info: self.func_info.clone(),
+            line_info: self.line_info.clone(),
+            ldimm64_second_slots: self.ldimm64_second_slots.clone(),
+            pc_relative_ldimm64_targets: self.pc_relative_ldimm64_targets.clone(),
+            predecessors: self.predecessors.clone(),
+            successors: self.successors.clone(),
+            prog_type: self.prog_type,
+            site_liveness_cache: Mutex::new(None),
+            lifted_reg_facts_cache: Mutex::new(None),
+        }
+    }
 }
 #[derive(Clone, Debug)]
 pub struct Block {
@@ -106,21 +133,6 @@ pub(crate) struct BlockStartWindow<'a> {
     pub(crate) sites: &'a [InsnSite],
     pub(crate) insns: &'a [BpfInsn],
     pub(crate) lookahead: &'a [BpfInsn],
-}
-impl BlockStartWindow<'_> {
-    pub(crate) fn hit<T>(&self, start_idx: usize, old_len: usize, value: T) -> LocalWindowHit<T> {
-        LocalWindowHit {
-            start_idx,
-            old_len,
-            value,
-        }
-    }
-}
-#[derive(Debug)]
-pub(crate) struct LocalWindowHit<T> {
-    pub(crate) start_idx: usize,
-    pub(crate) old_len: usize,
-    pub(crate) value: T,
 }
 #[derive(Debug)]
 pub(crate) struct WindowHit<T> {
@@ -179,6 +191,9 @@ impl BBProgram {
             pc_relative_ldimm64_targets,
             predecessors: Vec::new(),
             successors: Vec::new(),
+            prog_type: 0,
+            site_liveness_cache: Mutex::new(None),
+            lifted_reg_facts_cache: Mutex::new(None),
         };
         prog.rebuild_cfg_edges()?;
         prog.rebuild_use_def()?;
@@ -204,9 +219,6 @@ impl BBProgram {
     }
     pub fn site_frame(&self, site: InsnSite) -> anyhow::Result<FrameId> {
         self.block_frame(site.block)
-    }
-    pub fn same_block(&self, a: InsnSite, b: InsnSite) -> bool {
-        a.block == b.block
     }
     pub fn terminator(&self, block: BlockId) -> anyhow::Result<Terminator> {
         Ok(self.block(block)?.terminator)
@@ -276,23 +288,58 @@ impl BBProgram {
     pub fn live_out_site_checked(&self, site: InsnSite) -> anyhow::Result<RegSet> {
         self.insn_at(site)
             .ok_or_else(|| anyhow::anyhow!("invalid instruction site {:?}", site))?;
-        compute_site_liveness(self)?
+        self.site_liveness()?
             .live_out
-            .remove(&site)
+            .get(&site)
+            .cloned()
             .ok_or_else(|| anyhow::anyhow!("site liveness missing live_out for {:?}", site))
     }
-    #[cfg(test)]
-    pub fn reaching_defs(&self, block: BlockId) -> ReachingDefs {
-        let defs = self
-            .use_def
-            .defs()
-            .copied()
-            .filter(|def| def.block == block)
-            .fold(BTreeMap::<u8, Vec<DefSite>>::new(), |mut defs, def| {
-                defs.entry(def.reg).or_default().push(def);
-                defs
-            });
-        ReachingDefs { defs }
+    fn site_liveness(&self) -> anyhow::Result<Arc<SiteLivenessSets>> {
+        let mut slot = self
+            .site_liveness_cache
+            .lock()
+            .map_err(|_| anyhow::anyhow!("site liveness cache poisoned"))?;
+        if let Some(cached) = slot.as_ref() {
+            return Ok(Arc::clone(cached));
+        }
+        let fresh = Arc::new(compute_site_liveness(self)?);
+        *slot = Some(Arc::clone(&fresh));
+        Ok(fresh)
+    }
+    /// Lift-time linear reg-fact for `reg` at the entry of `site`.
+    /// Returns `LiftedRegFact::Unknown` if the site is not tracked.
+    pub fn reg_fact_at(&self, site: InsnSite, reg: u8) -> anyhow::Result<LiftedRegFact> {
+        let facts = self.lifted_reg_facts()?;
+        Ok(facts
+            .by_site
+            .get(&site)
+            .map(|state| state[reg as usize])
+            .unwrap_or(LiftedRegFact::Unknown))
+    }
+    /// Set the program type and invalidate any caches that depend on it
+    /// (lifted reg facts use prog_type to derive packet ctx layout).
+    pub(crate) fn set_prog_type(&mut self, prog_type: u32) -> anyhow::Result<()> {
+        if self.prog_type == prog_type {
+            return Ok(());
+        }
+        self.prog_type = prog_type;
+        *self
+            .lifted_reg_facts_cache
+            .lock()
+            .map_err(|_| anyhow::anyhow!("lifted reg facts cache poisoned"))? = None;
+        Ok(())
+    }
+    fn lifted_reg_facts(&self) -> anyhow::Result<Arc<LiftedRegFacts>> {
+        let mut slot = self
+            .lifted_reg_facts_cache
+            .lock()
+            .map_err(|_| anyhow::anyhow!("lifted reg facts cache poisoned"))?;
+        if let Some(cached) = slot.as_ref() {
+            return Ok(Arc::clone(cached));
+        }
+        let fresh = Arc::new(compute_lifted_reg_facts(self)?);
+        *slot = Some(Arc::clone(&fresh));
+        Ok(fresh)
     }
     pub fn map_bindings(&self) -> &[BBMapBinding] {
         &self.map_bindings
@@ -456,42 +503,6 @@ impl BBProgram {
             func: remap_btf_records_view(self, self.func_info.as_ref(), BtfRecordKind::Func)?,
             line: remap_btf_records_view(self, self.line_info.as_ref(), BtfRecordKind::Line)?,
         })
-    }
-    pub fn unreachable_blocks(&self) -> Vec<BlockId> {
-        if self.blocks.is_empty() {
-            return Vec::new();
-        }
-        let mut reachable = BTreeSet::new();
-        let mut stack = vec![self.entry];
-        while let Some(block) = stack.pop() {
-            if !reachable.insert(block) {
-                continue;
-            }
-            stack.extend(self.successors(block).iter().copied());
-        }
-        self.blocks
-            .iter()
-            .map(|block| block.id)
-            .filter(|block| !reachable.contains(block))
-            .filter(|&block| !self.is_lexical_dead_tail(block, &reachable))
-            .collect()
-    }
-    fn is_lexical_dead_tail(&self, block: BlockId, reachable: &BTreeSet<BlockId>) -> bool {
-        let mut idx = block.0;
-        while idx > 0 {
-            let prev = &self.blocks[idx - 1];
-            if reachable.contains(&prev.id) {
-                return matches!(prev.terminator, Terminator::Exit { .. } | Terminator::End);
-            }
-            if !matches!(
-                prev.terminator,
-                Terminator::Exit { .. } | Terminator::End | Terminator::Fallthrough { .. }
-            ) {
-                return false;
-            }
-            idx -= 1;
-        }
-        false
     }
     pub fn sites_in_block(&self, block: BlockId) -> anyhow::Result<Vec<InsnSite>> {
         let len = self.block(block)?.insns.len();
@@ -679,20 +690,7 @@ impl BBProgram {
         block: BlockId,
         start_slot: usize,
         old_len: usize,
-        replacement_len: usize,
     ) -> anyhow::Result<Option<String>> {
-        if old_len == 0 {
-            anyhow::bail!(
-                "kinsn replacement in {:?} at slot {start_slot} has zero old length",
-                block
-            );
-        }
-        if replacement_len == 0 {
-            anyhow::bail!(
-                "kinsn replacement in {:?} at slot {start_slot} has zero replacement length",
-                block
-            );
-        }
         let block_ref = self.block(block)?;
         let frame = block_ref.frame;
         let frame_start_slot = frame_relative_logical_slot(self, block, start_slot)?;
@@ -715,7 +713,6 @@ impl BBProgram {
                 "kinsn site crosses subprog boundary (site {frame_start_slot}..{old_end}, subprog {frame_start_slot_abs}..{frame_end_slot_abs})"
             )));
         }
-        let _ = replacement_len;
         Ok(None)
     }
     pub(crate) fn remap_block_after_insert(
@@ -891,7 +888,7 @@ impl BBProgram {
         mut f: F,
     ) -> anyhow::Result<Vec<WindowHit<T>>>
     where
-        F: FnMut(BlockStartWindow<'_>) -> anyhow::Result<Option<LocalWindowHit<T>>>,
+        F: FnMut(BlockStartWindow<'_>) -> anyhow::Result<Option<(usize, usize, T)>>,
     {
         let mut hits = Vec::new();
         for block in self.block_ids() {
@@ -912,35 +909,35 @@ impl BBProgram {
                 if window.sites.get(window.start_idx).copied() != Some(window.start_site) {
                     anyhow::bail!("inconsistent start window in {:?}", window.block);
                 }
-                let Some(local) = f(window)? else {
+                let Some((local_start_idx, old_len, value)) = f(window)? else {
                     continue;
                 };
-                if local.old_len == 0 {
+                if old_len == 0 {
                     anyhow::bail!(
                         "window match in {:?} at index {} has zero old length",
                         body.block,
-                        local.start_idx
+                        local_start_idx
                     );
                 }
-                let Some(&start) = body.sites.get(local.start_idx) else {
+                let Some(&start) = body.sites.get(local_start_idx) else {
                     anyhow::bail!(
                         "window match start index {} exceeds {:?} body length {}",
-                        local.start_idx,
+                        local_start_idx,
                         body.block,
                         body.sites.len()
                     );
                 };
-                let end_idx = local.start_idx.checked_add(local.old_len).ok_or_else(|| {
+                let end_idx = local_start_idx.checked_add(old_len).ok_or_else(|| {
                     anyhow::anyhow!(
                         "window match range {} + {} overflows",
-                        local.start_idx,
-                        local.old_len
+                        local_start_idx,
+                        old_len
                     )
                 })?;
                 if end_idx > body.sites.len() {
                     anyhow::bail!(
                         "window match range {}..{} exceeds {:?} body length {}",
-                        local.start_idx,
+                        local_start_idx,
                         end_idx,
                         body.block,
                         body.sites.len()
@@ -948,10 +945,10 @@ impl BBProgram {
                 }
                 hits.push(WindowHit {
                     block: body.block,
-                    start_idx: local.start_idx,
+                    start_idx: local_start_idx,
                     start,
-                    old_len: local.old_len,
-                    value: local.value,
+                    old_len,
+                    value,
                 });
             }
         }
@@ -1003,13 +1000,7 @@ fn reg_exact_value(state: &RegState) -> Option<u64> {
         .or_else(|| state.exact_u32().map(u64::from))
 }
 fn fp_stack_offset_from_reg_state(state: &RegState) -> Option<i32> {
-    if state.reg_type != "fp" {
-        return None;
-    }
-    match state.offset {
-        Some(offset) => Some(offset),
-        None => Some(0),
-    }
+    (state.reg_type == "fp").then(|| state.offset.unwrap_or(0))
 }
 fn known_stack_bytes_from_state(
     state: &VerifierInsn,
@@ -1031,10 +1022,7 @@ fn known_stack_bytes_from_state(
 }
 fn known_stack_byte_from_state(state: &VerifierInsn, absolute_off: i32) -> Option<u8> {
     let slot_start = verifier_stack_slot_start(absolute_off)?;
-    let byte_index = match usize::try_from(absolute_off - i32::from(slot_start)) {
-        Ok(byte_index) => byte_index,
-        Err(_) => return None,
-    };
+    let byte_index = usize::try_from(absolute_off - i32::from(slot_start)).ok()?;
     if byte_index >= 8 {
         return None;
     }
@@ -1050,10 +1038,7 @@ fn verifier_stack_slot_start(absolute_off: i32) -> Option<i16> {
         return None;
     }
     let slot_index = ((-absolute_off - 1) / 8) + 1;
-    let Ok(slot_start) = i16::try_from(-slot_index * 8) else {
-        return None;
-    };
-    Some(slot_start)
+    i16::try_from(-slot_index * 8).ok()
 }
 fn verifier_stack_slot_type(stack: &StackState, byte_index: usize) -> Option<u8> {
     let slot_types = stack.slot_types.as_ref()?;
@@ -1187,20 +1172,6 @@ impl Dominance {
             .is_some_and(|set| set.contains(&dominator))
     }
 }
-#[derive(Clone, Debug, Default)]
-#[cfg(test)]
-pub struct ReachingDefs {
-    defs: BTreeMap<u8, Vec<DefSite>>,
-}
-#[cfg(test)]
-impl ReachingDefs {
-    pub fn defs_for(&self, reg: u8) -> impl Iterator<Item = DefSite> + '_ {
-        self.defs
-            .get(&reg)
-            .into_iter()
-            .flat_map(|defs| defs.iter().copied())
-    }
-}
 fn current_site_pcs(prog: &BBProgram) -> anyhow::Result<BTreeMap<InsnSite, usize>> {
     let mut pcs = BTreeMap::new();
     let mut pc = 0usize;
@@ -1315,6 +1286,92 @@ struct LivenessSets {
 #[derive(Clone, Debug, Default)]
 struct SiteLivenessSets {
     live_out: HashMap<InsnSite, RegSet>,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum LiftedRegFact {
+    Unknown,
+    Ctx,
+    Const(i64),
+    FpOff(i32),
+    /// Direct packet-data pointer. `ptr_def` is the LDX site that loaded it
+    /// (or the latest aliased site after MOV-X / ADD-K propagation).
+    /// `const_off` is the constant offset accumulated from ADD-K.
+    PacketData { ptr_def: InsnSite, const_off: i32 },
+    /// Direct packet-end pointer. `ptr_def` is the matching data-load site
+    /// when this end-load follows a data-load in the same block; otherwise it
+    /// is this end-load's own site.
+    PacketEnd { ptr_def: InsnSite },
+    /// Scalar from a memory load that is not a packet pointer.
+    Scalar,
+}
+impl LiftedRegFact {
+    pub fn as_const(self) -> Option<i64> {
+        match self {
+            Self::Const(value) => Some(value),
+            _ => None,
+        }
+    }
+    pub fn as_fp_off(self) -> Option<i32> {
+        match self {
+            Self::FpOff(off) => Some(off),
+            _ => None,
+        }
+    }
+    pub fn as_packet_data(self) -> Option<(InsnSite, i32)> {
+        match self {
+            Self::PacketData { ptr_def, const_off } => Some((ptr_def, const_off)),
+            _ => None,
+        }
+    }
+    pub fn as_packet_end(self) -> Option<InsnSite> {
+        match self {
+            Self::PacketEnd { ptr_def } => Some(ptr_def),
+            _ => None,
+        }
+    }
+}
+impl LiftedRegFact {
+    fn alu64_imm(self, op: u8, imm: i32) -> Self {
+        use crate::insn::{BPF_ADD, BPF_SUB};
+        let add_sub = |current: i64| match op {
+            BPF_ADD => current.checked_add(i64::from(imm)),
+            BPF_SUB => current.checked_sub(i64::from(imm)),
+            _ => None,
+        };
+        match self {
+            Self::Const(current) => add_sub(current).map(Self::Const).unwrap_or(Self::Unknown),
+            Self::FpOff(current) => add_sub(i64::from(current))
+                .and_then(|next| i32::try_from(next).ok())
+                .map(Self::FpOff)
+                .unwrap_or(Self::Unknown),
+            _ => Self::Unknown,
+        }
+    }
+    fn alu32_add_sub(self, imm: i32, is_add: bool) -> Self {
+        match self {
+            Self::Const(current) => {
+                let current = current as u32;
+                let imm = imm as u32;
+                let next = if is_add {
+                    current.wrapping_add(imm)
+                } else {
+                    current.wrapping_sub(imm)
+                };
+                Self::Const(next as i64)
+            }
+            _ => Self::Unknown,
+        }
+    }
+    fn mov32(self) -> Self {
+        match self {
+            Self::Const(current) => Self::Const(current as u32 as i64),
+            _ => Self::Unknown,
+        }
+    }
+}
+#[derive(Clone, Debug, Default)]
+struct LiftedRegFacts {
+    by_site: HashMap<InsnSite, [LiftedRegFact; 11]>,
 }
 #[cfg(test)]
 fn compute_liveness(prog: &BBProgram) -> LivenessSets {
@@ -1445,6 +1502,134 @@ fn compute_site_liveness(prog: &BBProgram) -> anyhow::Result<SiteLivenessSets> {
     }
     Ok(SiteLivenessSets { live_out })
 }
+fn compute_lifted_reg_facts(prog: &BBProgram) -> anyhow::Result<LiftedRegFacts> {
+    let mut by_site = HashMap::new();
+    let layout =
+        crate::insn::packet_ctx_layout(prog.prog_type, crate::insn::PacketCtxLayoutScope::PacketAccess);
+    let mut regs = [LiftedRegFact::Unknown; 11];
+    let mut last_data_load: Option<InsnSite> = None;
+    for (idx, block) in prog.block_ids().enumerate().collect::<Vec<_>>() {
+        if idx == 0 {
+            regs = [LiftedRegFact::Unknown; 11];
+            regs[1] = LiftedRegFact::Ctx;
+            regs[10] = LiftedRegFact::FpOff(0);
+            last_data_load = None;
+        } else if prog.should_reset_linear_state_at_block(block)? {
+            regs = [LiftedRegFact::Unknown; 11];
+            regs[10] = LiftedRegFact::FpOff(0);
+            last_data_load = None;
+        }
+        let sites = prog.sites_in_block_with_terminator(block)?;
+        for site in sites {
+            by_site.insert(site, regs);
+            let Some(insn) = prog.insn_at(site) else {
+                continue;
+            };
+            let ldimm64_hi = if insn.is_ldimm64() {
+                Some(prog.ldimm64_second_slot(site).ok_or_else(|| {
+                    anyhow::anyhow!("LD_IMM64 at {:?} is missing high half", site)
+                })?)
+            } else {
+                None
+            };
+            advance_lifted_regs(insn, ldimm64_hi, site, layout, &mut regs, &mut last_data_load)?;
+        }
+    }
+    Ok(LiftedRegFacts { by_site })
+}
+fn advance_lifted_regs(
+    insn: &BpfInsn,
+    ldimm64_hi: Option<&BpfInsn>,
+    site: InsnSite,
+    layout: Option<crate::insn::PacketCtxLayout>,
+    regs: &mut [LiftedRegFact; 11],
+    last_data_load: &mut Option<InsnSite>,
+) -> anyhow::Result<()> {
+    use crate::insn::{
+        bpf_size, bpf_op, bpf_src, decode_ldimm64_value, BPF_ADD, BPF_ALU, BPF_ALU64, BPF_K,
+        BPF_LD, BPF_LDX, BPF_MEM, BPF_MOV, BPF_REG_0, BPF_REG_5, BPF_SUB, BPF_W, BPF_X, BPF_XOR,
+    };
+    if insn.is_call() {
+        // Conservative: blast all packet-typed regs and r0..r5 to Unknown.
+        // (Original bounds_check_merge cleared ALL regs on call; we keep r6..r9
+        // for non-packet facts but clear packet facts.)
+        for reg in BPF_REG_0..=BPF_REG_5 {
+            regs[reg as usize] = LiftedRegFact::Unknown;
+        }
+        for fact in regs.iter_mut() {
+            if matches!(
+                fact,
+                LiftedRegFact::PacketData { .. } | LiftedRegFact::PacketEnd { .. }
+            ) {
+                *fact = LiftedRegFact::Unknown;
+            }
+        }
+        *last_data_load = None;
+        return Ok(());
+    }
+    if insn.is_ldimm64() {
+        let hi =
+            ldimm64_hi.ok_or_else(|| anyhow::anyhow!("LD_IMM64 is missing its second slot"))?;
+        regs[insn.dst_reg() as usize] =
+            LiftedRegFact::Const(decode_ldimm64_value(insn, hi) as i64);
+        return Ok(());
+    }
+    match insn.class() {
+        BPF_ALU64 => {
+            let dst = insn.dst_reg() as usize;
+            regs[dst] = match (bpf_op(insn.code), bpf_src(insn.code)) {
+                (BPF_MOV, BPF_K) => LiftedRegFact::Const(insn.imm as i64),
+                (BPF_MOV, BPF_X) => regs[insn.src_reg() as usize],
+                (BPF_ADD, BPF_K) => match regs[dst] {
+                    LiftedRegFact::PacketData { ptr_def, const_off } => LiftedRegFact::PacketData {
+                        ptr_def,
+                        const_off: const_off.saturating_add(insn.imm),
+                    },
+                    _ => regs[dst].alu64_imm(BPF_ADD, insn.imm),
+                },
+                (BPF_SUB, BPF_K) => regs[dst].alu64_imm(BPF_SUB, insn.imm),
+                (BPF_XOR, BPF_X) if insn.dst_reg() == insn.src_reg() => LiftedRegFact::Unknown,
+                _ => LiftedRegFact::Unknown,
+            };
+        }
+        BPF_ALU => {
+            let dst = insn.dst_reg() as usize;
+            regs[dst] = match (bpf_op(insn.code), bpf_src(insn.code)) {
+                (BPF_MOV, BPF_K) => LiftedRegFact::Const(insn.imm as u32 as i64),
+                (BPF_MOV, BPF_X) => regs[insn.src_reg() as usize].mov32(),
+                (BPF_ADD, BPF_K) => regs[dst].alu32_add_sub(insn.imm, true),
+                (BPF_SUB, BPF_K) => regs[dst].alu32_add_sub(insn.imm, false),
+                (BPF_XOR, BPF_X) if insn.dst_reg() == insn.src_reg() => LiftedRegFact::Unknown,
+                _ => LiftedRegFact::Unknown,
+            };
+        }
+        BPF_LDX => {
+            let dst = insn.dst_reg() as usize;
+            let mut fact = LiftedRegFact::Unknown;
+            if let Some(layout) = layout {
+                if bpf_size(insn.code) == BPF_W
+                    && (insn.code & 0xe0) == BPF_MEM
+                    && matches!(regs[insn.src_reg() as usize], LiftedRegFact::Ctx)
+                {
+                    if insn.off == layout.data_off {
+                        fact = LiftedRegFact::PacketData {
+                            ptr_def: site,
+                            const_off: 0,
+                        };
+                        *last_data_load = Some(site);
+                    } else if insn.off == layout.data_end_off {
+                        let ptr_def = last_data_load.unwrap_or(site);
+                        fact = LiftedRegFact::PacketEnd { ptr_def };
+                    }
+                }
+            }
+            regs[dst] = fact;
+        }
+        BPF_LD => regs[insn.dst_reg() as usize] = LiftedRegFact::Unknown,
+        _ => {}
+    }
+    Ok(())
+}
 fn site_successors(prog: &BBProgram, site: InsnSite) -> anyhow::Result<Vec<InsnSite>> {
     let block = prog.block(site.block)?;
     if site.idx < block.insns.len() {
@@ -1501,10 +1686,9 @@ impl BBProgram {
         &self,
         start: InsnSite,
         old_len: usize,
-        new_len: usize,
     ) -> anyhow::Result<Option<String>> {
         let start_slot = site_offset_in_block_slots(self, start)?;
-        self.kinsn_replacement_subprog_skip_reason(start.block, start_slot, old_len, new_len)
+        self.kinsn_replacement_subprog_skip_reason(start.block, start_slot, old_len)
     }
 }
 
@@ -1635,9 +1819,8 @@ mod tests {
         set_map_ids(&mut ctx, vec![101, 202]);
         let mut prog = lift_test_program(&[a[0], a[1], b[0], b[1], BpfInsn::exit()], &ctx);
         let def = prog
-            .reaching_defs(BlockId(0))
-            .defs_for(BPF_REG_1)
-            .next()
+            .def_sites()
+            .find(|d| d.block == BlockId(0) && d.reg == BPF_REG_1)
             .expect("map fd r1 def should exist");
         prog.delete_insn(def)
             .expect("delete should keep stable binding");
@@ -1727,11 +1910,7 @@ mod tests {
                 assert_eq!(window.start_site, InsnSite::for_test(BlockId(0), 0));
                 assert_eq!(window.sites.len(), 1);
                 assert_eq!(window.lookahead.len(), 1);
-                Ok(Some(LocalWindowHit {
-                    start_idx: window.start_idx,
-                    old_len: 1,
-                    value: window.lookahead[0].imm,
-                }))
+                Ok(Some((window.start_idx, 1, window.lookahead[0].imm)))
             })
             .expect("truncated lookahead scan should succeed");
         assert_eq!(hits.len(), 1);
@@ -1752,11 +1931,7 @@ mod tests {
         );
         let hits = prog
             .scan_block_starts(2, |window| {
-                Ok((window.start_idx == 2).then_some(LocalWindowHit {
-                    start_idx: 1,
-                    old_len: 2,
-                    value: window.start_site,
-                }))
+                Ok((window.start_idx == 2).then_some((1, 2, window.start_site)))
             })
             .expect("backward-start scan should succeed");
         assert_eq!(hits.len(), 1);
@@ -1771,13 +1946,7 @@ mod tests {
             &pass_ctx(),
         );
         let err = prog
-            .scan_block_starts(1, |_| {
-                Ok(Some(LocalWindowHit {
-                    start_idx: 1,
-                    old_len: 1,
-                    value: (),
-                }))
-            })
+            .scan_block_starts(1, |_| Ok(Some((1, 1, ()))))
             .expect_err("out-of-range local start should fail");
         assert!(err.to_string().contains("window match start index 1"));
     }

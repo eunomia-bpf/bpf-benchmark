@@ -127,17 +127,17 @@ fn lookup_value_size(
     side_input: &MapInlineSideInput<'_>,
     info: &MapInfo,
 ) -> std::result::Result<usize, String> {
-    if let Some(overlay) = side_input.compressed_values.get(&info.map_id) {
-        return Ok(overlay.value_size);
-    }
-    if let Some(value_size) = side_input
-        .values
-        .iter()
-        .find_map(|((map_id, _), value)| (*map_id == info.map_id).then_some(value.len()))
-    {
-        return Ok(value_size);
-    }
-    Ok(info.value_size as usize)
+    Ok(side_input
+        .compressed_values
+        .get(&info.map_id)
+        .map(|overlay| overlay.value_size)
+        .or_else(|| {
+            side_input
+                .values
+                .iter()
+                .find_map(|((map_id, _), value)| (*map_id == info.map_id).then_some(value.len()))
+        })
+        .unwrap_or(info.value_size as usize))
 }
 fn lookup_elem(
     side_input: &MapInlineSideInput<'_>,
@@ -2249,9 +2249,7 @@ fn find_r2_stack_pointer_setup_simple(
             Ok(None) => return Ok(None),
             Err(err) => return Err(err),
         };
-    let add = prog
-        .insn_at(r2_add_site)
-        .ok_or_else(|| anyhow::anyhow!("missing r2 add instruction at {:?}", r2_add_site))?;
+    let add = prog.insn(r2_add_site)?;
     if add.code != (BPF_ALU64 | BPF_ADD | BPF_K) || add.dst_reg() != 2 || add.imm >= 0 {
         return Ok(None);
     }
@@ -2261,9 +2259,7 @@ fn find_r2_stack_pointer_setup_simple(
         Ok(None) => return Ok(None),
         Err(err) => return Err(err),
     };
-    let mov = prog
-        .insn_at(r2_mov_site)
-        .ok_or_else(|| anyhow::anyhow!("missing r2 mov instruction at {:?}", r2_mov_site))?;
+    let mov = prog.insn(r2_mov_site)?;
     if mov.code != (BPF_ALU64 | BPF_MOV | BPF_X) || mov.dst_reg() != 2 || mov.src_reg() != 10 {
         return Ok(None);
     }
@@ -2290,13 +2286,7 @@ fn find_prev_reg_def_within(
     Ok(None)
 }
 fn size_in_bytes(size: u8) -> Option<u8> {
-    match size {
-        BPF_B => Some(1),
-        BPF_H => Some(2),
-        BPF_W => Some(4),
-        BPF_DW => Some(8),
-        _ => None,
-    }
+    BpfMemWidth::from_size_opcode(size).map(|w| w.bytes() as u8)
 }
 fn find_prev_reg_def(
     prog: &BBProgram,
@@ -2372,48 +2362,7 @@ fn resolve_map_value_pointer_inner(
     }
     Ok(None)
 }
-fn resolve_stack_pointer_to_stack_inner(
-    prog: &BBProgram,
-    before_site: InsnSite,
-    reg: u8,
-    budget: usize,
-) -> anyhow::Result<Option<i16>> {
-    if budget == 0 {
-        bail!(
-            "stack pointer resolution for r{} exceeded {} steps",
-            reg,
-            REG_RESOLUTION_LIMIT
-        );
-    }
-    if reg == 10 {
-        return Ok(Some(0));
-    }
-    let Some(site) = find_prev_reg_def(prog, before_site, reg).map_err(anyhow::Error::msg)? else {
-        return Ok(None);
-    };
-    let insn = *prog.insn(site)?;
-    if (insn.class() == BPF_ALU64 || insn.class() == BPF_ALU) && insn.dst_reg() == reg {
-        let op = bpf_op(insn.code);
-        let src_mode = bpf_src(insn.code);
-        if op == BPF_MOV && src_mode == BPF_X {
-            return resolve_stack_pointer_to_stack_inner(prog, site, insn.src_reg(), budget - 1);
-        }
-        if matches!(op, BPF_ADD | BPF_SUB) && src_mode == BPF_K {
-            let Some(base) = resolve_stack_pointer_to_stack_inner(prog, site, reg, budget - 1)?
-            else {
-                return Ok(None);
-            };
-            let delta = insn.imm as i64;
-            let signed_delta = if op == BPF_SUB { -delta } else { delta };
-            let stack_off = base as i64 + signed_delta;
-            let Ok(stack_off) = i16::try_from(stack_off) else {
-                return Ok(None);
-            };
-            return Ok(Some(stack_off));
-        }
-    }
-    Ok(None)
-}
+
 fn log_map_inline_debug(message: &str) {
     static ENABLED: OnceLock<bool> = OnceLock::new();
     if *ENABLED.get_or_init(|| std::env::var_os("BPFREJIT_MAP_INLINE_DEBUG").is_some()) {
@@ -2609,13 +2558,11 @@ fn resolve_stack_store_slot(
     if !(insn.class() == BPF_ST || insn.class() == BPF_STX) {
         return Ok(None);
     }
-    let base_stack_off = match resolve_stack_pointer_to_stack_inner(
-        prog,
-        site,
-        insn.dst_reg(),
-        REG_RESOLUTION_LIMIT,
-    )? {
-        Some(base_stack_off) => base_stack_off,
+    let base_stack_off = match prog.reg_fact_at(site, insn.dst_reg())?.as_fp_off() {
+        Some(off) => match i16::try_from(off) {
+            Ok(off) => off,
+            Err(_) => return Ok(None),
+        },
         None => return Ok(None),
     };
     let stack_off = i32::from(base_stack_off) + i32::from(insn.off);
@@ -2633,13 +2580,11 @@ fn resolve_stack_load_slot(
     if insn.class() != BPF_LDX || bpf_mode(insn.code) != BPF_MEM || bpf_size(insn.code) != BPF_DW {
         return Ok(None);
     }
-    let base_stack_off = match resolve_stack_pointer_to_stack_inner(
-        prog,
-        site,
-        insn.src_reg(),
-        REG_RESOLUTION_LIMIT,
-    )? {
-        Some(base_stack_off) => base_stack_off,
+    let base_stack_off = match prog.reg_fact_at(site, insn.src_reg())?.as_fp_off() {
+        Some(off) => match i16::try_from(off) {
+            Ok(off) => off,
+            Err(_) => return Ok(None),
+        },
         None => return Ok(None),
     };
     let stack_off = i32::from(base_stack_off) + i32::from(insn.off);
@@ -3676,15 +3621,15 @@ fn resolve_map_ref(
         return (Some(index), map_ids.get(index).copied());
     }
 
-    if !fd_order.contains(&imm) {
+    let index = fd_order.iter().position(|fd| *fd == imm).unwrap_or_else(|| {
         fd_order.push(imm);
-    }
-    let index = fd_order.iter().position(|fd| *fd == imm);
+        fd_order.len() - 1
+    });
     let map_id = fd_bindings
         .get(&imm)
         .copied()
-        .or_else(|| index.and_then(|idx| map_ids.get(idx).copied()));
-    (index, map_id)
+        .or_else(|| map_ids.get(index).copied());
+    (Some(index), map_id)
 }
 
 fn collect_map_references_from_bindings<F>(

@@ -61,14 +61,14 @@ pub fn run_on_bbprogram(
         );
     }
     if program_miss_rate > max_branch_miss_rate {
-        return Ok(PassResult::skipped_site(SiteSkipReason::new(
-            first_report_site(prog)?,
+        return PassResult::skipped_pass(
+            prog,
             format!(
                 "program branch_miss_rate {:.1}% exceeds threshold {:.1}% (unpredictable branches)",
                 program_miss_rate * 100.0,
                 max_branch_miss_rate * 100.0,
             ),
-        )));
+        );
     }
 
     let branch_targets = prog.branch_target_entry_sites()?;
@@ -203,24 +203,17 @@ fn bf_validate_flipped_branch_deltas(
                 site.cond_site
             )
         })?;
-    validate_branch_delta(site.cond_site, cond, "else", cond_delta)?;
-    validate_branch_delta(site.cond_site, BpfInsn::ja(0), "then", then_len)
-}
-
-fn validate_branch_delta(
-    report_site: InsnSite,
-    mut insn: BpfInsn,
-    arm: &str,
-    delta: SlotDistance,
-) -> anyhow::Result<()> {
-    insn.set_branch_target_delta(i64::try_from(delta.slots()).map_err(|_| {
-        anyhow::anyhow!(
-            "branch_flip site {:?} {} arm length {} overflows branch delta",
-            report_site,
-            arm,
-            delta.slots()
-        )
-    })?)
+    for (mut insn, arm, delta) in [(cond, "else", cond_delta), (BpfInsn::ja(0), "then", then_len)] {
+        insn.set_branch_target_delta(i64::try_from(delta.slots()).map_err(|_| {
+            anyhow::anyhow!(
+                "branch_flip site {:?} {} arm length {} overflows branch delta",
+                site.cond_site,
+                arm,
+                delta.slots()
+            )
+        })?)?;
+    }
+    Ok(())
 }
 
 fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow::Result<()> {

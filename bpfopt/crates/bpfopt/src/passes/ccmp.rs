@@ -7,17 +7,12 @@ use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     canonical_name: "bpf_ccmp64",
     aliases: &["ccmp64"],
-    decode_proof: decode_ccmp_proof,
+    proof_len: ccmp_proof_len,
     register_uses: ccmp_register_uses,
 }];
 
 const MIN_CCMP_TERMS: usize = 2;
 const MAX_CCMP_TERMS: usize = 4;
-const CCMP_ADMISSION_REPLACEMENT_LEN: usize = 3;
-
-fn decode_ccmp_proof(payload: &[u8]) -> ProofRegion {
-    ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(ccmp_proof_len))
-}
 
 fn ccmp_proof_len(payload: u64) -> anyhow::Result<usize> {
     let dst_reg = kinsn_payload_reg(payload, 0);
@@ -121,10 +116,7 @@ impl BpfPass for CcmpPass {
 
 pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
     if ctx.platform.arch != Arch::Aarch64 {
-        return Ok(PassResult::skipped_site(SiteSkipReason::new(
-            first_report_site(prog)?,
-            "ccmp is only valid on aarch64",
-        )));
+        return PassResult::skipped_pass(prog, "ccmp is only valid on aarch64");
     }
 
     let sites = scan_ccmp_sites(prog)?;
@@ -146,11 +138,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             continue;
         }
 
-        if let Some(reason) = prog.admission_skip_reason(
-            site.start_site,
-            site.old_len,
-            CCMP_ADMISSION_REPLACEMENT_LEN,
-        )? {
+        if let Some(reason) = prog.admission_skip_reason(site.start_site, site.old_len)? {
             skipped.push(site.skip(reason));
             continue;
         }
@@ -415,8 +403,7 @@ fn branch_term(prog: &BBProgram, block: BlockId) -> anyhow::Result<Option<Branch
     let branch_site = prog
         .terminator_site(block)?
         .ok_or_else(|| anyhow::anyhow!("ccmp block {:?} has no terminator site", block))?;
-    prog.insn_at(branch_site)
-        .ok_or_else(|| anyhow::anyhow!("missing branch terminator at {:?}", branch_site))?;
+    prog.insn(branch_site)?;
     Ok(Some(BranchTerm {
         block,
         target_block: taken,

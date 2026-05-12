@@ -9,13 +9,9 @@ use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     canonical_name: "bpf_select64",
     aliases: &["select64"],
-    decode_proof: decode_select_proof,
+    proof_len: select_proof_len,
     register_uses: cond_select_register_uses,
 }];
-
-fn decode_select_proof(payload: &[u8]) -> ProofRegion {
-    ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(select_proof_len))
-}
 
 fn select_proof_len(payload: u64) -> anyhow::Result<usize> {
     validate_bpf_reg("select dst", kinsn_payload_reg(payload, 0))?;
@@ -29,14 +25,7 @@ fn select_proof_len(payload: u64) -> anyhow::Result<usize> {
 }
 
 fn cond_select_register_uses(payload: u64) -> RegSet {
-    [
-        kinsn_payload_reg(payload, 0),
-        kinsn_payload_reg(payload, 4),
-        kinsn_payload_reg(payload, 8),
-        kinsn_payload_reg(payload, 12),
-    ]
-    .into_iter()
-    .collect()
+    regs_from_offsets(payload, &[0, 4, 8, 12])
 }
 
 /// COND_SELECT pass: replaces branch+mov diamond patterns with
@@ -120,10 +109,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     // Check if the target can lower bpf_select64 to branchless select
     // (CMOV on x86, CSEL on ARM64).
     if !ctx.has_branchless_select() {
-        return Ok(PassResult::skipped_site(SiteSkipReason::new(
-            first_report_site(prog)?,
-            "platform lacks branchless select support",
-        )));
+        return PassResult::skipped_pass(prog, "platform lacks branchless select support");
     }
 
     let sites = scan_cond_select_sites(prog)?;
@@ -143,7 +129,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
         };
 
         if let Some(reason) =
-            prog.admission_skip_reason(site.start_site, site.old_len, lowering.prefix.len() + 2)?
+            prog.admission_skip_reason(site.start_site, site.old_len)?
         {
             skipped.push(site.skip(reason));
             continue;
@@ -354,9 +340,7 @@ fn try_match_pattern_c(
     let Some(mov_true_site) = prog.sites_in_block(shape.block)?.last().copied() else {
         return Ok(None);
     };
-    let mov_true = prog
-        .insn_at(mov_true_site)
-        .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", mov_true_site))?;
+    let mov_true = prog.insn(mov_true_site)?;
     let Some(mov_false) = prog.block_single_body_insn(shape.fallthrough)? else {
         return Ok(None);
     };

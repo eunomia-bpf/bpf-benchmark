@@ -9,7 +9,8 @@ pub(crate) mod bbprogram_lower;
 mod bbprogram_use_def;
 
 pub use bbprogram::{
-    BBMapBinding, BBProgram, Block, BlockId, FrameId, InsnSite, SlotDistance, Terminator,
+    BBMapBinding, BBProgram, Block, BlockId, FrameId, InsnSite, LiftedRegFact, SlotDistance,
+    Terminator,
 };
 pub(crate) use bbprogram::{BtfMetadataMap, VerifierOracle};
 pub use bbprogram_api::{DiamondPattern, MakeReplacement};

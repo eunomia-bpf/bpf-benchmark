@@ -79,9 +79,8 @@ fn bbprogram_liveness_recomputes_after_delete_insn() {
     ];
     let mut prog = lift_test_program(&insns, &pass_ctx());
     let def = prog
-        .reaching_defs(BlockId(0))
-        .defs_for(BPF_REG_2)
-        .next()
+        .def_sites()
+        .find(|d| d.block == BlockId(0) && d.reg == BPF_REG_2)
         .expect("r2 def should exist");
 
     prog.delete_insn(def).expect("delete should update use-def");

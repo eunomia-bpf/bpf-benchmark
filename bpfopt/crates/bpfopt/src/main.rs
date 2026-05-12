@@ -19,34 +19,13 @@ use bpfopt::verifier_log::{verifier_states_from_log, VerifierStatesJson};
 use clap::{Args, Parser, Subcommand};
 use serde::{Deserialize, Serialize};
 
-const PASS_ALIASES: &[(&str, &str)] = &[
-    ("noop", "noop"),
-    ("wide-mem", "wide_mem"),
-    ("wide_mem", "wide_mem"),
-    ("rotate", "rotate"),
-    ("const-prop", "const_prop"),
-    ("const_prop", "const_prop"),
-    ("cond-select", "cond_select"),
-    ("cond_select", "cond_select"),
-    ("ccmp", "ccmp"),
-    ("extract", "extract"),
+/// Non-trivial alias map: kebab/short CLI form -> canonical (snake) registry name.
+/// Trivial aliases (snake form -> itself, snake -> kebab(snake.replace('_','-')))
+/// are derived in `canonicalize_pass_name`.
+const PASS_NONTRIVIAL_ALIASES: &[(&str, &str)] = &[
     ("endian", "endian_fusion"),
-    ("endian-fusion", "endian_fusion"),
-    ("endian_fusion", "endian_fusion"),
-    ("branch-flip", "branch_flip"),
-    ("branch_flip", "branch_flip"),
-    ("prefetch", "prefetch"),
-    ("dce", "dce"),
-    ("map-inline", "map_inline"),
-    ("map_inline", "map_inline"),
-    ("bulk-memory", "bulk_memory"),
-    ("bulk_memory", "bulk_memory"),
-    ("bounds-check-merge", "bounds_check_merge"),
-    ("bounds_check_merge", "bounds_check_merge"),
     ("skb-load-bytes", "skb_load_bytes_spec"),
     ("skb_load_bytes", "skb_load_bytes_spec"),
-    ("skb-load-bytes-spec", "skb_load_bytes_spec"),
-    ("skb_load_bytes_spec", "skb_load_bytes_spec"),
 ];
 
 #[derive(Parser)]
@@ -110,7 +89,7 @@ struct SkippedSiteReport {
 
 #[derive(Clone, Debug, Serialize)]
 struct ListPassEntry {
-    name: &'static str,
+    name: String,
     canonical_name: &'static str,
     description: &'static str,
     needs_target: bool,
@@ -225,20 +204,15 @@ fn run_single_pass(
 
     let input = read_bytecode(common.input.as_deref())?;
     let mut ctx = build_pass_context(common)?;
-    let empty_pass_args = Vec::new();
-    let pass_constructor_args = if pass_name == "map_inline" {
+    let pass_constructor_args: &[String] = if pass_name == "map_inline" {
         bpfopt::passes::map_inline::attach_cli_side_input(common, &mut ctx, pass_args)?;
-        empty_pass_args.as_slice()
+        &[]
     } else {
         pass_args
     };
     validate_required_kinsns(&ctx, &[pass_name])?;
     let mut program = lift_with_pass_context(&input, &ctx)?;
-    let report_program = if common.report.is_some() {
-        Some(program.clone())
-    } else {
-        None
-    };
+    let report_program = common.report.is_some().then(|| program.clone());
     let entry = registry_entry(pass_name)?;
     let pass = (entry.make)(pass_constructor_args)?;
     let result = run_pass_once(pass.as_ref(), &mut program, &ctx)?;
@@ -246,14 +220,10 @@ fn run_single_pass(
     write_bytecode(common.output.as_deref(), &output)?;
     write_btf_info_outputs(common, &program)?;
 
-    if let Some(report_path) = common.report.as_deref() {
-        let report = pass_report(
-            pass_name,
-            report_program
-                .as_ref()
-                .ok_or_else(|| anyhow!("report program snapshot is unavailable"))?,
-            &result,
-        )?;
+    if let (Some(report_path), Some(snapshot)) =
+        (common.report.as_deref(), report_program.as_ref())
+    {
+        let report = pass_report(pass_name, snapshot, &result)?;
         write_json(Some(report_path), &report)?;
     }
 
@@ -269,30 +239,25 @@ fn registry_entry(name: &str) -> Result<&'static bpfopt::passes::PassRegistryEnt
 
 fn canonicalize_pass_name(input: &str) -> Result<&'static str> {
     let normalized = input.trim();
-    PASS_ALIASES
+    if let Some((_, canonical)) = PASS_NONTRIVIAL_ALIASES
         .iter()
-        .find_map(|(alias, canonical)| (*alias == normalized).then_some(*canonical))
+        .find(|(alias, _)| *alias == normalized)
+    {
+        return Ok(*canonical);
+    }
+    let snake = normalized.replace('-', "_");
+    PASS_REGISTRY
+        .iter()
+        .find(|entry| entry.name == snake)
+        .map(|entry| entry.name)
         .ok_or_else(|| anyhow!("unknown pass name: {input}"))
 }
 
-fn cli_name_for_pass(canonical: &str) -> &'static str {
+fn cli_name_for_pass(canonical: &str) -> String {
     match canonical {
-        "noop" => "noop",
-        "wide_mem" => "wide-mem",
-        "rotate" => "rotate",
-        "const_prop" => "const-prop",
-        "cond_select" => "cond-select",
-        "ccmp" => "ccmp",
-        "extract" => "extract",
-        "endian_fusion" => "endian",
-        "branch_flip" => "branch-flip",
-        "prefetch" => "prefetch",
-        "dce" => "dce",
-        "map_inline" => "map-inline",
-        "bulk_memory" => "bulk-memory",
-        "bounds_check_merge" => "bounds-check-merge",
-        "skb_load_bytes_spec" => "skb-load-bytes",
-        _ => "unknown",
+        "endian_fusion" => "endian".into(),
+        "skb_load_bytes_spec" => "skb-load-bytes".into(),
+        _ => canonical.replace('_', "-"),
     }
 }
 
@@ -320,7 +285,7 @@ fn validate_required_kinsns(ctx: &PassContext, pass_names: &[&str]) -> Result<()
         }
         let target_names = entry.metadata.required_kinsns.iter().copied();
         let label = cli_name_for_pass(pass_name);
-        require_all_kinsns(ctx, target_names, label)?;
+        require_all_kinsns(ctx, target_names, &label)?;
     }
     Ok(())
 }
@@ -418,22 +383,22 @@ fn read_btf_info_records(
 }
 
 fn write_btf_info_outputs(common: &CommonArgs, program: &BBProgram) -> Result<()> {
-    if let Some(path) = common.func_info.as_deref() {
-        let bytes = program
-            .remapped_func_info_records()?
-            .map(|records| records.bytes)
-            .ok_or_else(|| {
-                anyhow!("--func-info requested but remapped func_info records are unavailable")
-            })?;
-        fs::write(path, bytes).with_context(|| format!("failed to write {}", path.display()))?;
-    }
-    if let Some(path) = common.line_info.as_deref() {
-        let bytes = program
-            .remapped_line_info_records()?
-            .map(|records| records.bytes)
-            .ok_or_else(|| {
-                anyhow!("--line-info requested but remapped line_info records are unavailable")
-            })?;
+    for (path_opt, records, label) in [
+        (
+            common.func_info.as_deref(),
+            program.remapped_func_info_records()?,
+            "func-info",
+        ),
+        (
+            common.line_info.as_deref(),
+            program.remapped_line_info_records()?,
+            "line-info",
+        ),
+    ] {
+        let Some(path) = path_opt else { continue };
+        let bytes = records.map(|r| r.bytes).ok_or_else(|| {
+            anyhow!("--{label} requested but remapped records are unavailable")
+        })?;
         fs::write(path, bytes).with_context(|| format!("failed to write {}", path.display()))?;
     }
     Ok(())
@@ -576,7 +541,7 @@ fn apply_features(platform: &mut PlatformCapabilities, features: &[String]) -> R
 }
 
 fn kinsn_registry_from_target(target: &TargetJson) -> Result<KinsnRegistry> {
-    let mut registry = KinsnRegistry::unavailable()?;
+    let mut registry = KinsnRegistry::new()?;
     for (name, spec) in &target.kinsns {
         let canonical = canonicalize_kinsn_name(name)?;
         registry.set_kinsn_call_for_target_name(canonical, spec.btf_func_id, spec.call_offset)?;
@@ -590,14 +555,13 @@ fn apply_kinsn_list(registry: &mut KinsnRegistry, kinsns: &[String]) -> Result<(
         if trimmed.is_empty() {
             continue;
         }
-        let (name, btf_id) = match trimmed.split_once(':') {
-            Some((name, btf_id)) => (
-                name,
-                btf_id
-                    .parse::<i32>()
-                    .with_context(|| format!("invalid btf id in --kinsns entry {trimmed}"))?,
-            ),
-            None => (trimmed, 0),
+        let (name, btf_id) = if let Some((name, btf)) = trimmed.split_once(':') {
+            let id = btf
+                .parse::<i32>()
+                .with_context(|| format!("invalid btf id in --kinsns entry {trimmed}"))?;
+            (name, id)
+        } else {
+            (trimmed, 0)
         };
         let canonical = canonicalize_kinsn_name(name)?;
         registry.set_kinsn_call_for_target_name(canonical, btf_id, 0)?;
@@ -606,7 +570,7 @@ fn apply_kinsn_list(registry: &mut KinsnRegistry, kinsns: &[String]) -> Result<(
 }
 
 fn canonicalize_kinsn_name(input: &str) -> Result<&'static str> {
-    KinsnRegistry::unavailable()?
+    KinsnRegistry::new()?
         .canonical_name_for_target_name(input)
         .ok_or_else(|| anyhow!("unknown kinsn name: {input}"))
 }

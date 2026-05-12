@@ -20,7 +20,7 @@ pub(crate) fn lift(
     insns: &[BpfInsn],
     oracle: Option<Arc<[VerifierInsn]>>,
 ) -> anyhow::Result<BBProgram> {
-    lift_with_kinsn_registry(insns, oracle, Arc::new(KinsnRegistry::unavailable()?))
+    lift_with_kinsn_registry(insns, oracle, Arc::new(KinsnRegistry::new()?))
 }
 
 pub(crate) fn lift_with_kinsn_registry(
@@ -149,6 +149,7 @@ pub fn lift_with_pass_context(insns: &[BpfInsn], ctx: &PassContext) -> anyhow::R
         ctx.line_info.clone(),
     )?;
     prog.attach_profile_from_annotations(&ctx.annotations)?;
+    prog.set_prog_type(ctx.prog_type)?;
     Ok(prog)
 }
 
@@ -232,12 +233,8 @@ fn collect_fd_form_map_refs(insns: &[BpfInsn]) -> Result<HashMap<i32, usize>> {
                         "canonicalize_map_refs_to_idx: truncated LD_IMM64 map reference at pc {i}"
                     );
                 }
-                let old_fd = insns[i].imm;
                 let next_index = fd_to_map_index.len();
-                if let std::collections::hash_map::Entry::Vacant(e) = fd_to_map_index.entry(old_fd)
-                {
-                    e.insert(next_index);
-                }
+                fd_to_map_index.entry(insns[i].imm).or_insert(next_index);
             }
             i += 2;
             continue;

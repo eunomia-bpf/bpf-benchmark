@@ -53,7 +53,7 @@ pub struct PrefetchHint {
 pub struct KinsnDescriptor {
     pub canonical_name: &'static str,
     pub aliases: &'static [&'static str],
-    pub decode_proof: fn(&[u8]) -> ProofRegion,
+    pub proof_len: fn(payload: u64) -> anyhow::Result<usize>,
     pub register_uses: fn(payload: u64) -> RegSet,
 }
 
@@ -85,48 +85,18 @@ impl Serialize for KinsnDescriptor {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct ProofRegion {
-    state: ProofRegionState,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-enum ProofRegionState {
-    Valid { proof_len: usize },
-    Invalid { error: String },
-}
-
-impl ProofRegion {
-    pub fn from_result(result: anyhow::Result<usize>) -> Self {
-        let state = match result {
-            Ok(proof_len) => ProofRegionState::Valid { proof_len },
-            Err(err) => ProofRegionState::Invalid {
-                error: err.to_string(),
-            },
-        };
-        Self { state }
-    }
-
-    pub fn proof_len(&self) -> anyhow::Result<usize> {
-        match &self.state {
-            ProofRegionState::Valid { proof_len } => Ok(*proof_len),
-            ProofRegionState::Invalid { error } => anyhow::bail!("{error}"),
-        }
-    }
-}
-
-pub(crate) fn decode_packed_kinsn_payload(payload: &[u8]) -> anyhow::Result<u64> {
-    let bytes: [u8; 8] = payload.try_into().map_err(|_| {
-        anyhow::anyhow!(
-            "kinsn proof payload has length {}, expected 8 bytes",
-            payload.len()
-        )
-    })?;
-    Ok(u64::from_le_bytes(bytes))
-}
-
 pub(crate) fn kinsn_payload_reg(payload: u64, shift: u8) -> u8 {
     BpfInsn::unpack_u4(payload, shift)
+}
+
+/// Build a RegSet from a fixed list of payload reg offsets. Use for kinsn
+/// descriptors whose register operands are at known bit offsets.
+pub(crate) fn regs_from_offsets(payload: u64, offsets: &[u8]) -> RegSet {
+    offsets
+        .iter()
+        .copied()
+        .map(|shift| kinsn_payload_reg(payload, shift))
+        .collect()
 }
 
 pub(crate) fn kinsn_payload_u8(payload: u64, shift: u8) -> u8 {
@@ -428,6 +398,17 @@ impl PassResult {
         }
     }
 
+    /// Whole-pass skip anchored at the program's first report site.
+    pub fn skipped_pass(
+        program: &BBProgram,
+        reason: impl Into<String>,
+    ) -> anyhow::Result<Self> {
+        Ok(Self::skipped_site(SiteSkipReason::new(
+            first_report_site(program)?,
+            reason,
+        )))
+    }
+
     pub fn with_sites(sites_applied: usize, site_skipped: Vec<SiteSkipReason>) -> Self {
         Self {
             sites_applied,
@@ -561,10 +542,6 @@ impl KinsnRegistry {
             }
         }
         Ok(registry)
-    }
-
-    pub fn unavailable() -> anyhow::Result<Self> {
-        Self::new()
     }
 
     pub fn canonical_name_for_target_name(&self, target_name: &str) -> Option<&'static str> {
@@ -843,14 +820,12 @@ where
     F: FnOnce(&BpfInsn, &BpfInsn) -> bool,
 {
     use crate::analysis::Terminator;
-    let i0 = prog
-        .insn_at(start)
-        .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", start))?;
-    let body = prog.block_body_view(prog.site_block(start))?;
+    let i0 = prog.insn(start)?;
+    let start_block = prog.site_block(start);
+    let body = prog.block_body_view(start_block)?;
     if start.idx + 1 < body.sites.len() {
         return Ok(None);
     }
-    let start_block = prog.site_block(start);
     let next_block = match prog.terminator_at_site(start)? {
         Terminator::Fallthrough { next } => next,
         _ => return Ok(None),
@@ -865,9 +840,7 @@ where
     let Some(next) = prog.sites_in_block(next_block)?.first().copied() else {
         return Ok(None);
     };
-    let i1 = prog
-        .insn_at(next)
-        .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", next))?;
+    let i1 = prog.insn(next)?;
     Ok(matches_pair(i0, i1).then(|| SiteSkipReason::new(start, reason)))
 }
 
@@ -923,52 +896,50 @@ where
     Ok(deleted)
 }
 
+/// Collect all sites in `anchor`'s frame, returning either the sites strictly
+/// after `anchor` (in forward order) or the sites strictly before `anchor`
+/// (in reverse order, nearest first).
+fn frame_sites_around(
+    prog: &BBProgram,
+    anchor: InsnSite,
+    after: bool,
+) -> anyhow::Result<Vec<InsnSite>> {
+    let frame = prog.site_frame(anchor)?;
+    let mut sites = Vec::new();
+    let mut seen = false;
+    'outer: for block in prog.subprog_blocks(frame) {
+        for site in prog.sites_in_block_with_terminator(block)? {
+            if site == anchor {
+                seen = true;
+                if !after {
+                    break 'outer;
+                }
+            } else if after == seen {
+                sites.push(site);
+            }
+        }
+    }
+    if !seen {
+        anyhow::bail!("site {:?} is missing from frame {:?}", anchor, frame);
+    }
+    if !after {
+        sites.reverse();
+    }
+    Ok(sites)
+}
+
 pub(crate) fn sites_after_in_frame(
     prog: &BBProgram,
     start: InsnSite,
 ) -> anyhow::Result<Vec<InsnSite>> {
-    let frame = prog.site_frame(start)?;
-    let mut seen_start = false;
-    let mut sites = Vec::new();
-    for block in prog.subprog_blocks(frame) {
-        for site in prog.sites_in_block_with_terminator(block)? {
-            if seen_start {
-                sites.push(site);
-            } else if site == start {
-                seen_start = true;
-            }
-        }
-    }
-    if !seen_start {
-        anyhow::bail!("site {:?} is missing from frame {:?}", start, frame);
-    }
-    Ok(sites)
+    frame_sites_around(prog, start, true)
 }
 
 pub(crate) fn sites_before_in_frame_rev(
     prog: &BBProgram,
     end: InsnSite,
 ) -> anyhow::Result<Vec<InsnSite>> {
-    let frame = prog.site_frame(end)?;
-    let mut seen_end = false;
-    let mut sites = Vec::new();
-    for block in prog.subprog_blocks(frame) {
-        for site in prog.sites_in_block_with_terminator(block)? {
-            if site == end {
-                seen_end = true;
-                break;
-            }
-            sites.push(site);
-        }
-        if seen_end {
-            break;
-        }
-    }
-    if !seen_end {
-        anyhow::bail!("site {:?} is missing from frame {:?}", end, frame);
-    }
-    sites.reverse();
-    Ok(sites)
+    frame_sites_around(prog, end, false)
 }
 
 pub fn first_report_site(program: &BBProgram) -> anyhow::Result<InsnSite> {
@@ -1006,7 +977,7 @@ impl PassContext {
 
     pub fn try_baseline() -> anyhow::Result<Self> {
         Ok(Self {
-            kinsn_registry: KinsnRegistry::unavailable()?,
+            kinsn_registry: KinsnRegistry::new()?,
             platform: PlatformCapabilities::default(),
             prog_type: 0,
             verifier_states: Arc::from([]),

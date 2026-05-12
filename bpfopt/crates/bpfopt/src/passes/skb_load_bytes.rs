@@ -1,87 +1,11 @@
 // SPDX-License-Identifier: MIT
 use std::collections::BTreeSet;
 
-use crate::analysis::{BBProgram, InsnSite};
+use crate::analysis::{BBProgram, InsnSite, LiftedRegFact};
 use crate::insn::*;
 use crate::pass::*;
 
 const BPF_FUNC_SKB_LOAD_BYTES: i32 = libbpf_sys::BPF_FUNC_skb_load_bytes as i32;
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum RegValue {
-    Unknown,
-    Ctx,
-    Const(i64),
-    FpPlusConst(i32),
-}
-
-impl RegValue {
-    fn nonnegative_i32(self) -> Option<i32> {
-        match self {
-            Self::Const(current) if (0..=i32::MAX as i64).contains(&current) => {
-                Some(current as i32)
-            }
-            _ => None,
-        }
-    }
-
-    fn fp_stack_off(self) -> Option<i32> {
-        match self {
-            Self::FpPlusConst(off) => Some(off),
-            _ => None,
-        }
-    }
-}
-
-impl SimpleRegValue for RegValue {
-    fn unknown() -> Self {
-        Self::Unknown
-    }
-
-    fn const64(value: i64) -> Self {
-        Self::Const(value)
-    }
-
-    fn const32(value: u32) -> Self {
-        Self::Const(value as i64)
-    }
-
-    fn mov32(value: Self) -> Self {
-        match value {
-            Self::Const(current) => Self::Const(current as u32 as i64),
-            _ => Self::Unknown,
-        }
-    }
-
-    fn alu64_imm(value: Self, op: u8, imm: i32) -> Self {
-        match value {
-            Self::Const(current) => add_sub_i64(current, op, imm)
-                .map(Self::Const)
-                .unwrap_or(Self::Unknown),
-            Self::FpPlusConst(current) => add_sub_i64(i64::from(current), op, imm)
-                .and_then(|next| i32::try_from(next).ok())
-                .map(Self::FpPlusConst)
-                .unwrap_or(Self::Unknown),
-            _ => Self::Unknown,
-        }
-    }
-
-    fn alu32_add_sub(value: Self, imm: i32, is_add: bool) -> Self {
-        match value {
-            Self::Const(current) => {
-                let current = current as u32;
-                let imm = imm as u32;
-                let next = if is_add {
-                    current.wrapping_add(imm)
-                } else {
-                    current.wrapping_sub(imm)
-                };
-                Self::Const(next as i64)
-            }
-            _ => Self::Unknown,
-        }
-    }
-}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct RewriteSite {
@@ -125,75 +49,66 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<
 
 fn scan_sites(prog: &BBProgram, branch_targets: &BTreeSet<InsnSite>) -> anyhow::Result<ScanResult> {
     let mut scan = ScanResult::default();
-
     for block in prog.block_ids().collect::<Vec<_>>() {
-        let mut regs = initial_reg_state();
-        let sites = prog.sites_in_block(block)?;
-        for site in sites {
-            let insn = prog
-                .insn_at(site)
-                .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
-            if insn.is_call() && insn.imm == BPF_FUNC_SKB_LOAD_BYTES {
-                if insn.src_reg() != 0 {
-                    scan.skips.push(SiteSkipReason {
-                        site,
-                        reason: "helper is not regular call #26".into(),
-                    });
-                } else {
-                    match classify_site(branch_targets.contains(&site), &regs) {
-                        Ok(rewrite_site) => scan.sites.push((site, rewrite_site)),
-                        Err(reason) => scan.skips.push(SiteSkipReason::new(site, reason)),
-                    }
-                }
+        for site in prog.sites_in_block(block)? {
+            let insn = prog.insn(site)?;
+            if !insn.is_call() || insn.imm != BPF_FUNC_SKB_LOAD_BYTES {
+                continue;
             }
-
-            let ldimm64_hi = if insn.is_ldimm64() {
-                Some(prog.ldimm64_second_slot(site).ok_or_else(|| {
-                    anyhow::anyhow!("LD_IMM64 at {:?} is missing high half", site)
-                })?)
-            } else {
-                None
-            };
-            advance_reg_state(insn, ldimm64_hi, &mut regs)?;
+            if insn.src_reg() != 0 {
+                scan.skips.push(SiteSkipReason {
+                    site,
+                    reason: "helper is not regular call #26".into(),
+                });
+                continue;
+            }
+            match classify_site(prog, site, branch_targets.contains(&site))? {
+                Ok(rewrite_site) => scan.sites.push((site, rewrite_site)),
+                Err(reason) => scan.skips.push(SiteSkipReason::new(site, reason)),
+            }
         }
     }
-
     Ok(scan)
 }
 
-fn classify_site(is_branch_target: bool, regs: &[RegValue; 11]) -> Result<RewriteSite, String> {
+fn classify_site(
+    prog: &BBProgram,
+    site: InsnSite,
+    is_branch_target: bool,
+) -> anyhow::Result<Result<RewriteSite, String>> {
     if is_branch_target {
-        return Err("call site is a branch target".into());
+        return Ok(Err("call site is a branch target".into()));
     }
-    if regs[1] != RegValue::Ctx {
-        return Err("arg1 is not ctx".into());
+    if prog.reg_fact_at(site, 1)? != LiftedRegFact::Ctx {
+        return Ok(Err("arg1 is not ctx".into()));
     }
-
-    let Some(offset) = regs[2].nonnegative_i32() else {
-        return Err("offset is not constant".into());
+    let Some(offset) = nonnegative_i32(prog.reg_fact_at(site, 2)?) else {
+        return Ok(Err("offset is not constant".into()));
     };
-
-    let Some(dest_off) = regs[3].fp_stack_off() else {
-        return Err("dest is not fp-relative stack".into());
+    let Some(dest_off) = prog.reg_fact_at(site, 3)?.as_fp_off() else {
+        return Ok(Err("dest is not fp-relative stack".into()));
     };
     if dest_off >= 0 {
-        return Err("dest is not fp-relative stack".into());
+        return Ok(Err("dest is not fp-relative stack".into()));
     }
-
-    let Some(len) = regs[4].nonnegative_i32() else {
-        return Err("len is not constant".into());
+    let Some(len) = nonnegative_i32(prog.reg_fact_at(site, 4)?) else {
+        return Ok(Err("len is not constant".into()));
     };
     if len == 0 {
-        return Err("len == 0".into());
+        return Ok(Err("len == 0".into()));
     }
     if len > 8 {
-        return Err("len > 8".into());
+        return Ok(Err("len > 8".into()));
     }
     if offset.checked_add(len).is_none() {
-        return Err("offset + len exceeds i32".into());
+        return Ok(Err("offset + len exceeds i32".into()));
     }
+    Ok(Ok(RewriteSite { offset, len }))
+}
 
-    Ok(RewriteSite { offset, len })
+fn nonnegative_i32(fact: LiftedRegFact) -> Option<i32> {
+    let value = fact.as_const()?;
+    (0..=i64::from(i32::MAX)).contains(&value).then_some(value as i32)
 }
 
 fn emit_replacement(site: RewriteSite, layout: PacketCtxLayout) -> Vec<BpfInsn> {
@@ -236,19 +151,4 @@ fn emit_copy_insns(len: i32) -> Vec<BpfInsn> {
         insns.push(BpfInsn::stx_mem(BPF_B, 3, 4, off));
     }
     insns
-}
-
-fn initial_reg_state() -> [RegValue; 11] {
-    let mut regs = [RegValue::Unknown; 11];
-    regs[1] = RegValue::Ctx;
-    regs[10] = RegValue::FpPlusConst(0);
-    regs
-}
-
-fn add_sub_i64(current: i64, op: u8, imm: i32) -> Option<i64> {
-    match op {
-        BPF_ADD => current.checked_add(i64::from(imm)),
-        BPF_SUB => current.checked_sub(i64::from(imm)),
-        _ => None,
-    }
 }

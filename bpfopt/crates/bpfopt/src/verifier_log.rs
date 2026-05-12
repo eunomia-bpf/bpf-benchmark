@@ -182,11 +182,7 @@ pub(crate) fn verifier_states_from_json(
         .collect()
 }
 fn json_verifier_insn_kind(kind: Option<&str>) -> anyhow::Result<VerifierInsnKind> {
-    let mut kind_value = "insn_delta_state";
-    if let Some(kind) = kind {
-        kind_value = kind;
-    }
-    match kind_value {
+    match kind.unwrap_or("insn_delta_state") {
         "edge_full_state" => Ok(VerifierInsnKind::EdgeFullState),
         "pc_full_state" => Ok(VerifierInsnKind::PcFullState),
         "branch_delta_state" => Ok(VerifierInsnKind::BranchDeltaState),
@@ -195,26 +191,26 @@ fn json_verifier_insn_kind(kind: Option<&str>) -> anyhow::Result<VerifierInsnKin
     }
 }
 fn json_reg_name(reg: &str) -> anyhow::Result<u8> {
-    let reg = match reg.strip_prefix('r').or_else(|| reg.strip_prefix('R')) {
-        Some(stripped) => stripped,
-        None => reg,
-    };
-    let value = reg
+    let stripped = reg
+        .strip_prefix('r')
+        .or_else(|| reg.strip_prefix('R'))
+        .unwrap_or(reg);
+    let value = stripped
         .parse::<u8>()
-        .map_err(|err| anyhow::anyhow!("invalid register name {reg}: {err}"))?;
+        .map_err(|err| anyhow::anyhow!("invalid register name {stripped}: {err}"))?;
     if value > 10 {
         anyhow::bail!("invalid BPF register r{value}");
     }
     Ok(value)
 }
 fn json_stack_name(off: &str) -> anyhow::Result<i16> {
-    let off = match off.strip_prefix("fp").or_else(|| off.strip_prefix("FP")) {
-        Some(stripped) => stripped,
-        None => off,
-    };
-    let value = off
+    let stripped = off
+        .strip_prefix("fp")
+        .or_else(|| off.strip_prefix("FP"))
+        .unwrap_or(off);
+    let value = stripped
         .parse::<i16>()
-        .map_err(|err| anyhow::anyhow!("invalid stack slot name {off}: {err}"))?;
+        .map_err(|err| anyhow::anyhow!("invalid stack slot name {stripped}: {err}"))?;
     if value >= 0 || value % 8 != 0 {
         anyhow::bail!("invalid BPF stack slot fp{value}");
     }
@@ -237,34 +233,23 @@ fn json_stack_state(state: VerifierStackJson) -> anyhow::Result<StackState> {
     })
 }
 fn json_reg_state(state: VerifierRegJson) -> anyhow::Result<RegState> {
-    let exact_value = state.const_val.map(|value| value as u64);
     let tnum = state.tnum.as_deref().map(json_tnum).transpose()?;
-    let mut precise = false;
-    if let Some(state_precise) = state.precise {
-        precise = state_precise;
-    }
     Ok(RegState {
         reg_type: state.reg_type,
         value_width: VerifierValueWidth::Unknown,
-        precise,
-        exact_value,
+        precise: state.precise.unwrap_or(false),
+        exact_value: state.const_val.map(|value| value as u64),
         tnum,
         range: ScalarRange {
             smin: state.min,
             smax: state.max,
-            umin: state.min.and_then(nonnegative_i64_to_u64),
-            umax: state.max.and_then(nonnegative_i64_to_u64),
+            umin: state.min.and_then(|v| u64::try_from(v).ok()),
+            umax: state.max.and_then(|v| u64::try_from(v).ok()),
             ..ScalarRange::default()
         },
         offset: state.offset,
         id: None,
     })
-}
-fn nonnegative_i64_to_u64(value: i64) -> Option<u64> {
-    let Ok(value) = u64::try_from(value) else {
-        return None;
-    };
-    Some(value)
 }
 fn json_tnum(input: &str) -> anyhow::Result<Tnum> {
     let (value, mask) = input
@@ -416,12 +401,12 @@ fn parse_from_state_line(
 ) -> Option<(usize, Option<usize>, VerifierInsnKind, bool, &str)> {
     let rest = line.strip_prefix("from ")?;
     let (from_text, rest) = rest.split_once(" to ")?;
-    let from_pc = parse_optional(from_text.trim())?;
+    let from_pc = from_text.trim().parse().ok()?;
     let digits_len = rest.chars().take_while(|ch| ch.is_ascii_digit()).count();
     if digits_len == 0 {
         return None;
     }
-    let pc = parse_optional(&rest[..digits_len])?;
+    let pc = rest[..digits_len].parse().ok()?;
     let mut tail = &rest[digits_len..];
     let speculative = if let Some(stripped) = tail.strip_prefix(" (speculative execution)") {
         tail = stripped;
@@ -440,7 +425,7 @@ fn parse_from_state_line(
 }
 fn parse_pc_state_line(line: &str) -> Option<(usize, Option<usize>, VerifierInsnKind, bool, &str)> {
     let colon = line.find(':')?;
-    let pc = parse_optional(line[..colon].trim())?;
+    let pc = line[..colon].trim().parse().ok()?;
     let tail = line[colon + 1..].trim();
     if tail.is_empty() {
         return None;
@@ -469,7 +454,7 @@ fn strip_frame_prefix(text: &str) -> (usize, &str) {
     if digits_len == 0 {
         return (0, text);
     }
-    let frame = parse_optional(&rest[..digits_len]);
+    let frame = rest[..digits_len].parse().ok();
     let tail = rest[digits_len..].trim_start();
     match (frame, tail.strip_prefix(':')) {
         (Some(frame), Some(tail)) => (frame, tail.trim_start()),
@@ -516,7 +501,7 @@ fn parse_reg_token(token: &str) -> Option<(u8, RegState)> {
 }
 fn parse_stack_token(token: &str) -> Option<(i16, StackState)> {
     let (lhs, rhs) = token.split_once('=')?;
-    let off = result_to_option(parse_i32(lhs.strip_prefix("fp")?)?.try_into())?;
+    let off = parse_i32(lhs.strip_prefix("fp")?)?.try_into().ok()?;
     let state = parse_stack_state(rhs.trim());
     Some((off, state))
 }
@@ -527,7 +512,7 @@ fn parse_reg_name(name: &str) -> Option<(u8, VerifierValueWidth)> {
     } else {
         (name, VerifierValueWidth::Bits64)
     };
-    Some((parse_optional(name)?, value_width))
+    Some((name.parse().ok()?, value_width))
 }
 fn parse_reg_state(raw: &str, value_width: VerifierValueWidth) -> RegState {
     let (precise, value) = match raw.strip_prefix('P') {
@@ -647,10 +632,10 @@ fn parse_reg_attributes(attrs: &str, state: &mut RegState) {
                 "smax" | "smax_value" => state.range.smax = parse_signed_value(value),
                 "umin" | "umin_value" => state.range.umin = parse_unsigned_value(value),
                 "umax" | "umax_value" => state.range.umax = parse_unsigned_value(value),
-                "smin32" | "smin32_value" => state.range.smin32 = parse_signed_i32(value),
-                "smax32" | "smax32_value" => state.range.smax32 = parse_signed_i32(value),
-                "umin32" | "umin32_value" => state.range.umin32 = parse_unsigned_u32(value),
-                "umax32" | "umax32_value" => state.range.umax32 = parse_unsigned_u32(value),
+                "smin32" | "smin32_value" => state.range.smin32 = parse_i32(value),
+                "smax32" | "smax32_value" => state.range.smax32 = parse_i32(value),
+                "umin32" | "umin32_value" => state.range.umin32 = parse_u32(value),
+                "umax32" | "umax32_value" => state.range.umax32 = parse_u32(value),
                 "off" => state.offset = parse_i32(value),
                 "id" => state.id = parse_u32(value),
                 "var_off" => state.tnum = parse_tnum(value),
@@ -738,62 +723,33 @@ fn find_top_level_char(text: &str, needle: char) -> Option<usize> {
     None
 }
 fn parse_i32(text: &str) -> Option<i32> {
-    result_to_option(parse_signed_value(text)?.try_into())
+    parse_signed_value(text)?.try_into().ok()
 }
 fn parse_u32(text: &str) -> Option<u32> {
-    result_to_option(parse_unsigned_u64(text)?.try_into())
-}
-fn parse_signed_i32(text: &str) -> Option<i32> {
-    result_to_option(parse_signed_value(text)?.try_into())
-}
-fn parse_unsigned_u32(text: &str) -> Option<u32> {
-    result_to_option(parse_unsigned_u64(text)?.try_into())
-}
-fn parse_optional<T: std::str::FromStr>(text: &str) -> Option<T> {
-    let Ok(value) = text.parse() else {
-        return None;
-    };
-    Some(value)
-}
-fn result_to_option<T, E>(result: Result<T, E>) -> Option<T> {
-    let Ok(value) = result else {
-        return None;
-    };
-    Some(value)
+    parse_unsigned_u64(text)?.try_into().ok()
 }
 fn parse_hex_u64(text: &str) -> Option<u64> {
-    let Ok(value) = u64::from_str_radix(text, 16) else {
-        return None;
-    };
-    Some(value)
+    u64::from_str_radix(text, 16).ok()
 }
 fn parse_signed_value(text: &str) -> Option<i64> {
     let value = text.trim();
-    if value.is_empty() {
-        return None;
+    let (negative, body) = match value.as_bytes().first()? {
+        b'-' => (true, &value[1..]),
+        b'+' => (false, &value[1..]),
+        _ => (false, value),
+    };
+    if let Some(rest) = body.strip_prefix("0x").or_else(|| body.strip_prefix("0X")) {
+        let mag = parse_hex_u64(rest)?;
+        if negative {
+            return i64::try_from(-(mag as i128)).ok();
+        }
+        return Some(mag as i64);
     }
-    if let Some(rest) = value
-        .strip_prefix("-0x")
-        .or_else(|| value.strip_prefix("-0X"))
-    {
-        let magnitude = parse_hex_u64(rest)? as i128;
-        return result_to_option(i64::try_from(-magnitude));
+    if negative {
+        value.parse::<i64>().ok()
+    } else {
+        body.parse().ok()
     }
-    if let Some(rest) = value
-        .strip_prefix("+0x")
-        .or_else(|| value.strip_prefix("+0X"))
-    {
-        let magnitude = parse_hex_u64(rest)?;
-        return Some(magnitude as i64);
-    }
-    if let Some(rest) = value
-        .strip_prefix("0x")
-        .or_else(|| value.strip_prefix("0X"))
-    {
-        let magnitude = parse_hex_u64(rest)?;
-        return Some(magnitude as i64);
-    }
-    parse_optional(value)
 }
 fn parse_unsigned_value(text: &str) -> Option<u64> {
     let value = text.trim();
@@ -810,7 +766,7 @@ fn parse_unsigned_u64(text: &str) -> Option<u64> {
     if let Some(rest) = text.strip_prefix("0x").or_else(|| text.strip_prefix("0X")) {
         return parse_hex_u64(rest);
     }
-    parse_optional(text)
+    text.parse().ok()
 }
 fn parse_scalar_exact_value(text: &str) -> Option<u64> {
     let value = text.trim();
@@ -825,7 +781,7 @@ fn parse_scalar_exact_value(text: &str) -> Option<u64> {
         return Some(0u64.wrapping_sub(magnitude));
     }
     if let Some(rest) = value.strip_prefix('-') {
-        let magnitude = parse_optional(rest)?;
+        let magnitude = rest.parse().ok()?;
         return Some(0u64.wrapping_sub(magnitude));
     }
     if let Some(rest) = value.strip_prefix('+') {
