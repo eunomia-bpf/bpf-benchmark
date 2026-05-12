@@ -118,10 +118,7 @@ struct BranchTerm {
 
 impl CcmpSite {
     fn skip(&self, reason: impl Into<String>) -> SiteSkipReason {
-        SiteSkipReason {
-            site: self.start_site,
-            reason: reason.into(),
-        }
+        SiteSkipReason::new(self.start_site, reason)
     }
 }
 
@@ -144,10 +141,10 @@ impl BpfPass for CcmpPass {
 
 pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
     if ctx.platform.arch != Arch::Aarch64 {
-        return Ok(PassResult::skipped_site(SiteSkipReason {
-            site: first_report_site(prog)?,
-            reason: "ccmp is only valid on aarch64".into(),
-        }));
+        return Ok(PassResult::skipped_site(SiteSkipReason::new(
+            first_report_site(prog)?,
+            "ccmp is only valid on aarch64",
+        )));
     }
 
     let sites = scan_ccmp_sites(prog)?;
@@ -192,10 +189,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     }
 
     if safe_sites.is_empty() {
-        return Ok(PassResult {
-            site_skipped: skipped,
-            ..PassResult::unchanged()
-        });
+        return Ok(PassResult::with_sites(0, skipped));
     }
 
     let (btf_id, kfunc_off) = prog.kinsn_call("bpf_ccmp64")?;
@@ -215,11 +209,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
         }
     }
 
-    Ok(PassResult {
-        sites_applied: applied,
-        site_skipped: skipped,
-        ..Default::default()
-    })
+    Ok(PassResult::with_sites(applied, skipped))
 }
 
 fn apply_ccmp_site(

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{BBProgram, BlockId, InsnSite, MakeReplacement, SlotDistance};
+use crate::analysis::{BBProgram, BlockId, InsnSite, SlotDistance};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const HELPER_MAP_LOOKUP_ELEM: i32 = libbpf_sys::BPF_FUNC_map_lookup_elem as i32;
@@ -97,28 +97,19 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     }
     let candidates = dedup_candidates(candidates);
     if candidates.is_empty() {
-        return Ok(PassResult {
-            site_skipped: skipped,
-            ..PassResult::unchanged()
-        });
+        return Ok(PassResult::with_sites(0, skipped));
     }
     let (btf_id, kfunc_off) = prog.kinsn_call(PREFETCH_TARGET_NAME)?;
-    let mut applied = 0usize;
-    for candidate in candidates.iter().rev() {
+    let pairs: Vec<(InsnSite, PrefetchCandidate)> =
+        candidates.into_iter().map(|c| (c.insert, c)).collect();
+    let applied = apply_candidates_reverse(prog, &pairs, &mut skipped, |_, _, candidate| {
         let payload = prefetch_payload(candidate.ptr_reg)?;
-        let replacement = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
-        let new_len = replacement.len();
-        if prog.try_replace_range_with_skips(candidate.insert, 0, new_len, &mut skipped, || {
-            Ok(MakeReplacement::Use(replacement))
-        })? {
-            applied += 1;
-        }
-    }
-    Ok(PassResult {
-        sites_applied: applied,
-        site_skipped: skipped,
-        ..Default::default()
-    })
+        Ok((
+            0,
+            emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
+        ))
+    })?;
+    Ok(PassResult::with_sites(applied, skipped))
 }
 fn scan_prefetch_sites(prog: &BBProgram, prog_type: u32) -> anyhow::Result<Vec<PrefetchSite>> {
     let mut sites = scan_map_value_prefetch_sites(prog)?;
@@ -377,7 +368,7 @@ fn pf_skip_reason(
     reason: String,
 ) -> anyhow::Result<SiteSkipReason> {
     prog.insn(site)?;
-    Ok(SiteSkipReason { site, reason })
+    Ok(SiteSkipReason::new(site, reason))
 }
 
 fn pf_sites_after_in_frame(

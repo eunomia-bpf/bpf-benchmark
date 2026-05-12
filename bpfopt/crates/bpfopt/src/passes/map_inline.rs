@@ -2946,8 +2946,6 @@ fn kill_defined_alias_regs(alias_regs: &mut HashMap<u8, i16>, insn: &BpfInsn) {
     alias_regs.retain(|reg, _| !use_def.defs.contains(reg));
 }
 
-// ===== begin merged from passes/map_inline/cli.rs =====
-
 pub fn attach_cli_side_input(
     common: &CommonArgs,
     ctx: &mut PassContext,
@@ -3396,16 +3394,7 @@ fn read_inner_map_ids_supplement(
 }
 
 fn decode_inner_map_id_key_hex(map_id: u32, hex: &str, key_size: usize) -> Result<Vec<u8>> {
-    let expected = expected_hex_digits(key_size, "key_size")?;
-    if hex.len() != expected {
-        bail!(
-            "map {map_id} inner_map_id supplement key has {} hex digit(s), expected {}",
-            hex.len(),
-            expected
-        );
-    }
-    parse_inline_hint_hex(hex)
-        .with_context(|| format!("map {map_id} inner_map_id supplement key has invalid hex"))
+    decode_fixed_hex_bytes(map_id, "inner_map_id supplement key", hex, key_size)
 }
 
 fn decode_inner_map_id_json(map_id: u32, key_hex: &str, value: &InnerMapIdJson) -> Result<u32> {
@@ -3596,16 +3585,7 @@ fn decode_compressed_entries(
 }
 
 fn decode_compressed_key_hex(map_id: u32, hex: &str, key_size: usize) -> Result<Vec<u8>> {
-    let expected = expected_hex_digits(key_size, "key_size")?;
-    if hex.len() != expected {
-        bail!(
-            "map {map_id} compressed entry key has {} hex digit(s), expected {}",
-            hex.len(),
-            expected
-        );
-    }
-    parse_inline_hint_hex(hex)
-        .with_context(|| format!("map {map_id} compressed entry key has invalid hex"))
+    decode_fixed_hex_bytes(map_id, "compressed entry key", hex, key_size)
 }
 
 fn decode_compressed_value_hex(
@@ -3614,22 +3594,21 @@ fn decode_compressed_value_hex(
     hex: &str,
     value_size: usize,
 ) -> Result<Vec<u8>> {
-    let expected = expected_hex_digits(value_size, "value_size")?;
+    decode_fixed_hex_bytes(map_id, &format!("compressed {field}"), hex, value_size)
+}
+
+fn decode_fixed_hex_bytes(map_id: u32, label: &str, hex: &str, byte_len: usize) -> Result<Vec<u8>> {
+    let expected = byte_len
+        .checked_mul(2)
+        .ok_or_else(|| anyhow!("map {map_id} {label} byte_len {byte_len} overflows hex length"))?;
     if hex.len() != expected {
         bail!(
-            "map {map_id} compressed {field} has {} hex digit(s), expected {}",
+            "map {map_id} {label} has {} hex digit(s), expected {}",
             hex.len(),
             expected
         );
     }
-    parse_inline_hint_hex(hex)
-        .with_context(|| format!("map {map_id} compressed {field} has invalid hex"))
-}
-
-fn expected_hex_digits(byte_len: usize, label: &str) -> Result<usize> {
-    byte_len
-        .checked_mul(2)
-        .ok_or_else(|| anyhow!("{label} {byte_len} overflows hex length"))
+    parse_inline_hint_hex(hex).with_context(|| format!("map {map_id} {label} has invalid hex"))
 }
 
 fn decode_bpftool_entry_value(
@@ -3779,44 +3758,35 @@ fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Res
         .with_context(|| format!("failed to parse {label} from {}", path.display()))
 }
 
-// ===== begin merged from passes/map_inline/map_info.rs =====
-
-const BPF_MAP_TYPE_HASH_LOCAL: u32 = libbpf_sys::BPF_MAP_TYPE_HASH;
-const BPF_MAP_TYPE_ARRAY_LOCAL: u32 = libbpf_sys::BPF_MAP_TYPE_ARRAY;
-const BPF_MAP_TYPE_ARRAY_OF_MAPS_LOCAL: u32 = libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS;
-const BPF_MAP_TYPE_PERCPU_ARRAY_LOCAL: u32 = libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
-const BPF_MAP_TYPE_HASH_OF_MAPS_LOCAL: u32 = libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS;
-const BPF_MAP_TYPE_LRU_HASH_LOCAL: u32 = libbpf_sys::BPF_MAP_TYPE_LRU_HASH;
-
 impl MapMetadata {
     pub fn supports_direct_value_access(&self) -> bool {
         matches!(
             self.map_type,
-            BPF_MAP_TYPE_HASH_LOCAL
-                | BPF_MAP_TYPE_ARRAY_LOCAL
-                | BPF_MAP_TYPE_PERCPU_ARRAY_LOCAL
-                | BPF_MAP_TYPE_LRU_HASH_LOCAL
+            libbpf_sys::BPF_MAP_TYPE_HASH
+                | libbpf_sys::BPF_MAP_TYPE_ARRAY
+                | libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY
+                | libbpf_sys::BPF_MAP_TYPE_LRU_HASH
         )
     }
 
     pub fn is_map_in_map(&self) -> bool {
         matches!(
             self.map_type,
-            BPF_MAP_TYPE_ARRAY_OF_MAPS_LOCAL | BPF_MAP_TYPE_HASH_OF_MAPS_LOCAL
+            libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS | libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS
         )
     }
 
     pub fn has_removable_lookup_pattern(&self) -> bool {
         matches!(
             self.map_type,
-            BPF_MAP_TYPE_ARRAY_LOCAL | BPF_MAP_TYPE_PERCPU_ARRAY_LOCAL
+            libbpf_sys::BPF_MAP_TYPE_ARRAY | libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY
         )
     }
 
     pub fn requires_entry_presence_check(&self) -> bool {
         matches!(
             self.map_type,
-            BPF_MAP_TYPE_HASH_LOCAL | BPF_MAP_TYPE_LRU_HASH_LOCAL
+            libbpf_sys::BPF_MAP_TYPE_HASH | libbpf_sys::BPF_MAP_TYPE_LRU_HASH
         )
     }
 }
@@ -4173,8 +4143,9 @@ mod map_info_tests {
         let ld1 = make_ld_imm64(2, MapPseudo::Fd.src_reg(), 11);
         let insns = vec![ld0[0], ld0[1], ld1[0], ld1[1]];
 
-        let result = collect_map_references(&insns, &[101], |map_id| Ok(Some(array_map(map_id, 4))))
-            .expect("map reference collection should succeed");
+        let result =
+            collect_map_references(&insns, &[101], |map_id| Ok(Some(array_map(map_id, 4))))
+                .expect("map reference collection should succeed");
 
         assert_eq!(result.references.len(), 2);
         assert_eq!(result.references[0].map_id, Some(101));

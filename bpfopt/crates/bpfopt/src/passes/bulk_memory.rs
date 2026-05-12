@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{insn_use_def_set, BBProgram, InsnSite, MakeReplacement};
+use crate::analysis::{insn_use_def_set, BBProgram, InsnSite};
 use crate::insn::{advance_reg_state as advance_simple_reg_state, SimpleRegValue, *};
 use crate::pass::*;
 use std::collections::HashMap;
@@ -160,15 +160,6 @@ struct BulkSite {
     old_len: usize,
     kind: BulkSiteKind,
 }
-impl BulkSite {
-    fn replacement_len(&self) -> usize {
-        match &self.kind {
-            BulkSiteKind::Memcpy { chunk_sizes, .. } | BulkSiteKind::Memset { chunk_sizes, .. } => {
-                chunk_sizes.len() * 2
-            }
-        }
-    }
-}
 #[derive(Default)]
 struct ScanResult {
     sites: Vec<(InsnSite, BulkSite)>,
@@ -208,30 +199,12 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, _ctx: &PassContext) -> anyhow::Res
     let scan = scan_sites(prog)?;
     let mut skipped = scan.skips;
     if scan.sites.is_empty() {
-        return Ok(PassResult {
-            site_skipped: skipped,
-            ..PassResult::unchanged()
-        });
+        return Ok(PassResult::with_sites(0, skipped));
     }
-    let mut applied = 0usize;
-    for (start, site) in scan.sites.iter().rev() {
-        let replacement_len = site.replacement_len();
-        let replacement = emit_site_replacement(site, prog)?;
-        if prog.try_replace_range_with_skips(
-            *start,
-            site.old_len,
-            replacement_len,
-            &mut skipped,
-            || Ok(MakeReplacement::Use(replacement)),
-        )? {
-            applied += 1;
-        }
-    }
-    Ok(PassResult {
-        sites_applied: applied,
-        site_skipped: skipped,
-        ..Default::default()
-    })
+    let applied = apply_candidates_reverse(prog, &scan.sites, &mut skipped, |prog, _, site| {
+        Ok((site.old_len, emit_site_replacement(site, prog)?))
+    })?;
+    Ok(PassResult::with_sites(applied, skipped))
 }
 fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
     let mut scan = ScanResult::default();

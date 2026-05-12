@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{BBProgram, BlockId, InsnSite, MakeReplacement};
+use crate::analysis::{BBProgram, BlockId, InsnSite};
 use crate::insn::*;
 use crate::pass::*;
 use std::collections::BTreeMap;
@@ -81,16 +81,11 @@ pub fn run_on_bbprogram(prog: &mut BBProgram) -> anyhow::Result<PassResult> {
         });
     }
     let alu_materialized = replacements.len();
-    let mut applied = 0usize;
     replacements.sort_by_key(|(site, _)| *site);
-    for (site, replacement) in replacements.into_iter().rev() {
-        let new_len = replacement.len();
-        if prog.try_replace_range_with_skips(site, 1, new_len, &mut sites_skipped, || {
-            Ok(MakeReplacement::Use(replacement))
-        })? {
-            applied += 1;
-        }
-    }
+    let candidates: Vec<(InsnSite, Vec<BpfInsn>)> = replacements;
+    let applied = apply_candidates_reverse(prog, &candidates, &mut sites_skipped, |_, _, repl| {
+        Ok((1, repl.clone()))
+    })?;
     Ok(PassResult {
         sites_applied: applied,
         site_skipped: sites_skipped,

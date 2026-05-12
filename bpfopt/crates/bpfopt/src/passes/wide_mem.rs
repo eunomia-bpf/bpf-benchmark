@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{BBProgram, BlockId, InsnSite, MakeReplacement, Terminator};
+use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 use anyhow::{bail, Context};
@@ -160,12 +160,6 @@ fn wide_load_alignment_skip_reason(site: &RewriteSite) -> Option<String> {
     }
     None
 }
-fn skip_site(site: InsnSite, reason: impl Into<String>) -> SiteSkipReason {
-    SiteSkipReason {
-        site,
-        reason: reason.into(),
-    }
-}
 fn is_packet_unsafe_prog_type(prog_type: u32) -> bool {
     matches!(
         prog_type,
@@ -230,7 +224,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             .iter()
             .any(|candidate| branch_targets.contains(candidate));
         if has_interior_target {
-            skipped.push(skip_site(start_site, "interior branch target"));
+            skipped.push(SiteSkipReason::new(start_site, "interior branch target"));
             continue;
         }
         let live_after = prog.live_out_site_checked(body.sites[hit_end - 1])?;
@@ -240,17 +234,20 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                 && live_after.contains(&insn.dst_reg())
         });
         if has_live_scratch {
-            skipped.push(skip_site(start_site, "scratch register live after site"));
+            skipped.push(SiteSkipReason::new(
+                start_site,
+                "scratch register live after site",
+            ));
             continue;
         }
         if let Some(reason) = wide_load_alignment_skip_reason(&site) {
-            skipped.push(skip_site(start_site, reason));
+            skipped.push(SiteSkipReason::new(start_site, reason));
             continue;
         }
         if is_packet_unsafe_prog_type(ctx.prog_type) {
             let base_reg = i32::from(site.base_reg);
             if site.base_reg != 10 && is_likely_packet_ptr(base_reg, start_idx, body.insns) {
-                skipped.push(skip_site(
+                skipped.push(SiteSkipReason::new(
                     start_site,
                     format!(
                         "likely packet pointer r{} in XDP/TC prog (prog_type={})",
@@ -264,7 +261,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             .reg_kind(start_site, site.base_reg)
             .is_some_and(|kind| matches!(kind, RegKind::BtfStructPointer | RegKind::OtherPointer))
         {
-            skipped.push(skip_site(
+            skipped.push(SiteSkipReason::new(
                 start_site,
                 format!(
                     "base register r{} is a BTF struct pointer; wide load may cross field boundary",
@@ -277,26 +274,12 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     }
     add_cross_block_wide_mem_skips(prog, &branch_targets, &mut reported_starts, &mut skipped)?;
     if safe_sites.is_empty() {
-        return Ok(PassResult {
-            site_skipped: skipped,
-            ..PassResult::unchanged()
-        });
+        return Ok(PassResult::with_sites(0, skipped));
     }
-    let mut applied = 0usize;
-    for (start, site) in safe_sites.iter().rev() {
-        let replacement = emit_wide_mem(site)?;
-        let new_len = replacement.len();
-        if prog.try_replace_range_with_skips(*start, site.old_len, new_len, &mut skipped, || {
-            Ok(MakeReplacement::Use(replacement))
-        })? {
-            applied += 1;
-        }
-    }
-    Ok(PassResult {
-        sites_applied: applied,
-        site_skipped: skipped,
-        ..Default::default()
-    })
+    let applied = apply_candidates_reverse(prog, &safe_sites, &mut skipped, |_, _, site| {
+        Ok((site.old_len, emit_wide_mem(site)?))
+    })?;
+    Ok(PassResult::with_sites(applied, skipped))
 }
 fn add_cross_block_wide_mem_skips(
     prog: &BBProgram,
@@ -323,7 +306,7 @@ fn add_cross_block_wide_mem_skips(
                 continue;
             }
             reported_starts.insert(site);
-            skipped.push(skip_site(site, "interior branch target"));
+            skipped.push(SiteSkipReason::new(site, "interior branch target"));
         }
     }
     Ok(())

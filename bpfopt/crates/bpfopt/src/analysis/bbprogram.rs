@@ -273,11 +273,6 @@ impl BBProgram {
             .remove(&block)
             .ok_or_else(|| anyhow::anyhow!("liveness missing live_out for {:?}", block))
     }
-    #[cfg(test)]
-    pub fn live_out_site(&self, site: InsnSite) -> RegSet {
-        self.live_out_site_checked(site)
-            .unwrap_or_else(|err| panic!("invalid live_out_site query for {:?}: {err}", site))
-    }
     pub fn live_out_site_checked(&self, site: InsnSite) -> anyhow::Result<RegSet> {
         self.insn_at(site)
             .ok_or_else(|| anyhow::anyhow!("invalid instruction site {:?}", site))?;
@@ -709,9 +704,6 @@ impl BBProgram {
         let old_end = frame_start_slot
             .checked_add(old_len)
             .ok_or_else(|| anyhow::anyhow!("kinsn replacement old range overflows"))?;
-        let replacement_end = frame_start_slot
-            .checked_add(replacement_len)
-            .ok_or_else(|| anyhow::anyhow!("kinsn replacement new range overflows"))?;
         let mut frame_start_slot_abs = usize::MAX;
         let mut frame_end_slot_abs = 0usize;
         for frame_block in self.blocks().filter(|candidate| candidate.frame == frame) {
@@ -728,11 +720,7 @@ impl BBProgram {
                 "kinsn site crosses subprog boundary (site {frame_start_slot}..{old_end}, subprog {frame_start_slot_abs}..{frame_end_slot_abs})"
             )));
         }
-        if replacement_end > frame_end_slot_abs {
-            return Ok(Some(format!(
-                "kinsn replacement crosses subprog boundary (replacement {frame_start_slot}..{replacement_end}, subprog {frame_start_slot_abs}..{frame_end_slot_abs})"
-            )));
-        }
+        let _ = replacement_len;
         Ok(None)
     }
     pub(crate) fn remap_block_after_insert(

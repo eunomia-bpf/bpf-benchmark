@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{BBProgram, InsnSite, MakeReplacement};
+use crate::analysis::{BBProgram, InsnSite};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
@@ -79,46 +79,46 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, _ctx: &PassContext) -> anyhow::Res
         .collect();
 
     if candidates.is_empty() {
-        return Ok(PassResult {
-            site_skipped: skipped,
-            ..PassResult::unchanged()
-        });
+        return Ok(PassResult::with_sites(0, skipped));
     }
 
-    let mut applied = 0usize;
-    for (start, site) in candidates.iter().rev() {
-        let (btf_id, kfunc_off) = prog.kinsn_call(site.width.target_name())?;
-        let shift_amount = u8::try_from(site.shift_amount).map_err(|_| {
-            anyhow::anyhow!(
-                "rotate shift amount {} exceeds packed payload width",
-                site.shift_amount
-            )
-        })?;
-        let live_out = prog.live_out_after_window(*start, site.old_len)?;
-        if prog.try_replace_range_with_skips(*start, site.old_len, 2, &mut skipped, || {
-            if live_out.contains(&site.tmp_reg) {
-                return Ok(MakeReplacement::Skip(format!(
-                    "tmp_reg r{} is live after site",
-                    site.tmp_reg
-                )));
-            }
+    // tmp_reg liveness pre-check: skip sites whose tmp_reg is read after the
+    // window, since the kinsn replacement does not preserve tmp_reg.
+    let mut applicable = Vec::with_capacity(candidates.len());
+    for (start, site) in candidates {
+        if prog
+            .live_out_after_window(start, site.old_len)?
+            .contains(&site.tmp_reg)
+        {
+            skipped.push(SiteSkipReason::new(
+                start,
+                format!("tmp_reg r{} is live after site", site.tmp_reg),
+            ));
+        } else {
+            applicable.push((start, site));
+        }
+    }
+
+    let applied =
+        apply_candidates_reverse(prog, &applicable, &mut skipped, |prog, _start, site| {
+            let (btf_id, kfunc_off) = prog.kinsn_call(site.width.target_name())?;
+            let shift_amount = u8::try_from(site.shift_amount).map_err(|_| {
+                anyhow::anyhow!(
+                    "rotate shift amount {} exceeds packed payload width",
+                    site.shift_amount
+                )
+            })?;
             let payload = BpfInsn::pack_u4(site.dst_reg, 0)
                 | BpfInsn::pack_u4(site.val_reg, 4)
                 | BpfInsn::pack_u8(shift_amount, 8)
                 | BpfInsn::pack_u4(site.tmp_reg, 16);
-            Ok(MakeReplacement::Use(emit_packed_kinsn_call_with_off(
-                payload, btf_id, kfunc_off,
-            )))
-        })? {
-            applied += 1;
-        }
-    }
+            Ok((
+                site.old_len,
+                emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
+            ))
+        })?;
 
-    Ok(PassResult {
-        sites_applied: applied,
-        site_skipped: skipped,
-        ..Default::default()
-    })
+    Ok(PassResult::with_sites(applied, skipped))
 }
 
 fn rotate_site_at(insns: &[BpfInsn], idx: usize) -> Option<RotateSite> {
@@ -284,20 +284,17 @@ fn try_match_rotate_width(
 }
 
 fn checked_shift_pair(i0: &BpfInsn, i1: &BpfInsn, width: RotateWidth) -> Option<(u32, u8, u8)> {
-    let (lsh_amount, rsh_amount, lsh_reg, rsh_reg) = shift_pair(i0, i1, width)?;
+    let alu_class = width.alu_class();
+    let (lsh_amount, rsh_amount, lsh_reg, rsh_reg) =
+        if i0.is_alu_imm(alu_class, BPF_RSH) && i1.is_alu_imm(alu_class, BPF_LSH) {
+            (i1.imm as u32, i0.imm as u32, i1.dst_reg(), i0.dst_reg())
+        } else if i0.is_alu_imm(alu_class, BPF_LSH) && i1.is_alu_imm(alu_class, BPF_RSH) {
+            (i0.imm as u32, i1.imm as u32, i0.dst_reg(), i1.dst_reg())
+        } else {
+            return None;
+        };
     (lsh_amount + rsh_amount == width.bits() && lsh_reg != rsh_reg)
         .then_some((lsh_amount, lsh_reg, rsh_reg))
-}
-
-fn shift_pair(i0: &BpfInsn, i1: &BpfInsn, width: RotateWidth) -> Option<(u32, u32, u8, u8)> {
-    let alu_class = width.alu_class();
-    if i0.is_alu_imm(alu_class, BPF_RSH) && i1.is_alu_imm(alu_class, BPF_LSH) {
-        return Some((i1.imm as u32, i0.imm as u32, i1.dst_reg(), i0.dst_reg()));
-    }
-    if i0.is_alu_imm(alu_class, BPF_LSH) && i1.is_alu_imm(alu_class, BPF_RSH) {
-        return Some((i0.imm as u32, i1.imm as u32, i0.dst_reg(), i1.dst_reg()));
-    }
-    None
 }
 
 fn uses_both_regs(dst: u8, src: u8, reg0: u8, reg1: u8) -> bool {

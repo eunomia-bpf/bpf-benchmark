@@ -63,10 +63,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<
     let target_sites = prog.branch_target_entry_sites()?;
     let mut scan = scan_guard_sites(prog, &target_sites, layout)?;
     if scan.guards.is_empty() {
-        return Ok(PassResult {
-            site_skipped: scan.skips,
-            ..PassResult::unchanged()
-        });
+        return Ok(PassResult::with_sites(0, scan.skips));
     }
 
     let mut rewrites = Vec::new();
@@ -106,26 +103,19 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<
 
     for (idx, guard) in scan.guards.iter().enumerate() {
         if !consumed[idx] {
-            scan.skips.push(SiteSkipReason {
-                site: guard.compare,
-                reason: "guard not part of a mergeable ladder".into(),
-            });
+            scan.skips.push(SiteSkipReason::new(
+                guard.compare,
+                "guard not part of a mergeable ladder",
+            ));
         }
     }
 
     if rewrites.is_empty() {
-        return Ok(PassResult {
-            site_skipped: scan.skips,
-            ..PassResult::unchanged()
-        });
+        return Ok(PassResult::with_sites(0, scan.skips));
     }
 
     apply_rewrites(prog, &rewrites, &mut scan.skips)?;
-    Ok(PassResult {
-        sites_applied: rewrites.len(),
-        site_skipped: scan.skips,
-        ..Default::default()
-    })
+    Ok(PassResult::with_sites(rewrites.len(), scan.skips))
 }
 
 fn apply_rewrites(
@@ -192,7 +182,7 @@ fn scan_guard_sites(
             .copied()
             .is_some_and(|site| target_sites.contains(&site))
         {
-            clear_states(&mut states);
+            states.fill(RegValue::Unknown);
             last_data_root = None;
         }
 
@@ -261,8 +251,10 @@ fn detect_guard_candidate(
             Some(RegValue::PacketEnd {
                 root_id: right_root,
             }),
-        ) = (reg_value(states, root_reg), reg_value(states, data_end_reg))
-        {
+        ) = (
+            states.get(root_reg as usize).copied(),
+            states.get(data_end_reg as usize).copied(),
+        ) {
             if left_root == right_root {
                 skips.push(SiteSkipReason {
                     site,
@@ -291,9 +283,9 @@ fn detect_guard_candidate(
             root_id: end_root_id,
         }),
     ) = (
-        reg_value(states, cursor_reg),
-        reg_value(states, root_reg),
-        reg_value(states, data_end_reg),
+        states.get(cursor_reg as usize).copied(),
+        states.get(root_reg as usize).copied(),
+        states.get(data_end_reg as usize).copied(),
     )
     else {
         return Ok(None);
@@ -481,7 +473,7 @@ fn apply_transfer(
 
     match insn.class() {
         BPF_LDX => {
-            if is_ctx_data_load(&insn, layout) {
+            if insn.is_ldx_mem() && insn.src_reg() == 1 && insn.off == layout.data_off {
                 let root_id = *next_root_id;
                 *next_root_id += 1;
                 states[dst] = RegValue::PacketData {
@@ -489,7 +481,7 @@ fn apply_transfer(
                     const_off: 0,
                 };
                 *last_data_root = Some(root_id);
-            } else if is_ctx_data_end_load(&insn, layout) {
+            } else if insn.is_ldx_mem() && insn.src_reg() == 1 && insn.off == layout.data_end_off {
                 let root_id = match *last_data_root {
                     Some(root_id) => root_id,
                     None => {
@@ -506,7 +498,9 @@ fn apply_transfer(
         BPF_ALU64 | BPF_ALU => {
             let op = bpf_op(insn.code);
             match (op, bpf_src(insn.code)) {
-                (BPF_MOV, BPF_X) => states[dst] = reg_index_value(states, src),
+                (BPF_MOV, BPF_X) => {
+                    states[dst] = states.get(src).copied().unwrap_or(RegValue::Unknown)
+                }
                 (BPF_MOV, _) => states[dst] = RegValue::Scalar,
                 (BPF_ADD, BPF_K) => {
                     states[dst] = match states.get(dst).copied() {
@@ -523,30 +517,10 @@ fn apply_transfer(
         BPF_LD => states[dst] = RegValue::Scalar,
         BPF_JMP | BPF_JMP32 => {
             if insn.is_call() {
-                clear_states(states);
+                states.fill(RegValue::Unknown);
                 *last_data_root = None;
             }
         }
         _ => {}
     }
-}
-
-fn is_ctx_data_load(insn: &BpfInsn, layout: PacketCtxLayout) -> bool {
-    insn.is_ldx_mem() && insn.src_reg() == 1 && insn.off == layout.data_off
-}
-
-fn is_ctx_data_end_load(insn: &BpfInsn, layout: PacketCtxLayout) -> bool {
-    insn.is_ldx_mem() && insn.src_reg() == 1 && insn.off == layout.data_end_off
-}
-
-fn reg_value(states: &[RegValue], reg: u8) -> Option<RegValue> {
-    states.get(reg as usize).copied()
-}
-
-fn reg_index_value(states: &[RegValue], reg: usize) -> RegValue {
-    states.get(reg).copied().unwrap_or(RegValue::Unknown)
-}
-
-fn clear_states(states: &mut [RegValue]) {
-    states.fill(RegValue::Unknown);
 }

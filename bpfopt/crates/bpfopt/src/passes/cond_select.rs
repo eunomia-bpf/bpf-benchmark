@@ -103,10 +103,7 @@ impl CondSelectValue {
 
 impl CondSelectSite {
     fn skip(&self, reason: impl Into<String>) -> SiteSkipReason {
-        SiteSkipReason {
-            site: self.start_site,
-            reason: reason.into(),
-        }
+        SiteSkipReason::new(self.start_site, reason)
     }
 }
 
@@ -123,10 +120,10 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     // Check if the target can lower bpf_select64 to branchless select
     // (CMOV on x86, CSEL on ARM64).
     if !ctx.has_branchless_select() {
-        return Ok(PassResult::skipped_site(SiteSkipReason {
-            site: first_report_site(prog)?,
-            reason: "platform lacks branchless select support".into(),
-        }));
+        return Ok(PassResult::skipped_site(SiteSkipReason::new(
+            first_report_site(prog)?,
+            "platform lacks branchless select support",
+        )));
     }
 
     let sites = scan_cond_select_sites(prog)?;
@@ -158,10 +155,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     }
 
     if safe_sites.is_empty() {
-        return Ok(PassResult {
-            site_skipped: skipped,
-            ..PassResult::unchanged()
-        });
+        return Ok(PassResult::with_sites(0, skipped));
     }
 
     safe_sites.sort_by_key(|(site, _)| site.start_site);
@@ -178,11 +172,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
         prog.replace_diamond_with_insns(pattern, replacement)?;
     }
 
-    Ok(PassResult {
-        sites_applied: safe_sites.len(),
-        site_skipped: skipped,
-        ..Default::default()
-    })
+    Ok(PassResult::with_sites(safe_sites.len(), skipped))
 }
 
 fn validate_diamond_site(prog: &BBProgram, site: &CondSelectSite) -> anyhow::Result<()> {

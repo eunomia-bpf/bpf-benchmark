@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 use std::collections::BTreeSet;
 
-use crate::analysis::{BBProgram, InsnSite, MakeReplacement};
+use crate::analysis::{BBProgram, InsnSite};
 use crate::insn::*;
 use crate::pass::*;
 
@@ -115,36 +115,12 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<
     let branch_targets = prog.branch_target_entry_sites()?;
     let mut scan = scan_sites(prog, &branch_targets)?;
     if scan.sites.is_empty() {
-        return Ok(PassResult {
-            site_skipped: scan.skips,
-            ..PassResult::unchanged()
-        });
+        return Ok(PassResult::with_sites(0, scan.skips));
     }
-    let applied = apply_skb_load_bytes_sites(prog, &scan.sites, layout, &mut scan.skips)?;
-    Ok(PassResult {
-        sites_applied: applied,
-        site_skipped: scan.skips,
-        ..PassResult::unchanged()
-    })
-}
-
-fn apply_skb_load_bytes_sites(
-    prog: &mut BBProgram,
-    sites: &[AppliedRewriteSite],
-    layout: PacketCtxLayout,
-    skipped: &mut Vec<SiteSkipReason>,
-) -> anyhow::Result<usize> {
-    let mut applied = 0usize;
-    for &(call_site, rewrite) in sites.iter().rev() {
-        let replacement = emit_replacement(rewrite, layout);
-        let new_len = replacement.len();
-        if prog.try_replace_range_with_skips(call_site, 1, new_len, skipped, || {
-            Ok(MakeReplacement::Use(replacement))
-        })? {
-            applied += 1;
-        }
-    }
-    Ok(applied)
+    let applied = apply_candidates_reverse(prog, &scan.sites, &mut scan.skips, |_, _, rewrite| {
+        Ok((1, emit_replacement(*rewrite, layout)))
+    })?;
+    Ok(PassResult::with_sites(applied, scan.skips))
 }
 
 fn scan_sites(prog: &BBProgram, branch_targets: &BTreeSet<InsnSite>) -> anyhow::Result<ScanResult> {
@@ -166,7 +142,7 @@ fn scan_sites(prog: &BBProgram, branch_targets: &BTreeSet<InsnSite>) -> anyhow::
                 } else {
                     match classify_site(branch_targets.contains(&site), &regs) {
                         Ok(rewrite_site) => scan.sites.push((site, rewrite_site)),
-                        Err(reason) => scan.skips.push(SiteSkipReason { site, reason }),
+                        Err(reason) => scan.skips.push(SiteSkipReason::new(site, reason)),
                     }
                 }
             }

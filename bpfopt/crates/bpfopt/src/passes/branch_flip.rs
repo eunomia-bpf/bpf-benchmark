@@ -61,14 +61,14 @@ pub fn run_on_bbprogram(
         );
     }
     if program_miss_rate > max_branch_miss_rate {
-        return Ok(PassResult::skipped_site(SiteSkipReason {
-            site: first_report_site(prog)?,
-            reason: format!(
+        return Ok(PassResult::skipped_site(SiteSkipReason::new(
+            first_report_site(prog)?,
+            format!(
                 "program branch_miss_rate {:.1}% exceeds threshold {:.1}% (unpredictable branches)",
                 program_miss_rate * 100.0,
                 max_branch_miss_rate * 100.0,
             ),
-        }));
+        )));
     }
 
     let branch_targets = prog.branch_target_entry_sites()?;
@@ -93,21 +93,14 @@ pub fn run_on_bbprogram(
     }
 
     if safe_sites.is_empty() {
-        return Ok(PassResult {
-            site_skipped: skipped,
-            ..PassResult::unchanged()
-        });
+        return Ok(PassResult::with_sites(0, skipped));
     }
     safe_sites.sort_by_key(|site| site.cond_site);
     for site in &safe_sites {
         apply_branch_flip_site(prog, site)?;
     }
 
-    Ok(PassResult {
-        sites_applied: safe_sites.len(),
-        site_skipped: skipped,
-        ..PassResult::unchanged()
-    })
+    Ok(PassResult::with_sites(safe_sites.len(), skipped))
 }
 
 fn branch_flip_candidate_cond(
@@ -196,7 +189,7 @@ fn bf_skip_reason(
     reason: String,
 ) -> anyhow::Result<SiteSkipReason> {
     prog.insn(site)?;
-    Ok(SiteSkipReason { site, reason })
+    Ok(SiteSkipReason::new(site, reason))
 }
 
 fn bf_blocks_are_adjacent(prog: &BBProgram, left: BlockId, right: BlockId) -> anyhow::Result<bool> {

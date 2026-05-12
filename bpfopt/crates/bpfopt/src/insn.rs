@@ -252,6 +252,7 @@ impl BpfInsn {
         inner.set_src_reg((regs >> 4) & 0xf);
         Self(inner)
     }
+    #[cfg(test)]
     #[inline]
     pub fn as_kernel(&self) -> &libbpf_sys::bpf_insn {
         &self.0
@@ -397,16 +398,8 @@ impl BpfInsn {
         self.code == (BPF_ALU64 | BPF_MOV | BPF_X)
     }
     #[inline]
-    pub fn is_mov64_imm(&self) -> bool {
-        self.code == (BPF_ALU64 | BPF_MOV | BPF_K)
-    }
-    #[inline]
     pub fn is_mov32_reg(&self) -> bool {
         self.code == (BPF_ALU | BPF_MOV | BPF_X)
-    }
-    #[inline]
-    pub fn is_mov32_imm(&self) -> bool {
-        self.code == (BPF_ALU | BPF_MOV | BPF_K)
     }
     // ── Constructors ────────────────────────────────────────────────
     /// `mov64 dst, src` (register)
@@ -561,6 +554,7 @@ impl BpfInsn {
     pub fn alu32_imm(op: u8, dst: u8, imm: i32) -> Self {
         Self::new(BPF_ALU | op | BPF_K, Self::make_regs(dst, 0), 0, imm)
     }
+    #[cfg(test)]
     pub fn alu32_reg(op: u8, dst: u8, src: u8) -> Self {
         Self::new(BPF_ALU | op | BPF_X, Self::make_regs(dst, src), 0, 0)
     }
@@ -607,7 +601,6 @@ pub fn insn_width(insn: &BpfInsn) -> usize {
         1
     }
 }
-/// Emit a two-instruction `LD_IMM64 dst, value` sequence.
 pub fn emit_ldimm64(dst_reg: u8, value: u64) -> Vec<BpfInsn> {
     vec![
         BpfInsn::new(

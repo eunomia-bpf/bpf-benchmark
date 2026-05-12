@@ -435,12 +435,29 @@ impl PassResult {
             ..Self::unchanged()
         }
     }
+
+    pub fn with_sites(sites_applied: usize, site_skipped: Vec<SiteSkipReason>) -> Self {
+        Self {
+            sites_applied,
+            site_skipped,
+            ..Default::default()
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
 pub struct SiteSkipReason {
     pub site: InsnSite,
     pub reason: String,
+}
+
+impl SiteSkipReason {
+    pub fn new(site: InsnSite, reason: impl Into<String>) -> Self {
+        Self {
+            site,
+            reason: reason.into(),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -785,6 +802,81 @@ fn required_kinsn_skip(
         site: first_report_site(program)?,
         reason: format!("missing required kinsn target(s): {}", missing.join(", ")),
     }))
+}
+
+/// Apply matched candidates in reverse site order, calling `emit` for each.
+///
+/// `emit` receives `(prog, start_site, &site_data)` and returns
+/// `(old_len, replacement_insns)`. Returns the number of sites that committed
+/// (i.e. `try_replace_range_with_skips` returned `Ok(true)`).
+pub fn apply_candidates_reverse<S, F>(
+    prog: &mut BBProgram,
+    candidates: &[(InsnSite, S)],
+    skipped: &mut Vec<SiteSkipReason>,
+    mut emit: F,
+) -> anyhow::Result<usize>
+where
+    F: FnMut(&BBProgram, InsnSite, &S) -> anyhow::Result<(usize, Vec<BpfInsn>)>,
+{
+    let mut applied = 0usize;
+    for (start, site) in candidates.iter().rev() {
+        let (old_len, replacement) = emit(prog, *start, site)?;
+        let new_len = replacement.len();
+        if prog.try_replace_range_with_skips(*start, old_len, new_len, skipped, || {
+            Ok(crate::analysis::MakeReplacement::Use(replacement))
+        })? {
+            applied += 1;
+        }
+    }
+    Ok(applied)
+}
+
+/// Detect a 2-insn pattern that crosses a single fallthrough block boundary.
+///
+/// `start` must point to the candidate first insn. If `start` is the last site
+/// in its block and the block falls through into a successor whose first site
+/// makes `matches_pair(start_insn, next_insn)` true, returns
+/// `Some(SiteSkipReason { site: start, reason })`. Otherwise `None`.
+///
+/// Used by passes whose matchers operate on adjacent insn pairs and need to
+/// surface a clear "skipped: interior branch target" signal when the pattern
+/// straddles a block split (e.g. extract, endian, wide_mem).
+pub fn check_cross_block_pair_pattern<F>(
+    prog: &BBProgram,
+    start: InsnSite,
+    matches_pair: F,
+    reason: &str,
+) -> anyhow::Result<Option<SiteSkipReason>>
+where
+    F: FnOnce(&BpfInsn, &BpfInsn) -> bool,
+{
+    use crate::analysis::Terminator;
+    let i0 = prog
+        .insn_at(start)
+        .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", start))?;
+    let body = prog.block_body_view(prog.site_block(start))?;
+    if start.idx + 1 < body.sites.len() {
+        return Ok(None);
+    }
+    let start_block = prog.site_block(start);
+    let next_block = match prog.terminator_at_site(start)? {
+        Terminator::Fallthrough { next } => next,
+        _ => return Ok(None),
+    };
+    let successors = prog.successors(start_block);
+    if successors.len() != 1 || successors[0] != next_block {
+        anyhow::bail!(
+            "fallthrough block {:?} has inconsistent successors",
+            start_block
+        );
+    }
+    let Some(next) = prog.sites_in_block(next_block)?.first().copied() else {
+        return Ok(None);
+    };
+    let i1 = prog
+        .insn_at(next)
+        .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", next))?;
+    Ok(matches_pair(i0, i1).then(|| SiteSkipReason::new(start, reason)))
 }
 
 pub fn first_report_site(program: &BBProgram) -> anyhow::Result<InsnSite> {
