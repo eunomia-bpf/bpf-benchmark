@@ -1296,11 +1296,16 @@ pub enum LiftedRegFact {
     /// Direct packet-data pointer. `ptr_def` is the LDX site that loaded it
     /// (or the latest aliased site after MOV-X / ADD-K propagation).
     /// `const_off` is the constant offset accumulated from ADD-K.
-    PacketData { ptr_def: InsnSite, const_off: i32 },
+    PacketData {
+        ptr_def: InsnSite,
+        const_off: i32,
+    },
     /// Direct packet-end pointer. `ptr_def` is the matching data-load site
     /// when this end-load follows a data-load in the same block; otherwise it
     /// is this end-load's own site.
-    PacketEnd { ptr_def: InsnSite },
+    PacketEnd {
+        ptr_def: InsnSite,
+    },
     /// Scalar from a memory load that is not a packet pointer.
     Scalar,
 }
@@ -1504,8 +1509,10 @@ fn compute_site_liveness(prog: &BBProgram) -> anyhow::Result<SiteLivenessSets> {
 }
 fn compute_lifted_reg_facts(prog: &BBProgram) -> anyhow::Result<LiftedRegFacts> {
     let mut by_site = HashMap::new();
-    let layout =
-        crate::insn::packet_ctx_layout(prog.prog_type, crate::insn::PacketCtxLayoutScope::PacketAccess);
+    let layout = crate::insn::packet_ctx_layout(
+        prog.prog_type,
+        crate::insn::PacketCtxLayoutScope::PacketAccess,
+    );
     let mut regs = [LiftedRegFact::Unknown; 11];
     let mut last_data_load: Option<InsnSite> = None;
     for (idx, block) in prog.block_ids().enumerate().collect::<Vec<_>>() {
@@ -1532,7 +1539,14 @@ fn compute_lifted_reg_facts(prog: &BBProgram) -> anyhow::Result<LiftedRegFacts> 
             } else {
                 None
             };
-            advance_lifted_regs(insn, ldimm64_hi, site, layout, &mut regs, &mut last_data_load)?;
+            advance_lifted_regs(
+                insn,
+                ldimm64_hi,
+                site,
+                layout,
+                &mut regs,
+                &mut last_data_load,
+            )?;
         }
     }
     Ok(LiftedRegFacts { by_site })
@@ -1546,7 +1560,7 @@ fn advance_lifted_regs(
     last_data_load: &mut Option<InsnSite>,
 ) -> anyhow::Result<()> {
     use crate::insn::{
-        bpf_size, bpf_op, bpf_src, decode_ldimm64_value, BPF_ADD, BPF_ALU, BPF_ALU64, BPF_K,
+        bpf_op, bpf_size, bpf_src, decode_ldimm64_value, BPF_ADD, BPF_ALU, BPF_ALU64, BPF_K,
         BPF_LD, BPF_LDX, BPF_MEM, BPF_MOV, BPF_REG_0, BPF_REG_5, BPF_SUB, BPF_W, BPF_X, BPF_XOR,
     };
     if insn.is_call() {
@@ -1570,8 +1584,7 @@ fn advance_lifted_regs(
     if insn.is_ldimm64() {
         let hi =
             ldimm64_hi.ok_or_else(|| anyhow::anyhow!("LD_IMM64 is missing its second slot"))?;
-        regs[insn.dst_reg() as usize] =
-            LiftedRegFact::Const(decode_ldimm64_value(insn, hi) as i64);
+        regs[insn.dst_reg() as usize] = LiftedRegFact::Const(decode_ldimm64_value(insn, hi) as i64);
         return Ok(());
     }
     match insn.class() {

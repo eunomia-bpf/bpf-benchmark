@@ -115,9 +115,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             }
         };
 
-        if let Some(reason) =
-            prog.admission_skip_reason(site.start_site, site.old_len)?
-        {
+        if let Some(reason) = prog.admission_skip_reason(site.start_site, site.old_len)? {
             skipped.push(site.skip(reason));
             continue;
         }

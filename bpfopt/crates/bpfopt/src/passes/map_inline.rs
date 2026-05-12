@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 use crate::analysis::{
-    insn_use_def_set, validate_map_inline_hint_specs, BBProgram, InsnSite, MakeReplacement,
-    Terminator,
+    insn_use_def_set, validate_map_inline_hint_specs, BBProgram, InsnSite, Terminator,
 };
 use crate::insn::*;
 use crate::pass::*;
@@ -10,7 +9,6 @@ use serde::Deserialize;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, VecDeque};
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::sync::OnceLock;
 
 pub use crate::pass::MapMetadata as MapInfo;
 const R2_SETUP_LOOKBACK_LIMIT: usize = 8;
@@ -1043,15 +1041,14 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
         if side_input.hints.iter().any(|hint| {
             hint.mode == MapInlineHintMode::Soft && !inline_hints_consumed.contains(&hint.anchor)
         }) {
-            record_diagnostic(
-                &mut result.diagnostics,
-                "missing immediate null check".to_string(),
-            );
+            result
+                .diagnostics
+                .push("missing immediate null check".to_string());
         }
-        record_diagnostic(
-            &mut result.diagnostics,
-            format!("inline_hints_consumed={}", inline_hints_consumed.len()),
-        );
+        result.diagnostics.push(format!(
+            "inline_hints_consumed={}",
+            inline_hints_consumed.len()
+        ));
     }
     Ok(result)
 }
@@ -1077,7 +1074,7 @@ fn run_map_inline_round(
             .filter(|map_id| !side_input.compressed_values.contains_key(map_id))
             .count();
         if count > 0 {
-            record_diagnostic(&mut diagnostics, format!("maps_skipped_by_size={count}"));
+            diagnostics.push(format!("maps_skipped_by_size={count}"));
         }
     }
     let DirectMapValueLoadRewriteResult {
@@ -1228,11 +1225,11 @@ fn run_map_inline_round(
                 .iter()
                 .any(|site| branch_target_sites.contains(site))
             {
-                record_site_diagnostic(
-                    &mut site_diagnostics,
-                    site.call_site,
-                    "keeping lookup setup because removal would cross a branch target".to_string(),
-                );
+                site_diagnostics.push(SiteDiagnostic {
+                    site: site.call_site,
+                    message: "keeping lookup setup because removal would cross a branch target"
+                        .to_string(),
+                });
                 rewrite.skipped_sites.clear();
             }
             rewrites.push(rewrite);
@@ -1351,7 +1348,6 @@ fn run_map_inline_round(
             prog,
             site.call_site,
             info.has_removable_lookup_pattern(),
-            info.has_removable_lookup_pattern(),
         )?;
         let null_check = uses.null_check;
         if info.requires_entry_presence_check() && null_check.is_none() {
@@ -1382,11 +1378,11 @@ fn run_map_inline_round(
             .iter()
             .any(|site| branch_target_sites.contains(site))
         {
-            record_site_diagnostic(
-                &mut site_diagnostics,
-                site.call_site,
-                "keeping lookup pattern because removal would cross a branch target".to_string(),
-            );
+            site_diagnostics.push(SiteDiagnostic {
+                site: site.call_site,
+                message: "keeping lookup pattern because removal would cross a branch target"
+                    .to_string(),
+            });
             rewrite.skipped_sites.clear();
             rewrite.removed_null_check = false;
         }
@@ -1441,11 +1437,10 @@ fn run_map_inline_round(
             continue;
         }
         removed_any_null_check |= rewrite.removed_null_check;
-        record_site_diagnostic(
-            &mut site_diagnostics,
-            rewrite.call_site,
-            format!("inlined successfully, value={}", rewrite.diagnostic_value),
-        );
+        site_diagnostics.push(SiteDiagnostic {
+            site: rewrite.call_site,
+            message: format!("inlined successfully, value={}", rewrite.diagnostic_value),
+        });
         map_inline_records.extend(rewrite.map_inline_records);
         skip_sites.extend(rewrite.skipped_sites);
         replacement_sites.extend(
@@ -1557,11 +1552,7 @@ fn replace_site(
         return Ok(true);
     }
     let site = replacement.site;
-    let replacement = replacement.replacement;
-    let replacement_len = replacement.len();
-    prog.try_replace_range_with_skips(site, 1, replacement_len, skipped, || {
-        Ok(MakeReplacement::Use(replacement))
-    })
+    prog.try_replace_range(site, 1, replacement.replacement, skipped)
 }
 fn delete_site(
     prog: &mut BBProgram,
@@ -1582,7 +1573,7 @@ fn delete_site(
         prog.replace_terminator(prog.site_block(site), terminator)?;
         return Ok(true);
     }
-    prog.try_replace_range_with_skips(site, 1, 0, skipped, || Ok(MakeReplacement::Use(Vec::new())))
+    prog.try_replace_range(site, 1, Vec::new(), skipped)
 }
 fn terminator_for_site_replacement(
     prog: &BBProgram,
@@ -1919,22 +1910,20 @@ fn build_direct_map_value_load_rewrites(
                 continue;
             };
             let Some(total_off) = value_off.checked_add(insn.off as i32) else {
-                record_site_diagnostic(
-                    &mut site_diagnostics,
+                site_diagnostics.push(SiteDiagnostic {
                     site,
-                    format!(
+                    message: format!(
                         "pseudo-map-value offset overflow (base {} + load off {})",
                         value_off, insn.off
                     ),
-                );
+                });
                 continue;
             };
             if total_off < 0 {
-                record_site_diagnostic(
-                    &mut site_diagnostics,
+                site_diagnostics.push(SiteDiagnostic {
                     site,
-                    format!("pseudo-map-value load offset {} is negative", total_off),
-                );
+                    message: format!("pseudo-map-value load offset {} is negative", total_off),
+                });
                 continue;
             }
             let map_value = match resolve_snapshot_map_value(
@@ -1955,14 +1944,13 @@ fn build_direct_map_value_load_rewrites(
                     Some(size) => size.to_string(),
                     None => "invalid".to_string(),
                 };
-                record_site_diagnostic(
-                    &mut site_diagnostics,
+                site_diagnostics.push(SiteDiagnostic {
                     site,
-                    format!(
+                    message: format!(
                         "pseudo-map-value load out of bounds (map_id={}, off={}, size={})",
                         map_value.map_id, offset, size
                     ),
-                );
+                });
                 continue;
             };
             replacements.push(SiteReplacement {
@@ -1979,14 +1967,13 @@ fn build_direct_map_value_load_rewrites(
                 key: map_value.key.clone(),
                 value: map_value.value.clone(),
             });
-            record_site_diagnostic(
-                &mut site_diagnostics,
+            site_diagnostics.push(SiteDiagnostic {
                 site,
-                format!(
+                message: format!(
                     "constantized pseudo-map-value load from map_id={} off={} value=0x{:x}",
                     map_value.map_id, offset, scalar
                 ),
-            );
+            });
         }
     }
     Ok(DirectMapValueLoadRewriteResult {
@@ -2330,20 +2317,6 @@ fn resolve_map_value_pointer_inner(
     Ok(None)
 }
 
-fn log_map_inline_debug(message: &str) {
-    static ENABLED: OnceLock<bool> = OnceLock::new();
-    if *ENABLED.get_or_init(|| std::env::var_os("BPFREJIT_MAP_INLINE_DEBUG").is_some()) {
-        eprintln!("map_inline: {}", message);
-    }
-}
-fn record_diagnostic(diagnostics: &mut Vec<String>, message: String) {
-    log_map_inline_debug(&message);
-    diagnostics.push(message);
-}
-fn record_site_diagnostic(diagnostics: &mut Vec<SiteDiagnostic>, site: InsnSite, message: String) {
-    log_map_inline_debug(&format!("site {:?}: {}", site, message));
-    diagnostics.push(SiteDiagnostic { site, message });
-}
 fn map_snapshot_skipped_by_size(
     side_input: &MapInlineSideInput<'_>,
     map_id: u32,
@@ -2365,9 +2338,15 @@ fn record_skip(
         site,
         reason: reason.clone(),
     });
-    record_site_diagnostic(diagnostics, site, format!("skip reason: {}", reason));
+    diagnostics.push(SiteDiagnostic {
+        site,
+        message: format!("skip reason: {reason}"),
+    });
     if let Some(detail) = detail {
-        record_site_diagnostic(diagnostics, site, detail);
+        diagnostics.push(SiteDiagnostic {
+            site,
+            message: detail,
+        });
     }
 }
 fn format_bytes_preview(bytes: &[u8]) -> String {
@@ -2394,8 +2373,7 @@ fn format_inlined_value_diagnostic(value: &[u8], loads: &[LookupValueLoad]) -> S
 fn classify_r0_uses_with_options(
     prog: &BBProgram,
     start_site: InsnSite,
-    allow_unrelated_helper_calls: bool,
-    allow_readonly_helper_calls: bool,
+    allow_helper_calls: bool,
 ) -> anyhow::Result<LookupResultUses> {
     let mut classification = LookupResultUses::default();
     let mut alias_regs = HashMap::from([(0u8, 0i16)]);
@@ -2467,12 +2445,8 @@ fn classify_r0_uses_with_options(
                 break;
             }
             let surviving_aliases = surviving_alias_regs_after_helper_call(&alias_regs);
-            let can_follow_helper = allow_unrelated_helper_calls
-                || (allow_readonly_helper_calls
-                    && insn.is_call()
-                    && insn.src_reg() == 0
-                    && insn.imm == libbpf_sys::BPF_FUNC_ktime_get_ns as i32);
-            if can_follow_helper && (!surviving_aliases.is_empty() || !alias_stack_slots.is_empty())
+            if allow_helper_calls
+                && (!surviving_aliases.is_empty() || !alias_stack_slots.is_empty())
             {
                 alias_regs = surviving_aliases;
                 continue;
@@ -3489,7 +3463,6 @@ impl MapMetadata {
         )
     }
 }
-
 
 pub type MapInfoBySite = HashMap<InsnSite, MapInfo>;
 

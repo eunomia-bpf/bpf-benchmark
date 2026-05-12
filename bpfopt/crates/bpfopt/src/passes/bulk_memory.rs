@@ -330,10 +330,7 @@ fn memset_lane_at(
     }
     let fill_byte = match insn.class() {
         BPF_ST => fill_byte_from_imm(width, insn.imm)?,
-        BPF_STX => match prog
-            .reg_fact_at(sites[idx], insn.src_reg())?
-            .as_const()
-        {
+        BPF_STX => match prog.reg_fact_at(sites[idx], insn.src_reg())?.as_const() {
             Some(value) => fill_byte_from_lane(width_bytes(width)?, value as u64),
             None => None,
         },

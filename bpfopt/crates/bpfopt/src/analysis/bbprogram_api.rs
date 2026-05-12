@@ -16,14 +16,6 @@ pub struct DiamondPattern {
     pub join: Option<BlockId>,
 }
 
-/// What a `try_replace_range` closure returns to BBProgram.
-pub enum MakeReplacement {
-    /// Commit this replacement.
-    Use(Vec<BpfInsn>),
-    /// Skip this site (closure decided pass-specific check failed).
-    Skip(String),
-}
-
 impl BBProgram {
     pub fn delete_insn(&mut self, site: DefSite) -> anyhow::Result<usize> {
         let mut next = self.clone();
@@ -59,28 +51,21 @@ impl BBProgram {
 
     /// Universal in-block instruction replacement core.
     ///
-    /// Flow:
     /// 1. Basic bounds check on `(start, old_len)`.
     /// 2. Structural admission (subprog boundary) on `(old_len, new_len)`.
-    ///    Skipped admission for pure inserts (`old_len == 0`) and pure deletes
+    ///    Skipped for pure inserts (`old_len == 0`) and pure deletes
     ///    (`new_len == 0`) since those cannot cross subprog boundaries.
-    /// 3. On admission failure, records `SiteSkipReason` without calling closure.
-    /// 4. On admission success, calls closure to lazily produce the replacement
-    ///    or to opt out (e.g., pass-specific live-out check).
-    /// 5. Closure returning `Use(insns)` commits if `insns.len() == new_len`,
-    ///    else returns hard error. Closure returning `Skip(reason)` records a
-    ///    skip without mutation. Closure returning `Err` propagates.
-    pub fn try_replace_range_with_skips<F>(
+    /// 3. On admission failure, records `SiteSkipReason` and returns `Ok(false)`.
+    /// 4. On admission success, commits the replacement. `replacement.len()`
+    ///    must equal `new_len`.
+    pub fn try_replace_range(
         &mut self,
         start: InsnSite,
         old_len: usize,
-        new_len: usize,
+        replacement: Vec<BpfInsn>,
         skipped: &mut Vec<SiteSkipReason>,
-        make_replacement: F,
-    ) -> anyhow::Result<bool>
-    where
-        F: FnOnce() -> anyhow::Result<MakeReplacement>,
-    {
+    ) -> anyhow::Result<bool> {
+        let new_len = replacement.len();
         let block_ref = self.block(start.block)?;
         if start.idx > block_ref.insns.len() {
             anyhow::bail!(
@@ -110,25 +95,6 @@ impl BBProgram {
                 });
                 return Ok(false);
             }
-        }
-
-        let replacement = match make_replacement()? {
-            MakeReplacement::Use(insns) => insns,
-            MakeReplacement::Skip(reason) => {
-                skipped.push(SiteSkipReason {
-                    site: start,
-                    reason,
-                });
-                return Ok(false);
-            }
-        };
-        if replacement.len() != new_len {
-            anyhow::bail!(
-                "try_replace_range at {:?} expected {} replacement insns, closure produced {}",
-                start,
-                new_len,
-                replacement.len()
-            );
         }
 
         let mut next = self.clone();
@@ -759,9 +725,7 @@ where
     F: FnMut(BlockId) -> anyhow::Result<BlockId>,
 {
     Ok(match term {
-        Terminator::Fallthrough { next } => Terminator::Fallthrough {
-            next: remap(next)?,
-        },
+        Terminator::Fallthrough { next } => Terminator::Fallthrough { next: remap(next)? },
         Terminator::Jump { insn, target } => Terminator::Jump {
             insn,
             target: remap(target)?,

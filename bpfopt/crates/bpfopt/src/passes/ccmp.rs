@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 //! ARM64 CCMP optimization pass.
 
-use crate::analysis::{BBProgram, BlockId, InsnSite, MakeReplacement, Terminator};
+use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
@@ -181,13 +181,7 @@ fn apply_ccmp_site(
         })?,
     };
     let replacement = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
-    if !trial.try_replace_range_with_skips(
-        replacement_start,
-        merged_sites.len(),
-        replacement.len(),
-        skipped,
-        || Ok(MakeReplacement::Use(replacement)),
-    )? {
+    if !trial.try_replace_range(replacement_start, merged_sites.len(), replacement, skipped)? {
         return Ok(false);
     }
 

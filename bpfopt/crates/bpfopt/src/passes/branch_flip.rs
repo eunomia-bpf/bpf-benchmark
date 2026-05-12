@@ -203,7 +203,10 @@ fn bf_validate_flipped_branch_deltas(
                 site.cond_site
             )
         })?;
-    for (mut insn, arm, delta) in [(cond, "else", cond_delta), (BpfInsn::ja(0), "then", then_len)] {
+    for (mut insn, arm, delta) in [
+        (cond, "else", cond_delta),
+        (BpfInsn::ja(0), "then", then_len),
+    ] {
         insn.set_branch_target_delta(i64::try_from(delta.slots()).map_err(|_| {
             anyhow::anyhow!(
                 "branch_flip site {:?} {} arm length {} overflows branch delta",

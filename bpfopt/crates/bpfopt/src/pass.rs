@@ -10,7 +10,7 @@ use std::fmt;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use crate::analysis::{BBProgram, InsnSite, MakeReplacement};
+use crate::analysis::{BBProgram, InsnSite};
 use crate::insn::{
     BpfInsn, BPF_JEQ, BPF_JGE, BPF_JGT, BPF_JLE, BPF_JLT, BPF_JNE, BPF_JSGE, BPF_JSGT, BPF_JSLE,
     BPF_JSLT,
@@ -365,10 +365,7 @@ impl PassResult {
     }
 
     /// Whole-pass skip anchored at the program's first report site.
-    pub fn skipped_pass(
-        program: &BBProgram,
-        reason: impl Into<String>,
-    ) -> anyhow::Result<Self> {
+    pub fn skipped_pass(program: &BBProgram, reason: impl Into<String>) -> anyhow::Result<Self> {
         Ok(Self::skipped_site(SiteSkipReason::new(
             first_report_site(program)?,
             reason,
@@ -692,7 +689,7 @@ fn required_kinsn_skip(
 ///
 /// `emit` receives `(prog, start_site, &site_data)` and returns
 /// `(old_len, replacement_insns)`. Returns the number of sites that committed
-/// (i.e. `try_replace_range_with_skips` returned `Ok(true)`).
+/// (i.e. `try_replace_range` returned `Ok(true)`).
 pub fn apply_candidates_reverse<S, F>(
     prog: &mut BBProgram,
     candidates: &[(InsnSite, S)],
@@ -705,10 +702,7 @@ where
     let mut applied = 0usize;
     for (start, site) in candidates.iter().rev() {
         let (old_len, replacement) = emit(prog, *start, site)?;
-        let new_len = replacement.len();
-        if prog.try_replace_range_with_skips(*start, old_len, new_len, skipped, || {
-            Ok(crate::analysis::MakeReplacement::Use(replacement))
-        })? {
+        if prog.try_replace_range(*start, old_len, replacement, skipped)? {
             applied += 1;
         }
     }
@@ -802,9 +796,7 @@ where
                 site
             );
         }
-        if prog.try_replace_range_with_skips(site, 1, 0, skipped, || {
-            Ok(MakeReplacement::Use(Vec::new()))
-        })? {
+        if prog.try_replace_range(site, 1, Vec::new(), skipped)? {
             deleted += 1;
         }
     }

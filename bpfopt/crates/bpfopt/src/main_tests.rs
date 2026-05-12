@@ -99,18 +99,6 @@ fn canonicalize_map_refs_checks_idx_range_without_fd_array() {
 }
 
 #[test]
-fn canonical_pass_names_accept_v3_cli_names() {
-    assert_eq!(canonicalize_pass_name("wide-mem").unwrap(), "wide_mem");
-    assert_eq!(canonicalize_pass_name("ccmp").unwrap(), "ccmp");
-    assert_eq!(
-        canonicalize_pass_name("skb-load-bytes").unwrap(),
-        "skb_load_bytes_spec"
-    );
-    assert_eq!(canonicalize_pass_name("prefetch").unwrap(), "prefetch");
-    assert!(canonicalize_pass_name("wide_mem2").is_err());
-}
-
-#[test]
 fn target_json_disambiguates_module_local_btf_ids_by_call_offset() {
     let target = kinsn_target(&[
         ("bpf_endian_load16", 128703, 1),

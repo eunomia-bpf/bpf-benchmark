@@ -38,8 +38,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram) -> anyhow::Result<PassResult> {
             }
             let dst_reg = insn.dst_reg();
             if reg_kind_is_pointer(prog.reg_kind(site, dst_reg)) {
-                sites_skipped
-                    .push(SiteSkipReason::new(site, VERIFIER_POST_STATE_POINTER_TYPE));
+                sites_skipped.push(SiteSkipReason::new(site, VERIFIER_POST_STATE_POINTER_TYPE));
                 continue;
             }
             let Some(value) = prog.reg_known_constant(site, dst_reg) else {

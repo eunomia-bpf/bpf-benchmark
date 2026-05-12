@@ -19,15 +19,6 @@ use bpfopt::verifier_log::{verifier_states_from_log, VerifierStatesJson};
 use clap::{Args, Parser, Subcommand};
 use serde::{Deserialize, Serialize};
 
-/// Non-trivial alias map: kebab/short CLI form -> canonical (snake) registry name.
-/// Trivial aliases (snake form -> itself, snake -> kebab(snake.replace('_','-')))
-/// are derived in `canonicalize_pass_name`.
-const PASS_NONTRIVIAL_ALIASES: &[(&str, &str)] = &[
-    ("endian", "endian_fusion"),
-    ("skb-load-bytes", "skb_load_bytes_spec"),
-    ("skb_load_bytes", "skb_load_bytes_spec"),
-];
-
 #[derive(Parser)]
 #[command(name = "bpfopt", version, about = "BPF bytecode optimizer")]
 struct Cli {
@@ -89,7 +80,7 @@ struct SkippedSiteReport {
 
 #[derive(Clone, Debug, Serialize)]
 struct ListPassEntry {
-    name: String,
+    name: &'static str,
     description: &'static str,
     needs_target: bool,
     needs_verifier_states: bool,
@@ -140,7 +131,7 @@ fn run_main() -> Result<()> {
                 .pass
                 .as_deref()
                 .ok_or_else(|| anyhow!("bpfopt requires --pass <name> or list-passes"))?;
-            run_single_pass(&cli.common, canonicalize_pass_name(pass)?, &cli.pass_args)
+            run_single_pass(&cli.common, lookup_pass_name(pass)?, &cli.pass_args)
         }
     }
 }
@@ -174,7 +165,7 @@ fn list_passes(common: &CommonArgs, args: &ListPassesArgs) -> Result<()> {
         let entries = PASS_REGISTRY
             .iter()
             .map(|entry| ListPassEntry {
-                name: cli_name_for_pass(entry.name),
+                name: entry.name,
                 description: entry.description,
                 needs_target: entry.metadata.needs_target(),
                 needs_verifier_states: entry.metadata.needs_verifier_states(),
@@ -187,7 +178,7 @@ fn list_passes(common: &CommonArgs, args: &ListPassesArgs) -> Result<()> {
     } else {
         let mut out = open_binary_output(common.output.as_deref())?;
         for entry in PASS_REGISTRY {
-            writeln!(out, "{}", cli_name_for_pass(entry.name))?;
+            writeln!(out, "{}", entry.name)?;
         }
         Ok(())
     }
@@ -218,8 +209,7 @@ fn run_single_pass(
     write_bytecode(common.output.as_deref(), &output)?;
     write_btf_info_outputs(common, &program)?;
 
-    if let (Some(report_path), Some(snapshot)) =
-        (common.report.as_deref(), report_program.as_ref())
+    if let (Some(report_path), Some(snapshot)) = (common.report.as_deref(), report_program.as_ref())
     {
         let report = pass_report(pass_name, snapshot, &result)?;
         write_json(Some(report_path), &report)?;
@@ -235,39 +225,18 @@ fn registry_entry(name: &str) -> Result<&'static bpfopt::passes::PassRegistryEnt
         .ok_or_else(|| anyhow!("unknown pass name: {name}"))
 }
 
-fn canonicalize_pass_name(input: &str) -> Result<&'static str> {
-    let normalized = input.trim();
-    if let Some((_, canonical)) = PASS_NONTRIVIAL_ALIASES
-        .iter()
-        .find(|(alias, _)| *alias == normalized)
-    {
-        return Ok(*canonical);
-    }
-    let snake = normalized.replace('-', "_");
-    PASS_REGISTRY
-        .iter()
-        .find(|entry| entry.name == snake)
-        .map(|entry| entry.name)
-        .ok_or_else(|| anyhow!("unknown pass name: {input}"))
-}
-
-fn cli_name_for_pass(canonical: &str) -> String {
-    match canonical {
-        "endian_fusion" => "endian".into(),
-        "skb_load_bytes_spec" => "skb-load-bytes".into(),
-        _ => canonical.replace('_', "-"),
-    }
+fn lookup_pass_name(input: &str) -> Result<&'static str> {
+    Ok(registry_entry(input.trim())?.name)
 }
 
 fn validate_required_side_inputs(common: &CommonArgs, pass_names: &[&str]) -> Result<()> {
     for &pass_name in pass_names {
         let entry = registry_entry(pass_name)?;
-        let label = cli_name_for_pass(pass_name);
         if entry.metadata.needs_target() && common.target.is_none() && common.kinsns.is_empty() {
-            bail!("{label} requires --target or --kinsns");
+            bail!("{pass_name} requires --target or --kinsns");
         }
         if entry.metadata.needs_verifier_states() && common.verifier_states.is_none() {
-            bail!("{label} requires --verifier-states");
+            bail!("{pass_name} requires --verifier-states");
         }
     }
     Ok(())
@@ -282,8 +251,7 @@ fn validate_required_kinsns(ctx: &PassContext, pass_names: &[&str]) -> Result<()
             continue;
         }
         let target_names = entry.metadata.required_kinsns.iter().copied();
-        let label = cli_name_for_pass(pass_name);
-        require_all_kinsns(ctx, target_names, &label)?;
+        require_all_kinsns(ctx, target_names, pass_name)?;
     }
     Ok(())
 }
@@ -394,9 +362,9 @@ fn write_btf_info_outputs(common: &CommonArgs, program: &BBProgram) -> Result<()
         ),
     ] {
         let Some(path) = path_opt else { continue };
-        let bytes = records.map(|r| r.bytes).ok_or_else(|| {
-            anyhow!("--{label} requested but remapped records are unavailable")
-        })?;
+        let bytes = records
+            .map(|r| r.bytes)
+            .ok_or_else(|| anyhow!("--{label} requested but remapped records are unavailable"))?;
         fs::write(path, bytes).with_context(|| format!("failed to write {}", path.display()))?;
     }
     Ok(())

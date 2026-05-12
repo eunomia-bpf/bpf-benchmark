@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 use std::collections::BTreeSet;
 
-use crate::analysis::{BBProgram, BlockId, InsnSite, MakeReplacement, Terminator};
+use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 const MAX_LADDER_WINDOW_GROWTH: i32 = 24;
@@ -124,9 +124,7 @@ fn apply_rewrites(
     for (dominant_add, merged_end, skip_sites) in rewrites {
         let mut widened = *prog.insn(*dominant_add)?;
         widened.imm = *merged_end;
-        prog.try_replace_range_with_skips(*dominant_add, 1, 1, skipped, || {
-            Ok(MakeReplacement::Use(vec![widened]))
-        })?;
+        prog.try_replace_range(*dominant_add, 1, vec![widened], skipped)?;
 
         for &site in skip_sites {
             if prog.is_terminator_site(site)? {
@@ -397,4 +395,3 @@ fn build_ladder_rewrite(
 
     Some((dominant.add, merged_end, skip_sites))
 }
-

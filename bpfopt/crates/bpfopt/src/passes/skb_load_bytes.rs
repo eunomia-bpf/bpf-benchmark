@@ -108,7 +108,9 @@ fn classify_site(
 
 fn nonnegative_i32(fact: LiftedRegFact) -> Option<i32> {
     let value = fact.as_const()?;
-    (0..=i64::from(i32::MAX)).contains(&value).then_some(value as i32)
+    (0..=i64::from(i32::MAX))
+        .contains(&value)
+        .then_some(value as i32)
 }
 
 fn emit_replacement(site: RewriteSite, layout: PacketCtxLayout) -> Vec<BpfInsn> {

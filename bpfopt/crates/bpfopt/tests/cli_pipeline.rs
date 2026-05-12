@@ -238,7 +238,7 @@ fn run_bpfopt(args: &[&str], stdin_bytes: &[u8]) -> Output {
 }
 
 #[test]
-fn list_passes_outputs_cli_names_including_experimental_passes() {
+fn list_passes_outputs_canonical_names_including_experimental_passes() {
     let output = Command::new(bpfopt_bin())
         .arg("list-passes")
         .output()
@@ -253,17 +253,17 @@ fn list_passes_outputs_cli_names_including_experimental_passes() {
     let passes = stdout.lines().collect::<Vec<_>>();
 
     assert_eq!(passes.len(), 15);
-    assert!(passes.contains(&"wide-mem"));
-    assert!(passes.contains(&"skb-load-bytes"));
+    assert!(passes.contains(&"wide_mem"));
+    assert!(passes.contains(&"skb_load_bytes_spec"));
     assert!(passes.contains(&"ccmp"));
-    assert!(passes.contains(&"branch-flip"));
+    assert!(passes.contains(&"branch_flip"));
     assert!(passes.contains(&"prefetch"));
 }
 
 #[test]
 fn wide_mem_accepts_stdin_and_writes_instruction_aligned_stdout() {
     let input = minimal_program_bytes();
-    let output = run_bpfopt(&["--pass", "wide-mem", "--"], &input);
+    let output = run_bpfopt(&["--pass", "wide_mem", "--"], &input);
 
     assert!(
         output.status.success(),
@@ -348,7 +348,7 @@ fn single_kinsn_pass_without_target_fails_before_running() {
 
 #[test]
 fn invalid_bytecode_length_exits_with_error() {
-    let output = run_bpfopt(&["--pass", "wide-mem"], &[0u8; 9]);
+    let output = run_bpfopt(&["--pass", "wide_mem"], &[0u8; 9]);
 
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
