@@ -588,9 +588,6 @@ impl BBProgram {
     }
 
     fn remove_blocks_in_place(&mut self, remove: &BTreeSet<BlockId>) -> anyhow::Result<()> {
-        if remove.is_empty() {
-            return Ok(());
-        }
         for &block in remove {
             self.block(block)?;
         }

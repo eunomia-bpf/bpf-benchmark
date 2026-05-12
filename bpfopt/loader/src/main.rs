@@ -130,6 +130,10 @@ struct ProgramMetadata {
     name: String,
     section: String,
     prog_type: u32,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    expected_attach_type: u32,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    attach_btf_id: u32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -262,6 +266,7 @@ fn prepare(args: PrepareArgs) -> Result<()> {
     }
 
     let prog_fd = program_fd(selected.ptr)?;
+    let prog_info = program_info(prog_fd)?;
     let loaded_maps = maps(&obj)?;
     let insns = program_insns(selected.ptr)?;
     let map_ids = bytecode_map_ids(&insns, &loaded_maps)?;
@@ -290,6 +295,8 @@ fn prepare(args: PrepareArgs) -> Result<()> {
             name: selected.name,
             section: selected.section,
             prog_type: program_type(selected.ptr)?,
+            expected_attach_type: expected_attach_type(selected.ptr),
+            attach_btf_id: prog_info.attach_btf_id,
         },
     };
     write_json(&args.out.join(METADATA_JSON), &metadata)?;
@@ -318,7 +325,14 @@ fn run_bpfopt(args: RunArgs) -> Result<()> {
         .arg(&report)
         .arg("--prog-type")
         .arg(metadata.program.prog_type.to_string());
-    if let Some(verifier_states) = verifier_states_path(&workdir)? {
+    if pass_needs_verifier_states(&args.pass) {
+        let verifier_states = verifier_states_path(&workdir)?.ok_or_else(|| {
+            anyhow!(
+                "{} requires verifier states in {}",
+                args.pass,
+                workdir.display()
+            )
+        })?;
         cmd.arg("--verifier-states").arg(verifier_states);
     }
     if let Some(target) = args.target.as_deref() {
@@ -378,6 +392,8 @@ fn verify(args: VerifyArgs) -> Result<()> {
         log_level: args.log_level,
         log_size: u32::try_from(log_buf.len()).context("verifier log buffer exceeds u32")?,
         log_buf: log_buf.as_mut_ptr(),
+        expected_attach_type: metadata.program.expected_attach_type,
+        attach_btf_id: metadata.program.attach_btf_id,
         ..Default::default()
     };
     let fd = unsafe {
@@ -535,6 +551,10 @@ fn program_type(prog: *mut libbpf_sys::bpf_program) -> Result<u32> {
     Ok(unsafe { libbpf_sys::bpf_program__type(prog) })
 }
 
+fn expected_attach_type(prog: *mut libbpf_sys::bpf_program) -> u32 {
+    unsafe { libbpf_sys::bpf_program__expected_attach_type(prog) }
+}
+
 fn program_insns(prog: *mut libbpf_sys::bpf_program) -> Result<Vec<libbpf_sys::bpf_insn>> {
     let cnt = unsafe { libbpf_sys::bpf_program__insn_cnt(prog) };
     let ptr = unsafe { libbpf_sys::bpf_program__insns(prog) };
@@ -545,14 +565,7 @@ fn program_insns(prog: *mut libbpf_sys::bpf_program) -> Result<Vec<libbpf_sys::b
 }
 
 fn program_map_ids(fd: i32) -> Result<Vec<u32>> {
-    let mut info = libbpf_sys::bpf_prog_info::default();
-    let mut len = mem::size_of::<libbpf_sys::bpf_prog_info>() as u32;
-    syscall_ok(
-        unsafe {
-            libbpf_sys::bpf_obj_get_info_by_fd(fd, (&mut info as *mut _) as *mut c_void, &mut len)
-        },
-        "failed to read bpf_prog_info",
-    )?;
+    let info = program_info(fd)?;
     if info.nr_map_ids == 0 {
         return Ok(Vec::new());
     }
@@ -562,7 +575,7 @@ fn program_map_ids(fd: i32) -> Result<Vec<u32>> {
         map_ids: map_ids.as_mut_ptr() as u64,
         ..Default::default()
     };
-    len = mem::size_of::<libbpf_sys::bpf_prog_info>() as u32;
+    let mut len = mem::size_of::<libbpf_sys::bpf_prog_info>() as u32;
     syscall_ok(
         unsafe {
             libbpf_sys::bpf_obj_get_info_by_fd(
@@ -575,6 +588,18 @@ fn program_map_ids(fd: i32) -> Result<Vec<u32>> {
     )?;
     map_ids.truncate(map_info.nr_map_ids as usize);
     Ok(map_ids)
+}
+
+fn program_info(fd: i32) -> Result<libbpf_sys::bpf_prog_info> {
+    let mut info = libbpf_sys::bpf_prog_info::default();
+    let mut len = mem::size_of::<libbpf_sys::bpf_prog_info>() as u32;
+    syscall_ok(
+        unsafe {
+            libbpf_sys::bpf_obj_get_info_by_fd(fd, (&mut info as *mut _) as *mut c_void, &mut len)
+        },
+        "failed to read bpf_prog_info",
+    )?;
+    Ok(info)
 }
 
 fn map_info(fd: i32) -> Result<libbpf_sys::bpf_map_info> {
@@ -702,12 +727,16 @@ fn bytecode_map_ids(insns: &[libbpf_sys::bpf_insn], loaded_maps: &[MapRef]) -> R
 }
 
 fn validate_kernel_map_ids(bytecode_map_ids: &[u32], kernel_map_ids: &[u32]) -> Result<()> {
-    let bytecode_set = bytecode_map_ids.iter().copied().collect::<BTreeSet<_>>();
     let kernel_set = kernel_map_ids.iter().copied().collect::<BTreeSet<_>>();
-    if bytecode_set != kernel_set {
+    let missing = bytecode_map_ids
+        .iter()
+        .copied()
+        .filter(|map_id| !kernel_set.contains(map_id))
+        .collect::<Vec<_>>();
+    if !missing.is_empty() {
         bail!(
-            "bytecode map refs {:?} do not match kernel used_maps {:?}",
-            bytecode_map_ids,
+            "bytecode map refs {:?} are missing from kernel used_maps {:?}",
+            missing,
             kernel_map_ids
         );
     }
@@ -888,6 +917,10 @@ fn verifier_states_path(workdir: &Path) -> Result<Option<PathBuf>> {
         return Ok(Some(log));
     }
     Ok(None)
+}
+
+fn pass_needs_verifier_states(pass: &str) -> bool {
+    matches!(pass, "map_inline" | "const_prop")
 }
 
 fn read_insns(path: &Path) -> Result<Vec<libbpf_sys::bpf_insn>> {
@@ -1125,6 +1158,7 @@ fn is_zero(value: &u32) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::env;
 
     #[test]
     fn decode_hex_requires_even_length() {
@@ -1179,6 +1213,99 @@ mod tests {
         assert_eq!(bytecode_map_ids(&insns, &maps).unwrap(), vec![222, 111]);
     }
 
+    #[test]
+    #[ignore = "requires root/CAP_BPF and corpus BPF objects"]
+    fn prepare_noop_verify_many_objects() -> Result<()> {
+        let uid = Command::new("id")
+            .arg("-u")
+            .output()
+            .context("failed to run id -u")?;
+        if !uid.status.success() {
+            bail!("id -u failed with {}", uid.status);
+        }
+        if String::from_utf8(uid.stdout)
+            .context("id -u output is not UTF-8")?
+            .trim()
+            != "0"
+        {
+            bail!("prepare_noop_verify_many_objects must run as root");
+        }
+
+        let bpfopt = test_bpfopt_path()?;
+        let root = env::var_os("BPFOPT_LOADER_OBJECT_ROOT")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| Path::new(env!("CARGO_MANIFEST_DIR")).join("../../corpus/build"));
+        let object_count = env::var("BPFOPT_LOADER_SMOKE_OBJECTS")
+            .unwrap_or_else(|_| "200".to_string())
+            .parse::<usize>()
+            .context("BPFOPT_LOADER_SMOKE_OBJECTS must be a positive integer")?;
+        if object_count == 0 {
+            bail!("BPFOPT_LOADER_SMOKE_OBJECTS must be non-zero");
+        }
+        let objects = find_bpf_objects(&root)?;
+        if objects.len() < object_count {
+            bail!(
+                "{} has only {} BPF object(s), need {}",
+                root.display(),
+                objects.len(),
+                object_count
+            );
+        }
+
+        let work_root = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../target/bpfopt-loader-smoke")
+            .join(format!("prepare-noop-verify-{}", std::process::id()));
+        fs::create_dir_all(&work_root)
+            .with_context(|| format!("failed to create {}", work_root.display()))?;
+
+        let mut failures = Vec::new();
+        for (idx, obj) in objects.iter().take(object_count).enumerate() {
+            let result = (|| -> Result<()> {
+                let selector = first_program_selector(obj)?;
+                let workdir = work_root.join(format!("{idx:04}"));
+                prepare(PrepareArgs {
+                    obj: obj.clone(),
+                    prog: selector,
+                    out: workdir.clone(),
+                    map_updates: None,
+                    bpfopt: Some(bpfopt.clone()),
+                    log_bytes: DEFAULT_LOG_BYTES,
+                })?;
+                run_bpfopt(RunArgs {
+                    workdir: workdir.clone(),
+                    pass: "noop".to_string(),
+                    bpfopt: Some(bpfopt.clone()),
+                    input: None,
+                    output: None,
+                    report: None,
+                    target: None,
+                    pass_args: Vec::new(),
+                })?;
+                verify(VerifyArgs {
+                    workdir,
+                    input: None,
+                    prog_type: None,
+                    log_level: 1,
+                    log_bytes: DEFAULT_LOG_BYTES,
+                })
+            })();
+            if let Err(err) = result {
+                failures.push(format!("{}: {}", obj.display(), short_error(&err)));
+            }
+        }
+
+        if !failures.is_empty() {
+            bail!(
+                "{} of {} loader smoke object(s) failed under {}:\n{}",
+                failures.len(),
+                object_count,
+                work_root.display(),
+                failures.join("\n")
+            );
+        }
+        Ok(())
+    }
+
     fn ld_map_fd_insn(fd: i32) -> libbpf_sys::bpf_insn {
         libbpf_sys::bpf_insn {
             code: (libbpf_sys::BPF_LD | libbpf_sys::BPF_DW | libbpf_sys::BPF_IMM) as u8,
@@ -1199,6 +1326,85 @@ mod tests {
             fd,
             info,
             name: format!("map_{id}"),
+        }
+    }
+
+    fn test_bpfopt_path() -> Result<PathBuf> {
+        if let Some(path) = env::var_os("BPFOPT").map(PathBuf::from) {
+            if path.exists() {
+                return Ok(path);
+            }
+            bail!("BPFOPT points to missing binary {}", path.display());
+        }
+        let exe = env::current_exe().context("failed to resolve current test binary")?;
+        let deps_dir = exe
+            .parent()
+            .ok_or_else(|| anyhow!("test binary path has no parent: {}", exe.display()))?;
+        let target_dir = deps_dir
+            .parent()
+            .ok_or_else(|| anyhow!("test binary path has no target dir: {}", exe.display()))?;
+        let bpfopt = target_dir.join("bpfopt");
+        if !bpfopt.exists() {
+            bail!(
+                "missing {}; run `cargo build --manifest-path bpfopt/Cargo.toml -p bpfopt` or set BPFOPT",
+                bpfopt.display()
+            );
+        }
+        Ok(bpfopt)
+    }
+
+    fn find_bpf_objects(root: &Path) -> Result<Vec<PathBuf>> {
+        let output = Command::new("find")
+            .arg(root)
+            .args([
+                "-type", "f", "(", "-name", "*.bpf.o", "-o", "-name", "bpf_*.o", ")",
+            ])
+            .output()
+            .with_context(|| format!("failed to run find under {}", root.display()))?;
+        if !output.status.success() {
+            bail!("find {} failed with {}", root.display(), output.status);
+        }
+        let mut objects = String::from_utf8(output.stdout)
+            .context("find output is not UTF-8")?
+            .lines()
+            .map(PathBuf::from)
+            .collect::<Vec<_>>();
+        objects.sort();
+        Ok(objects)
+    }
+
+    fn first_program_selector(path: &Path) -> Result<String> {
+        let obj = open_bpf_object(path)?;
+        let progs = programs(&obj)?;
+        let first = progs
+            .first()
+            .ok_or_else(|| anyhow!("{} has no BPF programs", path.display()))?;
+        if progs.iter().filter(|prog| prog.name == first.name).count() == 1 {
+            return Ok(first.name.clone());
+        }
+        if progs
+            .iter()
+            .filter(|prog| prog.section == first.section)
+            .count()
+            == 1
+        {
+            return Ok(first.section.clone());
+        }
+        bail!(
+            "{} first program is ambiguous by name {:?} and section {:?}",
+            path.display(),
+            first.name,
+            first.section
+        );
+    }
+
+    fn short_error(err: &anyhow::Error) -> String {
+        let text = format!("{err:#}");
+        const LIMIT: usize = 1200;
+        if text.len() <= LIMIT {
+            text
+        } else {
+            format!("{}...[truncated]", &text[..LIMIT])
         }
     }
 }
