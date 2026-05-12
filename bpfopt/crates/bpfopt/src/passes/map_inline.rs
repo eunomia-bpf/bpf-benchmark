@@ -2348,11 +2348,7 @@ fn record_skip(
 }
 fn format_bytes_preview(bytes: &[u8]) -> String {
     let preview_len = bytes.len().min(VALUE_PREVIEW_BYTES);
-    let mut out = String::with_capacity(preview_len.saturating_mul(2) + 6);
-    out.push_str("0x");
-    for byte in &bytes[..preview_len] {
-        out.push_str(&format!("{byte:02x}"));
-    }
+    let mut out = format!("0x{}", hex_bytes(&bytes[..preview_len]));
     if bytes.len() > preview_len {
         out.push_str("...");
     }
@@ -3461,7 +3457,7 @@ impl MapMetadata {
     }
 }
 
-pub type MapInfoBySite = HashMap<InsnSite, MapInfo>;
+type MapInfoBySite = HashMap<InsnSite, MapInfo>;
 
 fn analyze_map_info(
     program: &BBProgram,

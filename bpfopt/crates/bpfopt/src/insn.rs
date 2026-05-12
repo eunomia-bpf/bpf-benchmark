@@ -60,8 +60,6 @@ pub const BPF_PSEUDO_MAP_VALUE: u8 = libbpf_sys::BPF_PSEUDO_MAP_VALUE as u8;
 pub const BPF_PSEUDO_MAP_IDX: u8 = 5;
 pub const BPF_PSEUDO_MAP_IDX_VALUE: u8 = 6;
 pub const BPF_PSEUDO_CALL: u8 = libbpf_sys::BPF_PSEUDO_CALL as u8;
-#[cfg(test)]
-pub const BPF_PSEUDO_KFUNC_CALL: u8 = libbpf_sys::BPF_PSEUDO_KFUNC_CALL as u8;
 pub const BPF_PSEUDO_KINSN_SIDECAR: u8 = 3;
 /// LD_IMM64 local-function reference used for helper callbacks.
 pub const BPF_PSEUDO_FUNC: u8 = libbpf_sys::BPF_PSEUDO_FUNC as u8;
@@ -93,8 +91,6 @@ pub enum BpfMemWidth {
 }
 
 impl BpfMemWidth {
-    pub const ALL: [Self; 4] = [Self::B, Self::H, Self::W, Self::DW];
-
     pub fn from_size_opcode(size: u8) -> Option<Self> {
         match size {
             BPF_B => Some(Self::B),
@@ -278,10 +274,6 @@ impl BpfInsn {
     // ── Field accessors ─────────────────────────────────────────────
     #[inline]
     pub fn new(code: u8, regs: u8, off: i16, imm: i32) -> Self {
-        Self::new_raw(code, regs, off, imm)
-    }
-    #[inline]
-    fn new_raw(code: u8, regs: u8, off: i16, imm: i32) -> Self {
         let mut inner = libbpf_sys::bpf_insn {
             code,
             _bitfield_align_1: [],
@@ -329,7 +321,7 @@ impl BpfInsn {
     }
     #[inline]
     pub fn from_raw_bytes(bytes: [u8; 8]) -> Self {
-        Self::new_raw(
+        Self::new(
             bytes[0],
             bytes[1],
             i16::from_le_bytes([bytes[2], bytes[3]]),

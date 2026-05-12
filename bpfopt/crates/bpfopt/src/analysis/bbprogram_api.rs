@@ -17,11 +17,20 @@ pub struct DiamondPattern {
 }
 
 impl BBProgram {
-    pub fn delete_insn(&mut self, site: DefSite) -> anyhow::Result<usize> {
+    /// Transactional rollback wrapper for mutations: clones self, applies `f` to
+    /// the clone, swaps on success. On error, self is left untouched.
+    fn try_mutate<R>(
+        &mut self,
+        f: impl FnOnce(&mut Self) -> anyhow::Result<R>,
+    ) -> anyhow::Result<R> {
         let mut next = self.clone();
-        let removed_slots = next.delete_insn_in_place(site)?;
+        let r = f(&mut next)?;
         *self = next;
-        Ok(removed_slots)
+        Ok(r)
+    }
+
+    pub fn delete_insn(&mut self, site: DefSite) -> anyhow::Result<usize> {
+        self.try_mutate(|p| p.delete_insn_in_place(site))
     }
 
     fn delete_insn_in_place(&mut self, site: DefSite) -> anyhow::Result<usize> {
@@ -163,10 +172,7 @@ impl BBProgram {
     }
 
     pub fn delete_cond_branch(&mut self, block: BlockId) -> anyhow::Result<()> {
-        let mut next = self.clone();
-        next.delete_cond_branch_in_place(block)?;
-        *self = next;
-        Ok(())
+        self.try_mutate(|p| p.delete_cond_branch_in_place(block))
     }
 
     fn delete_cond_branch_in_place(&mut self, block: BlockId) -> anyhow::Result<()> {
@@ -195,10 +201,7 @@ impl BBProgram {
         block: BlockId,
         terminator: Terminator,
     ) -> anyhow::Result<()> {
-        let mut next = self.clone();
-        next.replace_terminator_in_place(block, terminator)?;
-        *self = next;
-        Ok(())
+        self.try_mutate(|p| p.replace_terminator_in_place(block, terminator))
     }
 
     fn replace_terminator_in_place(
@@ -219,10 +222,7 @@ impl BBProgram {
     }
 
     pub fn permute_blocks(&mut self, new_order: &[BlockId]) -> anyhow::Result<()> {
-        let mut next = self.clone();
-        next.permute_blocks_in_place(new_order)?;
-        *self = next;
-        Ok(())
+        self.try_mutate(|p| p.permute_blocks_in_place(new_order))
     }
 
     fn permute_blocks_in_place(&mut self, new_order: &[BlockId]) -> anyhow::Result<()> {
@@ -264,10 +264,7 @@ impl BBProgram {
     }
 
     pub fn merge_linear_chain(&mut self, chain: &[BlockId]) -> anyhow::Result<BlockId> {
-        let mut next = self.clone();
-        let merged = next.merge_linear_chain_in_place(chain)?;
-        *self = next;
-        Ok(merged)
+        self.try_mutate(|p| p.merge_linear_chain_in_place(chain))
     }
 
     fn merge_linear_chain_in_place(&mut self, chain: &[BlockId]) -> anyhow::Result<BlockId> {
@@ -398,10 +395,7 @@ impl BBProgram {
     }
 
     pub fn split_block(&mut self, at: InsnSite) -> anyhow::Result<(BlockId, BlockId)> {
-        let mut next = self.clone();
-        let split = next.split_block_in_place(at)?;
-        *self = next;
-        Ok(split)
+        self.try_mutate(|p| p.split_block_in_place(at))
     }
 
     fn split_block_in_place(&mut self, at: InsnSite) -> anyhow::Result<(BlockId, BlockId)> {
@@ -464,10 +458,7 @@ impl BBProgram {
         pattern: DiamondPattern,
         replacement: Vec<BpfInsn>,
     ) -> anyhow::Result<()> {
-        let mut next = self.clone();
-        next.replace_diamond_with_insns_in_place(pattern, replacement)?;
-        *self = next;
-        Ok(())
+        self.try_mutate(|p| p.replace_diamond_with_insns_in_place(pattern, replacement))
     }
 
     fn replace_diamond_with_insns_in_place(

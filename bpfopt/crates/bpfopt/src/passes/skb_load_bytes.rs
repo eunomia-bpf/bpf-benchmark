@@ -13,11 +13,9 @@ struct RewriteSite {
     len: i32,
 }
 
-type AppliedRewriteSite = (InsnSite, RewriteSite);
-
 #[derive(Default)]
 struct ScanResult {
-    sites: Vec<AppliedRewriteSite>,
+    sites: Vec<(InsnSite, RewriteSite)>,
     skips: Vec<SiteSkipReason>,
 }
 

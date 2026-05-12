@@ -293,7 +293,7 @@ fn memcpy_lane_at(insns: &[BpfInsn], idx: usize) -> Option<MemcpyLane> {
     let load = insns.get(idx)?;
     let store = insns.get(idx + 1)?;
     let width = bpf_size(load.code);
-    if !is_supported_width(width) || !load.is_ldx_mem_size(width) {
+    if !BpfMemWidth::from_size_opcode(width).is_some() || !load.is_ldx_mem_size(width) {
         return None;
     }
     if store.class() != BPF_STX || bpf_mode(store.code) != BPF_MEM || bpf_size(store.code) != width
@@ -325,7 +325,7 @@ fn memset_lane_at(
         return Ok(None);
     };
     let width = bpf_size(insn.code);
-    if !is_supported_width(width) || bpf_mode(insn.code) != BPF_MEM {
+    if !BpfMemWidth::from_size_opcode(width).is_some() || bpf_mode(insn.code) != BPF_MEM {
         return Ok(None);
     }
     let fill_byte = match insn.class() {
@@ -437,7 +437,7 @@ fn pack_memset_payload(
     Ok(BpfInsn::pack_u4(base, 0)
         | BpfInsn::pack_u16(dst_off as u16, 8)
         | BpfInsn::pack_u8(len - 1, 24)
-        | BpfInsn::pack_u4(width_class(width)?, 32)
+        | BpfInsn::pack_u4(decode_width(width)? as u8, 32)
         | BpfInsn::pack_u4(zero_fill as u8, 35)
         | BpfInsn::pack_u8(fill_byte, 36))
 }
@@ -504,16 +504,10 @@ fn ranges_overlap(src_off: i16, dst_off: i16, len: usize) -> bool {
     let len = len as i32;
     src_start < dst_start + len && dst_start < src_start + len
 }
-fn is_supported_width(width: u8) -> bool {
-    BpfMemWidth::from_size_opcode(width).is_some()
-}
 fn width_bytes(width: u8) -> anyhow::Result<usize> {
-    Ok(BpfMemWidth::from_size_opcode(width)
-        .ok_or_else(|| anyhow::anyhow!("bulk_memory unsupported width opcode {width:#x}"))?
-        .bytes())
+    Ok(decode_width(width)?.bytes())
 }
-fn width_class(width: u8) -> anyhow::Result<u8> {
-    Ok(BpfMemWidth::from_size_opcode(width)
-        .ok_or_else(|| anyhow::anyhow!("bulk_memory unsupported width opcode {width:#x}"))?
-        as u8)
+fn decode_width(width: u8) -> anyhow::Result<BpfMemWidth> {
+    BpfMemWidth::from_size_opcode(width)
+        .ok_or_else(|| anyhow::anyhow!("bulk_memory unsupported width opcode {width:#x}"))
 }
