@@ -30,6 +30,28 @@ fn lookup_program(old_fd: i32) -> Vec<BpfInsn> {
     ]
 }
 
+fn nullable_lookup_program(old_fd: i32) -> Vec<BpfInsn> {
+    let map = BpfInsn::ld_imm64(BPF_REG_1, BPF_PSEUDO_MAP_FD, i64::from(old_fd));
+    vec![
+        map[0],
+        map[1],
+        BpfInsn::new(
+            BPF_ST | BPF_W | BPF_MEM,
+            BpfInsn::make_regs(BPF_REG_10, 0),
+            -4,
+            1,
+        ),
+        BpfInsn::mov64_reg(BPF_REG_2, BPF_REG_10),
+        BpfInsn::add64_imm(BPF_REG_2, -4),
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, LOOKUP),
+        BpfInsn::jeq_imm(BPF_REG_0, 0, 2),
+        BpfInsn::ldx_mem(BPF_W, BPF_REG_6, BPF_REG_0, 0),
+        BpfInsn::ja(1),
+        BpfInsn::mov64_imm(BPF_REG_6, 0),
+        BpfInsn::exit(),
+    ]
+}
+
 fn ctx_for_array_lookup(map_id: u32, value: Vec<u8>) -> PassContext {
     let mut ctx = ctx_with_verifier_states(vec![verifier_delta_state_with_stack(
         5,
@@ -154,6 +176,73 @@ fn map_inline_rejects_hint_pointing_at_non_lookup_call() {
     let err = pass_error_on_insns(MapInlinePass, lookup_program(42), &ctx);
 
     assert!(err.contains("non-lookup call"));
+}
+
+#[test]
+fn map_inline_soft_hint_inlines_load_but_keeps_lookup_and_null_check() {
+    let value = 7u32.to_le_bytes().to_vec();
+    let mut ctx = PassContext::baseline();
+    ctx.map_ids = vec![111];
+    ctx.map_metadata.insert(
+        111,
+        MapMetadata {
+            map_type: libbpf_sys::BPF_MAP_TYPE_HASH,
+            key_size: 4,
+            value_size: value.len() as u32,
+            max_entries: 8,
+            map_id: 111,
+            name: format!("hash_{}", 111),
+        },
+    );
+    ctx.map_values
+        .insert((111, 1u32.to_le_bytes().to_vec()), value);
+    ctx.map_inline_hints = vec![MapInlineHintSpec {
+        anchor: MapInlineHintAnchorSpec::Pc(5),
+        mode: MapInlineHintModeSpec::Soft,
+        key: 1u32.to_le_bytes().to_vec(),
+    }];
+
+    let run = run_pass_on_insns(MapInlinePass, nullable_lookup_program(42), &ctx);
+
+    assert_eq!(run.result.sites_applied, 1);
+    assert!(run.lowered.contains(&BpfInsn::mov32_imm(BPF_REG_6, 7)));
+    assert_eq!(
+        run.lowered
+            .iter()
+            .filter(|insn| insn.is_call() && insn.imm == LOOKUP)
+            .count(),
+        1
+    );
+    assert!(run.lowered.iter().any(|insn| insn.class() == BPF_JMP
+        && bpf_op(insn.code) == BPF_JEQ
+        && insn.dst_reg() == BPF_REG_0));
+}
+
+#[test]
+fn map_inline_soft_hint_skips_when_snapshot_key_is_absent() {
+    let mut ctx = PassContext::baseline();
+    ctx.map_ids = vec![111];
+    ctx.map_metadata.insert(
+        111,
+        MapMetadata {
+            map_type: libbpf_sys::BPF_MAP_TYPE_HASH,
+            key_size: 4,
+            value_size: 4,
+            max_entries: 8,
+            map_id: 111,
+            name: format!("hash_{}", 111),
+        },
+    );
+    ctx.map_inline_hints = vec![MapInlineHintSpec {
+        anchor: MapInlineHintAnchorSpec::Pc(5),
+        mode: MapInlineHintModeSpec::Soft,
+        key: 1u32.to_le_bytes().to_vec(),
+    }];
+
+    let run = run_pass_on_insns(MapInlinePass, nullable_lookup_program(42), &ctx);
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_skip_reason(&run.result, 5, "no live entry");
 }
 
 #[test]

@@ -146,7 +146,7 @@ impl BtfInfoRecords {
 ///
 /// IMPORTANT: only put a flag here when *every* bpfopt run conceivably
 /// needs it (input/output/report paths, target arch, prog type, BTF
-/// remapping inputs, kinsn target metadata, verifier-states log).
+/// remapping inputs, kinsn target metadata, verifier-states JSON).
 /// Per-pass tuning (e.g. map_inline's `--inline-hint`, branch_flip's
 /// `--profile`, prefetch's `--profile`) goes in the pass's own
 /// `<Pass>CliArgs` struct and is parsed AFTER `--`. Adding a pass-specific
@@ -613,10 +613,6 @@ pub fn run_pass_once(
     program: &mut BBProgram,
     ctx: &PassContext,
 ) -> anyhow::Result<PassResult> {
-    if let Some(skip) = required_kinsn_skip(pass.name(), program, ctx)? {
-        return Ok(PassResult::skipped_site(skip));
-    }
-
     let insns_before = program_instruction_slots(program)?;
     let mut result = pass.run(program, ctx)?;
     let insns_after = program_instruction_slots(program)?;
@@ -643,36 +639,6 @@ fn program_instruction_slots(program: &BBProgram) -> anyhow::Result<usize> {
             .ok_or_else(|| anyhow::anyhow!("program instruction slot count overflows"))?;
     }
     Ok(len)
-}
-
-fn required_kinsn_skip(
-    pass_name: &str,
-    program: &BBProgram,
-    ctx: &PassContext,
-) -> anyhow::Result<Option<SiteSkipReason>> {
-    if pass_name == "ccmp" && ctx.platform.arch != Arch::Aarch64 {
-        return Ok(None);
-    }
-    let Some(entry) = crate::passes::PASS_REGISTRY
-        .iter()
-        .find(|entry| entry.name == pass_name)
-    else {
-        return Ok(None);
-    };
-    let missing = entry
-        .metadata
-        .required_kinsns
-        .iter()
-        .copied()
-        .filter(|target| !ctx.kinsn_registry.is_target_available(target))
-        .collect::<Vec<_>>();
-    if missing.is_empty() {
-        return Ok(None);
-    }
-    Ok(Some(SiteSkipReason {
-        site: first_report_site(program)?,
-        reason: format!("missing required kinsn target(s): {}", missing.join(", ")),
-    }))
 }
 
 /// Apply matched candidates in reverse site order, calling `emit` for each.
@@ -899,8 +865,8 @@ impl PassContext {
         Self::try_baseline().expect("baseline pass context should build")
     }
 
-    /// Whether cond_select can lower to a target branchless-select kinsn.
+    /// Whether cond_select can lower to the branchless-select kinsn.
     pub fn has_branchless_select(&self) -> bool {
-        self.platform.has_cmov || self.kinsn_registry.is_target_available("bpf_select64")
+        self.kinsn_registry.is_target_available("bpf_select64")
     }
 }

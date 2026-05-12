@@ -357,6 +357,25 @@ fn invalid_bytecode_length_exits_with_error() {
 }
 
 #[test]
+fn verifier_states_rejects_raw_log_input() {
+    let verifier_path = write_temp_file("raw-verifier-log.txt", "0: R0=0\n");
+    let verifier_arg = verifier_path.to_string_lossy().to_string();
+    let output = run_bpfopt(
+        &["--pass", "const_prop", "--verifier-states", &verifier_arg],
+        &minimal_program_bytes(),
+    );
+    remove_file_if_exists(verifier_path);
+
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("must be JSON; raw verifier logs are not accepted"),
+        "stderr={stderr}"
+    );
+    assert!(output.stdout.is_empty());
+}
+
+#[test]
 fn map_inline_errors_when_snapshot_key_is_absent() {
     let map_values_path = write_bpftool_map_values_dir("map-values-absent-key", 111, "array", "[]");
     let verifier_path = write_temp_file(

@@ -15,7 +15,7 @@ use bpfopt::pass::{
     KinsnRegistry, PassContext, PassResult, PlatformCapabilities, TargetJson,
 };
 use bpfopt::passes::PASS_REGISTRY;
-use bpfopt::verifier_log::{verifier_states_from_log, VerifierStatesJson};
+use bpfopt::verifier_log::VerifierStatesJson;
 use clap::{Args, Parser, Subcommand};
 use serde::{Deserialize, Serialize};
 
@@ -536,16 +536,18 @@ fn apply_kinsn_list(registry: &mut KinsnRegistry, kinsns: &[String]) -> Result<(
 fn read_verifier_states(path: &Path) -> Result<VerifierStatesJson> {
     let input = fs::read_to_string(path)
         .with_context(|| format!("failed to read verifier states from {}", path.display()))?;
-    let states = if input.trim_start().starts_with('{') {
-        serde_json::from_str::<VerifierStatesJson>(&input).with_context(|| {
-            format!(
-                "failed to parse verifier states JSON from {}",
-                path.display()
-            )
-        })?
-    } else {
-        verifier_states_from_log(&input)
-    };
+    if !input.trim_start().starts_with('{') {
+        bail!(
+            "verifier states {} must be JSON; raw verifier logs are not accepted by the production CLI",
+            path.display()
+        );
+    }
+    let states = serde_json::from_str::<VerifierStatesJson>(&input).with_context(|| {
+        format!(
+            "failed to parse verifier states JSON from {}",
+            path.display()
+        )
+    })?;
     if states.insns.is_empty() {
         bail!(
             "verifier states {} did not contain parseable state snapshots",

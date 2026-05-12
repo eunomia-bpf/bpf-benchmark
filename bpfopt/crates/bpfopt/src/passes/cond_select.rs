@@ -93,10 +93,13 @@ impl BpfPass for CondSelectPass {
 }
 
 pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
-    // Check if the target can lower bpf_select64 to branchless select
-    // (CMOV on x86, CSEL on ARM64).
+    // Check if the target exposes the select kinsn; CPU features alone are
+    // insufficient because this pass always emits bpf_select64.
     if !ctx.has_branchless_select() {
-        return PassResult::skipped_pass(prog, "platform lacks branchless select support");
+        return PassResult::skipped_pass(
+            prog,
+            "target lacks bpf_select64 branchless select support",
+        );
     }
 
     let sites = scan_cond_select_sites(prog)?;
